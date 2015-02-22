@@ -4,7 +4,10 @@
 ;;
 ;; This module contains a simple Read-Eval-Print Loop
 ;;
-(display *Cyc-version-banner*)
+(cond-expand
+  (cyclone
+    (display *Cyc-version-banner*))
+  (else #f))
 (define (repl)
   (display "cyclone> ")
   (let ((c (eval (read))))
