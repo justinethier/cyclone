@@ -1,0 +1,59 @@
+These are my old notes for using globals as a performance improvement over creating dozens of nested closures. The old problem is still there if the code is restructured, so these notes may still be valuable. (1) is the only improvement that was implemented.
+
+ - Optimizations - there are massive performance problems in compiling eval.scm!!!
+
+1) it might be better for (define) statements to create GC roots, rather than attempting to pass
+   all defines around in closures. that should minimize closure size and the amount of data each function
+   needs to pass around (IE: funcall80)
+
+   Here are pure lines-of-code metrics:
+   Phase   Last line   First line  LOC % LOC
+   input   206 13  193 0.31%
+   expand  601 212 389 0.63%
+   alpha   1253    607 646 1.05%
+   CPS 2586    1259    1327    2.15%
+   wrap-mut    4151    2676    1475    2.39%
+   CC  29738   4157    25581   41.49%
+   C   61652   29743   31909   51.76%
+   
+   should compare times in each phase. but this still avoids WHY the last two phases are taking so long.
+   is it just the sheer amount of code that is being generated?
+   
+   notes about globals:
+   would have to occur after expand, since that could introduce more defines
+   want to take each top-level define and create a global for it
+   could filter top level into two categories - (define) expressions and other expressions, to be enclosed within a (begin)
+   could create a single list of these, eg: (define, define, ..., begin) and then map over it for the other phases
+   TBD: how to store defined functions? Do they become closures? how does that work?
+
+a global function can reference other globals, but I do not believe it needs to be a closure, because a global function can only reference other globals. 
+
+Issue list
+ - alpha conversion broken for internal define shadowing global (see below)
+ - call/cc probably broken for global define's
+
+2) it looked like there were cases where a closure had a copy created of it, and the copy was passed along. it would be nice if the closure conversion phase could detect this and just pass the original closure along instead of building a new one. that saves a lot of work downstream, and seems like it might save work in cc as well (depending upon how complex the check is, of course!)
+
+of course, fn is changed upon new closure, so it is not exactly the same object...
+
+Could make this happen by separating the continuation (which contains next fn) from the environment (closure vars). Even just doing this conceptually (in CC phase) may allow CC to detect unchanged environments. Also, can the existing code just reassign fn? I think that would work since closures are newly-allocated upon function invocation, though maybe it would break loops?
+
+just brainstorming this at the moment.
+
+3) important to see if optimizations can be made independent of adding globals, since even with globals there could be performance problems if there were to be large closures for whatever reason.
+
+4) does sequencing (IE, begin) have to create a new lambda for each expr?
+   might not make a difference, but seems like it should just create a lambda
+   body, and let CPS worry about extracting the lambdas. may end up with the
+   same result, though
+
+   by the same token, are there ever cases where it would make sense to pass a sequence all the way to the compiler? probably not, but just a thought
+
+ - lexical scoping issue - local does not shadow a global in this case:
+
+    (define a 2) ; global
+    (define (test2)
+    ; TODO: need to be able to shadow globals, too
+    ;       using an internal define
+     (define a 1)
+     a)

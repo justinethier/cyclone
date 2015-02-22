@@ -1,0 +1,129 @@
+Working TODO list:
+
+ - Issues with detecting cycles:
+   - (equal?) loops forever when comparing two different circular lists
+   - printing *global-environment* in the repl still loops forever
+
+ - compiled/interpreted code integration
+   * call a compiled function from eval
+   * call an interpreted function from compiled code (or is eval good enough? maybe that is the answer?)
+
+ - Use a lib.scm for libs, similar to eval/parser modules?
+
+ - cyclone should return an error code (IE: 1) when compilation fails and a 0 when it is successful. that way it can be scripted via bash (for example)
+ or, does it already do this?
+
+ - along the same lines, output should be controlled in a better way. or at minimum should print errors using stderr (possible with standard scheme, though??)
+
+ - Globals - issue list
+   - call/cc may be broken for global define's, or at least is not optimal
+     in that the code for call/cc will be added separately to each define.
+     maybe this is OK, at least functionally
+
+ - String support
+   issue is how to support strings themselves in memory. can add them directly to the string_type, but then apply won't work 
+   because it could return an unknown number of bytes. on the other hand could use a separate data heap that is mirrored during GC.
+   may need some extra buffer for that because technically it could overflow any time a new string is allocated, not just during
+   function calls. but this would work for apply as well as everything else, I believe. obviously it makes GC a bit harder because
+   there is another pair of heaps to deal with. but all that would be done is that strings from heap A would be copied to B during GC.
+   GC would need to keep track of a pointer to each one. Sounds straightforward, but have to be careful of complications.
+   Initial plan:
+    - Add two "data" heap sections, and vars for each (head ptr, pos ptr [active only?], size)
+    - Allocate string on active data heap via make_string
+    - Initiate GC when stack exceeded or data heap under certain threshold
+    - Need adequate extra space in data heap (100K? make config), since we only check it upon function call
+    - Need to update GC to copy strings to other heap
+    - Wait, this is broken if anything is pointing to one of these strings, since memory location changes upon GC!
+      Is that a fatal issue? How to handle? could write string operations such that any operate on copies of
+      strings rather than pointing to another string. not nearly as efficient but avoids this problem. could revisit
+      other solutions down the road.
+    - Anything else? Probably want to branch for this development, just in case there are complications
+
+  COMPLICATION - only need to memcpy strings on data heap during a major collection. during a minor collection the strings are already where they need to be
+  need to fully-implement this in the runtime by passing minor/major flag to transport
+
+  TODO: trigger GC if data heap too low
+  TODO: once this works but before moving all, consolidate all this in docs/strings.txt or such. would be useful to keep these notes
+
+
+- Error handling
+  need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
+
+- Unit test improvements
+  - concatenate all into one file when compiling / running
+  - add assert functions, and actually test for equality
+    otherwise it is too easy to miss failing test cases, unless they
+    blow up the runtime
+ - This has already been done, just need to incorporate other existing tests.
+
+- Parser
+  ;'a'c  ;; TODO: this is still an issue, try it
+
+- in regard to native apply support for primitives
+  - do we need to create a table of primitives, like husk?
+    might allow for more efficient comparisons than the stupid string cmp's
+    that are required if we use symbols to denote primitives (which also 
+    breaks lexical scoping)
+
+- Improved symbol storage
+  as part of above, probably will need a more dynamic and accurate way to store symbols.
+  for example, how to store the + symbol, how to differentiate #t and 't etc.
+  perhaps could use a malloc'd table for this? do want the lookups to be fast - IE, integer (pointer) comparisons and NOT string comparisons (those are unacceptable for symbols)
+- Improvements to symbol handling, including printing of symbols with invalid C chars, like 'hello-world
+- Consoldate list of primitives in (prim?) and (c-compile-prim?). should also include other information such as number of args (or variable args), for error handling
+
+- Notes on implementing variables
+
+ * could maintain env's in the interpreted code, and perform operations there to lookup vars. If a lookup fails though, would have to then fall back to looking in the compiled code. The compiler would have to (only if eval is used) set aside data to allow a reference back to vars in this case. Also, this becomes tricky because a var may not even be used, so it might not be added to any closures. There may have to be special analysis done if eval is used.
+ * chicken does this, obviously. could map var ==> rename (how to know?) and then look it up in a C-based symbol table 
+ * lexical addressing (see chapter 5 of SICP) can be used to find a variable in recursive env's, so you can access it directly instead of having to recursively traverse environments.
+
+- Add eval support. 
+    - moving forward with meta-circular evaluator from SICP. Let's try to add more cases and code, and see how far it can be pushed.
+    - also want to try integrating it with trans somehow. IE, if eval is a free var, then add eval code to the compiled program.
+
+Original notes: Will probably also require apply, read, etc. will probably be necessary to write interpreter in CPS style - see notes. One idea - parse and compile input to scheme expressions, then call apply. could that work? should also see chapter 6 of lisp in small pieces.
+
+- Integrate debug script into cyclone, so that by passing a specific command line arg, the compiler will output results of closure-conversion, prepended with the debug contents. That way the SCM code can be debugged independently of the compiled executable.
+
+- What happens when a continuation is captured? assigned to a variable? applied?
+  Should look into this a bit using cyclone and call/cc
+
+- Implement ER-macros using eval, in scheme. with this in place, could implement basic macros using ER and replace "desugar". presumably syntax rules could be implemented this way as well, but that can wait for a later time
+- Pass port along with emit procedures, to allow the scheme code to write to an output file (IE, c file)?? Or is with-output-file good enough? unfortunately that is not in husk yet so it makes boostrapping harder
+- Add more numeric support, and doubles 
+- WRT set! support, and mutable variables:
+  - set aggressive GC, and see if there are any problems with data being lost
+    need to do this with a more complicated example, though
+- Could add other scheme library functions to the compiled prog just
+  like call/cc. alternatively could compile them into a library somewhere
+  for inclusion.
+- define - can this with with mutable variable elimination, or does it require C globals (per cboyer)? Are there special cases for top-level? If cells can be used for vars, do we need to keep track of the roots to prevent invalid GC? lots of questions here
+- Question about closures and continuations:
+ Presumably every function will recieve a closure. Do we have to differentiate between continuation (which every
+ function must have) and closure (which can be empty if no fv)? right now the MTA runtime combines the two by
+ having an fn argument to each closure. Is that OK?
+
+ FWIW, chicken passes the following to generated C funcs:
+   - number of args
+   - env (the closure from caller)
+   - continuation (function to call into)
+   - actual args
+
+- may be necessary to specify arity of functions in call to apply
+- GC - notes from: http://www.more-magic.net/posts/internals-gc.html
+
+ JAE - Good notes here about mutations (use write barrier to keep track of changes, EG: vector-set!). remember changes so they can be handled properly during next GC:
+
+ Another major oversight is the assumption that objects can only point from the stack into the heap. If Scheme was a purely functional language, this would be entirely accurate: new objects can refer to old objects, but there is no way that a preexisting object can be made to refer to a newly created object. For that, you need to support mutation.
+ But Scheme does support mutation! So what happens when you use vector-set! to store a newly created, stack-allocated value in an old, heap-allocated vector? If we used the above algorithm, the newly created element would either be part of the live set and get copied, but the vector's pointer would not be updated, or it wouldn't be part of the live set and the object would be lost in the stack reset.
+ The answer to this problem is also pretty simple: we add a so-called write barrier. Whenever a value is written to an object, it is remembered. Then, when performing a GC, these remembered values are considered to be part of the live set, just like the addresses in the saved call. This is also the reason CHICKEN always shows the number of mutations when you're asking for GC statistics: mutation may slow down a program because GCs might take longer.
+
+ JAE - Important point, that the heap must be reallocated during a major GC if there is too much data in the stack / old heap. Considered this but not sure if cyclone's GC does that right now:
+
+The smart reader might have noticed a small problem here: what if the amount of garbage cleaned up is less than the data on the stack? Then, the stack data can't be copied to the new heap because it simply is too small. Well, this is when a third GC mode is triggered: a reallocating GC. This causes a new heap to be allocated, twice as big as the current heap. This is also split in from- and tospace. Then, Cheney's algorithm is performed on the old heap's fromspace, using one half of the new heap as tospace. When it's finished, the new tospace is called fromspace, and the other half of the new heap is called tospace. Then, the old heap is de-allocated.
+
+- farther off but along the same lines, how to support compilation of
+  multiple scheme files into multiple C modules?
+
+- Just a thought: if this ever became self-hosting, could distribute compiled C files
