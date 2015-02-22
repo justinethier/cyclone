@@ -1,7 +1,7 @@
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
-all: cyclone
+all: cyclone icyc
 
 trans.so: trans.scm
 	csc -s trans.scm
@@ -19,8 +19,8 @@ cyclone: cyclone.scm trans.so cgen.so parser.so
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
-repl: cyclone repl.scm eval.scm parser.scm
-	./cyclone repl.scm
+icyc: cyclone icyc.scm eval.scm parser.scm
+	./cyclone icyc.scm
 
 .PHONY: tags
 tags:
@@ -28,5 +28,5 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.c *.out tags cyclone repl
+	rm -rf a.out *.o *.so *.c *.out tags cyclone icyc
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)

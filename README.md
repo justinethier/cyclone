@@ -19,11 +19,9 @@ From the source directory, to build and run the compiler:
     ...
     $ ./cyclone
     
-To build the interpreter:
+To run the interpreter:
 
-    $ make repl
-    ...
-    $ ./repl
+    $ ./icyc
 
 Installation
 ------------
