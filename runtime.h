@@ -995,6 +995,7 @@ typedef union {
 } common_type;
 
 static void dispatch(int argc, closure func, object cont, object args) {
+// TODO: this approach is problematic due to GC. need to figure out something else:
 //    object buf, tmp;
 //    int i;
 //printf("%d %d ", sizeof(buf), sizeof(buf[0]));
