@@ -1076,8 +1076,17 @@ static object apply(object cont, object func, object args){
       }
       break;
     case closure0_tag:
-      // TODO: get length of args, 2 below is just an example
-      return_funcall2((closure)func, cont, car(args));
+      buf.integer_t = Cyc_length(args);
+      switch(buf.integer_t.value) {
+      case 0: return_funcall1((closure)func, cont);
+      case 1: return_funcall2((closure)func, cont, car(args));
+      case 2: return_funcall3((closure)func, cont, car(args), cadr(args));
+      // TODO: can see the pattern but this is not efficient. is there a better way?
+      default:
+        printf("Unhandled number of function arguments %d\n", buf.integer_t.value);
+        exit(1);
+      }
+      
       break;
     default:
       printf("Invalid object type %ld\n", type_of(func));
