@@ -6,6 +6,7 @@ Working TODO list:
 
  - compiled/interpreted code integration
    * call a compiled function from eval
+     we have the continuation in apply though. I think if the code gets that far, we should be able to apply a compiled function
    * call an interpreted function from compiled code (or is eval good enough? maybe that is the answer?)
 
  - Use a lib.scm for libs, similar to eval/parser modules?
