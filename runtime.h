@@ -572,6 +572,7 @@ static object Cyc_write(x) object x;
    {case string_tag:
       printf("\"%s\"", ((string_type *) x)->str);
       break;
+    // TODO: what about a list? contents should be displayed per (write)
     default:
       Cyc_display(x);}
  printf("\n");
@@ -993,6 +994,35 @@ typedef union {
   string_type string_t;
 } common_type;
 
+static void dispatch(int argc, closure func, object cont, object args) {
+//    object buf, tmp;
+//    int i;
+//printf("%d %d ", sizeof(buf), sizeof(buf[0]));
+//    for (i = 0; i < argc; i++){
+//      //tmp = car(args);
+//      //if (nullp(tmp) || is_value_type(tmp)) {
+//      //    buf[i] = tmp;
+//      //} else {
+//      //    buf[i] = &tmp;
+//      //}
+//      buf[i] = car(args);
+//      args = cdr(args);
+//    }
+//Cyc_display(buf[0]);
+
+object tmp;
+object buf[20];
+tmp = car(args); 
+buf[0] = tmp;
+object carbuf = buf[0]; //car(args);
+return_funcall2(func, cont, buf[0]);
+
+//    switch(argc) {
+//    case 5: return_funcall6(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4]);
+//    default: break;
+//    }
+}
+
 /*
  *
  * @param cont - Continuation for the function to call into
@@ -1089,6 +1119,7 @@ static object apply(object cont, object func, object args){
       case 3: return_funcall4((closure)func, cont, car(args), cadr(args), caddr(args));
       case 4: return_funcall5((closure)func, cont, car(args), cadr(args), caddr(args), cadddr(args));
       // TODO: can see the pattern but this is not efficient. is there a better way?
+      case 5: dispatch(buf.integer_t.value, (closure)func, cont, args);
       default:
         printf("Unhandled number of function arguments: %d\n", buf.integer_t.value);
         exit(1);
