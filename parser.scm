@@ -4,6 +4,10 @@
 ;;
 ;; This module contains the s-expression parser and supporting functions.
 ;;
+;; The code in this module is used both by the compiler and at runtime, so
+;; when bootstrapping from a Scheme, keep in mind the code in this module 
+;; cannot use features that are not also provided by Cyclone.
+;;
 ;; FUTURE: if this was a module/library, would probably only want to export
 ;;         read and read-all
 ;;

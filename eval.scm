@@ -1,5 +1,13 @@
-;; The meta-circular evaluator from SICP 4.1
+;; Cyclone Scheme
+;; Copyright (c) 2014, Justin Ethier
+;; All rights reserved.
+;;
+;; The Cyclone interpreter, based on the meta-circular evaluator from SICP 4.1:
 ;; http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1
+;;
+;; The code in this module is used both by the compiler and at runtime, so
+;; when bootstrapping from a Scheme, keep in mind the code in this module 
+;; cannot use features that are not also provided by Cyclone.
 ;;
 
 (define (eval exp . env)
