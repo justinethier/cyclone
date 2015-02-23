@@ -1076,14 +1076,21 @@ static object apply(object cont, object func, object args){
       }
       break;
     case closure0_tag:
+    case closure1_tag:
+    case closure2_tag:
+    case closure3_tag:
+    case closure4_tag:
+    case closureN_tag:
       buf.integer_t = Cyc_length(args);
       switch(buf.integer_t.value) {
       case 0: return_funcall1((closure)func, cont);
       case 1: return_funcall2((closure)func, cont, car(args));
       case 2: return_funcall3((closure)func, cont, car(args), cadr(args));
+      case 3: return_funcall4((closure)func, cont, car(args), cadr(args), caddr(args));
+      case 4: return_funcall5((closure)func, cont, car(args), cadr(args), caddr(args), cadddr(args));
       // TODO: can see the pattern but this is not efficient. is there a better way?
       default:
-        printf("Unhandled number of function arguments %d\n", buf.integer_t.value);
+        printf("Unhandled number of function arguments: %d\n", buf.integer_t.value);
         exit(1);
       }
       
