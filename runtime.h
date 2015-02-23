@@ -682,6 +682,23 @@ static object Cyc_is_char(object o){
         return boolean_t;
     return boolean_f;}
 
+static object Cyc_is_procedure(object o) {
+    int tag;
+    if (!nullp(o) && !is_value_type(o)) {
+        tag = type_of(o);
+        if (tag == closure0_tag ||
+            tag == closure1_tag ||
+            tag == closure2_tag ||
+            tag == closure3_tag ||
+            tag == closure4_tag ||
+            tag == closureN_tag ||
+            tag == primitive_tag) {
+            return boolean_t;
+        }
+    }
+    return boolean_f;
+}
+
 static object Cyc_is_eof_object(object o) {
     if (!nullp(o) && !is_value_type(o) && type_of(o) == eof_tag)
         return boolean_t;

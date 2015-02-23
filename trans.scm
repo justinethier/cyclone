@@ -550,6 +550,7 @@
      null?
      number?
      pair?
+     procedure?
      string?
      symbol?
      current-input-port
