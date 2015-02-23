@@ -355,6 +355,8 @@
           (extend-environment (procedure-parameters proc)
                               args
                               (procedure-environment proc))))
+        ((procedure? proc)
+         (apply proc args))
         (else
          (error
           "Unknown procedure type -- EXECUTE-APPLICATION"
