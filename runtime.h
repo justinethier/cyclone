@@ -1075,6 +1075,10 @@ static object apply(object cont, object func, object args){
           exit(1);
       }
       break;
+    case closure0_tag:
+      // TODO: get length of args, 2 below is just an example
+      return_funcall2((closure)func, cont, car(args));
+      break;
     default:
       printf("Invalid object type %ld\n", type_of(func));
       exit(1);
