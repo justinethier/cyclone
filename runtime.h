@@ -969,20 +969,92 @@ static const object primitive_##name = &name##_primitive
 
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
 
-// TODO: there has to be a better way:
-defprimitive(cons /*, Cyc_length*/);
-defprimitive(length /*, Cyc_length*/);
-defprimitive(car);
-defprimitive(cdr);
-defprimitive(cadr);
-defprimitive(set_91car_67);
-defprimitive(set_91cdr_67);
-defprimitive(eq_127);
-defprimitive(equal_127);
-defprimitive(null_127);
-defprimitive(_87); // The plus symbol: +
-defprimitive(Cyc_91global_91vars);
-defprimitive(has_91cycle_127);
+defprimitive(Cyc_91global_91vars); /* Cyc-global-vars */
+defprimitive(Cyc_91get_91cvar); /* Cyc-get-cvar */
+defprimitive(Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
+defprimitive(Cyc_91cvar_127); /* Cyc-cvar? */
+defprimitive(has_91cycle_127); /* has-cycle? */
+defprimitive(_87); /* + */
+defprimitive(_91); /* - */
+defprimitive(_85); /* * */
+defprimitive(_95); /* / */
+defprimitive(_123); /* = */
+defprimitive(_125); /* > */
+defprimitive(_121); /* < */
+defprimitive(_125_123); /* >= */
+defprimitive(_121_123); /* <= */
+defprimitive(apply); /* apply */
+defprimitive(_75halt); /* %halt */
+defprimitive(error); /* error */
+defprimitive(cons); /* cons */
+defprimitive(cell_91get); /* cell-get */
+defprimitive(set_91global_67); /* set-global! */
+defprimitive(set_91cell_67); /* set-cell! */
+defprimitive(cell); /* cell */
+defprimitive(eq_127); /* eq? */
+defprimitive(eqv_127); /* eqv? */
+defprimitive(equal_127); /* equal? */
+defprimitive(assoc); /* assoc */
+defprimitive(assq); /* assq */
+defprimitive(member); /* member */
+defprimitive(length); /* length */
+defprimitive(set_91car_67); /* set-car! */
+defprimitive(set_91cdr_67); /* set-cdr! */
+defprimitive(car); /* car */
+defprimitive(cdr); /* cdr */
+defprimitive(caar); /* caar */
+defprimitive(cadr); /* cadr */
+defprimitive(cdar); /* cdar */
+defprimitive(cddr); /* cddr */
+defprimitive(caaar); /* caaar */
+defprimitive(caadr); /* caadr */
+defprimitive(cadar); /* cadar */
+defprimitive(caddr); /* caddr */
+defprimitive(cdaar); /* cdaar */
+defprimitive(cdadr); /* cdadr */
+defprimitive(cddar); /* cddar */
+defprimitive(cdddr); /* cdddr */
+defprimitive(caaaar); /* caaaar */
+defprimitive(caaadr); /* caaadr */
+defprimitive(caadar); /* caadar */
+defprimitive(caaddr); /* caaddr */
+defprimitive(cadaar); /* cadaar */
+defprimitive(cadadr); /* cadadr */
+defprimitive(caddar); /* caddar */
+defprimitive(cadddr); /* cadddr */
+defprimitive(cdaaar); /* cdaaar */
+defprimitive(cdaadr); /* cdaadr */
+defprimitive(cdadar); /* cdadar */
+defprimitive(cdaddr); /* cdaddr */
+defprimitive(cddaar); /* cddaar */
+defprimitive(cddadr); /* cddadr */
+defprimitive(cdddar); /* cdddar */
+defprimitive(cddddr); /* cddddr */
+defprimitive(char_91_125integer); /* char->integer */
+defprimitive(integer_91_125char); /* integer->char */
+defprimitive(string_91_125number); /* string->number */
+defprimitive(string_91append); /* string-append */
+defprimitive(string_91_125list); /* string->list */
+defprimitive(list_91_125string); /* list->string */
+defprimitive(string_91_125symbol); /* string->symbol */
+defprimitive(symbol_91_125string); /* symbol->string */
+defprimitive(number_91_125string); /* number->string */
+defprimitive(boolean_127); /* boolean? */
+defprimitive(char_127); /* char? */
+defprimitive(eof_91object_127); /* eof-object? */
+defprimitive(null_127); /* null? */
+defprimitive(number_127); /* number? */
+defprimitive(pair_127); /* pair? */
+defprimitive(procedure_127); /* procedure? */
+defprimitive(string_127); /* string? */
+defprimitive(symbol_127); /* symbol? */
+defprimitive(current_91input_91port); /* current-input-port */
+defprimitive(open_91input_91file); /* open-input-file */
+defprimitive(close_91input_91port); /* close-input-port */
+defprimitive(read_91char); /* read-char */
+defprimitive(peek_91char); /* peek-char */
+defprimitive(write); /* write */
+defprimitive(display); /* display */
 
 /* All constant-size objects */
 typedef union {
