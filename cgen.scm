@@ -1058,6 +1058,7 @@
     (close-output-port fp)))
 
 (define (autogen:defprimitives fp)
+  (display "/* This section is auto-generated via --autogen */\n" fp)
   (for-each
     (lambda (p)
       (display
@@ -1068,7 +1069,8 @@
           (symbol->string p)
           " */\n")
         fp))
-    *primitives*))
+    *primitives*)
+  (display "/* -------------------------------------------- */\n" fp))
 
 ;; List of primitive procedures
 (define (autogen:primitive-procedures fp)
