@@ -994,34 +994,29 @@ typedef union {
   string_type string_t;
 } common_type;
 
+/**
+ * Receive a list of arguments and apply them to the given function
+ */
 static void dispatch(int argc, closure func, object cont, object args) {
-// TODO: this approach is problematic due to GC. need to figure out something else:
-//    object buf, tmp;
-//    int i;
-//printf("%d %d ", sizeof(buf), sizeof(buf[0]));
-//    for (i = 0; i < argc; i++){
-//      //tmp = car(args);
-//      //if (nullp(tmp) || is_value_type(tmp)) {
-//      //    buf[i] = tmp;
-//      //} else {
-//      //    buf[i] = &tmp;
-//      //}
-//      buf[i] = car(args);
-//      args = cdr(args);
-//    }
-//Cyc_display(buf[0]);
-
-object tmp;
-object buf[20];
-tmp = car(args); 
-buf[0] = tmp;
-object carbuf = buf[0]; //car(args);
-return_funcall2(func, cont, buf[0]);
-
-//    switch(argc) {
-//    case 5: return_funcall6(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4]);
-//    default: break;
-//    }
+    object buf[argc];
+    int i;
+    for (i = 0; i < argc; i++){
+      buf[i] = car(args);
+      args = cdr(args);
+    }
+    // Note memory scheme is not compatible with GC, so call funcs directly
+    // TODO: auto-generate this stuff, also need to make sure these funcall's
+    //       exist, since they are created by the compiler right now
+    switch(argc) {
+    case 5: funcall6(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4]);
+    case 6: funcall7(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
+    case 7: funcall8(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
+    case 8: funcall9(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
+    case 9: funcall10(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8]);
+    default:
+      printf("Unhandled number of function arguments: %d\n", argc);
+      exit(1);
+    }
 }
 
 /*
@@ -1119,11 +1114,8 @@ static object apply(object cont, object func, object args){
       case 2: return_funcall3((closure)func, cont, car(args), cadr(args));
       case 3: return_funcall4((closure)func, cont, car(args), cadr(args), caddr(args));
       case 4: return_funcall5((closure)func, cont, car(args), cadr(args), caddr(args), cadddr(args));
-      // TODO: can see the pattern but this is not efficient. is there a better way?
-      case 5: dispatch(buf.integer_t.value, (closure)func, cont, args);
-      default:
-        printf("Unhandled number of function arguments: %d\n", buf.integer_t.value);
-        exit(1);
+      // More efficient to do this for larger numbers of arguments:
+      default: dispatch(buf.integer_t.value, (closure)func, cont, args);
       }
       
       break;
