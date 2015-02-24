@@ -320,6 +320,7 @@ static void Cyc_apply(int argc, closure cont, object prim, ...);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
+static object Cyc_is_cons(object o);
 static int equal(object,object);
 static list assq(object,list);
 static object get(object,object);
@@ -480,7 +481,9 @@ static object Cyc_has_cycle(object lst) {
     fast_lst = cdr(lst);
     while(1) {
         if (nullp(fast_lst)) return boolean_f;
+        if (Cyc_is_cons(fast_lst) == boolean_f) return boolean_f;
         if (nullp(cdr(fast_lst))) return boolean_f;
+        if (Cyc_is_cons(cdr(fast_lst)) == boolean_f) return boolean_f;
         if (eq(car(slow_lst), car(fast_lst))) return boolean_t;
 
         slow_lst = cdr(slow_lst);
@@ -1091,6 +1094,117 @@ static void dispatch(int argc, closure func, object cont, object args) {
     }
 }
 
+/**
+ * Execute primitive function using given args, and pass result to cont
+ */
+static void dispatch_primitive(object func, object cont, object args) {
+  object result;
+  common_type buf;
+
+// TODO: should probably check arg counts and error out if needed
+// TODO: use *primitives* to make a list of all missing prims below
+
+  if (func == primitive_cons) {
+      make_cons(c, car(args), cadr(args));
+      buf.cons_t = c;
+      result = &buf;
+  } else if (func == primitive_length) {
+      buf.integer_t = Cyc_length(car (args));
+      result = &buf;
+  } else if (func == primitive_eq_127) {
+      result = Cyc_eq(car(args), cadr(args));
+  } else if (func == primitive_equal_127) {
+      result = equalp(car(args), cadr(args));
+  } else if (func == primitive_null_127) {
+      object tmp = car(args);
+      result = Cyc_is_null(tmp);
+  } else if (func == primitive__87) {
+      __sum(i, car(args), cadr(args));
+      buf.integer_t = i;
+      result = &buf;
+  } else if (func == primitive_car) {
+      result = car(car(args));
+  } else if (func == primitive_cdr) {
+      result = cdr(car(args));
+  } else if (func == primitive_cadr) {
+      result = cadr(car(args));
+  } else if (func == primitive_set_91car_67) {
+      result = Cyc_set_car(car(args), cadr(args));
+  } else if (func == primitive_set_91cdr_67) {
+      result = Cyc_set_cdr(car(args), cadr(args));
+  } else if (func == primitive_Cyc_91global_91vars) {
+      result = Cyc_global_variables;
+  } else if (func == primitive_has_91cycle_127) {
+      result = Cyc_has_cycle(car(args));
+  } else {
+      printf("Unrecognized primitive function: %s\n", ((symbol_type *)func)->pname);
+      exit(1);
+  }
+//     Cyc-global-vars
+//     Cyc-get-cvar
+//     Cyc-set-cvar!
+//     Cyc-cvar? ;; Cyclone-specific
+//     has-cycle?
+//     +
+//     -
+//     *
+//     /
+//     =
+//     >
+//     <
+//     >=
+//     <=
+//     apply
+//     %halt
+//     error
+//     cons
+//     cell-get
+//     set-global!
+//     set-cell!
+//     cell
+//     eq?
+//     eqv?
+//     equal?
+//     assoc
+//     assq
+//     member
+//     length
+//     set-car!
+//     set-cdr!
+//     car
+//     cdr
+//     caar cadr cdar cddr
+//     caaar caadr cadar caddr cdaar cdadr cddar cdddr
+//     caaaar caaadr caadar caaddr cadaar cadadr
+//     caddar cadddr cdaaar cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr
+//     char->integer
+//     integer->char
+//     string->number
+//     string-append
+//     string->list
+//     list->string
+//     string->symbol
+//     symbol->string
+//     number->string
+//     boolean?
+//     char?
+//     eof-object?
+//     null?
+//     number?
+//     pair?
+//     procedure?
+//     string?
+//     symbol?
+//     current-input-port
+//     open-input-file
+//     close-input-port
+//     read-char
+//     peek-char
+//     write
+//     display))
+  return_funcall1(cont, result);
+}
+
 /*
  *
  * @param cont - Continuation for the function to call into
@@ -1098,51 +1212,11 @@ static void dispatch(int argc, closure func, object cont, object args) {
  * @param args - A list of arguments to the function
  */
 static object apply(object cont, object func, object args){
-  object result;
   common_type buf;
-
-// TODO: should probably check arg counts and error out if needed
-// TODO: move primitive application to another function
-// TODO: use *primitives* to make a list of all missing prims below
 
   switch(type_of(func)) {
     case primitive_tag:
-      if (func == primitive_cons) {
-          make_cons(c, car(args), cadr(args));
-          buf.cons_t = c;
-          result = &buf;
-      } else if (func == primitive_length) {
-          buf.integer_t = Cyc_length(car (args));
-          result = &buf;
-      } else if (func == primitive_eq_127) {
-          result = Cyc_eq(car(args), cadr(args));
-      } else if (func == primitive_equal_127) {
-          result = equalp(car(args), cadr(args));
-      } else if (func == primitive_null_127) {
-          object tmp = car(args);
-          result = Cyc_is_null(tmp);
-      } else if (func == primitive__87) {
-          __sum(i, car(args), cadr(args));
-          buf.integer_t = i;
-          result = &buf;
-      } else if (func == primitive_car) {
-          result = car(car(args));
-      } else if (func == primitive_cdr) {
-          result = cdr(car(args));
-      } else if (func == primitive_cadr) {
-          result = cadr(car(args));
-      } else if (func == primitive_set_91car_67) {
-          result = Cyc_set_car(car(args), cadr(args));
-      } else if (func == primitive_set_91cdr_67) {
-          result = Cyc_set_cdr(car(args), cadr(args));
-      } else if (func == primitive_Cyc_91global_91vars) {
-          result = Cyc_global_variables;
-      } else if (func == primitive_has_91cycle_127) {
-          result = Cyc_has_cycle(car(args));
-      } else {
-          printf("Unrecognized primitive function: %s\n", ((symbol_type *)func)->pname);
-          exit(1);
-      }
+      dispatch_primitive(func, cont, args);
       break;
     case closure0_tag:
     case closure1_tag:
@@ -1166,11 +1240,7 @@ static object apply(object cont, object func, object args){
       printf("Invalid object type %ld\n", type_of(func));
       exit(1);
   }
-  return_funcall1(cont, result);
-  return nil; // TODO: restructure to avoid this?
-              // would require emitting apply's such that they are not assigning a val,
-              // but instead they replace the final call to return_X.
-              // Like at the end of Cyc_apply
+  return nil; // Never reached
 }
 
 // Version of apply meant to be called from within compiled code
