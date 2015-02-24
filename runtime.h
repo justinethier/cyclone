@@ -1029,12 +1029,6 @@ static object apply(object cont, object func, object args){
   object result;
   common_type buf;
 
-// TODO: consider passing an argc for just this purpose
-//  if (nullp(args)) {
-//      printf("Error: no arguments passed to apply\n");
-//      exit(1);
-//  }
-
   switch(type_of(func)) {
     case primitive_tag:
       if (func == primitive_cons) {

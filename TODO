@@ -5,9 +5,9 @@ Working TODO list:
    - printing *global-environment* in the repl still loops forever
 
  - compiled/interpreted code integration
-   * call a compiled function from eval
-     we have the continuation in apply though. I think if the code gets that far, we should be able to apply a compiled function
-   * call an interpreted function from compiled code (or is eval good enough? maybe that is the answer?)
+   * call an interpreted function from compiled code
+     need an example of this, for example maybe defining a function in the interpreter and
+     then passing it as a parameter. EG: (map (lambda ...) lst)
 
  - Use a lib.scm for libs, similar to eval/parser modules?
 
