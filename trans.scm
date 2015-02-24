@@ -497,7 +497,9 @@
   
 ; prim? : exp -> boolean
 (define (prim? exp)
-  (member exp '(
+  (member exp *primitives*))
+
+(define *primitives* '(
      Cyc-global-vars
      Cyc-get-cvar
      Cyc-set-cvar!
@@ -559,7 +561,7 @@
      read-char
      peek-char
      write
-     display)))
+     display))
 
 (define (prim-call? exp)
   (and (list? exp) (prim? (car exp))))

@@ -1048,33 +1048,36 @@
     (emit "}")
     (emit *c-main-function*)))
 
-; Unused -
-;;; Echo file to stdout
-;(define (emit-fp fp)
-;    (let ((l (read-line fp)))
-;        (if (eof-object? l)
-;            (close-port fp)
-;            (begin 
-;                (display l) 
-;                (newline)
-;                (emit-fp fp)))))
-;
-;(define (read-runtime fp)
-;  (letrec* 
-;    ((break "/** SCHEME CODE ENTRY POINT **/")
-;     (read-fp (lambda (header footer on-header?)
-;       (let ((l (read-line fp)))
-;         (cond
-;           ((eof-object? l)
-;             (close-port fp)
-;             (cons (reverse header) (reverse footer)))
-;           (else 
-;             (cond
-;               ((equal? l break)
-;                 (read-fp header footer #f))
-;               (else
-;                 (if on-header?
-;                   (read-fp (cons l header) footer on-header?)
-;                   (read-fp header (cons l footer) on-header?))))))))))
-;
-;   (read-fp (list) (list) #t)))
+;; Automatically generate blocks of code for the compiler
+;; TODO: need a compiler option to call this from cmd line
+(define (autogen)
+  (let ((fp (open-output-file "tmp.txt")))
+    (autogen:defprimitives fp)
+    (autogen:primitive-procedures fp)
+    (close-output-port fp)))
+
+(define (autogen:defprimitives fp)
+  (for-each
+    (lambda (p)
+      (display
+        (string-append 
+          "defprimitive(" 
+          (mangle p)
+          "); /* "
+          (symbol->string p)
+          " */\n")
+        fp))
+    *primitives*))
+
+;; List of primitive procedures
+(define (autogen:primitive-procedures fp)
+  (pp ;; CHICKEN pretty-print
+    (cons 
+      'list
+      (map
+        (lambda (p)
+          `(list (quote ,p) ,p))
+         *primitives*))
+    fp))
+
+
