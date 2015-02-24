@@ -1048,10 +1048,11 @@
     (emit "}")
     (emit *c-main-function*)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically generate blocks of code for the compiler
-;; TODO: need a compiler option to call this from cmd line
-(define (autogen)
-  (let ((fp (open-output-file "tmp.txt")))
+(define (autogen filename)
+  (let ((fp (open-output-file filename)))
     (autogen:defprimitives fp)
     (autogen:primitive-procedures fp)
     (close-output-port fp)))
@@ -1071,13 +1072,17 @@
 
 ;; List of primitive procedures
 (define (autogen:primitive-procedures fp)
-  (pp ;; CHICKEN pretty-print
-    (cons 
-      'list
-      (map
-        (lambda (p)
-          `(list (quote ,p) ,p))
-         *primitives*))
-    fp))
+  (let ((code 
+          (cons 
+            'list
+            (map
+              (lambda (p)
+                `(list (quote ,p) ,p))
+               *primitives*))))
+    (cond-expand
+      (chicken
+       (pp code fp)) ;; CHICKEN pretty-print
+      (else
+       (write code fp)))))
 
 

@@ -158,6 +158,8 @@
      (newline))
     ((member "-v" args)
      (display *version-banner*))
+    ((member "--autogen" args)
+     (autogen "autogen.out"))
     ((member "-d" args)
      (run-compiler args #f)) ;; Debug, do not run GCC
     (else
