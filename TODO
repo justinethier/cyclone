@@ -9,6 +9,9 @@ Working TODO list:
      need an example of this, for example maybe defining a function in the interpreter and
      then passing it as a parameter. EG: (map (lambda ...) lst)
 
+ - Handle errors better within icyc, instead of exiting the program, print an error and
+   keep going
+
  - Use a lib.scm for libs, similar to eval/parser modules?
 
  - cyclone should return an error code (IE: 1) when compilation fails and a 0 when it is successful. that way it can be scripted via bash (for example)
