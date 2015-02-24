@@ -17,7 +17,7 @@
         `@@@@@+  
        .@@@+@@@      Cyclone  
        @@     @@     An experimental Scheme compiler
-      ,@             TODO: project URL
+      ,@             https://github.com/justinethier/cyclone
       '@        
       .@        
        @@     #@     (c) 2014 Justin Ethier
