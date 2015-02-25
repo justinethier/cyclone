@@ -1151,76 +1151,6 @@ static void dispatch(int argc, closure func, object cont, object args) {
     }
 }
 
-/**
- * Execute primitive function using given args, and pass result to cont
- */
-static void dispatch_primitive(object func, object cont, object args) {
-  ((primitive_type *)func)->fn(cont, args);
-}
-// TODO: should probably check arg counts and error out if needed
-// TODO: use *primitives* to make a list of all missing prims below
-/*
-  } else if (func == primitive_pair_127) { result = Cyc_is_cons(car(args));
-  } else if (func == primitive_boolean_127) { result = Cyc_is_boolean(car(args));
-  } else if (func == primitive_char_127) { result = Cyc_is_char(car(args));
-  } else if (func == primitive_eof_91object_127) { result = Cyc_is_eof_object(car(args));
-  } else if (func == primitive_number_127) { result = Cyc_is_number(car(args));
-  } else if (func == primitive_procedure_127) { result = Cyc_is_procedure(car(args));
-  } else if (func == primitive_string_127) { result = Cyc_is_string(car(args));
-  } else if (func == primitive_symbol_127) { result = Cyc_is_symbol(car(args));
-  } else if (func == primitive_Cyc_91cvar_127) { result = Cyc_is_cvar(car(args));
-  } else if (func == primitive__87) {
-      __sum(i, car(args), cadr(args));
-      buf.integer_t = i;
-      result = &buf;
-  } else {
-      printf("Unrecognized primitive function: %s\n", ((symbol_type *)func)->pname);
-      exit(1);
-  }
-//     Cyc-get-cvar
-//     Cyc-set-cvar!
-//     -
-//     *
-//     /
-//     =
-//     >
-//     <
-//     >=
-//     <=
-//     apply
-//     %halt
-//     error
-//     cell-get
-//     set-global!
-//     set-cell!
-//     cell
-//     assoc
-//     assq
-//     member
-//     caar cdar cddr
-//     caaar caadr cadar caddr cdaar cdadr cddar cdddr
-//     caaaar caaadr caadar caaddr cadaar cadadr
-//     caddar cadddr cdaaar cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr
-//     char->integer
-//     integer->char
-//     string->number
-//     string-append
-//     string->list
-//     list->string
-//     string->symbol
-//     symbol->string
-//     number->string
-//     current-input-port
-//     open-input-file
-//     close-input-port
-//     read-char
-//     peek-char
-//     write
-//     display))
-  return_funcall1(cont, result);
-}
-  */
-
 /*
  *
  * @param cont - Continuation for the function to call into
@@ -1230,9 +1160,16 @@ static void dispatch_primitive(object func, object cont, object args) {
 static object apply(object cont, object func, object args){
   common_type buf;
 
+  if (!is_object_type(func)) {
+     printf("Call of non-procedure: ");
+     Cyc_display(func);
+     exit(1);
+  }
+
   switch(type_of(func)) {
     case primitive_tag:
-      dispatch_primitive(func, cont, args);
+      // TODO: should probably check arg counts and error out if needed
+      ((primitive_type *)func)->fn(cont, args);
       break;
     case closure0_tag:
     case closure1_tag:
