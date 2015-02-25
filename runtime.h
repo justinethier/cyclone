@@ -320,6 +320,7 @@ static void Cyc_apply(int argc, closure cont, object prim, ...);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
+static object Cyc_write(object);
 static object Cyc_is_boolean(object o);
 static object Cyc_is_cons(object o);
 static object Cyc_is_null(object o);
@@ -1116,24 +1117,51 @@ static void _symbol_127(object cont, object args) {
 // _assoc
 // _assq
 // _member
-// _char_91_125integer
-// _integer_91_125char
-// _string_91_125number
-// _string_91append
-// _string_91_125list
-// _list_91_125string
-// _string_91_125symbol
-// _symbol_91_125string
-// _number_91_125string
-// _current_91input_91port
-// _open_91input_91file
-// _close_91input_91port
-// _read_91char
-// _peek_91char
-// _write
-// _display
-//static void (object cont, object args) {
-//  return_funcall1(cont, );}
+//static void (object cont, object args) {  return_funcall1(cont, );}
+static void _char_91_125integer(object cont, object args) {  
+    integer_type i = Cyc_char2integer(car(args));
+    return_funcall1(cont, &i);}
+static void _integer_91_125char(object cont, object args) {  
+    return_funcall1(cont, Cyc_integer2char(car(args)));}
+static void _string_91_125number(object cont, object args) {  
+    integer_type i = Cyc_string2number(car(args));
+    return_funcall1(cont, &i);}
+static void _string_91append(object cont, object args) {  
+// TODO: how to dispatch list as varargs?
+    exit(1);
+//    string_type s = Cyc_string_append
+//    return_funcall1(cont, );
+}
+static void _string_91_125list(object cont, object args) {  
+    string2list(lst, car(args));
+    return_funcall1(cont, &lst);}
+static void _list_91_125string(object cont, object args) {  
+    string_type s = Cyc_list2string(car(args));
+    return_funcall1(cont, &s);}
+static void _string_91_125symbol(object cont, object args) {  
+    return_funcall1(cont, Cyc_string2symbol(car(args)));}
+static void _symbol_91_125string(object cont, object args) {  
+    string_type s = Cyc_symbol2string(car(args));
+    return_funcall1(cont, &s);}
+static void _number_91_125string(object cont, object args) {  
+    string_type s = Cyc_number2string(car(args));
+    return_funcall1(cont, &s);}
+static void _current_91input_91port(object cont, object args) {  
+    port_type p = Cyc_io_current_input_port();
+    return_funcall1(cont, &p);}
+static void _open_91input_91file(object cont, object args) {  
+    port_type p = Cyc_io_open_input_file(car(args));
+    return_funcall1(cont, &p);}
+static void _close_91input_91port(object cont, object args) {  
+    return_funcall1(cont, Cyc_io_close_input_port(car(args)));}
+static void _read_91char(object cont, object args) {  
+    return_funcall1(cont, Cyc_io_read_char(car(args)));}
+static void _peek_91char(object cont, object args) {  
+    return_funcall1(cont, Cyc_io_peek_char(car(args)));}
+static void _write(object cont, object args) {  
+    return_funcall1(cont, Cyc_write(car(args))); }
+static void _display(object cont, object args) {  
+    return_funcall1(cont, Cyc_display(car(args)));}
 
 /* This section is auto-generated via --autogen */
 defprimitive(Cyc_91global_91vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
