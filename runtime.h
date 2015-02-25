@@ -970,7 +970,6 @@ static object Cyc_io_peek_char(object port) {
 }
 
 /* Primitive types */
-//typedef common_type (*prim_function_type)();
 //typedef void (*prim_function_type)();
 typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
 typedef primitive_type *primitive;
@@ -1006,15 +1005,35 @@ static void _set_91_cdr_67(object cont, object args) {
     return_funcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
 static void _has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
-
+static void __87(object cont, object args) {
+    __sum(i, car(args), cadr(args));
+    return_funcall1(cont, &i); }
+static void _Cyc_91cvar_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_cvar(car(args))); }
+static void _boolean_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_boolean(car(args))); }
+static void _char_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_char(car(args))); }
+static void _eof_91object_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_eof_object(car(args))); }
+static void _number_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_number(car(args))); }
+static void _pair_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_cons(car(args))); }
+static void _procedure_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_procedure(car(args))); }
+static void _string_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_string(car(args))); }
+static void _symbol_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_symbol(car(args))); }
 
 /* This section is auto-generated via --autogen */
 defprimitive(Cyc_91global_91vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
 defprimitive(Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
 defprimitive(Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
-defprimitive(Cyc_91cvar_127, &missing_prim); /* Cyc-cvar? */
+defprimitive(Cyc_91cvar_127, &_Cyc_91cvar_127); /* Cyc-cvar? */
 defprimitive(has_91cycle_127, &_has_91cycle_127); /* has-cycle? */
-defprimitive(_87, &missing_prim); /* + */
+defprimitive(_87, &__87); /* + */
 defprimitive(_91, &missing_prim); /* - */
 defprimitive(_85, &missing_prim); /* * */
 defprimitive(_95, &missing_prim); /* / */
@@ -1079,15 +1098,15 @@ defprimitive(list_91_125string, &missing_prim); /* list->string */
 defprimitive(string_91_125symbol, &missing_prim); /* string->symbol */
 defprimitive(symbol_91_125string, &missing_prim); /* symbol->string */
 defprimitive(number_91_125string, &missing_prim); /* number->string */
-defprimitive(boolean_127, &missing_prim); /* boolean? */
-defprimitive(char_127, &missing_prim); /* char? */
-defprimitive(eof_91object_127, &missing_prim); /* eof-object? */
+defprimitive(boolean_127, &_boolean_127); /* boolean? */
+defprimitive(char_127, &_char_127); /* char? */
+defprimitive(eof_91object_127, &_eof_91object_127); /* eof-object? */
 defprimitive(null_127, &_null_127); /* null? */
-defprimitive(number_127, &missing_prim); /* number? */
-defprimitive(pair_127, &missing_prim); /* pair? */
-defprimitive(procedure_127, &missing_prim); /* procedure? */
-defprimitive(string_127, &missing_prim); /* string? */
-defprimitive(symbol_127, &missing_prim); /* symbol? */
+defprimitive(number_127, &_number_127); /* number? */
+defprimitive(pair_127, &_pair_127); /* pair? */
+defprimitive(procedure_127, &_procedure_127); /* procedure? */
+defprimitive(string_127, &_string_127); /* string? */
+defprimitive(symbol_127, &_symbol_127); /* symbol? */
 defprimitive(current_91input_91port, &missing_prim); /* current-input-port */
 defprimitive(open_91input_91file, &missing_prim); /* open-input-file */
 defprimitive(close_91input_91port, &missing_prim); /* close-input-port */
@@ -1141,22 +1160,6 @@ static void dispatch_primitive(object func, object cont, object args) {
 // TODO: should probably check arg counts and error out if needed
 // TODO: use *primitives* to make a list of all missing prims below
 /*
-  if (func == primitive_cons) {
-      make_cons(c, car(args), cadr(args));
-      buf.cons_t = c;
-      result = &buf;
-  } else if (func == primitive_length) {
-      buf.integer_t = Cyc_length(car (args));
-      result = &buf;
-  } else if (func == primitive_eqv_127) {
-      result = Cyc_eq(car(args), cadr(args));
-  } else if (func == primitive_eq_127) {
-      result = Cyc_eq(car(args), cadr(args));
-  } else if (func == primitive_equal_127) {
-      result = equalp(car(args), cadr(args));
-  } else if (func == primitive_null_127) {
-      object tmp = car(args);
-      result = Cyc_is_null(tmp);
   } else if (func == primitive_pair_127) { result = Cyc_is_cons(car(args));
   } else if (func == primitive_boolean_127) { result = Cyc_is_boolean(car(args));
   } else if (func == primitive_char_127) { result = Cyc_is_char(car(args));
@@ -1170,20 +1173,6 @@ static void dispatch_primitive(object func, object cont, object args) {
       __sum(i, car(args), cadr(args));
       buf.integer_t = i;
       result = &buf;
-  } else if (func == primitive_car) {
-      result = car(car(args));
-  } else if (func == primitive_cdr) {
-      result = cdr(car(args));
-  } else if (func == primitive_cadr) {
-      result = cadr(car(args));
-  } else if (func == primitive_set_91car_67) {
-      result = Cyc_set_car(car(args), cadr(args));
-  } else if (func == primitive_set_91cdr_67) {
-      result = Cyc_set_cdr(car(args), cadr(args));
-  } else if (func == primitive_Cyc_91global_91vars) {
-      result = Cyc_global_variables;
-  } else if (func == primitive_has_91cycle_127) {
-      result = Cyc_has_cycle(car(args));
   } else {
       printf("Unrecognized primitive function: %s\n", ((symbol_type *)func)->pname);
       exit(1);
