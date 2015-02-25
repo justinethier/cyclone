@@ -1065,7 +1065,9 @@
         (string-append 
           "defprimitive(" 
           (mangle p)
-          ", &missing_prim); /* "
+          ", &_"
+          (mangle p)
+          "); /* "
           (symbol->string p)
           " */\n")
         fp))
