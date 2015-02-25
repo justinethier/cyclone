@@ -984,16 +984,77 @@ static void missing_prim(object cont, object args) {
     printf("Primitive is not implemented\n");
     exit(1);
 }
-static void _Cyc_91global_91vars(object cont, object args){ return_funcall1(cont, Cyc_global_variables); } 
-static void _car(object cont, object args) { return_funcall1(cont, car(car(args))); }
-static void _cdr(object cont, object args) { return_funcall1(cont, cdr(car(args))); }
-static void _cadr(object cont, object args) { return_funcall1(cont, cadr(car(args))); }
+static void _Cyc_91global_91vars(object cont, object args){ 
+    return_funcall1(cont, Cyc_global_variables); } 
+static void _car(object cont, object args) { 
+    return_funcall1(cont, car(car(args))); }
+static void _cdr(object cont, object args) { 
+    return_funcall1(cont, cdr(car(args))); }
+static void _caar(object cont, object args) { 
+    return_funcall1(cont, caar(car(args))); }
+static void _cadr(object cont, object args) { 
+    return_funcall1(cont, cadr(car(args))); }
+static void _cdar(object cont, object args) { 
+    return_funcall1(cont, cdar(car(args))); }
+static void _cddr(object cont, object args) { 
+    return_funcall1(cont, cddr(car(args))); }
+static void _caaar(object cont, object args) { 
+    return_funcall1(cont, caaar(car(args))); }
+static void _caadr(object cont, object args) { 
+    return_funcall1(cont, caadr(car(args))); }
+static void _cadar(object cont, object args) { 
+    return_funcall1(cont, cadar(car(args))); }
+static void _caddr(object cont, object args) { 
+    return_funcall1(cont, caddr(car(args))); }
+static void _cdaar(object cont, object args) { 
+    return_funcall1(cont, cdaar(car(args))); }
+static void _cdadr(object cont, object args) { 
+    return_funcall1(cont, cdadr(car(args))); }
+static void _cddar(object cont, object args) { 
+    return_funcall1(cont, cddar(car(args))); }
+static void _cdddr(object cont, object args) { 
+    return_funcall1(cont, cdddr(car(args))); }
+static void _caaaar(object cont, object args) { 
+    return_funcall1(cont, caaaar(car(args))); }
+static void _caaadr(object cont, object args) { 
+    return_funcall1(cont, caaadr(car(args))); }
+static void _caadar(object cont, object args) { 
+    return_funcall1(cont, caadar(car(args))); }
+static void _caaddr(object cont, object args) { 
+    return_funcall1(cont, caaddr(car(args))); }
+static void _cadaar(object cont, object args) { 
+    return_funcall1(cont, cadaar(car(args))); }
+static void _cadadr(object cont, object args) { 
+    return_funcall1(cont, cadadr(car(args))); }
+static void _caddar(object cont, object args) { 
+    return_funcall1(cont, caddar(car(args))); }
+static void _cadddr(object cont, object args) { 
+    return_funcall1(cont, cadddr(car(args))); }
+static void _cdaaar(object cont, object args) { 
+    return_funcall1(cont, cdaaar(car(args))); }
+static void _cdaadr(object cont, object args) { 
+    return_funcall1(cont, cdaadr(car(args))); }
+static void _cdadar(object cont, object args) { 
+    return_funcall1(cont, cdadar(car(args))); }
+static void _cdaddr(object cont, object args) { 
+    return_funcall1(cont, cdaddr(car(args))); }
+static void _cddaar(object cont, object args) { 
+    return_funcall1(cont, cddaar(car(args))); }
+static void _cddadr(object cont, object args) { 
+    return_funcall1(cont, cddadr(car(args))); }
+static void _cdddar(object cont, object args) { 
+    return_funcall1(cont, cdddar(car(args))); }
+static void _cddddr(object cont, object args) { 
+    return_funcall1(cont, cddddr(car(args))); }
 static void _cons(object cont, object args) { 
     make_cons(c, car(args), cadr(args));
     return_funcall1(cont, &c); }
-static void _eq_127(object cont, object args){ return_funcall1(cont, Cyc_eq(car(args), cadr(args))); }
-static void _eqv_127(object cont, object args){ _eq_127(cont, args); }
-static void _equal_127(object cont, object args){ return_funcall1(cont, equalp(car(args), cadr(args))); }
+static void _eq_127(object cont, object args){ 
+    return_funcall1(cont, Cyc_eq(car(args), cadr(args))); }
+static void _eqv_127(object cont, object args){ 
+    _eq_127(cont, args); }
+static void _equal_127(object cont, object args){ 
+    return_funcall1(cont, equalp(car(args), cadr(args))); }
 static void _length(object cont, object args){ 
     integer_type i = Cyc_length(car(args));
     return_funcall1(cont, &i); }
@@ -1007,6 +1068,16 @@ static void _has_91cycle_127(object cont, object args) {
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
 static void __87(object cont, object args) {
     __sum(i, car(args), cadr(args));
+    return_funcall1(cont, &i); }
+static void __91(object cont, object args) {
+    __sub(i, car(args), cadr(args));
+    return_funcall1(cont, &i); }
+static void __85(object cont, object args) {
+    __mul(i, car(args), cadr(args));
+    return_funcall1(cont, &i); }
+static void __95(object cont, object args) {
+    // TODO: check for div by 0
+    __div(i, car(args), cadr(args));
     return_funcall1(cont, &i); }
 static void _Cyc_91cvar_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_cvar(car(args))); }
@@ -1034,9 +1105,9 @@ defprimitive(Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
 defprimitive(Cyc_91cvar_127, &_Cyc_91cvar_127); /* Cyc-cvar? */
 defprimitive(has_91cycle_127, &_has_91cycle_127); /* has-cycle? */
 defprimitive(_87, &__87); /* + */
-defprimitive(_91, &missing_prim); /* - */
-defprimitive(_85, &missing_prim); /* * */
-defprimitive(_95, &missing_prim); /* / */
+defprimitive(_91, &__91); /* - */
+defprimitive(_85, &__85); /* * */
+defprimitive(_95, &__95); /* / */
 defprimitive(_123, &missing_prim); /* = */
 defprimitive(_125, &missing_prim); /* > */
 defprimitive(_121, &missing_prim); /* < */
@@ -1061,34 +1132,34 @@ defprimitive(set_91car_67, &_set_91_car_67); /* set-car! */
 defprimitive(set_91cdr_67, &_set_91_cdr_67); /* set-cdr! */
 defprimitive(car, &_car); /* car */
 defprimitive(cdr, &_cdr); /* cdr */
-defprimitive(caar, &missing_prim); /* caar */
+defprimitive(caar, &_caar); /* caar */
 defprimitive(cadr, &_cadr); /* cadr */
-defprimitive(cdar, &missing_prim); /* cdar */
-defprimitive(cddr, &missing_prim); /* cddr */
-defprimitive(caaar, &missing_prim); /* caaar */
-defprimitive(caadr, &missing_prim); /* caadr */
-defprimitive(cadar, &missing_prim); /* cadar */
-defprimitive(caddr, &missing_prim); /* caddr */
-defprimitive(cdaar, &missing_prim); /* cdaar */
-defprimitive(cdadr, &missing_prim); /* cdadr */
-defprimitive(cddar, &missing_prim); /* cddar */
-defprimitive(cdddr, &missing_prim); /* cdddr */
-defprimitive(caaaar, &missing_prim); /* caaaar */
-defprimitive(caaadr, &missing_prim); /* caaadr */
-defprimitive(caadar, &missing_prim); /* caadar */
-defprimitive(caaddr, &missing_prim); /* caaddr */
-defprimitive(cadaar, &missing_prim); /* cadaar */
-defprimitive(cadadr, &missing_prim); /* cadadr */
-defprimitive(caddar, &missing_prim); /* caddar */
-defprimitive(cadddr, &missing_prim); /* cadddr */
-defprimitive(cdaaar, &missing_prim); /* cdaaar */
-defprimitive(cdaadr, &missing_prim); /* cdaadr */
-defprimitive(cdadar, &missing_prim); /* cdadar */
-defprimitive(cdaddr, &missing_prim); /* cdaddr */
-defprimitive(cddaar, &missing_prim); /* cddaar */
-defprimitive(cddadr, &missing_prim); /* cddadr */
-defprimitive(cdddar, &missing_prim); /* cdddar */
-defprimitive(cddddr, &missing_prim); /* cddddr */
+defprimitive(cdar, &_cdar); /* cdar */
+defprimitive(cddr, &_cddr); /* cddr */
+defprimitive(caaar, &_caaar); /* caaar */
+defprimitive(caadr, &_caadr); /* caadr */
+defprimitive(cadar, &_cadar); /* cadar */
+defprimitive(caddr, &_caddr); /* caddr */
+defprimitive(cdaar, &_cdaar); /* cdaar */
+defprimitive(cdadr, &_cdadr); /* cdadr */
+defprimitive(cddar, &_cddar); /* cddar */
+defprimitive(cdddr, &_cdddr); /* cdddr */
+defprimitive(caaaar, &_caaaar); /* caaaar */
+defprimitive(caaadr, &_caaadr); /* caaadr */
+defprimitive(caadar, &_caadar); /* caadar */
+defprimitive(caaddr, &_caaddr); /* caaddr */
+defprimitive(cadaar, &_cadaar); /* cadaar */
+defprimitive(cadadr, &_cadadr); /* cadadr */
+defprimitive(caddar, &_caddar); /* caddar */
+defprimitive(cadddr, &_cadddr); /* cadddr */
+defprimitive(cdaaar, &_cdaaar); /* cdaaar */
+defprimitive(cdaadr, &_cdaadr); /* cdaadr */
+defprimitive(cdadar, &_cdadar); /* cdadar */
+defprimitive(cdaddr, &_cdaddr); /* cdaddr */
+defprimitive(cddaar, &_cddaar); /* cddaar */
+defprimitive(cddadr, &_cddadr); /* cddadr */
+defprimitive(cdddar, &_cdddar); /* cdddar */
+defprimitive(cddddr, &_cddddr); /* cddddr */
 defprimitive(char_91_125integer, &missing_prim); /* char->integer */
 defprimitive(integer_91_125char, &missing_prim); /* integer->char */
 defprimitive(string_91_125number, &missing_prim); /* string->number */
