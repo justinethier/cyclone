@@ -1099,25 +1099,40 @@ static void _string_127(object cont, object args) {
 static void _symbol_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_symbol(car(args))); }
 
-// TODO:
-// _Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
-// _Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
-// __123, &missing_prim); /* = */
-// __125, &missing_prim); /* > */
-// __121, &missing_prim); /* < */
-// __125_123, &missing_prim); /* >= */
-// __121_123, &missing_prim); /* <= */
-// _apply
-// __75halt
-// _error
-// _cell_91get
-// _set_91global_67
-// _set_91cell_67
-// _cell
-// _assoc
-// _assq
-// _member
-//static void (object cont, object args) {  return_funcall1(cont, );}
+static void _Cyc_91get_91cvar(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void _Cyc_91set_91cvar_67(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void __75halt(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void _cell_91get(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void _set_91global_67(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void _set_91cell_67(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+static void _cell(object cont, object args) {  
+    printf("not implemented\n"); exit(1); }
+
+static void __123(object cont, object args) {  
+    return_funcall1(cont, __num_eq(car(args), cadr(args)));}
+static void __125(object cont, object args) {  
+    return_funcall1(cont, __num_gt(car(args), cadr(args)));}
+static void __121(object cont, object args) {
+    return_funcall1(cont, __num_lt(car(args), cadr(args)));}
+static void __125_123(object cont, object args) {
+    return_funcall1(cont, __num_gte(car(args), cadr(args)));}
+static void __121_123(object cont, object args) {
+    return_funcall1(cont, __num_lte(car(args), cadr(args)));}
+
+static void _apply(object cont, object args) {  
+    apply(cont, car(args), cdr(args)); }
+static void _assoc (object cont, object args) {  
+    return_funcall1(cont, assoc(car(args), cadr(args)));}
+static void _assq  (object cont, object args) {  
+    return_funcall1(cont, assq(car(args), cadr(args)));}
+static void _member(object cont, object args) {  
+    return_funcall1(cont, memberp(car(args), cadr(args)));}
 static void _char_91_125integer(object cont, object args) {  
     integer_type i = Cyc_char2integer(car(args));
     return_funcall1(cont, &i);}
@@ -1126,6 +1141,11 @@ static void _integer_91_125char(object cont, object args) {
 static void _string_91_125number(object cont, object args) {  
     integer_type i = Cyc_string2number(car(args));
     return_funcall1(cont, &i);}
+
+// TODO: need to dispatch as varargs
+// _error
+//static void _error(object cont, object args) {  return_funcall1(cont, );}
+
 static void _string_91append(object cont, object args) {  
 // TODO: how to dispatch list as varargs?
     exit(1);
@@ -1178,7 +1198,7 @@ defprimitive(_125, &missing_prim); /* > */
 defprimitive(_121, &missing_prim); /* < */
 defprimitive(_125_123, &missing_prim); /* >= */
 defprimitive(_121_123, &missing_prim); /* <= */
-defprimitive(apply, &missing_prim); /* apply */
+defprimitive(apply, &_apply); /* apply */
 defprimitive(_75halt, &missing_prim); /* %halt */
 defprimitive(error, &missing_prim); /* error */
 defprimitive(cons, &_cons); /* cons */
