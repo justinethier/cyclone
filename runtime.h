@@ -320,7 +320,16 @@ static void Cyc_apply(int argc, closure cont, object prim, ...);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
+static object Cyc_is_boolean(object o);
 static object Cyc_is_cons(object o);
+static object Cyc_is_null(object o);
+static object Cyc_is_number(object o);
+static object Cyc_is_symbol(object o);
+static object Cyc_is_string(object o);
+static object Cyc_is_char(object o);
+static object Cyc_is_procedure(object o);
+static object Cyc_is_eof_object(object o);
+static object Cyc_is_cvar(object o);
 static int equal(object,object);
 static list assq(object,list);
 static object get(object,object);
@@ -963,101 +972,130 @@ static object Cyc_io_peek_char(object port) {
 /* Primitive types */
 //typedef common_type (*prim_function_type)();
 //typedef void (*prim_function_type)();
-typedef struct {tag_type tag; const char *pname; /*prim_function_type fn;*/} primitive_type;
+typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
 typedef primitive_type *primitive;
 
-#define defprimitive(name/*, fnc*/) \
-static primitive_type name##_primitive = {primitive_tag, #name /*, &fnc*/}; \
+#define defprimitive(name, fnc) \
+static primitive_type name##_primitive = {primitive_tag, #name, fnc}; \
 static const object primitive_##name = &name##_primitive
 
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
 
-defprimitive(Cyc_91global_91vars); /* Cyc-global-vars */
-defprimitive(Cyc_91get_91cvar); /* Cyc-get-cvar */
-defprimitive(Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
-defprimitive(Cyc_91cvar_127); /* Cyc-cvar? */
-defprimitive(has_91cycle_127); /* has-cycle? */
-defprimitive(_87); /* + */
-defprimitive(_91); /* - */
-defprimitive(_85); /* * */
-defprimitive(_95); /* / */
-defprimitive(_123); /* = */
-defprimitive(_125); /* > */
-defprimitive(_121); /* < */
-defprimitive(_125_123); /* >= */
-defprimitive(_121_123); /* <= */
-defprimitive(apply); /* apply */
-defprimitive(_75halt); /* %halt */
-defprimitive(error); /* error */
-defprimitive(cons); /* cons */
-defprimitive(cell_91get); /* cell-get */
-defprimitive(set_91global_67); /* set-global! */
-defprimitive(set_91cell_67); /* set-cell! */
-defprimitive(cell); /* cell */
-defprimitive(eq_127); /* eq? */
-defprimitive(eqv_127); /* eqv? */
-defprimitive(equal_127); /* equal? */
-defprimitive(assoc); /* assoc */
-defprimitive(assq); /* assq */
-defprimitive(member); /* member */
-defprimitive(length); /* length */
-defprimitive(set_91car_67); /* set-car! */
-defprimitive(set_91cdr_67); /* set-cdr! */
-defprimitive(car); /* car */
-defprimitive(cdr); /* cdr */
-defprimitive(caar); /* caar */
-defprimitive(cadr); /* cadr */
-defprimitive(cdar); /* cdar */
-defprimitive(cddr); /* cddr */
-defprimitive(caaar); /* caaar */
-defprimitive(caadr); /* caadr */
-defprimitive(cadar); /* cadar */
-defprimitive(caddr); /* caddr */
-defprimitive(cdaar); /* cdaar */
-defprimitive(cdadr); /* cdadr */
-defprimitive(cddar); /* cddar */
-defprimitive(cdddr); /* cdddr */
-defprimitive(caaaar); /* caaaar */
-defprimitive(caaadr); /* caaadr */
-defprimitive(caadar); /* caadar */
-defprimitive(caaddr); /* caaddr */
-defprimitive(cadaar); /* cadaar */
-defprimitive(cadadr); /* cadadr */
-defprimitive(caddar); /* caddar */
-defprimitive(cadddr); /* cadddr */
-defprimitive(cdaaar); /* cdaaar */
-defprimitive(cdaadr); /* cdaadr */
-defprimitive(cdadar); /* cdadar */
-defprimitive(cdaddr); /* cdaddr */
-defprimitive(cddaar); /* cddaar */
-defprimitive(cddadr); /* cddadr */
-defprimitive(cdddar); /* cdddar */
-defprimitive(cddddr); /* cddddr */
-defprimitive(char_91_125integer); /* char->integer */
-defprimitive(integer_91_125char); /* integer->char */
-defprimitive(string_91_125number); /* string->number */
-defprimitive(string_91append); /* string-append */
-defprimitive(string_91_125list); /* string->list */
-defprimitive(list_91_125string); /* list->string */
-defprimitive(string_91_125symbol); /* string->symbol */
-defprimitive(symbol_91_125string); /* symbol->string */
-defprimitive(number_91_125string); /* number->string */
-defprimitive(boolean_127); /* boolean? */
-defprimitive(char_127); /* char? */
-defprimitive(eof_91object_127); /* eof-object? */
-defprimitive(null_127); /* null? */
-defprimitive(number_127); /* number? */
-defprimitive(pair_127); /* pair? */
-defprimitive(procedure_127); /* procedure? */
-defprimitive(string_127); /* string? */
-defprimitive(symbol_127); /* symbol? */
-defprimitive(current_91input_91port); /* current-input-port */
-defprimitive(open_91input_91file); /* open-input-file */
-defprimitive(close_91input_91port); /* close-input-port */
-defprimitive(read_91char); /* read-char */
-defprimitive(peek_91char); /* peek-char */
-defprimitive(write); /* write */
-defprimitive(display); /* display */
+static void missing_prim(object cont, object args) {
+    printf("Primitive is not implemented\n");
+    exit(1);
+}
+static void _Cyc_91global_91vars(object cont, object args){ return_funcall1(cont, Cyc_global_variables); } 
+static void _car(object cont, object args) { return_funcall1(cont, car(car(args))); }
+static void _cdr(object cont, object args) { return_funcall1(cont, cdr(car(args))); }
+static void _cadr(object cont, object args) { return_funcall1(cont, cadr(car(args))); }
+static void _cons(object cont, object args) { 
+    make_cons(c, car(args), cadr(args));
+    return_funcall1(cont, &c); }
+static void _eq_127(object cont, object args){ return_funcall1(cont, Cyc_eq(car(args), cadr(args))); }
+static void _eqv_127(object cont, object args){ _eq_127(cont, args); }
+static void _equal_127(object cont, object args){ return_funcall1(cont, equalp(car(args), cadr(args))); }
+static void _length(object cont, object args){ 
+    integer_type i = Cyc_length(car(args));
+    return_funcall1(cont, &i); }
+static void _null_127(object cont, object args) { 
+    return_funcall1(cont, Cyc_is_null(car(args))); }
+static void _set_91_car_67(object cont, object args) { 
+    return_funcall1(cont, Cyc_set_car(car(args), cadr(args))); }
+static void _set_91_cdr_67(object cont, object args) { 
+    return_funcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
+static void _has_91cycle_127(object cont, object args) { 
+    return_funcall1(cont, Cyc_has_cycle(car(args))); }
+
+
+/* This section is auto-generated via --autogen */
+defprimitive(Cyc_91global_91vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
+defprimitive(Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
+defprimitive(Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
+defprimitive(Cyc_91cvar_127, &missing_prim); /* Cyc-cvar? */
+defprimitive(has_91cycle_127, &_has_91cycle_127); /* has-cycle? */
+defprimitive(_87, &missing_prim); /* + */
+defprimitive(_91, &missing_prim); /* - */
+defprimitive(_85, &missing_prim); /* * */
+defprimitive(_95, &missing_prim); /* / */
+defprimitive(_123, &missing_prim); /* = */
+defprimitive(_125, &missing_prim); /* > */
+defprimitive(_121, &missing_prim); /* < */
+defprimitive(_125_123, &missing_prim); /* >= */
+defprimitive(_121_123, &missing_prim); /* <= */
+defprimitive(apply, &missing_prim); /* apply */
+defprimitive(_75halt, &missing_prim); /* %halt */
+defprimitive(error, &missing_prim); /* error */
+defprimitive(cons, &_cons); /* cons */
+defprimitive(cell_91get, &missing_prim); /* cell-get */
+defprimitive(set_91global_67, &missing_prim); /* set-global! */
+defprimitive(set_91cell_67, &missing_prim); /* set-cell! */
+defprimitive(cell, &missing_prim); /* cell */
+defprimitive(eq_127, &_eq_127); /* eq? */
+defprimitive(eqv_127, &_eqv_127); /* eqv? */
+defprimitive(equal_127, &_equal_127); /* equal? */
+defprimitive(assoc, &missing_prim); /* assoc */
+defprimitive(assq, &missing_prim); /* assq */
+defprimitive(member, &missing_prim); /* member */
+defprimitive(length, &_length); /* length */
+defprimitive(set_91car_67, &_set_91_car_67); /* set-car! */
+defprimitive(set_91cdr_67, &_set_91_cdr_67); /* set-cdr! */
+defprimitive(car, &_car); /* car */
+defprimitive(cdr, &_cdr); /* cdr */
+defprimitive(caar, &missing_prim); /* caar */
+defprimitive(cadr, &_cadr); /* cadr */
+defprimitive(cdar, &missing_prim); /* cdar */
+defprimitive(cddr, &missing_prim); /* cddr */
+defprimitive(caaar, &missing_prim); /* caaar */
+defprimitive(caadr, &missing_prim); /* caadr */
+defprimitive(cadar, &missing_prim); /* cadar */
+defprimitive(caddr, &missing_prim); /* caddr */
+defprimitive(cdaar, &missing_prim); /* cdaar */
+defprimitive(cdadr, &missing_prim); /* cdadr */
+defprimitive(cddar, &missing_prim); /* cddar */
+defprimitive(cdddr, &missing_prim); /* cdddr */
+defprimitive(caaaar, &missing_prim); /* caaaar */
+defprimitive(caaadr, &missing_prim); /* caaadr */
+defprimitive(caadar, &missing_prim); /* caadar */
+defprimitive(caaddr, &missing_prim); /* caaddr */
+defprimitive(cadaar, &missing_prim); /* cadaar */
+defprimitive(cadadr, &missing_prim); /* cadadr */
+defprimitive(caddar, &missing_prim); /* caddar */
+defprimitive(cadddr, &missing_prim); /* cadddr */
+defprimitive(cdaaar, &missing_prim); /* cdaaar */
+defprimitive(cdaadr, &missing_prim); /* cdaadr */
+defprimitive(cdadar, &missing_prim); /* cdadar */
+defprimitive(cdaddr, &missing_prim); /* cdaddr */
+defprimitive(cddaar, &missing_prim); /* cddaar */
+defprimitive(cddadr, &missing_prim); /* cddadr */
+defprimitive(cdddar, &missing_prim); /* cdddar */
+defprimitive(cddddr, &missing_prim); /* cddddr */
+defprimitive(char_91_125integer, &missing_prim); /* char->integer */
+defprimitive(integer_91_125char, &missing_prim); /* integer->char */
+defprimitive(string_91_125number, &missing_prim); /* string->number */
+defprimitive(string_91append, &missing_prim); /* string-append */
+defprimitive(string_91_125list, &missing_prim); /* string->list */
+defprimitive(list_91_125string, &missing_prim); /* list->string */
+defprimitive(string_91_125symbol, &missing_prim); /* string->symbol */
+defprimitive(symbol_91_125string, &missing_prim); /* symbol->string */
+defprimitive(number_91_125string, &missing_prim); /* number->string */
+defprimitive(boolean_127, &missing_prim); /* boolean? */
+defprimitive(char_127, &missing_prim); /* char? */
+defprimitive(eof_91object_127, &missing_prim); /* eof-object? */
+defprimitive(null_127, &_null_127); /* null? */
+defprimitive(number_127, &missing_prim); /* number? */
+defprimitive(pair_127, &missing_prim); /* pair? */
+defprimitive(procedure_127, &missing_prim); /* procedure? */
+defprimitive(string_127, &missing_prim); /* string? */
+defprimitive(symbol_127, &missing_prim); /* symbol? */
+defprimitive(current_91input_91port, &missing_prim); /* current-input-port */
+defprimitive(open_91input_91file, &missing_prim); /* open-input-file */
+defprimitive(close_91input_91port, &missing_prim); /* close-input-port */
+defprimitive(read_91char, &missing_prim); /* read-char */
+defprimitive(peek_91char, &missing_prim); /* peek-char */
+defprimitive(write, &missing_prim); /* write */
+defprimitive(display, &missing_prim); /* display */
+/* -------------------------------------------- */
 
 /* All constant-size objects */
 typedef union {
@@ -1098,12 +1136,11 @@ static void dispatch(int argc, closure func, object cont, object args) {
  * Execute primitive function using given args, and pass result to cont
  */
 static void dispatch_primitive(object func, object cont, object args) {
-  object result;
-  common_type buf;
-
+  ((primitive_type *)func)->fn(cont, args);
+}
 // TODO: should probably check arg counts and error out if needed
 // TODO: use *primitives* to make a list of all missing prims below
-
+/*
   if (func == primitive_cons) {
       make_cons(c, car(args), cadr(args));
       buf.cons_t = c;
@@ -1111,6 +1148,8 @@ static void dispatch_primitive(object func, object cont, object args) {
   } else if (func == primitive_length) {
       buf.integer_t = Cyc_length(car (args));
       result = &buf;
+  } else if (func == primitive_eqv_127) {
+      result = Cyc_eq(car(args), cadr(args));
   } else if (func == primitive_eq_127) {
       result = Cyc_eq(car(args), cadr(args));
   } else if (func == primitive_equal_127) {
@@ -1118,6 +1157,15 @@ static void dispatch_primitive(object func, object cont, object args) {
   } else if (func == primitive_null_127) {
       object tmp = car(args);
       result = Cyc_is_null(tmp);
+  } else if (func == primitive_pair_127) { result = Cyc_is_cons(car(args));
+  } else if (func == primitive_boolean_127) { result = Cyc_is_boolean(car(args));
+  } else if (func == primitive_char_127) { result = Cyc_is_char(car(args));
+  } else if (func == primitive_eof_91object_127) { result = Cyc_is_eof_object(car(args));
+  } else if (func == primitive_number_127) { result = Cyc_is_number(car(args));
+  } else if (func == primitive_procedure_127) { result = Cyc_is_procedure(car(args));
+  } else if (func == primitive_string_127) { result = Cyc_is_string(car(args));
+  } else if (func == primitive_symbol_127) { result = Cyc_is_symbol(car(args));
+  } else if (func == primitive_Cyc_91cvar_127) { result = Cyc_is_cvar(car(args));
   } else if (func == primitive__87) {
       __sum(i, car(args), cadr(args));
       buf.integer_t = i;
@@ -1140,12 +1188,8 @@ static void dispatch_primitive(object func, object cont, object args) {
       printf("Unrecognized primitive function: %s\n", ((symbol_type *)func)->pname);
       exit(1);
   }
-//     Cyc-global-vars
 //     Cyc-get-cvar
 //     Cyc-set-cvar!
-//     Cyc-cvar? ;; Cyclone-specific
-//     has-cycle?
-//     +
 //     -
 //     *
 //     /
@@ -1157,23 +1201,14 @@ static void dispatch_primitive(object func, object cont, object args) {
 //     apply
 //     %halt
 //     error
-//     cons
 //     cell-get
 //     set-global!
 //     set-cell!
 //     cell
-//     eq?
-//     eqv?
-//     equal?
 //     assoc
 //     assq
 //     member
-//     length
-//     set-car!
-//     set-cdr!
-//     car
-//     cdr
-//     caar cadr cdar cddr
+//     caar cdar cddr
 //     caaar caadr cadar caddr cdaar cdadr cddar cdddr
 //     caaaar caaadr caadar caaddr cadaar cadadr
 //     caddar cadddr cdaaar cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr
@@ -1186,15 +1221,6 @@ static void dispatch_primitive(object func, object cont, object args) {
 //     string->symbol
 //     symbol->string
 //     number->string
-//     boolean?
-//     char?
-//     eof-object?
-//     null?
-//     number?
-//     pair?
-//     procedure?
-//     string?
-//     symbol?
 //     current-input-port
 //     open-input-file
 //     close-input-port
@@ -1204,6 +1230,7 @@ static void dispatch_primitive(object func, object cont, object args) {
 //     display))
   return_funcall1(cont, result);
 }
+  */
 
 /*
  *
