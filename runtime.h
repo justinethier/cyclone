@@ -1098,6 +1098,43 @@ static void _string_127(object cont, object args) {
 static void _symbol_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_symbol(car(args))); }
 
+// TODO:
+// _Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
+// _Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
+// __123, &missing_prim); /* = */
+// __125, &missing_prim); /* > */
+// __121, &missing_prim); /* < */
+// __125_123, &missing_prim); /* >= */
+// __121_123, &missing_prim); /* <= */
+// _apply
+// __75halt
+// _error
+// _cell_91get
+// _set_91global_67
+// _set_91cell_67
+// _cell
+// _assoc
+// _assq
+// _member
+// _char_91_125integer
+// _integer_91_125char
+// _string_91_125number
+// _string_91append
+// _string_91_125list
+// _list_91_125string
+// _string_91_125symbol
+// _symbol_91_125string
+// _number_91_125string
+// _current_91input_91port
+// _open_91input_91file
+// _close_91input_91port
+// _read_91char
+// _peek_91char
+// _write
+// _display
+//static void (object cont, object args) {
+//  return_funcall1(cont, );}
+
 /* This section is auto-generated via --autogen */
 defprimitive(Cyc_91global_91vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
 defprimitive(Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
