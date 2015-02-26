@@ -1147,10 +1147,11 @@ static void _string_91_125number(object cont, object args) {
 //static void _error(object cont, object args) {  return_funcall1(cont, );}
 
 static void _string_91append(object cont, object args) {  
-// TODO: how to dispatch list as varargs?
-    exit(1);
-//    string_type s = Cyc_string_append
-//    return_funcall1(cont, );
+    integer_type argc = Cyc_length(args);
+    // not quite sure how to make this work, don't want to create multipe versions of this
+    // since others (like error) return an object not a string_type.
+    //string_type s = dispatch_direct(argc, &Cyc_string_append, args);
+    //return_funcall1(cont, &s);
 }
 static void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
@@ -1307,6 +1308,7 @@ static void dispatch(int argc, function_type func, object clo, object cont, obje
     case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
     case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
     case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+    // TODO: auto-generate more of these
     default:
       printf("Unhandled number of function arguments: %d\n", argc);
       exit(1);
