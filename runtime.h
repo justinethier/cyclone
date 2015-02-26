@@ -1299,6 +1299,21 @@ typedef union {
   string_type string_t;
 } common_type;
 
+TODO: define macro and use below to consolidate the code
+#define DISPATCH_CALL_FUNC \
+    switch(argc) {
+    case  0: func( 1, clo, cont);
+    case  1: func( 2, clo, cont, b[0]);
+    case  2: func( 3, clo, cont, b[0], b[1]);
+    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
+    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
+    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
+    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
+    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
+    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
+    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
+    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+
 /**
  * Receive a list of arguments and apply them to the given function
  */
