@@ -311,12 +311,20 @@ static object cell_set(object cell, object value){
 
 /* Prototypes for Lisp built-in functions. */
 
+// Testing dispatch of varargs
+typedef void (*va_function_type)(int, object, object, object, ...);
+static void dispatch_va(int argc, va_function_type func, object clo, object cont, object args);
+
 static object Cyc_global_variables = nil;
 static object Cyc_get_global_variables();
 static object Cyc_get_cvar(object var);
 static object Cyc_set_cvar(object var, object value);
+static void dispatch(int argc, function_type func, object clo, object cont, object args);
 static object apply(object cont, object func, object args);
 static void Cyc_apply(int argc, closure cont, object prim, ...);
+static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
+static string_type Cyc_string_append(int argc, object str1, ...);
+static string_type Cyc_string_append_va_list(int, object, va_list);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
@@ -821,21 +829,34 @@ static integer_type Cyc_string2number(object str){
     return n;
 }
 
-// TODO:
+static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
+    va_list ap;
+    va_start(ap, str1);
+    string_type result = Cyc_string_append_va_list(argc - 1, str1, ap);
+    va_end(ap);
+    return_funcall1(cont, &result);
+}
+
 static string_type Cyc_string_append(int argc, object str1, ...) {
+    va_list ap;
+    va_start(ap, str1);
+    string_type result = Cyc_string_append_va_list(argc, str1, ap);
+    va_end(ap);
+    return result;
+}
+
+static string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
     // TODO: one way to do this, perhaps not the most efficient:
     //   compute lengths of the strings,
     //   store lens and str ptrs
     //   allocate buffer, memcpy each str to buffer
     //   make_string using buffer
 
-    va_list ap;
     int i = 0, total_len = 1; // for null char
     int *len = alloca(sizeof(int) * argc);
     char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
     object tmp;
     
-    va_start(ap, str1);
     str[i] = ((string_type *)str1)->str;
     len[i] = strlen(str[i]);
     total_len += len[i];
@@ -846,8 +867,6 @@ static string_type Cyc_string_append(int argc, object str1, ...) {
         len[i] = strlen(str[i]);
         total_len += len[i];
     }
-
-    va_end(ap);
 
     buffer = bufferp = alloca(sizeof(char) * total_len);
     for (i = 0; i < argc; i++) {
@@ -1148,10 +1167,7 @@ static void _string_91_125number(object cont, object args) {
 
 static void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
-    // not quite sure how to make this work, don't want to create multipe versions of this
-    // since others (like error) return an object not a string_type.
-    //string_type s = dispatch_direct(argc, &Cyc_string_append, args);
-    //return_funcall1(cont, &s);
+    dispatch_va(argc.value, dispatch_string_91append, cont, cont, args);
 }
 static void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
@@ -1249,7 +1265,7 @@ defprimitive(cddddr, &_cddddr); /* cddddr */
 defprimitive(char_91_125integer, &missing_prim); /* char->integer */
 defprimitive(integer_91_125char, &missing_prim); /* integer->char */
 defprimitive(string_91_125number, &missing_prim); /* string->number */
-defprimitive(string_91append, &missing_prim); /* string-append */
+defprimitive(string_91append, &_string_91append); /* string-append */
 defprimitive(string_91_125list, &missing_prim); /* string->list */
 defprimitive(list_91_125string, &missing_prim); /* list->string */
 defprimitive(string_91_125symbol, &missing_prim); /* string->symbol */
@@ -1298,6 +1314,34 @@ static void dispatch(int argc, function_type func, object clo, object cont, obje
     //       exist, since they are created by the compiler right now
     switch(argc) {
     case  0: func( 1, clo, cont);
+    case  1: func( 2, clo, cont, b[0]);
+    case  2: func( 3, clo, cont, b[0], b[1]);
+    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
+    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
+    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
+    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
+    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
+    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
+    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
+    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+    // TODO: auto-generate more of these
+    default:
+      printf("Unhandled number of function arguments: %d\n", argc);
+      exit(1);
+    }
+}
+// TODO: consolidate this with above somehow?
+static void dispatch_va(int argc, va_function_type func, object clo, object cont, object args) {
+    object b[argc];
+    int i;
+    for (i = 0; i < argc; i++){
+      b[i] = car(args);
+      args = cdr(args);
+    }
+    // Note memory scheme is not compatible with GC, so call funcs directly
+    // TODO: auto-generate this stuff, also need to make sure these funcall's
+    //       exist, since they are created by the compiler right now
+    switch(argc) {
     case  1: func( 2, clo, cont, b[0]);
     case  2: func( 3, clo, cont, b[0], b[1]);
     case  3: func( 4, clo, cont, b[0], b[1], b[2]);
