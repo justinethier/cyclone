@@ -1285,22 +1285,28 @@ typedef union {
 /**
  * Receive a list of arguments and apply them to the given function
  */
-static void dispatch(int argc, closure func, object cont, object args) {
-    object buf[argc];
+static void dispatch(int argc, function_type func, object clo, object cont, object args) {
+    object b[argc];
     int i;
     for (i = 0; i < argc; i++){
-      buf[i] = car(args);
+      b[i] = car(args);
       args = cdr(args);
     }
     // Note memory scheme is not compatible with GC, so call funcs directly
     // TODO: auto-generate this stuff, also need to make sure these funcall's
     //       exist, since they are created by the compiler right now
     switch(argc) {
-    case 5: funcall6(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4]);
-    case 6: funcall7(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
-    case 7: funcall8(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
-    case 8: funcall9(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
-    case 9: funcall10(func, cont, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8]);
+    case  0: func( 1, clo, cont);
+    case  1: func( 2, clo, cont, b[0]);
+    case  2: func( 3, clo, cont, b[0], b[1]);
+    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
+    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
+    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
+    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
+    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
+    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
+    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
+    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
     default:
       printf("Unhandled number of function arguments: %d\n", argc);
       exit(1);
@@ -1341,7 +1347,7 @@ static object apply(object cont, object func, object args){
       case 3: return_funcall4((closure)func, cont, car(args), cadr(args), caddr(args));
       case 4: return_funcall5((closure)func, cont, car(args), cadr(args), caddr(args), cadddr(args));
       // More efficient to do this for larger numbers of arguments:
-      default: dispatch(buf.integer_t.value, (closure)func, cont, args);
+      default: dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       }
       
       break;

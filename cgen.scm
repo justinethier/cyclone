@@ -87,7 +87,7 @@
  return 0;}")
 
 ;;; Auto-generation of C macros
-(define *c-call-arity* 10)
+(define *c-call-arity* 0)
 
 (define (set-c-call-arity! arity)
   (cond
