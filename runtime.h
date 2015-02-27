@@ -309,17 +309,16 @@ static object cell_set(object cell, object value){
   var = args; \
 }
 
-/* Prototypes for Lisp built-in functions. */
+typedef void (*function_type_va)(int, object, object, object, ...);
+static void dispatch(int argc, function_type func, object clo, object cont, object args);
+static void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
 
-// Testing dispatch of varargs
-typedef void (*va_function_type)(int, object, object, object, ...);
-static void dispatch_va(int argc, va_function_type func, object clo, object cont, object args);
+/* Prototypes for Lisp built-in functions. */
 
 static object Cyc_global_variables = nil;
 static object Cyc_get_global_variables();
 static object Cyc_get_cvar(object var);
 static object Cyc_set_cvar(object var, object value);
-static void dispatch(int argc, function_type func, object clo, object cont, object args);
 static object apply(object cont, object func, object args);
 static void Cyc_apply(int argc, closure cont, object prim, ...);
 static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
@@ -1299,79 +1298,47 @@ typedef union {
   string_type string_t;
 } common_type;
 
-TODO: define macro and use below to consolidate the code
-#define DISPATCH_CALL_FUNC \
-    switch(argc) {
-    case  0: func( 1, clo, cont);
-    case  1: func( 2, clo, cont, b[0]);
-    case  2: func( 3, clo, cont, b[0], b[1]);
-    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
-    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
-    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
-    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
-    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
-    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
-    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
-    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+/**
+ * Take list of args and call a function with them as params.
+ *
+ * Note memory scheme below is not compatible with GC, 
+ * so macro calls funcs directly.
+ */
+#define DISPATCH_RETURN_CALL_FUNC \
+object b[argc]; \
+int i; \
+for (i = 0; i < argc; i++){ \
+  b[i] = car(args); \
+  args = cdr(args); \
+} \
+switch(argc) { \
+case  1: func( 2, clo, cont, b[0]); \
+case  2: func( 3, clo, cont, b[0], b[1]); \
+case  3: func( 4, clo, cont, b[0], b[1], b[2]); \
+case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]); \
+case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]); \
+case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]); \
+case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]); \
+case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]); \
+case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]); \
+case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]); \
+default: \
+  printf("Unhandled number of function arguments: %d\n", argc); \
+  exit(1); \
+}
 
 /**
  * Receive a list of arguments and apply them to the given function
  */
 static void dispatch(int argc, function_type func, object clo, object cont, object args) {
-    object b[argc];
-    int i;
-    for (i = 0; i < argc; i++){
-      b[i] = car(args);
-      args = cdr(args);
-    }
-    // Note memory scheme is not compatible with GC, so call funcs directly
-    // TODO: auto-generate this stuff, also need to make sure these funcall's
-    //       exist, since they are created by the compiler right now
-    switch(argc) {
-    case  0: func( 1, clo, cont);
-    case  1: func( 2, clo, cont, b[0]);
-    case  2: func( 3, clo, cont, b[0], b[1]);
-    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
-    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
-    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
-    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
-    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
-    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
-    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
-    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
-    // TODO: auto-generate more of these
-    default:
-      printf("Unhandled number of function arguments: %d\n", argc);
-      exit(1);
-    }
+    DISPATCH_RETURN_CALL_FUNC
 }
-// TODO: consolidate this with above somehow?
-static void dispatch_va(int argc, va_function_type func, object clo, object cont, object args) {
-    object b[argc];
-    int i;
-    for (i = 0; i < argc; i++){
-      b[i] = car(args);
-      args = cdr(args);
-    }
-    // Note memory scheme is not compatible with GC, so call funcs directly
-    // TODO: auto-generate this stuff, also need to make sure these funcall's
-    //       exist, since they are created by the compiler right now
-    switch(argc) {
-    case  1: func( 2, clo, cont, b[0]);
-    case  2: func( 3, clo, cont, b[0], b[1]);
-    case  3: func( 4, clo, cont, b[0], b[1], b[2]);
-    case  4: func( 5, clo, cont, b[0], b[1], b[2], b[3]);
-    case  5: func( 6, clo, cont, b[0], b[1], b[2], b[3], b[4]);
-    case  6: func( 7, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5]);
-    case  7: func( 8, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6]);
-    case  8: func( 9, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
-    case  9: func(10, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]);
-    case 10: func(11, clo, cont, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
-    // TODO: auto-generate more of these
-    default:
-      printf("Unhandled number of function arguments: %d\n", argc);
-      exit(1);
-    }
+
+/**
+ * Same as above but for a varargs C function
+ */
+static void dispatch_va(int argc, function_type_va func, object clo, object cont, object args) {
+    DISPATCH_RETURN_CALL_FUNC
 }
 
 /*
