@@ -1093,9 +1093,9 @@ static void _length(object cont, object args){
     return_funcall1(cont, &i); }
 static void _null_127(object cont, object args) { 
     return_funcall1(cont, Cyc_is_null(car(args))); }
-static void _set_91_car_67(object cont, object args) { 
+static void _set_91car_67(object cont, object args) { 
     return_funcall1(cont, Cyc_set_car(car(args), cadr(args))); }
-static void _set_91_cdr_67(object cont, object args) { 
+static void _set_91cdr_67(object cont, object args) { 
     return_funcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
 static void _has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
@@ -1212,36 +1212,36 @@ static void _display(object cont, object args) {
 
 /* This section is auto-generated via --autogen */
 defprimitive(Cyc_91global_91vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
-defprimitive(Cyc_91get_91cvar, &missing_prim); /* Cyc-get-cvar */
-defprimitive(Cyc_91set_91cvar_67, &missing_prim); /* Cyc-set-cvar! */
+defprimitive(Cyc_91get_91cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
+defprimitive(Cyc_91set_91cvar_67, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
 defprimitive(Cyc_91cvar_127, &_Cyc_91cvar_127); /* Cyc-cvar? */
 defprimitive(has_91cycle_127, &_has_91cycle_127); /* has-cycle? */
 defprimitive(_87, &__87); /* + */
 defprimitive(_91, &__91); /* - */
 defprimitive(_85, &__85); /* * */
 defprimitive(_95, &__95); /* / */
-defprimitive(_123, &missing_prim); /* = */
-defprimitive(_125, &missing_prim); /* > */
-defprimitive(_121, &missing_prim); /* < */
-defprimitive(_125_123, &missing_prim); /* >= */
-defprimitive(_121_123, &missing_prim); /* <= */
+defprimitive(_123, &__123); /* = */
+defprimitive(_125, &__125); /* > */
+defprimitive(_121, &__121); /* < */
+defprimitive(_125_123, &__125_123); /* >= */
+defprimitive(_121_123, &__121_123); /* <= */
 defprimitive(apply, &_apply); /* apply */
-defprimitive(_75halt, &missing_prim); /* %halt */
+defprimitive(_75halt, &__75halt); /* %halt */
 defprimitive(error, &_error); /* error */
 defprimitive(cons, &_cons); /* cons */
-defprimitive(cell_91get, &missing_prim); /* cell-get */
-defprimitive(set_91global_67, &missing_prim); /* set-global! */
-defprimitive(set_91cell_67, &missing_prim); /* set-cell! */
-defprimitive(cell, &missing_prim); /* cell */
+defprimitive(cell_91get, &_cell_91get); /* cell-get */
+defprimitive(set_91global_67, &_set_91global_67); /* set-global! */
+defprimitive(set_91cell_67, &_set_91cell_67); /* set-cell! */
+defprimitive(cell, &_cell); /* cell */
 defprimitive(eq_127, &_eq_127); /* eq? */
 defprimitive(eqv_127, &_eqv_127); /* eqv? */
 defprimitive(equal_127, &_equal_127); /* equal? */
-defprimitive(assoc, &missing_prim); /* assoc */
-defprimitive(assq, &missing_prim); /* assq */
-defprimitive(member, &missing_prim); /* member */
+defprimitive(assoc, &_assoc); /* assoc */
+defprimitive(assq, &_assq); /* assq */
+defprimitive(member, &_member); /* member */
 defprimitive(length, &_length); /* length */
-defprimitive(set_91car_67, &_set_91_car_67); /* set-car! */
-defprimitive(set_91cdr_67, &_set_91_cdr_67); /* set-cdr! */
+defprimitive(set_91car_67, &_set_91car_67); /* set-car! */
+defprimitive(set_91cdr_67, &_set_91cdr_67); /* set-cdr! */
 defprimitive(car, &_car); /* car */
 defprimitive(cdr, &_cdr); /* cdr */
 defprimitive(caar, &_caar); /* caar */
@@ -1272,15 +1272,15 @@ defprimitive(cddaar, &_cddaar); /* cddaar */
 defprimitive(cddadr, &_cddadr); /* cddadr */
 defprimitive(cdddar, &_cdddar); /* cdddar */
 defprimitive(cddddr, &_cddddr); /* cddddr */
-defprimitive(char_91_125integer, &missing_prim); /* char->integer */
-defprimitive(integer_91_125char, &missing_prim); /* integer->char */
-defprimitive(string_91_125number, &missing_prim); /* string->number */
+defprimitive(char_91_125integer, &_char_91_125integer); /* char->integer */
+defprimitive(integer_91_125char, &_integer_91_125char); /* integer->char */
+defprimitive(string_91_125number, &_string_91_125number); /* string->number */
 defprimitive(string_91append, &_string_91append); /* string-append */
-defprimitive(string_91_125list, &missing_prim); /* string->list */
-defprimitive(list_91_125string, &missing_prim); /* list->string */
-defprimitive(string_91_125symbol, &missing_prim); /* string->symbol */
-defprimitive(symbol_91_125string, &missing_prim); /* symbol->string */
-defprimitive(number_91_125string, &missing_prim); /* number->string */
+defprimitive(string_91_125list, &_string_91_125list); /* string->list */
+defprimitive(list_91_125string, &_list_91_125string); /* list->string */
+defprimitive(string_91_125symbol, &_string_91_125symbol); /* string->symbol */
+defprimitive(symbol_91_125string, &_symbol_91_125string); /* symbol->string */
+defprimitive(number_91_125string, &_number_91_125string); /* number->string */
 defprimitive(boolean_127, &_boolean_127); /* boolean? */
 defprimitive(char_127, &_char_127); /* char? */
 defprimitive(eof_91object_127, &_eof_91object_127); /* eof-object? */
@@ -1290,13 +1290,13 @@ defprimitive(pair_127, &_pair_127); /* pair? */
 defprimitive(procedure_127, &_procedure_127); /* procedure? */
 defprimitive(string_127, &_string_127); /* string? */
 defprimitive(symbol_127, &_symbol_127); /* symbol? */
-defprimitive(current_91input_91port, &missing_prim); /* current-input-port */
-defprimitive(open_91input_91file, &missing_prim); /* open-input-file */
-defprimitive(close_91input_91port, &missing_prim); /* close-input-port */
-defprimitive(read_91char, &missing_prim); /* read-char */
-defprimitive(peek_91char, &missing_prim); /* peek-char */
-defprimitive(write, &missing_prim); /* write */
-defprimitive(display, &missing_prim); /* display */
+defprimitive(current_91input_91port, &_current_91input_91port); /* current-input-port */
+defprimitive(open_91input_91file, &_open_91input_91file); /* open-input-file */
+defprimitive(close_91input_91port, &_close_91input_91port); /* close-input-port */
+defprimitive(read_91char, &_read_91char); /* read-char */
+defprimitive(peek_91char, &_peek_91char); /* peek-char */
+defprimitive(write, &_write); /* write */
+defprimitive(display, &_display); /* display */
 /* -------------------------------------------- */
 
 /* All constant-size objects */
