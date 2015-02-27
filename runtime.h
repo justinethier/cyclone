@@ -324,6 +324,9 @@ static void Cyc_apply(int argc, closure cont, object prim, ...);
 static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 static string_type Cyc_string_append(int argc, object str1, ...);
 static string_type Cyc_string_append_va_list(int, object, va_list);
+static void dispatch_error(int argc, object clo, object cont, object obj1, ...);
+static object Cyc_error(int count, object obj1, ...);
+static object Cyc_error_va(int count, object obj1, va_list ap);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
@@ -904,12 +907,24 @@ static void my_exit(env) closure env; {
 #endif
  exit(0);}
 
+static void dispatch_error(int argc, object clo, object cont, object obj1, ...) {
+    va_list ap;
+    va_start(ap, obj1);
+    Cyc_error_va(argc, obj1, ap);
+    va_end(ap); // Never get this far
+}
+
 static object Cyc_error(int count, object obj1, ...) {
     va_list ap;
+    va_start(ap, obj1);
+    Cyc_error_va(count, obj1, ap);
+    va_end(ap);
+}
+
+static object Cyc_error_va(int count, object obj1, va_list ap) {
     object tmp;
     int i;
     
-    va_start(ap, obj1);
     printf("Error: ");
     Cyc_display(obj1);
     printf("\n");
@@ -920,7 +935,6 @@ static object Cyc_error(int count, object obj1, ...) {
         printf("\n");
     }
 
-    va_end(ap);
     exit(1);
     return boolean_f;
 }
@@ -1159,15 +1173,12 @@ static void _integer_91_125char(object cont, object args) {
 static void _string_91_125number(object cont, object args) {  
     integer_type i = Cyc_string2number(car(args));
     return_funcall1(cont, &i);}
-
-// TODO: need to dispatch as varargs
-// _error
-//static void _error(object cont, object args) {  return_funcall1(cont, );}
-
+static void _error(object cont, object args) {
+    integer_type argc = Cyc_length(args);
+    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
 static void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
-    dispatch_va(argc.value, dispatch_string_91append, cont, cont, args);
-}
+    dispatch_va(argc.value, dispatch_string_91append, cont, cont, args); }
 static void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
     return_funcall1(cont, &lst);}
@@ -1216,7 +1227,7 @@ defprimitive(_125_123, &missing_prim); /* >= */
 defprimitive(_121_123, &missing_prim); /* <= */
 defprimitive(apply, &_apply); /* apply */
 defprimitive(_75halt, &missing_prim); /* %halt */
-defprimitive(error, &missing_prim); /* error */
+defprimitive(error, &_error); /* error */
 defprimitive(cons, &_cons); /* cons */
 defprimitive(cell_91get, &missing_prim); /* cell-get */
 defprimitive(set_91global_67, &missing_prim); /* set-global! */
