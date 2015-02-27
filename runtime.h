@@ -352,6 +352,17 @@ static void GC(closure,object*,int) never_returns;
 static void main_main(long stack_size,long heap_size,char *stack_base) never_returns;
 static long long_arg(int argc,char **argv,char *name,long dval);
 
+/* Primitive types */
+//typedef void (*prim_function_type)();
+typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
+typedef primitive_type *primitive;
+
+#define defprimitive(name, fnc) \
+static primitive_type name##_primitive = {primitive_tag, #name, fnc}; \
+static const object primitive_##name = &name##_primitive
+
+#define prim(x) (x && ((primitive)x)->tag == primitive_tag)
+
 /* Symbol Table */
 
 /* Notes for the symbol table
@@ -1002,21 +1013,6 @@ static object Cyc_io_peek_char(object port) {
     return Cyc_EOF;
 }
 
-/* Primitive types */
-//typedef void (*prim_function_type)();
-typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
-typedef primitive_type *primitive;
-
-#define defprimitive(name, fnc) \
-static primitive_type name##_primitive = {primitive_tag, #name, fnc}; \
-static const object primitive_##name = &name##_primitive
-
-#define prim(x) (x && ((primitive)x)->tag == primitive_tag)
-
-static void missing_prim(object cont, object args) {
-    printf("Primitive is not implemented\n");
-    exit(1);
-}
 static void _Cyc_91global_91vars(object cont, object args){ 
     return_funcall1(cont, Cyc_global_variables); } 
 static void _car(object cont, object args) { 
