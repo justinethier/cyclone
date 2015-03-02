@@ -1482,8 +1482,10 @@ static object apply(object cont, object func, object args){
 //#define funcall2(cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(2,cfn,a1,a2);}
     case cons_tag:
       if (!nullp(func) && eq(quote_Cyc_191procedure, car(func))) {
-          printf("TODO: apply compound proc\n");
-          exit(1);
+          //printf("TODO: apply compound proc\n");
+          Cyc_display(func);
+          //exit(1);
+          ((closure)__glo_eval)->fn(2, __glo_eval, cont, func);
       } else {
           printf("Unable to evaluate list\n");
           exit(1);
