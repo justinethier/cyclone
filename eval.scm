@@ -430,7 +430,16 @@
                               args
                               (procedure-environment proc))))
         ((procedure? proc)
-         (apply proc args))
+         (apply 
+           proc 
+           (map 
+             (lambda (a)
+               (cond
+                 ;; "unwrap" objects before passing to runtime
+                 ((primitive-procedure? a)
+                  (primitive-implementation a))
+                 (else a)))
+             args)))
         (else
          (error
           "Unknown procedure type -- EXECUTE-APPLICATION"
