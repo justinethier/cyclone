@@ -359,6 +359,10 @@
         ((cond? exp) (analyze (cond->if exp)))
       ;; END derived expression processing
         ((application? exp) (analyze-application exp))
+;; TODO:        ;; JAE - testing with these next 3
+;; TODO:        ((primitive-procedure? exp) exp)
+;; TODO:        ((compound-procedure? exp) exp)
+;; TODO:        ((procedure? exp) exp)
         (else
          (error "Unknown expression type -- ANALYZE" exp))))
          ;(lambda () 'TODO-unknown-exp-type)))) ; JAE - this is a debug line
