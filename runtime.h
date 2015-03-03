@@ -575,7 +575,7 @@ static object Cyc_display(x) object x;
       if (equal(quote_Cyc_191procedure, car(x))) {
           printf(" ");
           Cyc_display(cadr(x));
-          printf(")");
+          printf(" ...)"); /* skip body and env for now */
           break;
       }
 
@@ -1447,9 +1447,9 @@ static void dispatch_va(int argc, function_type_va func, object clo, object cont
 static object apply(object cont, object func, object args){
   common_type buf;
 
-printf("DEBUG apply: ");
-Cyc_display(args);
-printf("\n");
+//printf("DEBUG apply: ");
+//Cyc_display(args);
+//printf("\n");
   if (!is_object_type(func)) {
      printf("Call of non-procedure: ");
      Cyc_display(func);
@@ -1486,11 +1486,13 @@ printf("\n");
     case cons_tag:
       if (!nullp(func) && eq(quote_Cyc_191procedure, car(func))) {
           make_cons(c, func, args);
+          /*
           printf("DEBUG apply cons: ");
           Cyc_display(&c);
           printf("\n");
           //printf("TODO: apply compound proc\n");
           //exit(1);
+          */
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
       } else {
           printf("Unable to evaluate list\n");
