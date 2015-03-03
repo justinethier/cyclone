@@ -1,13 +1,16 @@
 Working TODO list:
 
- - Issues with detecting cycles:
-   - (equal?) loops forever when comparing two different circular lists
-   - printing *global-environment* in the repl still loops forever
-
  - compiled/interpreted code integration
    * call an interpreted function from compiled code
      need an example of this, for example maybe defining a function in the interpreter and
      then passing it as a parameter. EG: (map (lambda ...) lst)
+   * when eval is present
+     - #define CYC_EVAL
+     - do not optimize-out variables, or be more careful about it
+
+ - Issues with detecting cycles:
+   - (equal?) loops forever when comparing two different circular lists
+   - printing *global-environment* in the repl still loops forever
 
  - Handle errors better within icyc, instead of exiting the program, print an error and
    keep going
