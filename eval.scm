@@ -358,11 +358,13 @@
         ((begin? exp) (analyze-sequence (begin-actions exp)))
         ((cond? exp) (analyze (cond->if exp)))
       ;; END derived expression processing
+
+        ;; experimenting with passing these back to eval
+        ((compound-procedure? exp)
+         (lambda (env) exp)) ;; TODO: good enough? update env?
+        ;; END experimental code
+
         ((application? exp) (analyze-application exp))
-;; TODO:        ;; JAE - testing with these next 3
-;; TODO:        ((primitive-procedure? exp) exp)
-;; TODO:        ((compound-procedure? exp) exp)
-;; TODO:        ((procedure? exp) exp)
         (else
          (error "Unknown expression type -- ANALYZE" exp))))
          ;(lambda () 'TODO-unknown-exp-type)))) ; JAE - this is a debug line
