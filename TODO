@@ -24,6 +24,21 @@ cyclone> (a 1)
 Error: Unbound variable
 a
 
+and also
+
+cyclone> (define a 1)
+ok
+cyclone> a
+1
+cyclone> a
+1
+cyclone> a
+1
+cyclone> a
+Error: Unbound variable
+a
+
+something *very* weird is going on with variable access in the interpreter right now. problem may just manifest itself when GC is set to normal mode??
 
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
