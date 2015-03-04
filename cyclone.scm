@@ -38,10 +38,18 @@
       (set! input-program (expand input-program))
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
-    
+
+      ;; Separate global definitions from the rest of the top-level code
       (set! input-program 
-        (filter-unused-variables
-          (isolate-globals input-program)))
+          (isolate-globals input-program))
+
+      ;; Optimize-out unused global variables
+      ;; For now, do not do this if eval is used.
+      ;; TODO: do not have to be so aggressive, unless (eval (read)) or such
+      (if (not (has-global? input-program 'eval))
+          (set! input-program 
+            (filter-unused-variables input-program)))
+
       (trace:info "---------------- after processing globals")
       (trace:info input-program) ;pretty-print
     

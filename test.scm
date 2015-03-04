@@ -7,7 +7,7 @@
  (fn a))
 
 (call write 'hello)
-call2 ;; TODO: or would be optimized out... need to fix that
+
 ;; Demonstrate sending an interpreted function to compiled code
 ;; I think in order for this to work, the compiled code would have to
 ;; detect an interpreted proc, and use eval to execute it
