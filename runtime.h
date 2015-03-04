@@ -1485,26 +1485,22 @@ static object apply(object cont, object func, object args){
       }
       
       break;
-    // TODO: if #define CYC_EVAL
-// TODO: also, this only works if the generated code knows to call apply, want to do this,
-//       but again only if CYC_EVAL is defined:
-//#define funcall2(cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(2,cfn,a1,a2);}
+
+#ifdef CYC_EVAL
     case cons_tag:
+    {
+      make_cons(c, func, args);
+
       if (!nullp(func) && eq(quote_Cyc_191procedure, car(func))) {
-          make_cons(c, func, args);
-          /*
-          printf("DEBUG apply cons: ");
-          Cyc_display(&c);
-          printf("\n");
-          //printf("TODO: apply compound proc\n");
-          //exit(1);
-          */
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
       } else {
-          printf("Unable to evaluate list\n");
+          printf("Unable to evaluate: ");
+          Cyc_display(&c);
+          printf("\n");
           exit(1);
       }
-    // TODO: #endif
+    }
+#endif /* CYC_EVAL */
       
     default:
       printf("Invalid object type %ld\n", type_of(func));

@@ -949,6 +949,9 @@
   (let ((compiled-program 
           (apply string-append
             (map c-compile-program input-program))))
+    (if (member 'eval globals)
+      (emit "#define CYC_EVAL"))
+
     (emit-c-macros)
     (emit "#include \"runtime.h\"")
 
