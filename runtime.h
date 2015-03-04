@@ -368,6 +368,7 @@ static primitive_type name##_primitive = {primitive_tag, #name, fnc}; \
 static const object primitive_##name = &name##_primitive
 
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
+#define prim_name(x) (((primitive_type *) x)->pname)
 
 /* Symbol Table */
 
@@ -541,7 +542,7 @@ static object Cyc_display(x) object x;
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      printf("<%p>",(void *)((closure) x)->fn);
+      printf("<procedure %p>",(void *)((closure) x)->fn);
       break;
     case eof_tag:
       printf("<EOF>");
@@ -550,7 +551,7 @@ static object Cyc_display(x) object x;
       printf("<port>");
       break;
     case primitive_tag:
-      printf("<primitive>");
+      printf("<primitive %s>", prim_name(x));
       break;
     case cvar_tag:
       Cyc_display(Cyc_get_cvar(x));
