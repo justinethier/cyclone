@@ -4,9 +4,6 @@ Working TODO list:
    * call an interpreted function from compiled code
      need an example of this, for example maybe defining a function in the interpreter and
      then passing it as a parameter. EG: (map (lambda ...) lst)
-   * when eval is present
-     - #define CYC_EVAL
-     - do not optimize-out variables, or be more careful about it
 
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
@@ -16,9 +13,6 @@ Working TODO list:
    keep going
 
  - Use a lib.scm for libs, similar to eval/parser modules?
-
- - cyclone should return an error code (IE: 1) when compilation fails and a 0 when it is successful. that way it can be scripted via bash (for example)
- or, does it already do this?
 
  - along the same lines, output should be controlled in a better way. or at minimum should print errors using stderr (possible with standard scheme, though??)
 
