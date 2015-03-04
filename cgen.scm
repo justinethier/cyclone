@@ -1068,6 +1068,8 @@
         (string-append 
           "defprimitive(" 
           (mangle p)
+          ", "
+          (symbol->string p)
           ", &_"
           (mangle p)
           "); /* "
