@@ -1,9 +1,29 @@
 Working TODO list:
 
- - compiled/interpreted code integration
-   * call an interpreted function from compiled code
-     need an example of this, for example maybe defining a function in the interpreter and
-     then passing it as a parameter. EG: (map (lambda ...) lst)
+ - Intepreter needs work:
+
+cyclone> (define a (lambda (x) x))
+ok
+cyclone> a
+(procedure (x) ...)
+cyclone> (a 1)
+1
+cyclone> a
+(procedure (x) ...)
+cyclone> (a 'e)
+Error: Unknown procedure type -- EXECUTE-APPLICATION
+(quote e)
+
+and issues with interpreted vars being lost - WTF?
+
+cyclone> (define a (lambda (x) x))
+ok
+cyclone> (a 1)
+1
+cyclone> (a 1)
+Error: Unbound variable
+a
+
 
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
