@@ -1,19 +1,25 @@
-/* 
+/** 
  * Cyclone Scheme
+ * Copyright (c) 2014, Justin Ethier
+ * All rights reserved.
+ *
  * This file contains the C runtime used by compiled programs.
  */
 
-// If this is set, GC is called every function call.
-// Only turn this on for debugging!!!
+#ifndef CYCLONE_RUNTIME_H
+#define CYCLONE_RUNTIME_H
+
+/* If this is set, GC is called every function call.  */
+/* Only turn this on for debugging!!!                 */
 #define DEBUG_ALWAYS_GC 0
 
-// Debug GC flag
+/* Debug GC flag */
 #define DEBUG_GC 0
 
-// Show diagnostic information for the GC when program terminates
+/* Show diagnostic information for the GC when program terminate */
 #define DEBUG_SHOW_DIAG 0
 
-// Maximum number of args that GC will accept
+/* Maximum number of args that GC will accept */
 #define NUM_GC_ANS 100
 
 /* STACK_GROWS_DOWNWARD is a machine-specific preprocessor switch. */
@@ -1900,3 +1906,4 @@ static long long_arg(argc,argv,name,dval)
      return(atol(argv[j+1]));
  return(dval);}
 
+#endif /* CYCLONE_RUNTIME_H */
