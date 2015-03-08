@@ -424,6 +424,43 @@ static object find_or_add_symbol(const char *name){
     return add_symbol_by_name(name);
   }
 }
+/* END symbol table */
+
+/* Write Barrier
+   This is necessary when a mutation (EG: set-car!) occurs, because otherwise
+   if the new value is on the stack, it will never be transported to the heap.
+*/
+list write_barrier = nil;
+
+static void add_to_write_barrier(object obj);
+static void transport_write_barrier();
+static void clear_write_barrier();
+
+static void add_to_write_barrier(object obj) {
+  // TODO: only needed if obj is on the stack?
+  if (is_object_type(obj)) {
+    write_barrier = mcons(obj, write_barrier);
+  }
+}
+
+#define transp_write_barrier() { \
+  list l = write_barrier; \
+  for (; !nullp(l); l = cdr(l)) { \
+    printf("transp from WB: %d", type_of(car(l))); \
+    transp(car(l)); \
+  } \
+}
+
+static void clear_write_barrier() {
+  list l = write_barrier, next;
+  while (!nullp(l)) {
+    next = cdr(l);
+    free(l);
+    l = next;
+  }
+  write_barrier = nil;
+}
+/* END write barrier */
 
 /* Global variables. */
 
@@ -758,11 +795,13 @@ static object Cyc_eq(object x, object y) {
 }
 
 static object Cyc_set_car(object l, object val) {
+    add_to_write_barrier(val);
     ((list)l)->cons_car = val;
     return l;
 }
 
 static object Cyc_set_cdr(object l, object val) {
+    add_to_write_barrier(val);
     ((list)l)->cons_cdr = val;
     return l;
 }
@@ -1687,9 +1726,9 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
     dhalloc_end = dhallocp + global_heap_size - 8;
  }
 
-#if DEBUG_GC
+// #if DEBUG_GC
  printf("\n=== started GC type = %d === \n", major);
-#endif
+// #endif
  /* Transport GC's continuation and its argument. */
  transp(cont);
  gc_cont = cont;
@@ -1713,8 +1752,9 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
 #endif
 
  /* Transport global variables. */
- //transp(unify_subst);
- transp(Cyc_global_variables); // Internal global used by the runtime
+ transp_write_barrier();
+ clear_write_barrier(); /* Reset for next time */
+ transp(Cyc_global_variables); /* Internal global used by the runtime */
  GC_GLOBALS
  while (scanp<allocp)       /* Scan the newspace. */
    switch (type_of(scanp))
