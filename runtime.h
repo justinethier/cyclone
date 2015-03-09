@@ -1727,9 +1727,9 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
     dhalloc_end = dhallocp + global_heap_size - 8;
  }
 
-// #if DEBUG_GC
+#if DEBUG_GC
  printf("\n=== started GC type = %d === \n", major);
-// #endif
+#endif
  /* Transport GC's continuation and its argument. */
  transp(cont);
  gc_cont = cont;
