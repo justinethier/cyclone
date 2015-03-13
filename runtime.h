@@ -429,27 +429,21 @@ static object find_or_add_symbol(const char *name){
 /* Write Barrier
    This is necessary when a mutation (EG: set-car!) occurs, because otherwise
    if the new value is on the stack, it will never be transported to the heap.
+*/
 list write_barrier = nil;
 
-static void add_to_write_barrier(object obj);
-static void transport_write_barrier();
+static void add_to_write_barrier(object var, object value);
 static void clear_write_barrier();
 
-static void add_to_write_barrier(object obj) {
-  // TODO: only needed if obj is on the stack?
-  if (is_object_type(obj)) {
-    write_barrier = mcons(obj, write_barrier);
+static void add_to_write_barrier(object var, object value){
+  if (is_object_type(value)) {
+    write_barrier = mcons(var, write_barrier);
   }
 }
 
-#define transp_write_barrier() { \
-  list l = write_barrier; \
-  for (; !nullp(l); l = cdr(l)) { \
-    printf("transp from WB: %ld", type_of(car(l))); \
-    transp(car(l)); \
-  } \
-}
-
+/* TODO: consider a more efficient implementation, such as reusing old nodes
+         instead of reclaiming them each time
+ */
 static void clear_write_barrier() {
   list l = write_barrier, next;
   while (!nullp(l)) {
@@ -459,7 +453,7 @@ static void clear_write_barrier() {
   }
   write_barrier = nil;
 }
-* END write barrier */
+/* END write barrier */
 
 /* Global variables. */
 
@@ -795,12 +789,14 @@ static object Cyc_eq(object x, object y) {
 }
 
 static object Cyc_set_car(object l, object val) {
-    ((list)l)->cons_car = val;
+    car(l) = val;
+    add_to_write_barrier(l, val);
     return l;
 }
 
 static object Cyc_set_cdr(object l, object val) {
-    ((list)l)->cons_cdr = val;
+    cdr(l) = val;
+    add_to_write_barrier(l, val);
     return l;
 }
 
@@ -1749,9 +1745,28 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
  printf("DEBUG done transporting gc_ans\n");
 #endif
 
+ /* Transport mutations. */
+ {
+   list l;
+   for (l = write_barrier; !nullp(l); l = cdr(l)) {
+     object o = car(l);
+     if (type_of(o) == cons_tag) {
+         // Transport, if necessary
+         // TODO: need to test this with major GC, and 
+         //       GC's of list/car-cdr from same generation
+         transp(car(o));
+         transp(cdr(o));
+     } else if (type_of(o) == forward_tag) {
+         // Already transported, skip
+     } else {
+         printf("Unexpected type %ld transporting mutation\n", type_of(o));
+         exit(1);
+     }
+   }
+ }
+ clear_write_barrier(); /* Reset for next time */
+
  /* Transport global variables. */
-// transp_write_barrier();
-// clear_write_barrier(); /* Reset for next time */
  transp(Cyc_global_variables); /* Internal global used by the runtime */
  GC_GLOBALS
  while (scanp<allocp)       /* Scan the newspace. */
