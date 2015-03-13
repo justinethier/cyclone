@@ -426,34 +426,35 @@ static object find_or_add_symbol(const char *name){
 }
 /* END symbol table */
 
-/* Write Barrier
-   This is necessary when a mutation (EG: set-car!) occurs, because otherwise
-   if the new value is on the stack, it will never be transported to the heap.
-*/
-list write_barrier = nil;
+/* Mutation table
+ *
+ * Keep track of mutations (EG: set-car!) so that new
+ * values are transported to the heap during GC.
+ */
+list mutation_table = nil;
 
-static void add_to_write_barrier(object var, object value);
-static void clear_write_barrier();
+static void add_mutation(object var, object value);
+static void clear_mutations();
 
-static void add_to_write_barrier(object var, object value){
+static void add_mutation(object var, object value){
   if (is_object_type(value)) {
-    write_barrier = mcons(var, write_barrier);
+    mutation_table = mcons(var, mutation_table);
   }
 }
 
 /* TODO: consider a more efficient implementation, such as reusing old nodes
          instead of reclaiming them each time
  */
-static void clear_write_barrier() {
-  list l = write_barrier, next;
+static void clear_mutations() {
+  list l = mutation_table, next;
   while (!nullp(l)) {
     next = cdr(l);
     free(l);
     l = next;
   }
-  write_barrier = nil;
+  mutation_table = nil;
 }
-/* END write barrier */
+/* END mutation table */
 
 /* Global variables. */
 
@@ -789,13 +790,13 @@ static object Cyc_eq(object x, object y) {
 
 static object Cyc_set_car(object l, object val) {
     car(l) = val;
-    add_to_write_barrier(l, val);
+    add_mutation(l, val);
     return l;
 }
 
 static object Cyc_set_cdr(object l, object val) {
     cdr(l) = val;
-    add_to_write_barrier(l, val);
+    add_mutation(l, val);
     return l;
 }
 
@@ -1747,7 +1748,7 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
  /* Transport mutations. */
  {
    list l;
-   for (l = write_barrier; !nullp(l); l = cdr(l)) {
+   for (l = mutation_table; !nullp(l); l = cdr(l)) {
      object o = car(l);
      if (type_of(o) == cons_tag) {
          // Transport, if necessary
@@ -1763,7 +1764,7 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
      }
    }
  }
- clear_write_barrier(); /* Reset for next time */
+ clear_mutations(); /* Reset for next time */
 
  /* Transport global variables. */
  transp(Cyc_global_variables); /* Internal global used by the runtime */
