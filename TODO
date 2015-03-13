@@ -1,5 +1,7 @@
 Working TODO list:
 
+ - Add an (exit) primitive in the compiler and interpreter
+
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
    - printing *global-environment* in the repl still loops forever
