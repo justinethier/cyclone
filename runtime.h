@@ -639,7 +639,6 @@ static object Cyc_write(x) object x;
 {object tmp = nil;
  if (nullp(x)) {printf("()\n"); return x;}
  if (obj_is_char(x)) {printf("#\\%c\n", obj_obj2char(x)); return x;}
- printf("[DEBUG: %p]", x); // DEBUGGING LINE!!
  switch (type_of(x))
    {case string_tag:
       printf("\"%s\"", ((string_type *) x)->str);
