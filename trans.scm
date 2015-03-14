@@ -517,6 +517,7 @@
      apply
      %halt
      error
+     exit
      cons
      cell-get
      set-global!

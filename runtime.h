@@ -1171,6 +1171,10 @@ static void _Cyc_91get_91cvar(object cont, object args) {
     printf("not implemented\n"); exit(1); }
 static void _Cyc_91set_91cvar_67(object cont, object args) {  
     printf("not implemented\n"); exit(1); }
+/* Note we cannot use _exit (per convention) because it is reserved by C */
+static void _cyc_exit(object cont, object args) {  
+    __halt(car(args));
+}
 static void __75halt(object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 static void _cell_91get(object cont, object args) {  
@@ -1263,6 +1267,7 @@ defprimitive(_125_123, >=, &__125_123); /* >= */
 defprimitive(_121_123, <=, &__121_123); /* <= */
 defprimitive(apply, apply, &_apply); /* apply */
 defprimitive(_75halt, %halt, &__75halt); /* %halt */
+defprimitive(exit, exit, &_cyc_exit); /* exit */
 defprimitive(error, error, &_error); /* error */
 defprimitive(cons, cons, &_cons); /* cons */
 defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
