@@ -990,13 +990,14 @@ static object Cyc_error_va(int count, object obj1, va_list ap) {
     return boolean_f;
 }
 
-static void __halt(object obj) {
+static object __halt(object obj) {
 #if DEBUG_SHOW_DIAG
     printf("\nhalt: ");
     Cyc_display(obj);
     printf("\n");
 #endif
     my_exit(obj);
+    return nil;
 }
 
 #define __sum(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value + ((integer_type *)(y))->value);
