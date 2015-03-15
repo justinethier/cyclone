@@ -1,5 +1,12 @@
 Working TODO list:
 
+ - Try adding an exception handler based off of r7rs
+   - need this in icyc to prevent dying on error
+   - use cond-expand for chicken compatibility, esp in icyc
+   - add a default exception handler, and some means of assigning to/from it
+   - error calls into current exception handler instead of exit()
+   - do we need a stack of exception handlers?
+
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
    - printing *global-environment* in the repl still loops forever
