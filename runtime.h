@@ -456,6 +456,31 @@ static void clear_mutations() {
 }
 /* END mutation table */
 
+/* Exception handler */
+list exception_handler_stack = nil;
+
+static object default_exception_handler(object err) {
+    printf("Error: ");
+    Cyc_display(err);
+    printf("\n");
+    exit(1);
+}
+
+static object add_exception_handler(object handler) {
+    // TODO: error checking on handler?
+    exception_handler_stack = mcons(handler, exception_handler_stack);
+    return handler;
+}
+
+// TODO: remove ex handler, err if all are removed?
+// TODO: raise - call current exception handler
+
+static void init_exception_handler(){
+// TODO: package default_exception_handler into a closure??
+//    add_exception_handler( 
+}
+/* END exception handler */
+
 /* Global variables. */
 
 static clock_t start;   /* Starting time. */
