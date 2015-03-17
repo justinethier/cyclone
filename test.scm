@@ -23,6 +23,7 @@
 ;(eval '(a 1))
 ;(eval '(begin (define (a z) z) (a 1) (a 1)))
 
+(error 'test)
 (define test '(a b))
 (set-car! test '(1 2 3))
 (write test)

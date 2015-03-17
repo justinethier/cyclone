@@ -459,25 +459,28 @@ static void clear_mutations() {
 /* Exception handler */
 list exception_handler_stack = nil;
 
-static object default_exception_handler(object err) {
-    printf("Error: ");
+static void default_exception_handler(int argc, closure _, object k, object err) {
+    printf("default handler Error: ");
     Cyc_display(err);
     printf("\n");
     exit(1);
 }
 
-static object add_exception_handler(object handler) {
+static void add_exception_handler(function_type handler) {
     // TODO: error checking on handler?
     exception_handler_stack = mcons(handler, exception_handler_stack);
-    return handler;
 }
 
 // TODO: remove ex handler, err if all are removed?
 // TODO: raise - call current exception handler
+static void Cyc_raise(/*object cont,*/ object err) {
+    function_type fnc = (function_type) car(exception_handler_stack);
+    mclosure0(clo, fnc);
+    (fnc)(2, clo, clo, err);
+}
 
 static void init_exception_handler(){
-// TODO: package default_exception_handler into a closure??
-//    add_exception_handler( 
+    add_exception_handler(default_exception_handler);
 }
 /* END exception handler */
 
@@ -1011,7 +1014,8 @@ static object Cyc_error_va(int count, object obj1, va_list ap) {
         printf("\n");
     }
 
-    exit(1);
+    //exit(1);
+    Cyc_raise(obj1);
     return boolean_f;
 }
 
@@ -1953,6 +1957,7 @@ static void main_main (stack_size,heap_size,stack_base)
   mclosure0(run_test,&c_entry_pt);
   gc_cont = &run_test;
   /* Initialize constant expressions for the test runs. */
+  init_exception_handler();
 
   /* Allocate heap area for second generation. */
   /* Use calloc instead of malloc to assure pages are in main memory. */
