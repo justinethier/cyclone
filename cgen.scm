@@ -436,6 +436,7 @@
      ((eq? p 'exit)                  "__halt")
      ((eq? p 'raise)                 "Cyc_raise")
      ((eq? p 'Cyc-add-exception-handler) "Cyc_add_exception_handler")
+     ((eq? p 'Cyc-remove-exception-handler) "Cyc_remove_exception_handler")
      ((eq? p 'error)                 "Cyc_error")
      ((eq? p 'current-input-port)    "Cyc_io_current_input_port")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")

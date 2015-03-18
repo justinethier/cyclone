@@ -520,6 +520,7 @@
      exit
      raise
      Cyc-add-exception-handler
+     Cyc-remove-exception-handler
      cons
      cell-get
      set-global!

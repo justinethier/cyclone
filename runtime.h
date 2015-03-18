@@ -457,6 +457,15 @@ static void clear_mutations() {
 /* END mutation table */
 
 /* Exception handler */
+/*
+notes:
+
+- with-exception-handler, need to:
+  * GOOD case (no exception is raised): install new exception handler, execute thunk, uninstall ex handler, and return value from thunk
+  * EX raised - install new ex handler, execute thunk, uninstall handler, call handler, and throw 2nd exception if handler returns
+  
+- if a handler returns, a second exception is raised. how to handle that?
+*/
 list exception_handler_stack = nil;
 
 static void default_exception_handler(int argc, closure _, object k, object err) {
@@ -466,15 +475,26 @@ static void default_exception_handler(int argc, closure _, object k, object err)
     exit(1);
 }
 
+// TODO: not sure this is the best approach, may be able to do this in
+//       Scheme code, but for now do add/remove this way:
 static object Cyc_add_exception_handler(object handler) {
     // TODO: error checking on handler?
     exception_handler_stack = mcons(handler, exception_handler_stack);
     return handler;
 }
+static object Cyc_remove_exception_handler(){
+    object old_cons = exception_handler_stack;
 
-// TODO: remove ex handler, err if all are removed?
-// TODO: raise - call current exception handler
-//static void Cyc_raise(/*object cont,*/ object err) {
+    if (nullp(exception_handler_stack)) {
+        printf("Internal error, no exception handler to remove\n");
+        exit(1);
+    }
+    exception_handler_stack = cdr(exception_handler_stack);
+    free(old_cons);
+    return exception_handler_stack;
+}
+// END TODO
+
 static object Cyc_raise(object err) {
     //function_type fnc = (function_type) car(exception_handler_stack);
     //mclosure0(clo, fnc);
