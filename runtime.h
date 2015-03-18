@@ -466,24 +466,24 @@ static void default_exception_handler(int argc, closure _, object k, object err)
     exit(1);
 }
 
-static void add_exception_handler(function_type handler) {
+static object Cyc_add_exception_handler(object handler) {
     // TODO: error checking on handler?
     exception_handler_stack = mcons(handler, exception_handler_stack);
+    return handler;
 }
 
 // TODO: remove ex handler, err if all are removed?
 // TODO: raise - call current exception handler
 //static void Cyc_raise(/*object cont,*/ object err) {
 static object Cyc_raise(object err) {
-    function_type fnc = (function_type) car(exception_handler_stack);
-    mclosure0(clo, fnc);
-    (fnc)(2, &clo, &clo, err);
+    //function_type fnc = (function_type) car(exception_handler_stack);
+    //mclosure0(clo, fnc);
+    //(fnc)(2, &clo, &clo, err);
+    object clo = car(exception_handler_stack);
+    ((closure)clo)->fn(2, clo, clo, err);
     return nil;
 }
 
-static void init_exception_handler(){
-    add_exception_handler(default_exception_handler);
-}
 /* END exception handler */
 
 /* Global variables. */
@@ -1957,9 +1957,10 @@ static void main_main (stack_size,heap_size,stack_base)
 
   /* Create closure for the test function. */
   mclosure0(run_test,&c_entry_pt);
+  mclosure0(default_ex, &default_exception_handler);
   gc_cont = &run_test;
   /* Initialize constant expressions for the test runs. */
-  init_exception_handler();
+  Cyc_add_exception_handler(&default_ex);
 
   /* Allocate heap area for second generation. */
   /* Use calloc instead of malloc to assure pages are in main memory. */

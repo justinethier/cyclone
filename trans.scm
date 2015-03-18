@@ -519,6 +519,7 @@
      error
      exit
      raise
+     Cyc-add-exception-handler
      cons
      cell-get
      set-global!
