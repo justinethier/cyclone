@@ -434,6 +434,7 @@
      ((eq? p 'apply)                 "apply")
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
+     ((eq? p 'raise)                 "Cyc_raise")
      ((eq? p 'error)                 "Cyc_error")
      ((eq? p 'current-input-port)    "Cyc_io_current_input_port")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")

@@ -460,7 +460,7 @@ static void clear_mutations() {
 list exception_handler_stack = nil;
 
 static void default_exception_handler(int argc, closure _, object k, object err) {
-    printf("default handler Error: ");
+    printf("Error: ");
     Cyc_display(err);
     printf("\n");
     exit(1);
@@ -473,10 +473,12 @@ static void add_exception_handler(function_type handler) {
 
 // TODO: remove ex handler, err if all are removed?
 // TODO: raise - call current exception handler
-static void Cyc_raise(/*object cont,*/ object err) {
+//static void Cyc_raise(/*object cont,*/ object err) {
+static object Cyc_raise(object err) {
     function_type fnc = (function_type) car(exception_handler_stack);
     mclosure0(clo, fnc);
-    (fnc)(2, clo, clo, err);
+    (fnc)(2, &clo, &clo, err);
+    return nil;
 }
 
 static void init_exception_handler(){
@@ -1014,8 +1016,8 @@ static object Cyc_error_va(int count, object obj1, va_list ap) {
         printf("\n");
     }
 
-    //exit(1);
-    Cyc_raise(obj1);
+    exit(1);
+    // TODO: Cyc_raise(obj1);
     return boolean_f;
 }
 

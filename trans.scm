@@ -518,6 +518,7 @@
      %halt
      error
      exit
+     raise
      cons
      cell-get
      set-global!
