@@ -320,6 +320,8 @@
       ((or (equal? #\" c)
            (equal? #\\ c))
        (cons c buf))
+      ((equal? #\n c)
+       (cons #\newline buf))
       (else
         (parse-error "invalid escape character in string"
          (in-port:get-lnum ptbl)
