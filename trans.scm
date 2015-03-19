@@ -75,6 +75,7 @@
               ;; Unregister this handler since it is no longer needed
               (Cyc-remove-exception-handler)
               (handler obj) ;; Actual handler
+           ;; TODO: unless obj is continuable, then return above result:
               (error "exception handler returned")))) 
     ;; TODO: cond-expand below, since it uses Cyc functions?
     ;;       probably no need since this is part of internal lib

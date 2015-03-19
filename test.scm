@@ -23,8 +23,22 @@
 ;(eval '(a 1))
 ;(eval '(begin (define (a z) z) (a 1) (a 1)))
 
-;(Cyc-add-exception-handler (lambda (err) (write 'new-ex-handler)))
-;(Cyc-remove-exception-handler)
+
+(write
+  (with-exception-handler
+    (lambda (con)
+      (cond
+        ((string? con)
+         (display con))
+        (else
+         (display "a warning has been issued")))
+      42)
+    (lambda ()
+      (+ (raise-continuable "should be a number")
+        23))))
+;prints: should be a number
+;=> 65
+
 (write
   (call/cc
     (lambda (k)
