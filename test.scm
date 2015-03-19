@@ -23,8 +23,26 @@
 ;(eval '(a 1))
 ;(eval '(begin (define (a z) z) (a 1) (a 1)))
 
-(Cyc-add-exception-handler (lambda (err) (write 'new-ex-handler)))
-(Cyc-remove-exception-handler)
+;(Cyc-add-exception-handler (lambda (err) (write 'new-ex-handler)))
+;(Cyc-remove-exception-handler)
+(write
+  (call/cc
+    (lambda (k)
+      (with-exception-handler
+        (lambda (x)
+          (display "condition: ")
+          (write x)
+          ;(newline)
+          (k 'exception))
+        (lambda ()
+          (+ 1 (raise 'an-error)))))))
+
+(with-exception-handler
+    (lambda (x)
+        (display "something went wrong\n"))
+    (lambda ()
+        (+ 1 (raise 'an-error))))
+
 (define test '(a b))
 (set-car! test '(1 2 3))
 (write test)
