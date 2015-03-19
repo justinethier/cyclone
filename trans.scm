@@ -69,8 +69,19 @@
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (not x) (if x #f #t))
   (define (reverse lst)   (foldl cons '() lst))
-;  (define (with-exception-handler handler thunk)
-;    
+  (define (with-exception-handler handler thunk)
+    (let ((my-handler 
+            (lambda (obj)
+              ;; Unregister this handler since it is no longer needed
+              (Cyc-remove-exception-handler)
+              (handler obj) ;; Actual handler
+              (error "exception handler returned")))) 
+    ;; TODO: cond-expand below, since it uses Cyc functions?
+    ;;       probably no need since this is part of internal lib
+    (Cyc-add-exception-handler my-handler)
+    (thunk)
+    ;; Only reached if no ex raised
+    (Cyc-remove-exception-handler)))
 ))
 
 ;; Built-in macros
