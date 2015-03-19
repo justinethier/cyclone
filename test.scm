@@ -24,6 +24,7 @@
 ;(eval '(begin (define (a z) z) (a 1) (a 1)))
 
 (Cyc-add-exception-handler (lambda (err) (write 'new-ex-handler)))
+(Cyc-remove-exception-handler)
 (define test '(a b))
 (set-car! test '(1 2 3))
 (write test)

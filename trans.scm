@@ -69,6 +69,8 @@
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (not x) (if x #f #t))
   (define (reverse lst)   (foldl cons '() lst))
+;  (define (with-exception-handler handler thunk)
+;    
 ))
 
 ;; Built-in macros
