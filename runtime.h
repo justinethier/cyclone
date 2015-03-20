@@ -1220,6 +1220,8 @@ static void _Cyc_91set_91cvar_67(object cont, object args) {
     printf("not implemented\n"); exit(1); }
 /* Note we cannot use _exit (per convention) because it is reserved by C */
 static void _cyc_exit(object cont, object args) {  
+    if(nullp(args))
+        __halt(nil);
     __halt(car(args));
 }
 static void __75halt(object cont, object args) {  
