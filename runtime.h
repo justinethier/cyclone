@@ -495,13 +495,8 @@ static object Cyc_remove_exception_handler(){
 }
 // END TODO
 
-static object Cyc_raise(object err) {
-    //function_type fnc = (function_type) car(exception_handler_stack);
-    //mclosure0(clo, fnc);
-    //(fnc)(2, &clo, &clo, err);
-    object clo = car(exception_handler_stack);
-    ((closure)clo)->fn(2, clo, clo, err);
-    return nil;
+static object Cyc_current_exception_handler() {
+    return car(exception_handler_stack);
 }
 
 /* END exception handler */

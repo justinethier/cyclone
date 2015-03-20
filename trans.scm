@@ -69,14 +69,23 @@
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (not x) (if x #f #t))
   (define (reverse lst)   (foldl cons '() lst))
+  (define (raise obj)
+    ((Cyc-current-exception-handler) (list 'raised obj)))
+  (define (raise-continuable obj)
+    ((Cyc-current-exception-handler) (list 'continuable obj)))
   (define (with-exception-handler handler thunk)
     (let ((my-handler 
             (lambda (obj)
-              ;; Unregister this handler since it is no longer needed
-              (Cyc-remove-exception-handler)
-              (handler obj) ;; Actual handler
-           ;; TODO: unless obj is continuable, then return above result:
-              (error "exception handler returned")))) 
+              (let ((result #f)
+                    (continuable? (and (pair? obj) 
+                                       (equal? (car obj) 'continuable))))
+                ;; Unregister this handler since it is no longer needed
+                (Cyc-remove-exception-handler)
+                (set! result (handler (cadr obj))) ;; Actual handler
+
+                (if continuable?
+                    result
+                    (error "exception handler returned"))))))
     ;; TODO: cond-expand below, since it uses Cyc functions?
     ;;       probably no need since this is part of internal lib
     (Cyc-add-exception-handler my-handler)
@@ -532,7 +541,7 @@
      %halt
      error
      exit
-     raise
+     Cyc-current-exception-handler
      Cyc-add-exception-handler
      Cyc-remove-exception-handler
      cons

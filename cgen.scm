@@ -434,7 +434,7 @@
      ((eq? p 'apply)                 "apply")
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
-     ((eq? p 'raise)                 "Cyc_raise")
+     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
      ((eq? p 'Cyc-add-exception-handler) "Cyc_add_exception_handler")
      ((eq? p 'Cyc-remove-exception-handler) "Cyc_remove_exception_handler")
      ((eq? p 'error)                 "Cyc_error")
