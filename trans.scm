@@ -74,7 +74,8 @@
   (define (raise-continuable obj)
     ((Cyc-current-exception-handler) (list 'continuable obj)))
   (define (with-exception-handler handler thunk)
-    (let ((my-handler 
+    (let ((result #f)
+          (my-handler 
             (lambda (obj)
               (let ((result #f)
                     (continuable? (and (pair? obj) 
@@ -89,9 +90,10 @@
     ;; TODO: cond-expand below, since it uses Cyc functions?
     ;;       probably no need since this is part of internal lib
     (Cyc-add-exception-handler my-handler)
-    (thunk)
+    (set! result (thunk))
     ;; Only reached if no ex raised
-    (Cyc-remove-exception-handler)))
+    (Cyc-remove-exception-handler)
+    result))
 ))
 
 ;; Built-in macros

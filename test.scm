@@ -34,8 +34,8 @@
          (display "a warning has been issued")))
       42)
     (lambda ()
-      (+ (raise-continuable "should be a number")
-        23))))
+      (+ (raise-continuable "should be a number") 23)
+      )))
 ;prints: should be a number
 ;=> 65
 
