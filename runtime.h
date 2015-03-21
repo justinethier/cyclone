@@ -468,22 +468,27 @@ notes:
 */
 list exception_handler_stack = nil;
 
-static void default_exception_handler(int argc, closure _, object k, object err) {
+static void default_exception_handler(int argc, closure _, /*object k,*/ object err) {
     printf("Error: ");
     Cyc_display(err);
     printf("\n");
     exit(1);
 }
 
+// TODO: does this cause GC problems? for example, what if handler is on the stack??
+//       putting all of this in the scheme code could help solve that problem
+//
 // TODO: not sure this is the best approach, may be able to do this in
 //       Scheme code, but for now do add/remove this way:
 static object Cyc_add_exception_handler(object handler) {
+    printf("DEBUG: add ex handler\n");
     // TODO: error checking on handler?
     exception_handler_stack = mcons(handler, exception_handler_stack);
     return handler;
 }
 static object Cyc_remove_exception_handler(){
     object old_cons = exception_handler_stack;
+    printf("DEBUG: remove ex handler\n");
 
     if (nullp(exception_handler_stack)) {
         printf("Internal error, no exception handler to remove\n");
@@ -1018,6 +1023,7 @@ static object Cyc_error(int count, object obj1, ...) {
 }
 
 static object Cyc_error_va(int count, object obj1, va_list ap) {
+    closure ex = (closure)car(Cyc_current_exception_handler());
     object tmp;
     int i;
     
@@ -1031,8 +1037,10 @@ static object Cyc_error_va(int count, object obj1, va_list ap) {
         printf("\n");
     }
 
-    exit(1);
-    // TODO: Cyc_raise(obj1);
+    //exit(1);
+    //// TODO: Cyc_raise(obj1);
+    // TODO: make closure
+    (ex->fn)(1, ex, obj1);
     return boolean_f;
 }
 

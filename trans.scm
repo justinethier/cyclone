@@ -77,6 +77,7 @@
     (let ((result #f)
           (my-handler 
             (lambda (obj)
+              (write "entered my-handler")
               (let ((result #f)
                     (continuable? (and (pair? obj) 
                                        (equal? (car obj) 'continuable))))
@@ -89,8 +90,11 @@
                     (error "exception handler returned"))))))
     ;; TODO: cond-expand below, since it uses Cyc functions?
     ;;       probably no need since this is part of internal lib
+    (write "before add ex handler")
     (Cyc-add-exception-handler my-handler)
+    (write "before thunk")
     (set! result (thunk))
+    (write (list "after thunk" result))
     ;; Only reached if no ex raised
     (Cyc-remove-exception-handler)
     result))
