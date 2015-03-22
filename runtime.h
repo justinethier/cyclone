@@ -330,9 +330,9 @@ static void Cyc_apply(int argc, closure cont, object prim, ...);
 static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 static string_type Cyc_string_append(int argc, object str1, ...);
 static string_type Cyc_string_append_va_list(int, object, va_list);
-static void dispatch_error(int argc, object clo, object cont, object obj1, ...);
-static object Cyc_error(int count, object obj1, ...);
-static object Cyc_error_va(int count, object obj1, va_list ap);
+//static void dispatch_error(int argc, object clo, object cont, object obj1, ...);
+//static object Cyc_error(int count, object obj1, ...);
+//static object Cyc_error_va(int count, object obj1, va_list ap);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
@@ -468,11 +468,12 @@ notes:
 */
 list exception_handler_stack = nil;
 
-static void default_exception_handler(int argc, closure _, /*object k,*/ object err) {
+static object Cyc_default_exception_handler(int argc, closure _, /*object k,*/ object err) {
     printf("Error: ");
     Cyc_display(err);
     printf("\n");
     exit(1);
+    return nil;
 }
 
 // TODO: does this cause GC problems? for example, what if handler is on the stack??
@@ -480,30 +481,30 @@ static void default_exception_handler(int argc, closure _, /*object k,*/ object 
 //
 // TODO: not sure this is the best approach, may be able to do this in
 //       Scheme code, but for now do add/remove this way:
-static object Cyc_add_exception_handler(object handler) {
-    printf("DEBUG: add ex handler\n");
-    // TODO: error checking on handler?
-    exception_handler_stack = mcons(handler, exception_handler_stack);
-    return handler;
-}
-static object Cyc_remove_exception_handler(){
-    object old_cons = exception_handler_stack;
-    printf("DEBUG: remove ex handler\n");
-
-    if (nullp(exception_handler_stack)) {
-        printf("Internal error, no exception handler to remove\n");
-        exit(1);
-    }
-    exception_handler_stack = cdr(exception_handler_stack);
-    free(old_cons);
-    return exception_handler_stack;
-}
-// END TODO
-
-static object Cyc_current_exception_handler() {
-    return car(exception_handler_stack);
-}
-
+// static object Cyc_add_exception_handler(object handler) {
+//     printf("DEBUG: add ex handler\n");
+//     // TODO: error checking on handler?
+//     exception_handler_stack = mcons(handler, exception_handler_stack);
+//     return handler;
+// }
+// static object Cyc_remove_exception_handler(){
+//     object old_cons = exception_handler_stack;
+//     printf("DEBUG: remove ex handler\n");
+// 
+//     if (nullp(exception_handler_stack)) {
+//         printf("Internal error, no exception handler to remove\n");
+//         exit(1);
+//     }
+//     exception_handler_stack = cdr(exception_handler_stack);
+//     free(old_cons);
+//     return exception_handler_stack;
+// }
+// // END TODO
+// 
+// static object Cyc_current_exception_handler() {
+//     return car(exception_handler_stack);
+// }
+// 
 /* END exception handler */
 
 /* Global variables. */
@@ -1008,41 +1009,41 @@ static void my_exit(env) closure env; {
 #endif
  exit(0);}
 
-static void dispatch_error(int argc, object clo, object cont, object obj1, ...) {
-    va_list ap;
-    va_start(ap, obj1);
-    Cyc_error_va(argc, obj1, ap);
-    va_end(ap); // Never get this far
-}
-
-static object Cyc_error(int count, object obj1, ...) {
-    va_list ap;
-    va_start(ap, obj1);
-    Cyc_error_va(count, obj1, ap);
-    va_end(ap);
-}
-
-static object Cyc_error_va(int count, object obj1, va_list ap) {
-    closure ex = (closure)car(Cyc_current_exception_handler());
-    object tmp;
-    int i;
-    
-    printf("Error: ");
-    Cyc_display(obj1);
-    printf("\n");
-
-    for (i = 1; i < count; i++) {
-        tmp = va_arg(ap, object);
-        Cyc_display(tmp);
-        printf("\n");
-    }
-
-    //exit(1);
-    //// TODO: Cyc_raise(obj1);
-    // TODO: make closure
-    (ex->fn)(1, ex, obj1);
-    return boolean_f;
-}
+//static void dispatch_error(int argc, object clo, object cont, object obj1, ...) {
+//    va_list ap;
+//    va_start(ap, obj1);
+//    Cyc_error_va(argc, obj1, ap);
+//    va_end(ap); // Never get this far
+//}
+//
+//static object Cyc_error(int count, object obj1, ...) {
+//    va_list ap;
+//    va_start(ap, obj1);
+//    Cyc_error_va(count, obj1, ap);
+//    va_end(ap);
+//}
+//
+//static object Cyc_error_va(int count, object obj1, va_list ap) {
+//    closure ex = (closure)car(Cyc_current_exception_handler());
+//    object tmp;
+//    int i;
+//    
+//    printf("Error: ");
+//    Cyc_display(obj1);
+//    printf("\n");
+//
+//    for (i = 1; i < count; i++) {
+//        tmp = va_arg(ap, object);
+//        Cyc_display(tmp);
+//        printf("\n");
+//    }
+//
+//    //exit(1);
+//    //// TODO: Cyc_raise(obj1);
+//    // TODO: make closure
+//    (ex->fn)(1, ex, obj1);
+//    return boolean_f;
+//}
 
 static object __halt(object obj) {
 #if DEBUG_SHOW_DIAG
@@ -1270,9 +1271,13 @@ static void _integer_91_125char(object cont, object args) {
 static void _string_91_125number(object cont, object args) {  
     integer_type i = Cyc_string2number(car(args));
     return_funcall1(cont, &i);}
-static void _error(object cont, object args) {
-    integer_type argc = Cyc_length(args);
-    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
+//static void _error(object cont, object args) {
+//    integer_type argc = Cyc_length(args);
+//    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
+static void _Cyc_91default_91exception_91handler(object cont, object args) {
+    // TODO: this is a quick-and-dirty implementation, may be a better way to write this
+    Cyc_default_exception_handler(1, args, car(args));
+}
 static void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
     dispatch_va(argc.value, dispatch_string_91append, cont, cont, args); }
@@ -1325,7 +1330,11 @@ defprimitive(_121_123, <=, &__121_123); /* <= */
 defprimitive(apply, apply, &_apply); /* apply */
 defprimitive(_75halt, %halt, &__75halt); /* %halt */
 defprimitive(exit, exit, &_cyc_exit); /* exit */
-defprimitive(error, error, &_error); /* error */
+//defprimitive(error, error, &_error); /* error */
+defprimitive(
+    Cyc_91default_91exception_91handler,
+    Cyc_default_exception_handler,
+    &_Cyc_91default_91exception_91handler); /* Cyc-default-exception-handler */
 defprimitive(cons, cons, &_cons); /* cons */
 defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
 defprimitive(set_91global_67, set-global!, &_set_91global_67); /* set-global! */
@@ -1982,10 +1991,8 @@ static void main_main (stack_size,heap_size,stack_base)
 
   /* Create closure for the test function. */
   mclosure0(run_test,&c_entry_pt);
-  mclosure0(default_ex, &default_exception_handler);
   gc_cont = &run_test;
   /* Initialize constant expressions for the test runs. */
-  Cyc_add_exception_handler(&default_ex);
 
   /* Allocate heap area for second generation. */
   /* Use calloc instead of malloc to assure pages are in main memory. */

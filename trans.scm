@@ -69,6 +69,8 @@
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (not x) (if x #f #t))
   (define (reverse lst)   (foldl cons '() lst))
+  (define (error msg . args)
+    (raise (cons msg args)))
   (define (raise obj)
     ((Cyc-current-exception-handler) (list 'raised obj)))
   (define (raise-continuable obj)
@@ -98,6 +100,16 @@
     ;; Only reached if no ex raised
     (Cyc-remove-exception-handler)
     result))
+  (define *exception-handler-stack* '())
+  (define (Cyc-add-exception-handler h) 
+     (set! *exception-handler-stack* (cons h *exception-handler-stack*)))
+  (define (Cyc-remove-exception-handler)
+     (if (not (null? *exception-handler-stack*))
+        (set! *exception-handler-stack* (cdr *exception-handler-stack*))))
+  (define (Cyc-current-exception-handler)
+    (if (null? *exception-handler-stack*)
+      Cyc-default-exception-handler
+      (car *exception-handler-stack*)))
 ))
 
 ;; Built-in macros
@@ -545,11 +557,8 @@
      <=
      apply
      %halt
-     error
      exit
-     Cyc-current-exception-handler
-     Cyc-add-exception-handler
-     Cyc-remove-exception-handler
+     Cyc-default-exception-handler
      cons
      cell-get
      set-global!
