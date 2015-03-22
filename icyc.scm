@@ -12,11 +12,16 @@
 ;; TODO: define repl iteration, and wrap in an exception handler
 
 (define (repl:next-line)
-  (with-exception-handler
-    (lambda (obj)
-      (write (list 'an-error-occurred obj)))
-    (lambda ()
-      (repl))))
+;  (call/cc
+;    (lambda (continue)
+      (with-exception-handler
+        (lambda (obj)
+          (write (list 'an-error-occurred obj))
+);          (continue #t))
+        (lambda ()
+          (repl)))) ;)
+;  (repl:next-line))
+;#f)
 
 (define (repl)
   (display "cyclone> ")
