@@ -11,17 +11,25 @@
 
 ;; TODO: define repl iteration, and wrap in an exception handler
 
+; TODO: the below is broken because CPS conversion replaces it with:
+;
+; ((lambda (call/cc)
+;    (define repl:next-line
+;
+; So repl:next-line is never defined as a global!
+; We need a better solution
+
 (define (repl:next-line)
-;  (call/cc
-;    (lambda (continue)
+  (write '1)
+  (call/cc
+    (lambda (k)
       (with-exception-handler
         (lambda (obj)
           (write (list 'an-error-occurred obj))
-);          (continue #t))
+          (k #t))
         (lambda ()
-          (repl)))) ;)
-;  (repl:next-line))
-;#f)
+          (repl)))))
+  (repl:next-line))
 
 (define (repl)
   (display "cyclone> ")
