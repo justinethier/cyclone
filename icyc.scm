@@ -20,7 +20,6 @@
 ; We need a better solution
 
 (define (repl:next-line)
-  (write '1)
   (call/cc
     (lambda (k)
       (with-exception-handler
