@@ -9,22 +9,19 @@
     (display *Cyc-version-banner*))
   (else #f))
 
-;; TODO: define repl iteration, and wrap in an exception handler
-
-; TODO: the below is broken because CPS conversion replaces it with:
-;
-; ((lambda (call/cc)
-;    (define repl:next-line
-;
-; So repl:next-line is never defined as a global!
-; We need a better solution
-
 (define (repl:next-line)
   (call/cc
     (lambda (k)
       (with-exception-handler
         (lambda (obj)
-          (write (list 'an-error-occurred obj))
+          (display "Error: ")
+          (write obj)
+          ; TODO:
+          ;(for-each
+          ;  (lambda (o)
+          ;    (display o)
+          ;    (display " "))
+          ;  obj)
           (k #t))
         (lambda ()
           (repl)))))
@@ -37,6 +34,8 @@
       ((not (eof-object? c))
        (write c)
        (repl:next-line))
-      (else #f))))
+      (else 
+        (exit 0) ;; TODO: crashes on this branch... WTF?
+        ))))
 
 (repl:next-line)
