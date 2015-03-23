@@ -1472,16 +1472,16 @@
 ;; TODO: this is very broken if call/cc is used by a global function!!!
 ;; TODO: if needed, should call/cc be added as a global?
 ;; may need a separate scanning phase to detect call/cc and add the def
-    (if (member 'call/cc (free-vars ast))
-        ; add this definition for call/cc if call/cc is needed
-        (list 
-            (list
-                'lambda
-                (list 'call/cc)
-                ast-cps)
-           '(lambda (k f)
-                (f k (lambda (_ result) (k result)))))
-        ast-cps)
+    ;(if (member 'call/cc (free-vars ast))
+    ;    ; add this definition for call/cc if call/cc is needed
+    ;    (list 
+    ;        (list
+    ;            'lambda
+    ;            (list 'call/cc)
+    ;            ast-cps)
+    ;       '(lambda (k f)
+    ;            (f k (lambda (_ result) (k result)))))
+        ast-cps;)
     ))
 
 

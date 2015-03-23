@@ -66,11 +66,18 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
     
+      (set! globals (cons 'call/cc globals))
       (set! input-program 
-        (map 
-          (lambda (expr)
-            (cps-convert expr))
-          input-program))
+        (cons
+          ;; Add call/cc here because it is already in CPS form
+          ;; TODO: prevents this from being optimized-out
+          ;; TODO: will this cause issues if another var is assigned to call/cc?
+          '(define call/cc
+            (lambda (k f) (f k (lambda (_ result) (k result)))))
+           (map 
+             (lambda (expr)
+               (cps-convert expr))
+             input-program)))
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
     
