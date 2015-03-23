@@ -79,26 +79,19 @@
     (let ((result #f)
           (my-handler 
             (lambda (obj)
-              (write "entered my-handler")
               (let ((result #f)
                     (continuable? (and (pair? obj) 
                                        (equal? (car obj) 'continuable))))
                 ;; Unregister this handler since it is no longer needed
                 (Cyc-remove-exception-handler)
                 (set! result (handler (cadr obj))) ;; Actual handler
-
                 (if continuable?
                     result
                     (error "exception handler returned"))))))
-    ;; TODO: cond-expand below, since it uses Cyc functions?
-    ;;       probably no need since this is part of internal lib
-    (write "before add ex handler")
+    ;; No cond-expand below, since this is part of our internal lib
     (Cyc-add-exception-handler my-handler)
-    (write "before thunk")
     (set! result (thunk))
-    (write (list "after thunk" result))
-    ;; Only reached if no ex raised
-    (Cyc-remove-exception-handler)
+    (Cyc-remove-exception-handler) ; Only reached if no ex raised
     result))
   (define *exception-handler-stack* '())
   (define (Cyc-add-exception-handler h) 
