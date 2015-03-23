@@ -32,8 +32,8 @@
 ; Need to rewrite the code to use this, and preserve the global def
 (define (test)
   (call/cc
-    (lambda (k)
-      (k #t))))
+    (lambda (return)
+      (return #t))))
 (write (test))
 
 ;(write
