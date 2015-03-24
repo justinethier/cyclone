@@ -457,54 +457,13 @@ static void clear_mutations() {
 /* END mutation table */
 
 /* Exception handler */
-/*
-notes:
-
-- with-exception-handler, need to:
-  * GOOD case (no exception is raised): install new exception handler, execute thunk, uninstall ex handler, and return value from thunk
-  * EX raised - install new ex handler, execute thunk, uninstall handler, call handler, and throw 2nd exception if handler returns
-  
-- if a handler returns, a second exception is raised. how to handle that?
-*/
-list exception_handler_stack = nil;
-
-static object Cyc_default_exception_handler(int argc, closure _, /*object k,*/ object err) {
+static object Cyc_default_exception_handler(int argc, closure _, object err) {
     printf("Error: ");
     Cyc_display(err);
     printf("\n");
     exit(1);
     return nil;
 }
-
-// TODO: does this cause GC problems? for example, what if handler is on the stack??
-//       putting all of this in the scheme code could help solve that problem
-//
-// TODO: not sure this is the best approach, may be able to do this in
-//       Scheme code, but for now do add/remove this way:
-// static object Cyc_add_exception_handler(object handler) {
-//     printf("DEBUG: add ex handler\n");
-//     // TODO: error checking on handler?
-//     exception_handler_stack = mcons(handler, exception_handler_stack);
-//     return handler;
-// }
-// static object Cyc_remove_exception_handler(){
-//     object old_cons = exception_handler_stack;
-//     printf("DEBUG: remove ex handler\n");
-// 
-//     if (nullp(exception_handler_stack)) {
-//         printf("Internal error, no exception handler to remove\n");
-//         exit(1);
-//     }
-//     exception_handler_stack = cdr(exception_handler_stack);
-//     free(old_cons);
-//     return exception_handler_stack;
-// }
-// // END TODO
-// 
-// static object Cyc_current_exception_handler() {
-//     return car(exception_handler_stack);
-// }
-// 
 /* END exception handler */
 
 /* Global variables. */
