@@ -15,13 +15,12 @@
       (with-exception-handler
         (lambda (obj)
           (display "Error: ")
-          (write obj)
-          ; TODO:
-          ;(for-each
-          ;  (lambda (o)
-          ;    (display o)
-          ;    (display " "))
-          ;  obj)
+          (for-each
+            (lambda (o)
+              (display o)
+              (display " "))
+            obj)
+          (display "\n")
           (k #t))
         (lambda ()
           (repl)))))
