@@ -89,8 +89,16 @@
             (car lst)
             (foldl (lambda (a b) (append-2 b a)) (car lst) (cdr lst)))))
   (define (list . objs)  objs)
-  ; TODO: (define (make-list k . fill)
-  ; )
+  (define (make-list k . fill)
+    (letrec ((x (if (null? fill) 
+                 #f
+                 (car fill)))
+             (make
+               (lambda (n obj)
+                 (if (zero? n)
+                 '()
+                 (cons obj (make (- n 1) obj) )))))
+    (make k x)))
   (define (map func lst)
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (for-each f lst)
