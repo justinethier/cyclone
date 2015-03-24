@@ -563,7 +563,10 @@ static object Cyc_has_cycle(object lst) {
         if (Cyc_is_cons(fast_lst) == boolean_f) return boolean_f;
         if (nullp(cdr(fast_lst))) return boolean_f;
         if (Cyc_is_cons(cdr(fast_lst)) == boolean_f) return boolean_f;
-        if (eq(car(slow_lst), car(fast_lst))) return boolean_t;
+        if (is_object_type(car(slow_lst)) && 
+            !Cyc_is_boolean(car(slow_lst)) && // Avoid expected dupes
+            !Cyc_is_symbol(car(slow_lst)) &&  // 
+            eq(car(slow_lst), car(fast_lst))) return boolean_t;
 
         slow_lst = cdr(slow_lst);
         fast_lst = cddr(fast_lst);
