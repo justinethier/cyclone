@@ -64,12 +64,16 @@
     (if (null? lst)
       end
       (func (car lst) (foldr func end (cdr lst)))))
+  (define (not x) (if x #f #t))
   (define (list? obj)
     (cond
       ((null? obj) #t)
       ((pair? obj)
        (list? (cdr obj)))
       (else #f)))
+  (define (zero? n) (= n 0))
+  (define (positive? n) (> n 0))
+  (define (negative? n) (< n 0))
   ; append accepts a variable number of arguments, per R5RS. So a wrapper
   ; has been provided for the standard 2-argument version of (append).
   ;
@@ -85,9 +89,21 @@
             (car lst)
             (foldl (lambda (a b) (append-2 b a)) (car lst) (cdr lst)))))
   (define (list . objs)  objs)
+  ; TODO: (define (make-list k . fill)
+  ; )
   (define (map func lst)
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
-  (define (not x) (if x #f #t))
+  (define (for-each f lst)
+    (cond
+     ((null? lst) #t)
+     (else
+       (f (car lst))
+       (for-each f (cdr lst)))))
+  (define (list-tail lst k) 
+    (if (zero? k)
+      lst
+      (list-tail (cdr lst) (- k 1))))
+  (define (list-ref lst k)  (car (list-tail lst k)))
   (define (reverse lst)   (foldl cons '() lst))
   (define (error msg . args)
     (raise (cons msg args)))
