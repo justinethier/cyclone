@@ -115,6 +115,17 @@
       (list-tail (cdr lst) (- k 1))))
   (define (list-ref lst k)  (car (list-tail lst k)))
   (define (reverse lst)   (foldl cons '() lst))
+  (define (symbol=? sym1 sym2 . syms)
+    (and
+      (eq? sym1 sym2)
+      (call/cc
+        (lambda (return)
+          (for-each 
+            (lambda (s)
+              (if (not (eq? s sym1))
+                (return #f)))
+            syms)
+            #t))))
   (define (error msg . args)
     (raise (cons msg args)))
   (define (raise obj)
