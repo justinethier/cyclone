@@ -687,8 +687,10 @@ static object Cyc_display(x) object x;
       printf("Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
  return x;}
 
-static object Cyc_write(x) object x;
+static object _Cyc_write(x) object x;
 {object tmp = nil;
+ object has_cycle = boolean_f;
+ int i = 0;
  if (nullp(x)) {printf("()\n"); return x;}
  if (obj_is_char(x)) {printf("#\\%c\n", obj_obj2char(x)); return x;}
  switch (type_of(x))
@@ -696,10 +698,44 @@ static object Cyc_write(x) object x;
       printf("\"%s\"", ((string_type *) x)->str);
       break;
     // TODO: what about a list? contents should be displayed per (write)
+    case cons_tag:
+      has_cycle = Cyc_has_cycle(x);
+      printf("("); 
+      _Cyc_write(car(x));
+
+      // Experimenting with displaying lambda defs in REPL
+      // not good enough but this is a start. would probably need
+      // the same code in write()
+      if (equal(quote_Cyc_191procedure, car(x))) {
+          printf(" ");
+          _Cyc_write(cadr(x));
+          printf(" ...)"); /* skip body and env for now */
+          break;
+      }
+
+      for (tmp = cdr(x); tmp && ((closure) tmp)->tag == cons_tag; tmp = cdr(tmp)) {
+          if (has_cycle == boolean_t) {
+              if (i++ > 20) break; /* arbitrary number, for now */
+          }
+          printf(" ");
+          _Cyc_write(car(tmp));
+      }
+      if (has_cycle == boolean_t) {
+          printf(" ...");
+      } else if (tmp) {
+          printf(" . ");
+          _Cyc_write(tmp);
+      }
+      printf(")");
+      break;
     default:
       Cyc_display(x);}
- printf("\n");
  return x;}
+
+static object Cyc_write(x) object x;
+{object y = _Cyc_write(x);
+ printf("\n");
+ return y;}
 
 /* Some of these non-consing functions have been optimized from CPS. */
 
