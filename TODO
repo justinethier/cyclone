@@ -6,6 +6,8 @@ Working TODO list:
  - Error handling
    need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
 
+ - Add unit tests for exception handlers, and new constructs added to lib
+
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
