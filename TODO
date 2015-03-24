@@ -1,5 +1,8 @@
 Working TODO list:
 
+ - Add (list-set!) from r7rs
+   will likely require tweaks to GC similar to (set-car! / set-cdr!)
+
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
    - printing *global-environment* in the repl still loops forever
