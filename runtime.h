@@ -650,8 +650,8 @@ static object _Cyc_write(x) object x;
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {printf("()\n"); return x;}
- if (obj_is_char(x)) {printf("#\\%c\n", obj_obj2char(x)); return x;}
+ if (nullp(x)) {printf("()"); return x;}
+ if (obj_is_char(x)) {printf("#\\%c", obj_obj2char(x)); return x;}
  switch (type_of(x))
    {case string_tag:
       printf("\"%s\"", ((string_type *) x)->str);
