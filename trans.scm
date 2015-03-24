@@ -64,6 +64,12 @@
     (if (null? lst)
       end
       (func (car lst) (foldr func end (cdr lst)))))
+  (define (list? obj)
+    (cond
+      ((null? obj) #t)
+      ((pair? obj)
+       (list? (cdr obj)))
+      (else #f)))
   (define (list . objs)  objs)
   (define (map func lst)
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
