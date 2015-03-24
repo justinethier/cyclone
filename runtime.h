@@ -995,10 +995,7 @@ static object Cyc_integer2char(object n){
     return obj_char2obj(val);
 }
 
-/*static object sum(object x, object y) {}*/
-
 static void my_exit(closure) never_returns;
-
 static void my_exit(env) closure env; {
 #if DEBUG_SHOW_DIAG
     printf("my_exit: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
@@ -1006,42 +1003,6 @@ static void my_exit(env) closure env; {
  printf("my_exit: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
 #endif
  exit(0);}
-
-//static void dispatch_error(int argc, object clo, object cont, object obj1, ...) {
-//    va_list ap;
-//    va_start(ap, obj1);
-//    Cyc_error_va(argc, obj1, ap);
-//    va_end(ap); // Never get this far
-//}
-//
-//static object Cyc_error(int count, object obj1, ...) {
-//    va_list ap;
-//    va_start(ap, obj1);
-//    Cyc_error_va(count, obj1, ap);
-//    va_end(ap);
-//}
-//
-//static object Cyc_error_va(int count, object obj1, va_list ap) {
-//    closure ex = (closure)car(Cyc_current_exception_handler());
-//    object tmp;
-//    int i;
-//    
-//    printf("Error: ");
-//    Cyc_display(obj1);
-//    printf("\n");
-//
-//    for (i = 1; i < count; i++) {
-//        tmp = va_arg(ap, object);
-//        Cyc_display(tmp);
-//        printf("\n");
-//    }
-//
-//    //exit(1);
-//    //// TODO: Cyc_raise(obj1);
-//    // TODO: make closure
-//    (ex->fn)(1, ex, obj1);
-//    return boolean_f;
-//}
 
 static object __halt(object obj) {
 #if DEBUG_SHOW_DIAG
@@ -1309,8 +1270,13 @@ static void _write(object cont, object args) {
     return_funcall1(cont, Cyc_write(car(args))); }
 static void _display(object cont, object args) {  
     return_funcall1(cont, Cyc_display(car(args)));}
+static void _call_95cc(object cont, object args){
+    // TODO: global ref below is unfortunate, should try to refactor it out
+    return_funcall2(__glo_call_95cc, cont, car(args));
+}
 
 /* This section is auto-generated via --autogen */
+defprimitive(call_95cc, call/cc, &_call_95cc);
 defprimitive(Cyc_91global_91vars, Cyc-global-vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
 defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
 defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */

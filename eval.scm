@@ -183,6 +183,7 @@
 
 (define primitive-procedures
   (list 
+      (list 'call/cc call/cc)
       (list 'Cyc-global-vars Cyc-global-vars)
       (list 'Cyc-get-cvar Cyc-get-cvar)
       (list 'Cyc-set-cvar! Cyc-set-cvar!)
@@ -365,6 +366,8 @@
          (lambda (env) exp)) ;; TODO: good enough? update env?
         ;; END experimental code
 
+        ((procedure? exp)
+         (lambda (env) exp))
         ((application? exp) (analyze-application exp))
         (else
          (error "Unknown expression type -- ANALYZE" exp))))
