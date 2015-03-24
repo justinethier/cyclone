@@ -3,6 +3,13 @@ Working TODO list:
  - Add (list-set!) from r7rs
    will likely require tweaks to GC similar to (set-car! / set-cdr!)
 
+ - Error handling
+   need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
+
+ - Reduction in size of generated code
+   is there anything we can do?
+   are closures being packed/unpacked unnecessarily?
+
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
    - printing *global-environment* in the repl still loops forever
@@ -36,9 +43,6 @@ Working TODO list:
   TODO: trigger GC if data heap too low
   TODO: once this works but before moving all, consolidate all this in docs/strings.txt or such. would be useful to keep these notes
 
-
-- Error handling
-  need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
 
 - Unit test improvements
   - concatenate all into one file when compiling / running
