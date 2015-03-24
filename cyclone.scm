@@ -69,7 +69,7 @@
       (set! globals (cons 'call/cc globals))
       (set! input-program 
         (cons
-          ;; Add call/cc here because it is already in CPS form
+          ;; call/cc must be written in CPS form, so it is added here
           ;; TODO: prevents this from being optimized-out
           ;; TODO: will this cause issues if another var is assigned to call/cc?
           '(define call/cc
