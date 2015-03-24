@@ -1,27 +1,12 @@
 Working TODO list:
 
- - Try adding an exception handler based off of r7rs
-   - need this in icyc to prevent dying on error
-   - use cond-expand for chicken compatibility, esp in icyc
-   - add a default exception handler, and some means of assigning to/from it
-   - error calls into current exception handler instead of exit()
-   - do we need a stack of exception handlers?
-
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
    - printing *global-environment* in the repl still loops forever
 
- - Handle errors better within icyc, instead of exiting the program, print an error and
-   keep going
-
  - Use a lib.scm for libs, similar to eval/parser modules?
 
  - along the same lines, output should be controlled in a better way. or at minimum should print errors using stderr (possible with standard scheme, though??)
-
- - Globals - issue list
-   - call/cc may be broken for global define's, or at least is not optimal
-     in that the code for call/cc will be added separately to each define.
-     maybe this is OK, at least functionally
 
  - String support
    issue is how to support strings themselves in memory. can add them directly to the string_type, but then apply won't work 
