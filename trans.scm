@@ -99,6 +99,8 @@
                  '()
                  (cons obj (make (- n 1) obj) )))))
     (make k x)))
+  (define (list-copy lst)
+    (foldr (lambda (x y) (cons x y)) '() lst))
   (define (map func lst)
     (foldr (lambda (x y) (cons (func x) y)) '() lst))
   (define (for-each f lst)
