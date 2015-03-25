@@ -55,18 +55,23 @@
   (define *Cyc-version-banner* ,*version-banner*)
   ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
   (define call-with-current-continuation call/cc)
-; TODO:  (define (Cyc-bool-op cmp x lst)
-; TODO:    (cond
-; TODO:      ((null? lst) #t)
-; TODO:      ((cmp x (car lst))
-; TODO:       (Cyc-bool-op (car lst) (cdr lst)))
-; TODO:      (else #f)))
-; TODO:  (define (char>? c1 c2 . cs)
-; TODO:    (Cyc-bool-op 
-; TODO:      (lambda (x y)
-; TODO:       (> (char->integer x) (char->integer y)))
-; TODO:      c1
-; TODO:      (cons c2 cs)))
+  (define (Cyc-bin-op cmp x lst)
+    (cond
+      ((null? lst) #t)
+      ((cmp x (car lst))
+       (Cyc-bin-op cmp (car lst) (cdr lst)))
+      (else #f)))
+  (define (Cyc-bin-op-char cmp c cs)
+    (Cyc-bin-op
+      (lambda (x y) 
+        (cmp (char->integer x) (char->integer y)))
+      c
+      cs))
+  (define (char=?  c1 c2 . cs) (Cyc-bin-op-char =  c1 (cons c2 cs)))
+  (define (char<?  c1 c2 . cs) (Cyc-bin-op-char <  c1 (cons c2 cs)))
+  (define (char>?  c1 c2 . cs) (Cyc-bin-op-char >  c1 (cons c2 cs)))
+  (define (char<=? c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs)))
+  (define (char>=? c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs)))
   (define (char-whitespace? c) (member c '(#\tab #\space #\return #\newline)))
   (define (char-numeric? c) (member c '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
   ; TODO: implement in terms of char>? procs ==> (define (char-upper-case? c)
