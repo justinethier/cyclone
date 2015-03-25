@@ -1270,13 +1270,15 @@ static void _write(object cont, object args) {
     return_funcall1(cont, Cyc_write(car(args))); }
 static void _display(object cont, object args) {  
     return_funcall1(cont, Cyc_display(car(args)));}
+
+#ifdef CYC_EVAL
 static void _call_95cc(object cont, object args){
-    // TODO: global ref below is unfortunate, should try to refactor it out
     return_funcall2(__glo_call_95cc, cont, car(args));
 }
+defprimitive(call_95cc, call/cc, &_call_95cc); // Moved up here due to ifdef
+#endif /* CYC_EVAL */
 
 /* This section is auto-generated via --autogen */
-defprimitive(call_95cc, call/cc, &_call_95cc);
 defprimitive(Cyc_91global_91vars, Cyc-global-vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
 defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
 defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
