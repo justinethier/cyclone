@@ -6,6 +6,10 @@ Working TODO list:
  - Error handling
    need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
 
+  idea: set num_args and var_args in closure types. then can modify apply() to 
+  check that the right number of args is provided for closure types. don't want to check
+  numargs all the time, especially for compiled code. but this seems like a good compromise.
+
  - Add unit tests for exception handlers, and new constructs added to lib
 
  - Reduction in size of generated code
