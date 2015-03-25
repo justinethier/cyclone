@@ -26,7 +26,7 @@ Section | Status | Comments
 6.2 Numbers | |
 6.3 Booleans | |
 6.4 Pairs and lists | Yes |
-6.5 Symbols | |
+6.5 Symbols | Yes |
 6.6 Characters | |
 6.7 Strings | |
 6.8 Vectors | |
