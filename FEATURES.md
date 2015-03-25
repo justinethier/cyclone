@@ -25,7 +25,7 @@ Section | Status | Comments
 6.1 Equivalence predicates | |
 6.2 Numbers | |
 6.3 Booleans | |
-6.4 Pairs and lists | |
+6.4 Pairs and lists | Yes |
 6.5 Symbols | |
 6.6 Characters | |
 6.7 Strings | |
