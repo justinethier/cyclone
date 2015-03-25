@@ -625,6 +625,9 @@
      equal?
      assoc
      assq
+     assv
+     memq
+     memv
      member
      length
      set-car!

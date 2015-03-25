@@ -352,6 +352,7 @@ static list assq(object,list);
 static object get(object,object);
 static object equalp(object,object);
 static object memberp(object,list);
+static object memqp(object,list);
 static char *transport(char *,int);
 static void GC(closure,object*,int) never_returns;
 
@@ -701,8 +702,13 @@ static object Cyc_write(x) object x;
 
 /* Some of these non-consing functions have been optimized from CPS. */
 
+// TODO: should not be a predicate, may end up moving these to Scheme code
 static object memberp(x,l) object x; list l;
 {for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
+ return boolean_f;}
+
+static object memqp(x,l) object x; list l;
+{for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
 static object get(x,i) object x,i;
@@ -1220,8 +1226,14 @@ static void _assoc (object cont, object args) {
     return_funcall1(cont, assoc(car(args), cadr(args)));}
 static void _assq  (object cont, object args) {  
     return_funcall1(cont, assq(car(args), cadr(args)));}
+static void _assv  (object cont, object args) {  
+    return_funcall1(cont, assq(car(args), cadr(args)));}
 static void _member(object cont, object args) {  
     return_funcall1(cont, memberp(car(args), cadr(args)));}
+static void _memq(object cont, object args) {  
+    return_funcall1(cont, memqp(car(args), cadr(args)));}
+static void _memv(object cont, object args) {  
+    return_funcall1(cont, memqp(car(args), cadr(args)));}
 static void _char_91_125integer(object cont, object args) {  
     integer_type i = Cyc_char2integer(car(args));
     return_funcall1(cont, &i);}
@@ -1311,7 +1323,10 @@ defprimitive(eqv_127, eqv?, &_eqv_127); /* eqv? */
 defprimitive(equal_127, equal?, &_equal_127); /* equal? */
 defprimitive(assoc, assoc, &_assoc); /* assoc */
 defprimitive(assq, assq, &_assq); /* assq */
+defprimitive(assv, assv, &_assv); /* assq */
 defprimitive(member, member, &_member); /* member */
+defprimitive(memq, memq, &_memq); /* memq */
+defprimitive(memv, memv, &_memv); /* memv */
 defprimitive(length, length, &_length); /* length */
 defprimitive(set_91car_67, set-car!, &_set_91car_67); /* set-car! */
 defprimitive(set_91cdr_67, set-cdr!, &_set_91cdr_67); /* set-cdr! */
