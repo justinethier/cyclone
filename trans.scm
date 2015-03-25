@@ -117,6 +117,9 @@
       lst
       (list-tail (cdr lst) (- k 1))))
   (define (list-ref lst k)  (car (list-tail lst k)))
+  (define (list-set! lst k obj)
+    (let ((kth (list-tail lst k)))
+      (set-car! kth obj)))
   (define (reverse lst)   (foldl cons '() lst))
   (define (symbol=? sym1 sym2 . syms)
     (and
