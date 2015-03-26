@@ -72,9 +72,15 @@
   (define (char>?  c1 c2 . cs) (Cyc-bin-op-char >  c1 (cons c2 cs)))
   (define (char<=? c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs)))
   (define (char>=? c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs)))
-  (define (char-whitespace? c) (member c '(#\tab #\space #\return #\newline)))
+  (define (char-alphabetic? c) (and (char>=? c #\A) (char<=? c #\z))) ;; ASCII-only
+  (define (char-upper-case? c) (and (char>=? c #\A) (char<=? c #\Z))) ;; ASCII-only
+  (define (char-lower-case? c) (and (char>=? c #\a) (char<=? c #\z))) ;; ASCII-only
   (define (char-numeric? c) (member c '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
-  ; TODO: implement in terms of char>? procs ==> (define (char-upper-case? c)
+  (define (char-whitespace? c) (member c '(#\tab #\space #\return #\newline)))
+  (define (digit-value c)
+    (if (char-numeric? c)
+        (- (char->integer c) (char->integer #\0))
+        #f))
   (define (foldl func accum lst)
     (if (null? lst)
       accum
