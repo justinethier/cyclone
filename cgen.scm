@@ -421,7 +421,7 @@
      ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
-     ((eq? p 'has-cycle?)            "Cyc_has_cycle")
+     ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
      ((eq? p '+)                     "__sum")
      ((eq? p '-)                     "__sub")
      ((eq? p '*)                     "__mul")

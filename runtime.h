@@ -565,8 +565,8 @@ static object Cyc_has_cycle(object lst) {
         if (nullp(cdr(fast_lst))) return boolean_f;
         if (Cyc_is_cons(cdr(fast_lst)) == boolean_f) return boolean_f;
         if (is_object_type(car(slow_lst)) && 
-            !Cyc_is_boolean(car(slow_lst)) && // Avoid expected dupes
-            !Cyc_is_symbol(car(slow_lst)) &&  // 
+            boolean_f == Cyc_is_boolean(car(slow_lst)) && // Avoid expected dupes
+            boolean_f == Cyc_is_symbol(car(slow_lst)) &&  // 
             eq(car(slow_lst), car(fast_lst))) return boolean_t;
 
         slow_lst = cdr(slow_lst);
@@ -1154,7 +1154,7 @@ static void _set_91car_67(object cont, object args) {
     return_funcall1(cont, Cyc_set_car(car(args), cadr(args))); }
 static void _set_91cdr_67(object cont, object args) { 
     return_funcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
-static void _has_91cycle_127(object cont, object args) { 
+static void _Cyc_91has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
 static void __87(object cont, object args) {
     __sum(i, car(args), cadr(args));
@@ -1295,7 +1295,7 @@ defprimitive(Cyc_91global_91vars, Cyc-global-vars, &_Cyc_91global_91vars); /* Cy
 defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
 defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
 defprimitive(Cyc_91cvar_127, Cyc-cvar?, &_Cyc_91cvar_127); /* Cyc-cvar? */
-defprimitive(has_91cycle_127, has-cycle?, &_has_91cycle_127); /* has-cycle? */
+defprimitive(Cyc_91has_91cycle_127, Cyc-has-cycle?, &_Cyc_91has_91cycle_127); /* Cyc-has-cycle? */
 defprimitive(_87, +, &__87); /* + */
 defprimitive(_91, -, &__91); /* - */
 defprimitive(_85, *, &__85); /* * */

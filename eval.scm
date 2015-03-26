@@ -188,7 +188,7 @@
       (list 'Cyc-get-cvar Cyc-get-cvar)
       (list 'Cyc-set-cvar! Cyc-set-cvar!)
       (list 'Cyc-cvar? Cyc-cvar?)
-      (list 'has-cycle? has-cycle?)
+      (list 'Cyc-has-cycle? Cyc-has-cycle?)
       (list '+ +)
       (list '- -)
       (list '* *)

@@ -617,7 +617,7 @@
      Cyc-get-cvar
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
-     has-cycle?
+     Cyc-has-cycle?
      +
      -
      *
