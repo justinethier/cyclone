@@ -178,6 +178,12 @@
                 (return #f)))
             objs)
             #t))))
+  (define (make-string k . fill)
+    (let ((fill* (if (null? fill)
+                    '(#\space)
+                    fill)))
+      (list->string
+        (apply make-list (cons k fill*)))))
   (define (error msg . args)
     (raise (cons msg args)))
   (define (raise obj)
