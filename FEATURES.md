@@ -22,7 +22,7 @@ Section | Status | Comments
 5.5 Record-type definitions | |
 5.6 Libraries | |
 5.7 The REPL | |
-6.1 Equivalence predicates | |
+6.1 Equivalence predicates | | `eqv?` is not implemented, it is just an alias to `eq?`
 6.2 Numbers | |
 6.3 Booleans | |
 6.4 Pairs and lists | Yes |
