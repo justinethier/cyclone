@@ -13,6 +13,13 @@
 (assert "Testing assert function" #t)
 (assert "Testing assert function" 1)
 
+;; Lists
+(define l (list 'a 'b 'c))
+; TODO: seems to break eval below, is there a GC problem with a circular list?
+;(set-cdr! l l)
+(set-cdr! l '(c b)) ; Above seems to break if it replaces this line
+(assert:equal "list? on circular list" (list? l) #t)
+
 ;; Adder example
 (define (make-adder x)
   (lambda (y) (+ x  y)))
@@ -220,7 +227,7 @@
 (assert:equal "eval compiled - x" (eval 'x) x)
 (eval '(set! x 'mutated-x))
 (assert:equal "Access var with a mangled name" (eval '*z*) *z*)
-(assert:equal "Access compile var mutated by eval" x 'mutated-x)
+(assert:equal "Access compiled var mutated by eval" x 'mutated-x)
 ;; END eval
 
 ; TODO: use display, output without surrounding quotes
