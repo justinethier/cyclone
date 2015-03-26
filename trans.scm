@@ -84,12 +84,16 @@
       end
       (func (car lst) (foldr func end (cdr lst)))))
   (define (not x) (if x #f #t))
-  (define (list? obj)
-    (cond
-      ((null? obj) #t)
-      ((pair? obj)
-       (list? (cdr obj)))
-      (else #f)))
+  (define (list? o)
+    (define (_list? obj)
+      (cond
+        ((null? obj) #t)
+        ((pair? obj)
+         (_list? (cdr obj)))
+        (else #f)))
+    (if (Cyc-has-cycle? o)
+      #t
+      (_list? o)))
   (define (zero? n) (= n 0))
   (define (positive? n) (> n 0))
   (define (negative? n) (< n 0))
