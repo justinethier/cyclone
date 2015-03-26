@@ -72,13 +72,22 @@
   (define (char>?  c1 c2 . cs) (Cyc-bin-op-char >  c1 (cons c2 cs)))
   (define (char<=? c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs)))
   (define (char>=? c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs)))
-  (define (char-upcase c)
+  ; TODO: char-ci predicates
+  (define (char-upcase c) ;; ASCII-only
     (if (char-lower-case? c)
       (integer->char
         (- (char->integer c)
             (- (char->integer #\a)
                (char->integer #\A))))
       c))
+  (define (char-downcase c) ;; ASCII-only
+    (if (char-upper-case? c)
+      (integer->char
+        (+ (char->integer c)
+            (- (char->integer #\a)
+               (char->integer #\A))))
+      c))
+  ; TODO: char-foldcase
   (define (char-alphabetic? c) (and (char>=? c #\A) (char<=? c #\z))) ;; ASCII-only
   (define (char-upper-case? c) (and (char>=? c #\A) (char<=? c #\Z))) ;; ASCII-only
   (define (char-lower-case? c) (and (char>=? c #\a) (char<=? c #\z))) ;; ASCII-only
