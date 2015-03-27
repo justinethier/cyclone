@@ -12,6 +12,15 @@ cgen.so: cgen.scm
 parser.so: parser.scm
 	csc -s parser.scm
 
+libcyclone.a: runtime.c runtime.h
+	gcc -c runtime.c -o runtime.o
+	ar rcs libcyclone.a runtime.o
+# Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
+# Note compiler will have to link to this, eg:
+#Linking against static library
+#gcc -static main.c -L. -lmean -o statically_linked
+#Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
+
 cyclone: cyclone.scm trans.so cgen.so parser.so
 	csc cyclone.scm
 
