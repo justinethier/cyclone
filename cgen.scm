@@ -151,7 +151,7 @@
       "/* Return to continuation after checking for stack overflow. */\n"
       "#define return_funcall" n "(cfn" args ") \\\n"
       "{char stack; \\\n"
-      " if (DEBUG_ALWAYS_GC || check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,stack_limit1)) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(cfn,buf," n "); return; \\\n"
       " } else {funcall" n "((closure) (cfn)" args "); return;}}\n")))
@@ -164,7 +164,7 @@
       "/* Evaluate an expression after checking for stack overflow. */\n"
       "#define return_check" n "(_fn" args ") { \\\n"
       " char stack; \\\n"
-      " if (DEBUG_ALWAYS_GC || check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,stack_limit1)) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
       "     GC(&c1, buf, " n "); return; \\\n"
