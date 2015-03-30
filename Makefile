@@ -21,7 +21,7 @@ libcyclone.a: runtime.c runtime.h
 #gcc -static main.c -L. -lmean -o statically_linked
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
-cyclone: cyclone.scm trans.so cgen.so parser.so
+cyclone: cyclone.scm trans.so cgen.so parser.so libcyclone.a
 	csc cyclone.scm
 
 .PHONY: test
@@ -37,5 +37,5 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.c *.out tags cyclone icyc
+	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)

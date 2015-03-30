@@ -1,4 +1,4 @@
-#include "runtime.h"
+#include "cyclone.h"
 
 /**
  * Take list of args and call a function with them as params.
