@@ -12,6 +12,9 @@ cgen.so: cgen.scm
 parser.so: parser.scm
 	csc -s parser.scm
 
+libcyclone.so.1: runtime.c runtime.h
+	gcc -g -c -fPIC runtime.c -o runtime.o
+	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 libcyclone.a: runtime.c runtime.h
 	gcc -g -c runtime.c -o runtime.o
 	ar rcs libcyclone.a runtime.o
@@ -25,6 +28,9 @@ libcyclone.a: runtime.c runtime.h
 .PHONY: debug
 debug:
 	gcc -static test.c -L. -lcyclone -I. -g -o test
+.PHONY: debug2
+debug2: libcyclone.so.1
+	gcc test.c -L. -lcyclone -I. -g -o test
 
 cyclone: cyclone.scm trans.so cgen.so parser.so libcyclone.a
 	csc cyclone.scm
