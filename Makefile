@@ -27,7 +27,7 @@ libcyclone.a: runtime.c runtime.h
 # debug compilation using static lib
 .PHONY: debug
 debug:
-	gcc -static test.c -L. -lcyclone -I. -g -o test
+	gcc test.c -L. -lcyclone -I. -g -o test
 .PHONY: debug2
 debug2: libcyclone.so.1
 	gcc test.c -L. -lcyclone -I. -g -o test
