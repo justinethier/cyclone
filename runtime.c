@@ -7,10 +7,13 @@
  * so macro calls funcs directly.
  */
 
-// TODO: the following slows down compilation significantly.
-// it's not just the hack, but rather the size of the expanded code.
-// suggest creating a runtime library that will be linked to
-// the compiled executable. maybe just a small static lib for now
+// TODO: get VA args function below to work
+// TODO: need a way of consolidating AFTER_LONGJMP with code below.
+//       may be able to do this by creating a function that wraps
+//       an array of objs into a scheme list (at least initially),
+//       and calling apply on it. In this case, would want a flag
+//       to indicate that the cont parameter should be skipped,
+//       since it is not explicitly used by the AFTER_LONGJMP code.
 
 /**
  * Receive a list of arguments and apply them to the given function
@@ -18,9 +21,12 @@
 void dispatch(int argc, function_type func, object clo, object cont, object args) {
  // TODO: is this portable? may be better to have a dedicated memory area and
 //        just copy to it as needed
- object b[argc]; // OK to do this?
+ object b[argc + 1]; // OK to do this?
  int i; 
- for (i = 0; i < argc; i++){ 
+ // Assume there is always a cont. but could parametize this later
+ argc++;
+ b[0] = cont;
+ for (i = 1; i < argc; i++){ 
    b[i] = car(args); 
    args = cdr(args); 
  } 
@@ -57,7 +63,7 @@ void dispatch(int argc, function_type func, object clo, object cont, object args
  *  like CASE_C_PROC_p<N>, but with doubled output...
  */
 #define CASE_C_PROC_p0(n0,  p6,p5,p4,p3,p2,p1,p0) \
-    case (n0-2): func(n0-1, clo, cont \
+    case (n0-2): func(n0-2, clo \
 PTR_O_p6_##p6(((n0-2)&0x80)+0)\
 PTR_O_p5_##p5(((n0-2)&0xC0)+0)\
 PTR_O_p4_##p4(((n0-2)&0xE0)+0)\
