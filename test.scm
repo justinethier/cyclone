@@ -1,11 +1,15 @@
+((lambda (x)
+  ((lambda ()
+    ((lambda (z)
+      (+ x z)) 2)))) 1)
 ;;; Temporary testing, delete this once it works
 ; Need to rewrite the code to use this, and preserve the global def
-(define (test)
-  (call/cc
-    (lambda (return)
-      (return #t))))
-(write (test))
-
+;(define (test)
+;  (call/cc
+;    (lambda (return)
+;      (return #t))))
+;(write (test))
+;
 ;; (write
 ;;   (with-exception-handler
 ;;     (lambda (con)
