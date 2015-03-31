@@ -1,6 +1,5 @@
 Working TODO list:
 
-- Add static linking code to the compiler (cgen)
 - Only emit funcall* / return_funcall* definitions for cases that are actually used.
   IE, do not emit funcall9 just because funcall10 is required
 
