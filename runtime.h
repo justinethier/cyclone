@@ -1162,16 +1162,7 @@ static object apply(object cont, object func, object args){
     case closure4_tag:
     case closureN_tag:
       buf.integer_t = Cyc_length(args);
-      switch(buf.integer_t.value) {
-      case 0: return_funcall1((closure)func, cont);
-      case 1: return_funcall2((closure)func, cont, car(args));
-      case 2: return_funcall3((closure)func, cont, car(args), cadr(args));
-      case 3: return_funcall4((closure)func, cont, car(args), cadr(args), caddr(args));
-      case 4: return_funcall5((closure)func, cont, car(args), cadr(args), caddr(args), cadddr(args));
-      // More efficient to do this for larger numbers of arguments:
-      default: dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
-      }
-      
+      dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
 #ifdef CYC_EVAL
