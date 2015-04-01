@@ -103,9 +103,6 @@ static void GC(closure,object*,int) never_returns;
 static void main_main(long stack_size,long heap_size,char *stack_base) never_returns;
 static long long_arg(int argc,char **argv,char *name,long dval);
 
-void dispatch(int argc, function_type func, object clo, object cont, object args);
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
-
 /* Symbol Table */
 
 /* Notes for the symbol table
@@ -224,9 +221,9 @@ static char *dhalloc_end;
 static long no_gcs = 0; /* Count the number of GC's. */
 static long no_major_gcs = 0; /* Count the number of GC's. */
 
-static volatile object gc_cont;   /* GC continuation closure. */
-static volatile object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
-static volatile int gc_num_ans;
+static object gc_cont;   /* GC continuation closure. */
+static object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
+static int gc_num_ans;
 static jmp_buf jmp_main; /* Where to jump to. */
 
 //static object test_exp1, test_exp2; /* Expressions used within test. */
@@ -700,9 +697,11 @@ static string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) 
     char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
     object tmp;
     
-    str[i] = ((string_type *)str1)->str;
-    len[i] = strlen(str[i]);
-    total_len += len[i];
+    if (argc > 0) {
+      str[i] = ((string_type *)str1)->str;
+      len[i] = strlen(str[i]);
+      total_len += len[i];
+    }
 
     for (i = 1; i < argc; i++) {
         tmp = va_arg(ap, object);
@@ -1588,7 +1587,8 @@ static void main_main (stack_size,heap_size,stack_base)
 
   /* Tank, load the jump program... */
   setjmp(jmp_main);
-  AFTER_LONGJMP
+  do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
+
   /*                                                                      */
   printf("main: your setjmp and/or longjmp are broken.\n"); exit(0);}}
 

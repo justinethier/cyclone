@@ -8,29 +8,42 @@
  */
 
 // TODO: get VA args function below to work
-// TODO: need a way of consolidating AFTER_LONGJMP with code below.
-//       may be able to do this by creating a function that wraps
-//       an array of objs into a scheme list (at least initially),
-//       and calling apply on it. In this case, would want a flag
-//       to indicate that the cont parameter should be skipped,
-//       since it is not explicitly used by the AFTER_LONGJMP code.
 
 /**
  * Receive a list of arguments and apply them to the given function
  */
 void dispatch(int argc, function_type func, object clo, object cont, object args) {
- // TODO: is this portable? may be better to have a dedicated memory area and
-//        just copy to it as needed
- object b[argc + 1]; // OK to do this?
- int i; 
- // Assume there is always a cont. but could parametize this later
- argc++;
- b[0] = cont;
- for (i = 1; i < argc; i++){ 
-   b[i] = car(args); 
-   args = cdr(args); 
- } 
+  object b[argc + 1]; // OK to do this? Is this portable?
+  int i; 
 
+  argc++;
+  b[0] = cont;
+  for (i = 1; i < argc; i++){ 
+    b[i] = car(args); 
+    args = cdr(args); 
+  } 
+
+  do_dispatch(argc, func, clo, b);
+}
+
+/**
+ * Same as above but for a varargs C function
+ */
+void dispatch_va(int argc, function_type_va func, object clo, object cont, object args) {
+  object b[argc + 1]; // OK to do this? Is this portable?
+  int i; 
+ 
+  argc++;
+  b[0] = cont;
+  for (i = 1; i < argc; i++){ 
+    b[i] = car(args); 
+    args = cdr(args); 
+  } 
+
+  do_dispatch(argc, func, clo, b);
+}
+
+void do_dispatch(int argc, function_type func, object clo, object *b) {
 /* The following is based on the macro expansion code from CHICKEN's do_apply */
 
 /* PTR_O_p<P>_<B>(o): list of COUNT = ((2 ** P) * B) '*(b+I)' arguments,
@@ -107,14 +120,5 @@ PTR_O_p0_##p0(((n0-2)&0xFE)+0));
    printf("Unhandled number of function arguments: %d\n", argc); 
    exit(1);
   }
-}
-
-/**
- * Same as above but for a varargs C function
- */
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args) {
-// TODO:    DISPATCH_RETURN_CALL_FUNC
-  printf("TODO: implement\n");
-  exit(1);
 }
 

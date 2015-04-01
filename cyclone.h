@@ -266,5 +266,7 @@ static const object primitive_##name = &name##_primitive
 
 void dispatch(int argc, function_type func, object clo, object cont, object args);
 void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
+void do_dispatch(int argc, function_type func, object clo, object *buffer);
+
 
 #endif /* CYCLONE_H */
