@@ -985,7 +985,7 @@ static void _Cyc_91default_91exception_91handler(object cont, object args) {
 }
 static void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
-    dispatch_va(argc.value, dispatch_string_91append, cont, cont, args); }
+    dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
 static void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
     return_funcall1(cont, &lst);}
