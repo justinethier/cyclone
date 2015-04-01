@@ -100,7 +100,6 @@
 (define (emit-c-macros)
   (c-macro-declare-globals)
   (c-macro-GC-globals)
-  (emit (c-macro-after-longjmp))
   (emit-c-arity-macros 0))
 
 (define (emit-c-arity-macros arity)
@@ -109,39 +108,6 @@
     (emit (c-macro-return-funcall arity))
     (emit (c-macro-return-check arity))
     (emit-c-arity-macros (+ arity 1))))
-
-(define (c-macro-after-longjmp)
-  (letrec (
-    (append-args
-      (lambda (n)
-        (if (> n 0)
-          (string-append
-            (append-args (- n 1))
-            ",gc_ans[" (number->string (- n 1)) "]")
-          "")))
-    (append-next-clause
-      (lambda (i)
-         (cond 
-           ((= i 0)
-            (string-append
-              "  if (gc_num_ans == 0) { \\\n"
-              "    funcall0((closure) gc_cont); \\\n"
-              (append-next-clause (+ i 1))))
-           ((<= i *c-call-arity*)
-            (let ((this-clause
-                    (string-append
-                      "  } else if (gc_num_ans == " (number->string i)") { \\\n"
-                      "    funcall" (number->string i) "((closure) gc_cont" (append-args i) "); \\\n")))
-               (string-append 
-                  this-clause
-                  (append-next-clause (+ i 1)))))
-           (else
-             "  } else { \\\n"
-             "      printf(\"Unsupported number of args from GC %d\\n\", gc_num_ans); \\\n"
-                    "  } \n")))))
-  (string-append
-    "#define AFTER_LONGJMP \\\n"
-    (append-next-clause 0))))
 
 (define (c-macro-return-funcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
