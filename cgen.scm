@@ -87,15 +87,17 @@
  return 0;}")
 
 ;;; Auto-generation of C macros
-(define *c-call-arity* 5)
+(define *c-call-max-args* 128)
+(define *c-call-arity* (make-vector (+ 1 *c-call-max-args*) #f))
 
 (define (set-c-call-arity! arity)
   (cond
     ((not (number? arity))
      (error `(Non-numeric number of arguments received ,arity)))
+    ((> arity *c-call-max-args*)
+     (error "Only support up to 128 arguments. Received: " arity))
     (else
-      (if (> arity *c-call-arity*)
-          (set! *c-call-arity* arity)))))
+      (vector-set! *c-call-arity* arity #t))))
 
 (define (emit-c-macros)
   (c-macro-declare-globals)
@@ -103,10 +105,13 @@
   (emit-c-arity-macros 0))
 
 (define (emit-c-arity-macros arity)
-  (when (<= arity *c-call-arity*)
-    (emit (c-macro-funcall arity))
-    (emit (c-macro-return-funcall arity))
-    (emit (c-macro-return-check arity))
+  (when (<= arity *c-call-max-args*)
+    (cond
+      ((or (= arity 1) (= arity 2)
+           (vector-ref *c-call-arity* arity))
+       (emit (c-macro-funcall arity))
+       (emit (c-macro-return-funcall arity))
+       (emit (c-macro-return-check arity))))
     (emit-c-arity-macros (+ arity 1))))
 
 (define (c-macro-return-funcall num-args)

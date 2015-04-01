@@ -1,9 +1,5 @@
 Working TODO list:
 
-- Only emit funcall* / return_funcall* definitions for cases that are actually used.
-  IE, do not emit funcall9 just because funcall10 is required
-
-
  - Error handling
    need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
 
