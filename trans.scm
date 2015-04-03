@@ -1140,7 +1140,6 @@
 ;; Many improvements can be made, including:
 ;;
 ;; TODO: remove unused locals
-;; TODO: do not keep defines that call themselves recursively
 (define (filter-unused-variables asts)
   (define (do-filter code)
     (let ((all-fv (apply      ;; More efficient way to do this?
@@ -1148,7 +1147,12 @@
                     (map 
                       (lambda (ast)
                         (if (define? ast)
-                            (free-vars (define->exp ast))
+                            (let ((var (define->var ast)))
+                              ;; Do not keep global that refers to itself
+                              (filter
+                                (lambda (v)
+                                  (not (equal? v var)))
+                                (free-vars (define->exp ast))))
                             (free-vars ast)))
                       code))))
       (filter
