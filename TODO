@@ -1,5 +1,13 @@
 Working TODO list:
 
+ - Compiler efficiency
+
+ Is there a more efficient way to CPS convert expressions? for example, can these primitive applications be inlined, instead of creating wrapping lambdas?
+
+#;10> (cps-convert '(+ 1 (+ 2 2) (+ 3 3)))
+ ((lambda (r$632) ((lambda (r$633) (%halt (+ 1 r$632 r$633))) (+ 3 3))) (+ 2 2))
+
+
  - make *trace-level* a command-line parameter
 
  - Error handling
