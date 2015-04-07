@@ -8,6 +8,10 @@ Working TODO list:
  ((lambda (r$632) ((lambda (r$633) (%halt (+ 1 r$632 r$633))) (+ 3 3))) (+ 2 2))
 
 
+ - Simple idea about local variable elimination:
+
+ http://www.pvk.ca/Blog/2012/02/19/fixed-points-and-strike-mandates/
+
  - make *trace-level* a command-line parameter
 
  - Error handling
