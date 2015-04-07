@@ -1612,9 +1612,7 @@
                 ,@(let ((k (gensym 'k))
                         (r (gensym 'r)))
                    (cps (car (define->exp ast)) 'unused))))
-            (cps ast
-               (let ((r (gensym 'r)))
-                   `(lambda (,r) (%halt ,r)))))))
+            (cps ast '%halt))))
     ast-cps))
 
 ;; Closure-conversion.
