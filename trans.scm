@@ -1554,7 +1554,10 @@
 
           ((app? ast)
            (let ((fn (app->fun ast)))
-             (if (lambda? fn)
+             (cond
+              ;((literal-app? ast)
+              ; (cps (apply (car ast) (cdr ast)) cont-ast))
+              ((lambda? fn)
                  (cps-list (app->args ast)
                            (lambda (vals)
                              (cons (list
@@ -1562,12 +1565,13 @@
                                      (lambda->formals fn)
                                      (cps-seq (cddr fn) ;(ast-subx fn)
                                                     cont-ast))
-                                    vals)))
+                                    vals))))
+              (else
                  (cps-list ast ;(ast-subx ast)
                            (lambda (args)
                               (cons (car args)
                                     (cons cont-ast
-                                          (cdr args))))))))
+                                          (cdr args)))))))))
 
           (else
            (error "unknown ast" ast))))
@@ -1614,6 +1618,21 @@
                    (cps (car (define->exp ast)) 'unused))))
             (cps ast '%halt))))
     ast-cps))
+
+(define (literal-app? ast)
+  (and 
+    (pair? ast)
+    (prim? (car ast))
+    (not (equal? 'apply (car ast))) ;; Cannot always exec at compile time
+    (call/cc
+      (lambda (return)
+        (for-each
+          (lambda (expr)
+            (if (not (const? expr))
+              (return #f)))
+          (cdr ast))
+        #t))))
+
 
 ;; Closure-conversion.
 ;;
