@@ -747,6 +747,44 @@
      write
      display))
 
+;; Is a primitive being applied in such a way that it can be
+;; evaluated at compile time?
+(define (precompute-prim-app? ast)
+  (and 
+    (pair? ast)
+    (prim? (car ast))
+    ;; Does not make sense to precompute these
+    (not (member (car ast)
+                '(Cyc-global-vars
+                  Cyc-get-cvar
+                  Cyc-set-cvar!
+                  Cyc-cvar?
+                  apply
+                  %halt
+                  exit
+                  Cyc-default-exception-handler
+                  cell-get
+                  set-global!
+                  set-cell!
+                  cell
+                  set-car!
+                  set-cdr!
+                  current-input-port
+                  open-input-file
+                  close-input-port
+                  read-char
+                  peek-char
+                  write
+                  display)))
+    (call/cc
+      (lambda (return)
+        (for-each
+          (lambda (expr)
+            (if (not (const? expr))
+              (return #f)))
+          (cdr ast))
+        #t))))
+
 (define (prim-call? exp)
   (and (list? exp) (prim? (car exp))))
 
@@ -1388,9 +1426,16 @@
           `(if ,@(map (lambda (a) (convert a renamed)) (cdr ast)))
           (convert (append ast '(#f)) renamed)))
       ((prim-call? ast)
-       (cons (car ast) (map 
-                         (lambda (a) (convert a renamed))
-                         (cdr ast))))
+       (let ((converted
+               (cons (car ast) 
+                     (map (lambda (a) (convert a renamed))
+                          (cdr ast)))))
+         ;; TODO: want to enable this, but requires adding stuff to the
+         ;; runtime, such as floating point numbers
+         ;;
+         ;(if (precompute-prim-app? converted)
+         ;  (eval converted) ;; Evaluate now, if possible
+           converted));)
       ((lambda? ast)
        (let* ((args (lambda-formals->list ast))
               (ltype (lambda-formals-type ast))
@@ -1555,8 +1600,6 @@
           ((app? ast)
            (let ((fn (app->fun ast)))
              (cond
-              ;((literal-app? ast)
-              ; (cps (apply (car ast) (cdr ast)) cont-ast))
               ((lambda? fn)
                  (cps-list (app->args ast)
                            (lambda (vals)
@@ -1618,20 +1661,6 @@
                    (cps (car (define->exp ast)) 'unused))))
             (cps ast '%halt))))
     ast-cps))
-
-(define (literal-app? ast)
-  (and 
-    (pair? ast)
-    (prim? (car ast))
-    (not (equal? 'apply (car ast))) ;; Cannot always exec at compile time
-    (call/cc
-      (lambda (return)
-        (for-each
-          (lambda (expr)
-            (if (not (const? expr))
-              (return #f)))
-          (cdr ast))
-        #t))))
 
 
 ;; Closure-conversion.
