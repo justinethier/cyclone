@@ -1,7 +1,12 @@
-((lambda (x)
-  ((lambda ()
-    ((lambda (z)
-      (+ x z)) 2)))) 1)
+;((lambda (x)
+;  ((lambda ()
+;    ((lambda (z)
+;      (+ x z)) 2));))
+; 1)
+;((lambda (x y z) (+ x y)) 1 2 3)
+
+((lambda () (+ 1 2)))
+
 ;;; Temporary testing, delete this once it works
 ; Need to rewrite the code to use this, and preserve the global def
 ;(define (test)
