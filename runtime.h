@@ -615,9 +615,14 @@ static integer_type Cyc_length(object l){
 
 static string_type Cyc_number2string(object n) {
     char buffer[1024];
-    int num = ((integer_type *) n)->value;
-    
-    snprintf(buffer, 1024, "%d", num);
+    snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
+    //TODO: if (type_of(n) == integer_tag) {
+    //TODO:     snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
+    //TODO: } else if (type_of(n) == double_tag) {
+    //TODO:     snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
+    //TODO: } else {
+    //TODO:     buffer[0] = '\0'; // TODO: throw error instead
+    //TODO: }
     make_string(str, buffer);
     return str;
 }
