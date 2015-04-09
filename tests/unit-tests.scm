@@ -158,7 +158,7 @@
 (assert:equal "" (string->number "0") 0)
 (assert:equal "" (string->number "42") 42)
 ;(assert:equal "" (string->number "343243243232") ;; Note no bignum support
-(assert:equal "" (string->number "3.14159") 3) ;; Currently no float support
+(assert:equal "" (string->number "3.14159") 3.14159)
 (assert:equal "" (list->string (list #\A #\B #\C)) "ABC")
 (assert:equal "" (list->string (list #\A)) "A")
 (assert:equal "" (list->string (list)) "") 

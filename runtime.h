@@ -86,6 +86,8 @@ static object Cyc_is_boolean(object o);
 static object Cyc_is_cons(object o);
 static object Cyc_is_null(object o);
 static object Cyc_is_number(object o);
+static object Cyc_is_real(object o);
+static object Cyc_is_integer(object o);
 static object Cyc_is_symbol(object o);
 static object Cyc_is_string(object o);
 static object Cyc_is_char(object o);
@@ -528,6 +530,16 @@ static object Cyc_is_number(object o){
         return boolean_t;
     return boolean_f;}
 
+static object Cyc_is_real(object o){
+    if (!nullp(o) && !is_value_type(o) && type_of(o) == double_tag)
+        return boolean_t;
+    return boolean_f;}
+
+static object Cyc_is_integer(object o){
+    if (!nullp(o) && !is_value_type(o) && type_of(o) == integer_tag)
+        return boolean_t;
+    return boolean_f;}
+
 static object Cyc_is_symbol(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == symbol_tag)
         return boolean_t;
@@ -927,6 +939,10 @@ static void _eof_91object_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_eof_object(car(args))); }
 static void _number_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_number(car(args))); }
+static void _real_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_real(car(args))); }
+static void _integer_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_integer(car(args))); }
 static void _pair_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_cons(car(args))); }
 static void _procedure_127(object cont, object args) {
@@ -1122,6 +1138,8 @@ defprimitive(char_127, char?, &_char_127); /* char? */
 defprimitive(eof_91object_127, eof-object?, &_eof_91object_127); /* eof-object? */
 defprimitive(null_127, null?, &_null_127); /* null? */
 defprimitive(number_127, number?, &_number_127); /* number? */
+defprimitive(real_127, real?, &_real_127); /* real? */
+defprimitive(integer_127, integer?, &_integer_127); /* integer? */
 defprimitive(pair_127, pair?, &_pair_127); /* pair? */
 defprimitive(procedure_127, procedure?, &_procedure_127); /* procedure? */
 defprimitive(string_127, string?, &_string_127); /* string? */

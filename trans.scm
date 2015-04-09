@@ -511,6 +511,7 @@
 ; const? : exp -> boolean
 (define (const? exp)
   (or (integer? exp)
+      (real? exp)
       (string? exp)
       (char? exp)
       (boolean? exp)))
@@ -735,6 +736,8 @@
      eof-object?
      null?
      number?
+     real?
+     integer?
      pair?
      procedure?
      string?

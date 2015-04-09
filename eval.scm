@@ -263,6 +263,8 @@
       (list 'eof-object? eof-object?)
       (list 'null? null?)
       (list 'number? number?)
+      (list 'real? real?)
+      (list 'integer? integer?)
       (list 'pair? pair?)
       (list 'procedure? procedure?)
       (list 'string? string?)

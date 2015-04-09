@@ -468,6 +468,8 @@
      ((eq? p 'char?)         "Cyc_is_char")
      ((eq? p 'null?)         "Cyc_is_null")
      ((eq? p 'number?)       "Cyc_is_number")
+     ((eq? p 'real?)         "Cyc_is_real")
+     ((eq? p 'integer?)      "Cyc_is_integer")
      ((eq? p 'pair?)         "Cyc_is_cons")
      ((eq? p 'procedure?)    "Cyc_is_procedure")
      ((eq? p 'string?)       "Cyc_is_string")
