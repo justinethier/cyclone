@@ -545,7 +545,7 @@
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
-    ((eq? p 'string->number) "integer_type")
+    ((eq? p 'string->number) "common_type")
     ((eq? p 'list->string) "string_type")
 ;    ((eq? p 'string->list) "object")
     ((eq? p 'string-append) "string_type")

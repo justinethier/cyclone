@@ -660,14 +660,16 @@ static void __string2list(const char *str, cons_type *buf, int buflen){
     }
 }
 
-static integer_type Cyc_string2number(object str){
+static common_type Cyc_string2number(object str){
+    common_type result;
     make_int(n, 0);
     if (type_of(str) == string_tag &&
         ((string_type *) str)->str){
         // TODO: not good enough long-term since it doesn't parse floats
         n.value = atoi(((string_type *) str)->str);
     }
-    return n;
+    result.integer_t = n;
+    return result;
 }
 
 static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
@@ -975,7 +977,7 @@ static void _char_91_125integer(object cont, object args) {
 static void _integer_91_125char(object cont, object args) {  
     return_funcall1(cont, Cyc_integer2char(car(args)));}
 static void _string_91_125number(object cont, object args) {  
-    integer_type i = Cyc_string2number(car(args));
+    common_type i = Cyc_string2number(car(args));
     return_funcall1(cont, &i);}
 //static void _error(object cont, object args) {
 //    integer_type argc = Cyc_length(args);
@@ -1121,16 +1123,6 @@ defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
 defprimitive(write, write, &_write); /* write */
 defprimitive(display, display, &_display); /* display */
 /* -------------------------------------------- */
-
-/* All constant-size objects */
-typedef union {
-  cons_type cons_t;
-  symbol_type symbol_t;
-  primitive_type primitive_t;
-  integer_type integer_t;
-  double_type double_t;
-  string_type string_t;
-} common_type;
 
 /*
  *

@@ -268,5 +268,14 @@ void dispatch(int argc, function_type func, object clo, object cont, object args
 void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
 void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
+/* All constant-size objects */
+typedef union {
+  cons_type cons_t;
+  symbol_type symbol_t;
+  primitive_type primitive_t;
+  integer_type integer_t;
+  double_type double_t;
+  string_type string_t;
+} common_type;
 
 #endif /* CYCLONE_H */
