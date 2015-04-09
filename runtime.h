@@ -523,7 +523,8 @@ static object Cyc_is_null(object o){
     return boolean_f;}
 
 static object Cyc_is_number(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == integer_tag)
+    if (!nullp(o) && !is_value_type(o) && 
+        (type_of(o) == integer_tag || type_of(o) == double_tag))
         return boolean_t;
     return boolean_f;}
 
@@ -1301,6 +1302,12 @@ static char *transport(x, gcgen) char *x; int gcgen;
        forward(x) = nx; type_of(x) = forward_tag;
        x = (char *) nx; allocp = ((char *) nx)+sizeof(integer_type);
        return (char *) nx;}
+    case double_tag:
+      {register double_type *nx = (double_type *) allocp;
+       type_of(nx) = double_tag; nx->value = ((double_type *) x)->value;
+       forward(x) = nx; type_of(x) = forward_tag;
+       x = (char *) nx; allocp = ((char *) nx)+sizeof(double_type);
+       return (char *) nx;}
     case port_tag:
       {register port_type *nx = (port_type *) allocp;
        type_of(nx) = port_tag; nx->fp = ((port_type *) x)->fp;
@@ -1472,6 +1479,11 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
  printf("DEBUG transport integer \n");
 #endif
         scanp += sizeof(integer_type); break;
+      case double_tag:
+#if DEBUG_GC
+ printf("DEBUG transport double \n");
+#endif
+        scanp += sizeof(double_type); break;
       case port_tag:
 #if DEBUG_GC
  printf("DEBUG transport port \n");
