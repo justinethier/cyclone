@@ -1,5 +1,11 @@
 Working TODO list:
 
+ - Reduction in size of generated code
+   is there anything we can do?
+   are closures being packed/unpacked unnecessarily?
+
+   right now, bundling this with below and attempting to optimize CPS conversion process to generate less code
+
  - Compiler efficiency
 
  Is there a more efficient way to CPS convert expressions? for example, can these primitive applications be inlined, instead of creating wrapping lambdas?
@@ -22,10 +28,6 @@ Working TODO list:
   numargs all the time, especially for compiled code. but this seems like a good compromise.
 
  - Add unit tests for exception handlers, and new constructs added to lib
-
- - Reduction in size of generated code
-   is there anything we can do?
-   are closures being packed/unpacked unnecessarily?
 
  - Issues with detecting cycles:
    - (equal?) loops forever when comparing two different circular lists
