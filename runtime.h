@@ -662,13 +662,24 @@ static void __string2list(const char *str, cons_type *buf, int buflen){
 
 static common_type Cyc_string2number(object str){
     common_type result;
-    make_int(n, 0);
+    double n;
     if (type_of(str) == string_tag &&
         ((string_type *) str)->str){
-        // TODO: not good enough long-term since it doesn't parse floats
-        n.value = atoi(((string_type *) str)->str);
+        n = atof(((string_type *) str)->str);
+
+        if (ceilf(n) == n) {
+            result.integer_t.tag = integer_tag;
+            result.integer_t.value = (int)n;
+        }
+        else {
+            result.double_t.tag = double_tag;
+            result.double_t.value = n;
+        }
+    } else {
+        // TODO: not good enough because we do pointer comparisons to #f
+        //result.boolean_t = boolean_f;
     }
-    result.integer_t = n;
+
     return result;
 }
 

@@ -40,6 +40,7 @@ typedef long tag_type;
 #include <setjmp.h>
 #include <stdarg.h>
 #include <string.h>
+#include <math.h>
 
 #ifndef CLOCKS_PER_SEC
 /* gcc doesn't define this, even though ANSI requires it in <time.h>.. */
@@ -270,6 +271,7 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
 /* All constant-size objects */
 typedef union {
+  boolean_type boolean_t;
   cons_type cons_t;
   symbol_type symbol_t;
   primitive_type primitive_t;
