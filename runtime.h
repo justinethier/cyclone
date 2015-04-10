@@ -787,6 +787,26 @@ static object __halt(object obj) {
 #define __sub(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value - ((integer_type *)(y))->value);
 #define __div(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value / ((integer_type *)(y))->value);
 
+/* Brainstorming how this could work */
+static common_type Cyc_sum(object x, object y) { // TODO: varargs
+    common_type s;
+    int tx = type_of(x), ty = type_of(y);
+    s.double_t.tag = double_tag;
+    if (tx == integer_tag && ty == integer_tag) {
+        s.integer_t.tag = integer_tag;
+        s.integer_t.value = ((integer_type *)x)->value + ((integer_type *)y)->value;
+    } else if (tx == double_tag && ty == integer_tag) {
+        s.double_t.value = ((double_type *)x)->value + ((integer_type *)y)->value;
+    } else if (tx == integer_tag && ty == double_tag) {
+        s.double_t.value = ((integer_type *)x)->value + ((double_type *)y)->value;
+    } else if (tx == double_tag && ty == double_tag) {
+        s.double_t.value = ((double_type *)x)->value + ((double_type *)y)->value;
+    } else {
+        // TODO: error
+    }
+    return s;
+}
+
 /* I/O functions */
 
 static port_type Cyc_io_current_input_port() {
