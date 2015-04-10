@@ -351,13 +351,6 @@
      (c-code "nil"))
     ((pair? exp)
      (c-compile-scalars exp))
-    ((real? exp)
-      (let ((cvar-name (mangle (gensym 'c))))
-        (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
-            (list     ; Allocate on the C stack
-              (string-append 
-                "make_double(" cvar-name ", " (number->string exp) ");")))))
     ((integer? exp) 
       (let ((cvar-name (mangle (gensym 'c))))
         (c-code/vars
@@ -365,6 +358,13 @@
             (list     ; Allocate integer on the C stack
               (string-append 
                 "make_int(" cvar-name ", " (number->string exp) ");")))))
+    ((real? exp)
+      (let ((cvar-name (mangle (gensym 'c))))
+        (c-code/vars
+            (string-append "&" cvar-name) ; Code is just the variable name
+            (list     ; Allocate on the C stack
+              (string-append 
+                "make_double(" cvar-name ", " (number->string exp) ");")))))
     ((boolean? exp) 
       (c-code (string-append
                 (if exp "boolean_t" "boolean_f"))))

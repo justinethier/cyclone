@@ -531,9 +531,7 @@ static object Cyc_is_number(object o){
     return boolean_f;}
 
 static object Cyc_is_real(object o){
-    if (!nullp(o) && !is_value_type(o) && type_of(o) == double_tag)
-        return boolean_t;
-    return boolean_f;}
+    return Cyc_is_number(o);}
 
 static object Cyc_is_integer(object o){
     if (!nullp(o) && !is_value_type(o) && type_of(o) == integer_tag)
@@ -615,14 +613,13 @@ static integer_type Cyc_length(object l){
 
 static string_type Cyc_number2string(object n) {
     char buffer[1024];
-    snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
-    //TODO: if (type_of(n) == integer_tag) {
-    //TODO:     snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
-    //TODO: } else if (type_of(n) == double_tag) {
-    //TODO:     snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
-    //TODO: } else {
-    //TODO:     buffer[0] = '\0'; // TODO: throw error instead
-    //TODO: }
+    if (type_of(n) == integer_tag) {
+        snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
+    } else if (type_of(n) == double_tag) {
+        snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
+    } else {
+        buffer[0] = '\0'; // TODO: throw error instead
+    }
     make_string(str, buffer);
     return str;
 }
