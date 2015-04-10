@@ -1,7 +1,5 @@
 Working TODO list:
 
- - icyc was broken somehow. not quite sure how this happened???
-
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
