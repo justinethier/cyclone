@@ -80,6 +80,7 @@ static string_type Cyc_string_append_va_list(int, object, va_list);
 //static object Cyc_error_va(int count, object obj1, va_list ap);
 static list mcons(object,object);
 static object terpri(void);
+//object Cyc_raise(object);
 static object Cyc_display(object);
 static object Cyc_write(object);
 static object Cyc_is_boolean(object o);
@@ -200,6 +201,24 @@ static object Cyc_default_exception_handler(int argc, closure _, object err) {
     exit(1);
     return nil;
 }
+
+/* Provide the ability to raise an exception from the C runtime. 
+   Other runtime functions should call this as needed
+   
+   TODO: consolidate this with (raise) in trans.scm ????
+ * /
+TODO:
+object Cyc_raise(object err) {
+    // TODO: probably best to re-arrange things to not rely on a global here
+    object ehs = (object) __glo__85exception_91handler_91stack_85;
+    if (boolean_f == ehs) {
+        Cyc_default_exception_handler(1, (closure)err, err);
+    } else {
+        // TODO: call into just like (raise) car(ehs)
+    }
+    return nil;
+} */
+
 /* END exception handler */
 
 /* Global variables. */
