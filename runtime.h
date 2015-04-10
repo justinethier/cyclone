@@ -94,6 +94,7 @@ static object Cyc_is_char(object o);
 static object Cyc_is_procedure(object o);
 static object Cyc_is_eof_object(object o);
 static object Cyc_is_cvar(object o);
+static common_type Cyc_sum(object x, object y);
 static int equal(object,object);
 static list assq(object,list);
 static object get(object,object);
@@ -782,7 +783,6 @@ static object __halt(object obj) {
     return nil;
 }
 
-#define __sum(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value + ((integer_type *)(y))->value);
 #define __mul(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value * ((integer_type *)(y))->value);
 #define __sub(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value - ((integer_type *)(y))->value);
 #define __div(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value / ((integer_type *)(y))->value);
@@ -939,8 +939,8 @@ static void _set_91cdr_67(object cont, object args) {
 static void _Cyc_91has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
 static void __87(object cont, object args) {
-    __sum(i, car(args), cadr(args));
-    return_funcall1(cont, &i); }
+    common_type n = Cyc_sum(car(args), cadr(args));
+    return_funcall1(cont, &n); }
 static void __91(object cont, object args) {
     __sub(i, car(args), cadr(args));
     return_funcall1(cont, &i); }
