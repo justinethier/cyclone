@@ -18,6 +18,9 @@ Working TODO list:
 
  http://www.pvk.ca/Blog/2012/02/19/fixed-points-and-strike-mandates/
 
+ - need an error() function that will call (error) from the C runtime
+   useful for, EG, type checking
+
  - make *trace-level* a command-line parameter
 
  - Error handling
