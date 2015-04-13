@@ -393,6 +393,8 @@
   (string-append "\"" (cstr:escape-chars str) "\""))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Primitives
+
 (define (prim->c-func p)
   (cond
      ((eq? p 'Cyc-global-vars)       "Cyc_get_global_variables")
@@ -490,6 +492,43 @@
      (else
        (error "unhandled primitive: " p))))
 
+;; Determine if primitive assigns (allocates) a C variable
+;; EG: int v = prim();
+(define (prim/c-var-assign p)
+  (cond
+    ((eq? p 'current-input-port) "port_type")
+    ((eq? p 'open-input-file) "port_type")
+    ((eq? p 'length) "integer_type")
+    ((eq? p 'char->integer) "integer_type")
+    ((eq? p '+) "common_type")
+    ((eq? p 'string->number) "common_type")
+    ((eq? p 'list->string) "string_type")
+;    ((eq? p 'string->list) "object")
+    ((eq? p 'string-append) "string_type")
+    ((eq? p 'symbol->string) "string_type")
+    ((eq? p 'number->string) "string_type")
+    ((eq? p 'apply)  "object")
+    (else #f)))
+
+;; Determine if primitive creates a C variable
+(define (prim/cvar? exp)
+    (and (prim? exp)
+         (member exp '(
+             current-input-port open-input-file
+             char->integer string->number string-append list->string string->list
+             symbol->string number->string
+             + - * / apply cons length cell))))
+
+;; Pass an integer arg count as the function's first parameter?
+(define (prim:arg-count? exp)
+    (and (prim? exp)
+         (member exp '(error string-append))))
+
+;; Does primitive allocate an object?
+(define (prim:allocates-object? exp)
+    (and  (prim? exp)
+          (member exp '(string->list))))
+
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
   (let* ((c-func (prim->c-func p))
@@ -545,43 +584,6 @@
                 (string-append c-func "(" cv-name)))))
      (else
         (c-code (string-append c-func "("))))))
-
-;; Determine if primitive assigns (allocates) a C variable
-;; EG: int v = prim();
-(define (prim/c-var-assign p)
-  (cond
-    ((eq? p 'current-input-port) "port_type")
-    ((eq? p 'open-input-file) "port_type")
-    ((eq? p 'length) "integer_type")
-    ((eq? p 'char->integer) "integer_type")
-    ((eq? p '+) "common_type")
-    ((eq? p 'string->number) "common_type")
-    ((eq? p 'list->string) "string_type")
-;    ((eq? p 'string->list) "object")
-    ((eq? p 'string-append) "string_type")
-    ((eq? p 'symbol->string) "string_type")
-    ((eq? p 'number->string) "string_type")
-    ((eq? p 'apply)  "object")
-    (else #f)))
-
-;; Primitive creates a C variable
-(define (prim/cvar? exp)
-    (and (prim? exp)
-         (member exp '(
-             current-input-port open-input-file
-             char->integer string->number string-append list->string string->list
-             symbol->string number->string
-             + - * / apply cons length cell))))
-
-;; Need to pass an integer arg count as the function's first parameter
-(define (prim:arg-count? exp)
-    (and (prim? exp)
-         (member exp '(error string-append))))
-
-;; Primitive allocates an object
-(define (prim:allocates-object? exp)
-    (and  (prim? exp)
-          (member exp '(string->list))))
 
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
