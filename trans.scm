@@ -772,6 +772,9 @@
                   cell
                   set-car!
                   set-cdr!
+                  string->symbol ;; Could be mistaken for an identifier
+                  string->list ;; Mistaken for function call (maybe OK if it was quoted, though). same for above?
+                  ;; I/O must be done at runtime for side effects:
                   current-input-port
                   open-input-file
                   close-input-port
@@ -1433,12 +1436,9 @@
                (cons (car ast) 
                      (map (lambda (a) (convert a renamed))
                           (cdr ast)))))
-         ;; TODO: want to enable this, but requires adding stuff to the
-         ;; runtime, such as floating point numbers
-         ;;
-         ;(if (precompute-prim-app? converted)
-         ;  (eval converted) ;; Evaluate now, if possible
-           converted));)
+         (if (precompute-prim-app? converted)
+           (eval converted) ;; OK, evaluate at compile time
+           converted)))
       ((lambda? ast)
        (let* ((args (lambda-formals->list ast))
               (ltype (lambda-formals-type ast))
