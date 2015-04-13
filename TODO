@@ -1,5 +1,9 @@
 Working TODO list:
 
+ - Fixup Cyc_sum to use varargs and call (error) if anything bad happens. then generalize to - * /
+ - need an error() function that will call (error) from the C runtime
+   useful for, EG, type checking
+ - make *trace-level* a command-line parameter, and by default do not emit scheme code transformations in comments
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
@@ -13,15 +17,12 @@ Working TODO list:
 #;10> (cps-convert '(+ 1 (+ 2 2) (+ 3 3)))
  ((lambda (r$632) ((lambda (r$633) (%halt (+ 1 r$632 r$633))) (+ 3 3))) (+ 2 2))
 
+ yes, but what can we do when a function is applied to more than just literals? are there still opportunities for optimization?
+ may need to look through icyc.c for examples
 
  - Simple idea about local variable elimination:
 
  http://www.pvk.ca/Blog/2012/02/19/fixed-points-and-strike-mandates/
-
- - need an error() function that will call (error) from the C runtime
-   useful for, EG, type checking
-
- - make *trace-level* a command-line parameter
 
  - Error handling
    need to perform much more error handling of input code. one of the biggest is to report if a function is passed the wrong number of arguments, as this will result in segfauls, bad transport errors, etc downstream if it is allowed.
