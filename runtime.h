@@ -1026,10 +1026,11 @@ static void _set_91cdr_67(object cont, object args) {
 static void _Cyc_91has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
 static void __87(object cont, object args) {
-    common_type n = Cyc_sum(car(args), cadr(args));
-    return_funcall1(cont, &n); }
-//    integer_type argc = Cyc_length(args);
-//    dispatch(argc.value, (function_type)dispatch_sum, cont, cont, args); }
+//    common_type n = Cyc_sum(car(args), cadr(args));
+//    return_funcall1(cont, &n); }
+// TODO: re-enable this to get varargs sum in eval:
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_sum, cont, cont, args); }
 static void __91(object cont, object args) {
     __sub(i, car(args), cadr(args));
     return_funcall1(cont, &i); }
@@ -1502,9 +1503,9 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
     dhalloc_end = dhallocp + global_heap_size - 8;
  }
 
-#if DEBUG_GC
+//#if DEBUG_GC
  printf("\n=== started GC type = %d === \n", major);
-#endif
+//#endif
  /* Transport GC's continuation and its argument. */
  transp(cont);
  gc_cont = cont;
@@ -1731,9 +1732,9 @@ static void main_main (stack_size,heap_size,stack_base)
 
   /* Tank, load the jump program... */
   setjmp(jmp_main);
-#if DEBUG_GC
+//#if DEBUG_GC
   printf("Done with GC\n");
-#endif
+//#endif
   do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
 
   /*                                                                      */
