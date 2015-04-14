@@ -402,7 +402,7 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
-     ((eq? p '+)                     "Cyc_sum")
+     ((eq? p '+)                     "Cyc_sum_va")
      ((eq? p '-)                     "__sub")
      ((eq? p '*)                     "__mul")
      ((eq? p '/)                     "__div")
@@ -522,7 +522,7 @@
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
     (and (prim? exp)
-         (member exp '(error string-append))))
+         (member exp '(error string-append +))))
 
 ;; Does primitive allocate an object?
 (define (prim:allocates-object? exp)

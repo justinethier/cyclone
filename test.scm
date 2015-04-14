@@ -6,7 +6,11 @@
 ; 1)
 ;((lambda (x y z) (+ x y)) 1 2 3)
 
+(define x 1)
+(define y 2)
+(write (+ x y 3.3))
 ((lambda () (+ 1 2)))
+(+ x 2 3 4 1 34 2 5 2 -2 2 -10)
 
 ;;; Temporary testing, delete this once it works
 ; Need to rewrite the code to use this, and preserve the global def
