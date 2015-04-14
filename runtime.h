@@ -96,6 +96,8 @@ static object Cyc_is_procedure(object o);
 static object Cyc_is_eof_object(object o);
 static object Cyc_is_cvar(object o);
 static common_type Cyc_sum(object x, object y);
+//static common_type Cyc_sum_va(int argc, object n, ...);
+//static common_type Cyc_sum_va_list(int argc, object n, va_list ns);
 static int equal(object,object);
 static list assq(object,list);
 static object get(object,object);
@@ -718,17 +720,19 @@ static common_type Cyc_string2number(object str){
 }
 
 static void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
+    string_type result;
     va_list ap;
     va_start(ap, str1);
-    string_type result = Cyc_string_append_va_list(argc - 1, str1, ap);
+    result = Cyc_string_append_va_list(argc - 1, str1, ap);
     va_end(ap);
     return_funcall1(cont, &result);
 }
 
 static string_type Cyc_string_append(int argc, object str1, ...) {
+    string_type result;
     va_list ap;
     va_start(ap, str1);
-    string_type result = Cyc_string_append_va_list(argc, str1, ap);
+    result = Cyc_string_append_va_list(argc, str1, ap);
     va_end(ap);
     return result;
 }
@@ -825,6 +829,42 @@ static common_type Cyc_sum(object x, object y) { // TODO: varargs
     }
     return s;
 }
+/*
+static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
+  common_type acc;
+  common_type sum;
+  object tmp;
+  int i;
+  if (argc == 0) {
+    sum.integer_t.tag = integer_tag;
+    sum.integer_t.value = 0;
+    return sum;
+  }
+
+  if (type_of(n) == integer_tag) {
+    sum.integer_t.tag = integer_tag;
+    sum.integer_t.value = ((integer_type *)n)->value;
+  } else {
+    sum.double_t.tag = double_tag;
+    sum.double_t.value = ((double_type *)n)->value;
+  }
+
+  for (i = 1; i < argc; i++) {
+    tmp = va_arg(ns, object);
+    sum = Cyc_sum(&sum, tmp);
+  }
+
+  return sum;
+}
+
+static common_type Cyc_sum_va(int argc, object n, ...) {
+    va_list ap;
+    va_start(ap, n);
+    common_type result = Cyc_sum_va_list(argc, n, ap);
+    va_end(ap);
+    return result;
+}
+*/
 
 /* I/O functions */
 
