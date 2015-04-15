@@ -3,6 +3,14 @@ Working TODO list:
  - Fixup Cyc_sum to use varargs and call (error) if anything bad happens. then generalize to - * /
  - need an error() function that will call (error) from the C runtime
    useful for, EG, type checking
+   
+   notes:
+   can assume presence of *exception-handler-stack* global, at least for now
+   move Cyc-current-exception-handler to a runtime function, then can
+   (I think) rewrite raise to be one as well. Then should be able to call
+   into a common exception function in runtime that will in turn just
+   call raise (or just call it directly)
+
  - make *trace-level* a command-line parameter, and by default do not emit scheme code transformations in comments
  - Reduction in size of generated code
    is there anything we can do?
