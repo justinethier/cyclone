@@ -93,7 +93,7 @@ static object Cyc_is_eof_object(object o);
 static object Cyc_is_cvar(object o);
 static common_type Cyc_sum_op(object x, object y);
 static common_type Cyc_sum(int argc, object n, ...);
-static common_type Cyc_sum_va_list(int argc, object n, va_list ns);
+static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns);
 static int equal(object,object);
 static list assq(object,list);
 static object get(object,object);
@@ -827,7 +827,7 @@ static common_type Cyc_sum_op(object x, object y) {
     return s;
 }
 
-static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
+static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns) {
   common_type sum;
   int i;
   if (argc == 0) {
@@ -848,7 +848,7 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
   }
 
   for (i = 1; i < argc; i++) {
-    common_type result = Cyc_sum_op(&sum, va_arg(ns, object));
+    common_type result = fn_op(&sum, va_arg(ns, object));
     if (type_of(&result) == integer_tag) {
         sum.integer_t.tag = integer_tag;
         sum.integer_t.value = ((integer_type *) &result)->value;
@@ -856,7 +856,7 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
-        printf("Invalid tag in Cyc_sum_va_list\n");
+        printf("Invalid tag in Cyc_num_op_va_list\n");
         exit(1);
     }
   }
@@ -867,16 +867,15 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
 static common_type Cyc_sum(int argc, object n, ...) {
     va_list ap;
     va_start(ap, n);
-    common_type result = Cyc_sum_va_list(argc, n, ap);
+    common_type result = Cyc_num_op_va_list(argc, Cyc_sum_op, n, ap);
     va_end(ap);
     return result;
 }
 
-// TODO: (+ 1 2 3 4 1 34 2 5 2 -2 2 -10)
 static void dispatch_sum(int argc, object clo, object cont, object n, ...) {
     va_list ap;
     va_start(ap, n);
-    common_type result = Cyc_sum_va_list(argc - 1, n, ap);
+    common_type result = Cyc_num_op_va_list(argc - 1, Cyc_sum_op, n, ap);
     va_end(ap);
     return_funcall1(cont, &result);
 }
