@@ -91,8 +91,8 @@ static object Cyc_is_char(object o);
 static object Cyc_is_procedure(object o);
 static object Cyc_is_eof_object(object o);
 static object Cyc_is_cvar(object o);
-static common_type Cyc_sum(object x, object y);
-static common_type Cyc_sum_va(int argc, object n, ...);
+static common_type Cyc_sum_op(object x, object y);
+static common_type Cyc_sum(int argc, object n, ...);
 static common_type Cyc_sum_va_list(int argc, object n, va_list ns);
 static int equal(object,object);
 static list assq(object,list);
@@ -806,7 +806,7 @@ static object __halt(object obj) {
 #define __sub(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value - ((integer_type *)(y))->value);
 #define __div(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value / ((integer_type *)(y))->value);
 
-static common_type Cyc_sum(object x, object y) {
+static common_type Cyc_sum_op(object x, object y) {
     common_type s;
     int tx = type_of(x), ty = type_of(y);
     s.double_t.tag = double_tag;
@@ -848,7 +848,7 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
   }
 
   for (i = 1; i < argc; i++) {
-    common_type result = Cyc_sum(&sum, va_arg(ns, object));
+    common_type result = Cyc_sum_op(&sum, va_arg(ns, object));
     if (type_of(&result) == integer_tag) {
         sum.integer_t.tag = integer_tag;
         sum.integer_t.value = ((integer_type *) &result)->value;
@@ -864,7 +864,7 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
   return sum;
 }
 
-static common_type Cyc_sum_va(int argc, object n, ...) {
+static common_type Cyc_sum(int argc, object n, ...) {
     va_list ap;
     va_start(ap, n);
     common_type result = Cyc_sum_va_list(argc, n, ap);

@@ -402,7 +402,7 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
-     ((eq? p '+)                     "Cyc_sum_va")
+     ((eq? p '+)                     "Cyc_sum")
      ((eq? p '-)                     "__sub")
      ((eq? p '*)                     "__mul")
      ((eq? p '/)                     "__div")
