@@ -861,9 +861,6 @@ static common_type Cyc_sum_va_list(int argc, object n, va_list ns) {
     }
   }
 
-    printf("sum = ");
-    Cyc_display(&sum);
-    printf("\n");
   return sum;
 }
 
@@ -872,7 +869,6 @@ static common_type Cyc_sum_va(int argc, object n, ...) {
     va_start(ap, n);
     common_type result = Cyc_sum_va_list(argc, n, ap);
     va_end(ap);
-    printf("cyc_sum_va, argc = %d\n", argc);
     return result;
 }
 
@@ -882,10 +878,6 @@ static void dispatch_sum(int argc, object clo, object cont, object n, ...) {
     va_start(ap, n);
     common_type result = Cyc_sum_va_list(argc - 1, n, ap);
     va_end(ap);
-
-    printf("argc = %d, sum result = ", argc);
-    Cyc_display(&result);
-    printf("\n");
     return_funcall1(cont, &result);
 }
 
