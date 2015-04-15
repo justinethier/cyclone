@@ -487,7 +487,7 @@
      ((eq? p 'cons)          "make_cons")
      ((eq? p 'cell)          "make_cell")
      ((eq? p 'cell-get)      "cell_get")
-     ((eq? p 'set-cell!)     "cell_set")
+     ((eq? p 'set-cell!)     "Cyc_set_car")
      ((eq? p 'set-global!)   "global_set")
      (else
        (error "unhandled primitive: " p))))

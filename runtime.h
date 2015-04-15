@@ -20,10 +20,6 @@ static const object Cyc_EOF = &__EOF;
 static object cell_get(object cell){
     return car(cell);
 }
-static object cell_set(object cell, object value){
-    ((list) cell)->cons_car = value;
-    return cell;
-}
 
 #define global_set(glo,value) (glo=value)
 
