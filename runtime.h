@@ -198,6 +198,14 @@ static object Cyc_default_exception_handler(int argc, closure _, object err) {
     printf("\n");
     exit(1);
     return nil;
+
+// TODO: need to avoid using a global here, or add a define to shadow it for libcyclone
+object Cyc_current_exception_handler() {
+  if (nil(__glo__85exception_91handler_91stack_85)) {
+    return primitive_Cyc_91default_91exception_91handler;
+  } else {
+    return __glo__85exception_91handler_91stack_85;
+  }
 }
 
 /* Provide the ability to raise an exception from the C runtime. 
@@ -1108,6 +1116,8 @@ static void _string_91_125number(object cont, object args) {
 //static void _error(object cont, object args) {
 //    integer_type argc = Cyc_length(args);
 //    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
+static void _Cyc_91current_91exception_91handler(object cont, object args) {
+    return_funcall1(cont, Cyc_current_exception_handler()); }
 static void _Cyc_91default_91exception_91handler(object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
     Cyc_default_exception_handler(1, args, car(args));
@@ -1172,6 +1182,10 @@ defprimitive(apply, apply, &_apply); /* apply */
 defprimitive(_75halt, %halt, &__75halt); /* %halt */
 defprimitive(exit, exit, &_cyc_exit); /* exit */
 //defprimitive(error, error, &_error); /* error */
+defprimitive(
+    Cyc_91current_91exception_91handler,
+    Cyc_current_exception_handler,
+    &_Cyc_91current_91exception_91handler); /* Cyc-current-exception-handler */
 defprimitive(
     Cyc_91default_91exception_91handler,
     Cyc_default_exception_handler,

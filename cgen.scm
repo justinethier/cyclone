@@ -415,6 +415,7 @@
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
      ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
+     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
      ((eq? p 'current-input-port)    "Cyc_io_current_input_port")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
      ((eq? p 'close-input-port)      "Cyc_io_close_input_port")

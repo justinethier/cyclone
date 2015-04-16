@@ -189,6 +189,8 @@
       (list 'Cyc-set-cvar! Cyc-set-cvar!)
       (list 'Cyc-cvar? Cyc-cvar?)
       (list 'Cyc-has-cycle? Cyc-has-cycle?)
+      (list 'Cyc-default-exception-handler Cyc-default-exception-handler)
+      (list 'Cyc-current-exception-handler Cyc-current-exception-handler)
       (list '+ +)
       (list '- -)
       (list '* *)

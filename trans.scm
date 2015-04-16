@@ -214,10 +214,10 @@
   (define (Cyc-remove-exception-handler)
      (if (not (null? *exception-handler-stack*))
         (set! *exception-handler-stack* (cdr *exception-handler-stack*))))
-  (define (Cyc-current-exception-handler)
-    (if (null? *exception-handler-stack*)
-      Cyc-default-exception-handler
-      (car *exception-handler-stack*)))
+;  (define (Cyc-current-exception-handler)
+;    (if (null? *exception-handler-stack*)
+;      Cyc-default-exception-handler
+;      (car *exception-handler-stack*)))
 ))
 
 ;; Built-in macros
@@ -699,6 +699,7 @@
      %halt
      exit
      Cyc-default-exception-handler
+     Cyc-current-exception-handler
      cons
      cell-get
      set-global!
@@ -766,6 +767,7 @@
                   %halt
                   exit
                   Cyc-default-exception-handler
+                  Cyc-current-exception-handler
                   cell-get
                   set-global!
                   set-cell!
