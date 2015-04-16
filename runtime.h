@@ -1236,6 +1236,9 @@ defprimitive(display, display, &_display); /* display */
 object Cyc_exception_handler_stack = nil;
 
 // Special case, use this one instead since we need it in the runtime
+// This also seems to "shadow" the corresponding C var definition, as
+// subsequent instances of it are replaced during preprocessing. Is that
+// behavior portable? If not, will have to modify cgen to not emit the var.
 #define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
 
 static object Cyc_default_exception_handler(int argc, closure _, object err) {
