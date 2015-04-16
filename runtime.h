@@ -74,9 +74,11 @@ static string_type Cyc_string_append_va_list(int, object, va_list);
 //static void dispatch_error(int argc, object clo, object cont, object obj1, ...);
 //static object Cyc_error(int count, object obj1, ...);
 //static object Cyc_error_va(int count, object obj1, va_list ap);
+//object Cyc_raise(object);
+static object Cyc_default_exception_handler(int argc, closure _, object err);
+object Cyc_current_exception_handler();
 static list mcons(object,object);
 static object terpri(void);
-//object Cyc_raise(object);
 static object Cyc_display(object);
 static object Cyc_write(object);
 static object Cyc_is_boolean(object o);
@@ -190,42 +192,6 @@ static void clear_mutations() {
   mutation_table = nil;
 }
 /* END mutation table */
-
-/* Exception handler */
-static object Cyc_default_exception_handler(int argc, closure _, object err) {
-    printf("Error: ");
-    Cyc_display(err);
-    printf("\n");
-    exit(1);
-    return nil;
-
-// TODO: need to avoid using a global here, or add a define to shadow it for libcyclone
-object Cyc_current_exception_handler() {
-  if (nil(__glo__85exception_91handler_91stack_85)) {
-    return primitive_Cyc_91default_91exception_91handler;
-  } else {
-    return __glo__85exception_91handler_91stack_85;
-  }
-}
-
-/* Provide the ability to raise an exception from the C runtime. 
-   Other runtime functions should call this as needed
-   
-   TODO: consolidate this with (raise) in trans.scm ????
- * /
-TODO:
-object Cyc_raise(object err) {
-    // TODO: probably best to re-arrange things to not rely on a global here
-    object ehs = (object) __glo__85exception_91handler_91stack_85;
-    if (boolean_f == ehs) {
-        Cyc_default_exception_handler(1, (closure)err, err);
-    } else {
-        // TODO: call into just like (raise) car(ehs)
-    }
-    return nil;
-} */
-
-/* END exception handler */
 
 /* Global variables. */
 
@@ -1265,6 +1231,48 @@ defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
 defprimitive(write, write, &_write); /* write */
 defprimitive(display, display, &_display); /* display */
 /* -------------------------------------------- */
+
+/* Exception handler */
+object Cyc_exception_handler_stack = nil;
+
+// Special case, use this one instead since we need it in the runtime
+#define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
+
+static object Cyc_default_exception_handler(int argc, closure _, object err) {
+    printf("Error: ");
+    Cyc_display(err);
+    printf("\n");
+    exit(1);
+    return nil;
+}
+
+// TODO: need to avoid using a global here, or add a define to shadow it for libcyclone
+object Cyc_current_exception_handler() {
+  if (nullp(Cyc_exception_handler_stack)) {
+    return primitive_Cyc_91default_91exception_91handler;
+  } else {
+    return car(Cyc_exception_handler_stack);
+  }
+}
+
+/* Provide the ability to raise an exception from the C runtime. 
+   Other runtime functions should call this as needed
+   
+   TODO: consolidate this with (raise) in trans.scm ????
+ * /
+TODO:
+object Cyc_raise(object err) {
+    // TODO: probably best to re-arrange things to not rely on a global here
+    object ehs = (object) __glo__85exception_91handler_91stack_85;
+    if (boolean_f == ehs) {
+        Cyc_default_exception_handler(1, (closure)err, err);
+    } else {
+        // TODO: call into just like (raise) car(ehs)
+    }
+    return nil;
+} */
+
+/* END exception handler */
 
 /*
  *
