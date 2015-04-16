@@ -77,6 +77,8 @@ static string_type Cyc_string_append_va_list(int, object, va_list);
 //object Cyc_raise(object);
 static object Cyc_default_exception_handler(int argc, closure _, object err);
 object Cyc_current_exception_handler();
+void Cyc_rt_raise(object err);
+void Cyc_rt_raise_msg(const char *err);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
@@ -794,9 +796,7 @@ static common_type Cyc_sum_op(object x, object y) {
     } else if (tx == double_tag && ty == double_tag) {
         s.double_t.value = ((double_type *)x)->value + ((double_type *)y)->value;
     } else {
-        // TODO: error
-        printf("TODO: invalid tag in Cyc_sum\n");
-        exit(1);
+        Cyc_rt_raise_msg("Bad argument type\n");
     }
     return s;
 }
@@ -817,8 +817,7 @@ static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, objec
     sum.double_t.tag = double_tag;
     sum.double_t.value = ((double_type *)n)->value;
   } else {
-      printf("Invalid tag in n\n");
-      exit(1);
+      Cyc_rt_raise_msg("Bad argument type");
   }
 
   for (i = 1; i < argc; i++) {
@@ -830,8 +829,7 @@ static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, objec
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
-        printf("Invalid tag in Cyc_num_op_va_list\n");
-        exit(1);
+        Cyc_rt_raise_msg("Invalid tag in Cyc_num_op_va_list");
     }
   }
 
@@ -1249,13 +1247,28 @@ static object Cyc_default_exception_handler(int argc, closure _, object err) {
     return nil;
 }
 
-// TODO: need to avoid using a global here, or add a define to shadow it for libcyclone
 object Cyc_current_exception_handler() {
   if (nullp(Cyc_exception_handler_stack)) {
     return primitive_Cyc_91default_91exception_91handler;
   } else {
     return car(Cyc_exception_handler_stack);
   }
+}
+
+/* Raise an exception from the runtime code */
+void Cyc_rt_raise(object err) {
+    make_cons(c2, err, nil);
+    make_cons(c1, boolean_f, &c2);
+    apply(nil, Cyc_current_exception_handler(), &c1);
+    // Should never get here
+    fprintf(stderr, "Internal error in Cyc_rt_raise\n");
+    exit(1);
+}
+void Cyc_rt_raise_msg(const char *err) {
+    printf("TODO: %s", err);
+    exit(1);
+    //make_string(s, err);
+    //Cyc_rt_raise(&s);
 }
 
 /* Provide the ability to raise an exception from the C runtime. 
