@@ -1081,7 +1081,8 @@ static void _string_91_125number(object cont, object args) {
 //    integer_type argc = Cyc_length(args);
 //    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
 static void _Cyc_91current_91exception_91handler(object cont, object args) {
-    return_funcall1(cont, Cyc_current_exception_handler()); }
+    object handler = Cyc_current_exception_handler();
+    return_funcall1(cont, handler); }
 static void _Cyc_91default_91exception_91handler(object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
     Cyc_default_exception_handler(1, args, car(args));
