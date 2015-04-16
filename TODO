@@ -28,6 +28,8 @@ Working TODO list:
  yes, but what can we do when a function is applied to more than just literals? are there still opportunities for optimization?
  may need to look through icyc.c for examples
 
+ Are there instances where full CPS is not needed, and multiple expressions can be contained within a single lambda?
+
  - Simple idea about local variable elimination:
 
  http://www.pvk.ca/Blog/2012/02/19/fixed-points-and-strike-mandates/
