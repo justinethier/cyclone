@@ -15,11 +15,13 @@
       (with-exception-handler
         (lambda (obj)
           (display "Error: ")
-          (for-each
-            (lambda (o)
-              (display o)
-              (display " "))
-            obj)
+          (display obj)
+          ; TODO: if list, do this instead:
+          ;(for-each
+          ;  (lambda (o)
+          ;    (display o)
+          ;    (display " "))
+          ;  obj)
           (display "\n")
           (k #t))
         (lambda ()
