@@ -1756,6 +1756,11 @@ static void main_main (stack_size,heap_size,stack_base)
 // 2) looks like it is crashing in parser code
 //    an over-simplification:
 //    parse => reverse => foldl => (prim cont)
+// 3) could be looking at this all wrong. we do the following in funcall:
+//        //#define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
+//   isn't it obvious we need to do the same thing after GC (called via return_funcall)? instead we just
+//   try to call the prim directly, and predictably the call fails...
+///  I think this is the solution!
 //
 //  {
 //    int i;
