@@ -10,7 +10,7 @@
 #define CYCLONE_H
 
 /* Debug GC flag */
-#define DEBUG_GC 0
+#define DEBUG_GC 1
 
 /* Show diagnostic information for the GC when program terminate */
 #define DEBUG_SHOW_DIAG 0
