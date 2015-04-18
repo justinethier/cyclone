@@ -1773,59 +1773,11 @@ static void main_main (stack_size,heap_size,stack_base)
   printf("Done with GC\n");
 #endif
 
-// TODO: received a primitive as gc_cont - WTF?
-// 1) may way to examine the closureN that is also received, to see if
-//    it yields any clues (such as it's fn)
-// 2) looks like it is crashing in parser code
-//    an over-simplification:
-//    parse => reverse => foldl => (prim cont)
-// 3) could be looking at this all wrong. we do the following in funcall:
-//        //#define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
-//   isn't it obvious we need to do the same thing after GC (called via return_funcall)? instead we just
-//   try to call the prim directly, and predictably the call fails...
-///  I think this is the solution!
-//
-//  {
-//    int i;
-//    function_type fn;
-//    if (type_of(gc_cont) == cons_tag) {
-//        // for reference:
-//        //#define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
-//        printf("after GC, not handling cons type yet\n");
-//        exit(1);
-//    } else if (prim(gc_cont)) {
-//        // this is broken anyway, as a prim does not have a continuation chain.
-//        // should never encounter a primitive after GC
-//        fn = ((primitive)gc_cont)->fn;
-//
-//        // below is not correct, just experimenting
-//        gc_cont = gc_ans[0];
-//        for (i = 1; i < gc_num_ans; i++){
-//            gc_ans[i - 1] = gc_ans[i];
-//        }
-//        gc_num_ans--;
-//    } else {
-//        fn = ((closure)gc_cont)->fn;
-//    }
-//    printf("After GC, cont = ");
-//    Cyc_display(gc_cont);
-//    printf("\n args = \n");
-//    for (i = 0; i < gc_num_ans; i++){
-//        if (is_object_type(gc_ans[i])) {
-//            printf(" tag = %d ", type_of(gc_ans[i]));
-//        }
-//        printf(" arg = ");
-//        Cyc_display(gc_ans[i]);
-//        printf("\n");
-//    }
-//    do_dispatch(gc_num_ans, fn, gc_cont, gc_ans);
-//  }
-    if (type_of(gc_cont) == cons_tag || prim(gc_cont)) {
-      printf("DEBUG, prim found after GC\n");
-      Cyc_apply_from_buf(gc_num_ans, gc_cont, gc_ans);
-    } else {
-      do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
-    }
+  if (type_of(gc_cont) == cons_tag || prim(gc_cont)) {
+    Cyc_apply_from_buf(gc_num_ans, gc_cont, gc_ans);
+  } else {
+    do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
+  }
 
   /*                                                                      */
   printf("main: your setjmp and/or longjmp are broken.\n"); exit(0);}}

@@ -1,7 +1,6 @@
 Working TODO list:
 
- - (+ 1 2 3) is only crashing on dedicated PC - WTF?
-   need to cleanup ex handler output in icyc.scm
+ - need to cleanup ex handler output in icyc.scm
    remove debug lines from runtime raise function
 
  - Fixup Cyc_sum to use varargs and call (error) if anything bad happens. then generalize to - * /
