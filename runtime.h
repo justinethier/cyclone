@@ -1359,6 +1359,29 @@ static void Cyc_apply(int argc, closure cont, object prim, ...){
 }
 // END apply
 
+/* Extract args from given array, assuming cont is the first arg in buf */
+static void Cyc_apply_from_buf(int argc, object prim, object *buf) {
+    list args;
+    object cont;
+    int i;
+
+    if (argc == 0) {
+      printf("Internal error in Cyc_apply_from_buf, argc is 0\n");
+      exit(1);
+    }
+
+    args = alloca(sizeof(cons_type) * (argc - 1));
+    cont = buf[0];
+    
+    for (i = 1; i < argc; i++) {
+        args[i - 1].tag = cons_tag;
+        args[i - 1].cons_car = buf[i];
+        args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
+    }
+
+    apply(cont, prim, (object)&args[0]);
+}
+
 static char *transport(x, gcgen) char *x; int gcgen;
 /* Transport one object.  WARNING: x cannot be nil!!! */
 {
@@ -1797,7 +1820,12 @@ static void main_main (stack_size,heap_size,stack_base)
 //    }
 //    do_dispatch(gc_num_ans, fn, gc_cont, gc_ans);
 //  }
-  do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
+    if (type_of(gc_cont) == cons_tag || prim(gc_cont)) {
+      printf("DEBUG, prim found after GC\n");
+      Cyc_apply_from_buf(gc_num_ans, gc_cont, gc_ans);
+    } else {
+      do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
+    }
 
   /*                                                                      */
   printf("main: your setjmp and/or longjmp are broken.\n"); exit(0);}}
