@@ -1258,15 +1258,9 @@ object Cyc_current_exception_handler() {
 
 /* Raise an exception from the runtime code */
 void Cyc_rt_raise(object err) {
-   //printf("DEBUG err = ");
-   //Cyc_display(err);
-   //printf("\n");
     make_cons(c2, err, nil);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-   //printf("sending to apply => ");
-   //Cyc_display(&c0);
-   //printf("\n");
     apply(nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
