@@ -1,7 +1,5 @@
 Working TODO list:
 
- - need to cleanup ex handler output in icyc.scm
-
  - Fixup Cyc_sum to use varargs and call (error) if anything bad happens. then generalize to - * /
  - need an error() function that will call (error) from the C runtime
    useful for, EG, type checking
