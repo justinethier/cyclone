@@ -1,6 +1,8 @@
 Working TODO list:
 
  - Fixup Cyc_sum to use varargs and call (error) if anything bad happens. then generalize to - * /
+   can we pass the actual arg(s) to the error function?
+
  - need an error() function that will call (error) from the C runtime
    useful for, EG, type checking
    
