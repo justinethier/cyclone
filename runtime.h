@@ -96,6 +96,9 @@ static object Cyc_is_procedure(object o);
 static object Cyc_is_eof_object(object o);
 static object Cyc_is_cvar(object o);
 static common_type Cyc_sum_op(object x, object y);
+static common_type Cyc_sub_op(object x, object y);
+static common_type Cyc_mul_op(object x, object y);
+static common_type Cyc_div_op(object x, object y);
 static common_type Cyc_sum(int argc, object n, ...);
 static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns);
 static int equal(object,object);
@@ -778,28 +781,46 @@ static object __halt(object obj) {
     return nil;
 }
 
-#define __mul(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value * ((integer_type *)(y))->value);
-#define __sub(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value - ((integer_type *)(y))->value);
-#define __div(c,x,y) integer_type c; c.tag = integer_tag; c.value = (((integer_type *)(x))->value / ((integer_type *)(y))->value);
-
-static common_type Cyc_sum_op(object x, object y) {
-    common_type s;
-    int tx = type_of(x), ty = type_of(y);
-    s.double_t.tag = double_tag;
-    if (tx == integer_tag && ty == integer_tag) {
-        s.integer_t.tag = integer_tag;
-        s.integer_t.value = ((integer_type *)x)->value + ((integer_type *)y)->value;
-    } else if (tx == double_tag && ty == integer_tag) {
-        s.double_t.value = ((double_type *)x)->value + ((integer_type *)y)->value;
-    } else if (tx == integer_tag && ty == double_tag) {
-        s.double_t.value = ((integer_type *)x)->value + ((double_type *)y)->value;
-    } else if (tx == double_tag && ty == double_tag) {
-        s.double_t.value = ((double_type *)x)->value + ((double_type *)y)->value;
-    } else {
-        Cyc_rt_raise_msg("Bad argument type\n");
-    }
-    return s;
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP) \
+static common_type FUNC_OP(object x, object y) { \
+    common_type s; \
+    int tx = type_of(x), ty = type_of(y); \
+    s.double_t.tag = double_tag; \
+    if (tx == integer_tag && ty == integer_tag) { \
+        s.integer_t.tag = integer_tag; \
+        s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
+    } else if (tx == double_tag && ty == integer_tag) { \
+        s.double_t.value = ((double_type *)x)->value OP ((integer_type *)y)->value; \
+    } else if (tx == integer_tag && ty == double_tag) { \
+        s.double_t.value = ((integer_type *)x)->value OP ((double_type *)y)->value; \
+    } else if (tx == double_tag && ty == double_tag) { \
+        s.double_t.value = ((double_type *)x)->value OP ((double_type *)y)->value; \
+    } else { \
+        Cyc_rt_raise_msg("Bad argument type\n"); \
+    } \
+    return s; \
+} \
+static common_type FUNC(int argc, object n, ...) { \
+    va_list ap; \
+    va_start(ap, n); \
+    common_type result = Cyc_num_op_va_list(argc, FUNC_OP, n, ap); \
+    va_end(ap); \
+    return result; \
+} \
+static void FUNC_APPLY(int argc, object clo, object cont, object n, ...) { \
+    va_list ap; \
+    va_start(ap, n); \
+    common_type result = Cyc_num_op_va_list(argc - 1, FUNC_OP, n, ap); \
+    va_end(ap); \
+    return_funcall1(cont, &result); \
 }
+
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *);
+// TODO: what about divide-by-zero, and casting to double when
+//       result contains a decimal component?
+declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /);
 
 static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns) {
   common_type sum;
@@ -835,23 +856,6 @@ static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, objec
 
   return sum;
 }
-
-static common_type Cyc_sum(int argc, object n, ...) {
-    va_list ap;
-    va_start(ap, n);
-    common_type result = Cyc_num_op_va_list(argc, Cyc_sum_op, n, ap);
-    va_end(ap);
-    return result;
-}
-
-static void dispatch_sum(int argc, object clo, object cont, object n, ...) {
-    va_list ap;
-    va_start(ap, n);
-    common_type result = Cyc_num_op_va_list(argc - 1, Cyc_sum_op, n, ap);
-    va_end(ap);
-    return_funcall1(cont, &result);
-}
-
 
 /* I/O functions */
 
@@ -985,21 +989,17 @@ static void _set_91cdr_67(object cont, object args) {
 static void _Cyc_91has_91cycle_127(object cont, object args) { 
     return_funcall1(cont, Cyc_has_cycle(car(args))); }
 static void __87(object cont, object args) {
-//    common_type n = Cyc_sum(car(args), cadr(args));
-//    return_funcall1(cont, &n); }
-// TODO: re-enable this to get varargs sum in eval:
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_sum, cont, cont, args); }
 static void __91(object cont, object args) {
-    __sub(i, car(args), cadr(args));
-    return_funcall1(cont, &i); }
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_sub, cont, cont, args); }
 static void __85(object cont, object args) {
-    __mul(i, car(args), cadr(args));
-    return_funcall1(cont, &i); }
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_mul, cont, cont, args); }
 static void __95(object cont, object args) {
-    // TODO: check for div by 0
-    __div(i, car(args), cadr(args));
-    return_funcall1(cont, &i); }
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_div, cont, cont, args); }
 static void _Cyc_91cvar_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_cvar(car(args))); }
 static void _boolean_127(object cont, object args) {

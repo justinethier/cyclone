@@ -403,9 +403,9 @@
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
      ((eq? p '+)                     "Cyc_sum")
-     ((eq? p '-)                     "__sub")
-     ((eq? p '*)                     "__mul")
-     ((eq? p '/)                     "__div")
+     ((eq? p '-)                     "Cyc_sub")
+     ((eq? p '*)                     "Cyc_mul")
+     ((eq? p '/)                     "Cyc_div")
      ((eq? p '=)                     "__num_eq")
      ((eq? p '>)                     "__num_gt")
      ((eq? p '<)                     "__num_lt")
@@ -502,6 +502,9 @@
     ((eq? p 'length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
     ((eq? p '+) "common_type")
+    ((eq? p '-) "common_type")
+    ((eq? p '*) "common_type")
+    ((eq? p '/) "common_type")
     ((eq? p 'string->number) "common_type")
     ((eq? p 'list->string) "string_type")
 ;    ((eq? p 'string->list) "object")
@@ -523,7 +526,7 @@
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
     (and (prim? exp)
-         (member exp '(error string-append +))))
+         (member exp '(error string-append + - * /))))
 
 ;; Does primitive allocate an object?
 (define (prim:allocates-object? exp)
