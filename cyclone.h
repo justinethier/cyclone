@@ -264,11 +264,6 @@ static const object primitive_##name = &name##_primitive
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
 #define prim_name(x) (((primitive_type *) x)->pname)
 
-
-void dispatch(int argc, function_type func, object clo, object cont, object args);
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
-void do_dispatch(int argc, function_type func, object clo, object *buffer);
-
 /* All constant-size objects */
 typedef union {
   boolean_type boolean_t;
@@ -283,5 +278,10 @@ typedef union {
 /* Function prototypes */
 void Cyc_rt_raise(object err);
 void Cyc_rt_raise_msg(const char *err);
+
+void dispatch(int argc, function_type func, object clo, object cont, object args);
+void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
+void do_dispatch(int argc, function_type func, object clo, object *buffer);
+
 
 #endif /* CYCLONE_H */
