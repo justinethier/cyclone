@@ -280,4 +280,8 @@ typedef union {
   string_type string_t;
 } common_type;
 
+/* Function prototypes */
+void Cyc_rt_raise(object err);
+void Cyc_rt_raise_msg(const char *err);
+
 #endif /* CYCLONE_H */

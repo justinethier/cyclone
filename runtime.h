@@ -77,8 +77,6 @@ static string_type Cyc_string_append_va_list(int, object, va_list);
 //object Cyc_raise(object);
 static object Cyc_default_exception_handler(int argc, closure _, object err);
 object Cyc_current_exception_handler();
-void Cyc_rt_raise(object err);
-void Cyc_rt_raise_msg(const char *err);
 static list mcons(object,object);
 static object terpri(void);
 static object Cyc_display(object);
