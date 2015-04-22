@@ -1,7 +1,5 @@
 Working TODO list:
 
- - Cyc_sum, etc: can we pass the actual arg(s) to the error function?
-
  - make *trace-level* a command-line parameter, and by default do not emit scheme code transformations in comments
  - Reduction in size of generated code
    is there anything we can do?

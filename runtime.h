@@ -797,7 +797,10 @@ static common_type FUNC_OP(object x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
         s.double_t.value = ((double_type *)x)->value OP ((double_type *)y)->value; \
     } else { \
-        Cyc_rt_raise_msg("Bad argument type\n"); \
+        make_string(s, "Bad argument type"); \
+        make_cons(c1, y, nil); \
+        make_cons(c0, &s, &c1); \
+        Cyc_rt_raise(&c0); \
     } \
     return s; \
 } \
@@ -839,7 +842,10 @@ static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, objec
     sum.double_t.tag = double_tag;
     sum.double_t.value = ((double_type *)n)->value;
   } else {
-      Cyc_rt_raise_msg("Bad argument type");
+      make_string(s, "Bad argument type");
+      make_cons(c1, n, nil);
+      make_cons(c0, &s, &c1);
+      Cyc_rt_raise(&c0);
   }
 
   for (i = 1; i < argc; i++) {
@@ -851,7 +857,7 @@ static common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, objec
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
-        Cyc_rt_raise_msg("Invalid tag in Cyc_num_op_va_list");
+        Cyc_rt_raise_msg("Internal error, invalid tag in Cyc_num_op_va_list");
     }
   }
 
