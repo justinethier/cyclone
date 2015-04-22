@@ -1041,7 +1041,7 @@ static void _cyc_exit(object cont, object args) {
     __halt(car(args));
 }
 static void __75halt(object cont, object args) {  
-    printf("not implemented\n"); exit(1); }
+    exit(0); }
 static void _cell_91get(object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 static void _set_91global_67(object cont, object args) {  
