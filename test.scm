@@ -1,3 +1,5 @@
+(define (eval2 exp . env)
+  exp)
 
 (define (test)
   (call/cc
@@ -21,8 +23,8 @@
           (repl))))))))
 (define (repl)
   (display "cyclone> ")
-  (let ((c 'done)) ;(read))))   ;; fine with this line
-  ;(let ((c (eval 'done))) ;(read)))) ;; Crashes with this line
+  ;(let ((c 'done)) ;(read))))   ;; fine with this line
+  (let ((c (eval2 'done))) ;(read)))) ;; Crashes with this line
   ;(let ((c (read)))
     (cond
       ((not (eof-object? c))
