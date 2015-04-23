@@ -1252,6 +1252,10 @@ c_73403.num_elt = 1;
 c_73403.elts = (object *)alloca(sizeof(object) * 1);
 c_73403.elts[0] = ((closureN)self_73159)->elts[0];
 
+  printf("debug(65) - ");
+  Cyc_display(((closureN)self_73159)->elts[0]);
+  printf("\n");
+
 return_funcall2(  __glo_eval2,  &c_73403, r_73105);; 
 }
 
