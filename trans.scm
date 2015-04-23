@@ -335,7 +335,7 @@
 (define *do-code-gen* #t) ; Generate C code?
 
 ;; Trace
-(define *trace-level* 4)
+(define *trace-level* 2)
 (define (trace level msg pp prefix)
     (if (>= *trace-level* level)
       (begin

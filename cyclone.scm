@@ -163,7 +163,17 @@
         (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file)))))
 
 ;; Handle command line arguments
-(let ((args (command-line-arguments))) ;; TODO: port (command-line-arguments) to husk??
+(let* ((args (command-line-arguments)) ;; TODO: port (command-line-arguments) to husk??
+       (non-opts (filter
+                   (lambda (arg) 
+                     (not (and (> (string-length arg) 1)
+                               (equal? #\- (string-ref arg 0)))))
+                   args))
+       (compile? #t))
+  (if (member "-t" args)
+      (set! *trace-level* 4)) ;; Show all trace output
+  (if (member "-d" args)
+     (set! compile? #f)) ;; Debug, do not run GCC
   (cond
     ((< (length args) 1)
      (display "cyclone: no input file")
@@ -175,8 +185,6 @@
      (display *version-banner*))
     ((member "--autogen" args)
      (autogen "autogen.out"))
-    ((member "-d" args)
-     (run-compiler args #f)) ;; Debug, do not run GCC
     (else
-      (run-compiler args #t))))
+      (run-compiler non-opts compile?))))
 

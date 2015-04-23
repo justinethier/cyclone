@@ -1,6 +1,5 @@
 Working TODO list:
 
- - make *trace-level* a command-line parameter, and by default do not emit scheme code transformations in comments
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
