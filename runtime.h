@@ -37,28 +37,27 @@ static object cell_get(object cell){
    our compiler will compute the difference between the number of required
    args and the number of provided ones, and pass the difference as 'count'
  */
-#define load_varargs(var, count) { \
-  int i; \
-  object tmp; \
-  list args = nil; \
-  va_list va; \
-  if (count > 0) { \
-    args = alloca(sizeof(cons_type)*count); \
-    va_start(va, var); \
-    for (i = 0; i < count; i++) { \
-      if (i) { \
-          tmp = va_arg(va, object); \
-      } else { \
-          tmp = var; \
+#define load_varargs(var, arg_var, count) \
+  list var = (count > 0) ? alloca(sizeof(cons_type)*count) : nil; \
+  { \
+    int i; \
+    object tmp; \
+    va_list va; \
+    if (count > 0) { \
+      va_start(va, arg_var); \
+      for (i = 0; i < count; i++) { \
+        if (i) { \
+            tmp = va_arg(va, object); \
+        } else { \
+            tmp = arg_var; \
+        } \
+        var[i].tag = cons_tag; \
+        var[i].cons_car = tmp; \
+        var[i].cons_cdr = (i == (count-1)) ? nil : &var[i + 1]; \
       } \
-      args[i].tag = cons_tag; \
-      args[i].cons_car = tmp; \
-      args[i].cons_cdr = (i == (count-1)) ? nil : &args[i + 1]; \
+      va_end(va); \
     } \
-    va_end(va); \
-  } \
-  var = args; \
-}
+  }
 
 /* Prototypes for Lisp built-in functions. */
 

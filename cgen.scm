@@ -878,7 +878,7 @@
          ((pair? (cdr formals))
           (string-append ", " (c-compile-formals (cdr formals) type)))
          ((not (equal? 'args:fixed type)) 
-          (string-append ", object " (mangle (cdr formals)) ", ..."))
+          (string-append ", object " (mangle (cdr formals)) "_raw, ..."))
          (else
           "")))))
 
@@ -925,7 +925,9 @@
                            ;  (number->string (length (lambda-formals->list exp))) ");"
                            "load_varargs(" 
                            (mangle (lambda-varargs-var exp))
-                           ", argc - " (number->string 
+                           ", "
+                           (mangle (lambda-varargs-var exp))
+                           "_raw, argc - " (number->string 
                                          (- (length (lambda-formals->list exp)) 
                                             1
                                             (if has-closure? 1 0)))
