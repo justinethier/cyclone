@@ -1529,8 +1529,41 @@ static void __lambda_43(int argc, object self_73157, object r_7381) {
   return_funcall2(  __glo_call_95cc,  ((closureN)self_73157)->elts[0], r_7381);; 
 }
 
+//static void __lambda_42(int argc, closure _,object k_7377, object exp_7316, object env_7317, ...) {
+//load_varargs(env_7317, argc - 2);
+//  return_funcall1(  k_7377,  exp_7316);; 
+//}
 static void __lambda_42(int argc, closure _,object k_7377, object exp_7316, object env_7317, ...) {
-load_varargs(env_7317, argc - 2);
+/* this illustrates the problem - since env is never passed, the
+   address happens to be assigned somewhere else in memory, which
+   just happens to be elts[0], hence why that location becomes null.
+   probably need to enhance the compiler to introduce a new var
+   rather than trying to assign to one that could potentially lead
+   to memory corruption.
+*/
+//load_varargs(env_7317, argc - 2);
+      list args = nil; 
+    {
+      int i; 
+      object tmp; 
+      va_list va; 
+      if ((argc - 2) > 0) { 
+        args = alloca(sizeof(cons_type)*(argc - 2)); 
+        va_start(va, env_7317); 
+        for (i = 0; i < (argc - 2); i++) { 
+          if (i) { 
+              tmp = va_arg(va, object); 
+          } else { 
+              tmp = env_7317; 
+          } 
+          args[i].tag = cons_tag; 
+          args[i].cons_car = tmp; 
+          args[i].cons_cdr = (i == ((argc - 2)-1)) ? nil : &args[i + 1]; 
+        } 
+        va_end(va); 
+      } 
+      env_7317 = args; 
+    }
   return_funcall1(  k_7377,  exp_7316);; 
 }
 
