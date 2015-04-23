@@ -38,7 +38,7 @@
        (write c)
        (repl:next-line))
       (else 
-        (exit 0) ;; TODO: crashes on this branch... WTF?
-        ))))
+        (display "\n")
+        (exit 0)))))
 
 (repl:next-line)
