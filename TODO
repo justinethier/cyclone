@@ -75,58 +75,19 @@ Working TODO list:
 - Parser
   ;'a'c  ;; TODO: this is still an issue, try it
 
-- in regard to native apply support for primitives
-  - do we need to create a table of primitives, like husk?
-    might allow for more efficient comparisons than the stupid string cmp's
-    that are required if we use symbols to denote primitives (which also 
-    breaks lexical scoping)
-
-- Improved symbol storage
-  as part of above, probably will need a more dynamic and accurate way to store symbols.
-  for example, how to store the + symbol, how to differentiate #t and 't etc.
-  perhaps could use a malloc'd table for this? do want the lookups to be fast - IE, integer (pointer) comparisons and NOT string comparisons (those are unacceptable for symbols)
-- Improvements to symbol handling, including printing of symbols with invalid C chars, like 'hello-world
-- Consoldate list of primitives in (prim?) and (c-compile-prim?). should also include other information such as number of args (or variable args), for error handling
+- Think about consoldating list of primitives in (prim?) and (c-compile-prim?). should also include other information such as number of args (or variable args), for error handling.
 
 - Notes on implementing variables
 
- * could maintain env's in the interpreted code, and perform operations there to lookup vars. If a lookup fails though, would have to then fall back to looking in the compiled code. The compiler would have to (only if eval is used) set aside data to allow a reference back to vars in this case. Also, this becomes tricky because a var may not even be used, so it might not be added to any closures. There may have to be special analysis done if eval is used.
- * chicken does this, obviously. could map var ==> rename (how to know?) and then look it up in a C-based symbol table 
  * lexical addressing (see chapter 5 of SICP) can be used to find a variable in recursive env's, so you can access it directly instead of having to recursively traverse environments.
-
-- Add eval support. 
-    - moving forward with meta-circular evaluator from SICP. Let's try to add more cases and code, and see how far it can be pushed.
-    - also want to try integrating it with trans somehow. IE, if eval is a free var, then add eval code to the compiled program.
-
-Original notes: Will probably also require apply, read, etc. will probably be necessary to write interpreter in CPS style - see notes. One idea - parse and compile input to scheme expressions, then call apply. could that work? should also see chapter 6 of lisp in small pieces.
-
-- Integrate debug script into cyclone, so that by passing a specific command line arg, the compiler will output results of closure-conversion, prepended with the debug contents. That way the SCM code can be debugged independently of the compiled executable.
-
-- What happens when a continuation is captured? assigned to a variable? applied?
-  Should look into this a bit using cyclone and call/cc
 
 - Implement ER-macros using eval, in scheme. with this in place, could implement basic macros using ER and replace "desugar". presumably syntax rules could be implemented this way as well, but that can wait for a later time
 - Pass port along with emit procedures, to allow the scheme code to write to an output file (IE, c file)?? Or is with-output-file good enough? unfortunately that is not in husk yet so it makes boostrapping harder
-- Add more numeric support, and doubles 
-- WRT set! support, and mutable variables:
-  - set aggressive GC, and see if there are any problems with data being lost
-    need to do this with a more complicated example, though
-- Could add other scheme library functions to the compiled prog just
-  like call/cc. alternatively could compile them into a library somewhere
-  for inclusion.
-- define - can this with with mutable variable elimination, or does it require C globals (per cboyer)? Are there special cases for top-level? If cells can be used for vars, do we need to keep track of the roots to prevent invalid GC? lots of questions here
 - Question about closures and continuations:
  Presumably every function will recieve a closure. Do we have to differentiate between continuation (which every
  function must have) and closure (which can be empty if no fv)? right now the MTA runtime combines the two by
  having an fn argument to each closure. Is that OK?
 
- FWIW, chicken passes the following to generated C funcs:
-   - number of args
-   - env (the closure from caller)
-   - continuation (function to call into)
-   - actual args
-
-- may be necessary to specify arity of functions in call to apply
 - GC - notes from: http://www.more-magic.net/posts/internals-gc.html
 
  JAE - Good notes here about mutations (use write barrier to keep track of changes, EG: vector-set!). remember changes so they can be handled properly during next GC:
