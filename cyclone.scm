@@ -82,9 +82,16 @@
       (trace:info input-program) ;pretty-print
 
       
+      ;; TODO: do not run this if eval is in play, or (better) only do opts that are safe in that case (will be much more limited)
+      ;; because of this, programs such as icyc can only be so optimized. it would be much more beneficial if modules like
+      ;; eval.scm could be compiled separately and then linked to by a program such as icyc.scm. that would save a *lot* of compile
+      ;; time. in fact, it might be more beneficial than adding these optimizations.
+      ;;
       ;; TODO: run CPS optimization (not all of these phases may apply)
       ;; phase 1 - constant folding, function-argument expansion, beta-contraction of functions called once,
-      ;;           and other "contractions"
+      ;;           and other "contractions". some of this is already done in previous phases. we will leave
+      ;;           that alone for now
+;      (set! input-program (cps-opt:contractions input-program))
       ;; phase 2 - beta expansion
       ;; phase 3 - eta reduction
       ;; phase 4 - hoisting
@@ -190,8 +197,18 @@
     ((< (length args) 1)
      (display "cyclone: no input file")
      (newline))
-    ((member "-h" args)
-     (display "TODO: display help text")
+    ((or (member "-h" args)
+         (member "--help" args))
+     (write " -t              Show intermediate trace output in generated C files")
+     (write " -d              Only generate intermediate C files, do not compile them")
+     (write " -h, --help      Display usage information")
+     (write " -v              Display version information")
+     (write " --autogen       Cyclone developer use only, create autogen.out file")
+     (newline))
+    ((member "-v" args)
+     (display *version-banner*))
+    ((member "--autogen" args)
+     (autogen "autogen.out")
      (newline))
     ((member "-v" args)
      (display *version-banner*))
