@@ -21,6 +21,26 @@
    (load "trans.scm")
    (load "cgen.scm")))
 
+;; Library section
+;; A quicky-and-dirty (for now) implementation of r7rs libraries
+;; TODO: relocate this somewhere else, once it works. Ideally
+;;       somewhere accessible to the interpreter
+(define (library? ast)
+  (tagged-list? 'define-library ast))
+(define (lib:name ast) (cadr ast))
+(define (lib:exports ast)
+  (and-let* ((code (assoc 'export (cddr l))))
+    (cdr code)))
+(define (lib:imports ast)
+  (and-let* ((code (assoc 'import (cddr l))))
+    (cdr code)))
+(define (lib:body ast)
+  (and-let* ((code (assoc 'begin (cddr l))))
+    (cdr code)))
+;; TODO: include, include-ci, cond-expand
+
+;; END Library section
+
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
@@ -28,11 +48,26 @@
   (call/cc 
     (lambda (return)
       (define globals '())
+      (define program? #t) ;; Are we building a program or a library?
+      (define lib-exports '())
+      (define lib-imports '())
+
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
       (trace:info "---------------- input program:")
       (trace:info input-program) ;pretty-print
-      
+
+      (cond
+        ((library? input-program)
+         (set! program? #f)
+         (set! lib-exports (lib:exports input-program))
+         (set! lib-imports (lib:imports input-program))
+         (set! input-program (lib:body input-program))
+         (error "TODO: I do not know how to compile a library"))
+        (else
+         (error "DEBUG: not a library")))
+
+      ;; TODO: how to handle stdlib when compiling a library??
       (set! input-program (add-libs input-program))
     
       (set! input-program (expand input-program))
