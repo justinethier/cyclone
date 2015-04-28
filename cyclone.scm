@@ -29,13 +29,13 @@
   (tagged-list? 'define-library ast))
 (define (lib:name ast) (cadr ast))
 (define (lib:exports ast)
-  (and-let* ((code (assoc 'export (cddr l))))
+  (and-let* ((code (assoc 'export (cddr ast))))
     (cdr code)))
 (define (lib:imports ast)
-  (and-let* ((code (assoc 'import (cddr l))))
+  (and-let* ((code (assoc 'import (cddr ast))))
     (cdr code)))
 (define (lib:body ast)
-  (and-let* ((code (assoc 'begin (cddr l))))
+  (and-let* ((code (assoc 'begin (cddr ast))))
     (cdr code)))
 ;; TODO: include, include-ci, cond-expand
 
@@ -58,14 +58,14 @@
       (trace:info input-program) ;pretty-print
 
       (cond
-        ((library? input-program)
+        ((library? (car input-program))
          (set! program? #f)
-         (set! lib-exports (lib:exports input-program))
-         (set! lib-imports (lib:imports input-program))
-         (set! input-program (lib:body input-program))
+         (set! lib-exports (lib:exports (car input-program)))
+         (set! lib-imports (lib:imports (car input-program)))
+         (set! input-program (lib:body (car input-program)))
          (error "TODO: I do not know how to compile a library"))
         (else
-         (error "DEBUG: not a library")))
+         (error "DEBUG: not a library" input-program)))
 
       ;; TODO: how to handle stdlib when compiling a library??
       (set! input-program (add-libs input-program))
