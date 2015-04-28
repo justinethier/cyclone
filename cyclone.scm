@@ -63,11 +63,12 @@
          (set! lib-exports (lib:exports (car input-program)))
          (set! lib-imports (lib:imports (car input-program)))
          (set! input-program (lib:body (car input-program)))
-         (error "TODO: I do not know how to compile a library"))
-        (else
-         (error "DEBUG: not a library" input-program)))
+         (error "TODO: I do not know how to compile a library")))
 
       ;; TODO: how to handle stdlib when compiling a library??
+      ;; either need to keep track of what was actually used,
+      ;; or just assume all imports were used and include them
+      ;; in final compiled program
       (set! input-program (add-libs input-program))
     
       (set! input-program (expand input-program))
