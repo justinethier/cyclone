@@ -199,11 +199,13 @@
      (newline))
     ((or (member "-h" args)
          (member "--help" args))
-     (write " -t              Show intermediate trace output in generated C files")
-     (write " -d              Only generate intermediate C files, do not compile them")
-     (write " -h, --help      Display usage information")
-     (write " -v              Display version information")
-     (write " --autogen       Cyclone developer use only, create autogen.out file")
+     (display "
+ -t              Show intermediate trace output in generated C files
+ -d              Only generate intermediate C files, do not compile them
+ -h, --help      Display usage information
+ -v              Display version information
+ --autogen       Cyclone developer use only, create autogen.out file
+")
      (newline))
     ((member "-v" args)
      (display *version-banner*))
