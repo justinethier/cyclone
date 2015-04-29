@@ -63,7 +63,8 @@
          (set! lib-exports (lib:exports (car input-program)))
          (set! lib-imports (lib:imports (car input-program)))
          (set! input-program (lib:body (car input-program)))
-         (error "TODO: I do not know how to compile a library")))
+         ;(error "TODO: I do not know how to compile a library")
+        ))
 
       ;; TODO: how to handle stdlib when compiling a library??
       ;; either need to keep track of what was actually used,
@@ -186,6 +187,7 @@
 (define (run-compiler args cc?)
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
+         (program? (not (library? (car in-prog))))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (create-c-file 
@@ -197,7 +199,8 @@
          (result (create-c-file in-prog)))
     ;; Load other modules if necessary
     (cond
-     ((not (null? result))
+     ((and program?
+           (not (null? result)))
       (let ((program
               (append
                 (if (member 'eval result) 
@@ -209,13 +212,17 @@
                        '((define read cyc-read)))
                    '())
                 in-prog)))
-        (create-c-file program))))
+        (create-c-file program)))) ;; TODO: no, don't do same work twice. real answer is linking
 
     ;; Compile the generated C file
     (if cc?
-      (system 
-        ;; -I is a hack, real answer is to use 'make install' to place .h file
-        (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file)))))
+      (if program?
+        (system 
+          ;; -I is a hack, real answer is to use 'make install' to place .h file
+          (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file))
+        (system
+          (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o"))))))
+          
 
 ;; Handle command line arguments
 (let* ((args (command-line-arguments)) ;; TODO: port (command-line-arguments) to husk??
