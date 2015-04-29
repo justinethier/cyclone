@@ -39,6 +39,13 @@ cyclone: cyclone.scm trans.so cgen.so parser.so libcyclone.a
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
+# A temporary testing directive
+.PHONY: test2
+test2: examples/hello-library/int-test/hello.c
+	gcc examples/hello-library/int-test/lib2.c -I. -g -c -o lib2.o
+	gcc examples/hello-library/int-test/hello.c -L. -lcyclone -lm -I. -g -o hello
+
+
 icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
 	./cyclone icyc.scm
 
