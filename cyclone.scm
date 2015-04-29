@@ -83,6 +83,7 @@
       ;; Optimize-out unused global variables
       ;; For now, do not do this if eval is used.
       ;; TODO: do not have to be so aggressive, unless (eval (read)) or such
+TODO: do not remove globals that are part of the export list!
       (if (not (has-global? input-program 'eval))
           (set! input-program 
             (filter-unused-variables input-program)))
