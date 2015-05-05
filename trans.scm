@@ -1186,7 +1186,7 @@
 ;; Many improvements can be made, including:
 ;;
 ;; TODO: remove unused locals
-(define (filter-unused-variables asts)
+(define (filter-unused-variables asts lib-exports)
   (define (do-filter code)
     (let ((all-fv (apply      ;; More efficient way to do this?
                     append    ;; Could use delete-duplicates
@@ -1204,7 +1204,8 @@
       (filter
         (lambda (ast)
           (or (not (define? ast))
-              (member (define->var ast) all-fv)))
+              (member (define->var ast) all-fv)
+              (member (define->var ast) lib-exports)))
         code)))
   ;; Keep filtering until no more vars are removed
   (define (loop code)
