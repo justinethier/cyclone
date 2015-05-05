@@ -42,8 +42,8 @@ test: $(TESTFILES) cyclone
 # A temporary testing directive
 .PHONY: test2
 test2: examples/hello-library/int-test/hello.c
-	./cyclone examples/hello-library/hello.scm
-	./cyclone examples/hello-library/libs/lib2.sld
+	./cyclone -t examples/hello-library/hello.scm
+	./cyclone -t examples/hello-library/libs/lib2.sld
 	gcc examples/hello-library/int-test/lib2.c -I. -g -c -o lib2.o
 	gcc examples/hello-library/int-test/hello.c -L. -lcyclone -lm -I. -g -o hello
 
