@@ -168,11 +168,7 @@
           (exit)))
     
       (trace:info "---------------- C code:")
-      (mta:code-gen input-program globals)
-        ; TODO: add as parameters above?
-        ; (set! program? #f)
-        ; (set! lib-exports (lib:exports (car input-program)))
-        ; (set! lib-imports (lib:imports (car input-program)))
+      (mta:code-gen input-program globals program? lib-exports lib-imports)
       (return '())))) ;; No codes to return
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
