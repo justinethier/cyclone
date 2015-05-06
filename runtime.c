@@ -1,6 +1,28 @@
 #include "cyclone.h"
 #include "runtime.h"
 
+/* Global variables. */
+clock_t start;   /* Starting time. */
+char *stack_begin;   /* Initialized by main. */
+char *stack_limit1;  /* Initialized by main. */
+char *stack_limit2;
+char *bottom;    /* Bottom of tospace. */
+char *allocp;    /* Cheney allocate pointer. */
+char *alloc_end;
+/* TODO: not sure this is the best strategy for strings, especially if there 
+   are a lot of long, later gen strings because that will cause a lot of
+   copying to occur during GC */
+char *dhbottom; /* Bottom of data heap */
+char *dhallocp; /* Current place in data heap */
+char *dhalloc_end;
+long no_gcs = 0; /* Count the number of GC's. */
+long no_major_gcs = 0; /* Count the number of GC's. */
+object gc_cont;   /* GC continuation closure. */
+object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
+int gc_num_ans;
+jmp_buf jmp_main; /* Where to jump to. */
+
+//static object test_exp1, test_exp2; /* Expressions used within test. */
 object Cyc_global_variables = nil;
 
 static symbol_type __EOF = {eof_tag, "", nil}; // symbol_type in lieu of custom type

@@ -156,36 +156,26 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
   } \
 }
 
-
-// JAE TODO: not sure how to refactor global section yet
 /* Global variables. */
-
-static clock_t start;   /* Starting time. */
-
-static char *stack_begin;   /* Initialized by main. */
-static char *stack_limit1;  /* Initialized by main. */
-static char *stack_limit2;
-
-static char *bottom;    /* Bottom of tospace. */
-static char *allocp;    /* Cheney allocate pointer. */
-static char *alloc_end;
-
+extern clock_t start;   /* Starting time. */
+extern char *stack_begin;   /* Initialized by main. */
+extern char *stack_limit1;  /* Initialized by main. */
+extern char *stack_limit2;
+extern char *bottom;    /* Bottom of tospace. */
+extern char *allocp;    /* Cheney allocate pointer. */
+extern char *alloc_end;
 /* TODO: not sure this is the best strategy for strings, especially if there 
    are a lot of long, later gen strings because that will cause a lot of
    copying to occur during GC */
-static char *dhbottom; /* Bottom of data heap */
-static char *dhallocp; /* Current place in data heap */
-static char *dhalloc_end;
-
-static long no_gcs = 0; /* Count the number of GC's. */
-static long no_major_gcs = 0; /* Count the number of GC's. */
-
-static object gc_cont;   /* GC continuation closure. */
-static object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
-static int gc_num_ans;
-static jmp_buf jmp_main; /* Where to jump to. */
-
-//static object test_exp1, test_exp2; /* Expressions used within test. */
+extern char *dhbottom; /* Bottom of data heap */
+extern char *dhallocp; /* Current place in data heap */
+extern char *dhalloc_end;
+extern long no_gcs; /* Count the number of GC's. */
+extern long no_major_gcs; /* Count the number of GC's. */
+extern object gc_cont;   /* GC continuation closure. */
+extern object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
+extern int gc_num_ans;
+extern jmp_buf jmp_main; /* Where to jump to. */
 
 /* Define the Lisp atoms that we need. */
 extern const object boolean_t;
