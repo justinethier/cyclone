@@ -72,6 +72,7 @@
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
 #include "runtime.h"
+#include "runtime-main.h"
 static void __lambda_4(int argc, closure _) ;
 static void __lambda_3(int argc, closure _,object r_736) ;
 static void __lambda_2(int argc, closure _,object r_735) ;
