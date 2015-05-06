@@ -184,7 +184,7 @@ extern const object quote_Cyc_191procedure;
 
 // JAE TODO: will probably need to refactor this, since modules (libs)
 // can have globals, too
-//TODO: DECLARE_GLOBALS
+JAE TODO: DECLARE_GLOBALS
 
 #ifdef CYC_EVAL
 static void _call_95cc(object cont, object args){
@@ -613,7 +613,7 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
 
  /* Transport global variables. */
  transp(Cyc_global_variables); /* Internal global used by the runtime */
- //TODO: GC_GLOBALS
+ JAE TODO: GC_GLOBALS
  while (scanp<allocp)       /* Scan the newspace. */
    switch (type_of(scanp))
      {case cons_tag:
