@@ -1136,104 +1136,189 @@ PTR_O_p0_##p0(((n0-2)&0xFE)+0));
 }
 
 static primitive_type Cyc_91global_91vars_primitive = {primitive_tag, "Cyc-global-vars", &_Cyc_91global_91vars};
+static primitive_type Cyc_91get_91cvar_primitive = {primitive_tag, "Cyc-get-cvar", &_Cyc_91get_91cvar};
+static primitive_type Cyc_91set_91cvar_67_primitive = {primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67};
+static primitive_type Cyc_91cvar_127_primitive = {primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127};
+static primitive_type Cyc_91has_91cycle_127_primitive = {primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
+static primitive_type _87_primitive = {primitive_tag, "+", &__87};
+static primitive_type _91_primitive = {primitive_tag, "-", &__91};
+static primitive_type _85_primitive = {primitive_tag, "*", &__85};
+static primitive_type _95_primitive = {primitive_tag, "/", &__95};
+static primitive_type _123_primitive = {primitive_tag, "=", &__123};
+static primitive_type _125_primitive = {primitive_tag, ">", &__125};
+static primitive_type _121_primitive = {primitive_tag, "<", &__121};
+static primitive_type _125_123_primitive = {primitive_tag, ">=", &__125_123};
+static primitive_type _121_123_primitive = {primitive_tag, "<=", &__121_123};
+static primitive_type apply_primitive = {primitive_tag, "apply", &_apply};
+static primitive_type _75halt_primitive = {primitive_tag, "%halt", &__75halt};
+static primitive_type exit_primitive = {primitive_tag, "exit", &_cyc_exit};
+static primitive_type Cyc_91current_91exception_91handler_primitive = {primitive_tag, "Cyc_current_exception_handler", &_Cyc_91current_91exception_91handler};
+static primitive_type Cyc_91default_91exception_91handler_primitive = {primitive_tag, "Cyc_default_exception_handler", &_Cyc_91default_91exception_91handler};
+static primitive_type cons_primitive = {primitive_tag, "cons", &_cons};
+static primitive_type cell_91get_primitive = {primitive_tag, "cell-get", &_cell_91get};
+static primitive_type set_91global_67_primitive = {primitive_tag, "set-global!", &_set_91global_67};
+static primitive_type set_91cell_67_primitive = {primitive_tag, "set-cell!", &_set_91cell_67};
+static primitive_type cell_primitive = {primitive_tag, "cell", &_cell};
+static primitive_type eq_127_primitive = {primitive_tag, "eq?", &_eq_127};
+static primitive_type eqv_127_primitive = {primitive_tag, "eqv?", &_eqv_127};
+static primitive_type equal_127_primitive = {primitive_tag, "equal?", &_equal_127};
+static primitive_type assoc_primitive = {primitive_tag, "assoc", &_assoc};
+static primitive_type assq_primitive = {primitive_tag, "assq", &_assq};
+static primitive_type assv_primitive = {primitive_tag, "assv", &_assv};
+static primitive_type member_primitive = {primitive_tag, "member", &_member};
+static primitive_type memq_primitive = {primitive_tag, "memq", &_memq};
+static primitive_type memv_primitive = {primitive_tag, "memv", &_memv};
+static primitive_type length_primitive = {primitive_tag, "length", &_length};
+static primitive_type set_91car_67_primitive = {primitive_tag, "set-car!", &_set_91car_67};
+static primitive_type set_91cdr_67_primitive = {primitive_tag, "set-cdr!", &_set_91cdr_67};
+static primitive_type car_primitive = {primitive_tag, "car", &_car};
+static primitive_type cdr_primitive = {primitive_tag, "cdr", &_cdr};
+static primitive_type caar_primitive = {primitive_tag, "caar", &_caar};
+static primitive_type cadr_primitive = {primitive_tag, "cadr", &_cadr};
+static primitive_type cdar_primitive = {primitive_tag, "cdar", &_cdar};
+static primitive_type cddr_primitive = {primitive_tag, "cddr", &_cddr};
+static primitive_type caaar_primitive = {primitive_tag, "caaar", &_caaar};
+static primitive_type caadr_primitive = {primitive_tag, "caadr", &_caadr};
+static primitive_type cadar_primitive = {primitive_tag, "cadar", &_cadar};
+static primitive_type caddr_primitive = {primitive_tag, "caddr", &_caddr};
+static primitive_type cdaar_primitive = {primitive_tag, "cdaar", &_cdaar};
+static primitive_type cdadr_primitive = {primitive_tag, "cdadr", &_cdadr};
+static primitive_type cddar_primitive = {primitive_tag, "cddar", &_cddar};
+static primitive_type cdddr_primitive = {primitive_tag, "cdddr", &_cdddr};
+static primitive_type caaaar_primitive = {primitive_tag, "caaaar", &_caaaar};
+static primitive_type caaadr_primitive = {primitive_tag, "caaadr", &_caaadr};
+static primitive_type caadar_primitive = {primitive_tag, "caadar", &_caadar};
+static primitive_type caaddr_primitive = {primitive_tag, "caaddr", &_caaddr};
+static primitive_type cadaar_primitive = {primitive_tag, "cadaar", &_cadaar};
+static primitive_type cadadr_primitive = {primitive_tag, "cadadr", &_cadadr};
+static primitive_type caddar_primitive = {primitive_tag, "caddar", &_caddar};
+static primitive_type cadddr_primitive = {primitive_tag, "cadddr", &_cadddr};
+static primitive_type cdaaar_primitive = {primitive_tag, "cdaaar", &_cdaaar};
+static primitive_type cdaadr_primitive = {primitive_tag, "cdaadr", &_cdaadr};
+static primitive_type cdadar_primitive = {primitive_tag, "cdadar", &_cdadar};
+static primitive_type cdaddr_primitive = {primitive_tag, "cdaddr", &_cdaddr};
+static primitive_type cddaar_primitive = {primitive_tag, "cddaar", &_cddaar};
+static primitive_type cddadr_primitive = {primitive_tag, "cddadr", &_cddadr};
+static primitive_type cdddar_primitive = {primitive_tag, "cdddar", &_cdddar};
+static primitive_type cddddr_primitive = {primitive_tag, "cddddr", &_cddddr};
+static primitive_type char_91_125integer_primitive = {primitive_tag, "char->integer", &_char_91_125integer};
+static primitive_type integer_91_125char_primitive = {primitive_tag, "integer->char", &_integer_91_125char};
+static primitive_type string_91_125number_primitive = {primitive_tag, "string->number", &_string_91_125number};
+static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
+static primitive_type string_91_125list_primitive = {primitive_tag, "string->list", &_string_91_125list};
+static primitive_type list_91_125string_primitive = {primitive_tag, "list->string", &_list_91_125string};
+static primitive_type string_91_125symbol_primitive = {primitive_tag, "string->symbol", &_string_91_125symbol};
+static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->string", &_symbol_91_125string};
+static primitive_type number_91_125string_primitive = {primitive_tag, "number->string", &_number_91_125string};
+static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
+static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
+static primitive_type eof_91object_127_primitive = {primitive_tag, "eof-object?", &_eof_91object_127};
+static primitive_type null_127_primitive = {primitive_tag, "null?", &_null_127};
+static primitive_type number_127_primitive = {primitive_tag, "number?", &_number_127};
+static primitive_type real_127_primitive = {primitive_tag, "real?", &_real_127};
+static primitive_type integer_127_primitive = {primitive_tag, "integer?", &_integer_127};
+static primitive_type pair_127_primitive = {primitive_tag, "pair?", &_pair_127};
+static primitive_type procedure_127_primitive = {primitive_tag, "procedure?", &_procedure_127};
+static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
+static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
+static primitive_type current_91input_91port_primitive = {primitive_tag, "current-input-port", &_current_91input_91port};
+static primitive_type open_91input_91file_primitive = {primitive_tag, "open-input-file", &_open_91input_91file};
+static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
+static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
+static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
+static primitive_type write_primitive = {primitive_tag, "write", &_write};
+static primitive_type display_primitive = {primitive_tag, "display", &_display};
 const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
-// TODO:
-//defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
-//defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
-//defprimitive(Cyc_91cvar_127, Cyc-cvar?, &_Cyc_91cvar_127); /* Cyc-cvar? */
-//defprimitive(Cyc_91has_91cycle_127, Cyc-has-cycle?, &_Cyc_91has_91cycle_127); /* Cyc-has-cycle? */
-//defprimitive(_87, +, &__87); /* + */
-//defprimitive(_91, -, &__91); /* - */
-//defprimitive(_85, *, &__85); /* * */
-//defprimitive(_95, /, &__95); /* / */
-//defprimitive(_123, =, &__123); /* = */
-//defprimitive(_125, >, &__125); /* > */
-//defprimitive(_121, <, &__121); /* < */
-//defprimitive(_125_123, >=, &__125_123); /* >= */
-//defprimitive(_121_123, <=, &__121_123); /* <= */
-//defprimitive(apply, apply, &_apply); /* apply */
-//defprimitive(_75halt, %halt, &__75halt); /* %halt */
-//defprimitive(exit, exit, &_cyc_exit); /* exit */
-////defprimitive(error, error, &_error); /* error */
-//defprimitive(
-//    Cyc_91current_91exception_91handler,
-//    Cyc_current_exception_handler,
-//    &_Cyc_91current_91exception_91handler); /* Cyc-current-exception-handler */
-//defprimitive(
-//    Cyc_91default_91exception_91handler,
-//    Cyc_default_exception_handler,
-//    &_Cyc_91default_91exception_91handler); /* Cyc-default-exception-handler */
-//defprimitive(cons, cons, &_cons); /* cons */
-//defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
-//defprimitive(set_91global_67, set-global!, &_set_91global_67); /* set-global! */
-//defprimitive(set_91cell_67, set-cell!, &_set_91cell_67); /* set-cell! */
-//defprimitive(cell, cell, &_cell); /* cell */
-//defprimitive(eq_127, eq?, &_eq_127); /* eq? */
-//defprimitive(eqv_127, eqv?, &_eqv_127); /* eqv? */
-//defprimitive(equal_127, equal?, &_equal_127); /* equal? */
-//defprimitive(assoc, assoc, &_assoc); /* assoc */
-//defprimitive(assq, assq, &_assq); /* assq */
-//defprimitive(assv, assv, &_assv); /* assq */
-//defprimitive(member, member, &_member); /* member */
-//defprimitive(memq, memq, &_memq); /* memq */
-//defprimitive(memv, memv, &_memv); /* memv */
-//defprimitive(length, length, &_length); /* length */
-//defprimitive(set_91car_67, set-car!, &_set_91car_67); /* set-car! */
-//defprimitive(set_91cdr_67, set-cdr!, &_set_91cdr_67); /* set-cdr! */
-//defprimitive(car, car, &_car); /* car */
-//defprimitive(cdr, cdr, &_cdr); /* cdr */
-//defprimitive(caar, caar, &_caar); /* caar */
-//defprimitive(cadr, cadr, &_cadr); /* cadr */
-//defprimitive(cdar, cdar, &_cdar); /* cdar */
-//defprimitive(cddr, cddr, &_cddr); /* cddr */
-//defprimitive(caaar, caaar, &_caaar); /* caaar */
-//defprimitive(caadr, caadr, &_caadr); /* caadr */
-//defprimitive(cadar, cadar, &_cadar); /* cadar */
-//defprimitive(caddr, caddr, &_caddr); /* caddr */
-//defprimitive(cdaar, cdaar, &_cdaar); /* cdaar */
-//defprimitive(cdadr, cdadr, &_cdadr); /* cdadr */
-//defprimitive(cddar, cddar, &_cddar); /* cddar */
-//defprimitive(cdddr, cdddr, &_cdddr); /* cdddr */
-//defprimitive(caaaar, caaaar, &_caaaar); /* caaaar */
-//defprimitive(caaadr, caaadr, &_caaadr); /* caaadr */
-//defprimitive(caadar, caadar, &_caadar); /* caadar */
-//defprimitive(caaddr, caaddr, &_caaddr); /* caaddr */
-//defprimitive(cadaar, cadaar, &_cadaar); /* cadaar */
-//defprimitive(cadadr, cadadr, &_cadadr); /* cadadr */
-//defprimitive(caddar, caddar, &_caddar); /* caddar */
-//defprimitive(cadddr, cadddr, &_cadddr); /* cadddr */
-//defprimitive(cdaaar, cdaaar, &_cdaaar); /* cdaaar */
-//defprimitive(cdaadr, cdaadr, &_cdaadr); /* cdaadr */
-//defprimitive(cdadar, cdadar, &_cdadar); /* cdadar */
-//defprimitive(cdaddr, cdaddr, &_cdaddr); /* cdaddr */
-//defprimitive(cddaar, cddaar, &_cddaar); /* cddaar */
-//defprimitive(cddadr, cddadr, &_cddadr); /* cddadr */
-//defprimitive(cdddar, cdddar, &_cdddar); /* cdddar */
-//defprimitive(cddddr, cddddr, &_cddddr); /* cddddr */
-//defprimitive(char_91_125integer, char->integer, &_char_91_125integer); /* char->integer */
-//defprimitive(integer_91_125char, integer->char, &_integer_91_125char); /* integer->char */
-//defprimitive(string_91_125number, string->number, &_string_91_125number); /* string->number */
-//defprimitive(string_91append, string-append, &_string_91append); /* string-append */
-//defprimitive(string_91_125list, string->list, &_string_91_125list); /* string->list */
-//defprimitive(list_91_125string, list->string, &_list_91_125string); /* list->string */
-//defprimitive(string_91_125symbol, string->symbol, &_string_91_125symbol); /* string->symbol */
-//defprimitive(symbol_91_125string, symbol->string, &_symbol_91_125string); /* symbol->string */
-//defprimitive(number_91_125string, number->string, &_number_91_125string); /* number->string */
-//defprimitive(boolean_127, boolean?, &_boolean_127); /* boolean? */
-//defprimitive(char_127, char?, &_char_127); /* char? */
-//defprimitive(eof_91object_127, eof-object?, &_eof_91object_127); /* eof-object? */
-//defprimitive(null_127, null?, &_null_127); /* null? */
-//defprimitive(number_127, number?, &_number_127); /* number? */
-//defprimitive(real_127, real?, &_real_127); /* real? */
-//defprimitive(integer_127, integer?, &_integer_127); /* integer? */
-//defprimitive(pair_127, pair?, &_pair_127); /* pair? */
-//defprimitive(procedure_127, procedure?, &_procedure_127); /* procedure? */
-//defprimitive(string_127, string?, &_string_127); /* string? */
-//defprimitive(symbol_127, symbol?, &_symbol_127); /* symbol? */
-//defprimitive(current_91input_91port, current-input-port, &_current_91input_91port); /* current-input-port */
-//defprimitive(open_91input_91file, open-input-file, &_open_91input_91file); /* open-input-file */
-//defprimitive(close_91input_91port, close-input-port, &_close_91input_91port); /* close-input-port */
-//defprimitive(read_91char, read-char, &_read_91char); /* read-char */
-//defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
-//defprimitive(write, write, &_write); /* write */
-//defprimitive(display, display, &_display); /* display */
+const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
+const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
+const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
+const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
+const object primitive__87 = &_87_primitive;
+const object primitive__91 = &_91_primitive;
+const object primitive__85 = &_85_primitive;
+const object primitive__95 = &_95_primitive;
+const object primitive__123 = &_123_primitive;
+const object primitive__125 = &_125_primitive;
+const object primitive__121 = &_121_primitive;
+const object primitive__125_123 = &_125_123_primitive;
+const object primitive__121_123 = &_121_123_primitive;
+const object primitive_apply = &apply_primitive;
+const object primitive__75halt = &_75halt_primitive;
+const object primitive_exit = &exit_primitive;
+const object primitive_Cyc_91current_91exception_91handler = &Cyc_91current_91exception_91handler_primitive;
+const object primitive_Cyc_91default_91exception_91handler = &Cyc_91default_91exception_91handler_primitive;
+const object primitive_cons = &cons_primitive;
+const object primitive_cell_91get = &cell_91get_primitive;
+const object primitive_set_91global_67 = &set_91global_67_primitive;
+const object primitive_set_91cell_67 = &set_91cell_67_primitive;
+const object primitive_cell = &cell_primitive;
+const object primitive_eq_127 = &eq_127_primitive;
+const object primitive_eqv_127 = &eqv_127_primitive;
+const object primitive_equal_127 = &equal_127_primitive;
+const object primitive_assoc = &assoc_primitive;
+const object primitive_assq = &assq_primitive;
+const object primitive_assv = &assv_primitive;
+const object primitive_member = &member_primitive;
+const object primitive_memq = &memq_primitive;
+const object primitive_memv = &memv_primitive;
+const object primitive_length = &length_primitive;
+const object primitive_set_91car_67 = &set_91car_67_primitive;
+const object primitive_set_91cdr_67 = &set_91cdr_67_primitive;
+const object primitive_car = &car_primitive;
+const object primitive_cdr = &cdr_primitive;
+const object primitive_caar = &caar_primitive;
+const object primitive_cadr = &cadr_primitive;
+const object primitive_cdar = &cdar_primitive;
+const object primitive_cddr = &cddr_primitive;
+const object primitive_caaar = &caaar_primitive;
+const object primitive_caadr = &caadr_primitive;
+const object primitive_cadar = &cadar_primitive;
+const object primitive_caddr = &caddr_primitive;
+const object primitive_cdaar = &cdaar_primitive;
+const object primitive_cdadr = &cdadr_primitive;
+const object primitive_cddar = &cddar_primitive;
+const object primitive_cdddr = &cdddr_primitive;
+const object primitive_caaaar = &caaaar_primitive;
+const object primitive_caaadr = &caaadr_primitive;
+const object primitive_caadar = &caadar_primitive;
+const object primitive_caaddr = &caaddr_primitive;
+const object primitive_cadaar = &cadaar_primitive;
+const object primitive_cadadr = &cadadr_primitive;
+const object primitive_caddar = &caddar_primitive;
+const object primitive_cadddr = &cadddr_primitive;
+const object primitive_cdaaar = &cdaaar_primitive;
+const object primitive_cdaadr = &cdaadr_primitive;
+const object primitive_cdadar = &cdadar_primitive;
+const object primitive_cdaddr = &cdaddr_primitive;
+const object primitive_cddaar = &cddaar_primitive;
+const object primitive_cddadr = &cddadr_primitive;
+const object primitive_cdddar = &cdddar_primitive;
+const object primitive_cddddr = &cddddr_primitive;
+const object primitive_char_91_125integer = &char_91_125integer_primitive;
+const object primitive_integer_91_125char = &integer_91_125char_primitive;
+const object primitive_string_91_125number = &string_91_125number_primitive;
+const object primitive_string_91append = &string_91append_primitive;
+const object primitive_string_91_125list = &string_91_125list_primitive;
+const object primitive_list_91_125string = &list_91_125string_primitive;
+const object primitive_string_91_125symbol = &string_91_125symbol_primitive;
+const object primitive_symbol_91_125string = &symbol_91_125string_primitive;
+const object primitive_number_91_125string = &number_91_125string_primitive;
+const object primitive_boolean_127 = &boolean_127_primitive;
+const object primitive_char_127 = &char_127_primitive;
+const object primitive_eof_91object_127 = &eof_91object_127_primitive;
+const object primitive_null_127 = &null_127_primitive;
+const object primitive_number_127 = &number_127_primitive;
+const object primitive_real_127 = &real_127_primitive;
+const object primitive_integer_127 = &integer_127_primitive;
+const object primitive_pair_127 = &pair_127_primitive;
+const object primitive_procedure_127 = &procedure_127_primitive;
+const object primitive_string_127 = &string_127_primitive;
+const object primitive_symbol_127 = &symbol_127_primitive;
+const object primitive_current_91input_91port = &current_91input_91port_primitive;
+const object primitive_open_91input_91file = &open_91input_91file_primitive;
+const object primitive_close_91input_91port = &close_91input_91port_primitive;
+const object primitive_read_91char = &read_91char_primitive;
+const object primitive_peek_91char = &peek_91char_primitive;
+const object primitive_write = &write_primitive;
+const object primitive_display = &display_primitive;
+
