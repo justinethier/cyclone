@@ -1,4 +1,5 @@
 #include "cyclone.h"
+#include "runtime.h"
 
 object Cyc_global_variables = nil;
 
@@ -8,6 +9,14 @@ const object Cyc_EOF = &__EOF;
 object cell_get(object cell){
     return car(cell);
 }
+
+static boolean_type t_boolean = {boolean_tag, "t"};
+static boolean_type f_boolean = {boolean_tag, "f"};
+const object boolean_t = &t_boolean;
+const object boolean_f = &f_boolean;
+
+static symbol_type Cyc_191procedure_symbol = {symbol_tag, "procedure", nil};
+const object quote_Cyc_191procedure = &Cyc_191procedure_symbol;
 
 /* Symbol Table */
 
@@ -85,6 +94,41 @@ void clear_mutations() {
   mutation_table = nil;
 }
 /* END mutation table */
+
+/* Exception handler */
+object Cyc_exception_handler_stack = nil;
+
+object Cyc_default_exception_handler(int argc, closure _, object err) {
+    printf("Error: ");
+    Cyc_display(err);
+    printf("\n");
+    exit(1);
+    return nil;
+}
+
+object Cyc_current_exception_handler() {
+  if (nullp(Cyc_exception_handler_stack)) {
+    return primitive_Cyc_91default_91exception_91handler;
+  } else {
+    return car(Cyc_exception_handler_stack);
+  }
+}
+
+/* Raise an exception from the runtime code */
+void Cyc_rt_raise(object err) {
+    make_cons(c2, err, nil);
+    make_cons(c1, boolean_f, &c2);
+    make_cons(c0, &c1, nil);
+    apply(nil, Cyc_current_exception_handler(), &c0);
+    // Should never get here
+    fprintf(stderr, "Internal error in Cyc_rt_raise\n");
+    exit(1);
+}
+void Cyc_rt_raise_msg(const char *err) {
+    make_string(s, err);
+    Cyc_rt_raise(&s);
+}
+/* END exception handler */
 
 object terpri() {printf("\n"); return nil;}
 
@@ -494,17 +538,6 @@ string_type Cyc_list2string(object lst){
 
     make_string(str, buf);
     return str;
-}
-
-#define string2list(c,s) object c = nil; { \
-  char *str = ((string_type *)s)->str; \
-  int len = strlen(str); \
-  cons_type *buf; \
-  if (len > 0) { \
-      buf = alloca(sizeof(cons_type) * len); \
-      __string2list(str, buf, len); \
-      c = (object)&(buf[0]); \
-  } \
 }
 
 void __string2list(const char *str, cons_type *buf, int buflen){
@@ -1102,3 +1135,105 @@ PTR_O_p0_##p0(((n0-2)&0xFE)+0));
   }
 }
 
+static primitive_type Cyc_91global_91vars_primitive = {primitive_tag, "Cyc-global-vars", &_Cyc_91global_91vars};
+const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
+// TODO:
+//defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
+//defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
+//defprimitive(Cyc_91cvar_127, Cyc-cvar?, &_Cyc_91cvar_127); /* Cyc-cvar? */
+//defprimitive(Cyc_91has_91cycle_127, Cyc-has-cycle?, &_Cyc_91has_91cycle_127); /* Cyc-has-cycle? */
+//defprimitive(_87, +, &__87); /* + */
+//defprimitive(_91, -, &__91); /* - */
+//defprimitive(_85, *, &__85); /* * */
+//defprimitive(_95, /, &__95); /* / */
+//defprimitive(_123, =, &__123); /* = */
+//defprimitive(_125, >, &__125); /* > */
+//defprimitive(_121, <, &__121); /* < */
+//defprimitive(_125_123, >=, &__125_123); /* >= */
+//defprimitive(_121_123, <=, &__121_123); /* <= */
+//defprimitive(apply, apply, &_apply); /* apply */
+//defprimitive(_75halt, %halt, &__75halt); /* %halt */
+//defprimitive(exit, exit, &_cyc_exit); /* exit */
+////defprimitive(error, error, &_error); /* error */
+//defprimitive(
+//    Cyc_91current_91exception_91handler,
+//    Cyc_current_exception_handler,
+//    &_Cyc_91current_91exception_91handler); /* Cyc-current-exception-handler */
+//defprimitive(
+//    Cyc_91default_91exception_91handler,
+//    Cyc_default_exception_handler,
+//    &_Cyc_91default_91exception_91handler); /* Cyc-default-exception-handler */
+//defprimitive(cons, cons, &_cons); /* cons */
+//defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
+//defprimitive(set_91global_67, set-global!, &_set_91global_67); /* set-global! */
+//defprimitive(set_91cell_67, set-cell!, &_set_91cell_67); /* set-cell! */
+//defprimitive(cell, cell, &_cell); /* cell */
+//defprimitive(eq_127, eq?, &_eq_127); /* eq? */
+//defprimitive(eqv_127, eqv?, &_eqv_127); /* eqv? */
+//defprimitive(equal_127, equal?, &_equal_127); /* equal? */
+//defprimitive(assoc, assoc, &_assoc); /* assoc */
+//defprimitive(assq, assq, &_assq); /* assq */
+//defprimitive(assv, assv, &_assv); /* assq */
+//defprimitive(member, member, &_member); /* member */
+//defprimitive(memq, memq, &_memq); /* memq */
+//defprimitive(memv, memv, &_memv); /* memv */
+//defprimitive(length, length, &_length); /* length */
+//defprimitive(set_91car_67, set-car!, &_set_91car_67); /* set-car! */
+//defprimitive(set_91cdr_67, set-cdr!, &_set_91cdr_67); /* set-cdr! */
+//defprimitive(car, car, &_car); /* car */
+//defprimitive(cdr, cdr, &_cdr); /* cdr */
+//defprimitive(caar, caar, &_caar); /* caar */
+//defprimitive(cadr, cadr, &_cadr); /* cadr */
+//defprimitive(cdar, cdar, &_cdar); /* cdar */
+//defprimitive(cddr, cddr, &_cddr); /* cddr */
+//defprimitive(caaar, caaar, &_caaar); /* caaar */
+//defprimitive(caadr, caadr, &_caadr); /* caadr */
+//defprimitive(cadar, cadar, &_cadar); /* cadar */
+//defprimitive(caddr, caddr, &_caddr); /* caddr */
+//defprimitive(cdaar, cdaar, &_cdaar); /* cdaar */
+//defprimitive(cdadr, cdadr, &_cdadr); /* cdadr */
+//defprimitive(cddar, cddar, &_cddar); /* cddar */
+//defprimitive(cdddr, cdddr, &_cdddr); /* cdddr */
+//defprimitive(caaaar, caaaar, &_caaaar); /* caaaar */
+//defprimitive(caaadr, caaadr, &_caaadr); /* caaadr */
+//defprimitive(caadar, caadar, &_caadar); /* caadar */
+//defprimitive(caaddr, caaddr, &_caaddr); /* caaddr */
+//defprimitive(cadaar, cadaar, &_cadaar); /* cadaar */
+//defprimitive(cadadr, cadadr, &_cadadr); /* cadadr */
+//defprimitive(caddar, caddar, &_caddar); /* caddar */
+//defprimitive(cadddr, cadddr, &_cadddr); /* cadddr */
+//defprimitive(cdaaar, cdaaar, &_cdaaar); /* cdaaar */
+//defprimitive(cdaadr, cdaadr, &_cdaadr); /* cdaadr */
+//defprimitive(cdadar, cdadar, &_cdadar); /* cdadar */
+//defprimitive(cdaddr, cdaddr, &_cdaddr); /* cdaddr */
+//defprimitive(cddaar, cddaar, &_cddaar); /* cddaar */
+//defprimitive(cddadr, cddadr, &_cddadr); /* cddadr */
+//defprimitive(cdddar, cdddar, &_cdddar); /* cdddar */
+//defprimitive(cddddr, cddddr, &_cddddr); /* cddddr */
+//defprimitive(char_91_125integer, char->integer, &_char_91_125integer); /* char->integer */
+//defprimitive(integer_91_125char, integer->char, &_integer_91_125char); /* integer->char */
+//defprimitive(string_91_125number, string->number, &_string_91_125number); /* string->number */
+//defprimitive(string_91append, string-append, &_string_91append); /* string-append */
+//defprimitive(string_91_125list, string->list, &_string_91_125list); /* string->list */
+//defprimitive(list_91_125string, list->string, &_list_91_125string); /* list->string */
+//defprimitive(string_91_125symbol, string->symbol, &_string_91_125symbol); /* string->symbol */
+//defprimitive(symbol_91_125string, symbol->string, &_symbol_91_125string); /* symbol->string */
+//defprimitive(number_91_125string, number->string, &_number_91_125string); /* number->string */
+//defprimitive(boolean_127, boolean?, &_boolean_127); /* boolean? */
+//defprimitive(char_127, char?, &_char_127); /* char? */
+//defprimitive(eof_91object_127, eof-object?, &_eof_91object_127); /* eof-object? */
+//defprimitive(null_127, null?, &_null_127); /* null? */
+//defprimitive(number_127, number?, &_number_127); /* number? */
+//defprimitive(real_127, real?, &_real_127); /* real? */
+//defprimitive(integer_127, integer?, &_integer_127); /* integer? */
+//defprimitive(pair_127, pair?, &_pair_127); /* pair? */
+//defprimitive(procedure_127, procedure?, &_procedure_127); /* procedure? */
+//defprimitive(string_127, string?, &_string_127); /* string? */
+//defprimitive(symbol_127, symbol?, &_symbol_127); /* symbol? */
+//defprimitive(current_91input_91port, current-input-port, &_current_91input_91port); /* current-input-port */
+//defprimitive(open_91input_91file, open-input-file, &_open_91input_91file); /* open-input-file */
+//defprimitive(close_91input_91port, close-input-port, &_close_91input_91port); /* close-input-port */
+//defprimitive(read_91char, read-char, &_read_91char); /* read-char */
+//defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
+//defprimitive(write, write, &_write); /* write */
+//defprimitive(display, display, &_display); /* display */

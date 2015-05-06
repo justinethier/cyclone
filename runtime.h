@@ -66,16 +66,40 @@ void Cyc_apply(int argc, closure cont, object prim, ...);
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 string_type Cyc_string_append(int argc, object str1, ...);
 string_type Cyc_string_append_va_list(int, object, va_list);
-//void dispatch_error(int argc, object clo, object cont, object obj1, ...);
-//object Cyc_error(int count, object obj1, ...);
-//object Cyc_error_va(int count, object obj1, va_list ap);
-//object Cyc_raise(object);
-object Cyc_default_exception_handler(int argc, closure _, object err);
-object Cyc_current_exception_handler();
 list mcons(object,object);
 object terpri(void);
 object Cyc_display(object);
 object Cyc_write(object);
+
+object Cyc_has_cycle(object lst);
+list assoc(object x, list l);
+object __num_eq(object x, object y);
+object __num_gt(object x, object y);
+object __num_lt(object x, object y);
+object __num_gte(object x, object y);
+object __num_lte(object x, object y);
+object Cyc_eq(object x, object y);
+object Cyc_set_car(object l, object val) ;
+object Cyc_set_cdr(object l, object val) ;
+integer_type Cyc_length(object l);
+string_type Cyc_number2string(object n) ;
+string_type Cyc_symbol2string(object sym) ;
+object Cyc_string2symbol(object str);
+string_type Cyc_list2string(object lst);
+void __string2list(const char *str, cons_type *buf, int buflen);
+common_type Cyc_string2number(object str);
+void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
+string_type Cyc_string_append(int argc, object str1, ...);
+string_type Cyc_string_append_va_list(int argc, object str1, va_list ap);
+integer_type Cyc_char2integer(object chr);
+object Cyc_integer2char(object n);
+void my_exit(closure) never_returns;
+port_type Cyc_io_current_input_port();
+port_type Cyc_io_open_input_file(object str);
+object Cyc_io_close_input_port(object port);
+object Cyc_io_read_char(object port);
+object Cyc_io_peek_char(object port);
+
 object Cyc_is_boolean(object o);
 object Cyc_is_cons(object o);
 object Cyc_is_null(object o);
@@ -117,6 +141,22 @@ void add_mutation(object var, object value);
 void clear_mutations();
 extern list mutation_table;
 
+void dispatch(int argc, function_type func, object clo, object cont, object args);
+void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
+void do_dispatch(int argc, function_type func, object clo, object *buffer);
+
+#define string2list(c,s) object c = nil; { \
+  char *str = ((string_type *)s)->str; \
+  int len = strlen(str); \
+  cons_type *buf; \
+  if (len > 0) { \
+      buf = alloca(sizeof(cons_type) * len); \
+      __string2list(str, buf, len); \
+      c = (object)&(buf[0]); \
+  } \
+}
+
+
 // JAE TODO: not sure how to refactor global section yet
 /* Global variables. */
 
@@ -148,16 +188,13 @@ static jmp_buf jmp_main; /* Where to jump to. */
 //static object test_exp1, test_exp2; /* Expressions used within test. */
 
 /* Define the Lisp atoms that we need. */
-
-// JAE TODO: probably need to break these up, declare extern here and
-// put actual assignments into runtime.c
-defboolean(f,f);
-defboolean(t,t);
-defsymbol(Cyc_191procedure, procedure);
+extern const object boolean_t;
+extern const object boolean_f;
+extern const object quote_Cyc_191procedure;
 
 // JAE TODO: will probably need to refactor this, since modules (libs)
 // can have globals, too
-DECLARE_GLOBALS
+//TODO: DECLARE_GLOBALS
 
 #ifdef CYC_EVAL
 static void _call_95cc(object cont, object args){
@@ -167,110 +204,111 @@ defprimitive(call_95cc, call/cc, &_call_95cc); // Moved up here due to ifdef
 #endif /* CYC_EVAL */
 
 /* This section is auto-generated via --autogen */
-defprimitive(Cyc_91global_91vars, Cyc-global-vars, &_Cyc_91global_91vars); /* Cyc-global-vars */
-defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
-defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
-defprimitive(Cyc_91cvar_127, Cyc-cvar?, &_Cyc_91cvar_127); /* Cyc-cvar? */
-defprimitive(Cyc_91has_91cycle_127, Cyc-has-cycle?, &_Cyc_91has_91cycle_127); /* Cyc-has-cycle? */
-defprimitive(_87, +, &__87); /* + */
-defprimitive(_91, -, &__91); /* - */
-defprimitive(_85, *, &__85); /* * */
-defprimitive(_95, /, &__95); /* / */
-defprimitive(_123, =, &__123); /* = */
-defprimitive(_125, >, &__125); /* > */
-defprimitive(_121, <, &__121); /* < */
-defprimitive(_125_123, >=, &__125_123); /* >= */
-defprimitive(_121_123, <=, &__121_123); /* <= */
-defprimitive(apply, apply, &_apply); /* apply */
-defprimitive(_75halt, %halt, &__75halt); /* %halt */
-defprimitive(exit, exit, &_cyc_exit); /* exit */
-//defprimitive(error, error, &_error); /* error */
-defprimitive(
-    Cyc_91current_91exception_91handler,
-    Cyc_current_exception_handler,
-    &_Cyc_91current_91exception_91handler); /* Cyc-current-exception-handler */
-defprimitive(
-    Cyc_91default_91exception_91handler,
-    Cyc_default_exception_handler,
-    &_Cyc_91default_91exception_91handler); /* Cyc-default-exception-handler */
-defprimitive(cons, cons, &_cons); /* cons */
-defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
-defprimitive(set_91global_67, set-global!, &_set_91global_67); /* set-global! */
-defprimitive(set_91cell_67, set-cell!, &_set_91cell_67); /* set-cell! */
-defprimitive(cell, cell, &_cell); /* cell */
-defprimitive(eq_127, eq?, &_eq_127); /* eq? */
-defprimitive(eqv_127, eqv?, &_eqv_127); /* eqv? */
-defprimitive(equal_127, equal?, &_equal_127); /* equal? */
-defprimitive(assoc, assoc, &_assoc); /* assoc */
-defprimitive(assq, assq, &_assq); /* assq */
-defprimitive(assv, assv, &_assv); /* assq */
-defprimitive(member, member, &_member); /* member */
-defprimitive(memq, memq, &_memq); /* memq */
-defprimitive(memv, memv, &_memv); /* memv */
-defprimitive(length, length, &_length); /* length */
-defprimitive(set_91car_67, set-car!, &_set_91car_67); /* set-car! */
-defprimitive(set_91cdr_67, set-cdr!, &_set_91cdr_67); /* set-cdr! */
-defprimitive(car, car, &_car); /* car */
-defprimitive(cdr, cdr, &_cdr); /* cdr */
-defprimitive(caar, caar, &_caar); /* caar */
-defprimitive(cadr, cadr, &_cadr); /* cadr */
-defprimitive(cdar, cdar, &_cdar); /* cdar */
-defprimitive(cddr, cddr, &_cddr); /* cddr */
-defprimitive(caaar, caaar, &_caaar); /* caaar */
-defprimitive(caadr, caadr, &_caadr); /* caadr */
-defprimitive(cadar, cadar, &_cadar); /* cadar */
-defprimitive(caddr, caddr, &_caddr); /* caddr */
-defprimitive(cdaar, cdaar, &_cdaar); /* cdaar */
-defprimitive(cdadr, cdadr, &_cdadr); /* cdadr */
-defprimitive(cddar, cddar, &_cddar); /* cddar */
-defprimitive(cdddr, cdddr, &_cdddr); /* cdddr */
-defprimitive(caaaar, caaaar, &_caaaar); /* caaaar */
-defprimitive(caaadr, caaadr, &_caaadr); /* caaadr */
-defprimitive(caadar, caadar, &_caadar); /* caadar */
-defprimitive(caaddr, caaddr, &_caaddr); /* caaddr */
-defprimitive(cadaar, cadaar, &_cadaar); /* cadaar */
-defprimitive(cadadr, cadadr, &_cadadr); /* cadadr */
-defprimitive(caddar, caddar, &_caddar); /* caddar */
-defprimitive(cadddr, cadddr, &_cadddr); /* cadddr */
-defprimitive(cdaaar, cdaaar, &_cdaaar); /* cdaaar */
-defprimitive(cdaadr, cdaadr, &_cdaadr); /* cdaadr */
-defprimitive(cdadar, cdadar, &_cdadar); /* cdadar */
-defprimitive(cdaddr, cdaddr, &_cdaddr); /* cdaddr */
-defprimitive(cddaar, cddaar, &_cddaar); /* cddaar */
-defprimitive(cddadr, cddadr, &_cddadr); /* cddadr */
-defprimitive(cdddar, cdddar, &_cdddar); /* cdddar */
-defprimitive(cddddr, cddddr, &_cddddr); /* cddddr */
-defprimitive(char_91_125integer, char->integer, &_char_91_125integer); /* char->integer */
-defprimitive(integer_91_125char, integer->char, &_integer_91_125char); /* integer->char */
-defprimitive(string_91_125number, string->number, &_string_91_125number); /* string->number */
-defprimitive(string_91append, string-append, &_string_91append); /* string-append */
-defprimitive(string_91_125list, string->list, &_string_91_125list); /* string->list */
-defprimitive(list_91_125string, list->string, &_list_91_125string); /* list->string */
-defprimitive(string_91_125symbol, string->symbol, &_string_91_125symbol); /* string->symbol */
-defprimitive(symbol_91_125string, symbol->string, &_symbol_91_125string); /* symbol->string */
-defprimitive(number_91_125string, number->string, &_number_91_125string); /* number->string */
-defprimitive(boolean_127, boolean?, &_boolean_127); /* boolean? */
-defprimitive(char_127, char?, &_char_127); /* char? */
-defprimitive(eof_91object_127, eof-object?, &_eof_91object_127); /* eof-object? */
-defprimitive(null_127, null?, &_null_127); /* null? */
-defprimitive(number_127, number?, &_number_127); /* number? */
-defprimitive(real_127, real?, &_real_127); /* real? */
-defprimitive(integer_127, integer?, &_integer_127); /* integer? */
-defprimitive(pair_127, pair?, &_pair_127); /* pair? */
-defprimitive(procedure_127, procedure?, &_procedure_127); /* procedure? */
-defprimitive(string_127, string?, &_string_127); /* string? */
-defprimitive(symbol_127, symbol?, &_symbol_127); /* symbol? */
-defprimitive(current_91input_91port, current-input-port, &_current_91input_91port); /* current-input-port */
-defprimitive(open_91input_91file, open-input-file, &_open_91input_91file); /* open-input-file */
-defprimitive(close_91input_91port, close-input-port, &_close_91input_91port); /* close-input-port */
-defprimitive(read_91char, read-char, &_read_91char); /* read-char */
-defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
-defprimitive(write, write, &_write); /* write */
-defprimitive(display, display, &_display); /* display */
+extern const object primitive_Cyc_91global_91vars;
+// TODO:
+//defprimitive(Cyc_91get_91cvar, Cyc-get-cvar, &_Cyc_91get_91cvar); /* Cyc-get-cvar */
+//defprimitive(Cyc_91set_91cvar_67, Cyc-set-cvar!, &_Cyc_91set_91cvar_67); /* Cyc-set-cvar! */
+//defprimitive(Cyc_91cvar_127, Cyc-cvar?, &_Cyc_91cvar_127); /* Cyc-cvar? */
+//defprimitive(Cyc_91has_91cycle_127, Cyc-has-cycle?, &_Cyc_91has_91cycle_127); /* Cyc-has-cycle? */
+//defprimitive(_87, +, &__87); /* + */
+//defprimitive(_91, -, &__91); /* - */
+//defprimitive(_85, *, &__85); /* * */
+//defprimitive(_95, /, &__95); /* / */
+//defprimitive(_123, =, &__123); /* = */
+//defprimitive(_125, >, &__125); /* > */
+//defprimitive(_121, <, &__121); /* < */
+//defprimitive(_125_123, >=, &__125_123); /* >= */
+//defprimitive(_121_123, <=, &__121_123); /* <= */
+//defprimitive(apply, apply, &_apply); /* apply */
+//defprimitive(_75halt, %halt, &__75halt); /* %halt */
+//defprimitive(exit, exit, &_cyc_exit); /* exit */
+////defprimitive(error, error, &_error); /* error */
+//defprimitive(
+//    Cyc_91current_91exception_91handler,
+//    Cyc_current_exception_handler,
+//    &_Cyc_91current_91exception_91handler); /* Cyc-current-exception-handler */
+//defprimitive(
+//    Cyc_91default_91exception_91handler,
+//    Cyc_default_exception_handler,
+//    &_Cyc_91default_91exception_91handler); /* Cyc-default-exception-handler */
+//defprimitive(cons, cons, &_cons); /* cons */
+//defprimitive(cell_91get, cell-get, &_cell_91get); /* cell-get */
+//defprimitive(set_91global_67, set-global!, &_set_91global_67); /* set-global! */
+//defprimitive(set_91cell_67, set-cell!, &_set_91cell_67); /* set-cell! */
+//defprimitive(cell, cell, &_cell); /* cell */
+//defprimitive(eq_127, eq?, &_eq_127); /* eq? */
+//defprimitive(eqv_127, eqv?, &_eqv_127); /* eqv? */
+//defprimitive(equal_127, equal?, &_equal_127); /* equal? */
+//defprimitive(assoc, assoc, &_assoc); /* assoc */
+//defprimitive(assq, assq, &_assq); /* assq */
+//defprimitive(assv, assv, &_assv); /* assq */
+//defprimitive(member, member, &_member); /* member */
+//defprimitive(memq, memq, &_memq); /* memq */
+//defprimitive(memv, memv, &_memv); /* memv */
+//defprimitive(length, length, &_length); /* length */
+//defprimitive(set_91car_67, set-car!, &_set_91car_67); /* set-car! */
+//defprimitive(set_91cdr_67, set-cdr!, &_set_91cdr_67); /* set-cdr! */
+//defprimitive(car, car, &_car); /* car */
+//defprimitive(cdr, cdr, &_cdr); /* cdr */
+//defprimitive(caar, caar, &_caar); /* caar */
+//defprimitive(cadr, cadr, &_cadr); /* cadr */
+//defprimitive(cdar, cdar, &_cdar); /* cdar */
+//defprimitive(cddr, cddr, &_cddr); /* cddr */
+//defprimitive(caaar, caaar, &_caaar); /* caaar */
+//defprimitive(caadr, caadr, &_caadr); /* caadr */
+//defprimitive(cadar, cadar, &_cadar); /* cadar */
+//defprimitive(caddr, caddr, &_caddr); /* caddr */
+//defprimitive(cdaar, cdaar, &_cdaar); /* cdaar */
+//defprimitive(cdadr, cdadr, &_cdadr); /* cdadr */
+//defprimitive(cddar, cddar, &_cddar); /* cddar */
+//defprimitive(cdddr, cdddr, &_cdddr); /* cdddr */
+//defprimitive(caaaar, caaaar, &_caaaar); /* caaaar */
+//defprimitive(caaadr, caaadr, &_caaadr); /* caaadr */
+//defprimitive(caadar, caadar, &_caadar); /* caadar */
+//defprimitive(caaddr, caaddr, &_caaddr); /* caaddr */
+//defprimitive(cadaar, cadaar, &_cadaar); /* cadaar */
+//defprimitive(cadadr, cadadr, &_cadadr); /* cadadr */
+//defprimitive(caddar, caddar, &_caddar); /* caddar */
+//defprimitive(cadddr, cadddr, &_cadddr); /* cadddr */
+//defprimitive(cdaaar, cdaaar, &_cdaaar); /* cdaaar */
+//defprimitive(cdaadr, cdaadr, &_cdaadr); /* cdaadr */
+//defprimitive(cdadar, cdadar, &_cdadar); /* cdadar */
+//defprimitive(cdaddr, cdaddr, &_cdaddr); /* cdaddr */
+//defprimitive(cddaar, cddaar, &_cddaar); /* cddaar */
+//defprimitive(cddadr, cddadr, &_cddadr); /* cddadr */
+//defprimitive(cdddar, cdddar, &_cdddar); /* cdddar */
+//defprimitive(cddddr, cddddr, &_cddddr); /* cddddr */
+//defprimitive(char_91_125integer, char->integer, &_char_91_125integer); /* char->integer */
+//defprimitive(integer_91_125char, integer->char, &_integer_91_125char); /* integer->char */
+//defprimitive(string_91_125number, string->number, &_string_91_125number); /* string->number */
+//defprimitive(string_91append, string-append, &_string_91append); /* string-append */
+//defprimitive(string_91_125list, string->list, &_string_91_125list); /* string->list */
+//defprimitive(list_91_125string, list->string, &_list_91_125string); /* list->string */
+//defprimitive(string_91_125symbol, string->symbol, &_string_91_125symbol); /* string->symbol */
+//defprimitive(symbol_91_125string, symbol->string, &_symbol_91_125string); /* symbol->string */
+//defprimitive(number_91_125string, number->string, &_number_91_125string); /* number->string */
+//defprimitive(boolean_127, boolean?, &_boolean_127); /* boolean? */
+//defprimitive(char_127, char?, &_char_127); /* char? */
+//defprimitive(eof_91object_127, eof-object?, &_eof_91object_127); /* eof-object? */
+//defprimitive(null_127, null?, &_null_127); /* null? */
+//defprimitive(number_127, number?, &_number_127); /* number? */
+//defprimitive(real_127, real?, &_real_127); /* real? */
+//defprimitive(integer_127, integer?, &_integer_127); /* integer? */
+//defprimitive(pair_127, pair?, &_pair_127); /* pair? */
+//defprimitive(procedure_127, procedure?, &_procedure_127); /* procedure? */
+//defprimitive(string_127, string?, &_string_127); /* string? */
+//defprimitive(symbol_127, symbol?, &_symbol_127); /* symbol? */
+//defprimitive(current_91input_91port, current-input-port, &_current_91input_91port); /* current-input-port */
+//defprimitive(open_91input_91file, open-input-file, &_open_91input_91file); /* open-input-file */
+//defprimitive(close_91input_91port, close-input-port, &_close_91input_91port); /* close-input-port */
+//defprimitive(read_91char, read-char, &_read_91char); /* read-char */
+//defprimitive(peek_91char, peek-char, &_peek_91char); /* peek-char */
+//defprimitive(write, write, &_write); /* write */
+//defprimitive(display, display, &_display); /* display */
 /* -------------------------------------------- */
 
 /* Exception handler */
-object Cyc_exception_handler_stack = nil;
+extern object Cyc_exception_handler_stack;
 
 // Special case, use this one instead since we need it in the runtime
 // This also seems to "shadow" the corresponding C var definition, as
@@ -278,37 +316,10 @@ object Cyc_exception_handler_stack = nil;
 // behavior portable? If not, will have to modify cgen to not emit the var.
 #define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
 
-static object Cyc_default_exception_handler(int argc, closure _, object err) {
-    printf("Error: ");
-    Cyc_display(err);
-    printf("\n");
-    exit(1);
-    return nil;
-}
-
-object Cyc_current_exception_handler() {
-  if (nullp(Cyc_exception_handler_stack)) {
-    return primitive_Cyc_91default_91exception_91handler;
-  } else {
-    return car(Cyc_exception_handler_stack);
-  }
-}
-
-/* Raise an exception from the runtime code */
-void Cyc_rt_raise(object err) {
-    make_cons(c2, err, nil);
-    make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, nil);
-    apply(nil, Cyc_current_exception_handler(), &c0);
-    // Should never get here
-    fprintf(stderr, "Internal error in Cyc_rt_raise\n");
-    exit(1);
-}
-void Cyc_rt_raise_msg(const char *err) {
-    make_string(s, err);
-    Cyc_rt_raise(&s);
-}
-
+object Cyc_default_exception_handler(int argc, closure _, object err);
+object Cyc_current_exception_handler();
+void Cyc_rt_raise(object err);
+void Cyc_rt_raise_msg(const char *err);
 /* END exception handler */
 
 /*
@@ -317,7 +328,7 @@ void Cyc_rt_raise_msg(const char *err) {
  * @param func - Function to execute
  * @param args - A list of arguments to the function
  */
-static object apply(object cont, object func, object args){
+object apply(object cont, object func, object args){
   common_type buf;
 
 //printf("DEBUG apply: ");
@@ -368,7 +379,7 @@ static object apply(object cont, object func, object args){
 }
 
 // Version of apply meant to be called from within compiled code
-static void Cyc_apply(int argc, closure cont, object prim, ...){
+void Cyc_apply(int argc, closure cont, object prim, ...){
     va_list ap;
     object tmp;
     int i;
@@ -392,7 +403,7 @@ static void Cyc_apply(int argc, closure cont, object prim, ...){
 // END apply
 
 /* Extract args from given array, assuming cont is the first arg in buf */
-static void Cyc_apply_from_buf(int argc, object prim, object *buf) {
+void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     list args;
     object cont;
     int i;
@@ -414,7 +425,7 @@ static void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     apply(cont, prim, (object)&args[0]);
 }
 
-static char *transport(x, gcgen) char *x; int gcgen;
+char *transport(x, gcgen) char *x; int gcgen;
 /* Transport one object.  WARNING: x cannot be nil!!! */
 {
  if (nullp(x)) return x;
@@ -543,7 +554,7 @@ if ((check_overflow(low_limit,temp) && \
      check_overflow(temp,old_heap_high_limit + 1))) \
    (p) = (object) transport(temp,major);
 
-static void GC_loop(int major, closure cont, object *ans, int num_ans)
+void GC_loop(int major, closure cont, object *ans, int num_ans)
 {char foo;
  int i;
  register object temp;
@@ -620,7 +631,7 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
 
  /* Transport global variables. */
  transp(Cyc_global_variables); /* Internal global used by the runtime */
- GC_GLOBALS
+ //TODO: GC_GLOBALS
  while (scanp<allocp)       /* Scan the newspace. */
    switch (type_of(scanp))
      {case cons_tag:
@@ -710,7 +721,7 @@ static void GC_loop(int major, closure cont, object *ans, int num_ans)
  }
 }
 
-static void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
+void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
 {
  /* Only room for one more minor-GC, so do a major one.
   * Not sure this is the best strategy, it may be better to do major
@@ -735,7 +746,7 @@ static void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
 }
 
 /* This heap cons is used only for initialization. */
-static list mcons(a,d) object a,d;
+list mcons(a,d) object a,d;
 {register cons_type *c = malloc(sizeof(cons_type));
  c->tag = cons_tag; c->cons_car = a; c->cons_cdr = d;
  return c;}

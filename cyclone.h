@@ -132,9 +132,9 @@ typedef boolean_type *boolean;
 
 #define boolean_pname(x) (((boolean_type *) x)->pname)
 
-#define defboolean(name,pname) \
-static boolean_type name##_boolean = {boolean_tag, #pname}; \
-static const object boolean_##name = &name##_boolean
+/* #define defboolean(name,pname) \
+ static boolean_type name##_boolean = {boolean_tag, #pname}; \
+ static const object boolean_##name = &name##_boolean */
 
 /* Define symbol type. */
 
@@ -274,14 +274,6 @@ typedef union {
   double_type double_t;
   string_type string_t;
 } common_type;
-
-/* Function prototypes */
-void Cyc_rt_raise(object err);
-void Cyc_rt_raise_msg(const char *err);
-
-void dispatch(int argc, function_type func, object clo, object cont, object args);
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
-void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
 
 #endif /* CYCLONE_H */
