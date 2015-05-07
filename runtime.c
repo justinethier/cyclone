@@ -1389,11 +1389,11 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
 
  /* Transport global variables. */
  transp(Cyc_global_variables); /* Internal global used by the runtime */
- { //JAE TODO: GC_GLOBALS
+ {
    list l = global_table;
    for(; !nullp(l); l = cdr(l)){
     cvar_type *c = (cvar_type *)car(l);
-    transp((c->pvar)); // TODO: proper syntax here?
+    transp(*(c->pvar)); // GC global, not the pvar
    }
  }
  while (scanp<allocp)       /* Scan the newspace. */
