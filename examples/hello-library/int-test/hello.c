@@ -6,10 +6,223 @@
  **
  **/
 
-#define DECLARE_GLOBALS  \
-  static volatile object __glo_lib2_91hello = nil; \
-  static volatile object __glo__85exception_91handler_91stack_85 = nil; \
-  static volatile object __glo_call_95cc = nil;
+/* 
+"---------------- input program:"
+ */
+/* 
+((define lib2-hello "Hello from library #2") (write lib2-hello))
+ */
+/* 
+"---------------- after macro expansion:"
+ */
+/* 
+((define *Cyc-version-banner*
+   "\n              :@ \n            @@@  \n          @@@@:  \n        `@@@@@+  \n       .@@@+@@@      Cyclone  \n       @@     @@     An experimental Scheme compiler\n      ,@             https://github.com/justinethier/cyclone\n      '@        \n      .@        \n       @@     #@     (c) 2014 Justin Ethier\n       `@@@#@@@.     Version 0.0.1 (Pre-release)\n        #@@@@@   \n        +@@@+    \n        @@#      \n      `@.  \n     \n")
+ (define call-with-current-continuation call/cc)
+ (define Cyc-bin-op
+   (lambda (cmp x lst)
+     (if (null? lst)
+       #t
+       (if (cmp x (car lst)) (Cyc-bin-op cmp (car lst) (cdr lst)) #f))))
+ (define Cyc-bin-op-char
+   (lambda (cmp c cs)
+     (Cyc-bin-op
+       (lambda (x y) (cmp (char->integer x) (char->integer y)))
+       c
+       cs)))
+ (define char=? (lambda (c1 c2 . cs) (Cyc-bin-op-char = c1 (cons c2 cs))))
+ (define char<? (lambda (c1 c2 . cs) (Cyc-bin-op-char < c1 (cons c2 cs))))
+ (define char>? (lambda (c1 c2 . cs) (Cyc-bin-op-char > c1 (cons c2 cs))))
+ (define char<=? (lambda (c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs))))
+ (define char>=? (lambda (c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs))))
+ (define char-upcase
+   (lambda (c)
+     (if (char-lower-case? c)
+       (integer->char
+         (- (char->integer c) (- (char->integer #\a) (char->integer #\A))))
+       c)))
+ (define char-downcase
+   (lambda (c)
+     (if (char-upper-case? c)
+       (integer->char
+         (+ (char->integer c) (- (char->integer #\a) (char->integer #\A))))
+       c)))
+ (define char-alphabetic? (lambda (c) (if (char>=? c #\A) (char<=? c #\z) #f)))
+ (define char-upper-case? (lambda (c) (if (char>=? c #\A) (char<=? c #\Z) #f)))
+ (define char-lower-case? (lambda (c) (if (char>=? c #\a) (char<=? c #\z) #f)))
+ (define char-numeric?
+   (lambda (c) (member c '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9))))
+ (define char-whitespace?
+   (lambda (c) (member c '(#\tab #\space #\return #\newline))))
+ (define digit-value
+   (lambda (c)
+     (if (char-numeric? c) (- (char->integer c) (char->integer #\0)) #f)))
+ (define foldl
+   (lambda (func accum lst)
+     (if (null? lst) accum (foldl func (func (car lst) accum) (cdr lst)))))
+ (define foldr
+   (lambda (func end lst)
+     (if (null? lst) end (func (car lst) (foldr func end (cdr lst))))))
+ (define not (lambda (x) (if x #f #t)))
+ (define list?
+   (lambda (o)
+     (define _list?
+       (lambda (obj)
+         (if (null? obj) #t (if (pair? obj) (_list? (cdr obj)) #f))))
+     (if (Cyc-has-cycle? o) #t (_list? o))))
+ (define zero? (lambda (n) (= n 0)))
+ (define positive? (lambda (n) (> n 0)))
+ (define negative? (lambda (n) (< n 0)))
+ (define append
+   (lambda lst
+     (define append-2
+       (lambda (inlist alist)
+         (foldr (lambda (ap in) (cons ap in)) alist inlist)))
+     (if (null? lst)
+       lst
+       (if (null? (cdr lst))
+         (car lst)
+         (foldl (lambda (a b) (append-2 b a)) (car lst) (cdr lst))))))
+ (define list (lambda objs objs))
+ (define make-list
+   (lambda (k . fill)
+     ((lambda (x make)
+        ((lambda ()
+           (set! x (if (null? fill) #f (car fill)))
+           (set! make
+             (lambda (n obj) (if (zero? n) '() (cons obj (make (- n 1) obj)))))
+           (make k x))))
+      #f
+      #f)))
+ (define list-copy (lambda (lst) (foldr (lambda (x y) (cons x y)) '() lst)))
+ (define map
+   (lambda (func lst) (foldr (lambda (x y) (cons (func x) y)) '() lst)))
+ (define for-each
+   (lambda (f lst)
+     (if (null? lst) #t ((lambda () (f (car lst)) (for-each f (cdr lst)))))))
+ (define list-tail
+   (lambda (lst k) (if (zero? k) lst (list-tail (cdr lst) (- k 1)))))
+ (define list-ref (lambda (lst k) (car (list-tail lst k))))
+ (define list-set!
+   (lambda (lst k obj) ((lambda (kth) (set-car! kth obj)) (list-tail lst k))))
+ (define reverse (lambda (lst) (foldl cons '() lst)))
+ (define boolean=? (lambda (b1 b2 . bs) (Cyc-obj=? boolean? b1 (cons b2 bs))))
+ (define symbol=?
+   (lambda (sym1 sym2 . syms) (Cyc-obj=? symbol? sym1 (cons sym2 syms))))
+ (define Cyc-obj=?
+   (lambda (type? obj objs)
+     (if (type? obj)
+       (call/cc
+         (lambda (return)
+           (for-each (lambda (o) (if (not (eq? o obj)) (return #f) #f)) objs)
+           #t))
+       #f)))
+ (define make-string
+   (lambda (k . fill)
+     ((lambda (fill*) (list->string (apply make-list (cons k fill*))))
+      (if (null? fill) '(#\space) fill))))
+ (define error (lambda (msg . args) (raise (cons msg args))))
+ (define raise
+   (lambda (obj) ((Cyc-current-exception-handler) (list 'raised obj))))
+ (define raise-continuable
+   (lambda (obj) ((Cyc-current-exception-handler) (list 'continuable obj))))
+ (define with-exception-handler
+   (lambda (handler thunk)
+     ((lambda (result my-handler)
+        (Cyc-add-exception-handler my-handler)
+        (set! result (thunk))
+        (Cyc-remove-exception-handler)
+        result)
+      #f
+      (lambda (obj)
+        ((lambda (result continuable?)
+           (Cyc-remove-exception-handler)
+           (set! result (handler (cadr obj)))
+           (if continuable? result (error "exception handler returned")))
+         #f
+         (if (pair? obj) (equal? (car obj) 'continuable) #f))))))
+ (define *exception-handler-stack* '())
+ (define Cyc-add-exception-handler
+   (lambda (h)
+     (set! *exception-handler-stack* (cons h *exception-handler-stack*))))
+ (define Cyc-remove-exception-handler
+   (lambda ()
+     (if (not (null? *exception-handler-stack*))
+       (set! *exception-handler-stack* (cdr *exception-handler-stack*))
+       #f)))
+ (define lib2-hello "Hello from library #2")
+ (write lib2-hello))
+ */
+/* 
+"---------------- after processing globals"
+ */
+/* 
+((define *exception-handler-stack* #f)
+ (define lib2-hello "Hello from library #2")
+ ((lambda () (set! *exception-handler-stack* '()) (write lib2-hello))))
+ */
+/* 
+"---------------- after alpha conversion:"
+ */
+/* 
+((define *exception-handler-stack* #f)
+ (define lib2-hello "Hello from library #2")
+ ((lambda () (set! *exception-handler-stack* '()) (write lib2-hello))))
+ */
+/* 
+"---------------- after CPS:"
+ */
+/* 
+((define call/cc (lambda (k f) (f k (lambda (_ result) (k result)))))
+ (define *exception-handler-stack* #f)
+ (define lib2-hello "Hello from library #2")
+ ((lambda ()
+    ((lambda (r$6)
+       ((lambda (r$5) (%halt (write lib2-hello)))
+        (set! *exception-handler-stack* r$6)))
+     '()))))
+ */
+/* 
+"---------------- after wrap-mutables:"
+ */
+/* 
+((define call/cc (lambda (k f) (f k (lambda (_ result) (k result)))))
+ (define *exception-handler-stack* #f)
+ (define lib2-hello "Hello from library #2")
+ ((lambda ()
+    ((lambda (r$6)
+       ((lambda (r$5) (%halt (write lib2-hello)))
+        (set-global! *exception-handler-stack* r$6)))
+     '()))))
+ */
+/* 
+"---------------- after closure-convert:"
+ */
+/* 
+((define call/cc
+   (lambda (k f)
+     ((%closure-ref f 0)
+      f
+      k
+      (%closure
+        (lambda (self$7 _ result)
+          ((%closure-ref (%closure-ref self$7 1) 0)
+           (%closure-ref self$7 1)
+           result))
+        k))))
+ (define *exception-handler-stack* (%closure-ref #f 0) #f)
+ (define lib2-hello
+   (%closure-ref "Hello from library #2" 0)
+   "Hello from library #2")
+ ((lambda ()
+    ((lambda (r$6)
+       ((lambda (r$5) (%halt (write lib2-hello)))
+        (set-global! *exception-handler-stack* r$6)))
+     '()))))
+ */
+/* 
+"---------------- C code:"
+ */
 
 #define GC_GLOBALS \
 { \
@@ -71,8 +284,18 @@
      GC(&c1, buf, 2); return; \
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
+
+#include "cyclone.h"
+
+#define DECLARE_GLOBALS  \
+  static volatile object __glo_lib2_91hello = nil; \
+  static volatile object __glo__85exception_91handler_91stack_85 = nil; \
+  static volatile object __glo_call_95cc = nil;
+DECLARE_GLOBALS
+
 #include "runtime.h"
 #include "runtime-main.h"
+
 static void __lambda_4(int argc, closure _) ;
 static void __lambda_3(int argc, closure _,object r_736) ;
 static void __lambda_2(int argc, closure _,object r_735) ;
@@ -109,6 +332,10 @@ static void __lambda_0(int argc, object self_737, object _191, object result) {
 
 
   static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+  add_global((object *) &__glo_lib2_91hello);
+  add_global((object *) &__glo__85exception_91handler_91stack_85);
+  add_global((object *) &__glo_call_95cc);
+
   mclosure0(c_738, (function_type)__lambda_1); 
   __glo_call_95cc = &c_738; 
   make_string(c_7313, "Hello from library #2"); 
