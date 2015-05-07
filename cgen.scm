@@ -99,11 +99,6 @@
     (else
       (vector-set! *c-call-arity* arity #t))))
 
-(define (emit-c-macros)
-  (c-macro-declare-globals)
-  (c-macro-GC-globals)
-  (emit-c-arity-macros 0))
-
 (define (emit-c-arity-macros arity)
   (when (<= arity *c-call-max-args*)
     (cond
@@ -172,25 +167,20 @@
 (define (c-macro-GC-globals)
   ; emit directly to be more efficient
   ; TODO: convert all c-macro functions to direct emit???
-  (emit "#define GC_GLOBALS \\")
-  (emits "{")
   (for-each
     (lambda (global)
-      (emits " \\\n  transp(")
+      (emits "\n  add_global((object *) &")
       (emits (mangle-global (car global)))
       (emits ");"))
     *globals*)
-  (emit "}")
   (emit ""))
 
 (define (c-macro-declare-globals)
-  (emits "#define DECLARE_GLOBALS ")
   (for-each
       (lambda (global)
-        (emit " \\")
-        (emits "  static volatile object ")
+        (emits "object ")
         (emits (mangle-global (car global)))
-        (emits " = nil;"))
+        (emits " = nil;\n"))
       *globals*)
   (emit "")
   (emit ""))
@@ -945,8 +935,11 @@
     (if (member 'eval globals)
       (emit "#define CYC_EVAL"))
 
-    (emit-c-macros)
+    (emit-c-arity-macros 0)
+    (emit "#include \"cyclone.h\"")
+    (c-macro-declare-globals)
     (emit "#include \"runtime.h\"")
+    (emit "#include \"runtime-main.h\"")
 
     ;; Emit symbols
     (for-each
@@ -977,6 +970,9 @@
   
     (emit "
   static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { ")
+
+    ;; Initialize global table
+    (c-macro-GC-globals)
 
     ;; Initialize symbol table
     (for-each
