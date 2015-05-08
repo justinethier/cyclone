@@ -1,3 +1,11 @@
+/** 
+ * Cyclone Scheme
+ * Copyright (c) 2014, Justin Ethier
+ * All rights reserved.
+ *
+ * This file contains the C runtime used by compiled programs.
+ */
+
 #include "cyclone.h"
 #include "runtime.h"
 

@@ -3,7 +3,8 @@
  * Copyright (c) 2014, Justin Ethier
  * All rights reserved.
  *
- * This file contains the C runtime used by compiled programs.
+ * This file contains the C runtime code used only by the main program module.
+ * May want to consider migrating this into another runtime module.
  */
 
 #ifndef CYCLONE_RUNTIME_MAIN_H
