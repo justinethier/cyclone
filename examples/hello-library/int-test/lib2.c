@@ -289,6 +289,9 @@ static void __lambda_0(int argc, object self_736, object _191, object result) {
   make_string(c_7312, "Hello from library #2"); 
   __glo_lib2_91hello = &c_7312; 
   // TODO: How to assign lib2 to Cyc_global_variables?
+  make_cvar(cvar_7323, (object *)&__glo_lib2_91hello);make_cons(pair_7324, find_or_add_symbol("lib2-hello"), &cvar_7323);
+  make_cons(c_1, &pair_7324, Cyc_global_variables);
+  Cyc_global_variables = &c_1;
 
 //  __glo__85exception_91handler_91stack_85 = boolean_f; 
 //

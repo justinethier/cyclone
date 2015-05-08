@@ -278,7 +278,8 @@
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
 #include "cyclone.h"
-object __glo_lib2_91hello = nil;
+extern object __glo_lib2_91hello;
+//object __glo_lib2_91hello = nil;
 object __glo__85exception_91handler_91stack_85 = nil;
 object __glo_call_95cc = nil;
 
@@ -322,23 +323,24 @@ static void __lambda_0(int argc, object self_737, object _191, object result) {
 
   static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
 
-  add_global((object *) &__glo_lib2_91hello);
+  //add_global((object *) &__glo_lib2_91hello);
   add_global((object *) &__glo__85exception_91handler_91stack_85);
   add_global((object *) &__glo_call_95cc);
   mclosure0(c_738, (function_type)__lambda_1); 
   __glo_call_95cc = &c_738; 
-  make_string(c_7313, "Hello from library #2"); 
-  __glo_lib2_91hello = &c_7313; 
+  //make_string(c_7313, "Hello from library #2"); 
+  //__glo_lib2_91hello = &c_7313; 
   __glo__85exception_91handler_91stack_85 = boolean_f; 
 
-  make_cvar(cvar_7323, (object *)&__glo_lib2_91hello);make_cons(pair_7324, find_or_add_symbol("lib2-hello"), &cvar_7323);
+  //make_cvar(cvar_7323, (object *)&__glo_lib2_91hello);make_cons(pair_7324, find_or_add_symbol("lib2-hello"), &cvar_7323);
   make_cvar(cvar_7325, (object *)&__glo__85exception_91handler_91stack_85);make_cons(pair_7326, find_or_add_symbol("*exception-handler-stack*"), &cvar_7325);
   make_cvar(cvar_7327, (object *)&__glo_call_95cc);make_cons(pair_7328, find_or_add_symbol("call/cc"), &cvar_7327);
-make_cons(c_7331, &pair_7324,nil);
-make_cons(c_7330, &pair_7326, &c_7331);
+//make_cons(c_7331, &pair_7324,nil);
+make_cons(c_7330, &pair_7326, nil); //&c_7331);
 make_cons(c_7329, &pair_7328, &c_7330);
 Cyc_global_variables = &c_7329;  
     
+    c_lib2_entry_pt(argc, env, cont);
     
     return_check0(__lambda_4);
 }
