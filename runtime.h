@@ -93,6 +93,7 @@ string_type Cyc_string_append_va_list(int argc, object str1, va_list ap);
 integer_type Cyc_char2integer(object chr);
 object Cyc_integer2char(object n);
 void my_exit(closure) never_returns;
+object __halt(object obj);
 port_type Cyc_io_current_input_port();
 port_type Cyc_io_open_input_file(object str);
 object Cyc_io_close_input_port(object port);
