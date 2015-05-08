@@ -213,13 +213,6 @@
 /* 
 "---------------- C code:"
  */
-#define DECLARE_LIB2_GLOBALS  \
-  object __glo_lib2_91hello = nil;
-  //static volatile object __glo_lib2_91hello = nil;
-
-#define GC_LIB2_GLOBALS \
-{ \
-  transp(__glo_lib2_91hello);}
 
 #define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
 /* Return to continuation after checking for stack overflow. */
@@ -257,6 +250,10 @@
      GC(&c1, buf, 2); return; \
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
+#include "cyclone.h"
+
+object __glo_lib2_91hello = nil;
+
 #include "runtime.h"
 
 static void __lambda_2(int argc, closure _,object r_735) ;
@@ -288,6 +285,7 @@ static void __lambda_0(int argc, object self_736, object _191, object result) {
 //  static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
 //  mclosure0(c_737, (function_type)__lambda_1); 
 //  __glo_call_95cc = &c_737; 
+  add_global((object *) &__glo_lib2_91hello);
   make_string(c_7312, "Hello from library #2"); 
   __glo_lib2_91hello = &c_7312; 
   // TODO: How to assign lib2 to Cyc_global_variables?

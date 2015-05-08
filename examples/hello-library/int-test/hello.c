@@ -223,13 +223,6 @@
 /* 
 "---------------- C code:"
  */
-
-#define GC_GLOBALS \
-{ \
-  transp(__glo_lib2_91hello); \
-  transp(__glo__85exception_91handler_91stack_85); \
-  transp(__glo_call_95cc);}
-
 #define funcall0(cfn) ((cfn)->fn)(0,cfn)
 /* Return to continuation after checking for stack overflow. */
 #define return_funcall0(cfn) \
@@ -284,18 +277,14 @@
      GC(&c1, buf, 2); return; \
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
-
 #include "cyclone.h"
+object __glo_lib2_91hello = nil;
+object __glo__85exception_91handler_91stack_85 = nil;
+object __glo_call_95cc = nil;
 
-#define DECLARE_GLOBALS  \
-  static volatile object __glo_lib2_91hello = nil; \
-  static volatile object __glo__85exception_91handler_91stack_85 = nil; \
-  static volatile object __glo_call_95cc = nil;
-DECLARE_GLOBALS
 
 #include "runtime.h"
 #include "runtime-main.h"
-
 static void __lambda_4(int argc, closure _) ;
 static void __lambda_3(int argc, closure _,object r_736) ;
 static void __lambda_2(int argc, closure _,object r_735) ;
@@ -332,10 +321,10 @@ static void __lambda_0(int argc, object self_737, object _191, object result) {
 
 
   static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+
   add_global((object *) &__glo_lib2_91hello);
   add_global((object *) &__glo__85exception_91handler_91stack_85);
   add_global((object *) &__glo_call_95cc);
-
   mclosure0(c_738, (function_type)__lambda_1); 
   __glo_call_95cc = &c_738; 
   make_string(c_7313, "Hello from library #2"); 
