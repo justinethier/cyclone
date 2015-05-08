@@ -278,7 +278,15 @@ extern const object primitive_read_91char;
 extern const object primitive_peek_91char;
 extern const object primitive_write;
 extern const object primitive_display;
+extern const object primitive_call_95cc;
 /* -------------------------------------------- */
+
+/* Globals that are needed by the runtime */
+extern object Cyc_glo_eval;
+extern object Cyc_glo_call_cc;
+
+#define __glo_eval Cyc_glo_eval
+#define __glo_call_95cc Cyc_glo_call_cc
 
 /* Exception handler */
 extern object Cyc_exception_handler_stack;

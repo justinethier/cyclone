@@ -148,6 +148,10 @@ void clear_mutations() {
 }
 /* END mutation table */
 
+/* Runtime globals */
+object Cyc_glo_call_cc = nil;
+object Cyc_glo_eval = nil;
+
 /* Exception handler */
 object Cyc_exception_handler_stack = nil;
 
@@ -1070,16 +1074,9 @@ void _write(object cont, object args) {
     return_funcall1(cont, Cyc_write(car(args))); }
 void _display(object cont, object args) {  
     return_funcall1(cont, Cyc_display(car(args)));}
-
-// JAE TODO: need to refactor cyc_eval out of here,
-// and use #define's to mask global (IE, use another
-// runtime global and have the __glo_ expand into it
-#ifdef CYC_EVAL
-static void _call_95cc(object cont, object args){
+void _call_95cc(object cont, object args){
     return_funcall2(__glo_call_95cc, cont, car(args));
 }
-defprimitive(call_95cc, call/cc, &_call_95cc); // Moved up here due to ifdef
-#endif /* CYC_EVAL */
 
 /*
  * @param cont - Continuation for the function to call into
@@ -1113,7 +1110,6 @@ object apply(object cont, object func, object args){
       dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
-#ifdef CYC_EVAL
     case cons_tag:
     {
       make_cons(c, func, args);
@@ -1127,7 +1123,6 @@ object apply(object cont, object func, object args){
           exit(1);
       }
     }
-#endif /* CYC_EVAL */
       
     default:
       printf("Invalid object type %ld\n", type_of(func));
@@ -1729,6 +1724,8 @@ static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_rea
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
 static primitive_type write_primitive = {primitive_tag, "write", &_write};
 static primitive_type display_primitive = {primitive_tag, "display", &_display};
+static primitive_type call_95cc_primitive = {primitive_tag, "call/cc", &_call_95cc};
+
 const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
 const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
 const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
@@ -1822,4 +1819,5 @@ const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
 const object primitive_write = &write_primitive;
 const object primitive_display = &display_primitive;
+const object primitive_call_95cc = &call_95cc_primitive;
 
