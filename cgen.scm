@@ -164,17 +164,6 @@
       assign (number->string n) ";")
     ""))
 
-(define (c-macro-GC-globals)
-  ; emit directly to be more efficient
-  ; TODO: convert all c-macro functions to direct emit???
-  (for-each
-    (lambda (global)
-      (emits "\n  add_global((object *) &")
-      (emits (mangle-global (car global)))
-      (emits ");"))
-    *globals*)
-  (emit ""))
-
 (define (c-macro-declare-globals)
   (for-each
       (lambda (global)
@@ -927,19 +916,18 @@
                        "}\n"))
       formals*))))
   
-(define (mta:code-gen input-program globals program? lib-exports lib-imports)
+(define (mta:code-gen input-program globals program? lib-name lib-exports lib-imports)
   (set! *global-syms* globals)
   (let ((compiled-program 
           (apply string-append
             (map c-compile-program input-program))))
-    (if (member 'eval globals)
-      (emit "#define CYC_EVAL"))
-
     (emit-c-arity-macros 0)
     (emit "#include \"cyclone.h\"")
     (c-macro-declare-globals)
     (emit "#include \"runtime.h\"")
-    (emit "#include \"runtime-main.h\"")
+
+    (if program?
+        (emit "#include \"runtime-main.h\""))
 
     ;; Emit symbols
     (for-each
@@ -968,11 +956,19 @@
        (emit ((caadr l) (string-append "__lambda_" (number->string (car l))))))
      lambdas)
   
-    (emit "
-  static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { ")
+    ; Emit entry point
+    (if program?
+      (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { ")
+      (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { ")))
 
     ;; Initialize global table
-    (c-macro-GC-globals)
+    (for-each
+      (lambda (global)
+        (emits "\n  add_global((object *) &")
+        (emits (mangle-global (car global)))
+        (emits ");"))
+      *globals*)
+    (emit "")
 
     ;; Initialize symbol table
     (for-each
@@ -1023,7 +1019,7 @@
                    (emits str))
                  code))
               ((null? (cdr ps))
-               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ",nil);\n") code)
+               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
                      (cdr ps)
                      (cdr cs)))
               (else
@@ -1036,9 +1032,11 @@
             (emits
               (string-append "Cyc_global_variables = &" head-pair ";"))))
 
-    (emit compiled-program)
+    (if program?
+      (emit compiled-program))
     (emit "}")
-    (emit *c-main-function*)))
+    (if program?
+      (emit *c-main-function*))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

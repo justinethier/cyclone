@@ -28,6 +28,9 @@
 (define (library? ast)
   (tagged-list? 'define-library ast))
 (define (lib:name ast) (cadr ast))
+;; Convert name (as list of symbols) to a mangled string
+(define (lib:name->string name)
+  (apply string-append (map mangle name)))
 (define (lib:exports ast)
   (and-let* ((code (assoc 'export (cddr ast))))
     (cdr code)))
@@ -49,6 +52,7 @@
     (lambda (return)
       (define globals '())
       (define program? #t) ;; Are we building a program or a library?
+      (define lib-name '())
       (define lib-exports '())
       (define lib-imports '())
 
@@ -60,6 +64,7 @@
       (cond
         ((library? (car input-program))
          (set! program? #f)
+         (set! lib-name (lib:name (car input-program)))
          (set! lib-exports (lib:exports (car input-program)))
          (set! lib-imports (lib:imports (car input-program)))
          (set! input-program (lib:body (car input-program)))
@@ -103,18 +108,24 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
     
-      (set! globals (cons 'call/cc globals))
-      (set! input-program 
-        (cons
-          ;; call/cc must be written in CPS form, so it is added here
-          ;; TODO: prevents this from being optimized-out
-          ;; TODO: will this cause issues if another var is assigned to call/cc?
-          '(define call/cc
-            (lambda (k f) (f k (lambda (_ result) (k result)))))
-           (map 
-             (lambda (expr)
-               (cps-convert expr))
-             input-program)))
+      (let ((cps (map 
+                   (lambda (expr)
+                     (cps-convert expr))
+                   input-program)))
+        (cond
+         (program?
+           (set! globals (cons 'call/cc globals))
+           (set! input-program 
+             (cons
+               ;; call/cc must be written in CPS form, so it is added here
+               ;; TODO: prevents this from being optimized-out
+               ;; TODO: will this cause issues if another var is assigned to call/cc?
+               '(define call/cc
+                 (lambda (k f) (f k (lambda (_ result) (k result)))))
+                cps)))
+         (else
+           ;; Compiling a library, no need for call/cc yet
+           (set! input-program cps))))
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
 
@@ -168,7 +179,7 @@
           (exit)))
     
       (trace:info "---------------- C code:")
-      (mta:code-gen input-program globals program? lib-exports lib-imports)
+      (mta:code-gen input-program globals program? lib-name lib-exports lib-imports)
       (return '())))) ;; No codes to return
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
