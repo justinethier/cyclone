@@ -52,6 +52,7 @@
     (lambda (return)
       (define globals '())
       (define program? #t) ;; Are we building a program or a library?
+      (define imports '())
       (define lib-name '())
       (define lib-exports '())
       (define lib-imports '())
@@ -67,8 +68,11 @@
          (set! lib-name (lib:name (car input-program)))
          (set! lib-exports (lib:exports (car input-program)))
          (set! lib-imports (lib:imports (car input-program)))
-         (set! input-program (lib:body (car input-program)))
-         ;(error "TODO: I do not know how to compile a library")
+         (set! input-program (lib:body (car input-program))))
+        ((tagged-list? 'import (car input-program))
+         (set! imports (cdar input-program))
+         (set! input-program (cdr input-program))
+         ;(error (list 'imports (cdar input-program)))
         ))
 
       ;; TODO: how to handle stdlib when compiling a library??
