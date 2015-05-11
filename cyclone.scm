@@ -42,6 +42,11 @@
     (cdr code)))
 ;; TODO: include, include-ci, cond-expand
 
+(define (lib:import->filename import)
+ 'TODO) ;; resolve library filename from an import
+(define (lib:import->export-list)
+ ' TODO) ;; Read export list for a given import
+
 ;; END Library section
 
 ;; Code emission.
