@@ -55,7 +55,6 @@
       (define imports '())
       (define lib-name '())
       (define lib-exports '())
-      (define lib-imports '())
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
@@ -67,7 +66,7 @@
          (set! program? #f)
          (set! lib-name (lib:name (car input-program)))
          (set! lib-exports (lib:exports (car input-program)))
-         (set! lib-imports (lib:imports (car input-program)))
+         (set! imports (lib:imports (car input-program)))
          (set! input-program (lib:body (car input-program))))
         ((tagged-list? 'import (car input-program))
          (set! imports (cdar input-program))
@@ -183,7 +182,7 @@
           (exit)))
     
       (trace:info "---------------- C code:")
-      (mta:code-gen input-program globals program? lib-name lib-exports lib-imports)
+      (mta:code-gen input-program globals program? lib-name lib-exports imports)
       (return '())))) ;; No codes to return
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed

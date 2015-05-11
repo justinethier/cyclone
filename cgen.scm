@@ -916,7 +916,7 @@
                        "}\n"))
       formals*))))
   
-(define (mta:code-gen input-program globals program? lib-name lib-exports lib-imports)
+(define (mta:code-gen input-program globals program? lib-name lib-exports imports)
   (set! *global-syms* globals)
   (let ((compiled-program 
           (apply string-append
