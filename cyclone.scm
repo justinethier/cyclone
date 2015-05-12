@@ -30,6 +30,7 @@
       (define globals '())
       (define program? #t) ;; Are we building a program or a library?
       (define imports '())
+      (define imported-vars '())
       (define lib-name '())
       (define lib-exports '())
 
@@ -50,6 +51,18 @@
          (set! input-program (cdr input-program))
          ;(error (list 'imports (cdar input-program)))
         ))
+
+      ;; Process library imports
+      ;; TODO: this may not be good enough, may need to tag library
+      ;; imports uniquely to reduce issues when the same variable
+      ;; is used by multiple libraries, and to allow renaming of imports.
+      ;; As of now, that will have to be dealt with later.
+      (trace:info "imports:")
+      (trace:info imports)
+      ;; TODO: need to get basedir from env, this is just a placeholder
+      (set! imported-vars (lib:resolve-imports imports "examples/hello-library")) ;;"."))
+      (trace:info "resolved imports:")
+      (trace:info imported-vars)
 
       ;; TODO: how to handle stdlib when compiling a library??
       ;; either need to keep track of what was actually used,
@@ -79,7 +92,7 @@
       ; set!'s below, since all remaining phases operate on set!, not define.
       ;
       ; TODO: consider moving some of this alpha-conv logic below back into trans?
-      (set! globals (global-vars input-program))
+      (set! globals (append imported-vars (global-vars input-program)))
       (set! input-program 
         (map
           (lambda (expr)

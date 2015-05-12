@@ -1774,15 +1774,21 @@
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
   (apply string-append (map mangle name)))
+;; Helper function that returns an empty list as a default value
+(define (lib:result result)
+  (if result result '()))
 (define (lib:exports ast)
-  (and-let* ((code (assoc 'export (cddr ast))))
-    (cdr code)))
+  (lib:result 
+    (and-let* ((code (assoc 'export (cddr ast))))
+      (cdr code))))
 (define (lib:imports ast)
-  (and-let* ((code (assoc 'import (cddr ast))))
-    (cdr code)))
+  (lib:result
+    (and-let* ((code (assoc 'import (cddr ast))))
+      (cdr code))))
 (define (lib:body ast)
-  (and-let* ((code (assoc 'begin (cddr ast))))
-    (cdr code)))
+  (lib:result
+    (and-let* ((code (assoc 'begin (cddr ast))))
+      (cdr code))))
 ;; TODO: include, include-ci, cond-expand
 
 ;; resolve library filename from an import
@@ -1803,6 +1809,14 @@
          (exports (lib:exports (car lib))))
     (close-input-port fp)
     exports))
+;; Take a list of imports and resolve it to the imported vars
+(define (lib:resolve-imports imports basedir)
+ (apply
+   append
+   (map 
+     (lambda (import)
+       (lib:import->export-list import basedir))
+     imports)))
 
 ;; END Library section
 
