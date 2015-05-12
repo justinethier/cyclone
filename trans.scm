@@ -1801,6 +1801,9 @@
           (string-append "/" (symbol->string i)))
         import))
     ".sld"))
+;; Resolve, EG: (libs lib2) ==> lib2.o
+(define (lib:import->obj-file import)
+ 'TODO)
 ;; Read export list for a given import
 (define (lib:import->export-list import basedir)
   (let* ((dir (string-append basedir (lib:import->filename import)))

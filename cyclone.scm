@@ -28,6 +28,7 @@
   (call/cc 
     (lambda (return)
       (define globals '())
+      (define module-globals '()) ;; Globals defined by this module
       (define program? #t) ;; Are we building a program or a library?
       (define imports '())
       (define imported-vars '())
@@ -92,7 +93,8 @@
       ; set!'s below, since all remaining phases operate on set!, not define.
       ;
       ; TODO: consider moving some of this alpha-conv logic below back into trans?
-      (set! globals (append imported-vars (global-vars input-program)))
+      (set! module-globals (global-vars input-program))
+      (set! globals (append imported-vars module-globals))
       (set! input-program 
         (map
           (lambda (expr)
@@ -108,6 +110,7 @@
         (cond
          (program?
            (set! globals (cons 'call/cc globals))
+           (set! module-globals (cons 'call/cc module-globals))
            (set! input-program 
              (cons
                ;; call/cc must be written in CPS form, so it is added here
@@ -172,7 +175,12 @@
           (exit)))
     
       (trace:info "---------------- C code:")
-      (mta:code-gen input-program globals program? lib-name lib-exports imports)
+      (mta:code-gen input-program 
+                    program? 
+                    lib-name 
+                    lib-exports 
+                    imported-vars
+                    module-globals) 
       (return '())))) ;; No codes to return
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
@@ -223,6 +231,7 @@
       (if program?
         (system 
           ;; -I is a hack, real answer is to use 'make install' to place .h file
+TODO: need to link to object files from lib:import->obj-file
           (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file))
         (system
           (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o"))))))

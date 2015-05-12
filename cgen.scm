@@ -164,16 +164,6 @@
       assign (number->string n) ";")
     ""))
 
-(define (c-macro-declare-globals)
-  (for-each
-      (lambda (global)
-        (emits "object ")
-        (emits (mangle-global (car global)))
-        (emits " = nil;\n"))
-      *globals*)
-  (emit "")
-  (emit ""))
-
 ;;; Compilation routines.
 
 ;; Return generated code that also requests allocation of C variables on stack
@@ -916,14 +906,33 @@
                        "}\n"))
       formals*))))
   
-(define (mta:code-gen input-program globals program? lib-name lib-exports imports)
-  (set! *global-syms* globals)
+(define (mta:code-gen input-program 
+                      program? 
+                      lib-name 
+                      lib-exports 
+                      imported-globals
+                      globals)
+  (set! *global-syms* (append globals imported-globals))
   (let ((compiled-program 
           (apply string-append
             (map c-compile-program input-program))))
     (emit-c-arity-macros 0)
     (emit "#include \"cyclone.h\"")
-    (c-macro-declare-globals)
+
+    ;; Globals defined in this module
+    (for-each
+        (lambda (global)
+          (emits "object ")
+          (emits (mangle-global (car global)))
+          (emits " = nil;\n"))
+        *globals*)
+    ;; Globals defined by another module
+    (for-each
+        (lambda (global)
+          (emits "extern object ")
+          (emits (mangle-global global))
+          (emits ";\n"))
+        imported-globals)
     (emit "#include \"runtime.h\"")
 
     (if program?
