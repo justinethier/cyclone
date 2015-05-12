@@ -21,34 +21,6 @@
    (load "trans.scm")
    (load "cgen.scm")))
 
-;; Library section
-;; A quicky-and-dirty (for now) implementation of r7rs libraries
-;; TODO: relocate this somewhere else, once it works. Ideally
-;;       somewhere accessible to the interpreter
-(define (library? ast)
-  (tagged-list? 'define-library ast))
-(define (lib:name ast) (cadr ast))
-;; Convert name (as list of symbols) to a mangled string
-(define (lib:name->string name)
-  (apply string-append (map mangle name)))
-(define (lib:exports ast)
-  (and-let* ((code (assoc 'export (cddr ast))))
-    (cdr code)))
-(define (lib:imports ast)
-  (and-let* ((code (assoc 'import (cddr ast))))
-    (cdr code)))
-(define (lib:body ast)
-  (and-let* ((code (assoc 'begin (cddr ast))))
-    (cdr code)))
-;; TODO: include, include-ci, cond-expand
-
-(define (lib:import->filename import)
- 'TODO) ;; resolve library filename from an import
-(define (lib:import->export-list)
- ' TODO) ;; Read export list for a given import
-
-;; END Library section
-
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void

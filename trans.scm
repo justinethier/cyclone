@@ -1764,6 +1764,48 @@
  `(lambda ()
     ,(convert exp #f '())))
 
+;; Library section
+;; A quicky-and-dirty (for now) implementation of r7rs libraries
+;; TODO: relocate this somewhere else, once it works. Ideally
+;;       somewhere accessible to the interpreter
+(define (library? ast)
+  (tagged-list? 'define-library ast))
+(define (lib:name ast) (cadr ast))
+;; Convert name (as list of symbols) to a mangled string
+(define (lib:name->string name)
+  (apply string-append (map mangle name)))
+(define (lib:exports ast)
+  (and-let* ((code (assoc 'export (cddr ast))))
+    (cdr code)))
+(define (lib:imports ast)
+  (and-let* ((code (assoc 'import (cddr ast))))
+    (cdr code)))
+(define (lib:body ast)
+  (and-let* ((code (assoc 'begin (cddr ast))))
+    (cdr code)))
+;; TODO: include, include-ci, cond-expand
+
+;; resolve library filename from an import
+(define (lib:import->filename import)
+  (string-append
+    (apply
+      string-append
+      (map 
+        (lambda (i) 
+          (string-append "/" (symbol->string i)))
+        import))
+    ".sld"))
+;; Read export list for a given import
+(define (lib:import->export-list import basedir)
+  (let* ((dir (string-append basedir (lib:import->filename import)))
+         (fp (open-input-file dir))
+         (lib (read-all fp))
+         (exports (lib:exports (car lib))))
+    (close-input-port fp)
+    exports))
+
+;; END Library section
+
 ; Suitable definitions for the cell functions:
 ;(define (cell value) (lambda (get? new-value) 
 ;                       (if get? value (set! value new-value))))
