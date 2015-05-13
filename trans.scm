@@ -1807,6 +1807,13 @@
 (define (lib:import->obj-file import)
   (string-append (symbol->string (car (reverse import))) ".o"))
 
+
+; !!!!!!!!!!!!!!!!!!!!!!!!
+;TODO: all this basedir stuff below is silly. all we need is a way of saying OK, this
+; is a system library so use cyc:get-lib-dir to find it. I think basedir just goes away
+; at that point
+
+
 ;; Given a program's import set, resolve each import to its .o file, then
 ;; process each import recursively to get the .o files that each one of those
 ;; libs requires. will probably need to prune duplicates from completed list.
