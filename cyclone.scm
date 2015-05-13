@@ -231,7 +231,7 @@
       (if program?
         (system 
           ;; -I is a hack, real answer is to use 'make install' to place .h file
-TODO: need to link to object files from lib:import->obj-file
+;TODO: need to link to object files from lib:import->obj-file
           (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file))
         (system
           (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o"))))))

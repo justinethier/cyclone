@@ -1802,8 +1802,21 @@
         import))
     ".sld"))
 ;; Resolve, EG: (libs lib2) ==> lib2.o
+;; Thing is though, what if a library includes another library? now the
+;; program needs to link to both .o files
 (define (lib:import->obj-file import)
- 'TODO)
+  (string-append (symbol->string (car (reverse import))) ".o"))
+
+;; TODO: for a program import set, resolve each to their .o files, then
+;; process each import recursively to get the .o files that each one of those
+;; libs requires. will probably need to prune duplicates from completed list.
+;; longer-term, do we want to look at file timestamps to see if files need to
+;; be recompiled?
+(define (lib:imports->objs imports)
+  (for-each
+    (lambda (i)
+      TODO)
+    imports)
 ;; Read export list for a given import
 (define (lib:import->export-list import basedir)
   (let* ((dir (string-append basedir (lib:import->filename import)))
