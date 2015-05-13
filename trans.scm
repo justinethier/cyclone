@@ -1812,11 +1812,20 @@
 ;; libs requires. will probably need to prune duplicates from completed list.
 ;; longer-term, do we want to look at file timestamps to see if files need to
 ;; be recompiled?
-(define (lib:imports->objs imports)
-  (for-each
+(define (lib:imports->objs imports basedir)
+  (map
     (lambda (i)
-      TODO)
-    imports)
+      (append (lib:imports->objs (lib:read-imports i basedir))
+              (lib:import->obj-file i)))
+    imports))
+(define (lib:read-imports import basedir)
+  (let* ((dir (string-append basedir (lib:import->filename import)))
+         (fp (open-input-file dir))
+         (lib (read-all fp))
+         (imports (lib:imports (car lib))))
+    (close-input-port fp)
+    imports))
+
 ;; Read export list for a given import
 (define (lib:import->export-list import basedir)
   (let* ((dir (string-append basedir (lib:import->filename import)))

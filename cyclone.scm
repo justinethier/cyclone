@@ -228,13 +228,16 @@
 
     ;; Compile the generated C file
     (if cc?
-      (if program?
-        (system 
-          ;; -I is a hack, real answer is to use 'make install' to place .h file
-;TODO: need to link to object files from lib:import->obj-file
-          (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file))
-        (system
-          (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o"))))))
+      (cond
+        (program?
+; TODO:          (write `(DEBUG ,(lib:imports->objs (cdar input-program) ".")))
+          (system 
+            ;; -I is a hack, real answer is to use 'make install' to place .h file
+;TODO: n  eed to link to object files from lib:import->obj-file
+            (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file)))
+        (else
+          (system
+            (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o")))))))
           
 
 ;; Handle command line arguments
