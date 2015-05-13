@@ -230,7 +230,7 @@
     (if cc?
       (cond
         (program?
-; TODO:          (write `(DEBUG ,(lib:imports->objs (cdar input-program) ".")))
+          (write `(DEBUG ,(lib:imports->objs (cdar in-prog) ".")))
           (system 
             ;; -I is a hack, real answer is to use 'make install' to place .h file
 ;TODO: n  eed to link to object files from lib:import->obj-file
