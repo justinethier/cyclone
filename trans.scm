@@ -1791,7 +1791,7 @@
       (cdr code))))
 ;; TODO: include, include-ci, cond-expand
 
-;; resolve library filename from an import
+;; Resolve library filename from an import. Assumes ".sld" extension.
 (define (lib:import->filename import)
   (string-append
     (apply
@@ -1801,23 +1801,30 @@
           (string-append "/" (symbol->string i)))
         import))
     ".sld"))
-;; Resolve, EG: (libs lib2) ==> lib2.o
-;; Thing is though, what if a library includes another library? now the
-;; program needs to link to both .o files
+
+;; Resolve a single import to its corresponding object file.
+;; EG: (libs lib2) ==> "lib2.o"
 (define (lib:import->obj-file import)
   (string-append (symbol->string (car (reverse import))) ".o"))
 
-;; TODO: for a program import set, resolve each to their .o files, then
+;; Given a program's import set, resolve each import to its .o file, then
 ;; process each import recursively to get the .o files that each one of those
 ;; libs requires. will probably need to prune duplicates from completed list.
-;; longer-term, do we want to look at file timestamps to see if files need to
+;; Longer-term, do we want to look at file timestamps to see if files need to
 ;; be recompiled?
 (define (lib:imports->objs imports basedir)
-  (map
-    (lambda (i)
-      (append (lib:imports->objs (lib:read-imports i basedir))
-              (lib:import->obj-file i)))
-    imports))
+  (apply
+    append
+    (map
+      (lambda (i)
+        (cons
+          (lib:import->obj-file i)
+          (lib:imports->objs (lib:read-imports i basedir) basedir)
+        ))
+      imports)))
+
+;; Given a single import from an import-set, open the corresponding
+;; library file and retrieve the library's import-set.
 (define (lib:read-imports import basedir)
   (let* ((dir (string-append basedir (lib:import->filename import)))
          (fp (open-input-file dir))
@@ -1834,6 +1841,7 @@
          (exports (lib:exports (car lib))))
     (close-input-port fp)
     exports))
+
 ;; Take a list of imports and resolve it to the imported vars
 (define (lib:resolve-imports imports basedir)
  (apply
