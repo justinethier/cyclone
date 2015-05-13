@@ -238,10 +238,11 @@
         (program?
 ; TODO: if there is an (import)
 ;          (write `(DEBUG ,(lib:imports->objs (cdar in-prog) ".")))
-          (system 
-            ;; -I is a hack, real answer is to use 'make install' to place .h file
+          (let ((objs-str "")) ;; TODO: populate using above (if prog) and link to objs below (will need to run 2 gcc commands)
+            (system 
+              ;; -I is a hack, real answer is to use 'make install' to place .h file
 ;TODO: need to link to object files from lib:import->obj-file
-            (string-append "gcc " src-file " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))
+              (string-append "gcc " src-file " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file))))
         (else
           (system
             (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))))))
