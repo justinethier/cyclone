@@ -8,6 +8,8 @@
 ;; TODO: will need to read these from env somehow.
 ;; for now they are just hard-coded, but that won't work for an install
 (define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
+(define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
+(define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
 
 (cond-expand
  (chicken
@@ -234,14 +236,15 @@
     (if cc?
       (cond
         (program?
-          (write `(DEBUG ,(lib:imports->objs (cdar in-prog) ".")))
+; TODO: if there is an (import)
+;          (write `(DEBUG ,(lib:imports->objs (cdar in-prog) ".")))
           (system 
             ;; -I is a hack, real answer is to use 'make install' to place .h file
-;TODO: n  eed to link to object files from lib:import->obj-file
-            (string-append "gcc " src-file " -L. -lcyclone -lm -I. -g -o " exec-file)))
+;TODO: need to link to object files from lib:import->obj-file
+            (string-append "gcc " src-file " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))
         (else
           (system
-            (string-append "gcc " src-file " -I. -g -c -o " exec-file ".o")))))))
+            (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))))))
           
 
 ;; Handle command line arguments
