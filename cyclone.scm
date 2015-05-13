@@ -5,21 +5,25 @@
 ;; This module contains a front-end for the compiler itself.
 ;;
 
+;; TODO: will need to read these from env somehow.
+;; for now they are just hard-coded, but that won't work for an install
+(define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
+
 (cond-expand
  (chicken
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
-   (load "parser.so")
-   (load "trans.so")
-   (load "cgen.so"))
+   (load (string-append (cyc:get-lib-dir) "parser.so"))
+   (load (string-append (cyc:get-lib-dir) "trans.so"))
+   (load (string-append (cyc:get-lib-dir) "cgen.so")))
 ; (husk
 ;   (import (husk pretty-print))
 ;   ;; TODO: load files
 ; )
  (else
-   (load "parser.scm")
-   (load "trans.scm")
-   (load "cgen.scm")))
+   (load (string-append (cyc:get-lib-dir) "parser.scm"))
+   (load (string-append (cyc:get-lib-dir) "trans.scm"))
+   (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
 
 ;; Code emission.
   
