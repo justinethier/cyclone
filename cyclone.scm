@@ -233,19 +233,23 @@
         (create-c-file program)))) ;; TODO: no, don't do same work twice. real answer is linking
 
     ;; Compile the generated C file
+    ;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
     (if cc?
       (cond
         (program?
-; TODO: if there is an (import)
-;          (write `(DEBUG ,(lib:imports->objs (cdar in-prog) ".")))
           (let ((objs-str 
                   (if (tagged-list? 'import (car in-prog))
-                    TODO: lib:imports->objs;; TODO: populate using above (if prog) and link to objs below (will need to run 2 gcc commands)
+                    (apply string-append
+                           (map
+                             (lambda (str)
+                               (string-append " " str " "))
+                           (lib:imports->objs (cdar in-prog) ".")))
                     ""))) 
-            (system 
-              ;; -I is a hack, real answer is to use 'make install' to place .h file
-;TODO: need to link to object files from lib:import->obj-file
-              (string-append "gcc " src-file " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file))))
+            (if (equal? 0 
+                  (system
+                    (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))
+              (system 
+                (string-append "gcc " exec-file ".o " objs-str " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))))
         (else
           (system
             (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))))))
