@@ -1791,22 +1791,23 @@
       (cdr code))))
 ;; TODO: include, include-ci, cond-expand
 
-;; Resolve library filename from an import. Assumes ".sld" extension.
-(define (lib:import->filename import)
-  (string-append
-    (apply
-      string-append
-      (map 
-        (lambda (i) 
-          (string-append "/" (symbol->string i)))
-        import))
-    ".sld"))
-
-;; Resolve a single import to its corresponding object file.
-;; EG: (libs lib2) ==> "lib2.o"
-(define (lib:import->obj-file import)
-  (string-append (symbol->string (car (reverse import))) ".o"))
-
+;; Resolve library filename given an import. 
+;; Assumes ".sld" file extension if one is not specified.
+(define (lib:import->filename import . ext)
+  (let* ((file-ext 
+          (if (null? ext)
+              ".sld"
+              (car ext)))
+         (filename
+          (string-append
+            (apply
+              string-append
+              (map 
+                (lambda (i) 
+                  (string-append "/" (symbol->string i)))
+                import))
+            file-ext)))
+    (substring filename 1 (string-length filename))))
 
 ; !!!!!!!!!!!!!!!!!!!!!!!!
 ;TODO: all this basedir stuff below is silly. all we need is a way of saying OK, this
@@ -1825,7 +1826,7 @@
     (map
       (lambda (i)
         (cons
-          (lib:import->obj-file i)
+          (lib:import->filename i ".o")
           (lib:imports->objs (lib:read-imports i basedir) basedir)
         ))
       imports)))
@@ -1833,7 +1834,7 @@
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
 (define (lib:read-imports import basedir)
-  (let* ((dir (string-append basedir (lib:import->filename import)))
+  (let* ((dir (string-append basedir "/" (lib:import->filename import)))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (imports (lib:imports (car lib))))
@@ -1842,7 +1843,7 @@
 
 ;; Read export list for a given import
 (define (lib:import->export-list import basedir)
-  (let* ((dir (string-append basedir (lib:import->filename import)))
+  (let* ((dir (string-append basedir "/" (lib:import->filename import)))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
