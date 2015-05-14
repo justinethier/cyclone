@@ -48,11 +48,22 @@
 
       (cond
         ((library? (car input-program))
-         (set! program? #f)
-         (set! lib-name (lib:name (car input-program)))
-         (set! lib-exports (lib:exports (car input-program)))
-         (set! imports (lib:imports (car input-program)))
-         (set! input-program (lib:body (car input-program))))
+         (let ((includes (lib:includes (car input-program))))
+           (set! program? #f)
+           (set! lib-name (lib:name (car input-program)))
+           (set! lib-exports (lib:exports (car input-program)))
+           (set! imports (lib:imports (car input-program)))
+           (set! input-program (lib:body (car input-program)))
+           ;; Prepend any included files into the begin section
+           (if (not (null? includes))
+             (for-each
+               (lambda (include)
+                 (set! input-program 
+                       (append (read-file (string-append 
+                                            (lib:import->path lib-name) 
+                                            include)) 
+                               input-program)))
+               includes))))
         ((tagged-list? 'import (car input-program))
          (set! imports (cdar input-program))
          (set! input-program (cdr input-program))
