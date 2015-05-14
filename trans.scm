@@ -1781,8 +1781,22 @@
          (filename
            (substring filename* 1 (string-length filename*))))
     (if (tagged-list? 'scheme import)
-      (string-append (cyc:get-lib-dir filename)) ;; Built-in library
+      (string-append (cyc:get-lib-dir) filename) ;; Built-in library
       filename)))
+
+;; Get path to directory that contains the library
+(define (lib:import->path import)
+  (let* ((import-path (reverse (cdr (reverse import))))
+         (path
+           (apply
+             string-append
+             (map 
+               (lambda (i) 
+                 (string-append (symbol->string i) "/"))
+               import-path))))
+    (if (tagged-list? 'scheme import)
+      (string-append (cyc:get-lib-dir) path) ;; Built-in library
+      path)))
 
 ; !!!!!!!!!!!!!!!!!!!!!!!!
 ;TODO: all this basedir stuff below is silly. all we need is a way of saying OK, this
