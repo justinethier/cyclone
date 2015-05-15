@@ -78,7 +78,7 @@
       (trace:info "imports:")
       (trace:info imports)
       ;; TODO: need to get basedir from env, this is just a placeholder
-      (set! imported-vars (lib:resolve-imports imports "."))
+      (set! imported-vars (lib:resolve-imports imports))
       (trace:info "resolved imports:")
       (trace:info imported-vars)
 
@@ -254,7 +254,7 @@
                            (map
                              (lambda (str)
                                (string-append " " str " "))
-                           (lib:imports->objs (cdar in-prog) ".")))
+                           (lib:imports->objs (cdar in-prog))))
                     ""))) 
             (if (equal? 0 
                   (system

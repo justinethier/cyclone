@@ -1622,32 +1622,26 @@
       (string-append (cyc:get-lib-dir) path) ;; Built-in library
       path)))
 
-; !!!!!!!!!!!!!!!!!!!!!!!!
-;TODO: all this basedir stuff below is silly. all we need is a way of saying OK, this
-; is a system library so use cyc:get-lib-dir to find it. I think basedir just goes away
-; at that point
-
-
 ;; Given a program's import set, resolve each import to its .o file, then
 ;; process each import recursively to get the .o files that each one of those
 ;; libs requires. will probably need to prune duplicates from completed list.
 ;; Longer-term, do we want to look at file timestamps to see if files need to
 ;; be recompiled?
-(define (lib:imports->objs imports basedir)
+(define (lib:imports->objs imports)
   (apply
     append
     (map
       (lambda (i)
         (cons
           (lib:import->filename i ".o")
-          (lib:imports->objs (lib:read-imports i basedir) basedir)
+          (lib:imports->objs (lib:read-imports i))
         ))
       imports)))
 
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
-(define (lib:read-imports import basedir)
-  (let* ((dir (string-append basedir "/" (lib:import->filename import)))
+(define (lib:read-imports import)
+  (let* ((dir (lib:import->filename import))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (imports (lib:imports (car lib))))
@@ -1655,8 +1649,8 @@
     imports))
 
 ;; Read export list for a given import
-(define (lib:import->export-list import basedir)
-  (let* ((dir (string-append basedir "/" (lib:import->filename import)))
+(define (lib:import->export-list import)
+  (let* ((dir (string-append (lib:import->filename import)))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
@@ -1664,12 +1658,12 @@
     exports))
 
 ;; Take a list of imports and resolve it to the imported vars
-(define (lib:resolve-imports imports basedir)
+(define (lib:resolve-imports imports)
  (apply
    append
    (map 
      (lambda (import)
-       (lib:import->export-list import basedir))
+       (lib:import->export-list import))
      imports)))
 
 ;; END Library section
