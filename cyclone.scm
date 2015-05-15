@@ -77,7 +77,6 @@
       ;; As of now, that will have to be dealt with later.
       (trace:info "imports:")
       (trace:info imports)
-      ;; TODO: need to get basedir from env, this is just a placeholder
       (set! imported-vars (lib:resolve-imports imports))
       (trace:info "resolved imports:")
       (trace:info imported-vars)
