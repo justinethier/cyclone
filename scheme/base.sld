@@ -1,5 +1,51 @@
 (define-library (scheme base)
   (export
+    *Cyc-version-banner*
+    call-with-current-continuation
+    call/cc
+    ;(Cyc-bin-op cmp x lst)
+    ;(Cyc-bin-op-char cmp c cs)
+    char=?
+    char<?
+    char>?
+    char<=?
+    char>=?
+    char-upcase
+    char-downcase
+    char-alphabetic?
+    char-upper-case?
+    char-lower-case?
+    char-numeric?
+    char-whitespace?
+    digit-value
+    foldl
+    foldr
+    not
+    list?
+    zero?
+    positive?
+    negative?
+    append
+    list
+    make-list
+    list-copy
+    map
+    for-each
+    list-tail
+    list-ref
+    list-set!
+    reverse
+    boolean=?
+    symbol=?
+    Cyc-obj=?
+    make-string
+    error
+    raise
+    raise-continuable
+    with-exception-handler
+    *exception-handler-stack*
+    Cyc-add-exception-handler
+    Cyc-remove-exception-handler
   )
   (include "cyclone.scm")
   (begin
