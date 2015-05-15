@@ -1,6 +1,9 @@
 (define-library (scheme base)
   (export
     *Cyc-version-banner*
+    ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
+    ;delete
+    ;delete-duplicates
     call-with-current-continuation
     call/cc
     ;(Cyc-bin-op cmp x lst)
