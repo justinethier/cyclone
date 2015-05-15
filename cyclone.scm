@@ -249,11 +249,13 @@
         (program?
           (let ((objs-str 
                   (if (tagged-list? 'import (car in-prog))
-                    (apply string-append
-                           (map
-                             (lambda (str)
-                               (string-append " " str " "))
-                           (lib:imports->objs (cdar in-prog))))
+                    (apply 
+                      string-append
+                      (delete-duplicates
+                        (map
+                          (lambda (str)
+                            (string-append " " str " "))
+                        (lib:imports->objs (cdar in-prog)))))
                     ""))) 
             (if (equal? 0 
                   (system
