@@ -125,7 +125,7 @@
                      (cps-convert expr))
                    input-program)))
         (cond
-         (program?
+         ((and library? (equal? lib-name '(scheme base)))
            (set! globals (cons 'call/cc globals))
            (set! module-globals (cons 'call/cc module-globals))
            (set! input-program 
@@ -137,7 +137,7 @@
                  (lambda (k f) (f k (lambda (_ result) (k result)))))
                 cps)))
          (else
-           ;; Compiling a library, no need for call/cc yet
+           ;; No need for call/cc yet
            (set! input-program cps))))
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
