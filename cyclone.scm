@@ -86,7 +86,7 @@
       ;; either need to keep track of what was actually used,
       ;; or just assume all imports were used and include them
       ;; in final compiled program
-      (set! input-program (add-libs input-program))
+      ;(set! input-program (add-libs input-program))
     
       (set! input-program (expand input-program))
       (trace:info "---------------- after macro expansion:")

@@ -7,7 +7,7 @@
 (define-library (libs lib1)
     (export lib1-hello lib1-test)
     (include "lib1.scm")
-    (import ;(scheme base)
+    (import (scheme base)
             ;(scheme write)
             (libs lib2))
     (begin
