@@ -48,6 +48,8 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 #	gcc examples/hello-library/int-test/hello.c -I. -g -c -o hello.o
 #	gcc hello.o lib2.o -L. -lcyclone -lm -o hello
 #	gcc examples/hello-library/hello.c -L. -lcyclone -lm -I. -g -o hello
+# TODO: will need to manually compile hello example. need to manually add the entry points to hello, and there is an issue in the libs with Cyc_global_vars not being assigned. but this still leads to a tag error so there must be other issues...
+#gcc hello.o  libs/lib1.o  /home/justin/Documents/cyclone/scheme/base.o  libs/lib2.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o hello
 
 icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
 	./cyclone icyc.scm
