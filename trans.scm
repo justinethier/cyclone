@@ -899,7 +899,8 @@
        (append
          (reverse globals)
          (expand 
-          `((begin ,@(reverse exprs))))))
+          ;; 0 to ensure we always create a meaningful top-level
+          `((begin 0 ,@(reverse exprs))))))
       (else
        (cond
          ((define? (car top-lvl))
