@@ -14,4 +14,5 @@
         (define (internal-func)
             (write lib2-hello))
         (define (lib1-hello)
-            (internal-func))))
+            (internal-func)
+            1)))

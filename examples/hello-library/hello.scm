@@ -5,5 +5,7 @@
         ;(rename (prefix (libs lib1) test-))
         )
 
+(write "hello")
 ;(test-lib1-hello)
 (write lib1-hello)
+(write "world")
