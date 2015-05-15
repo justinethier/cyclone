@@ -33,4 +33,16 @@
 ;; Features implemented by this Scheme
 (define *features* '(cyclone))
 
+;; Based off corresponding SRFI-1 definition
+(define (delete x lis)
+  (filter (lambda (y) (not (equal? x y))) lis))
 
+;; Inefficient version based off code from SRFI-1
+(define (delete-duplicates lis)
+  (define (recur lis) ; ((lis lis))
+    (if (null? lis) lis
+        (let* ((x (car lis))
+               (tail (cdr lis))
+               (new-tail (recur (delete x tail))))
+          (if (eq? tail new-tail) lis (cons x new-tail)))))
+  (recur lis))
