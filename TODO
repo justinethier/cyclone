@@ -1,4 +1,19 @@
 Working TODO list:
+ 
+ - Issues with library hello example:
+
+1) Need to manually assign Cyc_global_variables in lib2.c
+2) Need to add this manually, need to compute it:
+
+    static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+    
+      c_schemebase_entry_pt(argc, env,cont);
+      c_libslib1_entry_pt(argc, env, cont);
+      c_libslib2_entry_pt(argc, env, cont);
+    
+      return_check0(__lambda_3);
+    }
+3) __glo_lib1_91hello has a bad tag. it looks like GC might be overwriting it. WTF?????
 
  - Reduction in size of generated code
    is there anything we can do?
