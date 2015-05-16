@@ -42,14 +42,21 @@ test: $(TESTFILES) cyclone
 # A temporary testing directive
 .PHONY: test2
 test2: examples/hello-library/int-test/hello.c libcyclone.a
-	./cyclone -t examples/hello-library/libs/lib2.sld
-	./cyclone -t examples/hello-library/hello.scm
+	./cyclone scheme/base.sld
+	cd examples/hello-library ; ../../cyclone libs/lib1.sld
+	cd examples/hello-library ; ../../cyclone libs/lib2.sld
+	cd examples/hello-library ; ../../cyclone hello.scm
 #	gcc examples/hello-library/int-test/lib2.c -I. -g -c -o lib2.o
 #	gcc examples/hello-library/int-test/hello.c -I. -g -c -o hello.o
 #	gcc hello.o lib2.o -L. -lcyclone -lm -o hello
 #	gcc examples/hello-library/hello.c -L. -lcyclone -lm -I. -g -o hello
 # TODO: will need to manually compile hello example. need to manually add the entry points to hello, and there is an issue in the libs with Cyc_global_vars not being assigned. but this still leads to a tag error so there must be other issues...
-#gcc hello.o  libs/lib1.o  /home/justin/Documents/cyclone/scheme/base.o  libs/lib2.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o hello
+.PHONY: test3
+test3:
+	gcc scheme/base.c -I/home/justin/Documents/cyclone/ -g -c -o scheme/base.o
+	cd examples/hello-library ; gcc libs/lib1.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib1.o
+	cd examples/hello-library ; gcc libs/lib2.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib2.o
+	cd examples/hello-library ; gcc hello.o  libs/lib1.o  /home/justin/Documents/cyclone/scheme/base.o  libs/lib2.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o hello
 
 icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
 	./cyclone icyc.scm
