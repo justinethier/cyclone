@@ -56,6 +56,7 @@ test3:
 	gcc scheme/base.c -I/home/justin/Documents/cyclone/ -g -c -o scheme/base.o
 	cd examples/hello-library ; gcc libs/lib1.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib1.o
 	cd examples/hello-library ; gcc libs/lib2.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib2.o
+	cd examples/hello-library ; gcc hello.c -I/home/justin/Documents/cyclone/ -g -c -o hello.o
 	cd examples/hello-library ; gcc hello.o  libs/lib1.o  /home/justin/Documents/cyclone/scheme/base.o  libs/lib2.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o hello
 
 icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
