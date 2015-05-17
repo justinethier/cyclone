@@ -6,24 +6,6 @@
  **
  **/
 
-#define funcall0(cfn) ((cfn)->fn)(0,cfn)
-/* Return to continuation after checking for stack overflow. */
-#define return_funcall0(cfn) \
-{char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
-     object buf[0]; \
-     GC(cfn,buf,0); return; \
- } else {funcall0((closure) (cfn)); return;}}
-
-/* Evaluate an expression after checking for stack overflow. */
-#define return_check0(_fn) { \
- char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
-     object buf[0];  \
-     mclosure0(c1, _fn); \
-     GC(&c1, buf, 0); return; \
- } else { (_fn)(0,(closure)_fn); }}
-
 #define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
 /* Return to continuation after checking for stack overflow. */
 #define return_funcall1(cfn,a1) \
@@ -61,6 +43,9 @@
  } else { (_fn)(2,(closure)_fn,a1,a2); }}
 
 #include "cyclone.h"
+object __glo_lib1_91hello = nil;
+object __glo_internal_91func = nil;
+object __glo_lib1_91test = nil;
 extern object __glo__85Cyc_91version_91banner_85;
 extern object __glo_call_91with_91current_91continuation;
 extern object __glo_call_95cc;
@@ -105,46 +90,50 @@ extern object __glo_with_91exception_91handler;
 extern object __glo__85exception_91handler_91stack_85;
 extern object __glo_Cyc_91add_91exception_91handler;
 extern object __glo_Cyc_91remove_91exception_91handler;
-extern object __glo_lib1_91hello;
-extern object __glo_lib1_91test;
+extern object __glo_lib2_91hello;
 #include "runtime.h"
-#include "runtime-main.h"
-static void __lambda_3(int argc, closure _) ;
-static void __lambda_2(int argc, closure _,object r_731) ;
-static void __lambda_1(int argc, closure _,object r_732) ;
-static void __lambda_0(int argc, closure _,object r_733) ;
+void __lambda_2(int argc, closure _,object k_738) ;
+void __lambda_1(int argc, object self_7310, object r_739) ;
+void __lambda_0(int argc, closure _,object k_735) ;
 
-static void __lambda_3(int argc, closure _) {
-  make_int(c_7318, 0);
-return_check1(__lambda_2,&c_7318);; 
+void __lambda_2(int argc, closure _,object k_738) {
+  
+closureN_type c_7318;
+c_7318.tag = closureN_tag;
+ c_7318.fn = __lambda_1;
+c_7318.num_elt = 1;
+c_7318.elts = (object *)alloca(sizeof(object) * 1);
+c_7318.elts[0] = k_738;
+
+return_funcall1(  __glo_internal_91func,  &c_7318);; 
 }
 
-static void __lambda_2(int argc, closure _,object r_731) {
-  make_string(c_7317, "hello");
-return_check1(__lambda_1,Cyc_write(&c_7317));; 
+void __lambda_1(int argc, object self_7310, object r_739) {
+  
+make_int(c_7321, 1);
+return_funcall1(  ((closureN)self_7310)->elts[0],  &c_7321);; 
 }
 
-static void __lambda_1(int argc, closure _,object r_732) {
-  return_check1(__lambda_0,Cyc_write(__glo_lib1_91hello));; 
+void __lambda_0(int argc, closure _,object k_735) {
+  return_funcall1(  k_735,  Cyc_write(__glo_lib2_91hello));; 
 }
 
-static void __lambda_0(int argc, closure _,object r_733) {
-  make_string(c_7312, "world");
-  __halt(Cyc_write(&c_7312)); 
-}
+void c_libslib1_entry_pt(argc, env,cont) int argc; closure env,cont; { 
 
-static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+  add_global((object *) &__glo_lib1_91hello);
+  add_global((object *) &__glo_internal_91func);
+  add_global((object *) &__glo_lib1_91test);
+  mclosure0(c_7316, (function_type)__lambda_2); 
+  __glo_lib1_91hello = &c_7316; 
+  mclosure0(c_7312, (function_type)__lambda_0); 
+  __glo_internal_91func = &c_7312; 
+  make_string(c_7311, "test of include from a library"); 
+  __glo_lib1_91test = &c_7311; 
 
-  c_schemebase_entry_pt(argc, env,cont);
-  c_libslib1_entry_pt(argc, env, cont);
-  c_libslib2_entry_pt(argc, env, cont);
-
-  return_check0(__lambda_3);
-}
-main(int argc,char **argv)
-{long stack_size = long_arg(argc,argv,"-s",STACK_SIZE);
- long heap_size = long_arg(argc,argv,"-h",HEAP_SIZE);
- global_stack_size = stack_size;
- global_heap_size = heap_size;
- main_main(stack_size,heap_size,(char *) &stack_size);
- return 0;}
+  make_cvar(cvar_7325, (object *)&__glo_lib1_91hello);make_cons(pair_7326, find_or_add_symbol("lib1-hello"), &cvar_7325);
+  make_cvar(cvar_7327, (object *)&__glo_internal_91func);make_cons(pair_7328, find_or_add_symbol("internal-func"), &cvar_7327);
+  make_cvar(cvar_7329, (object *)&__glo_lib1_91test);make_cons(pair_7330, find_or_add_symbol("lib1-test"), &cvar_7329);
+make_cons(c_7333, &pair_7326,Cyc_global_variables);
+make_cons(c_7332, &pair_7328, &c_7333);
+make_cons(c_7331, &pair_7330, &c_7332);
+Cyc_global_variables = &c_7331;}
