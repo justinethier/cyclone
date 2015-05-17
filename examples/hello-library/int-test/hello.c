@@ -134,13 +134,22 @@ static void __lambda_0(int argc, closure _,object r_733) {
 }
 
 static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+   // TODO: should do these explicitly instead of using macros, in case they are not generated
+   mclosure0(c_done, __lambda_3);
+   mclosure1(c_lib2, c_libslib2_entry_pt, &c_done);
+   mclosure1(c_lib1, c_libslib1_entry_pt, &c_lib2);
+   mclosure1(c_base, c_schemebase_entry_pt, &c_lib1);
+
+   // TODO: need to change each entry point to accept above closures
+   //       will need to check in each one for closure1 or closure0, I think???
+   funcall0(c_base);
 
 // TODO: these can't return, they need to call into each other as a continuation chain
-  c_schemebase_entry_pt(argc, env,cont);
-  c_libslib1_entry_pt(argc, env, cont);
-  c_libslib2_entry_pt(argc, env, cont);
+  //c_schemebase_entry_pt(argc, env,cont);
+  //c_libslib1_entry_pt(argc, env, cont);
+  //c_libslib2_entry_pt(argc, env, cont);
 
-  return_check0(__lambda_3);
+  //return_check0(__lambda_3);
 }
 main(int argc,char **argv)
 {long stack_size = long_arg(argc,argv,"-s",STACK_SIZE);
