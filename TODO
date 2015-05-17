@@ -13,7 +13,10 @@ Working TODO list:
     
       return_check0(__lambda_3);
     }
-3) __glo_lib1_91hello has a bad tag. it looks like GC might be overwriting it. WTF?????
+3) Above is no good, the functions cannot return, or any vars allocated on the stack will be corrupted!
+
+
+
 
  - Reduction in size of generated code
    is there anything we can do?

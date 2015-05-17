@@ -135,6 +135,7 @@ static void __lambda_0(int argc, closure _,object r_733) {
 
 static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
 
+// TODO: these can't return, they need to call into each other as a continuation chain
   c_schemebase_entry_pt(argc, env,cont);
   c_libslib1_entry_pt(argc, env, cont);
   c_libslib2_entry_pt(argc, env, cont);
