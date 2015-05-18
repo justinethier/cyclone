@@ -216,6 +216,14 @@
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
+         ; TODO: trying to get this here, then can pass it to 
+         ;       compiler code (for entry points) and below for
+         ;       gcc calls (need to wrap in .o string for that though)
+         ;(lib-deps 
+         ;  (if (and program? 
+         ;          (tagged-list? 'import (car in-prog)))
+         ;    (lib:get-all-import-deps (cadr in-prog)) 
+         ;   '()))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (create-c-file 
@@ -257,6 +265,7 @@
                             (string-append " " str " "))
                         (lib:imports->objs (cdar in-prog)))))
                     ""))) 
+            ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
             (if (equal? 0 
                   (system
                     (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))

@@ -1639,6 +1639,17 @@
         ))
       imports)))
 
+;; Given import names, get all dependant import names that are required
+(define (lib:get-all-import-deps imports)
+  (delete-duplicates
+    (apply
+      append
+      (map
+        (lambda (i)
+          (write `(DEBUG i ,i))
+          (cons i (lib:get-all-import-deps (lib:read-imports i))))
+        imports))))
+
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
 (define (lib:read-imports import)
