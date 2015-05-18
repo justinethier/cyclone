@@ -1628,27 +1628,26 @@
 ;; libs requires. will probably need to prune duplicates from completed list.
 ;; Longer-term, do we want to look at file timestamps to see if files need to
 ;; be recompiled?
-(define (lib:imports->objs imports)
+;(define (lib:imports->objs imports)
+;  (apply
+;    append
+;    (map
+;      (lambda (i)
+;        (cons
+;          (lib:import->filename i ".o")
+;          (lib:imports->objs (lib:read-imports i))
+;        ))
+;      imports)))
+
+;; Given import names, get all dependant import names that are required
+;; Note: does not filter out duplicates
+(define (lib:get-all-import-deps imports)
   (apply
     append
     (map
       (lambda (i)
-        (cons
-          (lib:import->filename i ".o")
-          (lib:imports->objs (lib:read-imports i))
-        ))
+        (cons i (lib:get-all-import-deps (lib:read-imports i))))
       imports)))
-
-;; Given import names, get all dependant import names that are required
-(define (lib:get-all-import-deps imports)
-  (delete-duplicates
-    (apply
-      append
-      (map
-        (lambda (i)
-          (write `(DEBUG i ,i))
-          (cons i (lib:get-all-import-deps (lib:read-imports i))))
-        imports))))
 
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
