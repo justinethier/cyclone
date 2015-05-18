@@ -911,7 +911,8 @@
                       lib-name 
                       lib-exports 
                       imported-globals
-                      globals)
+                      globals
+                      required-libs)
   (set! *global-syms* (append globals imported-globals))
   (let ((compiled-program 
           (apply string-append
@@ -966,9 +967,15 @@
      lambdas)
   
     ; Emit entry point
-    (if program?
-      (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { ")
-      (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { ")))
+    (cond
+      (program?
+        (for-each
+          (lambda (lib-name)
+            (emit (string-append "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure env, closure cont);")))
+          required-libs)
+        (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
+      (else
+        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { "))))
 
     ;; Initialize global table
     (for-each
@@ -1041,8 +1048,30 @@
             (emits
               (string-append "Cyc_global_variables = &" head-pair ";"))))
 
-    (if program?
-      (emit compiled-program))
+    (cond
+      (program?
+        ;; Emit code to initialize each module (compiled Scheme library)
+        (let ((this-clo "c_done")
+              (prev-clo "c_done"))
+          ;; TODO: need to wrap this in a well-known function (c_program_main??)
+          ;;       and call into it from the closure chain
+          (emit compiled-program)
+
+          (for-each
+            (lambda (lib-name)
+              (emit 
+                (string-append 
+                  "mclosure1(" this-clo
+                  ", c_" (lib:name->string lib-name) "_entry_pt"
+                  ", &" prev-clo ");"))
+              (set! prev-clo this-clo)
+              (set! this-clo (mangle (gensym "c")))
+            )
+            required-libs)
+          (emit 
+            (string-append "(" prev-clo ".fn)(0, &" prev-clo ");"))
+        )))
+
     (emit "}")
     (if program?
       (emit *c-main-function*))))
