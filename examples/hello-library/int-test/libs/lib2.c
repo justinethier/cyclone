@@ -46,7 +46,8 @@
 object __glo_lib2_91hello = nil;
 #include "runtime.h"
 
-void c_libslib2_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+void c_libslib2_entry_pt(argc, cont) int argc; closure cont; { 
+  printf("Initializing lib2\n");
 
   add_global((object *) &__glo_lib2_91hello);
   make_string(c_733, "Hello from library #2"); 
@@ -55,4 +56,9 @@ void c_libslib2_entry_pt(argc, env,cont) int argc; closure env,cont; {
   make_cvar(cvar_737, (object *)&__glo_lib2_91hello);make_cons(pair_738, find_or_add_symbol("lib2-hello"), &cvar_737);
 make_cons(c_739, &pair_738,Cyc_global_variables);
 Cyc_global_variables = &c_739;
-}
+
+if (((closure)cont)->tag == closure1_tag) {
+    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
+} else {
+    ((cont)->fn)(0, cont);
+}}

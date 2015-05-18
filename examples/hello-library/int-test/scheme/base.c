@@ -2641,7 +2641,8 @@ static void __lambda_0(int argc, object self_73378, object _191, object result) 
   return_funcall1(  ((closureN)self_73378)->elts[0],  result);; 
 }
 
-void c_schemebase_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+void c_schemebase_entry_pt(argc, cont) int argc; closure cont; { 
+  printf("Initializing base\n");
 
   add_global((object *) &__glo_Cyc_91remove_91exception_91handler);
   add_global((object *) &__glo_Cyc_91add_91exception_91handler);
@@ -2891,4 +2892,13 @@ make_cons(c_731473, &pair_731463, &c_731474);
 make_cons(c_731472, &pair_731465, &c_731473);
 make_cons(c_731471, &pair_731467, &c_731472);
 make_cons(c_731470, &pair_731469, &c_731471);
-Cyc_global_variables = &c_731470;}
+Cyc_global_variables = &c_731470;
+
+if (((closure)cont)->tag == closure1_tag) {
+    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
+} else {
+    ((cont)->fn)(0, cont);
+}
+
+
+}

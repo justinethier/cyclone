@@ -115,6 +115,7 @@ static void __lambda_1(int argc, closure _,object r_732) ;
 static void __lambda_0(int argc, closure _,object r_733) ;
 
 static void __lambda_3(int argc, closure _) {
+    printf("Done with library inits\n");
   make_int(c_7318, 0);
 return_check1(__lambda_2,&c_7318);; 
 }
@@ -133,6 +134,9 @@ static void __lambda_0(int argc, closure _,object r_733) {
   __halt(Cyc_write(&c_7312)); 
 }
 
+extern void c_libslib2_entry_pt(int argc, closure cont);
+extern void c_libslib1_entry_pt(int argc, closure cont);
+extern void c_schemebase_entry_pt(int argc, closure cont);
 static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
    // TODO: should do these explicitly instead of using macros, in case they are not generated
    mclosure0(c_done, __lambda_3);
@@ -142,7 +146,7 @@ static void c_entry_pt(argc, env,cont) int argc; closure env,cont; {
 
    // TODO: need to change each entry point to accept above closures
    //       will need to check in each one for closure1 or closure0, I think???
-   funcall0(c_base);
+   funcall0(&c_base);
 
 // TODO: these can't return, they need to call into each other as a continuation chain
   //c_schemebase_entry_pt(argc, env,cont);

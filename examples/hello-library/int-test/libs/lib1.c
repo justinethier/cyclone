@@ -118,7 +118,8 @@ void __lambda_0(int argc, closure _,object k_735) {
   return_funcall1(  k_735,  Cyc_write(__glo_lib2_91hello));; 
 }
 
-void c_libslib1_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+void c_libslib1_entry_pt(argc, cont) int argc; closure cont; { 
+  printf("Initializing lib1\n");
 
   add_global((object *) &__glo_lib1_91hello);
   add_global((object *) &__glo_internal_91func);
@@ -136,4 +137,10 @@ void c_libslib1_entry_pt(argc, env,cont) int argc; closure env,cont; {
 make_cons(c_7333, &pair_7326,Cyc_global_variables);
 make_cons(c_7332, &pair_7328, &c_7333);
 make_cons(c_7331, &pair_7330, &c_7332);
-Cyc_global_variables = &c_7331;}
+Cyc_global_variables = &c_7331;
+
+if (((closure)cont)->tag == closure1_tag) {
+    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
+} else {
+    ((cont)->fn)(0, cont);
+}}
