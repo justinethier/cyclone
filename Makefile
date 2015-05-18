@@ -39,7 +39,8 @@ cyclone: cyclone.scm trans.so cgen.so parser.so libcyclone.a
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
-# A temporary testing directive
+##############################
+# Temporary testing directives
 .PHONY: test2
 test2: examples/hello-library/int-test/hello.c libcyclone.a
 	./cyclone scheme/base.sld
@@ -53,11 +54,13 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 # TODO: will need to manually compile hello example. need to manually add the entry points to hello, and there is an issue in the libs with Cyc_global_vars not being assigned. but this still leads to a tag error so there must be other issues...
 .PHONY: test3
 test3:
-	gcc scheme/base.c -I/home/justin/Documents/cyclone/ -g -c -o scheme/base.o
-	cd examples/hello-library ; gcc libs/lib1.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib1.o
-	cd examples/hello-library ; gcc libs/lib2.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib2.o
-	cd examples/hello-library ; gcc hello.c -I/home/justin/Documents/cyclone/ -g -c -o hello.o
+	gcc examples/hello-library/int-test/scheme/base.c -I/home/justin/Documents/cyclone/ -g -c -o scheme/base.o
+	cd examples/hello-library ; gcc int-test/libs/lib1.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib1.o
+	cd examples/hello-library ; gcc int-test/libs/lib2.c -I/home/justin/Documents/cyclone/ -g -c -o libs/lib2.o
+	cd examples/hello-library ; gcc int-test/hello.c -I/home/justin/Documents/cyclone/ -g -c -o hello.o
 	cd examples/hello-library ; gcc hello.o  libs/lib1.o  /home/justin/Documents/cyclone/scheme/base.o  libs/lib2.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o hello
+# END temporary directives
+##########################
 
 icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
 	./cyclone icyc.scm
