@@ -139,14 +139,14 @@ extern void c_libslib1_entry_pt(int argc, closure cont);
 extern void c_schemebase_entry_pt(int argc, closure cont);
 static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
    // TODO: should do these explicitly instead of using macros, in case they are not generated
-   mclosure0(c_done, __lambda_3);
+   mclosure1(c_done, __lambda_3, &c_done);
    mclosure1(c_lib2, c_libslib2_entry_pt, &c_done);
    mclosure1(c_lib1, c_libslib1_entry_pt, &c_lib2);
    mclosure1(c_base, c_schemebase_entry_pt, &c_lib1);
 
    // TODO: need to change each entry point to accept above closures
    //       will need to check in each one for closure1 or closure0, I think???
-   funcall0(&c_base);
+   (c_base.fn)(0, &c_base);
 
 // TODO: these can't return, they need to call into each other as a continuation chain
   //c_schemebase_entry_pt(argc, env,cont);

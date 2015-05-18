@@ -139,8 +139,6 @@ make_cons(c_7332, &pair_7328, &c_7333);
 make_cons(c_7331, &pair_7330, &c_7332);
 Cyc_global_variables = &c_7331;
 
-if (((closure)cont)->tag == closure1_tag) {
-    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
-} else {
-    ((cont)->fn)(0, cont);
-}}
+cont = ((closure1_type *)cont)->elt1;
+((cont)->fn)(0, cont);
+}

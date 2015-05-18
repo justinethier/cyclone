@@ -57,8 +57,11 @@ void c_libslib2_entry_pt(argc, cont) int argc; closure cont; {
 make_cons(c_739, &pair_738,Cyc_global_variables);
 Cyc_global_variables = &c_739;
 
-if (((closure)cont)->tag == closure1_tag) {
-    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
-} else {
-    ((cont)->fn)(0, cont);
-}}
+cont = ((closure1_type *)cont)->elt1;
+((cont)->fn)(0, cont);
+//if (((closure)cont)->tag == closure1_tag) {
+//    ((cont)->fn)(1, ((closure1_type *)cont)->elt1);
+//} else {
+//    ((cont)->fn)(0, cont);
+//}
+}

@@ -5,17 +5,27 @@ Working TODO list:
 1) Need to manually assign Cyc_global_variables in lib2.c
 2) Need to add this manually, need to compute it:
 
-    static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
-    
-      c_schemebase_entry_pt(argc, env,cont);
-      c_libslib1_entry_pt(argc, env, cont);
-      c_libslib2_entry_pt(argc, env, cont);
-    
-      return_check0(__lambda_3);
+extern void c_libslib2_entry_pt(int argc, closure cont);
+extern void c_libslib1_entry_pt(int argc, closure cont);
+extern void c_schemebase_entry_pt(int argc, closure cont);
+static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { 
+   // TODO: should do these explicitly instead of using macros, in case they are not generated
+   mclosure1(c_done, __lambda_3, &c_done);
+   mclosure1(c_lib2, c_libslib2_entry_pt, &c_done);
+   mclosure1(c_lib1, c_libslib1_entry_pt, &c_lib2);
+   mclosure1(c_base, c_schemebase_entry_pt, &c_lib1);
+
+   // TODO: need to change each entry point to accept above closures
+   //       will need to check in each one for closure1 or closure0, I think???
+   (c_base.fn)(0, &c_base);
     }
-3) Above is no good, the functions cannot return, or any vars allocated on the stack will be corrupted!
 
+3) Need to change signature of library entry_pt functions, and append this at the end:
 
+cont = ((closure1_type *)cont)->elt1;
+((cont)->fn)(0, cont);
+
+Alternatively, we can leave the existing signature and pass cont twice...
 
 
  - Reduction in size of generated code
