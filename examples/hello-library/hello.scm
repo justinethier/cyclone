@@ -7,5 +7,5 @@
 
 (write "hello")
 ;(test-lib1-hello)
-(write lib1-hello)
+(write (lib1-hello))
 (write "world")

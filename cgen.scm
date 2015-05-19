@@ -969,13 +969,16 @@
     ; Emit entry point
     (cond
       (program?
+        (emit "static void c_entry_pt_first_lambda();")
         (for-each
           (lambda (lib-name)
             (emit (string-append "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure env, closure cont);")))
           required-libs)
         (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
       (else
-        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { "))))
+        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
+        (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+      ))
 
     ;; Initialize global table
     (for-each
@@ -1053,24 +1056,32 @@
         ;; Emit code to initialize each module (compiled Scheme library)
         (let ((this-clo "c_done")
               (prev-clo "c_done"))
-          ;; TODO: need to wrap this in a well-known function (c_program_main??)
-          ;;       and call into it from the closure chain
-          (emit compiled-program)
-
+          (emit
+            (string-append
+              "mclosure1(" this-clo
+              ", c_entry_pt_first_lambda, &" prev-clo ");"))
           (for-each
             (lambda (lib-name)
+              (set! prev-clo this-clo)
+              (set! this-clo (mangle (gensym "c")))
               (emit 
                 (string-append 
                   "mclosure1(" this-clo
                   ", c_" (lib:name->string lib-name) "_entry_pt"
                   ", &" prev-clo ");"))
-              (set! prev-clo this-clo)
-              (set! this-clo (mangle (gensym "c")))
             )
             required-libs)
           (emit 
-            (string-append "(" prev-clo ".fn)(0, &" prev-clo ");"))
-        )))
+            ;; Start cont chain, but do not assume funcall1 macro was defined
+            (string-append "(" prev-clo ".fn)(0, &" prev-clo ", &" prev-clo ");"))
+          (emit "}")
+          (emit "static void c_entry_pt_first_lambda(int argc, closure env, closure cont) {")
+          (emit (string-append "printf(\"init first lambda\\n\");"))
+          (emit compiled-program)))
+      (else
+        ;; Do not use funcall1 macro as it might not have been defined
+        (emit "cont = ((closure1_type *)cont)->elt1;")
+        (emit "((cont)->fn)(1, cont, cont);")))
 
     (emit "}")
     (if program?
