@@ -2,7 +2,7 @@ Working TODO list:
  
  - Issues with library hello example:
 
-1) Need to manually assign Cyc_global_variables in lib2.c
+   seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
 
  - Reduction in size of generated code
    is there anything we can do?
