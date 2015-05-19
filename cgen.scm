@@ -1073,7 +1073,7 @@
             required-libs)
           (emit 
             ;; Start cont chain, but do not assume funcall1 macro was defined
-            (string-append "(" prev-clo ".fn)(0, &" prev-clo ", &" prev-clo ");"))
+            (string-append "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");"))
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(int argc, closure env, closure cont) {")
           (emit (string-append "printf(\"init first lambda\\n\");"))
