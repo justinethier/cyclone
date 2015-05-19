@@ -977,7 +977,7 @@
         (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
       (else
         (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
-        (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        ;DEBUG: (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
     ;; Initialize global table
@@ -1038,6 +1038,8 @@
                    (emits str))
                  code))
               ((null? (cdr ps))
+               (if (not head-pair)
+                   (set! head-pair (car cs)))
                (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
                      (cdr ps)
                      (cdr cs)))
@@ -1048,7 +1050,7 @@
                      (cdr ps) 
                      (cdr cs)))))
         (if head-pair
-            (emits
+            (emit
               (string-append "Cyc_global_variables = &" head-pair ";"))))
 
     (cond
@@ -1076,7 +1078,7 @@
             (string-append "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");"))
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(int argc, closure env, closure cont) {")
-          (emit (string-append "printf(\"init first lambda\\n\");"))
+          ;DEBUG: (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)))
       (else
         ;; Do not use funcall1 macro as it might not have been defined
