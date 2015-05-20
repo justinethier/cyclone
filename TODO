@@ -2,7 +2,9 @@ Working TODO list:
  
  - Issues with library hello example:
 
-   seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
+   - need to call into compiled-program, even for library
+     scheme-read example - #f vs '() for *in-port-table*
+   - seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
 
  - Reduction in size of generated code
    is there anything we can do?
