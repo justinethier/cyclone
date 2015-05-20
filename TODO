@@ -4,6 +4,11 @@ Working TODO list:
 
    - need to call into compiled-program, even for library
      scheme-read example - #f vs '() for *in-port-table*
+     I think what needs to happen is that, for libraries, there should be an entry_pt
+     function created (with a continuation k) that contains the 'top-level' inits. Then
+     this can be called from the program to init the library and then call k to init
+     the next library, etc...
+
    - seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
 
  - Reduction in size of generated code
