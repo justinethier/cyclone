@@ -5,5 +5,5 @@
     cyc-read ;; try this first, but it needs to go away!!!
     read-all
   )
-  (include "parser.scm")
+  (include "../parser.scm")
   (begin))

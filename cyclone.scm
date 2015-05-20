@@ -240,11 +240,11 @@
                 (if (member 'eval result) 
                     (read-file (get-lib "eval.scm")) 
                    '())
-                (if (member 'read result) 
-                    (append
-                        (read-file (get-lib "parser.scm"))
-                       '((define read cyc-read)))
-                   '())
+                ;(if (member 'read result) 
+                ;    (append
+                ;        (read-file (get-lib "parser.scm"))
+                ;       '((define read cyc-read)))
+                ;   '())
                 in-prog)))
         (create-c-file program)))) ;; TODO: no, don't do same work twice. real answer is linking
 
