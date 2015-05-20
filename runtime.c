@@ -421,7 +421,7 @@ list assq(x,l) object x; list l;
  return boolean_f;}
 
 list assoc(x,l) object x; list l;
-{for (; !nullp(l); l = cdr(l))
+{for (; !nullp(l) && type_of(l) == cons_tag; l = cdr(l))
    {register list la = car(l); if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
