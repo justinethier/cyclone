@@ -4,6 +4,9 @@
 ;;
 ;; This module contains a simple Read-Eval-Print Loop
 ;;
+(import (scheme base)
+        (scheme read)
+        (scheme eval))
 (cond-expand
   (cyclone
     (display *Cyc-version-banner*))

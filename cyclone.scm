@@ -240,9 +240,9 @@
            (not (null? result)))
       (let ((program
               (append
-                (if (member 'eval result) 
-                    (read-file (get-lib "eval.scm")) 
-                   '())
+                ;(if (member 'eval result) 
+                ;    (read-file (get-lib "eval.scm")) 
+                ;   '())
                 ;(if (member 'read result) 
                 ;    (append
                 ;        (read-file (get-lib "parser.scm"))
