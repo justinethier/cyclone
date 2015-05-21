@@ -17,6 +17,9 @@
 (define (emits str)
   (display str))
 
+(define (emits* . strs)
+  (for-each emits strs))
+
 (define (emit-newline)
   (newline))
 
@@ -946,20 +949,19 @@
     ;; Emit symbols
     (for-each
         (lambda (sym)
-            (emit 
-              (string-append 
-                "defsymbol(" (mangle sym) ", " (symbol->string sym) ");")))
+            (emit* 
+                "defsymbol(" (mangle sym) ", " (symbol->string sym) ");"))
         *symbols*)
 
     ;; Emit lambdas:
     ; Print the prototypes:
     (for-each
      (lambda (l)
-       (emit (string-append 
-               "static void __lambda_" 
-               (number->string (car l)) "(int argc, "
-               (cdadr l)
-               ") ;")))
+       (emit*
+         "static void __lambda_" 
+         (number->string (car l)) "(int argc, "
+         (cdadr l)
+         ") ;"))
      lambdas)
     
     (emit "")
@@ -976,11 +978,11 @@
         (emit "static void c_entry_pt_first_lambda();")
         (for-each
           (lambda (lib-name)
-            (emit (string-append "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure cont, object value);")))
+            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure cont, object value);"))
           required-libs)
         (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
       (else
-        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ "))
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ ")
         ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
@@ -996,7 +998,7 @@
     ;; Initialize symbol table
     (for-each
         (lambda (sym)
-            (emit (string-append "  add_symbol(quote_" (mangle sym) ");")))
+            (emit* "  add_symbol(quote_" (mangle sym) ");"))
         *symbols*)
 
     ;; Initialize globals
@@ -1021,14 +1023,12 @@
           (lambda (g)
             (let ((cvar-sym (mangle (gensym 'cvar)))
                   (pair-sym (mangle (gensym 'pair))))
-             (emits 
-               (string-append 
+             (emits* 
                  "  make_cvar(" cvar-sym 
-                 ", (object *)&" (mangle-global (car g)) ");"))
-             (emits
-               (string-append
+                 ", (object *)&" (mangle-global (car g)) ");")
+             (emits*
                  "make_cons(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
-                 "\"), &" cvar-sym ");\n"))
+                 "\"), &" cvar-sym ");\n")
              (set! pairs (cons pair-sym pairs))
           ))
           *globals*)
@@ -1054,32 +1054,30 @@
                      (cdr ps) 
                      (cdr cs)))))
         (if head-pair
-            (emit
-              (string-append "Cyc_global_variables = &" head-pair ";"))))
+            (emit*
+              "Cyc_global_variables = &" head-pair ";")))
 
     (cond
       (program?
         ;; Emit code to initialize each module (compiled Scheme library)
         (let ((this-clo "c_done")
               (prev-clo "c_done"))
-          (emit
-            (string-append
+          (emit*
               "mclosure1(" this-clo
-              ", c_entry_pt_first_lambda, &" prev-clo ");"))
+              ", c_entry_pt_first_lambda, &" prev-clo ");")
           (for-each
             (lambda (lib-name)
               (set! prev-clo this-clo)
               (set! this-clo (mangle (gensym "c")))
-              (emit 
-                (string-append 
+              (emit* 
                   "mclosure1(" this-clo
                   ", c_" (lib:name->string lib-name) "_entry_pt"
-                  ", &" prev-clo ");"))
+                  ", &" prev-clo ");")
             )
             required-libs)
-          (emit 
+          (emit* 
             ;; Start cont chain, but do not assume funcall1 macro was defined
-            (string-append "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");"))
+            "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");")
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(int argc, closure cont, object value) {")
           ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
