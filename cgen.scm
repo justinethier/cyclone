@@ -981,7 +981,7 @@
         (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
       (else
         (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ "))
-        (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
     ;; Initialize global table
@@ -1082,7 +1082,7 @@
             (string-append "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");"))
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(int argc, closure cont, object value) {")
-          (emit (string-append "printf(\"init first lambda\\n\");"))
+          ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)))
       (else
         ;; Do not use funcall1 macro as it might not have been defined
