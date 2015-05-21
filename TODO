@@ -4,6 +4,10 @@ Working TODO list:
 
    - seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
 
+ - In cgen, start using (emit*) instead of (string-append).
+   There is no reason to allocate a bunch of strings if they are
+   just going to be deallocated after printing
+
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
