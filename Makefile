@@ -50,12 +50,11 @@ test: $(TESTFILES) cyclone
 
 ###############################
 ## Temporary testing directives
-#.PHONY: test2
-#test2: examples/hello-library/int-test/hello.c libcyclone.a
-#	./cyclone scheme/base.sld
-#	cd examples/hello-library ; ../../cyclone libs/lib1.sld
-#	cd examples/hello-library ; ../../cyclone libs/lib2.sld
-#	cd examples/hello-library ; ../../cyclone hello.scm
+.PHONY: test2
+test2: examples/hello-library/int-test/hello.c libcyclone.a
+	cd examples/hello-library ; ../../cyclone libs/lib1.sld
+	cd examples/hello-library ; ../../cyclone libs/lib2.sld
+	cd examples/hello-library ; ../../cyclone hello.scm
 ##	gcc examples/hello-library/int-test/lib2.c -I. -g -c -o lib2.o
 ##	gcc examples/hello-library/int-test/hello.c -I. -g -c -o hello.o
 ##	gcc hello.o lib2.o -L. -lcyclone -lm -o hello

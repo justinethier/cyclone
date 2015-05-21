@@ -2,7 +2,13 @@ Working TODO list:
  
  - Issues with library hello example:
 
-   - seems to be working! next step is to get parser, eval, and icyc (in that order) to work with libs
+ libraries do not handle dependencies correctly. there are at least two issues:
+
+  - cyclic dependencies cause the compiler to hang. will need to keep a running list of deps probably, like the chibi meta-language
+  - entry_pt inits are not always in the correct order. see icyc broken unless imports are reversed. the deps need to be ordered such that
+    an import is not placed before another import that it depends upon. may be able to keep track of this info while keeping the running
+    list in the above bullet
+
 
  - Reduction in size of generated code
    is there anything we can do?
