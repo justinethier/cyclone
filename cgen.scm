@@ -10,6 +10,10 @@
   (display line)
   (newline))
 
+(define (emit* . strs)
+  (for-each emits strs)
+  (newline))
+
 (define (emits str)
   (display str))
 
@@ -972,12 +976,12 @@
         (emit "static void c_entry_pt_first_lambda();")
         (for-each
           (lambda (lib-name)
-            (emit (string-append "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure env, closure cont);")))
+            (emit (string-append "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure cont, object value);")))
           required-libs)
         (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
       (else
-        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
-        ;DEBUG: (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        (emit (string-append "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ "))
+        (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
     ;; Initialize global table
@@ -1077,19 +1081,17 @@
             ;; Start cont chain, but do not assume funcall1 macro was defined
             (string-append "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");"))
           (emit "}")
-          (emit "static void c_entry_pt_first_lambda(int argc, closure env, closure cont) {")
-          ;DEBUG: (emit (string-append "printf(\"init first lambda\\n\");"))
+          (emit "static void c_entry_pt_first_lambda(int argc, closure cont, object value) {")
+          (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)))
       (else
         ;; Do not use funcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->elt1;")
-        (emit "((cont)->fn)(1, cont, cont);")
-         ;; TODO: 
-         ; need to call into computed func, EG: __glo_lib_91init_117schemeread
-         ; using cont->elt1 as k.
-;        (emit "}")
-;        (emit (string-append "static void c_" (lib:name->string lib-name) "_entry_pt_inits(int argc, closure "
-;        (emit compiled-program)
+        ;(emit "((cont)->fn)(1, cont, cont);")
+        (emit* 
+            "(((closure)"
+            (mangle-global (lib:name->symbol lib-name)) 
+            ")->fn)(1, cont, cont);")
       ))
 
     (emit "}")

@@ -1569,7 +1569,7 @@
 (define (lib:name->symbol name)
   (string->symbol 
     (string-append
-      "lib-init:"
+      "lib-init:" ;; Maybe make this an optional param? Trying to ensure uniqueness
       (lib:name->string name))))
 ;; Helper function that returns an empty list as a default value
 (define (lib:result result)
