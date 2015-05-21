@@ -926,8 +926,13 @@
             ;; into two parts - use the define to initialize it to false (CPS is fine),
             ;; and place the expression into a top-level (set!), which can be
             ;; handled by the existing CPS conversion.
-            ((and (list? (car (define->exp (car top-lvl))))
-                  (not (lambda? (car (define->exp (car top-lvl))))))
+            ((or 
+               ;; TODO: the following line may not be good enough, a global assigned to another
+               ;; global may still be init'd to nil if the order is incorrect in the "top level"
+               ;; initialization code.
+               (symbol? (car (define->exp (car top-lvl)))) ;; TODO: put these at the end of top-lvl???
+               (and (list? (car (define->exp (car top-lvl))))
+                    (not (lambda? (car (define->exp (car top-lvl)))))))
              (loop (cdr top-lvl)
                    (cons
                     `(define ,(define->var (car top-lvl)) #f)
