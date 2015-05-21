@@ -890,7 +890,7 @@
 ; This function extracts out non-define statements, and adds them to 
 ; a "main" after the defines.
 ;
-(define (isolate-globals exp)
+(define (isolate-globals exp program? lib-name)
   (let loop ((top-lvl exp)
              (globals '())
              (exprs '()))
@@ -899,8 +899,17 @@
        (append
          (reverse globals)
          (expand 
-          ;; 0 to ensure we always create a meaningful top-level
-          `((begin 0 ,@(reverse exprs))))))
+           (cond 
+             (program?
+               ;; This is the main program, keep top level.
+               ;; Use 0 here (and below) to ensure a meaningful top-level
+               `((begin 0 ,@(reverse exprs)))
+             )
+             (else
+               ;; This is a library, keep inits in their own function
+               `((define ,(lib:name->symbol lib-name)
+                  (lambda () 0 ,@(reverse exprs))))))
+           )))
       (else
        (cond
          ((define? (car top-lvl))
@@ -1557,6 +1566,11 @@
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
   (apply string-append (map mangle name)))
+(define (lib:name->symbol name)
+  (string->symbol 
+    (string-append
+      "lib-init:"
+      (lib:name->string name))))
 ;; Helper function that returns an empty list as a default value
 (define (lib:result result)
   (if result result '()))

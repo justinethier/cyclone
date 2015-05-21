@@ -51,7 +51,10 @@
          (let ((includes (lib:includes (car input-program))))
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
-           (set! lib-exports (lib:exports (car input-program)))
+           (set! lib-exports
+             (cons
+               (lib:name->symbol lib-name)
+               (lib:exports (car input-program))))
            (set! imports (lib:imports (car input-program)))
            (set! input-program (lib:body (car input-program)))
            ;; Prepend any included files into the begin section
@@ -93,7 +96,7 @@
 
       ;; Separate global definitions from the rest of the top-level code
       (set! input-program 
-          (isolate-globals input-program))
+          (isolate-globals input-program program? lib-name))
 
       ;; Optimize-out unused global variables
       ;; For now, do not do this if eval is used.

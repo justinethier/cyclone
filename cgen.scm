@@ -1083,7 +1083,14 @@
       (else
         ;; Do not use funcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->elt1;")
-        (emit "((cont)->fn)(1, cont, cont);")))
+        (emit "((cont)->fn)(1, cont, cont);")
+         ;; TODO: 
+         ; need to call into computed func, EG: __glo_lib_91init_117schemeread
+         ; using cont->elt1 as k.
+;        (emit "}")
+;        (emit (string-append "static void c_" (lib:name->string lib-name) "_entry_pt_inits(int argc, closure "
+;        (emit compiled-program)
+      ))
 
     (emit "}")
     (if program?

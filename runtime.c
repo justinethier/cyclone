@@ -421,7 +421,12 @@ list assq(x,l) object x; list l;
  return boolean_f;}
 
 list assoc(x,l) object x; list l;
-{for (; !nullp(l) && type_of(l) == cons_tag; l = cdr(l))
+{
+ printf("JAE DEBUG, assoc received: ");
+ Cyc_display(l);
+ printf("\n");
+ if (type_of(l) != cons_tag) return boolean_f;
+ for (; !nullp(l); l = cdr(l))
    {register list la = car(l); if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
