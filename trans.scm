@@ -1716,7 +1716,7 @@
 
 ;; Given a list of alists (library-name . imports), return an ordered
 ;; list of library names such that each lib is encounted after the
-;; libraries it imports (it's depencencies).
+;; libraries it imports (it's dependencies).
 ;;
 ;; TODO: this is not working at the moment!!!
 (define (lib:get-dep-list libs/deps)
@@ -1725,6 +1725,41 @@
  ; compute index of result that is before any libs that import lib
  ;  if there is a 'hole' then insert lib into result in that space
  ;  otherwise, throw an error (unfortunate but will identify problems)
+ (let ((result '()))
+  (for-each
+    (lambda (lib/dep)
+      (cond
+        ((null? result)
+         (set! result (cons lib/dep '())))
+        (else
+          (let ((idx-my-imports 0) ; lib must be placed after this
+                (idx-imports-me (length result))) ; lib must be before any libs that import it
+            (define (loop i)
+              (cond
+                ((= i (length result))
+                 'done)
+                (else
+                  ;; Does lib import this one?
+                  (if (and
+                        (> i idx-my-imports)
+                        (member (car (list-ref result i)) (cdr lib/dep)))
+                    (set! idx-my-imports i))
+
+                  ;; Does this one import lib?
+                  (if (and
+                        (< i idx-imports-me)
+                        (member (car lib/dep) (cdr (list-ref result i))))
+                    (set! idx-imports-me i))
+
+                  (loop (+ i 1)))))
+            (loop 0)
+            (write `(DEBUG ,(car lib/dep) ,idx-imports-me ,idx-my-imports))
+            (if (< idx-my-imports idx-imports-me)
+              (list-insert-at! result lib/dep (+ 1 idx-my-imports))
+              (error "Internal error: unable to import library"))))
+        ))
+    libs/deps)
+  (map car result)))
 
 ; TODO: helper function - (list-insert-at! lis obj k)
 ;
