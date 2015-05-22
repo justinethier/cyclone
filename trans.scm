@@ -1724,8 +1724,11 @@
  ; compute index of result that is after any libs that lib imports
  ; compute index of result that is before any libs that import lib
  ;  if there is a 'hole' then insert lib into result in that space
- ;  otherwise, throw an error (unfortunate but best we can do right now)
+ ;  otherwise, throw an error (unfortunate but will identify problems)
 
+; TODO: helper function - (list-insert-at! lis obj k)
+;
+;
 ;  (let* ((result '())
 ;         (add-result! 
 ;          (lambda (name)
@@ -1766,6 +1769,11 @@
 ; base read eval (move read before base because it depends on it)
 ; base read eval (base has no deps and is already there, nothing to do)
 ; base read eval lib2 lib1 (lib1's 'stuff' added at the end)
+
+
+
+
+
 
 ;; END Library section
 
