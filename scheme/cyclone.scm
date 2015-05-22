@@ -48,9 +48,9 @@
   (recur lis))
 
 ;; Insert obj at index k of list, increasing length of list by one.
-(define (list-insert! lis k obj)
+(define (list-insert-at! lis obj k)
   (cond
-   ((null? lis) (error "list-insert, lis cannot be null"))
+   ((null? lis) (error "list-insert-at!, lis cannot be null"))
    ((and (> k 0) (null? (cdr lis)))
     (set-cdr! lis (cons obj '())))
    ((zero? k)
@@ -58,5 +58,5 @@
       (set-car! lis obj)
       (set-cdr! lis (cons old-car (cdr lis)))))
    (else
-    (list-insert! (cdr lis) (- k 1) obj))))
+    (list-insert-at! (cdr lis) obj (- k 1)))))
 
