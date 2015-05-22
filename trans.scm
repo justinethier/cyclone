@@ -1567,15 +1567,20 @@
 ;;       somewhere accessible to the interpreter
 (define (library? ast)
   (tagged-list? 'define-library ast))
+
 (define (lib:name ast) (cadr ast))
+
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
   (apply string-append (map mangle name)))
+
+;; Convert library name to a unique symbol
 (define (lib:name->symbol name)
   (string->symbol 
     (string-append
       "lib-init:" ;; Maybe make this an optional param? Trying to ensure uniqueness
       (lib:name->string name))))
+
 ;; Helper function that returns an empty list as a default value
 (define (lib:result result)
   (if result result '()))
@@ -1658,16 +1663,6 @@
 ;        ))
 ;      imports)))
 
-;; Given import names, get all dependant import names that are required
-;; Note: does not filter out duplicates
-(define (lib:get-all-import-deps imports)
-  (apply
-    append
-    (map
-      (lambda (i)
-        (cons i (lib:get-all-import-deps (lib:read-imports i))))
-      imports)))
-
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
 (define (lib:read-imports import)
@@ -1695,6 +1690,74 @@
      (lambda (import)
        (lib:import->export-list import))
      imports)))
+
+;; Given an import set, get all dependant import names that are required
+;; The list of deps is intended to be returned in order, such that the
+;; libraries can be initialized properly in sequence.
+(define (lib:get-all-import-deps imports)
+  (let* ((libraries/deps '())
+         (find-deps! 
+          (lambda (import-set)
+            (for-each 
+              (lambda (i)
+                (cond
+                 ;; Prevent cycles by only processing new libraries
+                 ((not (assoc i libraries/deps))
+                  ;; Find all dependencies of i (IE, libraries it imports)
+                  (let ((deps (lib:read-imports i))) 
+                   (set! libraries/deps (cons (cons i deps) libraries/deps))
+                 ))))
+              import-set))))
+   (find-deps! imports)
+   `((deps ,libraries/deps) ; DEBUG
+     (result ,(lib:get-dep-list libraries/deps)))
+  ; (lib:get-dep-list libraries/deps)
+   ))
+
+;; Given a list of alists (library-name . imports), return an ordered
+;; list of library names such that each lib is encounted after the
+;; libraries it imports (it's depencencies).
+;;
+;; TODO: this is not working at the moment!!!
+(define (lib:get-dep-list libs/deps)
+  (let* ((result '())
+         (add-result! 
+          (lambda (name)
+            (cond
+              ((not (member name result))
+               (set! result (cons name result)))
+              (else 
+                ;; TODO: library already added, make sure it is after its deps
+                'TODO)))))
+    (for-each
+      (lambda (lib/deps)
+        (let ((lib (car lib/deps))
+              (deps (cdr lib/deps)))
+          (for-each add-result! (cons lib deps))))
+      libs/deps)
+    result))
+; Notes for above 2 functions: 
+;
+; Testing, run this from hello directory: 
+; (pp (lib:get-all-import-deps '((scheme base) (scheme eval) (scheme base) (scheme read) (scheme eval) (libs lib1) (libs lib2))))
+;
+;
+; Example, libs with their dependencies
+; ((scheme eval) => (scheme base) (scheme read)
+; ((scheme read) => (scheme base)
+; ((scheme base) => ()
+; ((lib lib1) => (scheme base) (lib lib2)
+; ((lib lib2) => ()
+;
+; can loop over them, and for each one:
+; - add my deps to the result, if they are not already there
+; - add myself to result
+; but that's not good enough, what if one of the libs is already there in the wrong place?? but at any given point, i think we only move the one library that we are looking at that has dependencies. so that could be managable??
+;
+; read base eval
+; base read eval (move read before base because it depends on it)
+; base read eval (base has no deps and is already there, nothing to do)
+; base read eval lib2 lib1 (lib1's 'stuff' added at the end)
 
 ;; END Library section
 
