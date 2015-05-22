@@ -1720,22 +1720,30 @@
 ;;
 ;; TODO: this is not working at the moment!!!
 (define (lib:get-dep-list libs/deps)
-  (let* ((result '())
-         (add-result! 
-          (lambda (name)
-            (cond
-              ((not (member name result))
-               (set! result (cons name result)))
-              (else 
-                ;; TODO: library already added, make sure it is after its deps
-                'TODO)))))
-    (for-each
-      (lambda (lib/deps)
-        (let ((lib (car lib/deps))
-              (deps (cdr lib/deps)))
-          (for-each add-result! (cons lib deps))))
-      libs/deps)
-    result))
+ ;for each library
+ ; compute index of result that is after any libs that lib imports
+ ; compute index of result that is before any libs that import lib
+ ;  if there is a 'hole' then insert lib into result in that space
+ ;  otherwise, throw an error (unfortunate but best we can do right now)
+
+;  (let* ((result '())
+;         (add-result! 
+;          (lambda (name)
+;            (cond
+;              ((not (member name result))
+;(write `(DEBUG adding ,name))
+;(newline)
+;               (set! result (cons name result)))
+;              (else 
+;                ;; TODO: library already added, make sure it is after its deps
+;                'TODO)))))
+;    (for-each
+;      (lambda (lib/deps)
+;        (let ((lib (car lib/deps))
+;              (deps (cdr lib/deps)))
+;          (for-each add-result! (cons lib deps))))
+;      libs/deps)
+;    result))
 ; Notes for above 2 functions: 
 ;
 ; Testing, run this from hello directory: 
