@@ -223,7 +223,7 @@
          (lib-deps 
            (if (and program? 
                    (tagged-list? 'import (car in-prog)))
-             (delete-duplicates (lib:get-all-import-deps (cdar in-prog)))
+             (lib:get-all-import-deps (cdar in-prog))
             '()))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))

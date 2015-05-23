@@ -1565,6 +1565,9 @@
 ;; A quicky-and-dirty (for now) implementation of r7rs libraries
 ;; TODO: relocate this somewhere else, once it works. Ideally
 ;;       somewhere accessible to the interpreter
+;; TODO: go through functions and ensure consistent naming conventions.
+;;   probably should also clean up some of the function names, this is
+;;   not a very clean or nice API at the moment.
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
@@ -1695,7 +1698,7 @@
 ;; The list of deps is intended to be returned in order, such that the
 ;; libraries can be initialized properly in sequence.
 (define (lib:get-all-import-deps imports)
-  (let* ((libraries/deps '())
+  (letrec ((libraries/deps '())
          (find-deps! 
           (lambda (import-set)
             (for-each 
@@ -1706,6 +1709,7 @@
                   ;; Find all dependencies of i (IE, libraries it imports)
                   (let ((deps (lib:read-imports i))) 
                    (set! libraries/deps (cons (cons i deps) libraries/deps))
+                   (find-deps! deps)
                  ))))
               import-set))))
    (find-deps! imports)
@@ -1757,7 +1761,7 @@
 
                   (loop (+ i 1)))))
             (loop 0)
-            (pp `(JAE DEBUG ,result ,lib/dep ,idx-imports-me ,idx-my-imports))
+            ;(pp `(JAE DEBUG ,result ,lib/dep ,idx-imports-me ,idx-my-imports))
             (if (<= idx-my-imports idx-imports-me)
               (list-insert-at! result lib/dep 
                 (if (= idx-my-imports idx-imports-me)
