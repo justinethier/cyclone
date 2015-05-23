@@ -1709,22 +1709,26 @@
                  ))))
               import-set))))
    (find-deps! imports)
-   `((deps ,libraries/deps) ; DEBUG
-     (result ,(lib:get-dep-list libraries/deps)))
-  ; (lib:get-dep-list libraries/deps)
+   ;`((deps ,libraries/deps) ; DEBUG
+   ;  (result ,(lib:get-dep-list libraries/deps)))
+   (lib:get-dep-list libraries/deps)
    ))
 
 ;; Given a list of alists (library-name . imports), return an ordered
 ;; list of library names such that each lib is encounted after the
 ;; libraries it imports (it's dependencies).
-;;
-;; TODO: this is not working at the moment!!!
 (define (lib:get-dep-list libs/deps)
- ;for each library
- ; compute index of result that is after any libs that lib imports
- ; compute index of result that is before any libs that import lib
- ;  if there is a 'hole' then insert lib into result in that space
- ;  otherwise, throw an error (unfortunate but will identify problems)
+ ; Overall strategy is:
+ ; for each library
+ ;  compute index of result that is after any libs that lib imports
+ ;  compute index of result that is before any libs that import lib
+ ;   if there is a 'hole' then insert lib into result in that space
+ ;   otherwise, throw an error (unfortunate but will identify problems)
+ ;
+ ; To test, run this from hello directory: 
+ ; (pp (lib:get-all-import-deps '((scheme base) (scheme eval) (scheme base)
+ ;       (scheme read) (scheme eval) (libs lib1) (libs lib2))))
+ ;
  (let ((result '()))
   (for-each
     (lambda (lib/dep)
@@ -1753,63 +1757,16 @@
 
                   (loop (+ i 1)))))
             (loop 0)
-            (write `(DEBUG ,(car lib/dep) ,idx-imports-me ,idx-my-imports))
-            (if (< idx-my-imports idx-imports-me)
-              (list-insert-at! result lib/dep (+ 1 idx-my-imports))
+            (pp `(JAE DEBUG ,result ,lib/dep ,idx-imports-me ,idx-my-imports))
+            (if (<= idx-my-imports idx-imports-me)
+              (list-insert-at! result lib/dep 
+                (if (= idx-my-imports idx-imports-me)
+                  idx-my-imports
+                  (+ 1 idx-my-imports)))
               (error "Internal error: unable to import library"))))
         ))
     libs/deps)
   (map car result)))
-
-; TODO: helper function - (list-insert-at! lis obj k)
-;
-;
-;  (let* ((result '())
-;         (add-result! 
-;          (lambda (name)
-;            (cond
-;              ((not (member name result))
-;(write `(DEBUG adding ,name))
-;(newline)
-;               (set! result (cons name result)))
-;              (else 
-;                ;; TODO: library already added, make sure it is after its deps
-;                'TODO)))))
-;    (for-each
-;      (lambda (lib/deps)
-;        (let ((lib (car lib/deps))
-;              (deps (cdr lib/deps)))
-;          (for-each add-result! (cons lib deps))))
-;      libs/deps)
-;    result))
-; Notes for above 2 functions: 
-;
-; Testing, run this from hello directory: 
-; (pp (lib:get-all-import-deps '((scheme base) (scheme eval) (scheme base) (scheme read) (scheme eval) (libs lib1) (libs lib2))))
-;
-;
-; Example, libs with their dependencies
-; ((scheme eval) => (scheme base) (scheme read)
-; ((scheme read) => (scheme base)
-; ((scheme base) => ()
-; ((lib lib1) => (scheme base) (lib lib2)
-; ((lib lib2) => ()
-;
-; can loop over them, and for each one:
-; - add my deps to the result, if they are not already there
-; - add myself to result
-; but that's not good enough, what if one of the libs is already there in the wrong place?? but at any given point, i think we only move the one library that we are looking at that has dependencies. so that could be managable??
-;
-; read base eval
-; base read eval (move read before base because it depends on it)
-; base read eval (base has no deps and is already there, nothing to do)
-; base read eval lib2 lib1 (lib1's 'stuff' added at the end)
-
-
-
-
-
-
 ;; END Library section
 
 ; Suitable definitions for the cell functions:
