@@ -7,6 +7,9 @@ Working TODO list:
     cyclone> 'a
     Error: Unbound variable quote
 
+  it seems tagged-list? is receiving two different instances of the "quote" symbol
+  add_symbol(quote_quote); appears in each module
+  can we fix this by updating defsymbol to call find_or_add_symbol???
 
  - Reduction in size of generated code
    is there anything we can do?
