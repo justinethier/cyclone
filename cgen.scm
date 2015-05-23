@@ -949,8 +949,7 @@
     ;; Emit symbol definitions
     (for-each
         (lambda (sym)
-            (emit* 
-                "defsymbol(" (mangle sym) ", " (symbol->string sym) ");"))
+            (emit* "defsymbol(" (mangle sym) ");"))
         *symbols*)
 
     ;; Emit lambdas:
@@ -990,7 +989,8 @@
     (for-each
         (lambda (sym)
             (emit* 
-                "  quote_" (mangle sym) " = find_or_add_symbol(\"" (symbol->string sym) "\");"))
+                "  quote_" (mangle sym) " = find_or_add_symbol(\"" 
+                (symbol->string sym) "\");"))
         *symbols*)
 
     ;; Initialize global table

@@ -144,7 +144,7 @@ typedef symbol_type *symbol;
 #define symbol_pname(x) (((symbol_type *) x)->pname)
 #define symbol_plist(x) (((symbol_type *) x)->plist)
 
-#define defsymbol(name,pname) \
+#define defsymbol(name) \
 static object quote_##name = nil;
 
 /* Define numeric types */
