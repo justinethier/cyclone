@@ -1074,7 +1074,7 @@
                   ", c_" (lib:name->string lib-name) "_entry_pt"
                   ", &" prev-clo ");")
             )
-            required-libs)
+            (reverse required-libs)) ;; Init each lib's dependencies 1st
           (emit* 
             ;; Start cont chain, but do not assume funcall1 macro was defined
             "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");")
