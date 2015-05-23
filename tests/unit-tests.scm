@@ -1,3 +1,6 @@
+(import (scheme base)
+        (scheme eval))
+
 (define *num-passed* 0)
 (define (assert:equal msg actual expected)
   (if (not (equal? actual expected))
