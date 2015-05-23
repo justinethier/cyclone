@@ -1,3 +1,12 @@
+Roadmap:
+ - Get libraries working (think this is done)?
+ - Add constructs used by the compiler
+ - Allow compiler to be hosted by Chicken (already working) or itself (self-hosting)
+ - Install scripts and instructions, need to be able to deploy this
+ - Add macro support (instead of current kludge)
+ - Target r7rs support (coordinate with feature list)
+ - User manual (or at least API docs)
+
 Working TODO list:
  
  - Reduction in size of generated code
