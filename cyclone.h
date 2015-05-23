@@ -145,8 +145,7 @@ typedef symbol_type *symbol;
 #define symbol_plist(x) (((symbol_type *) x)->plist)
 
 #define defsymbol(name,pname) \
-static symbol_type name##_symbol = {symbol_tag, #pname, nil}; \
-static const object quote_##name = &name##_symbol
+static object quote_##name = nil;
 
 /* Define numeric types */
 typedef struct {tag_type tag; int value;} integer_type;

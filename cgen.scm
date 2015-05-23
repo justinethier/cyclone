@@ -946,7 +946,7 @@
     (if program?
         (emit "#include \"runtime-main.h\""))
 
-    ;; Emit symbols
+    ;; Emit symbol definitions
     (for-each
         (lambda (sym)
             (emit* 
@@ -985,6 +985,13 @@
         (emit* "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ ")
         ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
+
+    ;; Initialize symbols
+    (for-each
+        (lambda (sym)
+            (emit* 
+                "  quote_" (mangle sym) " = find_or_add_symbol(\"" (symbol->string sym) "\");"))
+        *symbols*)
 
     ;; Initialize global table
     (for-each
