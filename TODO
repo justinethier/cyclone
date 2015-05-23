@@ -9,7 +9,9 @@ Working TODO list:
 
   it seems tagged-list? is receiving two different instances of the "quote" symbol
   add_symbol(quote_quote); appears in each module
-  can we fix this by updating defsymbol to call find_or_add_symbol???
+  possible fix:
+   - replace/modify defsymbol so it creates the quote_ pointers, but zeros them
+   - modify the entry_pt function to use find_or_add_sym to initialize all symbols prior to the module doing anything. as part of this, allocate the sym and assign the appropriate quote_ var to it. this should work across modules since the first module would create it, second one would use the found one, etc.
 
  - Reduction in size of generated code
    is there anything we can do?
