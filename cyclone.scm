@@ -234,22 +234,6 @@
                (lambda ()
                  (c-compile-and-emit program lib-deps)))))
          (result (create-c-file in-prog)))
-    ;; Load other modules if necessary
-    (cond
-     ((and program?
-           (not (null? result)))
-      (let ((program
-              (append
-                ;(if (member 'eval result) 
-                ;    (read-file (get-lib "eval.scm")) 
-                ;   '())
-                ;(if (member 'read result) 
-                ;    (append
-                ;        (read-file (get-lib "parser.scm"))
-                ;       '((define read cyc-read)))
-                ;   '())
-                in-prog)))
-        (create-c-file program)))) ;; TODO: no, don't do same work twice. real answer is linking
 
     ;; Compile the generated C file
     ;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
