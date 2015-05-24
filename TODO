@@ -9,6 +9,11 @@ Roadmap:
 
 Working TODO list:
  
+ - Constructs require for self-hosting
+
+   - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
+   - quasiquote - will need to enhance the parser to support a second type of quote, at minimum
+
  - Reduction in size of generated code
    is there anything we can do?
    are closures being packed/unpacked unnecessarily?
