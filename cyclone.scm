@@ -16,6 +16,7 @@
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (load (string-append (cyc:get-lib-dir) "parser.so"))
+   (load (string-append (cyc:get-lib-dir) "libraries.so"))
    (load (string-append (cyc:get-lib-dir) "trans.so"))
    (load (string-append (cyc:get-lib-dir) "cgen.so")))
 ; (husk
@@ -24,6 +25,7 @@
 ; )
  (else
    (load (string-append (cyc:get-lib-dir) "parser.scm"))
+   (load (string-append (cyc:get-lib-dir) "libraries.scm"))
    (load (string-append (cyc:get-lib-dir) "trans.scm"))
    (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
 

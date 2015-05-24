@@ -18,6 +18,9 @@ trans.so: trans.scm
 cgen.so: cgen.scm
 	csc -s cgen.scm
 
+libraries.so: libraries.scm
+	csc -s libraries.scm
+
 parser.so: parser.scm
 	csc -s parser.scm
 
@@ -41,7 +44,7 @@ debug:
 debug2: libcyclone.so.1
 	gcc test.c -L. -lcyclone -I. -g -o test
 
-cyclone: cyclone.scm trans.so cgen.so parser.so libcyclone.a
+cyclone: cyclone.scm trans.so cgen.so libraries.so parser.so libcyclone.a
 	csc cyclone.scm
 
 .PHONY: test
@@ -70,7 +73,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm parser.scm runtime.h
+icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h
 	./cyclone icyc.scm
 
 .PHONY: tags
