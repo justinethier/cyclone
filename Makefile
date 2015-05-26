@@ -1,10 +1,13 @@
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
-all: cyclone scheme/base.o scheme/read.o scheme/eval.o icyc
+all: cyclone scheme/base.o scheme/read.o scheme/char.o scheme/eval.o icyc
 
 scheme/base.o: cyclone scheme/base.sld
 	./cyclone scheme/base.sld
+
+scheme/char.o: cyclone scheme/char.sld
+	./cyclone scheme/char.sld
 
 scheme/eval.o: cyclone scheme/eval.sld
 	./cyclone scheme/eval.sld
@@ -82,5 +85,5 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc
+	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)

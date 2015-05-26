@@ -1,4 +1,5 @@
 (import (scheme base)
+        (scheme char)
         (scheme eval))
 
 (define *num-passed* 0)

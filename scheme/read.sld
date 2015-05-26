@@ -1,5 +1,6 @@
 (define-library (scheme read)
-  (import (scheme base))
+  (import (scheme base)
+          (scheme char))
   (export
     read
     read-all
