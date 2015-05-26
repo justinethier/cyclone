@@ -90,6 +90,7 @@ common_type Cyc_string2number(object str);
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 string_type Cyc_string_append(int argc, object str1, ...);
 string_type Cyc_string_append_va_list(int argc, object str1, va_list ap);
+integer_type Cyc_system(object cmd);
 integer_type Cyc_char2integer(object chr);
 object Cyc_integer2char(object n);
 void my_exit(closure) never_returns;

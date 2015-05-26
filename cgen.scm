@@ -438,6 +438,7 @@
      ((eq? p 'string->symbol) "Cyc_string2symbol")
      ((eq? p 'symbol->string) "Cyc_symbol2string")
      ((eq? p 'number->string) "Cyc_number2string")
+     ((eq? p 'system)         "Cyc_system")
      ((eq? p 'assq)          "assq")
      ((eq? p 'assv)          "assq")
      ((eq? p 'assoc)         "assoc")
@@ -477,6 +478,7 @@
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
+    ((eq? p 'system) "integer_type")
     ((eq? p '+) "common_type")
     ((eq? p '-) "common_type")
     ((eq? p '*) "common_type")
@@ -495,7 +497,7 @@
     (and (prim? exp)
          (member exp '(
              current-input-port open-input-file
-             char->integer string->number string-append list->string string->list
+             char->integer system string->number string-append list->string string->list
              symbol->string number->string
              + - * / apply cons length cell))))
 

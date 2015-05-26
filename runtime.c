@@ -692,6 +692,16 @@ string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
     return result;
 }
 
+integer_type Cyc_system(object cmd) {
+  if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
+    make_int(n, -1);
+    return n;
+  } else {
+    make_int(n, system(((string_type *)cmd)->str));
+    return n;
+  }
+}
+
 integer_type Cyc_char2integer(object chr){
     make_int(n, obj_obj2char(chr));
     return n;

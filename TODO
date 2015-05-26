@@ -15,6 +15,7 @@ Working TODO list:
    - quasiquote - will need to enhance the parser to support a second type of quote, at minimum
    - string<? - and related functions, too
    - (system) - not standard, but need to run gcc. See cyclone.scm for use
+     Almost done, need to add primitive to runtime
    - vectors - limited use in cgen module - make-vector, vector-set!, and vector-ref
 
  - Reduction in size of generated code

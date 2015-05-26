@@ -480,6 +480,7 @@
      apply
      %halt
      exit
+     system
      Cyc-default-exception-handler
      Cyc-current-exception-handler
      cons
@@ -548,6 +549,7 @@
                   apply
                   %halt
                   exit
+                  system
                   Cyc-default-exception-handler
                   Cyc-current-exception-handler
                   cell-get

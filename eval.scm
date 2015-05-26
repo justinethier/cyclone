@@ -203,6 +203,7 @@
       (list 'apply apply)
       (list '%halt %halt)
       (list 'exit exit)
+      (list 'system system)
       (list 'error error)
       (list 'cons cons)
       (list 'cell-get cell-get)
