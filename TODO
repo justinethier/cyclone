@@ -13,7 +13,7 @@ Working TODO list:
 
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
    - quasiquote - will need to enhance the parser to support a second type of quote, at minimum
-   - string<? symbol<? - and related functions, too
+   - string<? - and related functions, too
    - (system) - not standard, but need to run gcc. See cyclone.scm for use
    - vectors - limited use in cgen module - make-vector, vector-set!, and vector-ref
 

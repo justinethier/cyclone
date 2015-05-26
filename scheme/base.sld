@@ -65,7 +65,9 @@
     (define (char>?  c1 c2 . cs) (Cyc-bin-op-char >  c1 (cons c2 cs)))
     (define (char<=? c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs)))
     (define (char>=? c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs)))
-    ; TODO: char-ci predicates
+    ; TODO: char-ci predicates (in scheme/char library)
+    ; TODO: (define (string<? str1 str2 . strs)
+
     (define (foldl func accum lst)
       (if (null? lst)
         accum
