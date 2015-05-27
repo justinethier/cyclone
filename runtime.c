@@ -1050,6 +1050,9 @@ void _integer_91_125char(object cont, object args) {
 void _string_91_125number(object cont, object args) {  
     common_type i = Cyc_string2number(car(args));
     return_funcall1(cont, &i);}
+void _cyc_system(object cont, object args) {
+    integer_type i = Cyc_system(car(args));
+    return_funcall1(cont, &i);}
 //void _error(object cont, object args) {
 //    integer_type argc = Cyc_length(args);
 //    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
@@ -1719,6 +1722,7 @@ static primitive_type cddddr_primitive = {primitive_tag, "cddddr", &_cddddr};
 static primitive_type char_91_125integer_primitive = {primitive_tag, "char->integer", &_char_91_125integer};
 static primitive_type integer_91_125char_primitive = {primitive_tag, "integer->char", &_integer_91_125char};
 static primitive_type string_91_125number_primitive = {primitive_tag, "string->number", &_string_91_125number};
+static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
 static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
 static primitive_type string_91_125list_primitive = {primitive_tag, "string->list", &_string_91_125list};
 static primitive_type list_91_125string_primitive = {primitive_tag, "list->string", &_list_91_125string};
@@ -1814,6 +1818,7 @@ const object primitive_cddddr = &cddddr_primitive;
 const object primitive_char_91_125integer = &char_91_125integer_primitive;
 const object primitive_integer_91_125char = &integer_91_125char_primitive;
 const object primitive_string_91_125number = &string_91_125number_primitive;
+const object primitive_system = &system_primitive;
 const object primitive_string_91append = &string_91append_primitive;
 const object primitive_string_91_125list = &string_91_125list_primitive;
 const object primitive_list_91_125string = &list_91_125string_primitive;

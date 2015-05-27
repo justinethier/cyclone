@@ -262,6 +262,7 @@ extern const object primitive_list_91_125string;
 extern const object primitive_string_91_125symbol;
 extern const object primitive_symbol_91_125string;
 extern const object primitive_number_91_125string;
+extern const object primitive_system;
 extern const object primitive_boolean_127;
 extern const object primitive_char_127;
 extern const object primitive_eof_91object_127;
