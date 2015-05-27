@@ -8,9 +8,6 @@
 ;; when bootstrapping from a Scheme, keep in mind the code in this module 
 ;; cannot use features that are not also provided by Cyclone.
 ;;
-;; FUTURE: if this was a module/library, would probably only want to export
-;;         read and read-all
-;;
 
 ;; Extended information for each input port
 (define *in-port-table* '())
