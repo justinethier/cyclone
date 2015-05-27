@@ -13,6 +13,11 @@
     char>?
     char<=?
     char>=?
+    string=?
+    string<?
+    string<=?
+    string>?
+    string>=?
     foldl
     foldr
     not
@@ -66,7 +71,14 @@
     (define (char<=? c1 c2 . cs) (Cyc-bin-op-char <= c1 (cons c2 cs)))
     (define (char>=? c1 c2 . cs) (Cyc-bin-op-char >= c1 (cons c2 cs)))
     ; TODO: char-ci predicates (in scheme/char library)
-    ; TODO: (define (string<? str1 str2 . strs)
+
+
+    (define (string=? str1 str2)  (equal? (string-cmp str1 str2) 0))
+    (define (string<? str1 str2)  (<  (string-cmp str1 str2) 0))
+    (define (string<=? str1 str2) (<= (string-cmp str1 str2) 0))
+    (define (string>? str1 str2)  (>  (string-cmp str1 str2) 0))
+    (define (string>=? str1 str2) (>= (string-cmp str1 str2) 0))
+    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
 
     (define (foldl func accum lst)
       (if (null? lst)
