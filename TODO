@@ -12,8 +12,13 @@ Working TODO list:
  - Constructs require for self-hosting
 
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
+     issue here is, to do this right we need parameterize and dynamic-wind. both of which would be nice, but are a lot more work, too
    - quasiquote - will need to enhance the parser to support a second type of quote, at minimum
+     parser needs to be reworked to handle quotes by invoking parser and reading
+     (quote _) or (quasiquote _) etc
+     passing quote level won't work because could be anything there. 
    - vectors - limited use in cgen module - make-vector, vector-set!, vector-ref, list->vector, vector->list
+     obvious issues are how to represent the vector (array of objects, I suppose) and how to GC it, including handling mutations
 
  - Reduction in size of generated code
    is there anything we can do?
