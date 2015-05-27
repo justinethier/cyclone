@@ -510,6 +510,7 @@
      integer->char
      string->number
      string-append
+     string-cmp
      string->list
      list->string
      string->symbol

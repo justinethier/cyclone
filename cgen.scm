@@ -435,6 +435,7 @@
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'string->list)  "string2list")
      ((eq? p 'string-append) "Cyc_string_append")
+     ((eq? p 'string-cmp)    "Cyc_string_cmp")
      ((eq? p 'string->symbol) "Cyc_string2symbol")
      ((eq? p 'symbol->string) "Cyc_symbol2string")
      ((eq? p 'number->string) "Cyc_number2string")
@@ -486,6 +487,7 @@
     ((eq? p 'string->number) "common_type")
     ((eq? p 'list->string) "string_type")
 ;    ((eq? p 'string->list) "object")
+    ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "string_type")
     ((eq? p 'symbol->string) "string_type")
     ((eq? p 'number->string) "string_type")
@@ -497,7 +499,8 @@
     (and (prim? exp)
          (member exp '(
              current-input-port open-input-file
-             char->integer system string->number string-append list->string string->list
+             char->integer system string->number 
+             string-append string-cmp list->string string->list
              symbol->string number->string
              + - * / apply cons length cell))))
 

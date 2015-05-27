@@ -639,6 +639,13 @@ common_type Cyc_string2number(object str){
     return result;
 }
 
+integer_type Cyc_string_cmp(object str1, object str2) {
+  // TODO: check types of str1, str2
+  make_int(cmp, strcmp(((string_type *)str1)->str,
+                       ((string_type *)str2)->str));
+  return cmp;
+}
+
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
     string_type result;
     va_list ap;
@@ -1063,6 +1070,9 @@ void _Cyc_91default_91exception_91handler(object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
     Cyc_default_exception_handler(1, args, car(args));
 }
+void _string_91cmp(object cont, object args) {  
+    integer_type cmp = Cyc_string_cmp(car(args), cadr(args));
+    return_funcall1(cont, &cmp);}
 void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
@@ -1723,6 +1733,7 @@ static primitive_type char_91_125integer_primitive = {primitive_tag, "char->inte
 static primitive_type integer_91_125char_primitive = {primitive_tag, "integer->char", &_integer_91_125char};
 static primitive_type string_91_125number_primitive = {primitive_tag, "string->number", &_string_91_125number};
 static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
+static primitive_type string_91cmp_primitive = {primitive_tag, "string-cmp", &_string_91cmp};
 static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
 static primitive_type string_91_125list_primitive = {primitive_tag, "string->list", &_string_91_125list};
 static primitive_type list_91_125string_primitive = {primitive_tag, "list->string", &_list_91_125string};
@@ -1819,6 +1830,7 @@ const object primitive_char_91_125integer = &char_91_125integer_primitive;
 const object primitive_integer_91_125char = &integer_91_125char_primitive;
 const object primitive_string_91_125number = &string_91_125number_primitive;
 const object primitive_system = &system_primitive;
+const object primitive_string_91cmp = &string_91cmp_primitive;
 const object primitive_string_91append = &string_91append_primitive;
 const object primitive_string_91_125list = &string_91_125list_primitive;
 const object primitive_list_91_125string = &list_91_125string_primitive;

@@ -255,6 +255,7 @@
       (list 'char->integer char->integer)
       (list 'integer->char integer->char)
       (list 'string->number string->number)
+      (list 'string-cmp string-cmp)
       (list 'string-append string-append)
       (list 'string->list string->list)
       (list 'list->string list->string)
