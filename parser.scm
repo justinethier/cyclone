@@ -41,15 +41,16 @@
 
 ;; Helper functions
 (define (add-tok tok toks quotes)
-  (define (loop i)
-    (if (= quotes i)
-      tok
-      (cons 'quote (cons (loop (+ i 1)) '()))))
-  (if quotes
-     (cons
-       (loop 0)
-       toks)
-     (cons tok toks)))
+  ; TODO: all this code is obsolete, get rid of it and the 'quotes' parameters
+  ;(define (loop i)
+  ;  (if (= quotes i)
+  ;    tok
+  ;    (cons 'quote (cons (loop (+ i 1)) '()))))
+  ;(if quotes
+  ;   (cons
+  ;     (loop 0)
+  ;     toks)
+     (cons tok toks));)
 
 ;; Get completed list of tokens
 (define (get-toks tok toks quotes)
@@ -172,22 +173,7 @@
           (in-port:set-buf! ptbl c)
           (car (add-tok (->tok tok) toks quotes)))
          (else
-;; OLD CODE:
-;;           (let ((quote-level (if quotes
-;;                                  (+ quotes 1)
-;;                                  1)))
-;;             (cond
-;;              ((null? tok)
-;;                 (parse fp '() toks all? comment? quote-level parens ptbl))
-;;              (else
-;;                 (parse fp '() (add-tok (->tok tok) toks quotes)
-;;                               all? comment? quote-level parens ptbl)))))))
-
-;; New code - seems to be messing up the paren count??
-; maybe the code that reads closing parens needs to change such that
-; it keeps the closing paren buffered if we are not in "all?" mode.
-;           (write `(reading quoted subexpr))
-;           (newline)
+           ;; Read the next expression and wrap it in a quote
            (let ((sub
                    (parse fp 
                     '() 
@@ -210,8 +196,7 @@
            ;; Keep going
            (if all?
              (parse fp '() new-toks all? #f #f parens ptbl)
-             (car new-toks)))
-         )))
+             (car new-toks))))))
       ((eq? c #\()
        (cond
          ((and (not all?) (not (null? tok)))
