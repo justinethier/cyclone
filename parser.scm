@@ -135,7 +135,6 @@
 ;; END DEBUG
     (cond
       ((eof-object? c) 
-       (write `(JAE DEBUG parens is ,parens))
        (if (> parens 0)
            (parse-error "missing closing parenthesis" 
              (in-port:get-lnum ptbl)
@@ -187,9 +186,9 @@
 ;; New code - seems to be messing up the paren count??
 ; maybe the code that reads closing parens needs to change such that
 ; it keeps the closing paren buffered if we are not in "all?" mode.
-           (write `(reading quoted subexpr))
-           (newline)
-           (let* ((sub
+;           (write `(reading quoted subexpr))
+;           (newline)
+           (let ((sub
                    (parse fp 
                     '() 
                     '()
@@ -197,25 +196,23 @@
                     #f ;comment? 
                     #f ;quote-level 
                     0 ;parens 
-                    ptbl))
-                  (new-toks 
-                    (add-tok
-                      (list
-                         'quote
-                         (if (and (pair? sub) (dotted? sub))
-                              (->dotted-list sub)
-                              sub))
-                      (get-toks tok toks quotes)
-                      quotes)))
-           (write `(subexpr ,sub new-toks ,new-toks))
-           (newline)
+                    ptbl)))
+             (define new-toks 
+               (add-tok
+                 (list
+                    'quote
+                    sub)
+                    ;(if (and (pair? sub) (dotted? sub))
+                    ;     (->dotted-list sub)
+                    ;     sub))
+                 (get-toks tok toks quotes)
+                 quotes))
            ;; Keep going
            (if all?
              (parse fp '() new-toks all? #f #f parens ptbl)
              (car new-toks)))
          )))
       ((eq? c #\()
-;(write `(DEBUG read open paren ,tok))
        (cond
          ((and (not all?) (not (null? tok)))
           ;; Reached a terminal char, read out previous token
@@ -236,12 +233,17 @@
               (parse fp '() new-toks all? #f #f parens ptbl)
               (car new-toks))))))
       ((eq? c #\))
-;(write `(DEBUG decrementing paren level ,parens))
-       (if (= parens 0)
-           (parse-error "unexpected closing parenthesis" 
-             (in-port:get-lnum ptbl)
-             (in-port:get-cnum ptbl)))
-       (reverse (get-toks tok toks quotes)))
+       (cond
+         ((and (not all?) (not (null? tok)))
+          ;; Reached a terminal char, read out previous token
+          (in-port:set-buf! ptbl c)
+          (car (add-tok (->tok tok) toks quotes)))
+         ((= parens 0)
+          (parse-error "unexpected closing parenthesis" 
+            (in-port:get-lnum ptbl)
+            (in-port:get-cnum ptbl)))
+         (else
+           (reverse (get-toks tok toks quotes)))))
       ((eq? c #\")
        (cond
          ((and (not all?) (not (null? tok)))
@@ -263,8 +265,14 @@
                 (+ 1 (in-port:get-cnum ptbl)))
             (cond
               ;; Do not use add-tok below, no need to quote a bool
-              ((eq? #\t next-c) (parse fp '() (cons #t toks) all? #f #f parens ptbl))
-              ((eq? #\f next-c) (parse fp '() (cons #f toks) all? #f #f parens ptbl))
+              ((eq? #\t next-c) 
+               (if all?
+                   (parse fp '() (cons #t toks) all? #f #f parens ptbl)
+                   #t))
+              ((eq? #\f next-c) 
+               (if all?
+                   (parse fp '() (cons #f toks) all? #f #f parens ptbl)
+                   #f))
               ((eq? #\\ next-c)
                (let ((new-toks (cons (read-pound fp ptbl) toks)))
                  (if all?
@@ -400,12 +408,13 @@
 ;    ;; Test code
 ;    ;(let ((fp (open-input-file "tests/begin.scm")))
 ;    ;(let ((fp (open-input-file "tests/strings.scm")))
-     (let ((fp (open-input-file "test.scm")))
-      (write (read-all fp)))
-(define (repl)
-    (let ((fp (current-input-port)))
-     (write (cyc-read fp)))
-  (repl))
-;;(repl)
+;     (let ((fp (open-input-file "test.scm")))
+;     (let ((fp (open-input-file "tests/unit-tests.scm")))
+;      (write (read-all fp)))
+;(define (repl)
+;    (let ((fp (current-input-port)))
+;     (write (cyc-read fp)))
+;  (repl))
+;(repl)
 
 
