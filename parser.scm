@@ -135,6 +135,7 @@
 ;; END DEBUG
     (cond
       ((eof-object? c) 
+       (write `(JAE DEBUG parens is ,parens))
        (if (> parens 0)
            (parse-error "missing closing parenthesis" 
              (in-port:get-lnum ptbl)
@@ -172,15 +173,47 @@
           (in-port:set-buf! ptbl c)
           (car (add-tok (->tok tok) toks quotes)))
          (else
-           (let ((quote-level (if quotes
-                                  (+ quotes 1)
-                                  1)))
-             (cond
-              ((null? tok)
-                 (parse fp '() toks all? comment? quote-level parens ptbl))
-              (else
-                 (parse fp '() (add-tok (->tok tok) toks quotes) 
-                               all? comment? quote-level parens ptbl)))))))
+;; OLD CODE:
+;;           (let ((quote-level (if quotes
+;;                                  (+ quotes 1)
+;;                                  1)))
+;;             (cond
+;;              ((null? tok)
+;;                 (parse fp '() toks all? comment? quote-level parens ptbl))
+;;              (else
+;;                 (parse fp '() (add-tok (->tok tok) toks quotes)
+;;                               all? comment? quote-level parens ptbl)))))))
+
+;; New code - seems to be messing up the paren count??
+; maybe the code that reads closing parens needs to change such that
+; it keeps the closing paren buffered if we are not in "all?" mode.
+           (write `(reading quoted subexpr))
+           (newline)
+           (let* ((sub
+                   (parse fp 
+                    '() 
+                    '()
+                    #f ;all? 
+                    #f ;comment? 
+                    #f ;quote-level 
+                    0 ;parens 
+                    ptbl))
+                  (new-toks 
+                    (add-tok
+                      (list
+                         'quote
+                         (if (and (pair? sub) (dotted? sub))
+                              (->dotted-list sub)
+                              sub))
+                      (get-toks tok toks quotes)
+                      quotes)))
+           (write `(subexpr ,sub new-toks ,new-toks))
+           (newline)
+           ;; Keep going
+           (if all?
+             (parse fp '() new-toks all? #f #f parens ptbl)
+             (car new-toks)))
+         )))
       ((eq? c #\()
 ;(write `(DEBUG read open paren ,tok))
        (cond
@@ -364,16 +397,15 @@
 ;; read -> port -> object
 ;(define read cyc-read)
 
-;(define (repl)
 ;    ;; Test code
 ;    ;(let ((fp (open-input-file "tests/begin.scm")))
 ;    ;(let ((fp (open-input-file "tests/strings.scm")))
-;    ;(let ((fp (open-input-file "eval.scm")))
-;    ;(let ((fp (open-input-file "dev.scm")))
-;    ;  (write (read-all fp)))
-;    (let ((fp (current-input-port)))
-;     (write (cyc-read fp)))
-;  (repl))
+     (let ((fp (open-input-file "test.scm")))
+      (write (read-all fp)))
+(define (repl)
+    (let ((fp (current-input-port)))
+     (write (cyc-read fp)))
+  (repl))
 ;;(repl)
 
 
