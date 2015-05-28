@@ -197,6 +197,25 @@
            (if all?
              (parse fp '() new-toks all? #f #f parens ptbl)
              (car new-toks))))))
+      ((eq? c #\`)
+;; TODO: should consolidate this with above
+       (cond
+         ((and (not all?) (not quotes) (not (null? tok)))
+           ;; Reached a terminal char, read out previous token
+          (in-port:set-buf! ptbl c)
+          (car (add-tok (->tok tok) toks quotes)))
+         (else
+           ;; Read the next expression and wrap it in a quote
+           (let ((sub (parse fp '() '() #f #f #f 0 ptbl)))
+             (define new-toks 
+               (add-tok
+                 (list 'quasiquote sub)
+                 (get-toks tok toks quotes)
+                 quotes))
+           ;; Keep going
+           (if all?
+             (parse fp '() new-toks all? #f #f parens ptbl)
+             (car new-toks))))))
       ((eq? c #\()
        (cond
          ((and (not all?) (not (null? tok)))
