@@ -17,6 +17,11 @@
 (assert "Testing assert function" #t)
 (assert "Testing assert function" 1)
 
+;; Quotation / Quasi-quotes
+(assert:equal "quasi-quote #1" `(read ,(+ 1 2 3)) '(read 6))
+(assert:equal "quasi-quote #2" `(read ,(list 1 2 3)) '(read (1 2 3)))
+(assert:equal "quasi-quote splicing" `(read ,@(list 1 2 3)) '(read 1 2 3))
+
 ;; Lists
 (define l (list 'a 'b 'c))
 ; TODO: seems to break eval below, is there a GC problem with a circular list?
