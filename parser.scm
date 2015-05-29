@@ -229,6 +229,15 @@
          ;; need a way of peeking at the next char here, either
          ;; via peek-char, or perhaps better by having a larger buffer
          ;; of input chars.
+ ;; TODO: 
+ ; buffer must be empty now since it is only 1 char, so 
+ ; call read-char. then:
+ ; - @ - unquote-splicing processing
+ ; - eof - error
+ ; - otherwise, add char back to buffer and do unquote processing
+ ;
+ ; can test this below for unquote by doing the read-char and adding
+ ; back to the buffer
 
            ;; Read the next expression and wrap it in a quote
            (let ((sub (parse fp '() '() #f #f #f 0 ptbl)))
