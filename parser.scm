@@ -240,12 +240,18 @@
  ; back to the buffer
 
            ;; Read the next expression and wrap it in a quote
-           (let ((sub (parse fp '() '() #f #f #f 0 ptbl)))
-             (define new-toks 
-               (add-tok
-                 (list 'unquote sub)
-                 (get-toks tok toks quotes)
-                 quotes))
+           (letrec ((sub (parse fp '() '() #f #f #f 0 ptbl))
+                    (next-c (read-char fp))
+                    (unquote-sym (if (equal? next-c #\@) 'unquote-splicing 'unquote))
+                    (new-toks 
+                      (add-tok
+                        (list unquote-sym sub)
+                        (get-toks tok toks quotes)
+                        quotes)))
+           ;; Buffer read-ahead char, if unused
+           (if (not (equal? next-c #\@))
+             (in-port:set-buf! ptbl next-c))
+
            ;; Keep going
            (if all?
              (parse fp '() new-toks all? #f #f parens ptbl)
