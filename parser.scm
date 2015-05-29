@@ -223,39 +223,40 @@
           (in-port:set-buf! ptbl c)
           (car (add-tok (->tok tok) toks quotes)))
          (else
-
-         ;; TODO: this is not good enough for unquote-splicing as
-         ;; that construct requires reading two chars ,@
-         ;; need a way of peeking at the next char here, either
-         ;; via peek-char, or perhaps better by having a larger buffer
-         ;; of input chars.
  ;; TODO: 
  ; buffer must be empty now since it is only 1 char, so 
  ; call read-char. then:
  ; - @ - unquote-splicing processing
  ; - eof - error
  ; - otherwise, add char back to buffer and do unquote processing
- ;
- ; can test this below for unquote by doing the read-char and adding
- ; back to the buffer
 
            ;; Read the next expression and wrap it in a quote
-           (letrec ((sub (parse fp '() '() #f #f #f 0 ptbl))
+           (letrec ((sub #f)
                     (next-c (read-char fp))
                     (unquote-sym (if (equal? next-c #\@) 'unquote-splicing 'unquote))
-                    (new-toks 
-                      (add-tok
-                        (list unquote-sym sub)
-                        (get-toks tok toks quotes)
-                        quotes)))
-           ;; Buffer read-ahead char, if unused
-           (if (not (equal? next-c #\@))
-             (in-port:set-buf! ptbl next-c))
+                    (new-toks #f))
 
-           ;; Keep going
-           (if all?
-             (parse fp '() new-toks all? #f #f parens ptbl)
-             (car new-toks))))))
+             ;; Buffer read-ahead char, if unused
+             (cond
+               ((eof-object? next-c)
+                (parse-error "unexpected end of file" 
+                  (in-port:get-lnum ptbl)
+                  (in-port:get-cnum ptbl)))
+               ((not (equal? next-c #\@))
+                (in-port:set-buf! ptbl next-c))
+               (else #f))
+
+             (set! sub (parse fp '() '() #f #f #f 0 ptbl))
+             (set! new-toks
+                  (add-tok
+                    (list unquote-sym sub)
+                    (get-toks tok toks quotes)
+                    quotes))
+
+             ;; Keep going
+             (if all?
+               (parse fp '() new-toks all? #f #f parens ptbl)
+               (car new-toks))))))
       ((eq? c #\()
        (cond
          ((and (not all?) (not (null? tok)))
