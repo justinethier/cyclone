@@ -216,6 +216,31 @@
            (if all?
              (parse fp '() new-toks all? #f #f parens ptbl)
              (car new-toks))))))
+      ((eq? c #\,)
+       (cond
+         ((and (not all?) (not quotes) (not (null? tok)))
+           ;; Reached a terminal char, read out previous token
+          (in-port:set-buf! ptbl c)
+          (car (add-tok (->tok tok) toks quotes)))
+         (else
+
+         ;; TODO: this is not good enough for unquote-splicing as
+         ;; that construct requires reading two chars ,@
+         ;; need a way of peeking at the next char here, either
+         ;; via peek-char, or perhaps better by having a larger buffer
+         ;; of input chars.
+
+           ;; Read the next expression and wrap it in a quote
+           (let ((sub (parse fp '() '() #f #f #f 0 ptbl)))
+             (define new-toks 
+               (add-tok
+                 (list 'unquote sub)
+                 (get-toks tok toks quotes)
+                 quotes))
+           ;; Keep going
+           (if all?
+             (parse fp '() new-toks all? #f #f parens ptbl)
+             (car new-toks))))))
       ((eq? c #\()
        (cond
          ((and (not all?) (not (null? tok)))
