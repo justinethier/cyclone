@@ -40,23 +40,14 @@
 ;; END input port table
 
 ;; Helper functions
-(define (add-tok tok toks quotes)
-  ; TODO: all this code is obsolete, get rid of it and the 'quotes' parameters
-  ;(define (loop i)
-  ;  (if (= quotes i)
-  ;    tok
-  ;    (cons 'quote (cons (loop (+ i 1)) '()))))
-  ;(if quotes
-  ;   (cons
-  ;     (loop 0)
-  ;     toks)
-     (cons tok toks));)
+(define (add-tok tok toks)
+  (cons tok toks))
 
 ;; Get completed list of tokens
-(define (get-toks tok toks quotes)
+(define (get-toks tok toks)
   (if (null? tok)
     toks
-    (add-tok (->tok tok) toks quotes)))
+    (add-tok (->tok tok) toks)))
 
 ;; Add a token to the list, quoting it if necessary
 (define (->tok lst)
@@ -87,16 +78,15 @@
       msg)))
 
 ;; Add finished token, if there is one, and continue parsing
-(define (parse/tok fp tok toks all? comment? quotes parens ptbl curr-char)
+(define (parse/tok fp tok toks all? comment? parens ptbl curr-char)
   (cond
    ((null? tok)
-    (parse fp '() toks all? comment? quotes parens ptbl))
+    (parse fp '() toks all? comment? parens ptbl))
    (all?
     (parse fp '() 
-           (add-tok (->tok tok) toks quotes) 
+           (add-tok (->tok tok) toks) 
            all?
            comment? 
-           #f  ; read tok, no more quote
            parens
            ptbl))
    (else
@@ -107,7 +97,7 @@
      (in-port:set-buf! ptbl curr-char)
 ;(write `(DEBUG ,tok ,ptbl))
 ;(write "\n")
-     (car (add-tok (->tok tok) toks quotes)))))
+     (car (add-tok (->tok tok) toks)))))
 
 ;; Parse input from stream
 ;;
@@ -117,13 +107,12 @@
 ;; - List of tokens read (if applicable)
 ;; - Bool - Read-all mode, or just read the next object?
 ;; - Bool - Are we inside a comment?
-;; - Quote level
 ;; - Level of nested parentheses 
 ;; - Entry in the in-port table for this port
 ;;
 ;; Output: next object, or list of objects (if read-all mode)
 ;; 
-(define (parse fp tok toks all? comment? quotes parens ptbl)
+(define (parse fp tok toks all? comment? parens ptbl)
   (in-port:set-cnum! ptbl 
     (+ 1 (in-port:get-cnum ptbl)))
 
@@ -141,8 +130,8 @@
              (in-port:get-lnum ptbl)
              (in-port:get-cnum ptbl)))
        (if all?
-         (reverse (get-toks tok toks quotes))
-         (let ((last (get-toks tok toks quotes)))
+         (reverse (get-toks tok toks))
+         (let ((last (get-toks tok toks)))
            (if (> (length last) 0)
              (car last)
              c)))) ;; EOF
@@ -152,26 +141,26 @@
               (in-port:set-lnum! ptbl 
                 (+ 1 (in-port:get-lnum ptbl)))
               (in-port:set-cnum! ptbl 0)
-              (parse fp '() toks all? #f quotes parens ptbl))
-           (parse fp '() toks all? #t quotes parens ptbl)))
+              (parse fp '() toks all? #f parens ptbl))
+           (parse fp '() toks all? #t parens ptbl)))
       ((char-whitespace? c)
        (if (equal? c #\newline)
            (in-port:set-lnum! ptbl 
              (+ 1 (in-port:get-lnum ptbl))))
        (if (equal? c #\newline) 
            (in-port:set-cnum! ptbl 0))
-       (parse/tok fp tok toks all? #f quotes parens ptbl c))
+       (parse/tok fp tok toks all? #f parens ptbl c))
       ((eq? c #\;)
-       (parse/tok fp tok toks all? #t quotes parens ptbl c))
+       (parse/tok fp tok toks all? #t parens ptbl c))
       ((eq? c #\')
        (cond
-         ((and (not all?) (not quotes) (not (null? tok)))
+         ((and (not all?) (not (null? tok)))
            ;; Reached a terminal char, read out previous token
 ;; TODO: would also need to do this if previous char was
 ;;       not a quote!
 ;;       EG: 'a'b ==> (quote a) (quote b), NOT (quote (quote b))
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          (else
            ;; Read the next expression and wrap it in a quote
            (let ((sub
@@ -180,7 +169,6 @@
                     '()
                     #f ;all? 
                     #f ;comment? 
-                    #f ;quote-level 
                     0 ;parens 
                     ptbl)))
              (define new-toks 
@@ -191,37 +179,35 @@
                     ;(if (and (pair? sub) (dotted? sub))
                     ;     (->dotted-list sub)
                     ;     sub))
-                 (get-toks tok toks quotes)
-                 quotes))
+                 (get-toks tok toks)))
            ;; Keep going
            (if all?
-             (parse fp '() new-toks all? #f #f parens ptbl)
+             (parse fp '() new-toks all? #f parens ptbl)
              (car new-toks))))))
       ((eq? c #\`)
 ;; TODO: should consolidate this with above
        (cond
-         ((and (not all?) (not quotes) (not (null? tok)))
+         ((and (not all?) (not (null? tok)))
            ;; Reached a terminal char, read out previous token
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          (else
            ;; Read the next expression and wrap it in a quote
-           (let ((sub (parse fp '() '() #f #f #f 0 ptbl)))
+           (let ((sub (parse fp '() '() #f #f 0 ptbl)))
              (define new-toks 
                (add-tok
                  (list 'quasiquote sub)
-                 (get-toks tok toks quotes)
-                 quotes))
+                 (get-toks tok toks)))
            ;; Keep going
            (if all?
-             (parse fp '() new-toks all? #f #f parens ptbl)
+             (parse fp '() new-toks all? #f parens ptbl)
              (car new-toks))))))
       ((eq? c #\,)
        (cond
-         ((and (not all?) (not quotes) (not (null? tok)))
+         ((and (not all?) (not (null? tok)))
            ;; Reached a terminal char, read out previous token
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          (else
  ;; TODO: 
  ; buffer must be empty now since it is only 1 char, so 
@@ -246,61 +232,59 @@
                 (in-port:set-buf! ptbl next-c))
                (else #f))
 
-             (set! sub (parse fp '() '() #f #f #f 0 ptbl))
+             (set! sub (parse fp '() '() #f #f 0 ptbl))
              (set! new-toks
                   (add-tok
                     (list unquote-sym sub)
-                    (get-toks tok toks quotes)
-                    quotes))
+                    (get-toks tok toks)))
 
              ;; Keep going
              (if all?
-               (parse fp '() new-toks all? #f #f parens ptbl)
+               (parse fp '() new-toks all? #f parens ptbl)
                (car new-toks))))))
       ((eq? c #\()
        (cond
          ((and (not all?) (not (null? tok)))
           ;; Reached a terminal char, read out previous token
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          (else
            (let ((sub ;(_cyc-read-all fp (+ parens 1)))
-                      (parse fp '() '() #t #f #f (+ parens 1) ptbl))
-                 (toks* (get-toks tok toks quotes)))
+                      (parse fp '() '() #t #f (+ parens 1) ptbl))
+                 (toks* (get-toks tok toks)))
              (define new-toks (add-tok 
                                 (if (and (pair? sub) (dotted? sub))
                                     (->dotted-list sub)
                                     sub)
-                                toks* 
-                                quotes)) 
+                                toks*)) 
 ;(write `(DEBUG incrementing paren level ,parens ,sub))
              (if all?
-              (parse fp '() new-toks all? #f #f parens ptbl)
+              (parse fp '() new-toks all? #f parens ptbl)
               (car new-toks))))))
       ((eq? c #\))
        (cond
          ((and (not all?) (not (null? tok)))
           ;; Reached a terminal char, read out previous token
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          ((= parens 0)
           (parse-error "unexpected closing parenthesis" 
             (in-port:get-lnum ptbl)
             (in-port:get-cnum ptbl)))
          (else
-           (reverse (get-toks tok toks quotes)))))
+           (reverse (get-toks tok toks)))))
       ((eq? c #\")
        (cond
          ((and (not all?) (not (null? tok)))
           ;; Reached a terminal char, read out previous token
           (in-port:set-buf! ptbl c)
-          (car (add-tok (->tok tok) toks quotes)))
+          (car (add-tok (->tok tok) toks)))
          (else
           (let ((str (read-str fp '() ptbl))
-                (toks* (get-toks tok toks quotes)))
-            (define new-toks (add-tok str toks* quotes))
+                (toks* (get-toks tok toks)))
+            (define new-toks (add-tok str toks*))
             (if all?
-             (parse fp '() new-toks all? #f #f parens ptbl)
+             (parse fp '() new-toks all? #f parens ptbl)
              (car new-toks))))))
       ((eq? c #\#)
        (if (null? tok)
@@ -312,25 +296,25 @@
               ;; Do not use add-tok below, no need to quote a bool
               ((eq? #\t next-c) 
                (if all?
-                   (parse fp '() (cons #t toks) all? #f #f parens ptbl)
+                   (parse fp '() (cons #t toks) all? #f parens ptbl)
                    #t))
               ((eq? #\f next-c) 
                (if all?
-                   (parse fp '() (cons #f toks) all? #f #f parens ptbl)
+                   (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
               ((eq? #\\ next-c)
                (let ((new-toks (cons (read-pound fp ptbl) toks)))
                  (if all?
-                   (parse fp '() new-toks all? #f #f parens ptbl)
+                   (parse fp '() new-toks all? #f parens ptbl)
                    (car new-toks))))
               (else
                 (parse-error "Unhandled input sequence" 
                   (in-port:get-lnum ptbl)
                   (in-port:get-cnum ptbl)))))
          ;; just another char...
-         (parse fp (cons c tok) toks all? #f quotes parens ptbl)))
+         (parse fp (cons c tok) toks all? #f parens ptbl)))
       (else
-        (parse fp (cons c tok) toks all? #f quotes parens ptbl)))))
+        (parse fp (cons c tok) toks all? #f parens ptbl)))))
 
 ;; Read chars past a leading #\
 (define (read-pound fp ptbl)
@@ -432,7 +416,7 @@
     (let ((fp (if (null? args)
                   (current-input-port)
                   (car args))))
-      (parse fp '() '() #f #f #f 0 (reg-port fp)))))
+      (parse fp '() '() #f #f 0 (reg-port fp)))))
 
 ;; read-all -> port -> [objects]
 (define (read-all . args)
