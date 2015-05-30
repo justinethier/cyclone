@@ -86,6 +86,7 @@ typedef long tag_type;
 #define port_tag 14
 #define boolean_tag 15
 #define cvar_tag 16
+#define vector_tag 17
 
 #define nil NULL
 #define eq(x,y) (x == y)
@@ -170,6 +171,10 @@ typedef struct {tag_type tag; char *str;} string_type;
 typedef struct {tag_type tag; FILE *fp; int mode;} port_type;
 #define make_port(p,f,m) port_type p; p.tag = port_tag; p.fp = f; p.mode = m;
 
+/* Vector type */
+
+// TODO
+
 /* Define cons type. */
 
 typedef struct {tag_type tag; object cons_car,cons_cdr;} cons_type;
@@ -211,7 +216,7 @@ cons_type n; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
 #define atom(x) ((x == NULL) || (((cons_type *) x)->tag != cons_tag))
 
-/* Closure types.  (I don't trust compilers to optimize vector refs.) */
+/* Closure types */
 
 typedef struct {tag_type tag; function_type fn;} closure0_type;
 typedef struct {tag_type tag; function_type fn; object elt1;} closure1_type;
