@@ -173,7 +173,8 @@ typedef struct {tag_type tag; FILE *fp; int mode;} port_type;
 
 /* Vector type */
 
-// TODO
+typedef struct {tag_type tag; int num_elt; object *elts;} vector_type;
+typedef vector_type *vector;
 
 /* Define cons type. */
 

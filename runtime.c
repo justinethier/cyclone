@@ -213,6 +213,17 @@ int equal(x, y) object x, y;
       return (type_of(y) == string_tag &&
               strcmp(((string_type *) x)->str,
                      ((string_type *) y)->str) == 0);
+    case vector_tag:
+      if (type_of(y) == vector_tag && 
+          ((vector)x)->num_elt == ((vector)y)->num_elt) {
+        int i;
+        for (i = 0; i < ((vector)x)->num_elt; i++) { 
+          if (equalp(((vector)x)->elts[i], ((vector)y)->elts[i]) == boolean_f)
+            return 0;
+        }
+        return 1;
+      }
+      return  0;
     default:
       return x == y;
     }
@@ -301,6 +312,16 @@ object Cyc_display(x) object x;
       break;
     case string_tag:
       printf("%s", ((string_type *) x)->str);
+      break;
+    case vector_tag:
+      printf("#(");
+      for (i = 0; i < ((vector) x)->num_elt; i++) {
+        if (i > 0) { 
+          printf(" "); 
+        }
+        Cyc_display(((vector)x)->elts[i]);
+      }
+      printf(")");
       break;
     case cons_tag:
       has_cycle = Cyc_has_cycle(x);
