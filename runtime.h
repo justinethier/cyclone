@@ -161,6 +161,17 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
   } \
 }
 
+#define make_vector(v, len, fill) object v = nil; { \
+ int i; \
+ v = (object)alloca(sizeof(vector_type)); \
+ v->tag = vector_tag; \
+ v->num_elt = ((integer_type *)len)->value; \
+ v->elts = (v->num_elt > 0) ? (object *)alloca(sizeof(object) * v->num_elt): NULL; \
+ for (i = 0; i < v->num_elt; i++) { \
+   v->elts[i] = fill; \
+ } \
+}
+
 /* Global variables. */
 extern clock_t start;   /* Starting time. */
 extern char *stack_begin;   /* Initialized by main. */
@@ -264,6 +275,7 @@ extern const object primitive_list_91_125string;
 extern const object primitive_string_91_125symbol;
 extern const object primitive_symbol_91_125string;
 extern const object primitive_number_91_125string;
+extern const object primitive_make_91_125vector;
 extern const object primitive_system;
 extern const object primitive_boolean_127;
 extern const object primitive_char_127;

@@ -516,6 +516,7 @@
      string->symbol
      symbol->string
      number->string
+     make-vector
      boolean?
      char?
      eof-object?
