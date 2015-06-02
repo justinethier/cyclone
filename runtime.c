@@ -1302,6 +1302,18 @@ char *transport(x, gcgen) char *x; int gcgen;
        forward(x) = nx; type_of(x) = forward_tag;
        x = (char *) nx; allocp = ((char *) nx)+sizeof(closureN_type) + sizeof(object) * nx->num_elt;
        return (char *) nx;}
+    case vector_tag:
+      {register vector_type nx = (vector) allocp;
+       int i;
+       type_of(nx) = vector_tag;
+       nx->num_elt = ((vector) x)->num_elt;
+       nx->elts = (object *)(((char *)nx) + sizeof(vector_type));
+       for (i = 0; i < nx->num_elt; i++) {
+         nx->elts[i] = ((vector) x)->elts[i];
+       }
+       forward(x) = nx; type_of(x) = forward_tag;
+       x = (char *) nx; allocp = ((char *) nx)+sizeof(vector_type) + sizeof(object) * nx->num_elt;
+       return (char *) nx;}
     case string_tag:
       {register string_type *nx = (string_type *) allocp;
        type_of(nx) = string_tag; 
@@ -1428,6 +1440,7 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
          //       GC's of list/car-cdr from same generation
          transp(car(o));
          transp(cdr(o));
+// TODO: } else if (type_of(o) == vector_tag) {
      } else if (type_of(o) == forward_tag) {
          // Already transported, skip
      } else {
@@ -1495,6 +1508,17 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
           transp(((closureN) scanp)->elts[i]);
         }
         scanp += sizeof(closureN_type) + sizeof(object) * n;
+       }
+       break;
+      case vector_tag:
+#if DEBUG_GC
+ printf("DEBUG transport vector \n");
+#endif
+       {int i; int n = ((vector) scanp)->num_elt;
+        for (i = 0; i < n; i++) {
+          transp(((vector) scanp)->elts[i]);
+        }
+        scanp += sizeof(vector_type) + sizeof(object) * n;
        }
        break;
       case string_tag:
