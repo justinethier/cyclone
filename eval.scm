@@ -268,6 +268,7 @@
       (list 'number->string number->string)
       (list 'make-vector make-vector)
       (list 'list->vector list->vector)
+      (list 'vector-ref vector-ref)
       (list 'boolean? boolean?)
       (list 'char? char?)
       (list 'eof-object? eof-object?)

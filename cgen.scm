@@ -436,6 +436,7 @@
      ((eq? p 'string->list)  "string2list")
      ((eq? p 'make-vector)   "make_vector")
      ((eq? p 'list->vector)  "list2vector")
+     ((eq? p 'vector-ref)    "Cyc_vector_ref")
      ((eq? p 'string-append) "Cyc_string_append")
      ((eq? p 'string-cmp)    "Cyc_string_cmp")
      ((eq? p 'string->symbol) "Cyc_string2symbol")

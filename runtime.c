@@ -577,6 +577,17 @@ object Cyc_set_cdr(object l, object val) {
     return l;
 }
 
+object Cyc_vector_ref(object v, object k) {
+    if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
+      Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
+    }
+    if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
+      Cyc_rt_raise_msg("vector-ref - invalid parameter, expected integer\n"); 
+    }
+
+    return ((vector)v)->elts[((integer_type *)k)->value];
+}
+
 integer_type Cyc_vector_length(object v) {
     if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
       make_int(len, ((vector)v)->num_elt);
@@ -1124,6 +1135,9 @@ void _make_91vector(object cont, object args) {
     else {
       make_vector(v, car(args), boolean_f);
       return_funcall1(cont, v);}}
+void _vector_91ref(object cont, object args) {
+    object ref = Cyc_vector_ref(car(args), cadr(args));
+    return_funcall1(cont, ref);}
 void _list_91_125vector(object cont, object args) {
     list2vector(l, car(args));
     return_funcall1(cont, l);}
@@ -1815,6 +1829,7 @@ static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->s
 static primitive_type number_91_125string_primitive = {primitive_tag, "number->string", &_number_91_125string};
 static primitive_type list_91_125vector_primitive = {primitive_tag, "list-vector", &_list_91_125vector};
 static primitive_type make_91vector_primitive = {primitive_tag, "make-vector", &_make_91vector};
+static primitive_type vector_91ref_primitive = {primitive_tag, "vector-ref", &_vector_91ref};
 static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
 static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
 static primitive_type eof_91object_127_primitive = {primitive_tag, "eof-object?", &_eof_91object_127};
@@ -1871,6 +1886,7 @@ const object primitive_memq = &memq_primitive;
 const object primitive_memv = &memv_primitive;
 const object primitive_length = &length_primitive;
 const object primitive_vector_91length = &vector_91length_primitive;
+const object primitive_vector_91ref = &vector_91ref_primitive;
 const object primitive_set_91car_67 = &set_91car_67_primitive;
 const object primitive_set_91cdr_67 = &set_91cdr_67_primitive;
 const object primitive_car = &car_primitive;

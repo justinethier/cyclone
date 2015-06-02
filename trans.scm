@@ -519,6 +519,7 @@
      number->string
      make-vector
      list->vector
+     vector-ref
      boolean?
      char?
      eof-object?
