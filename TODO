@@ -14,6 +14,7 @@ Working TODO list:
    - vectors - limited use in cgen module - make-vector, vector-set!, vector-ref, list->vector, vector->list
      obvious issues are how to represent the vector (array of objects, I suppose) and how to GC it, including handling mutations
      * Working vector TODO-list
+       - Start in section 6.8 and add vector functions
        - make-vector should have an optional 'fill' arg in compiled code
        - add mutation support for vectors. needed for vector-set!
        - add vector literals. will probably require updating all trans scans
