@@ -449,6 +449,7 @@
      ((eq? p 'memv)          "memqp")
      ((eq? p 'member)        "memberp")
      ((eq? p 'length)        "Cyc_length")
+     ((eq? p 'vector-length) "Cyc_vector_length")
      ((eq? p 'set-car!)      "Cyc_set_car")
      ((eq? p 'set-cdr!)      "Cyc_set_cdr")
      ((eq? p 'eq?)           "Cyc_eq")
@@ -481,6 +482,7 @@
     ((eq? p 'current-input-port) "port_type")
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'length) "integer_type")
+    ((eq? p 'vector-length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
     ((eq? p 'system) "integer_type")
     ((eq? p '+) "common_type")
@@ -506,7 +508,7 @@
              string-append string-cmp list->string string->list
              make-vector list->vector
              symbol->string number->string
-             + - * / apply cons length cell))))
+             + - * / apply cons length vector-length cell))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)

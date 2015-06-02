@@ -498,6 +498,7 @@
      memv
      member
      length
+     vector-length
      set-car!
      set-cdr!
      car

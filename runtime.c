@@ -577,12 +577,18 @@ object Cyc_set_cdr(object l, object val) {
     return l;
 }
 
+integer_type Cyc_vector_length(object v) {
+    if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
+      make_int(len, ((vector)v)->num_elt);
+      return len;
+    }
+    Cyc_rt_raise_msg("vector-length - invalid parameter, expected vector\n"); }
+
 integer_type Cyc_length(object l){
     make_int(len, 0);
     while(!nullp(l)){
         if (((list)l)->tag != cons_tag){
-            printf("length - invalid parameter, expected list\n");
-            exit(1);
+            Cyc_rt_raise_msg("length - invalid parameter, expected list\n");
         }
         l = cdr(l);
         len.value++;
@@ -985,6 +991,9 @@ void _equal_127(object cont, object args){
     return_funcall1(cont, equalp(car(args), cadr(args))); }
 void _length(object cont, object args){ 
     integer_type i = Cyc_length(car(args));
+    return_funcall1(cont, &i); }
+void _vector_91length(object cont, object args){ 
+    integer_type i = Cyc_vector_length(car(args));
     return_funcall1(cont, &i); }
 void _null_127(object cont, object args) { 
     return_funcall1(cont, Cyc_is_null(car(args))); }
@@ -1760,6 +1769,7 @@ static primitive_type member_primitive = {primitive_tag, "member", &_member};
 static primitive_type memq_primitive = {primitive_tag, "memq", &_memq};
 static primitive_type memv_primitive = {primitive_tag, "memv", &_memv};
 static primitive_type length_primitive = {primitive_tag, "length", &_length};
+static primitive_type vector_91length_primitive = {primitive_tag, "vector-length", &_vector_91length};
 static primitive_type set_91car_67_primitive = {primitive_tag, "set-car!", &_set_91car_67};
 static primitive_type set_91cdr_67_primitive = {primitive_tag, "set-cdr!", &_set_91cdr_67};
 static primitive_type car_primitive = {primitive_tag, "car", &_car};
@@ -1860,6 +1870,7 @@ const object primitive_member = &member_primitive;
 const object primitive_memq = &memq_primitive;
 const object primitive_memv = &memv_primitive;
 const object primitive_length = &length_primitive;
+const object primitive_vector_91length = &vector_91length_primitive;
 const object primitive_set_91car_67 = &set_91car_67_primitive;
 const object primitive_set_91cdr_67 = &set_91cdr_67_primitive;
 const object primitive_car = &car_primitive;

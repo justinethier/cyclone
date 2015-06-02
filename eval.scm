@@ -223,6 +223,7 @@
       (list 'memv memv)
       (list 'member member)
       (list 'length length)
+      (list 'vector-length vector-length)
       (list 'set-car! set-car!)
       (list 'set-cdr! set-cdr!)
       (list 'car car)
