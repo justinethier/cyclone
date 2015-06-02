@@ -11,11 +11,17 @@ Working TODO list:
  
  - Constructs require for self-hosting
 
+   - vectors - limited use in cgen module - make-vector, vector-set!, vector-ref, list->vector, vector->list
+     obvious issues are how to represent the vector (array of objects, I suppose) and how to GC it, including handling mutations
+     * Working vector TODO-list
+       - make-vector should have an optional 'fill' arg in compiled code
+       - add mutation support for vectors. needed for vector-set!
+       - add vector literals. will probably require updating all trans scans
+         to handle vectors, though :(
+
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
      issue here is, to do this right we need parameterize and dynamic-wind. both of which would be nice, but are a lot more work, too
      * best place to start may be call-with-values, as that is needed before dynamic-wind. 
-   - vectors - limited use in cgen module - make-vector, vector-set!, vector-ref, list->vector, vector->list
-     obvious issues are how to represent the vector (array of objects, I suppose) and how to GC it, including handling mutations
    - what else? there must be more stuff
 
  - Reduction in size of generated code
