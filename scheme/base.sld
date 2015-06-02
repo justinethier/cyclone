@@ -39,6 +39,7 @@
     symbol=?
     Cyc-obj=?
     make-string
+    vector
     error
     raise
     raise-continuable
@@ -118,6 +119,7 @@
               (car lst)
               (foldl (lambda (a b) (append-2 b a)) (car lst) (cdr lst)))))
     (define (list . objs)  objs)
+    (define (vector . objs) (list->vector objs))
     (define (make-list k . fill)
       (letrec ((x (if (null? fill) 
                    #f
