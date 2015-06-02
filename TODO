@@ -16,6 +16,8 @@ Working TODO list:
      * Working vector TODO-list
        - Start in section 6.8 and add vector functions
        - make-vector should have an optional 'fill' arg in compiled code
+         note allocation functions can be functions instead of macros if they accept a
+         cont arg so they do not have to return
        - add mutation support for vectors. needed for vector-set!
        - add vector literals. will probably require updating all trans scans
          to handle vectors, though :(
