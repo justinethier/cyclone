@@ -150,6 +150,7 @@ void dispatch(int argc, function_type func, object clo, object cont, object args
 void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
 void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
+// Note: below is OK since alloca memory is not freed until function exits
 #define string2list(c,s) object c = nil; { \
   char *str = ((string_type *)s)->str; \
   int len = strlen(str); \
@@ -161,14 +162,14 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
   } \
 }
 
-// v = (object)alloca(sizeof(vector_type));
-#define make_vector(v, len, fill) vector_type v; { \
+#define make_vector(v, len, fill) object v = nil; { \
+ v = alloca(sizeof(vector_type)); \
+ ((vector)v)->tag = vector_tag; \
+ ((vector)v)->num_elt = ((integer_type *)len)->value; \
+ ((vector)v)->elts = (((vector)v)->num_elt > 0) ? (object *)alloca(sizeof(object) * ((vector)v)->num_elt): NULL; \
  int i; \
- v.tag = vector_tag; \
- v.num_elt = ((integer_type *)len)->value; \
- v.elts = (v.num_elt > 0) ? (object *)alloca(sizeof(object) * v.num_elt): NULL; \
- for (i = 0; i < v.num_elt; i++) { \
-   v.elts[i] = fill; \
+ for (i = 0; i < ((vector)v)->num_elt; i++) { \
+   ((vector)v)->elts[i] = fill; \
  } \
 }
 

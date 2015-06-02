@@ -1102,7 +1102,7 @@ void _string_91_125list(object cont, object args) {
     return_funcall1(cont, &lst);}
 void _make_91vector(object cont, object args) {
     make_vector(v, car(args), cadr(args));
-    return_funcall1(cont, &v);}
+    return_funcall1(cont, v);}
 void _list_91_125string(object cont, object args) {  
     string_type s = Cyc_list2string(car(args));
     return_funcall1(cont, &s);}

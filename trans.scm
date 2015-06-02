@@ -536,6 +536,7 @@
      write
      display))
 
+;; Constant Folding
 ;; Is a primitive being applied in such a way that it can be
 ;; evaluated at compile time?
 (define (precompute-prim-app? ast)
@@ -562,6 +563,7 @@
                   set-cdr!
                   string->symbol ;; Could be mistaken for an identifier
                   string->list ;; Mistaken for function call (maybe OK if it was quoted, though). same for above?
+                  make-vector
                   ;; I/O must be done at runtime for side effects:
                   current-input-port
                   open-input-file
