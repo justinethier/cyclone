@@ -435,6 +435,7 @@
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'string->list)  "string2list")
      ((eq? p 'make-vector)   "make_vector")
+     ((eq? p 'list->vector)  "list_vector")
      ((eq? p 'string-append) "Cyc_string_append")
      ((eq? p 'string-cmp)    "Cyc_string_cmp")
      ((eq? p 'string->symbol) "Cyc_string2symbol")
@@ -461,6 +462,7 @@
      ((eq? p 'integer?)      "Cyc_is_integer")
      ((eq? p 'pair?)         "Cyc_is_cons")
      ((eq? p 'procedure?)    "Cyc_is_procedure")
+     ((eq? p 'vector?)       "Cyc_is_vector")
      ((eq? p 'string?)       "Cyc_is_string")
      ((eq? p 'eof-object?)   "Cyc_is_eof_object")
      ((eq? p 'symbol?)       "Cyc_is_symbol")
@@ -502,7 +504,7 @@
              current-input-port open-input-file
              char->integer system string->number 
              string-append string-cmp list->string string->list
-             make-vector
+             make-vector list->vector
              symbol->string number->string
              + - * / apply cons length cell))))
 
@@ -514,7 +516,7 @@
 ;; Does primitive allocate an object?
 (define (prim:allocates-object? exp)
     (and  (prim? exp)
-          (member exp '(string->list make-vector))))
+          (member exp '(string->list make-vector list->vector))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)

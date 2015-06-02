@@ -517,6 +517,11 @@ object Cyc_is_symbol(object o){
         return boolean_t;
     return boolean_f;}
 
+object Cyc_is_vector(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == vector_tag)
+        return boolean_t;
+    return boolean_f;}
+
 object Cyc_is_string(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == string_tag)
         return boolean_t;
@@ -1019,6 +1024,8 @@ void _pair_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_cons(car(args))); }
 void _procedure_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_procedure(car(args))); }
+void _vector_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_vector(car(args))); }
 void _string_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_string(car(args))); }
 void _symbol_127(object cont, object args) {
@@ -1108,6 +1115,9 @@ void _make_91vector(object cont, object args) {
     else {
       make_vector(v, car(args), boolean_f);
       return_funcall1(cont, v);}}
+void _list_91_125vector(object cont, object args) {
+    list2vector(l, car(args));
+    return_funcall1(cont, l);}
 void _list_91_125string(object cont, object args) {  
     string_type s = Cyc_list2string(car(args));
     return_funcall1(cont, &s);}
@@ -1793,6 +1803,7 @@ static primitive_type list_91_125string_primitive = {primitive_tag, "list->strin
 static primitive_type string_91_125symbol_primitive = {primitive_tag, "string->symbol", &_string_91_125symbol};
 static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->string", &_symbol_91_125string};
 static primitive_type number_91_125string_primitive = {primitive_tag, "number->string", &_number_91_125string};
+static primitive_type list_91_125vector_primitive = {primitive_tag, "list-vector", &_list_91_125vector};
 static primitive_type make_91vector_primitive = {primitive_tag, "make-vector", &_make_91vector};
 static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
 static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
@@ -1803,6 +1814,7 @@ static primitive_type real_127_primitive = {primitive_tag, "real?", &_real_127};
 static primitive_type integer_127_primitive = {primitive_tag, "integer?", &_integer_127};
 static primitive_type pair_127_primitive = {primitive_tag, "pair?", &_pair_127};
 static primitive_type procedure_127_primitive = {primitive_tag, "procedure?", &_procedure_127};
+static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector_127};
 static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
 static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
 static primitive_type current_91input_91port_primitive = {primitive_tag, "current-input-port", &_current_91input_91port};
@@ -1892,6 +1904,7 @@ const object primitive_string_91_125symbol = &string_91_125symbol_primitive;
 const object primitive_symbol_91_125string = &symbol_91_125string_primitive;
 const object primitive_number_91_125string = &number_91_125string_primitive;
 const object primitive_make_91vector = &make_91vector_primitive;
+const object primitive_list_91_125vector = &list_91_125vector_primitive;
 const object primitive_boolean_127 = &boolean_127_primitive;
 const object primitive_char_127 = &char_127_primitive;
 const object primitive_eof_91object_127 = &eof_91object_127_primitive;
@@ -1902,6 +1915,7 @@ const object primitive_integer_127 = &integer_127_primitive;
 const object primitive_pair_127 = &pair_127_primitive;
 const object primitive_procedure_127 = &procedure_127_primitive;
 const object primitive_string_127 = &string_127_primitive;
+const object primitive_vector_127 = &vector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
 const object primitive_current_91input_91port = &current_91input_91port_primitive;
 const object primitive_open_91input_91file = &open_91input_91file_primitive;

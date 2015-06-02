@@ -162,6 +162,20 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
   } \
 }
 
+#define list2vector(v, l) object v = nil; { \
+  integer_type len = Cyc_length(l); \
+  v = alloca(sizeof(vector_type)); \
+  ((vector)v)->tag = vector_tag; \
+  ((vector)v)->num_elt = len.value; \
+  ((vector)v)->elts = (((vector)v)->num_elt > 0) ? (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : NULL; \
+  object lst = l; \
+  int i = 0; \
+  while(!nullp(lst)) { \
+    ((vector)v)->elts[i++] = car(lst); \
+    lst = cdr(lst); \
+  } \
+}
+
 #define make_vector(v, len, fill) object v = nil; { \
  v = alloca(sizeof(vector_type)); \
  ((vector)v)->tag = vector_tag; \
@@ -277,6 +291,7 @@ extern const object primitive_string_91_125symbol;
 extern const object primitive_symbol_91_125string;
 extern const object primitive_number_91_125string;
 extern const object primitive_make_91vector;
+extern const object primitive_list_91_125vector;
 extern const object primitive_system;
 extern const object primitive_boolean_127;
 extern const object primitive_char_127;
@@ -287,6 +302,7 @@ extern const object primitive_real_127;
 extern const object primitive_integer_127;
 extern const object primitive_pair_127;
 extern const object primitive_procedure_127;
+extern const object primitive_vector_127;
 extern const object primitive_string_127;
 extern const object primitive_symbol_127;
 extern const object primitive_current_91input_91port;

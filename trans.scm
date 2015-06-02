@@ -517,6 +517,7 @@
      symbol->string
      number->string
      make-vector
+     list->vector
      boolean?
      char?
      eof-object?
@@ -526,6 +527,7 @@
      integer?
      pair?
      procedure?
+     vector?
      string?
      symbol?
      current-input-port
