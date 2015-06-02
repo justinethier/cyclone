@@ -265,6 +265,7 @@
       (list 'string->symbol string->symbol)
       (list 'symbol->string symbol->string)
       (list 'number->string number->string)
+      (list 'make-vector make-vector)
       (list 'boolean? boolean?)
       (list 'char? char?)
       (list 'eof-object? eof-object?)

@@ -1100,7 +1100,7 @@ void _string_91append(object cont, object args) {
 void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
     return_funcall1(cont, &lst);}
-void _make_91_125vector(object cont, object args) {
+void _make_91vector(object cont, object args) {
     make_vector(v, car(args), cadr(args));
     return_funcall1(cont, &v);}
 void _list_91_125string(object cont, object args) {  
@@ -1764,7 +1764,7 @@ static primitive_type list_91_125string_primitive = {primitive_tag, "list->strin
 static primitive_type string_91_125symbol_primitive = {primitive_tag, "string->symbol", &_string_91_125symbol};
 static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->string", &_symbol_91_125string};
 static primitive_type number_91_125string_primitive = {primitive_tag, "number->string", &_number_91_125string};
-static primitive_type make_91_125vector_primitive = {primitive_tag, "make-vector", &_make_91_125vector};
+static primitive_type make_91vector_primitive = {primitive_tag, "make-vector", &_make_91vector};
 static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
 static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
 static primitive_type eof_91object_127_primitive = {primitive_tag, "eof-object?", &_eof_91object_127};
@@ -1862,7 +1862,7 @@ const object primitive_list_91_125string = &list_91_125string_primitive;
 const object primitive_string_91_125symbol = &string_91_125symbol_primitive;
 const object primitive_symbol_91_125string = &symbol_91_125string_primitive;
 const object primitive_number_91_125string = &number_91_125string_primitive;
-const object primitive_make_91_125vector = &make_91_125vector_primitive;
+const object primitive_make_91vector = &make_91vector_primitive;
 const object primitive_boolean_127 = &boolean_127_primitive;
 const object primitive_char_127 = &char_127_primitive;
 const object primitive_eof_91object_127 = &eof_91object_127_primitive;
