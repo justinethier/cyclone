@@ -1101,8 +1101,13 @@ void _string_91_125list(object cont, object args) {
     string2list(lst, car(args));
     return_funcall1(cont, &lst);}
 void _make_91vector(object cont, object args) {
-    make_vector(v, car(args), cadr(args));
-    return_funcall1(cont, v);}
+    integer_type argc = Cyc_length(args);
+    if (argc.value >= 2) {
+      make_vector(v, car(args), cadr(args));
+      return_funcall1(cont, v);}
+    else {
+      make_vector(v, car(args), boolean_f);
+      return_funcall1(cont, v);}}
 void _list_91_125string(object cont, object args) {  
     string_type s = Cyc_list2string(car(args));
     return_funcall1(cont, &s);}
@@ -1303,7 +1308,7 @@ char *transport(x, gcgen) char *x; int gcgen;
        x = (char *) nx; allocp = ((char *) nx)+sizeof(closureN_type) + sizeof(object) * nx->num_elt;
        return (char *) nx;}
     case vector_tag:
-      {register vector_type nx = (vector) allocp;
+      {register vector nx = (vector) allocp;
        int i;
        type_of(nx) = vector_tag;
        nx->num_elt = ((vector) x)->num_elt;
