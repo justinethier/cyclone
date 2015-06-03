@@ -498,7 +498,6 @@
      memv
      member
      length
-     vector-length
      set-car!
      set-cdr!
      car
@@ -519,7 +518,9 @@
      number->string
      make-vector
      list->vector
+     vector-length
      vector-ref
+     vector-set!
      boolean?
      char?
      eof-object?

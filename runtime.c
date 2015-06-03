@@ -577,6 +577,16 @@ object Cyc_set_cdr(object l, object val) {
     return l;
 }
 
+object Cyc_vector_set(object v, object k, object obj) {
+  // TODO: bounds checking? do eventually need to figure out where that should go
+  int idx = ((integer_type *)k)->value;
+  ((vector)v)->elts[idx] = obj;
+  // TODO: probably could be more efficient here and also pass
+  //       index, so only that one entry needs GC.
+  add_mutation(v, obj);
+  return v;
+}
+
 object Cyc_vector_ref(object v, object k) {
     if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
       Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
@@ -1138,6 +1148,9 @@ void _make_91vector(object cont, object args) {
 void _vector_91ref(object cont, object args) {
     object ref = Cyc_vector_ref(car(args), cadr(args));
     return_funcall1(cont, ref);}
+void _vector_91set_67(object cont, object args) {
+    object ref = Cyc_vector_set(car(args), cadr(args), caddr(args));
+    return_funcall1(cont, ref);}
 void _list_91_125vector(object cont, object args) {
     list2vector(l, car(args));
     return_funcall1(cont, l);}
@@ -1478,7 +1491,12 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
          //       GC's of list/car-cdr from same generation
          transp(car(o));
          transp(cdr(o));
-// TODO: } else if (type_of(o) == vector_tag) {
+     } else if (type_of(o) == vector_tag) {
+       int i;
+       // TODO: probably too inefficient, try collecting single index
+       for (i = 0; i < ((vector)o)->num_elt; i++) {
+         transp(((vector)o)->elts[i]);
+       }
      } else if (type_of(o) == forward_tag) {
          // Already transported, skip
      } else {
@@ -1830,6 +1848,7 @@ static primitive_type number_91_125string_primitive = {primitive_tag, "number->s
 static primitive_type list_91_125vector_primitive = {primitive_tag, "list-vector", &_list_91_125vector};
 static primitive_type make_91vector_primitive = {primitive_tag, "make-vector", &_make_91vector};
 static primitive_type vector_91ref_primitive = {primitive_tag, "vector-ref", &_vector_91ref};
+static primitive_type vector_91set_67_primitive = {primitive_tag, "vector-set!", &_vector_91set_67};
 static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
 static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
 static primitive_type eof_91object_127_primitive = {primitive_tag, "eof-object?", &_eof_91object_127};
@@ -1887,6 +1906,7 @@ const object primitive_memv = &memv_primitive;
 const object primitive_length = &length_primitive;
 const object primitive_vector_91length = &vector_91length_primitive;
 const object primitive_vector_91ref = &vector_91ref_primitive;
+const object primitive_vector_91set_67 = &vector_91set_67_primitive;
 const object primitive_set_91car_67 = &set_91car_67_primitive;
 const object primitive_set_91cdr_67 = &set_91cdr_67_primitive;
 const object primitive_car = &car_primitive;

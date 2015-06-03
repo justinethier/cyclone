@@ -297,6 +297,7 @@ extern const object primitive_number_91_125string;
 extern const object primitive_make_91vector;
 extern const object primitive_list_91_125vector;
 extern const object primitive_vector_91ref;
+extern const object primitive_vector_91set_67;
 extern const object primitive_system;
 extern const object primitive_boolean_127;
 extern const object primitive_char_127;
