@@ -84,6 +84,7 @@ object Cyc_set_cdr(object l, object val) ;
 integer_type Cyc_length(object l);
 integer_type Cyc_vector_length(object v);
 object Cyc_vector_ref(object v, object k);
+object Cyc_vector_set(object v, object k, object obj);
 string_type Cyc_number2string(object n) ;
 string_type Cyc_symbol2string(object sym) ;
 object Cyc_string2symbol(object str);
