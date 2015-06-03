@@ -1,5 +1,4 @@
 Roadmap:
- - Get libraries working (think this is done)?
  - Add constructs used by the compiler
  - Allow compiler to be hosted by Chicken (already working) or itself (self-hosting)
  - Install scripts and instructions, need to be able to deploy this
@@ -9,18 +8,19 @@ Roadmap:
 
 Working TODO list:
  
+ - apply seems broken:
+ cyclone> (apply append '((1) (2) (3)))
+ ((1) (2) (3))
+
  - Constructs require for self-hosting
 
-   - vectors - limited use in cgen module - make-vector, vector-set!, vector-ref, list->vector, vector->list
-     obvious issues are how to represent the vector (array of objects, I suppose) and how to GC it, including handling mutations
-     * Working vector TODO-list
+   - vectors
+       - add vector literals. will probably require updating all trans scans
+         to handle vectors, though :(
        - Start in section 6.8 and add vector functions
        - make-vector should have an optional 'fill' arg in compiled code
          note allocation functions can be functions instead of macros if they accept a
          cont arg so they do not have to return
-       - add mutation support for vectors. needed for vector-set!
-       - add vector literals. will probably require updating all trans scans
-         to handle vectors, though :(
        - After all this works, make sure to add tests from r7rs to test suite
 
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
