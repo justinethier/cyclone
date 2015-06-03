@@ -41,6 +41,7 @@
     make-string
     vector
     vector->list
+    vector->string
     error
     raise
     raise-continuable
@@ -161,6 +162,12 @@
                            (loop (+ i 1) 
                                  (cons (vector-ref vec i) lst))))))
         (loop start '())))
+    (define (vector->string vec . opts)
+      TODO
+    )
+    (define (string->vector str . opts)
+      TODO
+    )
 
     (define (boolean=? b1 b2 . bs)
       (Cyc-obj=? boolean? b1 (cons b2 bs)))
