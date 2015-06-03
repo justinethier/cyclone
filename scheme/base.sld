@@ -174,7 +174,8 @@
       (list->vector
         (string->list str)))
     (define (vector-append . vecs)
-      vecs) ; TODO
+      (list->vector
+        (apply append (map vector->list vecs))))
 
     (define (vector-copy vec . opts)
       (letrec ((len (vector-length vec))
