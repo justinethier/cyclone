@@ -40,6 +40,7 @@
     Cyc-obj=?
     make-string
     vector
+    vector->list
     error
     raise
     raise-continuable
@@ -119,7 +120,6 @@
               (car lst)
               (foldl (lambda (a b) (append-2 b a)) (car lst) (cdr lst)))))
     (define (list . objs)  objs)
-    (define (vector . objs) (list->vector objs))
     (define (make-list k . fill)
       (letrec ((x (if (null? fill) 
                    #f
@@ -149,6 +149,19 @@
       (let ((kth (list-tail lst k)))
         (set-car! kth obj)))
     (define (reverse lst)   (foldl cons '() lst))
+
+    (define (vector . objs) (list->vector objs))
+    (define (vector->list vec . opts)
+      (letrec ((len (vector-length vec))
+               (start (if (> (length opts) 0) (car opts) 0))
+               (end (if (> (length opts) 1) (cadr opts) len))
+               (loop (lambda (i lst)
+                       (if (= i end)
+                           lst
+                           (loop (+ i 1) 
+                                 (cons (vector-ref vec i) lst))))))
+        (loop start '())))
+
     (define (boolean=? b1 b2 . bs)
       (Cyc-obj=? boolean? b1 (cons b2 bs)))
     (define (symbol=? sym1 sym2 . syms)
