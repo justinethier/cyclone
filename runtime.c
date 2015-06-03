@@ -1136,7 +1136,7 @@ void _string_91append(object cont, object args) {
     dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
 void _string_91_125list(object cont, object args) {  
     string2list(lst, car(args));
-    return_funcall1(cont, &lst);}
+    return_funcall1(cont, lst);}
 void _make_91vector(object cont, object args) {
     integer_type argc = Cyc_length(args);
     if (argc.value >= 2) {

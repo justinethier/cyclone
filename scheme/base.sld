@@ -40,8 +40,11 @@
     Cyc-obj=?
     make-string
     vector
+    vector-append
+    vector-copy
     vector->list
     vector->string
+    string->vector
     error
     raise
     raise-continuable
@@ -163,11 +166,28 @@
                                  (cons (vector-ref vec i) lst))))))
         (loop start '())))
     (define (vector->string vec . opts)
-      TODO
-    )
+      (let ((lst (apply vector->list (cons vec opts))))
+        (list->string lst)))
+    ;; TODO: need to extend string->list to take optional start/end args, 
+    ;; then modify this function to work with optional args, too
     (define (string->vector str . opts)
-      TODO
-    )
+      (list->vector
+        (string->list str)))
+    (define (vector-append . vecs)
+      vecs) ; TODO
+
+    (define (vector-copy vec . opts)
+      (letrec ((len (vector-length vec))
+               (start (if (> (length opts) 0) (car opts) 0))
+               (end (if (> (length opts) 1) (cadr opts) len))
+               (loop (lambda (i new-vec)
+                       (cond
+                        ((= i end)
+                         new-vec)
+                        (else
+                           (vector-set! new-vec i (vector-ref vec i))
+                           (loop (+ i 1) new-vec))))))
+        (loop start (make-vector (- end start) #f))))
 
     (define (boolean=? b1 b2 . bs)
       (Cyc-obj=? boolean? b1 (cons b2 bs)))
