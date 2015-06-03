@@ -144,6 +144,17 @@
        (else
          (f (car lst))
          (for-each f (cdr lst)))))
+; TODO:
+;(define (vector-map fnc . vargs)
+;    (let ((ls (map vector->list v vargs)))
+;        (list->vector
+;            (apply map
+;                   (cons fnc ls)))))
+;
+;(define (vector-for-each fnc . vargs)
+;    (let ((ls (map vector->list vargs)))
+;        (apply for-each
+;               (cons fnc ls))))
     (define (list-tail lst k) 
       (if (zero? k)
         lst
@@ -176,7 +187,6 @@
     (define (vector-append . vecs)
       (list->vector
         (apply append (map vector->list vecs))))
-
     (define (vector-copy vec . opts)
       (letrec ((len (vector-length vec))
                (start (if (> (length opts) 0) (car opts) 0))
