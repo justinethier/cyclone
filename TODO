@@ -21,6 +21,7 @@ Working TODO list:
        - add mutation support for vectors. needed for vector-set!
        - add vector literals. will probably require updating all trans scans
          to handle vectors, though :(
+       - After all this works, make sure to add tests from r7rs to test suite
 
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
      issue here is, to do this right we need parameterize and dynamic-wind. both of which would be nice, but are a lot more work, too
