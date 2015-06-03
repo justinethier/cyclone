@@ -7,3 +7,4 @@
 ;`(read ,
 (write (make-vector 4 #t))
 (write (string->list "abc"))
+(write (apply append '((1) (2) (3))))

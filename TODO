@@ -11,6 +11,8 @@ Working TODO list:
  - apply seems broken:
  cyclone> (apply append '((1) (2) (3)))
  ((1) (2) (3))
+ 
+   This is broken in the interpreter (eval) not in compiled code. probably a deficiency in eval.scm
 
  - Constructs require for self-hosting
 
