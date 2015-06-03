@@ -1094,7 +1094,7 @@ void __121_123(object cont, object args) {
     return_funcall1(cont, __num_lte(car(args), cadr(args)));}
 
 void _apply(object cont, object args) {  
-    apply(cont, car(args), cdr(args)); }
+    apply(cont, car(args), cadr(args)); }
 void _assoc (object cont, object args) {  
     return_funcall1(cont, assoc(car(args), cadr(args)));}
 void _assq  (object cont, object args) {  
