@@ -1219,9 +1219,12 @@ object apply(object cont, object func, object args){
 
     case cons_tag:
     {
-      make_cons(c, func, args);
+      make_cons(c, cadr(func), args);
 
-      if (!nullp(func) && eq(quote_Cyc_191procedure, car(func))) {
+      // TODO: would be better to compare directly against symbol here,
+      //       but need a way of looking up this symbol ahead of time.
+      //       maybe a libinit() or such is required.
+      if (strncmp(((symbol)car(func))->pname, "primitive", 10) == 0) {
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
       } else {
           printf("Unable to evaluate: ");
