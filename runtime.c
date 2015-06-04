@@ -189,6 +189,17 @@ void Cyc_rt_raise(object err) {
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
     exit(1);
 }
+void Cyc_rt_raise2(const char *msg, object err) {
+    make_string(s, err);
+    make_cons(c3, err, nil);
+    make_cons(c2, &s, &c3);
+    make_cons(c1, boolean_f, &c2);
+    make_cons(c0, &c1, nil);
+    apply(nil, Cyc_current_exception_handler(), &c0);
+    // Should never get here
+    fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
+    exit(1);
+}
 void Cyc_rt_raise_msg(const char *err) {
     make_string(s, err);
     Cyc_rt_raise(&s);
@@ -1197,9 +1208,7 @@ object apply(object cont, object func, object args){
 //Cyc_display(args);
 //printf("\n");
   if (!is_object_type(func)) {
-     printf("Call of non-procedure: ");
-     Cyc_display(func);
-     exit(1);
+     Cyc_rt_raise2("Call of non-procedure: ", func);
   }
 
   switch(type_of(func)) {
@@ -1219,18 +1228,15 @@ object apply(object cont, object func, object args){
 
     case cons_tag:
     {
-      make_cons(c, cadr(func), args);
-
       // TODO: would be better to compare directly against symbol here,
       //       but need a way of looking up this symbol ahead of time.
       //       maybe a libinit() or such is required.
       if (strncmp(((symbol)car(func))->pname, "primitive", 10) == 0) {
+          make_cons(c, cadr(func), args);
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
       } else {
-          printf("Unable to evaluate: ");
-          Cyc_display(&c);
-          printf("\n");
-          exit(1);
+          make_cons(c, func, args);
+          Cyc_rt_raise2("Unable to evaluate: ", &c);
       }
     }
       

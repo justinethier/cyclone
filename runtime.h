@@ -341,6 +341,7 @@ extern object Cyc_exception_handler_stack;
 object Cyc_default_exception_handler(int argc, closure _, object err);
 object Cyc_current_exception_handler();
 void Cyc_rt_raise(object err);
+void Cyc_rt_raise2(const char *msg, object err);
 void Cyc_rt_raise_msg(const char *err);
 /* END exception handler */
 
