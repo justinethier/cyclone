@@ -295,6 +295,7 @@
   (or (integer? exp)
       (real? exp)
       (string? exp)
+      (vector? exp)
       (char? exp)
       (boolean? exp)))
 

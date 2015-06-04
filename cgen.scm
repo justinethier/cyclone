@@ -316,6 +316,15 @@
     (_c-compile-scalars args) 
     num-args)))
 
+(define (c-compile-vector exp)
+;; TODO: this is just a stub, does not allocate vector contents
+  (let ((cvar-name (mangle (gensym 'c))))
+    (c-code/vars
+        (string-append "&" cvar-name) ; Code is just the variable name
+        (list     ; Allocate integer on the C stack
+          (string-append 
+            "make_empty_vector(" cvar-name ");")))))
+
 ;; c-compile-const : const-exp -> c-pair
 ;;
 ;; Typically this function is used to compile constant values such as
@@ -327,6 +336,8 @@
      (c-code "nil"))
     ((pair? exp)
      (c-compile-scalars exp))
+    ((vector? exp)
+     (c-compile-vector exp))
     ((integer? exp) 
       (let ((cvar-name (mangle (gensym 'c))))
         (c-code/vars

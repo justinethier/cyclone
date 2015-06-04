@@ -176,6 +176,8 @@ typedef struct {tag_type tag; FILE *fp; int mode;} port_type;
 typedef struct {tag_type tag; int num_elt; object *elts;} vector_type;
 typedef vector_type *vector;
 
+#define make_empty_vector(v) vector_type v; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
+
 /* Define cons type. */
 
 typedef struct {tag_type tag; object cons_car,cons_cdr;} cons_type;
