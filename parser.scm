@@ -293,6 +293,7 @@
             (in-port:set-cnum! ptbl
                 (+ 1 (in-port:get-cnum ptbl)))
             (cond
+              ;; Booleans
               ;; Do not use add-tok below, no need to quote a bool
               ((eq? #\t next-c) 
                (if all?
@@ -302,6 +303,23 @@
                (if all?
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
+              ;; Vector
+              ((eq? #\( next-c)
+               (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
+                     (toks* (get-toks tok toks)))
+                 (define new-toks 
+                   (add-tok 
+                     (if (and (pair? sub) (dotted? sub))
+                         (parse-error 
+                            "Invalid vector syntax" ;(->dotted-list sub)
+                            (in-port:get-lnum ptbl)
+                            (in-port:get-cnum ptbl))
+                         (list->vector sub))
+                     toks*)) 
+                 (if all?
+                  (parse fp '() new-toks all? #f parens ptbl)
+                  (car new-toks))))
+              ;; Character
               ((eq? #\\ next-c)
                (let ((new-toks (cons (read-pound fp ptbl) toks)))
                  (if all?
