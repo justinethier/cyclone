@@ -15,6 +15,7 @@ Working TODO list:
        - make-vector should have an optional 'fill' arg in compiled code
          note allocation functions can be functions instead of macros if they accept a
          cont arg so they do not have to return
+       - should make GC more efficient, only transport mutated vector index, not the whole vector
        - After all this works, make sure to add tests from r7rs to test suite
 
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
