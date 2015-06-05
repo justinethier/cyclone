@@ -15,3 +15,8 @@
 (write (equal? #(1 1 1) (make-vector 3 1)))
 (write '#(1))
 (write '#())
+
+(define a (vector 1 2 3 4 5))
+(define b (vector 10 20 30 40 50))
+(vector-copy! b 1 a 0 2)
+(write (equal? b #(10 1 2 40 50)))
