@@ -174,7 +174,7 @@
                (end (if (> (length opts) 1) (cadr opts) len))
                (loop (lambda (i lst)
                        (if (= i end)
-                           lst
+                           (reverse lst)
                            (loop (+ i 1) 
                                  (cons (vector-ref vec i) lst))))))
         (loop start '())))
