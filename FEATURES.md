@@ -29,7 +29,7 @@ Section | Status | Comments
 6.5 Symbols | Yes |
 6.6 Characters | Partial | No unicode support, `char-ci` predicates are not implemented.
 6.7 Strings | |
-6.8 Vectors | |
+6.8 Vectors | Yes |
 6.9 Bytevectors | |
 6.10 Control features | |
 6.11 Exceptions | |
