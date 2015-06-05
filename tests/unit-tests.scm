@@ -239,6 +239,30 @@
 (assert:equal "Access compiled var mutated by eval" x 'mutated-x)
 ;; END eval
 
+
+;; Vectors
+
+TODO:
+(assert:equal "vector->list" (vector->list #(dah dah didah))
+                            '(dah dah didah))
+;(vector->list .#(dah dah didah) 1 2)
+;=. (dah)
+;(list->vector .(dididit dah))
+;=. #(dididit dah)
+
+(assert:equal "string->vector" (string->vector "ABC")  #(#\A #\B #\C))
+(assert:equal "vector->string" (vector->string #(#\1 #\2 #\3)) "123")
+
+(define a (vector 1 2 3 4 5))
+(define b (vector 10 20 30 40 50))
+(vector-copy! b 1 a 0 2)
+(assert "vector-copy!" (equal? b #(10 1 2 40 50)))
+
+(define a (vector 1 2 3 4 5))
+(vector-fill! a 'smash 2 4)
+(assert:equal "vector-fill!" a #(1 2 smash smash 5))
+;; END vectors
+
 ; TODO: use display, output without surrounding quotes
 (write (list *num-passed* " tests passed with no errors"))
 ;;
