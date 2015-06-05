@@ -317,13 +317,47 @@
     num-args)))
 
 (define (c-compile-vector exp)
-;; TODO: this is just a stub, does not allocate vector contents
-  (let ((cvar-name (mangle (gensym 'c))))
-    (c-code/vars
-        (string-append "&" cvar-name) ; Code is just the variable name
-        (list     ; Allocate integer on the C stack
-          (string-append 
-            "make_empty_vector(" cvar-name ");")))))
+  (letrec ((cvar-name (mangle (gensym 'vec)))
+           (len (vector-length exp))
+           ;; Generate code for each member of the vector 
+           (loop 
+            (lambda (i code)
+              (if (= i len)
+                code
+                (let ((idx-code (c-compile-const (vector-ref exp i))))
+                  (loop 
+                    (+ i 1)
+                    (c-code/vars
+                      ;; The vector's C variable
+                      (c:body code)
+                      ;; Allocations
+                      (append
+                        (c:allocs code) ;; Vector alloc
+                        (c:allocs idx-code) ;; Member alloc at index i
+                        (list ;; Assign this member to vector
+                          (string-append 
+                            cvar-name ".elts[" (number->string i) "] = "
+                            (c:body idx-code)
+                            ";")))))))))
+          )
+    (cond
+      ((zero? len)
+        (c-code/vars
+            (string-append "&" cvar-name) ; Code is just the variable name
+            (list ; Allocate empty vector
+              (string-append 
+                "make_empty_vector(" cvar-name ");"))))
+      (else
+        (let ((code
+                (c-code/vars
+                  (string-append "&" cvar-name) ; Code body is just var name
+                  (list ; Allocate the vector
+                    (string-append 
+                      "make_empty_vector(" cvar-name ");"
+                      cvar-name ".num_elt = " (number->string len) ";"
+                      cvar-name ".elts = (object *)alloca(sizeof(object) * " 
+                                         (number->string len) ");")))))
+        (loop 0 code))))))
 
 ;; c-compile-const : const-exp -> c-pair
 ;;
