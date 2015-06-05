@@ -133,13 +133,18 @@
            (set! globals (cons 'call/cc globals))
            (set! module-globals (cons 'call/cc module-globals))
            (set! input-program 
+             ;(cons
+             ; '(define call-with-values
+             ;   (lambda (k producer consumer)
+             ;     (producer
+             ; )
              (cons
                ;; call/cc must be written in CPS form, so it is added here
                ;; TODO: prevents this from being optimized-out
                ;; TODO: will this cause issues if another var is assigned to call/cc?
                '(define call/cc
                  (lambda (k f) (f k (lambda (_ result) (k result)))))
-                cps)))
+                cps)));)
          (else
            ;; No need for call/cc yet
            (set! input-program cps))))
