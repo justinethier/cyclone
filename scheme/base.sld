@@ -6,6 +6,7 @@
     ;delete-duplicates
     call-with-current-continuation
     call/cc
+    call-with-values
     values
     ;(Cyc-bin-op cmp x lst)
     ;(Cyc-bin-op-char cmp c cs)
