@@ -136,6 +136,9 @@
              (cons
               ;; Experimental version of call-with-values, but this
               ;; is not working yet!
+              ;;
+              ;; may want to look at:
+              ;; http://stackoverflow.com/questions/16674214/how-to-implement-call-with-values-to-match-the-values-example-in-r5rs
               '(define call-with-values
                 (lambda (k producer consumer)
                   (producer 
