@@ -6,6 +6,7 @@
     ;delete-duplicates
     call-with-current-continuation
     call/cc
+    values
     ;(Cyc-bin-op cmp x lst)
     ;(Cyc-bin-op-char cmp c cs)
     char=?
@@ -61,6 +62,9 @@
     (define *Cyc-version-banner* *version-banner*)
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
+    (define (values . things)
+      (call/cc
+        (lambda (cont) (apply cont things))))
     (define (Cyc-bin-op cmp x lst)
       (cond
         ((null? lst) #t)
