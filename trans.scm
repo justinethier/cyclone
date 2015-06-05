@@ -582,7 +582,8 @@
       (lambda (return)
         (for-each
           (lambda (expr)
-            (if (not (const? expr))
+            (if (or (vector? expr)
+                    (not (const? expr)))
               (return #f)))
           (cdr ast))
         #t))))
