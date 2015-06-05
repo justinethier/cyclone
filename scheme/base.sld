@@ -42,6 +42,8 @@
     vector
     vector-append
     vector-copy
+    ;vector-copy!
+    vector-fill!
     vector->list
     vector->string
     string->vector
@@ -199,6 +201,30 @@
                            (vector-set! new-vec i (vector-ref vec i))
                            (loop (+ i 1) new-vec))))))
         (loop start (make-vector (- end start) #f))))
+; TODO:
+;    (define (vector-copy! vec to at from . opts)
+;      (letrec ((len (vector-length vec))
+;               (start (if (> (length opts) 0) (car opts) 0))
+;               (end (if (> (length opts) 1) (cadr opts) len))
+;               (loop (lambda (i)
+;                       (cond
+;                        ((= i end) vec)
+;                        (else
+;                          (vector-set! vec i fill)
+;                          (loop (+ i 1)))))))
+;        (loop start '())))
+    ;; TODO: this len/start/end/loop pattern is common, could use a macro for it
+    (define (vector-fill! vec fill . opts)
+      (letrec ((len (vector-length vec))
+               (start (if (> (length opts) 0) (car opts) 0))
+               (end (if (> (length opts) 1) (cadr opts) len))
+               (loop (lambda (i)
+                       (cond
+                        ((= i end) vec)
+                        (else
+                          (vector-set! vec i fill)
+                          (loop (+ i 1)))))))
+        (loop start '())))
 
     (define (boolean=? b1 b2 . bs)
       (Cyc-obj=? boolean? b1 (cons b2 bs)))
