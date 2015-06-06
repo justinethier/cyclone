@@ -7,6 +7,7 @@
     call-with-current-continuation
     call/cc
     call-with-values
+    dynamic-wind
     values
     ;(Cyc-bin-op cmp x lst)
     ;(Cyc-bin-op-char cmp c cs)
@@ -63,9 +64,20 @@
     (define *Cyc-version-banner* *version-banner*)
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
+    ;; TODO: this is from r7rs, but is not really good enough by itself
     (define (values . things)
       (call/cc
         (lambda (cont) (apply cont things))))
+    ;; TODO: just need something good enough for bootstrapping (for now)
+    ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
+    (define (dynamic-wind before thunk after)
+      (before)
+      (call-with-values
+        thunk
+        (lambda (result) ;results
+          (after)
+          result)))
+          ;(apply values results))))
     (define (Cyc-bin-op cmp x lst)
       (cond
         ((null? lst) #t)
