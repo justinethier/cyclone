@@ -134,18 +134,18 @@
            (set! module-globals (cons 'call/cc module-globals))
            (set! input-program 
              (cons
-              ;; Experimental version of call-with-values, but this
-              ;; is not working yet!
-              ;;
-              ;; may want to look at:
-              ;; http://stackoverflow.com/questions/16674214/how-to-implement-call-with-values-to-match-the-values-example-in-r5rs
+              ;; Experimental version of call-with-values,
+              ;; seems OK in compiler but not in eval.
               '(define call-with-values
                 (lambda (k producer consumer)
                   (producer 
-                    (lambda (val)
-                      (consumer k val)))))
-                    ;(lambda vals
-                    ;  (apply k consumer vals)))))
+                    (lambda (result)
+                      (consumer k result)))))
+                    ;; multiple args requires more than just this.
+                    ;; may want to look at:
+                    ;; http://stackoverflow.com/questions/16674214/how-to-implement-call-with-values-to-match-the-values-example-in-r5rs
+                    ;; (lambda vals
+                    ;;   (apply k consumer vals)))))
              (cons
                ;; call/cc must be written in CPS form, so it is added here
                ;; TODO: prevents this from being optimized-out

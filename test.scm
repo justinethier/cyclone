@@ -20,3 +20,7 @@
 (define b (vector 10 20 30 40 50))
 (vector-copy! b 1 a 0 2)
 (write (equal? b #(10 1 2 40 50)))
+(call-with-values 
+  (lambda () (values 1 1))
+  (lambda (a) (write a)))
+
