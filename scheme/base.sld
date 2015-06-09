@@ -6,9 +6,9 @@
     ;delete-duplicates
     call-with-current-continuation
     call/cc
-    call-with-values
-    dynamic-wind
-    values
+    ;call-with-values
+    ;dynamic-wind
+    ;values
     ;(Cyc-bin-op cmp x lst)
     ;(Cyc-bin-op-char cmp c cs)
     char=?
@@ -70,14 +70,14 @@
         (lambda (cont) (apply cont things))))
     ;; TODO: just need something good enough for bootstrapping (for now)
     ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
-    (define (dynamic-wind before thunk after)
-      (before)
-      (call-with-values
-        thunk
-        (lambda (result) ;results
-          (after)
-          result)))
-          ;(apply values results))))
+    ;(define (dynamic-wind before thunk after)
+    ;  (before)
+    ;  (call-with-values
+    ;    thunk
+    ;    (lambda (result) ;results
+    ;      (after)
+    ;      result)))
+    ;      ;(apply values results))))
     (define (Cyc-bin-op cmp x lst)
       (cond
         ((null? lst) #t)

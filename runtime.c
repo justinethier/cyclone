@@ -165,7 +165,7 @@ object Cyc_exception_handler_stack = nil;
 
 object Cyc_default_exception_handler(int argc, closure _, object err) {
     printf("Error: ");
-    Cyc_display(err);
+    Cyc_display_va(1, err);
     printf("\n");
     exit(1);
     return nil;
@@ -292,18 +292,39 @@ object Cyc_has_cycle(object lst) {
 // to the value returned by (current-output-port). It is an
 // error to attempt an output operation on a closed port
 //
-//object dispatch_display_va(int argc, object x, ...) {
-//object Cyc_display_va(int argc, object x, ...) {
-// object Cyc_display_va_list(int argc, object x, va_list ap) {
+object dispatch_display_va(int argc, object x, ...) {
+  object result;
+  va_list ap;
+  va_start(ap, x);
+  result = Cyc_display_va_list(argc - 1, x, ap);
+  va_end(ap);
+  return result;
+}
 
-TODO: change all printf's below:
+object Cyc_display_va(int argc, object x, ...) {
+  object result;
+  va_list ap;
+  va_start(ap, x);
+  result = Cyc_display_va_list(argc, x, ap);
+  va_end(ap);
+  return result;
+}
+
+object Cyc_display_va_list(int argc, object x, va_list ap) {
+  FILE *fp = stdout; // TODO: just a placeholder, should use current-output-port
+  if (argc > 1) {
+    object tmp;
+    tmp = va_arg(ap, object);
+    fp = ((port_type *)tmp)->fp;
+  }
+  return Cyc_display(x, fp);}
 
 object Cyc_display(object x, FILE *port)
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return x;}
- if (obj_is_char(x)) {printf("%c", obj_obj2char(x)); return x;}
+ if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return x;}
  switch (type_of(x))
    {case closure0_tag:
     case closure1_tag:
@@ -311,57 +332,57 @@ object Cyc_display(object x, FILE *port)
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      printf("<procedure %p>",(void *)((closure) x)->fn);
+      fprintf(port, "<procedure %p>",(void *)((closure) x)->fn);
       break;
     case eof_tag:
-      printf("<EOF>");
+      fprintf(port, "<EOF>");
       break;
     case port_tag:
-      printf("<port>");
+      fprintf(port, "<port>");
       break;
     case primitive_tag:
-      printf("<primitive %s>", prim_name(x));
+      fprintf(port, "<primitive %s>", prim_name(x));
       break;
     case cvar_tag:
-      Cyc_display(Cyc_get_cvar(x));
+      Cyc_display(Cyc_get_cvar(x), port);
       break;
     case boolean_tag:
-      printf("#%s",((boolean_type *) x)->pname);
+      fprintf(port, "#%s",((boolean_type *) x)->pname);
       break;
     case symbol_tag:
-      printf("%s",((symbol_type *) x)->pname);
+      fprintf(port, "%s",((symbol_type *) x)->pname);
       break;
     case integer_tag:
-      printf("%d", ((integer_type *) x)->value);
+      fprintf(port, "%d", ((integer_type *) x)->value);
       break;
     case double_tag:
-      printf("%lf", ((double_type *) x)->value);
+      fprintf(port, "%lf", ((double_type *) x)->value);
       break;
     case string_tag:
-      printf("%s", ((string_type *) x)->str);
+      fprintf(port, "%s", ((string_type *) x)->str);
       break;
     case vector_tag:
-      printf("#(");
+      fprintf(port, "#(");
       for (i = 0; i < ((vector) x)->num_elt; i++) {
         if (i > 0) { 
-          printf(" "); 
+          fprintf(port, " "); 
         }
-        Cyc_display(((vector)x)->elts[i]);
+        Cyc_display(((vector)x)->elts[i], port);
       }
-      printf(")");
+      fprintf(port, ")");
       break;
     case cons_tag:
       has_cycle = Cyc_has_cycle(x);
-      printf("("); 
-      Cyc_display(car(x));
+      fprintf(port, "("); 
+      Cyc_display(car(x), port);
 
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
       if (equal(quote_Cyc_191procedure, car(x))) {
-          printf(" ");
-          Cyc_display(cadr(x));
-          printf(" ...)"); /* skip body and env for now */
+          fprintf(port, " ");
+          Cyc_display(cadr(x), port);
+          fprintf(port, " ...)"); /* skip body and env for now */
           break;
       }
 
@@ -369,44 +390,71 @@ object Cyc_display(object x, FILE *port)
           if (has_cycle == boolean_t) {
               if (i++ > 20) break; /* arbitrary number, for now */
           }
-          printf(" ");
-          Cyc_display(car(tmp));
+          fprintf(port, " ");
+          Cyc_display(car(tmp), port);
       }
       if (has_cycle == boolean_t) {
-          printf(" ...");
+          fprintf(port, " ...");
       } else if (tmp) {
-          printf(" . ");
-          Cyc_display(tmp);
+          fprintf(port, " . ");
+          Cyc_display(tmp, port);
       }
-      printf(")");
+      fprintf(port, ")");
       break;
     default:
-      printf("Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
+      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
  return x;}
 
-static object _Cyc_write(x) object x;
+object dispatch_write_va(int argc, object x, ...) {
+  object result;
+  va_list ap;
+  va_start(ap, x);
+  result = Cyc_write_va_list(argc - 1, x, ap);
+  va_end(ap);
+  return result;
+}
+
+object Cyc_write_va(int argc, object x, ...) {
+  object result;
+  va_list ap;
+  va_start(ap, x);
+  result = Cyc_write_va_list(argc, x, ap);
+  va_end(ap);
+  return result;
+}
+
+object Cyc_write_va_list(int argc, object x, va_list ap) {
+  FILE *fp = stdout; // TODO: just a placeholder, should use current-output-port
+  if (argc > 1) {
+    object tmp;
+    tmp = va_arg(ap, object);
+    fp = ((port_type *)tmp)->fp;
+  }
+  return Cyc_write(x, fp);}
+
+static object _Cyc_write(object x, FILE *port)
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {printf("()"); return x;}
- if (obj_is_char(x)) {printf("#\\%c", obj_obj2char(x)); return x;}
+ if (nullp(x)) {fprintf(port, "()"); return x;}
+ if (obj_is_char(x)) {fprintf(port, "#\\%c", obj_obj2char(x)); return x;}
  switch (type_of(x))
    {case string_tag:
-      printf("\"%s\"", ((string_type *) x)->str);
+      fprintf(port, "\"%s\"", ((string_type *) x)->str);
       break;
     // TODO: what about a list? contents should be displayed per (write)
     case cons_tag:
       has_cycle = Cyc_has_cycle(x);
-      printf("("); 
-      _Cyc_write(car(x));
+      fprintf(port, "("); 
+      _Cyc_write(car(x), port);
 
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
       if (equal(quote_Cyc_191procedure, car(x))) {
-          printf(" ");
-          _Cyc_write(cadr(x));
-          printf(" ...)"); /* skip body and env for now */
+          fprintf(port, " ");
+          _Cyc_write(cadr(x), port);
+          fprintf(port, " ...)"); /* skip body and env for now */
           break;
       }
 
@@ -414,24 +462,24 @@ static object _Cyc_write(x) object x;
           if (has_cycle == boolean_t) {
               if (i++ > 20) break; /* arbitrary number, for now */
           }
-          printf(" ");
-          _Cyc_write(car(tmp));
+          fprintf(port, " ");
+          _Cyc_write(car(tmp), port);
       }
       if (has_cycle == boolean_t) {
-          printf(" ...");
+          fprintf(port, " ...");
       } else if (tmp) {
-          printf(" . ");
-          _Cyc_write(tmp);
+          fprintf(port, " . ");
+          _Cyc_write(tmp, port);
       }
-      printf(")");
+      fprintf(port, ")");
       break;
     default:
-      Cyc_display(x);}
+      Cyc_display(x, port);}
  return x;}
 
-object Cyc_write(x) object x;
-{object y = _Cyc_write(x);
- printf("\n");
+object Cyc_write(object x, FILE *port)
+{object y = _Cyc_write(x, port);
+ fprintf(port, "\n");
  return y;}
 
 /* Some of these non-consing functions have been optimized from CPS. */
@@ -1205,9 +1253,13 @@ void _read_91char(object cont, object args) {
 void _peek_91char(object cont, object args) {  
     return_funcall1(cont, Cyc_io_peek_char(car(args)));}
 void _write(object cont, object args) {  
-    return_funcall1(cont, Cyc_write(car(args))); }
+
+   TODO: this and _display below are broken and crashing in icyc. not sure what is going on?
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }
 void _display(object cont, object args) {  
-    return_funcall1(cont, Cyc_display(car(args)));}
+    integer_type argc = Cyc_length(args);
+    dispatch(argc.value, (function_type)dispatch_display_va, cont, cont, args); }
 void _call_95cc(object cont, object args){
     return_funcall2(__glo_call_95cc, cont, car(args));
 }

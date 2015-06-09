@@ -68,8 +68,14 @@ string_type Cyc_string_append_va_list(int, object, va_list);
 list mcons(object,object);
 cvar_type *mcvar(object *var);
 object terpri(void);
-object Cyc_display(object);
-object Cyc_write(object);
+object Cyc_display(object, FILE *port);
+object dispatch_display_va(int argc, object x, ...);
+object Cyc_display_va(int argc, object x, ...);
+object Cyc_display_va_list(int argc, object x, va_list ap);
+object Cyc_write(object, FILE *port);
+object dispatch_write_va(int argc, object x, ...);
+object Cyc_write_va(int argc, object x, ...);
+object Cyc_write_va_list(int argc, object x, va_list ap);
 
 object Cyc_has_cycle(object lst);
 list assoc(object x, list l);
