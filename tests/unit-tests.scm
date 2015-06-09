@@ -242,13 +242,12 @@
 
 ;; Vectors
 
-TODO:
 (assert:equal "vector->list" (vector->list #(dah dah didah))
                             '(dah dah didah))
 ;(vector->list .#(dah dah didah) 1 2)
 ;=. (dah)
-;(list->vector .(dididit dah))
-;=. #(dididit dah)
+(assert:equal "list->vector" (list->vector '(dididit dah))
+                             #(dididit dah))
 
 (assert:equal "string->vector" (string->vector "ABC")  #(#\A #\B #\C))
 (assert:equal "vector->string" (vector->string #(#\1 #\2 #\3)) "123")
