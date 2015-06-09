@@ -292,7 +292,7 @@ object Cyc_has_cycle(object lst) {
 // to the value returned by (current-output-port). It is an
 // error to attempt an output operation on a closed port
 //
-object dispatch_display_va(int argc, object x, ...) {
+object dispatch_display_va(int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
@@ -405,7 +405,7 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
  return x;}
 
-object dispatch_write_va(int argc, object x, ...) {
+object dispatch_write_va(int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
@@ -1254,7 +1254,7 @@ void _peek_91char(object cont, object args) {
     return_funcall1(cont, Cyc_io_peek_char(car(args)));}
 void _write(object cont, object args) {  
 
-   TODO: this and _display below are broken and crashing in icyc. not sure what is going on?
+//   TODO: this and _display below are broken and crashing in icyc. not sure what is going on?
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }
 void _display(object cont, object args) {  

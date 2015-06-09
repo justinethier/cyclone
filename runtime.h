@@ -69,11 +69,11 @@ list mcons(object,object);
 cvar_type *mcvar(object *var);
 object terpri(void);
 object Cyc_display(object, FILE *port);
-object dispatch_display_va(int argc, object x, ...);
+object dispatch_display_va(int argc, object clo, object cont, object x, ...);
 object Cyc_display_va(int argc, object x, ...);
 object Cyc_display_va_list(int argc, object x, va_list ap);
 object Cyc_write(object, FILE *port);
-object dispatch_write_va(int argc, object x, ...);
+object dispatch_write_va(int argc, object clo, object cont, object x, ...);
 object Cyc_write_va(int argc, object x, ...);
 object Cyc_write_va_list(int argc, object x, va_list ap);
 
