@@ -282,11 +282,27 @@ object Cyc_has_cycle(object lst) {
     }
 }
 
-object Cyc_display(x) object x;
+// TODO: need to change I/O functions (including display/write below)
+// to accept an optional port arg. also, if port is not specified, should
+// use (current-output-port) instead of stdout. will need to expose the
+// (current-*port) functions somehow (tricky since we do not have param
+// object yet) then figure out how to use them.
+//
+// If port is omitted from any output procedure, it defaults
+// to the value returned by (current-output-port). It is an
+// error to attempt an output operation on a closed port
+//
+//object dispatch_display_va(int argc, object x, ...) {
+//object Cyc_display_va(int argc, object x, ...) {
+// object Cyc_display_va_list(int argc, object x, va_list ap) {
+
+TODO: change all printf's below:
+
+object Cyc_display(object x, FILE *port)
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {printf("()"); return x;}
+ if (nullp(x)) {fprintf(port, "()"); return x;}
  if (obj_is_char(x)) {printf("%c", obj_obj2char(x)); return x;}
  switch (type_of(x))
    {case closure0_tag:
