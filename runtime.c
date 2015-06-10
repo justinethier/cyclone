@@ -298,7 +298,7 @@ object dispatch_display_va(int argc, object clo, object cont, object x, ...) {
   va_start(ap, x);
   result = Cyc_display_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_funcall1(cont, &result);
+  return_funcall1(cont, result);
 }
 
 object Cyc_display_va(int argc, object x, ...) {
@@ -411,7 +411,7 @@ object dispatch_write_va(int argc, object clo, object cont, object x, ...) {
   va_start(ap, x);
   result = Cyc_write_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_funcall1(cont, &result);
+  return_funcall1(cont, result);
 }
 
 object Cyc_write_va(int argc, object x, ...) {
