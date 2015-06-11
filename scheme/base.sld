@@ -50,6 +50,7 @@
     vector->list
     vector->string
     string->vector
+    make-parameter
     error
     raise
     raise-continuable
@@ -264,6 +265,20 @@
                       fill)))
         (list->string
           (apply make-list (cons k fill*)))))
+    (define (make-parameter init . o)
+      (let* ((converter
+               (if (pair? o) (car o) (lambda (x) x)))
+             (value (converter init)))
+        (lambda args
+          (cond
+            ((null? args)
+             value)
+            ((eq? (car args) '<param-set!>)
+             (set! value (cadr args)))
+            ((eq? (car args) '<param-convert>)
+             converter)
+           (else
+             (error "bad parameter syntax"))))))
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)

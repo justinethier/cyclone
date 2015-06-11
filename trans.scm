@@ -31,6 +31,21 @@
                           (rename 'tmp)
                           (cons (rename 'or) (cddr expr))))))))
     (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
+    (cons 'let*
+      (lambda (expr rename compare)
+        (if (null? (cdr expr)) (error "empty let*" expr))
+        (if (null? (cddr expr)) (error "no let* body" expr))
+        (if (null? (cadr expr))
+            `(,(rename 'let) () ,@(cddr expr))
+            (if (if (list? (cadr expr))
+                    (every
+                     (lambda (x)
+                       (if (pair? x) (if (pair? (cdr x)) (null? (cddr x)) #f) #f))
+                     (cadr expr))
+                    #f)
+                `(,(rename 'let) (,(caar (cdr expr)))
+                  (,(rename 'let*) ,(cdar (cdr expr)) ,@(cddr expr)))
+                (error "bad let* syntax")))))
     (cons 'begin (lambda (exp rename compare) (begin=>let exp)))
     (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
     (cons 'cond

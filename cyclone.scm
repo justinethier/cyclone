@@ -15,6 +15,7 @@
  (chicken
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
+   (require-extension srfi-1) ;; every
    (load (string-append (cyc:get-lib-dir) "parser.so"))
    (load (string-append (cyc:get-lib-dir) "libraries.so"))
    (load (string-append (cyc:get-lib-dir) "trans.so"))
