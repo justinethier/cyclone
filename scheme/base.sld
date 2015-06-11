@@ -51,6 +51,9 @@
     vector->string
     string->vector
     make-parameter
+    current-output-port
+    ;current-input-port
+    ;current-error-port
     error
     raise
     raise-continuable
@@ -279,6 +282,8 @@
              converter)
            (else
              (error "bad parameter syntax"))))))
+    (define (current-output-port)
+      (make-parameter 'TODO-Cyc-stdout)) ;; TODO: need to expose stdout as a port obj
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)
