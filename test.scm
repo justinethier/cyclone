@@ -24,3 +24,4 @@
   (lambda () (values 1 1))
   (lambda (a) (write a)))
 
+(write (Cyc-stdout))

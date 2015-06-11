@@ -48,10 +48,7 @@ static void main_main (stack_size,heap_size,stack_base)
  /* Do initializations of Lisp objects and rewrite rules.
  quote_list_f = mlist1(boolean_f); quote_list_t = mlist1(boolean_t); */
 
- /* Make temporary short names for certain atoms. */
  {
-
-  /* Define the rules, but only those that are actually referenced. */
 
   /* Create closure for the test function. */
   mclosure0(run_test,&c_entry_pt);

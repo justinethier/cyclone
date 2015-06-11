@@ -423,6 +423,7 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
+     ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p '+)                     "Cyc_sum")
      ((eq? p '-)                     "Cyc_sub")
      ((eq? p '*)                     "Cyc_mul")
@@ -526,6 +527,7 @@
 ;; EG: int v = prim();
 (define (prim/c-var-assign p)
   (cond
+    ((eq? p 'Cyc-stdout) "port_type")
     ((eq? p 'current-input-port) "port_type")
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'length) "integer_type")
@@ -550,6 +552,7 @@
 (define (prim/cvar? exp)
     (and (prim? exp)
          (member exp '(
+             Cyc-stdout
              current-input-port open-input-file
              char->integer system string->number 
              string-append string-cmp list->string string->list

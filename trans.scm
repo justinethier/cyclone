@@ -484,6 +484,7 @@
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
      Cyc-has-cycle?
+     Cyc-stdout
      +
      -
      *
@@ -570,6 +571,7 @@
                   Cyc-get-cvar
                   Cyc-set-cvar!
                   Cyc-cvar?
+                  Cyc-stdout
                   apply
                   %halt
                   exit

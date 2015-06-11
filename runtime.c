@@ -955,6 +955,11 @@ common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), ob
 
 /* I/O functions */
 
+port_type Cyc_stdout() {
+  make_port(_stdout, stdout, 0);
+  return _stdout;
+}
+
 port_type Cyc_io_current_input_port() {
     make_port(p, stdin, 0);
     return p;

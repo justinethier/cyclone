@@ -59,6 +59,7 @@ extern object Cyc_global_variables;
 object Cyc_get_global_variables();
 object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
+port_type Cyc_stdout(void);
 object apply(object cont, object func, object args);
 void Cyc_apply(int argc, closure cont, object prim, ...);
 integer_type Cyc_string_cmp(object str1, object str2);
