@@ -283,7 +283,7 @@
            (else
              (error "bad parameter syntax"))))))
     (define current-output-port
-      (make-parameter 'TODO-Cyc-stdout)) ;; TODO: need to expose stdout as a port obj
+      (make-parameter (Cyc-stdout)))
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)
