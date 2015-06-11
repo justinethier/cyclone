@@ -131,8 +131,8 @@
                    input-program)))
         (cond
          ((and library? (equal? lib-name '(scheme base)))
-           (set! globals (cons 'call/cc globals))
-           (set! module-globals (cons 'call/cc module-globals))
+           (set! globals (append '(call-with-values call/cc) globals))
+           (set! module-globals (append '(call-with-values call/cc) module-globals))
            (set! input-program 
              (cons
               ;; Experimental version of call-with-values,

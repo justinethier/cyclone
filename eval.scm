@@ -188,6 +188,7 @@
 (define primitive-procedures
   (list 
       (list 'call/cc call/cc)
+      (list 'call-with-values call-with-values)
       (list 'Cyc-global-vars Cyc-global-vars)
       (list 'Cyc-get-cvar Cyc-get-cvar)
       (list 'Cyc-set-cvar! Cyc-set-cvar!)

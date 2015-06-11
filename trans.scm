@@ -126,7 +126,7 @@
 
 
 (define (built-in-syms)
-  '(call/cc define))
+  '(call-with-values call/cc define))
 
 ;; Tuning
 (define *do-code-gen* #t) ; Generate C code?
