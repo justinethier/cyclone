@@ -4,6 +4,7 @@
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
+    list-insert-at!
     call-with-current-continuation
     call/cc
     call-with-values
@@ -63,7 +64,7 @@
     Cyc-remove-exception-handler
     newline
   )
-  (include "cyclone.scm")
+  (include "common.scm")
   (begin
     (define *Cyc-version-banner* *version-banner*)
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.

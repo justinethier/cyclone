@@ -7,7 +7,7 @@
 ;; various utility functions used by the compiler.
 ;;
 
-(load (string-append (cyc:get-lib-dir) "scheme/cyclone.scm"))
+(load (string-append (cyc:get-lib-dir) "scheme/common.scm"))
 
 ;; Built-in macros
 ;; TODO: just a stub, real code would read (define-syntax) 
