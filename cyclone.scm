@@ -18,7 +18,7 @@
    (require-extension srfi-1) ;; every
    (load (string-append (cyc:get-lib-dir) "parser.so"))
    (load (string-append (cyc:get-lib-dir) "libraries.so"))
-   (load (string-append (cyc:get-lib-dir) "trans.so"))
+   (load (string-append (cyc:get-lib-dir) "transforms.so"))
    (load (string-append (cyc:get-lib-dir) "cgen.so")))
 ; (husk
 ;   (import (husk pretty-print))
@@ -27,7 +27,7 @@
  (else
    (load (string-append (cyc:get-lib-dir) "parser.scm"))
    (load (string-append (cyc:get-lib-dir) "libraries.scm"))
-   (load (string-append (cyc:get-lib-dir) "trans.scm"))
+   (load (string-append (cyc:get-lib-dir) "transforms.scm"))
    (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
 
 ;; Code emission.

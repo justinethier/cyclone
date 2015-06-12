@@ -18,8 +18,8 @@ scheme/read.o: cyclone scheme/read.sld
 scheme/write.o: cyclone scheme/write.sld
 	./cyclone scheme/write.sld
 
-trans.so: trans.scm
-	csc -s trans.scm
+transforms.so: transforms.scm
+	csc -s transforms.scm
 
 cgen.so: cgen.scm
 	csc -s cgen.scm
@@ -50,7 +50,7 @@ debug:
 debug2: libcyclone.so.1
 	gcc test.c -L. -lcyclone -I. -g -o test
 
-cyclone: cyclone.scm trans.so cgen.so libraries.so parser.so libcyclone.a
+cyclone: cyclone.scm transforms.so cgen.so libraries.so parser.so libcyclone.a
 	csc cyclone.scm
 
 .PHONY: test
