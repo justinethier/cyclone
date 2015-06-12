@@ -68,6 +68,9 @@ const object boolean_f = &f_boolean;
 static symbol_type Cyc_191procedure_symbol = {symbol_tag, "procedure", nil};
 const object quote_Cyc_191procedure = &Cyc_191procedure_symbol;
 
+static symbol_type Cyc_void_symbol = {symbol_tag, "", nil};
+const object quote_void = &Cyc_void_symbol;
+
 /* Symbol Table */
 
 /* Notes for the symbol table
@@ -323,8 +326,8 @@ object Cyc_display(object x, FILE *port)
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {fprintf(port, "()"); return x;}
- if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return x;}
+ if (nullp(x)) {fprintf(port, "()"); return quote_void;}
+ if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
  switch (type_of(x))
    {case closure0_tag:
     case closure1_tag:
@@ -403,7 +406,7 @@ object Cyc_display(object x, FILE *port)
       break;
     default:
       fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
- return x;}
+ return quote_void;}
 
 object dispatch_write_va(int argc, object clo, object cont, object x, ...) {
   object result;
@@ -437,8 +440,8 @@ static object _Cyc_write(object x, FILE *port)
 {object tmp = nil;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {fprintf(port, "()"); return x;}
- if (obj_is_char(x)) {fprintf(port, "#\\%c", obj_obj2char(x)); return x;}
+ if (nullp(x)) {fprintf(port, "()"); return quote_void;}
+ if (obj_is_char(x)) {fprintf(port, "#\\%c", obj_obj2char(x)); return quote_void;}
  switch (type_of(x))
    {case string_tag:
       fprintf(port, "\"%s\"", ((string_type *) x)->str);
@@ -476,7 +479,7 @@ static object _Cyc_write(object x, FILE *port)
       break;
     default:
       Cyc_display(x, port);}
- return x;}
+ return quote_void;}
 
 object Cyc_write(object x, FILE *port)
 {object y = _Cyc_write(x, port);
@@ -486,11 +489,11 @@ object Cyc_write(object x, FILE *port)
 object Cyc_write_char(object c, object port) 
 {
   if (obj_is_char(c)) {
-    fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c)); return c;
+    fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c));
   } else {
     Cyc_rt_raise2("Argument is not a character", c);
   }
-  return c;
+  return quote_void;
 }
 
 /* Some of these non-consing functions have been optimized from CPS. */

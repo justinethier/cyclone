@@ -87,10 +87,6 @@ typedef long tag_type;
 #define boolean_tag 15
 #define cvar_tag 16
 #define vector_tag 17
-/* TODO: need a type to return from things like
-   (if #f #t) and (write 1) so the REPL will not print
-   anything for them:
-  void_tag */
 
 #define nil NULL
 #define eq(x,y) (x == y)

@@ -224,6 +224,7 @@ extern jmp_buf jmp_main; /* Where to jump to. */
 extern const object boolean_t;
 extern const object boolean_f;
 extern const object quote_Cyc_191procedure;
+extern const object quote_void;
 
 /* This section is auto-generated via --autogen */
 extern const object primitive_Cyc_91global_91vars;
