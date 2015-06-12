@@ -445,6 +445,7 @@
      ((eq? p 'peek-char)             "Cyc_io_peek_char")
      ((eq? p 'Cyc-display)           "Cyc_display_va")
      ((eq? p 'Cyc-write)             "Cyc_write_va")
+     ((eq? p 'Cyc-write-char)        "Cyc_write_char")
      ((eq? p 'car)           "car")
      ((eq? p 'cdr)           "cdr")
      ((eq? p 'caar)          "caar")

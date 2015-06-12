@@ -289,6 +289,7 @@
       (list 'close-input-port close-input-port)
       (list 'read-char read-char)
       (list 'peek-char peek-char)
+      (list 'Cyc-write-char Cyc-write-char)
       (list 'Cyc-write Cyc-write)
       (list 'Cyc-display Cyc-display)))
 

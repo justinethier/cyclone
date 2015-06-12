@@ -555,6 +555,7 @@
      close-input-port
      read-char
      peek-char
+     Cyc-write-char
      Cyc-write
      Cyc-display))
 

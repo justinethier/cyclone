@@ -483,6 +483,16 @@ object Cyc_write(object x, FILE *port)
  fprintf(port, "\n");
  return y;}
 
+object Cyc_write_char(object c, object port) 
+{
+  if (obj_is_char(c)) {
+    fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c)); return c;
+  } else {
+    Cyc_rt_raise2("Argument is not a character", c);
+  }
+  return c;
+}
+
 /* Some of these non-consing functions have been optimized from CPS. */
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
@@ -1258,6 +1268,8 @@ void _read_91char(object cont, object args) {
     return_funcall1(cont, Cyc_io_read_char(car(args)));}
 void _peek_91char(object cont, object args) {  
     return_funcall1(cont, Cyc_io_peek_char(car(args)));}
+void _Cyc_91write_91char(object cont, object args) {  
+    return_funcall1(cont, Cyc_write_char(car(args), cadr(args)));}
 void _Cyc_91write(object cont, object args) {  
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }
@@ -1948,6 +1960,7 @@ static primitive_type close_91input_91port_primitive = {primitive_tag, "close-in
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
 static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
+static primitive_type Cyc_91write_91char_primitive = {primitive_tag, "Cyc-write-char", &_Cyc_91write_91char};
 static primitive_type Cyc_91display_primitive = {primitive_tag, "Cyc-display", &_display};
 static primitive_type call_95cc_primitive = {primitive_tag, "call/cc", &_call_95cc};
 
@@ -2050,6 +2063,7 @@ const object primitive_open_91input_91file = &open_91input_91file_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
+const object primitive_Cyc_91write_91char = &Cyc_91write_91char_primitive;
 const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;

@@ -119,11 +119,12 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
-    (define (newline) (display "\n"))
     (define (write-char char . port)
       (if (null? port)
         (Cyc-write-char char (current-output-port))
         (Cyc-write-char char (car port))))
+    (define (newline . port) 
+      (apply write-char (cons #\newline port)))
     (define (not x) (if x #f #t))
     (define (list? o)
       (define (_list? obj)
