@@ -324,7 +324,7 @@ extern const object primitive_open_91input_91file;
 extern const object primitive_close_91input_91port;
 extern const object primitive_read_91char;
 extern const object primitive_peek_91char;
-extern const object primitive_write;
+extern const object primitive_Cyc_91write;
 extern const object primitive_display;
 extern const object primitive_call_95cc;
 /* -------------------------------------------- */

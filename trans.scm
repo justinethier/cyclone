@@ -555,7 +555,7 @@
      close-input-port
      read-char
      peek-char
-     write
+     Cyc-write
      display))
 
 ;; Constant Folding

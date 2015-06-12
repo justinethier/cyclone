@@ -289,7 +289,7 @@
       (list 'close-input-port close-input-port)
       (list 'read-char read-char)
       (list 'peek-char peek-char)
-      (list 'write write)
+      (list 'Cyc-write Cyc-write)
       (list 'display display)))
 
 (define (primitive-procedure-names)

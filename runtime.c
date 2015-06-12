@@ -424,7 +424,8 @@ object Cyc_write_va(int argc, object x, ...) {
 }
 
 object Cyc_write_va_list(int argc, object x, va_list ap) {
-  FILE *fp = stdout; // TODO: just a placeholder, should use current-output-port
+  FILE *fp = stdout; // OK since this is the internal version of write
+                     // Longer-term maybe we get rid of varargs for this one
   if (argc > 1) {
     object tmp;
     tmp = va_arg(ap, object);
@@ -1257,9 +1258,7 @@ void _read_91char(object cont, object args) {
     return_funcall1(cont, Cyc_io_read_char(car(args)));}
 void _peek_91char(object cont, object args) {  
     return_funcall1(cont, Cyc_io_peek_char(car(args)));}
-void _write(object cont, object args) {  
-
-//   TODO: this and _display below are broken and crashing in icyc. not sure what is going on?
+void _Cyc_91write(object cont, object args) {  
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }
 void _display(object cont, object args) {  
@@ -1948,7 +1947,7 @@ static primitive_type open_91input_91file_primitive = {primitive_tag, "open-inpu
 static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
-static primitive_type write_primitive = {primitive_tag, "write", &_write};
+static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
 static primitive_type display_primitive = {primitive_tag, "display", &_display};
 static primitive_type call_95cc_primitive = {primitive_tag, "call/cc", &_call_95cc};
 
@@ -2051,7 +2050,7 @@ const object primitive_open_91input_91file = &open_91input_91file_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
-const object primitive_write = &write_primitive;
+const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_display = &display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
 

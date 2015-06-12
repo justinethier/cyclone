@@ -54,6 +54,7 @@
     current-output-port
     ;current-input-port
     ;current-error-port
+    write ;; TODO: move to (scheme write) library
     error
     raise
     raise-continuable
@@ -284,6 +285,10 @@
              (error "bad parameter syntax"))))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
+    (define (write obj . port)
+      (if (null? port)
+          (Cyc-write obj (current-output-port))
+          (Cyc-write obj (car port))))
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)
