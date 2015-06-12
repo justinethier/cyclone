@@ -546,6 +546,7 @@
      real?
      integer?
      pair?
+     port?
      procedure?
      vector?
      string?
@@ -594,8 +595,9 @@
                   close-input-port
                   read-char
                   peek-char
-                  write
-                  display)))
+                  Cyc-write-char
+                  Cyc-write
+                  Cyc-display)))
     (call/cc
       (lambda (return)
         (for-each

@@ -280,6 +280,7 @@
       (list 'real? real?)
       (list 'integer? integer?)
       (list 'pair? pair?)
+      (list 'port? port?)
       (list 'procedure? procedure?)
       (list 'vector? vector?)
       (list 'string? string?)

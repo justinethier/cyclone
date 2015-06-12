@@ -606,6 +606,11 @@ object Cyc_is_vector(object o){
         return boolean_t;
     return boolean_f;}
 
+object Cyc_is_port(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == port_tag)
+        return boolean_t;
+    return boolean_f;}
+
 object Cyc_is_string(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == string_tag)
         return boolean_t;
@@ -1143,6 +1148,8 @@ void _pair_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_cons(car(args))); }
 void _procedure_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_procedure(car(args))); }
+void _port_127(object cont, object args) {
+    return_funcall1(cont, Cyc_is_port(car(args))); }
 void _vector_127(object cont, object args) {
     return_funcall1(cont, Cyc_is_vector(car(args))); }
 void _string_127(object cont, object args) {
@@ -1949,6 +1956,7 @@ static primitive_type real_127_primitive = {primitive_tag, "real?", &_real_127};
 static primitive_type integer_127_primitive = {primitive_tag, "integer?", &_integer_127};
 static primitive_type pair_127_primitive = {primitive_tag, "pair?", &_pair_127};
 static primitive_type procedure_127_primitive = {primitive_tag, "procedure?", &_procedure_127};
+static primitive_type port_127_primitive = {primitive_tag, "port?", &_port_127};
 static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector_127};
 static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
 static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
@@ -2054,6 +2062,7 @@ const object primitive_integer_127 = &integer_127_primitive;
 const object primitive_pair_127 = &pair_127_primitive;
 const object primitive_procedure_127 = &procedure_127_primitive;
 const object primitive_string_127 = &string_127_primitive;
+const object primitive_port_127 = &port_127_primitive;
 const object primitive_vector_127 = &vector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
 const object primitive_current_91input_91port = &current_91input_91port_primitive;
