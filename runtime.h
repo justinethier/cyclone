@@ -68,7 +68,6 @@ string_type Cyc_string_append(int argc, object str1, ...);
 string_type Cyc_string_append_va_list(int, object, va_list);
 list mcons(object,object);
 cvar_type *mcvar(object *var);
-object terpri(void);
 object Cyc_display(object, FILE *port);
 object dispatch_display_va(int argc, object clo, object cont, object x, ...);
 object Cyc_display_va(int argc, object x, ...);

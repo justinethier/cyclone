@@ -50,7 +50,6 @@ object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
 int gc_num_ans;
 jmp_buf jmp_main; /* Where to jump to. */
 
-//static object test_exp1, test_exp2; /* Expressions used within test. */
 object Cyc_global_variables = nil;
 
 static symbol_type __EOF = {eof_tag, "", nil}; // symbol_type in lieu of custom type
@@ -208,8 +207,6 @@ void Cyc_rt_raise_msg(const char *err) {
     Cyc_rt_raise(&s);
 }
 /* END exception handler */
-
-object terpri() {printf("\n"); return nil;}
 
 int equal(x, y) object x, y;
 {
@@ -495,8 +492,6 @@ object Cyc_write_char(object c, object port)
   }
   return quote_void;
 }
-
-/* Some of these non-consing functions have been optimized from CPS. */
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
 object memberp(x,l) object x; list l;
