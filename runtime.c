@@ -185,7 +185,7 @@ object Cyc_current_exception_handler() {
 void Cyc_rt_raise(object err) {
     make_cons(c2, err, nil);
     make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, nil);
+    make_cons(c0, &c1, nil); // TODO: seems broken?
     apply(nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");

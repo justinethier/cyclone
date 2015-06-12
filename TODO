@@ -15,6 +15,8 @@ Working TODO list:
        cyclone> (write-char 1)
        Error:  
 
+    This it might be an issue with rt_raise2, perhaps this line:
+    make_cons(c0, &c1, nil);
 
  - Constructs require for self-hosting
 
