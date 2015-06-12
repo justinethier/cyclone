@@ -9,6 +9,13 @@ Roadmap:
 
 Working TODO list:
  
+ - Issues with repl errors
+   why is it displaying "Error" at the repl without a description for certain errors, eg:
+
+       cyclone> (write-char 1)
+       Error:  
+
+
  - Constructs require for self-hosting
 
    - vectors
