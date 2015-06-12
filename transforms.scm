@@ -556,7 +556,7 @@
      read-char
      peek-char
      Cyc-write
-     display))
+     Cyc-display))
 
 ;; Constant Folding
 ;; Is a primitive being applied in such a way that it can be

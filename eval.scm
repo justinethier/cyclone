@@ -290,7 +290,7 @@
       (list 'read-char read-char)
       (list 'peek-char peek-char)
       (list 'Cyc-write Cyc-write)
-      (list 'display display)))
+      (list 'Cyc-display Cyc-display)))
 
 (define (primitive-procedure-names)
   (map car

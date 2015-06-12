@@ -1948,7 +1948,7 @@ static primitive_type close_91input_91port_primitive = {primitive_tag, "close-in
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
 static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
-static primitive_type display_primitive = {primitive_tag, "display", &_display};
+static primitive_type Cyc_91display_primitive = {primitive_tag, "Cyc-display", &_display};
 static primitive_type call_95cc_primitive = {primitive_tag, "call/cc", &_call_95cc};
 
 const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
@@ -2051,6 +2051,6 @@ const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
 const object primitive_Cyc_91write = &Cyc_91write_primitive;
-const object primitive_display = &display_primitive;
+const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
 

@@ -63,6 +63,7 @@
     Cyc-add-exception-handler
     Cyc-remove-exception-handler
     newline
+    write-char
   )
   (include "common.scm")
   (begin
@@ -119,6 +120,10 @@
         end
         (func (car lst) (foldr func end (cdr lst)))))
     (define (newline) (display "\n"))
+    (define (write-char char . port)
+      (if (null? port)
+        (Cyc-write-char char (current-output-port))
+        (Cyc-write-char char (car port))))
     (define (not x) (if x #f #t))
     (define (list? o)
       (define (_list? obj)

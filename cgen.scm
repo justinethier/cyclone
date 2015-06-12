@@ -443,7 +443,7 @@
      ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
      ((eq? p 'read-char)             "Cyc_io_read_char")
      ((eq? p 'peek-char)             "Cyc_io_peek_char")
-     ((eq? p 'display)               "Cyc_display_va")
+     ((eq? p 'Cyc-display)           "Cyc_display_va")
      ((eq? p 'Cyc-write)             "Cyc_write_va")
      ((eq? p 'car)           "car")
      ((eq? p 'cdr)           "cdr")
@@ -563,7 +563,7 @@
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
     (and (prim? exp)
-         (member exp '(error Cyc-write display string-append + - * /))))
+         (member exp '(error Cyc-write Cyc-display string-append + - * /))))
 
 ;; Does primitive allocate an object?
 (define (prim:allocates-object? exp)
