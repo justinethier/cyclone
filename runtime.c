@@ -166,11 +166,20 @@ object Cyc_glo_eval = nil;
 object Cyc_exception_handler_stack = nil;
 
 object Cyc_default_exception_handler(int argc, closure _, object err) {
-    printf("Error: ");
-    // TODO: error should be a list of form (type arg1 ... argn)
-    // want to ignore type and display args without enclosing parens
-    Cyc_display_va(1, err);
-    printf("\n");
+    fprintf(stderr, "Error: ");
+
+    if (nullp(err) || is_value_type(err) || type_of(err) != cons_tag) {
+      Cyc_display(err, stderr);
+    } else {
+      // Error is list of form (type arg1 ... argn)
+      err = cdr(err); // skip type field
+      for (; !nullp(err); err = cdr(err)){ // output with no enclosing parens
+        Cyc_display(car(err), stderr);
+        fprintf(stderr, " ");
+      }
+    }
+
+    fprintf(stderr, "\n");
     exit(1);
     return nil;
 }
