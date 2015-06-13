@@ -8,15 +8,6 @@ Roadmap:
  - User manual (or at least API docs)
 
 Working TODO list:
- 
- - Issues with repl errors
-   why is it displaying "Error" at the repl without a description for certain errors, eg:
-
-       cyclone> (write-char 1)
-       Error:  
-
-    This it might be an issue with rt_raise2, perhaps this line:
-    make_cons(c0, &c1, nil);
 
  - Constructs require for self-hosting
 
