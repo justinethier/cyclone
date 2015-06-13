@@ -18,6 +18,9 @@ Working TODO list:
        - should make GC more efficient, only transport mutated vector index, not the whole vector
        - After all this works, make sure to add tests from r7rs to test suite
 
+   - I/O
+     - may be able to use fmemopen to implement output strings, although it is not supported on windows
+
    - need to change current*port functions to actually have a current port, and other i/o operations to use the correct current port
      issue here is, to do this right we need parameterize and dynamic-wind. both of which would be nice, but are a lot more work, too
      * best place to start may be call-with-values, as that is needed before dynamic-wind. 
