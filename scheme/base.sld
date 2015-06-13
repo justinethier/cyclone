@@ -294,9 +294,11 @@
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)
-      ((Cyc-current-exception-handler) (list 'raised obj)))
+      ((Cyc-current-exception-handler) 
+        (cons 'raised (if (pair? obj) obj (list obj)))))
     (define (raise-continuable obj)
-      ((Cyc-current-exception-handler) (list 'continuable obj)))
+      ((Cyc-current-exception-handler) 
+        (cons 'continuable (if (pair? obj) obj (list obj)))))
     (define (with-exception-handler handler thunk)
       (let ((result #f)
             (my-handler 
@@ -306,7 +308,7 @@
                                          (equal? (car obj) 'continuable))))
                   ;; Unregister this handler since it is no longer needed
                   (Cyc-remove-exception-handler)
-                  (set! result (handler (cadr obj))) ;; Actual handler
+                  (set! result (handler (cdr obj))) ;; Actual handler
                   (if continuable?
                       result
                       (error "exception handler returned"))))))
