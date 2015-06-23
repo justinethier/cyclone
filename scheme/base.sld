@@ -53,8 +53,8 @@
     string->vector
     make-parameter
     current-output-port
-    ;current-input-port
-    ;current-error-port
+    current-input-port
+    current-error-port
     error
     raise
     raise-continuable
@@ -291,6 +291,10 @@
              (error "bad parameter syntax"))))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
+    (define current-input-port
+      (make-parameter (Cyc-stdin)))
+    (define current-error-port
+      (make-parameter (Cyc-stderr)))
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)

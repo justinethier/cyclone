@@ -285,7 +285,6 @@
       (list 'vector? vector?)
       (list 'string? string?)
       (list 'symbol? symbol?)
-      (list 'current-input-port current-input-port)
       (list 'open-input-file open-input-file)
       (list 'close-input-port close-input-port)
       (list 'read-char read-char)

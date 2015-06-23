@@ -424,6 +424,8 @@
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
+     ((eq? p 'Cyc-stdin)             "Cyc_stdin")
+     ((eq? p 'Cyc-stderr)            "Cyc_stderr")
      ((eq? p '+)                     "Cyc_sum")
      ((eq? p '-)                     "Cyc_sub")
      ((eq? p '*)                     "Cyc_mul")
@@ -438,7 +440,6 @@
      ((eq? p 'exit)                  "__halt")
      ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
      ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
-     ((eq? p 'current-input-port)    "Cyc_io_current_input_port")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
      ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
      ((eq? p 'read-char)             "Cyc_io_read_char")
@@ -530,7 +531,8 @@
 (define (prim/c-var-assign p)
   (cond
     ((eq? p 'Cyc-stdout) "port_type")
-    ((eq? p 'current-input-port) "port_type")
+    ((eq? p 'Cyc-stdin) "port_type")
+    ((eq? p 'Cyc-stderr) "port_type")
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'length) "integer_type")
     ((eq? p 'vector-length) "integer_type")
@@ -555,7 +557,9 @@
     (and (prim? exp)
          (member exp '(
              Cyc-stdout
-             current-input-port open-input-file
+             Cyc-stdin
+             Cyc-stderr
+             open-input-file
              char->integer system string->number 
              string-append string-cmp list->string string->list
              make-vector list->vector

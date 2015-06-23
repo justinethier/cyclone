@@ -485,6 +485,8 @@
      Cyc-cvar? ;; Cyclone-specific
      Cyc-has-cycle?
      Cyc-stdout
+     Cyc-stdin
+     Cyc-stderr
      +
      -
      *
@@ -551,7 +553,6 @@
      vector?
      string?
      symbol?
-     current-input-port
      open-input-file
      close-input-port
      read-char
@@ -573,7 +574,6 @@
                   Cyc-get-cvar
                   Cyc-set-cvar!
                   Cyc-cvar?
-                  Cyc-stdout
                   apply
                   %halt
                   exit
@@ -590,7 +590,9 @@
                   string->list ;; Mistaken for function call (maybe OK if it was quoted, though). same for above?
                   make-vector
                   ;; I/O must be done at runtime for side effects:
-                  current-input-port
+                  Cyc-stdout
+                  Cyc-stdin
+                  Cyc-stderr
                   open-input-file
                   close-input-port
                   read-char

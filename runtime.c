@@ -985,14 +985,19 @@ port_type Cyc_stdout() {
   return _stdout;
 }
 
-port_type Cyc_io_current_input_port() {
-    make_port(p, stdin, 0);
+port_type Cyc_stdin() {
+    make_port(p, stdin, 1);
+    return p;
+}
+
+port_type Cyc_stderr() {
+    make_port(p, stderr, 0);
     return p;
 }
 
 port_type Cyc_io_open_input_file(object str) {
     const char *fname = ((string_type *)str)->str;
-    make_port(p, NULL, 0);
+    make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
     return p;
 }
@@ -1272,9 +1277,6 @@ void _symbol_91_125string(object cont, object args) {
 void _number_91_125string(object cont, object args) {  
     string_type s = Cyc_number2string(car(args));
     return_funcall1(cont, &s);}
-void _current_91input_91port(object cont, object args) {  
-    port_type p = Cyc_io_current_input_port();
-    return_funcall1(cont, &p);}
 void _open_91input_91file(object cont, object args) {  
     port_type p = Cyc_io_open_input_file(car(args));
     return_funcall1(cont, &p);}
@@ -1971,7 +1973,6 @@ static primitive_type port_127_primitive = {primitive_tag, "port?", &_port_127};
 static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector_127};
 static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
 static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
-static primitive_type current_91input_91port_primitive = {primitive_tag, "current-input-port", &_current_91input_91port};
 static primitive_type open_91input_91file_primitive = {primitive_tag, "open-input-file", &_open_91input_91file};
 static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
@@ -2076,7 +2077,6 @@ const object primitive_string_127 = &string_127_primitive;
 const object primitive_port_127 = &port_127_primitive;
 const object primitive_vector_127 = &vector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
-const object primitive_current_91input_91port = &current_91input_91port_primitive;
 const object primitive_open_91input_91file = &open_91input_91file_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_read_91char = &read_91char_primitive;
