@@ -1002,6 +1002,9 @@ port_type Cyc_io_open_input_file(object str) {
     return p;
 }
 
+TODO: Cyc_io_close_port
+TODO: close-input-port can be written in scheme code, I think, using input-port? and close-port
+
 object Cyc_io_close_input_port(object port) {
     if (port && type_of(port) == port_tag) {
        FILE *stream = ((port_type *)port)->fp;
