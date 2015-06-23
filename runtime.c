@@ -1002,10 +1002,13 @@ port_type Cyc_io_open_input_file(object str) {
     return p;
 }
 
-TODO: Cyc_io_close_port
-TODO: close-input-port can be written in scheme code, I think, using input-port? and close-port
-
 object Cyc_io_close_input_port(object port) {
+  return Cyc_io_close_port(port); }
+
+object Cyc_io_close_output_port(object port) {
+  return Cyc_io_close_port(port); }
+
+object Cyc_io_close_port(object port) {
     if (port && type_of(port) == port_tag) {
        FILE *stream = ((port_type *)port)->fp;
        if (stream) fclose(stream);
@@ -1283,8 +1286,12 @@ void _number_91_125string(object cont, object args) {
 void _open_91input_91file(object cont, object args) {  
     port_type p = Cyc_io_open_input_file(car(args));
     return_funcall1(cont, &p);}
+void _close_91port(object cont, object args) {  
+    return_funcall1(cont, Cyc_io_close_port(car(args)));}
 void _close_91input_91port(object cont, object args) {  
     return_funcall1(cont, Cyc_io_close_input_port(car(args)));}
+void _close_91output_91port(object cont, object args) {  
+    return_funcall1(cont, Cyc_io_close_output_port(car(args)));}
 void _read_91char(object cont, object args) {  
     return_funcall1(cont, Cyc_io_read_char(car(args)));}
 void _peek_91char(object cont, object args) {  
@@ -1977,7 +1984,9 @@ static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector
 static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
 static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
 static primitive_type open_91input_91file_primitive = {primitive_tag, "open-input-file", &_open_91input_91file};
+static primitive_type close_91port_primitive = {primitive_tag, "close-port", &_close_91port};
 static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
+static primitive_type close_91output_91port_primitive = {primitive_tag, "close-output-port", &_close_91output_91port};
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
 static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
@@ -2081,7 +2090,9 @@ const object primitive_port_127 = &port_127_primitive;
 const object primitive_vector_127 = &vector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
 const object primitive_open_91input_91file = &open_91input_91file_primitive;
+const object primitive_close_91port = &close_91port_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
+const object primitive_close_91output_91port = &close_91output_91port_primitive;
 const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
 const object primitive_Cyc_91write_91char = &Cyc_91write_91char_primitive;

@@ -554,7 +554,9 @@
      string?
      symbol?
      open-input-file
+     close-port
      close-input-port
+     close-output-port
      read-char
      peek-char
      Cyc-write-char
@@ -594,7 +596,9 @@
                   Cyc-stdin
                   Cyc-stderr
                   open-input-file
+                  close-port
                   close-input-port
+                  close-output-port
                   read-char
                   peek-char
                   Cyc-write-char
