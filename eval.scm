@@ -286,6 +286,7 @@
       (list 'string? string?)
       (list 'symbol? symbol?)
       (list 'open-input-file open-input-file)
+      (list 'open-output-file open-output-file)
       (list 'close-port close-port)
       (list 'close-input-port close-input-port)
       (list 'close-output-port close-output-port)

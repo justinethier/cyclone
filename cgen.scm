@@ -441,6 +441,7 @@
      ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
      ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
+     ((eq? p 'open-output-file)      "Cyc_io_open_output_file")
      ((eq? p 'close-port)            "Cyc_io_close_port")
      ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
      ((eq? p 'close-output-port)     "Cyc_io_close_output_port")
@@ -536,6 +537,7 @@
     ((eq? p 'Cyc-stdin) "port_type")
     ((eq? p 'Cyc-stderr) "port_type")
     ((eq? p 'open-input-file) "port_type")
+    ((eq? p 'open-output-file) "port_type")
     ((eq? p 'length) "integer_type")
     ((eq? p 'vector-length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
@@ -562,6 +564,7 @@
              Cyc-stdin
              Cyc-stderr
              open-input-file
+             open-output-file
              char->integer system string->number 
              string-append string-cmp list->string string->list
              make-vector list->vector
