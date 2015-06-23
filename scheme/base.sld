@@ -55,6 +55,11 @@
     current-output-port
     current-input-port
     current-error-port
+    call-with-port
+    ; TODO: call-with-input-file
+    ; TODO: call-with-output-file
+    ; TODO: close-input-port
+    ; TODO: close-output-port
     error
     raise
     raise-continuable
@@ -84,6 +89,10 @@
           (after)
           result)))
           ;(apply values results))))
+    (define (call-with-port port proc)
+      (let ((result (proc port)))
+        (close-port port)
+        result))
     (define (Cyc-bin-op cmp x lst)
       (cond
         ((null? lst) #t)
