@@ -56,8 +56,6 @@
     current-input-port
     current-error-port
     call-with-port
-    call-with-input-file
-    call-with-output-file
     error
     raise
     raise-continuable
@@ -91,10 +89,6 @@
       (let ((result (proc port)))
         (close-port port)
         result))
-    (define (call-with-input-file string proc)
-      (call-with-port (open-input-file string) proc))
-    (define (call-with-output-file string proc)
-      (call-with-port (open-output-file string) proc))
     (define (Cyc-bin-op cmp x lst)
       (cond
         ((null? lst) #t)
