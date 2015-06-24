@@ -253,26 +253,36 @@
 
     ;; Compile the generated C file
     ;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
-    (if cc?
-      (cond
-        (program?
-          (let ((objs-str 
+    (cond
+      (program?
+        (letrec ((objs-str 
                   (apply
                     string-append
                     (map
                       (lambda (i)
                         (string-append " " (lib:import->filename i ".o") " "))
-                      lib-deps))))
-            ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
-            ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
-            (if (equal? 0 
-                  (system
-                    (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))
-              (system 
-                (string-append "gcc " exec-file ".o " objs-str " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))))
-        (else
-          (system
-            (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))))))
+                      lib-deps)))
+                 (comp-prog-cmd 
+                   (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o"))
+                 (comp-objs-cmd 
+                   (string-append "gcc " exec-file ".o " objs-str " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))
+          ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
+          ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
+          (cond
+            (cc?
+             (if (equal? 0 (system comp-prog-cmd))
+               (system comp-objs-cmd)))
+            (else
+              (write comp-prog-cmd)
+              (write comp-objs-cmd)))))
+      (else
+        (let ((comp-lib-cmd
+                (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))
+          (cond
+            (cc?
+              (system comp-lib-cmd))
+            (else
+              (write comp-lib-cmd))))))))
           
 
 ;; Handle command line arguments
