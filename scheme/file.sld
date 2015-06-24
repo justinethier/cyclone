@@ -21,7 +21,7 @@
     (define (with-output-to-file string thunk)
       ;; Have to do this the long way since parameterize is not available
       (let ((old (current-output-port))
-            (new (current-output-port '<param-convert> (open-output-file string))))
+            (new ((current-output-port '<param-convert>) (open-output-file string))))
         (dynamic-wind
           (lambda () (current-output-port '<param-set!> new))
           thunk

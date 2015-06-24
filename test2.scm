@@ -1,6 +1,6 @@
-;(import (scheme base)
-;        (scheme file)
-;        (scheme write))
+(import (scheme base)
+        (scheme file)
+        (scheme write))
 
 ; TODO: I think this compiles OK (test), but interpreter does not like it:
 ;cyclone> ( call-with-output-file "test.txt" (lambda () #f))
@@ -32,7 +32,7 @@
     (define my-param
       (my-make-parameter (current-output-port)));(Cyc-stdout)))
 (define old (my-param))
-(define new (my-param '<param-convert> (open-output-file "test.txt")))
+(define new ((my-param '<param-convert>) (open-output-file "test.txt")))
 ; The next line seems to crash in icyc but not in compiled code (until write, at least). what's going on??
 (my-param '<param-set!> new)
 (write 'test (my-param))
