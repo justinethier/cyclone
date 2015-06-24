@@ -349,7 +349,7 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, "<EOF>");
       break;
     case port_tag:
-      fprintf(port, "<port>");
+      fprintf(port, "<port %p>", ((port_type *)x)->fp);
       break;
     case primitive_tag:
       fprintf(port, "<primitive %s>", prim_name(x));
