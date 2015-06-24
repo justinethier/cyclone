@@ -1,5 +1,6 @@
 (import (scheme base)
-        (scheme file))
+        (scheme file)
+        (scheme write))
 
 (with-output-to-file 
   "test.out" 
