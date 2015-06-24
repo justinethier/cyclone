@@ -885,7 +885,7 @@
            (string-append
              "closureN_type " cv-name ";\n"
              cv-name ".tag = closureN_tag;\n "
-             cv-name ".fn = __lambda_" (number->string lid) ";\n"
+             cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
              cv-name ".num_elt = " (number->string (length free-vars)) ";\n"
              cv-name ".elts = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
