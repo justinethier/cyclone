@@ -17,7 +17,8 @@
 ; BEGIN test code - trying to get definition of with-output-to-file to work
 (define old (current-output-port))
 (define new (current-output-port '<param-convert> (open-output-file "test.txt")))
+; The next line seems to crash in icyc but not in compiled code (until write, at least). what's going on??
 (current-output-port '<param-set!> new)
-(write 'test (current-output-port))
+;(write 'test (current-output-port))
 ;(write 'hello-world)
 ; END test code
