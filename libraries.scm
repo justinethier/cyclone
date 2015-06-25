@@ -37,16 +37,16 @@
 ;; support more than 1 instance.
 (define (lib:exports ast)
   (lib:result 
-    (and-let* ((code (assoc 'export (cddr ast))))
-      (cdr code))))
+    (let ((code (assoc 'export (cddr ast))))
+      (if code (cdr code) #f))))
 (define (lib:imports ast)
   (lib:result
-    (and-let* ((code (assoc 'import (cddr ast))))
-      (cdr code))))
+    (let ((code (assoc 'import (cddr ast))))
+      (if code (cdr code) #f))))
 (define (lib:body ast)
   (lib:result
-    (and-let* ((code (assoc 'begin (cddr ast))))
-      (cdr code))))
+    (let ((code (assoc 'begin (cddr ast))))
+      (if code (cdr code) #f))))
 (define (lib:includes ast)
   (map
     (lambda (inc-lst)
