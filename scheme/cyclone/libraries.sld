@@ -1,7 +1,7 @@
 (define-library (scheme cyclone libraries)
   (import (scheme base)
           (scheme read)
-          ; TODO: what else? definitely need trans.scm
+          (scheme cyclone util)
   )
   (export
     library?
