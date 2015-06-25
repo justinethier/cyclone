@@ -1,5 +1,7 @@
 (import (scheme base)
         (scheme char)
+        (scheme file)
+        (scheme read)
         (scheme write)
         (scheme eval))
 
@@ -262,6 +264,20 @@
 (vector-fill! a 'smash 2 4)
 (assert:equal "vector-fill!" a #(1 2 smash smash 5))
 ;; END vectors
+
+;; I/O
+(with-output-to-file 
+  "test.out" 
+  (lambda ()
+    (write 'hello-world)))
+;(write "done with output")
+(with-input-from-file
+  "test.out"
+  (lambda ()
+    (assert:equal "I/O with-*-file test" (read) 'hello-world)))
+;(write "done with input")
+;; TODO: (delete-file "test.out")
+;; END I/O
 
 ; TODO: use display, output without surrounding quotes
 (write (list *num-passed* " tests passed with no errors"))
