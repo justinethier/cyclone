@@ -190,11 +190,6 @@
     (define (void) (if #f #t)))
   (else #f))
 
-; tagged-list? : symbol value -> boolean
-(define (tagged-list? tag l)
-  (and (pair? l)
-       (eq? tag (car l))))
-
 ; char->natural : char -> natural
 (define (char->natural c)
   (let ((i (char->integer c)))

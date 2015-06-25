@@ -17,6 +17,7 @@
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
    (load (string-append (cyc:get-lib-dir) "parser.so"))
+   (load (string-append (cyc:get-lib-dir) "util.so"))
    (load (string-append (cyc:get-lib-dir) "libraries.so"))
    (load (string-append (cyc:get-lib-dir) "transforms.so"))
    (load (string-append (cyc:get-lib-dir) "cgen.so")))
@@ -26,6 +27,7 @@
 ; )
  (else
    (load (string-append (cyc:get-lib-dir) "parser.scm"))
+   (load (string-append (cyc:get-lib-dir) "util.scm"))
    (load (string-append (cyc:get-lib-dir) "libraries.scm"))
    (load (string-append (cyc:get-lib-dir) "transforms.scm"))
    (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
