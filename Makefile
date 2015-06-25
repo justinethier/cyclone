@@ -1,7 +1,10 @@
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
-all: cyclone scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o icyc
+all: cyclone scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o icyc scheme/cyclone/util.o
+
+scheme/cyclone/util.o: cyclone scheme/cyclone/util.sld
+	./cyclone scheme/cyclone/util.sld
 
 scheme/base.o: cyclone scheme/base.sld
 	./cyclone scheme/base.sld

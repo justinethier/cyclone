@@ -4,6 +4,17 @@
       (equal? (car exp) tag)
       #f))
 
+; char->natural : char -> natural
+(define (char->natural c)
+  (let ((i (char->integer c)))
+    (if (< i 0)
+        (* -2 i)
+        (+ (* 2 i) 1))))
+
+; integer->char-list : integer -> string
+(define (integer->char-list n)
+  (string->list (number->string n)))
+
 ;; Name-mangling.
 
 ;; We have to "mangle" Scheme identifiers into
