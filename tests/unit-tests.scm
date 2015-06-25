@@ -275,8 +275,11 @@
   "test.out"
   (lambda ()
     (assert:equal "I/O with-*-file test" (read) 'hello-world)))
+(call-with-output-file "test.txt" (lambda (port) (write 'ok port))) ;; Note: was a good test, did not always work in icyc
+(call-with-input-file "test.txt" (lambda (port) (assert:equal "read input" (read port) 'ok)))
 ;(write "done with input")
 ;; TODO: (delete-file "test.out")
+;; TODO: (delete-file "test.txt")
 ;; END I/O
 
 ; TODO: use display, output without surrounding quotes
