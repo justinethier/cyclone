@@ -56,6 +56,11 @@
     current-input-port
     current-error-port
     call-with-port
+    ; TODO: error-object?
+    ; TODO: error-object-message
+    ; TODO: error-object-irritants
+    ; TODO: file-error?
+    ; TODO: read-error?
     error
     raise
     raise-continuable
