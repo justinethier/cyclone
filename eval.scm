@@ -28,6 +28,7 @@
         ((string? exp) #t)
         ((vector? exp) #t)
         ((char? exp) #t)
+        ((port? exp) #t)
         ((eof-object? exp) #t)
         (else #f)))
 
