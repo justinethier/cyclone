@@ -291,6 +291,8 @@
       (list 'close-port close-port)
       (list 'close-input-port close-input-port)
       (list 'close-output-port close-output-port)
+      (list 'file-exists? file-exists?)
+      (list 'delete-file delete-file)
       (list 'read-char read-char)
       (list 'peek-char peek-char)
       (list 'Cyc-write-char Cyc-write-char)

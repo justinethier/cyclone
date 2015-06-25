@@ -558,6 +558,8 @@
      close-port
      close-input-port
      close-output-port
+     file-exists?
+     delete-file
      read-char
      peek-char
      Cyc-write-char
@@ -601,6 +603,8 @@
                   close-port
                   close-input-port
                   close-output-port
+                  file-exists?
+                  delete-file
                   read-char
                   peek-char
                   Cyc-write-char

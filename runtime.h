@@ -113,6 +113,8 @@ port_type Cyc_io_open_output_file(object str);
 object Cyc_io_close_port(object port);
 object Cyc_io_close_input_port(object port);
 object Cyc_io_close_output_port(object port);
+object Cyc_io_delete_file(object filename);
+object Cyc_io_file_exists(object filename);
 object Cyc_io_read_char(object port);
 object Cyc_io_peek_char(object port);
 
@@ -331,6 +333,8 @@ extern const object primitive_open_91output_91file;
 extern const object primitive_close_91port;
 extern const object primitive_close_91input_91port;
 extern const object primitive_close_91output_91port;
+extern const object primitive_file_91exists_127;
+extern const object primitive_delete_91file;
 extern const object primitive_read_91char;
 extern const object primitive_peek_91char;
 extern const object primitive_Cyc_91write_91char;
