@@ -1351,7 +1351,7 @@ object apply(object cont, object func, object args){
     case cons_tag:
     {
       // TODO: would be better to compare directly against symbols here,
-      //       but need a way of looking up this symbol ahead of time.
+      //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       if (strncmp(((symbol)car(func))->pname, "primitive", 10) == 0) {
           make_cons(c, cadr(func), args);
