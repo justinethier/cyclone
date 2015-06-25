@@ -9,13 +9,13 @@ scheme/base.o: cyclone scheme/base.sld
 scheme/char.o: cyclone scheme/char.sld
 	./cyclone scheme/char.sld
 
-scheme/eval.o: cyclone scheme/eval.sld
+scheme/eval.o: cyclone scheme/eval.sld eval.scm
 	./cyclone scheme/eval.sld
 
 scheme/file.o: cyclone scheme/file.sld
 	./cyclone scheme/file.sld
 
-scheme/read.o: cyclone scheme/read.sld
+scheme/read.o: cyclone scheme/read.sld parser.scm
 	./cyclone scheme/read.sld
 
 scheme/write.o: cyclone scheme/write.sld
