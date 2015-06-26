@@ -12,6 +12,12 @@
 ;;   probably should also clean up some of the function names, this is
 ;;   not a very clean or nice API at the moment.
 ;;
+
+;; TODO: this definition is just temporary until we figure out how to get this info.
+;;  this is problematic as it has to work for the bootstrap and the actual cyclone comp.
+;;  although I suppose it would be OK if you have to bootstrap from a hardcoded dir
+(define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
+
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
