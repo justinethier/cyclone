@@ -857,7 +857,7 @@ integer_type Cyc_string_length(object str) {
   return len;
 }
 
-// TODO: need error checking below, this is much too dangerous without!
+TODO: need error checking below, this is much too dangerous without!
 string_type Cyc_substring(object str, object start, object end) {
   int s = integer_value(start),
       e = integer_value(end);
