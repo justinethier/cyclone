@@ -1,3 +1,10 @@
+;;
+;; Cyclone Scheme
+;; Copyright (c) 2015, Justin Ethier
+;; All rights reserved.
+;;
+;; This module contains various utility functions.
+;;
 
 (define (tagged-list? tag exp)
   (if (pair? exp)
@@ -14,6 +21,21 @@
 ; integer->char-list : integer -> string
 (define (integer->char-list n)
   (string->list (number->string n)))
+
+;; Simplified version of filter from SRFI 1
+(define (filter pred lis)
+  (letrec ((recur (lambda (lis)
+                    (if (null? lis)
+                     lis
+                     (let ((head (car lis))
+                           (tail (cdr lis)))
+                       (if (pred head)
+                           (let ((new-tail (recur tail)))
+                         (if (eq? tail new-tail) lis
+                             (cons head new-tail)))
+                           (recur tail)))))))
+    (recur lis)))
+
 
 ;; Name-mangling.
 

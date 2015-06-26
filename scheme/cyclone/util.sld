@@ -2,6 +2,7 @@
   (import (scheme base)
           (scheme char))
   (export
+    filter
     tagged-list?
     mangle
     mangle-global)

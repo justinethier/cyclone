@@ -273,19 +273,6 @@
       env
       (assq-remove-keys (assq-remove-key env (car keys)) (cdr keys))))
 
-;; Simplified version of filter from SRFI 1
-(define (filter pred lis)
-  (let recur ((lis lis))
-   (if (null? lis)
-    lis
-    (let ((head (car lis))
-          (tail (cdr lis)))
-      (if (pred head)
-          (let ((new-tail (recur tail)))
-        (if (eq? tail new-tail) lis
-            (cons head new-tail)))
-          (recur tail))))))
-
 
 ;; Data type predicates and accessors.
 
