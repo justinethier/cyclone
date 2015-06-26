@@ -857,13 +857,26 @@ integer_type Cyc_string_length(object str) {
   return len;
 }
 
-TODO: need error checking below, this is much too dangerous without!
 string_type Cyc_substring(object str, object start, object end) {
-  int s = integer_value(start),
-      e = integer_value(end);
   const char *raw = string_str(str);
-  make_stringn(sub, raw + s, e - s);
-  return sub;
+  int s = integer_value(start),
+      e = integer_value(end),
+      len = strlen(raw);
+
+  if (s > e) {
+    Cyc_rt_raise2("substring - start cannot be greater than end", start);
+  }
+  if (s > len) {
+    Cyc_rt_raise2("substring - start cannot be greater than string length", start);
+  }
+  if (e > len) {
+    e = len;
+  }
+
+  {
+    make_stringn(sub, raw + s, e - s);
+    return sub;
+  }
 }
 
 integer_type Cyc_system(object cmd) {
