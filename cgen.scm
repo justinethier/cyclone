@@ -464,6 +464,8 @@
      ((eq? p 'string->symbol) "Cyc_string2symbol")
      ((eq? p 'symbol->string) "Cyc_symbol2string")
      ((eq? p 'number->string) "Cyc_number2string")
+     ((eq? p 'string-length)  "Cyc_string_length")
+     ((eq? p 'substring)      "Cyc_substring")
      ((eq? p 'system)         "Cyc_system")
      ((eq? p 'assq)          "assq")
      ((eq? p 'assv)          "assq")
@@ -522,6 +524,8 @@
     ((eq? p 'string-append) "string_type")
     ((eq? p 'symbol->string) "string_type")
     ((eq? p 'number->string) "string_type")
+    ((eq? p 'string-length) "integer_type")
+    ((eq? p 'substring) "string_type")
     ((eq? p 'apply)  "object")
     (else #f)))
 
@@ -537,7 +541,8 @@
              char->integer system string->number 
              string-append string-cmp list->string string->list
              make-vector list->vector
-             symbol->string number->string
+             symbol->string number->string 
+             string-length substring
              + - * / apply cons length vector-length cell))))
 
 ;; Pass an integer arg count as the function's first parameter?

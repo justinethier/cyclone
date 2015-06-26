@@ -506,6 +506,8 @@
      string->symbol
      symbol->string
      number->string
+     string-length
+     substring
      make-vector
      list->vector
      vector-length

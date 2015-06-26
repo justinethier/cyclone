@@ -268,6 +268,8 @@
       (list 'string->symbol string->symbol)
       (list 'symbol->string symbol->string)
       (list 'number->string number->string)
+      (list 'string-length string-length)
+      (list 'substring substring)
       (list 'make-vector make-vector)
       (list 'list->vector list->vector)
       (list 'vector-length vector-length)

@@ -154,6 +154,9 @@ typedef struct {tag_type tag; int value;} integer_type;
 typedef struct {tag_type tag; double value;} double_type;
 #define make_double(n,v) double_type n; n.tag = double_tag; n.value = v;
 
+#define integer_value(x) (((integer_type *) x)->value)
+#define double_value(x) (((double_type *) x)->value)
+
 /* Define string type */
 typedef struct {tag_type tag; char *str;} string_type;
 #define make_string(cv,s) string_type cv; cv.tag = string_tag; \
@@ -161,6 +164,14 @@ typedef struct {tag_type tag; char *str;} string_type;
   if ((dhallocp + len + 1) >= dhbottom + global_heap_size) { \
       printf("Fatal error: data heap overflow\n"); exit(1); } \
   memcpy(dhallocp, s, len + 1); dhallocp += len + 1; }
+#define make_stringn(cv,s,len) string_type cv; cv.tag = string_tag; \
+{ cv.str = dhallocp; \
+  if ((dhallocp + len + 1) >= dhbottom + global_heap_size) { \
+      printf("Fatal error: data heap overflow\n"); exit(1); } \
+  memcpy(dhallocp, s, len); dhallocp += len; \
+  *dhallocp = '\0'; dhallocp += 1;}
+
+#define string_str(x) (((string_type *) x)->str)
 
 /* I/O types */
 
