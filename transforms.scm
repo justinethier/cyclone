@@ -7,7 +7,11 @@
 ;; various utility functions used by the compiler.
 ;;
 
-(load (string-append (cyc:get-lib-dir) "scheme/common.scm"))
+(cond-expand
+ (chicken
+  (load (string-append (cyc:get-lib-dir) "scheme/common.scm")))
+ (else
+  #f))
 
 ;; Built-in macros
 ;; TODO: just a stub, real code would read (define-syntax) 
