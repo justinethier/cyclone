@@ -12,7 +12,8 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
-   - named let is not supported. either need to add it or stop using it
+   - named let
+   - when
 
    - vectors
        - make-vector should have an optional 'fill' arg in compiled code
