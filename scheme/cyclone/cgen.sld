@@ -1,7 +1,11 @@
 (define-library (scheme cyclone cgen)
   (import (scheme base)
           (scheme char)
-          (scheme write))
+          (scheme write)
+          (scheme cyclone transforms)
+          (scheme cyclone util)
+          (scheme cyclone libraries)
+  )
   (export
     mta:code-gen
     autogen
