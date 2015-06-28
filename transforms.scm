@@ -34,7 +34,29 @@
                     (list (rename 'if) (rename 'tmp)
                           (rename 'tmp)
                           (cons (rename 'or) (cddr expr))))))))
-    (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
+;    (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
+    (cons 'let
+     (lambda (expr rename compare)
+       (if (null? (cdr expr)) (error "empty let" expr))
+       (if (null? (cddr expr)) (error "no let body" expr))
+       ((lambda (bindings)
+          (if (list? bindings) #f (error "bad let bindings"))
+          (if (every (lambda (x)
+                       (if (pair? x) (if (pair? (cdr x)) (null? (cddr x)) #f) #f))
+                     bindings)
+              ((lambda (vars vals)
+                 (if (symbol? (cadr expr))
+                     `((,(rename 'lambda) ,vars
+                        (,(rename 'letrec) ((,(cadr expr)
+                                             (,(rename 'lambda) ,vars
+                                              ,@(cdr (cddr expr)))))
+                         (,(cadr expr) ,@vars)))
+                       ,@vals)
+                     `((,(rename 'lambda) ,vars ,@(cddr expr)) ,@vals)))
+               (map car bindings)
+               (map cadr bindings))
+              (error "bad let syntax" expr)))
+        (if (symbol? (cadr expr)) (car (cddr expr)) (cadr expr)))))
     (cons 'let*
       (lambda (expr rename compare)
         (if (null? (cdr expr)) (error "empty let*" expr))
@@ -857,13 +879,13 @@
 ; TODO: eventually, merge below functions with above *defined-macros* defs and 
 ;;      replace both with a lib of (define-syntax) constructs
 
-; let=>lambda : let-exp -> app-exp
-(define (let=>lambda exp)
-  (if (let? exp)
-      (let ((vars (map car (let->bindings exp)))
-            (args (map cadr (let->bindings exp))))
-        `((lambda (,@vars) ,@(let->exp exp)) ,@args))
-      exp))
+;; let=>lambda : let-exp -> app-exp
+;(define (let=>lambda exp)
+;  (if (let? exp)
+;      (let ((vars (map car (let->bindings exp)))
+;            (args (map cadr (let->bindings exp))))
+;        `((lambda (,@vars) ,@(let->exp exp)) ,@args))
+;      exp))
 
 ; letrec=>lets+sets : letrec-exp -> exp
 (define (letrec=>lets+sets exp)

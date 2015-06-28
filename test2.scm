@@ -2,12 +2,7 @@
         (scheme file)
         (scheme write))
 
-;; TODO: fails with an "unspecified" error unless there is an else clause. WTF?
-;(write 
-  (cond
-    (#f #f)
-    ;(else #t)
-  )
-;)
-1
-
+(let loop ((i 10))
+  (if (zero? i)
+    (write 'done)
+    (loop (- i 1))))
