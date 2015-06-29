@@ -12,7 +12,7 @@
     ;*defined-macros* 
     *do-code-gen*
     ;*trace-level*
-    ;*primitives*
+    *primitives*
     built-in-syms
     trace
     trace:error
