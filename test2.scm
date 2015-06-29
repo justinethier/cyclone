@@ -10,3 +10,5 @@
 
 (write (when (lambda () #t) 'true))
 (write (when (lambda () #f) 'false))
+
+((lambda test (write test)) 1 2 3 4)

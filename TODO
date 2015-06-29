@@ -12,7 +12,9 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
-   - when
+   - support for pure varargs functions
+     see test2.scm, this is not quite implemented in the compiler
+
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
 
