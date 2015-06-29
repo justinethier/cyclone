@@ -74,6 +74,12 @@
                 (error "bad let* syntax")))))
     (cons 'begin (lambda (exp rename compare) (begin=>let exp)))
     (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
+    (cons 'when (lambda (exp rename compare)
+      (if (null? (cdr exp)) (error "empty when" exp))
+      (if (null? (cddr exp)) (error "no when body" exp))
+      `(if ,(cadr exp)
+           ((lambda () ,(caddr exp)))
+           #f)))
     (cons 'cond
           (lambda (expr rename compare)
             (if (null? (cdr expr))

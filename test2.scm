@@ -6,3 +6,7 @@
   (if (zero? i)
     (write 'done)
     (loop (- i 1))))
+
+
+(write (when (lambda () #t) 'true))
+(write (when (lambda () #f) 'false))
