@@ -11,4 +11,10 @@
 (write (when (lambda () #t) 'true))
 (write (when (lambda () #f) 'false))
 
+; Lambda application is broken with pure varargs
+; TODO: once this works, add it to test suite!!!
 ((lambda test (write test)) 1 2 3 4)
+
+;; This is OK
+;(define test (lambda args args))
+;(write (test 1 2 3 4))
