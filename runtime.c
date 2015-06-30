@@ -896,19 +896,16 @@ string_type Cyc_substring(object str, object start, object end) {
 object Cyc_command_line_arguments(object cont) {
   int i;
   object lis = nil;
-  for (i = argc; i > 0; i--) {
+  for (i = _cyc_argc; i > 0; i--) {
     object ps = alloca(sizeof(string_type));
     object pl = alloca(sizeof(cons_type));
     make_string(s, _cyc_argv[i - 1]);
-    memcpy(ps, s, sizeof(string_type));
-
-TODO: unfortunately this won't work because vars will get clobbered. need to use alloca
-      to get fresh  memory each iteration for s and l.
-      attempting to above, but code is incomplete
-//    make_cons(l, &s, lis);
-//    lis = &l;
+    memcpy(ps, &s, sizeof(string_type));
+    ((list)pl)->tag = cons_tag;
+    ((list)pl)->cons_car = ps;
+    ((list)pl)->cons_cdr = lis;
+    lis = pl;
   }
-
   return_funcall1(cont, lis);
 }
 
