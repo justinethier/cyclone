@@ -51,6 +51,7 @@ int gc_num_ans;
 jmp_buf jmp_main; /* Where to jump to. */
 
 object Cyc_global_variables = nil;
+object Cyc_command_line_arguments = nil;
 
 static symbol_type __EOF = {eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;

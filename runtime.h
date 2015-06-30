@@ -56,6 +56,7 @@ object cell_get(object cell);
 /* Prototypes for Lisp built-in functions. */
 
 extern object Cyc_global_variables;
+extern object Cyc_command_line_arguments;
 object Cyc_get_global_variables();
 object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
