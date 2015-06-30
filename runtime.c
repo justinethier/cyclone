@@ -857,6 +857,18 @@ integer_type Cyc_string_length(object str) {
   return len;
 }
 
+object Cyc_string_ref(object str, object k) {
+  const char *raw = string_str(str);
+  int idx = integer_value(k),
+      len = strlen(raw);
+
+  if (idx < 0 || idx >= len) {
+    Cyc_rt_raise2("string-ref - invalid index", k);
+  }
+
+  return obj_char2obj(raw[idx]);
+}
+
 string_type Cyc_substring(object str, object start, object end) {
   const char *raw = string_str(str);
   int s = integer_value(start),
@@ -877,6 +889,11 @@ string_type Cyc_substring(object str, object start, object end) {
     make_stringn(sub, raw + s, e - s);
     return sub;
   }
+}
+
+object Cyc_command_line_arguments() {
+  Cyc_rt_raise_msg("not implemented yet");
+  return boolean_f;
 }
 
 integer_type Cyc_system(object cmd) {
@@ -1291,6 +1308,12 @@ void _string_91length(object cont, object args) {
 void _cyc_substring(object cont, object args) {
     string_type s = Cyc_substring(car(args), cadr(args), caddr(args));
     return_funcall1(cont, &s);}
+void _cyc_string_91ref(object cont, object args) {
+    object c = Cyc_string_ref(car(args), cadr(args));
+    return_funcall1(cont, c); }
+void _command_91line_91arguments(object cont, object args) {
+    object cmdline = Cyc_command_line_arguments();
+    return_funcall1(cont, cmdline); }
 void _cyc_system(object cont, object args) {
     integer_type i = Cyc_system(car(args));
     return_funcall1(cont, &i);}
@@ -2028,6 +2051,8 @@ static primitive_type integer_91_125char_primitive = {primitive_tag, "integer->c
 static primitive_type string_91_125number_primitive = {primitive_tag, "string->number", &_string_91_125number};
 static primitive_type string_91length_primitive = {primitive_tag, "string-length", &_string_91length};
 static primitive_type substring_primitive = {primitive_tag, "substring", &_cyc_substring};
+static primitive_type string_91ref_primitive = {primitive_tag, "string-ref", &_cyc_string_91ref};
+static primitive_type command_91line_91arguments_primitive = {primitive_tag, "command-line-arguments", &_command_91line_91arguments};
 static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
 static primitive_type string_91cmp_primitive = {primitive_tag, "string-cmp", &_string_91cmp};
 static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
@@ -2141,6 +2166,8 @@ const object primitive_integer_91_125char = &integer_91_125char_primitive;
 const object primitive_string_91_125number = &string_91_125number_primitive;
 const object primitive_string_91length = &string_91length_primitive;
 const object primitive_substring = &substring_primitive;
+const object primitive_string_91ref = &string_91ref_primitive;
+const object primitive_command_91line_91arguments = &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;
 const object primitive_string_91cmp = &string_91cmp_primitive;
 const object primitive_string_91append = &string_91append_primitive;

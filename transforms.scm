@@ -536,6 +536,7 @@
      %halt
      exit
      system
+     command-line-arguments
      Cyc-default-exception-handler
      Cyc-current-exception-handler
      cons
@@ -572,6 +573,7 @@
      symbol->string
      number->string
      string-length
+     string-ref
      substring
      make-vector
      list->vector
@@ -621,6 +623,7 @@
                   %halt
                   exit
                   system
+                  command-line-arguments
                   Cyc-default-exception-handler
                   Cyc-current-exception-handler
                   cell-get
