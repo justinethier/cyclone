@@ -17,6 +17,8 @@
 ;;  this is problematic as it has to work for the bootstrap and the actual cyclone comp.
 ;;  although I suppose it would be OK if you have to bootstrap from a hardcoded dir
 (define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
+(define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
+(define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
 
 (define (library? ast)
   (tagged-list? 'define-library ast))

@@ -5,14 +5,24 @@
 ;; This module contains a front-end for the compiler itself.
 ;;
 
-;; TODO: will need to read these from env somehow.
-;; for now they are just hard-coded, but that won't work for an install
-(define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
-(define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
-(define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
+; TODO:
+;(import (scheme base)
+;        (scheme file)
+;        (scheme read)
+;        (scheme write)
+;        (scheme cyclone util)
+;        (scheme cyclone cgen)
+;        (scheme cyclone transforms)
+;        (scheme cyclone libraries))
 
 (cond-expand
  (chicken
+   ;; TODO: will need to read these from env somehow.
+   ;; for now they are just hard-coded, but that won't work for an install
+   (define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
+   (define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
+   (define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
+   ;; END TODO
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
@@ -21,16 +31,17 @@
    (load (string-append (cyc:get-lib-dir) "libraries.so"))
    (load (string-append (cyc:get-lib-dir) "transforms.so"))
    (load (string-append (cyc:get-lib-dir) "cgen.so")))
-; (husk
-;   (import (husk pretty-print))
-;   ;; TODO: load files
-; )
- (else
-   (load (string-append (cyc:get-lib-dir) "parser.scm"))
-   (load (string-append (cyc:get-lib-dir) "util.scm"))
-   (load (string-append (cyc:get-lib-dir) "libraries.scm"))
-   (load (string-append (cyc:get-lib-dir) "transforms.scm"))
-   (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
+ (else #f))
+;; (husk
+;;   (import (husk pretty-print))
+;;   ;; TODO: load files
+;; )
+; (else
+;   (load (string-append (cyc:get-lib-dir) "parser.scm"))
+;   (load (string-append (cyc:get-lib-dir) "util.scm"))
+;   (load (string-append (cyc:get-lib-dir) "libraries.scm"))
+;   (load (string-append (cyc:get-lib-dir) "transforms.scm"))
+;   (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
 
 ;; Code emission.
   

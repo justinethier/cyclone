@@ -1,6 +1,8 @@
 (define-library (scheme base)
   (export
     *Cyc-version-banner*
+    *c-file-header-comment*
+    *version-banner*
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
