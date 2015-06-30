@@ -913,7 +913,9 @@
                       (lambda->formals exp)
                       (lambda-formals-type exp)))
            (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
-                          (mangle (car (lambda->formals exp)))
+                          (mangle (if (pair? (lambda->formals exp))
+                                      (car (lambda->formals exp))
+                                      (lambda->formals exp)))
                           ""))
            (has-closure? 
              (and

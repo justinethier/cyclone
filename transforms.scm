@@ -387,7 +387,7 @@
 (define (lambda-varargs-var exp)
   (if (lambda-varargs? exp)
     (if (equal? (lambda-formals-type exp) 'args:varargs)
-        (lambda-formals exp) ; take symbol directly
+        (lambda->formals exp) ; take symbol directly
         (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
     #f))
 
