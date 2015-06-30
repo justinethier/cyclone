@@ -12,12 +12,17 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
-   - support for application of pure varargs functions, EG:
-         ((lambda test (write test)) 1 2 3 4)
-     don't think this is needed for self-hosting though, so it can wait
+   - compiler error in transforms:
+   Error: Unbound variable(s): (any case else every)
 
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
+     almost certainly will break when running the self-hosted compiler...
+
+
+   - support for application of pure varargs functions, EG:
+         ((lambda test (write test)) 1 2 3 4)
+     don't think this is needed for self-hosting though, so it can wait
 
    - vectors
        - make-vector should have an optional 'fill' arg in compiled code
