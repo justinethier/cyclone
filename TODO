@@ -12,8 +12,9 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
-   - support for pure varargs functions
-     see test2.scm, this is not quite implemented in the compiler
+   - support for application of pure varargs functions, EG:
+         ((lambda test (write test)) 1 2 3 4)
+     don't think this is needed for self-hosting though, so it can wait
 
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
