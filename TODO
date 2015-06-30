@@ -12,8 +12,7 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
-   - compiler error in transforms:
-   Error: Unbound variable(s): (any case else every)
+   - modify main cyclone.scm program to compile
 
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
