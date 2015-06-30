@@ -10,6 +10,9 @@
 (cond-expand
  (chicken
   (load (string-append (cyc:get-lib-dir) "scheme/common.scm")))
+ (cyclone
+  ;; Temporary work-around for pp not being implemented yet
+  (define pretty-print write))
  (else
   #f))
 
@@ -216,8 +219,11 @@
           #f
           (if (eq? sym (car S))
               #t
-              (member sym (cdr S)))))
+              (member sym (cdr S))))))
+  (else #f))
 
+(cond-expand
+  (cyclone
     ; void : -> void
     (define (void) (if #f #t)))
   (else #f))
