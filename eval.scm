@@ -17,7 +17,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression handling helper functions
-(define (tagged-list? exp tag)
+(define (tagged-list? tag exp)
   (if (pair? exp)
       (equal? (car exp) tag)
       #f))
@@ -35,18 +35,18 @@
 (define (variable? exp) (symbol? exp))
 
 (define (quoted? exp)
-  (tagged-list? exp 'quote))
+  (tagged-list? 'quote exp))
 
 (define (quasiquoted? exp)
-  (tagged-list? exp 'quasiquote))
+  (tagged-list? 'quasiquote exp))
 
 (define (assignment? exp)
-  (tagged-list? exp 'set!))
+  (tagged-list? 'set! exp))
 (define (assignment-variable exp) (cadr exp))
 (define (assignment-value exp) (caddr exp))
 
 (define (definition? exp)
-  (tagged-list? exp 'define))
+  (tagged-list? 'define exp))
 (define (definition-variable exp)
   (if (symbol? (cadr exp))
       (cadr exp)
@@ -57,14 +57,14 @@
       (make-lambda (cdadr exp)   ; formal parameters
                    (cddr exp)))) ; body
 
-(define (lambda? exp) (tagged-list? exp 'lambda))
+(define (lambda? exp) (tagged-list? 'lambda exp))
 (define (lambda-parameters exp) (cadr exp))
 (define (lambda-body exp) (cddr exp))
 
 (define (make-lambda parameters body)
   (cons 'lambda (cons parameters body)))
 
-(define (if? exp) (tagged-list? exp 'if))
+(define (if? exp) (tagged-list? 'if exp))
 (define (if-predicate exp) (cadr exp))
 (define (if-consequent exp) (caddr exp))
 (define (if-alternative exp)
@@ -74,7 +74,7 @@
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
-(define (begin? exp) (tagged-list? exp 'begin))
+(define (begin? exp) (tagged-list? 'begin exp))
 (define (begin-actions exp) (cdr exp))
 (define (last-exp? seq) (null? (cdr seq)))
 (define (first-exp seq) (car seq))
@@ -101,7 +101,7 @@
 (define (make-procedure parameters body env)
   (list procedure-tag parameters body env))
 (define (compound-procedure? p)
-  (tagged-list? p procedure-tag))
+  (tagged-list? procedure-tag p))
 (define (procedure-parameters p) (cadr p))
 (define (procedure-body p) (caddr p))
 (define (procedure-environment p) (cadddr p))
@@ -182,7 +182,7 @@
           (frame-values frame))))
 
 (define (primitive-procedure? proc)
-  (tagged-list? proc 'primitive))
+  (tagged-list? 'primitive proc))
 
 (define (primitive-implementation proc) (cadr proc))
 
@@ -341,7 +341,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Derived expressions
 ;; TODO: longer-term, this would be replaced by a macro system
-(define (cond? exp) (tagged-list? exp 'cond))
+(define (cond? exp) (tagged-list? 'cond exp))
 (define (cond-clauses exp) (cdr exp))
 (define (cond-else-clause? clause)
   (eq? (cond-predicate clause) 'else))
@@ -381,7 +381,7 @@
          ((if? exp) (analyze-if exp))
          ((lambda? exp) (analyze-lambda exp))
       ;; TODO: ideally, macro system would handle these next three
-        ((tagged-list? exp 'let)
+        ((tagged-list? 'let exp)
          (let ((vars (map car  (cadr exp))) ;(let->bindings exp)))
                (args (map cadr (cadr exp))) ;(let->bindings exp))))
                (body (cddr exp)))
