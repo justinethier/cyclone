@@ -220,7 +220,7 @@
       (if (not *do-code-gen*)
         (begin
           (trace:error "DEBUG, existing program")
-          (exit)))
+          (exit 0)))
     
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 
