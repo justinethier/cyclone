@@ -56,7 +56,8 @@ object cell_get(object cell);
 /* Prototypes for Lisp built-in functions. */
 
 extern object Cyc_global_variables;
-extern object Cyc_command_line_arguments;
+int _cyc_argc;
+char **_cyc_argv;
 object Cyc_get_global_variables();
 object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
@@ -104,7 +105,7 @@ string_type Cyc_string_append_va_list(int argc, object str1, va_list ap);
 integer_type Cyc_string_length(object str);
 string_type Cyc_substring(object str, object start, object end);
 object Cyc_string_ref(object str, object k);
-object Cyc_command_line_arguments();
+object Cyc_command_line_arguments(object cont);
 integer_type Cyc_system(object cmd);
 integer_type Cyc_char2integer(object chr);
 object Cyc_integer2char(object n);

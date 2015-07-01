@@ -529,6 +529,7 @@
     ((eq? p 'string-length) "integer_type")
     ((eq? p 'substring) "string_type")
     ((eq? p 'apply)  "object")
+    ((eq? p 'command-line-arguments) "object")
     (else #f)))
 
 ;; Determine if primitive creates a C variable
@@ -545,7 +546,19 @@
              make-vector list->vector
              symbol->string number->string 
              string-length substring
-             + - * / apply cons length vector-length cell))))
+             + - * / apply 
+             command-line-arguments
+             cons length vector-length cell))))
+
+;; Pass continuation as the function's first parameter?
+(define (prim:cont? exp)
+  (and (prim? exp)
+       (member exp '(apply command-line-arguments))))
+;; TODO: this is a hack, right answer is to include information about
+;;  how many args each primitive is supposed to take
+(define (prim:cont-has-args? exp)
+  (and (prim? exp)
+       (member exp '(apply))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
@@ -560,16 +573,16 @@
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
   (let* ((c-func (prim->c-func p))
-         ;; Following closure defs are only used for apply, to
+         ;; Following closure defs are only used for prim:cont? to
          ;; create a new closure for the continuation, if needed.
          ;;
-         ;; Apply is different in that it takes a continuation so that it can
+         ;; Each prim:cont? function is different in that it takes a continuation so that it can
          ;; allocate arbitrary data as needed using alloca, and then call into
          ;; the cont so allocations can remain on stack until GC.
          (closure-sym (mangle (gensym 'c)))
          (closure-def
            (cond
-             ((and (eq? p 'apply)
+             ((and (prim:cont? p)
                    (> (string-length cont) (string-length "__lambda_"))
                    (equal? (substring cont 0 9) "__lambda_"))
               (string-append 
@@ -581,7 +594,7 @@
             (lambda (type)
               (let ((cv-name (mangle (gensym 'c))))
                 (c-code/vars 
-                  (string-append (if (eq? p 'apply) "" "&") cv-name)
+                  (string-append (if (prim:cont? p) "" "&") cv-name)
                   (list
                     (string-append 
                       ;; Define closure if necessary (apply only)
@@ -595,14 +608,22 @@
                       ;; Emit closure as first arg, if necessary (apply only)
                       (cond
                        (closure-def
-                        (string-append "&" closure-sym ", "))
-                       ((eq? p 'apply) 
-                        (string-append cont ", "))
+                        (string-append "&" closure-sym 
+                          (if (prim:cont-has-args? p) ", " "")))
+                       ((prim:cont? p) 
+                        (string-append cont
+                          (if (prim:cont-has-args? p) ", " "")))
                        (else "")))))))))
     (cond
      ((prim/c-var-assign p)
       (c-var-assign (prim/c-var-assign p)))
      ((prim/cvar? p)
+        ;;
+        ;; TODO: look at functions that would actually fall into this
+        ;; branch, I think they are just the macro's like string->list ??
+        ;; may be able to remove this using prim:cont? and simplify
+        ;; the logic
+        ;;
         (let ((cv-name (mangle (gensym 'c))))
            (c-code/vars 
             (if (prim:allocates-object? p)

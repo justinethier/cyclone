@@ -8,6 +8,8 @@
     (loop (- i 1))))
 
 
+(write (command-line-arguments))
+
 (write (when (lambda () #t) 'true))
 (write (when (lambda () #f) 'false))
 

@@ -51,7 +51,8 @@ int gc_num_ans;
 jmp_buf jmp_main; /* Where to jump to. */
 
 object Cyc_global_variables = nil;
-object Cyc_command_line_arguments = nil;
+int _cyc_argc = 0;
+char **_cyc_argv = NULL;
 
 static symbol_type __EOF = {eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
@@ -892,9 +893,12 @@ string_type Cyc_substring(object str, object start, object end) {
   }
 }
 
-object Cyc_command_line_arguments() {
-  Cyc_rt_raise_msg("not implemented yet");
-  return boolean_f;
+object Cyc_command_line_arguments(object cont) {
+  //Cyc_rt_raise_msg("not implemented yet");
+  //return boolean_f;
+  make_string(s, "TODO");
+  make_cons(l, &s, nil);
+  return_funcall1(cont, &l);
 }
 
 integer_type Cyc_system(object cmd) {
@@ -1313,7 +1317,7 @@ void _cyc_string_91ref(object cont, object args) {
     object c = Cyc_string_ref(car(args), cadr(args));
     return_funcall1(cont, c); }
 void _command_91line_91arguments(object cont, object args) {
-    object cmdline = Cyc_command_line_arguments();
+    object cmdline = Cyc_command_line_arguments(cont);
     return_funcall1(cont, cmdline); }
 void _cyc_system(object cont, object args) {
     integer_type i = Cyc_system(car(args));
