@@ -894,8 +894,10 @@ string_type Cyc_substring(object str, object start, object end) {
 }
 
 object Cyc_command_line_arguments(object cont) {
-  //Cyc_rt_raise_msg("not implemented yet");
-  //return boolean_f;
+
+  // TODO: store argc/argv somewhere (probably globals, unfortunately) and then
+  // use them here to pack up a list of strings
+
   make_string(s, "TODO");
   make_cons(l, &s, nil);
   return_funcall1(cont, &l);
