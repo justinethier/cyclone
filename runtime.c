@@ -894,13 +894,22 @@ string_type Cyc_substring(object str, object start, object end) {
 }
 
 object Cyc_command_line_arguments(object cont) {
+  int i;
+  object lis = nil;
+  for (i = argc; i > 0; i--) {
+    object ps = alloca(sizeof(string_type));
+    object pl = alloca(sizeof(cons_type));
+    make_string(s, _cyc_argv[i - 1]);
+    memcpy(ps, s, sizeof(string_type));
 
-  // TODO: store argc/argv somewhere (probably globals, unfortunately) and then
-  // use them here to pack up a list of strings
+TODO: unfortunately this won't work because vars will get clobbered. need to use alloca
+      to get fresh  memory each iteration for s and l.
+      attempting to above, but code is incomplete
+//    make_cons(l, &s, lis);
+//    lis = &l;
+  }
 
-  make_string(s, "TODO");
-  make_cons(l, &s, nil);
-  return_funcall1(cont, &l);
+  return_funcall1(cont, lis);
 }
 
 integer_type Cyc_system(object cmd) {
