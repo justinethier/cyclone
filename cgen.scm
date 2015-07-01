@@ -57,6 +57,8 @@
  long heap_size = long_arg(argc,argv,\"-h\",HEAP_SIZE);
  global_stack_size = stack_size;
  global_heap_size = heap_size;
+ _cyc_argc = argc;
+ _cyc_argv = argv;
  main_main(stack_size,heap_size,(char *) &stack_size);
  return 0;}")
 
