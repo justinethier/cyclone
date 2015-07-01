@@ -1,16 +1,7 @@
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
-all: cyclone scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o icyc
-
-#scheme/cyclone/util.o: cyclone scheme/cyclone/util.sld
-.PHONY: self
-self:
-	./cyclone scheme/cyclone/util.sld
-	./cyclone scheme/cyclone/libraries.sld
-	./cyclone scheme/cyclone/transforms.sld
-	./cyclone scheme/cyclone/cgen.sld
-	./cyclone cyclone.scm
+all: cyclone icyc
 
 scheme/base.o: cyclone scheme/base.sld
 	./cyclone scheme/base.sld
@@ -68,6 +59,15 @@ debug2: libcyclone.so.1
 cyclone: cyclone.scm transforms.so util.so cgen.so libraries.so parser.so libcyclone.a
 	csc cyclone.scm
 
+#scheme/cyclone/util.o: cyclone scheme/cyclone/util.sld
+.PHONY: self
+self:
+	./cyclone scheme/cyclone/util.sld
+	./cyclone scheme/cyclone/libraries.sld
+	./cyclone scheme/cyclone/transforms.sld
+	./cyclone scheme/cyclone/cgen.sld
+	./cyclone cyclone.scm
+
 .PHONY: test
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
@@ -94,7 +94,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h
+icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o
 	./cyclone icyc.scm
 
 .PHONY: tags
