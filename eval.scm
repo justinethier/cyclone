@@ -17,11 +17,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression handling helper functions
-(define (tagged-list? tag exp)
-  (if (pair? exp)
-      (equal? (car exp) tag)
-      #f))
-
 (define (self-evaluating? exp)
   (cond ((number? exp) #t)
         ((boolean? exp) #t)
