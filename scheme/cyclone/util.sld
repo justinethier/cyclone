@@ -3,13 +3,18 @@
           (scheme char))
   ; TODO: really need export-all for these cyclone libs!!
   (export
-    any
-    every
-    filter
+    ;; Code analysis
     tagged-list?
     if?
+    begin?
+    lambda?
+    ;; Code generation
     mangle
-    mangle-global)
+    mangle-global
+    ;; Scheme library functions
+    any
+    every
+    filter)
   (include "../../util.scm")
   (begin
     ;; Simplified versions of every/any from SRFI-1

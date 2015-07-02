@@ -398,10 +398,6 @@
 (define (letrec->args exp)
   (map cadr (cadr exp)))
 
-; lambda? : exp -> boolean
-(define (lambda? exp)
-  (tagged-list? 'lambda exp))
-
 (define (lambda-varargs? exp)
   (and (lambda? exp)
        (or (symbol? (lambda->formals exp))
@@ -659,10 +655,6 @@
 
 (define (prim-call? exp)
   (and (list? exp) (prim? (car exp))))
-
-; begin? : exp -> boolean
-(define (begin? exp) 
-  (tagged-list? 'begin exp))
 
 ; begin->exps : begin-exp -> list[exp]
 (define (begin->exps exp)

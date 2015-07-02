@@ -52,7 +52,6 @@
       (make-lambda (cdadr exp)   ; formal parameters
                    (cddr exp)))) ; body
 
-(define (lambda? exp) (tagged-list? 'lambda exp))
 (define (lambda-parameters exp) (cadr exp))
 (define (lambda-body exp) (cddr exp))
 
@@ -68,7 +67,6 @@
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
-(define (begin? exp) (tagged-list? 'begin exp))
 (define (begin-actions exp) (cdr exp))
 (define (last-exp? seq) (null? (cdr seq)))
 (define (first-exp seq) (car seq))

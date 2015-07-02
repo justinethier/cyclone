@@ -68,7 +68,7 @@ self:
 	./cyclone scheme/cyclone/libraries.sld
 	./cyclone scheme/cyclone/transforms.sld
 	./cyclone scheme/cyclone/cgen.sld
-	./cyclone cyclone.scm
+	./cyclone cyclone-self.scm
 
 .PHONY: test
 test: $(TESTFILES) cyclone
