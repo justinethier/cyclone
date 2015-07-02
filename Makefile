@@ -21,6 +21,9 @@ scheme/read.o: cyclone scheme/read.sld parser.scm
 scheme/write.o: cyclone scheme/write.sld
 	./cyclone scheme/write.sld
 
+scheme/cyclone/util.o: scheme/cyclone/util.sld
+	./cyclone scheme/cyclone/util.sld
+
 util.so: util.scm
 	csc -s util.scm
 
@@ -62,7 +65,6 @@ cyclone: cyclone.scm transforms.so util.so cgen.so libraries.so parser.so libcyc
 #scheme/cyclone/util.o: cyclone scheme/cyclone/util.sld
 .PHONY: self
 self:
-	./cyclone scheme/cyclone/util.sld
 	./cyclone scheme/cyclone/libraries.sld
 	./cyclone scheme/cyclone/transforms.sld
 	./cyclone scheme/cyclone/cgen.sld
@@ -94,7 +96,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o
+icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o
 	./cyclone icyc.scm
 
 .PHONY: tags

@@ -7,6 +7,7 @@
     every
     filter
     tagged-list?
+    if?
     mangle
     mangle-global)
   (include "../../util.scm")

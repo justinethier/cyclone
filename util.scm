@@ -11,6 +11,10 @@
       (equal? (car exp) tag)
       #f))
 
+; if? : exp -> boolean
+(define (if? exp)
+  (tagged-list? 'if exp))
+
 ; char->natural : char -> natural
 (define (char->natural c)
   (let ((i (char->integer c)))

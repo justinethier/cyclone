@@ -59,7 +59,6 @@
 (define (make-lambda parameters body)
   (cons 'lambda (cons parameters body)))
 
-(define (if? exp) (tagged-list? 'if exp))
 (define (if-predicate exp) (cadr exp))
 (define (if-consequent exp) (caddr exp))
 (define (if-alternative exp)

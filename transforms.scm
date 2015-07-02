@@ -476,10 +476,6 @@
 (define (lambda->exp exp)
   (cddr exp)) ;; JAE - changed from caddr, so we can handle multiple expressions
 
-; if? : exp -> boolean
-(define (if? exp)
-  (tagged-list? 'if exp))
-
 ; if->condition : if-exp -> exp
 (define (if->condition exp)
   (cadr exp))
