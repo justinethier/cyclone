@@ -4,7 +4,8 @@
 ;;
 ;; This module contains a simple Read-Eval-Print Loop
 ;;
-(import (scheme base)
+(import (scheme cyclone common)
+        (scheme base)
         (scheme char)
         (scheme read)
         (scheme write)

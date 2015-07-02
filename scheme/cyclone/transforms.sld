@@ -5,6 +5,7 @@
           (scheme eval)
           (scheme read)
           (scheme write)
+          (scheme cyclone common)
           (scheme cyclone util)
           (scheme cyclone libraries)
   )
@@ -117,6 +118,5 @@
     pos-in-list 
     closure-convert 
   )
-  (include "../common.scm")
   (include "../../transforms.scm"))
 

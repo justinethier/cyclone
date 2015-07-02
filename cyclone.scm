@@ -10,6 +10,7 @@
 ;        (scheme file)
 ;        (scheme read)
 ;        (scheme write)
+;        (scheme cyclone common)
 ;        (scheme cyclone util)
 ;        (scheme cyclone cgen)
 ;        (scheme cyclone transforms)
@@ -26,6 +27,7 @@
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
+   (load (string-append (cyc:get-lib-dir) "scheme/cyclone/common.so"))
    (load (string-append (cyc:get-lib-dir) "parser.so"))
    (load (string-append (cyc:get-lib-dir) "util.so"))
    (load (string-append (cyc:get-lib-dir) "libraries.so"))

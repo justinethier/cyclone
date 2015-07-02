@@ -8,8 +8,8 @@
 ;;
 
 (cond-expand
- (chicken
-  (load (string-append (cyc:get-lib-dir) "scheme/common.scm")))
+; (chicken
+;  (load (string-append (cyc:get-lib-dir) "scheme/common.scm")))
  (cyclone
   ;; Temporary work-around for pp not being implemented yet
   (define pretty-print write))

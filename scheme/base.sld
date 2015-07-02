@@ -1,8 +1,5 @@
 (define-library (scheme base)
   (export
-    *Cyc-version-banner*
-    *c-file-header-comment*
-    *version-banner*
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
@@ -72,9 +69,7 @@
     newline
     write-char
   )
-  (include "common.scm")
   (begin
-    (define *Cyc-version-banner* *version-banner*)
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
     ;; TODO: this is from r7rs, but is not really good enough by itself
