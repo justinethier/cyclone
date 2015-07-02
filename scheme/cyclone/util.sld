@@ -12,6 +12,9 @@
     mangle
     mangle-global
     ;; Scheme library functions
+    delete
+    delete-duplicates
+    list-insert-at!
     any
     every
     filter)

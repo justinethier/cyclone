@@ -48,6 +48,33 @@
                            (recur tail)))))))
     (recur lis)))
 
+;; Based off corresponding SRFI-1 definition
+(define (delete x lis)
+  (filter (lambda (y) (not (equal? x y))) lis))
+
+;; Inefficient version based off code from SRFI-1
+(define (delete-duplicates lis)
+  (define (recur lis) ; ((lis lis))
+    (if (null? lis) lis
+        (let* ((x (car lis))
+               (tail (cdr lis))
+               (new-tail (recur (delete x tail))))
+          (if (eq? tail new-tail) lis (cons x new-tail)))))
+  (recur lis))
+
+;; Insert obj at index k of list, increasing length of list by one.
+(define (list-insert-at! lis obj k)
+  (cond
+   ((null? lis) (error "list-insert-at!, lis cannot be null"))
+   ((and (> k 0) (null? (cdr lis)))
+    (set-cdr! lis (cons obj '())))
+   ((zero? k)
+    (let ((old-car (car lis)))
+      (set-car! lis obj)
+      (set-cdr! lis (cons old-car (cdr lis)))))
+   (else
+    (list-insert-at! (cdr lis) obj (- k 1)))))
+
 
 ;; Name-mangling.
 

@@ -6,7 +6,6 @@
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
-    list-insert-at!
     call-with-current-continuation
     call/cc
     call-with-values
