@@ -408,7 +408,10 @@
       ((equal? #\n c)
        (cons #\newline buf))
       (else
-        (parse-error "invalid escape character in string"
+        (parse-error (string-append 
+                       "invalid escape character [" 
+                       (list->string (list c))
+                       "] in string")
          (in-port:get-lnum ptbl)
          (in-port:get-cnum ptbl))))))
 
