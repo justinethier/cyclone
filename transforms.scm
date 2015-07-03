@@ -81,7 +81,7 @@
       (if (null? (cdr exp)) (error "empty when" exp))
       (if (null? (cddr exp)) (error "no when body" exp))
       `(if ,(cadr exp)
-           ((lambda () ,(caddr exp)))
+           ((lambda () ,@(cddr exp)))
            #f)))
     (cons 'cond
           (lambda (expr rename compare)
