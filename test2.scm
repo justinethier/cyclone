@@ -2,17 +2,18 @@
         (scheme file)
         (scheme write))
 
-(let loop ((i 10))
-  (if (zero? i)
-    (write 'done)
-    (loop (- i 1))))
-
-
-(write (command-line-arguments))
-
-(write (when (lambda () #t) 'true))
-(write (when (lambda () #f) 'false))
-
+(write 'hello)
+;(let loop ((i 10))
+;  (if (zero? i)
+;    (write 'done)
+;    (loop (- i 1))))
+;
+;
+;(write (command-line-arguments))
+;
+;(write (when (lambda () #t) 'true))
+;(write (when (lambda () #f) 'false))
+;
 ;; Need to fix this up at some point:
 ;;
 ;; Lambda application is broken with pure varargs
