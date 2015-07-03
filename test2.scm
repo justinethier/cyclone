@@ -2,6 +2,8 @@
         (scheme file)
         (scheme write))
 
+;; TODO: C macros for funcall1, etc are not being generated even though entries are set
+;;    in the vector. must be another problem inspecting the vector ???
 (write 'hello)
 ;(let loop ((i 10))
 ;  (if (zero? i)
