@@ -22,6 +22,11 @@ Working TODO list:
      there is no concept of macro expansion, probably other deficiencies as well
      almost certainly will break when running the self-hosted compiler...
 
+   - stack traces - not required but may be essential
+     if we can record function names in cgen, then it is not too much
+     of a stretch to create a circular buffer of string ptr's and then
+     add to this buffer each time a function is called. then print the
+     buffer out in the default exception handler (or such).
 
    - support for application of pure varargs functions, EG:
          ((lambda test (write test)) 1 2 3 4)
