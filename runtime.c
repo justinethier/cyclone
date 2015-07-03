@@ -272,8 +272,6 @@ object Cyc_set_cvar(object var, object value) {
 
 object Cyc_has_cycle(object lst) {
     object slow_lst, fast_lst;
-    int is_obj = is_object_type(lst);
-    int type = type_of(lst);
     if (nullp(lst) || is_value_type(lst) ||
         (is_object_type(lst) && type_of(lst) != cons_tag)) {
         return (boolean_f);
@@ -893,10 +891,19 @@ string_type Cyc_substring(object str, object start, object end) {
   }
 }
 
+/**
+ * Perform same role as the CHICKEN function:
+ *
+ * Contains the list of arguments passed to this program, with the name 
+ * of the program and any runtime options (all options starting with -:) 
+ * removed.
+ *
+ * For now, runtime options are not removed.
+ */
 object Cyc_command_line_arguments(object cont) {
   int i;
   object lis = nil;
-  for (i = _cyc_argc; i > 0; i--) {
+  for (i = _cyc_argc; i > 1; i--) { // skip program name
     object ps = alloca(sizeof(string_type));
     object pl = alloca(sizeof(cons_type));
     make_string(s, _cyc_argv[i - 1]);
