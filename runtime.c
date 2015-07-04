@@ -42,6 +42,7 @@ char *alloc_end;
    copying to occur during GC */
 char *dhbottom; /* Bottom of data heap */
 char *dhallocp; /* Current place in data heap */
+char *dhalloc_limit; /* GC beyond this limit */ 
 char *dhalloc_end;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
@@ -1674,6 +1675,14 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
  char *tmp_dhbottom = dhbottom;
  char *tmp_dhallocp = dhallocp;
  char *tmp_dhallocp_end = dhalloc_end;
+
+ if (dhallocp > dhalloc_limit) {
+   // Upgrade to major GC
+   major = 1;
+   no_major_gcs++;
+   no_gcs--;
+ }
+
  if (major) {
     // Initialize new heap (TODO: make a function for this)
     bottom = calloc(1,global_heap_size);
@@ -1684,6 +1693,7 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
     old_heap_high_limit = tmp_alloc_end;
     
     dhallocp = dhbottom = calloc(1, global_heap_size);
+    dhalloc_limit = dhallocp + (long)((global_heap_size - 8) * 0.90);
     dhalloc_end = dhallocp + global_heap_size - 8;
  }
 

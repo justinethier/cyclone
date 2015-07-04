@@ -65,6 +65,7 @@ static void main_main (stack_size,heap_size,stack_base)
   alloc_end = allocp + heap_size - 8;
   
   dhallocp = dhbottom = calloc(1, heap_size);
+  dhalloc_limit = dhallocp + (long)((heap_size - 8) * 0.90);
   dhalloc_end = dhallocp + heap_size - 8;
 #if DEBUG_SHOW_DIAG
   printf("main: heap_size=%ld  allocp=%p  alloc_end=%p\n",

@@ -224,6 +224,7 @@ extern char *alloc_end;
    copying to occur during GC */
 extern char *dhbottom; /* Bottom of data heap */
 extern char *dhallocp; /* Current place in data heap */
+extern char *dhalloc_limit; /* GC beyond this limit */ 
 extern char *dhalloc_end;
 extern long no_gcs; /* Count the number of GC's. */
 extern long no_major_gcs; /* Count the number of GC's. */
