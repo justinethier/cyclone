@@ -13,10 +13,12 @@ Working TODO list:
  - Constructs require for self-hosting
 
    - modify main cyclone.scm program to compile
-     1) Need to add support:
-        Error: Unbound variable(s): (command-line-arguments string-ref)
 
      2) Need to either allow code to read an import after macro expansion, or have another main module for self-hosting
+
+   - GC improvements
+     - is dhalloc limit good enough?
+     - should expand size of heap if there is not enough room to fit all the "kept" objects
 
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
