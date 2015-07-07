@@ -79,7 +79,14 @@ self:
 
 .PHONY: self2
 self2:
+	./cyclone-self scheme/base.sld
+	./cyclone-self scheme/read.sld
+	./cyclone-self scheme/write.sld
+	./cyclone-self scheme/char.sld
+	./cyclone-self scheme/eval.sld
+	./cyclone-self scheme/file.sld
 	./cyclone-self scheme/cyclone/common.sld
+	./cyclone-self icyc.scm
 	./cyclone-self scheme/cyclone/libraries.sld
 	./cyclone-self scheme/cyclone/transforms.sld
 	./cyclone-self scheme/cyclone/cgen.sld
