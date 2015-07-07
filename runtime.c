@@ -614,6 +614,10 @@ object Cyc_is_symbol(object o){
     return boolean_f;}
 
 object Cyc_is_reserved_symbol(object o) {
+TODO: why did this return #t all the time in self-compiled cyclone
+when equalp was used below instead of equal? should switch them and
+debug to investigate. is this the same reason why the Cyc_procedure error
+is thrown when trying to self-compile eval.c????
   if (Cyc_is_symbol(o) == boolean_t && equal(o, quote_Cyc_191procedure))
       return boolean_t;
   return boolean_f; }
