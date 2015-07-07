@@ -817,9 +817,6 @@
   (else #f))
 
 (define (allocate-symbol sym)
-  ; These are (at least for now) preallocated by the runtime
-  ;(define *reserved-symbols* (list 'Cyc_procedure))
-
   (if (and (not (member sym *symbols*))
            (not (Cyc-reserved-symbol? sym)))
       (set! *symbols* (cons sym *symbols*))))
