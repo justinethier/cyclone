@@ -77,6 +77,14 @@ self:
 	./cyclone scheme/cyclone/cgen.sld
 	./cyclone cyclone-self.scm
 
+.PHONY: self2
+self2:
+	./cyclone-self scheme/cyclone/common.sld
+	./cyclone-self scheme/cyclone/libraries.sld
+	./cyclone-self scheme/cyclone/transforms.sld
+	./cyclone-self scheme/cyclone/cgen.sld
+	./cyclone-self cyclone-self.scm
+
 .PHONY: test
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)

@@ -392,6 +392,7 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
+     ((eq? p 'Cyc-reserved-symbol?) "Cyc_is_reserved_symbol")
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p 'Cyc-stdin)             "Cyc_stdin")
      ((eq? p 'Cyc-stderr)            "Cyc_stderr")
@@ -810,10 +811,10 @@
 
 (define *symbols* '())
 
-; These are (at least for now) preallocated by the runtime
-(define *reserved-symbols* '(Cyc_procedure))
-
 (define (allocate-symbol sym)
+  ; These are (at least for now) preallocated by the runtime
+  (define *reserved-symbols* (list 'Cyc_procedure))
+
   (if (and (not (member sym *symbols*))
            (not (member sym *reserved-symbols*)))
       (set! *symbols* (cons sym *symbols*))))

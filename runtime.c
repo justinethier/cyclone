@@ -613,6 +613,11 @@ object Cyc_is_symbol(object o){
         return boolean_t;
     return boolean_f;}
 
+object Cyc_is_reserved_symbol(object o) {
+  if (Cyc_is_symbol(o) == boolean_t && equalp(o, quote_Cyc_191procedure))
+      return boolean_t;
+  return boolean_f; }
+
 object Cyc_is_vector(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == vector_tag)
         return boolean_t;
