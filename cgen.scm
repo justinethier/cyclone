@@ -817,6 +817,7 @@
   (else #f))
 
 (define (allocate-symbol sym)
+(trace:error `(JAE DEBUG allocate-symbol ,sym ,(Cyc-reserved-symbol? sym)))
   (if (and (not (member sym *symbols*))
            (not (Cyc-reserved-symbol? sym)))
       (set! *symbols* (cons sym *symbols*))))
