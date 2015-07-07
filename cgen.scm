@@ -811,12 +811,17 @@
 
 (define *symbols* '())
 
+(cond-expand
+  (chicken
+    (define (Cyc-reserved-symbol? sym) (member sym (list 'Cyc_procedure))))
+  (else #f))
+
 (define (allocate-symbol sym)
   ; These are (at least for now) preallocated by the runtime
-  (define *reserved-symbols* (list 'Cyc_procedure))
+  ;(define *reserved-symbols* (list 'Cyc_procedure))
 
   (if (and (not (member sym *symbols*))
-           (not (member sym *reserved-symbols*)))
+           (not (Cyc-reserved-symbol? sym)))
       (set! *symbols* (cons sym *symbols*))))
 
 ;; Lambda compilation.
