@@ -89,7 +89,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Evaluator data structures
 
-(define procedure-tag 'Cyc_procedure)
+(define procedure-tag 'procedure)
 (define (make-procedure parameters body env)
   (list procedure-tag parameters body env))
 (define (compound-procedure? p)

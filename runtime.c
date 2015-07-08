@@ -67,9 +67,6 @@ static boolean_type f_boolean = {boolean_tag, "f"};
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
 
-static symbol_type Cyc_191procedure_symbol = {symbol_tag, "procedure", nil};
-const object quote_Cyc_191procedure = &Cyc_191procedure_symbol;
-
 static symbol_type Cyc_void_symbol = {symbol_tag, "", nil};
 const object quote_void = &Cyc_void_symbol;
 
@@ -391,7 +388,7 @@ object Cyc_display(object x, FILE *port)
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
-      if (equal(quote_Cyc_191procedure, car(x))) {
+      if (strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
           fprintf(port, " ");
           Cyc_display(cadr(x), port);
           fprintf(port, " ...)"); /* skip body and env for now */
@@ -464,7 +461,7 @@ static object _Cyc_write(object x, FILE *port)
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
-      if (equal(quote_Cyc_191procedure, car(x))) {
+      if (strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
           fprintf(port, " ");
           _Cyc_write(cadr(x), port);
           fprintf(port, " ...)"); /* skip body and env for now */
@@ -612,12 +609,6 @@ object Cyc_is_symbol(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == symbol_tag)
         return boolean_t;
     return boolean_f;}
-
-object Cyc_is_reserved_symbol(object o) {
-  if (Cyc_is_symbol(o) == boolean_t && 
-      equalp(o, quote_Cyc_191procedure) == boolean_t)
-      return boolean_t;
-  return boolean_f; }
 
 object Cyc_is_vector(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == vector_tag)

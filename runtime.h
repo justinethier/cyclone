@@ -133,7 +133,6 @@ object Cyc_is_integer(object o);
 object Cyc_is_vector(object o);
 object Cyc_is_port(object o);
 object Cyc_is_symbol(object o);
-object Cyc_is_reserved_symbol(object o);
 object Cyc_is_string(object o);
 object Cyc_is_char(object o);
 object Cyc_is_procedure(object o);
@@ -237,7 +236,6 @@ extern jmp_buf jmp_main; /* Where to jump to. */
 /* Define the Lisp atoms that we need. */
 extern const object boolean_t;
 extern const object boolean_f;
-extern const object quote_Cyc_191procedure;
 extern const object quote_void;
 
 /* This section is auto-generated via --autogen */

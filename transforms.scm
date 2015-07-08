@@ -512,7 +512,6 @@
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
      Cyc-has-cycle?
-     Cyc-reserved-symbol?
      Cyc-stdout
      Cyc-stdin
      Cyc-stderr

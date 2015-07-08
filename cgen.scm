@@ -392,7 +392,6 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
-     ((eq? p 'Cyc-reserved-symbol?) "Cyc_is_reserved_symbol")
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p 'Cyc-stdin)             "Cyc_stdin")
      ((eq? p 'Cyc-stderr)            "Cyc_stderr")
@@ -811,15 +810,9 @@
 
 (define *symbols* '())
 
-(cond-expand
-  (chicken
-    (define (Cyc-reserved-symbol? sym) (member sym (list 'Cyc_procedure))))
-  (else #f))
-
 (define (allocate-symbol sym)
-(trace:error `(JAE DEBUG allocate-symbol ,sym ,(Cyc-reserved-symbol? sym)))
-  (if (and (not (member sym *symbols*))
-           (not (Cyc-reserved-symbol? sym)))
+  (if (not (member sym *symbols*))
+           ;(not (Cyc-reserved-symbol? sym)))
       (set! *symbols* (cons sym *symbols*))))
 
 ;; Lambda compilation.
