@@ -388,7 +388,8 @@ object Cyc_display(object x, FILE *port)
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
-      if (strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
+      if (Cyc_is_symbol(car(x)) == boolean_t &&
+          strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
           fprintf(port, " ");
           Cyc_display(cadr(x), port);
           fprintf(port, " ...)"); /* skip body and env for now */
@@ -461,7 +462,8 @@ static object _Cyc_write(object x, FILE *port)
       // Experimenting with displaying lambda defs in REPL
       // not good enough but this is a start. would probably need
       // the same code in write()
-      if (strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
+      if (Cyc_is_symbol(car(x)) == boolean_t &&
+          strncmp(((symbol)car(x))->pname, "procedure", 10) == 0) {
           fprintf(port, " ");
           _Cyc_write(cadr(x), port);
           fprintf(port, " ...)"); /* skip body and env for now */
@@ -1446,6 +1448,8 @@ object apply(object cont, object func, object args){
 
     case cons_tag:
     {
+      // TODO: should add more error checking here, make sure car(func) is a symbol
+
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
