@@ -75,6 +75,7 @@ self:
 	./cyclone scheme/cyclone/libraries.sld
 	./cyclone scheme/cyclone/transforms.sld
 	./cyclone scheme/cyclone/cgen.sld
+	./cyclone scheme/cyclone/util.sld
 	./cyclone cyclone-self.scm
 
 .PHONY: self2
@@ -90,6 +91,7 @@ self2:
 	./cyclone-self scheme/cyclone/libraries.sld
 	./cyclone-self scheme/cyclone/transforms.sld
 	./cyclone-self scheme/cyclone/cgen.sld
+	./cyclone-self scheme/cyclone/util.sld
 	./cyclone-self cyclone-self.scm
 
 # TODO: this is ugly and needs lots of work yet...
@@ -100,9 +102,13 @@ self2:
 # which can be done from a fixed location)
 .PHONY: bootstrap
 bootstrap:
-	$(MAKE) self2
+#	$(MAKE) self2
 	rm -rf tmp
 	mkdir -p tmp/scheme/cyclone
+	cp cyclone.h tmp
+	cp runtime-main.h tmp
+	cp runtime.h tmp
+	cp runtime.c tmp
 	cp scheme/base.c tmp/scheme
 	cp scheme/read.c tmp/scheme
 	cp scheme/write.c tmp/scheme
@@ -110,11 +116,13 @@ bootstrap:
 	cp scheme/eval.c tmp/scheme
 	cp scheme/file.c tmp/scheme
 	cp scheme/cyclone/common.c tmp/scheme/cyclone
-	cp icyc.c tmp
+#	cp icyc.c tmp
+	cp icyc.scm tmp
 	cp scheme/cyclone/libraries.c tmp/scheme/cyclone
 	cp scheme/cyclone/transforms.c tmp/scheme/cyclone
 	cp scheme/cyclone/cgen.c tmp/scheme/cyclone
-	cp cyclone-self.c tmp
+	cp scheme/cyclone/util.c tmp/scheme/cyclone
+	cp cyclone-self.c tmp/cyclone.c
 	cp Makefile-bootstrap tmp/Makefile
 
 

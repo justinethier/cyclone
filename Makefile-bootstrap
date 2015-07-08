@@ -1,31 +1,38 @@
 # TODO
-"gcc test2.c -I/home/justin/Documents/cyclone/ -g -c -o test2.o""gcc test2.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/file.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o test2
+#gcc test2.c -I/home/justin/Documents/cyclone/ -g -c -o test2.o
+#gcc test2.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/file.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o test2
+#"gcc cyclone-self.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/char.o  /home/justin/Documents/cyclone/scheme/file.o  /home/justin/Documents/cyclone/scheme/read.o  /home/justin/Documents/cyclone/scheme/cyclone/util.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/cyclone/common.o  /home/justin/Documents/cyclone/scheme/cyclone/libraries.o  /home/justin/Documents/cyclone/scheme/eval.o  /home/justin/Documents/cyclone/scheme/cyclone/transforms.o  /home/justin/Documents/cyclone/scheme/cyclone/cgen.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o cyclone-self"
 
 # TODO: let's pretty this up, then port some of that back to the main makefile:
 
-#CC = gcc
-#CSTD = -std=c99
-#CFLAGS = $(CSTD) -g
-#LIBS = -lcurl -ljson
-#
-#COBJ = se-api util main http entities
-#CFILES = $(addsuffix .c, $(COBJ))
-#COBJECTS=$(CFILES:.c=.o)
-#
-#TOBJ = se-api util test entities
-#TFILES = $(addsuffix .c, $(TOBJ))
-#TOBJECTS=$(TFILES:.c=.o)
-#
-#%.o: %.c %.h
-#  $(CC) $(CFLAGS) $< -c -o $@
-#
-#stack-watch: $(COBJECTS) config.h
-#  $(CC) $(CFLAGS) $(COBJECTS) $(LIBS) -o stack-watch
-#
+CC = gcc
+CFLAGS = -g -I.
+LIBS = -lcyclone -lm
+
+COBJ = scheme/base scheme/read scheme/write scheme/char scheme/eval scheme/file scheme/cyclone/common scheme/cyclone/libraries scheme/cyclone/transforms scheme/cyclone/cgen scheme/cyclone/util
+CFILES = $(addsuffix .c, $(COBJ))
+COBJECTS=$(CFILES:.c=.o)
+
+%.o: %.c %.h
+  $(CC) $(CFLAGS) $< -c -o $@
+
+all: cyclone icyc
+
+libcyclone.a: runtime.c runtime.h
+	$(CC) -g -c runtime.c -o runtime.o
+	ar rcs libcyclone.a runtime.o
+
+cyclone: $(COBJECTS) libcyclone.a
+	$(CC) cyclone.c $(CFLAGS) -c -o cyclone.o
+	$(CC) cyclone.o $(COBJECTS) -L. $(LIBS) $(CFLAGS) -o cyclone
+
+icyc: cyclone
+	./cyclone icyc.scm
+
 #test: $(TOBJECTS) config.h
 #  $(CC) $(CFLAGS) $(TOBJECTS) $(LIBS) -o stack-tests
 #  ./stack-tests
-#
+
 #.PHONY: clean
 #clean:
 #  rm -rf a.out http stack-watch stack-tests *.o
