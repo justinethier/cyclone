@@ -1,3 +1,7 @@
+# Cyclone Scheme
+# Copyright (c) 2014, Justin Ethier
+# All rights reserved.
+
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
@@ -116,8 +120,8 @@ bootstrap:
 	cp scheme/eval.c tmp/scheme
 	cp scheme/file.c tmp/scheme
 	cp scheme/cyclone/common.c tmp/scheme/cyclone
-#	cp icyc.c tmp
 	cp icyc.scm tmp
+	cp tests/unit-tests.scm tmp
 	cp scheme/cyclone/libraries.c tmp/scheme/cyclone
 	cp scheme/cyclone/transforms.c tmp/scheme/cyclone
 	cp scheme/cyclone/cgen.c tmp/scheme/cyclone

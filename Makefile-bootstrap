@@ -1,9 +1,8 @@
-# TODO
-#gcc test2.c -I/home/justin/Documents/cyclone/ -g -c -o test2.o
-#gcc test2.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/file.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o test2
-#"gcc cyclone-self.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/char.o  /home/justin/Documents/cyclone/scheme/file.o  /home/justin/Documents/cyclone/scheme/read.o  /home/justin/Documents/cyclone/scheme/cyclone/util.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/cyclone/common.o  /home/justin/Documents/cyclone/scheme/cyclone/libraries.o  /home/justin/Documents/cyclone/scheme/eval.o  /home/justin/Documents/cyclone/scheme/cyclone/transforms.o  /home/justin/Documents/cyclone/scheme/cyclone/cgen.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o cyclone-self"
-
-# TODO: let's pretty this up, then port some of that back to the main makefile:
+# Cyclone Scheme
+# Copyright (c) 2014, Justin Ethier
+# All rights reserved.
+#
+# Makefile for bootstrapping cyclone from generated C files.
 
 CC = gcc
 CFLAGS = -g -I.
@@ -14,9 +13,9 @@ CFILES = $(addsuffix .c, $(COBJ))
 COBJECTS=$(CFILES:.c=.o)
 
 %.o: %.c %.h
-  $(CC) $(CFLAGS) $< -c -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
-all: cyclone icyc
+all: cyclone icyc unit-tests
 
 libcyclone.a: runtime.c runtime.h
 	$(CC) -g -c runtime.c -o runtime.o
@@ -29,9 +28,8 @@ cyclone: $(COBJECTS) libcyclone.a
 icyc: cyclone
 	./cyclone icyc.scm
 
-#test: $(TOBJECTS) config.h
-#  $(CC) $(CFLAGS) $(TOBJECTS) $(LIBS) -o stack-tests
-#  ./stack-tests
+unit-tests: unit-tests.scm
+	./cyclone unit-tests.scm && ./unit-tests
 
 #.PHONY: clean
 #clean:
