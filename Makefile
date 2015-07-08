@@ -92,6 +92,28 @@ self2:
 	./cyclone-self scheme/cyclone/cgen.sld
 	./cyclone-self cyclone-self.scm
 
+# TODO: this is ugly and needs lots of work yet...
+# would also need to call this after self2
+.PHONY: bootstrap
+bootstrap:
+	$(MAKE) self2
+	rm -rf tmp
+	mkdir -p tmp/scheme/cyclone
+	cp scheme/base.c tmp/scheme
+	cp scheme/read.c tmp/scheme
+	cp scheme/write.c tmp/scheme
+	cp scheme/char.c tmp/scheme
+	cp scheme/eval.c tmp/scheme
+	cp scheme/file.c tmp/scheme
+	cp scheme/cyclone/common.c tmp/scheme/cyclone
+	cp icyc.c tmp
+	cp scheme/cyclone/libraries.c tmp/scheme/cyclone
+	cp scheme/cyclone/transforms.c tmp/scheme/cyclone
+	cp scheme/cyclone/cgen.c tmp/scheme/cyclone
+	cp cyclone-self.scm tmp
+	cp Makefile-bootstrap tmp/Makefile
+
+
 .PHONY: test
 test: $(TESTFILES) cyclone
 	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)

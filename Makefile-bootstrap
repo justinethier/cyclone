@@ -1,1 +1,2 @@
 # TODO
+"gcc test2.c -I/home/justin/Documents/cyclone/ -g -c -o test2.o""gcc test2.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/file.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o test2
