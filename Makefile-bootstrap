@@ -1,2 +1,31 @@
 # TODO
 "gcc test2.c -I/home/justin/Documents/cyclone/ -g -c -o test2.o""gcc test2.o  /home/justin/Documents/cyclone/scheme/base.o  /home/justin/Documents/cyclone/scheme/write.o  /home/justin/Documents/cyclone/scheme/file.o  -L/home/justin/Documents/cyclone/ -lcyclone -lm -I/home/justin/Documents/cyclone/ -g -o test2
+
+# TODO: let's pretty this up, then port some of that back to the main makefile:
+
+#CC = gcc
+#CSTD = -std=c99
+#CFLAGS = $(CSTD) -g
+#LIBS = -lcurl -ljson
+#
+#COBJ = se-api util main http entities
+#CFILES = $(addsuffix .c, $(COBJ))
+#COBJECTS=$(CFILES:.c=.o)
+#
+#TOBJ = se-api util test entities
+#TFILES = $(addsuffix .c, $(TOBJ))
+#TOBJECTS=$(TFILES:.c=.o)
+#
+#%.o: %.c %.h
+#  $(CC) $(CFLAGS) $< -c -o $@
+#
+#stack-watch: $(COBJECTS) config.h
+#  $(CC) $(CFLAGS) $(COBJECTS) $(LIBS) -o stack-watch
+#
+#test: $(TOBJECTS) config.h
+#  $(CC) $(CFLAGS) $(TOBJECTS) $(LIBS) -o stack-tests
+#  ./stack-tests
+#
+#.PHONY: clean
+#clean:
+#  rm -rf a.out http stack-watch stack-tests *.o
