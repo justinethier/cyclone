@@ -94,6 +94,10 @@ self2:
 
 # TODO: this is ugly and needs lots of work yet...
 # would also need to call this after self2
+# TODO: also need to take all the .sld files (??), and will need to configure.
+#  or not, is it OK to assume bootstrap will only generate cyclone and (maybe) icyc??
+# install location (although maybe that is a 'make install' issue rather than bootstrap,
+# which can be done from a fixed location)
 .PHONY: bootstrap
 bootstrap:
 	$(MAKE) self2
@@ -110,7 +114,7 @@ bootstrap:
 	cp scheme/cyclone/libraries.c tmp/scheme/cyclone
 	cp scheme/cyclone/transforms.c tmp/scheme/cyclone
 	cp scheme/cyclone/cgen.c tmp/scheme/cyclone
-	cp cyclone-self.scm tmp
+	cp cyclone-self.c tmp
 	cp Makefile-bootstrap tmp/Makefile
 
 
