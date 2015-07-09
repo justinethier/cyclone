@@ -12,6 +12,7 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
+   - it seems add-global is being called in reverse order on globals. WTF????   
    - why does the -t option not work in self-hosted executable?
 
    - modify main cyclone.scm program to compile
