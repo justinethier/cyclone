@@ -12,6 +12,8 @@ Working TODO list:
 
  - Constructs require for self-hosting
 
+   - why does the -t option not work in self-hosted executable?
+
    - modify main cyclone.scm program to compile
 
      2) Need to either allow code to read an import after macro expansion, or have another main module for self-hosting
