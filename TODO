@@ -10,10 +10,16 @@ Roadmap:
 
 Working TODO list:
 
- - Constructs require for self-hosting
+ - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
-   - it seems add-global is being called in reverse order on globals. WTF????   
    - why does the -t option not work in self-hosted executable?
+     need to figure this out, assume some underlying defect
+
+   - improved error handling:
+     - code traces
+     - type checking
+
+     without these, it will be impossible (or at least time-consuming) to debug issues going forward
 
    - modify main cyclone.scm program to compile
 
