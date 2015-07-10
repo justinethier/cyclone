@@ -14,6 +14,7 @@ Working TODO list:
 
    - why does the -t option not work in self-hosted executable?
      need to figure this out, assume some underlying defect
+     should have been an error because *trace-level* is not exported from transforms module.
 
    - improved error handling:
      - code traces
