@@ -1063,6 +1063,7 @@ port_type Cyc_io_open_input_file(object str) {
     const char *fname = ((string_type *)str)->str;
     make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
+    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
     return p;
 }
 
@@ -1070,6 +1071,7 @@ port_type Cyc_io_open_output_file(object str) {
     const char *fname = ((string_type *)str)->str;
     make_port(p, NULL, 0);
     p.fp = fopen(fname, "w");
+    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
     return p;
 }
 
