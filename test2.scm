@@ -2,6 +2,8 @@
         (scheme file)
         (scheme write))
 
+(set! x 1)
+(write x)
 (write 'Cyc_procedure)
 ;;; TODO: C macros for funcall1, etc are not being generated even though entries are set
 ;;;    in the vector. must be another problem inspecting the vector ???

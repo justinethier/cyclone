@@ -12,7 +12,7 @@
   (export
     ;*defined-macros* 
     *do-code-gen*
-    ;*trace-level*
+    *trace-level*
     *primitives*
     built-in-syms
     trace
