@@ -991,9 +991,20 @@
                       globals
                       required-libs)
   (set! *global-syms* (append globals imported-globals))
-  (let ((compiled-program 
-          (apply string-append
-            (map c-compile-program input-program))))
+  (let ((compiled-program-lst '())
+        (compiled-program #f))
+    ;; Compile program, using for-each to guarantee execution order,
+    ;; since c-compile-program has side-effects.
+    (for-each
+      (lambda (expr)
+        (set! compiled-program-lst
+          (cons (c-compile-program expr) compiled-program-lst)))
+      input-program)
+
+    ;; Get top-level string
+    (set! compiled-program
+      (apply string-append (reverse compiled-program-lst)))
+
     (emit-c-arity-macros 0)
     (emit "#include \"cyclone.h\"")
 
