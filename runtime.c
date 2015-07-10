@@ -70,6 +70,24 @@ const object boolean_f = &f_boolean;
 static symbol_type Cyc_void_symbol = {symbol_tag, "", nil};
 const object quote_void = &Cyc_void_symbol;
 
+/* Stack Traces */
+const int MAX_STACK_TRACES = 10;
+char **Cyc_Stack_Traces;
+int Cyc_Stack_Trace_Idx = 0;
+
+void Cyc_st_init() { /* calloc tbl */ }
+void Cyc_st_add(char *frame) { /* add to circ buf */ }
+void Cyc_st_print(FILE *out) {
+  /* print to stream, note it is possible that
+     some traces could be on the stack after a GC.
+     not sure what to do about it, may need to
+     detect that case and stop printing.
+     or, with the tbl being so small, maybe it will
+     not be an issue in practice? a bit risky to ignore though
+  */
+}
+/* END Stack Traces section */
+
 /* Symbol Table */
 
 /* Notes for the symbol table
