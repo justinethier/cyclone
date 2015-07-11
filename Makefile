@@ -52,9 +52,10 @@ parser.so: parser.scm
 libcyclone.so.1: runtime.c runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
-libcyclone.a: runtime.c runtime.h
+libcyclone.a: runtime.c runtime.h dispatch.c
+	gcc -g -c dispatch.c -o dispatch.o
 	gcc -g -c runtime.c -o runtime.o
-	ar rcs libcyclone.a runtime.o
+	ar rcs libcyclone.a runtime.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library

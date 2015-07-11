@@ -3,7 +3,7 @@
         (scheme write))
 
 (with-output-to-file 
-  "tmp.c"
+  "dispatch.c"
   (lambda ()
     (display "
 #include \"cyclone.h\"
