@@ -12,11 +12,11 @@ Working TODO list:
 
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
-   - can we use scheme to generate the dispatch macro, instead of a C macro?
+   (1) - can we use scheme to generate the dispatch macro, instead of a C macro?
      I know not ideal, but want to avoid any licensing issues
 
    - improved error handling:
-     - code traces
+     (2) - code traces
        could pass filename and define name (if applicable) to c-compile-exp,
        and record it for each lambda. could then add code to each lambda to 
        write that info to a circular buffer when the function is called.
