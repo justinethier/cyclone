@@ -2,36 +2,29 @@
         (scheme file)
         (scheme write))
 
-(call-with-output-file "tmp.c"
-  (lambda (fp)
+(with-output-to-file 
+  "tmp.c"
+  (lambda ()
     (display "
 #include \"cyclone.h\"
 #include \"runtime.h\"
 
 void do_dispatch(int argc, function_type func, object clo, object *b) {
-  switch(argc) {" fp)
+  switch(argc) {" )
 
     (define bs "")
-    ;(for-each
-    ;  (lambda (i)
     (let loop ((i 0))
-
-        (display "case " fp)
-        (display i fp)
-        (display ":func(" fp)
-        (display i fp)
-        (display ",clo" fp)
-        (display bs fp)
-        (display ");" fp)
+        (display "case " )
+        (display i )
+        (display ":func(" )
+        (display i )
+        (display ",clo" )
+        (display bs )
+        (display ");" )
 
         (set! bs (string-append bs ",*(b+" (number->string i) ")"))
-        
         (if (< i 129)
           (loop (+ i 1))))
-    ;  '(0 1 2))
-;  case (0): func(0, clo);
-;  case (1): func(1, clo, *(b+0));
-;  case (2): func(2, clo, *(b+0), *(b+1));
 
     (display "
   default:
@@ -41,5 +34,5 @@ void do_dispatch(int argc, function_type func, object clo, object *b) {
    Cyc_rt_raise_msg(buf);
   }
   }
-}" fp)))
+}" )))
 
