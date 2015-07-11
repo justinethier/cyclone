@@ -156,6 +156,10 @@ object memqp(object,list);
 char *transport(char *,int);
 void GC(closure,object*,int) never_returns;
 
+void Cyc_st_init();
+void Cyc_st_add(char *frame);
+void Cyc_st_print(FILE *out);
+
 char *_strdup (const char *s);
 object add_symbol(symbol_type *psym);
 object add_symbol_by_name(const char *name);
