@@ -45,8 +45,9 @@ static void main_main (stack_size,heap_size,stack_base)
         stack_size,(void *)stack_base,(void *)stack_limit1);
  printf("main: Try different stack sizes from 4 K to 1 Meg.\n");
 #endif
- /* Do initializations of Lisp objects and rewrite rules.
- quote_list_f = mlist1(boolean_f); quote_list_t = mlist1(boolean_t); */
+
+ /* Initialize stack trace table */
+ Cyc_st_init();
 
  {
 

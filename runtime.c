@@ -212,6 +212,8 @@ object Cyc_default_exception_handler(int argc, closure _, object err) {
       }
     }
 
+    fprintf(stderr, "\nCall history:\n");
+    Cyc_st_print(stderr);
     fprintf(stderr, "\n");
     exit(1);
     return nil;
