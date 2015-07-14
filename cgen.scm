@@ -148,11 +148,7 @@
     (cons (car trace) fnc)
     trace))
 
-TODO: don't just do this, need to output as valid C code...
-TODO: try and output this as the first expression after all var declarations.
-      may require change where this is called, though
 (define (st:->code trace)
-  ;;(write `(JAE DEBUG ,trace))
   (if (or (not (pair? trace))
           (null? (cdr trace)))
     ""
@@ -1013,8 +1009,12 @@ TODO: try and output this as the first expression after all var declarations.
                                             (if has-closure? 1 0)))
                            ");\n");
                          "") ; No varargs, skip
-                       (st:->code trace)
-                       (c:serialize body "  ") "; \n"
+                       (c:serialize
+                         (c:append
+                           (c-code (st:->code trace))
+                           body)
+                         "  ")
+                       "; \n"
                        "}\n"))
       formals*))))
   
