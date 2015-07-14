@@ -145,9 +145,10 @@
 ;; Add function to trace, if not already set
 (define (st:add-function! trace fnc)
   (if (null? (cdr trace))
-    (set-cdr! trace fnc)
-    #f))
+    (cons (car trace) fnc)
+    trace))
 
+TODO: don't just do this, need to output as valid C code...
 (define (st:->code trace)
   ;;(write `(JAE DEBUG ,trace))
   (if (or (not (pair? trace))
