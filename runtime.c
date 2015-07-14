@@ -9,6 +9,16 @@
 #include "cyclone.h"
 #include "runtime.h"
 
+/* TODO: working on validation for applying functions */
+#define Cyc_check_num_args(fnc_name, num_args, args) { \
+  integer_type l = Cyc_length(args); \
+  if (num_args > l.value) { \
+    char buf[256]; \
+    snprintf(buf, 255, "Expected %d arguments but received %d.", num_args, l.value);  \
+    Cyc_rt_raise_msg(buf); \
+  } \
+}
+
 /* Funcall section, these are hardcoded here to support
    functions in this module. */
 #define funcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
@@ -1186,6 +1196,7 @@ cvar_type *mcvar(object *var) {
 void _Cyc_91global_91vars(object cont, object args){ 
     return_funcall1(cont, Cyc_global_variables); } 
 void _car(object cont, object args) { 
+    Cyc_check_num_args("car", 1, args);
     return_funcall1(cont, car(car(args))); }
 void _cdr(object cont, object args) { 
     return_funcall1(cont, cdr(car(args))); }
