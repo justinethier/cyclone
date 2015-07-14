@@ -13,19 +13,6 @@ Working TODO list:
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - improved error handling:
-     (1) - code traces
-       could pass filename and define name (if applicable) to c-compile-exp,
-       and record it for each lambda. could then add code to each lambda to 
-       write that info to a circular buffer when the function is called.
-       that would enable a primitive stack trace to be maintained at runtime.
-
-       ideally use an array of (char *) and a pointer incremented like (i = (i + 1) % size)
-       to treat it as a circular buffer
-
-       as a starting point, could encode lambda name and filename and get the
-       circular buffer and runtime reporting working. then come back and add
-       Scheme function names.
-
      - type checking
        ideally want to do this in a way that minimized performance impacts.
        will probaby require extensive checks within apply() though, since that

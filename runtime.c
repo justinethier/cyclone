@@ -80,9 +80,11 @@ void Cyc_st_init() {
 }
 
 void Cyc_st_add(char *frame) { 
-  // TODO: do not add if (idx - 1) == frame, since that causes recursion to remove older frames
-  Cyc_Stack_Traces[Cyc_Stack_Trace_Idx] = frame;
-  Cyc_Stack_Trace_Idx = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
+  // Do not allow recursion to remove older frames
+  if (frame != Cyc_Stack_Traces[(Cyc_Stack_Trace_Idx - 1) % MAX_STACK_TRACES]) {
+    Cyc_Stack_Traces[Cyc_Stack_Trace_Idx] = frame;
+    Cyc_Stack_Trace_Idx = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
+  }
 }
 
 void Cyc_st_print(FILE *out) {

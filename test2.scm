@@ -2,10 +2,14 @@
         (scheme file)
         (scheme write))
 
+(map
+  (lambda (_)
 (set! x 1)
-(write x)
-(write 'Cyc_procedure)
+;(write x)
+;(write 'Cyc_procedure)
 (open-input-file "1.scm")
+)
+(list 1))
 ;;; TODO: C macros for funcall1, etc are not being generated even though entries are set
 ;;;    in the vector. must be another problem inspecting the vector ???
 ;(write 'hello)
