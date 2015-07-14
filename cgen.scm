@@ -140,6 +140,26 @@
       assign (number->string n) ";")
     ""))
 
+;;; Stack trace (call history) helpers
+
+;; Add function to trace, if not already set
+(define (st:add-function! trace fnc)
+  (if (null? (cdr trace))
+    (set-cdr! trace fnc)
+    #f))
+
+(define (st:->code trace)
+  ;;(write `(JAE DEBUG ,trace))
+  (if (or (not (pair? trace))
+          (null? (cdr trace)))
+    ""
+    (string-append 
+      (car trace) 
+      ":" 
+      (symbol->string (cdr trace)))))
+
+;; END st helpers
+
 ;;; Compilation routines.
 
 ;; Return generated code that also requests allocation of C variables on stack
@@ -202,11 +222,11 @@
         (c:body cp)))
 
 ;; c-compile-program : exp -> string
-(define (c-compile-program exp)
+(define (c-compile-program exp src-file)
   (let* ((preamble "")
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n"))))
-         (body (c-compile-exp exp append-preamble "cont")))
+         (body (c-compile-exp exp append-preamble "cont" (list src-file))))
     ;(write `(DEBUG ,body))
     (string-append 
      preamble 
@@ -222,7 +242,10 @@
 ;; append-preamble - ??
 ;; cont - name of the next continuation
 ;;        this is experimental and probably needs refinement
-(define (c-compile-exp exp append-preamble cont)
+;; trace - trace information. presently a pair containing:
+;;         * source file
+;;         * function name (or nil if none)
+(define (c-compile-exp exp append-preamble cont trace)
   (cond
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
@@ -231,22 +254,22 @@
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
     ((quote? exp)       (c-compile-quote exp))
-    ((if? exp)          (c-compile-if exp append-preamble cont))
+    ((if? exp)          (c-compile-if exp append-preamble cont trace))
 
     ; IR (2):
     ((tagged-list? '%closure exp)
-     (c-compile-closure exp append-preamble cont))
+     (c-compile-closure exp append-preamble cont trace))
     ; Global definition
     ((define? exp)
-     (c-compile-global exp append-preamble cont))
+     (c-compile-global exp append-preamble cont trace))
     ; Special case - global function w/out a closure. Create an empty closure
     ((tagged-list? 'lambda exp)
      (c-compile-exp
       `(%closure ,exp)
-       append-preamble cont))
+       append-preamble cont trace))
     
     ; Application:      
-    ((app? exp)         (c-compile-app exp append-preamble cont))
+    ((app? exp)         (c-compile-app exp append-preamble cont trace))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
 (define (c-compile-quote qexp)
@@ -647,7 +670,7 @@
       (mangle exp))))
 
 ; c-compile-args : list[exp] (string -> void) -> string
-(define (c-compile-args args append-preamble prefix cont)
+(define (c-compile-args args append-preamble prefix cont trace)
   (letrec ((num-args 0)
          (_c-compile-args 
           (lambda (args append-preamble prefix cont)
@@ -659,7 +682,7 @@
                   (c:append/prefix
                     prefix 
                     (c-compile-exp (car args) 
-                      append-preamble cont)
+                      append-preamble cont trace)
                     (_c-compile-args (cdr args) 
                       append-preamble ", " cont)))))))
   (c:tuple/args
@@ -668,14 +691,14 @@
     num-args)))
 
 ;; c-compile-app : app-exp (string -> void) -> string
-(define (c-compile-app exp append-preamble cont)
+(define (c-compile-app exp append-preamble cont trace)
   ;(trace:debug `(c-compile-app: ,exp))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
         ((lambda? fun)
-         (let* ((lid (allocate-lambda (c-compile-lambda fun))) ;; TODO: pass in free vars? may be needed to track closures
+         (let* ((lid (allocate-lambda (c-compile-lambda fun trace))) ;; TODO: pass in free vars? may be needed to track closures
                                                                ;; properly, wait until this comes up in an example
                 (this-cont (string-append "__lambda_" (number->string lid)))
                 (cgen 
@@ -683,7 +706,8 @@
                      args 
                      append-preamble 
                      ""
-                     this-cont))
+                     this-cont
+                     trace))
                 (num-cargs (c:num-args cgen)))
            (set-c-call-arity! num-cargs)
            (c-code
@@ -698,7 +722,7 @@
          (let* ((c-fun 
                  (c-compile-prim fun cont))
                 (c-args
-                 (c-compile-args args append-preamble "" ""))
+                 (c-compile-args args append-preamble "" "" trace))
                 (num-args (length args))
                 (num-args-str
                   (string-append 
@@ -733,9 +757,9 @@
 
         ;; TODO: may not be good enough, closure app could be from an elt
         ((tagged-list? '%closure-ref fun)
-         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont))
+         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace))
                 (this-cont (c:body cfun))
-                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont)))
+                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont trace)))
            (set-c-call-arity! (c:num-args cargs))
            (c-code 
              (string-append
@@ -750,10 +774,10 @@
 
         ((tagged-list? '%closure fun)
          (let* ((cfun (c-compile-closure 
-                        fun append-preamble cont))
+                        fun append-preamble cont trace))
                 (this-cont (string-append "(closure)" (c:body cfun)))
                 (cargs (c-compile-args
-                         args append-preamble "  " this-cont))
+                         args append-preamble "  " this-cont trace))
                 (num-cargs (c:num-args cargs)))
            (set-c-call-arity! num-cargs)
            (c-code
@@ -771,9 +795,9 @@
          (error `(Unsupported function application ,exp)))))))
 
 ; c-compile-if : if-exp -> string
-(define (c-compile-if exp append-preamble cont)
+(define (c-compile-if exp append-preamble cont trace)
   (let* ((compile (lambda (exp)
-                    (c-compile-exp exp append-preamble cont)))
+                    (c-compile-exp exp append-preamble cont trace)))
          (test (compile (if->condition exp)))
          (then (compile (if->then exp)))
          (els (compile (if->else exp))))
@@ -795,7 +819,7 @@
 (define (add-global var-sym lambda? code)
   ;(write `(add-global ,var-sym ,code))
   (set! *globals* (cons (list var-sym lambda? code) *globals*)))
-(define (c-compile-global exp append-preamble cont)
+(define (c-compile-global exp append-preamble cont trace)
  (let ((var (define->var exp))
        (body (if (equal? 4 (length exp)) ; Simple var assignment contains superfluous %closure-ref
                  (cadddr exp)
@@ -803,7 +827,9 @@
    (add-global 
      var 
      (lambda? body) 
-     (c-compile-exp body append-preamble cont))
+     (c-compile-exp 
+      body append-preamble cont
+      (st:add-function! trace var)))
    (c-code/vars "" (list ""))))
 
 ;; Symbol compilation
@@ -863,7 +889,7 @@
 ;;    the closure. The closure conversion phase tags each access
 ;;    to one with the corresponding index so `lambda` can use them.
 ;;
-(define (c-compile-closure exp append-preamble cont)
+(define (c-compile-closure exp append-preamble cont trace)
   (let* ((lam (closure->lam exp))
          (free-vars
            (map
@@ -876,7 +902,7 @@
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
-         (lid (allocate-lambda (c-compile-lambda lam)))
+         (lid (allocate-lambda (c-compile-lambda lam trace)))
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
@@ -927,7 +953,7 @@
           "")))))
 
 ; c-compile-lambda : lamda-exp (string -> void) -> (string -> string)
-(define (c-compile-lambda exp)
+(define (c-compile-lambda exp trace)
   (let* ((preamble "")
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n")))))
@@ -955,7 +981,8 @@
            (body    (c-compile-exp     
                         (car (lambda->exp exp)) ;; car ==> assume single expr in lambda body after CPS
                         append-preamble
-                        (mangle env-closure))))
+                        (mangle env-closure)
+                        trace)))
      (cons 
       (lambda (name)
         (string-append "static void " name 
@@ -979,6 +1006,7 @@
                                             (if has-closure? 1 0)))
                            ");\n");
                          "") ; No varargs, skip
+                       (st:->code trace)
                        (c:serialize body "  ") "; \n"
                        "}\n"))
       formals*))))
@@ -989,7 +1017,8 @@
                       lib-exports 
                       imported-globals
                       globals
-                      required-libs)
+                      required-libs
+                      src-file)
   (set! *global-syms* (append globals imported-globals))
   (let ((compiled-program-lst '())
         (compiled-program #f))
@@ -998,7 +1027,7 @@
     (for-each
       (lambda (expr)
         (set! compiled-program-lst
-          (cons (c-compile-program expr) compiled-program-lst)))
+          (cons (c-compile-program expr src-file) compiled-program-lst)))
       input-program)
 
     ;; Get top-level string

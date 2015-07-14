@@ -48,7 +48,7 @@
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
-(define (c-compile-and-emit input-program lib-deps)
+(define (c-compile-and-emit input-program lib-deps src-file)
   (call/cc 
     (lambda (return)
       (define globals '())
@@ -231,7 +231,8 @@
                     lib-exports 
                     imported-vars
                     module-globals
-                    lib-deps) 
+                    lib-deps
+                    src-file) 
       (return '())))) ;; No codes to return
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
@@ -263,7 +264,7 @@
              (with-output-to-file 
                src-file
                (lambda ()
-                 (c-compile-and-emit program lib-deps)))))
+                 (c-compile-and-emit program lib-deps src-file)))))
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
