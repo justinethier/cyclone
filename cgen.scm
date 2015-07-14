@@ -149,15 +149,21 @@
     trace))
 
 TODO: don't just do this, need to output as valid C code...
+TODO: try and output this as the first expression after all var declarations.
+      may require change where this is called, though
 (define (st:->code trace)
   ;;(write `(JAE DEBUG ,trace))
   (if (or (not (pair? trace))
           (null? (cdr trace)))
     ""
     (string-append 
+      "Cyc_st_add(\""
       (car trace) 
       ":" 
-      (symbol->string (cdr trace)))))
+      ;; TODO: escape backslashes
+      (symbol->string (cdr trace))
+      "\");\n"
+      )))
 
 ;; END st helpers
 
