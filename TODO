@@ -13,6 +13,10 @@ Working TODO list:
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - improved error handling:
+     - param count checks
+       * some rudimentary support in runtime
+       * should have checks in compiler as well. could possibly
+         use prim metadata to autogenerate the runtime checks (later, perhaps)
      - type checking
        ideally want to do this in a way that minimized performance impacts.
        will probaby require extensive checks within apply() though, since that
