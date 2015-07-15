@@ -437,6 +437,11 @@
             (pair->list args)))
       (lambda->formals exp)))
 
+(define (lambda-num-args exp)
+  (if (lambda-varargs? exp)
+    -1 ;; Unlimited
+    (length (lambda-formals->list exp))))
+
 ;; Repack a list of args (symbols) into lambda formals, by type
 ;; assumes args is a proper list
 (define (list->lambda-formals args type)

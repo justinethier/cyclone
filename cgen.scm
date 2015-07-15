@@ -911,6 +911,7 @@
              "closureN_type " cv-name ";\n"
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
+             cv-name ".num_args = " (number->string (lambda-num-args lam)) ";\n"
              cv-name ".num_elt = " (number->string (length free-vars)) ";\n"
              cv-name ".elts = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
@@ -932,7 +933,9 @@
             "(function_type)__lambda_" (number->string lid)
             (if (> (length free-vars) 0) "," "")
             (string-join free-vars ", ")
-            ");"))))
+            ");"
+            cv-name ".num_args = " (number->string (lambda-num-args lam)) ";"
+            ))))
   (c-code/vars
     (string-append "&" cv-name)
     (list 

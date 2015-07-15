@@ -232,12 +232,12 @@ cons_type n; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
 /* Closure types */
 
-typedef struct {tag_type tag; function_type fn;} closure0_type;
-typedef struct {tag_type tag; function_type fn; object elt1;} closure1_type;
-typedef struct {tag_type tag; function_type fn; object elt1,elt2;} closure2_type;
-typedef struct {tag_type tag; function_type fn; object elt1,elt2,elt3;} closure3_type;
-typedef struct {tag_type tag; function_type fn; object elt1,elt2,elt3,elt4;} closure4_type;
-typedef struct {tag_type tag; function_type fn; int num_elt; object *elts;} closureN_type;
+typedef struct {tag_type tag; function_type fn; int num_args; } closure0_type;
+typedef struct {tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
+typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2;} closure2_type;
+typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3;} closure3_type;
+typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3,elt4;} closure4_type;
+typedef struct {tag_type tag; function_type fn; int num_args; int num_elt; object *elts;} closureN_type;
 
 typedef closure0_type *closure0;
 typedef closure1_type *closure1;
@@ -247,15 +247,15 @@ typedef closure4_type *closure4;
 typedef closureN_type *closureN;
 typedef closure0_type *closure;
 
-#define mclosure0(c,f) closure0_type c; c.tag = closure0_tag; c.fn = f;
+#define mclosure0(c,f) closure0_type c; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
 #define mclosure1(c,f,a) closure1_type c; c.tag = closure1_tag; \
-   c.fn = f; c.elt1 = a;
+   c.fn = f; c.num_args = -1; c.elt1 = a;
 #define mclosure2(c,f,a1,a2) closure2_type c; c.tag = closure2_tag; \
-   c.fn = f; c.elt1 = a1; c.elt2 = a2;
+   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2;
 #define mclosure3(c,f,a1,a2,a3) closure3_type c; c.tag = closure3_tag; \
-   c.fn = f; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3;
+   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3;
 #define mclosure4(c,f,a1,a2,a3,a4) closure4_type c; c.tag = closure4_tag; \
-   c.fn = f; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3; c.elt4 = a4;
+   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3; c.elt4 = a4;
 // #define setq(x,e) x = e
 
 #define mlist1(e1) (mcons(e1,nil))

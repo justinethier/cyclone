@@ -53,6 +53,7 @@
     lambda-varargs-var 
     lambda-formals-type 
     lambda-formals->list 
+    lambda-num-args
     list->lambda-formals 
     pair->list 
     list->pair 

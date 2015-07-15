@@ -157,7 +157,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o
+icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o scheme/cyclone/util.o
 	./cyclone icyc.scm
 
 .PHONY: tags

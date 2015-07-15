@@ -1590,6 +1590,8 @@ object apply(object cont, object func, object args){
     case closure4_tag:
     case closureN_tag:
       buf.integer_t = Cyc_length(args);
+      // TODO: validate number of args provided:
+      //Cyc_check_num_args("<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
       dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
@@ -1685,12 +1687,14 @@ char *transport(x, gcgen) char *x; int gcgen;
     case closure0_tag:
       {register closure0 nx = (closure0) allocp;
        type_of(nx) = closure0_tag; nx->fn = ((closure0) x)->fn;
+       nx->num_args = ((closure0) x)->num_args;
        forward(x) = nx; type_of(x) = forward_tag;
        allocp = ((char *) nx)+sizeof(closure0_type);
        return (char *) nx;}
     case closure1_tag:
       {register closure1 nx = (closure1) allocp;
        type_of(nx) = closure1_tag; nx->fn = ((closure1) x)->fn;
+       nx->num_args = ((closure1) x)->num_args;
        nx->elt1 = ((closure1) x)->elt1;
        forward(x) = nx; type_of(x) = forward_tag;
        x = (char *) nx; allocp = ((char *) nx)+sizeof(closure1_type);
@@ -1698,6 +1702,7 @@ char *transport(x, gcgen) char *x; int gcgen;
     case closure2_tag:
       {register closure2 nx = (closure2) allocp;
        type_of(nx) = closure2_tag; nx->fn = ((closure2) x)->fn;
+       nx->num_args = ((closure2) x)->num_args;
        nx->elt1 = ((closure2) x)->elt1;
        nx->elt2 = ((closure2) x)->elt2;
        forward(x) = nx; type_of(x) = forward_tag;
@@ -1706,6 +1711,7 @@ char *transport(x, gcgen) char *x; int gcgen;
     case closure3_tag:
       {register closure3 nx = (closure3) allocp;
        type_of(nx) = closure3_tag; nx->fn = ((closure3) x)->fn;
+       nx->num_args = ((closure3) x)->num_args;
        nx->elt1 = ((closure3) x)->elt1;
        nx->elt2 = ((closure3) x)->elt2;
        nx->elt3 = ((closure3) x)->elt3;
@@ -1715,6 +1721,7 @@ char *transport(x, gcgen) char *x; int gcgen;
     case closure4_tag:
       {register closure4 nx = (closure4) allocp;
        type_of(nx) = closure4_tag; nx->fn = ((closure4) x)->fn;
+       nx->num_args = ((closure4) x)->num_args;
        nx->elt1 = ((closure4) x)->elt1;
        nx->elt2 = ((closure4) x)->elt2;
        nx->elt3 = ((closure4) x)->elt3;
@@ -1726,6 +1733,7 @@ char *transport(x, gcgen) char *x; int gcgen;
       {register closureN nx = (closureN) allocp;
        int i;
        type_of(nx) = closureN_tag; nx->fn = ((closureN) x)->fn;
+       nx->num_args = ((closureN) x)->num_args;
        nx->num_elt = ((closureN) x)->num_elt;
        nx->elts = (object *)(((char *)nx) + sizeof(closureN_type));
        for (i = 0; i < nx->num_elt; i++) {
