@@ -2,6 +2,8 @@
 # Copyright (c) 2014, Justin Ethier
 # All rights reserved.
 
+include Makefile.config
+
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 
@@ -55,7 +57,7 @@ libcyclone.so.1: runtime.c runtime.h
 libcyclone.a: runtime.c runtime.h dispatch.c
 	gcc -g -c dispatch.c -o dispatch.o
 	gcc -g -c runtime.c -o runtime.o
-	ar rcs libcyclone.a runtime.o dispatch.o
+	$(AR) rcs libcyclone.a runtime.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library
@@ -168,3 +170,13 @@ tags:
 clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
+
+install: all
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
+	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
+
+uninstall:
+	$(RM) $(DESTDIR)$(BINDIR)/cyclone
+	$(RM) $(DESTDIR)$(BINDIR)/icyc
+
