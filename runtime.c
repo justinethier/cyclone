@@ -13,8 +13,8 @@
 #define Cyc_check_num_args(fnc_name, num_args, args) { \
   integer_type l = Cyc_length(args); \
   if (num_args > l.value) { \
-    char buf[256]; \
-    snprintf(buf, 255, "Expected %d arguments but received %d.", num_args, l.value);  \
+    char buf[128]; \
+    snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
     Cyc_rt_raise_msg(buf); \
   } \
 }
