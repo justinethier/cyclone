@@ -1007,11 +1007,16 @@ object __halt(object obj) {
     return nil;
 }
 
-#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP) \
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 common_type FUNC_OP(object x, object y) { \
     common_type s; \
     int tx = type_of(x), ty = type_of(y); \
     s.double_t.tag = double_tag; \
+    if (DIV &&  \
+        ((ty == integer_tag && integer_value(y) == 0) || \
+        (ty == double_tag && double_value(y) == 0.0))) { \
+      Cyc_rt_raise_msg("Divide by zero"); \
+    } \
     if (tx == integer_tag && ty == integer_tag) { \
         s.integer_t.tag = integer_tag; \
         s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
@@ -1044,12 +1049,12 @@ void FUNC_APPLY(int argc, object clo, object cont, object n, ...) { \
     return_funcall1(cont, &result); \
 }
 
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
 // TODO: what about divide-by-zero, and casting to double when
 //       result contains a decimal component?
-declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /);
+declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
 
 common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns) {
   common_type sum;
