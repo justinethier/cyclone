@@ -878,6 +878,54 @@
             (car formals)
             'unused)))
 
+;           (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
+;                          (mangle (if (pair? (lambda->formals exp))
+;                                      (car (lambda->formals exp))
+;                                      (lambda->formals exp)))
+;                          ""))
+;           (has-closure? 
+;             (and
+;               (> (string-length tmp-ident) 3)
+;               (equal? "self" (substring tmp-ident 0 4))))
+
+;; Compute the minimum number of arguments a function expects.
+;; Note this must be the count before additional closure/CPS arguments
+;; are added, so we need to detect those and not include them.
+(define (compute-num-args lam)
+  (let ((count (lambda-num-args lam))) ;; Current arg count, may be too high
+    (cond
+      ((< count 0) -1) ;; Unlimited
+      (else
+        (let ((formals (lambda-formals->list lam)))
+          (- count
+             (if (fl/closure? formals) 1 0)
+             (if (fl/cont? formals) 1 0)))))))
+
+;; Formal list with a closure?
+(define (fl/closure? lis)
+  (cond
+    ((null? lis) #f)
+    (else
+      (let ((arg (symbol->string (car lis))))
+        (and
+          (> (string-length arg) 4)
+          (equal? "self$" (substring arg 0 5)))))))
+
+;; Formal list with a continuation (k)?
+(define (fl/cont? lis)
+  (let ((check (lambda (lis)
+                (cond
+                  ((null? lis) #f)
+                  (else
+                    (let ((arg (symbol->string (car lis))))
+                      (and
+                        (> (string-length arg) 1)
+                        (equal? "k$" (substring arg 0 2)))))))))
+    ;; Find the cont arg; if there is a closure it is always first
+    (if (fl/closure? lis)
+      (check (cdr lis))
+      (check lis))))
+
 ;; c-compile-closure : closure-exp (string -> void) -> string
 ;;
 ;; This function compiles closures generated earlier in the
@@ -911,7 +959,7 @@
              "closureN_type " cv-name ";\n"
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
-             cv-name ".num_args = " (number->string (lambda-num-args lam)) ";\n"
+             cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"
              cv-name ".num_elt = " (number->string (length free-vars)) ";\n"
              cv-name ".elts = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
@@ -934,7 +982,7 @@
             (if (> (length free-vars) 0) "," "")
             (string-join free-vars ", ")
             ");"
-            cv-name ".num_args = " (number->string (lambda-num-args lam)) ";"
+            cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
             ))))
   (c-code/vars
     (string-append "&" cv-name)

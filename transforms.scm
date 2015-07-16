@@ -437,10 +437,17 @@
             (pair->list args)))
       (lambda->formals exp)))
 
+;; Minimum number of required arguments for a lambda
 (define (lambda-num-args exp)
-  (if (lambda-varargs? exp)
-    -1 ;; Unlimited
-    (length (lambda-formals->list exp))))
+  (let ((type (lambda-formals-type exp))
+        (num (length (lambda-formals->list exp))))
+    (cond
+      ((equal? type 'args:varargs)
+       -1) ;; Unlimited
+      ((equal? type 'args:fixed-with-varargs)
+       (- num 1)) ;; Last arg is optional
+      (else
+        num))))
 
 ;; Repack a list of args (symbols) into lambda formals, by type
 ;; assumes args is a proper list

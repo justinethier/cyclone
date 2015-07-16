@@ -1591,7 +1591,7 @@ object apply(object cont, object func, object args){
     case closureN_tag:
       buf.integer_t = Cyc_length(args);
       // TODO: validate number of args provided:
-      //Cyc_check_num_args("<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
+      Cyc_check_num_args("<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
       dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
