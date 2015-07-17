@@ -55,8 +55,8 @@ libcyclone.so.1: runtime.c runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 libcyclone.a: runtime.c runtime.h dispatch.c
-	gcc -g -c dispatch.c -o dispatch.o
-	gcc -g -c runtime.c -o runtime.o
+	$(CC) -g -c dispatch.c -o dispatch.o
+	$(CC) -g -c runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
@@ -116,6 +116,7 @@ bootstrap:
 	cp runtime-main.h tmp
 	cp runtime.h tmp
 	cp runtime.c tmp
+	cp dispatch.c tmp
 	cp scheme/base.c tmp/scheme
 	cp scheme/read.c tmp/scheme
 	cp scheme/write.c tmp/scheme
@@ -131,6 +132,7 @@ bootstrap:
 	cp scheme/cyclone/util.c tmp/scheme/cyclone
 	cp cyclone-self.c tmp/cyclone.c
 	cp Makefile-bootstrap tmp/Makefile
+	cp Makefile.config tmp/Makefile.config
 
 
 .PHONY: test
@@ -171,12 +173,34 @@ clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
 
-install: all
+#install: all
+install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(MKDIR) $(DESTDIR)$(INCDIR)
+	$(MKDIR) $(DESTDIR)$(DATADIR)
+	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
+	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
+	$(INSTALL) -m0644 *.h $(DESTDIR)$(INCDIR)/
+	$(INSTALL) scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) scheme/*.c $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) scheme/*.o $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) scheme/cyclone/*.c $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 
 uninstall:
 	$(RM) $(DESTDIR)$(BINDIR)/cyclone
 	$(RM) $(DESTDIR)$(BINDIR)/icyc
+	$(RM) $(DESTDIR)$(LIBDIR)/*.*
+	$(RMDIR) $(DESTDIR)$(LIBDIR)
+	$(RM) $(DESTDIR)$(INCDIR)/*.*
+	$(RMDIR) $(DESTDIR)$(INCDIR)
+	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/scheme/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
+	$(RMDIR) $(DESTDIR)$(DATADIR)
 

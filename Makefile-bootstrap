@@ -4,7 +4,8 @@
 #
 # Makefile for bootstrapping cyclone from generated C files.
 
-CC = gcc
+include Makefile.config
+
 CFLAGS = -g -I.
 LIBS = -lcyclone -lm
 
@@ -17,9 +18,10 @@ COBJECTS=$(CFILES:.c=.o)
 
 all: cyclone icyc unit-tests
 
-libcyclone.a: runtime.c runtime.h
+libcyclone.a: runtime.c runtime.h dispatch.c
+	$(CC) -g -c dispatch.c -o dispatch.o
 	$(CC) -g -c runtime.c -o runtime.o
-	ar rcs libcyclone.a runtime.o
+	$(AR) rcs libcyclone.a runtime.o dispatch.o
 
 cyclone: $(COBJECTS) libcyclone.a
 	$(CC) cyclone.c $(CFLAGS) -c -o cyclone.o
