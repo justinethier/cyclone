@@ -946,8 +946,14 @@ string_type Cyc_installation_dir(object type) {
   // TODO: need to handle 'inc 'lib 'sld and return appropriate dir.
   // EG: if 'sld, return (CYC_INSTALL_DIR "/" CYC_SLD_DIR)
   // need to use directives from makefile
-  make_string(str, CYC_INSTALL_DIR);
-  return str;
+  if (Cyc_is_symbol(type) == boolean_t &&
+      strncmp(((symbol)type)->pname, "sld", 5) == 0) {
+    make_string(str, CYC_INSTALL_SLD); // TODO: prepend INSTALL_DIR + "/"
+    return str;
+  } else {
+    make_string(str, CYC_INSTALL_DIR);
+    return str;
+  }
 }
 
 /**
