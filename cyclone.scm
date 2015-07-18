@@ -18,6 +18,9 @@
 
 (cond-expand
  (chicken
+   (define (Cyc-installation-dir) "home/justin/Documents/cyclone")
+;; TODO: nuke all the other defs below, this is the only one to base installed locations on 
+
    ;; TODO: will need to read these from env somehow.
    ;; for now they are just hard-coded, but that won't work for an install
    (define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
