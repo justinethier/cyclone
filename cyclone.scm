@@ -18,7 +18,9 @@
 
 (cond-expand
  (chicken
-   (define (Cyc-installation-dir) "/home/justin/Documents/cyclone")
+   (define (Cyc-installation-dir . opt) 
+     ;; Ignore opt and always assume current dir for chicken, since it is just dev
+     "/home/justin/Documents/cyclone")
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
@@ -253,8 +255,6 @@
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
-(define (Cyc-installation-lib-dir) "") ; /lib/cyclone
-(define (Cyc-installation-inc-dir) "") ; /inc/cyclone
 ;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
 ;; TODO: real answer is to get rid of -I and -L below, and assume header and libs are
 ;;       already installed on the system. this is OK since we are going to have a place
@@ -269,9 +269,9 @@
                         (string-append " " (lib:import->filename i ".o") " "))
                       lib-deps)))
                  (comp-prog-cmd 
-                   (string-append "gcc " src-file " -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -c -o " exec-file ".o"))
+                   (string-append "gcc " src-file " -I" (Cyc-installation-dir 'inc) " -g -c -o " exec-file ".o"))
                  (comp-objs-cmd 
-                   (string-append "gcc " exec-file ".o " objs-str " -L" (Cyc-installation-dir) (Cyc-installation-lib-dir) " -lcyclone -lm -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -o " exec-file)))
+                   (string-append "gcc " exec-file ".o " objs-str " -L" (Cyc-installation-dir 'lib) " -lcyclone -lm -I" (Cyc-installation-dir 'inc) " -g -o " exec-file)))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond
@@ -283,7 +283,7 @@
               (write comp-objs-cmd)))))
       (else
         (let ((comp-lib-cmd
-                (string-append "gcc " src-file " -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -c -o " exec-file ".o")))
+                (string-append "gcc " src-file " -I" (Cyc-installation-dir 'inc) " -g -c -o " exec-file ".o")))
           (cond
             (cc?
               (system comp-lib-cmd))
