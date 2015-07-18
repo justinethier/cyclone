@@ -13,13 +13,6 @@
 ;;   not a very clean or nice API at the moment.
 ;;
 
-;; TODO: this definition is just temporary until we figure out how to get this info.
-;;  this is problematic as it has to work for the bootstrap and the actual cyclone comp.
-;;  although I suppose it would be OK if you have to bootstrap from a hardcoded dir
-(define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
-(define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
-(define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
-
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
@@ -66,6 +59,9 @@
 
 ;; TODO: include-ci, cond-expand
 
+(define (Cyc-installation-sld-dir) "")
+;(define (Cyc-installation-sld-dir) "/share/cyclone")
+
 ;; Resolve library filename given an import. 
 ;; Assumes ".sld" file extension if one is not specified.
 (define (lib:import->filename import . ext)
@@ -85,7 +81,7 @@
          (filename
            (substring filename* 1 (string-length filename*))))
     (if (tagged-list? 'scheme import)
-      (string-append (cyc:get-lib-dir) filename) ;; Built-in library
+      (string-append (Cyc-installation-dir) (Cyc-installation-sld-dir) "/" filename) ;; Built-in library
       filename)))
 
 ;; Get path to directory that contains the library
@@ -99,7 +95,7 @@
                  (string-append (symbol->string i) "/"))
                import-path))))
     (if (tagged-list? 'scheme import)
-      (string-append (cyc:get-lib-dir) path) ;; Built-in library
+      (string-append (Cyc-installation-dir) (Cyc-installation-sld-dir) "/" path) ;; Built-in library
       path)))
 
 ;; Given a program's import set, resolve each import to its .o file, then

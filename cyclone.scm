@@ -18,35 +18,17 @@
 
 (cond-expand
  (chicken
-   (define (Cyc-installation-dir) "home/justin/Documents/cyclone")
-;; TODO: nuke all the other defs below, this is the only one to base installed locations on 
-
-   ;; TODO: will need to read these from env somehow.
-   ;; for now they are just hard-coded, but that won't work for an install
-   (define (cyc:get-lib-dir) "/home/justin/Documents/cyclone/")
-   (define (cyc:get-clib-dir) "/home/justin/Documents/cyclone/")
-   (define (cyc:get-include-dir) "/home/justin/Documents/cyclone/")
-   ;; END TODO
+   (define (Cyc-installation-dir) "/home/justin/Documents/cyclone")
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
-   (load (string-append (cyc:get-lib-dir) "scheme/cyclone/common.so"))
-   (load (string-append (cyc:get-lib-dir) "parser.so"))
-   (load (string-append (cyc:get-lib-dir) "util.so"))
-   (load (string-append (cyc:get-lib-dir) "libraries.so"))
-   (load (string-append (cyc:get-lib-dir) "transforms.so"))
-   (load (string-append (cyc:get-lib-dir) "cgen.so")))
+   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
+   (load (string-append (Cyc-installation-dir) "/parser.so"))
+   (load (string-append (Cyc-installation-dir) "/util.so"))
+   (load (string-append (Cyc-installation-dir) "/libraries.so"))
+   (load (string-append (Cyc-installation-dir) "/transforms.so"))
+   (load (string-append (Cyc-installation-dir) "/cgen.so")))
  (else #f))
-;; (husk
-;;   (import (husk pretty-print))
-;;   ;; TODO: load files
-;; )
-; (else
-;   (load (string-append (cyc:get-lib-dir) "parser.scm"))
-;   (load (string-append (cyc:get-lib-dir) "util.scm"))
-;   (load (string-append (cyc:get-lib-dir) "libraries.scm"))
-;   (load (string-append (cyc:get-lib-dir) "transforms.scm"))
-;   (load (string-append (cyc:get-lib-dir) "cgen.scm"))))
 
 ;; Code emission.
   
@@ -271,7 +253,12 @@
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
-    ;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
+(define (Cyc-installation-lib-dir) "") ; /lib/cyclone
+(define (Cyc-installation-inc-dir) "") ; /inc/cyclone
+;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
+;; TODO: real answer is to get rid of -I and -L below, and assume header and libs are
+;;       already installed on the system. this is OK since we are going to have a place
+;;       to bootstrap cyclone from, so it will always be installed.
     (cond
       (program?
         (letrec ((objs-str 
@@ -282,9 +269,9 @@
                         (string-append " " (lib:import->filename i ".o") " "))
                       lib-deps)))
                  (comp-prog-cmd 
-                   (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o"))
+                   (string-append "gcc " src-file " -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -c -o " exec-file ".o"))
                  (comp-objs-cmd 
-                   (string-append "gcc " exec-file ".o " objs-str " -L" (cyc:get-clib-dir) " -lcyclone -lm -I" (cyc:get-include-dir) " -g -o " exec-file)))
+                   (string-append "gcc " exec-file ".o " objs-str " -L" (Cyc-installation-dir) (Cyc-installation-lib-dir) " -lcyclone -lm -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -o " exec-file)))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond
@@ -296,7 +283,7 @@
               (write comp-objs-cmd)))))
       (else
         (let ((comp-lib-cmd
-                (string-append "gcc " src-file " -I" (cyc:get-include-dir) " -g -c -o " exec-file ".o")))
+                (string-append "gcc " src-file " -I" (Cyc-installation-dir) (Cyc-installation-inc-dir) " -g -c -o " exec-file ".o")))
           (cond
             (cc?
               (system comp-lib-cmd))

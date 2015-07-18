@@ -4,9 +4,6 @@
           (scheme cyclone util)
   )
   (export
-    cyc:get-clib-dir
-    cyc:get-lib-dir
-    cyc:get-include-dir
     library?
     lib:name
     lib:name->string
