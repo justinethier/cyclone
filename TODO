@@ -22,6 +22,8 @@ how about we add installation-dir (AKA PREFIX) as a libcyclone.a function?
 the code can assume a cyc:get function for install dir and act accordingly.
 in addition, the chicken code can just hardwire it to the current directory or a home dir (maybe ideal, that is just debug anyway)
 
+1) makefile needs to pass PREFIX when building the runtime lib
+
      * purge (cyc:get-*-dir) functions
        should only need these maybe for the chicken install.
      * figure out how a build will go now. is it possible to build locally

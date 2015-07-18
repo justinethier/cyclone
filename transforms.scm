@@ -541,6 +541,7 @@
      exit
      system
      command-line-arguments
+     Cyc-installation-dir
      Cyc-default-exception-handler
      Cyc-current-exception-handler
      cons
@@ -628,6 +629,7 @@
                   exit
                   system
                   command-line-arguments
+                  Cyc-installation-dir
                   Cyc-default-exception-handler
                   Cyc-current-exception-handler
                   cell-get

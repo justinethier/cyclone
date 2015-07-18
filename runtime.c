@@ -939,6 +939,15 @@ string_type Cyc_substring(object str, object start, object end) {
 }
 
 /**
+ * Return directory where cyclone is installed.
+ * This is configured via the makefile during a build.
+ */
+string_type Cyc_installation_dir() {
+  make_string(str, CYC_INSTALL_DIR);
+  return str;
+}
+
+/**
  * Perform same role as the CHICKEN function:
  *
  * Contains the list of arguments passed to this program, with the name 
@@ -1459,6 +1468,9 @@ void _cyc_string_91ref(object cont, object args) {
     Cyc_check_num_args("string-ref", 2, args);
     { object c = Cyc_string_ref(car(args), cadr(args));
       return_funcall1(cont, c); }}
+void _Cyc_91installation_91dir(object cont, object args) {
+    string_type dir = Cyc_installation_dir();
+    return_funcall1(cont, &dir);}
 void _command_91line_91arguments(object cont, object args) {
     object cmdline = Cyc_command_line_arguments(cont);
     return_funcall1(cont, cmdline); }
@@ -2151,6 +2163,7 @@ static primitive_type string_91_125number_primitive = {primitive_tag, "string->n
 static primitive_type string_91length_primitive = {primitive_tag, "string-length", &_string_91length};
 static primitive_type substring_primitive = {primitive_tag, "substring", &_cyc_substring};
 static primitive_type string_91ref_primitive = {primitive_tag, "string-ref", &_cyc_string_91ref};
+static primitive_type Cyc_91installation_91dir_primitive = {primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir};
 static primitive_type command_91line_91arguments_primitive = {primitive_tag, "command-line-arguments", &_command_91line_91arguments};
 static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
 static primitive_type string_91cmp_primitive = {primitive_tag, "string-cmp", &_string_91cmp};
@@ -2266,6 +2279,7 @@ const object primitive_string_91_125number = &string_91_125number_primitive;
 const object primitive_string_91length = &string_91length_primitive;
 const object primitive_substring = &substring_primitive;
 const object primitive_string_91ref = &string_91ref_primitive;
+const object primitive_Cyc_91installation_91dir = &Cyc_91installation_91dir_primitive;
 const object primitive_command_91line_91arguments = &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;
 const object primitive_string_91cmp = &string_91cmp_primitive;

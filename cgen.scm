@@ -495,6 +495,7 @@
      ((eq? p 'string-length)  "Cyc_string_length")
      ((eq? p 'string-ref)     "Cyc_string_ref")
      ((eq? p 'substring)      "Cyc_substring")
+     ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
      ((eq? p 'system)         "Cyc_system")
      ((eq? p 'assq)          "assq")
@@ -542,6 +543,7 @@
     ((eq? p 'length) "integer_type")
     ((eq? p 'vector-length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
+    ((eq? p 'Cyc-installation-dir) "string_type")
     ((eq? p 'system) "integer_type")
     ((eq? p '+) "common_type")
     ((eq? p '-) "common_type")
@@ -569,7 +571,10 @@
              Cyc-stderr
              open-input-file
              open-output-file
-             char->integer system string->number 
+             char->integer 
+             system 
+             Cyc-installation-dir
+             string->number 
              string-append string-cmp list->string string->list
              make-vector list->vector
              symbol->string number->string 
