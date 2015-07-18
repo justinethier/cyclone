@@ -56,7 +56,7 @@ libcyclone.so.1: runtime.c runtime.h
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 libcyclone.a: runtime.c runtime.h dispatch.c
 	$(CC) -g -c dispatch.c -o dispatch.o
-	$(CC) -g -c -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_SLD=\"/share/cyclone\" runtime.c -o runtime.o
+	$(CC) -g -c -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_LIB=\"$(LIBDIR)\" -DCYC_INSTALL_INC=\"$(INCDIR)\" -DCYC_INSTALL_SLD=\"$(DATADIR)\" runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:

@@ -943,12 +943,23 @@ string_type Cyc_substring(object str, object start, object end) {
  * This is configured via the makefile during a build.
  */
 string_type Cyc_installation_dir(object type) {
-  // TODO: need to handle 'inc 'lib 'sld and return appropriate dir.
-  // EG: if 'sld, return (CYC_INSTALL_DIR "/" CYC_SLD_DIR)
-  // need to use directives from makefile
   if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "sld", 5) == 0) {
-    make_string(str, CYC_INSTALL_SLD); // TODO: prepend INSTALL_DIR + "/"
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
+    make_string(str, buf);
+    return str;
+  } else if (Cyc_is_symbol(type) == boolean_t &&
+      strncmp(((symbol)type)->pname, "lib", 5) == 0) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
+    make_string(str, buf);
+    return str;
+  } else if (Cyc_is_symbol(type) == boolean_t &&
+      strncmp(((symbol)type)->pname, "inc", 5) == 0) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
+    make_string(str, buf);
     return str;
   } else {
     make_string(str, CYC_INSTALL_DIR);
