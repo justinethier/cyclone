@@ -59,9 +59,6 @@
 
 ;; TODO: include-ci, cond-expand
 
-(define (Cyc-installation-sld-dir) "")
-;(define (Cyc-installation-sld-dir) "/share/cyclone")
-
 ;; Resolve library filename given an import. 
 ;; Assumes ".sld" file extension if one is not specified.
 (define (lib:import->filename import . ext)
@@ -81,7 +78,7 @@
          (filename
            (substring filename* 1 (string-length filename*))))
     (if (tagged-list? 'scheme import)
-      (string-append (Cyc-installation-dir) (Cyc-installation-sld-dir) "/" filename) ;; Built-in library
+      (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
       filename)))
 
 ;; Get path to directory that contains the library
@@ -95,7 +92,7 @@
                  (string-append (symbol->string i) "/"))
                import-path))))
     (if (tagged-list? 'scheme import)
-      (string-append (Cyc-installation-dir) (Cyc-installation-sld-dir) "/" path) ;; Built-in library
+      (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
       path)))
 
 ;; Given a program's import set, resolve each import to its .o file, then

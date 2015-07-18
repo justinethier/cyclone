@@ -942,7 +942,10 @@ string_type Cyc_substring(object str, object start, object end) {
  * Return directory where cyclone is installed.
  * This is configured via the makefile during a build.
  */
-string_type Cyc_installation_dir() {
+string_type Cyc_installation_dir(object type) {
+  // TODO: need to handle 'inc 'lib 'sld and return appropriate dir.
+  // EG: if 'sld, return (CYC_INSTALL_DIR "/" CYC_SLD_DIR)
+  // need to use directives from makefile
   make_string(str, CYC_INSTALL_DIR);
   return str;
 }
@@ -1469,8 +1472,9 @@ void _cyc_string_91ref(object cont, object args) {
     { object c = Cyc_string_ref(car(args), cadr(args));
       return_funcall1(cont, c); }}
 void _Cyc_91installation_91dir(object cont, object args) {
-    string_type dir = Cyc_installation_dir();
-    return_funcall1(cont, &dir);}
+    Cyc_check_num_args("Cyc-installation-dir", 1, args);
+    { string_type dir = Cyc_installation_dir(car(args));
+      return_funcall1(cont, &dir);}}
 void _command_91line_91arguments(object cont, object args) {
     object cmdline = Cyc_command_line_arguments(cont);
     return_funcall1(cont, cmdline); }

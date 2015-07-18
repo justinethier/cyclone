@@ -201,3 +201,6 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
 	$(RMDIR) $(DESTDIR)$(DATADIR)
 
+testing:
+	make PREFIX="." libcyclone.a && make && make test && make self && make self2 && make bootstrap
+
