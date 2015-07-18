@@ -20,7 +20,7 @@ all: cyclone icyc unit-tests
 
 libcyclone.a: runtime.c runtime.h dispatch.c
 	$(CC) -g -c dispatch.c -o dispatch.o
-	$(CC) -g -c runtime.c -o runtime.o
+	$(CC) -g -c -DCYC_INSTALL_DIR=\"$(PREFIX)\" runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o dispatch.o
 
 cyclone: $(COBJECTS) libcyclone.a
