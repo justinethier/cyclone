@@ -13,16 +13,10 @@ Working TODO list:
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - installation - let's get this nailed down, since it is important and a mess right now
-     * need to figure out how to get the share/cyclone dir from build
-       cmd line to the codebase. Maybe it could be part of the runtime
-       library, as a C argument? EG: could pass $(PREFIX) to the build
-       command
+     * looks like will need to relocate .scm files from main dir to the same dirs as the .sld files.
+       see issues with trying to compile self2
+       note self now requires a 'make install' to get the sld's in place
 
-how about we add installation-dir (AKA PREFIX) as a libcyclone.a function?
-the code can assume a cyc:get function for install dir and act accordingly.
-in addition, the chicken code can just hardwire it to the current directory or a home dir (maybe ideal, that is just debug anyway)
-
-1) makefile needs to pass PREFIX when building the runtime lib
 
      * figure out how a build will go now. is it possible to build locally
        and test (which would be ideal) or is an install required? a
