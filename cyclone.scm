@@ -19,8 +19,10 @@
 (cond-expand
  (chicken
    (define (Cyc-installation-dir . opt) 
-     ;; Ignore opt and always assume current dir for chicken, since it is just dev
-     "/home/justin/Documents/cyclone")
+     (if (equal? '(inc) opt)
+       "/home/justin/Documents/cyclone/include"
+       ;; Ignore opt and always assume current dir for chicken, since it is just dev
+       "/home/justin/Documents/cyclone"))
    (require-extension extras) ;; pretty-print
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
