@@ -6,8 +6,16 @@
  * This file contains C types used by compiled programs.
  */
 
-#ifndef CYCLONE_H
-#define CYCLONE_H
+#ifndef CYCLONE_TYPES_H
+#define CYCLONE_TYPES_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <setjmp.h>
+#include <stdarg.h>
+#include <string.h>
+#include <math.h>
 
 /* Debug GC flag */
 #define DEBUG_GC 0
@@ -34,32 +42,11 @@
 /* Define size of Lisp tags.  Options are "short" or "long". */
 typedef long tag_type;
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <setjmp.h>
-#include <stdarg.h>
-#include <string.h>
-#include <math.h>
-
 #ifndef CLOCKS_PER_SEC
 /* gcc doesn't define this, even though ANSI requires it in <time.h>.. */
 #define CLOCKS_PER_SEC 0
 #define setjmp _setjmp
 #define longjmp _longjmp
-#endif
-
-/* The following sparc hack is courtesy of Roger Critchlow. */
-/* It speeds up the output by more than a factor of THREE. */
-/* Do 'gcc -O -S cboyer13.c'; 'perlscript >cboyer.s'; 'gcc cboyer.s'. */
-#ifdef __GNUC__
-#ifdef sparc
-#define never_returns __attribute__ ((noreturn))
-#else
-#define never_returns /* __attribute__ ((noreturn)) */
-#endif
-#else
-#define never_returns /* __attribute__ ((noreturn)) */
 #endif
 
 #if STACK_GROWS_DOWNWARD
@@ -68,7 +55,7 @@ typedef long tag_type;
 #define check_overflow(x,y) ((x) > (y))
 #endif
 
-/* Define tag values.  (I don't trust compilers to optimize enums.) */
+/* Define tag values. Could be an enum... */
 #define cons_tag 0
 #define symbol_tag 1
 #define forward_tag 2
@@ -107,8 +94,6 @@ typedef void *object;
    values instead of objects (IE, pointer to a tagged object).
    On many machines, addresses are multiples of four, leaving the two
    least significant bits free - according to lisp in small pieces.
-
-   experimenting with chars below:
 */
 #define obj_is_char(x)  ((unsigned long)(x) & (unsigned long)1)
 #define obj_obj2char(x) (char)((long)(x)>>1)
@@ -132,10 +117,6 @@ typedef struct {const tag_type tag; const char *pname;} boolean_type;
 typedef boolean_type *boolean;
 
 #define boolean_pname(x) (((boolean_type *) x)->pname)
-
-/* #define defboolean(name,pname) \
- static boolean_type name##_boolean = {boolean_tag, #pname}; \
- static const object boolean_##name = &name##_boolean */
 
 /* Define symbol type. */
 
@@ -228,8 +209,6 @@ typedef cons_type *list;
 #define make_cons(n,a,d) \
 cons_type n; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
-#define atom(x) ((x == NULL) || (((cons_type *) x)->tag != cons_tag))
-
 /* Closure types */
 
 typedef struct {tag_type tag; function_type fn; int num_args; } closure0_type;
@@ -294,4 +273,4 @@ typedef union {
 } common_type;
 
 
-#endif /* CYCLONE_H */
+#endif /* CYCLONE_TYPES_H */

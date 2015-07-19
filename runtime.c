@@ -1017,7 +1017,7 @@ object Cyc_integer2char(object n){
     return obj_char2obj(val);
 }
 
-void my_exit(closure) never_returns;
+void my_exit(closure);
 void my_exit(env) closure env; {
 #if DEBUG_SHOW_DIAG
     printf("my_exit: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",

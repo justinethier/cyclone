@@ -17,7 +17,7 @@ long global_heap_size = 0;
 
 static long long_arg(int argc,char **argv,char *name,long dval);
 static void c_entry_pt(int,closure,closure);
-static void main_main(long stack_size,long heap_size,char *stack_base) never_returns;
+static void main_main(long stack_size,long heap_size,char *stack_base);
 
 static void main_main (stack_size,heap_size,stack_base)
      long stack_size,heap_size; char *stack_base;

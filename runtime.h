@@ -110,7 +110,7 @@ object Cyc_command_line_arguments(object cont);
 integer_type Cyc_system(object cmd);
 integer_type Cyc_char2integer(object chr);
 object Cyc_integer2char(object n);
-void my_exit(closure) never_returns;
+void my_exit(closure);
 object __halt(object obj);
 port_type Cyc_stdout(void);
 port_type Cyc_stdin(void);
@@ -155,7 +155,7 @@ object equalp(object,object);
 object memberp(object,list);
 object memqp(object,list);
 char *transport(char *,int);
-void GC(closure,object*,int) never_returns;
+void GC(closure,object*,int);
 
 void Cyc_st_init();
 void Cyc_st_add(char *frame);
@@ -238,7 +238,7 @@ extern object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
 extern int gc_num_ans;
 extern jmp_buf jmp_main; /* Where to jump to. */
 
-/* Define the Lisp atoms that we need. */
+/* Define Lisp constants we need. */
 extern const object boolean_t;
 extern const object boolean_f;
 extern const object quote_void;
