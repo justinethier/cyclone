@@ -1098,7 +1098,7 @@
       (apply string-append (reverse compiled-program-lst)))
 
     (emit-c-arity-macros 0)
-    (emit "#include \"cyclone.h\"")
+    (emit "#include \"cyclone/types.h\"")
 
     ;; Globals defined in this module
     (for-each
@@ -1114,10 +1114,10 @@
           (emits (mangle-global global))
           (emits ";\n"))
         imported-globals)
-    (emit "#include \"runtime.h\"")
+    (emit "#include \"cyclone/runtime.h\"")
 
     (if program?
-        (emit "#include \"runtime-main.h\""))
+        (emit "#include \"cyclone/runtime-main.h\""))
 
     ;; Emit symbol definitions
     (for-each

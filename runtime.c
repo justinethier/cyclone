@@ -6,8 +6,8 @@
  * This file contains the C runtime used by compiled programs.
  */
 
-#include "cyclone.h"
-#include "runtime.h"
+#include "cyclone/types.h"
+#include "cyclone/runtime.h"
 
 /* TODO: working on validation for applying functions */
 #define Cyc_check_num_args(fnc_name, num_args, args) { \

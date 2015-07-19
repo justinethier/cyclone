@@ -51,12 +51,12 @@ libraries.so: libraries.scm
 parser.so: parser.scm
 	csc -s parser.scm
 
-libcyclone.so.1: runtime.c runtime.h
+libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
-libcyclone.a: runtime.c runtime.h dispatch.c
-	$(CC) -g -c dispatch.c -o dispatch.o
-	$(CC) -g -c -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_LIB=\"$(LIBDIR)\" -DCYC_INSTALL_INC=\"$(INCDIR)\" -DCYC_INSTALL_SLD=\"$(DATADIR)\" runtime.c -o runtime.o
+libcyclone.a: runtime.c include/cyclone/runtime.h dispatch.c
+	$(CC) -g -c -Iinclude dispatch.c -o dispatch.o
+	$(CC) -g -c -Iinclude -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_LIB=\"$(LIBDIR)\" -DCYC_INSTALL_INC=\"$(INCDIR)\" -DCYC_INSTALL_SLD=\"$(DATADIR)\" runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
@@ -112,9 +112,10 @@ bootstrap:
 #	$(MAKE) self2
 	rm -rf tmp
 	mkdir -p tmp/scheme/cyclone
-	cp cyclone.h tmp
-	cp runtime-main.h tmp
-	cp runtime.h tmp
+	mkdir -p tmp/include/cyclone
+	cp include/cyclone/cyclone.h tmp/include/cyclone
+	cp include/cyclone/runtime-main.h tmp/include/cyclone
+	cp include/cyclone/runtime.h tmp/include/cyclone
 	cp runtime.c tmp
 	cp dispatch.c tmp
 	cp scheme/base.c tmp/scheme
@@ -161,7 +162,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o scheme/cyclone/util.o
+icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm include/cyclone/runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o scheme/cyclone/util.o
 	./cyclone icyc.scm
 
 .PHONY: tags
@@ -182,7 +183,7 @@ install:
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
-	$(INSTALL) -m0644 *.h $(DESTDIR)$(INCDIR)/
+	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone

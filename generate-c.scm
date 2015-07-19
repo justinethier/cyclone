@@ -6,8 +6,8 @@
   "dispatch.c"
   (lambda ()
     (display "
-#include \"cyclone.h\"
-#include \"runtime.h\"
+#include \"cyclone/types.h\"
+#include \"cyclone/runtime.h\"
 
 void do_dispatch(int argc, function_type func, object clo, object *b) {
   switch(argc) {" )

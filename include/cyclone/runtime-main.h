@@ -10,7 +10,7 @@
 #ifndef CYCLONE_RUNTIME_MAIN_H
 #define CYCLONE_RUNTIME_MAIN_H
 
-#include "cyclone.h"
+#include "cyclone/types.h"
 
 long global_stack_size = 0;
 long global_heap_size = 0;
