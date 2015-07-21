@@ -113,7 +113,7 @@ bootstrap:
 	rm -rf tmp
 	mkdir -p tmp/scheme/cyclone
 	mkdir -p tmp/include/cyclone
-	cp include/cyclone/cyclone.h tmp/include/cyclone
+	cp include/cyclone/types.h tmp/include/cyclone
 	cp include/cyclone/runtime-main.h tmp/include/cyclone
 	cp include/cyclone/runtime.h tmp/include/cyclone
 	cp runtime.c tmp
