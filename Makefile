@@ -6,6 +6,7 @@ include Makefile.config
 
 TESTSCM = unit-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
+BOOTSTRAP_DIR = ../cyclone-bootstrap
 
 all: cyclone icyc
 
@@ -110,30 +111,34 @@ self2:
 .PHONY: bootstrap
 bootstrap:
 #	$(MAKE) self2
-	rm -rf tmp
-	mkdir -p tmp/scheme/cyclone
-	mkdir -p tmp/include/cyclone
-	cp include/cyclone/types.h tmp/include/cyclone
-	cp include/cyclone/runtime-main.h tmp/include/cyclone
-	cp include/cyclone/runtime.h tmp/include/cyclone
-	cp runtime.c tmp
-	cp dispatch.c tmp
-	cp scheme/base.c tmp/scheme
-	cp scheme/read.c tmp/scheme
-	cp scheme/write.c tmp/scheme
-	cp scheme/char.c tmp/scheme
-	cp scheme/eval.c tmp/scheme
-	cp scheme/file.c tmp/scheme
-	cp scheme/cyclone/common.c tmp/scheme/cyclone
-	cp icyc.scm tmp
-	cp tests/unit-tests.scm tmp
-	cp scheme/cyclone/libraries.c tmp/scheme/cyclone
-	cp scheme/cyclone/transforms.c tmp/scheme/cyclone
-	cp scheme/cyclone/cgen.c tmp/scheme/cyclone
-	cp scheme/cyclone/util.c tmp/scheme/cyclone
-	cp cyclone-self.c tmp/cyclone.c
-	cp Makefile-bootstrap tmp/Makefile
-	cp Makefile.config tmp/Makefile.config
+#	rm -rf $(BOOTSTRAP_DIR)
+	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
+	mkdir -p $(BOOTSTRAP_DIR)/include/cyclone
+	cp include/cyclone/types.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp include/cyclone/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp include/cyclone/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp scheme/*.scm $(BOOTSTRAP_DIR)/scheme
+	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
+	cp scheme/cyclone/*.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp runtime.c $(BOOTSTRAP_DIR)
+	cp dispatch.c $(BOOTSTRAP_DIR)
+	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/read.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/write.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/eval.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/file.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/cyclone/common.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp icyc.scm $(BOOTSTRAP_DIR)
+	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
+	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp cyclone-self.c $(BOOTSTRAP_DIR)/cyclone.c
+	cp Makefile-bootstrap $(BOOTSTRAP_DIR)/Makefile
+	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
 
 .PHONY: test
@@ -194,8 +199,7 @@ install:
 uninstall:
 	$(RM) $(DESTDIR)$(BINDIR)/cyclone
 	$(RM) $(DESTDIR)$(BINDIR)/icyc
-	$(RM) $(DESTDIR)$(LIBDIR)/*.*
-	$(RMDIR) $(DESTDIR)$(LIBDIR)
+	$(RM) $(DESTDIR)$(LIBDIR)/libcyclone.a
 	$(RM) $(DESTDIR)$(INCDIR)/*.*
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
