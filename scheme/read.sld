@@ -5,6 +5,6 @@
     read
     read-all
   )
-  (include "../parser.scm")
+  (include "parser.scm")
   (begin
     (define read cyc-read)))

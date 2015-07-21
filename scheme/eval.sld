@@ -8,5 +8,5 @@
   (export
     eval
   )
-  (include "../eval.scm")
+  (include "eval.scm")
   (begin))

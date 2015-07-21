@@ -21,7 +21,7 @@
     lib:get-all-import-deps
     lib:get-dep-list
   )
-  (include "../../libraries.scm")
+  (include "libraries.scm")
   ;(begin
   ;  (define read cyc-read))
 )

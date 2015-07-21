@@ -15,13 +15,13 @@ scheme/base.o: cyclone scheme/base.sld
 scheme/char.o: cyclone scheme/char.sld
 	./cyclone scheme/char.sld
 
-scheme/eval.o: cyclone scheme/eval.sld eval.scm
+scheme/eval.o: cyclone scheme/eval.sld scheme/eval.scm
 	./cyclone scheme/eval.sld
 
 scheme/file.o: cyclone scheme/file.sld
 	./cyclone scheme/file.sld
 
-scheme/read.o: cyclone scheme/read.sld parser.scm
+scheme/read.o: cyclone scheme/read.sld scheme/parser.scm
 	./cyclone scheme/read.sld
 
 scheme/write.o: cyclone scheme/write.sld
@@ -33,23 +33,23 @@ scheme/cyclone/common.o: scheme/cyclone/common.sld
 scheme/cyclone/util.o: scheme/cyclone/util.sld
 	./cyclone scheme/cyclone/util.sld
 
-common.so: scheme/cyclone/common.scm
+scheme/cyclone/common.so: scheme/cyclone/common.scm
 	csc -s scheme/cyclone/common.scm
 
-util.so: util.scm
-	csc -s util.scm
+scheme/cyclone/util.so: scheme/cyclone/util.scm
+	csc -s scheme/cyclone/util.scm
 
-transforms.so: transforms.scm
-	csc -s transforms.scm
+scheme/cyclone/transforms.so: scheme/cyclone/transforms.scm
+	csc -s scheme/cyclone/transforms.scm
 
-cgen.so: cgen.scm
-	csc -s cgen.scm
+scheme/cyclone/cgen.so: scheme/cyclone/cgen.scm
+	csc -s scheme/cyclone/cgen.scm
 
-libraries.so: libraries.scm
-	csc -s libraries.scm
+scheme/cyclone/libraries.so: scheme/cyclone/libraries.scm
+	csc -s scheme/cyclone/libraries.scm
 
-parser.so: parser.scm
-	csc -s parser.scm
+scheme/cyclone/parser.so: scheme/parser.scm
+	csc -s scheme/parser.scm
 
 libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
@@ -72,7 +72,7 @@ debug:
 debug2: libcyclone.so.1
 	gcc test.c -L. -lcyclone -I. -g -o test
 
-cyclone: cyclone.scm transforms.so util.so cgen.so libraries.so parser.so common.so libcyclone.a
+cyclone: cyclone.scm scheme/cyclone/transforms.so scheme/cyclone/util.so scheme/cyclone/cgen.so scheme/cyclone/libraries.so scheme/cyclone/parser.so scheme/cyclone/common.so libcyclone.a
 	csc cyclone.scm
 
 #scheme/cyclone/util.o: cyclone scheme/cyclone/util.sld
@@ -162,7 +162,7 @@ test2: examples/hello-library/int-test/hello.c libcyclone.a
 ## END temporary directives
 ###########################
 
-icyc: cyclone icyc.scm eval.scm libraries.scm parser.scm include/cyclone/runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o scheme/cyclone/util.o
+icyc: cyclone icyc.scm scheme/eval.scm scheme/cyclone/libraries.scm scheme/parser.scm include/cyclone/runtime.h scheme/base.o scheme/read.o scheme/write.o scheme/char.o scheme/eval.o scheme/file.o scheme/cyclone/util.o scheme/cyclone/common.o scheme/cyclone/util.o
 	./cyclone icyc.scm
 
 .PHONY: tags
@@ -186,6 +186,7 @@ install:
 	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 

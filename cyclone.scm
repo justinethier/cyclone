@@ -27,11 +27,11 @@
    (require-extension chicken-syntax) ;; when
    (require-extension srfi-1) ;; every
    (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
-   (load (string-append (Cyc-installation-dir) "/parser.so"))
-   (load (string-append (Cyc-installation-dir) "/util.so"))
-   (load (string-append (Cyc-installation-dir) "/libraries.so"))
-   (load (string-append (Cyc-installation-dir) "/transforms.so"))
-   (load (string-append (Cyc-installation-dir) "/cgen.so")))
+   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
+   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
+   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
+   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
+   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
  (else #f))
 
 ;; Code emission.

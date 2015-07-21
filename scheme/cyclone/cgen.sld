@@ -74,4 +74,4 @@
     ;(c-compile-formals formals type)
     ;(c-compile-lambda exp)
   )
-  (include "../../cgen.scm"))
+  (include "cgen.scm"))

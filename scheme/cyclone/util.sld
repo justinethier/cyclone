@@ -18,7 +18,7 @@
     any
     every
     filter)
-  (include "../../util.scm")
+  (include "util.scm")
   (begin
     ;; Simplified versions of every/any from SRFI-1
     (define (any pred lst)
