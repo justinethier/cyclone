@@ -53,6 +53,14 @@ install-libs:
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 
+install-cyclone:
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
+
+install-icyc:
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
+
 install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
