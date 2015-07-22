@@ -4,17 +4,15 @@
 ;;
 ;; This module contains a front-end for the compiler itself.
 ;;
-
-; TODO:
-;(import (scheme base)
-;        (scheme file)
-;        (scheme read)
-;        (scheme write)
-;        (scheme cyclone common)
-;        (scheme cyclone util)
-;        (scheme cyclone cgen)
-;        (scheme cyclone transforms)
-;        (scheme cyclone libraries))
+(import (scheme base)
+        (scheme file)
+        (scheme read)
+        (scheme write)
+        (scheme cyclone common)
+        (scheme cyclone util)
+        (scheme cyclone cgen)
+        (scheme cyclone transforms)
+        (scheme cyclone libraries))
 
 (cond-expand
  (chicken
@@ -257,10 +255,6 @@
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
-;; TODO: -I is a hack, real answer is to use 'make install' to place .h file
-;; TODO: real answer is to get rid of -I and -L below, and assume header and libs are
-;;       already installed on the system. this is OK since we are going to have a place
-;;       to bootstrap cyclone from, so it will always be installed.
     (cond
       (program?
         (letrec ((objs-str 
@@ -271,9 +265,9 @@
                         (string-append " " (lib:import->filename i ".o") " "))
                       lib-deps)))
                  (comp-prog-cmd 
-                   (string-append "gcc " src-file " -I" (Cyc-installation-dir 'inc) " -g -c -o " exec-file ".o"))
+                   (string-append "gcc " src-file " -g -c -o " exec-file ".o"))
                  (comp-objs-cmd 
-                   (string-append "gcc " exec-file ".o " objs-str " -L" (Cyc-installation-dir 'lib) " -lcyclone -lm -I" (Cyc-installation-dir 'inc) " -g -o " exec-file)))
+                   (string-append "gcc " exec-file ".o " objs-str " -lcyclone -lm -g -o " exec-file)))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond
@@ -285,7 +279,7 @@
               (write comp-objs-cmd)))))
       (else
         (let ((comp-lib-cmd
-                (string-append "gcc " src-file " -I" (Cyc-installation-dir 'inc) " -g -c -o " exec-file ".o")))
+                (string-append "gcc " src-file " -g -c -o " exec-file ".o")))
           (cond
             (cc?
               (system comp-lib-cmd))
