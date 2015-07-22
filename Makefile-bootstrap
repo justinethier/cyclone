@@ -33,9 +33,9 @@ icyc: cyclone
 unit-tests: unit-tests.scm
 	cyclone unit-tests.scm && ./unit-tests
 
-#.PHONY: clean
-#clean:
-#  rm -rf a.out http stack-watch stack-tests *.o
+.PHONY: clean
+clean:
+	rm -rf *.o *.a *.so cyclone icyc unit-tests test.out test.txt scheme/*.o scheme/cyclone/*.o icyc.c unit-tests.c
 
 # Install dependencies required to actually build this project
 install-deps:
