@@ -31,7 +31,7 @@ icyc: cyclone
 	./cyclone icyc.scm
 
 unit-tests: unit-tests.scm
-	./cyclone unit-tests.scm && ./unit-tests
+	cyclone unit-tests.scm && ./unit-tests
 
 #.PHONY: clean
 #clean:
@@ -54,13 +54,17 @@ install-libs:
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 
 install-cyclone:
-	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
+	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 
 install-icyc:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
 
+# Install everything. Can not call this directly initially as 
+# dependencies are required by portions of the build.
 install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
