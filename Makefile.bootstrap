@@ -59,10 +59,6 @@ install-cyclone:
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 
-install-icyc:
-	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
-
 # Install everything. Can not call this directly initially as 
 # dependencies are required by portions of the build.
 install:
