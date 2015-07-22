@@ -96,7 +96,7 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c dispatch.c
+	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/cyclone/*.o scheme/cyclone/*.c dispatch.c icyc.c generate-c.c generate-c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
 
 install:
