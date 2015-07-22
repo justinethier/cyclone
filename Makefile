@@ -35,9 +35,15 @@ cyclone: $(COBJECTS) libcyclone.a cyclone-self.scm
 icyc: $(COBJECTS) libcyclone.a icyc.scm
 	$(CYCLONE) icyc.scm
 
+dispatch.c: generate-c.scm
+# TODO: could call from icyc, eg: icyc generate-c.scm
+	$(CYCLONE) generate-c.scm
+	./generate-c
+
 libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
+
 libcyclone.a: runtime.c include/cyclone/runtime.h dispatch.c
 	$(CC) -g -c -Iinclude dispatch.c -o dispatch.o
 	$(CC) -g -c -Iinclude -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_LIB=\"$(LIBDIR)\" -DCYC_INSTALL_INC=\"$(INCDIR)\" -DCYC_INSTALL_SLD=\"$(DATADIR)\" runtime.c -o runtime.o
@@ -49,7 +55,7 @@ libcyclone.a: runtime.c include/cyclone/runtime.h dispatch.c
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
 .PHONY: bootstrap
-bootstrap:
+bootstrap: icyc
 #	rm -rf $(BOOTSTRAP_DIR)
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/include/cyclone
@@ -90,7 +96,7 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c
+	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c dispatch.c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
 
 install:
