@@ -1029,7 +1029,7 @@ void my_exit(env) closure env; {
 object __halt(object obj) {
 #if DEBUG_SHOW_DIAG
     printf("\nhalt: ");
-    Cyc_display(obj);
+    Cyc_display(obj, stdout);
     printf("\n");
 #endif
     my_exit(obj);

@@ -44,7 +44,7 @@ libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc -g -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 
-libcyclone.a: runtime.c include/cyclone/runtime.h dispatch.c
+libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h dispatch.c
 	$(CC) -g -c -Iinclude dispatch.c -o dispatch.o
 	$(CC) -g -c -Iinclude -DCYC_INSTALL_DIR=\"$(PREFIX)\" -DCYC_INSTALL_LIB=\"$(LIBDIR)\" -DCYC_INSTALL_INC=\"$(INCDIR)\" -DCYC_INSTALL_SLD=\"$(DATADIR)\" runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o dispatch.o

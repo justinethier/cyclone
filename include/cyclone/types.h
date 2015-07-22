@@ -20,7 +20,7 @@
 /* Debug GC flag */
 #define DEBUG_GC 0
 
-/* Show diagnostic information for the GC when program terminate */
+/* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
 
 /* Maximum number of args that GC will accept */
