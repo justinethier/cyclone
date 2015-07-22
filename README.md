@@ -5,13 +5,12 @@ Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA
 Building
 ------------
 
+TODO: new instructions, link/instructions for bootstrapping, etc
+
 Prerequisites:
 
 - make
 - gcc
-- CHICKEN Scheme
-
-CHICKEN is required to bootstrap the Scheme parts of Cyclone. A long-term goal is for the compiler to be self-hosting.
 
 From the source directory, to build and run the compiler:
 
@@ -25,11 +24,11 @@ To run the interpreter:
 
 Installation
 ------------
-At the moment there is no support for a separate installation. Just run `cyclone` from the build directory.
+TODO: integrate with previous section???
 
 Documentation
 -------------
-Run the `cyclone` command to compile a single Scheme file, and the `repl` command to start the interactive interpreter.
+Run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start the interactive interpreter.
 
 List of [features](FEATURES.md).
 
