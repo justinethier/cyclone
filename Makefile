@@ -29,8 +29,8 @@ all: cyclone icyc
 %.o: %.sld
 	$(CYCLONE) $<
 
-cyclone: $(COBJECTS) libcyclone.a cyclone-self.scm
-	$(CYCLONE) cyclone-self.scm
+cyclone: $(COBJECTS) libcyclone.a cyclone.scm
+	$(CYCLONE) cyclone.scm
 
 icyc: $(COBJECTS) libcyclone.a icyc.scm
 	$(CYCLONE) icyc.scm
@@ -81,7 +81,7 @@ bootstrap: icyc
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp cyclone-self.c $(BOOTSTRAP_DIR)/cyclone.c
+	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.bootstrap $(BOOTSTRAP_DIR)/Makefile
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
