@@ -9,7 +9,29 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
-/* TODO: working on validation for applying functions */
+const char *tag_names[20] = { \
+   "pair" \
+ , "symbol" \
+ , "" \
+ , "closure" \
+ , "closure" \
+ , "closure" \
+ , "closure" \
+ , "closure" \
+ , "closure" \
+ , "integer" \
+ , "double" \
+ , "string" \
+ , "primitive" \
+ , "eof" \
+ , "port" \
+ , "boolean" \
+ , "C primitive" \
+ , "vector" \
+ , "" \
+ , "" };
+
+/* Error handling section */
 #define Cyc_check_num_args(fnc_name, num_args, args) { \
   integer_type l = Cyc_length(args); \
   if (num_args > l.value) { \
@@ -17,6 +39,12 @@
     snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
     Cyc_rt_raise_msg(buf); \
   } \
+}
+
+void Cyc_invalid_type_error(int tag, object found) {
+  char buf[256];
+  snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
+  Cyc_rt_raise2(buf, found);
 }
 
 /* Funcall section, these are hardcoded here to support
@@ -1231,8 +1259,9 @@ void _Cyc_91global_91vars(object cont, object args){
     return_funcall1(cont, Cyc_global_variables); } 
 void _car(object cont, object args) { 
     Cyc_check_num_args("car", 1, args);
-    //Cyc_check_type("car", 
-    return_funcall1(cont, car(car(args))); }
+    { object var = car(args);
+      if (eq(boolean_f, Cyc_is_cons(var))) Cyc_invalid_type_error(cons_tag, var);
+      return_funcall1(cont, car(var)); }}
 void _cdr(object cont, object args) { 
     Cyc_check_num_args("cdr", 1, args);
     return_funcall1(cont, cdr(car(args))); }

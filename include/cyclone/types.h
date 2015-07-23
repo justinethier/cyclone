@@ -55,7 +55,8 @@ typedef long tag_type;
 #define check_overflow(x,y) ((x) > (y))
 #endif
 
-/* Define tag values. Could be an enum... */
+/* Define tag values. Could be an enum...
+   Remember to update tag_names in runtime.c when adding new tags */
 #define cons_tag 0
 #define symbol_tag 1
 #define forward_tag 2
