@@ -7,7 +7,7 @@
           @@@@:  
         `@@@@@+  
        .@@@+@@@      Cyclone  
-       @@     @@     An experimental Scheme compiler
+       @@     @@     Scheme-to-C compiler
       ,@             https://github.com/justinethier/cyclone
       '@        
       .@        
