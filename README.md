@@ -2,37 +2,41 @@
 
 Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, and generational garbage collection.
 
+Getting Started
+---------------
+
+If you are installing Cyclone for the first time, you will need to use [`cyclone-bootstrap`](https://github.com/justinethier/cyclone-bootstrap). 
+
+After installing you can read the Documentation section below for more.
+
 Building
 ------------
 
-TODO: new instructions, link/instructions for bootstrapping, etc
-
-Prerequisites:
+If you already have a copy of Cyclone installed, you can build from Scheme source. The following prerequisites are required:
 
 - make
 - gcc
+- Existing installation of Cyclone
 
-From the source directory, to build and run the compiler:
+From the source directory, use the following commands to build and install:
 
     $ make
-    ...
+    $ make test
+    $ sudo make install
     $ ./cyclone
     
-To run the interpreter:
+By default everything is installed under `/usr/local`. This may be changed by passing a different `PREFIX`. For example:
 
-    $ ./icyc
+    make PREFIX=/home/me install
 
-Installation
-------------
-TODO: integrate with previous section???
+You may then run the compiler using the `cyclone` command, and run the interpreter using `icyc`.
 
 Documentation
 -------------
+
 Run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start the interactive interpreter.
 
-List of [features](FEATURES.md).
-
-TODO: "how it works section", or a link to a document that provides a brief overview. Much of this would also involve tying together references
+For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). Here is a list of included [features](FEATURES.md).
 
 References
 ----------
