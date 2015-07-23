@@ -82,7 +82,6 @@ bootstrap: icyc
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
-	cp Makefile.bootstrap $(BOOTSTRAP_DIR)/Makefile
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
 
