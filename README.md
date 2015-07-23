@@ -5,14 +5,16 @@ Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA
 Getting Started
 ---------------
 
-If you are installing Cyclone for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
+If you are installing Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
 
 After installing you can read the Documentation section below for more.
 
 Building
 ------------
 
-If you already have a copy of Cyclone installed you can build from Scheme source. The following prerequisites are required:
+Please skip this section if you are installing Cyclone on a machine for the first time. Otherwise, if you already have a copy of Cyclone installed you can build from Scheme source. 
+
+The following prerequisites are required:
 
 - make
 - gcc
@@ -28,8 +30,6 @@ From the source directory, use the following commands to build and install:
 By default everything is installed under `/usr/local`. This may be changed by passing a different `PREFIX`. For example:
 
     make PREFIX=/home/me install
-
-You may then run the compiler using the `cyclone` command, and run the interpreter using `icyc`.
 
 Documentation
 -------------
