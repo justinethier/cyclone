@@ -31,7 +31,7 @@ const char *tag_names[20] = { \
  , "" \
  , "" };
 
-/* Error handling section */
+/* Type checking section */
 #define Cyc_check_num_args(fnc_name, num_args, args) { \
   integer_type l = Cyc_length(args); \
   if (num_args > l.value) { \
@@ -40,6 +40,9 @@ const char *tag_names[20] = { \
     Cyc_rt_raise_msg(buf); \
   } \
 }
+
+#define Cyc_check_type(fnc_test, tag, var) { \
+  if (eq(boolean_f, fnc_test(var))) Cyc_invalid_type_error(cons_tag, var); }
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
