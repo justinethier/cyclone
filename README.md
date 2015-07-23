@@ -53,6 +53,6 @@ References
 
 License
 -------
-Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier)
+Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
 
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
