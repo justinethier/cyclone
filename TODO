@@ -26,8 +26,9 @@ Working TODO list:
      2) Need to either allow code to read an import after macro expansion, or have another main module for self-hosting
 
    - Documentation improvements
-     - create a getting started page to go into more detail (build options, rlwrap, etc)
+     - create a getting started page to go into more detail (build section could move to a that page, could go over build options, rlwrap, etc)
      - create a 'how this was built' page to go into more detail about which references were used where
+     - Documentation section should clearly link to build page, features, how-this-was-built, etc.
      
    - GC improvements
      - is dhalloc limit good enough?
