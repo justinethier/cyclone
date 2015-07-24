@@ -9,6 +9,7 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
+/* Type names to use for error messages */
 const char *tag_names[20] = { \
    "pair" \
  , "symbol" \
@@ -19,8 +20,8 @@ const char *tag_names[20] = { \
  , "closure" \
  , "closure" \
  , "closure" \
- , "integer" \
- , "double" \
+ , "number" \
+ , "number" \
  , "string" \
  , "primitive" \
  , "eof" \
@@ -28,8 +29,8 @@ const char *tag_names[20] = { \
  , "boolean" \
  , "C primitive" \
  , "vector" \
- , "" \
- , "" };
+ , "TODO: add missing type" \
+ , "TODO: add missing type" };
 
 /* Type checking section */
 #define Cyc_check_num_args(fnc_name, num_args, args) { \
@@ -45,6 +46,7 @@ const char *tag_names[20] = { \
   if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(cons_tag, obj); }
 
 #define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
+#define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
@@ -625,7 +627,9 @@ list assoc(x,l) object x; list l;
 
 // TODO: generate these using macros???
 object __num_eq(x, y) object x, y;
-{if (x && y && ((integer_type *)x)->value == ((integer_type *)y)->value)
+{Cyc_check_num(x);
+ Cyc_check_num(y);
+ if (((integer_type *)x)->value == ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
@@ -1066,6 +1070,9 @@ object __halt(object obj) {
     printf("\nhalt: ");
     Cyc_display(obj, stdout);
     printf("\n");
+    printf("my_exit: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
+        allocp-bottom,clock()-start,no_gcs,no_major_gcs);
+    printf("my_exit: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
 #endif
     my_exit(obj);
     return nil;
