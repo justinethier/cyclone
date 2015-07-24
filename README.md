@@ -5,43 +5,43 @@ Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA
 Getting Started
 ---------------
 
-If you are installing Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
+1. To install Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
 
-After installing you can run the `cyclone` command to compile a single Scheme file:
+2. After installing you can run the `cyclone` command to compile a single Scheme file:
 
-    $ cyclone examples/fac.scm
-    $ examples/fac
-    3628800
-
-And the `icyc` command to start an interactive interpreter:
-
-    $ icyc
+        $ cyclone examples/fac.scm
+        $ examples/fac
+        3628800
     
-                  :@
-                @@@
-              @@@@:
-            `@@@@@+
-           .@@@+@@@      Cyclone
-           @@     @@     An experimental Scheme compiler
-          ,@             https://github.com/justinethier/cyclone
-          '@
-          .@
-           @@     #@     (c) 2014 Justin Ethier
-           `@@@#@@@.     Version 0.0.1 (Pre-release)
-            #@@@@@
-            +@@@+
-            @@#
-          `@.
+    And the `icyc` command to start an interactive interpreter:
     
-    cyclone> (write 'hello-world)
-    hello-world
+        $ icyc
+        
+                      :@
+                    @@@
+                  @@@@:
+                `@@@@@+
+               .@@@+@@@      Cyclone
+               @@     @@     An experimental Scheme compiler
+              ,@             https://github.com/justinethier/cyclone
+              '@
+              .@
+               @@     #@     (c) 2014 Justin Ethier
+               `@@@#@@@.     Version 0.0.1 (Pre-release)
+                #@@@@@
+                +@@@+
+                @@#
+              `@.
+        
+        cyclone> (write 'hello-world)
+        hello-world
 
 Documentation
 -------------
 
 For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). 
 
-The [features](FEATURES.md) page lists what has been implemented so far.
+The [features](FEATURES.md) page lists the language features currently implemented.
 
 The [development](docs/Development.md) page contains instructions for hacking on Cyclone.
 
