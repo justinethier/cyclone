@@ -7,7 +7,7 @@ Getting Started
 
 If you are installing Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
 
-After installing you can read the Documentation section below for more.
+After installing you can run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start an interactive interpreter.
 
 Building
 ------------
@@ -34,9 +34,7 @@ By default everything is installed under `/usr/local`. This may be changed by pa
 Documentation
 -------------
 
-Run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start the interactive interpreter.
-
-For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). Here is a list of included [features](FEATURES.md).
+For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). The [features](FEATURES.md) page lists what has been implemented so far.
 
 References
 ----------
