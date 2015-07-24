@@ -746,12 +746,14 @@ object Cyc_eq(object x, object y) {
 }
 
 object Cyc_set_car(object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
     car(l) = val;
     add_mutation(l, val);
     return l;
 }
 
 object Cyc_set_cdr(object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
     cdr(l) = val;
     add_mutation(l, val);
     return l;
@@ -788,7 +790,7 @@ integer_type Cyc_vector_length(object v) {
 integer_type Cyc_length(object l){
     make_int(len, 0);
     while(!nullp(l)){
-        if (((list)l)->tag != cons_tag){
+        if (is_value_type(l) || ((list)l)->tag != cons_tag){
             Cyc_rt_raise_msg("length - invalid parameter, expected list\n");
         }
         l = cdr(l);
@@ -1398,7 +1400,6 @@ void _equal_127(object cont, object args){
     return_funcall1(cont, equalp(car(args), cadr(args))); }
 void _length(object cont, object args){ 
     Cyc_check_num_args("length", 1, args);
-    if (!nullp(car(args))) Cyc_check_cons(car(args));
     { integer_type i = Cyc_length(car(args));
       return_funcall1(cont, &i); }}
 void _vector_91length(object cont, object args){ 
