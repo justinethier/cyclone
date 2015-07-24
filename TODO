@@ -29,28 +29,15 @@ Working TODO list. should start creating issues for these to get them out of her
      - create a getting started page to go into more detail (build section could move to a that page, could go over build options, rlwrap, etc)
      - create a 'how this was built' page to go into more detail about which references were used where
      - features section is not accurate, need to assess what is implemented
-     
-   - library improvements
-     - should detect dependent libraries and build them if necessary.
-       basically, build them if the .o file does not exist or if it is older than the corresponding source file(s)
-
-   - GC improvements
-     - is dhalloc limit good enough?
-     - should expand size of heap if there is not enough room to fit all the "kept" objects
-       get a test case for this, should be simple enough to write a program that exhausts memory
 
    - eval
      there is no concept of macro expansion, probably other deficiencies as well
      almost certainly will break when running the self-hosted compiler...
      no, I think this is ok. may want to unify macros with compiler side though
-
-   - support for application of pure varargs functions, EG:
-         ((lambda test (write test)) 1 2 3 4)
-     don't think this is needed for self-hosting though, so it can wait
-
+     
    - vectors
        - make-vector should have an optional 'fill' arg in compiled code
-         note allocation functions can be functions instead of macros if they accept a
+       - note allocation functions can be functions instead of macros if they accept a
          cont arg so they do not have to return
        - should make GC more efficient, only transport mutated vector index, not the whole vector
        - After all this works, make sure to add tests from r7rs to test suite
@@ -82,25 +69,6 @@ Working TODO list. should start creating issues for these to get them out of her
 
  http://www.pvk.ca/Blog/2012/02/19/fixed-points-and-strike-mandates/
 
-- FUTURE error handling
-  - param count checks
-    * should have checks in compiler as well. could possibly
-      use prim metadata to autogenerate the runtime checks (later, perhaps).
-      absolutely need this, but  may require some thought. which phase should
-      do the checks? also may require looking at lib files because you need
-      to check each application point, and need to look up the function to
-      see how many args it can receive.
-
- - Add unit tests for exception handlers, and new constructs added to lib
-
- - Issues with detecting cycles:
-   - (equal?) loops forever when comparing two different circular lists
-   - printing *global-environment* in the repl still loops forever
-
- - Use a lib.scm for libs, similar to eval/parser modules?
-
- - along the same lines, output should be controlled in a better way. or at minimum should print errors using stderr (possible with standard scheme, though??)
-
  - String support
    issue is how to support strings themselves in memory. can add them directly to the string_type, but then apply won't work 
    because it could return an unknown number of bytes. on the other hand could use a separate data heap that is mirrored during GC.
@@ -126,31 +94,19 @@ Working TODO list. should start creating issues for these to get them out of her
   TODO: trigger GC if data heap too low
   TODO: once this works but before moving all, consolidate all this in docs/strings.txt or such. would be useful to keep these notes
 
-
-- Unit test improvements
-  - concatenate all into one file when compiling / running
-  - add assert functions, and actually test for equality
-    otherwise it is too easy to miss failing test cases, unless they
-    blow up the runtime
- - This has already been done, just need to incorporate other existing tests.
-
-- Parser
-  ;'a'c  ;; TODO: this is still an issue, try it
-
 - Think about consoldating list of primitives in (prim?) and (c-compile-prim?). should also include other information such as number of args (or variable args), for error handling.
 
 - Notes on implementing variables
 
  * lexical addressing (see chapter 5 of SICP) can be used to find a variable in recursive env's, so you can access it directly instead of having to recursively traverse environments.
 
-- Implement ER-macros using eval, in scheme. with this in place, could implement basic macros using ER and replace "desugar". presumably syntax rules could be implemented this way as well, but that can wait for a later time
-- Pass port along with emit procedures, to allow the scheme code to write to an output file (IE, c file)?? Or is with-output-file good enough? unfortunately that is not in husk yet so it makes boostrapping harder
 - Question about closures and continuations:
  Presumably every function will recieve a closure. Do we have to differentiate between continuation (which every
  function must have) and closure (which can be empty if no fv)? right now the MTA runtime combines the two by
  having an fn argument to each closure. Is that OK?
 
-- GC - notes from: http://www.more-magic.net/posts/internals-gc.html
+- keeping this in here, should mention this in the 'how this works' doc:
+GC - notes from: http://www.more-magic.net/posts/internals-gc.html
 
  JAE - Good notes here about mutations (use write barrier to keep track of changes, EG: vector-set!). remember changes so they can be handled properly during next GC:
 
@@ -162,7 +118,3 @@ Working TODO list. should start creating issues for these to get them out of her
 
 The smart reader might have noticed a small problem here: what if the amount of garbage cleaned up is less than the data on the stack? Then, the stack data can't be copied to the new heap because it simply is too small. Well, this is when a third GC mode is triggered: a reallocating GC. This causes a new heap to be allocated, twice as big as the current heap. This is also split in from- and tospace. Then, Cheney's algorithm is performed on the old heap's fromspace, using one half of the new heap as tospace. When it's finished, the new tospace is called fromspace, and the other half of the new heap is called tospace. Then, the old heap is de-allocated.
 
-- farther off but along the same lines, how to support compilation of
-  multiple scheme files into multiple C modules?
-
-- Just a thought: if this ever became self-hosting, could distribute compiled C files
