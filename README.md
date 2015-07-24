@@ -5,7 +5,7 @@ Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA
 Getting Started
 ---------------
 
-1. To install Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
+1. To install Cyclone on your machine for the first time use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
 
 2. After installing you can run the `cyclone` command to compile a single Scheme file:
 
