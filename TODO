@@ -8,7 +8,7 @@ Roadmap:
  - Target r7rs support (coordinate with feature list)
  - User manual (or at least API docs)
 
-Working TODO list:
+Working TODO list. should start creating issues for these to get them out of here:
 
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
@@ -30,6 +30,10 @@ Working TODO list:
      - create a 'how this was built' page to go into more detail about which references were used where
      - features section is not accurate, need to assess what is implemented
      
+   - library improvements
+     - should detect dependent libraries and build them if necessary.
+       basically, build them if the .o file does not exist or if it is older than the corresponding source file(s)
+
    - GC improvements
      - is dhalloc limit good enough?
      - should expand size of heap if there is not enough room to fit all the "kept" objects
