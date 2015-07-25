@@ -1,5 +1,6 @@
-Building
-------------
+# Development
+
+## Building
 
 Please use cyclone-bootstrap if you are installing Cyclone on a machine for the first time. Otherwise, if you already have a copy of Cyclone installed you can build from Scheme source. 
 
