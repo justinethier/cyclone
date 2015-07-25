@@ -28,7 +28,7 @@ Working TODO list:
    - Documentation improvements
      - create a getting started page to go into more detail (build section could move to a that page, could go over build options, rlwrap, etc)
      - create a 'how this was built' page to go into more detail about which references were used where
-     - Documentation section should clearly link to build page, features, how-this-was-built, etc.
+     - features section is not accurate, need to assess what is implemented
      
    - GC improvements
      - is dhalloc limit good enough?
