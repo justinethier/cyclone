@@ -7,7 +7,34 @@ Getting Started
 
 If you are installing Cyclone on your machine for the first time use [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
 
-After installing you can run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start an interactive interpreter.
+After installing you can run the `cyclone` command to compile a single Scheme file:
+
+    $ cyclone examples/fac.scm
+    $ examples/fac
+    3628800
+
+And the `icyc` command to start an interactive interpreter:
+
+    $ icyc
+    
+                  :@
+                @@@
+              @@@@:
+            `@@@@@+
+           .@@@+@@@      Cyclone
+           @@     @@     An experimental Scheme compiler
+          ,@             https://github.com/justinethier/cyclone
+          '@
+          .@
+           @@     #@     (c) 2014 Justin Ethier
+           `@@@#@@@.     Version 0.0.1 (Pre-release)
+            #@@@@@
+            +@@@+
+            @@#
+          `@.
+    
+    cyclone> (write 'hello-world)
+    hello-world
 
 Documentation
 -------------
