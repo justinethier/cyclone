@@ -36,6 +36,8 @@ Getting Started
         cyclone> (write 'hello-world)
         hello-world
 
+3. If you need help getting started with the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
+
 Documentation
 -------------
 
