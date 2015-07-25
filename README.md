@@ -9,32 +9,14 @@ If you are installing Cyclone on your machine for the first time use [cyclone-bo
 
 After installing you can run the `cyclone` command to compile a single Scheme file, and the `icyc` command to start an interactive interpreter.
 
-Building
-------------
-
-Please skip this section if you are installing Cyclone on a machine for the first time. Otherwise, if you already have a copy of Cyclone installed you can build from Scheme source. 
-
-The following prerequisites are required:
-
-- make
-- gcc
-- Existing installation of Cyclone
-
-From the source directory, use the following commands to build and install:
-
-    $ make
-    $ make test
-    $ sudo make install
-    $ ./cyclone
-    
-By default everything is installed under `/usr/local`. This may be changed by passing a different `PREFIX`. For example:
-
-    make PREFIX=/home/me install
-
 Documentation
 -------------
 
-For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). The [features](FEATURES.md) page lists what has been implemented so far.
+For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). 
+
+The [features](FEATURES.md) page lists what has been implemented so far.
+
+The [development](docs/Development.md) page contains instructions for hacking on Cyclone.
 
 References
 ----------

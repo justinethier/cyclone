@@ -8,7 +8,7 @@
     (export lib1-hello lib1-test)
     (include "lib1.scm")
     (import (scheme base)
-            ;(scheme write)
+            (scheme write)
             (libs lib2))
     (begin
         (define (internal-func)
