@@ -1,6 +1,8 @@
-TODO: list of features, table of RxRS features (??), etc
+# Features
 
-R<sup>7</sup>RS Compliance
+This page summarizes the Scheme language features implemented by Cyclone.
+
+## R<sup>7</sup>RS Compliance
 
 Section | Status | Comments
 ------- | ------ | ---------
@@ -36,3 +38,11 @@ Section | Status | Comments
 6.12 Environments and evaluation | Partial |
 6.13 Input and output | |
 6.14 System interface | |
+
+## Cyclone-specific
+
+Cyclone also supports several non-standard features:
+
+- `system`
+- `command-line-arguments`
+- what else?

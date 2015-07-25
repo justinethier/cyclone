@@ -41,7 +41,7 @@ Documentation
 
 For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). 
 
-The [features](FEATURES.md) page lists the language features currently implemented.
+The [features](docs/Features.md) page lists the language features currently implemented.
 
 The [development](docs/Development.md) page contains instructions for hacking on Cyclone.
 
