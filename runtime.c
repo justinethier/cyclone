@@ -43,10 +43,12 @@ const char *tag_names[20] = { \
 }
 
 #define Cyc_check_type(fnc_test, tag, obj) { \
-  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(cons_tag, obj); }
+  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(tag, obj); }
 
+#define Cyc_check_cons_or_nil(obj) { if (!nullp(obj)) { Cyc_check_cons(obj); }}
 #define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
 #define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
+#define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
@@ -588,11 +590,13 @@ object Cyc_write_char(object c, object port)
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
 object memberp(x,l) object x; list l;
-{for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
+{Cyc_check_cons_or_nil(l);
+ for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
  return boolean_f;}
 
 object memqp(x,l) object x; list l;
-{for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
+{Cyc_check_cons_or_nil(l);
+ for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
 object get(x,i) object x,i;
@@ -614,14 +618,19 @@ object equalp(x,y) object x,y;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;}}
 
 list assq(x,l) object x; list l;
-{for (; !nullp(l); l = cdr(l))
-   {register list la = car(l); if (eq(x,car(la))) return la;}
+{if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+ for (; !nullp(l); l = cdr(l))
+   {register list la = car(l); 
+    Cyc_check_cons(la);
+    if (eq(x,car(la))) return la;}
  return boolean_f;}
 
 list assoc(x,l) object x; list l;
 {if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
  for (; !nullp(l); l = cdr(l))
-   {register list la = car(l); if (boolean_f != equalp(x,car(la))) return la;}
+   {register list la = car(l); 
+    Cyc_check_cons(la);
+    if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
 
@@ -634,27 +643,30 @@ object __num_eq(x, y) object x, y;
  return boolean_f;}
 
 object __num_gt(x, y) object x, y;
-{//printf("DEBUG cmp %d, x %d, y %d, x tag %d, y tag %d\n", 
- //   (((integer_type *)x)->value > ((integer_type *)y)->value),
- //   ((integer_type *)x)->value, ((integer_type *)y)->value,
- //   ((list)x)->tag, ((list)y)->tag);
- //exit(1);
+{Cyc_check_num(x);
+ Cyc_check_num(y);
  if (((integer_type *)x)->value > ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
 object __num_lt(x, y) object x, y;
-{if (((integer_type *)x)->value < ((integer_type *)y)->value)
+{Cyc_check_num(x);
+ Cyc_check_num(y);
+ if (((integer_type *)x)->value < ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
 object __num_gte(x, y) object x, y;
-{if (((integer_type *)x)->value >= ((integer_type *)y)->value)
+{Cyc_check_num(x);
+ Cyc_check_num(y);
+ if (((integer_type *)x)->value >= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
 object __num_lte(x, y) object x, y;
-{if (((integer_type *)x)->value <= ((integer_type *)y)->value)
+{Cyc_check_num(x);
+ Cyc_check_num(y);
+ if (((integer_type *)x)->value <= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
@@ -1049,6 +1061,7 @@ integer_type Cyc_char2integer(object chr){
 object Cyc_integer2char(object n){
     int val = 0;
 
+    Cyc_check_int(n);
     if (!nullp(n)) {
         val = ((integer_type *) n)->value;
     }
@@ -1687,6 +1700,9 @@ object apply(object cont, object func, object args){
   if (!is_object_type(func)) {
      Cyc_rt_raise2("Call of non-procedure: ", func);
   }
+
+  // Causes problems...
+  //Cyc_check_cons_or_nil(args);
 
   switch(type_of(func)) {
     case primitive_tag:
