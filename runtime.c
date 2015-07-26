@@ -49,11 +49,18 @@ const char *tag_names[20] = { \
 #define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
 #define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
+#define Cyc_check_str(obj) Cyc_check_type(Cyc_is_string, string_tag, obj);
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
   snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
   Cyc_rt_raise2(buf, found);
+}
+
+void Cyc_check_obj(int tag, object obj) {
+  if (!is_object_type(obj)) {
+    Cyc_invalid_type_error(tag, obj);
+  }
 }
 
 /* Funcall section, these are hardcoded here to support
@@ -870,6 +877,8 @@ void __string2list(const char *str, cons_type *buf, int buflen){
 common_type Cyc_string2number(object str){
     common_type result;
     double n;
+    Cyc_check_obj(string_tag, str);
+    Cyc_check_str(str);
     if (type_of(str) == string_tag &&
         ((string_type *) str)->str){
         n = atof(((string_type *) str)->str);
@@ -951,9 +960,10 @@ string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
 }
 
 integer_type Cyc_string_length(object str) {
-  make_int(len, strlen(string_str(str)));
-  return len;
-}
+  Cyc_check_obj(string_tag, str);
+  Cyc_check_str(str);
+  { make_int(len, strlen(string_str(str)));
+    return len; }}
 
 object Cyc_string_ref(object str, object k) {
   const char *raw = string_str(str);
