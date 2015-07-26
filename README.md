@@ -36,7 +36,9 @@ Getting Started
         cyclone> (write 'hello-world)
         hello-world
 
-3. If you need help getting started with the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
+3. If you need help learning the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
+
+   Also, check out the [features](docs/Features.md) page for a list of language features currently implemented.
 
 Documentation
 -------------

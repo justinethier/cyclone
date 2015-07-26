@@ -4,6 +4,8 @@ This page summarizes the Scheme language features implemented by Cyclone.
 
 ## R<sup>7</sup>RS Compliance
 
+This is the status of features implemented from the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki):
+
 Section | Status | Comments
 ------- | ------ | ---------
 2.2 Whitespace and comments | Partial | No datum or block comments
