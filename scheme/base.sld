@@ -49,6 +49,7 @@
     vector-fill!
     vector->list
     vector->string
+    my-string->list
     string->vector
     make-parameter
     current-output-port
@@ -216,6 +217,16 @@
     (define (vector->string vec . opts)
       (let ((lst (apply vector->list (cons vec opts))))
         (list->string lst)))
+    (define (my-string->list str . opts)
+      (letrec ((len (string-length str))
+               (start (if (> (length opts) 0) (car opts) 0))
+               (end (if (> (length opts) 1) (cadr opts) len))
+               (loop (lambda (i lst)
+                       (if (= i end)
+                           (reverse lst)
+                           (loop (+ i 1) 
+                                 (cons (string-ref str i) lst))))))
+        (loop start '())))
     ;; TODO: need to extend string->list to take optional start/end args, 
     ;; then modify this function to work with optional args, too
     (define (string->vector str . opts)
