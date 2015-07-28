@@ -181,8 +181,11 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
 // Note: below is OK since alloca memory is not freed until function exits
 #define string2list(c,s) object c = nil; { \
-  char *str = ((string_type *)s)->str; \
-  int len = strlen(str); \
+  char *str; \
+  int len; \
+  Cyc_check_str(s); \
+  str = ((string_type *)s)->str; \
+  len = strlen(str); \
   cons_type *buf; \
   if (len > 0) { \
       buf = alloca(sizeof(cons_type) * len); \
@@ -192,7 +195,9 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
 }
 
 #define list2vector(v, l) object v = nil; { \
-  integer_type len = Cyc_length(l); \
+  integer_type len; \
+  Cyc_check_cons_or_nil(l); \
+  len = Cyc_length(l); \
   v = alloca(sizeof(vector_type)); \
   ((vector)v)->tag = vector_tag; \
   ((vector)v)->num_elt = len.value; \
@@ -206,6 +211,7 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
 }
 
 #define make_vector(v, len, fill) object v = nil; { \
+ Cyc_check_int(len); \
  v = alloca(sizeof(vector_type)); \
  ((vector)v)->tag = vector_tag; \
  ((vector)v)->num_elt = ((integer_type *)len)->value; \

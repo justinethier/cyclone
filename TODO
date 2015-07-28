@@ -1,7 +1,7 @@
 Roadmap:
  - Add macro support (instead of current kludge)
  - Target r7rs support (coordinate with feature list)
- - User manual (or at least API docs)
+ - User manual (or at least API docs, features page may be a good 1st step)
 
 Working TODO list. should start creating issues for these to get them out of here:
 
@@ -12,13 +12,13 @@ Working TODO list. should start creating issues for these to get them out of her
        is what we have now robust enough to prevent segfaults?
 
      - type checking
-       ideally want to do this in a way that minimizes performance impacts.
-       will probaby require extensive checks within apply() though, since that
-       all happens at runtime.
-
-     without these, it will be impossible (or at least time-consuming) to debug issues going forward
+       done for now, check performance compiling transforms.sld
 
      2) Need to either allow code to read an import after macro expansion, or have another main module for self-hosting
+
+   - what's going on here:
+   cyclone> (call/cc (lambda (k) (k 1)))
+   Error: Expected 2 arguments but received 1.
 
    - Documentation improvements
      - create a getting started page to go into more detail (build section could move to a that page, could go over build options, rlwrap, etc)

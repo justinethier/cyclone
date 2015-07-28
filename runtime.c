@@ -9,17 +9,18 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
+/* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[20] = { \
    "pair" \
  , "symbol" \
  , "" \
- , "closure" \
- , "closure" \
- , "closure" \
- , "closure" \
- , "closure" \
- , "closure" \
+ , "procedure" \
+ , "procedure" \
+ , "procedure" \
+ , "procedure" \
+ , "procedure" \
+ , "procedure" \
  , "number" \
  , "number" \
  , "string" \
@@ -50,6 +51,10 @@ const char *tag_names[20] = { \
 #define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
 #define Cyc_check_str(obj) Cyc_check_type(Cyc_is_string, string_tag, obj);
+#define Cyc_check_sym(obj) Cyc_check_type(Cyc_is_symbol, symbol_tag, obj);
+#define Cyc_check_vec(obj) Cyc_check_type(Cyc_is_vector, vector_tag, obj);
+#define Cyc_check_port(obj) Cyc_check_type(Cyc_is_port, port_tag, obj);
+#define Cyc_check_fnc(obj) Cyc_check_type(Cyc_is_procedure, closure2_tag, obj);
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
@@ -62,6 +67,16 @@ void Cyc_check_obj(int tag, object obj) {
     Cyc_invalid_type_error(tag, obj);
   }
 }
+
+void Cyc_check_bounds(const char *label, int len, int index) {
+  if (index < 0 || index >= len) {
+    char buf[128];
+    snprintf(buf, 127, "%s - invalid index %d", label, index);
+    Cyc_rt_raise_msg(buf);
+  }
+}
+
+/* END error checking */
 
 /* Funcall section, these are hardcoded here to support
    functions in this module. */
@@ -783,8 +798,15 @@ object Cyc_set_cdr(object l, object val) {
 }
 
 object Cyc_vector_set(object v, object k, object obj) {
-  // TODO: bounds checking? do eventually need to figure out where that should go
-  int idx = ((integer_type *)k)->value;
+  int idx;
+  Cyc_check_vec(v);
+  Cyc_check_int(k);
+  idx = ((integer_type *)k)->value;
+
+  if (idx < 0 || idx >= ((vector)v)->num_elt) {
+    Cyc_rt_raise2("vector-set! - invalid index", k);
+  }
+
   ((vector)v)->elts[idx] = obj;
   // TODO: probably could be more efficient here and also pass
   //       index, so only that one entry needs GC.
@@ -793,14 +815,17 @@ object Cyc_vector_set(object v, object k, object obj) {
 }
 
 object Cyc_vector_ref(object v, object k) {
-    if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
-      Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
-    }
-    if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
-      Cyc_rt_raise_msg("vector-ref - invalid parameter, expected integer\n"); 
-    }
+  if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
+    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
+  }
+  if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
+    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected integer\n"); 
+  }
+  if (integer_value(k) < 0 || integer_value(k) >= ((vector)v)->num_elt) {
+    Cyc_rt_raise2("vector-ref - invalid index", k);
+  }
 
-    return ((vector)v)->elts[((integer_type *)k)->value];
+  return ((vector)v)->elts[((integer_type *)k)->value];
 }
 
 integer_type Cyc_vector_length(object v) {
@@ -824,24 +849,27 @@ integer_type Cyc_length(object l){
 
 string_type Cyc_number2string(object n) {
     char buffer[1024];
+    Cyc_check_num(n);
     if (type_of(n) == integer_tag) {
         snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
     } else if (type_of(n) == double_tag) {
         snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
     } else {
-        buffer[0] = '\0'; // TODO: throw error instead
+        Cyc_rt_raise2("number->string - Unexpected object", n);
     }
     make_string(str, buffer);
     return str;
 }
 
 string_type Cyc_symbol2string(object sym) {
-    make_string(str, symbol_pname(sym));
-    return str;
-}
+  Cyc_check_sym(sym);
+  { make_string(str, symbol_pname(sym));
+    return str; }}
 
 object Cyc_string2symbol(object str) {
-    object sym = find_symbol_by_name(symbol_pname(str));
+    object sym;
+    Cyc_check_str(str);
+    sym = find_symbol_by_name(symbol_pname(str));
     if (!sym) {
         sym = add_symbol_by_name(symbol_pname(str));
     }
@@ -851,9 +879,12 @@ object Cyc_string2symbol(object str) {
 string_type Cyc_list2string(object lst){
     char *buf;
     int i = 0;
-    integer_type len = Cyc_length(lst); // Inefficient, walks whole list
-    buf = alloca(sizeof(char) * (len.value + 1));
+    integer_type len;
 
+    Cyc_check_cons_or_nil(lst);
+    
+    len = Cyc_length(lst); // Inefficient, walks whole list
+    buf = alloca(sizeof(char) * (len.value + 1));
     while(!nullp(lst)){
         buf[i++] = obj_obj2char(car(lst));
         lst = cdr(lst);
@@ -900,10 +931,13 @@ common_type Cyc_string2number(object str){
 }
 
 integer_type Cyc_string_cmp(object str1, object str2) {
-  // TODO: check types of str1, str2
-  make_int(cmp, strcmp(((string_type *)str1)->str,
-                       ((string_type *)str2)->str));
-  return cmp;
+  Cyc_check_str(str1);
+  Cyc_check_str(str2);
+  {
+    make_int(cmp, strcmp(((string_type *)str1)->str,
+                        ((string_type *)str2)->str));
+    return cmp;
+  }
 }
 
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
@@ -937,16 +971,18 @@ string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
     object tmp;
     
     if (argc > 0) {
+      Cyc_check_str(str1);
       str[i] = ((string_type *)str1)->str;
       len[i] = strlen(str[i]);
       total_len += len[i];
     }
 
     for (i = 1; i < argc; i++) {
-        tmp = va_arg(ap, object);
-        str[i] = ((string_type *)tmp)->str;
-        len[i] = strlen(str[i]);
-        total_len += len[i];
+      tmp = va_arg(ap, object);
+      Cyc_check_str(tmp);
+      str[i] = ((string_type *)tmp)->str;
+      len[i] = strlen(str[i]);
+      total_len += len[i];
     }
 
     buffer = bufferp = alloca(sizeof(char) * total_len);
@@ -966,9 +1002,15 @@ integer_type Cyc_string_length(object str) {
     return len; }}
 
 object Cyc_string_ref(object str, object k) {
-  const char *raw = string_str(str);
-  int idx = integer_value(k),
-      len = strlen(raw);
+  const char *raw;
+  int idx, len;
+
+  Cyc_check_str(str);
+  Cyc_check_int(k);
+
+  raw = string_str(str);
+  idx = integer_value(k),
+  len = strlen(raw);
 
   if (idx < 0 || idx >= len) {
     Cyc_rt_raise2("string-ref - invalid index", k);
@@ -978,10 +1020,17 @@ object Cyc_string_ref(object str, object k) {
 }
 
 string_type Cyc_substring(object str, object start, object end) {
-  const char *raw = string_str(str);
-  int s = integer_value(start),
-      e = integer_value(end),
-      len = strlen(raw);
+  const char *raw;
+  int s, e, len;
+
+  Cyc_check_str(str);
+  Cyc_check_int(start);
+  Cyc_check_int(end);
+
+  raw = string_str(str);
+  s = integer_value(start),
+  e = integer_value(end),
+  len = strlen(raw);
 
   if (s > e) {
     Cyc_rt_raise2("substring - start cannot be greater than end", start);
@@ -1206,7 +1255,9 @@ port_type Cyc_stderr() {
 }
 
 port_type Cyc_io_open_input_file(object str) {
-    const char *fname = ((string_type *)str)->str;
+    const char *fname;
+    Cyc_check_str(str);
+    fname = ((string_type *)str)->str;
     make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
     if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
@@ -1214,7 +1265,9 @@ port_type Cyc_io_open_input_file(object str) {
 }
 
 port_type Cyc_io_open_output_file(object str) {
-    const char *fname = ((string_type *)str)->str;
+    const char *fname;
+    Cyc_check_str(str);
+    fname = ((string_type *)str)->str;
     make_port(p, NULL, 0);
     p.fp = fopen(fname, "w");
     if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
@@ -1228,7 +1281,8 @@ object Cyc_io_close_output_port(object port) {
   return Cyc_io_close_port(port); }
 
 object Cyc_io_close_port(object port) {
-    if (port && type_of(port) == port_tag) {
+    Cyc_check_port(port);
+    {
        FILE *stream = ((port_type *)port)->fp;
        if (stream) fclose(stream);
        ((port_type *)port)->fp = NULL;
@@ -1237,14 +1291,18 @@ object Cyc_io_close_port(object port) {
 }
 
 object Cyc_io_delete_file(object filename) {
-  const char *fname = ((string_type *)filename)->str;
+  const char *fname;
+  Cyc_check_str(filename);
+  fname = ((string_type *)filename)->str;
   if (remove(fname) == 0)
     return boolean_t; // Success
   return boolean_f;
 }
 
 object Cyc_io_file_exists(object filename) {
-  const char *fname = ((string_type *)filename)->str;
+  const char *fname;
+  Cyc_check_str(filename);
+  fname = ((string_type *)filename)->str;
   FILE *file;
   // Possibly overkill, but portable
   if (file = fopen(fname, "r")) {
@@ -1256,7 +1314,8 @@ object Cyc_io_file_exists(object filename) {
 
 //  TODO: port arg is optional! (maybe handle that in expansion section??)
 object Cyc_io_read_char(object port) {
-    if (type_of(port) == port_tag) {
+    Cyc_check_port(port);
+    {
         int c = fgetc(((port_type *) port)->fp);
         if (c != EOF) {
             return obj_char2obj(c);
@@ -1269,7 +1328,8 @@ object Cyc_io_peek_char(object port) {
     FILE *stream;
     int c;
 
-    if (type_of(port) == port_tag) {
+    Cyc_check_port(port);
+    {
         stream = ((port_type *) port)->fp;
         c = fgetc(stream);
         ungetc(c, stream);
@@ -1693,6 +1753,7 @@ void _display(object cont, object args) {
       dispatch(argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
 void _call_95cc(object cont, object args){
     Cyc_check_num_args("call/cc", 1, args);
+    Cyc_check_fnc(car(args));
     return_funcall2(__glo_call_95cc, cont, car(args));
 }
 
