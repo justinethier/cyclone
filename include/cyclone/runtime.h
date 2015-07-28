@@ -120,6 +120,7 @@ integer_type Cyc_length(object l);
 integer_type Cyc_vector_length(object v);
 object Cyc_vector_ref(object v, object k);
 object Cyc_vector_set(object v, object k, object obj);
+object Cyc_make_vector(object cont, object len, object fill);
 string_type Cyc_number2string(object n) ;
 string_type Cyc_symbol2string(object sym) ;
 object Cyc_string2symbol(object str);
@@ -235,18 +236,6 @@ void do_dispatch(int argc, function_type func, object clo, object *buffer);
     ((vector)v)->elts[i++] = car(lst); \
     lst = cdr(lst); \
   } \
-}
-
-#define make_vector(v, len, fill) object v = nil; { \
- Cyc_check_int(len); \
- v = alloca(sizeof(vector_type)); \
- ((vector)v)->tag = vector_tag; \
- ((vector)v)->num_elt = ((integer_type *)len)->value; \
- ((vector)v)->elts = (((vector)v)->num_elt > 0) ? (object *)alloca(sizeof(object) * ((vector)v)->num_elt): NULL; \
- int i; \
- for (i = 0; i < ((vector)v)->num_elt; i++) { \
-   ((vector)v)->elts[i] = fill; \
- } \
 }
 
 /* Global variables. */
