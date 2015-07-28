@@ -1079,6 +1079,23 @@ object Cyc_command_line_arguments(object cont) {
   return_funcall1(cont, lis);
 }
 
+object Cyc_make_vector(object cont, object len, object fill) {
+  object v = nil;
+  int i;
+  Cyc_check_int(len);
+  v = alloca(sizeof(vector_type));
+  ((vector)v)->tag = vector_tag;
+  ((vector)v)->num_elt = ((integer_type *)len)->value;
+  ((vector)v)->elts = 
+    (((vector)v)->num_elt > 0) ? 
+     (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
+     NULL;
+  for (i = 0; i < ((vector)v)->num_elt; i++) {
+    ((vector)v)->elts[i] = fill;
+  }
+  return_funcall1(cont, v);
+}
+
 integer_type Cyc_system(object cmd) {
   if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
     make_int(n, -1);
@@ -1656,11 +1673,9 @@ void _make_91vector(object cont, object args) {
     Cyc_check_num_args("make-vector", 1, args);
     { integer_type argc = Cyc_length(args);
       if (argc.value >= 2) {
-        make_vector(v, car(args), cadr(args));
-        return_funcall1(cont, v);}
+        Cyc_make_vector(cont, car(args), cadr(args));}
       else {
-        make_vector(v, car(args), boolean_f);
-        return_funcall1(cont, v);}}}
+        Cyc_make_vector(cont, car(args), boolean_f);}}}
 void _vector_91ref(object cont, object args) {
     Cyc_check_num_args("vector-ref", 2, args);
     { object ref = Cyc_vector_ref(car(args), cadr(args));
