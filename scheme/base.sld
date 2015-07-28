@@ -41,6 +41,7 @@
     symbol=?
     Cyc-obj=?
     make-string
+    string
     vector
     vector-append
     vector-copy
@@ -275,6 +276,8 @@
                   (return #f)))
               objs)
               #t))))
+    (define (string . chars)
+      (list->string chars))
     (define (make-string k . fill)
       (let ((fill* (if (null? fill)
                       '(#\space)

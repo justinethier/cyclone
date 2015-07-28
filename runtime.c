@@ -978,6 +978,26 @@ integer_type Cyc_string_length(object str) {
   { make_int(len, strlen(string_str(str)));
     return len; }}
 
+object Cyc_string_set(object str, object k, object chr) {
+  char *raw;
+  int idx, len;
+
+  Cyc_check_str(str);
+  Cyc_check_int(k);
+
+  if (!eq(boolean_t, Cyc_is_char(chr))) {
+    Cyc_rt_raise2("Expected char but received", chr);
+  }
+
+  raw = string_str(str);
+  idx = integer_value(k),
+  len = strlen(raw);
+
+  Cyc_check_bounds("string-set!", len, idx);
+  raw[idx] = obj_obj2char(chr);
+  return str;
+}
+
 object Cyc_string_ref(object str, object k) {
   const char *raw;
   int idx, len;
@@ -1633,6 +1653,10 @@ void _cyc_substring(object cont, object args) {
     Cyc_check_num_args("substring", 3, args);
     { string_type s = Cyc_substring(car(args), cadr(args), caddr(args));
       return_funcall1(cont, &s);}}
+void _cyc_string_91set_67(object cont, object args) {
+    Cyc_check_num_args("string-set!", 3, args);
+    { object s = Cyc_string_set(car(args), cadr(args), caddr(args));
+      return_funcall1(cont, s); }}
 void _cyc_string_91ref(object cont, object args) {
     Cyc_check_num_args("string-ref", 2, args);
     { object c = Cyc_string_ref(car(args), cadr(args));
@@ -2335,6 +2359,7 @@ static primitive_type string_91_125number_primitive = {primitive_tag, "string->n
 static primitive_type string_91length_primitive = {primitive_tag, "string-length", &_string_91length};
 static primitive_type substring_primitive = {primitive_tag, "substring", &_cyc_substring};
 static primitive_type string_91ref_primitive = {primitive_tag, "string-ref", &_cyc_string_91ref};
+static primitive_type string_91set_67_primitive = {primitive_tag, "string-set!", &_cyc_string_91set_67};
 static primitive_type Cyc_91installation_91dir_primitive = {primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir};
 static primitive_type command_91line_91arguments_primitive = {primitive_tag, "command-line-arguments", &_command_91line_91arguments};
 static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
@@ -2451,6 +2476,7 @@ const object primitive_string_91_125number = &string_91_125number_primitive;
 const object primitive_string_91length = &string_91length_primitive;
 const object primitive_substring = &substring_primitive;
 const object primitive_string_91ref = &string_91ref_primitive;
+const object primitive_string_91set_67 = &string_91set_67_primitive;
 const object primitive_Cyc_91installation_91dir = &Cyc_91installation_91dir_primitive;
 const object primitive_command_91line_91arguments = &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;

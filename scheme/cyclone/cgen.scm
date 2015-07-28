@@ -494,6 +494,7 @@
      ((eq? p 'number->string) "Cyc_number2string")
      ((eq? p 'string-length)  "Cyc_string_length")
      ((eq? p 'string-ref)     "Cyc_string_ref")
+     ((eq? p 'string-set!)    "Cyc_string_set")
      ((eq? p 'substring)      "Cyc_substring")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")

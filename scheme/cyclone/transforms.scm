@@ -577,6 +577,7 @@
      number->string
      string-length
      string-ref
+     string-set!
      substring
      make-vector
      list->vector
@@ -636,6 +637,7 @@
                   cell
                   set-car!
                   set-cdr!
+                  string-set!
                   string->symbol ;; Could be mistaken for an identifier
                   string->list ;; Mistaken for function call (maybe OK if it was quoted, though). same for above?
                   make-vector

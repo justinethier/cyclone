@@ -264,6 +264,7 @@
       (list 'number->string number->string)
       (list 'string-length string-length)
       (list 'string-ref string-ref)
+      (list 'string-set! string-set!)
       (list 'substring substring)
       (list 'make-vector make-vector)
       (list 'list->vector list->vector)

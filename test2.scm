@@ -1,7 +1,8 @@
 (import (scheme base)
         (scheme file)
         (scheme write))
-(write (make-vector 4 #t))
+  (apply make-vector '())
+  1
 ;
 ;(map
 ;  (lambda (_)
