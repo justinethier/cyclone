@@ -9,6 +9,33 @@
 #ifndef CYCLONE_RUNTIME_H
 #define CYCLONE_RUNTIME_H
 
+/* Error checking definitions */
+#define Cyc_check_num_args(fnc_name, num_args, args) { \
+  integer_type l = Cyc_length(args); \
+  if (num_args > l.value) { \
+    char buf[128]; \
+    snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
+    Cyc_rt_raise_msg(buf); \
+  } \
+}
+
+#define Cyc_check_type(fnc_test, tag, obj) { \
+  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(tag, obj); }
+
+#define Cyc_check_cons_or_nil(obj) { if (!nullp(obj)) { Cyc_check_cons(obj); }}
+#define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
+#define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
+#define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
+#define Cyc_check_str(obj) Cyc_check_type(Cyc_is_string, string_tag, obj);
+#define Cyc_check_sym(obj) Cyc_check_type(Cyc_is_symbol, symbol_tag, obj);
+#define Cyc_check_vec(obj) Cyc_check_type(Cyc_is_vector, vector_tag, obj);
+#define Cyc_check_port(obj) Cyc_check_type(Cyc_is_port, port_tag, obj);
+#define Cyc_check_fnc(obj) Cyc_check_type(Cyc_is_procedure, closure2_tag, obj);
+void Cyc_invalid_type_error(int tag, object found);
+void Cyc_check_obj(int tag, object obj);
+void Cyc_check_bounds(const char *label, int len, int index);
+/* END error checking */
+
 extern long global_stack_size;
 extern long global_heap_size;
 extern const object Cyc_EOF;

@@ -33,29 +33,6 @@ const char *tag_names[20] = { \
  , "TODO: add missing type" \
  , "TODO: add missing type" };
 
-/* Type checking section */
-#define Cyc_check_num_args(fnc_name, num_args, args) { \
-  integer_type l = Cyc_length(args); \
-  if (num_args > l.value) { \
-    char buf[128]; \
-    snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
-    Cyc_rt_raise_msg(buf); \
-  } \
-}
-
-#define Cyc_check_type(fnc_test, tag, obj) { \
-  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(tag, obj); }
-
-#define Cyc_check_cons_or_nil(obj) { if (!nullp(obj)) { Cyc_check_cons(obj); }}
-#define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
-#define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
-#define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
-#define Cyc_check_str(obj) Cyc_check_type(Cyc_is_string, string_tag, obj);
-#define Cyc_check_sym(obj) Cyc_check_type(Cyc_is_symbol, symbol_tag, obj);
-#define Cyc_check_vec(obj) Cyc_check_type(Cyc_is_vector, vector_tag, obj);
-#define Cyc_check_port(obj) Cyc_check_type(Cyc_is_port, port_tag, obj);
-#define Cyc_check_fnc(obj) Cyc_check_type(Cyc_is_procedure, closure2_tag, obj);
-
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
   snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
