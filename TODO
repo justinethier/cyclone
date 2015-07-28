@@ -9,6 +9,7 @@ Working TODO list. should start creating issues for these to get them out of her
 
    - improved error handling:
      - param count checks
+       if a primitive is called directly, shouldn't it be possible to check arg count?
        is what we have now robust enough to prevent segfaults?
 
      - type checking
@@ -29,13 +30,6 @@ Working TODO list. should start creating issues for these to get them out of her
      there is no concept of macro expansion, probably other deficiencies as well
      almost certainly will break when running the self-hosted compiler...
      no, I think this is ok. may want to unify macros with compiler side though
-     
-   - vectors
-       - make-vector should have an optional 'fill' arg in compiled code
-       - note allocation functions can be functions instead of macros if they accept a
-         cont arg so they do not have to return
-       - should make GC more efficient, only transport mutated vector index, not the whole vector
-       - After all this works, make sure to add tests from r7rs to test suite
 
    - I/O
      - may be able to use fmemopen to implement output strings, although it is not supported on windows
