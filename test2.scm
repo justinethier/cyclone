@@ -1,8 +1,9 @@
 (import (scheme base)
         (scheme file)
         (scheme write))
-  (apply make-vector '())
-  1
+
+(write
+  (string-set! "abc" 1 #\x))
 ;
 ;(map
 ;  (lambda (_)
