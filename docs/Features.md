@@ -32,10 +32,10 @@ Section | Status | Comments
 6.4 Pairs and lists | Yes | `member` functions are predicates, `member` and `assoc` do not accept `compare` argument.
 6.5 Symbols | Yes |
 6.6 Characters | Partial | No unicode support, `char-ci` predicates are not implemented.
-6.7 Strings | Partial | Many functions are missing. Need to sync up with r7rs.
+6.7 Strings | Partial | No unicode support, `string-ci` functions are not implemented.
 6.8 Vectors | Yes |
-6.9 Bytevectors | |
-6.10 Control features | |
+6.9 Bytevectors | | Not supported yet.
+6.10 Control features | | The `map` functions only support one "data" argument - for example, `string-map` only accepts one string.
 6.11 Exceptions | Partial | Need to check against r7rs
 6.12 Environments and evaluation | Partial |
 6.13 Input and output | |

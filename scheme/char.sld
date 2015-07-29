@@ -8,6 +8,10 @@
     char-upper-case?
     char-whitespace?
     digit-value
+    string-upcase
+    string-downcase
+    ; TODO:
+    ;string-foldcase
   )
   (import (scheme base))
   (begin
@@ -35,5 +39,6 @@
       (if (char-numeric? c)
           (- (char->integer c) (char->integer #\0))
           #f))
-
+    (define (string-upcase str) (string-map char-upcase str))
+    (define (string-downcase str) (string-map char-downcase str))
 ))

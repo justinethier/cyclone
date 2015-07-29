@@ -47,6 +47,7 @@
     vector-fill!
     vector->list
     vector->string
+    vector-map
     make-string
     string
     string-copy
@@ -54,10 +55,7 @@
     string-fill!
     string->list
     string->vector
-    ; TODO:
-    ;string-upcase
-    ;string-downcase
-    ;string-foldcase
+    string-map
     make-parameter
     current-output-port
     current-input-port
@@ -224,7 +222,6 @@
     (define (vector->string vec . opts)
       (let ((lst (apply vector->list (cons vec opts))))
         (list->string lst)))
-    ;; TODO: change to string->list
     (define (string->list str . opts)
       (letrec ((len (string-length str))
                (start (if (> (length opts) 0) (car opts) 0))
@@ -267,6 +264,10 @@
                           (string-set! str i fill)
                           (loop (+ i 1)))))))
         (loop start)))
+    (define (string-map func str)
+      (list->string (map func (string->list str))))
+    (define (vector-map func vec)
+      (list->vector (map func (vector->list vec)))) 
     (define (vector-append . vecs)
       (list->vector
         (apply append (map vector->list vecs))))
