@@ -35,7 +35,7 @@ Section | Status | Comments
 6.7 Strings | Partial | No unicode support, `string-ci` functions are not implemented.
 6.8 Vectors | Yes |
 6.9 Bytevectors | | Not supported yet.
-6.10 Control features | | The `map` functions only support one "data" argument - for example, `string-map` only accepts one string.
+6.10 Control features | Partial | The `map` and `for-each` families of functions only support one "data" argument - for example, `string-map` only accepts one string. `values` and `call-with-values` are not implemented. `dynamic-wind` is limited, and does not work across calls to continuations.
 6.11 Exceptions | Partial | Need to check against r7rs
 6.12 Environments and evaluation | Partial |
 6.13 Input and output | |
