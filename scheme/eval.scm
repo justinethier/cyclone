@@ -257,7 +257,6 @@
       (list 'string->number string->number)
       (list 'string-cmp string-cmp)
       (list 'string-append string-append)
-      (list 'string->list string->list)
       (list 'list->string list->string)
       (list 'string->symbol string->symbol)
       (list 'symbol->string symbol->string)

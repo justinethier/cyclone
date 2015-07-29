@@ -570,7 +570,6 @@
      string->number
      string-append
      string-cmp
-     string->list
      list->string
      string->symbol
      symbol->string
@@ -639,7 +638,6 @@
                   set-cdr!
                   string-set!
                   string->symbol ;; Could be mistaken for an identifier
-                  string->list ;; Mistaken for function call (maybe OK if it was quoted, though). same for above?
                   make-vector
                   ;; I/O must be done at runtime for side effects:
                   Cyc-stdout

@@ -125,7 +125,6 @@ string_type Cyc_number2string(object n) ;
 string_type Cyc_symbol2string(object sym) ;
 object Cyc_string2symbol(object str);
 string_type Cyc_list2string(object lst);
-void __string2list(const char *str, cons_type *buf, int buflen);
 common_type Cyc_string2number(object str);
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 string_type Cyc_string_append(int argc, object str1, ...);
@@ -209,20 +208,6 @@ void dispatch_va(int argc, function_type_va func, object clo, object cont, objec
 void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
 // Note: below is OK since alloca memory is not freed until function exits
-#define string2list(c,s) object c = nil; { \
-  char *str; \
-  int len; \
-  Cyc_check_str(s); \
-  str = ((string_type *)s)->str; \
-  len = strlen(str); \
-  cons_type *buf; \
-  if (len > 0) { \
-      buf = alloca(sizeof(cons_type) * len); \
-      __string2list(str, buf, len); \
-      c = (object)&(buf[0]); \
-  } \
-}
-
 #define list2vector(v, l) object v = nil; { \
   integer_type len; \
   Cyc_check_cons_or_nil(l); \
@@ -339,7 +324,6 @@ extern const object primitive_integer_91_125char;
 extern const object primitive_string_91_125number;
 extern const object primitive_string_91cmp;
 extern const object primitive_string_91append;
-extern const object primitive_string_91_125list;
 extern const object primitive_list_91_125string;
 extern const object primitive_string_91_125symbol;
 extern const object primitive_symbol_91_125string;

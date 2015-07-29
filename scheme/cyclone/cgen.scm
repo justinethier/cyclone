@@ -481,7 +481,6 @@
      ((eq? p 'integer->char) "Cyc_integer2char")
      ((eq? p 'string->number)"Cyc_string2number")
      ((eq? p 'list->string)  "Cyc_list2string")
-     ((eq? p 'string->list)  "string2list")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "list2vector")
      ((eq? p 'vector-length) "Cyc_vector_length")
@@ -552,7 +551,6 @@
     ((eq? p '/) "common_type")
     ((eq? p 'string->number) "common_type")
     ((eq? p 'list->string) "string_type")
-;    ((eq? p 'string->list) "object")
     ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "string_type")
     ((eq? p 'symbol->string) "string_type")
@@ -577,7 +575,7 @@
              system 
              Cyc-installation-dir
              string->number 
-             string-append string-cmp list->string string->list
+             string-append string-cmp list->string
              make-vector list->vector
              symbol->string number->string 
              string-length substring
@@ -605,7 +603,7 @@
 ;; is obsolete and should be replaced by prim:cont? functions over time.
 (define (prim:allocates-object? exp)
     (and  (prim? exp)
-          (member exp '(string->list list->vector))))
+          (member exp '(list->vector))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
@@ -657,7 +655,7 @@
      ((prim/cvar? p)
         ;;
         ;; TODO: look at functions that would actually fall into this
-        ;; branch, I think they are just the macro's like string->list ??
+        ;; branch, I think they are just the macro's like list->vector???
         ;; may be able to remove this using prim:cont? and simplify
         ;; the logic
         ;;

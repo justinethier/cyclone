@@ -872,16 +872,6 @@ string_type Cyc_list2string(object lst){
     return str;
 }
 
-void __string2list(const char *str, cons_type *buf, int buflen){
-    int i = 0;
-    while (str[i]){
-        buf[i].tag = cons_tag;
-        buf[i].cons_car = obj_char2obj(str[i]);
-        buf[i].cons_cdr = (i == buflen - 1) ? nil : buf + (i + 1); 
-        i++;
-    }
-}
-
 common_type Cyc_string2number(object str){
     common_type result;
     double n;
@@ -1689,10 +1679,6 @@ void _string_91cmp(object cont, object args) {
 void _string_91append(object cont, object args) {  
     integer_type argc = Cyc_length(args);
     dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
-void _string_91_125list(object cont, object args) {  
-    Cyc_check_num_args("string->list", 1, args);
-    { string2list(lst, car(args));
-      return_funcall1(cont, lst);}}
 void _make_91vector(object cont, object args) {
     Cyc_check_num_args("make-vector", 1, args);
     { integer_type argc = Cyc_length(args);
@@ -2365,7 +2351,6 @@ static primitive_type command_91line_91arguments_primitive = {primitive_tag, "co
 static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
 static primitive_type string_91cmp_primitive = {primitive_tag, "string-cmp", &_string_91cmp};
 static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
-static primitive_type string_91_125list_primitive = {primitive_tag, "string->list", &_string_91_125list};
 static primitive_type list_91_125string_primitive = {primitive_tag, "list->string", &_list_91_125string};
 static primitive_type string_91_125symbol_primitive = {primitive_tag, "string->symbol", &_string_91_125symbol};
 static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->string", &_symbol_91_125string};
@@ -2482,7 +2467,6 @@ const object primitive_command_91line_91arguments = &command_91line_91arguments_
 const object primitive_system = &system_primitive;
 const object primitive_string_91cmp = &string_91cmp_primitive;
 const object primitive_string_91append = &string_91append_primitive;
-const object primitive_string_91_125list = &string_91_125list_primitive;
 const object primitive_list_91_125string = &list_91_125string_primitive;
 const object primitive_string_91_125symbol = &string_91_125symbol_primitive;
 const object primitive_symbol_91_125string = &symbol_91_125string_primitive;

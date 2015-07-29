@@ -52,7 +52,7 @@
     string-copy
     string-copy!
     string-fill!
-    my-string->list
+    string->list
     string->vector
     ; TODO:
     ;string-upcase
@@ -225,7 +225,7 @@
       (let ((lst (apply vector->list (cons vec opts))))
         (list->string lst)))
     ;; TODO: change to string->list
-    (define (my-string->list str . opts)
+    (define (string->list str . opts)
       (letrec ((len (string-length str))
                (start (if (> (length opts) 0) (car opts) 0))
                (end (if (> (length opts) 1) (cadr opts) len))
