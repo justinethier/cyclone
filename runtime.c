@@ -739,6 +739,14 @@ object Cyc_is_procedure(object o) {
             tag == closureN_tag ||
             tag == primitive_tag) {
             return boolean_t;
+        } else if (tag == cons_tag) {
+          integer_type l = Cyc_length(o);
+          if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
+            if (strncmp(((symbol)car(o))->pname, "primitive", 10) == 0 ||
+                strncmp(((symbol)car(o))->pname, "procedure", 10) == 0 ) {
+              return boolean_t;
+            }
+          }
         }
     }
     return boolean_f;
