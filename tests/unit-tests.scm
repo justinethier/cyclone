@@ -148,6 +148,11 @@
 (define a "12345")
 (define b (string-copy "abcde"))
 (assert:equal "string-copy!" (string-copy! b 1 a 0 2) "a12de")
+(let ((v '()))
+  (string-for-each
+    (lambda (c) (set! v (cons (char->integer c) v)))
+    "abcde")
+  (assert:equal "string-for-each" v '(101 100 99 98 97)))
 
 ;; Recursion example:
 (letrec ((fnc (lambda (i) 

@@ -48,6 +48,7 @@
     vector->list
     vector->string
     vector-map
+    vector-for-each
     make-string
     string
     string-copy
@@ -56,6 +57,7 @@
     string->list
     string->vector
     string-map
+    string-for-each
     make-parameter
     current-output-port
     current-input-port
@@ -266,8 +268,12 @@
         (loop start)))
     (define (string-map func str)
       (list->string (map func (string->list str))))
+    (define (string-for-each func str)
+      (for-each func (string->list str)))
     (define (vector-map func vec)
       (list->vector (map func (vector->list vec)))) 
+    (define (vector-for-each func vec)
+      (for-each func (vector->list vec)))
     (define (vector-append . vecs)
       (list->vector
         (apply append (map vector->list vecs))))
