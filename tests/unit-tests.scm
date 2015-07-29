@@ -142,6 +142,12 @@
 (assert:equal "strings" d "(\"abc\")") ;; Test GC
 (set! a "hello 2")
 (assert:equal "strings" a "hello 2")
+(define (f) (make-string 3 #\*))
+(define (g) "***")
+(assert:equal "string-set!" (string-set! (f) 0 #\?) "?**")
+(define a "12345")
+(define b (string-copy "abcde"))
+(assert:equal "string-copy!" (string-copy! b 1 a 0 2) "a12de")
 
 ;; Recursion example:
 (letrec ((fnc (lambda (i) 
@@ -245,6 +251,8 @@
 
 ;; Vectors
 
+(assert:equal "vector-ref" (vector-ref #(1 1 2 3 5 8 13 21) 5) 8)
+(assert:equal "vector-set!" (vector-set! #(0 '(2 2 2 2) "anna") 1 "test") #(0 "test" "anna"))
 (assert:equal "vector->list" (vector->list #(dah dah didah))
                             '(dah dah didah))
 ;(vector->list .#(dah dah didah) 1 2)
