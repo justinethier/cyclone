@@ -7,6 +7,11 @@ Working TODO list. should start creating issues for these to get them out of her
 
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
+   - adding r7rs support
+     - vectors - add test cases from r7rs
+     - strings - finish adding functions, then add test cases
+     - review other sections from the report
+
    - improved error handling:
      - param count checks
        if a primitive is called directly, shouldn't it be possible to check arg count?
