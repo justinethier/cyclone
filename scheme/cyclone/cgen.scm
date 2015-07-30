@@ -440,6 +440,7 @@
      ((eq? p 'close-port)            "Cyc_io_close_port")
      ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
      ((eq? p 'close-output-port)     "Cyc_io_close_output_port")
+     ((eq? p 'Cyc-flush-output-port) "Cyc_io_flush_output_port")
      ((eq? p 'file-exists?)          "Cyc_io_file_exists")
      ((eq? p 'delete-file)           "Cyc_io_delete_file")
      ((eq? p 'read-char)             "Cyc_io_read_char")

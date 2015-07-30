@@ -77,6 +77,7 @@
     Cyc-remove-exception-handler
     newline
     write-char
+    flush-output-port
   )
   (begin
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
@@ -134,6 +135,11 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
+    (define (flush-output-port . port)
+      'TODO)
+;      (if (null? port)
+;        (Cyc-flush-output-port (current-output-port))
+;        (Cyc-flush-output-port (car port))))
     (define (write-char char . port)
       (if (null? port)
         (Cyc-write-char char (current-output-port))

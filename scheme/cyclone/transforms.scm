@@ -601,6 +601,7 @@
      close-port
      close-input-port
      close-output-port
+     Cyc-flush-output-port
      file-exists?
      delete-file
      read-char
@@ -648,6 +649,7 @@
                   close-port
                   close-input-port
                   close-output-port
+                  Cyc-flush-output-port
                   file-exists?
                   delete-file
                   read-char
