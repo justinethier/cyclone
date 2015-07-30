@@ -1293,13 +1293,25 @@ object Cyc_io_close_output_port(object port) {
   return Cyc_io_close_port(port); }
 
 object Cyc_io_close_port(object port) {
-    Cyc_check_port(port);
-    {
-       FILE *stream = ((port_type *)port)->fp;
-       if (stream) fclose(stream);
-       ((port_type *)port)->fp = NULL;
+  Cyc_check_port(port);
+  {
+    FILE *stream = ((port_type *)port)->fp;
+    if (stream) fclose(stream);
+    ((port_type *)port)->fp = NULL;
+  }
+  return port;
+}
+
+object Cyc_io_flush_output_port(object port) {
+  Cyc_check_port(port);
+  {
+    FILE *stream = ((port_type *)port)->fp;
+    if (stream) { 
+      int rv = fflush(stream);
+      // TODO: handle error if non-zero value returned
     }
-    return port;
+  }
+  return port;
 }
 
 object Cyc_io_delete_file(object filename) {
@@ -1738,6 +1750,9 @@ void _close_91input_91port(object cont, object args) {
 void _close_91output_91port(object cont, object args) {  
     Cyc_check_num_args("close-output-port", 1, args);
     return_funcall1(cont, Cyc_io_close_output_port(car(args)));}
+void _Cyc_91flush_91output_91port(object cont, object args) {
+    Cyc_check_num_args("Cyc-flush-output-port", 1, args);
+    return_funcall1(cont, Cyc_io_flush_output_port(car(args)));}
 void _file_91exists_127(object cont, object args) {
     Cyc_check_num_args("file-exists?", 1, args);
     return_funcall1(cont, Cyc_io_file_exists(car(args)));}
@@ -2385,6 +2400,7 @@ static primitive_type open_91output_91file_primitive = {primitive_tag, "open-out
 static primitive_type close_91port_primitive = {primitive_tag, "close-port", &_close_91port};
 static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
 static primitive_type close_91output_91port_primitive = {primitive_tag, "close-output-port", &_close_91output_91port};
+static primitive_type Cyc_91flush_91output_91port_primitive = {primitive_tag, "Cyc-flush-output-port", &_Cyc_91flush_91output_91port};
 static primitive_type file_91exists_127_primitive = {primitive_tag, "file-exists?", &_file_91exists_127};
 static primitive_type delete_91file_primitive = {primitive_tag, "delete-file", &_delete_91file};
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
@@ -2499,6 +2515,7 @@ const object primitive_open_91output_91file = &open_91output_91file_primitive;
 const object primitive_close_91port = &close_91port_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_close_91output_91port = &close_91output_91port_primitive;
+const object primitive_Cyc_91flush_91output_91port = &Cyc_91flush_91output_91port_primitive;
 const object primitive_file_91exists_127 = &file_91exists_127_primitive;
 const object primitive_delete_91file = &delete_91file_primitive;
 const object primitive_read_91char = &read_91char_primitive;
