@@ -98,6 +98,16 @@ clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/cyclone/*.o scheme/cyclone/*.c dispatch.c icyc.c generate-c.c generate-c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
 
+install-includes:
+	$(MKDIR) $(DESTDIR)$(INCDIR)
+	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
+
+install-libs:
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
+
+# TODO: rewrite install to be in terms of incremental steps above.
+#       also want to propagate this change to cyclone-bootstrap
 install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
