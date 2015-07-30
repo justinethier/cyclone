@@ -292,6 +292,7 @@
       (list 'delete-file delete-file)
       (list 'read-char read-char)
       (list 'peek-char peek-char)
+      (list 'Cyc-read-line Cyc-read-line)
       (list 'Cyc-write-char Cyc-write-char)
       (list 'Cyc-write Cyc-write)
       (list 'Cyc-display Cyc-display)))

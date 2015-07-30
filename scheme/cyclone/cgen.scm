@@ -445,6 +445,7 @@
      ((eq? p 'delete-file)           "Cyc_io_delete_file")
      ((eq? p 'read-char)             "Cyc_io_read_char")
      ((eq? p 'peek-char)             "Cyc_io_peek_char")
+     ((eq? p 'Cyc-read-line)         "Cyc_io_read_line")
      ((eq? p 'Cyc-display)           "Cyc_display_va")
      ((eq? p 'Cyc-write)             "Cyc_write_va")
      ((eq? p 'Cyc-write-char)        "Cyc_write_char")
@@ -559,6 +560,7 @@
     ((eq? p 'string-length) "integer_type")
     ((eq? p 'substring) "string_type")
     ((eq? p 'apply)  "object")
+    ((eq? p 'Cyc-read-line) "object")
     ((eq? p 'command-line-arguments) "object")
     ((eq? p 'make-vector) "object")
     (else #f)))
@@ -582,17 +584,18 @@
              string-length substring
              + - * / apply 
              command-line-arguments
+             Cyc-read-line
              cons length vector-length cell))))
 
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
-       (member exp '(apply command-line-arguments make-vector))))
+       (member exp '(Cyc-read-line apply command-line-arguments make-vector))))
 ;; TODO: this is a hack, right answer is to include information about
 ;;  how many args each primitive is supposed to take
 (define (prim:cont-has-args? exp)
   (and (prim? exp)
-       (member exp '(apply make-vector))))
+       (member exp '(Cyc-read-line apply make-vector))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)

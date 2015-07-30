@@ -2,6 +2,8 @@
         (scheme file)
         (scheme write))
 
+(define fp (open-input-file "test.scm"))
+(write (Cyc-read-line fp))
 (write
   (string-set! "abc" 1 #\x))
 ;

@@ -606,6 +606,7 @@
      delete-file
      read-char
      peek-char
+     Cyc-read-line
      Cyc-write-char
      Cyc-write
      Cyc-display))
@@ -654,6 +655,7 @@
                   delete-file
                   read-char
                   peek-char
+                  Cyc-read-line
                   Cyc-write-char
                   Cyc-write
                   Cyc-display)))

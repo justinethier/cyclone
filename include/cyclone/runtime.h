@@ -364,7 +364,7 @@ extern const object primitive_file_91exists_127;
 extern const object primitive_delete_91file;
 extern const object primitive_read_91char;
 extern const object primitive_peek_91char;
-extern const object primtitive_Cyc_91read_91line;
+extern const object primitive_Cyc_91read_91line;
 extern const object primitive_Cyc_91write_91char;
 extern const object primitive_Cyc_91write;
 extern const object primitive_Cyc_91display;
