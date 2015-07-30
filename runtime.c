@@ -1348,6 +1348,26 @@ object Cyc_io_read_char(object port) {
     return Cyc_EOF;
 }
 
+/* TODO: this function needs some work, but approximates what is needed */
+object Cyc_io_read_line(object cont, object port) {
+  FILE *stream = ((port_type *)port)->fp;
+  char buf[1024];
+  int i = 0, c;
+  
+  while (1) {
+    c = fgetc(stream);
+    if (c == EOF && i == 0) {
+      return_funcall1(cont, Cyc_EOF);
+    } else if (c == EOF || i == 1023 || c == '\n') {
+      make_string(s, buf);
+      return_funcall1(cont, &s);
+    }
+
+    buf[i++] = c;
+  }
+  return nil;
+}
+
 object Cyc_io_peek_char(object port) {
     FILE *stream;
     int c;
@@ -1765,6 +1785,9 @@ void _read_91char(object cont, object args) {
 void _peek_91char(object cont, object args) {  
     Cyc_check_num_args("peek-char", 1, args);
     return_funcall1(cont, Cyc_io_peek_char(car(args)));}
+void _Cyc_91read_91line(object cont, object args) {  
+    Cyc_check_num_args("Cyc-read-line", 1, args);
+    Cyc_io_read_line(cont, car(args));}
 void _Cyc_91write_91char(object cont, object args) {  
     Cyc_check_num_args("write-char", 2, args);
     return_funcall1(cont, Cyc_write_char(car(args), cadr(args)));}
@@ -2405,6 +2428,7 @@ static primitive_type file_91exists_127_primitive = {primitive_tag, "file-exists
 static primitive_type delete_91file_primitive = {primitive_tag, "delete-file", &_delete_91file};
 static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
 static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
+static primitive_type Cyc_91read_91line_primitive = {primitive_tag, "Cyc-read-line", &_Cyc_91read_91line};
 static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
 static primitive_type Cyc_91write_91char_primitive = {primitive_tag, "Cyc-write-char", &_Cyc_91write_91char};
 static primitive_type Cyc_91display_primitive = {primitive_tag, "Cyc-display", &_display};
@@ -2520,6 +2544,7 @@ const object primitive_file_91exists_127 = &file_91exists_127_primitive;
 const object primitive_delete_91file = &delete_91file_primitive;
 const object primitive_read_91char = &read_91char_primitive;
 const object primitive_peek_91char = &peek_91char_primitive;
+const object primitive_Cyc_91read_91line = &Cyc_91read_91line_primitive;
 const object primitive_Cyc_91write_91char = &Cyc_91write_91char_primitive;
 const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
