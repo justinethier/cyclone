@@ -136,10 +136,9 @@
         end
         (func (car lst) (foldr func end (cdr lst)))))
     (define (flush-output-port . port)
-      'TODO)
-;      (if (null? port)
-;        (Cyc-flush-output-port (current-output-port))
-;        (Cyc-flush-output-port (car port))))
+      (if (null? port)
+        (Cyc-flush-output-port (current-output-port))
+        (Cyc-flush-output-port (car port))))
     (define (write-char char . port)
       (if (null? port)
         (Cyc-write-char char (current-output-port))
