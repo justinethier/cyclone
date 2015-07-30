@@ -5,6 +5,9 @@
 - sudo make install-libs
 - Add to prim? section in transforms.scm. Some functions may need to added to the next section in the file, so they are not constant-folded (IE, evaluated at compile time).
 - Add to the c-compile-primitive section in cgen.scm.
+
+INSTALL .SCM FILES, then running cyclone will pick up the changes. I think that simplifies the below... may let a make take care of it
+
 - cyclone scheme/cyclone/transforms.sld && cyclone scheme/cyclone/cgen.sld
 - sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
   and cgen
