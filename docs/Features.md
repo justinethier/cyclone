@@ -36,9 +36,9 @@ Section | Status | Comments
 6.8 Vectors | Yes |
 6.9 Bytevectors | | Not supported yet.
 6.10 Control features | Partial | The `map` and `for-each` families of functions only support one "data" argument - for example, `string-map` only accepts one string. `values` and `call-with-values` are not implemented. `dynamic-wind` is limited, and does not work across calls to continuations.
-6.11 Exceptions | Partial | Need to check against r7rs
-6.12 Environments and evaluation | Partial | Need to check against r7rs
-6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports. Do not have support for input/output strings.
+6.11 Exceptions | Partial | Exceptions are implemented but error objects (and associated functions `error-object`, etc) are not at this time. 
+6.12 Environments and evaluation | Partial | Only `eval` is implemented at this time.
+6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports. Do not have support for input/output strings or bytevectors.
 6.14 System interface | | TODO: most of these are not implemented
 
 ## Cyclone-specific
