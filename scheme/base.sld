@@ -78,8 +78,12 @@
     newline
     write-char
     flush-output-port
+    features
   )
   (begin
+    ;; Features implemented by this Scheme
+    (define (features) '(cyclone))
+
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
     ;; TODO: this is from r7rs, but is not really good enough by itself

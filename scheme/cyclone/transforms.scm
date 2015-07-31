@@ -141,7 +141,7 @@
                 ((not) (not (check (cadr x))))
                 ;((library) (eval `(find-module ',(cadr x)) (%meta-env)))
                 (else (error "cond-expand: bad feature" x)))
-              (memq x *features*)))
+              (memq x (features))))
         (let expand ((ls (cdr expr)))
           (cond ((null? ls))  ; (error "cond-expand: no expansions" expr)
                 ((not (pair? (car ls))) (error "cond-expand: bad clause" (car ls)))

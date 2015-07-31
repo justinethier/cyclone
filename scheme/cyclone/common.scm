@@ -29,7 +29,3 @@
  **
  **/
 "))
-
-;; Features implemented by this Scheme
-(define *features* '(cyclone))
-
