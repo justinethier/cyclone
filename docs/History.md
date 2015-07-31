@@ -41,6 +41,10 @@ The 90-minute scc ultimately compiles the code down to a single function and use
 - CPS conversion
 - Closure conversion
 
+## C Code Generation
+
+anything worth mentioning here? tuples of allocations/code??
+
 ## C Runtime
 Henry Baker's paper [CONS Should Not CONS Its Arguments: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as the target runtime as it provides a reasonably fast approach meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
