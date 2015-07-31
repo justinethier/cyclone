@@ -1,3 +1,5 @@
+# How I wrote the Cyclone Scheme compiler
+
 This document covers some of the background on how Cyclone was written, including different aspects of the compiler and runtime system. Cyclone could not have been written without the abundance of Scheme resources online, and many of those resources are discussed. There is a list at the end of this document of the resources that were most helpful and/or influential in writing Cyclone.
 
 First, it is important to mention the [husk scheme](http://justinethier.github.io/husk-scheme) project which was my first serious open-source work in Scheme. Husk is primarily an interpreter but putting the project together originally led me to many of the resources and information that would later be used to build Cyclone. In fact, one of the main motivations in building Cyclone was to go further and understand not only how to write a Scheme compiler, but also how to build a runtime system as well. Over time, some of the features and understanding gained in Cyclone may be folded back into Husk.
