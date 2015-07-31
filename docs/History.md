@@ -6,9 +6,9 @@ Before we get started, it is important to mention my first serious open-source w
 
 ## Table of Contents
 
-- [Source-to-Source Transformations](#Source-to-Source Transformations)
+- [Source-to-Source Transformations](#source-to-source-transformations)
 - TODO
-- [References](#References)
+- [References](#references)
 
 ## Source-to-Source Transformations
 One of the most important inspirations for Cyclone is Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (video and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc) are also available). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
