@@ -31,7 +31,7 @@ As outlined in the presentation, some of the difficulties in compiling to C are:
 >
 > The rest is easy!
 
-To overcome these difficulties, a series of source-to-source transformations are used to remove powerful features not provided by C, add constructs needed by the C code, etc. The final code may be compiled direcly to C. Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
+To overcome these difficulties a series of source-to-source transformations are used to remove powerful features not provided by C, add constructs required by the C code, and restructure/relabel the code in preparation for generating C. The final code may be compiled direcly to C. Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
 
 The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used. Cyclone also includes many other intermediate transformations, including:
 
@@ -44,11 +44,11 @@ The 90-minute scc ultimately compiles the code down to a single function and use
 ## C Runtime
 Henry Baker's paper [CONS Should Not CONS Its Arguments: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as the target runtime as it provides a reasonably fast approach meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
-From the paper, in summary:
+Baker explains how it works:
 
 > We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow ... Eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
 
-The runtime uses a copying garbage collector. By using static roots and the current continuation closure, the GC is able to copy objects from the stack to a pre-allocated heap without having to know the format of C stack frames. To quote Baker:
+Cheney on the M.T.A. uses a copying garbage collector. By using static roots and the current continuation closure, the GC is able to copy objects from the stack to a pre-allocated heap without having to know the format of C stack frames. To quote Baker:
 
 > the entire C "stack" is effectively the youngest generation in a generational garbage collector!
 
@@ -72,9 +72,10 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
       return_funcall1(cont, v);
     }
 
+[CHICKEN](http://www.call-cc.org/) was the first Scheme compiler to use Baker's approach.
+
 TODO:
-also mention value types from lisp in small pieces
-also mention CHICKEN, a production-quality compiler that uses Baker's approach.
+also mention object types and value types from lisp in small pieces
 
 ## Scheme Standards
 
