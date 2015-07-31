@@ -77,18 +77,17 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 TODO:
 also mention object types and value types from lisp in small pieces
 
-## Scheme Standards
+## Eval
 
-r7rs - library (C module) support is the most important, but also exceptions, improvements from r5rs, etc.
-
-
-## Interpreter
-
-used meta-circular interpreter from SICP as a starting point
+The Metacircular Evaluator from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
 
 ## Macros
 
 Chibi scheme explicit renaming macros provide an efficient place to start
+
+## Scheme Standards
+
+r7rs - library (C module) support is the most important, but also exceptions, improvements from r5rs, etc.
 
 ## Future
 
