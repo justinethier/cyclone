@@ -82,7 +82,7 @@
   )
   (begin
     ;; Features implemented by this Scheme
-    (define (features) '(cyclone))
+    (define (features) '(cyclone r7rs exact-closed))
 
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
