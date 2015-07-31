@@ -1114,6 +1114,28 @@ object Cyc_make_vector(object cont, object len, object fill) {
   return_funcall1(cont, v);
 }
 
+object Cyc_list2vector(object cont, object l) {
+  object v = nil; 
+  integer_type len;
+  object lst = l; 
+  int i = 0; 
+
+  Cyc_check_cons_or_nil(l); 
+  len = Cyc_length(l); 
+  v = alloca(sizeof(vector_type)); 
+  ((vector)v)->tag = vector_tag; 
+  ((vector)v)->num_elt = len.value; 
+  ((vector)v)->elts = 
+    (((vector)v)->num_elt > 0) ? 
+       (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
+       NULL; 
+  while(!nullp(lst)) {
+    ((vector)v)->elts[i++] = car(lst); 
+    lst = cdr(lst);
+  }
+  return_funcall1(cont, v);
+}
+
 integer_type Cyc_system(object cmd) {
   if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
     make_int(n, -1);
@@ -1736,8 +1758,7 @@ void _vector_91set_67(object cont, object args) {
       return_funcall1(cont, ref);}}
 void _list_91_125vector(object cont, object args) {
     Cyc_check_num_args("list->vector", 1, args);
-    { list2vector(l, car(args));
-      return_funcall1(cont, l);}}
+    Cyc_list2vector(cont, car(args));}
 void _list_91_125string(object cont, object args) {  
     Cyc_check_num_args("list->string", 1, args);
     { string_type s = Cyc_list2string(car(args));

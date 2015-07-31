@@ -484,7 +484,7 @@
      ((eq? p 'string->number)"Cyc_string2number")
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-vector)   "Cyc_make_vector")
-     ((eq? p 'list->vector)  "list2vector")
+     ((eq? p 'list->vector)  "Cyc_list2vector")
      ((eq? p 'vector-length) "Cyc_vector_length")
      ((eq? p 'vector-ref)    "Cyc_vector_ref")
      ((eq? p 'vector-set!)   "Cyc_vector_set")
@@ -563,6 +563,7 @@
     ((eq? p 'Cyc-read-line) "object")
     ((eq? p 'command-line-arguments) "object")
     ((eq? p 'make-vector) "object")
+    ((eq? p 'list->vector) "object")
     (else #f)))
 
 ;; Determine if primitive creates a C variable
@@ -590,12 +591,12 @@
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
-       (member exp '(Cyc-read-line apply command-line-arguments make-vector))))
+       (member exp '(Cyc-read-line apply command-line-arguments make-vector list->vector))))
 ;; TODO: this is a hack, right answer is to include information about
 ;;  how many args each primitive is supposed to take
 (define (prim:cont-has-args? exp)
   (and (prim? exp)
-       (member exp '(Cyc-read-line apply make-vector))))
+       (member exp '(Cyc-read-line apply make-vector list->vector))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
@@ -607,7 +608,7 @@
 ;; is obsolete and should be replaced by prim:cont? functions over time.
 (define (prim:allocates-object? exp)
     (and  (prim? exp)
-          (member exp '(list->vector))))
+          (member exp '())))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
