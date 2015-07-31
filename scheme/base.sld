@@ -78,6 +78,7 @@
     newline
     write-char
     flush-output-port
+    read-line
     features
   )
   (begin
@@ -139,6 +140,10 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
+    (define (read-line . port)
+      (if (null? port)
+        (Cyc-read-line (current-output-port))
+        (Cyc-read-line (car port))))
     (define (flush-output-port . port)
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))

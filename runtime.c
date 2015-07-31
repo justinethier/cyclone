@@ -1381,8 +1381,11 @@ object Cyc_io_read_line(object cont, object port) {
     if (c == EOF && i == 0) {
       return_funcall1(cont, Cyc_EOF);
     } else if (c == EOF || i == 1023 || c == '\n') {
-      make_string(s, buf);
-      return_funcall1(cont, &s);
+      buf[i] = '\0';
+      {
+        make_string(s, buf);
+        return_funcall1(cont, &s);
+      }
     }
 
     buf[i++] = c;
