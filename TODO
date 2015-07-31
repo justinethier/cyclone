@@ -8,7 +8,6 @@ Working TODO list. should start creating issues for these to get them out of her
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - adding r7rs support
-     - add read-line based off of Cyc-read-line
      - review other sections from the report
 
    - improved error handling:
