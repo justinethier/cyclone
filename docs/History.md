@@ -4,7 +4,7 @@ This document covers some of the background on how Cyclone was written, includin
 
 Before we get started, I want to say Thank You to everyone that has contributed to the Scheme community. At the end of this document is a list of online resources that were the most helpful and influential in writing Cyclone. Without quality Scheme resources like these it would not have been possible to write Cyclone.
 
-In addition to those resources, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me discover many of the resources that would later be used to build Cyclone. In fact, the primary motivation in building Cyclone was to go a step further and understand not only how to write a Scheme compiler but also how to build a runtime system. Over time some of the features and understanding gained in Cyclone may be folded back into Husk.
+In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to build Cyclone. In fact, the primary motivation in building Cyclone was to go a step further and understand not only how to write a Scheme compiler but also how to build a runtime system. Over time some of the features and understanding gained in Cyclone may be folded back into Husk.
 
 ## Table of Contents
 
