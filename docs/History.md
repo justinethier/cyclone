@@ -48,11 +48,11 @@ The 90-minute scc ultimately compiles the code down to a single function and use
 anything worth mentioning here? mention converting scheme sexp => strings? tuples of allocations/code??
 
 ## C Runtime
-Henry Baker's paper [CONS Should Not CONS Its Arguments: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as the target runtime as it provides a reasonably fast approach meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
+A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it provides fast code while meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
 Baker explains how it works:
 
-> We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow ... Eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
+> We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow ... eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
 
 Cheney on the M.T.A. uses a copying garbage collector. By using static roots and the current continuation closure, the GC is able to copy objects from the stack to a pre-allocated heap without having to know the format of C stack frames. To quote Baker:
 
@@ -80,24 +80,25 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 [CHICKEN](http://www.call-cc.org/) was the first Scheme compiler to use Baker's approach.
 
-TODO:
+## Data Types
+
 also mention object types and value types from lisp in small pieces
 
-## Eval
+## Interpreter
 
-The Metacircular Evaluator from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
+The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
 
 ## Macros
 
-Chibi scheme explicit renaming macros provide an efficient place to start
+[Explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without much more code than `eval`. Many ER macros from - [Chibi Scheme](https://github.com/ashinn/chibi-scheme) were used to implement the built-in macros in Cyclone.
 
 ## Scheme Standards
 
-r7rs - library (C module) support is the most important, but also exceptions, improvements from r5rs, etc.
+Cyclone targets the R<sup>7</sup>RS-small specification. This spec is relatively new and provides several incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important, but there are also exceptions, more system interfaces, and a more consistent API.
 
 ## Future
 
-should consider optimizations from Andrew Appel's book compiling with continuations. he developed a similar compiler for Standard ML of New Jersey, which is referenced by Baker's paper.
+Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could be applied to Cyclone.
 
 ## Conclusion
 
