@@ -8,7 +8,7 @@ TODO
 - [References](#References)
 
 ## Source-to-Source Transformations
-One of the most important inspirations for Cyclone is Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) which includes a presentation, set of slides, and example code written in Gambit Scheme. Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
+One of the most important inspirations for Cyclone is Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (video and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc) are also available). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
 
 As outlined in the presentation, some of the difficulties in compiling to C are:
 
@@ -26,7 +26,7 @@ As outlined in the presentation, some of the difficulties in compiling to C are:
 >
 > The rest is easy!
 
-To overcome these difficulties, a series of source-to-source transformations may be used to transform the original Scheme source into code that may be compiled directly to C. Each step removes powerful features not provided by C, adds constructs needed by the C code, etc. Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), the code can remain in it's original form, without having to introduce special data types as would be the case with many other languages.
+To overcome these difficulties, a series of source-to-source transformations are used to remove powerful features not provided by C, add constructs needed by the C code, etc. The final code may be compiled direcly to C. Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
 
 The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used. Cyclone also includes many other intermediate transformations, including:
 
