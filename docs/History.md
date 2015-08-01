@@ -5,12 +5,36 @@ table of contents
 
 ## TODO
 
-All of the references listed below were used to some extent to write Cyclone.
+This document covers some of the background on how Cyclone was written, including different aspects of the compiler and runtime system. Cyclone could not have been written without the abundance of Scheme resources online, and many of those resources are discussed. There is a list at the end of this document of the resources that were most helpful and/or influential in writing Cyclone.
 
-mention husk-scheme
+Also, it is important to mention the [husk scheme](http://justinethier.github.io/husk-scheme) project. Husk is primarily an interpreter, but putting the project together originally led me to many of the resources and information that would later be used to build Cyclone. In fact, one of the main motivations in building Cyclone was to take the work a step further and understand what it was like not only to write a Scheme compiler, but also to understand what goes into the runtime system as well. Over time, some of the features and understanding gained in Cyclone may be folded back into Husk.
 
 ## Scheme source-to-source transformations
-One of the most important inspiration's for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler]() which includes a presentation, set of slides, and example code written in Gambit Scheme. Feeley includes an overview of how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style CPS conversions. The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
+One of the most important inspiration's for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler]() which includes a presentation, set of slides, and example code written in Gambit Scheme. Feeley includes an overview of how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
+
+As outlined in the presentation, some of the difficulties in compiling to C are:
+
+> Scheme has, and C does not have
+>  -  tail-calls a.k.a. tail-recursion optimization
+>  -  first-class continuations
+>  -  closures of indefinite extent
+>  -  automatic memory management i.e. GC
+> Implications
+>  -  cannot translate (all) Scheme calls into C calls
+>  -  have to implement continuations
+>  -  have to implement closures
+>  -  have to organize things to allow GC
+> The rest is easy!
+
+A series of source-to-source transformations may be used to transform the original Scheme code into a set of code that may be compiled directly to C. Each step removes powerful features not provided by C, adds constructs needed by the C code, etc. Since Scheme represents code and data in the same way using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), the code can remain in it's original form, without having to introduce special data types as would be the case with many other languages.
+
+The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used. Cyclone also includes many other intermediate transformations, including:
+
+- Macro expansion
+- Processing of globals
+- Alpha conversion
+- CPS conversion
+- Closure conversion
 
 ## C Runtime
 Henry Baker's paper [CONS Should Not CONS Its Arguments: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as the target runtime as it provides a reasonably fast approach that includes all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
