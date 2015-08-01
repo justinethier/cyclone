@@ -1,15 +1,13 @@
-
-table of contents
-
-- [References](#References)
-
-## TODO
-
 This document covers some of the background on how Cyclone was written, including different aspects of the compiler and runtime system. Cyclone could not have been written without the abundance of Scheme resources online, and many of those resources are discussed. There is a list at the end of this document of the resources that were most helpful and/or influential in writing Cyclone.
 
 First, it is important to mention the [husk scheme](http://justinethier.github.io/husk-scheme) project which was my first serious open-source work in Scheme. Husk is primarily an interpreter but putting the project together originally led me to many of the resources and information that would later be used to build Cyclone. In fact, one of the main motivations in building Cyclone was to go further and understand not only how to write a Scheme compiler, but also how to build a runtime system as well. Over time, some of the features and understanding gained in Cyclone may be folded back into Husk.
 
-## Scheme source-to-source transformations
+Table of Contents
+
+TODO
+- [References](#References)
+
+## Source-to-Source Transformations
 One of the most important inspirations for Cyclone is Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) which includes a presentation, set of slides, and example code written in Gambit Scheme. Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
 
 As outlined in the presentation, some of the difficulties in compiling to C are:
@@ -43,7 +41,7 @@ Henry Baker's paper [CONS Should Not CONS Its Arguments: Cheney on the M.T.A.](h
 
 From the paper, in summary:
 
-> We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow. ... Eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
+> We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow ... Eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
 
 The runtime uses a copying garbage collector. By using static roots and the current continuation closure, the GC is able to copy objects from the stack to a pre-allocated heap without having to know the format of C stack frames. To quote Baker:
 
@@ -73,7 +71,7 @@ TODO:
 also mention value types from lisp in small pieces
 also mention CHICKEN, a production-quality compiler that uses Baker's approach.
 
-## Scheme standards
+## Scheme Standards
 
 r7rs - library (C module) support is the most important, but also exceptions, improvements from r5rs, etc.
 
@@ -86,7 +84,7 @@ used meta-circular interpreter from SICP as a starting point
 
 Chibi scheme explicit renaming macros provide an efficient place to start
 
-## future
+## Future
 
 should consider optimizations from Andrew Appel's book compiling with continuations. he developed a similar compiler for Standard ML of New Jersey, which is referenced by Baker's paper.
 
