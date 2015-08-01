@@ -52,7 +52,11 @@ The 90-minute scc ultimately compiles the code down to a single function and use
 
 ## C Code Generation
 
-anything worth mentioning here? mention converting scheme sexp => strings? tuples of allocations/code??
+The compiler's code generation phase takes a single pass over the transformed Scheme code and outputs C code to the current output port (usually a `.c` file).
+
+During this phase C code is sometimes returned as a string instead of being output directly. For example, when compiling a vector literal or a series of function arguments. In this case, the code is returned as a list that separates variable declarations from C code in the "body" of the generated function.
+
+The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions/variables exported from the library become C globals in the generated code.
 
 ## C Runtime
 A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it provides fast code while meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
@@ -97,11 +101,11 @@ The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z
 
 ## Macros
 
-[Explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without much more code than `eval`. Many ER macros from - [Chibi Scheme](https://github.com/ashinn/chibi-scheme) were used to implement the built-in macros in Cyclone.
+[Explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without requiring much more than `eval`. Many ER macros from [Chibi Scheme](https://github.com/ashinn/chibi-scheme) are used to implement the built-in macros in Cyclone.
 
 ## Scheme Standards
 
-Cyclone targets the R<sup>7</sup>RS-small specification. This spec is relatively new and provides several incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important, but there are also exceptions, more system interfaces, and a more consistent API.
+Cyclone targets the R<sup>7</sup>RS-small specification. This spec is relatively new and provides incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
 
 ## Future
 
