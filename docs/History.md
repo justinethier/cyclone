@@ -59,7 +59,7 @@ During this phase C code is sometimes returned as a string instead of being outp
 The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions/variables exported from the library become C globals in the generated code.
 
 ## C Runtime
-A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it provides fast code while meeting all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
+A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
 Baker explains how it works:
 
