@@ -1,10 +1,10 @@
-# How I wrote the Cyclone Scheme compiler
+# Background on Writing Cyclone Scheme
 
 This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. 
 
-Before we get started it is important to mention my first serious open-source work in Scheme, [husk scheme](http://justinethier.github.io/husk-scheme). Husk is primarily an interpreter but over the course of its development I discovered many of the resources that would later be used to build Cyclone. In fact, the primary motivation in building Cyclone was to go a step further and understand not only how to write a Scheme compiler but also how to build a runtime system. Over time some of the features and understanding gained in Cyclone may be folded back into Husk.
+Before we get started, I want to say Thank You to everyone that has contributed to the Scheme community. At the end of this document is a list of online resources that were the most helpful and influential in writing Cyclone. Without these quality Scheme resources it would not have been possible to write Cyclone.
 
-Lastly and most importantly, Thank You to everyone that has contributed to the Scheme community. At the end of this document is a list of online resources that were the most helpful and/or influential in writing Cyclone. Without this abundance of online Scheme resources it would not have been possible to write Cyclone.
+In addition to those resources, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me discover many of the resources that would later be used to build Cyclone. In fact, the primary motivation in building Cyclone was to go a step further and understand not only how to write a Scheme compiler but also how to build a runtime system. Over time some of the features and understanding gained in Cyclone may be folded back into Husk.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ Lastly and most importantly, Thank You to everyone that has contributed to the S
 - [References](#references)
 
 ## Source-to-Source Transformations
-One of the most important inspirations for Cyclone is Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (video and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc) are also available). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
+My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (also [video](https://www.youtube.com/watch?v=TxOM9Y5YrCs) and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc)). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
 
 As outlined in the presentation, some of the difficulties in compiling to C are:
 
@@ -31,15 +31,17 @@ As outlined in the presentation, some of the difficulties in compiling to C are:
 >
 > The rest is easy!
 
-To overcome these difficulties a series of source-to-source transformations are used to remove powerful features not provided by C, add constructs required by the C code, and restructure/relabel the code in preparation for generating C. The final code may be compiled direcly to C. Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
-
-The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used. Cyclone also includes many other intermediate transformations, including:
+To overcome these difficulties a series of source-to-source transformations are used to remove powerful features not provided by C, add constructs required by the C code, and restructure/relabel the code in preparation for generating C. The final code may be compiled direcly to C. Cyclone also includes many other intermediate transformations, including:
 
 - Macro expansion
 - Processing of globals
 - Alpha conversion
 - CPS conversion
 - Closure conversion
+
+Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
+
+The 90-minute scc ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
 ## C Code Generation
 
