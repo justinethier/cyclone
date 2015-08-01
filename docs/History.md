@@ -108,17 +108,17 @@ From Feeley's presentation:
 
 Compared to a similar compiler (CHICKEN), Cyclone's performance is worse but also "not so bad":
 
-> $ time cyclone transforms.sld
-> 
-> real    0m22.657s
-> user    0m13.220s
-> sys     0m8.320s
->
-> $ time csc transforms.scm
-> 
-> real    0m9.305s
-> user    0m3.732s
-> sys     0m5.064s
+    $ time cyclone transforms.sld
+     
+     real    0m22.657s
+     user    0m13.220s
+     sys     0m8.320s
+    
+    $ time csc transforms.scm
+     
+    real    0m9.305s
+    user    0m3.732s
+    sys     0m5.064s
 
 
 ## References
