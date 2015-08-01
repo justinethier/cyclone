@@ -93,7 +93,15 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 ## Data Types
 
-also mention object types and value types from lisp in small pieces
+Most Scheme data types are represented as allocated "objects" that contain a tag to identify the object type. For example:
+
+    typedef struct {tag_type tag; double value;} double_type;
+
+On the other hand, some data types can be represented using 30 bits. These types can be stored as value types using a technique from Lisp in Small Pieces. 
+
+Depending on the underlying architecture, compiler, etc these types have extra least significant bits that can be used to mark them as values instead of objects.  On many machines, addresses are multiples of four, leaving the two least significant bits free.
+
+Cyclone uses this technique to store characters. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
 
 ## Interpreter
 
