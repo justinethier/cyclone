@@ -1,4 +1,4 @@
-# Background on Writing Cyclone Scheme
+# Writing the Cyclone Scheme Compiler
 
 This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. 
 
