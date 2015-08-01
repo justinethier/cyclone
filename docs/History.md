@@ -97,7 +97,7 @@ Most Scheme data types are represented as allocated "objects" that contain a tag
 
     typedef struct {tag_type tag; double value;} double_type;
 
-On the other hand, some data types can be represented using 30 bits. These types can be stored as value types using a technique from Lisp in Small Pieces. 
+On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. 
 
 Depending on the underlying architecture, compiler, etc these types have extra least significant bits that can be used to mark them as values instead of objects.  On many machines, addresses are multiples of four, leaving the two least significant bits free.
 
