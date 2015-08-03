@@ -115,7 +115,7 @@ The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z
 
 ## Scheme Standards
 
-Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
+Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular [R<sup>5</sup>RS spec](http://www.schemers.org/Documents/Standards/R5RS/HTML/). Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
 
 ## Future
 
