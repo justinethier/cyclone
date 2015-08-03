@@ -1,5 +1,7 @@
 # Writing the Cyclone Scheme Compiler
 
+###### by [Justin Ethier](https://github.com/justinethier)
+
 This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. 
 
 Before we get started, I want to say Thank You to everyone that has contributed to the Scheme community. At the end of this document is a list of online resources that were the most helpful and influential in writing Cyclone. Without quality Scheme resources like these it would not have been possible to write Cyclone.
@@ -54,9 +56,9 @@ The 90-minute scc ultimately compiles the code down to a single function and use
 
 The compiler's code generation phase takes a single pass over the transformed Scheme code and outputs C code to the current output port (usually a `.c` file).
 
-During this phase C code is sometimes returned as a string instead of being output directly. For example, when compiling a vector literal or a series of function arguments. In this case, the code is returned as a list that separates variable declarations from C code in the "body" of the generated function.
+During this phase C code is sometimes returned for later use instead of being output directly. For example, when compiling a vector literal or a series of function arguments. In this case, the code is returned as a list of strings that separates variable declarations from C code in the "body" of the generated function.
 
-The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions/variables exported from the library become C globals in the generated code.
+The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions and variables exported from the library become C globals in the generated code.
 
 ## C Runtime
 A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
@@ -113,7 +115,7 @@ The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z
 
 ## Scheme Standards
 
-Cyclone targets the R<sup>7</sup>RS-small specification. This spec is relatively new and provides incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
+Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular R<sup>5</sup>RS spec. Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
 
 ## Future
 
