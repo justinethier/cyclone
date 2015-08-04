@@ -99,9 +99,11 @@ Most Scheme data types are represented as allocated "objects" that contain a tag
 
     typedef struct {tag_type tag; double value;} double_type;
 
-On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. 
+On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. On many machines, addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
-Depending on the underlying architecture, compiler, etc these types have extra least significant bits that can be used to mark them as values instead of objects.  On many machines, addresses are multiples of four, leaving the two least significant bits free.
+> The reason why most pointers are aligned to at least 4 bytes is that most pointers are pointers to objects or basic types that themselves are aligned to at least 4 bytes. Things that have 4 byte alignment include (for most systems): int, float, bool (yes, really), any pointer type, and any basic type their size or larger.
+
+Due to the tag field, all Cyclone objects will have (at least) 4-byte alignment.
 
 Cyclone uses this technique to store characters. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
 
