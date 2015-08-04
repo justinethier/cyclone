@@ -30,7 +30,7 @@ Cyclone has a similar architecture to other modern compilers:
 
 input file => scheme AST => IR's => C-gen => C compiler => exe or obj
 
-<img src="docs/images/compiler.png">
+<img src="images/compiler.png">
 
 An input file containing Scheme code is received on the command line and load by Cyclone's parser. The code is represented as an abstract syntax tree (AST) of regular Scheme objects.  Since Scheme represents both code and data using [S-Expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not have to use abstract data types to store the code as would be the case with many other languages.
 
