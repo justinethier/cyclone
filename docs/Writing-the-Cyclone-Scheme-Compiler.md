@@ -26,6 +26,8 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 
 TODO: overview of the compilation process
 
+Cyclone has a similar architecture to other modern compilers:
+
 input file => scheme AST => IR's => C-gen => C compiler => exe or obj
 
 ## Source-to-Source Transformations
