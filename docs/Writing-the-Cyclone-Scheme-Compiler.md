@@ -141,6 +141,10 @@ Compared to a similar compiler (CHICKEN), Cyclone's performance is worse but als
     user    0m3.732s
     sys     0m5.064s
 
+Thanks for reading!
+
+Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap).
+
 
 ## References
 
