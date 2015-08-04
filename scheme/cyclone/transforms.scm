@@ -15,6 +15,7 @@
   #f))
 
 ;; Macro section
+;; TODO: place this in another module? could speed development
 (define (define-syntax? exp)
   (tagged-list 'define-syntax exp))
 
