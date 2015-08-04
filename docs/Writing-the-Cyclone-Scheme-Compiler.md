@@ -95,9 +95,13 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 ## Data Types
 
+### Objects
+
 Most Scheme data types are represented as allocated "objects" that contain a tag to identify the object type. For example:
 
     typedef struct {tag_type tag; double value;} double_type;
+
+### Value Types
 
 On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. On many machines, addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
