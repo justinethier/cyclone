@@ -45,11 +45,11 @@ Getting Started
 Documentation
 -------------
 
-[Features](docs/Features.md) lists the language features that have been implemented so far. For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](docs/r7rs.pdf).
+[Features](docs/Features.md) is a list of the language features implemented so far. For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](docs/r7rs.pdf).
 
-[Development](docs/Development.md) contains instructions for hacking on Cyclone.
+The [Development Guide](docs/Development.md) contains instructions for hacking on Cyclone.
 
-[Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on writing the compiler, and how it works.
+[Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on how the compiler was written and how it works.
 
 References
 ----------
