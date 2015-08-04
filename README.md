@@ -45,11 +45,11 @@ Getting Started
 Documentation
 -------------
 
-For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki). 
+[Features](docs/Features.md) lists the language features that have been implemented so far. For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](docs/r7rs.pdf).
 
-The [features](docs/Features.md) page lists the language features currently implemented.
+[Development](docs/Development.md) contains instructions for hacking on Cyclone.
 
-The [development](docs/Development.md) page contains instructions for hacking on Cyclone.
+[Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on writing the compiler, and how it works.
 
 References
 ----------
