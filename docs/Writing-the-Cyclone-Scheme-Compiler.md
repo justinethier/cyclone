@@ -30,6 +30,8 @@ Cyclone has a similar architecture to other modern compilers:
 
 input file => scheme AST => IR's => C-gen => C compiler => exe or obj
 
+An input file containing Scheme code is received on the command line and load by Cyclone's parser. The code is represented as an abstract syntax tree (AST) of a list of regular Scheme objects. From there a series of source-to-source transformations are performed on the AST to make it easier to compile to C, perform optimizations, etc. The final AST is then output as a `.c` file and the C compiler is called to create the final executable or object file.
+
 ## Source-to-Source Transformations
 My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (also [video](https://www.youtube.com/watch?v=TxOM9Y5YrCs) and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc)). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
 
