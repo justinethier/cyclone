@@ -10,6 +10,7 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Source-to-Source Transformations](#source-to-source-transformations)
 - [C Code Generation](#c-code-generation)
 - [C Runtime](#c-runtime)
@@ -20,6 +21,12 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 - [Future](#future)
 - [Conclusion](#conclusion)
 - [References](#references)
+
+## Overview
+
+TODO: overview of the compilation process
+
+input file => scheme AST => IR's => C-gen => C compiler => exe or obj
 
 ## Source-to-Source Transformations
 My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (also [video](https://www.youtube.com/watch?v=TxOM9Y5YrCs) and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc)). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
