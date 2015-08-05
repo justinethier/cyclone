@@ -5,6 +5,11 @@ Roadmap:
 
 Working TODO list. should start creating issues for these to get them out of here:
 
+ - need to speed up the compilation cycle
+   switch to using shared libraries instead of static ones
+   move macro code to that module
+   if necessary, write makefile directive to automate rebuilding cyclone for macro development
+
  - macros
    can start by adding define-syntax? section to transforms.scm.
    need to think about how macros from sld's will end up being
