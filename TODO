@@ -5,6 +5,11 @@ Roadmap:
 
 Working TODO list. should start creating issues for these to get them out of here:
 
+ - macros
+   can start by adding define-syntax? section to transforms.scm.
+   need to think about how macros from sld's will end up being
+   loaded though. do we need to emit .meta files or such?
+
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - adding r7rs support
@@ -24,13 +29,9 @@ Working TODO list. should start creating issues for these to get them out of her
    cyclone> (call/cc (lambda (k) (k 1)))
    Error: Expected 2 arguments but received 1.
 
-   - Documentation improvements
-     - create a getting started page to go into more detail (build section could move to a that page, could go over build options, rlwrap, etc)
-     - create a 'how this was built' page to go into more detail about which references were used where
-     - features section is not accurate, need to assess what is implemented
-
    - eval
-     there is no concept of macro expansion, probably other deficiencies as well
+     there is limited concept of macro expansion, probably other deficiencies as well
+     call/cc issues?
      almost certainly will break when running the self-hosted compiler...
      no, I think this is ok. may want to unify macros with compiler side though
 
