@@ -19,6 +19,7 @@ SMODULES = \
   scheme/cyclone/cgen \
   scheme/cyclone/common \
   scheme/cyclone/libraries \
+  scheme/cyclone/macros \
   scheme/cyclone/transforms \
   scheme/cyclone/util 
 SLDFILES = $(addsuffix .sld, $(SMODULES))
@@ -78,6 +79,7 @@ bootstrap: icyc
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone

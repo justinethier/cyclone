@@ -8,6 +8,7 @@
           (scheme cyclone common)
           (scheme cyclone util)
           (scheme cyclone libraries)
+          (scheme cyclone macros)
   )
   (export
     ;*defined-macros* 
