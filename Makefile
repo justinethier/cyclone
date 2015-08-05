@@ -139,3 +139,10 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
 	$(RMDIR) $(DESTDIR)$(DATADIR)
 
+trans:
+	sudo cp scheme/cyclone/transforms.scm /usr/local/share/cyclone/scheme/cyclone/
+	cyclone scheme/cyclone/transforms.sld
+	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
+	cyclone cyclone.scm
+	sudo cp cyclone /usr/local/bin/cyclone
+
