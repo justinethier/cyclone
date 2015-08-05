@@ -10,6 +10,9 @@ Working TODO list. should start creating issues for these to get them out of her
    need to think about how macros from sld's will end up being
    loaded though. do we need to emit .meta files or such?
 
+ - profile cyclone code, see if there are any bottlenecks we can reduce
+   EG: prof cyclone transforms.sld
+
  - self-hosting, there are a lot of accumulated TODO's that need to be addressed
 
    - adding r7rs support
