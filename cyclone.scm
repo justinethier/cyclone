@@ -251,7 +251,7 @@
              (with-output-to-file 
                src-file
                (lambda ()
-                 (c-compile-and-emit program lib-deps src-file)))))
+                 (c-compile-and-emit program lib-deps in-file)))))
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
