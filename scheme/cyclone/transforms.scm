@@ -914,7 +914,7 @@
 ;; return some value such as #t or nil as a placeholder, since the
 ;; define-syntax form would not be carried forward in the compiled code
      ((define-syntax? exp) ;; TODO: not good enough, should do error checking, and make sure list is big enough for cadr
-      (trace:info `(define-syntax ,exp))
+      ;(trace:info `(define-syntax ,exp))
       (let* ((name (cadr exp))
              (trans (caddr exp))
              (body (cadr trans)))
