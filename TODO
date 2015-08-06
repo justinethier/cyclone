@@ -15,6 +15,8 @@ Working TODO list. should start creating issues for these to get them out of her
    need to think about how macros from sld's will end up being
    loaded though. do we need to emit .meta files or such?
 
+   problem right now in that built-in macros work because they become compiled functions, but macros loaded at compile time may be just scheme objects (and eventually, compiled functions from libs).
+
  - profile cyclone code, see if there are any bottlenecks we can reduce
    EG: prof cyclone transforms.sld
 

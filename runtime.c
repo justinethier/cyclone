@@ -1867,14 +1867,23 @@ object apply(object cont, object func, object args){
     case cons_tag:
     {
       // TODO: should add more error checking here, make sure car(func) is a symbol
+      object fobj = car(func);
+
+      if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
+         Cyc_rt_raise2("Call of non-procedure: ", func);
+      } else if (strncmp(((symbol)fobj)->pname, "lambda", 7) == 0) {
+          make_cons(c, func, args);
+          printf("JAE DEBUG, sending to eval: ");
+          Cyc_display(&c, stderr);
+          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
-      if (strncmp(((symbol)car(func))->pname, "primitive", 10) == 0) {
+      } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
           make_cons(c, cadr(func), args);
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
-      } else if (strncmp(((symbol)car(func))->pname, "procedure", 10) == 0) {
+      } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
           make_cons(c, func, args);
           ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
       } else {

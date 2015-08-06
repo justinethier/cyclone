@@ -108,6 +108,11 @@ install-libs:
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 
+install-bin:
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
+	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
+
 # TODO: rewrite install to be in terms of incremental steps above.
 #       also want to propagate this change to cyclone-bootstrap
 install:
