@@ -1873,8 +1873,8 @@ object apply(object cont, object func, object args){
          Cyc_rt_raise2("Call of non-procedure: ", func);
       } else if (strncmp(((symbol)fobj)->pname, "lambda", 7) == 0) {
           make_cons(c, func, args);
-          printf("JAE DEBUG, sending to eval: ");
-          Cyc_display(&c, stderr);
+          //printf("JAE DEBUG, sending to eval: ");
+          //Cyc_display(&c, stderr);
           ((closure)__glo_eval)->fn(2, __glo_eval, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,

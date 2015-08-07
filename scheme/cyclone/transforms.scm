@@ -21,7 +21,7 @@
   (list 
     (cons 'and 
      (lambda (expr rename compare)
-       (cond ((null? (cdr expr)))
+       (cond ((null? (cdr expr))) ;; TODO (?): #t)
              ((null? (cddr expr)) (cadr expr))
              (else (list (rename 'if) (cadr expr)
                          (cons (rename 'and) (cddr expr))
