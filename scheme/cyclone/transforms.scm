@@ -871,18 +871,6 @@
 ;; 
 
 ;; Macro expansion
-(define (macro? exp) (assoc (car exp) *defined-macros*))
-(define (macro-expand exp)
-  (let ((macro (assoc (car exp) *defined-macros*)))
-    ;; assumes ER macro
-    (if macro
-      ((cdr macro) 
-        exp 
-        (lambda (sym) ;; TODO: not good enough, need to actually rename, and keep same results if
-          sym)        ;; the same symbol is renamed more than once
-        (lambda (sym-a sym-b) ;; TODO: the compare function from exrename.
-          (eq? sym-a sym-b))) ;; this may need to be more sophisticated
-      exp))) ;; TODO: error instead??
 
 ; expand : exp -> exp
 (define (expand exp)
@@ -920,9 +908,9 @@
              (body (cadr trans)))
         (set! *defined-macros* (cons (cons name body) *defined-macros*))
         #t))
-     ((macro? exp)
+     ((macro? exp *defined-macros*)
        (expand ;; Could expand into another macro
-         (macro-expand exp)))
+         (macro-expand exp *defined-macros*)))
      (else
        (map expand exp))))
     (else

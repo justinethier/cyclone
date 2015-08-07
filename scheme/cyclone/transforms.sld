@@ -99,8 +99,6 @@
     cell->value 
     cell-get? 
     cell-get->cell 
-    macro? 
-    macro-expand 
     expand 
     let=>lambda 
     letrec=>lets+sets 
