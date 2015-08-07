@@ -1875,7 +1875,7 @@ object apply(object cont, object func, object args){
           make_cons(c, func, args);
           printf("JAE DEBUG, sending to eval: ");
           Cyc_display(&c, stderr);
-          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(2, __glo_eval, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.

@@ -26,6 +26,7 @@
                          (cons (rename 'and) (cddr expr))
                          #f))))))
 
-(test 1 2 3)
+(write
+  (test 1 2 3))
 ;(test 'done)
 'done
