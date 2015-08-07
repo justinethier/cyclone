@@ -17,8 +17,16 @@ Working TODO list. should start creating issues for these to get them out of her
 
    how to load macros
    - in same file, at compile time - works now with define-syntax
+        there may be an issue here with top-level define's containing a macro that
+        is contained in a top-level define-syntax listed after the define
    - in same file, at runtime - would need to compile as a function, and mark somehow at runtime
+        keep in mind macro expansion is only done via eval, so eval would need to have
+        access to the compiled macros at runtime. with ER macros, it is very preferable
+        for the macros to be compiled C functions
    - in library at compile time - how to load these??? do we need a ".meta" file or such???
+        library is compiled, but how to know what the macros are, and how to access them?
+        could emit a meta file that contains the macro identifiers and either their body
+        or a way to access them in the obj file (may not be possible/portable)
    - in library at runtime - if marked as macro, could run function (should be nice and fast)
    - anything else?
 
