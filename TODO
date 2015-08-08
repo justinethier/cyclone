@@ -42,6 +42,11 @@ can we guarantee all libs are initiated before global environment?
         one possible solution is to emit an intermediate file containing a list of
         macros, like *defined-macros*.
 
+on the other hand, how is this going to work when compiling cyclone? obviously want the
+compiler to use compiled functions as much as possible. if there is a naming conflict
+can it just use the compiled one by default? don't want cyclone eval'ing functions
+when it does not have to, and slowing down compilation even more
+
       Previous notes:
       * library is compiled, but how to know what the macros are, and how to access them?
         could emit a meta file that contains the macro identifiers and either their body
