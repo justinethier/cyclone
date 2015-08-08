@@ -16,19 +16,44 @@ Working TODO list. should start creating issues for these to get them out of her
    loaded though. do we need to emit .meta files or such?
 
    how to load macros
-   - in same file, at compile time - works now with define-syntax
+  1- in same file, at compile time - works now with define-syntax
         there may be an issue here with top-level define's containing a macro that
         is contained in a top-level define-syntax listed after the define
-   - in same file, at runtime - would need to compile as a function, and mark somehow at runtime
+  2- in same file, at runtime - would need to compile as a function, and mark somehow at runtime
         keep in mind macro expansion is only done via eval, so eval would need to have
         access to the compiled macros at runtime. with ER macros, it is very preferable
         for the macros to be compiled C functions
-   - in library at compile time - how to load these??? do we need a ".meta" file or such???
-        library is compiled, but how to know what the macros are, and how to access them?
+        * how do macros get into the global environment?
+
+first, macros have to be converted to functions and compiled to even be available at runtime.
+there will probably need to be a table of macros loaded at init time. the (macro?) function 
+and others would use this table, much like they does now with *defined-macros*
+
+each macro needs to tie a symbol (eg: 'let) to a compiled C function (or a closure??)
+
+can we guarantee all libs are initiated before global environment?
+
+  3- in library at compile time - how to load these??? do we need a ".meta" file or such???
+      * basically the issue is we are compiling a file that references a macro in a library.
+        the library is available as a .o and a .sld file at this point. but:
+          a) how do we know an exported object is a macro, and
+          b) how do we get the macro function (either compiled or as a scheme AST)?
+
+        one possible solution is to emit an intermediate file containing a list of
+        macros, like *defined-macros*.
+
+      Previous notes:
+      * library is compiled, but how to know what the macros are, and how to access them?
         could emit a meta file that contains the macro identifiers and either their body
         or a way to access them in the obj file (may not be possible/portable)
-   - in library at runtime - if marked as macro, could run function (should be nice and fast)
+  4- in library at runtime - if marked as macro, could run function (should be nice and fast)
+     assume this would be done in the same manner (or similar) to (2).
    - anything else?
+
+
+
+
+
 
  - profile cyclone code, see if there are any bottlenecks we can reduce
    EG: prof cyclone transforms.sld
