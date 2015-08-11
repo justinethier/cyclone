@@ -65,7 +65,6 @@ bootstrap: icyc
 	cp include/cyclone/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.scm $(BOOTSTRAP_DIR)/scheme
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
-	cp scheme/cyclone/*.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp runtime.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
@@ -126,7 +125,6 @@ install:
 	$(INSTALL) -m0644 scheme/*.scm $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
-	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
