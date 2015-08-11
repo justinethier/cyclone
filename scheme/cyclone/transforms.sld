@@ -1031,6 +1031,9 @@
         ;; TODO: may run into issues with expanding now, before some
         ;; of the macros are defined. may need to make a special pass
         ;; to do loading or expansion of macro bodies
+        ;; TODO: would it be better to use *define-macros* directly instead
+        ;; of trying to define it here? that might help prevent issues where
+        ;; an expand is called here before all macros are defined yet
         `(define ,name ,(expand body))))
      ((macro? exp *defined-macros*)
        (expand ;; Could expand into another macro
