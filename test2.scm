@@ -5,6 +5,7 @@
 ;
 ;
 (import (scheme base)
+        (scheme eval)
         (scheme write))
 
 ;(define-syntax test
@@ -42,3 +43,8 @@
 (write (or #f 2 3 'or))
 ;(test 'done)
 'done
+
+(define x 1)
+(write x)
+(write
+  (eval 'x))

@@ -24,6 +24,7 @@
     *do-code-gen*
     *trace-level*
     *primitives*
+    get-macros
     built-in-syms
     trace
     trace:error
@@ -135,6 +136,7 @@
 ;; Built-in macros
 ;; TODO: just a stub, real code would read (define-syntax) 
 ;;       from a lib file or such
+(define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
     (cons 'and 
@@ -1025,7 +1027,11 @@
              (trans (caddr exp))
              (body (cadr trans)))
         (set! *defined-macros* (cons (cons name body) *defined-macros*))
-        #t))
+        ;; Keep as a 'define' form so available at runtime
+        ;; TODO: may run into issues with expanding now, before some
+        ;; of the macros are defined. may need to make a special pass
+        ;; to do loading or expansion of macro bodies
+        `(define ,name ,(expand body))))
      ((macro? exp *defined-macros*)
        (expand ;; Could expand into another macro
          (macro-expand exp *defined-macros*)))
