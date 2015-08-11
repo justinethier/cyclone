@@ -145,7 +145,6 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)
 
 trans:
-	sudo cp scheme/cyclone/transforms.scm /usr/local/share/cyclone/scheme/cyclone/
 	cyclone scheme/cyclone/transforms.sld
 	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
 	cyclone cyclone.scm
