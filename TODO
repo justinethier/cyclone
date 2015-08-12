@@ -11,6 +11,15 @@ Working TODO list. should start creating issues for these to get them out of her
    if necessary, write makefile directive to automate rebuilding cyclone for macro development
 
  - macros
+   how should eval deal with compiled macros?
+   do we need a new tag type, eg: macro closure or such?
+   then eval could say, if app macro, expand it and call analyze again
+   may want to branch and experiment with this approach.
+   or just add hooks, then experiment with it in eval...
+   TBD: relocate eval/parser from scm to sld files? might be a good time
+   for it
+
+
    can start by adding define-syntax? section to transforms.scm.
    need to think about how macros from sld's will end up being
    loaded though. do we need to emit .meta files or such?
