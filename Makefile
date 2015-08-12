@@ -63,7 +63,6 @@ bootstrap: icyc
 	cp include/cyclone/types.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp scheme/*.scm $(BOOTSTRAP_DIR)/scheme
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp runtime.c $(BOOTSTRAP_DIR)
@@ -122,7 +121,6 @@ install:
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
-	$(INSTALL) -m0644 scheme/*.scm $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
