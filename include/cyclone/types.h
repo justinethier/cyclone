@@ -75,6 +75,7 @@ typedef long tag_type;
 #define boolean_tag 15
 #define cvar_tag 16
 #define vector_tag 17
+#define macro_tag 18
 
 #define nil NULL
 #define eq(x,y) (x == y)
@@ -212,6 +213,7 @@ cons_type n; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
 /* Closure types */
 
+typedef struct {tag_type tag; function_type fn; int num_args; } macro_type;
 typedef struct {tag_type tag; function_type fn; int num_args; } closure0_type;
 typedef struct {tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
 typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2;} closure2_type;
@@ -226,7 +228,9 @@ typedef closure3_type *closure3;
 typedef closure4_type *closure4;
 typedef closureN_type *closureN;
 typedef closure0_type *closure;
+typedef closure0_type *macro;
 
+#define mmacro(c,f) macro_type c; c.tag = macro_tag; c.fn = f; c.num_args = -1;
 #define mclosure0(c,f) closure0_type c; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
 #define mclosure1(c,f,a) closure1_type c; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;

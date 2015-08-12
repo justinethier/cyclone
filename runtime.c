@@ -418,7 +418,8 @@ object Cyc_display(object x, FILE *port)
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
  switch (type_of(x))
-   {case closure0_tag:
+   {case macro_tag:
+    case closure0_tag:
     case closure1_tag:
     case closure2_tag:
     case closure3_tag:
@@ -1852,6 +1853,7 @@ object apply(object cont, object func, object args){
       // TODO: should probably check arg counts and error out if needed
       ((primitive_type *)func)->fn(cont, args);
       break;
+    case macro_tag:
     case closure0_tag:
     case closure1_tag:
     case closure2_tag:
@@ -1961,6 +1963,13 @@ char *transport(x, gcgen) char *x; int gcgen;
        type_of(nx) = cons_tag; car(nx) = car(x); cdr(nx) = cdr(x);
        forward(x) = nx; type_of(x) = forward_tag;
        allocp = ((char *) nx)+sizeof(cons_type);
+       return (char *) nx;}
+    case macro_tag:
+      {register macro nx = (macro) allocp;
+       type_of(nx) = macro_tag; nx->fn = ((macro) x)->fn;
+       nx->num_args = ((macro) x)->num_args;
+       forward(x) = nx; type_of(x) = forward_tag;
+       allocp = ((char *) nx)+sizeof(macro_type);
        return (char *) nx;}
     case closure0_tag:
       {register closure0 nx = (closure0) allocp;
@@ -2200,6 +2209,11 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
 #endif
         transp(car(scanp)); transp(cdr(scanp));
         scanp += sizeof(cons_type); break;
+      case macro_tag:
+#if DEBUG_GC
+ printf("DEBUG transport macro \n");
+#endif
+        scanp += sizeof(macro_type); break;
       case closure0_tag:
 #if DEBUG_GC
  printf("DEBUG transport closure0 \n");
