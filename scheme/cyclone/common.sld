@@ -4,10 +4,7 @@
     *version*
     *version-banner*
     *c-file-header-comment*)
-  (include "common.scm")
   (begin
-    (define *Cyc-version-banner* *version-banner*)
-
 (define *version* "0.0.2 (Pre-release)")
 
 (define *version-banner* 
@@ -29,6 +26,8 @@
       `@.  
      
 "))
+
+(define *Cyc-version-banner* *version-banner*)
 
 (define *c-file-header-comment* 
   (string-append "/**
