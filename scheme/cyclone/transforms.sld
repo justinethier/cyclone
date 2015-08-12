@@ -1034,6 +1034,9 @@
         ;; TODO: would it be better to use *define-macros* directly instead
         ;; of trying to define it here? that might help prevent issues where
         ;; an expand is called here before all macros are defined yet
+        ;;  - no, we need to do this here so code is carried though all transforms
+        ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
+        ;;
         `(define ,name ,(expand body))))
      ((macro? exp *defined-macros*)
        (expand ;; Could expand into another macro
@@ -1213,7 +1216,8 @@
         (lambda (ast)
           (or (not (define? ast))
               (member (define->var ast) all-fv)
-              (member (define->var ast) lib-exports)))
+              (member (define->var ast) lib-exports)
+              (assoc (define->var ast) (get-macros))))
         code)))
   ;; Keep filtering until no more vars are removed
   (define (loop code)
