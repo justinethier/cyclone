@@ -182,6 +182,8 @@
       "\");\n"
       )))
 
+(define (st:->var trace)
+  (cdr trace))
 ;; END st helpers
 
 ;;; Compilation routines.
@@ -987,6 +989,7 @@
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
          (lid (allocate-lambda (c-compile-lambda lam trace)))
+         (macro? (assoc (st:->var trace) (get-macros)))
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
@@ -1005,18 +1008,26 @@
                            (car vars) ";\n"
                    (loop (+ i 1) (cdr vars))))))))
          (create-mclosure (lambda () 
-           (string-append
-            "mclosure" (number->string (length free-vars)) "(" cv-name ", "
-            ;; NOTE:
-            ;; Hopefully will not cause issues with varargs when casting to
-            ;; generic function type below. Works fine in gcc, not sure if 
-            ;; this is portable to other compilers though
-            "(function_type)__lambda_" (number->string lid)
-            (if (> (length free-vars) 0) "," "")
-            (string-join free-vars ", ")
-            ");"
-            cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
-            ))))
+           (let ((prefix 
+                    (if macro?
+                      "mmacro"
+                      (string-append 
+                        "mclosure" 
+                        (number->string (length free-vars))))))
+             (string-append
+              prefix
+              "(" cv-name ", "
+              ;; NOTE:
+              ;; Hopefully will not cause issues with varargs when casting to
+              ;; generic function type below. Works fine in gcc, not sure if 
+              ;; this is portable to other compilers though
+              "(function_type)__lambda_" (number->string lid)
+              (if (> (length free-vars) 0) "," "")
+              (string-join free-vars ", ")
+              ");"
+              cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
+              )))))
+  ;(trace:info (list 'JAE-DEBUG trace macro?))
   (c-code/vars
     (string-append "&" cv-name)
     (list 
