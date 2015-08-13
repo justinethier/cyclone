@@ -383,8 +383,10 @@
         ((if? exp) (analyze-if exp))
         ((lambda? exp) (analyze-lambda exp))
       ;; Expand macros
+;; TODO: does not work below because car is a symbol ('or) and 
+;; not the actual macro. so how to look it up???
         ((and (pair? exp) (macro? (car exp)))
-(write (list 'debug 'macro exp))
+;(write (list 'debug 'macro exp))
          (analyze (apply (car exp) (cdr exp))))
       ;; TODO: ideally, macro system would handle these next three
         ((tagged-list? 'let exp)
