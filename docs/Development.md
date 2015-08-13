@@ -14,7 +14,7 @@ From the source directory, use the following commands to build and install:
     $ make
     $ make test
     $ sudo make install
-    $ ./cyclone
+    $ cyclone
     
 By default everything is installed under `/usr/local`. This may be changed by passing a different `PREFIX`. For example:
 
