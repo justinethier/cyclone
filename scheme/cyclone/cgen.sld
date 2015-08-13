@@ -543,6 +543,7 @@
      ((eq? p 'integer?)      "Cyc_is_integer")
      ((eq? p 'pair?)         "Cyc_is_cons")
      ((eq? p 'procedure?)    "Cyc_is_procedure")
+     ((eq? p 'macro?)        "Cyc_is_macro")
      ((eq? p 'port?)         "Cyc_is_port")
      ((eq? p 'vector?)       "Cyc_is_vector")
      ((eq? p 'string?)       "Cyc_is_string")

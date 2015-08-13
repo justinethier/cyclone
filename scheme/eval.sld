@@ -287,6 +287,7 @@
       (list 'pair? pair?)
       (list 'port? port?)
       (list 'procedure? procedure?)
+      (list 'macro? macro?)
       (list 'vector? vector?)
       (list 'string? string?)
       (list 'symbol? symbol?)

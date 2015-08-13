@@ -713,6 +713,7 @@
      pair?
      port?
      procedure?
+     macro?
      vector?
      string?
      symbol?
