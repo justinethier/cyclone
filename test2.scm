@@ -47,4 +47,5 @@
 (define x 1)
 (write x)
 (write
-  (eval '(or 1 2 x)))
+  (eval 'or))
+  ;(eval '(or 1 2 x)))

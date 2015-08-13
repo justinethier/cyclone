@@ -383,11 +383,13 @@
         ((if? exp) (analyze-if exp))
         ((lambda? exp) (analyze-lambda exp))
       ;; Expand macros
-;; TODO: does not work below because car is a symbol ('or) and 
-;; not the actual macro. so how to look it up???
-        ((and (pair? exp) (macro? (car exp)))
-;(write (list 'debug 'macro exp))
-         (analyze (apply (car exp) (cdr exp))))
+;        ((and (pair? exp) (symbol? (car exp)))
+;;; TODO: look up symbol in env, and expand if it is a macro
+; will need to pass env to analyze (ideally), and use same lookup
+; code as for analyze-variable. obviously this will introduce
+; some extra overhead into eval, which is not ideal. may need to 
+; reduce that overhead later...
+;         (analyze (apply (car exp) (cdr exp))))
       ;; TODO: ideally, macro system would handle these next three
         ((tagged-list? 'let exp)
          (let ((vars (map car  (cadr exp))) ;(let->bindings exp)))

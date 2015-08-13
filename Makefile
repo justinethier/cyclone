@@ -140,6 +140,12 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
 	$(RMDIR) $(DESTDIR)$(DATADIR)
 
+# This is an example of how to build/test changes to the compiler.
+# With the way everything is setup now, you need to rebuild the module(s),
+# install them, and then rebuild the compiler executable to run them.
+#
+# It may be possible to use dynamic linking to reduce some of this overhead
+# in the future (should really look into that!)
 trans:
 	cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyc lone /usr/local/bin
 #	cyclone scheme/cyclone/transforms.sld
