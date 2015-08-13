@@ -373,7 +373,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This step separates syntactic analysis from execution.
-;; And environment is passed, but it is only used to expand macros.
+;; - exp => Code to analyze
+;; - env => Environment used to expand macros
 ;;
 (define (analyze exp env)
   (cond ((self-evaluating? exp) 
@@ -473,10 +474,11 @@
                   #f)))
     (cond
       ((macro? var)
-; look up symbol in env, and expand if it is a macro
-; Adds some extra overhead into eval, which is not ideal. may need to 
-; reduce that overhead later...
-(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
+       ;; look up symbol in env, and expand if it is a macro
+       ;; Adds some extra overhead into eval, which is not ideal. may need to 
+       ;; reduce that overhead later...
+       ;;(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
+
        ;; TODO: need to use common rename/compare functions
        ;; instead of fudging them here. maybe keep common
        ;; functions in the macros module and hook into them???
