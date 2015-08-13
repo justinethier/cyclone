@@ -48,4 +48,5 @@
 (write x)
 (write
   (eval 'or))
-  ;(eval '(or 1 2 x)))
+(write
+  (eval '(or 1 2 x)))

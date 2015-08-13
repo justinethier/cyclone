@@ -143,7 +143,7 @@
                  (car vals))))
             (else (scan (cdr vars) (cdr vals)))))
     (if (eq? env the-empty-environment)
-        (error "Unbound variable" var)
+        (not-found)
         (let ((frame (first-frame env)))
           (scan (frame-variables frame)
                 (frame-values frame)))))
@@ -466,30 +466,30 @@
     (loop (car procs) (cdr procs))))
 
 (define (pre-analyze-application exp a-env)
-;  (let* ((op (operator exp))
-;         (var (if (symbol? op)
-;                  (_lookup-variable-value op a-env
-;                    (lambda () #f)) ; Not found
-;                  #f)))
-;    (cond
-;      ((macro? var)
-;; look up symbol in env, and expand if it is a macro
-;; Adds some extra overhead into eval, which is not ideal. may need to 
-;; reduce that overhead later...
-;(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
-;       ;; TODO: need to use common rename/compare functions
-;       ;; instead of fudging them here. maybe keep common
-;       ;; functions in the macros module and hook into them???
-;
-;       ;; see macro-expand in that module. believe these are the only
-;       ;; two places so far that introduce instances of rename/compare?
-;       (analyze (apply op 
-;                      (list (cons op (operands exp))
-;                            (lambda (sym) sym)
-;                            (lambda (a b) (eq? a b)))) 
-;                a-env))
-;      (else
-       (analyze-application exp a-env)) ;)))
+  (let* ((op (operator exp))
+         (var (if (symbol? op)
+                  (_lookup-variable-value op a-env
+                    (lambda () #f)) ; Not found
+                  #f)))
+    (cond
+      ((macro? var)
+; look up symbol in env, and expand if it is a macro
+; Adds some extra overhead into eval, which is not ideal. may need to 
+; reduce that overhead later...
+(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
+       ;; TODO: need to use common rename/compare functions
+       ;; instead of fudging them here. maybe keep common
+       ;; functions in the macros module and hook into them???
+
+       ;; see macro-expand in that module. believe these are the only
+       ;; two places so far that introduce instances of rename/compare?
+       (analyze (apply var
+                      (list (cons var (operands exp))
+                            (lambda (sym) sym)
+                            (lambda (a b) (eq? a b)))) 
+                a-env))
+      (else
+       (analyze-application exp a-env)))))
 
 (define (analyze-application exp a-env)
   (let ((fproc (analyze (operator exp) a-env))
