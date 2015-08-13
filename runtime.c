@@ -420,6 +420,8 @@ object Cyc_display(object x, FILE *port)
  if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
  switch (type_of(x))
    {case macro_tag:
+      fprintf(port, "<macro %p>",(void *)((closure) x)->fn);
+      break;
     case closure0_tag:
     case closure1_tag:
     case closure2_tag:
