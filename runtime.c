@@ -11,7 +11,7 @@
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
-const char *tag_names[20] = { \
+const char *tag_names[21] = { \
    "pair" \
  , "symbol" \
  , "" \
@@ -30,8 +30,9 @@ const char *tag_names[20] = { \
  , "boolean" \
  , "C primitive" \
  , "vector" \
- , "TODO: add missing type" \
- , "TODO: add missing type" };
+ , "macro" \
+ , "Reserved for future use" \
+ , "Reserved for future use" };
 
 void Cyc_invalid_type_error(int tag, object found) {
   char buf[256];
@@ -748,6 +749,17 @@ object Cyc_is_procedure(object o) {
               return boolean_t;
             }
           }
+        }
+    }
+    return boolean_f;
+}
+
+object Cyc_is_macro(object o) {
+    int tag;
+    if (!nullp(o) && !is_value_type(o)) {
+        tag = type_of(o);
+        if (tag == macro_tag) {
+          return boolean_t;
         }
     }
     return boolean_f;
@@ -1619,6 +1631,9 @@ void _pair_127(object cont, object args) {
 void _procedure_127(object cont, object args) {
     Cyc_check_num_args("procedure?", 1, args);
     return_funcall1(cont, Cyc_is_procedure(car(args))); }
+void _macro_127(object cont, object args) {
+    Cyc_check_num_args("macro?", 1, args);
+    return_funcall1(cont, Cyc_is_macro(car(args))); }
 void _port_127(object cont, object args) {
     Cyc_check_num_args("port?", 1, args);
     return_funcall1(cont, Cyc_is_port(car(args))); }
@@ -2461,6 +2476,7 @@ static primitive_type real_127_primitive = {primitive_tag, "real?", &_real_127};
 static primitive_type integer_127_primitive = {primitive_tag, "integer?", &_integer_127};
 static primitive_type pair_127_primitive = {primitive_tag, "pair?", &_pair_127};
 static primitive_type procedure_127_primitive = {primitive_tag, "procedure?", &_procedure_127};
+static primitive_type macro_127_primitive = {primitive_tag, "macro?", &_macro_127};
 static primitive_type port_127_primitive = {primitive_tag, "port?", &_port_127};
 static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector_127};
 static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
@@ -2577,6 +2593,7 @@ const object primitive_real_127 = &real_127_primitive;
 const object primitive_integer_127 = &integer_127_primitive;
 const object primitive_pair_127 = &pair_127_primitive;
 const object primitive_procedure_127 = &procedure_127_primitive;
+const object primitive_macro_127 = &macro_127_primitive;
 const object primitive_string_127 = &string_127_primitive;
 const object primitive_port_127 = &port_127_primitive;
 const object primitive_vector_127 = &vector_127_primitive;
