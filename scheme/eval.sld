@@ -19,8 +19,8 @@
 
 (define (eval exp . env)
   (if (null? env)
-      ((analyze exp) *global-environment*)
-      ((analyze exp) (car env))))
+      ((analyze exp *global-environment*) *global-environment*)
+      ((analyze exp (car env)) (car env))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression handling helper functions
@@ -126,6 +126,11 @@
           (error "Too few arguments supplied" vars vals))))
 
 (define (lookup-variable-value var env)
+  (_lookup-variable-value var env 
+    (lambda ()
+      (error "Unbound variable" var))))
+
+(define (_lookup-variable-value var env not-found)
   (define (env-loop env)
     (define (scan vars vals)
       (cond ((null? vars)
@@ -367,29 +372,19 @@
                      (expand-clauses rest))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Improvement from section 4.1.7 - Separate syntactic analysis from execution
+;; This step separates syntactic analysis from execution.
+;; And environment is passed, but it is only used to expand macros.
 ;;
-;; TODO: need to finish this section
-;; TODO: see 4.1.6  Internal Definitions
-;;
-(define (analyze exp)
+(define (analyze exp env)
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
         ((quasiquoted? exp) (analyze-quasiquoted exp))
         ((variable? exp) (analyze-variable exp))
-        ((assignment? exp) (analyze-assignment exp))
-        ((definition? exp) (analyze-definition exp))
-        ((if? exp) (analyze-if exp))
-        ((lambda? exp) (analyze-lambda exp))
-      ;; Expand macros
-;        ((and (pair? exp) (symbol? (car exp)))
-;;; TODO: look up symbol in env, and expand if it is a macro
-; will need to pass env to analyze (ideally), and use same lookup
-; code as for analyze-variable. obviously this will introduce
-; some extra overhead into eval, which is not ideal. may need to 
-; reduce that overhead later...
-;         (analyze (apply (car exp) (cdr exp))))
+        ((assignment? exp) (analyze-assignment exp env))
+        ((definition? exp) (analyze-definition exp env))
+        ((if? exp) (analyze-if exp env))
+        ((lambda? exp) (analyze-lambda exp env))
       ;; TODO: ideally, macro system would handle these next three
         ((tagged-list? 'let exp)
          (let ((vars (map car  (cadr exp))) ;(let->bindings exp)))
@@ -398,9 +393,10 @@
            (analyze
              (cons
                (cons 'lambda (cons vars body))
-               args))))
-        ((begin? exp) (analyze-sequence (begin-actions exp)))
-        ((cond? exp) (analyze (cond->if exp)))
+               args)
+             env)))
+        ((begin? exp) (analyze-sequence (begin-actions exp) env))
+        ((cond? exp) (analyze (cond->if exp) env))
       ;; END derived expression processing
 
         ;; experimenting with passing these back to eval
@@ -410,7 +406,7 @@
 
         ((procedure? exp)
          (lambda (env) exp))
-        ((application? exp) (analyze-application exp))
+        ((application? exp) (pre-analyze-application exp env))
         (else
          (error "Unknown expression type -- ANALYZE" exp))))
          ;(lambda () 'TODO-unknown-exp-type)))) ; JAE - this is a debug line
@@ -428,35 +424,35 @@
 (define (analyze-variable exp)
   (lambda (env) (lookup-variable-value exp env)))
 
-(define (analyze-assignment exp)
+(define (analyze-assignment exp a-env)
   (let ((var (assignment-variable exp))
-        (vproc (analyze (assignment-value exp))))
+        (vproc (analyze (assignment-value exp) a-env)))
     (lambda (env)
       (set-variable-value! var (vproc env) env)
       'ok)))
 
-(define (analyze-definition exp)
+(define (analyze-definition exp a-env)
   (let ((var (definition-variable exp))
-        (vproc (analyze (definition-value exp))))
+        (vproc (analyze (definition-value exp) a-env)))
     (lambda (env)
       (define-variable! var (vproc env) env)
       'ok)))
 
-(define (analyze-if exp)
-  (let ((pproc (analyze (if-predicate exp)))
-        (cproc (analyze (if-consequent exp)))
-        (aproc (analyze (if-alternative exp))))
+(define (analyze-if exp a-env)
+  (let ((pproc (analyze (if-predicate exp) a-env))
+        (cproc (analyze (if-consequent exp) a-env))
+        (aproc (analyze (if-alternative exp) a-env)))
     (lambda (env)
       (if (pproc env)
           (cproc env)
           (aproc env)))))
 
-(define (analyze-lambda exp)
+(define (analyze-lambda exp a-env)
   (let ((vars (lambda-parameters exp))
-        (bproc (analyze-sequence (lambda-body exp))))
+        (bproc (analyze-sequence (lambda-body exp) a-env)))
     (lambda (env) (make-procedure vars bproc env))))
 
-(define (analyze-sequence exps)
+(define (analyze-sequence exps a-env)
   (define (sequentially proc1 proc2)
     (lambda (env) (proc1 env) (proc2 env)))
   (define (loop first-proc rest-procs)
@@ -464,14 +460,42 @@
         first-proc
         (loop (sequentially first-proc (car rest-procs))
               (cdr rest-procs))))
-  (let ((procs (map analyze exps)))
+  (let ((procs (map (lambda (e) (analyze e a-env)) exps)))
     (if (null? procs)
         (error "Empty sequence -- ANALYZE"))
     (loop (car procs) (cdr procs))))
 
-(define (analyze-application exp)
-  (let ((fproc (analyze (operator exp)))
-        (aprocs (map analyze (operands exp))))
+(define (pre-analyze-application exp a-env)
+;  (let* ((op (operator exp))
+;         (var (if (symbol? op)
+;                  (_lookup-variable-value op a-env
+;                    (lambda () #f)) ; Not found
+;                  #f)))
+;    (cond
+;      ((macro? var)
+;; look up symbol in env, and expand if it is a macro
+;; Adds some extra overhead into eval, which is not ideal. may need to 
+;; reduce that overhead later...
+;(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
+;       ;; TODO: need to use common rename/compare functions
+;       ;; instead of fudging them here. maybe keep common
+;       ;; functions in the macros module and hook into them???
+;
+;       ;; see macro-expand in that module. believe these are the only
+;       ;; two places so far that introduce instances of rename/compare?
+;       (analyze (apply op 
+;                      (list (cons op (operands exp))
+;                            (lambda (sym) sym)
+;                            (lambda (a b) (eq? a b)))) 
+;                a-env))
+;      (else
+       (analyze-application exp a-env)) ;)))
+
+(define (analyze-application exp a-env)
+  (let ((fproc (analyze (operator exp) a-env))
+        (aprocs (map (lambda (o)
+                       (analyze o a-env))
+                     (operands exp))))
     (lambda (env)
       (execute-application (fproc env)
                            (map (lambda (aproc) (aproc env))

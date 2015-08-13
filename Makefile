@@ -153,3 +153,5 @@ trans:
 #	cyclone cyclone.scm
 #	sudo cp cyclone /usr/local/bin/cyclone
 
+eval:
+	cyclone scheme/eval.sld && sudo cp scheme/eval.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin && cyclone test2.scm && ./test2
