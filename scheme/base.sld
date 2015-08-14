@@ -80,10 +80,31 @@
     flush-output-port
     read-line
     features
+    and
+    or
   )
   (begin
     ;; Features implemented by this Scheme
     (define (features) '(cyclone r7rs exact-closed))
+
+    (define-syntax and
+      (er-macro-transformer
+       (lambda (expr rename compare)
+         (cond ((null? (cdr expr)) #t)
+               ((null? (cddr expr)) (cadr expr))
+               (else (list (rename 'if) (cadr expr)
+                           (cons (rename 'and) (cddr expr))
+                           #f))))))
+    (define-syntax or
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (cond ((null? (cdr expr)) #f)
+                ((null? (cddr expr)) (cadr expr))
+                (else
+                 (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
+                       (list (rename 'if) (rename 'tmp)
+                             (rename 'tmp)
+                             (cons (rename 'or) (cddr expr)))))))))
 
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)

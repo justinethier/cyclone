@@ -11,6 +11,13 @@ Working TODO list. should start creating issues for these to get them out of her
    if necessary, write makefile directive to automate rebuilding cyclone for macro development
 
  - macros
+   - tried moving 'and macro from base to trans, and recompiled/reinstalled modules and exec's.
+     seemed to work OK with meta file installed.
+     but without meta file, it seems and is not expanded and cyclone tries to call it
+     directly during execution, which of course segfaults.
+     need to understand why it is not expanded. also double-check but it must have worked
+     fine when meta file was installed, because did not see segfaults at that time.
+
    * thought: if we go with meta files, the compiler can revert back
      to using compiled macros if we do not install the meta files.
      just an idea, may be a hack or not feasible. not an awful idea to
