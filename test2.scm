@@ -5,6 +5,7 @@
 ;
 ;
 (import (scheme base)
+        (test-lib test)
         (scheme eval)
         (scheme write))
 
@@ -17,36 +18,36 @@
 ;
 ; WTF is the macro unable to be evaluated when the same code works as part of *defined-macros*???
 ;
-(define-syntax test 
-  (er-macro-transformer
-     (lambda (expr rename compare)
-       (cond ((null? (cdr expr)) #t)
-;       (cond ((null? (cdr expr)))
-             ((null? (cddr expr)) (cadr expr))
-             (else (list (rename 'if) (cadr expr)
-                         (cons (rename 'and) (cddr expr))
-                         #f))))))
-
-(define-syntax or
-  (er-macro-transformer
-     (lambda (expr rename compare)
-       (cond ((null? (cdr expr)) #f)
-             ((null? (cddr expr)) (cadr expr))
-             (else
-              (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
-                    (list (rename 'if) (rename 'tmp)
-                          (rename 'tmp)
-                          (cons (rename 'or) (cddr expr)))))))))
+;(define-syntax test 
+;  (er-macro-transformer
+;     (lambda (expr rename compare)
+;       (cond ((null? (cdr expr)) #t)
+;;       (cond ((null? (cdr expr)))
+;             ((null? (cddr expr)) (cadr expr))
+;             (else (list (rename 'if) (cadr expr)
+;                         (cons (rename 'and) (cddr expr))
+;                         #f))))))
+;
+;(define-syntax or
+;  (er-macro-transformer
+;     (lambda (expr rename compare)
+;       (cond ((null? (cdr expr)) #f)
+;             ((null? (cddr expr)) (cadr expr))
+;             (else
+;              (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
+;                    (list (rename 'if) (rename 'tmp)
+;                          (rename 'tmp)
+;                          (cons (rename 'or) (cddr expr)))))))))
 
 (write (test 1 2 3))
-(write (or 1 2 3 'or))
-(write (or #f 2 3 'or))
+(write (my-or 1 2 3 'or))
+(write (my-or #f 2 3 'or))
 ;(test 'done)
 'done
 
 (define x 1)
 (write x)
 (write
-  (eval 'or))
+  (eval 'my-or))
 (write
-  (eval '(or 1 2 x)))
+  (eval '(my-or 1 2 x)))
