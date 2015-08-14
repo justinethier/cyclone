@@ -1043,7 +1043,8 @@
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
         `(define ,name ,(expand body))))
-     ((macro:macro? exp *defined-macros*)
+     ((or (macro? exp)
+          (macro:macro? exp *defined-macros*))
        (expand ;; Could expand into another macro
          (macro:expand exp *defined-macros*)))
      (else
