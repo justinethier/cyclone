@@ -15,7 +15,7 @@
 
     (define (macro:add! name body)
       (set! *macro:defined-macros* 
-        (cons (cons name body) *macro:defined-macros*))
+        (cons (cons name (cons body '())) *macro:defined-macros*))
       #t)
 
     (define (macro:get-defined-macros) *macro:defined-macros*)
