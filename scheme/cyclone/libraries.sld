@@ -28,10 +28,12 @@
     lib:body
     lib:includes
     lib:import->filename
+    lib:import->metalist
     lib:import->path
     lib:read-imports
     lib:import->export-list
     lib:resolve-imports
+    lib:resolve-meta
     lib:get-all-import-deps
     lib:get-dep-list
   )
@@ -162,6 +164,25 @@
    (map 
      (lambda (import)
        (lib:import->export-list import))
+     imports)))
+
+(define (lib:import->metalist import)
+  (let ((file (lib:import->filename import ".meta"))
+        (fp #f)
+        (result '()))
+    (cond
+      ((file-exists? file)
+       (set! fp (open-input-file file))
+       (set! result (car (read-all fp)))
+       (close-input-port fp)))
+    result))
+
+(define (lib:resolve-meta imports)
+ (apply
+   append
+   (map 
+     (lambda (import)
+       (lib:import->metalist import))
      imports)))
 
 ;; Given an import set, get all dependant import names that are required
