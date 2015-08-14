@@ -1028,6 +1028,10 @@
              (trans (caddr exp))
              (body (cadr trans)))
         (set! *defined-macros* (cons (cons name body) *defined-macros*))
+        ;; Keep track of macros added during compilation.
+        ;; Previous list should eventually go away once macros are
+        ;; moved from that static list to libraries
+        (macro:add! name body)
         ;; Keep as a 'define' form so available at runtime
         ;; TODO: may run into issues with expanding now, before some
         ;; of the macros are defined. may need to make a special pass
@@ -1039,9 +1043,9 @@
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
         `(define ,name ,(expand body))))
-     ((macro? exp *defined-macros*)
+     ((macro:macro? exp *defined-macros*)
        (expand ;; Could expand into another macro
-         (macro-expand exp *defined-macros*)))
+         (macro:expand exp *defined-macros*)))
      (else
        (map expand exp))))
     (else

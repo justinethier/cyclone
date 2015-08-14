@@ -4,17 +4,29 @@
   ; TODO: really need export-all for these cyclone libs!!
   (export
     define-syntax?
-    macro?
-    macro-expand
+    macro:macro?
+    macro:expand
+    macro:add!
+    macro:get-defined-macros
   )
   (begin
+    ;; A list of all macros defined by the program/library being compiled
+    (define *macro:defined-macros* '())
+
+    (define (macro:add! name body)
+      (set! *macro:defined-macros* 
+        (cons (cons name body) *macro:defined-macros*))
+      #t)
+
+    (define (macro:get-defined-macros) *macro:defined-macros*)
+
     ;; Macro section
     ;; TODO: place this in another module? could speed development
     (define (define-syntax? exp)
       (tagged-list? 'define-syntax exp))
 
-    (define (macro? exp defined-macros) (assoc (car exp) defined-macros))
-    (define (macro-expand exp defined-macros)
+    (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
+    (define (macro:expand exp defined-macros)
       (let ((macro (assoc (car exp) defined-macros)))
         ;; assumes ER macro
         (if macro
