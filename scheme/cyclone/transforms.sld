@@ -20,7 +20,7 @@
           (scheme cyclone macros)
   )
   (export
-    ;*defined-macros* 
+    *defined-macros* 
     *do-code-gen*
     *trace-level*
     *primitives*

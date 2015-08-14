@@ -89,8 +89,10 @@
       (set! imported-vars (lib:resolve-imports imports))
       (trace:info "resolved imports:")
       (trace:info imported-vars)
-      (trace:info "resolved macros:")
-      (trace:info (lib:resolve-meta imports))
+      (let ((meta (lib:resolve-meta imports)))
+        (set! *defined-macros* (append meta *defined-macros*))
+        (trace:info "resolved macros:")
+        (trace:info meta))
 
       ;; TODO: how to handle stdlib when compiling a library??
       ;; either need to keep track of what was actually used,
