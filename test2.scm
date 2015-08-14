@@ -28,16 +28,16 @@
                          (cons (rename 'and) (cddr expr))
                          #f))))))
 
-(define-syntax or
-  (er-macro-transformer
-     (lambda (expr rename compare)
-       (cond ((null? (cdr expr)) #f)
-             ((null? (cddr expr)) (cadr expr))
-             (else
-              (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
-                    (list (rename 'if) (rename 'tmp)
-                          (rename 'tmp)
-                          (cons (rename 'or) (cddr expr)))))))))
+;(define-syntax or
+;  (er-macro-transformer
+;     (lambda (expr rename compare)
+;       (cond ((null? (cdr expr)) #f)
+;             ((null? (cddr expr)) (cadr expr))
+;             (else
+;              (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
+;                    (list (rename 'if) (rename 'tmp)
+;                          (rename 'tmp)
+;                          (cons (rename 'or) (cddr expr)))))))))
 
 (write (test 1 2 3))
 (write (my-or 1 2 3 'or))
