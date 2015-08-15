@@ -8,14 +8,37 @@
 (define-library (scheme eval)
   (import 
     (scheme cyclone util)
+    ;(scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
     (scheme write)
     (scheme read))
   (export
+    ;environment
     eval
+    create-environment ; non-standard
   )
   (begin
+
+;; From r7rs:
+;; This procedure returns a specifier for the environment that
+;; results by starting with an empty environment and then
+;; importing each list, considered as an import set, into it.
+;; (See section 5.6 for a description of import sets.) The
+;; bindings of the environment represented by the specifier
+;; are immutable, as is the environment itself.
+;;
+;; Ideally, want this to allow creating new env's on top of global-env.
+;(define (environment i . is)
+;  (let ((imports (cons i is)))
+;    'TODO
+;  ))
+
+;; Create a new environment on top of the default one.
+;; - vars => Identifiers in the new environment
+;; - vals => List of each value assigned to each identifier
+(define (create-environment vars vals)
+  (extend-environment vars vals *global-environment*)) ;; TODO: setup?
 
 (define (eval exp . env)
   (if (null? env)
