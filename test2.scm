@@ -28,6 +28,14 @@
                          (cons (rename 'and) (cddr expr))
                          #f))))))
 
+(define-syntax test2
+  (er-macro-transformer
+     (lambda (expr rename compare)
+       (test 1 2 3) ; breaks
+       ;(my-or 1 2 3) ; breaks
+       (list 'test #t))))
+           
+
 ;(define-syntax or
 ;  (er-macro-transformer
 ;     (lambda (expr rename compare)
@@ -39,6 +47,7 @@
 ;                          (rename 'tmp)
 ;                          (cons (rename 'or) (cddr expr)))))))))
 
+(write (test2 1 2 3))
 (write (test 1 2 3))
 (write (my-or 1 2 3 'or))
 (write (my-or #f 2 3 'or))
