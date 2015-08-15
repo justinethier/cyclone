@@ -31,6 +31,17 @@
 (define-syntax test2
   (er-macro-transformer
      (lambda (expr rename compare)
+       ;; need some way to get these in the eval env
+       ;;
+       ;; may need to maintain an environment in the compiler and pass it
+       ;; along to eval somehow when macro is expanded. would this just
+       ;; involve changes to expand? also, does that mean macro:expand
+       ;; should call eval directly if a non-compiled macro is found?
+       ;; if that is the case, macro:expand would also need to receive
+       ;; the env parameter so it could pass that along to.
+       ;; tbd how this parameter would be combined with eval's global env,
+       ;; because it would need to extend it.
+       ;; could eval expose a function to extend the global env (or any env)?
        (test 1 2 3) ; breaks
        ;(my-or 1 2 3) ; breaks
        (list 'test #t))))
