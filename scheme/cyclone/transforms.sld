@@ -1027,6 +1027,11 @@
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
         `(define ,name ,(expand body))))
+
+TODO: this is not working (I think) because we get "symbol and" and not "compiled macro and".
+would have to look up symbol to see if it is a macro, and then get the macro that way...
+may need to have a *define-macros* equivalent but in the compiled code, similar to globals.
+need to be able to look up var in a list and get the (macro?) instance.
      ((or (macro? exp)
           (macro:macro? exp *defined-macros*))
        (expand ;; Could expand into another macro
