@@ -28,6 +28,12 @@
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
     (define (macro:expand exp defined-macros)
       (let ((macro (assoc (car exp) defined-macros)))
+
+TODO: restructure this to use eval if the macro is not a proc.
+      then can try passing in an environment with create-environment.
+      once eval is extended to work with macros, this could allow it to
+      expand a macro contained within another
+
         ;; assumes ER macro
         (if macro
           ((cdr macro) 
