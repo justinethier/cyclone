@@ -27,26 +27,37 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
     (define (macro:expand exp defined-macros)
-      (let ((macro (assoc (car exp) defined-macros)))
+      (let ((rename (lambda (sym) ;; TODO: not good enough, need to actually rename, and keep same results if
+                      sym))       ;; the same symbol is renamed more than once
+            (compare? (lambda (sym-a sym-b)  ;; TODO: the compare function from exrename.
+                         (eq? sym-a sym-b))) ;; this may need to be more sophisticated
+           )
+        ;(cond
+        ;  ;; compiled macro
+        ;  ;((macro? (car exp))
+        ;  ;  ((car exp)
+        ;  ;   exp
+        ;  ;   rename
+        ;  ;   compare?))
+        ;  (else
+            (let ((macro (assoc (car exp) defined-macros)))
 
-TODO: restructure this to use eval if the macro is not a proc.
-      then can try passing in an environment with create-environment.
-      once eval is extended to work with macros, this could allow it to
-      expand a macro contained within another
+;TODO: restructure this to use eval if the macro is not a proc.
+;      then can try passing in an environment with create-environment.
+;      once eval is extended to work with macros, this could allow it to
+;      expand a macro contained within another
 
-        ;; assumes ER macro
-        (if macro
-          ((cdr macro) 
-            ;exp 
-            ; could be a raw lambda, if that is the case try quoting it
-            (if (procedure? (cdr macro))
-              exp
-              (list 'quote exp))
-            (lambda (sym) ;; TODO: not good enough, need to actually rename, and keep same results if
-              sym)        ;; the same symbol is renamed more than once
-            (lambda (sym-a sym-b) ;; TODO: the compare function from exrename.
-              (eq? sym-a sym-b))) ;; this may need to be more sophisticated
-          exp))) ;; TODO: error instead??
+              ;; assumes ER macro
+              (if macro
+                ((cdr macro) 
+                  ;exp 
+                  ; could be a raw lambda, if that is the case try quoting it
+                  (if (procedure? (cdr macro))
+                    exp
+                    (list 'quote exp))
+                  rename
+                  compare?)
+                exp))));)) ;; TODO: error instead??
 
     ; TODO: get macro name, transformer
     ; TODO: base off of syntactic closures instead of ER macros??
