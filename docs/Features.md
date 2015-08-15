@@ -9,18 +9,18 @@ This is the status of features implemented from the [R<sup>7</sup>RS Scheme Spec
 Section | Status | Comments
 ------- | ------ | ---------
 2.2 Whitespace and comments | Partial | No datum or block comments
-2.3 Other notations | |
+2.3 Other notations | Partial |  Not all of these notations are implemented
 2.4 Datum labels | No |
-3.1 Variables, syntactic keywords, and regions | |
+3.1 Variables, syntactic keywords, and regions | Yes |
 3.2 Disjointness of types | Yes |
-3.3 External representations | |
-3.4 Storage model | | No immutable types at this time.
+3.3 External representations | Yes |
+3.4 Storage model | Yes | No immutable types at this time.
 3.5 Proper tail recursion | Yes |
-4.1 Primitive expression types | |
-4.2 Derived expression types | |
+4.1 Primitive expression types | Partial | `include` and `include-ci` are not implemented, although `include` may be specified as part of a library definition.
+4.2 Derived expression types | Partial |
 4.3 Macros | |
 5.1 Programs | Yes |
-5.2 Import declarations | |
+5.2 Import declarations | Partial |
 5.3 Variable definitions | Partial | `define-values` is not implemented yet.
 5.4 Syntax definitions | |
 5.5 Record-type definitions | |
