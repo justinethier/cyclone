@@ -100,6 +100,32 @@
       ;; in final compiled program
       ;(set! input-program (add-libs input-program))
     
+;; JAE DEBUG code, remove (or refactor) once working
+(trace:info "JAE DEBUG - compiled macros")
+(trace:info
+  (filter 
+   (lambda (v)
+     (cond
+       ((equal? (car v) 'my-or)
+        (trace:info (list 'my-or (car v) (cdr v) (macro? (Cyc-get-cvar (cdr v)))))
+        #t)
+       (else #f)))
+     ;(macro? (cdr v)))
+   (Cyc-global-vars)))
+; TODO: should be able to use this to find all the compiled macros
+(let ((macros (filter 
+                (lambda (v) 
+                  (macro? (Cyc-get-cvar (cdr v))))
+                (Cyc-global-vars))))
+  (trace:info (map
+                (lambda (v)
+                ; TODO: can prepend these macros to *defined-macros*, but
+                ; also need to use Cyc-get-cvar to deref before using macro
+                ; during expansion
+                  (cons (car v) (cdr v)))
+                macros)))
+;; END JAE DEBUG
+
       (set! input-program (expand input-program))
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
