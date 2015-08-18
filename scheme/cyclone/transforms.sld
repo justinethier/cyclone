@@ -1048,8 +1048,9 @@
 ;would have to look up symbol to see if it is a macro, and then get the macro that way...
 ;may need to have a *define-macros* equivalent but in the compiled code, similar to globals.
 ;need to be able to look up var in a list and get the (macro?) instance.
-     ((or (macro? exp)
+     ((or ;(macro? exp)
           (macro:macro? exp *defined-macros*))
+       (trace:info (list 'expanding exp))
        (expand ;; Could expand into another macro
          (macro:expand exp *defined-macros*)))
      (else

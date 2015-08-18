@@ -49,10 +49,10 @@
 
               ;; assumes ER macro
               (if macro
-                ((cdr macro) 
+                ((Cyc-get-cvar (cdr macro))
                   ;exp 
                   ; could be a raw lambda, if that is the case try quoting it
-                  (if (procedure? (cdr macro))
+                  (if (macro? (Cyc-get-cvar (cdr macro)))
                     exp
                     (list 'quote exp))
                   rename

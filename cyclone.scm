@@ -117,13 +117,15 @@
                 (lambda (v) 
                   (macro? (Cyc-get-cvar (cdr v))))
                 (Cyc-global-vars))))
-  (trace:info (map
-                (lambda (v)
-                ; TODO: can prepend these macros to *defined-macros*, but
-                ; also need to use Cyc-get-cvar to deref before using macro
-                ; during expansion
-                  (cons (car v) (cdr v)))
-                macros)))
+  (set! *defined-macros*
+        (append
+          ;(map
+          ;  (lambda (v)
+          ;    (cons (car v) (cdr v)))
+          ;  macros))
+          macros
+          *defined-macros*)))
+TODO: try this again, make sure macro is loaded: (trace:info *defined-macros*)
 ;; END JAE DEBUG
 
       (set! input-program (expand input-program))
@@ -271,7 +273,7 @@
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
          (lib-deps 
-           (if (and program? 
+           (if (my-and program? 
                    (tagged-list? 'import (car in-prog)))
              (lib:get-all-import-deps (cdar in-prog))
             '()))
