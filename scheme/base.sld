@@ -80,14 +80,14 @@
     flush-output-port
     read-line
     features
-    and
-    or
+    my-and
+    my-or
   )
   (begin
     ;; Features implemented by this Scheme
     (define (features) '(cyclone r7rs exact-closed))
 
-    (define-syntax and
+    (define-syntax my-and
       (er-macro-transformer
        (lambda (expr rename compare)
          (cond ((null? (cdr expr)) #t)
@@ -95,7 +95,7 @@
                (else (list (rename 'if) (cadr expr)
                            (cons (rename 'and) (cddr expr))
                            #f))))))
-    (define-syntax or
+    (define-syntax my-or
       (er-macro-transformer
         (lambda (expr rename compare)
           (cond ((null? (cdr expr)) #f)

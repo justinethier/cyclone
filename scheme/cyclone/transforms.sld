@@ -139,6 +139,22 @@
 (define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
+    (cons 'and
+       (lambda (expr rename compare)
+         (cond ((null? (cdr expr)) #t)
+               ((null? (cddr expr)) (cadr expr))
+               (else (list (rename 'if) (cadr expr)
+                           (cons (rename 'and) (cddr expr))
+                           #f)))))
+    (cons 'or
+        (lambda (expr rename compare)
+          (cond ((null? (cdr expr)) #f)
+                ((null? (cddr expr)) (cadr expr))
+                (else
+                 (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
+                       (list (rename 'if) (rename 'tmp)
+                             (rename 'tmp)
+                             (cons (rename 'or) (cddr expr))))))))
 ;    (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
     (cons 'let
      (lambda (expr rename compare)
@@ -1028,10 +1044,10 @@
         ;;
         `(define ,name ,(expand body))))
 
-TODO: this is not working (I think) because we get "symbol and" and not "compiled macro and".
-would have to look up symbol to see if it is a macro, and then get the macro that way...
-may need to have a *define-macros* equivalent but in the compiled code, similar to globals.
-need to be able to look up var in a list and get the (macro?) instance.
+;TODO: this is not working (I think) because we get "symbol and" and not "compiled macro and".
+;would have to look up symbol to see if it is a macro, and then get the macro that way...
+;may need to have a *define-macros* equivalent but in the compiled code, similar to globals.
+;need to be able to look up var in a list and get the (macro?) instance.
      ((or (macro? exp)
           (macro:macro? exp *defined-macros*))
        (expand ;; Could expand into another macro
