@@ -139,22 +139,6 @@
 (define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
-    (cons 'and
-       (lambda (expr rename compare)
-         (cond ((null? (cdr expr)) #t)
-               ((null? (cddr expr)) (cadr expr))
-               (else (list (rename 'if) (cadr expr)
-                           (cons (rename 'and) (cddr expr))
-                           #f)))))
-    (cons 'or
-        (lambda (expr rename compare)
-          (cond ((null? (cdr expr)) #f)
-                ((null? (cddr expr)) (cadr expr))
-                (else
-                 (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
-                       (list (rename 'if) (rename 'tmp)
-                             (rename 'tmp)
-                             (cons (rename 'or) (cddr expr))))))))
 ;    (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
     (cons 'let
      (lambda (expr rename compare)

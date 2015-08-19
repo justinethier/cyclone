@@ -274,7 +274,7 @@
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
          (lib-deps 
-           (if (my-and program? 
+           (if (and program? 
                    (tagged-list? 'import (car in-prog)))
              (lib:get-all-import-deps (cdar in-prog))
             '()))
