@@ -147,7 +147,7 @@ uninstall:
 # It may be possible to use dynamic linking to reduce some of this overhead
 # in the future (should really look into that!)
 trans:
-	cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyclone /usr/local/bin
+	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyclone /usr/local/bin
 #	cyclone scheme/cyclone/transforms.sld
 #	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
 #	cyclone cyclone.scm

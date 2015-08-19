@@ -125,7 +125,8 @@
           ;  macros))
           macros
           *defined-macros*)))
-TODO: try this again, make sure macro is loaded: (trace:info *defined-macros*)
+;TODO: try this again, make sure macro is loaded: 
+(trace:info *defined-macros*)
 ;; END JAE DEBUG
 
       (set! input-program (expand input-program))
