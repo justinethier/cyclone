@@ -1,5 +1,6 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
+          ;(scheme write)
           (scheme cyclone util))
   ; TODO: really need export-all for these cyclone libs!!
   (export
@@ -27,6 +28,10 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
     (define (macro:expand exp defined-macros)
+        ;(display "/* ")
+        ;(newline)
+        ;(display "entered macro:expand exp")
+        ;(display " */")
       (let ((rename (lambda (sym) ;; TODO: not good enough, need to actually rename, and keep same results if
                       sym))       ;; the same symbol is renamed more than once
             (compare? (lambda (sym-a sym-b)  ;; TODO: the compare function from exrename.
@@ -46,13 +51,21 @@
 ;      then can try passing in an environment with create-environment.
 ;      once eval is extended to work with macros, this could allow it to
 ;      expand a macro contained within another
+        ;(display "/* ")
+        ;(newline)
+        ;(display (list macro (car exp) 
+        ;              (Cyc-get-cvar (cdr macro))
+        ;              (macro? (Cyc-get-cvar (cdr macro)))))
+        ;(display " */")
 
               ;; assumes ER macro
               (if macro
                 ((Cyc-get-cvar (cdr macro))
                   ;exp 
                   ; could be a raw lambda, if that is the case try quoting it
-                  (if (macro? (Cyc-get-cvar (cdr macro)))
+                  (if (or (macro? (Cyc-get-cvar (cdr macro)))
+                          (procedure? (cdr macro)))
+                  ; TODO: what about macros? (if (macro? (Cyc-get-cvar (cdr macro)))
                     exp
                     (list 'quote exp))
                   rename
