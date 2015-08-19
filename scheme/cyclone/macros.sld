@@ -37,15 +37,7 @@
             (compare? (lambda (sym-a sym-b)  ;; TODO: the compare function from exrename.
                          (eq? sym-a sym-b))) ;; this may need to be more sophisticated
            )
-        ;(cond
-        ;  ;; compiled macro
-        ;  ;((macro? (car exp))
-        ;  ;  ((car exp)
-        ;  ;   exp
-        ;  ;   rename
-        ;  ;   compare?))
-        ;  (else
-            (let ((macro (assoc (car exp) defined-macros)))
+        (let ((macro (assoc (car exp) defined-macros)))
 
 ;TODO: restructure this to use eval if the macro is not a proc.
 ;      then can try passing in an environment with create-environment.
@@ -58,19 +50,20 @@
         ;              (macro? (Cyc-get-cvar (cdr macro)))))
         ;(display " */")
 
-              ;; assumes ER macro
-              (if macro
-                ((Cyc-get-cvar (cdr macro))
-                  ;exp 
-                  ; could be a raw lambda, if that is the case try quoting it
-                  (if (or (macro? (Cyc-get-cvar (cdr macro)))
-                          (procedure? (cdr macro)))
-                  ; TODO: what about macros? (if (macro? (Cyc-get-cvar (cdr macro)))
-                    exp
-                    (list 'quote exp))
-                  rename
-                  compare?)
-                exp))));)) ;; TODO: error instead??
+          ;; Invoke ER macro
+          (if macro
+            ((Cyc-get-cvar (cdr macro))
+              ;; Pass expression differently depending upon if this is a 
+              ;; compiled macro or a cons one that will be called via eval.
+              ;;
+              ;; If a raw lambda (IE, exec using eval), try quoting it
+              (if (or (macro? (Cyc-get-cvar (cdr macro)))
+                      (procedure? (cdr macro)))
+                exp
+                (list 'quote exp))
+              rename
+              compare?)
+            exp)))) ;; TODO: error instead??
 
     ; TODO: get macro name, transformer
     ; TODO: base off of syntactic closures instead of ER macros??
