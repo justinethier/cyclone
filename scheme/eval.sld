@@ -94,17 +94,6 @@
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
-(define (begin-actions exp) (cdr exp))
-(define (last-exp? seq) (null? (cdr seq)))
-(define (first-exp seq) (car seq))
-(define (rest-exps seq) (cdr seq))
-
-(define (sequence->exp seq)
-  (cond ((null? seq) seq)
-        ((last-exp? seq) (first-exp seq))
-        (else (make-begin seq))))
-(define (make-begin seq) (cons 'begin seq))
-
 (define (application? exp) (pair? exp))
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
@@ -366,32 +355,6 @@
 (define *global-environment* (setup-environment))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Derived expressions
-;; TODO: longer-term, this would be replaced by a macro system
-(define (cond? exp) (tagged-list? 'cond exp))
-(define (cond-clauses exp) (cdr exp))
-(define (cond-else-clause? clause)
-  (eq? (cond-predicate clause) 'else))
-(define (cond-predicate clause) (car clause))
-(define (cond-actions clause) (cdr clause))
-(define (cond->if exp)
-  (expand-clauses (cond-clauses exp)))
-
-(define (expand-clauses clauses)
-  (if (null? clauses)
-      #f                              ; no else clause
-      (let ((first (car clauses))
-            (rest (cdr clauses)))
-        (if (cond-else-clause? first)
-            (if (null? rest)
-                (sequence->exp (cond-actions first))
-                (error "ELSE clause isn't last -- COND->IF"
-                       clauses))
-            (make-if (cond-predicate first)
-                     (sequence->exp (cond-actions first))
-                     (expand-clauses rest))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This step separates syntactic analysis from execution.
 ;; - exp => Code to analyze
 ;; - env => Environment used to expand macros
@@ -405,19 +368,6 @@
         ((definition? exp) (analyze-definition exp env))
         ((if? exp) (analyze-if exp env))
         ((lambda? exp) (analyze-lambda exp env))
-      ;; TODO: ideally, macro system would handle these next three
-        ((tagged-list? 'let exp)
-         (let ((vars (map car  (cadr exp))) ;(let->bindings exp)))
-               (args (map cadr (cadr exp))) ;(let->bindings exp))))
-               (body (cddr exp)))
-           (analyze
-             (cons
-               (cons 'lambda (cons vars body))
-               args)
-             env)))
-        ((begin? exp) (analyze-sequence (begin-actions exp) env))
-        ((cond? exp) (analyze (cond->if exp) env))
-      ;; END derived expression processing
 
         ;; experimenting with passing these back to eval
         ((compound-procedure? exp)
