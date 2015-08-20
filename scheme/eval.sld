@@ -62,9 +62,6 @@
 (define (quoted? exp)
   (tagged-list? 'quote exp))
 
-(define (quasiquoted? exp)
-  (tagged-list? 'quasiquote exp))
-
 (define (assignment? exp)
   (tagged-list? 'set! exp))
 (define (assignment-variable exp) (cadr exp))
@@ -403,7 +400,6 @@
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
-        ((quasiquoted? exp) (analyze-quasiquoted exp))
         ((variable? exp) (analyze-variable exp))
         ((assignment? exp) (analyze-assignment exp env))
         ((definition? exp) (analyze-definition exp env))
@@ -441,9 +437,6 @@
 (define (analyze-quoted exp)
   (let ((qval (cadr exp)))
     (lambda (env) qval)))
-
-(define (analyze-quasiquoted exp)
-  (error "quasiquote not supported yet by eval"))
 
 (define (analyze-variable exp)
   (lambda (env) (lookup-variable-value exp env)))
