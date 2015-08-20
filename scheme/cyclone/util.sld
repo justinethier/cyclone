@@ -22,8 +22,6 @@
     delete
     delete-duplicates
     list-insert-at!
-    any
-    every
     filter)
   (begin
 
@@ -130,22 +128,5 @@
    list  ;; Not a keyword but reserved type
    ))
 ;; END name mangling section
-
-    ;; Simplified versions of every/any from SRFI-1
-    (define (any pred lst)
-      (let any* ((l (map pred lst)))
-          (cond
-            ((null? l) #f) ; Empty list
-            ((car l)   #t) ; Done
-            (else 
-               (any* (cdr l))))))
-    (define (every pred lst)
-      (let every* ((l (map pred lst)))
-          (cond
-            ((null? l) #t) ; Empty list
-            ((car l)
-               (every* (cdr l)))
-            (else 
-               #f))))
 
     ))
