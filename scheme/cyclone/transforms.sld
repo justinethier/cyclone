@@ -112,7 +112,6 @@
     expand 
     let=>lambda 
     letrec=>lets+sets 
-    begin=>let 
     isolate-globals 
     has-global? 
     global-vars 
@@ -139,7 +138,6 @@
 (define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
-;    (cons 'let (lambda (exp rename compare) (let=>lambda exp)))
     (cons 'let
      (lambda (expr rename compare)
        (if (null? (cdr expr)) (error "empty let" expr))
@@ -177,36 +175,7 @@
                 `(,(rename 'let) (,(caar (cdr expr)))
                   (,(rename 'let*) ,(cdar (cdr expr)) ,@(cddr expr)))
                 (error "bad let* syntax")))))
-    (cons 'begin (lambda (exp rename compare) (begin=>let exp)))
     (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
-    (cons 'when (lambda (exp rename compare)
-      (if (null? (cdr exp)) (error "empty when" exp))
-      (if (null? (cddr exp)) (error "no when body" exp))
-      `(if ,(cadr exp)
-           ((lambda () ,@(cddr exp)))
-           #f)))
-    (cons 'cond
-          (lambda (expr rename compare)
-            (if (null? (cdr expr))
-                #f ;(if #f #f)
-                ((lambda (cl)
-                   (if (compare (rename 'else) (car cl))
-                       (if (pair? (cddr expr))
-                           (error "non-final else in cond" expr)
-                           (cons (rename 'begin) (cdr cl)))
-                       (if (if (null? (cdr cl)) #t (compare (rename '=>) (cadr cl)))
-                           (list (list (rename 'lambda) (list (rename 'tmp))
-                                       (list (rename 'if) (rename 'tmp)
-                                             (if (null? (cdr cl))
-                                                 (rename 'tmp)
-                                                 (list (car (cddr cl)) (rename 'tmp)))
-                                             (cons (rename 'cond) (cddr expr))))
-                                 (car cl))
-                           (list (rename 'if)
-                                 (car cl)
-                                 (cons (rename 'begin) (cdr cl))
-                                 (cons (rename 'cond) (cddr expr))))))
-                 (cadr expr)))))
     (cons 'case
           (lambda (expr rename compare)
             (define (body exprs)
@@ -1014,14 +983,6 @@
 ; TODO: eventually, merge below functions with above *defined-macros* defs and 
 ;;      replace both with a lib of (define-syntax) constructs
 
-;; let=>lambda : let-exp -> app-exp
-;(define (let=>lambda exp)
-;  (if (let? exp)
-;      (let ((vars (map car (let->bindings exp)))
-;            (args (map cadr (let->bindings exp))))
-;        `((lambda (,@vars) ,@(let->exp exp)) ,@args))
-;      exp))
-
 ; letrec=>lets+sets : letrec-exp -> exp
 (define (letrec=>lets+sets exp)
   (if (letrec? exp)
@@ -1042,24 +1003,6 @@
 ;;        `((,(rename 'lambda) () ,@defs ,@(cddr expr))))
 ;;      (map (lambda (x) (cons (rename 'define) x)) (cadr expr))))))
 ;;
-
-; begin=>let : begin-exp -> let-exp
-(define (begin=>let exp)
-  (define (singlet? l)
-    (and (list? l)
-         (= (length l) 1)))
-  
-  (define (dummy-bind exps)
-    (cond
-      ((singlet? exps)  (car exps))
-      
-      ; JAE - should be fine until CPS phase
-      ((pair? exps)
-       `((lambda ()
-         ,@exps)))))
-      ;((pair? exps)     `(let (($_ ,(car exps)))
-      ;                    ,(dummy-bind (cdr exps))))))
-  (dummy-bind (begin->exps exp)))
 
 
 ;; Top-level analysis

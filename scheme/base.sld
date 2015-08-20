@@ -82,6 +82,9 @@
     features
     and
     or
+    begin
+    cond
+    when
     quasiquote
   )
   (begin
@@ -106,6 +109,55 @@
                        (list (rename 'if) (rename 'tmp)
                              (rename 'tmp)
                              (cons (rename 'or) (cddr expr)))))))))
+    (define-syntax begin 
+      (er-macro-transformer
+        (lambda (exp rename compare)
+          (define (singlet? l)
+            (and (list? l)
+                 (= (length l) 1)))
+          
+          (define (dummy-bind exps)
+            (cond
+              ((singlet? exps)  (car exps))
+              
+              ; JAE - should be fine until CPS phase
+              ((pair? exps)
+               `((lambda ()
+                 ,@exps)))))
+              ;((pair? exps)     `(let (($_ ,(car exps)))
+              ;                    ,(dummy-bind (cdr exps))))))
+          (dummy-bind (cdr exp)))))
+    (define-syntax cond
+      (er-macro-transformer
+          (lambda (expr rename compare)
+            (if (null? (cdr expr))
+                #f ;(if #f #f)
+                ((lambda (cl)
+                   (if (compare (rename 'else) (car cl))
+                       (if (pair? (cddr expr))
+                           (error "non-final else in cond" expr)
+                           (cons (rename 'begin) (cdr cl)))
+                       (if (if (null? (cdr cl)) #t (compare (rename '=>) (cadr cl)))
+                           (list (list (rename 'lambda) (list (rename 'tmp))
+                                       (list (rename 'if) (rename 'tmp)
+                                             (if (null? (cdr cl))
+                                                 (rename 'tmp)
+                                                 (list (car (cddr cl)) (rename 'tmp)))
+                                             (cons (rename 'cond) (cddr expr))))
+                                 (car cl))
+                           (list (rename 'if)
+                                 (car cl)
+                                 (cons (rename 'begin) (cdr cl))
+                                 (cons (rename 'cond) (cddr expr))))))
+                 (cadr expr))))))
+    (define-syntax when
+      (er-macro-transformer
+        (lambda (exp rename compare)
+          (if (null? (cdr exp)) (error "empty when" exp))
+          (if (null? (cddr exp)) (error "no when body" exp))
+          `(if ,(cadr exp)
+               ((lambda () ,@(cddr exp)))
+               #f))))
     (define-syntax quasiquote
       (er-macro-transformer
         ;; Based on the quasiquote macro from Chibi scheme
