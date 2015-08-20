@@ -138,43 +138,6 @@
 (define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
-    (cons 'let
-     (lambda (expr rename compare)
-       (if (null? (cdr expr)) (error "empty let" expr))
-       (if (null? (cddr expr)) (error "no let body" expr))
-       ((lambda (bindings)
-          (if (list? bindings) #f (error "bad let bindings"))
-          (if (every (lambda (x)
-                       (if (pair? x) (if (pair? (cdr x)) (null? (cddr x)) #f) #f))
-                     bindings)
-              ((lambda (vars vals)
-                 (if (symbol? (cadr expr))
-                     `((,(rename 'lambda) ,vars
-                        (,(rename 'letrec) ((,(cadr expr)
-                                             (,(rename 'lambda) ,vars
-                                              ,@(cdr (cddr expr)))))
-                         (,(cadr expr) ,@vars)))
-                       ,@vals)
-                     `((,(rename 'lambda) ,vars ,@(cddr expr)) ,@vals)))
-               (map car bindings)
-               (map cadr bindings))
-              (error "bad let syntax" expr)))
-        (if (symbol? (cadr expr)) (car (cddr expr)) (cadr expr)))))
-    (cons 'let*
-      (lambda (expr rename compare)
-        (if (null? (cdr expr)) (error "empty let*" expr))
-        (if (null? (cddr expr)) (error "no let* body" expr))
-        (if (null? (cadr expr))
-            `(,(rename 'let) () ,@(cddr expr))
-            (if (if (list? (cadr expr))
-                    (every
-                     (lambda (x)
-                       (if (pair? x) (if (pair? (cdr x)) (null? (cddr x)) #f) #f))
-                     (cadr expr))
-                    #f)
-                `(,(rename 'let) (,(caar (cdr expr)))
-                  (,(rename 'let*) ,(cdar (cdr expr)) ,@(cddr expr)))
-                (error "bad let* syntax")))))
     (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
     (cons 'case
           (lambda (expr rename compare)
