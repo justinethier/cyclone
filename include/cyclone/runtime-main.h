@@ -4,7 +4,6 @@
  * All rights reserved.
  *
  * This file contains the C runtime code used only by the main program module.
- * May want to consider migrating this into another runtime module.
  */
 
 #ifndef CYCLONE_RUNTIME_MAIN_H
@@ -43,7 +42,6 @@ static void main_main (stack_size,heap_size,stack_base)
 #if DEBUG_SHOW_DIAG
  printf("main: stack_size=%ld  stack_base=%p  stack_limit1=%p\n",
         stack_size,(void *)stack_base,(void *)stack_limit1);
- printf("main: Try different stack sizes from 4 K to 1 Meg.\n");
 #endif
 
  /* Initialize stack trace table */
@@ -88,8 +86,7 @@ static void main_main (stack_size,heap_size,stack_base)
     do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
   }
 
-  /*                                                                      */
-  printf("main: your setjmp and/or longjmp are broken.\n"); exit(0);}}
+  printf("Internal error: should never have reached this line\n"); exit(0);}}
 
 static long long_arg(argc,argv,name,dval)
      int argc; char **argv; char *name; long dval;

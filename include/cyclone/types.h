@@ -26,20 +26,16 @@
 /* Maximum number of args that GC will accept */
 #define NUM_GC_ANS 128
 
-/* STACK_GROWS_DOWNWARD is a machine-specific preprocessor switch. */
-/* It is true for the Macintosh 680X0 and the Intel 80860. */
+/* Which way does the CPU grow its stack? */
 #define STACK_GROWS_DOWNWARD 1
 
-/* STACK_SIZE is the size of the stack buffer, in bytes.           */
-/* Some machines like a smallish stack--i.e., 4k-16k, while others */
-/* like a biggish stack--i.e., 100k-500k.                          */
+/* Size of the stack buffer, in bytes.           */
 #define STACK_SIZE 100000
 
-/* HEAP_SIZE is the size of the 2nd generation, in bytes. */
-/* HEAP_SIZE should be at LEAST 225000*sizeof(cons_type). */
+/* Size of the 2nd generation, in bytes. */
 #define HEAP_SIZE 6000000
 
-/* Define size of Lisp tags.  Options are "short" or "long". */
+/* Define size of object tags.  Options are "short" or "long". */
 typedef long tag_type;
 
 #ifndef CLOCKS_PER_SEC
@@ -49,13 +45,14 @@ typedef long tag_type;
 #define longjmp _longjmp
 #endif
 
+/* Determine if stack has overflowed */
 #if STACK_GROWS_DOWNWARD
 #define check_overflow(x,y) ((x) < (y))
 #else
 #define check_overflow(x,y) ((x) > (y))
 #endif
 
-/* Define tag values. Could be an enum...
+/* Define object tag values. Could be an enum...
    Remember to update tag_names in runtime.c when adding new tags */
 #define cons_tag 0
 #define symbol_tag 1
@@ -80,8 +77,6 @@ typedef long tag_type;
 #define nil NULL
 #define eq(x,y) (x == y)
 #define nullp(x) (x == NULL)
-#define or(x,y) (x || y)
-#define and(x,y) (x && y)
 
 /* Define general object type. */
 
@@ -179,18 +174,18 @@ typedef cons_type *list;
 
 #define car(x) (((list) x)->cons_car)
 #define cdr(x) (((list) x)->cons_cdr)
-#define caar(x) (car(car(x)))
-#define cadr(x) (car(cdr(x)))
-#define cdar(x) (cdr(car(x)))
-#define cddr(x) (cdr(cdr(x)))
-#define caaar(x) (car(car(car(x))))
-#define caadr(x) (car(car(cdr(x))))
-#define cadar(x) (car(cdr(car(x))))
-#define caddr(x) (car(cdr(cdr(x))))
-#define cdaar(x) (cdr(car(car(x))))
-#define cdadr(x) (cdr(car(cdr(x))))
-#define cddar(x) (cdr(cdr(car(x))))
-#define cdddr(x) (cdr(cdr(cdr(x))))
+#define caar(x)   (car(car(x)))
+#define cadr(x)   (car(cdr(x)))
+#define cdar(x)   (cdr(car(x)))
+#define cddr(x)   (cdr(cdr(x)))
+#define caaar(x)  (car(car(car(x))))
+#define caadr(x)  (car(car(cdr(x))))
+#define cadar(x)  (car(cdr(car(x))))
+#define caddr(x)  (car(cdr(cdr(x))))
+#define cdaar(x)  (cdr(car(car(x))))
+#define cdadr(x)  (cdr(car(cdr(x))))
+#define cddar(x)  (cdr(cdr(car(x))))
+#define cdddr(x)  (cdr(cdr(cdr(x))))
 #define caaaar(x) (car(car(car(car(x)))))
 #define caaadr(x) (car(car(car(cdr(x)))))
 #define caadar(x) (car(car(cdr(car(x)))))
@@ -240,7 +235,6 @@ typedef closure0_type *macro;
    c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3;
 #define mclosure4(c,f,a1,a2,a3,a4) closure4_type c; c.tag = closure4_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3; c.elt4 = a4;
-// #define setq(x,e) x = e
 
 #define mlist1(e1) (mcons(e1,nil))
 #define mlist2(e2,e1) (mcons(e2,mlist1(e1)))
@@ -250,12 +244,9 @@ typedef closure0_type *macro;
 #define mlist6(e6,e5,e4,e3,e2,e1) (mcons(e6,mlist5(e5,e4,e3,e2,e1)))
 #define mlist7(e7,e6,e5,e4,e3,e2,e1) (mcons(e7,mlist6(e6,e5,e4,e3,e2,e1)))
 
-// #define rule(lhs,rhs) (mlist3(quote_equal,lhs,rhs))
-
 #define make_cell(n,a) make_cons(n,a,nil);
 
 /* Primitive types */
-//typedef void (*prim_function_type)();
 typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
 typedef primitive_type *primitive;
 
