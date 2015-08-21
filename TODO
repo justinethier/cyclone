@@ -11,6 +11,11 @@ Working TODO list. should start creating issues for these to get them out of her
    if necessary, write makefile directive to automate rebuilding cyclone for macro development
 
  - macros
+   - next steps:
+     - how should ex rename/compare work? check working implementations, papers
+     - review 4 cases below for handling macro expansion. I think there are still some outstanding issues
+       with respect to eval'd macros
+     - check chibi's syntax-rules
 
    * thought: if we go with meta files, the compiler can revert back
      to using compiled macros if we do not install the meta files.
