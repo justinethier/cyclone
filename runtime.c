@@ -1965,8 +1965,10 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     apply(cont, prim, (object)&args[0]);
 }
 
+/**
+ * Copy an object to the GC heap
+ */
 char *transport(x, gcgen) char *x; int gcgen;
-/* Transport one object.  WARNING: x cannot be nil!!! */
 {
  if (nullp(x)) return x;
  if (obj_is_char(x)) return x;
