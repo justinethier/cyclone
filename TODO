@@ -190,3 +190,17 @@ GC - notes from: http://www.more-magic.net/posts/internals-gc.html
 
 The smart reader might have noticed a small problem here: what if the amount of garbage cleaned up is less than the data on the stack? Then, the stack data can't be copied to the new heap because it simply is too small. Well, this is when a third GC mode is triggered: a reallocating GC. This causes a new heap to be allocated, twice as big as the current heap. This is also split in from- and tospace. Then, Cheney's algorithm is performed on the old heap's fromspace, using one half of the new heap as tospace. When it's finished, the new tospace is called fromspace, and the other half of the new heap is called tospace. Then, the old heap is de-allocated.
 
+- Notes on native threads
+
+WRT chicken, felix has this to say:
+
+----
+Native threads are not supported for two reasons. One, the runtime system is not reentrant. Two, concurrency implemented properly would require mandatory locking of every object that could be potentially shared between two threads. The garbage-collection algorithm would then become much more complex and inefficient, since the location of every object has to be accessed via a thread synchronization protocol. Such a design would make native threads in Chicken essentially equivalent to Unix processes and shared memory.
+----
+
+I believe .NET pauses all threads before performing GC, performs GC, then starts them back up? could something like that make GC any more efficient?
+
+would still probably have to lock each object that could be accessed between threads though, so there could be a large non-GC overhead to adding thread support.
+
+ideally would want to be able to build the compiler in single-threaded and threaded modes, to be able to measure the overhead
+
