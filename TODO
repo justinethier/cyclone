@@ -199,8 +199,21 @@ Native threads are not supported for two reasons. One, the runtime system is not
 ----
 
 I believe .NET pauses all threads before performing GC, performs GC, then starts them back up? could something like that make GC any more efficient?
+may be a problem pausing a thread in the middle of a function though, because addresses could change after GC (??). maybe we check for GC and if ready set a flag and 
+pause the thread (block on a mutex or something). have all the other threads check and stop as well (they would see the flag set and block). once all have blocked, do GC and 
+resume all threads. some issues:
+ - might be a lot of overhead with stopping all threads when really only one of them is running low on stack space. do we GC all of the stacks, then? or just the one in trouble?
+ - how to handle calling into C code, especially code that blocks???
+   this is the core problem....
+
+how to make runtime reentrant??
 
 would still probably have to lock each object that could be accessed between threads though, so there could be a large non-GC overhead to adding thread support.
+Well, not necessarily. need to lock any object shared behind the scenes, yes. but anything that could be accessed in user code, just give the user mutexes, etc and let them worry about syncronization
+
+GC becomes more compilcated because each thread has its own stack.
+
+so, each thread has separate GC cont/args, then? each one must longjmp back to the bottom of its stack, too, I believe?
 
 ideally would want to be able to build the compiler in single-threaded and threaded modes, to be able to measure the overhead
 
