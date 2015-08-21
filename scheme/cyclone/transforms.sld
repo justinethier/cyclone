@@ -111,7 +111,6 @@
     cell-get->cell 
     expand 
     let=>lambda 
-    letrec=>lets+sets 
     isolate-globals 
     has-global? 
     global-vars 
@@ -914,22 +913,6 @@
        (map expand exp))))
     (else
       (error "unknown exp: " exp))))
-
-; TODO: eventually, merge below functions with above *defined-macros* defs and 
-;;      replace both with a lib of (define-syntax) constructs
-
-; letrec=>lets+sets : letrec-exp -> exp
-(define (letrec=>lets+sets exp)
-  (if (letrec? exp)
-      (let* ((bindings  (letrec->bindings exp))
-             (namings   (map (lambda (b) (list (car b) #f)) bindings))
-             (names     (letrec->bound-vars exp))
-             (sets      (map (lambda (binding) 
-                               (cons 'set! binding))
-                             bindings))
-             (args      (letrec->args exp)))
-        `(let ,namings
-           (begin ,@(append sets (letrec->exp exp)))))))
 
 ;; Top-level analysis
 
