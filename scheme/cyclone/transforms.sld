@@ -138,7 +138,6 @@
 (define (get-macros) *defined-macros*)
 (define *defined-macros* 
   (list 
-    (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
     (cons 'cond-expand
       ;; Based on the cond-expand macro from Chibi scheme
       (lambda (expr rename compare)
@@ -931,15 +930,6 @@
              (args      (letrec->args exp)))
         `(let ,namings
            (begin ,@(append sets (letrec->exp exp)))))))
-;; NOTE: chibi uses the following macro. turns vars into defines?
-;;(define-syntax letrec
-;;  (er-macro-transformer
-;;   (lambda (expr rename compare)
-;;     ((lambda (defs)
-;;        `((,(rename 'lambda) () ,@defs ,@(cddr expr))))
-;;      (map (lambda (x) (cons (rename 'define) x)) (cadr expr))))))
-;;
-
 
 ;; Top-level analysis
 
