@@ -198,6 +198,8 @@ WRT chicken, felix has this to say:
 Native threads are not supported for two reasons. One, the runtime system is not reentrant. Two, concurrency implemented properly would require mandatory locking of every object that could be potentially shared between two threads. The garbage-collection algorithm would then become much more complex and inefficient, since the location of every object has to be accessed via a thread synchronization protocol. Such a design would make native threads in Chicken essentially equivalent to Unix processes and shared memory.
 ----
 
+my notes:
+--------
 I believe .NET pauses all threads before performing GC, performs GC, then starts them back up? could something like that make GC any more efficient?
 may be a problem pausing a thread in the middle of a function though, because addresses could change after GC (??). maybe we check for GC and if ready set a flag and 
 pause the thread (block on a mutex or something). have all the other threads check and stop as well (they would see the flag set and block). once all have blocked, do GC and 
@@ -216,4 +218,31 @@ GC becomes more compilcated because each thread has its own stack.
 so, each thread has separate GC cont/args, then? each one must longjmp back to the bottom of its stack, too, I believe?
 
 ideally would want to be able to build the compiler in single-threaded and threaded modes, to be able to measure the overhead
+--------
+
+Overall Approach:
+
+Detecting GC:
+- When a thread is ready for GC, stop it and wait on event (actual sync primitive TBD)
+- When another thread checks for GC, have it wait on the event also
+- Keep doing this until a thread detects it is the last one not waiting on event or blocking in C code. Have it initiate GC
+
+TODO: Is there a race condition here, though? What if the last thread calls into C before checking for GC? may also need to check GC before calling C code (and is there still a race condition there?)
+
+During GC:
+- GC initial thread's stack.
+- Potentially GC other thread stacks if they are not in C calls
+- Cannot GC stack of a thread in C, for obvious reasons (may be actively running, etc)
+
+After GC is done:
+- Reset event, let threads execute again
+- Need to longjmp any threads that had their stacks GC'd
+
+To handle threads executing C code, that may be blocking:
+- Set a flag when going into a potentially blocking C function. (any C function?)
+- After exiting C function (back in runtime code), wait on event if GC is active. need to do this only using synchronization primitives to prevent race conditions
+
+Limitations:
+- C code cannot manipulate objects that are not on its stack
+- Windows "events" are not available in linux/pthreads. how to actually implement this behavior??
 
