@@ -87,6 +87,7 @@
     let
     let*
     begin
+    case
     cond
     when
     quasiquote
@@ -193,6 +194,34 @@
                                  (cons (rename 'begin) (cdr cl))
                                  (cons (rename 'cond) (cddr expr))))))
                  (cadr expr))))))
+    (define-syntax case
+      (er-macro-transformer
+          (lambda (expr rename compare)
+            (define (body exprs)
+              (cond
+               ((null? exprs)
+                (rename 'tmp))
+               ((compare (rename '=>) (car exprs))
+                `(,(cadr exprs) ,(rename 'tmp)))
+               (else
+                `(,(rename 'begin) ,@exprs))))
+            (define (clause ls)
+              (cond
+               ((null? ls) #f)
+               ((compare (rename 'else) (caar ls))
+                (body (cdar ls)))
+               ((and (pair? (car (car ls))) (null? (cdr (car (car ls)))))
+                `(,(rename 'if) (,(rename 'eqv?) ,(rename 'tmp)
+                                 (,(rename 'quote) ,(car (caar ls))))
+                  ,(body (cdar ls))
+                  ,(clause (cdr ls))))
+               (else
+                `(,(rename 'if) (,(rename 'memv) ,(rename 'tmp)
+                                 (,(rename 'quote) ,(caar ls)))
+                  ,(body (cdar ls))
+                  ,(clause (cdr ls))))))
+            `(let ((,(rename 'tmp) ,(cadr expr)))
+               ,(clause (cddr expr))))))
     (define-syntax when
       (er-macro-transformer
         (lambda (exp rename compare)

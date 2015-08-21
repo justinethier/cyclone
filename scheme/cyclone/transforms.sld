@@ -139,33 +139,6 @@
 (define *defined-macros* 
   (list 
     (cons 'letrec (lambda (exp rename compare) (letrec=>lets+sets exp)))
-    (cons 'case
-          (lambda (expr rename compare)
-            (define (body exprs)
-              (cond
-               ((null? exprs)
-                (rename 'tmp))
-               ((compare (rename '=>) (car exprs))
-                `(,(cadr exprs) ,(rename 'tmp)))
-               (else
-                `(,(rename 'begin) ,@exprs))))
-            (define (clause ls)
-              (cond
-               ((null? ls) #f)
-               ((compare (rename 'else) (caar ls))
-                (body (cdar ls)))
-               ((and (pair? (car (car ls))) (null? (cdr (car (car ls)))))
-                `(,(rename 'if) (,(rename 'eqv?) ,(rename 'tmp)
-                                 (,(rename 'quote) ,(car (caar ls))))
-                  ,(body (cdar ls))
-                  ,(clause (cdr ls))))
-               (else
-                `(,(rename 'if) (,(rename 'memv) ,(rename 'tmp)
-                                 (,(rename 'quote) ,(caar ls)))
-                  ,(body (cdar ls))
-                  ,(clause (cdr ls))))))
-            `(let ((,(rename 'tmp) ,(cadr expr)))
-               ,(clause (cddr expr)))))
     (cons 'cond-expand
       ;; Based on the cond-expand macro from Chibi scheme
       (lambda (expr rename compare)
