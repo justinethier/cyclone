@@ -366,11 +366,11 @@
 (define (letrec->exp exp)
   (cddr exp))
 
-; letrec->exp : letrec-exp -> list[symbol]
+; letrec->bound-vars : letrec-exp -> list[symbol]
 (define (letrec->bound-vars exp)
   (map car (cadr exp)))
 
-; letrec->exp : letrec-exp -> list[exp]
+; letrec->args : letrec-exp -> list[exp]
 (define (letrec->args exp)
   (map cadr (cadr exp)))
 

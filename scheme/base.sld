@@ -86,6 +86,7 @@
     or
     let
     let*
+    ;letrec
     begin
     case
     cond
@@ -153,6 +154,18 @@
                   `(,(rename 'let) (,(caar (cdr expr)))
                     (,(rename 'let*) ,(cdar (cdr expr)) ,@(cddr expr)))
                   (error "bad let* syntax"))))))
+;    (define-syntax letrec 
+;      (er-macro-transformer
+;        (lambda (exp rename compare)
+;          (let* ((bindings  (cadr exp)) ;(letrec->bindings exp)
+;                 (namings   (map (lambda (b) (list (car b) #f)) bindings))
+;                 (names     (map car (cadr exp))) ;(letrec->bound-vars exp)
+;                 (sets      (map (lambda (binding) 
+;                                   (cons 'set! binding))
+;                                 bindings))
+;                 (args      (map cadr (cadr exp)))) ;(letrec->args exp)
+;            `(let ,namings
+;               (begin ,@(append sets (cddr exp)))))))) ;(letrec->exp exp)
     (define-syntax begin 
       (er-macro-transformer
         (lambda (exp rename compare)
