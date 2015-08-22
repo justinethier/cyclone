@@ -27,7 +27,7 @@ Working TODO list. should start creating issues for these to get them out of her
        TODO: explain how each one will be expanded:
        - compiled macro within compiled macro - expands fine, a lot of the built-in macros in scheme/base do this
        - eval'd macro within compiled macro - ??
-       - compiled macro within eval'd macro - ??
+       - compiled macro within eval'd macro - works fine
        - eval'd macro within eval'd macro - does not work yet, see test2.scm. would need to be able to add macros to an eval env so they can be seen by subsequent macros that use them
 
    * thought: if we go with meta files, the compiler can revert back
@@ -246,4 +246,5 @@ To handle threads executing C code, that may be blocking:
 Limitations:
 - C code cannot manipulate objects that are not on its stack
 - Windows "events" are not available in linux/pthreads. how to actually implement this behavior??
+  may be able to use condition variables. read up on that and update above to use them (so spec above can more closely follow likely implementation)
 
