@@ -38,6 +38,8 @@
 ;; - vars => Identifiers in the new environment
 ;; - vals => List of each value assigned to each identifier
 (define (create-environment vars vals)
+  ;(write `(DEBUG vars ,vars))
+  ;(write `(DEBUG vals ,vals))
   (extend-environment vars vals *global-environment*)) ;; TODO: setup?
 
 (define (eval exp . env)
@@ -113,6 +115,11 @@
 (define (procedure-parameters p) (cadr p))
 (define (procedure-body p) (caddr p))
 (define (procedure-environment p) (cadddr p))
+
+;; Evaluated macros
+(define macro-tag 'macro)
+(define (compound-macro? exp)
+  (tagged-list? macro-tag exp))
 
 ;; Environments
 (define (enclosing-environment env) (cdr env))
@@ -433,29 +440,41 @@
     (loop (car procs) (cdr procs))))
 
 (define (pre-analyze-application exp a-env)
+  ;; Notes:
+  ;;
+  ;; look up symbol in env, and expand if it is a macro
+  ;; Adds some extra overhead into eval, which is not ideal. may need to 
+  ;; reduce that overhead later...
+  ;;(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
+
+  ;; TODO: need to use common rename/compare functions
+  ;; instead of fudging them here. maybe keep common
+  ;; functions in the macros module and hook into them???
+
+  ;; see macro-expand in that module. believe these are the only
+  ;; two places so far that introduce instances of rename/compare?
   (let* ((op (operator exp))
          (var (if (symbol? op)
                   (_lookup-variable-value op a-env
                     (lambda () #f)) ; Not found
-                  #f)))
+                  #f))
+         (expand (lambda (macro-op)
+                   (analyze (apply macro-op
+                                  (list (cons macro-op (operands exp))
+                                        (lambda (sym) sym)
+                                        (lambda (a b) (eq? a b)))) 
+                            a-env))))
     (cond
+      ;; compiled macro
       ((macro? var)
-       ;; look up symbol in env, and expand if it is a macro
-       ;; Adds some extra overhead into eval, which is not ideal. may need to 
-       ;; reduce that overhead later...
-       ;;(write (list 'JAE-DEBUG 'expanding exp)) ;; DEBUG-only
-
-       ;; TODO: need to use common rename/compare functions
-       ;; instead of fudging them here. maybe keep common
-       ;; functions in the macros module and hook into them???
-
-       ;; see macro-expand in that module. believe these are the only
-       ;; two places so far that introduce instances of rename/compare?
-       (analyze (apply var
-                      (list (cons var (operands exp))
-                            (lambda (sym) sym)
-                            (lambda (a b) (eq? a b)))) 
-                a-env))
+       (expand var))
+      ;; compiled macro in compound form
+      ((compound-macro? var)
+       (expand (Cyc-get-cvar (cadr var))))
+      ;; standard interpreted macro
+      ((compound-macro? op)
+       (expand (cdr op)))
+      ;; normal function
       (else
        (analyze-application exp a-env)))))
 

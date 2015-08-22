@@ -58,17 +58,20 @@
                 rename
                 compare?))
             (else
-              ;; Assume evaluated macro
-              (eval
-                (list
-                  (cdr macro)
-                  (list 'quote exp)
-                  rename
-                  compare?)
-                ;; TODO: environment (would need to create a new macro
-                ;; type in eval though, and then format defined-macros 
-                ;; to create an env of macros
-              )))))
+              (let* ((env-vars (map car defined-macros))
+                     (env-vals (map (lambda (v)
+                                      (list 'macro (cdr v)))
+                                    defined-macros))
+                     (env (create-environment env-vars env-vals)))
+                ;; Assume evaluated macro
+                (eval
+                  (list
+                    (cdr macro)
+                    (list 'quote exp)
+                    rename
+                    compare?)
+                  env))
+              ))))
 
     ; TODO: get macro name, transformer
     ; TODO: base off of syntactic closures instead of ER macros??

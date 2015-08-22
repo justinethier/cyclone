@@ -45,18 +45,6 @@
        (test 1 2 3) ; breaks
        ;(my-or 1 2 3) ; breaks
        (and ''test ''test2))))
-           
-
-;(define-syntax or
-;  (er-macro-transformer
-;     (lambda (expr rename compare)
-;       (cond ((null? (cdr expr)) #f)
-;             ((null? (cddr expr)) (cadr expr))
-;             (else
-;              (list (rename 'let) (list (list (rename 'tmp) (cadr expr)))
-;                    (list (rename 'if) (rename 'tmp)
-;                          (rename 'tmp)
-;                          (cons (rename 'or) (cddr expr)))))))))
 
 (write (test2 1 2 3))
 (write (test 1 2 3))
