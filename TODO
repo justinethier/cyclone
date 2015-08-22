@@ -31,6 +31,7 @@ Working TODO list. should start creating issues for these to get them out of her
        - eval'd macro within compiled macro - ??
        - compiled macro within eval'd macro - works fine
        - eval'd macro within eval'd macro - does not work yet, see test2.scm. would need to be able to add macros to an eval env so they can be seen by subsequent macros that use them
+     - *defined-macros* is redundant now with the list in the macros module, except for appending macros from meta files. should pick one list (probably module one) and consolidate
 
    * thought: if we go with meta files, the compiler can revert back
      to using compiled macros if we do not install the meta files.

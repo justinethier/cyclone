@@ -1,6 +1,7 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          ;(scheme write)
+          (scheme eval) ;; TODO: without this line, compilation just
+                        ;; silently fails. WTF??
           (scheme cyclone util))
   ; TODO: really need export-all for these cyclone libs!!
   (export
@@ -28,42 +29,46 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
     (define (macro:expand exp defined-macros)
-        ;(display "/* ")
-        ;(newline)
-        ;(display "entered macro:expand exp")
-        ;(display " */")
-      (let ((rename (lambda (sym) ;; TODO: not good enough, need to actually rename, and keep same results if
-                      sym))       ;; the same symbol is renamed more than once
-            (compare? (lambda (sym-a sym-b)  ;; TODO: the compare function from exrename.
-                         (eq? sym-a sym-b))) ;; this may need to be more sophisticated
-           )
-        (let ((macro (assoc (car exp) defined-macros)))
+      (let* (
+             ;; TODO: not good enough, need to actually rename, 
+             ;; and keep same results if
+             ;; the same symbol is renamed more than once
+             (rename (lambda (sym) 
+                       sym))       
+             ;; TODO: the compare function from exrename.
+             ;; this may need to be more sophisticated
+             (compare? (lambda (sym-a sym-b)  
+                          (eq? sym-a sym-b))) 
+             (macro (assoc (car exp) defined-macros))
+             (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
+                                  (procedure? (cdr macro)))))
 
 ;TODO: restructure this to use eval if the macro is not a proc.
 ;      then can try passing in an environment with create-environment.
 ;      once eval is extended to work with macros, this could allow it to
 ;      expand a macro contained within another
-        ;(display "/* ")
-        ;(newline)
-        ;(display (list macro (car exp) 
-        ;              (Cyc-get-cvar (cdr macro))
-        ;              (macro? (Cyc-get-cvar (cdr macro)))))
-        ;(display " */")
 
           ;; Invoke ER macro
-          (if macro
-            ((Cyc-get-cvar (cdr macro))
-              ;; Pass expression differently depending upon if this is a 
-              ;; compiled macro or a cons one that will be called via eval.
-              ;;
-              ;; If a raw lambda (IE, exec using eval), try quoting it
-              (if (or (macro? (Cyc-get-cvar (cdr macro)))
-                      (procedure? (cdr macro)))
+          (cond
+            ((not macro)
+              (error "macro not found" exp))
+            (compiled-macro?
+              ((Cyc-get-cvar (cdr macro))
                 exp
-                (list 'quote exp))
-              rename
-              compare?)
-            exp)))) ;; TODO: error instead??
+                rename
+                compare?))
+            (else
+              ;; Assume evaluated macro
+              (eval
+                (list
+                  (cdr macro)
+                  (list 'quote exp)
+                  rename
+                  compare?)
+                ;; TODO: environment (would need to create a new macro
+                ;; type in eval though, and then format defined-macros 
+                ;; to create an env of macros
+              )))))
 
     ; TODO: get macro name, transformer
     ; TODO: base off of syntactic closures instead of ER macros??
