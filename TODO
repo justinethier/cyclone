@@ -1,7 +1,9 @@
 Roadmap:
  - Add macro support (instead of current kludge)
  - Target r7rs support (coordinate with feature list)
+ - Code cleanup - need to take care of accumulated cruft before release
  - User manual (or at least API docs, features page may be a good 1st step)
+ - Investigate native thread support. see notes at the end of this file
 
 Working TODO list. should start creating issues for these to get them out of here:
 
