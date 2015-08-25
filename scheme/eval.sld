@@ -367,6 +367,10 @@
 ;; - env => Environment used to expand macros
 ;;
 (define (analyze exp env)
+;(newline)
+;(display "/* ")
+;(display (list 'analyze exp))
+;(display " */")
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
@@ -440,6 +444,10 @@
     (loop (car procs) (cdr procs))))
 
 (define (pre-analyze-application exp a-env)
+(newline)
+(display "/* ")
+(display (list 'pre-analyze exp))
+(display " */ ")
   ;; Notes:
   ;;
   ;; look up symbol in env, and expand if it is a macro
@@ -459,6 +467,10 @@
                     (lambda () #f)) ; Not found
                   #f))
          (expand (lambda (macro-op)
+(newline)
+(display "/* ")
+(display (list 'expand macro-op (operands exp)))
+(display " */ ")
                    (analyze (apply macro-op
                                   (list (cons macro-op (operands exp))
                                         (lambda (sym) sym)
@@ -470,10 +482,20 @@
        (expand var))
       ;; compiled macro in compound form
       ((compound-macro? var)
-       (expand (Cyc-get-cvar (cadr var))))
+(newline)
+(display "/* ")
+(display (list 'compound-macro var))
+(display " */ ")
+
+       (let ((macro (Cyc-get-cvar (cadr var))))
+         (if (macro? macro) ;; compiled macro
+             (expand macro)
+             (expand (analyze macro a-env))))) ;; interpreted, make sure macr is expanded first
+                                               ;; TODO: may need to optimize macros by expanding them just once when constructing env
       ;; standard interpreted macro
       ((compound-macro? op)
-       (expand (cdr op)))
+       (expand (cdr op))) ;; ?? correct? need to test this
+       ;(expand (analyze (cdr op) a-env))) ;; ?? correct? need to test this
       ;; normal function
       (else
        (analyze-application exp a-env)))))
