@@ -13,7 +13,6 @@ Working TODO list. should start creating issues for these to get them out of her
    if necessary, write makefile directive to automate rebuilding cyclone for macro development
 
  - clean up runtime
-   - fix up return_ macros, remove cgen comments
    - remove unused runtime globals, rename others to make more sense
    - need multiple closure types? maybe just migrate closureN to closure?
    - remove unused code, old comments, etc

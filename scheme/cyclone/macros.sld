@@ -1,5 +1,6 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
+          (scheme write)
           (scheme eval) ;; TODO: without this line, compilation just
                         ;; silently fails. WTF??
           (scheme cyclone util))
@@ -64,13 +65,22 @@
                                     defined-macros))
                      (env (create-environment env-vars env-vals)))
                 ;; Assume evaluated macro
+(newline)
+(display "/* ")
+(display (list 'evaluating-macro macro exp))
+(display " */ ")
                 (eval
                   (list
                     (cdr macro)
                     (list 'quote exp)
                     rename
                     compare?)
-                  ;env
+;; TODO: at the moment this causes building cyclone to break because not
+;; all macros can be evaluated correctly. suspect some shortcomings in 
+;; eval compared to compilation? anyway, as of now this line breaks:
+;; 1) scheme/base.sld due to macros defined in this module being evaluated
+;; 2) test2.scm, because we're trying to debug this issue
+                  env
                 ))
               ))))
 
