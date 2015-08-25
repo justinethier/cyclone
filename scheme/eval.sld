@@ -444,10 +444,6 @@
     (loop (car procs) (cdr procs))))
 
 (define (pre-analyze-application exp a-env)
-(newline)
-(display "/* ")
-(display (list 'pre-analyze exp))
-(display " */ ")
   ;; Notes:
   ;;
   ;; look up symbol in env, and expand if it is a macro
@@ -469,13 +465,28 @@
          (expand (lambda (macro-op)
 (newline)
 (display "/* ")
-(display (list 'expand macro-op (operands exp)))
+(display (list 'expand macro-op (operands exp)
+(car exp)
+(macro? var)
+(compound-macro? var)
+       (macro? macro-op)
+       (Cyc-get-cvar (cadr var)) ;; this is what is analyzed
+(compound-macro? op)
+))
 (display " */ ")
                    (analyze (apply macro-op
-                                  (list (cons macro-op (operands exp))
+                                  (list (cons (car exp) (operands exp))
                                         (lambda (sym) sym)
                                         (lambda (a b) (eq? a b)))) 
                             a-env))))
+(newline)
+(display "/* ")
+(display (list 'pre-analyze 
+(macro? var)
+(compound-macro? var)
+(compound-macro? op)
+exp))
+(display " */ ")
     (cond
       ;; compiled macro
       ((macro? var)

@@ -67,7 +67,7 @@
                 ;; Assume evaluated macro
 (newline)
 (display "/* ")
-(display (list 'evaluating-macro macro exp))
+(display (list 'evaluating-macro macro exp env-vars env-vals))
 (display " */ ")
                 (eval
                   (list
