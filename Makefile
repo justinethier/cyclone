@@ -140,21 +140,27 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
 	$(RMDIR) $(DESTDIR)$(DATADIR)
 
-# This is an example of how to build/test changes to the compiler.
-# With the way everything is setup now, you need to rebuild the module(s),
-# install them, and then rebuild the compiler executable to run them.
+
+# This is a test directive used to test changes to a SLD file
+# EG: make sld SLD=scheme/cyclone/macros
+sld:
+	cyclone $(SLD).sld && sudo cp $(SLD).* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+
+## This is an example of how to build/test changes to the compiler.
+## With the way everything is setup now, you need to rebuild the module(s),
+## install them, and then rebuild the compiler executable to run them.
+##
+## It may be possible to use dynamic linking to reduce some of this overhead
+## in the future (should really look into that!)
+#trans:
+#	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyclone /usr/local/bin
+##	cyclone scheme/cyclone/transforms.sld
+##	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
+##	cyclone cyclone.scm
+##	sudo cp cyclone /usr/local/bin/cyclone
 #
-# It may be possible to use dynamic linking to reduce some of this overhead
-# in the future (should really look into that!)
-trans:
-	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyclone /usr/local/bin
-#	cyclone scheme/cyclone/transforms.sld
-#	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
-#	cyclone cyclone.scm
-#	sudo cp cyclone /usr/local/bin/cyclone
-
-base:
-	cyclone scheme/base.sld && sudo cp scheme/base.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
-
-eval:
-	cyclone scheme/eval.sld && sudo cp scheme/eval.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+#base:
+#	cyclone scheme/base.sld && sudo cp scheme/base.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+#
+#eval:
+#	cyclone scheme/eval.sld && sudo cp scheme/eval.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
