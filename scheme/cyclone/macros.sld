@@ -70,7 +70,8 @@
                     (list 'quote exp)
                     rename
                     compare?)
-                  env))
+                  ;env
+                ))
               ))))
 
     ; TODO: get macro name, transformer
