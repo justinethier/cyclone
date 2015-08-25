@@ -144,7 +144,7 @@ uninstall:
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
 sld:
-	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).* /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
 
 ## This is an example of how to build/test changes to the compiler.
 ## With the way everything is setup now, you need to rebuild the module(s),
