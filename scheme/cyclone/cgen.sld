@@ -101,31 +101,31 @@
     (cond
       ((or (= arity 1) (= arity 2)
            (vector-ref *c-call-arity* arity))
-       (emit (c-macro-funcall arity))
-       (emit (c-macro-return-funcall arity))
-       (emit (c-macro-return-check arity))))
+       (emit (c-macro-closcall arity))
+       (emit (c-macro-return-closcall arity))
+       (emit (c-macro-return-direct arity))))
     (emit-c-arity-macros (+ arity 1))))
 
-(define (c-macro-return-funcall num-args)
+(define (c-macro-return-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      "/* Return to continuation after checking for stack overflow. */\n"
-      "#define return_funcall" n "(cfn" args ") \\\n"
+      "/* Check for GC, then call given continuation closure */\n"
+      "#define return_closcall" n "(cfn" args ") \\\n"
       "{char stack; \\\n"
       " if (check_overflow(&stack,stack_limit1)) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(cfn,buf," n "); return; \\\n"
-      " } else {funcall" n "((closure) (cfn)" args "); return;}}\n")))
+      " } else {closcall" n "((closure) (cfn)" args "); return;}}\n")))
 
-(define (c-macro-return-check num-args)
+(define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      "/* Evaluate an expression after checking for stack overflow. */\n"
-      "#define return_check" n "(_fn" args ") { \\\n"
+      "/* Check for GC, then call C function directly */\n"
+      "#define return_direct" n "(_fn" args ") { \\\n"
       " char stack; \\\n"
       " if (check_overflow(&stack,stack_limit1)) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
@@ -133,13 +133,13 @@
       "     GC(&c1, buf, " n "); return; \\\n"
       " } else { (_fn)(" n ",(closure)_fn" args "); }}\n")))
 
-(define (c-macro-funcall num-args)
+(define (c-macro-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define funcall" n "(cfn" args ") "
+      "#define closcall" n "(cfn" args ") "
         (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(" n-1 ", (closure)a1, cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
         (wrap " else { ")
         "((cfn)->fn)(" n ",cfn" args ")"
@@ -752,7 +752,7 @@
            (c-code
              (string-append
                (c:allocs->str (c:allocs cgen))
-               "return_check" (number->string num-cargs) 
+               "return_direct" (number->string num-cargs) 
                "(" this-cont
                (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
                   (c:body cgen) ");"))))
@@ -804,7 +804,7 @@
              (string-append
                (c:allocs->str (c:allocs cfun) "\n")
                (c:allocs->str (c:allocs cargs) "\n")
-               "return_funcall" (number->string (c:num-args cargs))
+               "return_closcall" (number->string (c:num-args cargs))
                "("
                this-cont
                (if (> (c:num-args cargs) 0) "," "")
@@ -823,7 +823,7 @@
              (string-append
                 (c:allocs->str (c:allocs cfun) "\n")
                 (c:allocs->str (c:allocs cargs) "\n")
-                "return_funcall" (number->string num-cargs)
+                "return_closcall" (number->string num-cargs)
                 "("
                 this-cont
                 (if (> num-cargs 0) "," "")
@@ -1296,14 +1296,14 @@
             )
             (reverse required-libs)) ;; Init each lib's dependencies 1st
           (emit* 
-            ;; Start cont chain, but do not assume funcall1 macro was defined
+            ;; Start cont chain, but do not assume closcall1 macro was defined
             "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");")
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(int argc, closure cont, object value) {")
           ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)))
       (else
-        ;; Do not use funcall1 macro as it might not have been defined
+        ;; Do not use closcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->elt1;")
         ;(emit "((cont)->fn)(1, cont, cont);")
         (emit* 

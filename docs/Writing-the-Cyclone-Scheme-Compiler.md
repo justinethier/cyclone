@@ -97,7 +97,7 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
       ... 
 
       // Check if GC is needed, then call into continuation with the new vector
-      return_funcall1(cont, v);
+      return_closcall1(cont, v);
     }
 
 [CHICKEN](http://www.call-cc.org/) was the first Scheme compiler to use Baker's approach.
