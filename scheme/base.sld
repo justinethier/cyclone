@@ -223,7 +223,7 @@
                    (if (compare (rename 'else) (car cl))
                        (if (pair? (cddr expr))
                            (error "non-final else in cond" expr)
-                           (cons (rename 'begin) (cdr cl)))
+                           (list (cons (rename 'lambda) (cons '() (cdr cl)))))
                        (if (if (null? (cdr cl)) #t (compare (rename '=>) (cadr cl)))
                            (list (list (rename 'lambda) (list (rename 'tmp))
                                        (list (rename 'if) (rename 'tmp)
@@ -234,7 +234,7 @@
                                  (car cl))
                            (list (rename 'if)
                                  (car cl)
-                                 (cons (rename 'begin) (cdr cl))
+                                 (list (cons (rename 'lambda) (cons '() (cdr cl))))
                                  (cons (rename 'cond) (cddr expr))))))
                  (cadr expr))))))
     (define-syntax case
