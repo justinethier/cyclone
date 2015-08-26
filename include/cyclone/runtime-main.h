@@ -48,11 +48,9 @@ static void Cyc_main (stack_size,heap_size,stack_base)
  Cyc_st_init();
 
  {
-
-  /* Create closure for the test function. */
-  mclosure0(run_test,&c_entry_pt);
-  gc_cont = &run_test;
-  /* Initialize constant expressions for the test runs. */
+  /* Setup first function to execute */
+  mclosure0(entry_pt,&c_entry_pt);
+  gc_cont = &entry_pt;
 
   /* Allocate heap area for second generation. */
   /* Use calloc instead of malloc to assure pages are in main memory. */
