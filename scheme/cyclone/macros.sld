@@ -1,6 +1,6 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          (scheme write)
+          ;(scheme write) ;; Debug only
           (scheme eval) ;; TODO: without this line, compilation just
                         ;; silently fails. WTF??
           (scheme cyclone util))
@@ -24,7 +24,6 @@
     (define (macro:get-defined-macros) *macro:defined-macros*)
 
     ;; Macro section
-    ;; TODO: place this in another module? could speed development
     (define (define-syntax? exp)
       (tagged-list? 'define-syntax exp))
 
@@ -43,12 +42,6 @@
              (macro (assoc (car exp) defined-macros))
              (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
                                   (procedure? (cdr macro)))))
-
-;TODO: restructure this to use eval if the macro is not a proc.
-;      then can try passing in an environment with create-environment.
-;      once eval is extended to work with macros, this could allow it to
-;      expand a macro contained within another
-
           ;; Invoke ER macro
           (cond
             ((not macro)
@@ -59,32 +52,21 @@
                 rename
                 compare?))
             (else
+              ;; Assume evaluated macro
               (let* ((env-vars (map car defined-macros))
                      (env-vals (map (lambda (v)
                                       (list 'macro (cdr v)))
                                     defined-macros))
+                     ;; Pass defined macros so nested macros can be expanded
                      (env (create-environment env-vars env-vals)))
-                ;; Assume evaluated macro
-(newline)
-(display "/* ")
-(display (list 'evaluating-macro macro exp env-vars env-vals))
-(display " */ ")
                 (eval
                   (list
                     (cdr macro)
                     (list 'quote exp)
                     rename
                     compare?)
-;; TODO: at the moment this causes building cyclone to break because not
-;; all macros can be evaluated correctly. suspect some shortcomings in 
-;; eval compared to compilation? anyway, as of now this line breaks:
-;; 1) scheme/base.sld due to macros defined in this module being evaluated
-;; 2) test2.scm, because we're trying to debug this issue
-                  env
-                ))
-              ))))
+                  env))))))
 
     ; TODO: get macro name, transformer
-    ; TODO: base off of syntactic closures instead of ER macros??
     ; TODO: let-syntax forms
   ))
