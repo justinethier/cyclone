@@ -42,7 +42,8 @@
        ;; tbd how this parameter would be combined with eval's global env,
        ;; because it would need to extend it.
        ;; could eval expose a function to extend the global env (or any env)?
-       (test 1 2 3) ; breaks
+       (test 1 2 3)
+       ;(test 1 2 3) ; breaks
        ;(my-or 1 2 3) ; breaks
        (and ''test ''test2))))
 
