@@ -20,6 +20,7 @@ Working TODO list. should start creating issues for these to get them out of her
 
  - macros
    - next steps:
+     - migrate tests from test2.scm to unit-test suite
      - how should ex rename/compare work? check working implementations, papers. find test cases that cyclone does not handle right now
      - review 4 cases below for handling macro expansion. I think there are still some outstanding issues
        with respect to eval'd macros
@@ -111,11 +112,8 @@ when it does not have to, and slowing down compilation even more
    cyclone> (call/cc (lambda (k) (k 1)))
    Error: Expected 2 arguments but received 1.
 
-   - eval
-     there is limited concept of macro expansion, probably other deficiencies as well
-     call/cc issues?
-     almost certainly will break when running the self-hosted compiler...
-     no, I think this is ok. may want to unify macros with compiler side though
+  extra 'cont' param is being exposed, because this works:
+  (call/cc (lambda (k) (k 1 1)) (lambda (k) (k 1 1)))
 
    - I/O
      - may be able to use fmemopen to implement output strings, although it is not supported on windows
