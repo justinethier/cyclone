@@ -251,5 +251,35 @@ Limitations:
 more thoughts:
  - instead of using single lock across all threads, which could involve a lot of contention, think about locking each thread's var instead. the var would only be locked by the thread or by another thread when GC is requested. this should minimize contention, and may allow pthread mutexes to be acceptable, since they generally use a fast lock (such as futex on linux) when there is no contention.
  - sucks to have to use a lock (even a futex) whenever calling a C function primitive. Is there any way at all around it though?
+  maybe only do it certain times:
+   - when calling a known blocking function, use futex to register thread as blocking
+   - make API for this available in runtime, for 3rd party FFI at a later time
+
  - have to be able to handle forwarding pointers in the case where a C function prim was blocking while GC was being performed, and missed it
+
+   thread may be blocked for an extended period of time due to:
+     - waiting for blocking I/O to become available
+     - mutex lock (from scheme layer or runtime. likely a short wait in the latter case)
+     - ??
+
+   how to handle case where a mutex lock blocked a thread?
+   may need to check for GC after mutex is released, because objects
+   might have been collected while the thread was blocked. although, this
+   might be mitigated somewhat by mutex calls from the scheme side
+
+   bigger issue, how to handle major collection when threads might be blocked?
+   objects forwarded once can be  handled I think (you have the fwd address)
+   but if an object is forwarded twice the fwd address is no longer valid.
+
+   is it possible for a collection to inspect the stack of a blocked thread
+   and update forwarding addresses??
+
+   *should take some examples from compiled code and work through how the GC
+   would need to work to handle a C primitive blocking for an unknown
+   amount of time.
+
+
+Final thought on native threads - need to move all of this into a separate document and consolidate it to determine if a viable design can be achieved.
+
+
 
