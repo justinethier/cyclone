@@ -21,8 +21,8 @@ static void main_main(long stack_size,long heap_size,char *stack_base);
 static void main_main (stack_size,heap_size,stack_base)
      long stack_size,heap_size; char *stack_base;
 {char in_my_frame;
- mclosure0(clos_exit,&my_exit);  /* Create a closure for exit function. */
- gc_ans[0] = &clos_exit;            /* It becomes the argument to test. */
+ mclosure0(clos_halt,&Cyc_halt);  /* Halt program if final closure is reached */
+ gc_ans[0] = &clos_halt;
  gc_num_ans = 1;
  /* Allocate stack buffer. */
  stack_begin = stack_base;

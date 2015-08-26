@@ -139,7 +139,7 @@ object Cyc_command_line_arguments(object cont);
 integer_type Cyc_system(object cmd);
 integer_type Cyc_char2integer(object chr);
 object Cyc_integer2char(object n);
-void my_exit(closure);
+void Cyc_halt(closure);
 object __halt(object obj);
 port_type Cyc_stdout(void);
 port_type Cyc_stdin(void);

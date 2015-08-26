@@ -1176,25 +1176,17 @@ object Cyc_integer2char(object n){
     return obj_char2obj(val);
 }
 
-void my_exit(closure);
-void my_exit(env) closure env; {
+void Cyc_halt(closure);
+void Cyc_halt(env) closure env; {
 #if DEBUG_SHOW_DIAG
-    printf("my_exit: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
+    printf("Cyc_halt: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
         allocp-bottom,clock()-start,no_gcs,no_major_gcs);
- printf("my_exit: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
+ printf("Cyc_halt: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
 #endif
  exit(0);}
 
 object __halt(object obj) {
-#if DEBUG_SHOW_DIAG
-    printf("\nhalt: ");
-    Cyc_display(obj, stdout);
-    printf("\n");
-    printf("my_exit: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
-        allocp-bottom,clock()-start,no_gcs,no_major_gcs);
-    printf("my_exit: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
-#endif
-    my_exit(obj);
+    Cyc_halt(obj);
     return nil;
 }
 
