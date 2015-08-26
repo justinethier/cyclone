@@ -20,7 +20,6 @@ Working TODO list. should start creating issues for these to get them out of her
 
  - macros
    - next steps:
-     - migrate tests from test2.scm to unit-test suite
      - how should ex rename/compare work? check working implementations, papers. find test cases that cyclone does not handle right now
      - review 4 cases below for handling macro expansion. I think there are still some outstanding issues
        with respect to eval'd macros

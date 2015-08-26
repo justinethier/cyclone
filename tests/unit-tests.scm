@@ -295,6 +295,29 @@
 ;; TODO: (delete-file "test.txt")
 ;; END I/O
 
+;; Macros
+(define-syntax test 
+  (er-macro-transformer
+     (lambda (expr rename compare)
+       (cond ((null? (cdr expr)) #t)
+             ((null? (cddr expr)) (cadr expr))
+             (else (list (rename 'if) (cadr expr)
+                         (cons (rename 'and) (cddr expr))
+                         #f))))))
+
+(define-syntax test2
+  (er-macro-transformer
+     (lambda (expr rename compare)
+       (test 1 2)
+       (test 1 2 3)
+       (and ''test ''test2))))
+
+(define x 42)
+(assert:equal "macro: test2" (test2 1 2 3) 'test2)
+(assert:equal "macro: test" (test 1 2 3) 3)
+(assert:equal "macro: eval test" (eval '(test 1 2 x)) x)
+;; END macros
+
 ; TODO: use display, output without surrounding quotes
 (write (list *num-passed* " tests passed with no errors"))
 ;;
