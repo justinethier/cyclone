@@ -248,3 +248,8 @@ Limitations:
 - Windows "events" are not available in linux/pthreads. how to actually implement this behavior??
   may be able to use condition variables. read up on that and update above to use them (so spec above can more closely follow likely implementation)
 
+more thoughts:
+ - instead of using single lock across all threads, which could involve a lot of contention, think about locking each thread's var instead. the var would only be locked by the thread or by another thread when GC is requested. this should minimize contention, and may allow pthread mutexes to be acceptable, since they generally use a fast lock (such as futex on linux) when there is no contention.
+ - sucks to have to use a lock (even a futex) whenever calling a C function primitive. Is there any way at all around it though?
+ - have to be able to handle forwarding pointers in the case where a C function prim was blocking while GC was being performed, and missed it
+
