@@ -277,6 +277,11 @@ more thoughts:
    would need to work to handle a C primitive blocking for an unknown
    amount of time.
 
+ - how could this possibly scale to hundreds/thousands of threads if a single thread's GC stops the world?
+   maybe the sweet spot is fewer threads?
+   maybe it will work anyway, just less optimal after a certain point (see .net gc, not sure how well that scales though)
+   maybe there is a way to make GC more efficient, or GC one thread at a time (not sure that is viable)?
+   Baker does have another paper on realtime GC, maybe those concepts can be applied
 
 Final thought on native threads - need to move all of this into a separate document and consolidate it to determine if a viable design can be achieved.
 
