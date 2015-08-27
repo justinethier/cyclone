@@ -34,7 +34,6 @@
     cyc:error
     basename
     list-index
-    gensym
     symbol<? 
     insert
     remove 
@@ -202,26 +201,6 @@
     ; void : -> void
     (define (void) (if #f #t)))
   (else #f))
-
-; gensym-count : integer
-(define gensym-count 0)
-
-; gensym : symbol -> symbol
-(define gensym (lambda params
-                 (if (null? params)
-                     (begin
-                       (set! gensym-count (+ gensym-count 1))
-                       (string->symbol (string-append
-                                        "$"
-                                        (number->string gensym-count))))
-                     (begin
-                       (set! gensym-count (+ gensym-count 1))
-                       (string->symbol (string-append 
-                                        (if (symbol? (car params))
-                                            (symbol->string (car params))
-                                            (car params))
-                                        "$"
-                                        (number->string gensym-count)))))))
 
 ; symbol<? : symbol symobl -> boolean
 (define (symbol<? sym1 sym2)

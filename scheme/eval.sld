@@ -454,30 +454,22 @@
                   (_lookup-variable-value op a-env
                     (lambda () #f)) ; Not found
                   #f))
-;; TODO: need to use common rename/compare functions
-;; instead of fudging them here. maybe keep common
-;; functions in the macros module and hook into them???
-;;
-;; see macro-expand in that module. believe these are the only
-;; two places so far that introduce instances of rename/compare?
-         (rename (lambda (sym) sym))
-         (compare? (lambda (a b) (eq? a b))) 
          (expand 
            (lambda (macro-op)
              (if (macro? macro-op)
                ;; Compiled macro, call directly
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
-                                    rename
-                                    compare?)) 
+                                    Cyc-er-rename
+                                    Cyc-er-compare?)) 
                         a-env)
                ;; Interpreted macro, build expression and eval
                (let ((expr (cons macro-op 
                              (list (cons 'quote 
                                          (list (cons (car exp) 
                                                      (operands exp))))
-                                   rename
-                                   compare?))))
+                                   Cyc-er-rename
+                                   Cyc-er-compare?))))
                  (analyze
                    (eval expr a-env) ;; Expand macro
                    a-env))))))

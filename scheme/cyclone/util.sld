@@ -15,10 +15,14 @@
     if?
     begin?
     lambda?
+    ;; ER macro supporting functions
+    Cyc-er-rename
+    Cyc-er-compare?
     ;; Code generation
     mangle
     mangle-global
     ;; Scheme library functions
+    gensym
     delete
     delete-duplicates
     list-insert-at!
@@ -94,6 +98,60 @@
    (else
     (list-insert-at! (cdr lis) obj (- k 1)))))
 
+; gensym-count : integer
+(define gensym-count 0)
+
+; gensym : symbol -> symbol
+(define gensym (lambda params
+                 (if (null? params)
+                     (begin
+                       (set! gensym-count (+ gensym-count 1))
+                       (string->symbol (string-append
+                                        "$"
+                                        (number->string gensym-count))))
+                     (begin
+                       (set! gensym-count (+ gensym-count 1))
+                       (string->symbol (string-append 
+                                        (if (symbol? (car params))
+                                            (symbol->string (car params))
+                                            (car params))
+                                        "$"
+                                        (number->string gensym-count)))))))
+
+;;; Explicit renaming macros
+
+;; ER macro rename function, based on code from Chibi scheme
+(define Cyc-er-rename
+  (lambda (sym) sym)) ; placeholder
+; TODO:
+;  ;; TODO: this is not good enough, need to take macro environment
+;  ;; into account
+;  ((lambda (renames)
+;     (lambda (identifier)
+;       ((lambda (cell)
+;          (if cell
+;              (cdr cell)
+;              ((lambda (name)
+;                 (set! renames (cons (cons identifier name) renames))
+;                 name)
+;               (gensym identifier)
+;               ;(make-syntactic-closure mac-env '() identifier)
+;              )))
+;        (assq identifier renames))))
+;   ;; TODO: For now, do not allow renaming of special form symbols to 
+;   ;; prevent issues within the compiler
+;   '(
+;     (define . define)
+;     (define-syntax . define-syntax)
+;     (if . if)
+;     (lambda . lambda)
+;     (quote . quote)
+;     (set! . set!)
+;    )))
+(define (Cyc-er-compare? a b)
+  ;; TODO: this is not good enough, need to determine if these symbols
+  ;; are the same identifier in their *environment of use*
+  (eq? a b))
 
 ;; Name-mangling.
 

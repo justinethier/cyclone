@@ -29,17 +29,7 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
     (define (macro:expand exp defined-macros)
-      (let* (
-             ;; TODO: not good enough, need to actually rename, 
-             ;; and keep same results if
-             ;; the same symbol is renamed more than once
-             (rename (lambda (sym) 
-                       sym))       
-             ;; TODO: the compare function from exrename.
-             ;; this may need to be more sophisticated
-             (compare? (lambda (sym-a sym-b)  
-                          (eq? sym-a sym-b))) 
-             (macro (assoc (car exp) defined-macros))
+      (let* ((macro (assoc (car exp) defined-macros))
              (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
                                   (procedure? (cdr macro)))))
           ;; Invoke ER macro
@@ -49,8 +39,8 @@
             (compiled-macro?
               ((Cyc-get-cvar (cdr macro))
                 exp
-                rename
-                compare?))
+                Cyc-er-rename
+                Cyc-er-compare?))
             (else
               ;; Assume evaluated macro
               (let* ((env-vars (map car defined-macros))
@@ -63,8 +53,8 @@
                   (list
                     (cdr macro)
                     (list 'quote exp)
-                    rename
-                    compare?)
+                    Cyc-er-rename
+                    Cyc-er-compare?)
                   env))))))
 
     ; TODO: get macro name, transformer
