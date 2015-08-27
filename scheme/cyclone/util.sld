@@ -126,6 +126,9 @@
 ; TODO:
 ;  ;; TODO: this is not good enough, need to take macro environment
 ;  ;; into account
+   can pass useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
+   would still need to modify expand (and eval?) to deal with those renames??? or maybe not, if only macros are affected??
+
 ;  ((lambda (renames)
 ;     (lambda (identifier)
 ;       ((lambda (cell)
