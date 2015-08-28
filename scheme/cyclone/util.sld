@@ -15,6 +15,20 @@
     if?
     begin?
     lambda?
+    ;; Environments
+    env:enclosing-environment
+    env:first-frame
+    env:the-empty-environment
+    env:make-frame
+    env:frame-variables
+    env:frame-values 
+    env:add-binding-to-frame! 
+    env:extend-environment 
+    env:lookup
+    env:lookup-variable-value 
+    env:_lookup-variable-value 
+    env:set-variable-value! 
+    env:define-variable! 
     ;; ER macro supporting functions
     Cyc-er-rename
     Cyc-er-compare?
@@ -117,6 +131,92 @@
                                             (car params))
                                         "$"
                                         (number->string gensym-count)))))))
+
+;;;; Environments
+;;;; TODO: longer-term, move these into their own module
+(define (env:enclosing-environment env) (cdr env))
+(define (env:first-frame env) (car env))
+(define env:the-empty-environment '())
+
+(define (env:make-frame variables values)
+  (cons variables values))
+(define (env:frame-variables frame) (car frame))
+(define (env:frame-values frame) (cdr frame))
+(define (env:add-binding-to-frame! var val frame)
+  (set-car! frame (cons var (car frame)))
+  (set-cdr! frame (cons val (cdr frame))))
+
+(define (env:extend-environment vars vals base-env)
+  (if (= (length vars) (length vals))
+      (cons (env:make-frame vars vals) base-env)
+      (if (< (length vars) (length vals))
+          (error "Too many arguments supplied" vars vals)
+          (error "Too few arguments supplied" vars vals))))
+
+(define (env:lookup-variable-value var env)
+  (env:_lookup-variable-value var env 
+    (lambda ()
+      (error "Unbound variable" var))))
+
+(define (env:_lookup-variable-value var env not-found)
+  (define (env-loop env)
+    (define (scan vars vals)
+      (cond ((null? vars)
+             (env-loop (env:enclosing-environment env)))
+            ((eq? var (car vars))
+             (cond-expand
+               (cyclone
+                 (Cyc-get-cvar (car vals)))
+               (else 
+                 (car vals))))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env env:the-empty-environment)
+        (not-found)
+        (let ((frame (env:first-frame env)))
+          (scan (env:frame-variables frame)
+                (env:frame-values frame)))))
+  (env-loop env))
+
+(define (env:lookup var env default-value)
+  (env:_lookup-variable-value var env (lambda () default-value)))
+
+(define (env:set-variable-value! var val env)
+  (define (env-loop env)
+    (define (scan vars vals)
+      (cond ((null? vars)
+             (env-loop (env:enclosing-environment env)))
+            ((eq? var (car vars))
+             (cond-expand
+               (cyclone
+                 (if (Cyc-cvar? (car vals))
+                   (Cyc-set-cvar! (car vals) val)
+                   (set-car! vals val)))
+               (else
+                 (set-car! vals val))))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env env:the-empty-environment)
+        (error "Unbound variable -- SET!" var)
+        (let ((frame (env:first-frame env)))
+          (scan (env:frame-variables frame)
+                (env:frame-values frame)))))
+  (env-loop env))
+
+(define (env:define-variable! var val env)
+  (let ((frame (env:first-frame env)))
+    (define (scan vars vals)
+      (cond ((null? vars)
+             (env:add-binding-to-frame! var val frame))
+            ((eq? var (car vars))
+             ;; TODO: update compiled var
+             ;; cond-expand
+             ;;  if cvar
+             ;;     set-cvar
+             (set-car! vals val))
+            (else (scan (cdr vars) (cdr vals)))))
+    (scan (env:frame-variables frame)
+          (env:frame-values frame))))
+;;;; END Environments
+
 
 ;;; Explicit renaming macros
 
