@@ -122,13 +122,24 @@
 
 ;; ER macro rename function, based on code from Chibi scheme
 (define Cyc-er-rename
-  (lambda (sym) sym)) ; placeholder
+  (lambda (sym) sym)) ; temporary placeholder, see below
 ; TODO:
 ;  ;; TODO: this is not good enough, need to take macro environment
 ;  ;; into account
-   can pass useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
-   would still need to modify expand (and eval?) to deal with those renames??? or maybe not, if only macros are affected??
+;   can pass useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
+;   would still need to modify expand (and eval?) to deal with those renames??? or maybe not, if only macros are affected??
 
+ mac-env is 
+  - global env for interpreted macros, at least for now until
+    they can be recognized by eval
+  - ?? for compiled macros
+
+ use-env is:
+  - current env for eval, can be passed in.
+    is this really a-env though? or do we need to extend it when
+    a new lambda scope is introduced?
+  - need to keep track of it for compiled macro expansion
+;
 ;  ((lambda (renames)
 ;     (lambda (identifier)
 ;       ((lambda (cell)
@@ -138,6 +149,12 @@
 ;                 (set! renames (cons (cons identifier name) renames))
 ;                 name)
 ;               (gensym identifier)
+;               ; gensym not good enough, need to also preserve ref trans.
+;               ; also note that an identifier can be an object, it does not
+;               ; just have to be a symbol. although, of course, the rest
+;               ; of the code needs to be able to handle identifiers in
+;               ; forms other than symbols, if that is done.
+;               ;
 ;               ;(make-syntactic-closure mac-env '() identifier)
 ;              )))
 ;        (assq identifier renames))))
@@ -151,6 +168,7 @@
 ;     (quote . quote)
 ;     (set! . set!)
 ;    )))
+
 (define (Cyc-er-compare? a b)
   ;; TODO: this is not good enough, need to determine if these symbols
   ;; are the same identifier in their *environment of use*
