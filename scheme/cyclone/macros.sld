@@ -39,7 +39,7 @@
             (compiled-macro?
               ((Cyc-get-cvar (cdr macro))
                 exp
-                Cyc-er-rename
+                (Cyc-er-rename 'todo-mac-env)
                 Cyc-er-compare?))
             (else
               ;; Assume evaluated macro
@@ -53,7 +53,7 @@
                   (list
                     (cdr macro)
                     (list 'quote exp)
-                    Cyc-er-rename
+                    (Cyc-er-rename 'todo-mac-env)
                     Cyc-er-compare?)
                   env))))))
 

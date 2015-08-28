@@ -221,8 +221,9 @@
 ;;; Explicit renaming macros
 
 ;; ER macro rename function, based on code from Chibi scheme
-(define Cyc-er-rename
+(define (Cyc-er-rename mac-env)
   (lambda (sym) sym)) ; TODO: temporary placeholder, see below
+;(define (Cyc-er-rename mac-env)
 ; Notes:
 ;
 ; need to figure out what to return from this function so that renaming
@@ -245,8 +246,6 @@
 ; - interpreter can use a-env and global-env??????
 ;   there are open questions about extending a-env, but without eval being
 ;   able to define-syntax (yet), I think we can defer that until later.
-; - environment code needs to be added to a common place, away from eval.sld
-done, need to change eval to use new functions from this module
 ;
 ;   can pass mac-env, useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
 ;
@@ -269,7 +268,17 @@ done, need to change eval to use new functions from this module
 ;              ((lambda (name)
 ;                 (set! renames (cons (cons identifier name) renames))
 ;                 name)
-;               (gensym identifier)
+;
+;               (let ((val (env:lookup identifier mac-env 'not-defined)))
+;                 (cond
+;                   ((eq? val 'not-defined)
+;                    identifier)
+;                   (else
+;                    (let ((renamed (gensym identifier)))
+;                      (env:define-variable! renamed val mac-env)
+;                      renamed))))
+;               ; 
+;               ;(gensym identifier)
 ;               ; gensym not good enough, need to also preserve ref trans.
 ;               ; also note that an identifier can be an object, it does not
 ;               ; just have to be a symbol. although, of course, the rest
