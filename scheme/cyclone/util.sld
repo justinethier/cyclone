@@ -122,23 +122,43 @@
 
 ;; ER macro rename function, based on code from Chibi scheme
 (define Cyc-er-rename
-  (lambda (sym) sym)) ; temporary placeholder, see below
-; TODO:
-;  ;; TODO: this is not good enough, need to take macro environment
-;  ;; into account
-;   can pass useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
-;   would still need to modify expand (and eval?) to deal with those renames??? or maybe not, if only macros are affected??
-
- mac-env is 
-  - global env for interpreted macros, at least for now until
-    they can be recognized by eval
-  - ?? for compiled macros
-
- use-env is:
-  - current env for eval, can be passed in.
-    is this really a-env though? or do we need to extend it when
-    a new lambda scope is introduced?
-  - need to keep track of it for compiled macro expansion
+  (lambda (sym) sym)) ; TODO: temporary placeholder, see below
+; Notes:
+;
+; need to figure out what to return from this function so that renaming
+; actually does what it is supposed to do (or a close approximation).
+; then need to figure out what needs to change in the rest of the code to
+; support that.
+; 
+; how renaming should work:
+;
+;  - ideally, add a closure from the macro-env for identifier
+;  - practically, if identifier is defined in mac-env, gensym but
+;    update mac-env so renamed variable points to original.
+;    if not defined, is it the same as a gensym? or nothing at all???
+;
+;in order for this to work:
+;
+; - compiler needs to maintain env consisting of at least macros,
+;   and pass this along. presumably this env would be used instead of
+;   *defined-macros*.
+; - interpreter can use a-env and global-env??????
+;   there are open questions about extending a-env, but without eval being
+;   able to define-syntax (yet), I think we can defer that until later.
+; - environment code needs to be added to a common place, away from eval.sld
+;
+;   can pass mac-env, useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
+;
+; mac-env is 
+;  - global env for interpreted macros, at least for now until
+;    they can be recognized by eval
+;  - ?? for compiled macros
+;
+; use-env is:
+;  - current env for eval, can be passed in.
+;    is this really a-env though? or do we need to extend it when
+;    a new lambda scope is introduced?
+;  - need to keep track of it for compiled macro expansion
 ;
 ;  ((lambda (renames)
 ;     (lambda (identifier)

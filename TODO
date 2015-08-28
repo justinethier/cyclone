@@ -1,16 +1,11 @@
 Roadmap:
- - Add macro support (instead of current kludge)
- - Target r7rs support (coordinate with feature list)
+ - Add macro support, ideally including some level of hygiene
  - Code cleanup - need to take care of accumulated cruft before release
+ - Target r7rs support (coordinate with feature list)
  - User manual (or at least API docs, features page may be a good 1st step)
  - Investigate native thread support. see notes at the end of this file
 
 Working TODO list. should start creating issues for these to get them out of here:
-
- - need to speed up the compilation cycle
-   switch to using shared libraries instead of static ones
-   move macro code to that module
-   if necessary, write makefile directive to automate rebuilding cyclone for macro development
 
  - clean up runtime
    - remove unused runtime globals, rename others to make more sense
@@ -20,12 +15,13 @@ Working TODO list. should start creating issues for these to get them out of her
 
  - macros
    - next steps:
-     - how should ex rename/compare work? check working implementations, papers. find test cases that cyclone does not handle right now
+     - added notes to macros.sld module for how ex rename/compare should work. check working implementations, papers. find test cases that cyclone does not handle right now
+       next step is to work through implementing these notes
+
      - review 4 cases below for handling macro expansion. I think there are still some outstanding issues
        with respect to eval'd macros
      - check chibi's syntax-rules
      - macros within macros, 4 cases:
-       TODO: explain how each one will be expanded:
        - compiled macro within compiled macro - expands fine, a lot of the built-in macros in scheme/base do this
        - eval'd macro within compiled macro - ??
        - compiled macro within eval'd macro - works fine
@@ -89,6 +85,9 @@ when it does not have to, and slowing down compilation even more
    - anything else?
 
 
+ - need to speed up the compilation cycle
+   switch to using shared libraries instead of static ones?
+
  - profile cyclone code, see if there are any bottlenecks we can reduce
    EG: prof cyclone transforms.sld
 
@@ -106,13 +105,6 @@ when it does not have to, and slowing down compilation even more
        done for now, check performance compiling transforms.sld
 
      2) Need to either allow code to read an import after macro expansion, or have another main module for self-hosting
-
-   - what's going on here:
-   cyclone> (call/cc (lambda (k) (k 1)))
-   Error: Expected 2 arguments but received 1.
-
-  extra 'cont' param is being exposed, because this works:
-  (call/cc (lambda (k) (k 1 1)) (lambda (k) (k 1 1)))
 
    - I/O
      - may be able to use fmemopen to implement output strings, although it is not supported on windows
@@ -189,6 +181,10 @@ GC - notes from: http://www.more-magic.net/posts/internals-gc.html
  JAE - Important point, that the heap must be reallocated during a major GC if there is too much data in the stack / old heap. Considered this but not sure if cyclone's GC does that right now:
 
 The smart reader might have noticed a small problem here: what if the amount of garbage cleaned up is less than the data on the stack? Then, the stack data can't be copied to the new heap because it simply is too small. Well, this is when a third GC mode is triggered: a reallocating GC. This causes a new heap to be allocated, twice as big as the current heap. This is also split in from- and tospace. Then, Cheney's algorithm is performed on the old heap's fromspace, using one half of the new heap as tospace. When it's finished, the new tospace is called fromspace, and the other half of the new heap is called tospace. Then, the old heap is de-allocated.
+
+
+
+
 
 - Notes on native threads
 
@@ -282,6 +278,11 @@ more thoughts:
    maybe it will work anyway, just less optimal after a certain point (see .net gc, not sure how well that scales though)
    maybe there is a way to make GC more efficient, or GC one thread at a time (not sure that is viable)?
    Baker does have another paper on realtime GC, maybe those concepts can be applied
+
+See:
+- http://comments.gmane.org/gmane.lisp.scheme.chicken/17683
+- http://www.cs.technion.ac.il/~erez/Papers/real-time-pldi.pdf
+- http://www.cs.technion.ac.il/~erez/Papers/stopless.pdf
 
 Final thought on native threads - need to move all of this into a separate document and consolidate it to determine if a viable design can be achieved.
 
