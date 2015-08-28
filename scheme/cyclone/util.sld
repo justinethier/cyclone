@@ -246,6 +246,7 @@
 ;   there are open questions about extending a-env, but without eval being
 ;   able to define-syntax (yet), I think we can defer that until later.
 ; - environment code needs to be added to a common place, away from eval.sld
+done, need to change eval to use new functions from this module
 ;
 ;   can pass mac-env, useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
 ;
