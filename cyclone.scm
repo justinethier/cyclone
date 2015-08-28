@@ -102,16 +102,16 @@
     
 ;; JAE DEBUG code, remove (or refactor) once working
 (trace:info "JAE DEBUG - compiled macros")
-(trace:info
-  (filter 
-   (lambda (v)
-     (cond
-       ((equal? (car v) 'my-or)
-        (trace:info (list 'my-or (car v) (cdr v) (macro? (Cyc-get-cvar (cdr v)))))
-        #t)
-       (else #f)))
-     ;(macro? (cdr v)))
-   (Cyc-global-vars)))
+;(trace:info
+;  (filter 
+;   (lambda (v)
+;     (cond
+;       ((equal? (car v) 'my-or)
+;        (trace:info (list 'my-or (car v) (cdr v) (macro? (Cyc-get-cvar (cdr v)))))
+;        #t)
+;       (else #f)))
+;     ;(macro? (cdr v)))
+;   (Cyc-global-vars)))
 ; TODO: should be able to use this to find all the compiled macros
 (let ((macros (filter 
                 (lambda (v) 
@@ -119,14 +119,12 @@
                 (Cyc-global-vars))))
   (set! *defined-macros*
         (append
-          ;(map
-          ;  (lambda (v)
-          ;    (cons (car v) (cdr v)))
-          ;  macros))
           macros
           *defined-macros*)))
+(macro:load-env! *defined-macros*)
 ;TODO: try this again, make sure macro is loaded: 
 (trace:info *defined-macros*)
+(trace:info (list 'macro-env (macro:get-env)))
 ;; END JAE DEBUG
 
       (set! input-program (expand input-program))

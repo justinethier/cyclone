@@ -10,9 +10,14 @@
     macro:macro?
     macro:expand
     macro:add!
+    macro:load-env!
+    macro:get-env
     macro:get-defined-macros
   )
   (begin
+    ;; top-level macro environment
+    (define *macro:env* '())
+
     ;; A list of all macros defined by the program/library being compiled
     (define *macro:defined-macros* '())
 
@@ -20,6 +25,14 @@
       (set! *macro:defined-macros* 
         (cons (cons name body) *macro:defined-macros*))
       #t)
+
+    (define (macro:load-env! defined-macros)
+      (set! *macro-env* (env:extend-environment
+                          (map car defined-macros)
+                          (map cdr defined-macros)
+                          env:the-empty-environment)))
+
+    (define (macro:get-env) *macro:env*)
 
     (define (macro:get-defined-macros) *macro:defined-macros*)
 
