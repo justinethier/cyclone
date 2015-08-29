@@ -127,7 +127,7 @@
 (trace:info (list 'macro-env (macro:get-env)))
 ;; END JAE DEBUG
 
-      (set! input-program (expand input-program))
+      (set! input-program (expand input-program (macro:get-env)))
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
 

@@ -732,26 +732,29 @@
 
 ;; Macro expansion
 
-TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
+;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
-(define (expand exp)
+(define (expand exp env)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
     ((ref? exp)        exp)
     ((quote? exp)      exp)
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
-                          ,@(map expand (lambda->exp exp))))
+                          ,@(map 
+                            ;; TODO: use extend env here?
+                            (lambda (expr) (expand expr env))
+                            (lambda->exp exp))))
     ((define? exp)     (if (define-lambda? exp)
-                           (expand (define->lambda exp))
-                          `(define ,(expand (define->var exp))
-                                ,@(expand (define->exp exp)))))
-    ((set!? exp)       `(set! ,(expand (set!->var exp))
-                              ,(expand (set!->exp exp))))
-    ((if? exp)         `(if ,(expand (if->condition exp))
-                            ,(expand (if->then exp))
+                           (expand (define->lambda exp) env)
+                          `(define ,(expand (define->var exp) env)
+                                ,@(expand (define->exp exp) env))))
+    ((set!? exp)       `(set! ,(expand (set!->var exp) env)
+                              ,(expand (set!->exp exp) env)))
+    ((if? exp)         `(if ,(expand (if->condition exp) env)
+                            ,(expand (if->then exp) env)
                             ,(if (if-else? exp)
-                                 (expand (if->else exp))
+                                 (expand (if->else exp) env)
                                  ;; Insert default value for missing else clause
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
@@ -782,19 +785,18 @@ TODO: modify this whole section to use macros:get-env instead of *defined-macros
         ;;  - no, we need to do this here so code is carried though all transforms
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
-        `(define ,name ,(expand body))))
+        `(define ,name ,(expand body env))))
 
-;TODO: this is not working (I think) because we get "symbol and" and not "compiled macro and".
-;would have to look up symbol to see if it is a macro, and then get the macro that way...
-;may need to have a *define-macros* equivalent but in the compiled code, similar to globals.
-;need to be able to look up var in a list and get the (macro?) instance.
-     ((or ;(macro? exp)
-          (macro:macro? exp *defined-macros*))
+; TODO: need to change below to use the env
+     ((macro:macro? exp *defined-macros*)
        ;(trace:info (list 'expanding exp))
        (expand ;; Could expand into another macro
-         (macro:expand exp *defined-macros*)))
+         (macro:expand exp *defined-macros*)
+         env))
      (else
-       (map expand exp))))
+       (map 
+        (lambda (expr) (expand expr env))
+        exp))))
     (else
       (error "unknown exp: " exp))))
 
@@ -824,7 +826,7 @@ TODO: modify this whole section to use macros:get-env instead of *defined-macros
                ;; This is a library, keep inits in their own function
                `((define ,(lib:name->symbol lib-name)
                   (lambda () 0 ,@(reverse exprs))))))
-           )))
+           (macro:get-env))))
       (else
        (cond
          ((define? (car top-lvl))
