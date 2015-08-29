@@ -41,34 +41,34 @@
       (tagged-list? 'define-syntax exp))
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
-    (define (macro:expand exp defined-macros)
-      (let* ((macro (assoc (car exp) defined-macros))
-             (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
-                                  (procedure? (cdr macro)))))
+    (define (macro:expand macro-val exp mac-env)
+      (let* ( ;(macro (assoc (car exp) defined-macros))
+             (compiled-macro? (or (macro? (Cyc-get-cvar macro-val))
+                                  (procedure? macro-val))))
           ;; Invoke ER macro
           (cond
-            ((not macro)
+            ((not macro-val)
               (error "macro not found" exp))
             (compiled-macro?
-              ((Cyc-get-cvar (cdr macro))
+              ((Cyc-get-cvar macro-val)
                 exp
-                (Cyc-er-rename 'todo-mac-env)
+                (Cyc-er-rename mac-env)
                 Cyc-er-compare?))
             (else
               ;; Assume evaluated macro
-              (let* ((env-vars (map car defined-macros))
-                     (env-vals (map (lambda (v)
-                                      (list 'macro (cdr v)))
-                                    defined-macros))
-                     ;; Pass defined macros so nested macros can be expanded
-                     (env (create-environment env-vars env-vals)))
+              ;(let* ((env-vars (map car defined-macros))
+              ;       (env-vals (map (lambda (v)
+              ;                        (list 'macro (cdr v)))
+              ;                      defined-macros))
+              ;       ;; Pass defined macros so nested macros can be expanded
+              ;       (env (create-environment env-vars env-vals)))
                 (eval
                   (list
-                    (cdr macro)
+                    macro-val
                     (list 'quote exp)
-                    (Cyc-er-rename 'todo-mac-env)
+                    (Cyc-er-rename mac-env)
                     Cyc-er-compare?)
-                  env))))))
+                  mac-env)))));)
 
     ; TODO: get macro name, transformer
     ; TODO: let-syntax forms
