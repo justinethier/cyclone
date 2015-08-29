@@ -27,7 +27,7 @@
       #t)
 
     (define (macro:load-env! defined-macros)
-      (set! *macro-env* (env:extend-environment
+      (set! *macro:env* (env:extend-environment
                           (map car defined-macros)
                           (map cdr defined-macros)
                           env:the-empty-environment)))
