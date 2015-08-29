@@ -41,6 +41,8 @@
       (tagged-list? 'define-syntax exp))
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
+TODO: seems to be a problem with below. may want to revert and try and see if that works, then
+restore this and debug...
     (define (macro:expand macro-val exp mac-env)
       (let* ( ;(macro (assoc (car exp) defined-macros))
              (compiled-macro? (or (macro? (Cyc-get-cvar macro-val))
