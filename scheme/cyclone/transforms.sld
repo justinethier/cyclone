@@ -732,6 +732,7 @@
 
 ;; Macro expansion
 
+TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
 (define (expand exp)
   (cond
