@@ -789,7 +789,7 @@
 ;need to be able to look up var in a list and get the (macro?) instance.
      ((or ;(macro? exp)
           (macro:macro? exp *defined-macros*))
-       (trace:info (list 'expanding exp))
+       ;(trace:info (list 'expanding exp))
        (expand ;; Could expand into another macro
          (macro:expand exp *defined-macros*)))
      (else
