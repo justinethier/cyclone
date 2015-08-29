@@ -775,6 +775,7 @@
         ;; Previous list should eventually go away once macros are
         ;; moved from that static list to libraries
         (macro:add! name body)
+TODO: add macro to env
         ;; Keep as a 'define' form so available at runtime
         ;; TODO: may run into issues with expanding now, before some
         ;; of the macros are defined. may need to make a special pass
@@ -787,7 +788,7 @@
         ;;
         `(define ,name ,(expand body env))))
 
-; TODO: need to change below to use the env
+TODO: need to change below to use the env, and corresponding changes to macros module to set renames
      ((macro:macro? exp *defined-macros*)
        ;(trace:info (list 'expanding exp))
        (expand ;; Could expand into another macro
