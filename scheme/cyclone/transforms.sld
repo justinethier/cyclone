@@ -788,18 +788,21 @@
         ;;
         `(define ,name ,(expand body env))))
 
-     ((symbol? (car exp))
-      (let ((val (env:lookup (car exp) env #f)))
-        (if val
-          (macro:expand val exp env)
-          (map
-            (lambda (expr) (expand expr env))
-            exp))))
-;((macro:macro? exp *defined-macros*)
-;  ;(trace:info (list 'expanding exp))
-;  (expand ;; Could expand into another macro
-;    (macro:expand exp *defined-macros*)
-;    env))
+; Newer macro expansion code, but not ready yet
+;     ((symbol? (car exp))
+;      (let ((val (env:lookup (car exp) env #f)))
+;        (if val
+;          (macro:expand val exp env)
+;          (map
+;            (lambda (expr) (expand expr env))
+;            exp))))
+
+;; Older *define-macro* code:
+((macro:macro? exp *defined-macros*)
+  ;(trace:info (list 'expanding exp))
+  (expand ;; Could expand into another macro
+    (macro:expand 'TODO-val exp 'TODO-env *defined-macros*)
+    env))
 
      (else
        (map 

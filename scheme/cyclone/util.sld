@@ -224,7 +224,7 @@
 (define (Cyc-er-rename mac-env)
   (lambda (sym) sym)) ; TODO: temporary placeholder, see below
 
-TODO: I think we're ready to cut back over to this now?
+;TODO: I think we're ready to cut back over to this now?
 
 ;(define (Cyc-er-rename mac-env)
 ; Notes:
