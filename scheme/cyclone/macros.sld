@@ -27,13 +27,13 @@
         (cons (cons name body) *macro:defined-macros*))
       #t)
 
-    (define (macro:load-env! defined-macros)
+    (define (macro:load-env! defined-macros base-env)
       (set! *macro:env* (env:extend-environment
                           (map car defined-macros)
                           (map (lambda (v)
                                  (list 'macro (cdr v)))
                                defined-macros)
-                          env:the-empty-environment)))
+                          base-env)))
 
     (define (macro:get-env) *macro:env*)
 
@@ -54,10 +54,10 @@
       (let* ((macro (assoc (car exp) defined-macros))
              (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
                                   (procedure? (cdr macro)))))
-        (newline)
-        (display "/* ")
-        (display (list 'macro:expand exp macro compiled-macro?))
-        (display "*/ ")
+        ;(newline)
+        ;(display "/* ")
+        ;(display (list 'macro:expand exp macro compiled-macro?))
+        ;(display "*/ ")
           ;; Invoke ER macro
           (cond
             ((not macro)

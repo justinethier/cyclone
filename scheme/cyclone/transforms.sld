@@ -791,7 +791,7 @@
 ; Newer macro expansion code, but not ready yet
      ((symbol? (car exp))
       (let ((val (env:lookup (car exp) env #f)))
-        (if val
+        (if (tagged-list? 'macro val)
           (expand ; Could expand into another macro
             (macro:expand 'val exp env *defined-macros*)
             ;(macro:expand2 exp val env)

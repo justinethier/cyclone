@@ -5,6 +5,7 @@
 ;; This module contains a front-end for the compiler itself.
 ;;
 (import (scheme base)
+        (scheme eval)
         (scheme file)
         (scheme read)
         (scheme write)
@@ -121,7 +122,7 @@
         (append
           macros
           *defined-macros*)))
-(macro:load-env! *defined-macros*)
+(macro:load-env! *defined-macros* (create-environment '() '()))
 ;TODO: try this again, make sure macro is loaded: 
 (trace:info (list 'defined-macros *defined-macros*))
 (trace:info (list 'macro-env (macro:get-env)))
