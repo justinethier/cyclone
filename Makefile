@@ -146,21 +146,6 @@ uninstall:
 sld:
 	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
 
-## This is an example of how to build/test changes to the compiler.
-## With the way everything is setup now, you need to rebuild the module(s),
-## install them, and then rebuild the compiler executable to run them.
-##
-## It may be possible to use dynamic linking to reduce some of this overhead
-## in the future (should really look into that!)
-#trans:
-#	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo cp cyclone /usr/local/bin
-##	cyclone scheme/cyclone/transforms.sld
-##	sudo cp scheme/cyclone/transforms.* /usr/local/share/cyclone/scheme/cyclone/
-##	cyclone cyclone.scm
-##	sudo cp cyclone /usr/local/bin/cyclone
-#
-#base:
-#	cyclone scheme/base.sld && sudo cp scheme/base.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
-#
-#eval:
-#	cyclone scheme/eval.sld && sudo cp scheme/eval.* /usr/local/share/cyclone/scheme/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+.PHONY: debug
+debug:
+	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/macros.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/macros.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/util.sld && sudo cp scheme/cyclone/util.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/util.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/util.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/transforms.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/transforms.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
