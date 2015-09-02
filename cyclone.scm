@@ -123,7 +123,7 @@
           *defined-macros*)))
 (macro:load-env! *defined-macros*)
 ;TODO: try this again, make sure macro is loaded: 
-(trace:info *defined-macros*)
+(trace:info (list 'defined-macros *defined-macros*))
 (trace:info (list 'macro-env (macro:get-env)))
 ;; END JAE DEBUG
 

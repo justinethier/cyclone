@@ -148,4 +148,8 @@ sld:
 
 .PHONY: debug
 debug:
-	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/macros.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/macros.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/util.sld && sudo cp scheme/cyclone/util.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/util.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/util.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/transforms.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/transforms.o /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/macros.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/macros.o /usr/local/share/cyclone/scheme/cyclone/ && \
+	cyclone scheme/cyclone/util.sld && sudo cp scheme/cyclone/util.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/util.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/util.o /usr/local/share/cyclone/scheme/cyclone/ && \
+	cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/transforms.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/transforms.o /usr/local/share/cyclone/scheme/cyclone/ && \
+	cyclone -t cyclone.scm && cyclone -t icyc.scm && sudo make install-bin
+
