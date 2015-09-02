@@ -101,33 +101,18 @@
       ;; in final compiled program
       ;(set! input-program (add-libs input-program))
     
-;; JAE DEBUG code, remove (or refactor) once working
-;(trace:info "JAE DEBUG - compiled macros")
-;(trace:info
-;  (filter 
-;   (lambda (v)
-;     (cond
-;       ((equal? (car v) 'my-or)
-;        (trace:info (list 'my-or (car v) (cdr v) (macro? (Cyc-get-cvar (cdr v)))))
-;        #t)
-;       (else #f)))
-;     ;(macro? (cdr v)))
-;   (Cyc-global-vars)))
-; TODO: should be able to use this to find all the compiled macros
-(let ((macros (filter 
-                (lambda (v) 
-                  (macro? (Cyc-get-cvar (cdr v))))
-                (Cyc-global-vars))))
-  (set! *defined-macros*
-        (append
-          macros
-          *defined-macros*)))
-(macro:load-env! *defined-macros* (create-environment '() '()))
-;TODO: try this again, make sure macro is loaded: 
-;(trace:info (list 'defined-macros *defined-macros*))
-;(trace:info (list 'macro-env (macro:get-env)))
-;; END JAE DEBUG
+      ;; Load macros for expansion phase
+      (let ((macros (filter 
+                      (lambda (v) 
+                        (macro? (Cyc-get-cvar (cdr v))))
+                      (Cyc-global-vars))))
+        (set! *defined-macros*
+              (append
+                macros
+                *defined-macros*)))
+      (macro:load-env! *defined-macros* (create-environment '() '()))
 
+      ;; Expand macros
       (set! input-program (expand input-program (macro:get-env)))
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
