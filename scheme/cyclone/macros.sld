@@ -87,10 +87,10 @@
     (define (macro:expand2 exp macro mac-env)
       (let* ((compiled-macro? (or (macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro)))))
-        (newline)
-        (display "/* ")
-        (display (list 'macro:expand2 exp macro compiled-macro?))
-        (display "*/ ")
+        ;(newline)
+        ;(display "/* ")
+        ;(display (list 'macro:expand2 exp macro compiled-macro?))
+        ;(display "*/ ")
 
           ;; Invoke ER macro
           (cond
@@ -108,10 +108,6 @@
                   (list 'quote exp)
                   (Cyc-er-rename mac-env)
                   Cyc-er-compare?)
-;    TODO: this is broken because mac-env only contains macros, but
-;    we need global-env to handle functions (like null?, caddr, etc).
-;    not sure what the answer is yet... might need to base macro-env
-;    on global-env, and ensure symbol is a macro before expanding
                 mac-env)))))
 
     ; TODO: get macro name, transformer

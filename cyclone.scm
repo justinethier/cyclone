@@ -102,7 +102,7 @@
       ;(set! input-program (add-libs input-program))
     
 ;; JAE DEBUG code, remove (or refactor) once working
-(trace:info "JAE DEBUG - compiled macros")
+;(trace:info "JAE DEBUG - compiled macros")
 ;(trace:info
 ;  (filter 
 ;   (lambda (v)
@@ -124,8 +124,8 @@
           *defined-macros*)))
 (macro:load-env! *defined-macros* (create-environment '() '()))
 ;TODO: try this again, make sure macro is loaded: 
-(trace:info (list 'defined-macros *defined-macros*))
-(trace:info (list 'macro-env (macro:get-env)))
+;(trace:info (list 'defined-macros *defined-macros*))
+;(trace:info (list 'macro-env (macro:get-env)))
 ;; END JAE DEBUG
 
       (set! input-program (expand input-program (macro:get-env)))

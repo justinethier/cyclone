@@ -793,8 +793,8 @@
       (let ((val (env:lookup (car exp) env #f)))
         (if (tagged-list? 'macro val)
           (expand ; Could expand into another macro
-            (macro:expand 'val exp env *defined-macros*)
-            ;(macro:expand2 exp val env)
+            ;(macro:expand 'val exp env *defined-macros*)
+            (macro:expand2 exp val env)
             env)
           (map
             (lambda (expr) (expand expr env))
