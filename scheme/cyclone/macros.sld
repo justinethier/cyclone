@@ -58,7 +58,7 @@
             ((not macro)
               (error "macro not found" exp))
             (compiled-macro?
-              ((Cyc-get-cvar (cdr macro))
+              ((Cyc-get-cvar macro)
                 exp
                 (Cyc-er-rename mac-env)
                 Cyc-er-compare?))
@@ -72,7 +72,7 @@
               ;       (env (create-environment env-vars env-vals)))
                 (eval
                   (list
-                    (cdr macro)
+                    (Cyc-get-cvar macro)
                     (list 'quote exp)
                     (Cyc-er-rename mac-env)
                     Cyc-er-compare?)
