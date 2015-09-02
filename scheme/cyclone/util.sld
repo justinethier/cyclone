@@ -266,31 +266,31 @@
   ((lambda (renames)
      (lambda (identifier)
        ((lambda (cell)
-       ;   (if cell
-       ;       (cdr cell)
-       ;       ((lambda (name)
-       ;          (set! renames (cons (cons identifier name) renames))
-       ;          name)
+          (if cell
+              (cdr cell)
+              ((lambda (name)
+                 (set! renames (cons (cons identifier name) renames))
+                 name)
 
-       ;        (let ((val (env:lookup identifier mac-env 'not-defined)))
-       ;          (cond
-       ;            ((eq? val 'not-defined)
-       ;             identifier)
-       ;            (else
-       ;             (let ((renamed (gensym identifier)))
-       ;               (env:define-variable! renamed val mac-env)
-       ;               renamed))))
-       ;        ; 
-       ;        ;(gensym identifier)
-       ;        ; gensym not good enough, need to also preserve ref trans.
-       ;        ; also note that an identifier can be an object, it does not
-       ;        ; just have to be a symbol. although, of course, the rest
-       ;        ; of the code needs to be able to handle identifiers in
-       ;        ; forms other than symbols, if that is done.
-       ;        ;
-       ;        ;(make-syntactic-closure mac-env '() identifier)
-       ;       )))
-identifier)
+               (let ((val (env:lookup identifier mac-env 'not-defined)))
+                 (cond
+                   ((or (not (tagged-list? 'macro val)) ;; TODO: For now only rename macros, but should support anything
+                        (eq? val 'not-defined))
+                    identifier)
+                   (else
+                    (let ((renamed (gensym identifier)))
+                      (env:define-variable! renamed val mac-env)
+                      renamed))))
+               ; 
+               ;(gensym identifier)
+               ; gensym not good enough, need to also preserve ref trans.
+               ; also note that an identifier can be an object, it does not
+               ; just have to be a symbol. although, of course, the rest
+               ; of the code needs to be able to handle identifiers in
+               ; forms other than symbols, if that is done.
+               ;
+               ;(make-syntactic-closure mac-env '() identifier)
+              )))
         (assq identifier renames))
        ))
    ;; TODO: For now, do not allow renaming of special form symbols to 
