@@ -1,6 +1,6 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          ;(scheme write) ;; Debug only
+          (scheme write) ;; Debug only
           (scheme eval) ;; TODO: without this line, compilation just
                         ;; silently fails. WTF??
           (scheme cyclone util))
@@ -54,6 +54,10 @@
       (let* ((macro (assoc (car exp) defined-macros))
              (compiled-macro? (or (macro? (Cyc-get-cvar (cdr macro)))
                                   (procedure? (cdr macro)))))
+        (newline)
+        (display "/* ")
+        (display (list 'macro:expand exp macro compiled-macro?))
+        (display "*/ ")
           ;; Invoke ER macro
           (cond
             ((not macro)
@@ -80,25 +84,34 @@
                   env))))))
                   ;mac-env))))))
 
-    (define (macro:expand2 macro exp mac-env)
-      (let* ((compiled-macro? (or (macro? (Cyc-get-cvar macro))
-                                  (procedure? macro))))
+    (define (macro:expand2 exp macro mac-env)
+      (let* ((compiled-macro? (or (macro? (Cyc-get-cvar (cadr macro)))
+                                  (procedure? (cadr macro)))))
+        (newline)
+        (display "/* ")
+        (display (list 'macro:expand2 exp macro compiled-macro?))
+        (display "*/ ")
+
           ;; Invoke ER macro
           (cond
             ((not macro)
               (error "macro not found" exp))
             (compiled-macro?
-              ((Cyc-get-cvar macro)
+              ((Cyc-get-cvar (cadr macro))
                 exp
                 (Cyc-er-rename mac-env)
                 Cyc-er-compare?))
             (else
               (eval
                 (list
-                  (Cyc-get-cvar macro)
+                  (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
                   (Cyc-er-rename mac-env)
                   Cyc-er-compare?)
+;    TODO: this is broken because mac-env only contains macros, but
+;    we need global-env to handle functions (like null?, caddr, etc).
+;    not sure what the answer is yet... might need to base macro-env
+;    on global-env, and ensure symbol is a macro before expanding
                 mac-env)))))
 
     ; TODO: get macro name, transformer
