@@ -14,7 +14,6 @@
 long global_stack_size = 0;
 long global_heap_size = 0;
 
-static long long_arg(int argc,char **argv,char *name,long dval);
 static void c_entry_pt(int,closure,closure);
 static void Cyc_main(long stack_size,long heap_size,char *stack_base);
 
@@ -85,13 +84,5 @@ static void Cyc_main (stack_size,heap_size,stack_base)
   }
 
   printf("Internal error: should never have reached this line\n"); exit(0);}}
-
-static long long_arg(argc,argv,name,dval)
-     int argc; char **argv; char *name; long dval;
-{int j;
- for(j=1;(j+1)<argc;j += 2)
-   if (strcmp(name,argv[j]) == 0)
-     return(atol(argv[j+1]));
- return(dval);}
 
 #endif /* CYCLONE_RUNTIME_MAIN_H */
