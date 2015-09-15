@@ -5,7 +5,7 @@
     *version-banner*
     *c-file-header-comment*)
   (begin
-(define *version* "0.0.2 (Pre-release)")
+(define *version* "0.0.3 (Pre-release)")
 
 (define *version-banner* 
  (string-append "
