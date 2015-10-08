@@ -2065,7 +2065,7 @@ char *transport(x, gcgen) char *x; int gcgen;
          dhallocp += len + 1;
        }
        forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(integer_type);
+       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type);
        return (char *) nx;}
     case integer_tag:
       {register integer_type *nx = (integer_type *) allocp;
