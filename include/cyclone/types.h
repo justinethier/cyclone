@@ -17,8 +17,61 @@
 #include <string.h>
 #include <math.h>
 
-/* Debug GC flag */
-#define DEBUG_GC 0
+/* Define general object type. */
+typedef void *object;
+
+/* GC data structures */
+
+typedef struct gc_free_list_t gc_free_list;
+struct gc_free_list_t {
+  unsigned int size;
+  gc_free_list *next;
+};
+
+typedef struct gc_heap_t gc_heap;
+struct gc_heap_t {
+  unsigned int size;
+  unsigned int chunk_size; // 0 for any size, other and heap will only alloc chunks of that size
+  unsigned int max_size;
+  gc_free_list *free_list; // TBD
+  gc_heap *next; // TBD, linked list is not very efficient, but easy to work with as a start
+  char *data;
+};
+
+typedef struct gc_header_type_t gc_header_type;
+struct gc_header_type_t {
+  unsigned char mark; // mark bits (only need 2)
+  // TODO: forwarding address (probably not needed for mark/sweep), anything else???
+};
+#define is_marked(x) (is_object_type(x) && ((list)x)->hdr.mark)
+
+/* HEAP definitions */
+// experimenting with a heap based off of the one in Chibi scheme
+#define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
+#define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
+#define gc_heap_end(h) ((object)((char*)h->data + h->size))
+#define gc_free_chunk_size (sizeof(gc_free_list))
+
+#define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((unsigned int)-1)-((1<<(bits))-1)))
+// 64-bit is 3, 32-bit is 2
+#define gc_word_align(n) gc_align((n), 2)
+#define gc_heap_align(n) gc_align(n, 5)
+
+/* GC prototypes */
+gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
+int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
+void *gc_try_alloc(gc_heap *h, size_t size);
+void *gc_alloc(gc_heap *h, size_t size);
+size_t gc_allocated_bytes(object obj);
+gc_heap *gc_heap_last(gc_heap *h);
+size_t gc_heap_total_size(gc_heap *h);
+void gc_mark(gc_heap *h, object obj);
+size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
+//void gc_collect(gc_heap *h, size_t *sum_freed) 
+
+/* GC debugging flags */
+//#define DEBUG_GC 0
+#define GC_DEBUG_PRINTFS 0
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
@@ -78,10 +131,6 @@ typedef long tag_type;
 #define eq(x,y) (x == y)
 #define nullp(x) (x == NULL)
 
-/* Define general object type. */
-
-typedef void *object;
-
 #define type_of(x) (((list) x)->tag)
 #define forward(x) (((list) x)->cons_car)
 
@@ -105,19 +154,19 @@ typedef void (*function_type)();
 typedef void (*function_type_va)(int, object, object, object, ...);
 
 /* Define C-variable integration type */
-typedef struct {tag_type tag; object *pvar;} cvar_type;
+typedef struct {gc_header_type hdr; tag_type tag; object *pvar;} cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) cvar_type n; n.tag = cvar_tag; n.pvar = v;
 
 /* Define boolean type. */
-typedef struct {const tag_type tag; const char *pname;} boolean_type;
+typedef struct {gc_header_type hdr; const tag_type tag; const char *pname;} boolean_type;
 typedef boolean_type *boolean;
 
 #define boolean_pname(x) (((boolean_type *) x)->pname)
 
 /* Define symbol type. */
 
-typedef struct {const tag_type tag; const char *pname; object plist;} symbol_type;
+typedef struct {gc_header_type hdr; const tag_type tag; const char *pname; object plist;} symbol_type;
 typedef symbol_type *symbol;
 
 #define symbol_pname(x) (((symbol_type *) x)->pname)
@@ -127,16 +176,20 @@ typedef symbol_type *symbol;
 static object quote_##name = nil;
 
 /* Define numeric types */
-typedef struct {tag_type tag; int value;} integer_type;
+typedef struct {gc_header_type hdr; tag_type tag; int value;} integer_type;
 #define make_int(n,v) integer_type n; n.tag = integer_tag; n.value = v;
-typedef struct {tag_type tag; double value;} double_type;
+typedef struct {gc_header_type hdr; tag_type tag; double value;} double_type;
 #define make_double(n,v) double_type n; n.tag = double_tag; n.value = v;
 
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
 
 /* Define string type */
-typedef struct {tag_type tag; char *str;} string_type;
+typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_type;
+//#define make_cstring(cs, len, s) \
+//  string_type cs; cs.tag = string_tag; cs.len = len; cs.str = s;
+// TODO: all of the dhalloc below needs to go away for this GC. maybe
+// just plan on having strings be allocated separately like vectors.
 #define make_string(cv,s) string_type cv; cv.tag = string_tag; \
 { int len = strlen(s); cv.str = dhallocp; \
   if ((dhallocp + len + 1) >= dhbottom + global_heap_size) { \
@@ -157,19 +210,19 @@ typedef struct {tag_type tag; char *str;} string_type;
 //       consider http://stackoverflow.com/questions/6206893/how-to-implement-char-ready-in-c
 // TODO: a simple wrapper around FILE may not be good enough long-term
 // TODO: how exactly mode will be used. need to know r/w, bin/txt
-typedef struct {tag_type tag; FILE *fp; int mode;} port_type;
+typedef struct {gc_header_type hdr; tag_type tag; FILE *fp; int mode;} port_type;
 #define make_port(p,f,m) port_type p; p.tag = port_tag; p.fp = f; p.mode = m;
 
 /* Vector type */
 
-typedef struct {tag_type tag; int num_elt; object *elts;} vector_type;
+typedef struct {gc_header_type hdr; tag_type tag; int num_elt; object *elts;} vector_type;
 typedef vector_type *vector;
 
 #define make_empty_vector(v) vector_type v; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
 
 /* Define cons type. */
 
-typedef struct {tag_type tag; object cons_car,cons_cdr;} cons_type;
+typedef struct {gc_header_type hdr; tag_type tag; object cons_car,cons_cdr;} cons_type;
 typedef cons_type *list;
 
 #define car(x) (((list) x)->cons_car)
@@ -208,13 +261,13 @@ cons_type n; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
 /* Closure types */
 
-typedef struct {tag_type tag; function_type fn; int num_args; } macro_type;
-typedef struct {tag_type tag; function_type fn; int num_args; } closure0_type;
-typedef struct {tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
-typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2;} closure2_type;
-typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3;} closure3_type;
-typedef struct {tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3,elt4;} closure4_type;
-typedef struct {tag_type tag; function_type fn; int num_args; int num_elt; object *elts;} closureN_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } macro_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } closure0_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2;} closure2_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3;} closure3_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3,elt4;} closure4_type;
+typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; int num_elt; object *elts;} closureN_type;
 
 typedef closure0_type *closure0;
 typedef closure1_type *closure1;
@@ -247,7 +300,7 @@ typedef closure0_type *macro;
 #define make_cell(n,a) make_cons(n,a,nil);
 
 /* Primitive types */
-typedef struct {tag_type tag; const char *pname; function_type fn;} primitive_type;
+typedef struct {gc_header_type hdr; tag_type tag; const char *pname; function_type fn;} primitive_type;
 typedef primitive_type *primitive;
 
 #define defprimitive(name, pname, fnc) \
