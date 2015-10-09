@@ -868,9 +868,9 @@ string_type Cyc_symbol2string(object sym) {
 object Cyc_string2symbol(object str) {
     object sym;
     Cyc_check_str(str);
-    sym = find_symbol_by_name(symbol_pname(str));
+    sym = find_symbol_by_name(string_str(str));
     if (!sym) {
-        sym = add_symbol_by_name(symbol_pname(str));
+        sym = add_symbol_by_name(string_str(str));
     }
     return sym;
 }
