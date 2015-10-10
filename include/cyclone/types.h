@@ -318,7 +318,6 @@ typedef union {
   primitive_type primitive_t;
   integer_type integer_t;
   double_type double_t;
-  string_type string_t;
 } common_type;
 
 
