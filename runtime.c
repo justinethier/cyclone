@@ -286,7 +286,7 @@ void Cyc_rt_raise(object err) {
     exit(1);
 }
 void Cyc_rt_raise2(const char *msg, object err) {
-    make_string(s, strlen(msg), msg);
+    make_string(s, msg);
     make_cons(c3, err, nil);
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
@@ -297,7 +297,7 @@ void Cyc_rt_raise2(const char *msg, object err) {
     exit(1);
 }
 void Cyc_rt_raise_msg(const char *err) {
-    make_string(s, strlen(err), err);
+    make_string(s, err);
     Cyc_rt_raise(&s);
 }
 /* END exception handler */
@@ -857,14 +857,14 @@ object Cyc_number2string(object cont, object n) {
         Cyc_rt_raise2("number->string - Unexpected object", n);
     }
     make_string_noalloc(str, strlen(buffer), buffer);
-    return_closcall1(cont, str);
+    return_closcall1(cont, &str);
 }
 
 object Cyc_symbol2string(object cont, object sym) {
   Cyc_check_sym(sym);
-  { char *pname = symbol_pname(sym);
-    make_string(str, strlen(pname), pname);
-    return_closcall1(cont, str); }}
+  { const char *pname = symbol_pname(sym);
+    make_string(str, pname);
+    return_closcall1(cont, &str); }}
 
 object Cyc_string2symbol(object str) {
     object sym;
