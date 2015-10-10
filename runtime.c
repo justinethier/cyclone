@@ -286,7 +286,7 @@ void Cyc_rt_raise(object err) {
     exit(1);
 }
 void Cyc_rt_raise2(const char *msg, object err) {
-    make_string(s, msg);
+    make_string(s, strlen(msg), msg);
     make_cons(c3, err, nil);
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
@@ -297,7 +297,7 @@ void Cyc_rt_raise2(const char *msg, object err) {
     exit(1);
 }
 void Cyc_rt_raise_msg(const char *err) {
-    make_string(s, err);
+    make_string(s, strlen(err), err);
     Cyc_rt_raise(&s);
 }
 /* END exception handler */
@@ -846,7 +846,7 @@ integer_type Cyc_length(object l){
     return len;
 }
 
-string_type Cyc_number2string(object n) {
+object Cyc_number2string(object cont, object n) {
     char buffer[1024];
     Cyc_check_num(n);
     if (type_of(n) == integer_tag) {
@@ -856,14 +856,15 @@ string_type Cyc_number2string(object n) {
     } else {
         Cyc_rt_raise2("number->string - Unexpected object", n);
     }
-    make_string(str, buffer);
-    return str;
+    make_string_noalloc(str, strlen(buffer), buffer);
+    return_closcall1(cont, str);
 }
 
-string_type Cyc_symbol2string(object sym) {
+object Cyc_symbol2string(object cont, object sym) {
   Cyc_check_sym(sym);
-  { make_string(str, symbol_pname(sym));
-    return str; }}
+  { char *pname = symbol_pname(sym);
+    make_string(str, strlen(pname), pname);
+    return_closcall1(cont, str); }}
 
 object Cyc_string2symbol(object str) {
     object sym;
@@ -875,7 +876,7 @@ object Cyc_string2symbol(object str) {
     return sym;
 }
 
-string_type Cyc_list2string(object lst){
+object Cyc_list2string(object cont, object lst){
     char *buf;
     int i = 0;
     integer_type len;
@@ -890,8 +891,8 @@ string_type Cyc_list2string(object lst){
     }
     buf[i] = '\0';
 
-    make_string(str, buf);
-    return str;
+    { make_string_noalloc(str, i - 1, buf);
+      return_closcall1(cont, &str);}
 }
 
 common_type Cyc_string2number(object str){
@@ -1773,19 +1774,16 @@ void _list_91_125vector(object cont, object args) {
     Cyc_list2vector(cont, car(args));}
 void _list_91_125string(object cont, object args) {  
     Cyc_check_num_args("list->string", 1, args);
-    { string_type s = Cyc_list2string(car(args));
-      return_closcall1(cont, &s);}}
+    Cyc_list2string(cont, car(args));}
 void _string_91_125symbol(object cont, object args) {  
     Cyc_check_num_args("string->symbol", 1, args);
     return_closcall1(cont, Cyc_string2symbol(car(args)));}
 void _symbol_91_125string(object cont, object args) {  
     Cyc_check_num_args("symbol->string", 1, args);
-    { string_type s = Cyc_symbol2string(car(args));
-      return_closcall1(cont, &s);}}
+    Cyc_symbol2string(cont, car(args));}
 void _number_91_125string(object cont, object args) {  
     Cyc_check_num_args("number->string", 1, args);
-    { string_type s = Cyc_number2string(car(args));
-      return_closcall1(cont, &s);}}
+    Cyc_number2string(cont, car(args));}
 void _open_91input_91file(object cont, object args) {  
     Cyc_check_num_args("open-input-file", 1, args);
     { port_type p = Cyc_io_open_input_file(car(args));

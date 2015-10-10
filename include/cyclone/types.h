@@ -193,6 +193,10 @@ typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_ty
 { cs.tag = string_tag; cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   strcpy(cs.str, s);}
+TODO: make_string_with_len, remove len from above args
+#define make_string_noalloc(cs, len, s) string_type cs \
+{ cs.tag = string_tag; cs.len = len; \
+  cs.str = s; }
 // TODO: all of the dhalloc below needs to go away...
 //#define make_string(cv,s) string_type cv; cv.tag = string_tag; \
 //{ int len = strlen(s); cv.str = dhallocp; \
