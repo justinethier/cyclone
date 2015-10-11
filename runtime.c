@@ -1054,7 +1054,7 @@ object Cyc_substring(object cont, object str, object start, object end) {
 
   {
     make_string_with_len(sub, raw + s, e - s);
-    return_closcall1(cont, sub);
+    return_closcall1(cont, &sub);
   }
 }
 
@@ -1062,28 +1062,28 @@ object Cyc_substring(object cont, object str, object start, object end) {
  * Return directory where cyclone is installed.
  * This is configured via the makefile during a build.
  */
-string_type Cyc_installation_dir(object type) {
+object Cyc_installation_dir(object cont, object type) {
   if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "sld", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
     make_string(str, buf);
-    return str;
+    return_closcall1(cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
     make_string(str, buf);
-    return str;
+    return_closcall1(cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
     make_string(str, buf);
-    return str;
+    return_closcall1(cont, &str);
   } else {
     make_string(str, CYC_INSTALL_DIR);
-    return str;
+    return_closcall1(cont, &str);
   }
 }
 
@@ -1727,8 +1727,7 @@ void _cyc_string_91ref(object cont, object args) {
       return_closcall1(cont, c); }}
 void _Cyc_91installation_91dir(object cont, object args) {
     Cyc_check_num_args("Cyc-installation-dir", 1, args);
-    { string_type dir = Cyc_installation_dir(car(args));
-      return_closcall1(cont, &dir);}}
+    Cyc_installation_dir(cont, car(args));}
 void _command_91line_91arguments(object cont, object args) {
     object cmdline = Cyc_command_line_arguments(cont);
     return_closcall1(cont, cmdline); }
