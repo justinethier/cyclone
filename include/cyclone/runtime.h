@@ -131,7 +131,7 @@ void dispatch_string_91append(int argc, object clo, object cont, object str1, ..
 string_type Cyc_string_append(int argc, object str1, ...);
 string_type Cyc_string_append_va_list(int argc, object str1, va_list ap);
 integer_type Cyc_string_length(object str);
-string_type Cyc_substring(object str, object start, object end);
+object Cyc_substring(object cont, object str, object start, object end);
 object Cyc_string_ref(object str, object k);
 object Cyc_string_set(object str, object k, object chr);
 string_type Cyc_installation_dir();

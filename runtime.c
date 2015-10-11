@@ -856,7 +856,7 @@ object Cyc_number2string(object cont, object n) {
     } else {
         Cyc_rt_raise2("number->string - Unexpected object", n);
     }
-    make_string_noalloc(str, strlen(buffer), buffer);
+    make_string_noalloc(str, buffer, strlen(buffer));
     return_closcall1(cont, &str);
 }
 
@@ -891,7 +891,7 @@ object Cyc_list2string(object cont, object lst){
     }
     buf[i] = '\0';
 
-    { make_string_noalloc(str, i - 1, buf);
+    { make_string_noalloc(str, buf, i - 1);
       return_closcall1(cont, &str);}
 }
 
@@ -1029,7 +1029,7 @@ object Cyc_string_ref(object str, object k) {
   return obj_char2obj(raw[idx]);
 }
 
-string_type Cyc_substring(object str, object start, object end) {
+object Cyc_substring(object cont, object str, object start, object end) {
   const char *raw;
   int s, e, len;
 
@@ -1053,8 +1053,8 @@ string_type Cyc_substring(object str, object start, object end) {
   }
 
   {
-    make_stringn(sub, raw + s, e - s);
-    return sub;
+    make_string_with_len(sub, raw + s, e - s);
+    return_closcall1(cont, sub);
   }
 }
 
@@ -1716,8 +1716,7 @@ void _string_91length(object cont, object args) {
       return_closcall1(cont, &i);}}
 void _cyc_substring(object cont, object args) {
     Cyc_check_num_args("substring", 3, args);
-    { string_type s = Cyc_substring(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, &s);}}
+    Cyc_substring(cont, car(args), cadr(args), caddr(args));}
 void _cyc_string_91set_67(object cont, object args) {
     Cyc_check_num_args("string-set!", 3, args);
     { object s = Cyc_string_set(car(args), cadr(args), caddr(args));
