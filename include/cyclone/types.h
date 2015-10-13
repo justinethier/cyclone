@@ -40,7 +40,8 @@ struct gc_heap_t {
 
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned char mark; // mark bits (only need 2)
+  //unsigned char mark; // mark bits (only need 2)
+  unsigned int mark; // mark bits (only need 2)
   // TODO: forwarding address (probably not needed for mark/sweep), anything else???
 };
 #define is_marked(x) (is_object_type(x) && ((list)x)->hdr.mark)

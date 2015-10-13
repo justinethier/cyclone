@@ -2049,22 +2049,26 @@ char *transport(x, gcgen) char *x; int gcgen;
        return (char *) nx;}
     case string_tag:
       {register string_type *nx = (string_type *) allocp;
+       int str_size = gc_word_align(((string_type *)x)->len + 1);
        type_of(nx) = string_tag; 
-TODO: below is changing, now we will need to always copy the cstring
-along with the string_type. need to be careful of any off-by-one errors 
-here...
-       if (gcgen == 0) {
-         // Minor, data heap is not relocated
-         nx->str = ((string_type *)x)->str;
-       } else {
-         // Major collection, data heap is moving
-         nx->str = dhallocp;
-         int len = strlen(((string_type *) x)->str);
-         memcpy(dhallocp, ((string_type *) x)->str, len + 1);
-         dhallocp += len + 1;
-       }
+       nx->len = ((string_type *)x)->len;
+       nx->str = ((char *)nx) + sizeof(string_type);
+       memcpy(nx->str, ((string_type *)x)->str, nx->len + 1);
+//TODO: below is changing, now we will need to always copy the cstring
+//along with the string_type. need to be careful of any off-by-one errors 
+//here...
+//       if (gcgen == 0) {
+//         // Minor, data heap is not relocated
+//         nx->str = ((string_type *)x)->str;
+//       } else {
+//         // Major collection, data heap is moving
+//         nx->str = dhallocp;
+//         int len = strlen(((string_type *) x)->str);
+//         memcpy(dhallocp, ((string_type *) x)->str, len + 1);
+//         dhallocp += len + 1;
+//       }
        forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type);
+       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type)+str_size;
        return (char *) nx;}
     case integer_tag:
       {register integer_type *nx = (integer_type *) allocp;
@@ -2276,15 +2280,19 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
         scanp += sizeof(vector_type) + sizeof(object) * n;
        }
        break;
-      case string_tag:
+      case string_tag: {
 #if DEBUG_GC
  printf("DEBUG transport string \n");
 #endif
-        scanp += sizeof(string_type); break;
-TODO: cstring is now after string_type, so need to skip that, too.
-stack allocations should be OK since we are only scanning the newspace here,
-but should double-check that... (though we are not able to even scan the
-stack so should be fine)
+        string_type *x = (string_type *)scanp;
+        scanp += sizeof(string_type); 
+        scanp += gc_word_align(x->len + 1);
+        break;
+      }
+//TODO: cstring is now after string_type, so need to skip that, too.
+//stack allocations should be OK since we are only scanning the newspace here,
+//but should double-check that... (though we are not able to even scan the
+//stack so should be fine)
       case integer_tag:
 #if DEBUG_GC
  printf("DEBUG transport integer \n");
