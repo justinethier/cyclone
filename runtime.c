@@ -2050,6 +2050,9 @@ char *transport(x, gcgen) char *x; int gcgen;
     case string_tag:
       {register string_type *nx = (string_type *) allocp;
        type_of(nx) = string_tag; 
+TODO: below is changing, now we will need to always copy the cstring
+along with the string_type. need to be careful of any off-by-one errors 
+here...
        if (gcgen == 0) {
          // Minor, data heap is not relocated
          nx->str = ((string_type *)x)->str;
@@ -2278,6 +2281,10 @@ void GC_loop(int major, closure cont, object *ans, int num_ans)
  printf("DEBUG transport string \n");
 #endif
         scanp += sizeof(string_type); break;
+TODO: cstring is now after string_type, so need to skip that, too.
+stack allocations should be OK since we are only scanning the newspace here,
+but should double-check that... (though we are not able to even scan the
+stack so should be fine)
       case integer_tag:
 #if DEBUG_GC
  printf("DEBUG transport integer \n");
