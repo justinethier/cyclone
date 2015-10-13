@@ -891,7 +891,7 @@ object Cyc_list2string(object cont, object lst){
     }
     buf[i] = '\0';
 
-    { make_string_noalloc(str, buf, i - 1);
+    { make_string_noalloc(str, buf, i);
       return_closcall1(cont, &str);}
 }
 
