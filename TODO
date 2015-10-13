@@ -1,11 +1,13 @@
 Instructions to rebuild cyclone after changing string_type returns to object returns:
-sudo ls ; cyclone  scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/
-make clean ; make && sudo make install
-sudo make install-includes
-cp ../cyclone-bootstrap/dispatch.c .
-make libcyclone.a
-sudo make install-libs
-make clean ; make && sudo make install
+shouldn't it just be a matter of compiling cgen and dumping that and the includes/libs into bootstrap??
+;sudo ls ; cyclone  scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/
+;make clean ; make && sudo make install
+;sudo make install-includes
+;cp ../cyclone-bootstrap/dispatch.c .
+;make libcyclone.a
+;sudo make install-libs
+;make clean ; make && sudo make install
+at this point, cyclone crashes when compiling the test suite. I think there may be a problem with there being a disconnect between the old/new versions of compiled code, runtime libs, etc. however, the generated c files have the change. so it should be possible to bootstrap using them...
 
 
 Roadmap:
