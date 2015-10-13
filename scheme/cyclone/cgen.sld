@@ -610,6 +610,13 @@
              Cyc-read-line
              cons length vector-length cell))))
 
+TODO: how to fix this up to generate argc after cont?
+or alternatively, maybe we say screw it and just reverse the order of
+args in the runtime function... but that's not ideal since we do it differently
+everywhere else. will it cause problems to have a special case?????
+object c_732612 = Cyc_string_append((closure)&c_732599, 2,&c_732613, r_73276);
+return_closcall1((closure)&c_732599,  c_732612);; 
+
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
