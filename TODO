@@ -1,3 +1,13 @@
+Instructions to rebuild cyclone after changing string_type returns to object returns:
+sudo ls ; cyclone  scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/
+make clean ; make && sudo make install
+sudo make install-includes
+cp ../cyclone-bootstrap/dispatch.c .
+make libcyclone.a
+sudo make install-libs
+make clean ; make && sudo make install
+
+
 Roadmap:
  - Add macro support, ideally including some level of hygiene
  - Code cleanup - need to take care of accumulated cruft before release. also, can we profile to make things any faster?
