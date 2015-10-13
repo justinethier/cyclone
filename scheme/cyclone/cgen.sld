@@ -574,7 +574,7 @@
     ((eq? p '/) "common_type")
     ((eq? p 'string->number) "common_type")
     ((eq? p 'string-cmp) "integer_type")
-    ((eq? p 'string-append) "string_type")
+    ((eq? p 'string-append) "object")
     ((eq? p 'string-length) "integer_type")
     ((eq? p 'apply)  "object")
     ((eq? p 'Cyc-read-line) "object")
@@ -614,14 +614,14 @@
 (define (prim:cont? exp)
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
-                     symbol->string list->string substring
+                     symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 ;; TODO: this is a hack, right answer is to include information about
 ;;  how many args each primitive is supposed to take
 (define (prim:cont-has-args? exp)
   (and (prim? exp)
        (member exp '(Cyc-read-line apply number->string symbol->string 
-                     list->string substring
+                     list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Pass an integer arg count as the function's first parameter?

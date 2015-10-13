@@ -930,59 +930,47 @@ integer_type Cyc_string_cmp(object str1, object str2) {
   }
 }
 
-void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
+#define Cyc_string_append_va_list(argc) { \
+    int i = 0, total_len = 1; \
+    int *len = alloca(sizeof(int) * argc); \
+    char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc); \
+    object tmp; \
+    if (argc > 0) { \
+      Cyc_check_str(str1); \
+      str[i] = ((string_type *)str1)->str; \
+      len[i] = strlen(str[i]); \
+      total_len += len[i]; \
+    } \
+    for (i = 1; i < argc; i++) { \
+      tmp = va_arg(ap, object); \
+      Cyc_check_str(tmp); \
+      str[i] = ((string_type *)tmp)->str; \
+      len[i] = strlen(str[i]); \
+      total_len += len[i]; \
+    } \
+    buffer = bufferp = alloca(sizeof(char) * total_len); \
+    for (i = 0; i < argc; i++) { \
+        memcpy(bufferp, str[i], len[i]); \
+        bufferp += len[i]; \
+    } \
+    *bufferp = '\0'; \
+    make_string(result, buffer); \
+    va_end(ap); \
+    return_closcall1(cont, &result); \
+}
+
+void dispatch_string_91append(int _argc, object clo, object cont, object str1, ...) {
     string_type result;
     va_list ap;
     va_start(ap, str1);
-    result = Cyc_string_append_va_list(argc - 1, str1, ap);
-    va_end(ap);
-    return_closcall1(cont, &result);
+    Cyc_string_append_va_list(_argc - 1);
 }
 
-string_type Cyc_string_append(int argc, object str1, ...) {
+object Cyc_string_append(int _argc, object cont, object str1, ...) {
     string_type result;
     va_list ap;
     va_start(ap, str1);
-    result = Cyc_string_append_va_list(argc, str1, ap);
-    va_end(ap);
-    return result;
-}
-
-string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
-    // TODO: one way to do this, perhaps not the most efficient:
-    //   compute lengths of the strings,
-    //   store lens and str ptrs
-    //   allocate buffer, memcpy each str to buffer
-    //   make_string using buffer
-
-    int i = 0, total_len = 1; // for null char
-    int *len = alloca(sizeof(int) * argc);
-    char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
-    object tmp;
-    
-    if (argc > 0) {
-      Cyc_check_str(str1);
-      str[i] = ((string_type *)str1)->str;
-      len[i] = strlen(str[i]);
-      total_len += len[i];
-    }
-
-    for (i = 1; i < argc; i++) {
-      tmp = va_arg(ap, object);
-      Cyc_check_str(tmp);
-      str[i] = ((string_type *)tmp)->str;
-      len[i] = strlen(str[i]);
-      total_len += len[i];
-    }
-
-    buffer = bufferp = alloca(sizeof(char) * total_len);
-    for (i = 0; i < argc; i++) {
-        memcpy(bufferp, str[i], len[i]);
-        bufferp += len[i];
-    }
-    *bufferp = '\0';
-    make_string(result, buffer);
-    return result;
+    Cyc_string_append_va_list(_argc);
 }
 
 integer_type Cyc_string_length(object str) {
