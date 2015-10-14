@@ -966,7 +966,7 @@ void dispatch_string_91append(int _argc, object clo, object cont, object str1, .
     Cyc_string_append_va_list(_argc - 1);
 }
 
-object Cyc_string_append(int _argc, object cont, object str1, ...) {
+object Cyc_string_append(object cont, int _argc, object str1, ...) {
     string_type result;
     va_list ap;
     va_start(ap, str1);
