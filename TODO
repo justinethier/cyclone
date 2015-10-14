@@ -11,6 +11,7 @@ at this point, cyclone crashes when compiling the test suite. I think there may 
 
 
 Roadmap:
+ - Make it easier to work with multiple copies of cyclone. for example, maybe an env variable could be used to point a local copy of cyclone to the current directory for resources, instead of /usr/local/
  - Add macro support, ideally including some level of hygiene
  - Code cleanup - need to take care of accumulated cruft before release. also, can we profile to make things any faster?
  - Target r7rs support (coordinate with feature list)
