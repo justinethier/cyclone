@@ -193,11 +193,13 @@ typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_ty
 #define make_string(cs, s) string_type cs; \
 { int len = strlen(s); cs.tag = string_tag; cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
-  strcpy(cs.str, s);}
+  memcpy(cs.str, s, len + 1);}
 #define make_string_with_len(cs, s, length) string_type cs; \
-{ cs.tag = string_tag; cs.len = length; \
+{ int len = length; \
+  cs.tag = string_tag; cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
-  strcpy(cs.str, s);}
+  memcpy(cs.str, s, len); \
+  cs.str[len + 1] = '\0';}
 #define make_string_noalloc(cs, s, length) string_type cs; \
 { cs.tag = string_tag; cs.len = length; \
   cs.str = s; }

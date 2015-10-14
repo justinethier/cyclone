@@ -856,7 +856,8 @@ object Cyc_number2string(object cont, object n) {
     } else {
         Cyc_rt_raise2("number->string - Unexpected object", n);
     }
-    make_string_noalloc(str, buffer, strlen(buffer));
+    //make_string_noalloc(str, buffer, strlen(buffer));
+    make_string(str, buffer);
     return_closcall1(cont, &str);
 }
 
@@ -891,7 +892,8 @@ object Cyc_list2string(object cont, object lst){
     }
     buf[i] = '\0';
 
-    { make_string_noalloc(str, buf, i);
+    //{ make_string_noalloc(str, buf, i);
+    { make_string(str, buf);
       return_closcall1(cont, &str);}
 }
 
@@ -960,14 +962,12 @@ integer_type Cyc_string_cmp(object str1, object str2) {
 }
 
 void dispatch_string_91append(int _argc, object clo, object cont, object str1, ...) {
-    string_type result;
     va_list ap;
     va_start(ap, str1);
     Cyc_string_append_va_list(_argc - 1);
 }
 
 object Cyc_string_append(object cont, int _argc, object str1, ...) {
-    string_type result;
     va_list ap;
     va_start(ap, str1);
     Cyc_string_append_va_list(_argc);
@@ -1042,6 +1042,12 @@ object Cyc_substring(object cont, object str, object start, object end) {
 
   {
     make_string_with_len(sub, raw + s, e - s);
+//string_type sub; 
+//{ int len = e - s;
+//  sub.tag = string_tag; sub.len = len; 
+//  sub.str = alloca(sizeof(char) * (len + 1)); 
+//  memcpy(sub.str, raw + s, len); 
+//  sub.str[len + 1] = '\0';}
     return_closcall1(cont, &sub);
   }
 }
