@@ -1946,405 +1946,483 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     apply(cont, prim, (object)&args[0]);
 }
 
-/**
- * Copy an object to the GC heap
- */
-char *transport(x, gcgen) char *x; int gcgen;
-{
- if (nullp(x)) return x;
- if (obj_is_char(x)) return x;
-#if DEBUG_GC
- printf("entered transport ");
- printf("transport %ld\n", type_of(x));
-#endif
- switch (type_of(x))
-   {case cons_tag:
-      {register list nx = (list) allocp;
-       type_of(nx) = cons_tag; car(nx) = car(x); cdr(nx) = cdr(x);
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(cons_type);
-       return (char *) nx;}
-    case macro_tag:
-      {register macro nx = (macro) allocp;
-       type_of(nx) = macro_tag; nx->fn = ((macro) x)->fn;
-       nx->num_args = ((macro) x)->num_args;
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(macro_type);
-       return (char *) nx;}
-    case closure0_tag:
-      {register closure0 nx = (closure0) allocp;
-       type_of(nx) = closure0_tag; nx->fn = ((closure0) x)->fn;
-       nx->num_args = ((closure0) x)->num_args;
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(closure0_type);
-       return (char *) nx;}
-    case closure1_tag:
-      {register closure1 nx = (closure1) allocp;
-       type_of(nx) = closure1_tag; nx->fn = ((closure1) x)->fn;
-       nx->num_args = ((closure1) x)->num_args;
-       nx->elt1 = ((closure1) x)->elt1;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure1_type);
-       return (char *) nx;}
-    case closure2_tag:
-      {register closure2 nx = (closure2) allocp;
-       type_of(nx) = closure2_tag; nx->fn = ((closure2) x)->fn;
-       nx->num_args = ((closure2) x)->num_args;
-       nx->elt1 = ((closure2) x)->elt1;
-       nx->elt2 = ((closure2) x)->elt2;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure2_type);
-       return (char *) nx;}
-    case closure3_tag:
-      {register closure3 nx = (closure3) allocp;
-       type_of(nx) = closure3_tag; nx->fn = ((closure3) x)->fn;
-       nx->num_args = ((closure3) x)->num_args;
-       nx->elt1 = ((closure3) x)->elt1;
-       nx->elt2 = ((closure3) x)->elt2;
-       nx->elt3 = ((closure3) x)->elt3;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure3_type);
-       return (char *) nx;}
-    case closure4_tag:
-      {register closure4 nx = (closure4) allocp;
-       type_of(nx) = closure4_tag; nx->fn = ((closure4) x)->fn;
-       nx->num_args = ((closure4) x)->num_args;
-       nx->elt1 = ((closure4) x)->elt1;
-       nx->elt2 = ((closure4) x)->elt2;
-       nx->elt3 = ((closure4) x)->elt3;
-       nx->elt4 = ((closure4) x)->elt4;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure4_type);
-       return (char *) nx;}
-    case closureN_tag:
-      {register closureN nx = (closureN) allocp;
-       int i;
-       type_of(nx) = closureN_tag; nx->fn = ((closureN) x)->fn;
-       nx->num_args = ((closureN) x)->num_args;
-       nx->num_elt = ((closureN) x)->num_elt;
-       nx->elts = (object *)(((char *)nx) + sizeof(closureN_type));
-       for (i = 0; i < nx->num_elt; i++) {
-         nx->elts[i] = ((closureN) x)->elts[i];
-       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closureN_type) + sizeof(object) * nx->num_elt;
-       return (char *) nx;}
-    case vector_tag:
-      {register vector nx = (vector) allocp;
-       int i;
-       type_of(nx) = vector_tag;
-       nx->num_elt = ((vector) x)->num_elt;
-       nx->elts = (object *)(((char *)nx) + sizeof(vector_type));
-       for (i = 0; i < nx->num_elt; i++) {
-         nx->elts[i] = ((vector) x)->elts[i];
-       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(vector_type) + sizeof(object) * nx->num_elt;
-       return (char *) nx;}
-    case string_tag:
-      {register string_type *nx = (string_type *) allocp;
-       int str_size = gc_word_align(((string_type *)x)->len + 1);
-       type_of(nx) = string_tag; 
-       nx->len = ((string_type *)x)->len;
-       nx->str = ((char *)nx) + sizeof(string_type);
-       memcpy(nx->str, ((string_type *)x)->str, nx->len + 1);
-//TODO: below is changing, now we will need to always copy the cstring
-//along with the string_type. need to be careful of any off-by-one errors 
-//here...
-//       if (gcgen == 0) {
-//         // Minor, data heap is not relocated
-//         nx->str = ((string_type *)x)->str;
-//       } else {
-//         // Major collection, data heap is moving
-//         nx->str = dhallocp;
-//         int len = strlen(((string_type *) x)->str);
-//         memcpy(dhallocp, ((string_type *) x)->str, len + 1);
-//         dhallocp += len + 1;
+///**
+// * Copy an object to the GC heap
+// */
+//char *transport(x, gcgen) char *x; int gcgen;
+//{
+// if (nullp(x)) return x;
+// if (obj_is_char(x)) return x;
+//#if DEBUG_GC
+// printf("entered transport ");
+// printf("transport %ld\n", type_of(x));
+//#endif
+// switch (type_of(x))
+//   {case cons_tag:
+//      {register list nx = (list) allocp;
+//       type_of(nx) = cons_tag; car(nx) = car(x); cdr(nx) = cdr(x);
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       allocp = ((char *) nx)+sizeof(cons_type);
+//       return (char *) nx;}
+//    case macro_tag:
+//      {register macro nx = (macro) allocp;
+//       type_of(nx) = macro_tag; nx->fn = ((macro) x)->fn;
+//       nx->num_args = ((macro) x)->num_args;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       allocp = ((char *) nx)+sizeof(macro_type);
+//       return (char *) nx;}
+//    case closure0_tag:
+//      {register closure0 nx = (closure0) allocp;
+//       type_of(nx) = closure0_tag; nx->fn = ((closure0) x)->fn;
+//       nx->num_args = ((closure0) x)->num_args;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       allocp = ((char *) nx)+sizeof(closure0_type);
+//       return (char *) nx;}
+//    case closure1_tag:
+//      {register closure1 nx = (closure1) allocp;
+//       type_of(nx) = closure1_tag; nx->fn = ((closure1) x)->fn;
+//       nx->num_args = ((closure1) x)->num_args;
+//       nx->elt1 = ((closure1) x)->elt1;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure1_type);
+//       return (char *) nx;}
+//    case closure2_tag:
+//      {register closure2 nx = (closure2) allocp;
+//       type_of(nx) = closure2_tag; nx->fn = ((closure2) x)->fn;
+//       nx->num_args = ((closure2) x)->num_args;
+//       nx->elt1 = ((closure2) x)->elt1;
+//       nx->elt2 = ((closure2) x)->elt2;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure2_type);
+//       return (char *) nx;}
+//    case closure3_tag:
+//      {register closure3 nx = (closure3) allocp;
+//       type_of(nx) = closure3_tag; nx->fn = ((closure3) x)->fn;
+//       nx->num_args = ((closure3) x)->num_args;
+//       nx->elt1 = ((closure3) x)->elt1;
+//       nx->elt2 = ((closure3) x)->elt2;
+//       nx->elt3 = ((closure3) x)->elt3;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure3_type);
+//       return (char *) nx;}
+//    case closure4_tag:
+//      {register closure4 nx = (closure4) allocp;
+//       type_of(nx) = closure4_tag; nx->fn = ((closure4) x)->fn;
+//       nx->num_args = ((closure4) x)->num_args;
+//       nx->elt1 = ((closure4) x)->elt1;
+//       nx->elt2 = ((closure4) x)->elt2;
+//       nx->elt3 = ((closure4) x)->elt3;
+//       nx->elt4 = ((closure4) x)->elt4;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure4_type);
+//       return (char *) nx;}
+//    case closureN_tag:
+//      {register closureN nx = (closureN) allocp;
+//       int i;
+//       type_of(nx) = closureN_tag; nx->fn = ((closureN) x)->fn;
+//       nx->num_args = ((closureN) x)->num_args;
+//       nx->num_elt = ((closureN) x)->num_elt;
+//       nx->elts = (object *)(((char *)nx) + sizeof(closureN_type));
+//       for (i = 0; i < nx->num_elt; i++) {
+//         nx->elts[i] = ((closureN) x)->elts[i];
 //       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type)+str_size;
-       return (char *) nx;}
-    case integer_tag:
-      {register integer_type *nx = (integer_type *) allocp;
-       type_of(nx) = integer_tag; nx->value = ((integer_type *) x)->value;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(integer_type);
-       return (char *) nx;}
-    case double_tag:
-      {register double_type *nx = (double_type *) allocp;
-       type_of(nx) = double_tag; nx->value = ((double_type *) x)->value;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(double_type);
-       return (char *) nx;}
-    case port_tag:
-      {register port_type *nx = (port_type *) allocp;
-       type_of(nx) = port_tag; nx->fp = ((port_type *) x)->fp;
-       nx->mode = ((port_type *) x)->mode;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(port_type);
-       return (char *) nx;}
-    case cvar_tag:
-      {register cvar_type *nx = (cvar_type *) allocp;
-       type_of(nx) = cvar_tag; nx->pvar = ((cvar_type *) x)->pvar;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(cvar_type);
-       return (char *) nx;}
-    case forward_tag:
-       return (char *) forward(x);
-    case eof_tag: break;
-    case primitive_tag: break;
-    case boolean_tag: break;
-    case symbol_tag: break; // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
-    default:
-      printf("transport: bad tag x=%p x.tag=%ld\n",(void *)x,type_of(x)); exit(0);}
- return x;}
-
-/* Use overflow macro which already knows which way the stack goes. */
-/* Major collection, transport objects on stack or old heap */
-#define transp(p) \
-temp = (p); \
-if ((check_overflow(low_limit,temp) && \
-     check_overflow(temp,high_limit)) || \
-    (check_overflow(old_heap_low_limit - 1, temp) && \
-     check_overflow(temp,old_heap_high_limit + 1))) \
-   (p) = (object) transport(temp,major);
-
-void GC_loop(int major, closure cont, object *ans, int num_ans)
-{char foo;
- int i;
- register object temp;
- register object low_limit = &foo; /* Move live data above us. */
- register object high_limit = stack_begin;
- register char *scanp = allocp; /* Cheney scan pointer. */
- register object old_heap_low_limit = low_limit; // Minor-GC default
- register object old_heap_high_limit = high_limit; // Minor-GC default
-
- char *tmp_bottom = bottom;    /* Bottom of tospace. */
- char *tmp_allocp = allocp;    /* Cheney allocate pointer. */
- char *tmp_alloc_end = alloc_end;
- char *tmp_dhbottom = dhbottom;
- char *tmp_dhallocp = dhallocp;
- char *tmp_dhallocp_end = dhalloc_end;
-
- if (dhallocp > dhalloc_limit) {
-   // Upgrade to major GC
-   major = 1;
-   no_major_gcs++;
-   no_gcs--;
- }
-
- if (major) {
-    // Initialize new heap (TODO: make a function for this)
-    bottom = calloc(1,global_heap_size);
-    allocp = (char *) ((((long) bottom)+7) & -8);
-    alloc_end = allocp + global_heap_size - 8;
-    scanp = allocp;
-    old_heap_low_limit = tmp_bottom;
-    old_heap_high_limit = tmp_alloc_end;
-    
-    dhallocp = dhbottom = calloc(1, global_heap_size);
-    dhalloc_limit = dhallocp + (long)((global_heap_size - 8) * 0.90);
-    dhalloc_end = dhallocp + global_heap_size - 8;
- }
-
-#if DEBUG_GC
- printf("\n=== started GC type = %d === \n", major);
-#endif
- /* Transport GC's continuation and its argument. */
- transp(cont);
- gc_cont = cont;
- gc_num_ans = num_ans;
-#if DEBUG_GC
- printf("DEBUG done transporting cont\n");
-#endif
-
- /* Prevent overrunning buffer */
- if (num_ans > NUM_GC_ANS) {
-   printf("Fatal error - too many arguments (%d) to GC\n", num_ans);
-   exit(1);
- }
-
- for (i = 0; i < num_ans; i++){ 
-     transp(ans[i]);
-     gc_ans[i] = ans[i];
- }
-#if DEBUG_GC
- printf("DEBUG done transporting gc_ans\n");
-#endif
-
- /* Transport mutations. */
- {
-   list l;
-   for (l = mutation_table; !nullp(l); l = cdr(l)) {
-     object o = car(l);
-     if (type_of(o) == cons_tag) {
-         // Transport, if necessary
-         // TODO: need to test this with major GC, and 
-         //       GC's of list/car-cdr from same generation
-         transp(car(o));
-         transp(cdr(o));
-     } else if (type_of(o) == vector_tag) {
-       int i;
-       // TODO: probably too inefficient, try collecting single index
-       for (i = 0; i < ((vector)o)->num_elt; i++) {
-         transp(((vector)o)->elts[i]);
-       }
-     } else if (type_of(o) == forward_tag) {
-         // Already transported, skip
-     } else {
-         printf("Unexpected type %ld transporting mutation\n", type_of(o));
-         exit(1);
-     }
-   }
- }
- clear_mutations(); /* Reset for next time */
-
- /* Transport global variables. */
- transp(Cyc_global_variables); /* Internal global used by the runtime */
- {
-   list l = global_table;
-   for(; !nullp(l); l = cdr(l)){
-    cvar_type *c = (cvar_type *)car(l);
-    transp(*(c->pvar)); // GC global, not the pvar
-   }
- }
- while (scanp<allocp)       /* Scan the newspace. */
-   switch (type_of(scanp))
-     {case cons_tag:
-#if DEBUG_GC
- printf("DEBUG transport cons_tag\n");
-#endif
-        transp(car(scanp)); transp(cdr(scanp));
-        scanp += sizeof(cons_type); break;
-      case macro_tag:
-#if DEBUG_GC
- printf("DEBUG transport macro \n");
-#endif
-        scanp += sizeof(macro_type); break;
-      case closure0_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure0 \n");
-#endif
-        scanp += sizeof(closure0_type); break;
-      case closure1_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure1 \n");
-#endif
-        transp(((closure1) scanp)->elt1);
-        scanp += sizeof(closure1_type); break;
-      case closure2_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure2 \n");
-#endif
-        transp(((closure2) scanp)->elt1); transp(((closure2) scanp)->elt2);
-        scanp += sizeof(closure2_type); break;
-      case closure3_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure3 \n");
-#endif
-        transp(((closure3) scanp)->elt1); transp(((closure3) scanp)->elt2);
-        transp(((closure3) scanp)->elt3);
-        scanp += sizeof(closure3_type); break;
-      case closure4_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure4 \n");
-#endif
-        transp(((closure4) scanp)->elt1); transp(((closure4) scanp)->elt2);
-        transp(((closure4) scanp)->elt3); transp(((closure4) scanp)->elt4);
-        scanp += sizeof(closure4_type); break;
-      case closureN_tag:
-#if DEBUG_GC
- printf("DEBUG transport closureN \n");
-#endif
-       {int i; int n = ((closureN) scanp)->num_elt;
-        for (i = 0; i < n; i++) {
-          transp(((closureN) scanp)->elts[i]);
-        }
-        scanp += sizeof(closureN_type) + sizeof(object) * n;
-       }
-       break;
-      case vector_tag:
-#if DEBUG_GC
- printf("DEBUG transport vector \n");
-#endif
-       {int i; int n = ((vector) scanp)->num_elt;
-        for (i = 0; i < n; i++) {
-          transp(((vector) scanp)->elts[i]);
-        }
-        scanp += sizeof(vector_type) + sizeof(object) * n;
-       }
-       break;
-      case string_tag: {
-#if DEBUG_GC
- printf("DEBUG transport string \n");
-#endif
-        string_type *x = (string_type *)scanp;
-        scanp += sizeof(string_type); 
-        scanp += gc_word_align(x->len + 1);
-        break;
-      }
-//TODO: cstring is now after string_type, so need to skip that, too.
-//stack allocations should be OK since we are only scanning the newspace here,
-//but should double-check that... (though we are not able to even scan the
-//stack so should be fine)
-      case integer_tag:
-#if DEBUG_GC
- printf("DEBUG transport integer \n");
-#endif
-        scanp += sizeof(integer_type); break;
-      case double_tag:
-#if DEBUG_GC
- printf("DEBUG transport double \n");
-#endif
-        scanp += sizeof(double_type); break;
-      case port_tag:
-#if DEBUG_GC
- printf("DEBUG transport port \n");
-#endif
-        scanp += sizeof(port_type); break;
-      case cvar_tag:
-#if DEBUG_GC
- printf("DEBUG transport cvar \n");
-#endif
-        scanp += sizeof(cvar_type); break;
-      case eof_tag:
-      case primitive_tag:
-      case symbol_tag: 
-      case boolean_tag:
-      default:
-        printf("GC: bad tag scanp=%p scanp.tag=%ld\n",(void *)scanp,type_of(scanp));
-        exit(0);}
-
- if (major) {
-     free(tmp_bottom);
-     free(tmp_dhbottom);
- }
-}
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(closureN_type) + sizeof(object) * nx->num_elt;
+//       return (char *) nx;}
+//    case vector_tag:
+//      {register vector nx = (vector) allocp;
+//       int i;
+//       type_of(nx) = vector_tag;
+//       nx->num_elt = ((vector) x)->num_elt;
+//       nx->elts = (object *)(((char *)nx) + sizeof(vector_type));
+//       for (i = 0; i < nx->num_elt; i++) {
+//         nx->elts[i] = ((vector) x)->elts[i];
+//       }
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(vector_type) + sizeof(object) * nx->num_elt;
+//       return (char *) nx;}
+//    case string_tag:
+//      {register string_type *nx = (string_type *) allocp;
+//       int str_size = gc_word_align(((string_type *)x)->len + 1);
+//       type_of(nx) = string_tag; 
+//       nx->len = ((string_type *)x)->len;
+//       nx->str = ((char *)nx) + sizeof(string_type);
+//       memcpy(nx->str, ((string_type *)x)->str, nx->len + 1);
+////TODO: below is changing, now we will need to always copy the cstring
+////along with the string_type. need to be careful of any off-by-one errors 
+////here...
+////       if (gcgen == 0) {
+////         // Minor, data heap is not relocated
+////         nx->str = ((string_type *)x)->str;
+////       } else {
+////         // Major collection, data heap is moving
+////         nx->str = dhallocp;
+////         int len = strlen(((string_type *) x)->str);
+////         memcpy(dhallocp, ((string_type *) x)->str, len + 1);
+////         dhallocp += len + 1;
+////       }
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type)+str_size;
+//       return (char *) nx;}
+//    case integer_tag:
+//      {register integer_type *nx = (integer_type *) allocp;
+//       type_of(nx) = integer_tag; nx->value = ((integer_type *) x)->value;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(integer_type);
+//       return (char *) nx;}
+//    case double_tag:
+//      {register double_type *nx = (double_type *) allocp;
+//       type_of(nx) = double_tag; nx->value = ((double_type *) x)->value;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(double_type);
+//       return (char *) nx;}
+//    case port_tag:
+//      {register port_type *nx = (port_type *) allocp;
+//       type_of(nx) = port_tag; nx->fp = ((port_type *) x)->fp;
+//       nx->mode = ((port_type *) x)->mode;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(port_type);
+//       return (char *) nx;}
+//    case cvar_tag:
+//      {register cvar_type *nx = (cvar_type *) allocp;
+//       type_of(nx) = cvar_tag; nx->pvar = ((cvar_type *) x)->pvar;
+//       forward(x) = nx; type_of(x) = forward_tag;
+//       x = (char *) nx; allocp = ((char *) nx)+sizeof(cvar_type);
+//       return (char *) nx;}
+//    case forward_tag:
+//       return (char *) forward(x);
+//    case eof_tag: break;
+//    case primitive_tag: break;
+//    case boolean_tag: break;
+//    case symbol_tag: break; // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
+//    default:
+//      printf("transport: bad tag x=%p x.tag=%ld\n",(void *)x,type_of(x)); exit(0);}
+// return x;}
+//
+///* Use overflow macro which already knows which way the stack goes. */
+///* Major collection, transport objects on stack or old heap */
+//#define transp(p) \
+//temp = (p); \
+//if ((check_overflow(low_limit,temp) && \
+//     check_overflow(temp,high_limit)) || \
+//    (check_overflow(old_heap_low_limit - 1, temp) && \
+//     check_overflow(temp,old_heap_high_limit + 1))) \
+//   (p) = (object) transport(temp,major);
+//
+//void GC_loop(int major, closure cont, object *ans, int num_ans)
+//{char foo;
+// int i;
+// register object temp;
+// register object low_limit = &foo; /* Move live data above us. */
+// register object high_limit = stack_begin;
+// register char *scanp = allocp; /* Cheney scan pointer. */
+// register object old_heap_low_limit = low_limit; // Minor-GC default
+// register object old_heap_high_limit = high_limit; // Minor-GC default
+//
+// char *tmp_bottom = bottom;    /* Bottom of tospace. */
+// char *tmp_allocp = allocp;    /* Cheney allocate pointer. */
+// char *tmp_alloc_end = alloc_end;
+// char *tmp_dhbottom = dhbottom;
+// char *tmp_dhallocp = dhallocp;
+// char *tmp_dhallocp_end = dhalloc_end;
+//
+// if (dhallocp > dhalloc_limit) {
+//   // Upgrade to major GC
+//   major = 1;
+//   no_major_gcs++;
+//   no_gcs--;
+// }
+//
+// if (major) {
+//    // Initialize new heap (TODO: make a function for this)
+//    bottom = calloc(1,global_heap_size);
+//    allocp = (char *) ((((long) bottom)+7) & -8);
+//    alloc_end = allocp + global_heap_size - 8;
+//    scanp = allocp;
+//    old_heap_low_limit = tmp_bottom;
+//    old_heap_high_limit = tmp_alloc_end;
+//    
+//    dhallocp = dhbottom = calloc(1, global_heap_size);
+//    dhalloc_limit = dhallocp + (long)((global_heap_size - 8) * 0.90);
+//    dhalloc_end = dhallocp + global_heap_size - 8;
+// }
+//
+//#if DEBUG_GC
+// printf("\n=== started GC type = %d === \n", major);
+//#endif
+// /* Transport GC's continuation and its argument. */
+// transp(cont);
+// gc_cont = cont;
+// gc_num_ans = num_ans;
+//#if DEBUG_GC
+// printf("DEBUG done transporting cont\n");
+//#endif
+//
+// /* Prevent overrunning buffer */
+// if (num_ans > NUM_GC_ANS) {
+//   printf("Fatal error - too many arguments (%d) to GC\n", num_ans);
+//   exit(1);
+// }
+//
+// for (i = 0; i < num_ans; i++){ 
+//     transp(ans[i]);
+//     gc_ans[i] = ans[i];
+// }
+//#if DEBUG_GC
+// printf("DEBUG done transporting gc_ans\n");
+//#endif
+//
+// /* Transport mutations. */
+// {
+//   list l;
+//   for (l = mutation_table; !nullp(l); l = cdr(l)) {
+//     object o = car(l);
+//     if (type_of(o) == cons_tag) {
+//         // Transport, if necessary
+//         // TODO: need to test this with major GC, and 
+//         //       GC's of list/car-cdr from same generation
+//         transp(car(o));
+//         transp(cdr(o));
+//     } else if (type_of(o) == vector_tag) {
+//       int i;
+//       // TODO: probably too inefficient, try collecting single index
+//       for (i = 0; i < ((vector)o)->num_elt; i++) {
+//         transp(((vector)o)->elts[i]);
+//       }
+//     } else if (type_of(o) == forward_tag) {
+//         // Already transported, skip
+//     } else {
+//         printf("Unexpected type %ld transporting mutation\n", type_of(o));
+//         exit(1);
+//     }
+//   }
+// }
+// clear_mutations(); /* Reset for next time */
+//
+// /* Transport global variables. */
+// transp(Cyc_global_variables); /* Internal global used by the runtime */
+// {
+//   list l = global_table;
+//   for(; !nullp(l); l = cdr(l)){
+//    cvar_type *c = (cvar_type *)car(l);
+//    transp(*(c->pvar)); // GC global, not the pvar
+//   }
+// }
+// while (scanp<allocp)       /* Scan the newspace. */
+//   switch (type_of(scanp))
+//     {case cons_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport cons_tag\n");
+//#endif
+//        transp(car(scanp)); transp(cdr(scanp));
+//        scanp += sizeof(cons_type); break;
+//      case macro_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport macro \n");
+//#endif
+//        scanp += sizeof(macro_type); break;
+//      case closure0_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closure0 \n");
+//#endif
+//        scanp += sizeof(closure0_type); break;
+//      case closure1_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closure1 \n");
+//#endif
+//        transp(((closure1) scanp)->elt1);
+//        scanp += sizeof(closure1_type); break;
+//      case closure2_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closure2 \n");
+//#endif
+//        transp(((closure2) scanp)->elt1); transp(((closure2) scanp)->elt2);
+//        scanp += sizeof(closure2_type); break;
+//      case closure3_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closure3 \n");
+//#endif
+//        transp(((closure3) scanp)->elt1); transp(((closure3) scanp)->elt2);
+//        transp(((closure3) scanp)->elt3);
+//        scanp += sizeof(closure3_type); break;
+//      case closure4_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closure4 \n");
+//#endif
+//        transp(((closure4) scanp)->elt1); transp(((closure4) scanp)->elt2);
+//        transp(((closure4) scanp)->elt3); transp(((closure4) scanp)->elt4);
+//        scanp += sizeof(closure4_type); break;
+//      case closureN_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport closureN \n");
+//#endif
+//       {int i; int n = ((closureN) scanp)->num_elt;
+//        for (i = 0; i < n; i++) {
+//          transp(((closureN) scanp)->elts[i]);
+//        }
+//        scanp += sizeof(closureN_type) + sizeof(object) * n;
+//       }
+//       break;
+//      case vector_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport vector \n");
+//#endif
+//       {int i; int n = ((vector) scanp)->num_elt;
+//        for (i = 0; i < n; i++) {
+//          transp(((vector) scanp)->elts[i]);
+//        }
+//        scanp += sizeof(vector_type) + sizeof(object) * n;
+//       }
+//       break;
+//      case string_tag: {
+//#if DEBUG_GC
+// printf("DEBUG transport string \n");
+//#endif
+//        string_type *x = (string_type *)scanp;
+//        scanp += sizeof(string_type); 
+//        scanp += gc_word_align(x->len + 1);
+//        break;
+//      }
+////TODO: cstring is now after string_type, so need to skip that, too.
+////stack allocations should be OK since we are only scanning the newspace here,
+////but should double-check that... (though we are not able to even scan the
+////stack so should be fine)
+//      case integer_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport integer \n");
+//#endif
+//        scanp += sizeof(integer_type); break;
+//      case double_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport double \n");
+//#endif
+//        scanp += sizeof(double_type); break;
+//      case port_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport port \n");
+//#endif
+//        scanp += sizeof(port_type); break;
+//      case cvar_tag:
+//#if DEBUG_GC
+// printf("DEBUG transport cvar \n");
+//#endif
+//        scanp += sizeof(cvar_type); break;
+//      case eof_tag:
+//      case primitive_tag:
+//      case symbol_tag: 
+//      case boolean_tag:
+//      default:
+//        printf("GC: bad tag scanp=%p scanp.tag=%ld\n",(void *)scanp,type_of(scanp));
+//        exit(0);}
+//
+// if (major) {
+//     free(tmp_bottom);
+//     free(tmp_dhbottom);
+// }
+//}
+//
+//void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
+//{
+// /* Only room for one more minor-GC, so do a major one.
+//  * Not sure this is the best strategy, it may be better to do major
+//  * ones sooner, perhaps after every x minor GC's.
+//  *
+//  * Also may need to consider dynamically increasing heap size, but
+//  * by how much (1.3x, 1.5x, etc) and when? I suppose when heap usage
+//  * after a collection is above a certain percentage, then it would be 
+//  * necessary to increase heap size the next time.
+//  */
+// if (allocp >= (bottom + (global_heap_size - global_stack_size))) {
+//     //printf("Possibly only room for one more minor GC. no_gcs = %ld\n", no_gcs);
+//     no_major_gcs++;
+//     GC_loop(1, cont, ans, num_ans);
+// } else {
+//     no_gcs++; /* Count the number of minor GC's. */
+//     GC_loop(0, cont, ans, num_ans);
+// }
+//
+// /* You have to let it all go, Neo. Fear, doubt, and disbelief. Free your mind... */
+// longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
+//}
 
 void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
-{
- /* Only room for one more minor-GC, so do a major one.
-  * Not sure this is the best strategy, it may be better to do major
-  * ones sooner, perhaps after every x minor GC's.
-  *
-  * Also may need to consider dynamically increasing heap size, but
-  * by how much (1.3x, 1.5x, etc) and when? I suppose when heap usage
-  * after a collection is above a certain percentage, then it would be 
-  * necessary to increase heap size the next time.
-  */
- if (allocp >= (bottom + (global_heap_size - global_stack_size))) {
-     //printf("Possibly only room for one more minor GC. no_gcs = %ld\n", no_gcs);
-     no_major_gcs++;
-     GC_loop(1, cont, ans, num_ans);
- } else {
-     no_gcs++; /* Count the number of minor GC's. */
-     GC_loop(0, cont, ans, num_ans);
- }
+ // TODO: take 'live' objects from the stack and allocate them on the heap
+ /*
+ note fwd pointers are only ever placed on the stack, never the heap
+ 
+ we now have 2 GC's:
+ - Stack GC, a minor collection where we move live stack objs to heap
+ - Heap GC, a major collection where we do mark&sweep
 
- /* You have to let it all go, Neo. Fear, doubt, and disbelief. Free your mind... */
+ when replacing an object,
+ - only need to do this for objects on 'this' stack
+ - if object is a fwd pointer, return it's forwarding address
+ - otherwise, 
+   * allocate them on the heap
+   * return the new address
+   * leave a forwarding pointer on the stack with the new address
+ - may be able to modify transp macro to do this part
+
+ can still use write buffer to ensure any heap->stack references are handled
+
+ need to transport:
+ - stack closure/args
+ - mutation write barrier
+ - globals
+
+ after transport is complete, we will not be scanning newspace but
+ do need to transport any stack objects referenced by the above
+ a couple of ideas:
+ - create a list of allocated objects, and pass over them in much
+   the same way the cheney algorithm does (2 "fingers"??). I think
+   this could actually just be a list of pointers since we want to
+   copy to the heap not the scan space. the goal is just to ensure
+   all live stack references are moved to the heap. trick here is to 
+   ensure scan space is large enough, although if it runs out
+   we can just allocate a new space (of say double the size), 
+   memcpy the old one, and update scanp/allocp accordingly.
+   * can use a bump pointer to build the list, so it should be
+     fairly efficient, especially if we don't have to resize too much
+   * will be writing all of this code from scratch, but can use
+     existing scan code as a guide
+ - or, during transport recursively transport objects that could
+   contain references (closures, lists, etc). This may be more
+   convenient to code, although it requires stack space to traverse
+   the structures. I think it might also get stuck processing circular
+   structures (!!!), so this approach is not an option
+ TBD how (or even if) this can scale to multiple threads...
+ is is possible to use write barrier(s) to detect if one thread is
+ working with another's data during GC? This will be an important
+ point to keep in mind as the code is being written
+
+!!!
+IMPORTANT - does the timing of GC matter? for example, if we GC before
+scanning all the stack space, there might be an object referenced by
+a live stack object that would get freed because we haven't gotten to
+it yet!
+
+so I think we have to scan all the stack space before doing a GC.
+alternatively, can we use a write barrier to keep track of when a
+stack object references one on the heap? that would effectively make
+the heap object into a root until stack GC
+
+Originally thought this, but now not so sure because it seems the above
+has to be taken into account:
+
+ Do not have to explicitly GC until heap is full enough for one to 
+ be initiated. do need to code gc_collect though, and ensure it is
+ called at the appropriate time.
+
+I think everything else will work as written, but not quite sure how
+to handle this detail yet. and it is very important to get right
+!!!!
+
+ thoughts:
+ - worth having a write barrier for globals? that is, only GC those that
+   were modified. just an idea...
+ */
  longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 }
-
 
 /**
  * Receive a list of arguments and apply them to the given function
