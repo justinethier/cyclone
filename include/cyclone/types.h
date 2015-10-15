@@ -68,7 +68,7 @@ gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
 void gc_mark(gc_heap *h, object obj);
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
-//void gc_collect(gc_heap *h, size_t *sum_freed) 
+void gc_collect(gc_heap *h, size_t *sum_freed);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0

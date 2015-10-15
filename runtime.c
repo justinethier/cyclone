@@ -2345,6 +2345,27 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
 // longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 //}
 
+// NEW GC algorithm
+void gc_collect(gc_heap *h, size_t *sum_freed) 
+{
+  printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  // Mark global variables
+  gc_mark(h, Cyc_global_variables); /* Internal global used by the runtime */
+  {
+    list l = global_table;
+    for(; !nullp(l); l = cdr(l)){
+     cvar_type *c = (cvar_type *)car(l);
+     gc_mark(h, *(c->pvar)); // Mark global, not the pvar
+    }
+  }
+  // TODO: what else to mark? gc_mark(
+  // conservative mark?
+  // weak refs?
+  // finalize?
+  gc_sweep(h, sum_freed);
+  // debug print free stats
+  // return value from sweep??
+}
 void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
  // TODO: take 'live' objects from the stack and allocate them on the heap
  /*
