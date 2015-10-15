@@ -2385,6 +2385,11 @@ void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
  - may be able to modify transp macro to do this part
 
  can still use write buffer to ensure any heap->stack references are handled
+ - also want to use this barrier to handle any globals that are re-assigned to 
+   locations on the stack, to ensure they are moved to the heap during GC.
+ - write barrier really should be per-stack, since OK to leave those items until
+   stack is collected
+ - TBD how this works with multiple threads, each with its own stack
 
  need to transport:
  - stack closure/args
