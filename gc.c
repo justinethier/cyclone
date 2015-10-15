@@ -1,4 +1,4 @@
-/* TODO: a basic mark-sweep GC
+/* A basic mark-sweep GC
    As of now, the GC code is based off the implementation from chibi scheme
 
  Goals of this project:
@@ -146,23 +146,45 @@ void gc_mark(gc_heap *h, object obj)
     return;
 
 #if GC_DEBUG_PRINTFS
- fprintf(stdout, "gc_mark %p\n", obj);
+  fprintf(stdout, "gc_mark %p\n", obj);
 #endif
- ((list)obj)->hdr.mark = 1;
+  ((list)obj)->hdr.mark = 1;
  // TODO: mark heap saves (??) 
  // could this be a write barrier?
  
  // Mark objects this one references
- if (type_of(obj) == cons_tag) {
-   gc_mark(h, car(obj)); 
-   gc_mark(h, cdr(obj)); 
- }
- // TODO: will be more work in here the "real" implementation
+  if (type_of(obj) == cons_tag) {
+    gc_mark(h, car(obj)); 
+    gc_mark(h, cdr(obj)); 
+  } else if (type_of(obj) == closure1_tag) {
+    gc_mark(h, ((closure1) obj)->elt1); 
+  } else if (type_of(obj) == closure2_tag) {
+    gc_mark(h, ((closure2) obj)->elt1); 
+    gc_mark(h, ((closure2) obj)->elt2); 
+  } else if (type_of(obj) == closure3_tag) {
+    gc_mark(h, ((closure3) obj)->elt1); 
+    gc_mark(h, ((closure3) obj)->elt2); 
+    gc_mark(h, ((closure3) obj)->elt3); 
+  } else if (type_of(obj) == closure4_tag) {
+    gc_mark(h, ((closure4) obj)->elt1); 
+    gc_mark(h, ((closure4) obj)->elt2); 
+    gc_mark(h, ((closure4) obj)->elt3); 
+    gc_mark(h, ((closure4) obj)->elt4); 
+  } else if (type_of(obj) == closureN_tag) {
+    int i, n = ((closureN) obj)->num_elt;
+    for (i = 0; i < n; i++) {
+      gc_mark(h, ((closureN) obj)->elts[i]);
+    }
+  } else if (type_of(obj) == vector_tag) {
+    int i, n = ((vector) obj)->num_elt;
+    for (i = 0; i < n; i++) {
+      gc_mark(h, ((vector) obj)->elts[i]);
+    }
+  }
 }
 
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 {
-  // TODO: scan entire heap, freeing objects that have not been marked
   size_t freed, max_freed=0, sum_freed=0, size;
   object p, end;
   gc_free_list *q, *r, *s;
@@ -238,19 +260,6 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   }
   if (sum_freed_ptr) *sum_freed_ptr = sum_freed;
   return max_freed;
-}
-
-void gc_collect(gc_heap *h, size_t *sum_freed) 
-{
-  printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
-  // TODO: mark globals
-  // TODO: gc_mark(h, h);
-  // conservative mark?
-  // weak refs?
-  // finalize?
-  gc_sweep(h, sum_freed);
-  // debug print free stats
-  // return value from sweep??
 }
 
 // void gc_init()
