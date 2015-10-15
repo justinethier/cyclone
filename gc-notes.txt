@@ -1,0 +1,2 @@
+Phase 1 (gc-dev) - Add gc.h, make sure it compiles.
+Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and be compatible with a new GC algorithm.

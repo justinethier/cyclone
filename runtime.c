@@ -2420,6 +2420,14 @@ to handle this detail yet. and it is very important to get right
  thoughts:
  - worth having a write barrier for globals? that is, only GC those that
    were modified. just an idea...
+ - KEEP IN MIND AN OVERALL GOAL, that this should try to be as close as
+   possible to the cheney algorithm in terms of performance. so obviously we 
+   want to try and do as little work as necessary during each minor GC.
+   since we will use a write barrier to keep track of the heap's stack refs,
+   it seems reasonable that we could skip globals that live on the heap.
+ - To some extent, it should be possible to test changes that improve performance 
+   by coding something inefficient (but guaranteed to work) and then modifying it to
+   be more efficient (but not quite sure if idea will work).
  */
  longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 }
