@@ -2375,8 +2375,20 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
 // TODO: move globals to thread-specific structures.
 // for example - gc_cont, gc_ans, gc_num_ans
 
+#define gc_move2heap(obj) { \
+  temp = obj; \
+  if (check_overflow(low_limit, temp) && \
+      check_overflow(temp, high_limit)){ \
+    (obj) = TODO: allocate on heap, return new address, replace old w/fwd ptr \
+  } \
+}
+
 void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
 { 
+  char tmp;
+  object temp;
+  object low_limit = &tmp; // This is one end of the stack...
+  object high_limit = stack_begin; // TODO: move to thread-specific struct
   int i;
   int moveBufLen = 128, mbIdx = 0;
   void **moved = alloca(sizeof(void *) * moveBufLen);
@@ -2387,12 +2399,12 @@ void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
     exit(1);
   }
 
-  cp2heap(cont);
+  gc_move2heap(cont);
   gc_cont = cont;
   gc_num_ans = num_args;
 
   for (i = 0; i < num_args; i++){ 
-    cp2heap(args[i]);
+    gc_move2heap(args[i]);
     gc_ans[i] = args[i];
   }
 
@@ -2402,13 +2414,13 @@ void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
     for (l = mutation_table; !nullp(l); l = cdr(l)) {
       object o = car(l);
       if (type_of(o) == cons_tag) {
-          cp2heap(car(o));
-          cp2heap(cdr(o));
+          gc_move2heap(car(o));
+          gc_move2heap(cdr(o));
       } else if (type_of(o) == vector_tag) {
         int i;
         // TODO: probably too inefficient, try collecting single index
         for (i = 0; i < ((vector)o)->num_elt; i++) {
-          cp2heap(((vector)o)->elts[i]);
+          gc_move2heap(((vector)o)->elts[i]);
         }
       } else if (type_of(o) == forward_tag) {
           // Already transported, skip
@@ -2421,7 +2433,7 @@ void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
   clear_mutations(); // Reset for next time
 
   // TODO: use a bump pointer to keep track of who was moved
-  //       probably need to do this as part of cp2heap
+  //       probably need to do this as part of gc_move2heap
 
   // TODO: scan bump pointer space, moving additional objects as needed
   // TODO: at some point during all of this, check the 'major GC' flag
