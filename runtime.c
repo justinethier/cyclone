@@ -2375,11 +2375,33 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
 // TODO: move globals to thread-specific structures.
 // for example - gc_cont, gc_ans, gc_num_ans
 
+char *gc_move(char *obj) {
+  if (!is_object_type(obj)) return obj;
+
+  switch(type_of(obj)){
+    case cons_tag: {
+      list hobj = gc_alloc(Cyc_heap, sizeof(cons_type));
+      hobj->hdr.mark = 0;
+      type_of(hobj) = cons_tag;
+      car(hobj) = car(obj);
+      cdr(hobj) = cdr(hobj);
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+// TODO: add hobj to bump pointer, so we can scan/move the whole live object 'tree'
+//       will require we pass the 'bump' space to this function,
+//       and will require us to check somewhere for overflow of this space, and 
+//       realloc/expand it if necessary
+      return (char *)hobj;
+    }
+    // TODO: other types
+  }
+}
+
 #define gc_move2heap(obj) { \
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = TODO: allocate on heap, return new address, replace old w/fwd ptr \
+    (obj) = (object) gc_move(temp); \
   } \
 }
 

@@ -13,6 +13,7 @@
 
 long global_stack_size = 0;
 long global_heap_size = 0;
+gc_heap *Cyc_heap;
 
 static void c_entry_pt(int,closure,closure);
 static void Cyc_main(long stack_size,long heap_size,char *stack_base);
@@ -56,6 +57,10 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 #if DEBUG_SHOW_DIAG
   printf("main: Allocating and initializing heap...\n");
 #endif
+
+  Cyc_heap = gc_heap_create(heap_size, 0);
+
+  // JAE TODO: clean up below (and all of this old code, really)
   bottom = calloc(1,heap_size);
   allocp = (char *) ((((long) bottom)+7) & -8);
   alloc_end = allocp + heap_size - 8;
