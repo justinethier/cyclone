@@ -2346,6 +2346,11 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
 //}
 
 // NEW GC algorithm
+//
+// TODO: not quite sure when to call this function. might want to set a flag
+// if the heap was expanded during alloc, and after all the allocs are done
+// after a minor GC (or during the minor GC), call into this function to
+// free up unused space
 void gc_collect(gc_heap *h, size_t *sum_freed) 
 {
   printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
@@ -2366,9 +2371,66 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
   // debug print free stats
   // return value from sweep??
 }
-void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
- // TODO: take 'live' objects from the stack and allocate them on the heap
- /*
+
+// TODO: move globals to thread-specific structures.
+// for example - gc_cont, gc_ans, gc_num_ans
+
+void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
+{ 
+  int i;
+  int moveBufLen = 128, mbIdx = 0;
+  void **moved = alloca(sizeof(void *) * moveBufLen);
+
+  // Prevent overrunning buffer
+  if (num_ans > NUM_GC_ANS) {
+    printf("Fatal error - too many arguments (%d) to GC\n", num_ans);
+    exit(1);
+  }
+
+  cp2heap(cont);
+  gc_cont = cont;
+  gc_num_ans = num_args;
+
+  for (i = 0; i < num_args; i++){ 
+    cp2heap(args[i]);
+    gc_ans[i] = args[i];
+  }
+
+  // TODO: move mutations to heap (any stack-allocated globals must be here, too)
+  {
+    list l;
+    for (l = mutation_table; !nullp(l); l = cdr(l)) {
+      object o = car(l);
+      if (type_of(o) == cons_tag) {
+          cp2heap(car(o));
+          cp2heap(cdr(o));
+      } else if (type_of(o) == vector_tag) {
+        int i;
+        // TODO: probably too inefficient, try collecting single index
+        for (i = 0; i < ((vector)o)->num_elt; i++) {
+          cp2heap(((vector)o)->elts[i]);
+        }
+      } else if (type_of(o) == forward_tag) {
+          // Already transported, skip
+      } else {
+          printf("Unexpected type %ld transporting mutation\n", type_of(o));
+          exit(1);
+      }
+    }
+  }
+  clear_mutations(); // Reset for next time
+
+  // TODO: use a bump pointer to keep track of who was moved
+  //       probably need to do this as part of cp2heap
+
+  // TODO: scan bump pointer space, moving additional objects as needed
+  // TODO: at some point during all of this, check the 'major GC' flag
+  //       to see if we need to do a gc_collect
+
+  longjmp(jmp_main,1); // Return globals gc_cont, gc_ans
+}
+
+ /* Overall GC notes:
  note fwd pointers are only ever placed on the stack, never the heap
  
  we now have 2 GC's:
@@ -2455,8 +2517,6 @@ to handle this detail yet. and it is very important to get right
    by coding something inefficient (but guaranteed to work) and then modifying it to
    be more efficient (but not quite sure if idea will work).
  */
- longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
-}
 
 /**
  * Receive a list of arguments and apply them to the given function
