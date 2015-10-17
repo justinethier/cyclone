@@ -13,7 +13,6 @@
 
 long global_stack_size = 0;
 long global_heap_size = 0;
-gc_heap *Cyc_heap;
 
 static void c_entry_pt(int,closure,closure);
 static void Cyc_main(long stack_size,long heap_size,char *stack_base);
@@ -59,6 +58,10 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 #endif
 
   Cyc_heap = gc_heap_create(heap_size, 0);
+  Cyc_thread = (gc_thread_data *)malloc(sizeof(gc_thread_data));
+  Cyc_thread->moveBufLen = 0;
+  gc_thr_grow_move_buffer(Cyc_thread); // Initialize the buffer
+  
 
   // JAE TODO: clean up below (and all of this old code, really)
   bottom = calloc(1,heap_size);

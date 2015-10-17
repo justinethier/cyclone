@@ -262,6 +262,19 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   return max_freed;
 }
 
+void gc_thr_grow_move_buffer(gc_thread_data *d){
+  if (!d) return;
+
+  if (d->moveBufLen == 0) { // Special case
+    d->moveBufLen = 128;
+    d->moveBuf = NULL;
+  } else {
+    d->moveBufLen *= 2;
+  }
+
+  d->moveBuf = realloc(d->moveBuf, d->moveBufLen);
+}
+
 // void gc_init()
 // {
 // }

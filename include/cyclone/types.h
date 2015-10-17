@@ -20,6 +20,13 @@
 /* Define general object type. */
 typedef void *object;
 
+/* Thread data structures */
+typedef struct gc_thread_data_t gc_thread_data;
+struct gc_thread_data_t {
+  char *moveBuf; /* list of objects moved to heap during GC */
+  int moveBufLen;
+};
+
 /* GC data structures */
 
 typedef struct gc_free_list_t gc_free_list;
@@ -69,6 +76,7 @@ size_t gc_heap_total_size(gc_heap *h);
 void gc_mark(gc_heap *h, object obj);
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
 void gc_collect(gc_heap *h, size_t *sum_freed);
+void gc_thr_grow_move_buffer(gc_thread_data *d);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0

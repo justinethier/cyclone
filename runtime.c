@@ -9,6 +9,9 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
+gc_heap *Cyc_heap;
+gc_thread_data *Cyc_thread;
+
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[21] = { \
@@ -2405,7 +2408,7 @@ char *gc_move(char *obj) {
   } \
 }
 
-void GC(cont,ans,num_ans) closure cont; object *args; int num_args;
+void GC(cont, args, num_args) closure cont; object *args; int num_args;
 { 
   char tmp;
   object temp;
