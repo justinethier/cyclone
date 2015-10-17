@@ -2505,8 +2505,8 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       gc_thr_add_to_move_buffer(thd, alloci, hobj);
       return (char *)hobj;
     }
-// TODO case string_tag: {
-//    }
+ TODO case string_tag: {
+    }
     case integer_tag: {
       integer_type *hobj = gc_alloc(Cyc_heap, sizeof(integer_type), heap_grown);
       mark(hobj) = 0;
