@@ -2417,6 +2417,7 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   int i;
   int moveBufLen = 128, mbIdx = 0;
   void **moved = alloca(sizeof(void *) * moveBufLen);
+  int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
 
   // Prevent overrunning buffer
   if (num_ans > NUM_GC_ANS) {
