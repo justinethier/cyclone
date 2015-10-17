@@ -52,6 +52,7 @@ struct gc_header_type_t {
   // TODO: forwarding address (probably not needed for mark/sweep), anything else???
 };
 #define is_marked(x) (is_object_type(x) && ((list)x)->hdr.mark)
+#define mark(x) (((list) x)->hdr.mark)
 
 /* HEAP definitions */
 // experimenting with a heap based off of the one in Chibi scheme

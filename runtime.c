@@ -2395,8 +2395,170 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       gc_thr_add_to_move_buffer(thd, alloci, hobj);
       return (char *)hobj;
     }
-    // TODO: other types
+    case macro_tag: {
+      macro_type *hobj = gc_alloc(Cyc_heap, sizeof(macro_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = macro_tag;
+      hobj->fn = ((macro) obj)->fn;
+      hobj->num_args = ((macro) obj)->num_args;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closure0_tag: {
+      closure0_type *hobj = gc_alloc(Cyc_heap, sizeof(closure0_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closure0_tag;
+      hobj->fn = ((closure0) obj)->fn;
+      hobj->num_args = ((closure0) obj)->num_args;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closure1_tag: {
+      closure1_type *hobj = gc_alloc(Cyc_heap, sizeof(closure1_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closure1_tag;
+      hobj->fn = ((closure1) obj)->fn;
+      hobj->num_args = ((closure1) obj)->num_args;
+      hobj->elt1 = ((closure1) obj)->elt1;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closure2_tag: {
+      closure2_type *hobj = gc_alloc(Cyc_heap, sizeof(closure2_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closure2_tag;
+      hobj->fn = ((closure2) obj)->fn;
+      hobj->num_args = ((closure2) obj)->num_args;
+      hobj->elt1 = ((closure2) obj)->elt1;
+      hobj->elt2 = ((closure2) obj)->elt2;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closure3_tag: {
+      closure3_type *hobj = gc_alloc(Cyc_heap, sizeof(closure3_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closure3_tag;
+      hobj->fn = ((closure3) obj)->fn;
+      hobj->num_args = ((closure3) obj)->num_args;
+      hobj->elt1 = ((closure3) obj)->elt1;
+      hobj->elt2 = ((closure3) obj)->elt2;
+      hobj->elt3 = ((closure3) obj)->elt3;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closure4_tag: {
+      closure4_type *hobj = gc_alloc(Cyc_heap, sizeof(closure4_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closure4_tag;
+      hobj->fn = ((closure4) obj)->fn;
+      hobj->num_args = ((closure4) obj)->num_args;
+      hobj->elt1 = ((closure4) obj)->elt1;
+      hobj->elt2 = ((closure4) obj)->elt2;
+      hobj->elt3 = ((closure4) obj)->elt3;
+      hobj->elt4 = ((closure4) obj)->elt4;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case closureN_tag: {
+      int i;
+      closureN_type *hobj = gc_alloc(Cyc_heap, 
+                            sizeof(closureN_type) + sizeof(object) * hobj->num_elt, 
+                            heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = closureN_tag;
+      hobj->fn = ((closureN) obj)->fn;
+      hobj->num_args = ((closureN) obj)->num_args;
+      hobj->num_elt = ((closureN) obj)-> num_elt;
+      for (i = 0; i < hobj->num_elt; i++) {
+        hobj->elts[i] = ((closureN) obj)->elts[i];
+      }
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case vector_tag: {
+      int i;
+      vector_type *hobj = gc_alloc(Cyc_heap, 
+                            sizeof(vector_type) + sizeof(object) * hobj->num_elt, 
+                            heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = vector_tag;
+      hobj->num_elt = ((vector) obj)-> num_elt;
+      for (i = 0; i < hobj->num_elt; i++) {
+        hobj->elts[i] = ((vector) obj)->elts[i];
+      }
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+// TODO case string_tag: {
+//    }
+    case integer_tag: {
+      integer_type *hobj = gc_alloc(Cyc_heap, sizeof(integer_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = integer_tag;
+      hobj->value = ((integer_type *) obj)->value;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case double_tag: {
+      double_type *hobj = gc_alloc(Cyc_heap, sizeof(double_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = double_tag;
+      hobj->value = ((double_type *) obj)->value;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case port_tag: {
+      port_type *hobj = gc_alloc(Cyc_heap, sizeof(port_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = port_tag;
+      hobj->fp = ((port_type *) obj)->fp;
+      hobj->mode = ((port_type *) obj)->mode;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case cvar_tag: {
+      cvar_type *hobj = gc_alloc(Cyc_heap, sizeof(cvar_type), heap_grown);
+      mark(hobj) = 0;
+      type_of(hobj) = cvar_tag;
+      hobj->pvar = ((cvar_type *) obj)->pvar;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
+    }
+    case forward_tag:
+      return (char *)forward(obj);
+    case eof_tag: break;
+    case primitive_tag: break;
+    case boolean_tag: break;
+    case symbol_tag: break; // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
+    default:
+      fprintf(stderr, "gc_move: bad tag x=%p x.tag=%ld\n",(object) obj, type_of(obj));
+      exit(1);
   }
+  return (char *)obj;
 }
 
 #define gc_move2heap(obj) { \
