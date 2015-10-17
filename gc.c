@@ -71,7 +71,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
   return NULL; 
 }
 
-void *gc_alloc(gc_heap *h, size_t size) 
+void *gc_alloc(gc_heap *h, size_t size, int *heap_grown) 
 {
   void *result = NULL;
   size_t max_freed, sum_freed, total_size;
@@ -95,6 +95,7 @@ max_freed = 0;
           (total_size - sum_freed) > (total_size * 0.75))) // Grow ratio
         && ((!h->max_size) || (total_size < h->max_size))) {
       gc_grow_heap(h, size, 0);
+      *heap_grown = 1;
     }
     result = gc_try_alloc(h, size);
     if (!result) {

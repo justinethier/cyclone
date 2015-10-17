@@ -2378,12 +2378,12 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
 // TODO: move globals to thread-specific structures.
 // for example - gc_cont, gc_ans, gc_num_ans
 
-char *gc_move(char *obj, gc_thread_data *thd, int *alloci) {
+char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
 
   switch(type_of(obj)){
     case cons_tag: {
-      list hobj = gc_alloc(Cyc_heap, sizeof(cons_type));
+      list hobj = gc_alloc(Cyc_heap, sizeof(cons_type), heap_grown);
       hobj->hdr.mark = 0;
       type_of(hobj) = cons_tag;
       car(hobj) = car(obj);
@@ -2403,7 +2403,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci) {
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = (object) gc_move(temp, Cyc_thread, &alloci); \
+    (obj) = (object) gc_move(temp, Cyc_thread, &alloci, &heap_grown); \
   } \
 }
 
@@ -2415,6 +2415,7 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   object high_limit = stack_begin; // TODO: move to thread-specific struct
   int i;
   int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
+  int heap_grown = 0;
 
   // Prevent overrunning buffer
   if (num_args > NUM_GC_ANS) {
@@ -2472,8 +2473,13 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
     scani++;
   }
 
-  // TODO: at some point during all of this, check the 'major GC' flag
-  //       to see if we need to do a gc_collect
+  // Check if we need to do a major GC
+  if (heap_grown) {
+    size_t freed = 0;
+    // TODO: not good enough, need to pass current cont/args
+    // what about mutation barrier, do we care at this point???
+    gc_collect(Cyc_heap, &freed);
+  }
 
   longjmp(jmp_main,1); // Return globals gc_cont, gc_ans
 }

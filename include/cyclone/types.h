@@ -69,7 +69,7 @@ struct gc_header_type_t {
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
 void *gc_try_alloc(gc_heap *h, size_t size);
-void *gc_alloc(gc_heap *h, size_t size);
+void *gc_alloc(gc_heap *h, size_t size, int *heap_grown);
 size_t gc_allocated_bytes(object obj);
 gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
