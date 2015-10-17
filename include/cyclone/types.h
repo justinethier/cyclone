@@ -23,7 +23,7 @@ typedef void *object;
 /* Thread data structures */
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
-  char *moveBuf; /* list of objects moved to heap during GC */
+  void **moveBuf; /* list of objects moved to heap during GC */
   int moveBufLen;
 };
 
@@ -77,6 +77,7 @@ void gc_mark(gc_heap *h, object obj);
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
 void gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
+void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0

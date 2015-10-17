@@ -2378,7 +2378,7 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
 // TODO: move globals to thread-specific structures.
 // for example - gc_cont, gc_ans, gc_num_ans
 
-char *gc_move(char *obj) {
+char *gc_move(char *obj, gc_thread_data *thd, int *alloci) {
   if (!is_object_type(obj)) return obj;
 
   switch(type_of(obj)){
@@ -2390,10 +2390,9 @@ char *gc_move(char *obj) {
       cdr(hobj) = cdr(hobj);
       forward(obj) = hobj;
       type_of(obj) = forward_tag;
-// TODO: add hobj to bump pointer, so we can scan/move the whole live object 'tree'
-//       will require we pass the 'bump' space to this function,
-//       and will require us to check somewhere for overflow of this space, and 
-//       realloc/expand it if necessary
+      // keep track of each allocation so we can scan/move 
+      // the whole live object 'tree'
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
       return (char *)hobj;
     }
     // TODO: other types
@@ -2404,7 +2403,7 @@ char *gc_move(char *obj) {
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = (object) gc_move(temp); \
+    (obj) = (object) gc_move(temp, Cyc_thread, &alloci); \
   } \
 }
 
@@ -2415,13 +2414,11 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   object low_limit = &tmp; // This is one end of the stack...
   object high_limit = stack_begin; // TODO: move to thread-specific struct
   int i;
-  int moveBufLen = 128, mbIdx = 0;
-  void **moved = alloca(sizeof(void *) * moveBufLen);
   int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
 
   // Prevent overrunning buffer
-  if (num_ans > NUM_GC_ANS) {
-    printf("Fatal error - too many arguments (%d) to GC\n", num_ans);
+  if (num_args > NUM_GC_ANS) {
+    printf("Fatal error - too many arguments (%d) to GC\n", num_args);
     exit(1);
   }
 
