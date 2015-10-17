@@ -2455,10 +2455,23 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   }
   clear_mutations(); // Reset for next time
 
-  // TODO: use a bump pointer to keep track of who was moved
-  //       probably need to do this as part of gc_move2heap
+  // Check allocated objects, moving additional objects as needed
+  while (scani < alloci) {
+    object obj = Cyc_thread->moveBuf[scani];
+    switch(type_of(obj)) {
+      case cons_tag: {
+        gc_move2heap(car(obj));
+        gc_move2heap(cdr(obj));
+      }
+      // TODO: other types to move
+      default:
+        fprintf(stderr, 
+          "GC: unexpected object type %ld for object %p\n", type_of(obj), obj);
+        exit(1);
+    }
+    scani++;
+  }
 
-  // TODO: scan bump pointer space, moving additional objects as needed
   // TODO: at some point during all of this, check the 'major GC' flag
   //       to see if we need to do a gc_collect
 
