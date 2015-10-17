@@ -2463,8 +2463,52 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
       case cons_tag: {
         gc_move2heap(car(obj));
         gc_move2heap(cdr(obj));
+        break;
       }
-      // TODO: other types to move
+      case closure1_tag:
+        gc_move2heap(((closure1) obj)->elt1);
+        break;
+      case closure2_tag:
+        gc_move2heap(((closure2) obj)->elt1);
+        gc_move2heap(((closure2) obj)->elt2);
+      case closure3_tag:
+        gc_move2heap(((closure3) obj)->elt1);
+        gc_move2heap(((closure3) obj)->elt2);
+        gc_move2heap(((closure3) obj)->elt3);
+      case closure4_tag:
+        gc_move2heap(((closure4) obj)->elt1);
+        gc_move2heap(((closure4) obj)->elt2);
+        gc_move2heap(((closure4) obj)->elt3);
+        gc_move2heap(((closure4) obj)->elt4);
+        break;
+      case closureN_tag: {
+        int i, n = ((closureN) obj)->num_elt;
+        for (i = 0; i < n; i++) {
+          gc_move2heap(((closureN) obj)->elts[i]);
+        }
+        break;
+      }
+      case vector_tag: {
+        int i, n = ((vector) obj)->num_elt;
+        for (i = 0; i < n; i++) {
+          gc_move2heap(((vector) obj)->elts[i]);
+        }
+        break;
+      }
+      // No child objects to move
+      case closure0_tag:
+      case macro_tag:
+      case string_tag:
+      case integer_tag:
+      case double_tag:
+      case port_tag:
+      case cvar_tag:
+        break;
+      // These types are not heap-allocated
+      case eof_tag:
+      case primitive_tag:
+      case symbol_tag: 
+      case boolean_tag:
       default:
         fprintf(stderr, 
           "GC: unexpected object type %ld for object %p\n", type_of(obj), obj);
