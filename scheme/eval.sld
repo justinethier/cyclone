@@ -11,7 +11,7 @@
     ;(scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
-    ;(scheme write) ;; Only used for debugging
+    (scheme write) ;; Only used for debugging
     (scheme read))
   (export
     ;environment
@@ -252,7 +252,8 @@
        primitive-procedures))
 
 (define (primitive-procedure-objects)
-  (map (lambda (proc) (list 'primitive (cadr proc)))
+  (write `(DEBUG ,primitive-procedures))
+  (map (lambda (proc) (write `(DEBUG2 ,proc)) (list 'primitive (cadr proc)))
        primitive-procedures))
 
 (define (apply-primitive-procedure proc args)
