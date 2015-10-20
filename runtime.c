@@ -2608,9 +2608,7 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
     gc_ans[i] = args[i];
   }
 
-TODO: move mutations to heap (any stack-allocated globals must be here, too)
-but that complicates the block below. is there a better way to do this?
-ideally want to minimize changes to scheme code as well...
+  // Transport mutations
   {
     list l;
     for (l = mutation_table; !nullp(l); l = cdr(l)) {
@@ -2633,6 +2631,16 @@ ideally want to minimize changes to scheme code as well...
     }
   }
   clear_mutations(); // Reset for next time
+
+  // Transport globals
+  gc_move2heap(Cyc_global_variables); // Internal global used by the runtime
+  {
+    list l = global_table;
+    for(; !nullp(l); l = cdr(l)){
+      cvar_type *c = (cvar_type *)car(l);
+      gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+    }
+  }
 
   // Check allocated objects, moving additional objects as needed
   while (scani < alloci) {
