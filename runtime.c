@@ -2505,7 +2505,21 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       gc_thr_add_to_move_buffer(thd, alloci, hobj);
       return (char *)hobj;
     }
- TODO case string_tag: {
+    case string_tag: {
+      char *s;
+      string_type *hobj = gc_alloc(Cyc_heap, 
+        sizeof(string_type) + ((string_len(obj) + 1)), 
+        heap_grown);
+      s = ((char *)hobj) + sizeof(string_type);
+      memcpy(s, string_str(obj), string_len(obj) + 1);
+      mark(hobj) = 0;
+      type_of(hobj) = string_tag;
+      string_len(hobj) = string_len(obj);
+      string_str(hobj) = s;
+      forward(obj) = hobj;
+      type_of(obj) = forward_tag;
+      gc_thr_add_to_move_buffer(thd, alloci, hobj);
+      return (char *)hobj;
     }
     case integer_tag: {
       integer_type *hobj = gc_alloc(Cyc_heap, sizeof(integer_type), heap_grown);

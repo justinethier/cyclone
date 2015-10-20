@@ -116,10 +116,28 @@ size_t gc_allocated_bytes(object obj)
     return gc_heap_align(1);
   t = type_of(obj); 
   if (t == cons_tag) return gc_heap_align(sizeof(cons_type));
+  if (t == macro_tag) return gc_heap_align(sizeof(macro_type));
+  if (t == closure0_tag) return gc_heap_align(sizeof(closure0_type));
+  if (t == closure1_tag) return gc_heap_align(sizeof(closure1_type));
+  if (t == closure2_tag) return gc_heap_align(sizeof(closure2_type));
+  if (t == closure3_tag) return gc_heap_align(sizeof(closure3_type));
+  if (t == closure4_tag) return gc_heap_align(sizeof(closure4_type));
+  if (t == closureN_tag){
+    return gc_heap_align(sizeof(closureN_type) + sizeof(object) * ((closureN_type *)obj)->num_elt);
+  }
+  if (t == vector_tag){
+    return gc_heap_align(sizeof(vector_type) + sizeof(object) * ((vector_type *)obj)->num_elt);
+  }
+  if (t == string_tag){
+    return gc_heap_align(sizeof(string_type) + string_len(obj) + 1);
+  }
   if (t == integer_tag) return gc_heap_align(sizeof(integer_type));
+  if (t == double_tag) return gc_heap_align(sizeof(double_type));
+  if (t == port_tag) return gc_heap_align(sizeof(port_type));
+  if (t == cvar_tag) return gc_heap_align(sizeof(cvar_type));
   
 #if GC_DEBUG_PRINTFS
-  fprintf(stderr, "cannot get size of object %ld\n", t);
+  fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %ld\n", obj, t);
 #endif
   return 0;
 }
