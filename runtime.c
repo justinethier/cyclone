@@ -2608,7 +2608,9 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
     gc_ans[i] = args[i];
   }
 
-  // TODO: move mutations to heap (any stack-allocated globals must be here, too)
+TODO: move mutations to heap (any stack-allocated globals must be here, too)
+but that complicates the block below. is there a better way to do this?
+ideally want to minimize changes to scheme code as well...
   {
     list l;
     for (l = mutation_table; !nullp(l); l = cdr(l)) {
