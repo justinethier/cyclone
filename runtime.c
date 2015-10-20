@@ -2382,7 +2382,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
 
   switch(type_of(obj)){
     case cons_tag: {
-      list hobj = gc_alloc(Cyc_heap, sizeof(cons_type), heap_grown);
+      list hobj = gc_alloc(Cyc_heap, sizeof(cons_type), heap_grown); // hobj ==> new heap object
       hobj->hdr.mark = 0;
       type_of(hobj) = cons_tag;
       car(hobj) = car(obj);
@@ -2473,7 +2473,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
     case closureN_tag: {
       int i;
       closureN_type *hobj = gc_alloc(Cyc_heap, 
-                            sizeof(closureN_type) + sizeof(object) * hobj->num_elt, 
+                            sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elt), 
                             heap_grown);
       mark(hobj) = 0;
       type_of(hobj) = closureN_tag;
@@ -2491,7 +2491,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
     case vector_tag: {
       int i;
       vector_type *hobj = gc_alloc(Cyc_heap, 
-                            sizeof(vector_type) + sizeof(object) * hobj->num_elt, 
+                            sizeof(vector_type) + sizeof(object) * (((vector) obj)->num_elt), 
                             heap_grown);
       mark(hobj) = 0;
       type_of(hobj) = vector_tag;
