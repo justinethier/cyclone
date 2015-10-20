@@ -2480,6 +2480,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       hobj->fn = ((closureN) obj)->fn;
       hobj->num_args = ((closureN) obj)->num_args;
       hobj->num_elt = ((closureN) obj)-> num_elt;
+      hobj->elts = (object *)(((char *)hobj) + sizeof(closureN_type));
       for (i = 0; i < hobj->num_elt; i++) {
         hobj->elts[i] = ((closureN) obj)->elts[i];
       }
@@ -2496,6 +2497,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       mark(hobj) = 0;
       type_of(hobj) = vector_tag;
       hobj->num_elt = ((vector) obj)-> num_elt;
+      hobj->elts = (object *)(((char *)hobj) + sizeof(vector_type));
       for (i = 0; i < hobj->num_elt; i++) {
         hobj->elts[i] = ((vector) obj)->elts[i];
       }
