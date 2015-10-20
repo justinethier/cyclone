@@ -209,6 +209,8 @@ void dispatch_va(int argc, function_type_va func, object clo, object cont, objec
 void do_dispatch(int argc, function_type func, object clo, object *buffer);
 
 /* Global variables. */
+extern gc_heap *Cyc_heap;
+extern gc_thread_data *Cyc_thread;
 extern clock_t start;   /* Starting time. */
 extern char *stack_begin;   /* Initialized by main. */
 extern char *stack_limit1;  /* Initialized by main. */

@@ -9,9 +9,6 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
-gc_heap *Cyc_heap;
-gc_thread_data *Cyc_thread;
-
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[21] = { \
@@ -2593,7 +2590,7 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
   int heap_grown = 0;
 
-fprintf("DEBUG, started minor GC\n"); // JAE DEBUG
+fprintf(stderr, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer
   if (num_args > NUM_GC_ANS) {
     printf("Fatal error - too many arguments (%d) to GC\n", num_args);
@@ -2707,14 +2704,15 @@ fprintf("DEBUG, started minor GC\n"); // JAE DEBUG
   // Check if we need to do a major GC
   if (heap_grown) {
     size_t freed = 0;
-fprintf("DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
-     TODO: not good enough, need to pass current cont/args
-     what about mutation barrier, do we care at this point???
-     I don't think so because those are just updates to globals
+fprintf(stderr, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
+    gc_mark(Cyc_heap, cont);
+    for (i = 0; i < num_args; i++){ 
+      gc_mark(Cyc_heap, args[i]);
+    }
     gc_collect(Cyc_heap, &freed);
   }
 
-fprintf("DEBUG, finished minor GC\n"); // JAE DEBUG
+fprintf(stderr, "DEBUG, finished minor GC\n"); // JAE DEBUG
   longjmp(jmp_main,1); // Return globals gc_cont, gc_ans
 }
 
