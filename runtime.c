@@ -76,6 +76,8 @@ void Cyc_check_bounds(const char *label, int len, int index) {
 /*END closcall section */
 
 /* Global variables. */
+gc_heap *Cyc_heap;
+gc_thread_data *Cyc_thread;
 clock_t start;   /* Starting time. */
 char *stack_begin;   /* Initialized by main. */
 char *stack_limit1;  /* Initialized by main. */
