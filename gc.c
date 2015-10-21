@@ -74,29 +74,27 @@ void *gc_try_alloc(gc_heap *h, size_t size)
 void *gc_alloc(gc_heap *h, size_t size, int *heap_grown) 
 {
   void *result = NULL;
-  size_t max_freed, sum_freed, total_size;
+  size_t max_freed = 0, sum_freed = 0, total_size;
   // TODO: check return value, if null (could not alloc) then 
   // run a collection and check how much free space there is. if less
   // the allowed ratio, try growing heap.
   // then try realloc. if cannot alloc now, then throw out of memory error
   size = gc_heap_align(size);
-  //return gc_try_alloc(h, size);
   result = gc_try_alloc(h, size);
   if (!result) {
     // TODO: may want to consider not doing this now, and implementing gc_collect as
     // part of the runtime, since we would have all of the roots, stack args, 
     // etc available there.
 //    max_freed = gc_collect(h); TODO: this does not work yet!
-max_freed = 0;
-
-    total_size = gc_heap_total_size(h);
-    if (((max_freed < size) ||
-         ((total_size > sum_freed) &&
-          (total_size - sum_freed) > (total_size * 0.75))) // Grow ratio
-        && ((!h->max_size) || (total_size < h->max_size))) {
+//
+//    total_size = gc_heap_total_size(h);
+//    if (((max_freed < size) ||
+//         ((total_size > sum_freed) &&
+//          (total_size - sum_freed) > (total_size * 0.75))) // Grow ratio
+//        && ((!h->max_size) || (total_size < h->max_size))) {
       gc_grow_heap(h, size, 0);
       *heap_grown = 1;
-    }
+//    }
     result = gc_try_alloc(h, size);
     if (!result) {
       fprintf(stderr, "out of memory error allocating %d bytes\n", size);
@@ -104,7 +102,7 @@ max_freed = 0;
     }
   }
 #if GC_DEBUG_PRINTFS
-  fprintf(stdout, "alloc %p\n", result);
+//  fprintf(stdout, "alloc %p\n", result);
 #endif
   return result;
 }
@@ -165,7 +163,7 @@ void gc_mark(gc_heap *h, object obj)
     return;
 
 #if GC_DEBUG_PRINTFS
-  fprintf(stdout, "gc_mark %p\n", obj);
+//  fprintf(stdout, "gc_mark %p\n", obj);
 #endif
   ((list)obj)->hdr.mark = 1;
  // TODO: mark heap saves (??) 
@@ -234,7 +232,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if (!mark(p)) {
 #if GC_DEBUG_PRINTFS
-        fprintf(stdout, "sweep: object is not marked %p\n", p);
+//        fprintf(stdout, "sweep: object is not marked %p\n", p);
 #endif
         // free p
         sum_freed += size;
@@ -270,7 +268,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
           max_freed = freed;
       } else {
 #if GC_DEBUG_PRINTFS
-        fprintf(stdout, "sweep: object is marked %p\n", p);
+//        fprintf(stdout, "sweep: object is marked %p\n", p);
 #endif
         ((list)p)->hdr.mark = 0;
         p = (object)(((char *)p) + size);
