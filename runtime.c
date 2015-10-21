@@ -2715,7 +2715,7 @@ fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
     }
     max_freed = gc_collect(Cyc_heap, &freed);
 printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
-exit(1); // JAE DEBUG
+//exit(1); // JAE DEBUG
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
