@@ -67,6 +67,7 @@ bootstrap: icyc
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp runtime.c $(BOOTSTRAP_DIR)
+	cp gc.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
 	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/read.c $(BOOTSTRAP_DIR)/scheme
