@@ -161,7 +161,7 @@ size_t gc_heap_total_size(gc_heap *h)
 
 void gc_mark(gc_heap *h, object obj)
 {
-  if (!obj || is_marked(obj))
+  if (nullp(obj) || is_value_type(obj) || mark(obj))
     return;
 
 #if GC_DEBUG_PRINTFS
@@ -232,7 +232,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       // END DEBUG
 #endif
 
-      if (!is_marked(p)) {
+      if (!mark(p)) {
 #if GC_DEBUG_PRINTFS
         fprintf(stdout, "sweep: object is not marked %p\n", p);
 #endif

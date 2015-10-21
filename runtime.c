@@ -2353,7 +2353,7 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
 // if the heap was expanded during alloc, and after all the allocs are done
 // after a minor GC (or during the minor GC), call into this function to
 // free up unused space
-void gc_collect(gc_heap *h, size_t *sum_freed) 
+size_t gc_collect(gc_heap *h, size_t *sum_freed) 
 {
   printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
   // Mark global variables
@@ -2369,7 +2369,7 @@ void gc_collect(gc_heap *h, size_t *sum_freed)
   // conservative mark?
   // weak refs?
   // finalize?
-  gc_sweep(h, sum_freed);
+  return gc_sweep(h, sum_freed);
   // debug print free stats
   // return value from sweep??
 }
@@ -2594,7 +2594,7 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
   int heap_grown = 0;
 
-fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
+//fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer
   if (num_args > NUM_GC_ANS) {
     printf("Fatal error - too many arguments (%d) to GC\n", num_args);
@@ -2707,16 +2707,18 @@ fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
 
   // Check if we need to do a major GC
   if (heap_grown) {
-    size_t freed = 0;
+    size_t freed = 0, max_freed = 0;
 fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
     gc_mark(Cyc_heap, cont);
     for (i = 0; i < num_args; i++){ 
       gc_mark(Cyc_heap, args[i]);
     }
-    gc_collect(Cyc_heap, &freed);
+    max_freed = gc_collect(Cyc_heap, &freed);
+printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
+exit(1); // JAE DEBUG
   }
 
-fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
+//fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
   longjmp(jmp_main,1); // Return globals gc_cont, gc_ans
 }
 

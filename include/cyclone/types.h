@@ -51,7 +51,6 @@ struct gc_header_type_t {
   unsigned int mark; // mark bits (only need 2)
   // TODO: forwarding address (probably not needed for mark/sweep), anything else???
 };
-#define is_marked(x) (is_object_type(x) && ((list)x)->hdr.mark)
 #define mark(x) (((list) x)->hdr.mark)
 
 /* HEAP definitions */
@@ -76,13 +75,13 @@ gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
 void gc_mark(gc_heap *h, object obj);
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
-void gc_collect(gc_heap *h, size_t *sum_freed);
+size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0
-#define GC_DEBUG_PRINTFS 0
+#define GC_DEBUG_PRINTFS 1
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
