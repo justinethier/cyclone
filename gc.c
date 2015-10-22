@@ -219,7 +219,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       }
       size = gc_heap_align(gc_allocated_bytes(p));
       
-#if GC_DEBUG_PRINTFS
+//#if GC_DEBUG_PRINTFS
       // DEBUG
       if (!is_object_type(p))
         fprintf(stderr, "sweep: invalid object at %p", p);
@@ -228,7 +228,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       if (r && ((char *)p) + size > (char *)r)
         fprintf(stderr, "sweep: bad size at %p + %d > %p", p, size, r);
       // END DEBUG
-#endif
+//#endif
 
       if (!mark(p)) {
 #if GC_DEBUG_PRINTFS
