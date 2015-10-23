@@ -225,7 +225,9 @@ fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
 
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
-fprintf(stdout, "skip free block %p size = %d\n", p, r->size);
+#if GC_DEBUG_PRINTFS
+        fprintf(stdout, "skip free block %p size = %d\n", p, r->size);
+#endif
         continue;
       }
       size = gc_heap_align(gc_allocated_bytes(p));
@@ -308,6 +310,7 @@ void gc_thr_grow_move_buffer(gc_thread_data *d)
   }
 
   d->moveBuf = realloc(d->moveBuf, d->moveBufLen * sizeof(void *));
+  printf("grew moveBuffer, len = %d\n", d->moveBufLen);
 }
 
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj)

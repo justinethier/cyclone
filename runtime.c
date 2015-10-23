@@ -2708,8 +2708,11 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
     scani++;
   }
 
+//fprintf(stdout, "DEBUG done minor GC, alloci = %d\n", alloci);
+
   // Check if we need to do a major GC
   if (heap_grown) {
+    time_t majorStart = time(NULL);
     size_t freed = 0, max_freed = 0;
 fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
     gc_mark(Cyc_heap, cont);
@@ -2717,7 +2720,7 @@ fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
       gc_mark(Cyc_heap, args[i]);
     }
     max_freed = gc_collect(Cyc_heap, &freed);
-printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
+printf("done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - majorStart);
 //JAE_DEBUG++;
 //if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
   }
