@@ -33,8 +33,8 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   next->size = size - gc_heap_align(gc_free_chunk_size);
   next->next = NULL;
 #if GC_DEBUG_PRINTFS
-  fprintf(stderr, ("heap: %p-%p data: %p-%p\n"),
-          h, ((char*)h)+gc_heap_pad_size(size), h->data, h->data + size);
+  fprintf(stderr, ("heap: %p-%p data: %p-%p size: %d\n"),
+          h, ((char*)h)+gc_heap_pad_size(size), h->data, h->data + size, size);
   fprintf(stderr, ("first: %p end: %p\n"),
           (object)gc_heap_first_block(h), (object)gc_heap_end(h));
   fprintf(stderr, ("free1: %p-%p free2: %p-%p\n"),
@@ -49,8 +49,8 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   gc_heap *h_last = gc_heap_last(h);
   cur_size = h_last->size;
   new_size = gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
-  h->next = gc_heap_create(new_size, h->max_size, chunk_size);
-  return (h->next != NULL);
+  h_last->next = gc_heap_create(new_size, h_last->max_size, chunk_size);
+  return (h_last->next != NULL);
 }
 
 void *gc_try_alloc(gc_heap *h, size_t size) 
@@ -142,9 +142,10 @@ size_t gc_allocated_bytes(object obj)
   if (t == port_tag) return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag) return gc_heap_align(sizeof(cvar_type));
   
-#if GC_DEBUG_PRINTFS
+//#if GC_DEBUG_PRINTFS
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %ld\n", obj, t);
-#endif
+  exit(1);
+//#endif
   return 0;
 }
 
@@ -214,6 +215,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   object p, end;
   gc_free_list *q, *r, *s;
   for (; h; h = h->next) { // All heaps
+fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
     p = gc_heap_first_block(h);
     q = h->free_list;
     end = gc_heap_end(h);
@@ -223,9 +225,11 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
+fprintf(stdout, "skip free block %p size = %d\n", p, r->size);
         continue;
       }
       size = gc_heap_align(gc_allocated_bytes(p));
+//fprintf(stdout, "check object %p, size = %d\n", p, size);
       
 //#if GC_DEBUG_PRINTFS
       // DEBUG
@@ -240,7 +244,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if (!mark(p)) {
 #if GC_DEBUG_PRINTFS
-//        fprintf(stdout, "sweep: object is not marked %p\n", p);
+        fprintf(stdout, "sweep: object is not marked %p\n", p);
 #endif
         // free p
         sum_freed += size;
@@ -278,6 +282,11 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 #if GC_DEBUG_PRINTFS
 //        fprintf(stdout, "sweep: object is marked %p\n", p);
 #endif
+        //if (mark(p) != 1) {
+        //  printf("unexpected mark value %d\n", mark(p));
+        //  exit(1);
+        //}
+
         ((list)p)->hdr.mark = 0;
         p = (object)(((char *)p) + size);
       }
