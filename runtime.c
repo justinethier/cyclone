@@ -2380,7 +2380,7 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed)
 char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
 
-printf("DEBUG gc_move type = %ld\n", type_of(obj)); // JAE DEBUG
+//printf("DEBUG gc_move type = %ld\n", type_of(obj)); // JAE DEBUG
   switch(type_of(obj)){
     case cons_tag: {
       list hp = gc_alloc(Cyc_heap, sizeof(cons_type), heap_grown); // hp ==> new heap object
@@ -2716,7 +2716,7 @@ fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
     }
     max_freed = gc_collect(Cyc_heap, &freed);
 printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
-exit(1); // JAE DEBUG
+//exit(1); // JAE DEBUG
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG

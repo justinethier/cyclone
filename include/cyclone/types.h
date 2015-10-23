@@ -82,7 +82,7 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0
-#define GC_DEBUG_PRINTFS 1
+#define GC_DEBUG_PRINTFS 0
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0

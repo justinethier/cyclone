@@ -22,9 +22,9 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   h->size = size;
   h->chunk_size = chunk_size;
   h->max_size = max_size;
-printf("DEBUG h->data addr: %p\n", &(h->data));
+//printf("DEBUG h->data addr: %p\n", &(h->data));
   h->data = (char *) gc_heap_align(sizeof(h->data) + (uint)&(h->data)); 
-printf("DEBUG h->data addr: %p\n", h->data);
+//printf("DEBUG h->data addr: %p\n", h->data);
   h->next = NULL;
   free = h->free_list = (gc_free_list *)h->data;
   next = (gc_free_list *)(((char *) free) + gc_heap_align(gc_free_chunk_size));
@@ -32,14 +32,14 @@ printf("DEBUG h->data addr: %p\n", h->data);
   free->next = next;
   next->size = size - gc_heap_align(gc_free_chunk_size);
   next->next = NULL;
-//#if GC_DEBUG_PRINTFS
-  fprintf(stderr, ("heap: %p-%p data: %p-%p"),
+#if GC_DEBUG_PRINTFS
+  fprintf(stderr, ("heap: %p-%p data: %p-%p\n"),
           h, ((char*)h)+gc_heap_pad_size(size), h->data, h->data + size);
-  fprintf(stderr, ("first: %p end: %p"),
+  fprintf(stderr, ("first: %p end: %p\n"),
           (object)gc_heap_first_block(h), (object)gc_heap_end(h));
-  fprintf(stderr, ("free1: %p-%p free2: %p-%p"),
+  fprintf(stderr, ("free1: %p-%p free2: %p-%p\n"),
           free, ((char*)free)+free->size, next, ((char*)next)+next->size);
-//#endif
+#endif
   return h;
 }
 
@@ -109,9 +109,9 @@ void *gc_alloc(gc_heap *h, size_t size, int *heap_grown)
       exit(1); // TODO: throw error???
     }
   }
-//#if GC_DEBUG_PRINTFS
+#if GC_DEBUG_PRINTFS
   fprintf(stdout, "alloc %p size = %d\n", result, size);
-//#endif
+#endif
   return result;
 }
 
