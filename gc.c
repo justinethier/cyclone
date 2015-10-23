@@ -34,9 +34,9 @@ printf("DEBUG h->data addr: %p\n", h->data);
   next->next = NULL;
 //#if GC_DEBUG_PRINTFS
   fprintf(stderr, ("heap: %p-%p data: %p-%p"),
-          h, ((char*)h)+sexp_heap_pad_size(size), h->data, h->data + size);
+          h, ((char*)h)+gc_heap_pad_size(size), h->data, h->data + size);
   fprintf(stderr, ("first: %p end: %p"),
-          (object)sexp_heap_first_block(h), (object)sexp_heap_end(h));
+          (object)gc_heap_first_block(h), (object)gc_heap_end(h));
   fprintf(stderr, ("free1: %p-%p free2: %p-%p"),
           free, ((char*)free)+free->size, next, ((char*)next)+next->size);
 //#endif
