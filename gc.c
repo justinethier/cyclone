@@ -17,7 +17,7 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   gc_free_list *free, *next;
   gc_heap *h;
   // TODO: mmap?
-  h = malloc(size);
+  h = malloc(gc_heap_pad_size(size));
   if (!h) return NULL;
   h->size = size;
   h->chunk_size = chunk_size;
@@ -32,6 +32,14 @@ printf("DEBUG h->data addr: %p\n", h->data);
   free->next = next;
   next->size = size - gc_heap_align(gc_free_chunk_size);
   next->next = NULL;
+//#if GC_DEBUG_PRINTFS
+  fprintf(stderr, ("heap: %p-%p data: %p-%p"),
+          h, ((char*)h)+sexp_heap_pad_size(size), h->data, h->data + size);
+  fprintf(stderr, ("first: %p end: %p"),
+          (object)sexp_heap_first_block(h), (object)sexp_heap_end(h));
+  fprintf(stderr, ("free1: %p-%p free2: %p-%p"),
+          free, ((char*)free)+free->size, next, ((char*)next)+next->size);
+//#endif
   return h;
 }
 
@@ -101,9 +109,9 @@ void *gc_alloc(gc_heap *h, size_t size, int *heap_grown)
       exit(1); // TODO: throw error???
     }
   }
-#if GC_DEBUG_PRINTFS
-//  fprintf(stdout, "alloc %p\n", result);
-#endif
+//#if GC_DEBUG_PRINTFS
+  fprintf(stdout, "alloc %p size = %d\n", result, size);
+//#endif
   return result;
 }
 

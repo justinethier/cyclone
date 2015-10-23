@@ -58,6 +58,7 @@ struct gc_header_type_t {
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_end(h) ((object)((char*)h->data + h->size))
+#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
 #define gc_free_chunk_size (sizeof(gc_free_list))
 
 #define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((unsigned int)-1)-((1<<(bits))-1)))
