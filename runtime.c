@@ -9,6 +9,8 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
+int JAE_DEBUG = 0;
+
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[21] = { \
@@ -2716,7 +2718,8 @@ fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
     }
     max_freed = gc_collect(Cyc_heap, &freed);
 printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
-//exit(1); // JAE DEBUG
+JAE_DEBUG++;
+if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
