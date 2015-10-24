@@ -61,7 +61,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
     // TODO: chunk size (ignoring for now)
 
     for (f1 = h->free_list, f2 = f1->next; f2; f1 = f2, f2 = f2->next) { // all free in this heap
-      if (f2->size > size) { // Big enough for request
+      if (f2->size >= size) { // Big enough for request
         // TODO: take whole chunk or divide up f2 (using f3)?
         if (f2->size >= (size + gc_heap_align(1) /* min obj size */)) {
           f3 = (gc_free_list *) (((char *)f2) + size);
