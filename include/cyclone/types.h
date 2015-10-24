@@ -94,7 +94,7 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 #define STACK_GROWS_DOWNWARD 1
 
 /* Size of the stack buffer, in bytes.           */
-#define STACK_SIZE 500000
+#define STACK_SIZE 250000
 
 /* Size of the 2nd generation, in bytes. */
 #define HEAP_SIZE 6000000
