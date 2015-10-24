@@ -83,6 +83,7 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 /* GC debugging flags */
 //#define DEBUG_GC 0
 #define GC_DEBUG_PRINTFS 0
+#define GC_DEBUG_CONCISE_PRINTFS 0
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
@@ -93,13 +94,14 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 /* Which way does the CPU grow its stack? */
 #define STACK_GROWS_DOWNWARD 1
 
-/* Size of the stack buffer, in bytes.           */
+/* Size of the stack buffer, in bytes.
+   This is used as the first generation of the GC. */
 #define STACK_SIZE 250000
 
-/* Size of the 2nd generation, in bytes. */
+/* Size of a "page" on the heap (the 2nd generation), in bytes. */
 #define HEAP_SIZE 6000000
 
-/* Define size of object tags.  Options are "short" or "long". */
+/* Define size of object tags */
 typedef long tag_type;
 
 #ifndef CLOCKS_PER_SEC
@@ -150,7 +152,7 @@ typedef long tag_type;
    have extra least significant bits that can be used to mark them as
    values instead of objects (IE, pointer to a tagged object).
    On many machines, addresses are multiples of four, leaving the two
-   least significant bits free - according to lisp in small pieces.
+   least significant bits free - from lisp in small pieces.
 */
 #define obj_is_char(x)  ((unsigned long)(x) & (unsigned long)1)
 #define obj_obj2char(x) (char)((long)(x)>>1)

@@ -10,7 +10,7 @@
 #include "cyclone/runtime.h"
 
 //int JAE_DEBUG = 0;
-int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+//int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -2350,22 +2350,21 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
 // longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 //}
 
-// NEW GC algorithm
-//
-// TODO: not quite sure when to call this function. might want to set a flag
-// if the heap was expanded during alloc, and after all the allocs are done
-// after a minor GC (or during the minor GC), call into this function to
-// free up unused space
+// Collect garbage using mark&sweep algorithm
+// Note non-global roots should be marked prior to calling this function.
 size_t gc_collect(gc_heap *h, size_t *sum_freed) 
 {
+#if GC_DEBUG_CONCISE_PRINTFS
   printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+#endif
   // Mark global variables
-  gc_mark(h, Cyc_global_variables); /* Internal global used by the runtime */
+  gc_mark(h, Cyc_global_variables); // Internal global used by the runtime
+                                    // Marking it ensures all glos are marked
   {
     list l = global_table;
     for(; !nullp(l); l = cdr(l)){
      cvar_type *c = (cvar_type *)car(l);
-     gc_mark(h, *(c->pvar)); // Mark global, not the pvar
+     gc_mark(h, *(c->pvar)); // Mark actual object the global points to
     }
   }
   // TODO: what else to mark? gc_mark(
@@ -2373,8 +2372,7 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed)
   // weak refs?
   // finalize?
   return gc_sweep(h, sum_freed);
-  // debug print free stats
-  // return value from sweep??
+  // debug print free stats?
 }
 
 // TODO: move globals to thread-specific structures.
@@ -2383,7 +2381,7 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed)
 char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
 
-gcMoveCountsDEBUG[type_of(obj)]++;
+//gcMoveCountsDEBUG[type_of(obj)]++;
 
 //printf("DEBUG gc_move type = %ld\n", type_of(obj)); // JAE DEBUG
   switch(type_of(obj)){
@@ -2715,19 +2713,24 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
 
   // Check if we need to do a major GC
   if (heap_grown) {
-    time_t majorStart = time(NULL);
     size_t freed = 0, max_freed = 0;
-fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
+#if GC_DEBUG_CONCISE_PRINTFS
+    time_t majorStart = time(NULL);
+    fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
+#endif
     gc_mark(Cyc_heap, cont);
     for (i = 0; i < num_args; i++){ 
       gc_mark(Cyc_heap, args[i]);
     }
     max_freed = gc_collect(Cyc_heap, &freed);
-printf("done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - majorStart);
-//JAE_DEBUG++;
-//if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
-for (i = 0; i < 20; i++){
-  printf("gcMoveCountsDEBUG[%d] = %d\n", i, gcMoveCountsDEBUG[i]);}
+#if GC_DEBUG_CONCISE_PRINTFS
+    printf("done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - majorStart);
+    //JAE_DEBUG++;
+    //if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
+    for (i = 0; i < 20; i++){
+      printf("gcMoveCountsDEBUG[%d] = %d\n", i, gcMoveCountsDEBUG[i]);
+    }
+#endif
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG

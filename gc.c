@@ -71,8 +71,6 @@ void *gc_try_alloc(gc_heap *h, size_t size)
         } else { /* Take the whole chunk */
           f1->next = f2->next;
         }
-        // zero-out the header
-        //memset((object)f2, 0, sizeof(gc_header_type));
         return f2;
       }
     }
@@ -216,7 +214,9 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   object p, end;
   gc_free_list *q, *r, *s;
   for (; h; h = h->next) { // All heaps
-fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
+#if GC_DEBUG_CONCISE_PRINTFS
+    fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
+#endif
     p = gc_heap_first_block(h);
     q = h->free_list;
     end = gc_heap_end(h);
@@ -234,7 +234,7 @@ fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
       size = gc_heap_align(gc_allocated_bytes(p));
 //fprintf(stdout, "check object %p, size = %d\n", p, size);
       
-//#if GC_DEBUG_PRINTFS
+#if GC_DEBUG_CONCISE_PRINTFS
       // DEBUG
       if (!is_object_type(p))
         fprintf(stderr, "sweep: invalid object at %p", p);
@@ -243,7 +243,7 @@ fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
       if (r && ((char *)p) + size > (char *)r)
         fprintf(stderr, "sweep: bad size at %p + %d > %p", p, size, r);
       // END DEBUG
-//#endif
+#endif
 
       if (!mark(p)) {
 #if GC_DEBUG_PRINTFS
@@ -311,7 +311,9 @@ void gc_thr_grow_move_buffer(gc_thread_data *d)
   }
 
   d->moveBuf = realloc(d->moveBuf, d->moveBufLen * sizeof(void *));
+#if GC_DEBUG_CONCISE_PRINTFS
   printf("grew moveBuffer, len = %d\n", d->moveBufLen);
+#endif
 }
 
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj)
