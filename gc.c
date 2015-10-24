@@ -48,7 +48,8 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   size_t cur_size, new_size;
   gc_heap *h_last = gc_heap_last(h);
   cur_size = h_last->size;
-  new_size = gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
+  // JAE - For now, just add a new page
+  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
   h_last->next = gc_heap_create(new_size, h_last->max_size, chunk_size);
   return (h_last->next != NULL);
 }
@@ -71,7 +72,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
           f1->next = f2->next;
         }
         // zero-out the header
-        memset((object)f2, 0, sizeof(gc_header_type));
+        //memset((object)f2, 0, sizeof(gc_header_type));
         return f2;
       }
     }

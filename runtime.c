@@ -10,6 +10,7 @@
 #include "cyclone/runtime.h"
 
 //int JAE_DEBUG = 0;
+int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -2382,6 +2383,8 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed)
 char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
 
+gcMoveCountsDEBUG[type_of(obj)]++;
+
 //printf("DEBUG gc_move type = %ld\n", type_of(obj)); // JAE DEBUG
   switch(type_of(obj)){
     case cons_tag: {
@@ -2723,6 +2726,8 @@ fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
 printf("done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - majorStart);
 //JAE_DEBUG++;
 //if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
+for (i = 0; i < 20; i++){
+  printf("gcMoveCountsDEBUG[%d] = %d\n", i, gcMoveCountsDEBUG[i]);}
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
