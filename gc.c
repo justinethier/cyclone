@@ -1,3 +1,4 @@
+TODO: what the fuck is being printed by the runtime? looks like a time_t? find and remove it from this branch and gc-dev3
 /* A basic mark-sweep GC
    As of now, the GC code is based off the implementation from chibi scheme
 
