@@ -400,7 +400,7 @@ static const int  gc_color_blue = 3;
 static int gc_status_coll;
 static int gc_stage;
 
-// Mutator functions
+// GC functions called by the Mutator threads
 
 void gc_mut_update()
 {
@@ -424,7 +424,7 @@ void gc_mut_cooperate()
 //  statusm = statusc
 }
 
-// Collector functions
-// Collection cycle
+// GC functions calld by the Collector thread
+// GC Collection cycle
 
 // END tri-color marking section
