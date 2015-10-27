@@ -397,7 +397,7 @@ static const int  gc_color_grey = 1;
 static int        gc_color_clear = 2; // White
 static const int  gc_color_blue = 3;
 
-static int gc_status_coll;
+static int gc_status_col;
 static int gc_stage;
 
 // GC functions called by the Mutator threads
@@ -407,24 +407,30 @@ void gc_mut_update()
   // TODO: how does this fit in with the write buffer?
 }
 
-void gc_mut_create()
+// Done as part of gc_move
+//void gc_mut_create()
+
+void gc_mut_cooperate(gc_thread_data *thd)
 {
-  // TODO: probably do not need this, can modify gc_move to 
-  // assign thread's allocation color
+  if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
+    if (thd->gc_mut_status == STATUS_SYNC2) { // TODO: more sync??
+      // Since everything is on the stack, at this point probably only need
+      // to worry about anything on the stack that is referencing a heap object
+      //  For each x in roots:
+      //  MarkGray(x)
+      thd->gc_alloc_color = gc_color_mark; // TODO: synchronization for global??
+    }
+    thd->gc_mut_status = gc_status_col; // TODO: syncronization??
+  }
 }
 
-void gc_mut_cooperate()
+// Collector functions
+void gc_mark_gray(object obj)
 {
-// TODO:
-//  If (statusm != statusc) then
-//  If (statusm == sync2) then
-//  For each x in roots:
-//  MarkGray(x)
-//  allocationColorm = markColor
-//  statusm = statusc
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
+    // TODO: mark buffer, last write
+  }
 }
-
-// GC functions calld by the Collector thread
 // GC Collection cycle
 
 // END tri-color marking section
