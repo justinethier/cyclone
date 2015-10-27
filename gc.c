@@ -331,25 +331,6 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj)
 // }
 // END heap definitions
 
-/* tri-color GC stuff, we will care about this later...
-int colorWhite = 0;
-int colorGray  = 1;
-int colorBlack = 2;
-int colorBlue  = 3;
-
-typedef enum {STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2} status_type;
-
-// DLG globals
-static void *swept;
-static int dirty;
-static void *scanned;
-
-// TODO: mutator actions
-// TODO: collector
-// TODO: extentions
-// TODO: proofs, etc
-// TODO: revist design using content from kolodner
-*/
 
 // int main(int argc, char **argv) {
 //   int i;
@@ -394,3 +375,56 @@ static void *scanned;
 // 
 //   return 0;
 // }
+
+// tri-color GC section, WIP
+//
+// Note: will need to use atomics and/or locking to access any
+// variables shared between threads
+typedef enum { STATUS_ASYNC 
+             , STATUS_SYNC1 
+             , STATUS_SYNC2 
+             } gc_status_type;
+
+typedef enum { STAGE_CLEAR_OR_MARKING 
+             , STAGE_TRACING 
+             , STAGE_REF_PROCESSING 
+             , STAGE_SWEEPING 
+             , STAGE_RESTING
+             } gc_stage_type;
+
+static int        gc_color_mark = 0; // Black
+static const int  gc_color_grey = 1;
+static int        gc_color_clear = 2; // White
+static const int  gc_color_blue = 3;
+
+static int gc_status_coll;
+static int gc_stage;
+
+// Mutator functions
+
+void gc_mut_update()
+{
+  // TODO: how does this fit in with the write buffer?
+}
+
+void gc_mut_create()
+{
+  // TODO: probably do not need this, can modify gc_move to 
+  // assign thread's allocation color
+}
+
+void gc_mut_cooperate()
+{
+// TODO:
+//  If (statusm != statusc) then
+//  If (statusm == sync2) then
+//  For each x in roots:
+//  MarkGray(x)
+//  allocationColorm = markColor
+//  statusm = statusc
+}
+
+// Collector functions
+// Collection cycle
+
+// END tri-color marking section
