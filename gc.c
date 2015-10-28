@@ -410,9 +410,11 @@ void gc_mut_update()
 // Done as part of gc_move
 //void gc_mut_create()
 
-//
+/*
 TODO: think these points through and get answers from the paper
 before writing the code:
+
+PHASE 1 - separation of mutator and collector into separate threads
 
 can cooperate be part of a minor gc? in that case, the 
 marking could be done as part of allocation
@@ -435,19 +437,44 @@ async they have a chance to markgray, which will include the write
 barrier. so given that, is it still possible for an old heap ref to 
 sneak into a stack object during the async phase?
 
-
-more questions:
-- from above, figure out how/if after cooperation/async, can a stack object pick
+more questions on above point:
+- figure out how/if after cooperation/async, can a stack object pick
   up a reference to a heap object that will be collected during that GC cycle?
   need to be able to prevent this somehow...
+
+- need to figure out real world use case(s) where this could happen, to try and
+  figure out how to address this problem
+
+PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
+
 - how does the collector handle stack objects that reference objects from 
   another thread's stack?
-  ) need to figure this out because do not want to move these early, right?
-    want its own stack to move them?
-  ) but does that mean we need a fwd pointer to be live for awhile? do we need
+  * minor GC will only relocate that thread's objects, so another thread's would not
+    be moved. however, if another thread references one of the GC'd thread's
+    stack objects, it will now get a forwarding pointer. even worse, what if the
+    other thread is blocked and the reference becomes corrupt due to the stack
+    longjmp? there are major issues with one thread referencing another thread's
+    objects.
+  * had considered adding a stack bit to the object header. if we do this and
+    initialize it during object creation, a thread could in theory detect
+    if an object belongs to another thread. but it might be expensive because
+    a read barrier would have to be used to check the object's stack bit and
+    address (to see if it is on this heap).
+  * alternatively, how would one thread pick up a reference to another one's
+    objects? are there any ways to detect these events and deal with them?
+    it might be possible to detect such a case and allocate the object on the heap,
+    replacing it with a fwd pointer. unfortunately that means we need a read 
+    barrier (ick) to handle forwarding pointers in arbitrary places
+  * but does that mean we need a fwd pointer to be live for awhile? do we need
     a read barrier to get this to work? obviously we want to avoid a read barrier
     at all costs.
-//
+- what are the real costs of allowing forwarding pointers to exist outside of just
+  minor GC? assume each runtime primitive would need to be updated to handle the
+  case where the obj is a fwd pointer - is it just a matter of each function 
+  detecting this and (possibly) calling itself again with the 'real' address?
+  obviously that makes the runtime slower due to more checks, but maybe it is
+  not *so* bad?
+*/
 void gc_mut_cooperate(gc_thread_data *thd)
 {
   if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
