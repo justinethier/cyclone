@@ -434,6 +434,19 @@ any allocations will not be collected. also once collectors go
 async they have a chance to markgray, which will include the write
 barrier. so given that, is it still possible for an old heap ref to 
 sneak into a stack object during the async phase?
+
+
+more questions:
+- from above, figure out how/if after cooperation/async, can a stack object pick
+  up a reference to a heap object that will be collected during that GC cycle?
+  need to be able to prevent this somehow...
+- how does the collector handle stack objects that reference objects from 
+  another thread's stack?
+  ) need to figure this out because do not want to move these early, right?
+    want its own stack to move them?
+  ) but does that mean we need a fwd pointer to be live for awhile? do we need
+    a read barrier to get this to work? obviously we want to avoid a read barrier
+    at all costs.
 //
 void gc_mut_cooperate(gc_thread_data *thd)
 {
