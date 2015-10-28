@@ -1,4 +1,3 @@
-TODO: what the fuck is being printed by the runtime? looks like a time_t? find and remove it from this branch and gc-dev3
 /* A basic mark-sweep GC
    As of now, the GC code is based off the implementation from chibi scheme
 
@@ -411,6 +410,31 @@ void gc_mut_update()
 // Done as part of gc_move
 //void gc_mut_create()
 
+//
+TODO: think these points through and get answers from the paper
+before writing the code:
+
+can cooperate be part of a minor gc? in that case, the 
+marking could be done as part of allocation
+
+but then what exactly does that mean, to mark gray? because
+objects moved to the heap will be set to mark color at that 
+point (until collector thread finishes). but would want
+objects on the heap referenced by them to be traced, so 
+I suppose that is the purpose of the gray, to indicate
+those still need to be traced. but need to think this through,
+do we need the markbuffer and last read/write? do those make
+  sense with mta approach (assume so)???
+
+ONLY CONCERN - what happens if an object on the stack 
+has a reference to an object on the heap that is collected?
+but how would this happen? collector marks global roots before
+telling mutators to go to async, and once mutators go async
+any allocations will not be collected. also once collectors go
+async they have a chance to markgray, which will include the write
+barrier. so given that, is it still possible for an old heap ref to 
+sneak into a stack object during the async phase?
+//
 void gc_mut_cooperate(gc_thread_data *thd)
 {
   if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
