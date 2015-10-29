@@ -73,6 +73,11 @@ struct gc_header_type_t {
 #define gc_word_align(n) gc_align((n), 2)
 #define gc_heap_align(n) gc_align(n, 5)
 
+/* Utility functions */
+void **vpbuffer_realloc(void **buf, int *len);
+void **vpbuffer_add(void **buf, int *len, int i, void *obj);
+void vpbuffer_free(void **buf);
+
 /* GC prototypes */
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);

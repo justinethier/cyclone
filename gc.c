@@ -326,55 +326,33 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj)
   (*alloci)++;
 }
 
+// Generic buffer functions
+void **vpbuffer_realloc(void **buf, int *len)
+{
+  return realloc(buf, (*len) * sizeof(void *));
+}
+
+void **vpbuffer_add(void **buf, int *len, int i, void *obj)
+{
+  if (i == *len) {
+    *len *= 2;
+    buf = vpbuffer_realloc(buf, len);
+  }
+  buf[i] = obj;
+  return buf;
+}
+
+void vpbuffer_free(void **buf)
+{
+  free(buf);
+}
+
+
 // void gc_init()
 // {
 // }
 // END heap definitions
 
-
-// int main(int argc, char **argv) {
-//   int i;
-//   size_t freed = 0, max_freed = 0;
-//   gc_heap *h = gc_heap_create(8 * 1024 * 1024, 0, 0);
-//   void *obj1 = gc_alloc(h, sizeof(cons_type));
-//   void *obj2 = gc_alloc(h, sizeof(cons_type));
-//   void *objI = gc_alloc(h, sizeof(integer_type));
-// 
-//   for (i = 0; i < 1000000; i++) {
-//     gc_alloc(h, sizeof(integer_type));
-//     gc_alloc(h, sizeof(integer_type));
-//   }
-// 
-//   // Build up an object graph to test collection...
-//   ((integer_type *)objI)->hdr.mark = 0;
-//   ((integer_type *)objI)->tag = integer_tag;
-//   ((integer_type *)objI)->value = 42;
-// 
-//   ((list)obj2)->hdr.mark = 0;
-//   ((list)obj2)->tag = cons_tag;
-//   ((list)obj2)->cons_car = objI;
-//   ((list)obj2)->cons_cdr = NULL;
-// 
-//   ((list)obj1)->hdr.mark = 0;
-//   ((list)obj1)->tag = cons_tag;
-//   ((list)obj1)->cons_car = obj2;
-//   ((list)obj1)->cons_cdr = NULL;
-// 
-//   printf("(heap: %p size: %d)", h, (unsigned int)gc_heap_total_size(h));
-//   gc_mark(h, obj1);
-//   max_freed = gc_sweep(h, &freed);
-//   printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
-//   for (i = 0; i < 10; i++) {
-//     gc_alloc(h, sizeof(integer_type));
-//     gc_alloc(h, sizeof(integer_type));
-//   }
-//   printf("(heap: %p size: %d)", h, (unsigned int)gc_heap_total_size(h));
-//   gc_mark(h, obj1);
-//   max_freed = gc_sweep(h, &freed);
-//   printf("done, freed = %d, max_freed = %d\n", freed, max_freed);
-// 
-//   return 0;
-// }
 
 /*
 Rough plan for how to implement new GC algorithm. We need to do this in
@@ -481,8 +459,8 @@ static int gc_status_col;
 static int gc_stage;
 
 // Does not need sync, only used by collector thread
-static void **mark_stack;
-static int mark_stack_len;
+static void **mark_stack = NULL;
+static int mark_stack_len = 128;
 
 // GC functions called by the Mutator threads
 
@@ -521,3 +499,34 @@ void gc_mark_gray(object obj)
 // GC Collection cycle
 
 // END tri-color marking section
+
+//// Unit testing:
+//int main(int argc, char **argv) {
+//  int a = 1, b = 2, c = 3, i;
+//  void **buf = NULL;
+//  int size = 1;
+//
+//  buf = vpbuffer_realloc(buf, &size);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  buf = vpbuffer_add(buf, &size, 0, &a);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  buf = vpbuffer_add(buf, &size, 1, &b);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  buf = vpbuffer_add(buf, &size, 2, &c);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  buf = vpbuffer_add(buf, &size, 3, &a);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  buf = vpbuffer_add(buf, &size, 4, &b);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  for (i = 5; i < 20; i++) {
+//    buf = vpbuffer_add(buf, &size, i, &c);
+//  }
+//
+//  for (i = 0; i < 20; i++){
+//    printf("%d\n", *((int *) buf[i]));
+//  }
+//  vpbuffer_free(buf);
+//  printf("buf = %p, size = %d\n", buf, size);
+//  return 0;
+//}
+//
