@@ -461,6 +461,7 @@ static int gc_stage;
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
 static int mark_stack_len = 128;
+static int mark_stack_i = 0;
 
 // GC functions called by the Mutator threads
 
@@ -490,11 +491,33 @@ void gc_mut_cooperate(gc_thread_data *thd)
 }
 
 // Collector functions
-void gc_mark_gray(object obj)
+void gc_mark_gray(gc_thread_data *thd, object obj)
 {
   if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
-    // TODO: mark buffer, last write
+    // TODO: lock mark buffer (not ideal, but a possible first step)?
+    // pthread_mutex_lock
+    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
+                                    &(thd->mark_buffer_len),
+                                    thd->last_write,
+                                    obj);
+    // pthread_mutex_unlock
+    // unlock mark buffer
+    ATOMIC_INC(&(thd->last_write));
   }
+}
+
+void gc_col_mark_gray(object obj)
+{
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
+    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
+  }
+}
+
+void gc_col_empty_collector_stack()
+{
+// TODO:
+//  while (!markstack.empty())
+//    markBlack(markstack.pop())
 }
 // GC Collection cycle
 
