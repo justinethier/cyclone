@@ -493,7 +493,10 @@ void gc_mut_cooperate(gc_thread_data *thd)
 // Collector functions
 void gc_mark_gray(gc_thread_data *thd, object obj)
 {
-  if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
+  // sync access to obj? check the paper, need to see if any other thread would be modifying
+  // either object type or mark. I believe both should be stable once the object is placed
+  // into the heap, with the collector being the only thread that changes marks. but double-check.
+  if (is_object_type(obj) && mark(obj) == ATOMIC_GET(&gc_color_clear)) { // TODO: sync??
     // TODO: lock mark buffer (not ideal, but a possible first step)?
     // pthread_mutex_lock
     thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
@@ -508,7 +511,7 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
 
 void gc_col_mark_gray(object obj)
 {
-  if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
+  if (is_object_type(obj) && mark(obj) == ATOMIC_GET(&gc_color_clear)) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
   }
 }
