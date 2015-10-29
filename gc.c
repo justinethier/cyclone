@@ -376,45 +376,16 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj)
 //   return 0;
 // }
 
-// tri-color GC section, WIP
-//
-// Note: will need to use atomics and/or locking to access any
-// variables shared between threads
-typedef enum { STATUS_ASYNC 
-             , STATUS_SYNC1 
-             , STATUS_SYNC2 
-             } gc_status_type;
-
-typedef enum { STAGE_CLEAR_OR_MARKING 
-             , STAGE_TRACING 
-             , STAGE_REF_PROCESSING 
-             , STAGE_SWEEPING 
-             , STAGE_RESTING
-             } gc_stage_type;
-
-static int        gc_color_mark = 0; // Black
-static const int  gc_color_grey = 1;
-static int        gc_color_clear = 2; // White
-static const int  gc_color_blue = 3;
-
-static int gc_status_col;
-static int gc_stage;
-
-// GC functions called by the Mutator threads
-
-void gc_mut_update()
-{
-  // TODO: how does this fit in with the write buffer?
-}
-
-// Done as part of gc_move
-//void gc_mut_create()
-
 /*
-TODO: think these points through and get answers from the paper
-before writing the code:
+Rough plan for how to implement new GC algorithm. We need to do this in
+phases in order to have any hope of getting everything working. Let's prove
+the algorithm out, then extend support to multiple mutators if everything
+looks good.
 
 PHASE 1 - separation of mutator and collector into separate threads
+
+need to syncronize access (preferably via atomics) for anything shared between the 
+collector and mutator threads.
 
 can cooperate be part of a minor gc? in that case, the 
 marking could be done as part of allocation
@@ -444,6 +415,15 @@ more questions on above point:
 
 - need to figure out real world use case(s) where this could happen, to try and
   figure out how to address this problem
+
+from my understanding of the paper, the write barrier prevents this. consider, at the
+start of async, the mutator's roots, global roots, and anything on the write barrier
+have been marked. any new objects will be allocated as marked. that way, anything the
+mutator could later access is either marked or will be after tracing. the only exception
+is if the mutator changes a reference such that tracing will no longer find an object.
+but the write barrier prevents this - during tracing a heap update causes the old
+object to be marked as well. so it will eventually be traced, and there should be no
+dangling objects after GC completes.
 
 PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 
@@ -475,6 +455,44 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
   obviously that makes the runtime slower due to more checks, but maybe it is
   not *so* bad?
 */
+
+// tri-color GC section, WIP
+//
+// Note: will need to use atomics and/or locking to access any
+// variables shared between threads
+typedef enum { STATUS_ASYNC 
+             , STATUS_SYNC1 
+             , STATUS_SYNC2 
+             } gc_status_type;
+
+typedef enum { STAGE_CLEAR_OR_MARKING 
+             , STAGE_TRACING 
+             , STAGE_REF_PROCESSING 
+             , STAGE_SWEEPING 
+             , STAGE_RESTING
+             } gc_stage_type;
+
+static int        gc_color_mark = 0; // Black
+static const int  gc_color_grey = 1;
+static int        gc_color_clear = 2; // White
+static const int  gc_color_blue = 3;
+
+static int gc_status_col;
+static int gc_stage;
+
+// GC functions called by the Mutator threads
+
+void gc_mut_update()
+{
+  // TODO: how does this fit in with the write buffer?
+  // this part is important, especially during tracing
+}
+
+// Done as part of gc_move
+// ideally want to do this without needing sync. we need to sync to get markColor in coop, though
+//void gc_mut_create()
+
+// TODO: when is this called, is this good enough, etc??
 void gc_mut_cooperate(gc_thread_data *thd)
 {
   if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
