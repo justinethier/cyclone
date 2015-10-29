@@ -25,8 +25,13 @@ typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
   void **moveBuf; /* list of objects moved to heap during GC */
   int moveBufLen;
-  int gc_alloc_color; // For tri-color marking
+  // Data needed for tri-color marking 
+  int gc_alloc_color;
   int gc_mut_status;
+  int last_write;
+  int last_read;
+  void **mark_buffer;
+  int mark_buffer_len;
 };
 
 /* GC data structures */

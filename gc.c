@@ -480,6 +480,10 @@ static const int  gc_color_blue = 3;
 static int gc_status_col;
 static int gc_stage;
 
+// Does not need sync, only used by collector thread
+static void **mark_stack;
+static int mark_stack_len;
+
 // GC functions called by the Mutator threads
 
 void gc_mut_update()
