@@ -996,6 +996,7 @@
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
+             cv-name ".hdr.mark = gc_color_red;\n "
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
              cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"

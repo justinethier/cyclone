@@ -438,10 +438,10 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 //
 // Note: will need to use atomics and/or locking to access any
 // variables shared between threads
-static int        gc_color_mark = 0; // Black
-static const int  gc_color_grey = 1; // TODO: appears unused, clean up
-static int        gc_color_clear = 2; // White
-static const int  gc_color_blue = 3;
+static int        gc_color_mark = 0; // Black, is swapped during GC
+//static const int  gc_color_grey = 1; // TODO: appears unused, clean up
+static int        gc_color_clear = 2; // White, is swapped during GC
+// unfortunately this had to be split up; const colors are located in types.h
 
 static int gc_status_col;
 static int gc_stage;
@@ -502,20 +502,21 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
 void gc_collector_trace()
 {
   int clean = 0;
-  while (!clean) {
-    clean = 1;
-  }
-  TODO: need a list of mutators.
-  could keep a buffer or linked list of them. a list may be more efficient
-  also need to consider how to map thread back to its gc_thread_data,
-  which we will need during GC (cooperate). maybe use a (platform-specific)
-  call like below to get a unique ID for the thread, and then use a
-  hashtable to get the thread info. how often will we be accessing this data?
-  seems we will need to be able to access it from 2 places:
-   - from mutator (can compute thread id here)
-   - from collector (need to be able to iterate across all mutators)
-   #include <syscall.h>
-   printf("tid = %d\n", syscall(SYS_gettid));
+//  while (!clean) {
+//    clean = 1;
+//  }
+//  TODO: need a list of mutators.
+//  could keep a buffer or linked list of them. a list may be more efficient
+//  also need to consider how to map thread back to its gc_thread_data,
+//  which we will need during GC (cooperate). maybe use a (platform-specific)
+//  call like below to get a unique ID for the thread, and then use a
+//  hashtable to get the thread info. how often will we be accessing this data?
+//  seems we will need to be able to access it from 2 places:
+//   - from mutator (can compute thread id here)
+//   - from collector (need to be able to iterate across all mutators)
+//   #include <syscall.h>
+//   printf("tid = %d\n", syscall(SYS_gettid));
+
 // note - can atomic operations be used for last read/write, to prevent
 //        coarser-grained synchronization there?
 // TODO:
