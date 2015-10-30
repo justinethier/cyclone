@@ -59,9 +59,8 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 
   Cyc_heap = gc_heap_create(heap_size / 2, 0, 0);
   //Cyc_heap = gc_heap_create(1024, 0, 0);
-  Cyc_thread = (gc_thread_data *)malloc(sizeof(gc_thread_data));
-  Cyc_thread->moveBufLen = 0;
-  gc_thr_grow_move_buffer(Cyc_thread); // Initialize the buffer
+  Cyc_thread = malloc(sizeof(gc_thread_data));
+  gc_thread_data_init(Cyc_thread);
   
 
   // JAE TODO: clean up below (and all of this old code, really)

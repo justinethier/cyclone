@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#include <pthread.h>
 
 /* Define general object type. */
 typedef void *object;
@@ -32,6 +33,7 @@ struct gc_thread_data_t {
   int last_read;
   void **mark_buffer;
   int mark_buffer_len;
+  pthread_mutex_t lock;
 };
 
 /* GC data structures */
@@ -91,6 +93,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
 size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
+void gc_thread_data_init(gc_thread_data *thd);
 
 /* GC debugging flags */
 //#define DEBUG_GC 0

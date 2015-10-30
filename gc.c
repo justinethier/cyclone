@@ -498,13 +498,12 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   // into the heap, with the collector being the only thread that changes marks. but double-check.
   if (is_object_type(obj) && mark(obj) == ATOMIC_GET(&gc_color_clear)) { // TODO: sync??
     // TODO: lock mark buffer (not ideal, but a possible first step)?
-    // pthread_mutex_lock
+    pthread_mutex_lock(&(thd->lock));
     thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
                                     &(thd->mark_buffer_len),
                                     thd->last_write,
                                     obj);
-    // pthread_mutex_unlock
-    // unlock mark buffer
+    pthread_mutex_unlock(&(thd->lock));
     ATOMIC_INC(&(thd->last_write));
   }
 }
@@ -525,6 +524,24 @@ void gc_col_empty_collector_stack()
 // GC Collection cycle
 
 // END tri-color marking section
+
+
+// Initialize a thread from scratch
+void gc_thread_data_init(gc_thread_data *thd)
+{
+  thd->moveBufLen = 0;
+  gc_thr_grow_move_buffer(thd);
+// TODO: depends on collector state:  thd->gc_alloc_color = ATOMIC_GET(&gc_;
+// TODO: depends on collector state:  thd->gc_mut_status;
+  thd->last_write = 0;
+  thd->last_read = 0;
+  thd->mark_buffer_len = 128;
+  thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
+  if (pthread_mutex(&(thd->lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize thread mutex\n");
+    exit(1);
+  }
+}
 
 //// Unit testing:
 //int main(int argc, char **argv) {
