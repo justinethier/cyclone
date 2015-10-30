@@ -1103,6 +1103,7 @@ object Cyc_command_line_arguments(object cont) {
     object pl = alloca(sizeof(cons_type));
     make_string(s, _cyc_argv[i - 1]);
     memcpy(ps, &s, sizeof(string_type));
+    ((list)pl)->hdr.mark = gc_color_red;
     ((list)pl)->tag = cons_tag;
     ((list)pl)->cons_car = ps;
     ((list)pl)->cons_cdr = lis;
@@ -1116,6 +1117,7 @@ object Cyc_make_vector(object cont, object len, object fill) {
   int i;
   Cyc_check_int(len);
   v = alloca(sizeof(vector_type));
+  ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->tag = vector_tag;
   ((vector)v)->num_elt = ((integer_type *)len)->value;
   ((vector)v)->elts = 
@@ -1137,6 +1139,7 @@ object Cyc_list2vector(object cont, object l) {
   Cyc_check_cons_or_nil(l); 
   len = Cyc_length(l); 
   v = alloca(sizeof(vector_type)); 
+  ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->tag = vector_tag; 
   ((vector)v)->num_elt = len.value; 
   ((vector)v)->elts = 
@@ -1418,11 +1421,13 @@ object Cyc_io_peek_char(object port) {
 /* This heap cons is used only for initialization. */
 list mcons(a,d) object a,d;
 {register cons_type *c = malloc(sizeof(cons_type));
+ c->hdr.mark = gc_color_red;
  c->tag = cons_tag; c->cons_car = a; c->cons_cdr = d;
  return c;}
 
 cvar_type *mcvar(object *var) {
   cvar_type *c = malloc(sizeof(cvar_type));
+  c->hdr.mark = gc_color_red;
   c->tag = cvar_tag; 
   c->pvar = var;
   return c;}
@@ -1915,6 +1920,7 @@ void Cyc_apply(int argc, closure cont, object prim, ...){
 
     for (i = 0; i < argc; i++) {
         tmp = va_arg(ap, object);
+        args[i].hdr.mark = gc_color_red;
         args[i].tag = cons_tag;
         args[i].cons_car = tmp;
         args[i].cons_cdr = (i == (argc-1)) ? nil : &args[i + 1];
@@ -1943,6 +1949,7 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     cont = buf[0];
     
     for (i = 1; i < argc; i++) {
+        args[i - 1].hdr.mark = gc_color_red;
         args[i - 1].tag = cons_tag;
         args[i - 1].cons_car = buf[i];
         args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
