@@ -438,20 +438,8 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 //
 // Note: will need to use atomics and/or locking to access any
 // variables shared between threads
-typedef enum { STATUS_ASYNC 
-             , STATUS_SYNC1 
-             , STATUS_SYNC2 
-             } gc_status_type;
-
-typedef enum { STAGE_CLEAR_OR_MARKING 
-             , STAGE_TRACING 
-             , STAGE_REF_PROCESSING 
-             , STAGE_SWEEPING 
-             , STAGE_RESTING
-             } gc_stage_type;
-
 static int        gc_color_mark = 0; // Black
-static const int  gc_color_grey = 1;
+static const int  gc_color_grey = 1; // TODO: appears unused, clean up
 static int        gc_color_clear = 2; // White
 static const int  gc_color_blue = 3;
 
@@ -463,6 +451,7 @@ static void **mark_stack = NULL;
 static int mark_stack_len = 128;
 static int mark_stack_i = 0;
 
+/////////////////////////////////////////////
 // GC functions called by the Mutator threads
 
 void gc_mut_update()
@@ -490,13 +479,15 @@ void gc_mut_cooperate(gc_thread_data *thd)
   }
 }
 
+/////////////////////////////////////////////
 // Collector functions
+
 void gc_mark_gray(gc_thread_data *thd, object obj)
 {
-  // sync access to obj? check the paper, need to see if any other thread would be modifying
-  // either object type or mark. I believe both should be stable once the object is placed
-  // into the heap, with the collector being the only thread that changes marks. but double-check.
-  if (is_object_type(obj) && mark(obj) == ATOMIC_GET(&gc_color_clear)) { // TODO: sync??
+  // From what I can tell, no other thread would be modifying
+  // either object type or mark. Both should be stable once the object is placed
+  // into the heap, with the collector being the only thread that changes marks.
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
     // TODO: lock mark buffer (not ideal, but a possible first step)?
     pthread_mutex_lock(&(thd->lock));
     thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
@@ -508,22 +499,87 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   }
 }
 
-void gc_col_mark_gray(object obj)
+void gc_collector_trace()
 {
-  if (is_object_type(obj) && mark(obj) == ATOMIC_GET(&gc_color_clear)) {
+// note - can atomic operations be used for last read/write, to prevent
+//        coarser-grained synchronization there?
+// TODO:
+//  clean = FALSE
+//  while (!(clean))
+//    clean = TRUE
+//    For each m in mutators
+//    while (lastread[m] < lastwrite[m]) // TODO: use atomic sub to compare?
+//      clean = FALSE
+//      lastread[m] = lastread[m] + 1 // TODO: atomic increment
+//      markBlack(markbuffer[m][lastread[m]])
+//      EmptyCollectorStack()
+}
+
+// TODO: seriously consider changing the mark() macro to color(),
+// and sync up the header variable. that would make all of this code
+// bit clearer...
+
+void gc_mark_black(object obj) 
+{
+  // TODO: is sync required to get colors? probably not on the collector
+  // thread (at least) since colors are only changed once during the clear
+  // phase and before the first handshake.
+  int markColor = gc_color_mark; //TODO: is atomic require here?? ATOMIC_GET(&gc_color_mark);
+  if (is_object_type(obj) && mark(obj) != markColor) {
+    // TODO: need to examine type and branch accordingly to grey pointers
+    // EG: colmarkgray(car); colmarkgray(cdr); etc..
+    //For each pointer i in x do:
+    //  CollectorMarkGray(i)
+    mark(obj) = markColor;
+  }
+}
+
+void gc_collector_mark_gray(object obj)
+{
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
   }
 }
 
-void gc_col_empty_collector_stack()
+void gc_empty_collector_stack()
 {
-// TODO:
-//  while (!markstack.empty())
-//    markBlack(markstack.pop())
+  // Mark stack is only used by the collector thread, so no sync needed
+  while (mark_stack_i > 0) { // not empty
+    mark_stack--;
+    gc_mark_black(mark_stack[mark_stack_i]);
+  }
 }
+
+// TODO:
+void gc_handshake(gc_status_type s)
+{
+  gc_post_handshake(s);
+  gc_wait_handshake();
+}
+
+//void gc_post_handshake(gc_status_type s)
+//{
+//  TODO: use atomic to change value of gc_status_col
+//}
+
+//void gc_wait_handshake()
+//{
+//  // TODO:
+//  for each m in mutators
+//    wait for statusm = statusc
+//}
+
+/////////////////////////////////////////////
 // GC Collection cycle
 
+// TODO:
+//void gc_collector()
+//{
+//}
+
+/////////////////////////////////////////////
 // END tri-color marking section
+/////////////////////////////////////////////
 
 
 // Initialize a thread from scratch

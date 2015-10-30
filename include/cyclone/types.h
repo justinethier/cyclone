@@ -75,6 +75,19 @@ struct gc_header_type_t {
 #define gc_word_align(n) gc_align((n), 2)
 #define gc_heap_align(n) gc_align(n, 5)
 
+/* Enums for tri-color marking */
+typedef enum { STATUS_ASYNC 
+             , STATUS_SYNC1 
+             , STATUS_SYNC2 
+             } gc_status_type;
+
+typedef enum { STAGE_CLEAR_OR_MARKING 
+             , STAGE_TRACING 
+             , STAGE_REF_PROCESSING 
+             , STAGE_SWEEPING 
+             , STAGE_RESTING
+             } gc_stage_type;
+
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
 void **vpbuffer_add(void **buf, int *len, int i, void *obj);
@@ -94,6 +107,21 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data *thd);
+// Prototypes for mutator/collector:
+void gc_mark_gray(gc_thread_data *thd, object obj);
+void gc_collector_trace();
+void gc_mark_black(object obj);
+void gc_collector_mark_gray(object obj);
+void gc_empty_collector_stack();
+void gc_handshake(gc_status_type s);
+void gc_post_handshake(gc_status_type s);
+void gc_wait_handshake();
+
+/////////////////////////////////////////////
+// GC Collection cycle
+
+// TODO:
+//void gc_collector()
 
 /* GC debugging flags */
 //#define DEBUG_GC 0
