@@ -545,8 +545,6 @@ void gc_mark_black(object obj)
     // Gray any child objects
     // Note we probably should use some form of atomics/synchronization
     // for cons and vector types, as these pointers could change.
-    // Also this is a case for adding the stack/heap bit, because these could
-    // be stack objects if a thread issued an update.
     switch(type_of(obj)) {
       case cons_tag: {
         gc_collector_mark_gray(car(obj));
@@ -592,6 +590,11 @@ void gc_mark_black(object obj)
 
 void gc_collector_mark_gray(object obj)
 {
+  // "Color" objects gray by adding them to the mark stack for further processing.
+  //
+  // Note that stack objects are always colored red during creation, so
+  // they should never be added to the mark stack. Which would be bad because it
+  // could lead to stack corruption.
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
   }
