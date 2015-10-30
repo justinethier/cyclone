@@ -544,6 +544,8 @@ void gc_mark_black(object obj)
     // Gray any child objects
     // Note we probably should use some form of atomics/synchronization
     // for cons and vector types, as these pointers could change.
+    // Also this is a case for adding the stack/heap bit, because these could
+    // be stack objects if a thread issued an update.
     switch(type_of(obj)) {
       case cons_tag: {
         gc_collector_mark_gray(car(obj));
