@@ -501,6 +501,21 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
 
 void gc_collector_trace()
 {
+  int clean = 0;
+  while (!clean) {
+    clean = 1;
+  }
+  TODO: need a list of mutators.
+  could keep a buffer or linked list of them. a list may be more efficient
+  also need to consider how to map thread back to its gc_thread_data,
+  which we will need during GC (cooperate). maybe use a (platform-specific)
+  call like below to get a unique ID for the thread, and then use a
+  hashtable to get the thread info. how often will we be accessing this data?
+  seems we will need to be able to access it from 2 places:
+   - from mutator (can compute thread id here)
+   - from collector (need to be able to iterate across all mutators)
+   #include <syscall.h>
+   printf("tid = %d\n", syscall(SYS_gettid));
 // note - can atomic operations be used for last read/write, to prevent
 //        coarser-grained synchronization there?
 // TODO:
@@ -526,10 +541,48 @@ void gc_mark_black(object obj)
   // phase and before the first handshake.
   int markColor = gc_color_mark; //TODO: is atomic require here?? ATOMIC_GET(&gc_color_mark);
   if (is_object_type(obj) && mark(obj) != markColor) {
-    // TODO: need to examine type and branch accordingly to grey pointers
-    // EG: colmarkgray(car); colmarkgray(cdr); etc..
-    //For each pointer i in x do:
-    //  CollectorMarkGray(i)
+    // Gray any child objects
+    // Note we probably should use some form of atomics/synchronization
+    // for cons and vector types, as these pointers could change.
+    switch(type_of(obj)) {
+      case cons_tag: {
+        gc_collector_mark_gray(car(obj));
+        gc_collector_mark_gray(cdr(obj));
+        break;
+      }
+      case closure1_tag:
+        gc_collector_mark_gray(((closure1) obj)->elt1);
+        break;
+      case closure2_tag:
+        gc_collector_mark_gray(((closure2) obj)->elt1);
+        gc_collector_mark_gray(((closure2) obj)->elt2);
+      case closure3_tag:
+        gc_collector_mark_gray(((closure3) obj)->elt1);
+        gc_collector_mark_gray(((closure3) obj)->elt2);
+        gc_collector_mark_gray(((closure3) obj)->elt3);
+      case closure4_tag:
+        gc_collector_mark_gray(((closure4) obj)->elt1);
+        gc_collector_mark_gray(((closure4) obj)->elt2);
+        gc_collector_mark_gray(((closure4) obj)->elt3);
+        gc_collector_mark_gray(((closure4) obj)->elt4);
+        break;
+      case closureN_tag: {
+        int i, n = ((closureN) obj)->num_elt;
+        for (i = 0; i < n; i++) {
+          gc_collector_mark_gray(((closureN) obj)->elts[i]);
+        }
+        break;
+      }
+      case vector_tag: {
+        int i, n = ((vector) obj)->num_elt;
+        for (i = 0; i < n; i++) {
+          gc_collector_mark_gray(((vector) obj)->elts[i]);
+        }
+        break;
+      }
+      default:
+      break;
+    }
     mark(obj) = markColor;
   }
 }
