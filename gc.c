@@ -516,6 +516,22 @@ void gc_collector_trace()
 //   - from collector (need to be able to iterate across all mutators)
 //   #include <syscall.h>
 //   printf("tid = %d\n", syscall(SYS_gettid));
+//
+// TODO:
+// ACTION - I think the most efficient solution is to have each thread pass around
+//          the pointer to it's thread data. this param would have to be passed to all
+//          continuation calls made by the thread.
+//          the collector/runtime will need to maintain a list of the thread data structures,
+//          and will need to maintain it when a thread is created or terminated (either
+//          explicitly or when it returns).
+//          practically the required changes are:
+//          - stabilize this branch so it builds and runs (hope this just means commenting out
+//            the pthread calls for right now)
+//          - extend the runtime and compiled code to have a new thread_data (sp?) param
+//            also need to judge if there are issues that would prevent being able to add
+//            one, but it seems like it should be no problem
+//          - build the code and test that the value is actually maintained across calls
+//            (maybe assign it to a global at start and exit from GC if cur val != global val)
 
 // note - can atomic operations be used for last read/write, to prevent
 //        coarser-grained synchronization there?
