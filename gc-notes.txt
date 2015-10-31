@@ -27,6 +27,7 @@ declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
 declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
 port_type Cyc_io_open_input_file(void *data, object str) {
 port_type Cyc_io_open_output_file(void *data, object str) {
+object Cyc_io_read_line(void *data, object cont, object port) {
 
 - plan:
   - update runtime, get it to compile
