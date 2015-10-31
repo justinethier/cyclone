@@ -91,8 +91,8 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 // Constant colors are defined here.
 // The mark/clear colors are defined in the gc module because
 // the collector swaps their values as an optimization.
-const int gc_color_red = 0; // Memory not to be GC'd, such as on the stack
-const int  gc_color_blue = 1; // Unallocated memory
+#define gc_color_red  0 // Memory not to be GC'd, such as on the stack
+#define gc_color_blue 1 // Unallocated memory
 
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
