@@ -626,11 +626,11 @@ void gc_empty_collector_stack()
 }
 
 // TODO:
-void gc_handshake(gc_status_type s)
-{
-  gc_post_handshake(s);
-  gc_wait_handshake();
-}
+//void gc_handshake(gc_status_type s)
+//{
+//  gc_post_handshake(s);
+//  gc_wait_handshake();
+//}
 
 //void gc_post_handshake(gc_status_type s)
 //{
