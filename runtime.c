@@ -60,22 +60,22 @@ void Cyc_check_bounds(const char *label, int len, int index) {
 /* END error checking */
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
+#define closcall1(td,cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,0, (closure)a1, cfn); } else { ((cfn)->fn)(td,1,cfn,a1);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall1(cfn,a1) \
+#define return_closcall1(td,cfn,a1) \
 {char stack; \
  if (check_overflow(&stack,stack_limit1)) { \
      object buf[1]; buf[0] = a1;\
-     GC(cfn,buf,1); return; \
- } else {closcall1((closure) (cfn),a1); return;}}
-#define closcall2(cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(2,cfn,a1,a2);}
+     GC(td,cfn,buf,1); return; \
+ } else {closcall1(td,(closure) (cfn),a1); return;}}
+#define closcall2(td,cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(td,2,cfn,a1,a2);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall2(cfn,a1,a2) \
+#define return_closcall2(td,cfn,a1,a2) \
 {char stack; \
  if (check_overflow(&stack,stack_limit1)) { \
      object buf[2]; buf[0] = a1;buf[1] = a2;\
-     GC(cfn,buf,2); return; \
- } else {closcall2((closure) (cfn),a1,a2); return;}}
+     GC(td,cfn,buf,2); return; \
+ } else {closcall2(td,(closure) (cfn),a1,a2); return;}}
 /*END closcall section */
 
 /* Global variables. */
@@ -251,7 +251,7 @@ object Cyc_glo_eval = nil;
 /* Exception handler */
 object Cyc_exception_handler_stack = nil;
 
-object Cyc_default_exception_handler(int argc, closure _, object err) {
+object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
     fprintf(stderr, "Error: ");
 
     if (nullp(err) || is_value_type(err) || type_of(err) != cons_tag) {
@@ -281,29 +281,29 @@ object Cyc_current_exception_handler() {
 }
 
 /* Raise an exception from the runtime code */
-void Cyc_rt_raise(object err) {
+void Cyc_rt_raise(void *data, object err) {
     make_cons(c2, err, nil);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
     exit(1);
 }
-void Cyc_rt_raise2(const char *msg, object err) {
+void Cyc_rt_raise2(void *data, const char *msg, object err) {
     make_string(s, msg);
     make_cons(c3, err, nil);
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
     exit(1);
 }
-void Cyc_rt_raise_msg(const char *err) {
+void Cyc_rt_raise_msg(void *data, const char *err) {
     make_string(s, err);
-    Cyc_rt_raise(&s);
+    Cyc_rt_raise(data, &s);
 }
 /* END exception handler */
 
@@ -389,13 +389,13 @@ object Cyc_has_cycle(object lst) {
 // to the value returned by (current-output-port). It is an
 // error to attempt an output operation on a closed port
 //
-object dispatch_display_va(int argc, object clo, object cont, object x, ...) {
+object dispatch_display_va(void *data, int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
   result = Cyc_display_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_closcall1(cont, result);
+  return_closcall1(data, cont, result);
 }
 
 object Cyc_display_va(int argc, object x, ...) {
@@ -506,13 +506,13 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
  return quote_void;}
 
-object dispatch_write_va(int argc, object clo, object cont, object x, ...) {
+object dispatch_write_va(void *data, int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
   result = Cyc_write_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_closcall1(cont, result);
+  return_closcall1(data, cont, result);
 }
 
 object Cyc_write_va(int argc, object x, ...) {
@@ -585,7 +585,7 @@ object Cyc_write(object x, FILE *port)
  fprintf(port, "\n");
  return y;}
 
-object Cyc_write_char(object c, object port) 
+object Cyc_write_char(void *data, object c, object port) 
 {
   if (obj_is_char(c)) {
     fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c));
@@ -801,14 +801,14 @@ object Cyc_set_cdr(object l, object val) {
     return l;
 }
 
-object Cyc_vector_set(object v, object k, object obj) {
+object Cyc_vector_set(void *data, object v, object k, object obj) {
   int idx;
   Cyc_check_vec(v);
   Cyc_check_int(k);
   idx = ((integer_type *)k)->value;
 
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
-    Cyc_rt_raise2("vector-set! - invalid index", k);
+    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
   }
 
   ((vector)v)->elts[idx] = obj;
@@ -818,32 +818,32 @@ object Cyc_vector_set(object v, object k, object obj) {
   return v;
 }
 
-object Cyc_vector_ref(object v, object k) {
+object Cyc_vector_ref(void *data, object v, object k) {
   if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
-    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
+    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected vector\n"); 
   }
   if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
-    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected integer\n"); 
+    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected integer\n"); 
   }
   if (integer_value(k) < 0 || integer_value(k) >= ((vector)v)->num_elt) {
-    Cyc_rt_raise2("vector-ref - invalid index", k);
+    Cyc_rt_raise2(data, "vector-ref - invalid index", k);
   }
 
   return ((vector)v)->elts[((integer_type *)k)->value];
 }
 
-integer_type Cyc_vector_length(object v) {
+integer_type Cyc_vector_length(void *data, object v) {
     if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
       make_int(len, ((vector)v)->num_elt);
       return len;
     }
-    Cyc_rt_raise_msg("vector-length - invalid parameter, expected vector\n"); }
+    Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
 
-integer_type Cyc_length(object l){
+integer_type Cyc_length(void *data, object l){
     make_int(len, 0);
     while(!nullp(l)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
-            Cyc_rt_raise_msg("length - invalid parameter, expected list\n");
+            Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
         l = cdr(l);
         len.value++;
@@ -851,7 +851,7 @@ integer_type Cyc_length(object l){
     return len;
 }
 
-object Cyc_number2string(object cont, object n) {
+object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
     Cyc_check_num(n);
     if (type_of(n) == integer_tag) {
@@ -859,18 +859,18 @@ object Cyc_number2string(object cont, object n) {
     } else if (type_of(n) == double_tag) {
         snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
     } else {
-        Cyc_rt_raise2("number->string - Unexpected object", n);
+        Cyc_rt_raise2(data, "number->string - Unexpected object", n);
     }
     //make_string_noalloc(str, buffer, strlen(buffer));
     make_string(str, buffer);
-    return_closcall1(cont, &str);
+    return_closcall1(data, cont, &str);
 }
 
-object Cyc_symbol2string(object cont, object sym) {
+object Cyc_symbol2string(void *data, object cont, object sym) {
   Cyc_check_sym(sym);
   { const char *pname = symbol_pname(sym);
     make_string(str, pname);
-    return_closcall1(cont, &str); }}
+    return_closcall1(data, cont, &str); }}
 
 object Cyc_string2symbol(object str) {
     object sym;
@@ -882,14 +882,14 @@ object Cyc_string2symbol(object str) {
     return sym;
 }
 
-object Cyc_list2string(object cont, object lst){
+object Cyc_list2string(void *data, object cont, object lst){
     char *buf;
     int i = 0;
     integer_type len;
 
     Cyc_check_cons_or_nil(lst);
     
-    len = Cyc_length(lst); // Inefficient, walks whole list
+    len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (len.value + 1));
     while(!nullp(lst)){
         buf[i++] = obj_obj2char(car(lst));
@@ -899,7 +899,7 @@ object Cyc_list2string(object cont, object lst){
 
     //{ make_string_noalloc(str, buf, i);
     { make_string(str, buf);
-      return_closcall1(cont, &str);}
+      return_closcall1(data, cont, &str);}
 }
 
 common_type Cyc_string2number(object str){
@@ -937,7 +937,7 @@ integer_type Cyc_string_cmp(object str1, object str2) {
   }
 }
 
-#define Cyc_string_append_va_list(argc) { \
+#define Cyc_string_append_va_list(data, argc) { \
     int i = 0, total_len = 1; \
     int *len = alloca(sizeof(int) * argc); \
     char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc); \
@@ -963,19 +963,19 @@ integer_type Cyc_string_cmp(object str1, object str2) {
     *bufferp = '\0'; \
     make_string(result, buffer); \
     va_end(ap); \
-    return_closcall1(cont, &result); \
+    return_closcall1(data, cont, &result); \
 }
 
-void dispatch_string_91append(int _argc, object clo, object cont, object str1, ...) {
+void dispatch_string_91append(void *data, int _argc, object clo, object cont, object str1, ...) {
     va_list ap;
     va_start(ap, str1);
-    Cyc_string_append_va_list(_argc - 1);
+    Cyc_string_append_va_list(data, _argc - 1);
 }
 
-object Cyc_string_append(object cont, int _argc, object str1, ...) {
+object Cyc_string_append(void *data, object cont, int _argc, object str1, ...) {
     va_list ap;
     va_start(ap, str1);
-    Cyc_string_append_va_list(_argc);
+    Cyc_string_append_va_list(data, _argc);
 }
 
 integer_type Cyc_string_length(object str) {
@@ -984,7 +984,7 @@ integer_type Cyc_string_length(object str) {
   { make_int(len, strlen(string_str(str)));
     return len; }}
 
-object Cyc_string_set(object str, object k, object chr) {
+object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
   int idx, len;
 
@@ -992,7 +992,7 @@ object Cyc_string_set(object str, object k, object chr) {
   Cyc_check_int(k);
 
   if (!eq(boolean_t, Cyc_is_char(chr))) {
-    Cyc_rt_raise2("Expected char but received", chr);
+    Cyc_rt_raise2(data, "Expected char but received", chr);
   }
 
   raw = string_str(str);
@@ -1004,7 +1004,7 @@ object Cyc_string_set(object str, object k, object chr) {
   return str;
 }
 
-object Cyc_string_ref(object str, object k) {
+object Cyc_string_ref(void *data, object str, object k) {
   const char *raw;
   int idx, len;
 
@@ -1016,13 +1016,13 @@ object Cyc_string_ref(object str, object k) {
   len = strlen(raw);
 
   if (idx < 0 || idx >= len) {
-    Cyc_rt_raise2("string-ref - invalid index", k);
+    Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
 
   return obj_char2obj(raw[idx]);
 }
 
-object Cyc_substring(object cont, object str, object start, object end) {
+object Cyc_substring(void *data, object cont, object str, object start, object end) {
   const char *raw;
   int s, e, len;
 
@@ -1036,10 +1036,10 @@ object Cyc_substring(object cont, object str, object start, object end) {
   len = strlen(raw);
 
   if (s > e) {
-    Cyc_rt_raise2("substring - start cannot be greater than end", start);
+    Cyc_rt_raise2(data, "substring - start cannot be greater than end", start);
   }
   if (s > len) {
-    Cyc_rt_raise2("substring - start cannot be greater than string length", start);
+    Cyc_rt_raise2(data, "substring - start cannot be greater than string length", start);
   }
   if (e > len) {
     e = len;
@@ -1047,13 +1047,7 @@ object Cyc_substring(object cont, object str, object start, object end) {
 
   {
     make_string_with_len(sub, raw + s, e - s);
-//string_type sub; 
-//{ int len = e - s;
-//  sub.tag = string_tag; sub.len = len; 
-//  sub.str = alloca(sizeof(char) * (len + 1)); 
-//  memcpy(sub.str, raw + s, len); 
-//  sub.str[len + 1] = '\0';}
-    return_closcall1(cont, &sub);
+    return_closcall1(data, cont, &sub);
   }
 }
 
@@ -1061,28 +1055,28 @@ object Cyc_substring(object cont, object str, object start, object end) {
  * Return directory where cyclone is installed.
  * This is configured via the makefile during a build.
  */
-object Cyc_installation_dir(object cont, object type) {
+object Cyc_installation_dir(void *data, object cont, object type) {
   if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "sld", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
     make_string(str, buf);
-    return_closcall1(cont, &str);
+    return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
     make_string(str, buf);
-    return_closcall1(cont, &str);
+    return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
     make_string(str, buf);
-    return_closcall1(cont, &str);
+    return_closcall1(data, cont, &str);
   } else {
     make_string(str, CYC_INSTALL_DIR);
-    return_closcall1(cont, &str);
+    return_closcall1(data, cont, &str);
   }
 }
 
@@ -1095,7 +1089,7 @@ object Cyc_installation_dir(object cont, object type) {
  *
  * For now, runtime options are not removed.
  */
-object Cyc_command_line_arguments(object cont) {
+object Cyc_command_line_arguments(void *data, object cont) {
   int i;
   object lis = nil;
   for (i = _cyc_argc; i > 1; i--) { // skip program name
@@ -1109,10 +1103,10 @@ object Cyc_command_line_arguments(object cont) {
     ((list)pl)->cons_cdr = lis;
     lis = pl;
   }
-  return_closcall1(cont, lis);
+  return_closcall1(data, cont, lis);
 }
 
-object Cyc_make_vector(object cont, object len, object fill) {
+object Cyc_make_vector(void *data, object cont, object len, object fill) {
   object v = nil;
   int i;
   Cyc_check_int(len);
@@ -1127,10 +1121,10 @@ object Cyc_make_vector(object cont, object len, object fill) {
   for (i = 0; i < ((vector)v)->num_elt; i++) {
     ((vector)v)->elts[i] = fill;
   }
-  return_closcall1(cont, v);
+  return_closcall1(data, cont, v);
 }
 
-object Cyc_list2vector(object cont, object l) {
+object Cyc_list2vector(void *data, object cont, object l) {
   object v = nil; 
   integer_type len;
   object lst = l; 
@@ -1150,7 +1144,7 @@ object Cyc_list2vector(object cont, object l) {
     ((vector)v)->elts[i++] = car(lst); 
     lst = cdr(lst);
   }
-  return_closcall1(cont, v);
+  return_closcall1(data, cont, v);
 }
 
 integer_type Cyc_system(object cmd) {
@@ -1192,6 +1186,8 @@ object __halt(object obj) {
     Cyc_halt(obj);
     return nil;
 }
+
+JAE TODO: left off here
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 common_type FUNC_OP(object x, object y) { \
@@ -1823,7 +1819,7 @@ void _Cyc_91read_91line(object cont, object args) {
     Cyc_io_read_line(cont, car(args));}
 void _Cyc_91write_91char(object cont, object args) {  
     Cyc_check_num_args("write-char", 2, args);
-    return_closcall1(cont, Cyc_write_char(car(args), cadr(args)));}
+    return_closcall1(cont, Cyc_write_char(data, car(args), cadr(args)));}
 void _Cyc_91write(object cont, object args) {  
     Cyc_check_num_args("write", 1, args);
     { integer_type argc = Cyc_length(args);
