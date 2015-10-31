@@ -1187,19 +1187,19 @@ object __halt(object obj) {
     return nil;
 }
 
-JAE TODO: left off here
-
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
-common_type FUNC_OP(object x, object y) { \
+common_type FUNC_OP(void *data, object x, object y) { \
     common_type s; \
     int tx = type_of(x), ty = type_of(y); \
+    s.double_t.hdr.mark = gc_color_red; \
     s.double_t.tag = double_tag; \
     if (DIV &&  \
         ((ty == integer_tag && integer_value(y) == 0) || \
         (ty == double_tag && double_value(y) == 0.0))) { \
-      Cyc_rt_raise_msg("Divide by zero"); \
+      Cyc_rt_raise_msg(data, "Divide by zero"); \
     } \
     if (tx == integer_tag && ty == integer_tag) { \
+        s.integer_t.hdr.mark = gc_color_red; \
         s.integer_t.tag = integer_tag; \
         s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
     } else if (tx == double_tag && ty == integer_tag) { \
@@ -1212,23 +1212,23 @@ common_type FUNC_OP(object x, object y) { \
         make_string(s, "Bad argument type"); \
         make_cons(c1, y, nil); \
         make_cons(c0, &s, &c1); \
-        Cyc_rt_raise(&c0); \
+        Cyc_rt_raise(data, &c0); \
     } \
     return s; \
 } \
-common_type FUNC(int argc, object n, ...) { \
+common_type FUNC(void *data, int argc, object n, ...) { \
     va_list ap; \
     va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(argc, FUNC_OP, n, ap); \
+    common_type result = Cyc_num_op_va_list(data, argc, FUNC_OP, n, ap); \
     va_end(ap); \
     return result; \
 } \
-void FUNC_APPLY(int argc, object clo, object cont, object n, ...) { \
+void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
     va_list ap; \
     va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(argc - 1, FUNC_OP, n, ap); \
+    common_type result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, n, ap); \
     va_end(ap); \
-    return_closcall1(cont, &result); \
+    return_closcall1(data, cont, &result); \
 }
 
 declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
@@ -1238,38 +1238,43 @@ declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
 //       result contains a decimal component?
 declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
 
-common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns) {
+common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(object, object)), object n, va_list ns) {
   common_type sum;
   int i;
   if (argc == 0) {
+    sum.integer_t.hdr.mark = gc_color_red;
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = 0;
     return sum;
   }
 
   if (type_of(n) == integer_tag) {
+    sum.integer_t.hdr.mark = gc_color_red;
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = ((integer_type *)n)->value;
   } else if (type_of(n) == double_tag) {
+    sum.double_t.hdr.mark = gc_color_red;
     sum.double_t.tag = double_tag;
     sum.double_t.value = ((double_type *)n)->value;
   } else {
       make_string(s, "Bad argument type");
       make_cons(c1, n, nil);
       make_cons(c0, &s, &c1);
-      Cyc_rt_raise(&c0);
+      Cyc_rt_raise(data, &c0);
   }
 
   for (i = 1; i < argc; i++) {
     common_type result = fn_op(&sum, va_arg(ns, object));
     if (type_of(&result) == integer_tag) {
+        sum.integer_t.hdr.mark = gc_color_red;
         sum.integer_t.tag = integer_tag;
         sum.integer_t.value = ((integer_type *) &result)->value;
     } else if (type_of(&result) == double_tag) {
+        sum.double_t.hdr.mark = gc_color_red;
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
-        Cyc_rt_raise_msg("Internal error, invalid tag in Cyc_num_op_va_list");
+        Cyc_rt_raise_msg(data, "Internal error, invalid tag in Cyc_num_op_va_list");
     }
   }
 
@@ -1293,23 +1298,23 @@ port_type Cyc_stderr() {
     return p;
 }
 
-port_type Cyc_io_open_input_file(object str) {
+port_type Cyc_io_open_input_file(void *data, object str) {
     const char *fname;
     Cyc_check_str(str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
-    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
+    if (p.fp == NULL) { Cyc_rt_raise2(data, "Unable to open file", str); }
     return p;
 }
 
-port_type Cyc_io_open_output_file(object str) {
+port_type Cyc_io_open_output_file(void *data, object str) {
     const char *fname;
     Cyc_check_str(str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 0);
     p.fp = fopen(fname, "w");
-    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
+    if (p.fp == NULL) { Cyc_rt_raise2(data, "Unable to open file", str); }
     return p;
 }
 
@@ -1376,7 +1381,7 @@ object Cyc_io_read_char(object port) {
 }
 
 /* TODO: this function needs some work, but approximates what is needed */
-object Cyc_io_read_line(object cont, object port) {
+object Cyc_io_read_line(void *data, object cont, object port) {
   FILE *stream = ((port_type *)port)->fp;
   char buf[1024];
   int i = 0, c;
@@ -1384,12 +1389,12 @@ object Cyc_io_read_line(object cont, object port) {
   while (1) {
     c = fgetc(stream);
     if (c == EOF && i == 0) {
-      return_closcall1(cont, Cyc_EOF);
+      return_closcall1(data, cont, Cyc_EOF);
     } else if (c == EOF || i == 1023 || c == '\n') {
       buf[i] = '\0';
       {
         make_string(s, buf);
-        return_closcall1(cont, &s);
+        return_closcall1(data, cont, &s);
       }
     }
 
@@ -1427,6 +1432,8 @@ cvar_type *mcvar(object *var) {
   c->tag = cvar_tag; 
   c->pvar = var;
   return c;}
+
+JAE TODO: left off thread data changes here
 
 void _Cyc_91global_91vars(object cont, object args){ 
     return_closcall1(cont, Cyc_global_variables); } 

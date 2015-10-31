@@ -21,9 +21,17 @@ object Cyc_installation_dir(object cont, object type) {
 object Cyc_command_line_arguments(object cont) {
 object Cyc_make_vector(object cont, object len, object fill) {
 object Cyc_list2vector(void *data, object cont, object l) {
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
+declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
+port_type Cyc_io_open_input_file(void *data, object str) {
+port_type Cyc_io_open_output_file(void *data, object str) {
 
 - plan:
   - update runtime, get it to compile
+  - have not adjusted any code that checks value of argc, will probably need to do that
+    EG for Cyc_num_op_va_list
   - update any associated tools (dispatch.c, etc)
   - update cgen
   - integration
