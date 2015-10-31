@@ -488,14 +488,14 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   // either object type or mark. Both should be stable once the object is placed
   // into the heap, with the collector being the only thread that changes marks.
   if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
-    // TODO: lock mark buffer (not ideal, but a possible first step)?
-    pthread_mutex_lock(&(thd->lock));
-    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
-                                    &(thd->mark_buffer_len),
-                                    thd->last_write,
-                                    obj);
-    pthread_mutex_unlock(&(thd->lock));
-    ATOMIC_INC(&(thd->last_write));
+//TODO:    // TODO: lock mark buffer (not ideal, but a possible first step)?
+//TODO:    pthread_mutex_lock(&(thd->lock));
+//TODO:    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
+//TODO:                                    &(thd->mark_buffer_len),
+//TODO:                                    thd->last_write,
+//TODO:                                    obj);
+//TODO:    pthread_mutex_unlock(&(thd->lock));
+//TODO:    ATOMIC_INC(&(thd->last_write));
   }
 }
 
@@ -668,10 +668,10 @@ void gc_thread_data_init(gc_thread_data *thd)
   thd->last_read = 0;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
-  if (pthread_mutex(&(thd->lock), NULL) != 0) {
-    fprintf(stderr, "Unable to initialize thread mutex\n");
-    exit(1);
-  }
+// TODO:  if (pthread_mutex(&(thd->lock), NULL) != 0) {
+// TODO:    fprintf(stderr, "Unable to initialize thread mutex\n");
+// TODO:    exit(1);
+// TODO:  }
 }
 
 //// Unit testing:
