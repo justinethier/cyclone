@@ -10,30 +10,30 @@
 #define CYCLONE_RUNTIME_H
 
 /* Error checking definitions */
-#define Cyc_check_num_args(fnc_name, num_args, args) { \
-  integer_type l = Cyc_length(args); \
+#define Cyc_check_num_args(data, fnc_name, num_args, args) { \
+  integer_type l = Cyc_length(data, args); \
   if (num_args > l.value) { \
     char buf[128]; \
     snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
-    Cyc_rt_raise_msg(buf); \
+    Cyc_rt_raise_msg(data, buf); \
   } \
 }
 
-#define Cyc_check_type(fnc_test, tag, obj) { \
-  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(tag, obj); }
+#define Cyc_check_type(data, fnc_test, tag, obj) { \
+  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 
-#define Cyc_check_cons_or_nil(obj) { if (!nullp(obj)) { Cyc_check_cons(obj); }}
-#define Cyc_check_cons(obj) Cyc_check_type(Cyc_is_cons, cons_tag, obj);
-#define Cyc_check_num(obj) Cyc_check_type(Cyc_is_number, integer_tag, obj);
-#define Cyc_check_int(obj) Cyc_check_type(Cyc_is_integer, integer_tag, obj);
-#define Cyc_check_str(obj) Cyc_check_type(Cyc_is_string, string_tag, obj);
-#define Cyc_check_sym(obj) Cyc_check_type(Cyc_is_symbol, symbol_tag, obj);
-#define Cyc_check_vec(obj) Cyc_check_type(Cyc_is_vector, vector_tag, obj);
-#define Cyc_check_port(obj) Cyc_check_type(Cyc_is_port, port_tag, obj);
-#define Cyc_check_fnc(obj) Cyc_check_type(Cyc_is_procedure, closure2_tag, obj);
-void Cyc_invalid_type_error(int tag, object found);
-void Cyc_check_obj(int tag, object obj);
-void Cyc_check_bounds(const char *label, int len, int index);
+#define Cyc_check_cons_or_nil(d,obj) { if (!nullp(obj)) { Cyc_check_cons(d,obj); }}
+#define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, cons_tag, obj);
+#define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
+#define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
+#define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
+#define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj);
+#define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj);
+#define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj);
+#define Cyc_check_fnc(d,obj) Cyc_check_type(d,Cyc_is_procedure, closure2_tag, obj);
+void Cyc_invalid_type_error(void *data, int tag, object found);
+void Cyc_check_obj(void *data, int tag, object obj);
+void Cyc_check_bounds(void *data, const char *label, int len, int index);
 /* END error checking */
 
 extern long global_stack_size;
@@ -80,7 +80,7 @@ object cell_get(object cell);
     } \
   }
 
-/* Prototypes for Lisp built-in functions. */
+/* Prototypes for primitive functions. */
 
 extern object Cyc_global_variables;
 int _cyc_argc;
@@ -88,8 +88,8 @@ char **_cyc_argv;
 object Cyc_get_global_variables();
 object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
-object apply(object cont, object func, object args);
-void Cyc_apply(int argc, closure cont, object prim, ...);
+object apply(void *data, object cont, object func, object args);
+void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
 integer_type Cyc_string_cmp(object str1, object str2);
 void dispatch_string_91append(int argc, object clo, object cont, object str1, ...);
 list mcons(object,object);
@@ -204,9 +204,9 @@ void add_mutation(object var, object value);
 void clear_mutations();
 extern list mutation_table;
 
-void dispatch(int argc, function_type func, object clo, object cont, object args);
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args);
-void do_dispatch(int argc, function_type func, object clo, object *buffer);
+void dispatch(void *data, int argc, function_type func, object clo, object cont, object args);
+void dispatch_va(void *data, int argc, function_type_va func, object clo, object cont, object args);
+void do_dispatch(void *data, int argc, function_type func, object clo, object *buffer);
 
 /* Global variables. */
 extern gc_heap *Cyc_heap;
@@ -372,11 +372,11 @@ extern object Cyc_exception_handler_stack;
 // behavior portable? If not, will have to modify cgen to not emit the var.
 #define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
 
-object Cyc_default_exception_handler(int argc, closure _, object err);
+object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
 object Cyc_current_exception_handler();
-void Cyc_rt_raise(object err);
-void Cyc_rt_raise2(const char *msg, object err);
-void Cyc_rt_raise_msg(const char *err);
+void Cyc_rt_raise(void *data, object err);
+void Cyc_rt_raise2(void *data, const char *msg, object err);
+void Cyc_rt_raise_msg(void *data, const char *err);
 /* END exception handler */
 
 #endif /* CYCLONE_RUNTIME_H */

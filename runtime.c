@@ -37,23 +37,23 @@ const char *tag_names[21] = { \
  , "Reserved for future use" \
  , "Reserved for future use" };
 
-void Cyc_invalid_type_error(int tag, object found) {
+void Cyc_invalid_type_error(void *data, int tag, object found) {
   char buf[256];
   snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
-  Cyc_rt_raise2(buf, found);
+  Cyc_rt_raise2(data, buf, found);
 }
 
-void Cyc_check_obj(int tag, object obj) {
+void Cyc_check_obj(void *data, int tag, object obj) {
   if (!is_object_type(obj)) {
-    Cyc_invalid_type_error(tag, obj);
+    Cyc_invalid_type_error(data, tag, obj);
   }
 }
 
-void Cyc_check_bounds(const char *label, int len, int index) {
+void Cyc_check_bounds(void *data, const char *label, int len, int index) {
   if (index < 0 || index >= len) {
     char buf[128];
     snprintf(buf, 127, "%s - invalid index %d", label, index);
-    Cyc_rt_raise_msg(buf);
+    Cyc_rt_raise_msg(data, buf);
   }
 }
 
@@ -590,7 +590,7 @@ object Cyc_write_char(void *data, object c, object port)
   if (obj_is_char(c)) {
     fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c));
   } else {
-    Cyc_rt_raise2("Argument is not a character", c);
+    Cyc_rt_raise2(data, "Argument is not a character", c);
   }
   return quote_void;
 }
@@ -1433,412 +1433,410 @@ cvar_type *mcvar(object *var) {
   c->pvar = var;
   return c;}
 
-JAE TODO: left off thread data changes here
-
-void _Cyc_91global_91vars(object cont, object args){ 
-    return_closcall1(cont, Cyc_global_variables); } 
-void _car(object cont, object args) { 
+void _Cyc_91global_91vars(void *data, object cont, object args){ 
+    return_closcall1(data, cont, Cyc_global_variables); } 
+void _car(void *data, object cont, object args) { 
     Cyc_check_num_args("car", 1, args);
     { object var = car(args);
       Cyc_check_cons(var);
-      return_closcall1(cont, car(var)); }}
-void _cdr(object cont, object args) { 
+      return_closcall1(data, cont, car(var)); }}
+void _cdr(void *data, object cont, object args) { 
     Cyc_check_num_args("cdr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdr(car(args))); }
-void _caar(object cont, object args) { 
+    return_closcall1(data, cont, cdr(car(args))); }
+void _caar(void *data, object cont, object args) { 
     Cyc_check_num_args("caar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caar(car(args))); }
-void _cadr(object cont, object args) { 
+    return_closcall1(data, cont, caar(car(args))); }
+void _cadr(void *data, object cont, object args) { 
     Cyc_check_num_args("cadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cadr(car(args))); }
-void _cdar(object cont, object args) { 
+    return_closcall1(data, cont, cadr(car(args))); }
+void _cdar(void *data, object cont, object args) { 
     Cyc_check_num_args("cdar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdar(car(args))); }
-void _cddr(object cont, object args) { 
+    return_closcall1(data, cont, cdar(car(args))); }
+void _cddr(void *data, object cont, object args) { 
     Cyc_check_num_args("cddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cddr(car(args))); }
-void _caaar(object cont, object args) { 
+    return_closcall1(data, cont, cddr(car(args))); }
+void _caaar(void *data, object cont, object args) { 
     Cyc_check_num_args("caaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caaar(car(args))); }
-void _caadr(object cont, object args) { 
+    return_closcall1(data, cont, caaar(car(args))); }
+void _caadr(void *data, object cont, object args) { 
     Cyc_check_num_args("caadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caadr(car(args))); }
-void _cadar(object cont, object args) { 
+    return_closcall1(data, cont, caadr(car(args))); }
+void _cadar(void *data, object cont, object args) { 
     Cyc_check_num_args("cadar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cadar(car(args))); }
-void _caddr(object cont, object args) { 
+    return_closcall1(data, cont, cadar(car(args))); }
+void _caddr(void *data, object cont, object args) { 
     Cyc_check_num_args("caddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caddr(car(args))); }
-void _cdaar(object cont, object args) { 
+    return_closcall1(data, cont, caddr(car(args))); }
+void _cdaar(void *data, object cont, object args) { 
     Cyc_check_num_args("cdaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaar(car(args))); }
-void _cdadr(object cont, object args) { 
+    return_closcall1(data, cont, cdaar(car(args))); }
+void _cdadr(void *data, object cont, object args) { 
     Cyc_check_num_args("cdadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdadr(car(args))); }
-void _cddar(object cont, object args) { 
+    return_closcall1(data, cont, cdadr(car(args))); }
+void _cddar(void *data, object cont, object args) { 
     Cyc_check_num_args("cddar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cddar(car(args))); }
-void _cdddr(object cont, object args) { 
+    return_closcall1(data, cont, cddar(car(args))); }
+void _cdddr(void *data, object cont, object args) { 
     Cyc_check_num_args("cdddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdddr(car(args))); }
-void _caaaar(object cont, object args) { 
+    return_closcall1(data, cont, cdddr(car(args))); }
+void _caaaar(void *data, object cont, object args) { 
     Cyc_check_num_args("caaaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caaaar(car(args))); }
-void _caaadr(object cont, object args) { 
+    return_closcall1(data, cont, caaaar(car(args))); }
+void _caaadr(void *data, object cont, object args) { 
     Cyc_check_num_args("caaadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caaadr(car(args))); }
-void _caadar(object cont, object args) { 
+    return_closcall1(data, cont, caaadr(car(args))); }
+void _caadar(void *data, object cont, object args) { 
     Cyc_check_num_args("caadar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caadar(car(args))); }
-void _caaddr(object cont, object args) { 
+    return_closcall1(data, cont, caadar(car(args))); }
+void _caaddr(void *data, object cont, object args) { 
     Cyc_check_num_args("caaddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caaddr(car(args))); }
-void _cadaar(object cont, object args) { 
+    return_closcall1(data, cont, caaddr(car(args))); }
+void _cadaar(void *data, object cont, object args) { 
     Cyc_check_num_args("cadaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cadaar(car(args))); }
-void _cadadr(object cont, object args) { 
+    return_closcall1(data, cont, cadaar(car(args))); }
+void _cadadr(void *data, object cont, object args) { 
     Cyc_check_num_args("cadadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cadadr(car(args))); }
-void _caddar(object cont, object args) { 
+    return_closcall1(data, cont, cadadr(car(args))); }
+void _caddar(void *data, object cont, object args) { 
     Cyc_check_num_args("caddar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, caddar(car(args))); }
-void _cadddr(object cont, object args) { 
+    return_closcall1(data, cont, caddar(car(args))); }
+void _cadddr(void *data, object cont, object args) { 
     Cyc_check_num_args("cadddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cadddr(car(args))); }
-void _cdaaar(object cont, object args) { 
+    return_closcall1(data, cont, cadddr(car(args))); }
+void _cdaaar(void *data, object cont, object args) { 
     Cyc_check_num_args("cdaaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaaar(car(args))); }
-void _cdaadr(object cont, object args) { 
+    return_closcall1(data, cont, cdaaar(car(args))); }
+void _cdaadr(void *data, object cont, object args) { 
     Cyc_check_num_args("cdaadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaadr(car(args))); }
-void _cdadar(object cont, object args) { 
+    return_closcall1(data, cont, cdaadr(car(args))); }
+void _cdadar(void *data, object cont, object args) { 
     Cyc_check_num_args("cdadar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdadar(car(args))); }
-void _cdaddr(object cont, object args) { 
+    return_closcall1(data, cont, cdadar(car(args))); }
+void _cdaddr(void *data, object cont, object args) { 
     Cyc_check_num_args("cdaddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaddr(car(args))); }
-void _cddaar(object cont, object args) { 
+    return_closcall1(data, cont, cdaddr(car(args))); }
+void _cddaar(void *data, object cont, object args) { 
     Cyc_check_num_args("cddaar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cddaar(car(args))); }
-void _cddadr(object cont, object args) { 
+    return_closcall1(data, cont, cddaar(car(args))); }
+void _cddadr(void *data, object cont, object args) { 
     Cyc_check_num_args("cddadr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cddadr(car(args))); }
-void _cdddar(object cont, object args) { 
+    return_closcall1(data, cont, cddadr(car(args))); }
+void _cdddar(void *data, object cont, object args) { 
     Cyc_check_num_args("cdddar", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cdddar(car(args))); }
-void _cddddr(object cont, object args) { 
+    return_closcall1(data, cont, cdddar(car(args))); }
+void _cddddr(void *data, object cont, object args) { 
     Cyc_check_num_args("cddddr", 1, args);
     Cyc_check_cons(car(args));
-    return_closcall1(cont, cddddr(car(args))); }
-void _cons(object cont, object args) { 
+    return_closcall1(data, cont, cddddr(car(args))); }
+void _cons(void *data, object cont, object args) { 
     Cyc_check_num_args("cons", 2, args);
     { make_cons(c, car(args), cadr(args));
-      return_closcall1(cont, &c); }}
-void _eq_127(object cont, object args){ 
+      return_closcall1(data, cont, &c); }}
+void _eq_127(void *data, object cont, object args){ 
     Cyc_check_num_args("eq?", 2, args);
-    return_closcall1(cont, Cyc_eq(car(args), cadr(args))); }
-void _eqv_127(object cont, object args){ 
+    return_closcall1(data, cont, Cyc_eq(car(args), cadr(args))); }
+void _eqv_127(void *data, object cont, object args){ 
     Cyc_check_num_args("eqv?", 2, args);
-    _eq_127(cont, args); }
-void _equal_127(object cont, object args){ 
+    _eq_127(data, cont, args); }
+void _equal_127(void *data, object cont, object args){ 
     Cyc_check_num_args("equal?", 2, args);
-    return_closcall1(cont, equalp(car(args), cadr(args))); }
-void _length(object cont, object args){ 
+    return_closcall1(data, cont, equalp(car(args), cadr(args))); }
+void _length(void *data, object cont, object args){ 
     Cyc_check_num_args("length", 1, args);
     { integer_type i = Cyc_length(car(args));
-      return_closcall1(cont, &i); }}
-void _vector_91length(object cont, object args){ 
+      return_closcall1(data, cont, &i); }}
+void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args("vector_91length", 1, args);
     { integer_type i = Cyc_vector_length(car(args));
-      return_closcall1(cont, &i); }}
-void _null_127(object cont, object args) { 
+      return_closcall1(data, cont, &i); }}
+void _null_127(void *data, object cont, object args) { 
     Cyc_check_num_args("null?", 1, args);
-    return_closcall1(cont, Cyc_is_null(car(args))); }
-void _set_91car_67(object cont, object args) { 
+    return_closcall1(data, cont, Cyc_is_null(car(args))); }
+void _set_91car_67(void *data, object cont, object args) { 
     Cyc_check_num_args("set-car!", 2, args);
-    return_closcall1(cont, Cyc_set_car(car(args), cadr(args))); }
-void _set_91cdr_67(object cont, object args) { 
+    return_closcall1(data, cont, Cyc_set_car(car(args), cadr(args))); }
+void _set_91cdr_67(void *data, object cont, object args) { 
     Cyc_check_num_args("set-cdr!", 2, args);
-    return_closcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
-void _Cyc_91has_91cycle_127(object cont, object args) { 
+    return_closcall1(data, cont, Cyc_set_cdr(car(args), cadr(args))); }
+void _Cyc_91has_91cycle_127(void *data, object cont, object args) { 
     Cyc_check_num_args("Cyc-has-cycle?", 1, args);
-    return_closcall1(cont, Cyc_has_cycle(car(args))); }
-void __87(object cont, object args) {
+    return_closcall1(data, cont, Cyc_has_cycle(car(args))); }
+void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_sum, cont, cont, args); }
-void __91(object cont, object args) {
+    dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
+void __91(void *data, object cont, object args) {
     Cyc_check_num_args("-", 1, args);
     { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_sub, cont, cont, args); }}
-void __85(object cont, object args) {
+      dispatch(data, argc.value, (function_type)dispatch_sub, cont, cont, args); }}
+void __85(void *data, object cont, object args) {
     integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_mul, cont, cont, args); }
-void __95(object cont, object args) {
+    dispatch(data, argc.value, (function_type)dispatch_mul, cont, cont, args); }
+void __95(void *data, object cont, object args) {
     Cyc_check_num_args("/", 1, args);
     { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_div, cont, cont, args); }}
-void _Cyc_91cvar_127(object cont, object args) {
+      dispatch(data, argc.value, (function_type)dispatch_div, cont, cont, args); }}
+void _Cyc_91cvar_127(void *data, object cont, object args) {
     Cyc_check_num_args("Cyc-cvar?", 1, args);
-    return_closcall1(cont, Cyc_is_cvar(car(args))); }
-void _boolean_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_cvar(car(args))); }
+void _boolean_127(void *data, object cont, object args) {
     Cyc_check_num_args("boolean?", 1, args);
-    return_closcall1(cont, Cyc_is_boolean(car(args))); }
-void _char_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_boolean(car(args))); }
+void _char_127(void *data, object cont, object args) {
     Cyc_check_num_args("char?", 1, args);
-    return_closcall1(cont, Cyc_is_char(car(args))); }
-void _eof_91object_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_char(car(args))); }
+void _eof_91object_127(void *data, object cont, object args) {
     Cyc_check_num_args("eof_91object?", 1, args);
-    return_closcall1(cont, Cyc_is_eof_object(car(args))); }
-void _number_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_eof_object(car(args))); }
+void _number_127(void *data, object cont, object args) {
     Cyc_check_num_args("number?", 1, args);
-    return_closcall1(cont, Cyc_is_number(car(args))); }
-void _real_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_number(car(args))); }
+void _real_127(void *data, object cont, object args) {
     Cyc_check_num_args("real?", 1, args);
-    return_closcall1(cont, Cyc_is_real(car(args))); }
-void _integer_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_real(car(args))); }
+void _integer_127(void *data, object cont, object args) {
     Cyc_check_num_args("integer?", 1, args);
-    return_closcall1(cont, Cyc_is_integer(car(args))); }
-void _pair_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_integer(car(args))); }
+void _pair_127(void *data, object cont, object args) {
     Cyc_check_num_args("pair?", 1, args);
-    return_closcall1(cont, Cyc_is_cons(car(args))); }
-void _procedure_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_cons(car(args))); }
+void _procedure_127(void *data, object cont, object args) {
     Cyc_check_num_args("procedure?", 1, args);
-    return_closcall1(cont, Cyc_is_procedure(car(args))); }
-void _macro_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_procedure(car(args))); }
+void _macro_127(void *data, object cont, object args) {
     Cyc_check_num_args("macro?", 1, args);
-    return_closcall1(cont, Cyc_is_macro(car(args))); }
-void _port_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_macro(car(args))); }
+void _port_127(void *data, object cont, object args) {
     Cyc_check_num_args("port?", 1, args);
-    return_closcall1(cont, Cyc_is_port(car(args))); }
-void _vector_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_port(car(args))); }
+void _vector_127(void *data, object cont, object args) {
     Cyc_check_num_args("vector?", 1, args);
-    return_closcall1(cont, Cyc_is_vector(car(args))); }
-void _string_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_vector(car(args))); }
+void _string_127(void *data, object cont, object args) {
     Cyc_check_num_args("string?", 1, args);
-    return_closcall1(cont, Cyc_is_string(car(args))); }
-void _symbol_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_is_string(car(args))); }
+void _symbol_127(void *data, object cont, object args) {
     Cyc_check_num_args("symbol?", 1, args);
-    return_closcall1(cont, Cyc_is_symbol(car(args))); }
+    return_closcall1(data, cont, Cyc_is_symbol(car(args))); }
 
-void _Cyc_91get_91cvar(object cont, object args) {  
+void _Cyc_91get_91cvar(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _Cyc_91set_91cvar_67(object cont, object args) {  
+void _Cyc_91set_91cvar_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 /* Note we cannot use _exit (per convention) because it is reserved by C */
-void _cyc_exit(object cont, object args) {  
+void _cyc_exit(void *data, object cont, object args) {  
     if(nullp(args))
         __halt(nil);
     __halt(car(args));
 }
-void __75halt(object cont, object args) {  
+void __75halt(void *data, object cont, object args) {  
     exit(0); }
-void _cell_91get(object cont, object args) {  
+void _cell_91get(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _set_91global_67(object cont, object args) {  
+void _set_91global_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _set_91cell_67(object cont, object args) {  
+void _set_91cell_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _cell(object cont, object args) {  
+void _cell(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 
-void __123(object cont, object args) {  
+void __123(void *data, object cont, object args) {  
     Cyc_check_num_args("=", 2, args);
-    return_closcall1(cont, __num_eq(car(args), cadr(args)));}
-void __125(object cont, object args) {  
+    return_closcall1(data, cont, __num_eq(car(args), cadr(args)));}
+void __125(void *data, object cont, object args) {  
     Cyc_check_num_args(">", 2, args);
-    return_closcall1(cont, __num_gt(car(args), cadr(args)));}
-void __121(object cont, object args) {
+    return_closcall1(data, cont, __num_gt(car(args), cadr(args)));}
+void __121(void *data, object cont, object args) {
     Cyc_check_num_args("<", 2, args);
-    return_closcall1(cont, __num_lt(car(args), cadr(args)));}
-void __125_123(object cont, object args) {
+    return_closcall1(data, cont, __num_lt(car(args), cadr(args)));}
+void __125_123(void *data, object cont, object args) {
     Cyc_check_num_args(">=", 2, args);
-    return_closcall1(cont, __num_gte(car(args), cadr(args)));}
-void __121_123(object cont, object args) {
+    return_closcall1(data, cont, __num_gte(car(args), cadr(args)));}
+void __121_123(void *data, object cont, object args) {
     Cyc_check_num_args("<=", 2, args);
-    return_closcall1(cont, __num_lte(car(args), cadr(args)));}
+    return_closcall1(data, cont, __num_lte(car(args), cadr(args)));}
 
-void _apply(object cont, object args) {  
+void _apply(void *data, object cont, object args) {  
     Cyc_check_num_args("apply", 2, args);
-    apply(cont, car(args), cadr(args)); }
-void _assoc (object cont, object args) {  
+    apply(data, cont, car(args), cadr(args)); }
+void _assoc (void *data, object cont, object args) {  
     Cyc_check_num_args("assoc ", 2, args);
-    return_closcall1(cont, assoc(car(args), cadr(args)));}
-void _assq  (object cont, object args) {  
+    return_closcall1(data, cont, assoc(car(args), cadr(args)));}
+void _assq  (void *data, object cont, object args) {  
     Cyc_check_num_args("assq  ", 2, args);
-    return_closcall1(cont, assq(car(args), cadr(args)));}
-void _assv  (object cont, object args) {  
+    return_closcall1(data, cont, assq(car(args), cadr(args)));}
+void _assv  (void *data, object cont, object args) {  
     Cyc_check_num_args("assv  ", 2, args);
-    return_closcall1(cont, assq(car(args), cadr(args)));}
-void _member(object cont, object args) {  
+    return_closcall1(data, cont, assq(car(args), cadr(args)));}
+void _member(void *data, object cont, object args) {  
     Cyc_check_num_args("member", 2, args);
-    return_closcall1(cont, memberp(car(args), cadr(args)));}
-void _memq(object cont, object args) {  
+    return_closcall1(data, cont, memberp(car(args), cadr(args)));}
+void _memq(void *data, object cont, object args) {  
     Cyc_check_num_args("memq", 2, args);
-    return_closcall1(cont, memqp(car(args), cadr(args)));}
-void _memv(object cont, object args) {  
+    return_closcall1(data, cont, memqp(car(args), cadr(args)));}
+void _memv(void *data, object cont, object args) {  
     Cyc_check_num_args("memv", 2, args);
-    return_closcall1(cont, memqp(car(args), cadr(args)));}
-void _char_91_125integer(object cont, object args) {  
+    return_closcall1(data, cont, memqp(car(args), cadr(args)));}
+void _char_91_125integer(void *data, object cont, object args) {  
     Cyc_check_num_args("char->integer", 1, args);
     { integer_type i = Cyc_char2integer(car(args));
-      return_closcall1(cont, &i);}}
-void _integer_91_125char(object cont, object args) {  
+      return_closcall1(data, cont, &i);}}
+void _integer_91_125char(void *data, object cont, object args) {  
     Cyc_check_num_args("integer->char", 1, args);
-    return_closcall1(cont, Cyc_integer2char(car(args)));}
-void _string_91_125number(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_integer2char(car(args)));}
+void _string_91_125number(void *data, object cont, object args) {  
     Cyc_check_num_args("string->number", 1, args);
     { common_type i = Cyc_string2number(car(args));
-      return_closcall1(cont, &i);}}
-void _string_91length(object cont, object args) {
+      return_closcall1(data, cont, &i);}}
+void _string_91length(void *data, object cont, object args) {
     Cyc_check_num_args("string-length", 1, args);
     { integer_type i = Cyc_string_length(car(args));
-      return_closcall1(cont, &i);}}
-void _cyc_substring(object cont, object args) {
+      return_closcall1(data, cont, &i);}}
+void _cyc_substring(void *data, object cont, object args) {
     Cyc_check_num_args("substring", 3, args);
-    Cyc_substring(cont, car(args), cadr(args), caddr(args));}
-void _cyc_string_91set_67(object cont, object args) {
+    Cyc_substring(data, cont, car(args), cadr(args), caddr(args));}
+void _cyc_string_91set_67(void *data, object cont, object args) {
     Cyc_check_num_args("string-set!", 3, args);
     { object s = Cyc_string_set(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, s); }}
-void _cyc_string_91ref(object cont, object args) {
+      return_closcall1(data, cont, s); }}
+void _cyc_string_91ref(void *data, object cont, object args) {
     Cyc_check_num_args("string-ref", 2, args);
     { object c = Cyc_string_ref(car(args), cadr(args));
-      return_closcall1(cont, c); }}
-void _Cyc_91installation_91dir(object cont, object args) {
+      return_closcall1(data, cont, c); }}
+void _Cyc_91installation_91dir(void *data, object cont, object args) {
     Cyc_check_num_args("Cyc-installation-dir", 1, args);
-    Cyc_installation_dir(cont, car(args));}
-void _command_91line_91arguments(object cont, object args) {
+    Cyc_installation_dir(data, cont, car(args));}
+void _command_91line_91arguments(void *data, object cont, object args) {
     object cmdline = Cyc_command_line_arguments(cont);
-    return_closcall1(cont, cmdline); }
-void _cyc_system(object cont, object args) {
+    return_closcall1(data, cont, cmdline); }
+void _cyc_system(void *data, object cont, object args) {
     Cyc_check_num_args("system", 1, args);
     { integer_type i = Cyc_system(car(args));
-      return_closcall1(cont, &i);}}
-//void _error(object cont, object args) {
+      return_closcall1(data, cont, &i);}}
+//void _error(void *data, object cont, object args) {
 //    integer_type argc = Cyc_length(args);
-//    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
-void _Cyc_91current_91exception_91handler(object cont, object args) {
+//    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
+void _Cyc_91current_91exception_91handler(void *data, object cont, object args) {
     object handler = Cyc_current_exception_handler();
-    return_closcall1(cont, handler); }
-void _Cyc_91default_91exception_91handler(object cont, object args) {
+    return_closcall1(data, cont, handler); }
+void _Cyc_91default_91exception_91handler(void *data, object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
-    Cyc_default_exception_handler(1, args, car(args));
+    Cyc_default_exception_handler(data, 1, args, car(args));
 }
-void _string_91cmp(object cont, object args) {  
+void _string_91cmp(void *data, object cont, object args) {  
     Cyc_check_num_args("string-cmp", 2, args);
     { integer_type cmp = Cyc_string_cmp(car(args), cadr(args));
-      return_closcall1(cont, &cmp);}}
-void _string_91append(object cont, object args) {  
+      return_closcall1(data, cont, &cmp);}}
+void _string_91append(void *data, object cont, object args) {  
     integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
-void _make_91vector(object cont, object args) {
+    dispatch(data, argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
+void _make_91vector(void *data, object cont, object args) {
     Cyc_check_num_args("make-vector", 1, args);
     { integer_type argc = Cyc_length(args);
       if (argc.value >= 2) {
-        Cyc_make_vector(cont, car(args), cadr(args));}
+        Cyc_make_vector(data, cont, car(args), cadr(args));}
       else {
-        Cyc_make_vector(cont, car(args), boolean_f);}}}
-void _vector_91ref(object cont, object args) {
+        Cyc_make_vector(data, cont, car(args), boolean_f);}}}
+void _vector_91ref(void *data, object cont, object args) {
     Cyc_check_num_args("vector-ref", 2, args);
     { object ref = Cyc_vector_ref(car(args), cadr(args));
-      return_closcall1(cont, ref);}}
-void _vector_91set_67(object cont, object args) {
+      return_closcall1(data, cont, ref);}}
+void _vector_91set_67(void *data, object cont, object args) {
     Cyc_check_num_args("vector-set!", 3, args);
     { object ref = Cyc_vector_set(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, ref);}}
-void _list_91_125vector(object cont, object args) {
+      return_closcall1(data, cont, ref);}}
+void _list_91_125vector(void *data, object cont, object args) {
     Cyc_check_num_args("list->vector", 1, args);
-    Cyc_list2vector(cont, car(args));}
-void _list_91_125string(object cont, object args) {  
+    Cyc_list2vector(data, cont, car(args));}
+void _list_91_125string(void *data, object cont, object args) {  
     Cyc_check_num_args("list->string", 1, args);
-    Cyc_list2string(cont, car(args));}
-void _string_91_125symbol(object cont, object args) {  
+    Cyc_list2string(data, cont, car(args));}
+void _string_91_125symbol(void *data, object cont, object args) {  
     Cyc_check_num_args("string->symbol", 1, args);
-    return_closcall1(cont, Cyc_string2symbol(car(args)));}
-void _symbol_91_125string(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_string2symbol(car(args)));}
+void _symbol_91_125string(void *data, object cont, object args) {  
     Cyc_check_num_args("symbol->string", 1, args);
-    Cyc_symbol2string(cont, car(args));}
-void _number_91_125string(object cont, object args) {  
+    Cyc_symbol2string(data, cont, car(args));}
+void _number_91_125string(void *data, object cont, object args) {  
     Cyc_check_num_args("number->string", 1, args);
-    Cyc_number2string(cont, car(args));}
-void _open_91input_91file(object cont, object args) {  
+    Cyc_number2string(data, cont, car(args));}
+void _open_91input_91file(void *data, object cont, object args) {  
     Cyc_check_num_args("open-input-file", 1, args);
     { port_type p = Cyc_io_open_input_file(car(args));
-      return_closcall1(cont, &p);}}
-void _open_91output_91file(object cont, object args) {  
+      return_closcall1(data, cont, &p);}}
+void _open_91output_91file(void *data, object cont, object args) {  
     Cyc_check_num_args("open-output-file", 1, args);
     { port_type p = Cyc_io_open_output_file(car(args));
-      return_closcall1(cont, &p);}}
-void _close_91port(object cont, object args) {  
+      return_closcall1(data, cont, &p);}}
+void _close_91port(void *data, object cont, object args) {  
     Cyc_check_num_args("close-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_port(car(args)));}
-void _close_91input_91port(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_io_close_port(car(args)));}
+void _close_91input_91port(void *data, object cont, object args) {  
     Cyc_check_num_args("close-input-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_input_port(car(args)));}
-void _close_91output_91port(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_io_close_input_port(car(args)));}
+void _close_91output_91port(void *data, object cont, object args) {  
     Cyc_check_num_args("close-output-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_output_port(car(args)));}
-void _Cyc_91flush_91output_91port(object cont, object args) {
+    return_closcall1(data, cont, Cyc_io_close_output_port(car(args)));}
+void _Cyc_91flush_91output_91port(void *data, object cont, object args) {
     Cyc_check_num_args("Cyc-flush-output-port", 1, args);
-    return_closcall1(cont, Cyc_io_flush_output_port(car(args)));}
-void _file_91exists_127(object cont, object args) {
+    return_closcall1(data, cont, Cyc_io_flush_output_port(car(args)));}
+void _file_91exists_127(void *data, object cont, object args) {
     Cyc_check_num_args("file-exists?", 1, args);
-    return_closcall1(cont, Cyc_io_file_exists(car(args)));}
-void _delete_91file(object cont, object args) {
+    return_closcall1(data, cont, Cyc_io_file_exists(car(args)));}
+void _delete_91file(void *data, object cont, object args) {
     Cyc_check_num_args("delete-file", 1, args);
-    return_closcall1(cont, Cyc_io_delete_file(car(args)));}
-void _read_91char(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_io_delete_file(car(args)));}
+void _read_91char(void *data, object cont, object args) {  
     Cyc_check_num_args("read-char", 1, args);
-    return_closcall1(cont, Cyc_io_read_char(car(args)));}
-void _peek_91char(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_io_read_char(car(args)));}
+void _peek_91char(void *data, object cont, object args) {  
     Cyc_check_num_args("peek-char", 1, args);
-    return_closcall1(cont, Cyc_io_peek_char(car(args)));}
-void _Cyc_91read_91line(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_io_peek_char(car(args)));}
+void _Cyc_91read_91line(void *data, object cont, object args) {  
     Cyc_check_num_args("Cyc-read-line", 1, args);
-    Cyc_io_read_line(cont, car(args));}
-void _Cyc_91write_91char(object cont, object args) {  
+    Cyc_io_read_line(data, cont, car(args));}
+void _Cyc_91write_91char(void *data, object cont, object args) {  
     Cyc_check_num_args("write-char", 2, args);
-    return_closcall1(cont, Cyc_write_char(data, car(args), cadr(args)));}
-void _Cyc_91write(object cont, object args) {  
+    return_closcall1(data, cont, Cyc_write_char(data, car(args), cadr(args)));}
+void _Cyc_91write(void *data, object cont, object args) {  
     Cyc_check_num_args("write", 1, args);
     { integer_type argc = Cyc_length(args);
-     dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }}
-void _display(object cont, object args) {  
+     dispatch(data, argc.value, (function_type)dispatch_write_va, cont, cont, args); }}
+void _display(void *data, object cont, object args) {  
     Cyc_check_num_args("display", 1, args);
     { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
-void _call_95cc(object cont, object args){
+      dispatch(data, argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
+void _call_95cc(void *data, object cont, object args){
     Cyc_check_num_args("call/cc", 1, args);
     Cyc_check_fnc(car(args));
-    return_closcall2(__glo_call_95cc, cont, car(args));
+    return_closcall2(data, __glo_call_95cc, cont, car(args));
 }
 
 /*
@@ -1846,14 +1844,14 @@ void _call_95cc(object cont, object args){
  * @param func - Function to execute
  * @param args - A list of arguments to the function
  */
-object apply(object cont, object func, object args){
+object apply(void *data, object cont, object func, object args){
   common_type buf;
 
 //printf("DEBUG apply: ");
 //Cyc_display(args);
 //printf("\n");
   if (!is_object_type(func)) {
-     Cyc_rt_raise2("Call of non-procedure: ", func);
+     Cyc_rt_raise2(data, "Call of non-procedure: ", func);
   }
 
   // Causes problems...
@@ -1862,7 +1860,7 @@ object apply(object cont, object func, object args){
   switch(type_of(func)) {
     case primitive_tag:
       // TODO: should probably check arg counts and error out if needed
-      ((primitive_type *)func)->fn(cont, args);
+      ((primitive_type *)func)->fn(data, cont, args);
       break;
     case macro_tag:
     case closure0_tag:
@@ -1871,10 +1869,10 @@ object apply(object cont, object func, object args){
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      buf.integer_t = Cyc_length(args);
+      buf.integer_t = Cyc_length(data, args);
       // TODO: validate number of args provided:
       Cyc_check_num_args("<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
-      dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
+      dispatch(data, buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
     case cons_tag:
@@ -1883,25 +1881,25 @@ object apply(object cont, object func, object args){
       object fobj = car(func);
 
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
-         Cyc_rt_raise2("Call of non-procedure: ", func);
+         Cyc_rt_raise2(data, "Call of non-procedure: ", func);
       } else if (strncmp(((symbol)fobj)->pname, "lambda", 7) == 0) {
           make_cons(c, func, args);
           //printf("JAE DEBUG, sending to eval: ");
           //Cyc_display(&c, stderr);
-          ((closure)__glo_eval)->fn(2, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 2, __glo_eval, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
           make_cons(c, cadr(func), args);
-          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
           make_cons(c, func, args);
-          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
       } else {
           make_cons(c, func, args);
-          Cyc_rt_raise2("Unable to evaluate: ", &c);
+          Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
       }
     }
       
@@ -1913,7 +1911,7 @@ object apply(object cont, object func, object args){
 }
 
 // Version of apply meant to be called from within compiled code
-void Cyc_apply(int argc, closure cont, object prim, ...){
+void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     va_list ap;
     object tmp;
     int i;
@@ -1933,12 +1931,12 @@ void Cyc_apply(int argc, closure cont, object prim, ...){
     //printf("\n");
 
     va_end(ap);
-    apply(cont, prim, (object)&args[0]);
+    apply(data, cont, prim, (object)&args[0]);
 }
 // END apply
 
 /* Extract args from given array, assuming cont is the first arg in buf */
-void Cyc_apply_from_buf(int argc, object prim, object *buf) {
+void Cyc_apply_from_buf(data, int argc, object prim, object *buf) {
     list args;
     object cont;
     int i;
@@ -1958,7 +1956,7 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
         args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
     }
 
-    apply(cont, prim, (object)&args[0]);
+    apply(data, cont, prim, (object)&args[0]);
 }
 
 ///**
@@ -2744,8 +2742,9 @@ void GC(cont, args, num_args) closure cont; object *args; int num_args;
   }
 
 //fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
-  longjmp(jmp_main,1); // Return globals gc_cont, gc_ans
+  longjmp(jmp_main, &data); // Return globals gc_cont, gc_ans
 }
+
 
  /* Overall GC notes:
  note fwd pointers are only ever placed on the stack, never the heap
@@ -2838,7 +2837,7 @@ to handle this detail yet. and it is very important to get right
 /**
  * Receive a list of arguments and apply them to the given function
  */
-void dispatch(int argc, function_type func, object clo, object cont, object args) {
+void dispatch(void *data, int argc, function_type func, object clo, object cont, object args) {
   object b[argc + 1]; // OK to do this? Is this portable?
   int i; 
 
@@ -2849,13 +2848,13 @@ void dispatch(int argc, function_type func, object clo, object cont, object args
     args = cdr(args); 
   } 
 
-  do_dispatch(argc, func, clo, b);
+  do_dispatch(data, argc, func, clo, b);
 }
 
 /**
  * Same as above but for a varargs C function
  */
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args) {
+void dispatch_va(void *data, int argc, function_type_va func, object clo, object cont, object args) {
   object b[argc + 1]; // OK to do this? Is this portable?
   int i; 
  
@@ -2866,7 +2865,7 @@ void dispatch_va(int argc, function_type_va func, object clo, object cont, objec
     args = cdr(args); 
   } 
 
-  do_dispatch(argc, (function_type)func, clo, b);
+  do_dispatch(data, argc, (function_type)func, clo, b);
 }
 
 static primitive_type Cyc_91global_91vars_primitive = {{0}, primitive_tag, "Cyc-global-vars", &_Cyc_91global_91vars};

@@ -85,6 +85,7 @@ static void Cyc_main (stack_size,heap_size,stack_base)
   printf("Done with GC\n");
 #endif
 
+// JAE - note for the general case, setjmp will return the data pointer's addy
   if (type_of(gc_cont) == cons_tag || prim(gc_cont)) {
     Cyc_apply_from_buf(gc_num_ans, gc_cont, gc_ans);
   } else {
