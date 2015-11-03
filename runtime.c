@@ -596,13 +596,13 @@ object Cyc_write_char(void *data, object c, object port)
 }
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
-object memberp(x,l) object x; list l;
-{Cyc_check_cons_or_nil(l);
+object memberp(void *data, object x, list l);
+{Cyc_check_cons_or_nil(data, l);
  for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
  return boolean_f;}
 
-object memqp(x,l) object x; list l;
-{Cyc_check_cons_or_nil(l);
+object memqp(void *data, object x, list l)
+{Cyc_check_cons_or_nil(data, l);
  for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
@@ -624,55 +624,55 @@ object equalp(x,y) object x,y;
         type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;}}
 
-list assq(x,l) object x; list l;
+list assq(void *data, object x, list l)
 {if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
  for (; !nullp(l); l = cdr(l))
    {register list la = car(l); 
-    Cyc_check_cons(la);
+    Cyc_check_cons(data, la);
     if (eq(x,car(la))) return la;}
  return boolean_f;}
 
-list assoc(x,l) object x; list l;
+list assoc(void *data, object x, list l)
 {if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
  for (; !nullp(l); l = cdr(l))
    {register list la = car(l); 
-    Cyc_check_cons(la);
+    Cyc_check_cons(data, la);
     if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
 
 // TODO: generate these using macros???
-object __num_eq(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_eq(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value == ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_gt(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_gt(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value > ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_lt(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_lt(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value < ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_gte(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_gte(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value >= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_lte(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_lte(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value <= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
@@ -735,7 +735,7 @@ object Cyc_is_char(object o){
         return boolean_t;
     return boolean_f;}
 
-object Cyc_is_procedure(object o) {
+object Cyc_is_procedure(void *data, object o) {
     int tag;
     if (!nullp(o) && !is_value_type(o)) {
         tag = type_of(o);
@@ -748,7 +748,7 @@ object Cyc_is_procedure(object o) {
             tag == primitive_tag) {
             return boolean_t;
         } else if (tag == cons_tag) {
-          integer_type l = Cyc_length(o);
+          integer_type l = Cyc_length(data, o);
           if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
             if (strncmp(((symbol)car(o))->pname, "primitive", 10) == 0 ||
                 strncmp(((symbol)car(o))->pname, "procedure", 10) == 0 ) {
@@ -787,15 +787,15 @@ object Cyc_eq(object x, object y) {
     return boolean_f;
 }
 
-object Cyc_set_car(object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
+object Cyc_set_car(void *data, object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     car(l) = val;
     add_mutation(l, val);
     return l;
 }
 
-object Cyc_set_cdr(object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
+object Cyc_set_cdr(void *data, object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     cdr(l) = val;
     add_mutation(l, val);
     return l;
@@ -803,8 +803,8 @@ object Cyc_set_cdr(object l, object val) {
 
 object Cyc_vector_set(void *data, object v, object k, object obj) {
   int idx;
-  Cyc_check_vec(v);
-  Cyc_check_int(k);
+  Cyc_check_vec(data, v);
+  Cyc_check_int(data, k);
   idx = ((integer_type *)k)->value;
 
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
@@ -853,7 +853,7 @@ integer_type Cyc_length(void *data, object l){
 
 object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
-    Cyc_check_num(n);
+    Cyc_check_num(data, n);
     if (type_of(n) == integer_tag) {
         snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
     } else if (type_of(n) == double_tag) {
@@ -867,14 +867,14 @@ object Cyc_number2string(void *data, object cont, object n) {
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym) {
-  Cyc_check_sym(sym);
+  Cyc_check_sym(data, sym);
   { const char *pname = symbol_pname(sym);
     make_string(str, pname);
     return_closcall1(data, cont, &str); }}
 
-object Cyc_string2symbol(object str) {
+object Cyc_string2symbol(void *data, object str) {
     object sym;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     sym = find_symbol_by_name(string_str(str));
     if (!sym) {
         sym = add_symbol_by_name(string_str(str));
@@ -887,7 +887,7 @@ object Cyc_list2string(void *data, object cont, object lst){
     int i = 0;
     integer_type len;
 
-    Cyc_check_cons_or_nil(lst);
+    Cyc_check_cons_or_nil(data, lst);
     
     len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (len.value + 1));
@@ -902,11 +902,11 @@ object Cyc_list2string(void *data, object cont, object lst){
       return_closcall1(data, cont, &str);}
 }
 
-common_type Cyc_string2number(object str){
+common_type Cyc_string2number(void *data, object str){
     common_type result;
     double n;
-    Cyc_check_obj(string_tag, str);
-    Cyc_check_str(str);
+    Cyc_check_obj(data, string_tag, str);
+    Cyc_check_str(data, str);
     if (type_of(str) == string_tag &&
         ((string_type *) str)->str){
         n = atof(((string_type *) str)->str);
@@ -927,9 +927,9 @@ common_type Cyc_string2number(object str){
     return result;
 }
 
-integer_type Cyc_string_cmp(object str1, object str2) {
-  Cyc_check_str(str1);
-  Cyc_check_str(str2);
+integer_type Cyc_string_cmp(void *data, object str1, object str2) {
+  Cyc_check_str(data, str1);
+  Cyc_check_str(data, str2);
   {
     make_int(cmp, strcmp(((string_type *)str1)->str,
                         ((string_type *)str2)->str));
@@ -943,14 +943,14 @@ integer_type Cyc_string_cmp(object str1, object str2) {
     char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc); \
     object tmp; \
     if (argc > 0) { \
-      Cyc_check_str(str1); \
+      Cyc_check_str(data, str1); \
       str[i] = ((string_type *)str1)->str; \
       len[i] = strlen(str[i]); \
       total_len += len[i]; \
     } \
     for (i = 1; i < argc; i++) { \
       tmp = va_arg(ap, object); \
-      Cyc_check_str(tmp); \
+      Cyc_check_str(data, tmp); \
       str[i] = ((string_type *)tmp)->str; \
       len[i] = strlen(str[i]); \
       total_len += len[i]; \
@@ -978,9 +978,9 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...) {
     Cyc_string_append_va_list(data, _argc);
 }
 
-integer_type Cyc_string_length(object str) {
-  Cyc_check_obj(string_tag, str);
-  Cyc_check_str(str);
+integer_type Cyc_string_length(void *data, object str) {
+  Cyc_check_obj(data, string_tag, str);
+  Cyc_check_str(data, str);
   { make_int(len, strlen(string_str(str)));
     return len; }}
 
@@ -988,8 +988,8 @@ object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
   int idx, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(k);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, k);
 
   if (!eq(boolean_t, Cyc_is_char(chr))) {
     Cyc_rt_raise2(data, "Expected char but received", chr);
@@ -999,7 +999,7 @@ object Cyc_string_set(void *data, object str, object k, object chr) {
   idx = integer_value(k),
   len = strlen(raw);
 
-  Cyc_check_bounds("string-set!", len, idx);
+  Cyc_check_bounds(data, "string-set!", len, idx);
   raw[idx] = obj_obj2char(chr);
   return str;
 }
@@ -1008,8 +1008,8 @@ object Cyc_string_ref(void *data, object str, object k) {
   const char *raw;
   int idx, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(k);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, k);
 
   raw = string_str(str);
   idx = integer_value(k),
@@ -1026,9 +1026,9 @@ object Cyc_substring(void *data, object cont, object str, object start, object e
   const char *raw;
   int s, e, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(start);
-  Cyc_check_int(end);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, start);
+  Cyc_check_int(data, end);
 
   raw = string_str(str);
   s = integer_value(start),
@@ -1109,7 +1109,7 @@ object Cyc_command_line_arguments(void *data, object cont) {
 object Cyc_make_vector(void *data, object cont, object len, object fill) {
   object v = nil;
   int i;
-  Cyc_check_int(len);
+  Cyc_check_int(data, len);
   v = alloca(sizeof(vector_type));
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->tag = vector_tag;
@@ -1130,8 +1130,8 @@ object Cyc_list2vector(void *data, object cont, object l) {
   object lst = l; 
   int i = 0; 
 
-  Cyc_check_cons_or_nil(l); 
-  len = Cyc_length(l); 
+  Cyc_check_cons_or_nil(data, l); 
+  len = Cyc_length(data, l); 
   v = alloca(sizeof(vector_type)); 
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->tag = vector_tag; 
@@ -1162,10 +1162,10 @@ integer_type Cyc_char2integer(object chr){
     return n;
 }
 
-object Cyc_integer2char(object n){
+object Cyc_integer2char(void *data, object n){
     int val = 0;
 
-    Cyc_check_int(n);
+    Cyc_check_int(data, n);
     if (!nullp(n)) {
         val = ((integer_type *) n)->value;
     }
@@ -1300,7 +1300,7 @@ port_type Cyc_stderr() {
 
 port_type Cyc_io_open_input_file(void *data, object str) {
     const char *fname;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
@@ -1310,7 +1310,7 @@ port_type Cyc_io_open_input_file(void *data, object str) {
 
 port_type Cyc_io_open_output_file(void *data, object str) {
     const char *fname;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 0);
     p.fp = fopen(fname, "w");
@@ -1318,14 +1318,14 @@ port_type Cyc_io_open_output_file(void *data, object str) {
     return p;
 }
 
-object Cyc_io_close_input_port(object port) {
-  return Cyc_io_close_port(port); }
+object Cyc_io_close_input_port(void *data, object port) {
+  return Cyc_io_close_port(data, port); }
 
-object Cyc_io_close_output_port(object port) {
-  return Cyc_io_close_port(port); }
+object Cyc_io_close_output_port(void *data, object port) {
+  return Cyc_io_close_port(data, port); }
 
-object Cyc_io_close_port(object port) {
-  Cyc_check_port(port);
+object Cyc_io_close_port(void *data, object port) {
+  Cyc_check_port(data, port);
   {
     FILE *stream = ((port_type *)port)->fp;
     if (stream) fclose(stream);
@@ -1334,8 +1334,8 @@ object Cyc_io_close_port(object port) {
   return port;
 }
 
-object Cyc_io_flush_output_port(object port) {
-  Cyc_check_port(port);
+object Cyc_io_flush_output_port(void *data, object port) {
+  Cyc_check_port(data, port);
   {
     FILE *stream = ((port_type *)port)->fp;
     if (stream) { 
@@ -1346,18 +1346,18 @@ object Cyc_io_flush_output_port(object port) {
   return port;
 }
 
-object Cyc_io_delete_file(object filename) {
+object Cyc_io_delete_file(void *data, object filename) {
   const char *fname;
-  Cyc_check_str(filename);
+  Cyc_check_str(data, filename);
   fname = ((string_type *)filename)->str;
   if (remove(fname) == 0)
     return boolean_t; // Success
   return boolean_f;
 }
 
-object Cyc_io_file_exists(object filename) {
+object Cyc_io_file_exists(void *data, object filename) {
   const char *fname;
-  Cyc_check_str(filename);
+  Cyc_check_str(data, filename);
   fname = ((string_type *)filename)->str;
   FILE *file;
   // Possibly overkill, but portable
@@ -1369,8 +1369,8 @@ object Cyc_io_file_exists(object filename) {
 }
 
 //  TODO: port arg is optional! (maybe handle that in expansion section??)
-object Cyc_io_read_char(object port) {
-    Cyc_check_port(port);
+object Cyc_io_read_char(void *data, object port) {
+    Cyc_check_port(data, port);
     {
         int c = fgetc(((port_type *) port)->fp);
         if (c != EOF) {
@@ -1403,11 +1403,11 @@ object Cyc_io_read_line(void *data, object cont, object port) {
   return nil;
 }
 
-object Cyc_io_peek_char(object port) {
+object Cyc_io_peek_char(void *data, object port) {
     FILE *stream;
     int c;
 
-    Cyc_check_port(port);
+    Cyc_check_port(data, port);
     {
         stream = ((port_type *) port)->fp;
         c = fgetc(stream);
@@ -2596,7 +2596,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   } \
 }
 
-void GC(cont, args, num_args) closure cont; object *args; int num_args;
+void GC(void *data, closure cont, object *args, int num_args)
 { 
   char tmp;
   object temp;
