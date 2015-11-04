@@ -14,7 +14,7 @@
 long global_stack_size = 0;
 long global_heap_size = 0;
 
-static void c_entry_pt(int,closure,closure);
+static void c_entry_pt(void *,int,closure,closure);
 static void Cyc_main(long stack_size,long heap_size,char *stack_base);
 
 static void Cyc_main (stack_size,heap_size,stack_base)
@@ -87,9 +87,9 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 
 // JAE - note for the general case, setjmp will return the data pointer's addy
   if (type_of(gc_cont) == cons_tag || prim(gc_cont)) {
-    Cyc_apply_from_buf(gc_num_ans, gc_cont, gc_ans);
+    Cyc_apply_from_buf(Cyc_thread, gc_num_ans, gc_cont, gc_ans);
   } else {
-    do_dispatch(gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
+    do_dispatch(Cyc_thread, gc_num_ans, ((closure)gc_cont)->fn, gc_cont, gc_ans);
   }
 
   printf("Internal error: should never have reached this line\n"); exit(0);}}
