@@ -555,132 +555,62 @@
      (else
        (error "unhandled primitive: " p))))
 
-TODO:
 ;; Does the primitive require passing thread data as its first argument?
 (define (prim/data-arg? p)
   (member p '(
-;  (cond
-;     ((eq? p 'Cyc-global-vars)       "Cyc_get_global_variables")
-;     ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
-;     ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
-;     ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
-;     ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
-;     ((eq? p 'Cyc-stdout)            "Cyc_stdout")
-;     ((eq? p 'Cyc-stdin)             "Cyc_stdin")
-;     ((eq? p 'Cyc-stderr)            "Cyc_stderr")
-;     ((eq? p '+)                     "Cyc_sum")
-;     ((eq? p '-)                     "Cyc_sub")
-;     ((eq? p '*)                     "Cyc_mul")
-;     ((eq? p '/)                     "Cyc_div")
-;     ((eq? p '=)                     "__num_eq")
-;     ((eq? p '>)                     "__num_gt")
-;     ((eq? p '<)                     "__num_lt")
-;     ((eq? p '>=)                    "__num_gte")
-;     ((eq? p '<=)                    "__num_lte")
-;     ((eq? p 'apply)                 "apply")
-;     ((eq? p '%halt)                 "__halt")
-;     ((eq? p 'exit)                  "__halt")
-;     ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
-;     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
-;     ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
-;     ((eq? p 'open-output-file)      "Cyc_io_open_output_file")
-;     ((eq? p 'close-port)            "Cyc_io_close_port")
-;     ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
-;     ((eq? p 'close-output-port)     "Cyc_io_close_output_port")
-;     ((eq? p 'Cyc-flush-output-port) "Cyc_io_flush_output_port")
-;     ((eq? p 'file-exists?)          "Cyc_io_file_exists")
-;     ((eq? p 'delete-file)           "Cyc_io_delete_file")
-;     ((eq? p 'read-char)             "Cyc_io_read_char")
-;     ((eq? p 'peek-char)             "Cyc_io_peek_char")
-;     ((eq? p 'Cyc-read-line)         "Cyc_io_read_line")
-;     ((eq? p 'Cyc-display)           "Cyc_display_va")
-;     ((eq? p 'Cyc-write)             "Cyc_write_va")
-;     ((eq? p 'Cyc-write-char)        "Cyc_write_char")
-;     ((eq? p 'car)           "car")
-;     ((eq? p 'cdr)           "cdr")
-;     ((eq? p 'caar)          "caar")
-;     ((eq? p 'cadr)          "cadr")
-;     ((eq? p 'cdar)          "cdar")
-;     ((eq? p 'cddr)          "cddr")
-;     ((eq? p 'caaar)         "caaar")
-;     ((eq? p 'caadr)         "caadr")
-;     ((eq? p 'cadar)         "cadar")
-;     ((eq? p 'caddr)         "caddr")
-;     ((eq? p 'cdaar)         "cdaar")
-;     ((eq? p 'cdadr)         "cdadr")
-;     ((eq? p 'cddar)         "cddar")
-;     ((eq? p 'cdddr)         "cdddr")
-;     ((eq? p 'caaaar)        "caaaar")
-;     ((eq? p 'caaadr)        "caaadr")
-;     ((eq? p 'caadar)        "caadar")
-;     ((eq? p 'caaddr)        "caaddr")
-;     ((eq? p 'cadaar)        "cadaar")
-;     ((eq? p 'cadadr)        "cadadr")
-;     ((eq? p 'caddar)        "caddar")
-;     ((eq? p 'cadddr)        "cadddr")
-;     ((eq? p 'cdaaar)        "cdaaar")
-;     ((eq? p 'cdaadr)        "cdaadr")
-;     ((eq? p 'cdadar)        "cdadar")
-;     ((eq? p 'cdaddr)        "cdaddr")
-;     ((eq? p 'cddaar)        "cddaar")
-;     ((eq? p 'cddadr)        "cddadr")
-;     ((eq? p 'cdddar)        "cdddar")
-;     ((eq? p 'cddddr)        "cddddr")
-;     ((eq? p 'char->integer) "Cyc_char2integer")
-;     ((eq? p 'integer->char) "Cyc_integer2char")
-;     ((eq? p 'string->number)"Cyc_string2number")
-;     ((eq? p 'list->string)  "Cyc_list2string")
-;     ((eq? p 'make-vector)   "Cyc_make_vector")
-;     ((eq? p 'list->vector)  "Cyc_list2vector")
-;     ((eq? p 'vector-length) "Cyc_vector_length")
-;     ((eq? p 'vector-ref)    "Cyc_vector_ref")
-;     ((eq? p 'vector-set!)   "Cyc_vector_set")
-;     ((eq? p 'string-append) "Cyc_string_append")
-;     ((eq? p 'string-cmp)    "Cyc_string_cmp")
-;     ((eq? p 'string->symbol) "Cyc_string2symbol")
-;     ((eq? p 'symbol->string) "Cyc_symbol2string")
-;     ((eq? p 'number->string) "Cyc_number2string")
-;     ((eq? p 'string-length)  "Cyc_string_length")
-;     ((eq? p 'string-ref)     "Cyc_string_ref")
-;     ((eq? p 'string-set!)    "Cyc_string_set")
-;     ((eq? p 'substring)      "Cyc_substring")
-;     ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
-;     ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
-;     ((eq? p 'system)         "Cyc_system")
-;     ((eq? p 'assq)          "assq")
-;     ((eq? p 'assv)          "assq")
-;     ((eq? p 'assoc)         "assoc")
-;     ((eq? p 'memq)          "memqp")
-;     ((eq? p 'memv)          "memqp")
-;     ((eq? p 'member)        "memberp")
-;     ((eq? p 'length)        "Cyc_length")
-;     ((eq? p 'set-car!)      "Cyc_set_car")
-;     ((eq? p 'set-cdr!)      "Cyc_set_cdr")
-;     ((eq? p 'eq?)           "Cyc_eq")
-;     ((eq? p 'eqv?)          "Cyc_eq")
-;     ((eq? p 'equal?)        "equalp")
-;     ((eq? p 'boolean?)      "Cyc_is_boolean")
-;     ((eq? p 'char?)         "Cyc_is_char")
-;     ((eq? p 'null?)         "Cyc_is_null")
-;     ((eq? p 'number?)       "Cyc_is_number")
-;     ((eq? p 'real?)         "Cyc_is_real")
-;     ((eq? p 'integer?)      "Cyc_is_integer")
-;     ((eq? p 'pair?)         "Cyc_is_cons")
-;     ((eq? p 'procedure?)    "Cyc_is_procedure")
-;     ((eq? p 'macro?)        "Cyc_is_macro")
-;     ((eq? p 'port?)         "Cyc_is_port")
-;     ((eq? p 'vector?)       "Cyc_is_vector")
-;     ((eq? p 'string?)       "Cyc_is_string")
-;     ((eq? p 'eof-object?)   "Cyc_is_eof_object")
-;     ((eq? p 'symbol?)       "Cyc_is_symbol")
-;     ((eq? p 'cons)          "make_cons")
-;     ((eq? p 'cell)          "make_cell")
-;     ((eq? p 'cell-get)      "cell_get")
-;     ((eq? p 'set-cell!)     "Cyc_set_car")
-;     ((eq? p 'set-global!)   "global_set")
-;     (else
-;       (error "unhandled primitive: " p))))
-))
+    +
+    -
+    *
+    /
+    =
+    >
+    <
+    >=
+    <=
+    apply
+    Cyc-default-exception-handler
+    open-input-file
+    open-output-file
+    close-port
+    close-input-port
+    close-output-port
+    Cyc-flush-output-port
+    file-exists?
+    delete-file
+    read-char
+    peek-char
+    Cyc-read-line
+    Cyc-write-char
+    integer->char
+    string->number
+    list->string
+    make-vector
+    list->vector
+    vector-length
+    vector-ref
+    vector-set!
+    string-append
+    string-cmp
+    string->symbol
+    symbol->string
+    number->string
+    string-length
+    string-ref
+    string-set!
+    substring
+    Cyc-installation-dir
+    command-line-arguments
+    assq
+    assv
+    assoc
+    memq
+    memv
+    member
+    length
+    set-car!
+    set-cdr!
+    procedure?
+    set-cell!))
 
 ;; Determine if primitive assigns (allocates) a C variable
 ;; EG: int v = prim();
