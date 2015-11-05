@@ -693,6 +693,13 @@
     (and  (prim? exp)
           (member exp '())))
 
+;; Does string end with the given substring?
+;; EG: ("test(" "(") ==> #t
+(define (str-ending? str end)
+  (let ((len (string-length str)))
+    (and (> len 0)
+         (equal? end (substring str (- len 1) len)))))
+
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
   (let* ((c-func (prim->c-func p))
@@ -847,7 +854,8 @@
                       ;; Add a comma if there were any args to the func
                       (let* ((fnc-str (car (c:allocs c-fun)))
                              (len (string-length fnc-str)))
-(write (string-append "(JAE-DEBUG " fnc-str))
+;(write (string-append "(JAE-DEBUG " fnc-str))
+TODO: rewrite cond below in terms of (str-ending?)
                         (cond
                          ((and (> len 0)
                                (not (equal? "(" 
@@ -858,7 +866,15 @@
                     (c:body c-args*) ");"))))
               ;; Args stay with body
               (c:append
-                (c:append c-fun c-args*)
+                (c:append 
+                  (let ()
+;(display "JAE DEBUG2: ")
+;(write c-fun)
+                    ;; Add a comma if necessary
+                    (if (str-ending? (c:body c-fun) "(")
+                      c-fun
+                      (c:append c-fun (c-code ", "))))
+                  c-args*)
                 (c-code ")")))))
 
         ((equal? '%closure-ref fun)
