@@ -2743,7 +2743,7 @@ void GC(void *data, closure cont, object *args, int num_args)
 #endif
   }
 
-//fprintf(stdout, "DEBUG, finished minor GC\n"); // JAE DEBUG
+  /* Let it all go, Neo... */
   longjmp(jmp_main, (int)(&data)); // Return globals gc_cont, gc_ans
 }
 
