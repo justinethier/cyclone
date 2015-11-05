@@ -674,6 +674,15 @@ void gc_thread_data_init(gc_thread_data *thd)
 // TODO:  }
 }
 
+void gc_thread_data_free(gc_thread_data *thd)
+{
+  if (thd) {
+    if (thd->moveBuf) free(thd->moveBuf);
+    if (thd->mark_buffer) free(thd->mark_buffer);
+    free(thd);
+  }
+}
+
 //// Unit testing:
 //int main(int argc, char **argv) {
 //  int a = 1, b = 2, c = 3, i;

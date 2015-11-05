@@ -22,6 +22,12 @@
 typedef void *object;
 
 /* Thread data structures */
+typedef struct gc_thread_stack_t gc_thread_stack;
+struct gc_thread_stack {
+  char *begin;
+  // TODO: move moveBuf stuff over here?
+};
+
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
   void **moveBuf; /* list of objects moved to heap during GC */
@@ -113,6 +119,7 @@ size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data *thd);
+void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
 void gc_mark_gray(gc_thread_data *thd, object obj);
 void gc_collector_trace();
