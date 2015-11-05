@@ -714,7 +714,7 @@
              (else #f)))
          ;; END apply defs
          (tdata (cond
-                 ((prim/data-arg? p) "data ")
+                 ((prim/data-arg? p) "data")
                  (else "")))
          (tdata-comma (if (> (string-length tdata) 0) "," ""))
          (c-var-assign 
@@ -737,13 +737,11 @@
                        (closure-def
                         (string-append 
                           tdata ","
-                          "&" closure-sym 
-                          (if (prim:cont-has-args? p) ", " "")))
+                          "&" closure-sym))
                        ((prim:cont? p) 
                         (string-append 
                           tdata ","
-                          cont
-                          (if (prim:cont-has-args? p) ", " "")))
+                          cont))
                        (else tdata)))))))))
     (cond
      ((prim/c-var-assign p)
@@ -763,7 +761,7 @@
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
-        (c-code (string-append c-func "(" tdata tdata-comma))))))
+        (c-code (string-append c-func "(" tdata))))))
 
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -845,8 +843,19 @@
                   (c:allocs c-args*) ;; fun alloc depends upon arg allocs
                   (list (string-append 
                     (car (c:allocs c-fun)) 
-                         (if (prim/c-var-assign fun) "" ",") ; Allocating C var
-                         (c:body c-args*) ");"))))
+                    (if (prim/c-var-assign fun)
+                      ;; Add a comma if there were any args to the func
+                      (let* ((fnc-str (car (c:allocs c-fun)))
+                             (len (string-length fnc-str)))
+(write (string-append "(JAE-DEBUG " fnc-str))
+                        (cond
+                         ((and (> len 0)
+                               (not (equal? "(" 
+                                            (substring fnc-str (- len 1) len))))
+                          ",")
+                         (else "")))
+                      ",")
+                    (c:body c-args*) ");"))))
               ;; Args stay with body
               (c:append
                 (c:append c-fun c-args*)
@@ -1255,7 +1264,7 @@
     ; Emit entry point
     (cond
       (program?
-        (emit "static void c_entry_pt_first_lambda(void *data);")
+        (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);")
         (for-each
           (lambda (lib-name)
             (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, closure cont, object value);"))
