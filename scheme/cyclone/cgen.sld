@@ -844,25 +844,14 @@
                   (list (string-append 
                     (car (c:allocs c-fun)) 
                     (if (prim/c-var-assign fun)
-                      ;; Add a comma if there were any args to the func
-                      (let* ((fnc-str (car (c:allocs c-fun)))
-                             (len (string-length fnc-str)))
-;(write (string-append "(JAE-DEBUG " fnc-str))
-TODO: rewrite cond below in terms of (str-ending?)
-                        (cond
-                         ((and (> len 0)
-                               (not (equal? "(" 
-                                            (substring fnc-str (- len 1) len))))
-                          ",")
-                         (else "")))
+                      ;; Add a comma if there were any args to the func added by comp-prim
+                      (if (str-ending? (car (c:allocs c-fun)) "(") "" ",")
                       ",")
                     (c:body c-args*) ");"))))
               ;; Args stay with body
               (c:append
                 (c:append 
                   (let ()
-;(display "JAE DEBUG2: ")
-;(write c-fun)
                     ;; Add a comma if necessary
                     (if (str-ending? (c:body c-fun) "(")
                       c-fun
