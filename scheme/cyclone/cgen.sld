@@ -674,6 +674,11 @@
                      symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 
+;; Primitive functions that pass a continuation but have no other arguments
+(define (prim:cont/no-args? exp)
+  (and (prim? exp)
+       (member exp '(command-line-arguments))))
+
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
     (and (prim? exp)
@@ -845,7 +850,10 @@
                     (car (c:allocs c-fun)) 
                     (if (prim/c-var-assign fun)
                       ;; Add a comma if there were any args to the func added by comp-prim
-                      (if (str-ending? (car (c:allocs c-fun)) "(") "" ",")
+                      (if (or (str-ending? (car (c:allocs c-fun)) "(") 
+                              (prim:cont/no-args? fun))
+                        "" 
+                        ",")
                       ",")
                     (c:body c-args*) ");"))))
               ;; Args stay with body
