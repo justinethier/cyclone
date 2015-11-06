@@ -42,7 +42,7 @@ struct gc_thread_data_t {
   char *stack_limit;
   jmp_buf *jmp_start;
   object gc_cont;
-  object *gc_ans; //[NUM_GC_ANS];
+  object *gc_ans;
   short gc_num_ans;
   // List of objects moved to heap during minor GC
   void **moveBuf;

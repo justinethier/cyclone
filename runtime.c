@@ -99,9 +99,9 @@ long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
 
 //TODO: after previous change, move these to thread data structure
-object gc_cont;   /* GC continuation closure. */
-object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
-int gc_num_ans;
+//object gc_cont;   /* GC continuation closure. */
+//object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
+//int gc_num_ans;
 
 object Cyc_global_variables = nil;
 int _cyc_argc = 0;
@@ -2617,12 +2617,12 @@ void GC(void *data, closure cont, object *args, int num_args)
   }
 
   gc_move2heap(cont);
-  gc_cont = cont;
-  gc_num_ans = num_args;
+  ((gc_thread_data *)data)->gc_cont = cont;
+  ((gc_thread_data *)data)->gc_num_ans = num_args;
 
   for (i = 0; i < num_args; i++){ 
     gc_move2heap(args[i]);
-    gc_ans[i] = args[i];
+    ((gc_thread_data *)data)->gc_ans[i] = args[i];
   }
 
   // Transport mutations
