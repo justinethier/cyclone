@@ -2594,7 +2594,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = (object) gc_move(temp, Cyc_thread, &alloci, &heap_grown); \
+    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown); \
   } \
 }
 
@@ -2660,7 +2660,7 @@ void GC(void *data, closure cont, object *args, int num_args)
 
   // Check allocated objects, moving additional objects as needed
   while (scani < alloci) {
-    object obj = Cyc_thread->moveBuf[scani];
+    object obj = ((gc_thread_data *)data)->moveBuf[scani];
     switch(type_of(obj)) {
       case cons_tag: {
         gc_move2heap(car(obj));

@@ -22,17 +22,15 @@
 typedef void *object;
 
 /* Thread data structures */
-typedef struct gc_thread_stack_t gc_thread_stack;
-struct gc_thread_stack {
-  char *begin;
-  // TODO: move moveBuf stuff over here?
-};
-
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
-  void **moveBuf; /* list of objects moved to heap during GC */
+  // Data needed for stack-based minor GC
+  char *stack_start;
+  char *stack_limit;
+  // List of objects moved to heap during minor GC
+  void **moveBuf;
   int moveBufLen;
-  // Data needed for tri-color marking 
+  // Data needed for heap GC
   int gc_alloc_color;
   int gc_mut_status;
   int last_write;
@@ -118,7 +116,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
 size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
-void gc_thread_data_init(gc_thread_data *thd);
+void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size);
 void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
 void gc_mark_gray(gc_thread_data *thd, object obj);

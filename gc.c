@@ -657,9 +657,24 @@ void gc_empty_collector_stack()
 /////////////////////////////////////////////
 
 
-// Initialize a thread from scratch
-void gc_thread_data_init(gc_thread_data *thd)
+// Initialize runtime data structures for a thread.
+// Must be called on the target thread itself during startup,
+// to verify stack limits are setup correctly.
+void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size)
 {
+  char stack_ref;
+  thd->stack_start = stack_base;
+#if STACK_GROWS_DOWNWARD
+  thd->stack_limit = stack_base - stack_size;
+#else
+  thd->stack_limit = stack_base + stack_size;
+#endif
+  if (check_overflow(stack_base, &stack_ref)){
+    fprintf(stderr, 
+      "Error: recompile with STACK_GROWS_DOWNWARD set to %d\n",
+      (1 - STACK_GROWS_DOWNWARD));
+    exit(1);
+  }
   thd->moveBufLen = 0;
   gc_thr_grow_move_buffer(thd);
 // TODO: depends on collector state:  thd->gc_alloc_color = ATOMIC_GET(&gc_;
