@@ -28,7 +28,7 @@
 // This is used as the first generation of the GC.
 #define STACK_SIZE 250000
 
-// Size of a "page" on the heap (the 2nd generation), in bytes.
+// Size of a "page" on the heap (the second generation), in bytes.
 #define HEAP_SIZE 6000000
 
 /* Define general object type. */
@@ -40,7 +40,7 @@ struct gc_thread_data_t {
   // Data needed for stack-based minor GC
   char *stack_start;
   char *stack_limit;
-TODO:
+  jmp_buf *jmp_start;
   object gc_cont;
   object *gc_ans; //[NUM_GC_ANS];
   short gc_num_ans;

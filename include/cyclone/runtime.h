@@ -225,7 +225,6 @@ extern long no_major_gcs; /* Count the number of GC's. */
 extern object gc_cont;   /* GC continuation closure. */
 extern object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
 extern int gc_num_ans;
-extern jmp_buf jmp_main; /* Where to jump to. */
 
 /* Define Lisp constants we need. */
 extern const object boolean_t;

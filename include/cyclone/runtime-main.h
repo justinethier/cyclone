@@ -60,7 +60,7 @@ static void Cyc_main (stack_size,heap_size,stack_base)
   start = clock(); /* Start the timing clock. */
 
   /* Tank, load the jump program... */
-  setjmp(jmp_main);
+  setjmp(*(Cyc_thread->jmp_start));
 #if DEBUG_GC
   printf("Done with GC\n");
 #endif

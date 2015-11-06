@@ -675,6 +675,9 @@ void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size)
       (1 - STACK_GROWS_DOWNWARD));
     exit(1);
   }
+  thd->jmp_start = malloc(sizeof(jmp_buf));
+  thd->gc_ans = malloc(sizeof(object) * NUM_GC_ANS);
+  thd->gc_num_ans = 0;
   thd->moveBufLen = 0;
   gc_thr_grow_move_buffer(thd);
 // TODO: depends on collector state:  thd->gc_alloc_color = ATOMIC_GET(&gc_;
@@ -692,6 +695,8 @@ void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size)
 void gc_thread_data_free(gc_thread_data *thd)
 {
   if (thd) {
+    if (thd->jmp_start) free(thd->jmp_start);
+    if (thd->gc_ans) free(thd->gc_ans);
     if (thd->moveBuf) free(thd->moveBuf);
     if (thd->mark_buffer) free(thd->mark_buffer);
     free(thd);
