@@ -18,6 +18,19 @@
 #include <math.h>
 // TODO: #include <pthread.h>
 
+// Maximum number of args that GC will accept
+#define NUM_GC_ANS 128
+
+// Which way does the CPU grow its stack?
+#define STACK_GROWS_DOWNWARD 1
+
+// Size of the stack buffer, in bytes.
+// This is used as the first generation of the GC.
+#define STACK_SIZE 250000
+
+// Size of a "page" on the heap (the 2nd generation), in bytes.
+#define HEAP_SIZE 6000000
+
 /* Define general object type. */
 typedef void *object;
 
@@ -27,6 +40,10 @@ struct gc_thread_data_t {
   // Data needed for stack-based minor GC
   char *stack_start;
   char *stack_limit;
+TODO:
+  object gc_cont;
+  object *gc_ans; //[NUM_GC_ANS];
+  short gc_num_ans;
   // List of objects moved to heap during minor GC
   void **moveBuf;
   int moveBufLen;
@@ -141,19 +158,6 @@ void gc_wait_handshake();
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
-
-/* Maximum number of args that GC will accept */
-#define NUM_GC_ANS 128
-
-/* Which way does the CPU grow its stack? */
-#define STACK_GROWS_DOWNWARD 1
-
-/* Size of the stack buffer, in bytes.
-   This is used as the first generation of the GC. */
-#define STACK_SIZE 250000
-
-/* Size of a "page" on the heap (the 2nd generation), in bytes. */
-#define HEAP_SIZE 6000000
 
 /* Define size of object tags */
 typedef long tag_type;
