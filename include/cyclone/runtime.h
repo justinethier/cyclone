@@ -209,17 +209,6 @@ void do_dispatch(void *data, int argc, function_type func, object clo, object *b
 /* Global variables. */
 extern gc_heap *Cyc_heap;
 extern gc_thread_data *Cyc_thread;
-extern clock_t start;   /* Starting time. */
-extern char *bottom;    /* Bottom of tospace. */
-extern char *allocp;    /* Cheney allocate pointer. */
-extern char *alloc_end;
-/* TODO: not sure this is the best strategy for strings, especially if there 
-   are a lot of long, later gen strings because that will cause a lot of
-   copying to occur during GC */
-extern char *dhbottom; /* Bottom of data heap */
-extern char *dhallocp; /* Current place in data heap */
-extern char *dhalloc_limit; /* GC beyond this limit */ 
-extern char *dhalloc_end;
 extern long no_gcs; /* Count the number of GC's. */
 extern long no_major_gcs; /* Count the number of GC's. */
 

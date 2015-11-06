@@ -43,22 +43,6 @@ static void Cyc_main (stack_size,heap_size,stack_base)
   Cyc_thread->gc_ans[0] = &clos_halt;
   Cyc_thread->gc_num_ans = 1;
 
-  // JAE TODO: clean up below (and all of this old code, really)
-  bottom = calloc(1,heap_size);
-  allocp = (char *) ((((long) bottom)+7) & -8);
-  alloc_end = allocp + heap_size - 8;
-  
-  dhallocp = dhbottom = calloc(1, heap_size);
-  dhalloc_limit = dhallocp + (long)((heap_size - 8) * 0.90);
-  dhalloc_end = dhallocp + heap_size - 8;
-#if DEBUG_SHOW_DIAG
-  printf("main: heap_size=%ld  allocp=%p  alloc_end=%p\n",
-         (long) heap_size,(void *)allocp,(void *)alloc_end);
-  printf("main: Try a larger heap_size if program bombs.\n");
-  printf("Starting...\n");
-#endif
-  start = clock(); /* Start the timing clock. */
-
   /* Tank, load the jump program... */
   setjmp(*(Cyc_thread->jmp_start));
 #if DEBUG_GC

@@ -81,27 +81,8 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* Global variables. */
 gc_heap *Cyc_heap;
 gc_thread_data *Cyc_thread;
-
-//TODO: get rid of globals below that are not needed
-clock_t start;   /* Starting time. */
-char *bottom;    /* Bottom of tospace. */
-char *allocp;    /* Cheney allocate pointer. */
-char *alloc_end;
-/* TODO: not sure this is the best strategy for strings, especially if there 
-   are a lot of long, later gen strings because that will cause a lot of
-   copying to occur during GC */
-char *dhbottom; /* Bottom of data heap */
-char *dhallocp; /* Current place in data heap */
-char *dhalloc_limit; /* GC beyond this limit */ 
-char *dhalloc_end;
-
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
-
-//TODO: after previous change, move these to thread data structure
-//object gc_cont;   /* GC continuation closure. */
-//object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
-//int gc_num_ans;
 
 object Cyc_global_variables = nil;
 int _cyc_argc = 0;
