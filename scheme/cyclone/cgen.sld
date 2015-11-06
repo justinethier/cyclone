@@ -112,7 +112,7 @@
       "/* Check for GC, then call given continuation closure */\n"
       "#define return_closcall" n "(td,cfn" args ") \\\n"
       "{char stack; \\\n"
-      " if (check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td,cfn,buf," n "); return; \\\n"
       " } else {closcall" n "(td,(closure) (cfn)" args "); return;}}\n")))
@@ -125,7 +125,7 @@
       "/* Check for GC, then call C function directly */\n"
       "#define return_direct" n "(td,_fn" args ") { \\\n"
       " char stack; \\\n"
-      " if (check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
       "     GC(td,&c1, buf, " n "); return; \\\n"

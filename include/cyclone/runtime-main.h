@@ -23,25 +23,6 @@ static void Cyc_main (stack_size,heap_size,stack_base)
  mclosure0(clos_halt,&Cyc_halt);  /* Halt program if final closure is reached */
  gc_ans[0] = &clos_halt;
  gc_num_ans = 1;
- /* Allocate stack buffer. */
- stack_begin = stack_base;
-#if STACK_GROWS_DOWNWARD
- stack_limit1 = stack_begin - stack_size;
- stack_limit2 = stack_limit1 - 2000;
-#else
- stack_limit1 = stack_begin + stack_size;
- stack_limit2 = stack_limit1 + 2000;
-#endif
-#if DEBUG_SHOW_DIAG
- printf("main: sizeof(cons_type)=%ld\n",(long) sizeof(cons_type));
-#endif
- if (check_overflow(stack_base,&in_my_frame))
-   {printf("main: Recompile with STACK_GROWS_DOWNWARD set to %ld\n",
-           (long) (1-STACK_GROWS_DOWNWARD)); exit(0);}
-#if DEBUG_SHOW_DIAG
- printf("main: stack_size=%ld  stack_base=%p  stack_limit1=%p\n",
-        stack_size,(void *)stack_base,(void *)stack_limit1);
-#endif
 
  /* Initialize stack trace table */
  Cyc_st_init();
@@ -58,7 +39,6 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 #endif
 
   Cyc_heap = gc_heap_create(heap_size / 2, 0, 0);
-  //Cyc_heap = gc_heap_create(1024, 0, 0);
   Cyc_thread = malloc(sizeof(gc_thread_data));
   gc_thread_data_init(Cyc_thread, stack_base, stack_size);
   

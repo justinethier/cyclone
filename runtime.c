@@ -64,7 +64,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall1(td,cfn,a1) \
 {char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
+ if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[1]; buf[0] = a1;\
      GC(td,cfn,buf,1); return; \
  } else {closcall1(td,(closure) (cfn),a1); return;}}
@@ -72,7 +72,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall2(td,cfn,a1,a2) \
 {char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
+ if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[2]; buf[0] = a1;buf[1] = a2;\
      GC(td,cfn,buf,2); return; \
  } else {closcall2(td,(closure) (cfn),a1,a2); return;}}
@@ -82,9 +82,6 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 gc_heap *Cyc_heap;
 gc_thread_data *Cyc_thread;
 clock_t start;   /* Starting time. */
-char *stack_begin;   /* Initialized by main. */
-char *stack_limit1;  /* Initialized by main. */
-char *stack_limit2;
 char *bottom;    /* Bottom of tospace. */
 char *allocp;    /* Cheney allocate pointer. */
 char *alloc_end;
@@ -2603,7 +2600,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   char tmp;
   object temp;
   object low_limit = &tmp; // This is one end of the stack...
-  object high_limit = stack_begin; // TODO: move to thread-specific struct
+  object high_limit = ((gc_thread_data *)data)->stack_start;
   int i;
   int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
   int heap_grown = 0;

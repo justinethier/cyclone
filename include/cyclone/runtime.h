@@ -210,9 +210,6 @@ void do_dispatch(void *data, int argc, function_type func, object clo, object *b
 extern gc_heap *Cyc_heap;
 extern gc_thread_data *Cyc_thread;
 extern clock_t start;   /* Starting time. */
-extern char *stack_begin;   /* Initialized by main. */
-extern char *stack_limit1;  /* Initialized by main. */
-extern char *stack_limit2;
 extern char *bottom;    /* Bottom of tospace. */
 extern char *allocp;    /* Cheney allocate pointer. */
 extern char *alloc_end;
