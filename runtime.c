@@ -2343,6 +2343,25 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 // longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 //}
 
+void Cyc_start_thread(gc_thread_data *thd)
+{
+  /* Tank, load the jump program... */
+  setjmp(*(thd->jmp_start));
+
+#if DEBUG_GC
+  printf("Done with GC\n");
+#endif
+
+  if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
+    Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
+  } else {
+    do_dispatch(thd, thd->gc_num_args, ((closure)(thd->gc_cont))->fn, thd->gc_cont, thd->gc_args);
+  }
+
+  printf("Internal error: should never have reached this line\n"); 
+  exit(0);
+}
+
 // Collect garbage using mark&sweep algorithm
 // Note non-global roots should be marked prior to calling this function.
 size_t gc_collect(gc_heap *h, size_t *sum_freed) 
@@ -2727,8 +2746,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   }
 
   /* Let it all go, Neo... */
-  longjmp(*(((gc_thread_data *)data)->jmp_start), 
-           (((gc_thread_data *)data)->mutator_num));
+  longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
 
 

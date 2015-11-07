@@ -181,7 +181,8 @@ object get(object,object);
 object equalp(object,object);
 object memberp(void *,object,list);
 object memqp(void *,object,list);
-char *transport(char *,int);
+
+void Cyc_start_thread(gc_thread_data *thd);
 void GC(void *,closure,object*,int);
 
 void Cyc_st_init();

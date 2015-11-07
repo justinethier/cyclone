@@ -45,7 +45,7 @@ struct gc_thread_data_t {
   void **moveBuf;
   int moveBufLen;
   // Need the following to perform longjmp's
-  int mutator_num;
+  //int mutator_num;
   jmp_buf *jmp_start;
   // After longjmp, pick up execution using continuation/arguments
   object gc_cont;

@@ -675,7 +675,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
       (1 - STACK_GROWS_DOWNWARD));
     exit(1);
   }
-  thd->mutator_num = mut_num;
+  //thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
   thd->gc_args = malloc(sizeof(object) * NUM_GC_ANS);
   thd->gc_num_args = 0;
