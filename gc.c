@@ -677,8 +677,8 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   }
   thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
-  thd->gc_ans = malloc(sizeof(object) * NUM_GC_ANS);
-  thd->gc_num_ans = 0;
+  thd->gc_args = malloc(sizeof(object) * NUM_GC_ANS);
+  thd->gc_num_args = 0;
   thd->moveBufLen = 0;
   gc_thr_grow_move_buffer(thd);
 // TODO: depends on collector state:  thd->gc_alloc_color = ATOMIC_GET(&gc_;
@@ -697,7 +697,7 @@ void gc_thread_data_free(gc_thread_data *thd)
 {
   if (thd) {
     if (thd->jmp_start) free(thd->jmp_start);
-    if (thd->gc_ans) free(thd->gc_ans);
+    if (thd->gc_args) free(thd->gc_args);
     if (thd->moveBuf) free(thd->moveBuf);
     if (thd->mark_buffer) free(thd->mark_buffer);
     free(thd);

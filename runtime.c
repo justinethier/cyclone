@@ -2600,11 +2600,11 @@ void GC(void *data, closure cont, object *args, int num_args)
 
   gc_move2heap(cont);
   ((gc_thread_data *)data)->gc_cont = cont;
-  ((gc_thread_data *)data)->gc_num_ans = num_args;
+  ((gc_thread_data *)data)->gc_num_args = num_args;
 
   for (i = 0; i < num_args; i++){ 
     gc_move2heap(args[i]);
-    ((gc_thread_data *)data)->gc_ans[i] = args[i];
+    ((gc_thread_data *)data)->gc_args[i] = args[i];
   }
 
   // Transport mutations

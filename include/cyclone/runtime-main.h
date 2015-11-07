@@ -50,8 +50,8 @@ static void Cyc_main (stack_size,heap_size,stack_base)
   gc_thread_data_init(Cyc_mutators[0], 0, stack_base, stack_size);
   
   Cyc_mutators[0]->gc_cont = &entry_pt;
-  Cyc_mutators[0]->gc_ans[0] = &clos_halt;
-  Cyc_mutators[0]->gc_num_ans = 1;
+  Cyc_mutators[0]->gc_args[0] = &clos_halt;
+  Cyc_mutators[0]->gc_num_args = 1;
 
   /* Tank, load the jump program... */
   setjmp(*(Cyc_mutators[0]->jmp_start));
@@ -61,9 +61,9 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 
 // JAE - note for the general case, setjmp will return the data pointer's addy
   if (type_of(Cyc_mutators[0]->gc_cont) == cons_tag || prim(Cyc_mutators[0]->gc_cont)) {
-    Cyc_apply_from_buf(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_ans);
+    Cyc_apply_from_buf(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
   } else {
-    do_dispatch(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, ((closure)(Cyc_mutators[0]->gc_cont))->fn, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_ans);
+    do_dispatch(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, ((closure)(Cyc_mutators[0]->gc_cont))->fn, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
   }
 
   printf("Internal error: should never have reached this line\n"); exit(0);}}

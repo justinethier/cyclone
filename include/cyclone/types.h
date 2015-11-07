@@ -37,19 +37,20 @@ typedef void *object;
 /* Thread data structures */
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
-  // Data needed for stack-based minor GC
+  // Data needed to initiate stack-based minor GC
   char *stack_start;
   char *stack_limit;
 //TODO: store stack traces per thread
-  // Need the following to perform longjmp's
-  int mutator_num;
-  jmp_buf *jmp_start;
-  object gc_cont;
-  object *gc_ans;
-  short gc_num_ans;
   // List of objects moved to heap during minor GC
   void **moveBuf;
   int moveBufLen;
+  // Need the following to perform longjmp's
+  int mutator_num;
+  jmp_buf *jmp_start;
+  // After longjmp, pick up execution using continuation/arguments
+  object gc_cont;
+  object *gc_args;
+  short gc_num_args;
   // Data needed for heap GC
   int gc_alloc_color;
   int gc_mut_status;
