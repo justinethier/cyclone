@@ -40,6 +40,7 @@ struct gc_thread_data_t {
   // Data needed for stack-based minor GC
   char *stack_start;
   char *stack_limit;
+//TODO: store stack traces per thread
   // Need the following to perform longjmp's
   int mutator_num;
   jmp_buf *jmp_start;
