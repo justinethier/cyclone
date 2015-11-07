@@ -660,7 +660,7 @@ void gc_empty_collector_stack()
 // Initialize runtime data structures for a thread.
 // Must be called on the target thread itself during startup,
 // to verify stack limits are setup correctly.
-void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size)
+void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size)
 {
   char stack_ref;
   thd->stack_start = stack_base;
@@ -675,6 +675,7 @@ void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size)
       (1 - STACK_GROWS_DOWNWARD));
     exit(1);
   }
+  thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
   thd->gc_ans = malloc(sizeof(object) * NUM_GC_ANS);
   thd->gc_num_ans = 0;

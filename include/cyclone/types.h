@@ -40,6 +40,8 @@ struct gc_thread_data_t {
   // Data needed for stack-based minor GC
   char *stack_start;
   char *stack_limit;
+  // Need the following to perform longjmp's
+  int mutator_num;
   jmp_buf *jmp_start;
   object gc_cont;
   object *gc_ans;
@@ -133,7 +135,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
 size_t gc_collect(gc_heap *h, size_t *sum_freed);
 void gc_thr_grow_move_buffer(gc_thread_data *d);
 void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
-void gc_thread_data_init(gc_thread_data *thd, char *stack_base, long stack_size);
+void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
 void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
 void gc_mark_gray(gc_thread_data *thd, object obj);

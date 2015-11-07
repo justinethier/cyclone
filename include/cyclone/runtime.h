@@ -208,7 +208,8 @@ void do_dispatch(void *data, int argc, function_type func, object clo, object *b
 
 /* Global variables. */
 extern gc_heap *Cyc_heap;
-extern gc_thread_data *Cyc_thread;
+extern gc_thread_data **Cyc_mutators;
+extern int Cyc_num_mutators;
 extern long no_gcs; /* Count the number of GC's. */
 extern long no_major_gcs; /* Count the number of GC's. */
 

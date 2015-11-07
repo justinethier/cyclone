@@ -80,7 +80,8 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 
 /* Global variables. */
 gc_heap *Cyc_heap;
-gc_thread_data *Cyc_thread;
+gc_thread_data **Cyc_mutators;
+int Cyc_num_mutators;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
 
@@ -2726,12 +2727,8 @@ void GC(void *data, closure cont, object *args, int num_args)
   }
 
   /* Let it all go, Neo... */
-  // TODO: apparently it is a bad idea to cast a pointer to an int on 64 bit platforms
-  // as a pointer may be larger than an int. so need to figure out another technique
-  // here to communicate back to the setjmp which data to use. need to store a data
-  // structure of thread buffers for heap gc, so maybe be able to use an int to index
-  // into that.
-  longjmp(*(((gc_thread_data *)data)->jmp_start), (int)(&data)); // Return globals gc_cont, gc_ans
+  longjmp(*(((gc_thread_data *)data)->jmp_start), 
+           (((gc_thread_data *)data)->mutator_num));
 }
 
 
