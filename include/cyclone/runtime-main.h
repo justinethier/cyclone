@@ -33,6 +33,9 @@ static void Cyc_heap_init(long heap_size)
   Cyc_num_mutators = 1; // TODO: alloca this using a vpbuffer, or maybe another type of data structure
 }
 
+TODO: relocate this to a runtime function (that accepts gc_thread_data and does the setjmp/dispatch, and 
+to cgen (to setup a new gc_thread_data and call to the new function)
+
 static void Cyc_main (long stack_size, char *stack_base)
 {
   mclosure0(clos_halt,&Cyc_halt);  // Halt if final closure is reached
