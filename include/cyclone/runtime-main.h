@@ -61,9 +61,9 @@ static void Cyc_main (stack_size,heap_size,stack_base)
 
 // JAE - note for the general case, setjmp will return the data pointer's addy
   if (type_of(Cyc_mutators[0]->gc_cont) == cons_tag || prim(Cyc_mutators[0]->gc_cont)) {
-    Cyc_apply_from_buf(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
+    Cyc_apply_from_buf(Cyc_mutators[0], Cyc_mutators[0]->gc_num_args, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
   } else {
-    do_dispatch(Cyc_mutators[0], Cyc_mutators[0]->gc_num_ans, ((closure)(Cyc_mutators[0]->gc_cont))->fn, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
+    do_dispatch(Cyc_mutators[0], Cyc_mutators[0]->gc_num_args, ((closure)(Cyc_mutators[0]->gc_cont))->fn, Cyc_mutators[0]->gc_cont, Cyc_mutators[0]->gc_args);
   }
 
   printf("Internal error: should never have reached this line\n"); exit(0);}}
