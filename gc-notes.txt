@@ -1,38 +1,4 @@
 Phase 1 (gc-dev) - Add gc.h, make sure it compiles.
 Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and be compatible with a new GC algorithm.
 Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
-
-
-Notes for adding new thread data param
-- primitives that will now need to accept the param:
-     ((eq? p 'Cyc-write-char)        "Cyc_write_char")
-     Cyc_vector_set
-     Cyc_vector_ref
-     Cyc_vector_length(void *data, object v) {
-     Cyc_length
-     Cyc_number2string(void *data, object cont, object n) {
-object Cyc_symbol2string(object cont, object sym) {
-object Cyc_list2string(void *data, object cont, object lst){
-#define Cyc_string_append_va_list(data, argc) { \
-object Cyc_string_set(object str, object k, object chr) {
-object Cyc_string_ref(void *data, object str, object k) {
-object Cyc_substring(void *data, object cont, object str, object start, object end) {
-object Cyc_installation_dir(object cont, object type) {
-object Cyc_command_line_arguments(object cont) {
-object Cyc_make_vector(object cont, object len, object fill) {
-object Cyc_list2vector(void *data, object cont, object l) {
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
-declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
-port_type Cyc_io_open_input_file(void *data, object str) {
-port_type Cyc_io_open_output_file(void *data, object str) {
-object Cyc_io_read_line(void *data, object cont, object port) {
-
-- plan:
-  - update runtime, get it to compile
-  - have not adjusted any code that checks value of argc, will probably need to do that
-    EG for Cyc_num_op_va_list
-  - update any associated tools (dispatch.c, etc)
-  - update cgen
-  - integration
+Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
