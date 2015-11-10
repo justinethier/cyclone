@@ -634,7 +634,9 @@ void gc_handshake(gc_status_type s)
 
 void gc_post_handshake(gc_status_type s)
 {
+  int status = ATOMIC_GET(&gc_status_col);
   TODO: use atomic to change value of gc_status_col
+  while (!ATOMIC_SET_IF_EQ(&gc_status_col, status, s)){}
 }
 
 void gc_wait_handshake()

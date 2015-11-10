@@ -405,6 +405,6 @@ typedef union {
 #define ATOMIC_INC(ptr) __sync_fetch_and_add((ptr),1)
 #define ATOMIC_DEC(ptr) __sync_fetch_and_sub((ptr),1)
 #define ATOMIC_GET(ptr) __sync_fetch_and_add((ptr),0)
-#define ATOMIC_SET_IF_EQ(ptr, oldv, newv) __sync_val_compare_and_swap(ptr, oldv, newv)
+#define ATOMIC_SET_IF_EQ(ptr, oldv, newv) __sync_bool_compare_and_swap(ptr, oldv, newv)
 
 #endif /* CYCLONE_TYPES_H */
