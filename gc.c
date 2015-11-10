@@ -626,24 +626,27 @@ void gc_empty_collector_stack()
   }
 }
 
-// TODO:
-//void gc_handshake(gc_status_type s)
-//{
-//  gc_post_handshake(s);
-//  gc_wait_handshake();
-//}
+void gc_handshake(gc_status_type s)
+{
+  gc_post_handshake(s);
+  gc_wait_handshake();
+}
 
-//void gc_post_handshake(gc_status_type s)
-//{
-//  TODO: use atomic to change value of gc_status_col
-//}
+void gc_post_handshake(gc_status_type s)
+{
+  TODO: use atomic to change value of gc_status_col
+}
 
-//void gc_wait_handshake()
-//{
+void gc_wait_handshake()
+{
+  int i;
+  // TODO: same as in other places, need to either sync access to
+  // mutator vars, or ensure only the collector uses them
+  for (i = 0; i < Cyc_num_mutators; i++) {
 //  // TODO:
-//  for each m in mutators
 //    wait for statusm = statusc
-//}
+  }
+}
 
 /////////////////////////////////////////////
 // GC Collection cycle
@@ -651,6 +654,24 @@ void gc_empty_collector_stack()
 // TODO:
 //void gc_collector()
 //{
+//  clear : stage clear-or-marking
+//    exchange values of markColor and clearColor
+//    weakRefsList:clear()
+//    Handshake(sync1)
+//  mark: Handshake(sync2)
+//    stage tracing
+//    postHandshake(async)
+//    mark global roots
+//    waitHandshake
+//  trace : CollectorTrace()
+//    stage refProcessing
+//    processRefs()
+//    stage sweeping
+//  sweep : For each object x in the heap:
+//    if (color(x) = clearColor)
+//      free free [ x
+//      color(x) blue
+//      stage resting
 //}
 
 /////////////////////////////////////////////
