@@ -480,6 +480,13 @@ void gc_mut_update()
 // TODO: when is this called, is this good enough, etc??
 void gc_mut_cooperate(gc_thread_data *thd)
 {
+
+// !!!!
+// TODO: think about what else needs to be done here. for example,
+// would want to reset last read/write at some point, to conserve
+// amount of memory being used by the mark buffers
+
+
   if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
     if (thd->gc_mut_status == STATUS_SYNC2) { // TODO: more sync??
       // Since everything is on the stack, at this point probably only need
@@ -518,6 +525,7 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
 
 void gc_collector_trace()
 {
+  gc_thread_data *m;
   int clean = 0, i;
   while (!clean) {
     clean = 1;
@@ -525,13 +533,18 @@ void gc_collector_trace()
     // the collector thread is the only one that is using these
     // fields.
     for (i = 0; i < Cyc_num_mutators; i++) {
+      m = Cyc_mutators[i];
+// TODO: ideally, want to use a lock-free data structure to prevent
+// having to use a mutex here. see corresponding code in gc_mark_gray
+      pthread_mutex_lock(&(m->lock));
+      while (m->last_read < m->last_write) {
+        clean = 0;
+        (m->last_read)++;
+        gc_mark_black((m->mark_buffer)[m->last_read]);
+        gc_empty_collector_stack();
+      }
+      pthread_mutex_unlock(&(m->lock));
     }
-//    For each m in mutators
-//    while (lastread[m] < lastwrite[m]) // TODO: use atomic sub to compare?
-//      clean = FALSE
-//      lastread[m] = lastread[m] + 1 // TODO: atomic increment
-//      markBlack(markbuffer[m][lastread[m]])
-//      EmptyCollectorStack()
   }
 }
 
