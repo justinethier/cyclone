@@ -456,8 +456,8 @@ static int        gc_color_clear = 3; // White, is swapped during GC
 //static const int  gc_color_grey = 4; // TODO: appears unused, clean up
 // unfortunately this had to be split up; const colors are located in types.h
 
-static int gc_status_col;
-static int gc_stage;
+static int gc_status_col = STATUS_SYNC1;
+static int gc_stage = STAGE_CLEAR_OR_MARKING;
 
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
@@ -487,15 +487,15 @@ void gc_mut_cooperate(gc_thread_data *thd)
 // amount of memory being used by the mark buffers
 
 
-  if (thd->gc_mut_status == gc_status_col) { // TODO: synchronization of var access
-    if (thd->gc_mut_status == STATUS_SYNC2) { // TODO: more sync??
+  if (thd->gc_status == gc_status_col) { // TODO: synchronization of var access
+    if (thd->gc_status == STATUS_SYNC2) { // TODO: more sync??
       // Since everything is on the stack, at this point probably only need
       // to worry about anything on the stack that is referencing a heap object
       //  For each x in roots:
       //  MarkGray(x)
       thd->gc_alloc_color = gc_color_mark; // TODO: synchronization for global??
     }
-    thd->gc_mut_status = gc_status_col; // TODO: syncronization??
+    thd->gc_status = gc_status_col; // TODO: syncronization??
   }
 }
 
@@ -640,12 +640,24 @@ void gc_post_handshake(gc_status_type s)
 
 void gc_wait_handshake()
 {
-  int i;
+  int i, statusm, statusc;
+  struct timespec tim;
+  tim.tv_sec = 0;
+  tim.tv_nsec = 1;
+
   // TODO: same as in other places, need to either sync access to
   // mutator vars, or ensure only the collector uses them
   for (i = 0; i < Cyc_num_mutators; i++) {
-//  // TODO:
-//    wait for statusm = statusc
+    statusc = ATOMIC_GET(&gc_status_col);
+    statusm = ATOMIC_GET(&(Cyc_mutators[i]->gc_status));
+    if (statusc != statusm) {
+      // At least for now, just give up quantum and come back to
+      // this quickly to test again. This probably could be more
+      // efficient.
+      // TODO: also need to consider mutators that are blocked and
+      // not cooperating.
+      nanosleep(&tim, NULL);     
+    }
   }
 }
 
@@ -704,16 +716,16 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->gc_num_args = 0;
   thd->moveBufLen = 0;
   gc_thr_grow_move_buffer(thd);
-// TODO: depends on collector state:  thd->gc_alloc_color = ATOMIC_GET(&gc_;
-// TODO: depends on collector state:  thd->gc_mut_status;
+  thd->gc_alloc_color = ATOMIC_GET(&gc_color_clear);
+  thd->gc_status = ATOMIC_GET(&gc_status_col);
   thd->last_write = 0;
   thd->last_read = 0;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
-// TODO:  if (pthread_mutex(&(thd->lock), NULL) != 0) {
-// TODO:    fprintf(stderr, "Unable to initialize thread mutex\n");
-// TODO:    exit(1);
-// TODO:  }
+  if (pthread_mutex(&(thd->lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize thread mutex\n");
+    exit(1);
+  }
 }
 
 void gc_thread_data_free(gc_thread_data *thd)

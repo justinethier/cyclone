@@ -53,7 +53,7 @@ struct gc_thread_data_t {
   short gc_num_args;
   // Data needed for heap GC
   int gc_alloc_color;
-  int gc_mut_status;
+  int gc_status;
   int last_write;
   int last_read;
   void **mark_buffer;
