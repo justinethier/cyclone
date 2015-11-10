@@ -12,6 +12,19 @@
 
 #include "cyclone/types.h"
 
+static gc_thread_data **Cyc_mutators;
+static int Cyc_num_mutators;
+
+void gc_init_mutators()
+{
+  // TODO: alloca this using a vpbuffer, or maybe another type of data structure??
+  // Will need this list for later use, but only by the collector thread. so it would be
+  // nice if there was a way to allocate mutators that avoids expensive synchronization...
+  // need to think on this when adding thread support, after upgrading the collector
+  Cyc_num_mutators = 1; 
+  Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
+}
+
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
 {
   gc_free_list *free, *next;
@@ -488,63 +501,38 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   // either object type or mark. Both should be stable once the object is placed
   // into the heap, with the collector being the only thread that changes marks.
   if (is_object_type(obj) && mark(obj) == gc_color_clear) { // TODO: sync??
-//TODO:    // TODO: lock mark buffer (not ideal, but a possible first step)?
-//TODO:    pthread_mutex_lock(&(thd->lock));
-//TODO:    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
-//TODO:                                    &(thd->mark_buffer_len),
-//TODO:                                    thd->last_write,
-//TODO:                                    obj);
-//TODO:    pthread_mutex_unlock(&(thd->lock));
-//TODO:    ATOMIC_INC(&(thd->last_write));
+    // Place marked object in a buffer to avoid repeated scans of the heap.
+// TODO:
+// Note that ideally this should be a lock-free data structure to make the
+// algorithm more efficient. So this code (and the corresponding collector
+// trace code) should be converted at some point.
+    pthread_mutex_lock(&(thd->lock));
+    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
+                                    &(thd->mark_buffer_len),
+                                    thd->last_write,
+                                    obj);
+    (thd->last_write)++; // Already locked, just do it...
+    pthread_mutex_unlock(&(thd->lock));
   }
 }
 
 void gc_collector_trace()
 {
-  int clean = 0;
-//  while (!clean) {
-//    clean = 1;
-//  }
-//  TODO: need a list of mutators.
-//  could keep a buffer or linked list of them. a list may be more efficient
-//  also need to consider how to map thread back to its gc_thread_data,
-//  which we will need during GC (cooperate). maybe use a (platform-specific)
-//  call like below to get a unique ID for the thread, and then use a
-//  hashtable to get the thread info. how often will we be accessing this data?
-//  seems we will need to be able to access it from 2 places:
-//   - from mutator (can compute thread id here)
-//   - from collector (need to be able to iterate across all mutators)
-//   #include <syscall.h>
-//   printf("tid = %d\n", syscall(SYS_gettid));
-//
-// TODO:
-// ACTION - I think the most efficient solution is to have each thread pass around
-//          the pointer to it's thread data. this param would have to be passed to all
-//          continuation calls made by the thread.
-//          the collector/runtime will need to maintain a list of the thread data structures,
-//          and will need to maintain it when a thread is created or terminated (either
-//          explicitly or when it returns).
-//          practically the required changes are:
-//          - stabilize this branch so it builds and runs (hope this just means commenting out
-//            the pthread calls for right now)
-//          - extend the runtime and compiled code to have a new thread_data (sp?) param
-//            also need to judge if there are issues that would prevent being able to add
-//            one, but it seems like it should be no problem
-//          - build the code and test that the value is actually maintained across calls
-//            (maybe assign it to a global at start and exit from GC if cur val != global val)
-
-// note - can atomic operations be used for last read/write, to prevent
-//        coarser-grained synchronization there?
-// TODO:
-//  clean = FALSE
-//  while (!(clean))
-//    clean = TRUE
+  int clean = 0, i;
+  while (!clean) {
+    clean = 1;
+    // TODO: need to sync access to mutator int/void data, UNLESS
+    // the collector thread is the only one that is using these
+    // fields.
+    for (i = 0; i < Cyc_num_mutators; i++) {
+    }
 //    For each m in mutators
 //    while (lastread[m] < lastwrite[m]) // TODO: use atomic sub to compare?
 //      clean = FALSE
 //      lastread[m] = lastread[m] + 1 // TODO: atomic increment
 //      markBlack(markbuffer[m][lastread[m]])
 //      EmptyCollectorStack()
+  }
 }
 
 // TODO: seriously consider changing the mark() macro to color(),

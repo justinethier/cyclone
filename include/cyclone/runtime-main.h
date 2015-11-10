@@ -28,12 +28,7 @@ static void Cyc_heap_init(long heap_size)
   printf("main: Allocating and initializing heap...\n");
 #endif
   Cyc_heap = gc_heap_create(heap_size / 2, 0, 0);
-  // TODO: alloca this using a vpbuffer, or maybe another type of data structure??
-  // Will need this list for later use, but only by the collector thread. so it would be
-  // nice if there was a way to allocate mutators that avoids expensive synchronization...
-  // need to think on this when adding thread support, after upgrading the collector
-  Cyc_num_mutators = 1; 
-  Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
+  gc_init_mutators();
 }
 
 #endif /* CYCLONE_RUNTIME_MAIN_H */

@@ -16,7 +16,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
-// TODO: #include <pthread.h>
+#include <pthread.h>
 
 // Maximum number of args that GC will accept
 #define NUM_GC_ANS 128
@@ -58,7 +58,7 @@ struct gc_thread_data_t {
   int last_read;
   void **mark_buffer;
   int mark_buffer_len;
-// TODO:   pthread_mutex_t lock;
+  pthread_mutex_t lock;
 };
 
 /* GC data structures */
@@ -125,6 +125,7 @@ void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
 
 /* GC prototypes */
+void gc_init_mutators();
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
 void *gc_try_alloc(gc_heap *h, size_t size);
