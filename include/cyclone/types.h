@@ -108,7 +108,7 @@ typedef enum { STATUS_ASYNC
 
 typedef enum { STAGE_CLEAR_OR_MARKING 
              , STAGE_TRACING 
-             , STAGE_REF_PROCESSING 
+             //, STAGE_REF_PROCESSING 
              , STAGE_SWEEPING 
              , STAGE_RESTING
              } gc_stage_type;

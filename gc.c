@@ -665,27 +665,34 @@ void gc_wait_handshake()
 // GC Collection cycle
 
 // TODO:
-//void gc_collector()
-//{
-//  clear : stage clear-or-marking
-//    exchange values of markColor and clearColor
-//    weakRefsList:clear()
-//    Handshake(sync1)
-//  mark: Handshake(sync2)
-//    stage tracing
-//    postHandshake(async)
-//    mark global roots
-//    waitHandshake
-//  trace : CollectorTrace()
-//    stage refProcessing
-//    processRefs()
-//    stage sweeping
-//  sweep : For each object x in the heap:
-//    if (color(x) = clearColor)
-//      free free [ x
-//      color(x) blue
-//      stage resting
-//}
+void gc_collector()
+{
+  int tmp;
+  // TODO: what kind of sync is required here?
+
+  //clear 
+  gc_stage = STAGE_CLEAR_OR_MARKING;
+  // exchange values of markColor and clearColor
+  tmp = gc_color_clear;
+  gc_color_clear = gc_color_mark;
+  gc_color_mark = tmp;
+  gc_handshake(STATUS_SYNC1);
+  //mark: 
+  gc_handshake(STATUS_SYNC2)
+  gc_stage = STAGE_TRACING;
+  gc_post_handshake(STATUS_ASYNC);
+  TODO: mark global roots
+  gc_wait_handshake();
+  //trace : 
+  CollectorTrace()
+  gc_stage = STAGE_SWEEPING;
+  //sweep : 
+  For each object x in the heap:
+    if (color(x) = clearColor)
+      free free [ x
+      color(x) blue
+  gc_stage = STAGE_RESTING;
+}
 
 /////////////////////////////////////////////
 // END tri-color marking section
