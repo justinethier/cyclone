@@ -178,48 +178,48 @@ size_t gc_heap_total_size(gc_heap *h)
   return total_size;
 }
 
-void gc_mark(gc_heap *h, object obj)
-{
-  if (nullp(obj) || is_value_type(obj) || mark(obj))
-    return;
-
-#if GC_DEBUG_PRINTFS
-//  fprintf(stdout, "gc_mark %p\n", obj);
-#endif
-  ((list)obj)->hdr.mark = 1;
- // TODO: mark heap saves (??) 
- // could this be a write barrier?
- 
- // Mark objects this one references
-  if (type_of(obj) == cons_tag) {
-    gc_mark(h, car(obj)); 
-    gc_mark(h, cdr(obj)); 
-  } else if (type_of(obj) == closure1_tag) {
-    gc_mark(h, ((closure1) obj)->elt1); 
-  } else if (type_of(obj) == closure2_tag) {
-    gc_mark(h, ((closure2) obj)->elt1); 
-    gc_mark(h, ((closure2) obj)->elt2); 
-  } else if (type_of(obj) == closure3_tag) {
-    gc_mark(h, ((closure3) obj)->elt1); 
-    gc_mark(h, ((closure3) obj)->elt2); 
-    gc_mark(h, ((closure3) obj)->elt3); 
-  } else if (type_of(obj) == closure4_tag) {
-    gc_mark(h, ((closure4) obj)->elt1); 
-    gc_mark(h, ((closure4) obj)->elt2); 
-    gc_mark(h, ((closure4) obj)->elt3); 
-    gc_mark(h, ((closure4) obj)->elt4); 
-  } else if (type_of(obj) == closureN_tag) {
-    int i, n = ((closureN) obj)->num_elt;
-    for (i = 0; i < n; i++) {
-      gc_mark(h, ((closureN) obj)->elts[i]);
-    }
-  } else if (type_of(obj) == vector_tag) {
-    int i, n = ((vector) obj)->num_elt;
-    for (i = 0; i < n; i++) {
-      gc_mark(h, ((vector) obj)->elts[i]);
-    }
-  }
-}
+//void gc_mark(gc_heap *h, object obj)
+//{
+//  if (nullp(obj) || is_value_type(obj) || mark(obj))
+//    return;
+//
+//#if GC_DEBUG_PRINTFS
+////  fprintf(stdout, "gc_mark %p\n", obj);
+//#endif
+//  ((list)obj)->hdr.mark = 1;
+// // TODO: mark heap saves (??) 
+// // could this be a write barrier?
+// 
+// // Mark objects this one references
+//  if (type_of(obj) == cons_tag) {
+//    gc_mark(h, car(obj)); 
+//    gc_mark(h, cdr(obj)); 
+//  } else if (type_of(obj) == closure1_tag) {
+//    gc_mark(h, ((closure1) obj)->elt1); 
+//  } else if (type_of(obj) == closure2_tag) {
+//    gc_mark(h, ((closure2) obj)->elt1); 
+//    gc_mark(h, ((closure2) obj)->elt2); 
+//  } else if (type_of(obj) == closure3_tag) {
+//    gc_mark(h, ((closure3) obj)->elt1); 
+//    gc_mark(h, ((closure3) obj)->elt2); 
+//    gc_mark(h, ((closure3) obj)->elt3); 
+//  } else if (type_of(obj) == closure4_tag) {
+//    gc_mark(h, ((closure4) obj)->elt1); 
+//    gc_mark(h, ((closure4) obj)->elt2); 
+//    gc_mark(h, ((closure4) obj)->elt3); 
+//    gc_mark(h, ((closure4) obj)->elt4); 
+//  } else if (type_of(obj) == closureN_tag) {
+//    int i, n = ((closureN) obj)->num_elt;
+//    for (i = 0; i < n; i++) {
+//      gc_mark(h, ((closureN) obj)->elts[i]);
+//    }
+//  } else if (type_of(obj) == vector_tag) {
+//    int i, n = ((vector) obj)->num_elt;
+//    for (i = 0; i < n; i++) {
+//      gc_mark(h, ((vector) obj)->elts[i]);
+//    }
+//  }
+//}
 
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 {
@@ -670,28 +670,30 @@ void gc_collector()
   int tmp;
   // TODO: what kind of sync is required here?
 
-  //clear 
+  //clear : 
   gc_stage = STAGE_CLEAR_OR_MARKING;
   // exchange values of markColor and clearColor
+  // TODO: synchronize?
   tmp = gc_color_clear;
   gc_color_clear = gc_color_mark;
   gc_color_mark = tmp;
   gc_handshake(STATUS_SYNC1);
-  //mark: 
+  //mark : 
   gc_handshake(STATUS_SYNC2)
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
-  TODO: mark global roots
+  gc_mark_globals();
   gc_wait_handshake();
   //trace : 
-  CollectorTrace()
+  gc_collector_trace();
   gc_stage = STAGE_SWEEPING;
   //sweep : 
-  For each object x in the heap:
-    if (color(x) = clearColor)
-      free free [ x
-      color(x) blue
+  // TODO: For each object x in the heap:
+  // TODO:   if (color(x) = clearColor)
+  // TODO:     free free [ x
+  // TODO:     color(x) blue
   gc_stage = STAGE_RESTING;
+  // TODO: how long to rest?
 }
 
 /////////////////////////////////////////////
