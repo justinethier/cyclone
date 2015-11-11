@@ -714,6 +714,14 @@ TODO: before updating sweep to make it work w/new GC, need to
 update the heap functions to be thread safe. ideally want to
 try to minimize amount of locking - IE, lock on individual ops
 IF POSSIBLE, instead of whole operations like 'alloc' and 'sweep'.
+functions that modify heap:
+ gc_try_alloc
+ gc_sweep
+ gc_grow_heap
+think that's it?
+consider what is being modified, and what is being read
+
+
   //
   //sweep : 
   // TODO: For each object x in the heap:
