@@ -12,9 +12,35 @@
 
 #include "cyclone/types.h"
 
+////////////////////
+// Global variables
+
+// Note: will need to use atomics and/or locking to access any
+// variables shared between threads
+static int        gc_color_mark = 2; // Black, is swapped during GC
+static int        gc_color_clear = 3; // White, is swapped during GC
+//static const int  gc_color_grey = 4; // TODO: appears unused, clean up
+// unfortunately this had to be split up; const colors are located in types.h
+
+static int gc_status_col = STATUS_SYNC1;
+static int gc_stage = STAGE_CLEAR_OR_MARKING;
+
+// Does not need sync, only used by collector thread
+static void **mark_stack = NULL;
+static int mark_stack_len = 128;
+static int mark_stack_i = 0;
+
+// Lock to protect the heap from concurrent modifications
+static pthread_mutex_t heap_lock;
+
+// Data for each individual mutator thread
 static gc_thread_data **Cyc_mutators;
 static int Cyc_num_mutators;
 
+/////////////
+// Functions
+
+// Perform one-time initialization before mutators can be executed
 void gc_init_mutators()
 {
   // TODO: alloca this using a vpbuffer, or maybe another type of data structure??
@@ -23,6 +49,12 @@ void gc_init_mutators()
   // need to think on this when adding thread support, after upgrading the collector
   Cyc_num_mutators = 1; 
   Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
+
+  // Here is as good a place as any to do this...
+  if (pthread_mutex(&(heap_lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize heap_lock mutex\n");
+    exit(1);
+  }
 }
 
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
@@ -90,6 +122,11 @@ void *gc_try_alloc(gc_heap *h, size_t size)
   }
   return NULL; 
 }
+
+//TODO: need a heap lock.
+//lock during - alloc, sweep? but now sweep becomes a stop the world...
+// maybe only lock during each individual operation, not for a whole
+// sweep or alloc
 
 void *gc_alloc(gc_heap *h, size_t size, int *heap_grown) 
 {
@@ -448,21 +485,6 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 */
 
 // tri-color GC section, WIP
-//
-// Note: will need to use atomics and/or locking to access any
-// variables shared between threads
-static int        gc_color_mark = 2; // Black, is swapped during GC
-static int        gc_color_clear = 3; // White, is swapped during GC
-//static const int  gc_color_grey = 4; // TODO: appears unused, clean up
-// unfortunately this had to be split up; const colors are located in types.h
-
-static int gc_status_col = STATUS_SYNC1;
-static int gc_stage = STAGE_CLEAR_OR_MARKING;
-
-// Does not need sync, only used by collector thread
-static void **mark_stack = NULL;
-static int mark_stack_len = 128;
-static int mark_stack_i = 0;
 
 /////////////////////////////////////////////
 // GC functions called by the Mutator threads
