@@ -91,17 +91,22 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
 {
   size_t cur_size, new_size;
-  gc_heap *h_last = gc_heap_last(h);
+  gc_heap *h_last, *h_new;
+  pthread_mutex_lock(&heap_lock);
+  h_last = gc_heap_last(h);
   cur_size = h_last->size;
   // JAE - For now, just add a new page
   new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
-  h_last->next = gc_heap_create(new_size, h_last->max_size, chunk_size);
-  return (h_last->next != NULL);
+  h_new = gc_heap_create(new_size, h_last->max_size, chunk_size);
+  h_last->next = h_new;
+  pthread_mutex_unlock(&heap_lock);
+  return (h_new != NULL);
 }
 
 void *gc_try_alloc(gc_heap *h, size_t size) 
 {
   gc_free_list *f1, *f2, *f3;
+  pthread_mutex_lock(&heap_lock);
   for (; h; h = h->next) { // All heaps
     // TODO: chunk size (ignoring for now)
 
@@ -120,6 +125,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
       }
     }
   }
+  pthread_mutex_unlock(&heap_lock);
   return NULL; 
 }
 
@@ -208,10 +214,12 @@ gc_heap *gc_heap_last(gc_heap *h)
 size_t gc_heap_total_size(gc_heap *h)
 {
   size_t total_size = 0;
+  //pthread_mutex_lock(&heap_lock);
   while(h) {
     total_size += h->size;
     h = h->next;
   }
+  //pthread_mutex_unlock(&heap_lock);
   return total_size;
 }
 
@@ -263,6 +271,16 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   size_t freed, max_freed=0, sum_freed=0, size;
   object p, end;
   gc_free_list *q, *r, *s;
+
+  //
+  // Lock the heap to prevent issues with allocations during sweep
+  // It sucks to have to use a coarse-grained lock like this, but let's
+  // be safe and prevent threading issues right now. Once the new GC
+  // works we can go back and try to speed things up (if possible)
+  // by using more fine-grained locking. Can also profile to see
+  // how much time is even spent sweeping
+  //
+  pthread_mutex_lock(&heap_lock);
   for (; h; h = h->next) { // All heaps
 #if GC_DEBUG_CONCISE_PRINTFS
     fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
@@ -295,10 +313,11 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       // END DEBUG
 #endif
 
-      if (!mark(p)) {
+      if (mark(p) == gc_color_clear) {
 #if GC_DEBUG_PRINTFS
         fprintf(stdout, "sweep: object is not marked %p\n", p);
 #endif
+        mark(p) = gc_color_blue; // Needed?
         // free p
         sum_freed += size;
         if (((((char *)q) + q->size) == (char *)p) && (q != h->free_list)) {
@@ -335,16 +354,11 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 #if GC_DEBUG_PRINTFS
 //        fprintf(stdout, "sweep: object is marked %p\n", p);
 #endif
-        //if (mark(p) != 1) {
-        //  printf("unexpected mark value %d\n", mark(p));
-        //  exit(1);
-        //}
-
-        ((list)p)->hdr.mark = 0;
         p = (object)(((char *)p) + size);
       }
     }
   }
+  pthread_mutex_unlock(&heap_lock);
   if (sum_freed_ptr) *sum_freed_ptr = sum_freed;
   return max_freed;
 }
@@ -686,10 +700,14 @@ void gc_wait_handshake()
 /////////////////////////////////////////////
 // GC Collection cycle
 
-// TODO:
+// Main collector function
 void gc_collector()
 {
   int tmp;
+  size_t freed = 0, max_freed = 0;
+#if GC_DEBUG_CONCISE_PRINTFS
+  time_t sweep_start = time(NULL);
+#endif
   // TODO: what kind of sync is required here?
 
   //clear : 
@@ -701,7 +719,7 @@ void gc_collector()
   gc_color_mark = tmp;
   gc_handshake(STATUS_SYNC1);
   //mark : 
-  gc_handshake(STATUS_SYNC2)
+  gc_handshake(STATUS_SYNC2);
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
   gc_mark_globals();
@@ -709,27 +727,13 @@ void gc_collector()
   //trace : 
   gc_collector_trace();
   gc_stage = STAGE_SWEEPING;
-
-TODO: before updating sweep to make it work w/new GC, need to
-update the heap functions to be thread safe. ideally want to
-try to minimize amount of locking - IE, lock on individual ops
-IF POSSIBLE, instead of whole operations like 'alloc' and 'sweep'.
-functions that modify heap:
- gc_try_alloc
- gc_sweep
- gc_grow_heap
-think that's it?
-consider what is being modified, and what is being read
-
-
   //
   //sweep : 
-  // TODO: For each object x in the heap:
-  // TODO:   if (color(x) = clearColor)
-  // TODO:     free free [ x
-  // TODO:     color(x) blue
+  max_freed = gc_sweep(Cyc_get_heap(), &freed);
+#if GC_DEBUG_CONCISE_PRINTFS
+    printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - sweep_start);
+#endif
   gc_stage = STAGE_RESTING;
-  // TODO: how long to rest?
 }
 
 /////////////////////////////////////////////

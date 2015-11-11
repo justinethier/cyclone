@@ -79,9 +79,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /*END closcall section */
 
 /* Global variables. */
-gc_heap *Cyc_heap;
-gc_thread_data **Cyc_mutators;
-int Cyc_num_mutators;
+static gc_heap *Cyc_heap;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
 
@@ -91,6 +89,11 @@ char **_cyc_argv = NULL;
 
 static symbol_type __EOF = {{0}, eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
+
+gc_heap *Cyc_get_heap()
+{
+  return Cyc_heap;
+}
 
 object cell_get(object cell){
     return car(cell);

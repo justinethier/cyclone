@@ -208,7 +208,6 @@ void dispatch_va(void *data, int argc, function_type_va func, object clo, object
 void do_dispatch(void *data, int argc, function_type func, object clo, object *buffer);
 
 /* Global variables. */
-extern gc_heap *Cyc_heap;
 extern long no_gcs; /* Count the number of GC's. */
 extern long no_major_gcs; /* Count the number of GC's. */
 
