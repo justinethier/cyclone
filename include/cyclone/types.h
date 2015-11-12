@@ -150,6 +150,7 @@ void gc_empty_collector_stack();
 void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
+void gc_start_collector();
 gc_heap *Cyc_get_heap();
 
 /////////////////////////////////////////////

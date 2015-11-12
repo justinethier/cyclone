@@ -731,9 +731,28 @@ void gc_collector()
   //sweep : 
   max_freed = gc_sweep(Cyc_get_heap(), &freed);
 #if GC_DEBUG_CONCISE_PRINTFS
-    printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - sweep_start);
+    printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
+      freed, max_freed, time(NULL) - sweep_start);
 #endif
   gc_stage = STAGE_RESTING;
+}
+
+void *collector_main(void *arg)
+{
+  while (1) {
+    gc_collector();
+    sleep(1); // TODO: how to schedule this thread?
+  }
+}
+
+static pthread_t collector_thread;
+
+void gc_start_collector()
+{
+  if (pthread_create(&collector_thread, NULL, collector_main, &collector_thread)) {
+    fprintf(stderr, "Error creating collector thread\n");
+    exit(1);
+  }
 }
 
 /////////////////////////////////////////////

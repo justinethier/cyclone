@@ -29,6 +29,7 @@ static void Cyc_heap_init(long heap_size)
 #endif
   Cyc_heap = gc_heap_create(heap_size / 2, 0, 0);
   gc_init_mutators();
+  gc_start_collector();
 }
 
 #endif /* CYCLONE_RUNTIME_MAIN_H */
