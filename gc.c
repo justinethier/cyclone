@@ -100,6 +100,7 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   h_new = gc_heap_create(new_size, h_last->max_size, chunk_size);
   h_last->next = h_new;
   pthread_mutex_unlock(&heap_lock);
+printf("DEBUG - grew heap\n");
   return (h_new != NULL);
 }
 
@@ -214,12 +215,12 @@ gc_heap *gc_heap_last(gc_heap *h)
 size_t gc_heap_total_size(gc_heap *h)
 {
   size_t total_size = 0;
-  //pthread_mutex_lock(&heap_lock);
+  pthread_mutex_lock(&heap_lock);
   while(h) {
     total_size += h->size;
     h = h->next;
   }
-  //pthread_mutex_unlock(&heap_lock);
+  pthread_mutex_unlock(&heap_lock);
   return total_size;
 }
 
@@ -529,7 +530,7 @@ void gc_mut_cooperate(gc_thread_data *thd)
       // to worry about anything on the stack that is referencing a heap object
       //  For each x in roots:
       //  MarkGray(x)
-      thd->gc_alloc_color = gc_color_mark; // TODO: synchronization for global??
+      thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark); // TODO: synchronization for global??
     }
     thd->gc_status = gc_status_col; // TODO: syncronization??
   }
@@ -593,7 +594,7 @@ void gc_mark_black(object obj)
   // TODO: is sync required to get colors? probably not on the collector
   // thread (at least) since colors are only changed once during the clear
   // phase and before the first handshake.
-  int markColor = gc_color_mark; //TODO: is atomic require here?? ATOMIC_GET(&gc_color_mark);
+  int markColor = ATOMIC_GET(&gc_color_mark);
   if (is_object_type(obj) && mark(obj) != markColor) {
     // Gray any child objects
     // Note we probably should use some form of atomics/synchronization
@@ -703,20 +704,21 @@ void gc_wait_handshake()
 // Main collector function
 void gc_collector()
 {
-  int tmp;
-  size_t freed = 0, max_freed = 0;
-#if GC_DEBUG_CONCISE_PRINTFS
+  int old_clear, old_mark;
+  size_t freed = 0, max_freed = 0, total_size;
+//#if GC_DEBUG_CONCISE_PRINTFS
   time_t sweep_start = time(NULL);
-#endif
+//#endif
   // TODO: what kind of sync is required here?
 
   //clear : 
   gc_stage = STAGE_CLEAR_OR_MARKING;
   // exchange values of markColor and clearColor
-  // TODO: synchronize?
-  tmp = gc_color_clear;
-  gc_color_clear = gc_color_mark;
-  gc_color_mark = tmp;
+  old_clear = ATOMIC_GET(&gc_color_clear);
+  old_mark = ATOMIC_GET(&gc_color_mark);
+  while(!ATOMIC_SET_IF_EQ(&gc_color_clear, old_clear, old_mark)){}
+  while(!ATOMIC_SET_IF_EQ(&gc_color_mark, old_mark, old_clear)){}
+printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   gc_handshake(STATUS_SYNC1);
   //mark : 
   gc_handshake(STATUS_SYNC2);
@@ -730,10 +732,11 @@ void gc_collector()
   //
   //sweep : 
   max_freed = gc_sweep(Cyc_get_heap(), &freed);
-#if GC_DEBUG_CONCISE_PRINTFS
+  // TODO: grow heap if it is mostly full after collection??
+//#if GC_DEBUG_CONCISE_PRINTFS
     printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
       freed, max_freed, time(NULL) - sweep_start);
-#endif
+//#endif
   gc_stage = STAGE_RESTING;
 }
 
@@ -741,7 +744,11 @@ void *collector_main(void *arg)
 {
   while (1) {
     gc_collector();
-    sleep(1); // TODO: how to schedule this thread?
+    // TODO: how to schedule this thread?
+    // this is inefficient but it should be good enough to 
+    // at least stand up this collector. then we'll have to
+    // come back and improve it
+    sleep(1);
   }
 }
 
