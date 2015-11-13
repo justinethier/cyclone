@@ -90,6 +90,11 @@ char **_cyc_argv = NULL;
 static symbol_type __EOF = {{0}, eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
 
+void Cyc_init_heap(long heap_size)
+{
+  Cyc_heap = gc_heap_create(heap_size, 0, 0);
+}
+
 gc_heap *Cyc_get_heap()
 {
   return Cyc_heap;
