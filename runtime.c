@@ -775,6 +775,7 @@ object Cyc_eq(object x, object y) {
 
 object Cyc_set_car(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    gc_mut_update((gc_thread_data *)data, car(l), val);
     car(l) = val;
     add_mutation(l, val);
     return l;
@@ -782,6 +783,7 @@ object Cyc_set_car(void *data, object l, object val) {
 
 object Cyc_set_cdr(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    gc_mut_update((gc_thread_data *)data, cdr(l), val);
     cdr(l) = val;
     add_mutation(l, val);
     return l;
@@ -796,6 +798,10 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
   }
+
+  gc_mut_update((gc_thread_data *)data, 
+                ((vector)v)->elts[idx],
+                obj);
 
   ((vector)v)->elts[idx] = obj;
   // TODO: probably could be more efficient here and also pass

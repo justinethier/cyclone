@@ -504,31 +504,45 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 /////////////////////////////////////////////
 // GC functions called by the Mutator threads
 
-void gc_mut_update(object heapO)
+// Write barrier for updates to heap-allocated objects
+void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 {
-  // TODO: how does this fit in with the write buffer?
-  // this part is important, especially during tracing
-
-  the paper marks both the heap location being written to and the
-  value being written. not sure it makes sense to mark the value 
-  as it will always be on the stack - issue is if any obj's it is
-  referencing are on the heap. this is where that stack bit might
-  come in handy.
-
-  do we want to mark gray immediately during add mutator, or wait
-  until minor GC? YES - I think for mutators we need to mark the
-  object gray immediately. otherwise if we delay until GC, a sweep
-  may have already finished up and freed such an obj that would
-  otherwise not have been freed if we had waited.
-
-  again, only potential issue seems to be if a stack obj could ref
-  something else on the heap - can that happen? I think this can only
-  happen if the heap obj it refs is linked to a root, because stack
-  objs are so short lived??
-
-  also we already know if objects are on the stack due to their color (RED).
-  so can use this to not mark red values. otherwise probably do want
-  to mark the 'y' as well (per paper) to prevent timing issues when we wait
+  int status = ATOMIC_GET(&gc_status_col),
+      stage = ATOMIC_GET(&gc_stage);
+  if (thd->gc_status != STATUS_ASYNC) {
+    gc_mark_gray(thd, old_obj);
+    gc_mark_gray(thd, value);
+  } else if (stage == STAGE_TRACING) {
+    gc_mark_gray(thd, old_obj);
+  }
+// TODO: concerned there may be an issue here with a stack object
+// having a 'tree' of references that contains heap objects. these
+// objects would be skipped and would never be grayed by the current
+// code:
+//
+//  the paper marks both the heap location being written to and the
+//  value being written. not sure it makes sense to mark the value 
+//  as it will always be on the stack - issue is if any obj's it is
+//  referencing are on the heap. this is where that stack bit might
+//  come in handy.
+//
+//  do we want to mark gray immediately during add mutator, or wait
+//  until minor GC? YES - I think for mutators we need to mark the
+//  object gray immediately. otherwise if we delay until GC, a sweep
+//  may have already finished up and freed such an obj that would
+//  otherwise not have been freed if we had waited.
+//
+//  again, only potential issue seems to be if a stack obj could ref
+//  something else on the heap - can that happen? I think this can only
+//  happen if the heap obj it refs is linked to a root, because stack
+//  objs are so short lived??
+//
+//  also we already know if objects are on the stack due to their color (RED).
+//  so can use this to not mark red values. otherwise probably do want
+//  to mark the 'y' as well (per paper) to prevent timing issues when we wait
+//
+// do have some concern though that mark_gray will stop when a stack obj
+// is detected, and the code will not examine any refs held by the stack obj.
 }
 
 // TODO: still need to handle case where a mutator is blocked

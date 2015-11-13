@@ -142,6 +142,7 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
 void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
+void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
 void gc_mut_cooperate(gc_thread_data *thd);
 void gc_mark_gray(gc_thread_data *thd, object obj);
 void gc_collector_trace();
