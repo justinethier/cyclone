@@ -2,3 +2,4 @@ Phase 1 (gc-dev) - Add gc.h, make sure it compiles.
 Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and be compatible with a new GC algorithm.
 Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
+Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
