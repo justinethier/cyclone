@@ -51,7 +51,7 @@ void gc_init_mutators()
   Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
 
   // Here is as good a place as any to do this...
-  if (pthread_mutex(&(heap_lock), NULL) != 0) {
+  if (pthread_mutex_init(&(heap_lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize heap_lock mutex\n");
     exit(1);
   }
@@ -845,7 +845,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->last_read = 0;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
-  if (pthread_mutex(&(thd->lock), NULL) != 0) {
+  if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
   }
