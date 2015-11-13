@@ -2764,7 +2764,10 @@ void GC(void *data, closure cont, object *args, int num_args)
 //#endif
 //  }
 
-  /* Let it all go, Neo... */
+  // Cooperate with the collector thread
+  gc_mut_cooperate((gc_thread_data *)data);
+
+  // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
 

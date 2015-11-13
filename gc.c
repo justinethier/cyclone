@@ -514,25 +514,25 @@ void gc_mut_update()
 // ideally want to do this without needing sync. we need to sync to get markColor in coop, though
 //void gc_mut_create()
 
-// TODO: when is this called, is this good enough, etc??
+// TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd)
 {
-
-// !!!!
-// TODO: think about what else needs to be done here. for example,
-// would want to reset last read/write at some point, to conserve
-// amount of memory being used by the mark buffers
-
-
-  if (thd->gc_status == gc_status_col) { // TODO: synchronization of var access
-    if (thd->gc_status == STATUS_SYNC2) { // TODO: more sync??
-      // Since everything is on the stack, at this point probably only need
-      // to worry about anything on the stack that is referencing a heap object
-      //  For each x in roots:
-      //  MarkGray(x)
-      thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark); // TODO: synchronization for global??
+  int i, status = ATOMIC_GET(&gc_status_col);
+  if (thd->gc_status != status) {
+    if (thd->gc_status == STATUS_ASYNC) {
+      // Async is done, so clean up old mark data from the last collection
+      thd->last_write = 0;
+      thd->last_read = 0;
     }
-    thd->gc_status = gc_status_col; // TODO: syncronization??
+    else if (thd->gc_status == STATUS_SYNC2) {
+      // Mark thread "roots"
+      gc_mark_gray(thd, thd->gc_cont);
+      for (i = 0; i < thd->gc_num_args; i++) {
+        gc_mark_gray(thd, thd->gc_args[i]);
+      }
+      thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
+    }
+    thd->gc_status = status;
   }
 }
 
