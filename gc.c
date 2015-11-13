@@ -504,15 +504,32 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 /////////////////////////////////////////////
 // GC functions called by the Mutator threads
 
-void gc_mut_update()
+void gc_mut_update(object heapO)
 {
   // TODO: how does this fit in with the write buffer?
   // this part is important, especially during tracing
-}
 
-// Done as part of gc_move
-// ideally want to do this without needing sync. we need to sync to get markColor in coop, though
-//void gc_mut_create()
+  the paper marks both the heap location being written to and the
+  value being written. not sure it makes sense to mark the value 
+  as it will always be on the stack - issue is if any obj's it is
+  referencing are on the heap. this is where that stack bit might
+  come in handy.
+
+  do we want to mark gray immediately during add mutator, or wait
+  until minor GC? YES - I think for mutators we need to mark the
+  object gray immediately. otherwise if we delay until GC, a sweep
+  may have already finished up and freed such an obj that would
+  otherwise not have been freed if we had waited.
+
+  again, only potential issue seems to be if a stack obj could ref
+  something else on the heap - can that happen? I think this can only
+  happen if the heap obj it refs is linked to a root, because stack
+  objs are so short lived??
+
+  also we already know if objects are on the stack due to their color (RED).
+  so can use this to not mark red values. otherwise probably do want
+  to mark the 'y' as well (per paper) to prevent timing issues when we wait
+}
 
 // TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd)
