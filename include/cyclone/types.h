@@ -154,7 +154,7 @@ void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
-gc_heap *Cyc_get_heap();
+gc_heap *gc_get_heap();
 
 /////////////////////////////////////////////
 // GC Collection cycle

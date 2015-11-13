@@ -27,7 +27,7 @@ static void Cyc_heap_init(long heap_size)
 #if DEBUG_SHOW_DIAG
   printf("main: Allocating and initializing heap...\n");
 #endif
-  gc_init_heap();
+  gc_init_heap(heap_size);
   gc_init_mutators();
   gc_start_collector();
 }

@@ -779,7 +779,7 @@ printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   gc_stage = STAGE_SWEEPING;
   //
   //sweep : 
-  max_freed = gc_sweep(Cyc_get_heap(), &freed);
+  max_freed = gc_sweep(gc_get_heap(), &freed);
   // TODO: grow heap if it is mostly full after collection??
 //#if GC_DEBUG_CONCISE_PRINTFS
     printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 

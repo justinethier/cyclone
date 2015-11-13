@@ -84,7 +84,7 @@ object cell_get(object cell);
 extern object Cyc_global_variables;
 int _cyc_argc;
 char **_cyc_argv;
-void Cyc_init_heap(long heap_size);
+void gc_init_heap(long heap_size);
 object Cyc_get_global_variables();
 object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
