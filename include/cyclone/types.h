@@ -125,7 +125,7 @@ void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
 
 /* GC prototypes */
-void gc_init_mutators();
+void gc_initialize();
 void gc_add_mutator(gc_thread_data *thd);
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
