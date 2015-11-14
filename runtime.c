@@ -494,7 +494,9 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, ")");
       break;
     default:
-      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
+      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); 
+      exit(1);
+ }
  return quote_void;}
 
 object dispatch_write_va(void *data, int argc, object clo, object cont, object x, ...) {
