@@ -139,6 +139,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
         } else { /* Take the whole chunk */
           f1->next = f2->next;
         }
+        pthread_mutex_unlock(&heap_lock);
         return f2;
       }
     }
