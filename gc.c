@@ -768,14 +768,19 @@ void gc_collector()
   while(!ATOMIC_SET_IF_EQ(&gc_color_mark, old_mark, old_clear)){}
 printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   gc_handshake(STATUS_SYNC1);
+printf("DEBUG - after handshake sync 1\n");
   //mark : 
   gc_handshake(STATUS_SYNC2);
+printf("DEBUG - after handshake sync 2\n");
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
+printf("DEBUG - after post_handshake aync\n");
   gc_mark_globals();
   gc_wait_handshake();
+printf("DEBUG - after wait_handshake aync\n");
   //trace : 
   gc_collector_trace();
+printf("DEBUG - after trace\n");
   gc_stage = STAGE_SWEEPING;
   //
   //sweep : 
