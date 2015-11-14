@@ -27,7 +27,7 @@ static int gc_stage = STAGE_CLEAR_OR_MARKING;
 
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
-static int mark_stack_len = 128;
+static int mark_stack_len = 0;
 static int mark_stack_i = 0;
 
 // Lock to protect the heap from concurrent modifications
@@ -41,7 +41,7 @@ static int Cyc_num_mutators;
 // Functions
 
 // Perform one-time initialization before mutators can be executed
-void gc_init_mutators()
+void gc_initialize()
 {
   // TODO: alloca this using a vpbuffer, or maybe another type of data structure??
   // Will need this list for later use, but only by the collector thread. so it would be
@@ -49,6 +49,10 @@ void gc_init_mutators()
   // need to think on this when adding thread support, after upgrading the collector
   Cyc_num_mutators = 1; 
   Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
+
+  // Initialize collector's mark stack
+  mark_stack_len = 128;
+  mark_stack = vpbuffer_realloc(mark_stack, &(mark_stack_len));
 
   // Here is as good a place as any to do this...
   if (pthread_mutex_init(&(heap_lock), NULL) != 0) {
