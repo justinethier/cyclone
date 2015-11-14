@@ -613,6 +613,28 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   }
 }
 
+TODO:
+// TODO: before doing this, may want to debug a bit and see what is
+// being passed to gc_mut_update. see if those objects tend to have
+// any heap refs. may need to add debug code to do that...
+//
+//
+//// This is called from the heap write barrier. The issue here is that
+//// this is not called during GC, so obj and some of its refs may be
+//// on the stack. So scan all refs and mark the ones that are on the heap
+//void gc_mark_gray_rec(gc_thread_data *thd, object obj)
+//{
+//  int mark;
+//
+//  if (is_object_type(obj)) {
+//    mark = mark(obj);
+//
+//// TODO: if we leave red as red and keep going, this could hang
+//// if there is a cycle!!
+//  }&& mark(obj) == gc_color_clear) { // TODO: sync??
+//
+//}
+
 void gc_collector_trace()
 {
   gc_thread_data *m;
