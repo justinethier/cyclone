@@ -583,8 +583,10 @@ void gc_mut_cooperate(gc_thread_data *thd)
   if (thd->gc_status != status) {
     if (thd->gc_status == STATUS_ASYNC) {
       // Async is done, so clean up old mark data from the last collection
+      pthread_mutex_lock(&(thd->lock));
       thd->last_write = 0;
       thd->last_read = 0;
+      pthread_mutex_unlock(&(thd->lock));
     }
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
