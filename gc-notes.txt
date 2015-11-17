@@ -3,3 +3,11 @@ Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and b
 Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
+
+
+Debugging notes:
+__glo_list_91ref - 
+tag is 0
+car appears corrupt
+cdr is set to 0x2 during a segfault. 
+how could this have happened? this variable should always be assigned a closure

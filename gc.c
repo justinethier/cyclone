@@ -532,9 +532,18 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
   int status = ATOMIC_GET(&gc_status_col),
       stage = ATOMIC_GET(&gc_stage);
   if (thd->gc_status != STATUS_ASYNC) {
+printf("DEBUG - GC sync marking heap obj ");
+Cyc_display(old_obj, stdout);
+printf(" and new value ");
+Cyc_display(value, stdout);
+//printf(" for heap object ");
+printf("\n");
     gc_mark_gray(thd, old_obj);
     gc_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
+printf("DEBUG - GC async tracing marking heap obj ");
+Cyc_display(old_obj, stdout);
+printf("\n");
     gc_mark_gray(thd, old_obj);
   }
 // TODO: concerned there may be an issue here with a stack object
@@ -613,7 +622,6 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
   }
 }
 
-TODO:
 // TODO: before doing this, may want to debug a bit and see what is
 // being passed to gc_mut_update. see if those objects tend to have
 // any heap refs. may need to add debug code to do that...
@@ -710,10 +718,17 @@ void gc_mark_black(object obj)
         }
         break;
       }
+      case cvar_tag: {
+        gc_collector_mark_gray( *(((cvar_type *)obj)->pvar) );
+        break;
+      }
       default:
       break;
     }
-    mark(obj) = markColor;
+    if (mark(obj) != gc_color_red) {
+      // Only blacken objects on the heap
+      mark(obj) = markColor;
+    }
   }
 }
 
@@ -828,7 +843,7 @@ void *collector_main(void *arg)
     // this is inefficient but it should be good enough to 
     // at least stand up this collector. then we'll have to
     // come back and improve it
-    sleep(1);
+//    sleep(1);
   }
 }
 
