@@ -206,6 +206,27 @@ void add_global(object *glo) {
   // this is more expedient
   global_table = mcons(mcvar(glo), global_table);
 }
+
+void debug_dump_globals()
+{
+  list l = global_table;
+  for(; !nullp(l); l = cdr(l)){
+   cvar_type *c = (cvar_type *)car(l);
+   //gc_mark(h, *(c->pvar)); // Mark actual object the global points to
+   printf("DEBUG %p ", c->pvar);
+   if (*c->pvar){
+     printf("mark = %d ", mark(*c->pvar));
+     if (mark(*c->pvar) == gc_color_red) {
+       printf("obj = ");
+       Cyc_display(*c->pvar, stdout);
+     }
+     printf("\n");
+   } else { 
+     printf(" is NULL\n");
+   }
+  }
+}
+
 /* END Global table */
 
 /* Mutation table
@@ -2417,7 +2438,10 @@ void gc_mark_globals()
     list l = global_table;
     for(; !nullp(l); l = cdr(l)){
      cvar_type *c = (cvar_type *)car(l);
-     gc_mark_black(*(c->pvar)); // Mark actual object the global points to
+     object glo =  *(c->pvar);
+     if (!nullp(glo)) {
+       gc_mark_black(glo); // Mark actual object the global points to
+     }
     }
   }
 }
