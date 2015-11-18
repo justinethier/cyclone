@@ -532,16 +532,16 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
   int status = ATOMIC_GET(&gc_status_col),
       stage = ATOMIC_GET(&gc_stage);
   if (thd->gc_status != STATUS_ASYNC) {
-printf("DEBUG - GC sync marking heap obj ");
+printf("DEBUG - GC sync marking heap obj %p ", old_obj);
 Cyc_display(old_obj, stdout);
-printf(" and new value ");
+printf(" and new value %p ", value);
 Cyc_display(value, stdout);
 //printf(" for heap object ");
 printf("\n");
     gc_mark_gray(thd, old_obj);
     gc_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
-printf("DEBUG - GC async tracing marking heap obj ");
+printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 Cyc_display(old_obj, stdout);
 printf("\n");
     gc_mark_gray(thd, old_obj);
@@ -777,9 +777,14 @@ void gc_wait_handshake()
   // TODO: same as in other places, need to either sync access to
   // mutator vars, or ensure only the collector uses them
   for (i = 0; i < Cyc_num_mutators; i++) {
-    statusc = ATOMIC_GET(&gc_status_col);
-    statusm = ATOMIC_GET(&(Cyc_mutators[i]->gc_status));
-    if (statusc != statusm) {
+    while (1) {
+      statusc = ATOMIC_GET(&gc_status_col);
+      statusm = ATOMIC_GET(&(Cyc_mutators[i]->gc_status));
+      if (statusc == statusm) {
+        // Handshake succeeded, check next mutator
+        break;
+      }
+
       // At least for now, just give up quantum and come back to
       // this quickly to test again. This probably could be more
       // efficient.
