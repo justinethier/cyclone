@@ -532,18 +532,18 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
   int status = ATOMIC_GET(&gc_status_col),
       stage = ATOMIC_GET(&gc_stage);
   if (thd->gc_status != STATUS_ASYNC) {
-printf("DEBUG - GC sync marking heap obj %p ", old_obj);
-Cyc_display(old_obj, stdout);
-printf(" and new value %p ", value);
-Cyc_display(value, stdout);
-//printf(" for heap object ");
-printf("\n");
+//printf("DEBUG - GC sync marking heap obj %p ", old_obj);
+//Cyc_display(old_obj, stdout);
+//printf(" and new value %p ", value);
+//Cyc_display(value, stdout);
+////printf(" for heap object ");
+//printf("\n");
     gc_mark_gray(thd, old_obj);
     gc_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
-printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
-Cyc_display(old_obj, stdout);
-printf("\n");
+//printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
+//Cyc_display(old_obj, stdout);
+//printf("\n");
     gc_mark_gray(thd, old_obj);
   }
 // TODO: concerned there may be an issue here with a stack object
@@ -720,10 +720,10 @@ void gc_mark_black(object obj)
         }
         break;
       }
-      case cvar_tag: {
-        gc_collector_mark_gray( *(((cvar_type *)obj)->pvar) );
-        break;
-      }
+      //case cvar_tag: {
+      //  gc_collector_mark_gray( *(((cvar_type *)obj)->pvar) );
+      //  break;
+      //}
       default:
       break;
     }
@@ -835,7 +835,7 @@ printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   //trace : 
   gc_collector_trace();
 //printf("DEBUG - after trace\n");
-debug_dump_globals();
+//debug_dump_globals();
   gc_stage = STAGE_SWEEPING;
   //
   //sweep : 
