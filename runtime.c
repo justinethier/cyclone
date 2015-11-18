@@ -12,6 +12,16 @@
 //int JAE_DEBUG = 0;
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+TODO: still not good enough, need to be smarter when marking grey objs that are
+still on the stack (??). see reg-port in read.sld
+
+object Cyc_global_set(void *thd, object *glo, object value)
+{
+  gc_mut_update((gc_thread_data *)thd, *glo, value);
+  *(glo) = value;
+  return value;
+}
+
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[21] = { \

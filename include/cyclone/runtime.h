@@ -41,7 +41,8 @@ extern const object Cyc_EOF;
 
 object cell_get(object cell);
 
-#define global_set(glo,value) (glo=value)
+#define global_set(glo,value) Cyc_global_set(data, (object *)&glo, value)
+object Cyc_global_set(void *thd, object *glo, object value);
 
 /* Variable argument count support 
 
