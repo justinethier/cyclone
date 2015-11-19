@@ -327,12 +327,18 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       
 //#if GC_DEBUG_CONCISE_PRINTFS
       // DEBUG
-      if (!is_object_type(p))
+      if (!is_object_type(p)) {
         fprintf(stderr, "sweep: invalid object at %p", p);
-      if ((char *)q + q->size > (char *)p)
+        exit(1);
+      }
+      if ((char *)q + q->size > (char *)p) {
         fprintf(stderr, "bad size at %p < %p + %u", p, q, q->size);
-      if (r && ((char *)p) + size > (char *)r)
+        exit(1);
+      }
+      if (r && ((char *)p) + size > (char *)r) {
         fprintf(stderr, "sweep: bad size at %p + %d > %p", p, size, r);
+        exit(1);
+      }
       // END DEBUG
 //#endif
 
