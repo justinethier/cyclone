@@ -526,7 +526,81 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 /////////////////////////////////////////////
 // GC functions called by the Mutator threads
 
-// Write barrier for updates to heap-allocated objects
+// Scan the given object and its refs, marking all heap objects. The issue
+// here is that the heap's write barrier can be invoked at any time and
+// we need to ensure any heap objects affected are traced
+void gc_stack_mark_gray(gc_thread_data *thd, object obj)
+{
+  int color;
+
+  if (is_object_type(obj)) {
+    color = mark(obj);
+    if (color == gc_color_clear) {
+      gc_mark_gray(thd, obj);
+    } else if (color == gc_color_red) {
+      gc_stack_mark_refs_gray(thd, obj);
+    }
+  }
+}
+
+// Should only be called from above function as a helper
+//
+// TODO: this will probably hang procssing circular
+// references!!!! need to extend this once the concept is proven
+//
+// ideally would need some way of recording which nodes have
+// been visited. trick is that, unlike in other places, the
+// nodes may be visited multiple times so cannot destructively
+// alter them.
+void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj)
+{
+  switch(type_of(obj)) {
+    case cons_tag: {
+      gc_stack_mark_gray(thd, car(obj));
+      gc_stack_mark_gray(thd, cdr(obj));
+      break;
+    }
+    case closure1_tag:
+      gc_stack_mark_gray(thd, ((closure1) obj)->elt1);
+      break;
+    case closure2_tag:
+      gc_stack_mark_gray(thd, ((closure2) obj)->elt1);
+      gc_stack_mark_gray(thd, ((closure2) obj)->elt2);
+    case closure3_tag:
+      gc_stack_mark_gray(thd, ((closure3) obj)->elt1);
+      gc_stack_mark_gray(thd, ((closure3) obj)->elt2);
+      gc_stack_mark_gray(thd, ((closure3) obj)->elt3);
+    case closure4_tag:
+      gc_stack_mark_gray(thd, ((closure4) obj)->elt1);
+      gc_stack_mark_gray(thd, ((closure4) obj)->elt2);
+      gc_stack_mark_gray(thd, ((closure4) obj)->elt3);
+      gc_stack_mark_gray(thd, ((closure4) obj)->elt4);
+      break;
+    case closureN_tag: {
+      int i, n = ((closureN) obj)->num_elt;
+      for (i = 0; i < n; i++) {
+        gc_stack_mark_gray(thd, ((closureN) obj)->elts[i]);
+      }
+      break;
+    }
+    case vector_tag: {
+      int i, n = ((vector) obj)->num_elt;
+      for (i = 0; i < n; i++) {
+        gc_stack_mark_gray(thd, ((vector) obj)->elts[i]);
+      }
+      break;
+    }
+    default:
+    break;
+  }
+}
+
+/**
+Write barrier for updates to heap-allocated objects
+Plans:
+The key for this barrier is to identify stack objects that contain
+heap references, so they can be marked to avoid collection.
+*/
 void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 {
   int status = ATOMIC_GET(&gc_status_col),
@@ -539,7 +613,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 ////printf(" for heap object ");
 //printf("\n");
     gc_mark_gray(thd, old_obj);
-    gc_mark_gray(thd, value);
+    gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
 //printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stdout);

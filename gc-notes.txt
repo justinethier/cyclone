@@ -5,9 +5,5 @@ Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data 
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
 
 
-Debugging notes:
-__glo_list_91ref - 
-tag is 0
-car appears corrupt
-cdr is set to 0x2 during a segfault. 
-how could this have happened? this variable should always be assigned a closure
+TODO:
+- add_mutation will need to be brought into thread local data
