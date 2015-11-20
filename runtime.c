@@ -939,10 +939,12 @@ common_type Cyc_string2number(void *data, object str){
         n = atof(((string_type *) str)->str);
 
         if (ceilf(n) == n) {
+            result.integer_t.hdr.mark = gc_color_red;
             result.integer_t.tag = integer_tag;
             result.integer_t.value = (int)n;
         }
         else {
+            result.double_t.hdr.mark = gc_color_red;
             result.double_t.tag = double_tag;
             result.double_t.value = n;
         }
