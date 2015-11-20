@@ -109,6 +109,159 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   return h;
 }
 
+// Copy given object into given heap object
+char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
+{
+  // NOTE: no additional type checking because this is called from gc_move
+  // which already does that
+
+  switch(type_of(obj)){
+    case cons_tag: {
+      list hp = dest;
+      hp->hdr.mark = thd->gc_alloc_color;
+      type_of(hp) = cons_tag;
+      car(hp) = car(obj);
+      cdr(hp) = cdr(obj);
+      return (char *)hp;
+    }
+    case macro_tag: {
+      macro_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = macro_tag;
+      hp->fn = ((macro) obj)->fn;
+      hp->num_args = ((macro) obj)->num_args;
+      return (char *)hp;
+    }
+    case closure0_tag: {
+      closure0_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure0_tag;
+      hp->fn = ((closure0) obj)->fn;
+      hp->num_args = ((closure0) obj)->num_args;
+      return (char *)hp;
+    }
+    case closure1_tag: {
+      closure1_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure1_tag;
+      hp->fn = ((closure1) obj)->fn;
+      hp->num_args = ((closure1) obj)->num_args;
+      hp->elt1 = ((closure1) obj)->elt1;
+      return (char *)hp;
+    }
+    case closure2_tag: {
+      closure2_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure2_tag;
+      hp->fn = ((closure2) obj)->fn;
+      hp->num_args = ((closure2) obj)->num_args;
+      hp->elt1 = ((closure2) obj)->elt1;
+      hp->elt2 = ((closure2) obj)->elt2;
+      return (char *)hp;
+    }
+    case closure3_tag: {
+      closure3_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure3_tag;
+      hp->fn = ((closure3) obj)->fn;
+      hp->num_args = ((closure3) obj)->num_args;
+      hp->elt1 = ((closure3) obj)->elt1;
+      hp->elt2 = ((closure3) obj)->elt2;
+      hp->elt3 = ((closure3) obj)->elt3;
+      return (char *)hp;
+    }
+    case closure4_tag: {
+      closure4_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure4_tag;
+      hp->fn = ((closure4) obj)->fn;
+      hp->num_args = ((closure4) obj)->num_args;
+      hp->elt1 = ((closure4) obj)->elt1;
+      hp->elt2 = ((closure4) obj)->elt2;
+      hp->elt3 = ((closure4) obj)->elt3;
+      hp->elt4 = ((closure4) obj)->elt4;
+      return (char *)hp;
+    }
+    case closureN_tag: {
+      int i;
+      closureN_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closureN_tag;
+      hp->fn = ((closureN) obj)->fn;
+      hp->num_args = ((closureN) obj)->num_args;
+      hp->num_elt = ((closureN) obj)-> num_elt;
+      hp->elts = (object *)(((char *)hp) + sizeof(closureN_type));
+      for (i = 0; i < hp->num_elt; i++) {
+        hp->elts[i] = ((closureN) obj)->elts[i];
+      }
+      return (char *)hp;
+    }
+    case vector_tag: {
+      int i;
+      vector_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = vector_tag;
+      hp->num_elt = ((vector) obj)-> num_elt;
+      hp->elts = (object *)(((char *)hp) + sizeof(vector_type));
+      for (i = 0; i < hp->num_elt; i++) {
+        hp->elts[i] = ((vector) obj)->elts[i];
+      }
+      return (char *)hp;
+    }
+    case string_tag: {
+      char *s;
+      string_type *hp = dest;
+      s = ((char *)hp) + sizeof(string_type);
+      memcpy(s, string_str(obj), string_len(obj) + 1);
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = string_tag;
+      string_len(hp) = string_len(obj);
+      string_str(hp) = s;
+      return (char *)hp;
+    }
+    case integer_tag: {
+      integer_type *hp = dest; 
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = integer_tag;
+      hp->value = ((integer_type *) obj)->value;
+      return (char *)hp;
+    }
+    case double_tag: {
+      double_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = double_tag;
+      hp->value = ((double_type *) obj)->value;
+      return (char *)hp;
+    }
+    case port_tag: {
+      port_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = port_tag;
+      hp->fp = ((port_type *) obj)->fp;
+      hp->mode = ((port_type *) obj)->mode;
+      return (char *)hp;
+    }
+    case cvar_tag: {
+      cvar_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = cvar_tag;
+      hp->pvar = ((cvar_type *) obj)->pvar;
+      return (char *)hp;
+    }
+    case forward_tag:
+      return (char *)forward(obj);
+    case eof_tag:
+    case primitive_tag:
+    case boolean_tag:
+    case symbol_tag:
+      break;
+    default:
+      fprintf(stderr, "gc_copy_obj: bad tag obj=%p obj.tag=%ld\n",(object) obj, type_of(obj));
+      exit(1);
+  }
+  return (char *)obj;
+}
+
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
 {
   size_t cur_size, new_size;
@@ -125,7 +278,7 @@ printf("DEBUG - grew heap\n");
   return (h_new != NULL);
 }
 
-void *gc_try_alloc(gc_heap *h, size_t size) 
+void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd) 
 {
   gc_free_list *f1, *f2, *f3;
   pthread_mutex_lock(&heap_lock);
@@ -143,6 +296,8 @@ void *gc_try_alloc(gc_heap *h, size_t size)
         } else { /* Take the whole chunk */
           f1->next = f2->next;
         }
+        // Copy object into heap now to avoid any uninitialized memory issues
+        gc_copy_obj(f2, obj, thd);
         pthread_mutex_unlock(&heap_lock);
         return f2;
       }
@@ -157,7 +312,7 @@ void *gc_try_alloc(gc_heap *h, size_t size)
 // maybe only lock during each individual operation, not for a whole
 // sweep or alloc
 
-void *gc_alloc(gc_heap *h, size_t size, int *heap_grown) 
+void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown) 
 {
   void *result = NULL;
   size_t max_freed = 0, sum_freed = 0, total_size;
@@ -166,7 +321,7 @@ void *gc_alloc(gc_heap *h, size_t size, int *heap_grown)
   // the allowed ratio, try growing heap.
   // then try realloc. if cannot alloc now, then throw out of memory error
   size = gc_heap_align(size);
-  result = gc_try_alloc(h, size);
+  result = gc_try_alloc(h, size, obj, thd);
   if (!result) {
     // TODO: may want to consider not doing this now, and implementing gc_collect as
     // part of the runtime, since we would have all of the roots, stack args, 
@@ -181,7 +336,7 @@ void *gc_alloc(gc_heap *h, size_t size, int *heap_grown)
       gc_grow_heap(h, size, 0);
       *heap_grown = 1;
 //    }
-    result = gc_try_alloc(h, size);
+    result = gc_try_alloc(h, size, obj, thd);
     if (!result) {
       fprintf(stderr, "out of memory error allocating %d bytes\n", size);
       exit(1); // TODO: throw error???
