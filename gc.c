@@ -788,7 +788,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //printf("\n");
     gc_mark_gray(thd, old_obj);
     // TODO: need this too???
-    //gc_stack_mark_gray(thd, value);
+    gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
 //printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stdout);
@@ -969,6 +969,8 @@ void gc_mark_black(object obj)
         }
         break;
       }
+TODO:??? should not matter t hough?
+maybe open this up but error out if we drop into it?
       //case cvar_tag: {
       //  gc_collector_mark_gray( *(((cvar_type *)obj)->pvar) );
       //  break;
