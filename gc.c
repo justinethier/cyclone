@@ -1091,6 +1091,13 @@ void *collector_main(void *arg)
     // this is inefficient but it should be good enough to 
     // at least stand up this collector. then we'll have to
     // come back and improve it
+//
+//    some ideas:
+//    - maybe check amount of free space in heap, and collect if less than a certain amount/percentage.
+//      otherwise just sleep for awhile and check again.
+//      once that works, might consider a way to let a mutator alert the collector that it should kick off
+//    - after collection, maybe grow heap if usage is above a certain percentage
+//
 //    sleep(1);
   }
 }
