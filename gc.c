@@ -787,7 +787,8 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 ////printf(" for heap object ");
 //printf("\n");
     gc_mark_gray(thd, old_obj);
-    gc_stack_mark_gray(thd, value);
+    // TODO: need this too???
+    //gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
 //printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stdout);
@@ -1087,7 +1088,7 @@ printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   gc_stage = STAGE_SWEEPING;
   //
   //sweep : 
-  //max_freed = gc_sweep(gc_get_heap(), &freed);
+  max_freed = gc_sweep(gc_get_heap(), &freed);
   // TODO: grow heap if it is mostly full after collection??
 //#if GC_DEBUG_CONCISE_PRINTFS
     printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 

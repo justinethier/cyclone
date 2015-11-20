@@ -2715,7 +2715,7 @@ void GC(void *data, closure cont, object *args, int num_args)
     scani++;
   }
 
-fprintf(stdout, "DEBUG done minor GC, alloci = %d\n", alloci);
+//fprintf(stdout, "DEBUG done minor GC, alloci = %d\n", alloci);
 
 //  // Check if we need to do a major GC
 //  if (heap_grown) {
