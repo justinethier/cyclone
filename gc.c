@@ -692,10 +692,23 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 // we need to ensure any heap objects affected are traced
 void gc_stack_mark_gray(gc_thread_data *thd, object obj)
 {
+  char tmp;
+  object low_limit = &tmp;
+  object high_limit = ((gc_thread_data *)thd)->stack_start;
   int color;
 
   if (is_object_type(obj)) {
     color = mark(obj);
+// TODO: no need to run this all the time. enclose in an "ifdef DEBUG" once
+// the GC is stabilized
+if (check_overflow(low_limit, obj) && 
+    check_overflow(obj, high_limit) &&
+    color != gc_color_red){ 
+  printf("stack object has wrong color %d!\n", color);
+  Cyc_display(obj, stdout);
+  printf("\n");
+  exit(1);
+}
     if (color == gc_color_clear) {
       gc_mark_gray(thd, obj);
     } else if (color == gc_color_red) {
@@ -1074,7 +1087,7 @@ printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
   gc_stage = STAGE_SWEEPING;
   //
   //sweep : 
-  max_freed = gc_sweep(gc_get_heap(), &freed);
+  //max_freed = gc_sweep(gc_get_heap(), &freed);
   // TODO: grow heap if it is mostly full after collection??
 //#if GC_DEBUG_CONCISE_PRINTFS
     printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
