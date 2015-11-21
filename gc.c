@@ -499,7 +499,10 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if (mark(p) == gc_color_clear) {
 #if GC_DEBUG_PRINTFS
-        fprintf(stdout, "sweep: object is not marked %p\n", p);
+        //fprintf(stdout, "sweep: object is not marked %p\n", p);
+        fprintf(stdout, "sweeping obj: %p ", p);
+        Cyc_display(p, stdout);
+        fprintf(stdout, "\n");
 #endif
         mark(p) = gc_color_blue; // Needed?
         // free p
@@ -969,12 +972,14 @@ void gc_mark_black(object obj)
         }
         break;
       }
-TODO:??? should not matter t hough?
-maybe open this up but error out if we drop into it?
-      //case cvar_tag: {
-      //  gc_collector_mark_gray( *(((cvar_type *)obj)->pvar) );
-      //  break;
-      //}
+      case cvar_tag: {
+        cvar_type *c = (cvar_type *)obj;
+        object pvar = *(c->pvar);
+        if (pvar) {
+          gc_collector_mark_gray(pvar);
+        }
+        break;
+      }
       default:
       break;
     }
