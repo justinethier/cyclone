@@ -345,14 +345,23 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
 #if GC_DEBUG_PRINTFS
   fprintf(stdout, "alloc %p size = %d\n", result, size);
 #endif
+
+// TODO: Debug check, remove (ifdef it) once GC is stabilized
+if (is_value_type(result)) {
+  printf("Invalid allocated address - is a value type %p\n", result);
+}
+
   return result;
 }
 
 size_t gc_allocated_bytes(object obj)
 {
   tag_type t;
-  if (is_value_type(obj))
-    return gc_heap_align(1);
+  if (is_value_type(obj)) {
+    fprintf(stdout, "gc_allocated_bytes - passed value type %p\n", obj);
+    exit(1);
+    //return gc_heap_align(1);
+  }
   t = type_of(obj); 
   if (t == cons_tag) return gc_heap_align(sizeof(cons_type));
   if (t == macro_tag) return gc_heap_align(sizeof(macro_type));
