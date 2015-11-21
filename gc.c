@@ -499,10 +499,10 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if (mark(p) == gc_color_clear) {
 #if GC_DEBUG_PRINTFS
-        //fprintf(stdout, "sweep: object is not marked %p\n", p);
-        fprintf(stdout, "sweeping obj: %p ", p);
-        Cyc_display(p, stdout);
-        fprintf(stdout, "\n");
+        fprintf(stdout, "sweep: object is not marked %p\n", p);
+        //fprintf(stdout, "sweep is freeing obj: %p ", p);
+        //Cyc_display(p, stdout);
+        //fprintf(stdout, "\n");
 #endif
         mark(p) = gc_color_blue; // Needed?
         // free p
