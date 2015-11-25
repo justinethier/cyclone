@@ -481,9 +481,9 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
-#if GC_DEBUG_PRINTFS
+//#if GC_DEBUG_PRINTFS
         fprintf(stdout, "skip free block %p size = %d\n", p, r->size);
-#endif
+//#endif
         continue;
       }
       size = gc_heap_align(gc_allocated_bytes(p));
@@ -806,6 +806,9 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //Cyc_display(old_obj, stdout);
 //printf("\n");
     gc_mark_gray(thd, old_obj);
+    printf("added to mark buffer (trace) from write barrier %p:", old_obj);
+    Cyc_display(old_obj, stdout);
+    printf("\n");
   }
 // TODO: concerned there may be an issue here with a stack object
 // having a 'tree' of references that contains heap objects. these
@@ -1099,7 +1102,7 @@ printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
 //printf("DEBUG - after wait_handshake aync\n");
   //trace : 
   gc_collector_trace();
-//printf("DEBUG - after trace\n");
+printf("DEBUG - after trace\n");
 //debug_dump_globals();
   gc_stage = STAGE_SWEEPING;
   //
