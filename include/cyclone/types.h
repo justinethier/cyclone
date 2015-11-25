@@ -65,6 +65,9 @@ struct gc_thread_data_t {
 
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
+//  somehow this size param is being overwritten by a "mark() =".
+//  how could that happen?
+unsigned int dummy; // just for testing/evaluation
   unsigned int size;
   gc_free_list *next;
 };
@@ -117,7 +120,7 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 // The mark/clear colors are defined in the gc module because
 // the collector swaps their values as an optimization.
 #define gc_color_red  0 // Memory not to be GC'd, such as on the stack
-#define gc_color_blue 1 // Unallocated memory
+#define gc_color_blue 2 // Unallocated memory
 
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
