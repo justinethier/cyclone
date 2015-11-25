@@ -67,12 +67,18 @@ typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
 //  somehow this size param is being overwritten by a "mark() =".
 //  how could that happen?
-somehow it appears free list pointers are being used where heap objects are
-expected. could this be as simple as objects being sweeped that should not
-have been? unfortunately it is harder to figure how why the objects were 
-sweeped. were they not marked properly? is there a race condition? maybe
-more than one issue? what is going on?
-unsigned int dummy; // just for testing/evaluation, this line is NOT a fix!!
+//somehow it appears free list pointers are being used where heap objects are
+//expected. could this be as simple as objects being sweeped that should not
+//have been? unfortunately it is harder to figure how why the objects were 
+//sweeped. were they not marked properly? is there a race condition? maybe
+//more than one issue? what is going on?
+//
+// the following line does not solve the problem. in fact, with this in
+// place there are still cases where the tag is a multiple of 32, implying
+// again that a free list node is being used as a heap object. IE, the
+// size value is being read into the tag field by code expecting a heap obj.
+//
+//unsigned int dummy; // just for testing/evaluation, this line is NOT a fix!!
   unsigned int size;
   gc_free_list *next;
 };
