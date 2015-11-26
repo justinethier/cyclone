@@ -165,7 +165,7 @@ void gc_stack_mark_gray(gc_thread_data *thd, object obj);
 void gc_mark_gray(gc_thread_data *thd, object obj);
 void gc_collector_trace();
 void gc_mark_black(object obj);
-void gc_collector_mark_gray(object obj);
+void gc_collector_mark_gray(object parent, object obj);
 void gc_empty_collector_stack();
 void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);

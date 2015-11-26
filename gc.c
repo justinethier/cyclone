@@ -808,9 +808,11 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //Cyc_display(old_obj, stdout);
 //printf("\n");
     gc_mark_gray(thd, old_obj);
-    printf("added to mark buffer (trace) from write barrier %p:", old_obj);
-    Cyc_display(old_obj, stdout);
-    printf("\n");
+    if (is_object_type(old_obj)) {
+      printf("added to mark buffer (trace) from write barrier %p:mark %d:", old_obj, mark(old_obj));
+      Cyc_display(old_obj, stdout);
+      printf("\n");
+    }
   }
 // TODO: concerned there may be an issue here with a stack object
 // having a 'tree' of references that contains heap objects. these
@@ -952,37 +954,37 @@ void gc_mark_black(object obj)
     // for cons and vector types, as these pointers could change.
     switch(type_of(obj)) {
       case cons_tag: {
-        gc_collector_mark_gray(car(obj));
-        gc_collector_mark_gray(cdr(obj));
+        gc_collector_mark_gray(obj, car(obj));
+        gc_collector_mark_gray(obj, cdr(obj));
         break;
       }
       case closure1_tag:
-        gc_collector_mark_gray(((closure1) obj)->elt1);
+        gc_collector_mark_gray(obj, ((closure1) obj)->elt1);
         break;
       case closure2_tag:
-        gc_collector_mark_gray(((closure2) obj)->elt1);
-        gc_collector_mark_gray(((closure2) obj)->elt2);
+        gc_collector_mark_gray(obj, ((closure2) obj)->elt1);
+        gc_collector_mark_gray(obj, ((closure2) obj)->elt2);
       case closure3_tag:
-        gc_collector_mark_gray(((closure3) obj)->elt1);
-        gc_collector_mark_gray(((closure3) obj)->elt2);
-        gc_collector_mark_gray(((closure3) obj)->elt3);
+        gc_collector_mark_gray(obj, ((closure3) obj)->elt1);
+        gc_collector_mark_gray(obj, ((closure3) obj)->elt2);
+        gc_collector_mark_gray(obj, ((closure3) obj)->elt3);
       case closure4_tag:
-        gc_collector_mark_gray(((closure4) obj)->elt1);
-        gc_collector_mark_gray(((closure4) obj)->elt2);
-        gc_collector_mark_gray(((closure4) obj)->elt3);
-        gc_collector_mark_gray(((closure4) obj)->elt4);
+        gc_collector_mark_gray(obj, ((closure4) obj)->elt1);
+        gc_collector_mark_gray(obj, ((closure4) obj)->elt2);
+        gc_collector_mark_gray(obj, ((closure4) obj)->elt3);
+        gc_collector_mark_gray(obj, ((closure4) obj)->elt4);
         break;
       case closureN_tag: {
         int i, n = ((closureN) obj)->num_elt;
         for (i = 0; i < n; i++) {
-          gc_collector_mark_gray(((closureN) obj)->elts[i]);
+          gc_collector_mark_gray(obj, ((closureN) obj)->elts[i]);
         }
         break;
       }
       case vector_tag: {
         int i, n = ((vector) obj)->num_elt;
         for (i = 0; i < n; i++) {
-          gc_collector_mark_gray(((vector) obj)->elts[i]);
+          gc_collector_mark_gray(obj, ((vector) obj)->elts[i]);
         }
         break;
       }
@@ -990,7 +992,7 @@ void gc_mark_black(object obj)
         cvar_type *c = (cvar_type *)obj;
         object pvar = *(c->pvar);
         if (pvar) {
-          gc_collector_mark_gray(pvar);
+          gc_collector_mark_gray(obj, pvar);
         }
         break;
       }
@@ -1005,7 +1007,7 @@ void gc_mark_black(object obj)
   }
 }
 
-void gc_collector_mark_gray(object obj)
+void gc_collector_mark_gray(object parent, object obj)
 {
   // "Color" objects gray by adding them to the mark stack for further processing.
   //
@@ -1014,6 +1016,7 @@ void gc_collector_mark_gray(object obj)
   // could lead to stack corruption.
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
+printf("mark gray parent = %p obj = %p\n", parent, obj);
   }
 }
 
