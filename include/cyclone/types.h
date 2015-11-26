@@ -146,7 +146,7 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
 void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
 void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
-size_t gc_allocated_bytes(object obj);
+size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
 gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);

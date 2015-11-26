@@ -354,11 +354,13 @@ if (is_value_type(result)) {
   return result;
 }
 
-size_t gc_allocated_bytes(object obj)
+size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
 {
   tag_type t;
   if (is_value_type(obj)) {
-    fprintf(stdout, "gc_allocated_bytes - passed value type %p\n", obj);
+    fprintf(stdout, 
+      "gc_allocated_bytes - passed value type %p q=[%p, %d] r=[%p, %d]\n", 
+      obj, q, q->size, r, r->size);
     exit(1);
     //return gc_heap_align(1);
   }
@@ -486,7 +488,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 //#endif
         continue;
       }
-      size = gc_heap_align(gc_allocated_bytes(p));
+      size = gc_heap_align(gc_allocated_bytes(p, q, r));
 //fprintf(stdout, "check object %p, size = %d\n", p, size);
       
 //#if GC_DEBUG_CONCISE_PRINTFS
@@ -507,12 +509,10 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 //#endif
 
       if (mark(p) == gc_color_clear) {
-#if GC_DEBUG_PRINTFS
-        fprintf(stdout, "sweep: object is not marked %p\n", p);
-        //fprintf(stdout, "sweep is freeing obj: %p ", p);
-        //Cyc_display(p, stdout);
-        //fprintf(stdout, "\n");
-#endif
+//#if GC_DEBUG_PRINTFS
+        //fprintf(stdout, "sweep: object is not marked %p\n", p);
+        fprintf(stdout, "sweep is freeing obj: %p with tag %d\n", p, type_of(p));
+//#endif
         mark(p) = gc_color_blue; // Needed?
         // free p
         sum_freed += size;
@@ -800,7 +800,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //printf("\n");
     gc_mark_gray(thd, old_obj);
     // TODO: need this too???
-    gc_stack_mark_gray(thd, value);
+    //gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
 //printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stdout);
