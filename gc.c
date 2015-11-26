@@ -998,6 +998,7 @@ void gc_mark_black(object obj)
     if (mark(obj) != gc_color_red) {
       // Only blacken objects on the heap
       mark(obj) = markColor;
+      printf("marked %p %d\n", obj, markColor);
     }
   }
 }
