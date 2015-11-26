@@ -342,9 +342,9 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
       exit(1); // TODO: throw error???
     }
   }
-#if GC_DEBUG_PRINTFS
+//#if GC_DEBUG_PRINTFS
   fprintf(stdout, "alloc %p size = %d\n", result, size);
-#endif
+//#endif
 
 // TODO: Debug check, remove (ifdef it) once GC is stabilized
 if (is_value_type(result)) {
@@ -511,7 +511,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       if (mark(p) == gc_color_clear) {
 //#if GC_DEBUG_PRINTFS
         //fprintf(stdout, "sweep: object is not marked %p\n", p);
-        fprintf(stdout, "sweep is freeing obj: %p with tag %d\n", p, type_of(p));
+        fprintf(stdout, "sweep is freeing obj: %p with tag %ld\n", p, type_of(p));
 //#endif
         mark(p) = gc_color_blue; // Needed?
         // free p
