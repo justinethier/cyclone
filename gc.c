@@ -343,7 +343,9 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
     }
   }
 //#if GC_DEBUG_PRINTFS
-  fprintf(stdout, "alloc %p size = %d\n", result, size);
+  fprintf(stdout, "alloc %p size = %d, obj=%p, tag=%ld\n", result, size, obj, type_of(obj));
+  //Cyc_display(obj, stdout);
+  //fprintf(stdout, "\n");
 //#endif
 
 // TODO: Debug check, remove (ifdef it) once GC is stabilized
