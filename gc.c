@@ -858,8 +858,10 @@ void gc_mut_cooperate(gc_thread_data *thd)
     }
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
+printf("gc_cont %p\n", thd->gc_cont);
       gc_mark_gray(thd, thd->gc_cont);
       for (i = 0; i < thd->gc_num_args; i++) {
+printf("gc_args[%d] %p\n", i, thd->gc_args[i]);
         gc_mark_gray(thd, thd->gc_args[i]);
       }
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
@@ -1016,7 +1018,7 @@ void gc_collector_mark_gray(object parent, object obj)
   // could lead to stack corruption.
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
-printf("mark gray parent = %p obj = %p\n", parent, obj);
+printf("mark gray parent = %p (%ld) obj = %p\n", parent, type_of(parent), obj);
   }
 }
 

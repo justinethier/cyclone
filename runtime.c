@@ -2441,6 +2441,7 @@ void gc_mark_globals()
   printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
 #endif
   // Mark global variables
+printf("Cyc_global_variables %p\n");
   gc_mark_black(Cyc_global_variables); // Internal global used by the runtime
                                        // Marking it ensures all glos are marked
   {
@@ -2449,6 +2450,7 @@ void gc_mark_globals()
      cvar_type *c = (cvar_type *)car(l);
      object glo =  *(c->pvar);
      if (!nullp(glo)) {
+printf("global pvar %p\n", glo);
        gc_mark_black(glo); // Mark actual object the global points to
      }
     }
