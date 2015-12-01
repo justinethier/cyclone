@@ -932,6 +932,9 @@ void gc_collector_trace()
       while (m->last_read < m->last_write) {
         clean = 0;
         (m->last_read)++;
+printf("gc_mark_black mark buffer %p, last_read = %d last_write = %d\n", 
+(m->mark_buffer)[m->last_read],
+m->last_read, m->last_write);
         gc_mark_black((m->mark_buffer)[m->last_read]);
         gc_empty_collector_stack();
       }
@@ -1005,6 +1008,9 @@ void gc_mark_black(object obj)
       // Only blacken objects on the heap
       mark(obj) = markColor;
       printf("marked %p %d\n", obj, markColor);
+    }
+    else {
+      printf("not marking stack obj %p %d\n", obj, markColor);
     }
   }
 }

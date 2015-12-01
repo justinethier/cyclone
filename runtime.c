@@ -2441,7 +2441,7 @@ void gc_mark_globals()
   printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
 #endif
   // Mark global variables
-printf("Cyc_global_variables %p\n");
+printf("Cyc_global_variables %p\n", Cyc_global_variables);
   gc_mark_black(Cyc_global_variables); // Internal global used by the runtime
                                        // Marking it ensures all glos are marked
   {
