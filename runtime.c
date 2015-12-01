@@ -8,6 +8,7 @@
 
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
+#include <signal.h> // TODO: only used for debugging!
 
 //int JAE_DEBUG = 0;
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -287,6 +288,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     fprintf(stderr, "\nCall history:\n");
     Cyc_st_print(stderr);
     fprintf(stderr, "\n");
+raise(SIGINT); // break into debugger, unix only
     exit(1);
     return nil;
 }
