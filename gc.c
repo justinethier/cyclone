@@ -932,6 +932,12 @@ void gc_collector_trace()
       while (m->last_read < m->last_write) {
         clean = 0;
         (m->last_read)++;
+TODO: I think there is an off-by-one error here. inspect last read/write.
+is the code going one too many? per paper it is not, but based on
+logs it looks like it is reading past end of buffer. (ie, errors always seem
+to be on the last object traced, and checking the history, an object
+incorrectly marked at position X can be seen to have been stored at position
+X in a previous collection.
 printf("gc_mark_black mark buffer %p, last_read = %d last_write = %d\n", 
 (m->mark_buffer)[m->last_read],
 m->last_read, m->last_write);
