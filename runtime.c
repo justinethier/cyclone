@@ -2408,40 +2408,15 @@ void Cyc_start_thread(gc_thread_data *thd)
   exit(0);
 }
 
-//// Collect garbage using mark&sweep algorithm
-//// Note non-global roots should be marked prior to calling this function.
-//size_t gc_collect(gc_heap *h, size_t *sum_freed) 
-//{
-//#if GC_DEBUG_CONCISE_PRINTFS
-//  printf("(heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
-//#endif
-//  // Mark global variables
-//  gc_mark(h, Cyc_global_variables); // Internal global used by the runtime
-//                                    // Marking it ensures all glos are marked
-//  {
-//    list l = global_table;
-//    for(; !nullp(l); l = cdr(l)){
-//     cvar_type *c = (cvar_type *)car(l);
-//     gc_mark(h, *(c->pvar)); // Mark actual object the global points to
-//    }
-//  }
-//  // TODO: what else to mark? gc_mark(
-//  // conservative mark?
-//  // weak refs?
-//  // finalize?
-//  return gc_sweep(h, sum_freed);
-//  // debug print free stats?
-//}
-
 // Mark globals as part of the tracing collector
 // This is called by the collector thread
 void gc_mark_globals()
 {
-#if GC_DEBUG_CONCISE_PRINTFS
+#if GC_DEBUG_TRACE
   printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  printf("Cyc_global_variables %p\n", Cyc_global_variables);
 #endif
   // Mark global variables
-printf("Cyc_global_variables %p\n", Cyc_global_variables);
   gc_mark_black(Cyc_global_variables); // Internal global used by the runtime
                                        // Marking it ensures all glos are marked
   {
@@ -2450,7 +2425,9 @@ printf("Cyc_global_variables %p\n", Cyc_global_variables);
      cvar_type *c = (cvar_type *)car(l);
      object glo =  *(c->pvar);
      if (!nullp(glo)) {
-printf("global pvar %p\n", glo);
+#if GC_DEBUG_TRACE
+       printf("global pvar %p\n", glo);
+#endif
        gc_mark_black(glo); // Mark actual object the global points to
      }
     }
@@ -2717,34 +2694,12 @@ void GC(void *data, closure cont, object *args, int num_args)
     scani++;
   }
 
-//fprintf(stdout, "DEBUG done minor GC, alloci = %d\n", alloci);
-
-//  // Check if we need to do a major GC
-//  if (heap_grown) {
-//    size_t freed = 0, max_freed = 0;
-//#if GC_DEBUG_CONCISE_PRINTFS
-//    time_t majorStart = time(NULL);
-//    fprintf(stdout, "DEBUG, starting major mark/sweep GC\n"); // JAE DEBUG
-//#endif
-//    gc_mark(Cyc_heap, cont);
-//    for (i = 0; i < num_args; i++){ 
-//      gc_mark(Cyc_heap, args[i]);
-//    }
-//    max_freed = gc_collect(Cyc_heap, &freed);
-//#if GC_DEBUG_CONCISE_PRINTFS
-//    printf("done, freed = %d, max_freed = %d, elapsed = %ld\n", freed, max_freed, time(NULL) - majorStart);
-//    //JAE_DEBUG++;
-//    //if (JAE_DEBUG == 2) exit(1); // JAE DEBUG
-//    for (i = 0; i < 20; i++){
-//      printf("gcMoveCountsDEBUG[%d] = %d\n", i, gcMoveCountsDEBUG[i]);
-//    }
-//#endif
-//  }
-
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data);
 
-printf("done with minor GC\n");
+#ifdef GC_DEBUG_TRACE
+  printf("done with minor GC\n");
+#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
