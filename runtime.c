@@ -2697,7 +2697,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data);
 
-#ifdef GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
   printf("done with minor GC\n");
 #endif
   // Let it all go, Neo...
