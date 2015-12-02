@@ -697,14 +697,14 @@ PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
 // Scan the given object and its refs, marking all heap objects. The issue
 // here is that the heap's write barrier can be invoked at any time and
 // we need to ensure any heap objects affected are traced
-void gc_stack_mark_gray(gc_thread_data *thd, object obj)
+void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
 {
   char tmp;
   object low_limit = &tmp;
   object high_limit = ((gc_thread_data *)thd)->stack_start;
   int color;
 
-  if (is_object_type(obj)) {
+  if (is_object_type(obj) && depth < 100) {
     color = mark(obj);
 #if GC_SAFETY_CHECKS
     if (check_overflow(low_limit, obj) && 
@@ -718,10 +718,16 @@ void gc_stack_mark_gray(gc_thread_data *thd, object obj)
 #endif
     if (color == gc_color_clear) {
       gc_mark_gray(thd, obj);
+      printf("marked heap obj from stack barrier %p %d\n", obj, color);
     } else if (color == gc_color_red) {
-      gc_stack_mark_refs_gray(thd, obj);
+      gc_stack_mark_refs_gray(thd, obj, depth + 1);
     }
   }
+}
+
+void gc_stack_mark_gray(gc_thread_data *thd, object obj)
+{
+  gc_stack_mark_gray3(thd, obj, 0);
 }
 
 // Should only be called from above function as a helper
@@ -733,41 +739,41 @@ void gc_stack_mark_gray(gc_thread_data *thd, object obj)
 // been visited. trick is that, unlike in other places, the
 // nodes may be visited multiple times so cannot destructively
 // alter them.
-void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj)
+void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj, int depth)
 {
   switch(type_of(obj)) {
     case cons_tag: {
-      gc_stack_mark_gray(thd, car(obj));
-      gc_stack_mark_gray(thd, cdr(obj));
+      gc_stack_mark_gray3(thd, car(obj), depth);
+      gc_stack_mark_gray3(thd, cdr(obj), depth);
       break;
     }
     case closure1_tag:
-      gc_stack_mark_gray(thd, ((closure1) obj)->elt1);
+      gc_stack_mark_gray3(thd, ((closure1) obj)->elt1, depth);
       break;
     case closure2_tag:
-      gc_stack_mark_gray(thd, ((closure2) obj)->elt1);
-      gc_stack_mark_gray(thd, ((closure2) obj)->elt2);
+      gc_stack_mark_gray3(thd, ((closure2) obj)->elt1, depth);
+      gc_stack_mark_gray3(thd, ((closure2) obj)->elt2, depth);
     case closure3_tag:
-      gc_stack_mark_gray(thd, ((closure3) obj)->elt1);
-      gc_stack_mark_gray(thd, ((closure3) obj)->elt2);
-      gc_stack_mark_gray(thd, ((closure3) obj)->elt3);
+      gc_stack_mark_gray3(thd, ((closure3) obj)->elt1, depth);
+      gc_stack_mark_gray3(thd, ((closure3) obj)->elt2, depth);
+      gc_stack_mark_gray3(thd, ((closure3) obj)->elt3, depth);
     case closure4_tag:
-      gc_stack_mark_gray(thd, ((closure4) obj)->elt1);
-      gc_stack_mark_gray(thd, ((closure4) obj)->elt2);
-      gc_stack_mark_gray(thd, ((closure4) obj)->elt3);
-      gc_stack_mark_gray(thd, ((closure4) obj)->elt4);
+      gc_stack_mark_gray3(thd, ((closure4) obj)->elt1, depth);
+      gc_stack_mark_gray3(thd, ((closure4) obj)->elt2, depth);
+      gc_stack_mark_gray3(thd, ((closure4) obj)->elt3, depth);
+      gc_stack_mark_gray3(thd, ((closure4) obj)->elt4, depth);
       break;
     case closureN_tag: {
       int i, n = ((closureN) obj)->num_elt;
       for (i = 0; i < n; i++) {
-        gc_stack_mark_gray(thd, ((closureN) obj)->elts[i]);
+        gc_stack_mark_gray3(thd, ((closureN) obj)->elts[i], depth);
       }
       break;
     }
     case vector_tag: {
       int i, n = ((vector) obj)->num_elt;
       for (i = 0; i < n; i++) {
-        gc_stack_mark_gray(thd, ((vector) obj)->elts[i]);
+        gc_stack_mark_gray3(thd, ((vector) obj)->elts[i], depth);
       }
       break;
     }

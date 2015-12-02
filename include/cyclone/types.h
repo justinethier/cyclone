@@ -160,7 +160,7 @@ void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
 void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
 void gc_mut_cooperate(gc_thread_data *thd);
-void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj);
+void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj, int depth);
 void gc_stack_mark_gray(gc_thread_data *thd, object obj);
 void gc_mark_gray(gc_thread_data *thd, object obj);
 void gc_collector_trace();
