@@ -47,7 +47,7 @@ const char *tag_names[21] = { \
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
   char buf[256];
-  snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
+  snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
   Cyc_rt_raise2(data, buf, found);
 }
 
@@ -2415,7 +2415,7 @@ void Cyc_start_thread(gc_thread_data *thd)
 void gc_mark_globals()
 {
 #if GC_DEBUG_TRACE
-  printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  //printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
   printf("Cyc_global_variables %p\n", Cyc_global_variables);
 #endif
   // Mark global variables

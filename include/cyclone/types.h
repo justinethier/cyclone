@@ -180,8 +180,8 @@ gc_heap *gc_get_heap();
 //void gc_collector()
 
 /* GC debugging flags */
-#define GC_DEBUG_TRACE 0
-#define GC_DEBUG_VERBOSE 0
+#define GC_DEBUG_TRACE 1
+#define GC_DEBUG_VERBOSE 1
 
 /* Additional runtime checking of the GC system.
    This is here because these checks should not be

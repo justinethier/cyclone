@@ -345,7 +345,7 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
     }
   }
 #if GC_DEBUG_TRACE
-  fprintf(stdout, "alloc %p size = %d, obj=%p, tag=%ld\n", result, size, obj, type_of(obj));
+  fprintf(stdout, "alloc %p size = %d, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
   //// TODO: Debug check, remove (ifdef it) once GC is stabilized
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
@@ -704,7 +704,7 @@ void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
   object high_limit = ((gc_thread_data *)thd)->stack_start;
   int color;
 
-  if (is_object_type(obj) && depth < 100) {
+  if (is_object_type(obj) && depth < 15) {
     color = mark(obj);
 #if GC_SAFETY_CHECKS
     if (check_overflow(low_limit, obj) && 
@@ -718,7 +718,7 @@ void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
 #endif
     if (color == gc_color_clear) {
       gc_mark_gray(thd, obj);
-      printf("marked heap obj from stack barrier %p %d\n", obj, color);
+      //printf("marked heap obj from stack barrier %p %d\n", obj, color);
     } else if (color == gc_color_red) {
       gc_stack_mark_refs_gray(thd, obj, depth + 1);
     }
@@ -801,7 +801,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //printf("\n");
     gc_mark_gray(thd, old_obj);
     // TODO: need this too???
-    //gc_stack_mark_gray(thd, value);
+    gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
 //printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stdout);
@@ -1105,8 +1105,6 @@ void gc_collector()
 #if GC_DEBUG_TRACE
   time_t sweep_start = time(NULL);
 #endif
-  // TODO: what kind of sync is required here?
-
   //clear : 
   gc_stage = STAGE_CLEAR_OR_MARKING;
   // exchange values of markColor and clearColor
@@ -1118,16 +1116,24 @@ void gc_collector()
   printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
 #endif
   gc_handshake(STATUS_SYNC1);
-//printf("DEBUG - after handshake sync 1\n");
+#if GC_DEBUG_TRACE
+printf("DEBUG - after handshake sync 1\n");
+#endif
   //mark : 
   gc_handshake(STATUS_SYNC2);
-//printf("DEBUG - after handshake sync 2\n");
+#if GC_DEBUG_TRACE
+printf("DEBUG - after handshake sync 2\n");
+#endif
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
-//printf("DEBUG - after post_handshake aync\n");
+#if GC_DEBUG_TRACE
+printf("DEBUG - after post_handshake aync\n");
+#endif
   gc_mark_globals();
   gc_wait_handshake();
-//printf("DEBUG - after wait_handshake aync\n");
+#if GC_DEBUG_TRACE
+printf("DEBUG - after wait_handshake aync\n");
+#endif
   //trace : 
   gc_collector_trace();
 #if GC_DEBUG_TRACE
