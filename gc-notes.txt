@@ -7,5 +7,7 @@ Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC
 TODO:
 - need to fix memory corruption bugs
 - need to cooperate when a mutator is blocked
+- need an intelligent scheduling of GC, instead of just constantly running it
 - add_mutation will need to be brought into thread local data. 
 - probably exceptions too. anything else?
+- multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
