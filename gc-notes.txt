@@ -4,6 +4,8 @@ Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naiv
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
 
-
 TODO:
-- add_mutation will need to be brought into thread local data
+- need to fix memory corruption bugs
+- need to cooperate when a mutator is blocked
+- add_mutation will need to be brought into thread local data. 
+- probably exceptions too. anything else?
