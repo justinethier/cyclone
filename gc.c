@@ -808,7 +808,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //printf("\n");
     gc_mark_gray(thd, old_obj);
 #if GC_DEBUG_VERBOSE
-    if (is_object_type(old_obj)) {
+    if (is_object_type(old_obj) && mark(old_obj) == gc_color_clear) {
       printf("added to mark buffer (trace) from write barrier %p:mark %d:", old_obj, mark(old_obj));
       Cyc_display(old_obj, stdout);
       printf("\n");
@@ -1127,12 +1127,12 @@ printf("DEBUG - after handshake sync 2\n");
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
 #if GC_DEBUG_TRACE
-printf("DEBUG - after post_handshake aync\n");
+printf("DEBUG - after post_handshake async\n");
 #endif
   gc_mark_globals();
   gc_wait_handshake();
 #if GC_DEBUG_TRACE
-printf("DEBUG - after wait_handshake aync\n");
+printf("DEBUG - after wait_handshake async\n");
 #endif
   //trace : 
   gc_collector_trace();
