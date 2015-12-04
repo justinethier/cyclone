@@ -2415,8 +2415,8 @@ void Cyc_start_thread(gc_thread_data *thd)
 void gc_mark_globals()
 {
 #if GC_DEBUG_TRACE
-  //printf("(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
-  printf("Cyc_global_variables %p\n", Cyc_global_variables);
+  //fprintf(stderr, "(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  fprintf(stderr, "Cyc_global_variables %p\n", Cyc_global_variables);
 #endif
   // Mark global variables
   gc_mark_black(Cyc_global_variables); // Internal global used by the runtime
@@ -2428,7 +2428,7 @@ void gc_mark_globals()
      object glo =  *(c->pvar);
      if (!nullp(glo)) {
 #if GC_DEBUG_TRACE
-       printf("global pvar %p\n", glo);
+       fprintf(stderr, "global pvar %p\n", glo);
 #endif
        gc_mark_black(glo); // Mark actual object the global points to
      }
@@ -2700,7 +2700,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   gc_mut_cooperate((gc_thread_data *)data);
 
 #if GC_DEBUG_TRACE
-  printf("done with minor GC\n");
+  fprintf(stderr, "done with minor GC\n");
 #endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
