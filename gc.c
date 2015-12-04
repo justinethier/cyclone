@@ -275,7 +275,7 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   h_last->next = h_new;
   pthread_mutex_unlock(&heap_lock);
 #if GC_DEBUG_TRACE
-  printf("DEBUG - grew heap\n");
+  fprintf(stderr, "DEBUG - grew heap\n");
 #endif
   return (h_new != NULL);
 }
@@ -345,7 +345,7 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
     }
   }
 #if GC_DEBUG_TRACE
-  fprintf(stdout, "alloc %p size = %d, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
+  fprintf(stderr, "alloc %p size = %d, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
   //// TODO: Debug check, remove (ifdef it) once GC is stabilized
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
@@ -359,7 +359,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   tag_type t;
 #if GC_SAFETY_CHECKS
   if (is_value_type(obj)) {
-    fprintf(stdout, 
+    fprintf(stderr, 
       "gc_allocated_bytes - passed value type %p q=[%p, %d] r=[%p, %d]\n", 
       obj, q, q->size, r, r->size);
     exit(1);
@@ -417,7 +417,7 @@ size_t gc_heap_total_size(gc_heap *h)
 //    return;
 //
 //#if GC_DEBUG_PRINTFS
-////  fprintf(stdout, "gc_mark %p\n", obj);
+////  fprintf(stderr, "gc_mark %p\n", obj);
 //#endif
 //  ((list)obj)->hdr.mark = 1;
 // // TODO: mark heap saves (??) 
@@ -471,7 +471,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   pthread_mutex_lock(&heap_lock);
   for (; h; h = h->next) { // All heaps
 #if GC_DEBUG_TRACE
-    fprintf(stdout, "sweep heap %p, size = %d\n", h, h->size);
+    fprintf(stderr, "sweep heap %p, size = %d\n", h, h->size);
 #endif
     p = gc_heap_first_block(h);
     q = h->free_list;
@@ -483,7 +483,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
 #if GC_DEBUG_TRACE
-        fprintf(stdout, "skip free block %p size = %d\n", p, r->size);
+        fprintf(stderr, "skip free block %p size = %d\n", p, r->size);
 #endif
         continue;
       }
@@ -506,7 +506,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if (mark(p) == gc_color_clear) {
 #if GC_DEBUG_VERBOSE
-        fprintf(stdout, "sweep is freeing unmarked obj: %p with tag %ld\n", p, type_of(p));
+        fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %ld\n", p, type_of(p));
 #endif
         mark(p) = gc_color_blue; // Needed?
         // free p
@@ -543,7 +543,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
           max_freed = freed;
       } else {
 //#if GC_DEBUG_VERBOSE
-//        fprintf(stdout, "sweep: object is marked %p\n", p);
+//        fprintf(stderr, "sweep: object is marked %p\n", p);
 //#endif
         p = (object)(((char *)p) + size);
       }
@@ -567,7 +567,7 @@ void gc_thr_grow_move_buffer(gc_thread_data *d)
 
   d->moveBuf = realloc(d->moveBuf, d->moveBufLen * sizeof(void *));
 #if GC_DEBUG_TRACE
-  printf("grew moveBuffer, len = %d\n", d->moveBufLen);
+  fprintf(stderr, "grew moveBuffer, len = %d\n", d->moveBufLen);
 #endif
 }
 
@@ -710,15 +710,15 @@ void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
     if (check_overflow(low_limit, obj) && 
         check_overflow(obj, high_limit) &&
         color != gc_color_red){ 
-      printf("stack object has wrong color %d!\n", color);
-      Cyc_display(obj, stdout);
-      printf("\n");
+      fprintf(stderr, "stack object has wrong color %d!\n", color);
+      Cyc_display(obj, stderr);
+      fprintf(stderr, "\n");
       exit(1);
     }
 #endif
     if (color == gc_color_clear) {
       gc_mark_gray(thd, obj);
-      //printf("marked heap obj from stack barrier %p %d\n", obj, color);
+      //fprintf(stderr, "marked heap obj from stack barrier %p %d\n", obj, color);
     } else if (color == gc_color_red) {
       gc_stack_mark_refs_gray(thd, obj, depth + 1);
     }
@@ -793,25 +793,25 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
   int status = ATOMIC_GET(&gc_status_col),
       stage = ATOMIC_GET(&gc_stage);
   if (thd->gc_status != STATUS_ASYNC) {
-//printf("DEBUG - GC sync marking heap obj %p ", old_obj);
-//Cyc_display(old_obj, stdout);
-//printf(" and new value %p ", value);
-//Cyc_display(value, stdout);
-////printf(" for heap object ");
-//printf("\n");
+//fprintf(stderr, "DEBUG - GC sync marking heap obj %p ", old_obj);
+//Cyc_display(old_obj, stderr);
+//fprintf(stderr, " and new value %p ", value);
+//Cyc_display(value, stderr);
+////fprintf(stderr, " for heap object ");
+//fprintf(stderr, "\n");
     gc_mark_gray(thd, old_obj);
     // TODO: need this too???
     gc_stack_mark_gray(thd, value);
   } else if (stage == STAGE_TRACING) {
-//printf("DEBUG - GC async tracing marking heap obj %p ", old_obj);
-//Cyc_display(old_obj, stdout);
-//printf("\n");
+//fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
+//Cyc_display(old_obj, stderr);
+//fprintf(stderr, "\n");
     gc_mark_gray(thd, old_obj);
 #if GC_DEBUG_VERBOSE
     if (is_object_type(old_obj) && mark(old_obj) == gc_color_clear) {
-      printf("added to mark buffer (trace) from write barrier %p:mark %d:", old_obj, mark(old_obj));
-      Cyc_display(old_obj, stdout);
-      printf("\n");
+      fprintf(stderr, "added to mark buffer (trace) from write barrier %p:mark %d:", old_obj, mark(old_obj));
+      Cyc_display(old_obj, stderr);
+      fprintf(stderr, "\n");
     }
 #endif
   }
@@ -860,12 +860,12 @@ void gc_mut_cooperate(gc_thread_data *thd)
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
 #if GC_DEBUG_VERBOSE
-printf("gc_cont %p\n", thd->gc_cont);
+fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
 #endif
       gc_mark_gray(thd, thd->gc_cont);
       for (i = 0; i < thd->gc_num_args; i++) {
 #if GC_DEBUG_VERBOSE
-printf("gc_args[%d] %p\n", i, thd->gc_args[i]);
+fprintf(stderr, "gc_args[%d] %p\n", i, thd->gc_args[i]);
 #endif
         gc_mark_gray(thd, thd->gc_args[i]);
       }
@@ -937,7 +937,7 @@ void gc_collector_trace()
       while (m->last_read < m->last_write) {
         clean = 0;
 #if GC_DEBUG_VERBOSE
-        printf("gc_mark_black mark buffer %p, last_read = %d last_write = %d\n", 
+        fprintf(stderr, "gc_mark_black mark buffer %p, last_read = %d last_write = %d\n", 
           (m->mark_buffer)[m->last_read],
           m->last_read, m->last_write);
 #endif
@@ -1017,9 +1017,9 @@ void gc_mark_black(object obj)
     }
 #if GC_DEBUG_VERBOSE
     if (mark(obj) != gc_color_red) {
-      printf("marked %p %d\n", obj, markColor);
+      fprintf(stderr, "marked %p %d\n", obj, markColor);
     } else {
-      printf("not marking stack obj %p %d\n", obj, markColor);
+      fprintf(stderr, "not marking stack obj %p %d\n", obj, markColor);
     }
 #endif
   }
@@ -1035,7 +1035,7 @@ void gc_collector_mark_gray(object parent, object obj)
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
 #if GC_DEBUG_VERBOSE
-    printf("mark gray parent = %p (%ld) obj = %p\n", parent, type_of(parent), obj);
+    fprintf(stderr, "mark gray parent = %p (%ld) obj = %p\n", parent, type_of(parent), obj);
 #endif
   }
 }
@@ -1113,31 +1113,31 @@ void gc_collector()
   while(!ATOMIC_SET_IF_EQ(&gc_color_clear, old_clear, old_mark)){}
   while(!ATOMIC_SET_IF_EQ(&gc_color_mark, old_mark, old_clear)){}
 #if GC_DEBUG_TRACE
-  printf("DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
+  fprintf(stderr, "DEBUG - swap clear %d / mark %d\n", gc_color_clear, gc_color_mark);
 #endif
   gc_handshake(STATUS_SYNC1);
 #if GC_DEBUG_TRACE
-printf("DEBUG - after handshake sync 1\n");
+fprintf(stderr, "DEBUG - after handshake sync 1\n");
 #endif
   //mark : 
   gc_handshake(STATUS_SYNC2);
 #if GC_DEBUG_TRACE
-printf("DEBUG - after handshake sync 2\n");
+fprintf(stderr, "DEBUG - after handshake sync 2\n");
 #endif
   gc_stage = STAGE_TRACING;
   gc_post_handshake(STATUS_ASYNC);
 #if GC_DEBUG_TRACE
-printf("DEBUG - after post_handshake async\n");
+fprintf(stderr, "DEBUG - after post_handshake async\n");
 #endif
   gc_mark_globals();
   gc_wait_handshake();
 #if GC_DEBUG_TRACE
-printf("DEBUG - after wait_handshake async\n");
+fprintf(stderr, "DEBUG - after wait_handshake async\n");
 #endif
   //trace : 
   gc_collector_trace();
 #if GC_DEBUG_TRACE
-  printf("DEBUG - after trace\n");
+  fprintf(stderr, "DEBUG - after trace\n");
   //debug_dump_globals();
 #endif
   gc_stage = STAGE_SWEEPING;
@@ -1146,7 +1146,7 @@ printf("DEBUG - after wait_handshake async\n");
   max_freed = gc_sweep(gc_get_heap(), &freed);
   // TODO: grow heap if it is mostly full after collection??
 #if GC_DEBUG_TRACE
-  printf("sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
+  fprintf(stderr, "sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
     freed, max_freed, time(NULL) - sweep_start);
 #endif
   gc_stage = STAGE_RESTING;
