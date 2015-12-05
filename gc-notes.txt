@@ -4,6 +4,15 @@ Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naiv
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
 
+memory corruption
+ - noticed that an object may be allocated with the old mark color, and then freed before it
+   can be marked, even though it is part of a global list.
+   what might be happening is that the new heap obj is part of the global list, but the minor
+   GC only marks gc-cont/gc-args, which this is not part of. and the globals are already marked
+   at that point by the collector thread, so no one is around to mark this object.
+   wait a minute - but how does the obj even get on the heap? see this - if above was true there would be no ref to move this to the heap, right? so what is going on?? ->
+alloc 0xb78400e0 size = 32, obj=0xbffcd648, tag=0, mark=1
+
 TODO:
 - need to fix memory corruption bugs
 - need to cooperate when a mutator is blocked
