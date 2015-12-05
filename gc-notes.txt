@@ -12,6 +12,9 @@ memory corruption
    at that point by the collector thread, so no one is around to mark this object.
    wait a minute - but how does the obj even get on the heap? see this - if above was true there would be no ref to move this to the heap, right? so what is going on?? ->
 alloc 0xb78400e0 size = 32, obj=0xbffcd648, tag=0, mark=1
+well, we also move globals, which would explain it since the next lambda becomes the head of the global list. so I think that explains it. the most expedient change is to just use moveBuf to mark the thread's roots.
+
+but again, this did not fix all crashes, so there are either other issues with the GC (not surprising, although disappointing) or this is not the issue. but I think this has to be a problem given the error output observed today.
 
 TODO:
 - need to fix memory corruption bugs
