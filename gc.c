@@ -704,6 +704,10 @@ void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
   object high_limit = ((gc_thread_data *)thd)->stack_start;
   int color;
 
+// TODO: is it just a coincidence that a corrupted lambda list element
+// was at 15? this approach may not work for deep lists, and may not
+// work at all. may need to replace with another method that is complete
+// but also handles circular references...
   if (is_object_type(obj) && depth < 15) {
     color = mark(obj);
 #if GC_SAFETY_CHECKS
