@@ -863,6 +863,8 @@ void gc_mut_cooperate(gc_thread_data *thd)
     }
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
+      // TODO: below is efficient, but is there a chance we are missing anything by
+      // doing this instead of marking the objects in moveBuf??
 #if GC_DEBUG_VERBOSE
 fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
 #endif
