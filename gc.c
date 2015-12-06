@@ -850,7 +850,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 }
 
 // TODO: still need to handle case where a mutator is blocked
-void gc_mut_cooperate(gc_thread_data *thd)
+void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
   int i, status = ATOMIC_GET(&gc_status_col);
   if (thd->gc_status != status) {
@@ -863,18 +863,23 @@ void gc_mut_cooperate(gc_thread_data *thd)
     }
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
-      // TODO: below is efficient, but is there a chance we are missing anything by
-      // doing this instead of marking the objects in moveBuf??
+      // In this case, mark everything the collector moved to the heap
+      for (i = 0; i < buf_len; i++) {
+        gc_mark_gray(thd, thd->moveBuf[i]);
 #if GC_DEBUG_VERBOSE
-fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
+        fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
 #endif
-      gc_mark_gray(thd, thd->gc_cont);
-      for (i = 0; i < thd->gc_num_args; i++) {
-#if GC_DEBUG_VERBOSE
-fprintf(stderr, "gc_args[%d] %p\n", i, thd->gc_args[i]);
-#endif
-        gc_mark_gray(thd, thd->gc_args[i]);
       }
+//#if GC_DEBUG_VERBOSE
+//fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
+//#endif
+//      gc_mark_gray(thd, thd->gc_cont);
+//      for (i = 0; i < thd->gc_num_args; i++) {
+//#if GC_DEBUG_VERBOSE
+//fprintf(stderr, "gc_args[%d] %p\n", i, thd->gc_args[i]);
+//#endif
+//        gc_mark_gray(thd, thd->gc_args[i]);
+//      }
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
     thd->gc_status = status;

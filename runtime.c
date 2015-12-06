@@ -2582,7 +2582,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   object low_limit = &tmp; // This is one end of the stack...
   object high_limit = ((gc_thread_data *)data)->stack_start;
   int i;
-  int scani = 0, alloci = 0; // TODO: not quite sure how to do this yet, want to user pointers but realloc can move them... need to think about how this will work
+  int scani = 0, alloci = 0;
   int heap_grown = 0;
 
 //fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
@@ -2697,7 +2697,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   }
 
   // Cooperate with the collector thread
-  gc_mut_cooperate((gc_thread_data *)data);
+  gc_mut_cooperate((gc_thread_data *)data, alloci);
 
 #if GC_DEBUG_TRACE
   fprintf(stderr, "done with minor GC\n");
