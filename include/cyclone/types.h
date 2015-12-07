@@ -95,11 +95,11 @@ struct gc_heap_t {
 
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  //unsigned char mark; // mark bits (only need 2)
   unsigned int mark; // mark bits (only need 2)
-  // TODO: forwarding address (probably not needed for mark/sweep), anything else???
+  unsigned char grayed; // stack object to be grayed when moved to heap
 };
 #define mark(x) (((list) x)->hdr.mark)
+#define grayed(x) (((list) x)->hdr.grayed)
 
 /* HEAP definitions */
 // experimenting with a heap based off of the one in Chibi scheme
@@ -158,6 +158,7 @@ void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
 void gc_thread_data_free(gc_thread_data *thd);
 // Prototypes for mutator/collector:
+int gc_is_stack_obj(gc_thread_data *thd, object obj);
 void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len);
 void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj, int depth);

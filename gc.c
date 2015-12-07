@@ -787,6 +787,18 @@ void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj, int depth)
 }
 
 /**
+ * Determine if object lives on the thread's stack
+ */
+int gc_is_stack_obj(gc_thread_data *thd, object obj)
+{
+  char tmp;
+  object low_limit = &tmp;
+  object high_limit = thd->stack_start;
+  return (check_overflow(low_limit, obj) && 
+          check_overflow(obj, high_limit));
+}
+
+/**
 Write barrier for updates to heap-allocated objects
 Plans:
 The key for this barrier is to identify stack objects that contain
@@ -804,8 +816,15 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 ////fprintf(stderr, " for heap object ");
 //fprintf(stderr, "\n");
     gc_mark_gray(thd, old_obj);
-    // TODO: need this too???
-    gc_stack_mark_gray(thd, value);
+// TODO: check if value is on the heap,
+//   if so, mark gray right now
+//   otherwise set it to be marked after moved to heap during next GC
+    //gc_stack_mark_gray(thd, value);
+    if (gc_is_stack_obj(thd, value)) {
+      grayed(value) = 1;
+    } else {
+      gc_mark_gray(thd, value);
+    }
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
