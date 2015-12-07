@@ -73,6 +73,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
             tmp = arg_var; \
         } \
         var[i].hdr.mark = gc_color_red; \
+        var[i].hdr.grayed = 0; \
         var[i].tag = cons_tag; \
         var[i].cons_car = tmp; \
         var[i].cons_cdr = (i == (count-1)) ? nil : &var[i + 1]; \

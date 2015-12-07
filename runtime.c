@@ -942,11 +942,13 @@ common_type Cyc_string2number(void *data, object str){
 
         if (ceilf(n) == n) {
             result.integer_t.hdr.mark = gc_color_red;
+            result.integer_t.hdr.grayed = 0;
             result.integer_t.tag = integer_tag;
             result.integer_t.value = (int)n;
         }
         else {
             result.double_t.hdr.mark = gc_color_red;
+            result.double_t.hdr.grayed = 0;
             result.double_t.tag = double_tag;
             result.double_t.value = n;
         }
@@ -1129,6 +1131,7 @@ object Cyc_command_line_arguments(void *data, object cont) {
     make_string(s, _cyc_argv[i - 1]);
     memcpy(ps, &s, sizeof(string_type));
     ((list)pl)->hdr.mark = gc_color_red;
+    ((list)pl)->hdr.grayed = 0;
     ((list)pl)->tag = cons_tag;
     ((list)pl)->cons_car = ps;
     ((list)pl)->cons_cdr = lis;
@@ -1143,6 +1146,7 @@ object Cyc_make_vector(void *data, object cont, object len, object fill) {
   Cyc_check_int(data, len);
   v = alloca(sizeof(vector_type));
   ((vector)v)->hdr.mark = gc_color_red;
+  ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag;
   ((vector)v)->num_elt = ((integer_type *)len)->value;
   ((vector)v)->elts = 
@@ -1165,6 +1169,7 @@ object Cyc_list2vector(void *data, object cont, object l) {
   len = Cyc_length(data, l); 
   v = alloca(sizeof(vector_type)); 
   ((vector)v)->hdr.mark = gc_color_red;
+  ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag; 
   ((vector)v)->num_elt = len.value; 
   ((vector)v)->elts = 
@@ -1223,6 +1228,7 @@ common_type FUNC_OP(void *data, object x, object y) { \
     common_type s; \
     int tx = type_of(x), ty = type_of(y); \
     s.double_t.hdr.mark = gc_color_red; \
+    s.double_t.hdr.grayed = 0; \
     s.double_t.tag = double_tag; \
     if (DIV &&  \
         ((ty == integer_tag && integer_value(y) == 0) || \
@@ -1231,6 +1237,7 @@ common_type FUNC_OP(void *data, object x, object y) { \
     } \
     if (tx == integer_tag && ty == integer_tag) { \
         s.integer_t.hdr.mark = gc_color_red; \
+        s.integer_t.hdr.grayed = 0; \
         s.integer_t.tag = integer_tag; \
         s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
     } else if (tx == double_tag && ty == integer_tag) { \
@@ -1274,6 +1281,7 @@ common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(void *, 
   int i;
   if (argc == 0) {
     sum.integer_t.hdr.mark = gc_color_red;
+    sum.integer_t.hdr.grayed = 0;
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = 0;
     return sum;
@@ -1281,10 +1289,12 @@ common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(void *, 
 
   if (type_of(n) == integer_tag) {
     sum.integer_t.hdr.mark = gc_color_red;
+    sum.integer_t.hdr.grayed = 0; 
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = ((integer_type *)n)->value;
   } else if (type_of(n) == double_tag) {
     sum.double_t.hdr.mark = gc_color_red;
+    sum.double_t.hdr.grayed = 0;
     sum.double_t.tag = double_tag;
     sum.double_t.value = ((double_type *)n)->value;
   } else {
@@ -1298,10 +1308,12 @@ common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(void *, 
     common_type result = fn_op(data, &sum, va_arg(ns, object));
     if (type_of(&result) == integer_tag) {
         sum.integer_t.hdr.mark = gc_color_red;
+        sum.integer_t.hdr.grayed = 0;
         sum.integer_t.tag = integer_tag;
         sum.integer_t.value = ((integer_type *) &result)->value;
     } else if (type_of(&result) == double_tag) {
         sum.double_t.hdr.mark = gc_color_red;
+        sum.double_t.hdr.grayed = 0;
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
@@ -1454,12 +1466,14 @@ object Cyc_io_peek_char(void *data, object port) {
 list mcons(a,d) object a,d;
 {register cons_type *c = malloc(sizeof(cons_type));
  c->hdr.mark = gc_color_red;
+ c->hdr.grayed = 0;
  c->tag = cons_tag; c->cons_car = a; c->cons_cdr = d;
  return c;}
 
 cvar_type *mcvar(object *var) {
   cvar_type *c = malloc(sizeof(cvar_type));
   c->hdr.mark = gc_color_red;
+  c->hdr.grayed = 0;
   c->tag = cvar_tag; 
   c->pvar = var;
   return c;}
@@ -1955,6 +1969,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     for (i = 0; i < argc; i++) {
         tmp = va_arg(ap, object);
         args[i].hdr.mark = gc_color_red;
+        args[i].hdr.grayed = 0;
         args[i].tag = cons_tag;
         args[i].cons_car = tmp;
         args[i].cons_cdr = (i == (argc-1)) ? nil : &args[i + 1];
@@ -1984,6 +1999,7 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
     
     for (i = 1; i < argc; i++) {
         args[i - 1].hdr.mark = gc_color_red;
+        args[i - 1].hdr.grayed = 0;
         args[i - 1].tag = cons_tag;
         args[i - 1].cons_car = buf[i];
         args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
