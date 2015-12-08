@@ -821,13 +821,12 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
     gc_mark_gray(thd, old_obj);
     // Check if value is on the heap. If so, mark gray right now,
     // otherwise set it to be marked after moved to heap by next GC
-//    if (gc_is_stack_obj(thd, value)) {
-//      grayed(value) = 1;
-//    } else {
-//      gc_mark_gray(thd, value);
-//    }
+    if (gc_is_stack_obj(thd, value)) {
+      grayed(value) = 1;
+    } else {
+      gc_mark_gray(thd, value);
+    }
     pthread_mutex_unlock(&(thd->lock));
-gc_stack_mark_gray(thd, value); // TODO: this line will be replace with above block
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
@@ -877,12 +876,20 @@ gc_stack_mark_gray(thd, value); // TODO: this line will be replace with above bl
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
   int i, status = ATOMIC_GET(&gc_status_col);
+
+  // Handle any pending marks from write barrier
+  pthread_mutex_lock(&(thd->lock));
+  thd->last_write += thd->pending_writes;
+  thd->pending_writes = 0;
+  pthread_mutex_unlock(&(thd->lock));
+
   if (thd->gc_status != status) {
     if (thd->gc_status == STATUS_ASYNC) {
       // Async is done, so clean up old mark data from the last collection
       pthread_mutex_lock(&(thd->lock));
       thd->last_write = 0;
       thd->last_read = 0;
+      thd->pending_writes = 0;
       pthread_mutex_unlock(&(thd->lock));
     }
     else if (thd->gc_status == STATUS_SYNC2) {
@@ -938,6 +945,17 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
                                     thd->last_write,
                                     obj);
     (thd->last_write)++; // Already locked, just do it...
+  }
+}
+
+void gc_mark_gray2(gc_thread_data *thd, object obj)
+{
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
+    thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
+                                    &(thd->mark_buffer_len),
+                                    (thd->last_write + thd->pending_writes),
+                                    obj);
+    thd->pending_writes++;
   }
 }
 
@@ -1003,7 +1021,10 @@ void gc_collector_trace()
       if (clean) {
         pthread_mutex_lock(&(m->lock));
         if (m->last_read < m->last_write) {
-          printf("JAE DEBUG - might have exited trace early\n");
+          fprintf(stderr, "JAE DEBUG - might have exited trace early\n");
+          clean = 0;
+        }
+        else if (m->pending_writes) {
           clean = 0;
         }
         pthread_mutex_unlock(&(m->lock));

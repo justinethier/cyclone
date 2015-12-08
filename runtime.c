@@ -2452,35 +2452,24 @@ void gc_mark_globals()
   }
 }
 
-char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, int *num_grayed, char *obj, object hp)
+char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
 {
+  if (grayed(obj)) {
+    pthread_mutex_lock(&(thd->lock));
+    gc_mark_gray2(thd, hp);
+    pthread_mutex_unlock(&(thd->lock));
+  }
+
   // hp ==> new heap object, point to it from old stack object
   forward(obj) = hp;
   type_of(obj) = forward_tag;
   // keep track of each allocation so we can scan/move 
   // the whole live object 'tree'
   gc_thr_add_to_move_buffer(thd, alloci, hp);
-
-// TODO: if grayed(obj) then - do a deferred gc_mark_gray on hp
-// you know, one possibility would be to add it to the thread mark buffer
-// but now increment the read (write?) variable. instead increment another
-// one and wait until the end of minor GC to set read (write?) to the
-// appropriate value. just need to make sure we have the lock before
-// updating it.
-// that should avoid race conditions and the need for an additional buffer
-
- if (TODO){
-   lock
-   gc_mark_gray - but WITHOUT incrementing write (read?)
-   unlock
-   (*num_grayed)++;
-}
-
-
   return (char *)hp;
 }
 
-char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown, int *num_grayed) {
+char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
   switch(type_of(obj)){
     case cons_tag: {
@@ -2562,7 +2551,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown, int 
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown, &num_grayed); \
+    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown); \
   } \
 }
 
@@ -2575,7 +2564,6 @@ void GC(void *data, closure cont, object *args, int num_args)
   int i;
   int scani = 0, alloci = 0;
   int heap_grown = 0;
-  int num_grayed = 0;
 
 //fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer

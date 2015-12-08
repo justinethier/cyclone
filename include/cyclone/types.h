@@ -56,6 +56,7 @@ struct gc_thread_data_t {
   int gc_status;
   int last_write;
   int last_read;
+  int pending_writes;
   void **mark_buffer;
   int mark_buffer_len;
   pthread_mutex_t lock;
@@ -164,6 +165,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len);
 void gc_stack_mark_refs_gray(gc_thread_data *thd, object obj, int depth);
 void gc_stack_mark_gray(gc_thread_data *thd, object obj);
 void gc_mark_gray(gc_thread_data *thd, object obj);
+void gc_mark_gray2(gc_thread_data *thd, object obj);
 void gc_collector_trace();
 void gc_mark_black(object obj);
 void gc_collector_mark_gray(object parent, object obj);
