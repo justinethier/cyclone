@@ -721,7 +721,9 @@ void gc_stack_mark_gray3(gc_thread_data *thd, object obj, int depth)
     }
 #endif
     if (color == gc_color_clear) {
+      pthread_mutex_lock(&(thd->lock));
       gc_mark_gray(thd, obj);
+      pthread_mutex_unlock(&(thd->lock));
       //fprintf(stderr, "marked heap obj from stack barrier %p %d\n", obj, color);
     } else if (color == gc_color_red) {
       gc_stack_mark_refs_gray(thd, obj, depth + 1);
@@ -815,21 +817,23 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 //Cyc_display(value, stderr);
 ////fprintf(stderr, " for heap object ");
 //fprintf(stderr, "\n");
+    pthread_mutex_lock(&(thd->lock));
     gc_mark_gray(thd, old_obj);
-// TODO: check if value is on the heap,
-//   if so, mark gray right now
-//   otherwise set it to be marked after moved to heap during next GC
-    //gc_stack_mark_gray(thd, value);
+    // Check if value is on the heap. If so, mark gray right now,
+    // otherwise set it to be marked after moved to heap by next GC
     if (gc_is_stack_obj(thd, value)) {
       grayed(value) = 1;
     } else {
       gc_mark_gray(thd, value);
     }
+    pthread_mutex_unlock(&(thd->lock));
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
 //fprintf(stderr, "\n");
+    pthread_mutex_lock(&(thd->lock));
     gc_mark_gray(thd, old_obj);
+    pthread_mutex_unlock(&(thd->lock));
 #if GC_DEBUG_VERBOSE
     if (is_object_type(old_obj) && mark(old_obj) == gc_color_clear) {
       fprintf(stderr, "added to mark buffer (trace) from write barrier %p:mark %d:", old_obj, mark(old_obj));
@@ -883,12 +887,14 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
     else if (thd->gc_status == STATUS_SYNC2) {
       // Mark thread "roots"
       // In this case, mark everything the collector moved to the heap
+      pthread_mutex_lock(&(thd->lock));
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
 #if GC_DEBUG_VERBOSE
         fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
 #endif
       }
+      pthread_mutex_unlock(&(thd->lock));
 //#if GC_DEBUG_VERBOSE
 //fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
 //#endif
@@ -908,6 +914,13 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 /////////////////////////////////////////////
 // Collector functions
 
+/**
+ * Mark the given object gray if it is on the heap.
+ * Note marking is done implicitly by placing it in a buffer,
+ * to avoid repeated re-scanning.
+ *
+ * This function must be executed once the thread lock has been acquired.
+ */
 void gc_mark_gray(gc_thread_data *thd, object obj)
 {
   // From what I can tell, no other thread would be modifying
@@ -919,13 +932,11 @@ void gc_mark_gray(gc_thread_data *thd, object obj)
 // Note that ideally this should be a lock-free data structure to make the
 // algorithm more efficient. So this code (and the corresponding collector
 // trace code) should be converted at some point.
-    pthread_mutex_lock(&(thd->lock));
     thd->mark_buffer = vpbuffer_add(thd->mark_buffer, 
                                     &(thd->mark_buffer_len),
                                     thd->last_write,
                                     obj);
     (thd->last_write)++; // Already locked, just do it...
-    pthread_mutex_unlock(&(thd->lock));
   }
 }
 
