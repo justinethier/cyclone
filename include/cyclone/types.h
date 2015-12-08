@@ -294,16 +294,16 @@ typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_ty
 //// all functions that allocate strings, the GC, cgen, and maybe more.
 //// Because these strings are (at least for now) allocaed on the stack.
 #define make_string(cs, s) string_type cs; \
-{ int len = strlen(s); cs.tag = string_tag; cs.len = len; cs.hdr.mark = gc_color_red; n.hdr.grayed = 0; \
+{ int len = strlen(s); cs.tag = string_tag; cs.len = len; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
-#define make_string_with_len(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; n.hdr.grayed = 0; \
+#define make_string_with_len(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
 { int len = length; \
   cs.tag = string_tag; cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
-#define make_string_noalloc(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; n.hdr.grayed = 0; \
+#define make_string_noalloc(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
 { cs.tag = string_tag; cs.len = length; \
   cs.str = s; }
 
@@ -317,14 +317,14 @@ typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_ty
 // TODO: a simple wrapper around FILE may not be good enough long-term
 // TODO: how exactly mode will be used. need to know r/w, bin/txt
 typedef struct {gc_header_type hdr; tag_type tag; FILE *fp; int mode;} port_type;
-#define make_port(p,f,m) port_type p; p.hdr.mark = gc_color_red; n.hdr.grayed = 0; p.tag = port_tag; p.fp = f; p.mode = m;
+#define make_port(p,f,m) port_type p; p.hdr.mark = gc_color_red; p.hdr.grayed = 0; p.tag = port_tag; p.fp = f; p.mode = m;
 
 /* Vector type */
 
 typedef struct {gc_header_type hdr; tag_type tag; int num_elt; object *elts;} vector_type;
 typedef vector_type *vector;
 
-#define make_empty_vector(v) vector_type v; v.hdr.mark = gc_color_red; n.hdr.grayed = 0; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
+#define make_empty_vector(v) vector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
 
 /* Define cons type. */
 
@@ -384,15 +384,15 @@ typedef closureN_type *closureN;
 typedef closure0_type *closure;
 typedef closure0_type *macro;
 
-#define mmacro(c,f) macro_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = macro_tag; c.fn = f; c.num_args = -1;
-#define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
-#define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = closure1_tag; \
+#define mmacro(c,f) macro_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = macro_tag; c.fn = f; c.num_args = -1;
+#define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
+#define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;
-#define mclosure2(c,f,a1,a2) closure2_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = closure2_tag; \
+#define mclosure2(c,f,a1,a2) closure2_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure2_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2;
-#define mclosure3(c,f,a1,a2,a3) closure3_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = closure3_tag; \
+#define mclosure3(c,f,a1,a2,a3) closure3_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure3_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3;
-#define mclosure4(c,f,a1,a2,a3,a4) closure4_type c; c.hdr.mark = gc_color_red; n.hdr.grayed = 0; c.tag = closure4_tag; \
+#define mclosure4(c,f,a1,a2,a3,a4) closure4_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure4_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3; c.elt4 = a4;
 
 #define mlist1(e1) (mcons(e1,nil))
