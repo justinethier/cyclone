@@ -2452,123 +2452,81 @@ void gc_mark_globals()
   }
 }
 
+char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, object hp)
+{
+  // hp ==> new heap object, point to it from old stack object
+  forward(obj) = hp;
+  type_of(obj) = forward_tag;
+  // keep track of each allocation so we can scan/move 
+  // the whole live object 'tree'
+  gc_thr_add_to_move_buffer(thd, alloci, hp);
+  return (char *)hp;
+}
+
 char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
-
-
-// !!!
-// TODO: clean up code below and consolidate with gc_copy_obj in gc.c:
-// !!!
-
-
-//gcMoveCountsDEBUG[type_of(obj)]++;
-//printf("DEBUG gc_move type = %ld\n", type_of(obj)); // JAE DEBUG
   switch(type_of(obj)){
     case cons_tag: {
-      list hp = gc_alloc(Cyc_heap, sizeof(cons_type), obj, thd, heap_grown); // hp ==> new heap object
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      // keep track of each allocation so we can scan/move 
-      // the whole live object 'tree'
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      list hp = gc_alloc(Cyc_heap, sizeof(cons_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case macro_tag: {
       macro_type *hp = gc_alloc(Cyc_heap, sizeof(macro_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closure0_tag: {
       closure0_type *hp = gc_alloc(Cyc_heap, sizeof(closure0_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closure1_tag: {
       closure1_type *hp = gc_alloc(Cyc_heap, sizeof(closure1_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closure2_tag: {
       closure2_type *hp = gc_alloc(Cyc_heap, sizeof(closure2_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closure3_tag: {
       closure3_type *hp = gc_alloc(Cyc_heap, sizeof(closure3_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closure4_tag: {
       closure4_type *hp = gc_alloc(Cyc_heap, sizeof(closure4_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case closureN_tag: {
       closureN_type *hp = gc_alloc(Cyc_heap, 
                             sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elt), 
                             obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case vector_tag: {
       vector_type *hp = gc_alloc(Cyc_heap, 
                             sizeof(vector_type) + sizeof(object) * (((vector) obj)->num_elt), 
                             obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case string_tag: {
       string_type *hp = gc_alloc(Cyc_heap, 
         sizeof(string_type) + ((string_len(obj) + 1)), 
         obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case integer_tag: {
       integer_type *hp = gc_alloc(Cyc_heap, sizeof(integer_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case double_tag: {
       double_type *hp = gc_alloc(Cyc_heap, sizeof(double_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case port_tag: {
       port_type *hp = gc_alloc(Cyc_heap, sizeof(port_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case cvar_tag: {
       cvar_type *hp = gc_alloc(Cyc_heap, sizeof(cvar_type), obj, thd, heap_grown);
-      forward(obj) = hp;
-      type_of(obj) = forward_tag;
-      gc_thr_add_to_move_buffer(thd, alloci, hp);
-      return (char *)hp;
+      return gc_fixup_moved_obj(thd, alloci, hp);
     }
     case forward_tag:
       return (char *)forward(obj);
