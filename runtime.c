@@ -2460,6 +2460,14 @@ char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
   // keep track of each allocation so we can scan/move 
   // the whole live object 'tree'
   gc_thr_add_to_move_buffer(thd, alloci, hp);
+
+// TODO: if grayed(obj) then - do a deferred gc_mark_gray on hp
+// you know, one possibility would be to add it to the thread mark buffer
+// but now increment the read (write?) variable. instead increment another
+// one and wait until the end of minor GC to set read (write?) to the
+// appropriate value. just need to make sure we have the lock before
+// updating it.
+// that should avoid race conditions and the need for an additional buffer
   return (char *)hp;
 }
 
