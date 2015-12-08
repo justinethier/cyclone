@@ -821,12 +821,13 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
     gc_mark_gray(thd, old_obj);
     // Check if value is on the heap. If so, mark gray right now,
     // otherwise set it to be marked after moved to heap by next GC
-    if (gc_is_stack_obj(thd, value)) {
-      grayed(value) = 1;
-    } else {
-      gc_mark_gray(thd, value);
-    }
+//    if (gc_is_stack_obj(thd, value)) {
+//      grayed(value) = 1;
+//    } else {
+//      gc_mark_gray(thd, value);
+//    }
     pthread_mutex_unlock(&(thd->lock));
+gc_stack_mark_gray(thd, value); // TODO: this line will be replace with above block
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
