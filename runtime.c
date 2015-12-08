@@ -2452,7 +2452,7 @@ void gc_mark_globals()
   }
 }
 
-char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
+char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, int *num_grayed, char *obj, object hp)
 {
   // hp ==> new heap object, point to it from old stack object
   forward(obj) = hp;
@@ -2468,10 +2468,19 @@ char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
 // appropriate value. just need to make sure we have the lock before
 // updating it.
 // that should avoid race conditions and the need for an additional buffer
+
+ if (TODO){
+   lock
+   gc_mark_gray - but WITHOUT incrementing write (read?)
+   unlock
+   (*num_grayed)++;
+}
+
+
   return (char *)hp;
 }
 
-char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
+char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown, int *num_grayed) {
   if (!is_object_type(obj)) return obj;
   switch(type_of(obj)){
     case cons_tag: {
@@ -2553,7 +2562,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   temp = obj; \
   if (check_overflow(low_limit, temp) && \
       check_overflow(temp, high_limit)){ \
-    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown); \
+    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown, &num_grayed); \
   } \
 }
 
@@ -2566,6 +2575,7 @@ void GC(void *data, closure cont, object *args, int num_args)
   int i;
   int scani = 0, alloci = 0;
   int heap_grown = 0;
+  int num_grayed = 0;
 
 //fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer
