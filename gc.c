@@ -975,6 +975,14 @@ void gc_collector_trace()
       m = Cyc_mutators[i];
 // TODO: ideally, want to use a lock-free data structure to prevent
 // having to use a mutex here. see corresponding code in gc_mark_gray
+
+TODO: I think this locking is too coarse. observing immediate failures with the recent change to g_mark_gray locking and
+wonder if the problem is that this locking will prevent a batch of changes from being seen.
+you know, do we really need locking here? the last read/write can be made atomic, and any reads/writes to mark buffer can
+be made atomic as well. I think we may need a dirty flag to let the collector know something is happening when the mark buffer
+needs to be resized, but other than that it this good enough?
+on the other hand, a central issue with this collector is when can we be sure that we are existing tracing at the right time, and
+not too early? because an early exit here will surely mean that objects are incorrectly freed 
       pthread_mutex_lock(&(m->lock));
       while (m->last_read < m->last_write) {
         clean = 0;
