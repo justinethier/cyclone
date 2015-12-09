@@ -81,13 +81,14 @@
  mclosure0(entry_pt,&c_entry_pt); // First function to execute
  _cyc_argc = argc;
  _cyc_argv = argv;
- Cyc_heap_init(heap_size);
+ gc_initialize();
  thd = malloc(sizeof(gc_thread_data));
  gc_thread_data_init(thd, 0, (char *) &stack_size, stack_size);
  thd->gc_cont = &entry_pt;
  thd->gc_args[0] = &clos_halt;
  thd->gc_num_args = 1;
  gc_add_mutator(thd);
+ Cyc_heap_init(heap_size);
  Cyc_start_thread(thd);
  return 0;}")
 
