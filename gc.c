@@ -411,49 +411,6 @@ size_t gc_heap_total_size(gc_heap *h)
   return total_size;
 }
 
-//void gc_mark(gc_heap *h, object obj)
-//{
-//  if (nullp(obj) || is_value_type(obj) || mark(obj))
-//    return;
-//
-//#if GC_DEBUG_PRINTFS
-////  fprintf(stderr, "gc_mark %p\n", obj);
-//#endif
-//  ((list)obj)->hdr.mark = 1;
-// // TODO: mark heap saves (??) 
-// // could this be a write barrier?
-// 
-// // Mark objects this one references
-//  if (type_of(obj) == cons_tag) {
-//    gc_mark(h, car(obj)); 
-//    gc_mark(h, cdr(obj)); 
-//  } else if (type_of(obj) == closure1_tag) {
-//    gc_mark(h, ((closure1) obj)->elt1); 
-//  } else if (type_of(obj) == closure2_tag) {
-//    gc_mark(h, ((closure2) obj)->elt1); 
-//    gc_mark(h, ((closure2) obj)->elt2); 
-//  } else if (type_of(obj) == closure3_tag) {
-//    gc_mark(h, ((closure3) obj)->elt1); 
-//    gc_mark(h, ((closure3) obj)->elt2); 
-//    gc_mark(h, ((closure3) obj)->elt3); 
-//  } else if (type_of(obj) == closure4_tag) {
-//    gc_mark(h, ((closure4) obj)->elt1); 
-//    gc_mark(h, ((closure4) obj)->elt2); 
-//    gc_mark(h, ((closure4) obj)->elt3); 
-//    gc_mark(h, ((closure4) obj)->elt4); 
-//  } else if (type_of(obj) == closureN_tag) {
-//    int i, n = ((closureN) obj)->num_elt;
-//    for (i = 0; i < n; i++) {
-//      gc_mark(h, ((closureN) obj)->elts[i]);
-//    }
-//  } else if (type_of(obj) == vector_tag) {
-//    int i, n = ((vector) obj)->num_elt;
-//    for (i = 0; i < n; i++) {
-//      gc_mark(h, ((vector) obj)->elts[i]);
-//    }
-//  }
-//}
-
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 {
   size_t freed, max_freed=0, sum_freed=0, size;
@@ -807,10 +764,10 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       pthread_mutex_lock(&(thd->lock));
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
-#if GC_DEBUG_VERBOSE
-        debug_print = 1;
-#endif
       }
+#if GC_DEBUG_VERBOSE
+      debug_print = 1;
+#endif
       pthread_mutex_unlock(&(thd->lock));
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
@@ -819,7 +776,6 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 #if GC_DEBUG_VERBOSE
   if (debug_print) {
     for (i = 0; i < buf_len; i++) {
-      gc_mark_gray(thd, thd->moveBuf[i]);
       fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
     }
   }
