@@ -1035,6 +1035,10 @@ void gc_empty_collector_stack()
   // Mark stack is only used by the collector thread, so no sync needed
   while (mark_stack_i > 0) { // not empty
     mark_stack_i--;
+//#if GC_DEBUG_VERBOSE
+//    fprintf(stderr, "gc_mark_black mark stack %p \n",
+//      mark_stack[mark_stack_i]);
+//#endif
     gc_mark_black(mark_stack[mark_stack_i]);
   }
 }
