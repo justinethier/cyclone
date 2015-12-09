@@ -782,6 +782,9 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
   int i, status = ATOMIC_GET(&gc_status_col);
+#if GC_DEBUG_VERBOSE
+  int debug_print = 0;
+#endif
 
   // Handle any pending marks from write barrier
   pthread_mutex_lock(&(thd->lock));
@@ -805,24 +808,22 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
 #if GC_DEBUG_VERBOSE
-        fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
+        debug_print = 1;
 #endif
       }
       pthread_mutex_unlock(&(thd->lock));
-//#if GC_DEBUG_VERBOSE
-//fprintf(stderr, "gc_cont %p\n", thd->gc_cont);
-//#endif
-//      gc_mark_gray(thd, thd->gc_cont);
-//      for (i = 0; i < thd->gc_num_args; i++) {
-//#if GC_DEBUG_VERBOSE
-//fprintf(stderr, "gc_args[%d] %p\n", i, thd->gc_args[i]);
-//#endif
-//        gc_mark_gray(thd, thd->gc_args[i]);
-//      }
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
     thd->gc_status = status;
   }
+#if GC_DEBUG_VERBOSE
+  if (debug_print) {
+    for (i = 0; i < buf_len; i++) {
+      gc_mark_gray(thd, thd->moveBuf[i]);
+      fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
+    }
+  }
+#endif
 }
 
 /////////////////////////////////////////////
