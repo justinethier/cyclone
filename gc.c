@@ -303,6 +303,14 @@ void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd)
         gc_copy_obj(f2, obj, thd);
         h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
         pthread_mutex_unlock(&heap_lock);
+
+// TODO: initiate collection cycle if free space is too low
+// TODO: cache total size (??),  probably need to do that because we
+// want to look at sizes across all heaps, not just this one. and
+// don't want to waste a lot of time scanning heaps to just to find
+// these sizes
+//        if (gc_stage != STAGE_RESTING) {
+//        }
         return f2;
       }
     }
@@ -1134,20 +1142,15 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
 
 void *collector_main(void *arg)
 {
+  struct timespec tim;
+  tim.tv_sec = 0;
+  tim.tv_nsec = 100;
   while (1) {
-    gc_collector();
-    // TODO: how to schedule this thread?
-    // this is inefficient but it should be good enough to 
-    // at least stand up this collector. then we'll have to
-    // come back and improve it
-//
-//    some ideas:
-//    - maybe check amount of free space in heap, and collect if less than a certain amount/percentage.
-//      otherwise just sleep for awhile and check again.
-//      once that works, might consider a way to let a mutator alert the collector that it should kick off
-//    - after collection, maybe grow heap if usage is above a certain percentage
-//
-//    sleep(1);
+    // TODO: setup scheduling such that we transition away from resting at some point
+    //if (gc_stage != STAGE_RESTING) {
+      gc_collector();
+    //}
+    nanosleep(&tim, NULL);
   }
 }
 
