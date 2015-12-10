@@ -759,15 +759,21 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       pthread_mutex_unlock(&(thd->lock));
     }
     else if (thd->gc_status == STATUS_SYNC2) {
-      // Mark thread "roots"
-      // In this case, mark everything the collector moved to the heap
-      pthread_mutex_lock(&(thd->lock));
-      for (i = 0; i < buf_len; i++) {
-        gc_mark_gray(thd, thd->moveBuf[i]);
-      }
 #if GC_DEBUG_VERBOSE
       debug_print = 1;
 #endif
+      // Mark thread "roots":
+      // Begin my marking current continuation, which may have already
+      // been on the heap prior to latest minor GC
+      pthread_mutex_lock(&(thd->lock));
+      gc_mark_gray(thd, thd->gc_cont);
+      for (i = 0; i < thd->gc_num_args; i++) {
+        gc_mark_gray(thd, thd->gc_args[i]);
+      }
+      // Also, mark everything the collector moved to the heap
+      for (i = 0; i < buf_len; i++) {
+        gc_mark_gray(thd, thd->moveBuf[i]);
+      }
       pthread_mutex_unlock(&(thd->lock));
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
@@ -775,8 +781,12 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   }
 #if GC_DEBUG_VERBOSE
   if (debug_print) {
+    fprintf(stderr, "coop mark gc_cont %p\n", thd->gc_cont);
+    for (i = 0; i < thd->gc_num_args; i++) {
+      fprintf(stderr, "coop mark gc_args[%d] %p\n", i, thd->gc_args[i]);
+    }
     for (i = 0; i < buf_len; i++) {
-      fprintf(stderr, "mark from move buf %i %p\n", i, thd->moveBuf[i]);
+      fprintf(stderr, "coop mark from move buf %i %p\n", i, thd->moveBuf[i]);
     }
   }
 #endif
