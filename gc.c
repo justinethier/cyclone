@@ -86,6 +86,7 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   h = malloc(gc_heap_pad_size(size));
   if (!h) return NULL;
   h->size = size;
+  h->free_size = size;
   h->chunk_size = chunk_size;
   h->max_size = max_size;
   h->data = (char *) gc_heap_align(sizeof(h->data) + (uint)&(h->data)); 
@@ -300,6 +301,7 @@ void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd)
         }
         // Copy object into heap now to avoid any uninitialized memory issues
         gc_copy_obj(f2, obj, thd);
+        h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
         pthread_mutex_unlock(&heap_lock);
         return f2;
       }
@@ -411,9 +413,21 @@ size_t gc_heap_total_size(gc_heap *h)
   return total_size;
 }
 
+size_t gc_heap_total_free(gc_heap *h)
+{
+  size_t total_size = 0;
+  pthread_mutex_lock(&heap_lock);
+  while(h) {
+    total_size += h->free_size;
+    h = h->next;
+  }
+  pthread_mutex_unlock(&heap_lock);
+  return total_size;
+}
+
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 {
-  size_t freed, max_freed=0, sum_freed=0, size;
+  size_t freed, max_freed=0, heap_freed = 0, sum_freed=0, size;
   object p, end;
   gc_free_list *q, *r, *s;
 
@@ -467,7 +481,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 #endif
         mark(p) = gc_color_blue; // Needed?
         // free p
-        sum_freed += size;
+        heap_freed += size;
         if (((((char *)q) + q->size) == (char *)p) && (q != h->free_list)) {
           /* merge q with p */
           if (r && r->size && ((((char *)p)+size) == (char *)r)) {
@@ -505,6 +519,9 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
         p = (object)(((char *)p) + size);
       }
     }
+    h->free_size += heap_freed;
+    sum_freed += heap_freed;
+    heap_freed = 0;
   }
   pthread_mutex_unlock(&heap_lock);
   if (sum_freed_ptr) *sum_freed_ptr = sum_freed;
@@ -1061,7 +1078,7 @@ void debug_dump_globals();
 void gc_collector()
 {
   int old_clear, old_mark;
-  size_t freed = 0, max_freed = 0, total_size;
+  size_t freed = 0, max_freed = 0, total_size, total_free;
 #if GC_DEBUG_TRACE
   time_t sweep_start = time(NULL);
 #endif
@@ -1104,9 +1121,12 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   //
   //sweep : 
   max_freed = gc_sweep(gc_get_heap(), &freed);
-  // TODO: grow heap if it is mostly full after collection??
+  total_size = gc_heap_total_size(gc_get_heap());
+  total_free = gc_heap_total_free(gc_get_heap());
+
 #if GC_DEBUG_TRACE
-  fprintf(stderr, "sweep done, freed = %d, max_freed = %d, elapsed = %ld\n", 
+  fprintf(stderr, "sweep done, total_size = %d, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
+    total_size, total_free, 
     freed, max_freed, time(NULL) - sweep_start);
 #endif
   gc_stage = STAGE_RESTING;
