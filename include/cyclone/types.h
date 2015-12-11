@@ -89,7 +89,7 @@ struct gc_heap_t {
   unsigned int size;
   unsigned int chunk_size; // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
-  unsigned int free_size;
+  //unsigned int free_size;
   gc_free_list *free_list; // TBD
   gc_heap *next; // TBD, linked list is not very efficient, but easy to work with as a start
   char *data;
@@ -151,7 +151,7 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
 size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
 gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
-size_t gc_heap_total_free(gc_heap *h);
+//size_t gc_heap_total_free_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);
 //void gc_mark(gc_heap *h, object obj);
 void gc_mark_globals(void);

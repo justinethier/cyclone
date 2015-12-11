@@ -15,6 +15,8 @@
 ////////////////////
 // Global variables
 
+static const int NANOSECONDS_PER_MILLISECOND = 1000000;
+
 // Note: will need to use atomics and/or locking to access any
 // variables shared between threads
 static int        gc_color_mark = 1; // Black, is swapped during GC
@@ -23,7 +25,7 @@ static int        gc_color_clear = 3; // White, is swapped during GC
 // unfortunately this had to be split up; const colors are located in types.h
 
 static int gc_status_col = STATUS_SYNC1;
-static int gc_stage = STAGE_CLEAR_OR_MARKING;
+static int gc_stage = STAGE_RESTING;
 
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
@@ -32,6 +34,12 @@ static int mark_stack_i = 0;
 
 // Lock to protect the heap from concurrent modifications
 static pthread_mutex_t heap_lock;
+
+// Cached heap statistics
+// Note this assumes a single overall heap "chain". Code would need to
+// be modified to support multiple independent heaps
+static int cached_heap_free_size = 0;
+static int cached_heap_total_size = 0;
 
 // Data for each individual mutator thread
 static gc_thread_data **Cyc_mutators;
@@ -86,7 +94,9 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   h = malloc(gc_heap_pad_size(size));
   if (!h) return NULL;
   h->size = size;
-  h->free_size = size;
+  //h->free_size = size;
+  cached_heap_total_size += size;
+  cached_heap_free_size += size;
   h->chunk_size = chunk_size;
   h->max_size = max_size;
   h->data = (char *) gc_heap_align(sizeof(h->data) + (uint)&(h->data)); 
@@ -301,16 +311,9 @@ void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd)
         }
         // Copy object into heap now to avoid any uninitialized memory issues
         gc_copy_obj(f2, obj, thd);
-        h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
+        //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
+        cached_heap_free_size -= gc_allocated_bytes(obj, NULL, NULL);
         pthread_mutex_unlock(&heap_lock);
-
-// TODO: initiate collection cycle if free space is too low
-// TODO: cache total size (??),  probably need to do that because we
-// want to look at sizes across all heaps, not just this one. and
-// don't want to waste a lot of time scanning heaps to just to find
-// these sizes
-//        if (gc_stage != STAGE_RESTING) {
-//        }
         return f2;
       }
     }
@@ -421,17 +424,17 @@ size_t gc_heap_total_size(gc_heap *h)
   return total_size;
 }
 
-size_t gc_heap_total_free(gc_heap *h)
-{
-  size_t total_size = 0;
-  pthread_mutex_lock(&heap_lock);
-  while(h) {
-    total_size += h->free_size;
-    h = h->next;
-  }
-  pthread_mutex_unlock(&heap_lock);
-  return total_size;
-}
+//size_t gc_heap_total_free_size(gc_heap *h)
+//{
+//  size_t total_size = 0;
+//  pthread_mutex_lock(&heap_lock);
+//  while(h) {
+//    total_size += h->free_size;
+//    h = h->next;
+//  }
+//  pthread_mutex_unlock(&heap_lock);
+//  return total_size;
+//}
 
 size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 {
@@ -527,7 +530,8 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
         p = (object)(((char *)p) + size);
       }
     }
-    h->free_size += heap_freed;
+    //h->free_size += heap_freed;
+    cached_heap_free_size += heap_freed;
     sum_freed += heap_freed;
     heap_freed = 0;
   }
@@ -763,7 +767,8 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 // TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
-  int i, status = ATOMIC_GET(&gc_status_col);
+  int i, status = ATOMIC_GET(&gc_status_col),
+      stage = ATOMIC_GET(&gc_stage);
 #if GC_DEBUG_VERBOSE
   int debug_print = 0;
 #endif
@@ -815,6 +820,16 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
     }
   }
 #endif
+
+  // Initiate collection cycle if free space is too low
+  if (stage == STAGE_RESTING &&
+      (cached_heap_free_size < (cached_heap_total_size * 0.10))){
+    fprintf(stdout, "Less than 10%% of the heap is free, initiating collector\n"); // Temporary debug line
+    ATOMIC_SET_IF_EQ(&gc_stage, 
+                     STAGE_RESTING, 
+                     STAGE_CLEAR_OR_MARKING);
+
+  }
 }
 
 /////////////////////////////////////////////
@@ -1051,7 +1066,7 @@ void gc_wait_handshake()
   int i, statusm, statusc;
   struct timespec tim;
   tim.tv_sec = 0;
-  tim.tv_nsec = 1;
+  tim.tv_nsec = 1000000; // 1 millisecond
 
   // TODO: same as in other places, need to either sync access to
   // mutator vars, or ensure only the collector uses them
@@ -1087,11 +1102,11 @@ void gc_collector()
 {
   int old_clear, old_mark;
   size_t freed = 0, max_freed = 0, total_size, total_free;
-#if GC_DEBUG_TRACE
+//#if GC_DEBUG_TRACE
   time_t sweep_start = time(NULL);
-#endif
+//#endif
   //clear : 
-  gc_stage = STAGE_CLEAR_OR_MARKING;
+  ATOMIC_SET_IF_EQ(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
   // exchange values of markColor and clearColor
   old_clear = ATOMIC_GET(&gc_color_clear);
   old_mark = ATOMIC_GET(&gc_color_mark);
@@ -1109,7 +1124,7 @@ fprintf(stderr, "DEBUG - after handshake sync 1\n");
 #if GC_DEBUG_TRACE
 fprintf(stderr, "DEBUG - after handshake sync 2\n");
 #endif
-  gc_stage = STAGE_TRACING;
+  ATOMIC_SET_IF_EQ(&gc_stage, STAGE_CLEAR_OR_MARKING, STAGE_TRACING);
   gc_post_handshake(STATUS_ASYNC);
 #if GC_DEBUG_TRACE
 fprintf(stderr, "DEBUG - after post_handshake async\n");
@@ -1125,31 +1140,38 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   fprintf(stderr, "DEBUG - after trace\n");
   //debug_dump_globals();
 #endif
-  gc_stage = STAGE_SWEEPING;
+  ATOMIC_SET_IF_EQ(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
   max_freed = gc_sweep(gc_get_heap(), &freed);
-  total_size = gc_heap_total_size(gc_get_heap());
-  total_free = gc_heap_total_free(gc_get_heap());
+  total_size = cached_heap_total_size; //gc_heap_total_size(gc_get_heap());
+  total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 
-#if GC_DEBUG_TRACE
+  if (total_free < (total_size * 0.10)) {
+fprintf(stdout, "JAE TODO: may need to rethink this growth strategy\n");
+    fprintf(stdout, "Less than 10%% of the heap is free, growing it\n",
+      total_free, total_size);
+    gc_grow_heap(gc_get_heap(), 0, 0);
+  }
+//#if GC_DEBUG_TRACE
   fprintf(stderr, "sweep done, total_size = %d, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
     total_size, total_free, 
     freed, max_freed, time(NULL) - sweep_start);
-#endif
-  gc_stage = STAGE_RESTING;
+//#endif
+  ATOMIC_SET_IF_EQ(&gc_stage, STAGE_SWEEPING, STAGE_RESTING);
 }
 
 void *collector_main(void *arg)
 {
+  int stage;
   struct timespec tim;
   tim.tv_sec = 0;
-  tim.tv_nsec = 100;
+  tim.tv_nsec = 100 * NANOSECONDS_PER_MILLISECOND;
   while (1) {
-    // TODO: setup scheduling such that we transition away from resting at some point
-    //if (gc_stage != STAGE_RESTING) {
+    stage = ATOMIC_GET(&gc_stage);
+    if (stage != STAGE_RESTING) {
       gc_collector();
-    //}
+    }
     nanosleep(&tim, NULL);
   }
 }
