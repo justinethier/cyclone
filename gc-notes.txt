@@ -5,7 +5,10 @@ Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data 
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
 
 TODO:
-- need an intelligent scheduling of GC, instead of just constantly running it
+- profiling and performance improvements
+  let's trying using hash tables for symbol table. maybe give concurrency kit a try,
+  since it could be used for atomic operations. also want data structures that will be
+  concurrency-friendly, especially hash tables
 - need to cooperate when a mutator is blocked
 - add_mutation will need to be brought into thread local data. 
 - probably exceptions too. anything else?
