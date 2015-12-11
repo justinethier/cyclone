@@ -1166,6 +1166,9 @@ void *collector_main(void *arg)
   int stage;
   struct timespec tim;
   tim.tv_sec = 0;
+JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
+alternatively, may want to consider shrinking the heap if possible after a collection, if it is
+sparse enough (would be difficult to do without relocations, though
   tim.tv_nsec = 100 * NANOSECONDS_PER_MILLISECOND;
   while (1) {
     stage = ATOMIC_GET(&gc_stage);
