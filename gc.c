@@ -821,13 +821,15 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   }
 #endif
 
-  // Initiate collection cycle if free space is too low
+  // Initiate collection cycle if free space is too low.
+  // Threshold is intentially low because we have to go through an
+  // entire handshake/trace/sweep cycle, ideally without growing heap.
   if (stage == STAGE_RESTING &&
-      (cached_heap_free_size < (cached_heap_total_size * 0.10))){
-    fprintf(stdout, "Less than 10%% of the heap is free, initiating collector\n"); // Temporary debug line
-    ATOMIC_SET_IF_EQ(&gc_stage, 
-                     STAGE_RESTING, 
-                     STAGE_CLEAR_OR_MARKING);
+      (cached_heap_free_size < (cached_heap_total_size * 0.50))){
+#if GC_DEBUG_TRACE
+    fprintf(stdout, "Less than 50%% of the heap is free, initiating collector\n");
+#endif
+    ATOMIC_SET_IF_EQ(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
 
   }
 }
@@ -1102,9 +1104,9 @@ void gc_collector()
 {
   int old_clear, old_mark;
   size_t freed = 0, max_freed = 0, total_size, total_free;
-//#if GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
   time_t sweep_start = time(NULL);
-//#endif
+#endif
   //clear : 
   ATOMIC_SET_IF_EQ(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
   // exchange values of markColor and clearColor
@@ -1148,16 +1150,17 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 
   if (total_free < (total_size * 0.10)) {
-fprintf(stdout, "JAE TODO: may need to rethink this growth strategy\n");
-    fprintf(stdout, "Less than 10%% of the heap is free, growing it\n",
+#if GC_DEBUG_TRACE
+    fprintf(stdout, "Less than 10%% of the heap is free, growing it\n", 
       total_free, total_size);
+#endif
     gc_grow_heap(gc_get_heap(), 0, 0);
   }
-//#if GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
   fprintf(stderr, "sweep done, total_size = %d, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
     total_size, total_free, 
     freed, max_freed, time(NULL) - sweep_start);
-//#endif
+#endif
   ATOMIC_SET_IF_EQ(&gc_stage, STAGE_SWEEPING, STAGE_RESTING);
 }
 
@@ -1166,9 +1169,9 @@ void *collector_main(void *arg)
   int stage;
   struct timespec tim;
   tim.tv_sec = 0;
-JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
-alternatively, may want to consider shrinking the heap if possible after a collection, if it is
-sparse enough (would be difficult to do without relocations, though
+//JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
+//alternatively, may want to consider shrinking the heap if possible after a collection, if it is
+//sparse enough (would be difficult to do without relocations, though
   tim.tv_nsec = 100 * NANOSECONDS_PER_MILLISECOND;
   while (1) {
     stage = ATOMIC_GET(&gc_stage);
