@@ -64,6 +64,7 @@ bootstrap: icyc
 	cp include/cyclone/types.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp include/cyclone/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp runtime.c $(BOOTSTRAP_DIR)
