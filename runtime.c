@@ -277,7 +277,9 @@ object find_or_add_symbol(const char *name){
 
 /* END symbol table */
 
-/* Global table */
+/* Global table 
+   A list is appropriate for this table because the only time 
+   we use it is to iterate over all the globals... */
 list global_table = nil;
 
 void add_global(object *glo) {
