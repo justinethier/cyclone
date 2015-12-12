@@ -286,7 +286,7 @@
                  (comp-prog-cmd 
                    (string-append "gcc " src-file " -g -c -o " exec-file ".o"))
                  (comp-objs-cmd 
-                   (string-append "gcc " exec-file ".o " objs-str " -pthread -lcyclone -lm -g -o " exec-file)))
+                   (string-append "gcc " exec-file ".o " objs-str " -pthread -lcyclone -lck -lm -g -o " exec-file)))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond

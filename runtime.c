@@ -6,8 +6,10 @@
  * This file contains the C runtime used by compiled programs.
  */
 
+#include <ck_hs.h>
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
+#include "cyclone/ck_ht_hash.h"
 #include <signal.h> // TODO: only used for debugging!
 
 //int JAE_DEBUG = 0;
@@ -97,10 +99,74 @@ char **_cyc_argv = NULL;
 
 static symbol_type __EOF = {{0}, eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
+static ck_hs_t symbol_table;
+static int symbol_table_size = 65536;
+
+// Functions to support concurrency kit hashset
+// These are specifically for a table of symbols
+static void *hs_malloc(size_t r)
+{
+    return malloc(r);
+}
+
+static void hs_free(void *p, size_t b, bool r)
+{
+//    (void)b;
+//    (void)r;
+    free(p);
+//    return;
+}
+
+static struct ck_malloc my_allocator = {
+    .malloc = hs_malloc,
+    .free = hs_free
+};
+
+static unsigned long hs_hash(const void *object, unsigned long seed)
+{
+  const symbol_type *c = object;
+  unsigned long h;
+
+  h = (unsigned long)MurmurHash64A(c->pname, strlen(c->pname), seed);
+  return h;
+}
+
+static bool hs_compare(const void *previous, const void *compare)
+{
+  return strcmp(symbol_pname(previous), symbol_pname(compare)) == 0;
+}
+
+static void *set_get(ck_hs_t *hs, const void *value)
+{
+  unsigned long h;
+  void *v;
+
+  h = CK_HS_HASH(hs, hs_hash, value);
+  v = ck_hs_get(hs, h, value);
+  return v;
+}
+
+static bool set_insert(ck_hs_t *hs, const void *value)
+{
+  unsigned long h;
+
+  h = CK_HS_HASH(hs, hs_hash, value);
+  return ck_hs_put(hs, h, value);
+}
+// End supporting functions
 
 void gc_init_heap(long heap_size)
 {
   Cyc_heap = gc_heap_create(heap_size, 0, 0);
+  if (!ck_hs_init(&symbol_table, 
+                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
+                  hs_hash, hs_compare,
+                  &my_allocator,
+                  symbol_table_size, 
+                  43423)){
+    fprintf(stderr, "Unable to initialize symbol table\n");
+    exit(1);
+  }
 }
 
 gc_heap *gc_get_heap()
@@ -166,8 +232,6 @@ void Cyc_st_print(FILE *out) {
 
  For now, GC of symbols is missing. long-term it probably would be desirable
 */
-list symbol_table = nil;
-
 char *_strdup (const char *s) {
     char *d = malloc (strlen (s) + 1);
     if (d) { strcpy (d,s); }
@@ -175,16 +239,23 @@ char *_strdup (const char *s) {
 }
 
 object find_symbol_by_name(const char *name) {
-  list l = symbol_table;
-  for (; !nullp(l); l = cdr(l)) {
-    const char *str = symbol_pname(car(l));
-    if (strcmp(str, name) == 0) return car(l);
-  }
-  return nil;
+  symbol_type tmp = {{0}, symbol_tag, name, nil};
+  object result = set_get(&symbol_table, &tmp);
+  //if (result) {
+  //  printf("found symbol %s\n", symbol_pname(result));
+  //}
+  return result;
 }
 
 object add_symbol(symbol_type *psym) {
-  symbol_table = mcons(psym, symbol_table);
+  //printf("Adding symbol %s, table size = %ld\n", symbol_pname(psym), ck_hs_count(&symbol_table));
+  // TODO: lock table here, only allow one writer at a time
+  // TODO: grow table if it is not big enough
+  if (ck_hs_count(&symbol_table) == symbol_table_size) {
+    fprintf(stderr, "Ran out of symbol table entries\n");
+    exit(1);
+  }
+  set_insert(&symbol_table, psym);
   return psym;
 }
 
@@ -203,6 +274,7 @@ object find_or_add_symbol(const char *name){
     return add_symbol_by_name(name);
   }
 }
+
 /* END symbol table */
 
 /* Global table */

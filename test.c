@@ -13,8 +13,7 @@ static void *hs_malloc(size_t r)
     return malloc(r);
 }
 
-static void
-hs_free(void *p, size_t b, bool r)
+static void hs_free(void *p, size_t b, bool r)
 {
     (void)b;
     (void)r;
@@ -27,8 +26,7 @@ static struct ck_malloc my_allocator = {
     .free = hs_free
 };
 
-static unsigned long
-hs_hash(const void *object, unsigned long seed)
+static unsigned long hs_hash(const void *object, unsigned long seed)
 {
 //  const char *c = object;
 //  unsigned long h;
@@ -120,7 +118,7 @@ void main()
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
                   &my_allocator,
-                  2, 43423)){
+                  1024, 43423)){
     fprintf(stderr, "Unable to initialize symbol table\n");
     exit(1);
   }
@@ -138,19 +136,19 @@ void main()
 //  printf("has \"b\" = %p\n", set_get(&hs_symbol_table, &b));
 //  printf("has \"c\" = %p\n", set_get(&hs_symbol_table, &c));
 
-  object asym = find_or_add_symbol("a");
+  object asym = find_or_add_symbol("producer");
   printf("%p\n", asym);
 
   object bsym = find_or_add_symbol("b");
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
 
-  object csym = find_or_add_symbol("c");
+  object csym = find_or_add_symbol("lambda");
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
 
   object dsym = find_or_add_symbol("d");
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
 
-  object aasym = find_or_add_symbol("a");
+  object aasym = find_or_add_symbol("producer");
   printf("%p\n", aasym);
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
   return;
