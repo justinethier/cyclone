@@ -198,7 +198,6 @@ object add_symbol(symbol_type *psym);
 object add_symbol_by_name(const char *name);
 object find_symbol_by_name(const char *name);
 object find_or_add_symbol(const char *name);
-extern list symbol_table;
 
 extern list global_table;
 void add_global(object *glo);
