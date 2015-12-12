@@ -30,10 +30,15 @@ static struct ck_malloc my_allocator = {
 static unsigned long
 hs_hash(const void *object, unsigned long seed)
 {
-  const char *c = object;
+//  const char *c = object;
+//  unsigned long h;
+//
+//  h = (unsigned long)MurmurHash64A(c, strlen(c), seed);
+//  return h;
+  const symbol_type *c = object;
   unsigned long h;
 
-  h = (unsigned long)MurmurHash64A(c, strlen(c), seed);
+  h = (unsigned long)MurmurHash64A(c->pname, strlen(c->pname), seed);
   return h;
 }
 
@@ -41,10 +46,11 @@ static bool
 hs_compare(const void *previous, const void *compare)
 {
 
-  return strcmp(previous, compare) == 0;
+  return strcmp((previous), (compare)) == 0;
+  //return strcmp(symbol_pname(previous), symbol_pname(compare)) == 0;
 }
 static void *
-set_get(ck_hs_t *hs, const char *value)
+set_get(ck_hs_t *hs, const void *value)
 {
   unsigned long h;
   void *v;
@@ -55,7 +61,7 @@ set_get(ck_hs_t *hs, const char *value)
 }
 
 static bool
-set_insert(ck_hs_t *hs, const char *value)
+set_insert(ck_hs_t *hs, const void *value)
 {
   unsigned long h;
 
@@ -136,9 +142,13 @@ char *_strdup (const char *s) {
 //
 void main()
 {
-  char a[] = "a";
-  char b[] = "b";
-  char c[] = "c";
+  char astr[] = "a";
+  char bstr[] = "b";
+  char cstr[] = "c";
+  symbol_type a = {{0}, symbol_tag, astr, nil};
+  symbol_type aa = {{0}, symbol_tag, astr, nil};
+  symbol_type b = {{0}, symbol_tag, bstr, nil};
+  symbol_type c = {{0}, symbol_tag, cstr, nil};
 
   if (!ck_hs_init(&hs_symbol_table, 
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
@@ -150,15 +160,17 @@ void main()
   }
 
   
-  set_insert(&hs_symbol_table, a);
+  set_insert(&hs_symbol_table, &a);
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
-  printf("has \"a\" = %p\n", set_get(&hs_symbol_table, "a"));
-  printf("has \"b\" = %p\n", set_get(&hs_symbol_table, "b"));
+  printf("has \"a\" = %p\n", set_get(&hs_symbol_table, &aa));
+  printf("has \"b\" = %p\n", set_get(&hs_symbol_table, &b));
+  printf("has \"c\" = %p\n", set_get(&hs_symbol_table, &c));
 
-  set_insert(&hs_symbol_table, b);
+  set_insert(&hs_symbol_table, &b);
   printf("hs length = %ld\n", ck_hs_count(&hs_symbol_table));
-  printf("has \"a\" = %p\n", set_get(&hs_symbol_table, "a"));
-  printf("has \"b\" = %p\n", set_get(&hs_symbol_table, "b"));
+  printf("has \"a\" = %p\n", set_get(&hs_symbol_table, &aa));
+  printf("has \"b\" = %p\n", set_get(&hs_symbol_table, &b));
+  printf("has \"c\" = %p\n", set_get(&hs_symbol_table, &c));
 //  object a = find_or_add_symbol("a");
 //  printf("%p\n", a);
 //
