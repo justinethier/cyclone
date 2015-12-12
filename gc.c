@@ -1,13 +1,13 @@
-/* A basic mark-sweep GC
-   As of now, the GC code is based off the implementation from chibi scheme
-
- Goals of this project:
- - write algorithms
- - add test cases
- - integrate with types
- - integrate with cyclone
- - extend to tri-color marking an on-the-fly collection
- - etc...
+/** 
+ * Cyclone Scheme
+ * Copyright (c) 2015, Justin Ethier
+ * All rights reserved.
+ *
+ * Primary garbage collector used by the Cyclone runtime. 
+ * Based on the tracing GC algorithm from:
+ * "Implementing an on-the-fly garbage collector for Java", by Domani et al.
+ *
+ * The heap implementation (alloc / sweep, etc) is based on code from Chibi Scheme.
  */
 
 #include "cyclone/types.h"
