@@ -10,7 +10,7 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 #include "cyclone/ck_ht_hash.h"
-#include <signal.h> // TODO: only used for debugging!
+//#include <signal.h> // TODO: only used for debugging!
 
 //int JAE_DEBUG = 0;
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -49,7 +49,8 @@ const char *tag_names[21] = { \
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
   char buf[256];
-  snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
+  snprintf(buf, 255, "Invalid type: expected %s, found ", tag_names[tag]);
+  //snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
   Cyc_rt_raise2(data, buf, found);
 }
 
@@ -190,6 +191,7 @@ const object quote_void = &Cyc_void_symbol;
 static const int MAX_STACK_TRACES = 10;
 static char **Cyc_Stack_Traces;
 static int Cyc_Stack_Trace_Idx = 0;
+static char *Cyc_Stack_Prev_Frame = NULL;
 
 void Cyc_st_init() { 
   Cyc_Stack_Traces = calloc(MAX_STACK_TRACES, sizeof(char *));
@@ -197,7 +199,8 @@ void Cyc_st_init() {
 
 void Cyc_st_add(char *frame) { 
   // Do not allow recursion to remove older frames
-  if (frame != Cyc_Stack_Traces[(Cyc_Stack_Trace_Idx - 1) % MAX_STACK_TRACES]) {
+  if (frame != Cyc_Stack_Prev_Frame) { 
+    Cyc_Stack_Prev_Frame = frame;
     Cyc_Stack_Traces[Cyc_Stack_Trace_Idx] = frame;
     Cyc_Stack_Trace_Idx = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
   }
@@ -277,9 +280,7 @@ object find_or_add_symbol(const char *name){
 
 /* END symbol table */
 
-/* Global table 
-   A list is appropriate for this table because the only time 
-   we use it is to iterate over all the globals... */
+/* Global table */
 list global_table = nil;
 
 void add_global(object *glo) {
@@ -362,7 +363,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     fprintf(stderr, "\nCall history:\n");
     Cyc_st_print(stderr);
     fprintf(stderr, "\n");
-raise(SIGINT); // break into debugger, unix only
+    //raise(SIGINT); // break into debugger, unix only
     exit(1);
     return nil;
 }
