@@ -3,13 +3,46 @@ Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and b
 Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
+Phase 6 (TBD) - Multiple mutators (application threads)
 
 TODO:
-- profiling and performance improvements
-  let's trying using hash tables for symbol table. maybe give concurrency kit a try,
-  since it could be used for atomic operations. also want data structures that will be
-  concurrency-friendly, especially hash tables
-- need to cooperate when a mutator is blocked
 - add_mutation will need to be brought into thread local data. 
 - probably exceptions too. anything else?
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
+- need to cooperate when a mutator is blocked
+  might be able to stop a thread and do a minor GC on it, but no longjmp until after major GC.
+  would need to figure out how to repack gc_cont and args
+  optionally, some primitives can accept a cont, how to handle? I guess we would have to 
+  call the primitive with a wrapper instead of the real cont.
+  worse, how to handle args to a possibly blocking cont? maybe use some kind of proxy
+  objects? do these primitives need to use a read barrier?? ideally want low overhead...
+
+  at the end of the day, obviously need to use a wrapper function to call the primitive,
+  instead of calling it directly.
+
+  how to stop a thread? suppose mutator would set a member in thread data (need to mutex/atomic
+  that, and be careful about doing that for any shared members), and mutator would need to
+  lock somehow if that is set upon return.
+
+  bottom line, only have to worry about this when calling potentially-blocking primitives.
+  and if one is blocked when collector is active, then need the collector to cooperate
+  instead of the blocked mutator. overally this seems do-able, though there are many details
+  to consider.
+
+- how to share variables between threads?
+  obviously need to use mutexes (on the application side) to handle access.
+  but how to handle the case where an object from one thread is added to
+  a list that belongs to another (IE, queueing an object)? because the
+  other thread's object might be added as a stack object.
+
+  keep in mind referenced obj may be a list or such that contains many other
+  refs to stack objects on another thread
+
+  how can a variable be shared? - cons, vector, set!, define (?), set-car, set-cdr
+  can we detect if there will be a problem?
+  * adding var to something in this thread - can tell that obj is red and not on this stack
+  * modifying list on another thread - if list is on heap, how do we know the 'owning' thread is 
+    not this one? we would have no idea
+
+  very concerned about how to make this work
+
