@@ -4,11 +4,15 @@ Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naiv
 Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
 Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
 Phase 6 (TBD) - Multiple mutators (application threads)
+Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
 - add_mutation will need to be brought into thread local data. 
 - probably exceptions too. anything else?
+  do this before branching???
+
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
+  part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
 - need to cooperate when a mutator is blocked
   might be able to stop a thread and do a minor GC on it, but no longjmp until after major GC.
   would need to figure out how to repack gc_cont and args
@@ -45,4 +49,12 @@ TODO:
     not this one? we would have no idea
 
   very concerned about how to make this work
+
+  since we only need a minor GC to put the var in the heap, might be able to add a function to trigger a minor GC. could call this function, then it would be safe to move a var to another thread (I think).
+
+  might also need to expose a function that would determine whether any given object lives on the stack, and which thread it is on (or at least, if it belongs to the current one).
+
+  neither is ideal, but might make the whole thing workable. ideally application code would not need to know about stack vs heap
+
+  this feature might end up being gc-dev7 (possibly the final phase)
 
