@@ -1215,6 +1215,9 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
       (1 - STACK_GROWS_DOWNWARD));
     exit(1);
   }
+  thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
+  thd->stack_trace_idx = 0;
+  thd->stack_prev_frame = NULL;
   //thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
   thd->gc_args = malloc(sizeof(object) * NUM_GC_ANS);
@@ -1236,10 +1239,18 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
 void gc_thread_data_free(gc_thread_data *thd)
 {
   if (thd) {
+    if (pthread_mutex_destroy(&thd->lock) != 0) {
+      // TODO: can only destroy the lock if it is unlocked. need to make sure we
+      // can guarantee that is the case prior to making this call
+      // On the other hand, can we just use sleep and a loop to retry??
+      fprintf(stderr, "Thread mutex is locked, unable to free\n");
+      exit(1);
+    }
     if (thd->jmp_start) free(thd->jmp_start);
     if (thd->gc_args) free(thd->gc_args);
     if (thd->moveBuf) free(thd->moveBuf);
     if (thd->mark_buffer) free(thd->mark_buffer);
+    if (thd->stack_traces) free(thd->stack_traces);
     free(thd);
   }
 }

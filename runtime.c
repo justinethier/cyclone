@@ -188,8 +188,6 @@ static symbol_type Cyc_void_symbol = {{0}, symbol_tag, "", nil};
 const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
-static const int MAX_STACK_TRACES = 10;
-
 void Cyc_st_add(void *data, char *frame) { 
   gc_thread_data *thd = (gc_thread_data *)data;
   // Do not allow recursion to remove older frames
@@ -2479,13 +2477,6 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 
 void Cyc_start_thread(gc_thread_data *thd)
 {
-  thd->stack_trace_idx = 0;
-  thd->stack_prev_frame = NULL;
-  // TODO: may need to relocate the calloc to another function that
-  // initializes thread objects, rather than here that just calls them.
-  // at a minimum, should initialize it to NULL so we can test for that here.
-  thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
-
   /* Tank, load the jump program... */
   setjmp(*(thd->jmp_start));
 

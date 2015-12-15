@@ -31,6 +31,19 @@
 // Size of a "page" on the heap (the second generation), in bytes.
 #define HEAP_SIZE 6000000
 
+// Number of functions to save for printing call history
+#define MAX_STACK_TRACES 10
+
+// GC debugging flags
+#define GC_DEBUG_TRACE 0
+#define GC_DEBUG_VERBOSE 0
+
+/* Additional runtime checking of the GC system.
+   This is here because these checks should not be
+   necessary if GC is working correctly. */
+#define GC_SAFETY_CHECKS 1
+
+
 /* Define general object type. */
 typedef void *object;
 
@@ -185,15 +198,6 @@ gc_heap *gc_get_heap();
 
 // TODO:
 //void gc_collector()
-
-/* GC debugging flags */
-#define GC_DEBUG_TRACE 0
-#define GC_DEBUG_VERBOSE 0
-
-/* Additional runtime checking of the GC system.
-   This is here because these checks should not be
-   necessary if GC is working correctly. */
-#define GC_SAFETY_CHECKS 1
 
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
