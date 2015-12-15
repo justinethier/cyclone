@@ -2494,6 +2494,12 @@ void Cyc_start_thread(gc_thread_data *thd)
   exit(0);
 }
 
+void Cyc_end_thread(gc_thread_data *thd) {
+  // TODO:  call pthread_exit?
+  // alternatively could call longjmp with a null continuation, but that seems
+  // more complicated than necessary
+}
+
 // Mark globals as part of the tracing collector
 // This is called by the collector thread
 void gc_mark_globals()
