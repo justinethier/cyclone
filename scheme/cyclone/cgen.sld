@@ -183,7 +183,7 @@
           (null? (cdr trace)))
     ""
     (string-append 
-      "Cyc_st_add2(data, \""
+      "Cyc_st_add(data, \""
       (car trace) 
       ":" 
       ;; TODO: escape backslashes
