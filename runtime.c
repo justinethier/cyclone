@@ -190,7 +190,6 @@ const object quote_void = &Cyc_void_symbol;
 /* Stack Traces */
 static const int MAX_STACK_TRACES = 10;
 
-void Cyc_st_add2(void *data, char *frame) { } // TODO: a temporary function, merge with below
 void Cyc_st_add(void *data, char *frame) { 
   gc_thread_data *thd = (gc_thread_data *)data;
   // Do not allow recursion to remove older frames
