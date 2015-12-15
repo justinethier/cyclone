@@ -189,9 +189,9 @@ object memqp(void *,object,list);
 void Cyc_start_thread(gc_thread_data *thd);
 void GC(void *,closure,object*,int);
 
-void Cyc_st_init();
 void Cyc_st_add(char *frame);
-void Cyc_st_print(FILE *out);
+void Cyc_st_add2(void *data, char *frame);
+void Cyc_st_print(void *data, FILE *out);
 
 char *_strdup (const char *s);
 object add_symbol(symbol_type *psym);

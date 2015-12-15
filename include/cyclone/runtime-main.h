@@ -19,10 +19,6 @@ static void Cyc_heap_init(long heap_size);
 
 static void Cyc_heap_init(long heap_size)
 {
-  /* Initialize stack trace table
-     TODO: will eventually be relocated to a per-thread operation */
-  Cyc_st_init();
-
   /* Allocate heap area for second generation. */
 #if DEBUG_SHOW_DIAG
   printf("main: Allocating and initializing heap...\n");

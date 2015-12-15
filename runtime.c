@@ -189,24 +189,19 @@ const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
 static const int MAX_STACK_TRACES = 10;
-static char **Cyc_Stack_Traces;
-static int Cyc_Stack_Trace_Idx = 0;
-static char *Cyc_Stack_Prev_Frame = NULL;
 
-void Cyc_st_init() { 
-  Cyc_Stack_Traces = calloc(MAX_STACK_TRACES, sizeof(char *));
-}
-
-void Cyc_st_add(char *frame) { 
+void Cyc_st_add(char *frame) { } // TODO: a temporary function, merge with below
+void Cyc_st_add2(void *data, char *frame) { 
+  gc_thread_data *thd = (gc_thread_data *)data;
   // Do not allow recursion to remove older frames
-  if (frame != Cyc_Stack_Prev_Frame) { 
-    Cyc_Stack_Prev_Frame = frame;
-    Cyc_Stack_Traces[Cyc_Stack_Trace_Idx] = frame;
-    Cyc_Stack_Trace_Idx = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
+  if (frame != thd->stack_prev_frame) { 
+    thd->stack_prev_frame = frame;
+    thd->stack_traces[thd->stack_trace_idx] = frame;
+    thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
   }
 }
 
-void Cyc_st_print(FILE *out) {
+void Cyc_st_print(void *data, FILE *out) {
   /* print to stream, note it is possible that
      some traces could be on the stack after a GC.
      not sure what to do about it, may need to
@@ -214,10 +209,11 @@ void Cyc_st_print(FILE *out) {
      or, with the tbl being so small, maybe it will
      not be an issue in practice? a bit risky to ignore though
   */
-  int i = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
-  while (i != Cyc_Stack_Trace_Idx) {
-    if (Cyc_Stack_Traces[i]) {
-      fprintf(out, "%s\n", Cyc_Stack_Traces[i]);
+  gc_thread_data *thd = (gc_thread_data *)data;
+  int i = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
+  while (i != thd->stack_trace_idx) {
+    if (thd->stack_traces[i]) {
+      fprintf(out, "%s\n", thd->stack_traces[i]);
     }
     i = (i + 1) % MAX_STACK_TRACES;
   }
@@ -361,7 +357,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     }
 
     fprintf(stderr, "\nCall history:\n");
-    Cyc_st_print(stderr);
+    Cyc_st_print(data, stderr);
     fprintf(stderr, "\n");
     //raise(SIGINT); // break into debugger, unix only
     exit(1);
@@ -2484,6 +2480,13 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 
 void Cyc_start_thread(gc_thread_data *thd)
 {
+  thd->stack_trace_idx = 0;
+  thd->stack_prev_frame = NULL;
+  // TODO: may need to relocate the calloc to another function that
+  // initializes thread objects, rather than here that just calls them.
+  // at a minimum, should initialize it to NULL so we can test for that here.
+  thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
+
   /* Tank, load the jump program... */
   setjmp(*(thd->jmp_start));
 
