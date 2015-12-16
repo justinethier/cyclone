@@ -70,7 +70,7 @@ void gc_initialize()
 }
 
 // Add data for a new mutator
-void gc_add_mutator(gc_thread_data *thd)
+int gc_add_mutator(gc_thread_data *thd)
 {
   // TODO: need to sync access to these static variables. both here and
   // elsewhere in the module!!
@@ -78,12 +78,13 @@ void gc_add_mutator(gc_thread_data *thd)
   for (i = 0; i < Cyc_num_mutators; i++) {
     if (!Cyc_mutators[i]) {
       Cyc_mutators[i] = thd;
-      return;
+      return i;
     }
   }
   // TODO: unable to create any more mutators. what to do???
   fprintf(stderr, "Unable to create a new thread, exiting\n");
   exit(1);
+  return -1;
 }
 
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)

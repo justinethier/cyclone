@@ -1,5 +1,8 @@
 (define-library (scheme base)
   (export
+    ;; Thread functions. these are not standard, and may be relocated
+    make-thread
+    ;; END threads
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
@@ -95,6 +98,13 @@
     quasiquote
   )
   (begin
+    ;; Threading
+    (define (make-thread thunk . name)
+      (let ((name-str (if (pair? name)
+                          (car name)
+                          "")))
+        (list 'cyc-thread-obj thunk name-str)))
+
     ;; Features implemented by this Scheme
     (define (features) '(cyclone r7rs exact-closed))
 
