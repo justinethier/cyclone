@@ -2475,6 +2475,19 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 // longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 //}
 
+void Cyc_setup_thread(thunk)
+{
+  // TODO: how to use pthread? need to run this in a pthread, I think. when/how to do that?
+  // TODO: this function should be start_thread, call below one run_thread
+  // TODO:
+  gc_thread_data *thd;
+  // malloc thread, init it
+  // setup gc_cont, args
+  // gc_add_mutator
+  // Cyc_start_thread(thd)
+  
+}
+
 void Cyc_start_thread(gc_thread_data *thd)
 {
   /* Tank, load the jump program... */
