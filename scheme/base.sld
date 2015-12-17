@@ -109,17 +109,19 @@
            (> (vector-length obj) 0) 
            (equal? 'cyc-thread-obj (vector-ref obj 0))))
 
+;; TODO: does not compile. I suspect the let is not getting expanded for some reason...
     (define (make-thread thunk . name)
-;      (let ((name-str (if (pair? name)
-;                          (car name)
-;                          "")))
+      (let ((name-str (if (pair? name)
+                          (car name)
+                          "")))
+        (vector 'cyc-thread-obj thunk #f name-str #f)))
         ;; Fields supported so far:
         ;; - type marker (implementation-specific)
         ;; - thunk
         ;; - internal thread id (implementation-specific)
         ;; - name
         ;; - specific
-        (vector 'cyc-thread-obj thunk #f name #f))
+;        (vector 'cyc-thread-obj thunk #f name #f))
 ;        (vector 'cyc-thread-obj thunk #f 'name-str #f)))
 
     (define (thread-name t) (vector-ref t 3))
