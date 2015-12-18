@@ -1702,6 +1702,14 @@ void _set_91cdr_67(void *data, object cont, object args) {
 void _Cyc_91has_91cycle_127(void *data, object cont, object args) { 
     Cyc_check_num_args(data, "Cyc-has-cycle?", 1, args);
     return_closcall1(data, cont, Cyc_has_cycle(car(args))); }
+void _Cyc_91spawn_91thread_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-spawn-thread!", 1, args);
+    // TODO: validate argument type?
+    return_closcall1(data, cont, Cyc_spawn_thread(car(args))); }
+void _Cyc_91end_91thread_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-end-thread!", 0, args);
+    Cyc_end_thread((gc_thread_data *)data);
+    return_closcall1(data, cont, boolean_f); }
 void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
     dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
@@ -2501,6 +2509,12 @@ void *Cyc_init_thread(object thunk)
  */
 object Cyc_spawn_thread(object thunk)
 {
+// TODO: if we want to return mutator number to the caller, we need
+// to reserve a number here. need to figure out how we are going to
+// synchronize access to GC mutator fields, and then reserve one
+// here. will need to pass it, along with thunk, to Cyc_init_thread.
+// Then can use a new function up there to add the mutator, since we
+// already have the number.
   pthread_t thread;
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -2513,7 +2527,25 @@ object Cyc_spawn_thread(object thunk)
 }
 
 /**
+ * Terminate a thread
+ */
+void Cyc_end_thread(gc_thread_data *thd) 
+{
+  // alternatively could call longjmp with a null continuation, but that seems
+  // more complicated than necessary. or does it... see next comment:
+  
+  // TODO: what if there are any locals from the thread's stack still being
+  // referenced? might want to do one more minor GC to clear the stack before
+  // terminating the thread
+
+  pthread_exit(NULL); // For now, just a proof of concept
+}
+
+/**
  * Start a thread's trampoline
+
+TODO: should rename this function to make it more clear what is really going on
+
  */
 void Cyc_start_thread(gc_thread_data *thd)
 {
@@ -2532,21 +2564,6 @@ void Cyc_start_thread(gc_thread_data *thd)
 
   printf("Internal error: should never have reached this line\n"); 
   exit(0);
-}
-
-/**
- * Terminate a thread
- */
-void Cyc_end_thread(gc_thread_data *thd) 
-{
-  // alternatively could call longjmp with a null continuation, but that seems
-  // more complicated than necessary. or does it... see next comment:
-  
-  // TODO: what if there are any locals from the thread's stack still being
-  // referenced? might want to do one more minor GC to clear the stack before
-  // terminating the thread
-
-  pthread_exit(NULL); // For now, just a proof of concept
 }
 
 // Mark globals as part of the tracing collector
@@ -2937,6 +2954,8 @@ static primitive_type Cyc_91get_91cvar_primitive = {{0}, primitive_tag, "Cyc-get
 static primitive_type Cyc_91set_91cvar_67_primitive = {{0}, primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67};
 static primitive_type Cyc_91cvar_127_primitive = {{0}, primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127};
 static primitive_type Cyc_91has_91cycle_127_primitive = {{0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
+static primitive_type Cyc_91spawn_91thread_127_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_127};
+static primitive_type Cyc_91end_91thread_127_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_127};
 static primitive_type _87_primitive = {{0}, primitive_tag, "+", &__87};
 static primitive_type _91_primitive = {{0}, primitive_tag, "-", &__91};
 static primitive_type _85_primitive = {{0}, primitive_tag, "*", &__85};
@@ -3054,6 +3073,8 @@ const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
 const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
 const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
 const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
+const object primitive_Cyc_91spawn_91thread_127 = &Cyc_91spawn_91thread_127_primitive;
+const object primitive_Cyc_91end_91thread_127 = &Cyc_91end_91thread_127_primitive;
 const object primitive__87 = &_87_primitive;
 const object primitive__91 = &_91_primitive;
 const object primitive__85 = &_85_primitive;
