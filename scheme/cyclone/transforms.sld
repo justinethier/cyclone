@@ -556,6 +556,8 @@
                   Cyc-get-cvar
                   Cyc-set-cvar!
                   Cyc-cvar?
+                  Cyc-spawn-thread!
+                  Cyc-end-thread!
                   apply
                   %halt
                   exit
