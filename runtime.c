@@ -2484,64 +2484,6 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 //}
 
 /**
- * Thread initialization function only called from within the runtime
- */
-void *Cyc_init_thread(object thunk)
-{
-  long stack_start;
-  gc_thread_data *thd;
-// TODO: I don't think we want a closure here, but rather want to 
-// init the end-thread primitive, and call into that instead. that way
-// we can explicitly provide the thread_data argument.
-  mclosure0(clo_end, Cyc_end_thread);
-  thd = malloc(sizeof(gc_thread_data));
-  gc_thread_data_init(thd, 0, (char *) &stack_start, global_stack_size);
-  thd->gc_cont = thunk;
-  thd->gc_num_args = 1;
-  thd->gc_args[0] = &clo_end;
-  gc_add_mutator(thd);
-  Cyc_start_thread(thd);
-  return NULL;
-}
-
-/**
- * Spawn a new thread to execute the given thunk
- */
-object Cyc_spawn_thread(object thunk)
-{
-// TODO: if we want to return mutator number to the caller, we need
-// to reserve a number here. need to figure out how we are going to
-// synchronize access to GC mutator fields, and then reserve one
-// here. will need to pass it, along with thunk, to Cyc_init_thread.
-// Then can use a new function up there to add the mutator, since we
-// already have the number.
-  pthread_t thread;
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread, NULL, Cyc_init_thread, thunk)) {
-    fprintf(stderr, "Error creating a new thread\n");
-    exit(1);
-  }
-  return boolean_t;
-}
-
-/**
- * Terminate a thread
- */
-void Cyc_end_thread(gc_thread_data *thd) 
-{
-  // alternatively could call longjmp with a null continuation, but that seems
-  // more complicated than necessary. or does it... see next comment:
-  
-  // TODO: what if there are any locals from the thread's stack still being
-  // referenced? might want to do one more minor GC to clear the stack before
-  // terminating the thread
-
-  pthread_exit(NULL); // For now, just a proof of concept
-}
-
-/**
  * Start a thread's trampoline
 
 TODO: should rename this function to make it more clear what is really going on
@@ -3186,4 +3128,58 @@ const object primitive_Cyc_91write_91char = &Cyc_91write_91char_primitive;
 const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
+
+/**
+ * Thread initialization function only called from within the runtime
+ */
+void *Cyc_init_thread(object thunk)
+{
+  long stack_start;
+  gc_thread_data *thd;
+  thd = malloc(sizeof(gc_thread_data));
+  gc_thread_data_init(thd, 0, (char *) &stack_start, global_stack_size);
+  thd->gc_cont = thunk;
+  thd->gc_num_args = 1;
+  thd->gc_args[0] = &Cyc_91end_91thread_127_primitive;
+  gc_add_mutator(thd);
+  Cyc_start_thread(thd);
+  return NULL;
+}
+
+/**
+ * Spawn a new thread to execute the given thunk
+ */
+object Cyc_spawn_thread(object thunk)
+{
+// TODO: if we want to return mutator number to the caller, we need
+// to reserve a number here. need to figure out how we are going to
+// synchronize access to GC mutator fields, and then reserve one
+// here. will need to pass it, along with thunk, to Cyc_init_thread.
+// Then can use a new function up there to add the mutator, since we
+// already have the number.
+  pthread_t thread;
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  if (pthread_create(&thread, NULL, Cyc_init_thread, thunk)) {
+    fprintf(stderr, "Error creating a new thread\n");
+    exit(1);
+  }
+  return boolean_t;
+}
+
+/**
+ * Terminate a thread
+ */
+void Cyc_end_thread(gc_thread_data *thd) 
+{
+  // alternatively could call longjmp with a null continuation, but that seems
+  // more complicated than necessary. or does it... see next comment:
+  
+  // TODO: what if there are any locals from the thread's stack still being
+  // referenced? might want to do one more minor GC to clear the stack before
+  // terminating the thread
+
+  pthread_exit(NULL); // For now, just a proof of concept
+}
 
