@@ -1702,11 +1702,11 @@ void _set_91cdr_67(void *data, object cont, object args) {
 void _Cyc_91has_91cycle_127(void *data, object cont, object args) { 
     Cyc_check_num_args(data, "Cyc-has-cycle?", 1, args);
     return_closcall1(data, cont, Cyc_has_cycle(car(args))); }
-void _Cyc_91spawn_91thread_127(void *data, object cont, object args) {
+void _Cyc_91spawn_91thread_67(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-spawn-thread!", 1, args);
     // TODO: validate argument type?
     return_closcall1(data, cont, Cyc_spawn_thread(car(args))); }
-void _Cyc_91end_91thread_127(void *data, object cont, object args) {
+void _Cyc_91end_91thread_67(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-end-thread!", 0, args);
     Cyc_end_thread((gc_thread_data *)data);
     return_closcall1(data, cont, boolean_f); }
@@ -2896,8 +2896,8 @@ static primitive_type Cyc_91get_91cvar_primitive = {{0}, primitive_tag, "Cyc-get
 static primitive_type Cyc_91set_91cvar_67_primitive = {{0}, primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67};
 static primitive_type Cyc_91cvar_127_primitive = {{0}, primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127};
 static primitive_type Cyc_91has_91cycle_127_primitive = {{0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
-static primitive_type Cyc_91spawn_91thread_127_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_127};
-static primitive_type Cyc_91end_91thread_127_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_127};
+static primitive_type Cyc_91spawn_91thread_67_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_67};
+static primitive_type Cyc_91end_91thread_67_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_67};
 static primitive_type _87_primitive = {{0}, primitive_tag, "+", &__87};
 static primitive_type _91_primitive = {{0}, primitive_tag, "-", &__91};
 static primitive_type _85_primitive = {{0}, primitive_tag, "*", &__85};
@@ -3015,8 +3015,8 @@ const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
 const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
 const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
 const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
-const object primitive_Cyc_91spawn_91thread_127 = &Cyc_91spawn_91thread_127_primitive;
-const object primitive_Cyc_91end_91thread_127 = &Cyc_91end_91thread_127_primitive;
+const object primitive_Cyc_91spawn_91thread_67 = &Cyc_91spawn_91thread_67_primitive;
+const object primitive_Cyc_91end_91thread_67 = &Cyc_91end_91thread_67_primitive;
 const object primitive__87 = &_87_primitive;
 const object primitive__91 = &_91_primitive;
 const object primitive__85 = &_85_primitive;
@@ -3140,7 +3140,7 @@ void *Cyc_init_thread(object thunk)
   gc_thread_data_init(thd, 0, (char *) &stack_start, global_stack_size);
   thd->gc_cont = thunk;
   thd->gc_num_args = 1;
-  thd->gc_args[0] = &Cyc_91end_91thread_127_primitive;
+  thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
   gc_add_mutator(thd);
   Cyc_start_thread(thd);
   return NULL;

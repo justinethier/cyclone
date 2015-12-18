@@ -451,6 +451,8 @@
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
      Cyc-has-cycle?
+     Cyc-spawn-thread!
+     Cyc-end-thread!
      Cyc-stdout
      Cyc-stdin
      Cyc-stderr
