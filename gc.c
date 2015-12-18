@@ -1181,6 +1181,7 @@ void *collector_main(void *arg)
     }
     nanosleep(&tim, NULL);
   }
+  return NULL;
 }
 
 static pthread_t collector_thread;

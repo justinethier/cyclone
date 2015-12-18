@@ -2475,19 +2475,46 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 // longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
 //}
 
-void Cyc_setup_thread(thunk)
+/**
+ * Thread initialization function only called from within the runtime
+ */
+void *Cyc_init_thread(object thunk)
 {
-  // TODO: how to use pthread? need to run this in a pthread, I think. when/how to do that?
-  // TODO: this function should be start_thread, call below one run_thread
-  // TODO:
+  long stack_start;
   gc_thread_data *thd;
-  // malloc thread, init it
-  // setup gc_cont, args
-  // gc_add_mutator
-  // Cyc_start_thread(thd)
-  
+// TODO: I don't think we want a closure here, but rather want to 
+// init the end-thread primitive, and call into that instead. that way
+// we can explicitly provide the thread_data argument.
+  mclosure0(clo_end, Cyc_end_thread);
+  thd = malloc(sizeof(gc_thread_data));
+  gc_thread_data_init(thd, 0, (char *) &stack_start, global_stack_size);
+  thd->gc_cont = thunk;
+  thd->gc_num_args = 1;
+  thd->gc_args[0] = &clo_end;
+  gc_add_mutator(thd);
+  Cyc_start_thread(thd);
+  return NULL;
 }
 
+/**
+ * Spawn a new thread to execute the given thunk
+ */
+object Cyc_spawn_thread(object thunk)
+{
+  pthread_t thread;
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  if (pthread_create(&thread, NULL, Cyc_init_thread, thunk)) {
+    fprintf(stderr, "Error creating a new thread\n");
+    exit(1);
+  }
+  return boolean_t;
+}
+
+/**
+ * Start a thread's trampoline
+ */
 void Cyc_start_thread(gc_thread_data *thd)
 {
   /* Tank, load the jump program... */
@@ -2507,10 +2534,19 @@ void Cyc_start_thread(gc_thread_data *thd)
   exit(0);
 }
 
-void Cyc_end_thread(gc_thread_data *thd) {
-  // TODO:  call pthread_exit?
+/**
+ * Terminate a thread
+ */
+void Cyc_end_thread(gc_thread_data *thd) 
+{
   // alternatively could call longjmp with a null continuation, but that seems
-  // more complicated than necessary
+  // more complicated than necessary. or does it... see next comment:
+  
+  // TODO: what if there are any locals from the thread's stack still being
+  // referenced? might want to do one more minor GC to clear the stack before
+  // terminating the thread
+
+  pthread_exit(NULL); // For now, just a proof of concept
 }
 
 // Mark globals as part of the tracing collector
