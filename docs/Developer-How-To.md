@@ -7,11 +7,10 @@
 
 TODO: need to develop this section better to come up with a workable/optimal approach to building things:
 
-- Install modified `.sld` files -- ???
-- Compile: `cyclone scheme/cyclone/cgen.sld`
-- Copy modified files to cyclone-bootstrap, including `cgen.c`
-- install cyclone-bootstrap
-- run `make clean ; make && make bootstrap` from cyclone repo
-- run `make clean ; ./install` from bootstrap repo
+- Compile: 
+    cyclone scheme/cyclone/cgen.sld
+    cyclone scheme/cyclone/transforms.sld
+- Copy modified files to cyclone-bootstrap, including runtime, `.sld`, and compiled `.c` files.
+- Run `make clean ; ./install` from bootstrap repo
 
 - Add primitives to the list in eval.sld. Rebuild one more time.

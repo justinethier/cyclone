@@ -138,6 +138,7 @@
       (list 'Cyc-has-cycle? Cyc-has-cycle?)
       (list 'Cyc-spawn-thread! Cyc-spawn-thread!)
       (list 'Cyc-end-thread! Cyc-end-thread!)
+      (list 'Cyc-thread-sleep! Cyc-thread-sleep!)
       (list 'Cyc-default-exception-handler Cyc-default-exception-handler)
       (list 'Cyc-current-exception-handler Cyc-current-exception-handler)
       (list '+ +)
