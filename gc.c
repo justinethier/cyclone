@@ -10,7 +10,9 @@
  * The heap implementation (alloc / sweep, etc) is based on code from Chibi Scheme.
  */
 
+#include <ck_array.h>
 #include "cyclone/types.h"
+#include <time.h>
 
 ////////////////////
 // Global variables
@@ -42,8 +44,30 @@ static int cached_heap_free_size = 0;
 static int cached_heap_total_size = 0;
 
 // Data for each individual mutator thread
-static gc_thread_data **Cyc_mutators;
-static int Cyc_num_mutators;
+ck_array_t Cyc_mutators;
+static pthread_mutex_t mutators_lock;
+
+static void my_free(void *p, size_t m, bool d)
+{
+  free(p);
+  return;
+}
+
+static void *my_malloc(size_t b)
+{
+  return malloc(b);
+}
+
+static void *my_realloc(void *r, size_t a, size_t b, bool d)
+{
+  return realloc(r, b);
+}
+
+static struct ck_malloc my_allocator = {
+    .malloc = my_malloc,
+    .free = my_free,
+    .realloc = my_realloc
+};
 
 /////////////
 // Functions
@@ -51,12 +75,10 @@ static int Cyc_num_mutators;
 // Perform one-time initialization before mutators can be executed
 void gc_initialize()
 {
-  // TODO: alloca this using a vpbuffer, or maybe another type of data structure??
-  // Will need this list for later use, but only by the collector thread. so it would be
-  // nice if there was a way to allocate mutators that avoids expensive synchronization...
-  // need to think on this when adding thread support, after upgrading the collector
-  Cyc_num_mutators = 1; 
-  Cyc_mutators = calloc(Cyc_num_mutators, sizeof(gc_thread_data *));
+  if (ck_array_init(&Cyc_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0){
+    fprintf(stderr, "Unable to initialize mutator array\n");
+    exit(1);
+  }
 
   // Initialize collector's mark stack
   mark_stack_len = 128;
@@ -67,24 +89,22 @@ void gc_initialize()
     fprintf(stderr, "Unable to initialize heap_lock mutex\n");
     exit(1);
   }
+  if (pthread_mutex_init(&(mutators_lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize mutators_lock mutex\n");
+    exit(1);
+  }
 }
 
 // Add data for a new mutator
-int gc_add_mutator(gc_thread_data *thd)
+void gc_add_mutator(gc_thread_data *thd)
 {
-  // TODO: need to sync access to these static variables. both here and
-  // elsewhere in the module!!
-  int i;
-  for (i = 0; i < Cyc_num_mutators; i++) {
-    if (!Cyc_mutators[i]) {
-      Cyc_mutators[i] = thd;
-      return i;
-    }
+  pthread_mutex_lock(&mutators_lock);
+  if (ck_array_put_unique(&Cyc_mutators, (void *)thd) < 0) {
+    fprintf(stderr, "Unable to allocate memory for a new thread, exiting\n");
+    exit(1);
   }
-  // TODO: unable to create any more mutators. what to do???
-  fprintf(stderr, "Unable to create a new thread, exiting\n");
-  exit(1);
-  return -1;
+  ck_array_commit(&Cyc_mutators);
+  pthread_mutex_unlock(&mutators_lock);
 }
 
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
@@ -100,7 +120,7 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   cached_heap_free_size += size;
   h->chunk_size = chunk_size;
   h->max_size = max_size;
-  h->data = (char *) gc_heap_align(sizeof(h->data) + (uint)&(h->data)); 
+  h->data = (char *) gc_heap_align(sizeof(h->data) + (unsigned int)&(h->data)); 
   h->next = NULL;
   free = h->free_list = (gc_free_list *)h->data;
   next = (gc_free_list *)(((char *) free) + gc_heap_align(gc_free_chunk_size));
@@ -898,15 +918,13 @@ void gc_mark_gray2(gc_thread_data *thd, object obj)
 
 void gc_collector_trace()
 {
+  ck_array_iterator_t iterator;
   gc_thread_data *m;
-  int clean = 0, i;
+  int clean = 0;
   while (!clean) {
     clean = 1;
-    // TODO: need to sync access to mutator int/void data, UNLESS
-    // the collector thread is the only one that is using these
-    // fields.
-    for (i = 0; i < Cyc_num_mutators; i++) {
-      m = Cyc_mutators[i];
+
+    CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m){
 // TODO: ideally, want to use a lock-free data structure to prevent
 // having to use a mutex here. see corresponding code in gc_mark_gray
 
@@ -1066,17 +1084,17 @@ void gc_post_handshake(gc_status_type s)
 
 void gc_wait_handshake()
 {
-  int i, statusm, statusc;
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  int statusm, statusc;
   struct timespec tim;
   tim.tv_sec = 0;
   tim.tv_nsec = 1000000; // 1 millisecond
 
-  // TODO: same as in other places, need to either sync access to
-  // mutator vars, or ensure only the collector uses them
-  for (i = 0; i < Cyc_num_mutators; i++) {
+  CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
     while (1) {
       statusc = ATOMIC_GET(&gc_status_col);
-      statusm = ATOMIC_GET(&(Cyc_mutators[i]->gc_status));
+      statusm = ATOMIC_GET(&(m->gc_status));
       if (statusc == statusm) {
         // Handshake succeeded, check next mutator
         break;
