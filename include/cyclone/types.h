@@ -43,6 +43,8 @@
    necessary if GC is working correctly. */
 #define GC_SAFETY_CHECKS 1
 
+// General constants
+#define NANOSECONDS_PER_MILLISECOND 1000000
 
 /* Define general object type. */
 typedef void *object;

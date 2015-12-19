@@ -17,8 +17,6 @@
 ////////////////////
 // Global variables
 
-static const int NANOSECONDS_PER_MILLISECOND = 1000000;
-
 // Note: will need to use atomics and/or locking to access any
 // variables shared between threads
 static int        gc_color_mark = 1; // Black, is swapped during GC
