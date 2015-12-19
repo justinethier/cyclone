@@ -452,7 +452,7 @@
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
      ((eq? p 'Cyc-spawn-thread!)     "Cyc_spawn_thread")
      ((eq? p 'Cyc-end-thread!)       "Cyc_end_thread")
-     ((eq? p 'Cyc-thread-sleep!)     "Cyc_thread_sleep")
+     ((eq? p 'thread-sleep!)         "Cyc_thread_sleep")
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p 'Cyc-stdin)             "Cyc_stdin")
      ((eq? p 'Cyc-stderr)            "Cyc_stderr")
@@ -584,7 +584,7 @@
     apply
     Cyc-default-exception-handler
     Cyc-end-thread!
-    Cyc-thread-sleep!
+    thread-sleep!
     open-input-file
     open-output-file
     close-port

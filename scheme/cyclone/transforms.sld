@@ -453,7 +453,7 @@
      Cyc-has-cycle?
      Cyc-spawn-thread!
      Cyc-end-thread!
-     Cyc-thread-sleep!
+     thread-sleep!
      Cyc-stdout
      Cyc-stdin
      Cyc-stderr
@@ -559,7 +559,7 @@
                   Cyc-cvar?
                   Cyc-spawn-thread!
                   Cyc-end-thread!
-                  Cyc-thread-sleep!
+                  thread-sleep!
                   apply
                   %halt
                   exit
