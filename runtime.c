@@ -1707,7 +1707,6 @@ void _Cyc_91spawn_91thread_67(void *data, object cont, object args) {
     // TODO: validate argument type?
     return_closcall1(data, cont, Cyc_spawn_thread(car(args))); }
 void _Cyc_91end_91thread_67(void *data, object cont, object args) {
-    Cyc_check_num_args(data, "Cyc-end-thread!", 0, args);
     Cyc_end_thread((gc_thread_data *)data);
     return_closcall1(data, cont, boolean_f); }
 void __87(void *data, object cont, object args) {
