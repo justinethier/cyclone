@@ -47,9 +47,18 @@
 /* Define general object type. */
 typedef void *object;
 
+/* Threading */
+typedef enum { CYC_THREAD_STATE_NEW
+             , CYC_THREAD_STATE_RUNNABLE
+             , CYC_THREAD_STATE_TERMINATED
+             } cyc_thread_state_type;
+
 /* Thread data structures */
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
+// TODO:
+//  pthread_t *thread;
+  cyc_thread_state_type thread_state;
   // Data needed to initiate stack-based minor GC
   char *stack_start;
   char *stack_limit;

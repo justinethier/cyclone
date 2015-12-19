@@ -2491,6 +2491,9 @@ TODO: should rename this function to make it more clear what is really going on
  */
 void Cyc_start_thread(gc_thread_data *thd)
 {
+// TODO: should use an atomic set to modify this
+  thd->thread_state = CYC_THREAD_STATE_RUNNABLE;
+
   /* Tank, load the jump program... */
   setjmp(*(thd->jmp_start));
 
@@ -3141,6 +3144,9 @@ void *Cyc_init_thread(object thunk)
   thd->gc_cont = thunk;
   thd->gc_num_args = 1;
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
+//  thd->thread = pthread_self(); // TODO: ptr vs instance
+//  returns instance so would need to malloc here
+//  would also need to update termination code to free that memory
   gc_add_mutator(thd);
   Cyc_start_thread(thd);
   return NULL;
@@ -3193,6 +3199,8 @@ void Cyc_end_thread(gc_thread_data *thd)
   // referenced? might want to do one more minor GC to clear the stack before
   // terminating the thread
 
+// TODO: use ATOMIC set to modify this
+  thd->thread_state = CYC_THREAD_STATE_TERMINATED;
   pthread_exit(NULL); // For now, just a proof of concept
 }
 

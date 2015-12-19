@@ -1220,6 +1220,8 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;
+//  thd->thread = NULL;
+  thd->thread_state = CYC_THREAD_STATE_NEW;
   //thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
   thd->gc_args = malloc(sizeof(object) * NUM_GC_ANS);
