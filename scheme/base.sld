@@ -6,7 +6,7 @@
     thread-name
     thread-specific
     thread-specific-set!
-    ;thread-start!
+    thread-start!
     ;; END threads
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
@@ -675,12 +675,10 @@
     (define (thread-name t) (vector-ref t 3))
     (define (thread-specific t) (vector-ref t 4))
     (define (thread-specific-set! t obj) (vector-set! t 4 obj))
-
 ; TODO:
 ; current-thread - not sure how to look this up yet... may need a global list of running threads
-;    (define (thread-start! t)
-;      (let* ((thunk (vector-ref t 1)) 
-;             (mutator-id (Cyc-thread-start! thunk)))
-;        (vector-set! t 2 mutator-id)))
-
+    (define (thread-start! t)
+      (let* ((thunk (vector-ref t 1)) 
+             (mutator-id (Cyc-spawn-thread! thunk)))
+        (vector-set! t 2 mutator-id)))
 ))
