@@ -9,7 +9,7 @@
     thread-specific-set!
     thread-start!
     thread-yield!
-    thread-terminate!
+;    thread-terminate!
     ;; END threads
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
@@ -685,6 +685,6 @@
              (mutator-id (Cyc-spawn-thread! thunk)))
         (vector-set! t 2 mutator-id)))
     (define (thread-yield!) (thread-sleep! 1))
-    (define (thread-terminate!) (Cyc-end-thread!))
+;    (define (thread-terminate!) (Cyc-end-thread!))
     ;; TODO: thread-join!
 ))
