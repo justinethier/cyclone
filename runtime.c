@@ -3211,11 +3211,12 @@ void Cyc_end_thread(gc_thread_data *thd)
 // For now, accept a number of milliseconds to sleep
 object Cyc_thread_sleep(void *data, object timeout)
 {
-  // TODO: looks like there are overflow issues here:
   struct timespec tim;
+  long value;
   Cyc_check_num(data, timeout);
-  tim.tv_sec = 0;
-  tim.tv_nsec = ((integer_type *)timeout)->value * NANOSECONDS_PER_MILLISECOND;
+  value = ((integer_type *)timeout)->value;
+  tim.tv_sec = value / 1000;
+  tim.tv_nsec = (value % 1000) * NANOSECONDS_PER_MILLISECOND;
   nanosleep(&tim, NULL);
   return boolean_t;
 }
