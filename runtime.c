@@ -3152,6 +3152,7 @@ void *Cyc_init_thread(object thunk)
 //  returns instance so would need to malloc here
 //  would also need to update termination code to free that memory
   gc_add_mutator(thd);
+  ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE);
   Cyc_start_thread(thd);
   return NULL;
 }
@@ -3196,6 +3197,12 @@ to look at the lock-free structures provided by ck?
  */
 void Cyc_end_thread(gc_thread_data *thd) 
 {
+  mclosure0(clo, Cyc_exit_thread);
+  GC(thd, &clo, thd->gc_args, 0);
+}
+
+void Cyc_exit_thread(gc_thread_data *thd)
+{
   // alternatively could call longjmp with a null continuation, but that seems
   // more complicated than necessary. or does it... see next comment:
   
@@ -3203,8 +3210,8 @@ void Cyc_end_thread(gc_thread_data *thd)
   // referenced? might want to do one more minor GC to clear the stack before
   // terminating the thread
 
-// TODO: use ATOMIC set to modify this
-  thd->thread_state = CYC_THREAD_STATE_TERMINATED;
+printf("DEBUG - exiting thread\n");
+  ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
   pthread_exit(NULL); // For now, just a proof of concept
 }
 
