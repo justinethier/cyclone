@@ -2493,9 +2493,6 @@ TODO: should rename this function to make it more clear what is really going on
  */
 void Cyc_start_thread(gc_thread_data *thd)
 {
-// TODO: should use an atomic set to modify this
-  thd->thread_state = CYC_THREAD_STATE_RUNNABLE;
-
   /* Tank, load the jump program... */
   setjmp(*(thd->jmp_start));
 
@@ -3211,7 +3208,12 @@ void Cyc_exit_thread(gc_thread_data *thd)
   // terminating the thread
 
 printf("DEBUG - exiting thread\n");
+// TODO: race condition, cannot free thread data if the collector is using it
+  gc_remove_mutator(thd);
   ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
+// TODO: could maintain a dedicated list of old thread data to clean up...
+//  collector could do it at a time that is safe
+//  gc_thread_data_free(thd);
   pthread_exit(NULL); // For now, just a proof of concept
 }
 

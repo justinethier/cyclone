@@ -105,6 +105,17 @@ void gc_add_mutator(gc_thread_data *thd)
   pthread_mutex_unlock(&mutators_lock);
 }
 
+void gc_remove_mutator(gc_thread_data *thd)
+{
+  pthread_mutex_lock(&mutators_lock);
+  if (!ck_array_remove(&Cyc_mutators, (void *)thd)) {
+    fprintf(stderr, "Unable to remove thread data, exiting\n");
+    exit(1);
+  }
+  ck_array_commit(&Cyc_mutators);
+  pthread_mutex_unlock(&mutators_lock);
+}
+
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
 {
   gc_free_list *free, *next;
@@ -1084,7 +1095,7 @@ void gc_wait_handshake()
 {
   ck_array_iterator_t iterator;
   gc_thread_data *m;
-  int statusm, statusc;
+  int statusm, statusc, thread_status;
   struct timespec tim;
   tim.tv_sec = 0;
   tim.tv_nsec = 1000000; // 1 millisecond
@@ -1093,8 +1104,14 @@ void gc_wait_handshake()
     while (1) {
       statusc = ATOMIC_GET(&gc_status_col);
       statusm = ATOMIC_GET(&(m->gc_status));
+      thread_status = ATOMIC_GET(&(m->thread_state));
       if (statusc == statusm) {
         // Handshake succeeded, check next mutator
+        break;
+      }
+
+      if (thread_status == CYC_THREAD_STATE_TERMINATED) {
+        // Thread is no longer running
         break;
       }
 

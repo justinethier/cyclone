@@ -171,6 +171,7 @@ void vpbuffer_free(void **buf);
 /* GC prototypes */
 void gc_initialize();
 void gc_add_mutator(gc_thread_data *thd);
+void gc_remove_mutator(gc_thread_data *thd);
 gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
