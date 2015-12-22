@@ -42,7 +42,7 @@ static int cached_heap_free_size = 0;
 static int cached_heap_total_size = 0;
 
 // Data for each individual mutator thread
-ck_array_t Cyc_mutators;
+ck_array_t Cyc_mutators, old_mutators;
 static pthread_mutex_t mutators_lock;
 
 static void my_free(void *p, size_t m, bool d)
@@ -78,6 +78,11 @@ void gc_initialize()
     exit(1);
   }
 
+  if (ck_array_init(&old_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0){
+    fprintf(stderr, "Unable to initialize mutator array\n");
+    exit(1);
+  }
+
   // Initialize collector's mark stack
   mark_stack_len = 128;
   mark_stack = vpbuffer_realloc(mark_stack, &(mark_stack_len));
@@ -105,6 +110,10 @@ void gc_add_mutator(gc_thread_data *thd)
   pthread_mutex_unlock(&mutators_lock);
 }
 
+// Remove selected mutator from the mutator list.
+// This is done for terminated threads. Note data is queued to be
+// freed, to prevent accidentally freeing it while the collector
+// thread is potentially accessing it.
 void gc_remove_mutator(gc_thread_data *thd)
 {
   pthread_mutex_lock(&mutators_lock);
@@ -113,6 +122,36 @@ void gc_remove_mutator(gc_thread_data *thd)
     exit(1);
   }
   ck_array_commit(&Cyc_mutators);
+  // Place on list of old mutators to cleanup
+  if (ck_array_put_unique(&old_mutators, (void *)thd) < 0) {
+    fprintf(stderr, "Unable to add thread data to GC list, existing\n");
+    exit(1);
+  }
+  ck_array_commit(&old_mutators);
+  pthread_mutex_unlock(&mutators_lock);
+}
+
+void gc_free_old_thread_data()
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  int freed = 0;
+
+  pthread_mutex_lock(&mutators_lock);
+  CK_ARRAY_FOREACH(&old_mutators, &iterator, &m){
+printf("JAE DEBUG - freeing old thread data...");
+    gc_thread_data_free(m);
+    if (!ck_array_remove(&old_mutators, (void *)m)) {
+      fprintf(stderr, "Error removing old mutator data\n");
+      exit(1);
+    }
+    freed = 1;
+printf(" done\n");
+  }
+  if (freed) {
+    ck_array_commit(&old_mutators);
+printf("commited old mutator data deletions\n");
+  }
   pthread_mutex_unlock(&mutators_lock);
 }
 
@@ -1195,6 +1234,11 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
     total_size, total_free, 
     freed, max_freed, time(NULL) - sweep_start);
 #endif
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "cleaning up any old thread data\n");
+#endif
+  gc_free_old_thread_data();
+  // Idle the GC thread
   ATOMIC_SET_IF_EQ(&gc_stage, STAGE_SWEEPING, STAGE_RESTING);
 }
 

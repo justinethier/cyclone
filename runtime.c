@@ -2811,13 +2811,10 @@ void Cyc_exit_thread(gc_thread_data *thd)
   // referenced? might want to do one more minor GC to clear the stack before
   // terminating the thread
 
-printf("DEBUG - exiting thread\n");
-// TODO: race condition, cannot free thread data if the collector is using it
+//printf("DEBUG - exiting thread\n");
+  // Remove thread from the list of mutators, and mark its data to be freed
   gc_remove_mutator(thd);
   ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
-// TODO: could maintain a dedicated list of old thread data to clean up...
-//  collector could do it at a time that is safe
-//  gc_thread_data_free(thd);
   pthread_exit(NULL); // For now, just a proof of concept
 }
 
