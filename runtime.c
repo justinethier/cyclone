@@ -2795,6 +2795,9 @@ to look at the lock-free structures provided by ck?
  */
 void Cyc_end_thread(gc_thread_data *thd) 
 {
+  // TODO: should we consider passing the current continuation (and args)
+  // as an argument? if we don't, will objects be collected that are still
+  // being used by active threads??
   mclosure0(clo, Cyc_exit_thread);
   GC(thd, &clo, thd->gc_args, 0);
 }

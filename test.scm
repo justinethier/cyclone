@@ -1,13 +1,37 @@
 (import (scheme base)
+        (scheme read)
         (scheme write))
 
 ;; Spawn off a thread
-(let ((t (thread-start! (make-thread (lambda () (write 'a))))))
-  ;; Busy wait
-  (letrec ((foo (lambda () (bar)))
-           (bar (lambda () (foo))))
-      (foo))
-)
+;(let ((t (thread-start! (make-thread (lambda () (write 'a))))))
+;  ;; Busy wait
+;  (letrec ((foo (lambda () (bar)))
+;           (bar (lambda () (foo))))
+;      (foo))
+;)
+
+;; A program to prove if cooperation is working, or if it
+;; is blocked by another thread. The (read) causes the main
+;; thread to block. The collector should be notified prior 
+;; to the blocking call being made, and the collector should
+;; be able to cooperate on the main thread's behalf:
+(define tmp '())
+(thread-start! 
+  (make-thread 
+    (lambda () 
+      ;(write 'a)
+      (letrec ((loop (lambda ()
+                      (set! tmp (cons "cons" tmp))
+                      ;(write tmp)
+                      (cond
+                       ((> (length tmp) 1000)
+                        (write "resetting tmp")
+                        (set! tmp '()))
+                       (else #f))
+                      (loop))))
+      (loop))
+    )))
+(read)
 
 ;;;; A temporary file to attempt to repro crashing / data corruption
 ;;(import (scheme base) (scheme write))
