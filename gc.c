@@ -836,7 +836,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 // TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
-  int i;
+  int i, status;
 #if GC_DEBUG_VERBOSE
   int debug_print = 0;
 #endif
@@ -847,8 +847,8 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   thd->pending_writes = 0;
   pthread_mutex_unlock(&(thd->lock));
 
-  if (thd->gc_status != ATOMIC_GET(&gc_status_col)) {
-    thd->gc_status = ATOMIC_GET(&gc_status_col);
+  status = ATOMIC_GET(&gc_status_col);
+  if (thd->gc_status != status) {
     if (thd->gc_status == STATUS_ASYNC) {
       // Async is done, so clean up old mark data from the last collection
       pthread_mutex_lock(&(thd->lock));
@@ -876,6 +876,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       pthread_mutex_unlock(&(thd->lock));
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
+    thd->gc_status = status;
   }
 #if GC_DEBUG_VERBOSE
   if (debug_print) {
