@@ -12,8 +12,6 @@ TODO:
 
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
-  TODO items:
-  - lock writes to symbol table
 
 - need to cooperate when a mutator is blocked
   might be able to stop a thread and do a minor GC on it, but no longjmp until after major GC.
