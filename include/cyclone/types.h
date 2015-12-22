@@ -52,6 +52,7 @@ typedef void *object;
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW
              , CYC_THREAD_STATE_RUNNABLE
+             , CYC_THREAD_STATE_BLOCKED
              , CYC_THREAD_STATE_TERMINATED
              } cyc_thread_state_type;
 
@@ -203,6 +204,8 @@ void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
+void gc_set_thread_state_blocked(gc_thread_data *thd);
+void gc_set_thread_state_runnable(gc_thread_data *thd);
 gc_heap *gc_get_heap();
 
 /////////////////////////////////////////////
