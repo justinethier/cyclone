@@ -85,6 +85,7 @@ struct gc_thread_data_t {
   void **mark_buffer;
   int mark_buffer_len;
   pthread_mutex_t lock;
+  int collector_cooperated;
   // Data needed for call history
   char **stack_traces;
   int stack_trace_idx;

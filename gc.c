@@ -1335,6 +1335,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->last_read = 0;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
+  thd->collector_cooperated = 0;
   if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
@@ -1373,7 +1374,16 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
                    CYC_THREAD_STATE_BLOCKED, 
                    CYC_THREAD_STATE_RUNNABLE);
-  (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
+  if (ATOMIC_GET(&(thd->collector_cooperated))) {
+    // TODO:
+    //  wait for thd->lock
+    //  unset async flag
+    //  transport result to heap, if necessary (IE, is not a value type)
+    //  set gc_args[0] to result
+    //  longjmp. assumes gc_cont already set by collector
+  } else {
+    (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
+  }
 }
 
 //// Unit testing:
