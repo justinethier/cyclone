@@ -1157,7 +1157,19 @@ void gc_wait_handshake()
 
       thread_status = ATOMIC_GET(&(m->thread_state));
       if (thread_status == CYC_THREAD_STATE_BLOCKED) {
-        // CAS
+        // Cooperate for the blocked mutator
+        if (statusc != STATUS_ASYNC) { // TODO: need code to handle this
+          ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
+          if (statusc == STATUS_SYNC1) {
+            // Async is done, so clean up old mark data from the last collection
+            pthread_mutex_lock(&(m->lock));
+            m->last_write = 0;
+            m->last_read = 0;
+            m->pending_writes = 0;
+            pthread_mutex_unlock(&(m->lock));
+          }
+          // TODO: else if (statusc == STATUS_ASYNC) 
+        }
       } else if (thread_status == CYC_THREAD_STATE_TERMINATED) {
         // Thread is no longer running
         break;
