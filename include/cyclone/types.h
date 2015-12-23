@@ -441,8 +441,8 @@ void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
-void gc_set_thread_blocked(gc_thread_data *thd, object cont);
-void gc_set_thread_runnable(gc_thread_data *thd);
+void gc_mutator_thread_blocked(gc_thread_data *thd, object cont);
+void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 gc_heap *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
 
