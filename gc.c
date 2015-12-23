@@ -771,7 +771,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 {
   int status = ATOMIC_GET(&gc_status_col),
       stage = ATOMIC_GET(&gc_stage);
-  if (thd->gc_status != STATUS_ASYNC) {
+  if (ATOMIC_GET(&(thd->gc_status)) != STATUS_ASYNC) {
 //fprintf(stderr, "DEBUG - GC sync marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
 //fprintf(stderr, " and new value %p ", value);
@@ -836,7 +836,7 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 // TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
-  int i, status;
+  int i, status_c, status_m;
 #if GC_DEBUG_VERBOSE
   int debug_print = 0;
 #endif
@@ -847,9 +847,16 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   thd->pending_writes = 0;
   pthread_mutex_unlock(&(thd->lock));
 
-  status = ATOMIC_GET(&gc_status_col);
-  if (thd->gc_status != status) {
-    if (thd->gc_status == STATUS_ASYNC) {
+  // TODO: I think below is thread safe, but this code is tricky.
+  //       worst case should be that some work is done twice if there is
+  //       a race condition
+  //
+  // TODO: should use an atomic comparison here
+  status_c = ATOMIC_GET(&gc_status_col);
+  status_m = ATOMIC_GET(&(thd->gc_status));
+  if (status_m != status_c) {
+    ATOMIC_SET_IF_EQ(&(thd->gc_status), status_m, status_c); 
+    if (status_m == STATUS_ASYNC) {
       // Async is done, so clean up old mark data from the last collection
       pthread_mutex_lock(&(thd->lock));
       thd->last_write = 0;
@@ -857,7 +864,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       thd->pending_writes = 0;
       pthread_mutex_unlock(&(thd->lock));
     }
-    else if (thd->gc_status == STATUS_SYNC2) {
+    else if (status_m == STATUS_SYNC2) {
 #if GC_DEBUG_VERBOSE
       debug_print = 1;
 #endif
@@ -876,7 +883,6 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
       pthread_mutex_unlock(&(thd->lock));
       thd->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
     }
-    thd->gc_status = status;
   }
 #if GC_DEBUG_VERBOSE
   if (debug_print) {
@@ -1141,15 +1147,18 @@ void gc_wait_handshake()
 
   CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
     while (1) {
+      // TODO: use an atomic comparison
       statusc = ATOMIC_GET(&gc_status_col);
       statusm = ATOMIC_GET(&(m->gc_status));
-      thread_status = ATOMIC_GET(&(m->thread_state));
       if (statusc == statusm) {
         // Handshake succeeded, check next mutator
         break;
       }
 
-      if (thread_status == CYC_THREAD_STATE_TERMINATED) {
+      thread_status = ATOMIC_GET(&(m->thread_state));
+      if (thread_status == CYC_THREAD_STATE_BLOCKED) {
+        // CAS
+      } else if (thread_status == CYC_THREAD_STATE_TERMINATED) {
         // Thread is no longer running
         break;
       }
