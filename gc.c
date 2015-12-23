@@ -1169,6 +1169,9 @@ void gc_wait_handshake()
             pthread_mutex_unlock(&(m->lock));
           }
           // TODO: else if (statusc == STATUS_ASYNC) 
+          /*
+          take m->lock (also have to handle on mutator, maybe just lock/unlock after exiting prim? but then how to know if async transition happened? does the collector need to set a flag?
+          */
         }
       } else if (thread_status == CYC_THREAD_STATE_TERMINATED) {
         // Thread is no longer running

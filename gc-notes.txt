@@ -14,6 +14,53 @@ TODO:
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
 
 - need to cooperate when a mutator is blocked
+ IMPLEMENTATION NOTES:
+
+ these become gc_cont and gc_args, so we need them for the wrapper:
+     GC(td,cfn,buf,1); return;
+ also need the result of the primitive, although that obviously is not
+ available until after it finishes blocking. will just have to live with that
+ constraint.
+
+ requirements:
+  - collector detects initiates async transition
+  - collector will need to perform a minor GC instead of this mutator
+    will need to pass in top of stack then, since collector won't have that.
+    can use address of continuation, if we can guarantee it will always be
+    allocated on the stack prior to wrapper call. or can just let the wrapper
+    do it, and stash it somewhere collector can get to it
+  - collector must set flag immediately to let mutator know what happened
+  - mutator must know when the transition occurs, and wait for it to finish
+  - can use mutator lock
+
+  will cont always be called via closcall1?
+  maybe we need to require prim accepts cont as an arg. might simplify
+  calling the wrapper.
+
+  then instead of a wrapper, the prim can call functions to set initial state and cleanup. it already does this to set thread state, so this isn't that big of a change (just call 2 other functions):
+
+  before_blocking {
+    set thread state ==> BLOCKING
+    set thd->gc_cont to cont, in case collector needs to use it
+    set stack_top to new field in "thd", again in case collector needs it
+      OR NOT, I think we can use stack_limit for this, to define the
+      range of stack addresses
+  }
+
+  after_blocking {
+    set thread state ==> RUNNABLE
+    check async flag
+    if set:
+      wait for thd->lock
+      unset async flag
+      transport result to heap, if necessary (not a value type)
+      set gc_args[0] to result
+      longjmp. assumes gc_cont already set by collector
+    else:
+      call into cont with result, just like today (see Cyc_io_read_line)
+  }
+
+ OLDER NOTES:
   might be able to stop a thread and do a minor GC on it, but no longjmp until after major GC.
   would need to figure out how to repack gc_cont and args
   optionally, some primitives can accept a cont, how to handle? I guess we would have to 
