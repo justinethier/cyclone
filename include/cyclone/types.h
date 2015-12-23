@@ -164,56 +164,6 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 #define gc_color_red  0 // Memory not to be GC'd, such as on the stack
 #define gc_color_blue 2 // Unallocated memory
 
-/* Utility functions */
-void **vpbuffer_realloc(void **buf, int *len);
-void **vpbuffer_add(void **buf, int *len, int i, void *obj);
-void vpbuffer_free(void **buf);
-
-/* GC prototypes */
-void gc_initialize();
-void gc_add_mutator(gc_thread_data *thd);
-void gc_remove_mutator(gc_thread_data *thd);
-gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
-int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
-char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
-void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
-void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
-size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
-gc_heap *gc_heap_last(gc_heap *h);
-size_t gc_heap_total_size(gc_heap *h);
-//size_t gc_heap_total_free_size(gc_heap *h);
-//size_t gc_collect(gc_heap *h, size_t *sum_freed);
-//void gc_mark(gc_heap *h, object obj);
-void gc_mark_globals(void);
-size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
-void gc_thr_grow_move_buffer(gc_thread_data *d);
-void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
-void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
-void gc_thread_data_free(gc_thread_data *thd);
-// Prototypes for mutator/collector:
-int gc_is_stack_obj(gc_thread_data *thd, object obj);
-void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
-void gc_mut_cooperate(gc_thread_data *thd, int buf_len);
-void gc_mark_gray(gc_thread_data *thd, object obj);
-void gc_mark_gray2(gc_thread_data *thd, object obj);
-void gc_collector_trace();
-void gc_mark_black(object obj);
-void gc_collector_mark_gray(object parent, object obj);
-void gc_empty_collector_stack();
-void gc_handshake(gc_status_type s);
-void gc_post_handshake(gc_status_type s);
-void gc_wait_handshake();
-void gc_start_collector();
-void gc_set_thread_state_blocked(gc_thread_data *thd);
-void gc_set_thread_state_runnable(gc_thread_data *thd);
-gc_heap *gc_get_heap();
-
-/////////////////////////////////////////////
-// GC Collection cycle
-
-// TODO:
-//void gc_collector()
-
 /* Show diagnostic information for the GC when program terminates */
 #define DEBUG_SHOW_DIAG 0
 
@@ -450,6 +400,51 @@ typedef union {
   integer_type integer_t;
   double_type double_t;
 } common_type;
+
+/* Utility functions */
+void **vpbuffer_realloc(void **buf, int *len);
+void **vpbuffer_add(void **buf, int *len, int i, void *obj);
+void vpbuffer_free(void **buf);
+
+/* GC prototypes */
+void gc_initialize();
+void gc_add_mutator(gc_thread_data *thd);
+void gc_remove_mutator(gc_thread_data *thd);
+gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size);
+int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
+char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
+void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
+void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
+size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
+gc_heap *gc_heap_last(gc_heap *h);
+size_t gc_heap_total_size(gc_heap *h);
+//size_t gc_heap_total_free_size(gc_heap *h);
+//size_t gc_collect(gc_heap *h, size_t *sum_freed);
+//void gc_mark(gc_heap *h, object obj);
+void gc_mark_globals(void);
+size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr);
+void gc_thr_grow_move_buffer(gc_thread_data *d);
+void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
+void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
+void gc_thread_data_free(gc_thread_data *thd);
+// Prototypes for mutator/collector:
+int gc_is_stack_obj(gc_thread_data *thd, object obj);
+void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
+void gc_mut_cooperate(gc_thread_data *thd, int buf_len);
+void gc_mark_gray(gc_thread_data *thd, object obj);
+void gc_mark_gray2(gc_thread_data *thd, object obj);
+void gc_collector_trace();
+void gc_mark_black(object obj);
+void gc_collector_mark_gray(object parent, object obj);
+void gc_empty_collector_stack();
+void gc_handshake(gc_status_type s);
+void gc_post_handshake(gc_status_type s);
+void gc_wait_handshake();
+void gc_start_collector();
+void gc_set_thread_state_blocked(gc_thread_data *thd);
+void gc_set_thread_state_runnable(gc_thread_data *thd);
+gc_heap *gc_get_heap();
+int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
 
 // Atomics section
 // TODO: this is all compiler dependent, need to use different macros depending

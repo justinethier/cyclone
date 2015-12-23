@@ -2254,12 +2254,10 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   } \
 }
 
-void GC(void *data, closure cont, object *args, int num_args)
+// Do a minor GC
+int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args)
 { 
-  char tmp;
   object temp;
-  object low_limit = &tmp; // This is one end of the stack...
-  object high_limit = ((gc_thread_data *)data)->stack_start;
   int i;
   int scani = 0, alloci = 0;
   int heap_grown = 0;
@@ -2374,10 +2372,22 @@ void GC(void *data, closure cont, object *args, int num_args)
     }
     scani++;
   }
+  return alloci;
+}
 
+/**
+ * Run a minor GC from a mutator thread.
+ * This function runs the core GC algorithm, cooperates with
+ * the collector, and then calls its continuation.
+ */
+void GC(void *data, closure cont, object *args, int num_args)
+{ 
+  char tmp;
+  object low_limit = &tmp; // This is one end of the stack...
+  object high_limit = ((gc_thread_data *)data)->stack_start;
+  int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data, alloci);
-
 #if GC_DEBUG_TRACE
   fprintf(stderr, "done with minor GC\n");
 #endif
