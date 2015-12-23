@@ -1490,9 +1490,9 @@ object Cyc_io_read_char(void *data, object cont, object port) {
     int c;
     Cyc_check_port(data, port);
     {
-        gc_set_thread_state_blocked((gc_thread_data *)data);
+        gc_set_thread_blocked((gc_thread_data *)data, cont);
         c = fgetc(((port_type *) port)->fp);
-        gc_set_thread_state_runnable((gc_thread_data *)data);
+        gc_set_thread_runnable((gc_thread_data *)data);
         if (c != EOF) {
             return obj_char2obj(c);
         }
@@ -1506,17 +1506,17 @@ object Cyc_io_read_line(void *data, object cont, object port) {
   char buf[1024];
   int i = 0, c;
   
-  gc_set_thread_state_blocked((gc_thread_data *)data);
+  gc_set_thread_blocked((gc_thread_data *)data, cont);
   while (1) {
     c = fgetc(stream);
     if (c == EOF && i == 0) {
-      gc_set_thread_state_runnable((gc_thread_data *)data);
+      gc_set_thread_runnable((gc_thread_data *)data);
       return_closcall1(data, cont, Cyc_EOF);
     } else if (c == EOF || i == 1023 || c == '\n') {
       buf[i] = '\0';
       {
         make_string(s, buf);
-        gc_set_thread_state_runnable((gc_thread_data *)data);
+        gc_set_thread_runnable((gc_thread_data *)data);
         return_closcall1(data, cont, &s);
       }
     }
@@ -1533,10 +1533,10 @@ object Cyc_io_peek_char(void *data, object cont, object port) {
     Cyc_check_port(data, port);
     {
         stream = ((port_type *) port)->fp;
-        gc_set_thread_state_blocked((gc_thread_data *)data);
+        gc_set_thread_blocked((gc_thread_data *)data, cont);
         c = fgetc(stream);
         ungetc(c, stream);
-        gc_set_thread_state_runnable((gc_thread_data *)data);
+        gc_set_thread_runnable((gc_thread_data *)data);
         if (c != EOF) {
             return obj_char2obj(c);
         }

@@ -1360,13 +1360,14 @@ void gc_thread_data_free(gc_thread_data *thd)
   }
 }
 
-void gc_set_thread_state_blocked(gc_thread_data *thd)
+void gc_set_thread_blocked(gc_thread_data *thd, object cont)
 {
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
                    CYC_THREAD_STATE_RUNNABLE,
                    CYC_THREAD_STATE_BLOCKED);
+  thd->gc_cont = cont;
 }
-void gc_set_thread_state_runnable(gc_thread_data *thd)
+void gc_set_thread_runnable(gc_thread_data *thd)
 {
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
                    CYC_THREAD_STATE_BLOCKED, 
