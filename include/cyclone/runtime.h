@@ -150,8 +150,8 @@ object Cyc_io_close_output_port(void *data, object port);
 object Cyc_io_flush_output_port(void *data, object port);
 object Cyc_io_delete_file(void *data, object filename);
 object Cyc_io_file_exists(void *data, object filename);
-object Cyc_io_read_char(void *data, object port);
-object Cyc_io_peek_char(void *data, object port);
+object Cyc_io_read_char(void *data, object cont, object port);
+object Cyc_io_peek_char(void *data, object cont, object port);
 object Cyc_io_read_line(void *data, object cont, object port);
 
 object Cyc_is_boolean(object o);

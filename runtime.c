@@ -1486,7 +1486,7 @@ object Cyc_io_file_exists(void *data, object filename) {
 }
 
 //  TODO: port arg is optional! (maybe handle that in expansion section??)
-object Cyc_io_read_char(void *data, object port) {
+object Cyc_io_read_char(void *data, object cont, object port) {
     int c;
     Cyc_check_port(data, port);
     {
@@ -1526,7 +1526,7 @@ object Cyc_io_read_line(void *data, object cont, object port) {
   return nil;
 }
 
-object Cyc_io_peek_char(void *data, object port) {
+object Cyc_io_peek_char(void *data, object cont, object port) {
     FILE *stream;
     int c;
 
@@ -1952,10 +1952,10 @@ void _delete_91file(void *data, object cont, object args) {
     return_closcall1(data, cont, Cyc_io_delete_file(data, car(args)));}
 void _read_91char(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "read-char", 1, args);
-    return_closcall1(data, cont, Cyc_io_read_char(data, car(args)));}
+    return_closcall1(data, cont, Cyc_io_read_char(data, cont, car(args)));}
 void _peek_91char(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "peek-char", 1, args);
-    return_closcall1(data, cont, Cyc_io_peek_char(data, car(args)));}
+    return_closcall1(data, cont, Cyc_io_peek_char(data, cont, car(args)));}
 void _Cyc_91read_91line(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "Cyc-read-line", 1, args);
     Cyc_io_read_line(data, cont, car(args));}

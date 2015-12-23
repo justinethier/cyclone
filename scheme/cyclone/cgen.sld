@@ -651,6 +651,8 @@
     ((eq? p 'string-length) "integer_type")
     ((eq? p 'apply)  "object")
     ((eq? p 'Cyc-read-line) "object")
+    ((eq? p 'read-char) "object")
+    ((eq? p 'peek-char) "object")
     ((eq? p 'command-line-arguments) "object")
     ((eq? p 'number->string) "object")
     ((eq? p 'symbol->string) "object")
@@ -681,12 +683,14 @@
              + - * / apply 
              command-line-arguments
              Cyc-read-line
+             read-char peek-char
              cons length vector-length cell))))
 
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
+                     read-char peek-char
                      symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 
