@@ -1360,18 +1360,20 @@ void gc_thread_data_free(gc_thread_data *thd)
   }
 }
 
-void gc_set_thread_blocked(gc_thread_data *thd, object cont)
+void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
 {
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
                    CYC_THREAD_STATE_RUNNABLE,
                    CYC_THREAD_STATE_BLOCKED);
   thd->gc_cont = cont;
 }
-void gc_set_thread_runnable(gc_thread_data *thd)
+
+void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
 {
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
                    CYC_THREAD_STATE_BLOCKED, 
                    CYC_THREAD_STATE_RUNNABLE);
+  (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
 }
 
 //// Unit testing:
