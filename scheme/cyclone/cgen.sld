@@ -89,6 +89,7 @@
  thd->gc_num_args = 1;
  gc_add_mutator(thd);
  Cyc_heap_init(heap_size);
+ thd->thread_state = CYC_THREAD_STATE_RUNNABLE;
  Cyc_start_thread(thd);
  return 0;}")
 
