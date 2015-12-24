@@ -53,6 +53,7 @@ typedef void *object;
 typedef enum { CYC_THREAD_STATE_NEW
              , CYC_THREAD_STATE_RUNNABLE
              , CYC_THREAD_STATE_BLOCKED
+             , CYC_THREAD_STATE_BLOCKED_COOPERATING
              , CYC_THREAD_STATE_TERMINATED
              } cyc_thread_state_type;
 
@@ -85,7 +86,6 @@ struct gc_thread_data_t {
   void **mark_buffer;
   int mark_buffer_len;
   pthread_mutex_t lock;
-  int collector_cooperated;
   // Data needed for call history
   char **stack_traces;
   int stack_trace_idx;

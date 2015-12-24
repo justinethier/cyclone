@@ -1140,7 +1140,7 @@ void gc_wait_handshake()
 {
   ck_array_iterator_t iterator;
   gc_thread_data *m;
-  int statusm, statusc, thread_status;
+  int statusm, statusc, thread_status, i, buf_len;
   struct timespec tim;
   tim.tv_sec = 0;
   tim.tv_nsec = 1000000; // 1 millisecond
@@ -1157,22 +1157,42 @@ void gc_wait_handshake()
 
       thread_status = ATOMIC_GET(&(m->thread_state));
       if (thread_status == CYC_THREAD_STATE_BLOCKED) {
-        // Cooperate for the blocked mutator
-        if (statusc != STATUS_ASYNC) { // TODO: need code to handle this
+        if (statusc == STATUS_SYNC1) {
           ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
-          if (statusc == STATUS_SYNC1) {
-            // Async is done, so clean up old mark data from the last collection
-            pthread_mutex_lock(&(m->lock));
-            m->last_write = 0;
-            m->last_read = 0;
-            m->pending_writes = 0;
-            pthread_mutex_unlock(&(m->lock));
-          }
-          // TODO: else if (statusc == STATUS_ASYNC) 
-          /*
-          take m->lock (also have to handle on mutator, maybe just lock/unlock after exiting prim? but then how to know if async transition happened? does the collector need to set a flag?
-          */
-        }
+          // Async is done, so clean up old mark data from the last collection
+          pthread_mutex_lock(&(m->lock));
+          m->last_write = 0;
+          m->last_read = 0;
+          m->pending_writes = 0;
+          pthread_mutex_unlock(&(m->lock));
+        }else if (statusc == STATUS_SYNC2) {
+          ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
+        } 
+// TODO: allow collector to cooperate on behalf of a mutator for the async phase
+//        else if (statusc == STATUS_ASYNC) {
+//printf("DEBUG - is mutator still blocked?\n");
+//          // Check again, if thread is still blocked we need to cooperate
+//          if (ATOMIC_SET_IF_EQ(&(m->thread_state), 
+//                               CYC_THREAD_STATE_BLOCKED,
+//                               CYC_THREAD_STATE_BLOCKED_COOPERATING)) {
+//printf("DEBUG - update mutator GC status\n");            
+//            ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
+//            pthread_mutex_lock(&(m->lock));
+//printf("DEBUG - collector is cooperating for blocked mutator\n");            
+//            buf_len = gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL, 0);
+//            // Mark thread "roots", based on code from mutator's cooperator
+//            gc_mark_gray(m, m->gc_cont);
+//            //for (i = 0; i < m->gc_num_args; i++) {
+//            //  gc_mark_gray(m, m->gc_args[i]);
+//            //}
+//            // Also, mark everything the collector moved to the heap
+//            for (i = 0; i < buf_len; i++) {
+//              gc_mark_gray(m, m->moveBuf[i]);
+//            }
+//            m->gc_alloc_color = ATOMIC_GET(&gc_color_mark);
+//            pthread_mutex_unlock(&(m->lock));
+//          }
+//        }
       } else if (thread_status == CYC_THREAD_STATE_TERMINATED) {
         // Thread is no longer running
         break;
@@ -1335,7 +1355,6 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->last_read = 0;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
-  thd->collector_cooperated = 0;
   if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
@@ -1367,35 +1386,45 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
                    CYC_THREAD_STATE_RUNNABLE,
                    CYC_THREAD_STATE_BLOCKED);
   thd->gc_cont = cont;
+  thd->gc_num_args = 0; // Will be set later, after collection
 }
 
 void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
 {
   ATOMIC_SET_IF_EQ(&(thd->thread_state), 
-                   CYC_THREAD_STATE_BLOCKED, 
+                   CYC_THREAD_STATE_BLOCKED,
                    CYC_THREAD_STATE_RUNNABLE);
-  if (ATOMIC_GET(&(thd->collector_cooperated))) {
-printf("DEBUG - Collector cooperated, wait for it to finish\n");
-    // wait for the collector to finish
-    pthread_mutex_lock(&(thd->lock));
-    pthread_mutex_unlock(&(thd->lock));
-    // unset async flag
-    while(!ATOMIC_SET_IF_EQ(&(thd->collector_cooperated), 1, 0)){}
-    // transport result to heap, if necessary (IE, is not a value type)
-    if (is_object_type(result)) {
-      fprintf(stderr, "Unhandled object type result, TODO: implement\n");
-      exit(1);
-    }
-    // Setup value to send to continuation
-    thd->gc_args[0] = result;
-    thd->gc_num_args = 1;
-    // Whoa.
-printf("DEBUG - Call into gc_cont setup by collector\n");
-    longjmp(*(thd->jmp_start), 1);
-  } else {
+//  // Transition from blocked back to runnable using CAS.
+//  // If we are unable to transition back, assume collector
+//  // has cooperated on behalf of this mutator thread.
+//  if (!ATOMIC_SET_IF_EQ(&(thd->thread_state), 
+//                   CYC_THREAD_STATE_BLOCKED, 
+//                   CYC_THREAD_STATE_RUNNABLE)){
+//printf("DEBUG - Collector cooperated, wait for it to finish\n");
+//    // wait for the collector to finish
+//    pthread_mutex_lock(&(thd->lock));
+//    pthread_mutex_unlock(&(thd->lock));
+//    // update thread status
+//    while(!ATOMIC_SET_IF_EQ(&(thd->thread_state), 
+//                            CYC_THREAD_STATE_BLOCKED_COOPERATING, 
+//                            CYC_THREAD_STATE_RUNNABLE)){}
+//    // transport result to heap, if necessary (IE, is not a value type)
+//    if (is_object_type(result)) {
+//      // TODO: need to move object to heap
+//      // TODO: also, then need to gc_mark_gray heap obj
+//      fprintf(stderr, "Unhandled object type result, TODO: implement\n");
+//      exit(1);
+//    }
+//    // Setup value to send to continuation
+//    thd->gc_args[0] = result;
+//    thd->gc_num_args = 1;
+//    // Whoa.
+//printf("DEBUG - Call into gc_cont after collector coop\n");
+//    longjmp(*(thd->jmp_start), 1);
+//  } else {
     // Collector didn't do anything; make a normal continuation call
     (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
-  }
+//  }
 }
 
 //// Unit testing:
