@@ -2157,10 +2157,17 @@ void gc_mark_globals()
 
 char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
 {
+  int acquired_lock = 0;
   if (grayed(obj)) {
-    pthread_mutex_lock(&(thd->lock));
+    // Try to acquire the lock, because we are already locked if
+    // the collector is cooperating on behalf of the mutator
+    if (pthread_mutex_trylock(&(thd->lock)) == 0) {
+      acquired_lock = 1;
+    }
     gc_mark_gray2(thd, hp);
-    pthread_mutex_unlock(&(thd->lock));
+    if (acquired_lock){
+      pthread_mutex_unlock(&(thd->lock));
+    }
   }
 
   // hp ==> new heap object, point to it from old stack object

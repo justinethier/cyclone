@@ -32,6 +32,7 @@
       (loop))
     )))
 (read)
+(write "main thread is done")
 
 ;;;; A temporary file to attempt to repro crashing / data corruption
 ;;(import (scheme base) (scheme write))
