@@ -1,13 +1,17 @@
 /** 
  * Cyclone Scheme
- * Copyright (c) 2015, Justin Ethier
+ * Copyright (c) 2015-2016, Justin Ethier
  * All rights reserved.
  *
- * Primary garbage collector used by the Cyclone runtime. 
- * Based on the tracing GC algorithm from:
- * "Implementing an on-the-fly garbage collector for Java", by Domani et al.
+ * Heap garbage collector used by the Cyclone runtime for major collections.
+ *
+ * Tracing GC algorithm is based on the one from "Implementing an on-the-fly 
+ * garbage collector for Java", by Domani et al.
  *
  * The heap implementation (alloc / sweep, etc) is based on code from Chibi Scheme.
+ *
+ * Note there is also a minor GC (in runtime.c) that collects objects allocated 
+ * on the stack, based on "Cheney on the MTA" (but without the copying collector). 
  */
 
 #include <ck_array.h>
