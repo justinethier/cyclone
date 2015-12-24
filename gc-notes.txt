@@ -12,7 +12,15 @@ TODO:
 
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
+  next steps:
+  - add mutex type, and associated functions from SRFI-18
+  - break out srfi 18 stuff into a (scheme srfi 18) module, or such
+  - start making core stuff thread safe. for example, test.scm sometimes
+    crashes, I think printing out result from (read)
+  - assume I/O and eval both have threading issues
 
+
+DONE:
 - need to cooperate when a mutator is blocked
  IMPLEMENTATION NOTES:
 
