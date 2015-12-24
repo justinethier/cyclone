@@ -2112,7 +2112,7 @@ TODO: should rename this function to make it more clear what is really going on
  */
 void Cyc_start_thread(gc_thread_data *thd)
 {
-  /* Tank, load the jump program... */
+  // Tank, load the jump program
   setjmp(*(thd->jmp_start));
 
 #if DEBUG_GC

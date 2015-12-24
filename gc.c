@@ -1375,13 +1375,25 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
                    CYC_THREAD_STATE_BLOCKED, 
                    CYC_THREAD_STATE_RUNNABLE);
   if (ATOMIC_GET(&(thd->collector_cooperated))) {
-    // TODO:
-    //  wait for thd->lock
-    //  unset async flag
-    //  transport result to heap, if necessary (IE, is not a value type)
-    //  set gc_args[0] to result
-    //  longjmp. assumes gc_cont already set by collector
+printf("DEBUG - Collector cooperated, wait for it to finish\n");
+    // wait for the collector to finish
+    pthread_mutex_lock(&(thd->lock));
+    pthread_mutex_unlock(&(thd->lock));
+    // unset async flag
+    while(!ATOMIC_SET_IF_EQ(&(thd->collector_cooperated), 1, 0)){}
+    // transport result to heap, if necessary (IE, is not a value type)
+    if (is_object_type(result)) {
+      fprintf(stderr, "Unhandled object type result, TODO: implement\n");
+      exit(1);
+    }
+    // Setup value to send to continuation
+    thd->gc_args[0] = result;
+    thd->gc_num_args = 1;
+    // Whoa.
+printf("DEBUG - Call into gc_cont setup by collector\n");
+    longjmp(*(thd->jmp_start), 1);
   } else {
+    // Collector didn't do anything; make a normal continuation call
     (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
   }
 }
