@@ -1172,7 +1172,14 @@ printf("DEBUG - is mutator still blocked?\n");
           // Check again, if thread is still blocked we need to cooperate
           if (ATOMIC_SET_IF_EQ(&(m->thread_state), 
                                CYC_THREAD_STATE_BLOCKED,
-                               CYC_THREAD_STATE_BLOCKED_COOPERATING)) {
+                               CYC_THREAD_STATE_BLOCKED_COOPERATING) 
+// TODO: seems to work OK for first collection, but then gc is blocked
+// again. tried this but there must be another issue...
+//            ||
+//              ATOMIC_SET_IF_EQ(&(m->thread_state), 
+//                               CYC_THREAD_STATE_BLOCKED_COOPERATING,
+//                               CYC_THREAD_STATE_BLOCKED_COOPERATING)
+              ) {
 printf("DEBUG - update mutator GC status\n");            
             ATOMIC_SET_IF_EQ(&(m->gc_status), statusm, statusc);
             pthread_mutex_lock(&(m->lock));
