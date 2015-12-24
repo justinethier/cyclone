@@ -1157,24 +1157,24 @@ void gc_wait_handshake()
 
       thread_status = ATOMIC_GET(&(m->thread_state));
       if (thread_status == CYC_THREAD_STATE_BLOCKED) {
-        if (statusc == STATUS_SYNC1) {
-          ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
+        if (statusm == STATUS_ASYNC) { // Prev state
+          ATOMIC_SET_IF_EQ(&(m->gc_status), statusm, statusc);
           // Async is done, so clean up old mark data from the last collection
           pthread_mutex_lock(&(m->lock));
           m->last_write = 0;
           m->last_read = 0;
           m->pending_writes = 0;
           pthread_mutex_unlock(&(m->lock));
-        }else if (statusc == STATUS_SYNC2) {
-          ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
-        } else if (statusc == STATUS_ASYNC) {
+        }else if (statusm == STATUS_SYNC1) {
+          ATOMIC_SET_IF_EQ(&(m->gc_status), statusm, statusc);
+        } else if (statusm == STATUS_SYNC2) {
 printf("DEBUG - is mutator still blocked?\n");
           // Check again, if thread is still blocked we need to cooperate
           if (ATOMIC_SET_IF_EQ(&(m->thread_state), 
                                CYC_THREAD_STATE_BLOCKED,
                                CYC_THREAD_STATE_BLOCKED_COOPERATING)) {
 printf("DEBUG - update mutator GC status\n");            
-            ATOMIC_SET_IF_EQ(&(m->gc_status), statusc, statusm);
+            ATOMIC_SET_IF_EQ(&(m->gc_status), statusm, statusc);
             pthread_mutex_lock(&(m->lock));
 printf("DEBUG - collector is cooperating for blocked mutator\n");            
             buf_len = gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL, 0);
