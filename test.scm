@@ -1,6 +1,7 @@
 (import (scheme base)
         (scheme read)
-        (scheme write))
+        (scheme write)
+        (srfi 18))
 
 ;; Spawn off a thread
 ;(let ((t (thread-start! (make-thread (lambda () (write 'a))))))
