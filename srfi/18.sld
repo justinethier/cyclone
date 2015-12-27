@@ -1,4 +1,5 @@
 (define-library (srfi 18)
+  (import (scheme base))
   (export
     thread?
     make-thread
