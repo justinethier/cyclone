@@ -43,7 +43,14 @@
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
-(define (lib:name ast) (cadr ast))
+(define (lib:name ast) 
+  (map
+    (lambda (atom)
+      (cond
+        ((number? atom)
+         (string->symbol (number->string atom)))
+        (else atom)))
+    (cadr ast)))
 
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
