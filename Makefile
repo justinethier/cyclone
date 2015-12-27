@@ -21,7 +21,8 @@ SMODULES = \
   scheme/cyclone/libraries \
   scheme/cyclone/macros \
   scheme/cyclone/transforms \
-  scheme/cyclone/util 
+  scheme/cyclone/util \
+  srfi/18
 SLDFILES = $(addsuffix .sld, $(SMODULES))
 COBJECTS=$(SLDFILES:.sld=.o)
 
@@ -60,6 +61,7 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
 bootstrap: icyc
 #	rm -rf $(BOOTSTRAP_DIR)
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
+	mkdir -p $(BOOTSTRAP_DIR)/srfi
 	mkdir -p $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/types.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp include/cyclone/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
@@ -67,6 +69,7 @@ bootstrap: icyc
 	cp include/cyclone/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
 	cp gc.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
@@ -84,6 +87,7 @@ bootstrap: icyc
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
@@ -98,7 +102,7 @@ tags:
 
 .PHONY: clean
 clean:
-	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
 
 install-includes:
@@ -122,12 +126,15 @@ install:
 	$(MKDIR) $(DESTDIR)$(INCDIR)
 	$(MKDIR) $(DESTDIR)$(DATADIR)
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
 
@@ -139,6 +146,8 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
 	$(RMDIR) $(DESTDIR)$(DATADIR)
