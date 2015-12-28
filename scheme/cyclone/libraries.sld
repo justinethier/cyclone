@@ -19,6 +19,7 @@
   )
   (export
     library?
+    lib:list->import-set
     lib:name
     lib:name->string
     lib:name->symbol
@@ -43,14 +44,19 @@
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
-(define (lib:name ast) 
+;; Convert a raw list to an import set. For example, a list might be
+;; (srfi 18) containing the number 18. An import set contains only symbols.
+(define (lib:list->import-set lis)
   (map
     (lambda (atom)
       (cond
         ((number? atom)
          (string->symbol (number->string atom)))
         (else atom)))
-    (cadr ast)))
+    lis))
+
+(define (lib:name ast) 
+  (lib:list->import-set (cadr ast)))
 
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
@@ -210,7 +216,7 @@
                    (find-deps! deps)
                  ))))
               import-set))))
-   (find-deps! imports)
+   (find-deps! (lib:list->import-set imports))
    ;`((deps ,libraries/deps) ; DEBUG
    ;  (result ,(lib:get-dep-list libraries/deps)))
    (lib:get-dep-list libraries/deps)
