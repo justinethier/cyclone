@@ -192,6 +192,7 @@ void Cyc_end_thread(gc_thread_data *thd);
 void Cyc_exit_thread(gc_thread_data *thd);
 object Cyc_thread_sleep(void *data, object timeout);
 void GC(void *,closure,object*,int);
+object Cyc_trigger_minor_gc(void *data, object cont);
 
 void Cyc_st_add(void *data, char *frame);
 void Cyc_st_print(void *data, FILE *out);
@@ -231,6 +232,7 @@ extern const object primitive_Cyc_91has_91cycle_127;
 extern const object primitive_Cyc_91spawn_91thread_67;
 extern const object primitive_Cyc_91end_91thread_67;
 extern const object primitive_thread_91sleep_67;
+extern const object primitive_Cyc_91minor_91gc;
 extern const object primitive__87;
 extern const object primitive__91;
 extern const object primitive__85;

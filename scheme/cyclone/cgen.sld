@@ -535,6 +535,7 @@
      ((eq? p 'substring)      "Cyc_substring")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
+     ((eq? p 'Cyc-minor-gc)  "Cyc_trigger_minor_gc")
      ((eq? p 'system)         "Cyc_system")
      ((eq? p 'assq)          "assq")
      ((eq? p 'assv)          "assq")
@@ -617,6 +618,7 @@
     substring
     Cyc-installation-dir
     command-line-arguments
+    Cyc-minor-gc
     assq
     assv
     assoc
@@ -655,6 +657,7 @@
     ((eq? p 'read-char) "object")
     ((eq? p 'peek-char) "object")
     ((eq? p 'command-line-arguments) "object")
+    ((eq? p 'Cyc-minor-gc) "object")
     ((eq? p 'number->string) "object")
     ((eq? p 'symbol->string) "object")
     ((eq? p 'substring) "object")
@@ -683,6 +686,7 @@
              string-length substring
              + - * / apply 
              command-line-arguments
+             Cyc-minor-gc
              Cyc-read-line
              read-char peek-char
              cons length vector-length cell))))
@@ -690,7 +694,7 @@
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
-       (member exp '(Cyc-read-line apply command-line-arguments number->string 
+       (member exp '(Cyc-read-line apply command-line-arguments Cyc-minor-gc number->string 
                      read-char peek-char
                      symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
@@ -698,7 +702,7 @@
 ;; Primitive functions that pass a continuation but have no other arguments
 (define (prim:cont/no-args? exp)
   (and (prim? exp)
-       (member exp '(command-line-arguments))))
+       (member exp '(command-line-arguments Cyc-minor-gc))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)

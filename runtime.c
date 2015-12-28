@@ -1730,6 +1730,8 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args) {
 void _thread_91sleep_67(void *data, object cont, object args) {
     Cyc_check_num_args(data, "thread-sleep!", 1, args);
     return_closcall1(data, cont, Cyc_thread_sleep(data, car(args))); }
+void _Cyc_91minor_91gc_primitive(void *data, object cont, object args){
+    Cyc_trigger_minor_gc(data, cont); }
 void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
     dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
@@ -2265,6 +2267,13 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   } \
 }
 
+object Cyc_trigger_minor_gc(void *data, object cont) {
+  gc_thread_data* thd = (gc_thread_data *)data;
+  thd->gc_args = boolean_t;
+  GC(data, cont, thd->gc_args, 1);
+  return nil;
+}
+
 // Do a minor GC
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args)
 { 
@@ -2399,9 +2408,9 @@ void GC(void *data, closure cont, object *args, int num_args)
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data, alloci);
-#if GC_DEBUG_TRACE
+//#if GC_DEBUG_TRACE
   fprintf(stderr, "done with minor GC\n");
-#endif
+//#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
@@ -2537,6 +2546,7 @@ static primitive_type Cyc_91has_91cycle_127_primitive = {{0}, primitive_tag, "Cy
 static primitive_type Cyc_91spawn_91thread_67_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_67};
 static primitive_type Cyc_91end_91thread_67_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_67};
 static primitive_type thread_91sleep_67_primitive = {{0}, primitive_tag, "thread-sleep!", &_thread_91sleep_67};
+static primitive_type Cyc_91minor_91gc_primitive = {{0}, primitive_tag, "Cyc-minor-gc", &_Cyc_91minor_91gc_primitive};
 static primitive_type _87_primitive = {{0}, primitive_tag, "+", &__87};
 static primitive_type _91_primitive = {{0}, primitive_tag, "-", &__91};
 static primitive_type _85_primitive = {{0}, primitive_tag, "*", &__85};
@@ -2657,6 +2667,7 @@ const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
 const object primitive_Cyc_91spawn_91thread_67 = &Cyc_91spawn_91thread_67_primitive;
 const object primitive_Cyc_91end_91thread_67 = &Cyc_91end_91thread_67_primitive;
 const object primitive_thread_91sleep_67 = &thread_91sleep_67_primitive;
+const object primitive_Cyc_91minor_91gc = &Cyc_91minor_91gc_primitive;
 const object primitive__87 = &_87_primitive;
 const object primitive__91 = &_91_primitive;
 const object primitive__85 = &_85_primitive;

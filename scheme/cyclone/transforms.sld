@@ -454,6 +454,7 @@
      Cyc-spawn-thread!
      Cyc-end-thread!
      thread-sleep!
+     Cyc-minor-gc
      Cyc-stdout
      Cyc-stdin
      Cyc-stderr
@@ -560,6 +561,7 @@
                   Cyc-spawn-thread!
                   Cyc-end-thread!
                   thread-sleep!
+                  Cyc-minor-gc
                   apply
                   %halt
                   exit
