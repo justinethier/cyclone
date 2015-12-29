@@ -7,6 +7,14 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
+- create a branch and try to use CK atomics. goals:
+  - make sure this is stable on x86 (first priority)
+  - see if this will build/work on ARM
+  - rename SET to CAS (compare and swap)
+  - anything else?
+  - This is higher priority than mutexes (though not by much), because we want cyclone to work on both ARM and x86.
+
+
 - bring exceptions into local thread data? anything else?
   also, will probably need to lock shared resources such as I/O...
 
