@@ -7,6 +7,7 @@
  */
 
 #include <ck_hs.h>
+#include <ck_pr.h>
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 #include "cyclone/ck_ht_hash.h"
@@ -2408,9 +2409,9 @@ void GC(void *data, closure cont, object *args, int num_args)
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data, alloci);
-//#if GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
   fprintf(stderr, "done with minor GC\n");
-//#endif
+#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
@@ -2796,7 +2797,7 @@ void *Cyc_init_thread(object thunk)
 //  returns instance so would need to malloc here
 //  would also need to update termination code to free that memory
   gc_add_mutator(thd);
-  ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE);
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE); 
   Cyc_start_thread(thd);
   return NULL;
 }
@@ -2860,7 +2861,7 @@ void Cyc_exit_thread(gc_thread_data *thd)
 //printf("DEBUG - exiting thread\n");
   // Remove thread from the list of mutators, and mark its data to be freed
   gc_remove_mutator(thd);
-  ATOMIC_SET_IF_EQ(&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
   pthread_exit(NULL); // For now, just a proof of concept
 }
 
