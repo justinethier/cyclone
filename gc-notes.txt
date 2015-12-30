@@ -7,15 +7,7 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
-- create a branch and try to use CK atomics. goals:
-  - make sure this is stable on x86 (first priority)
-  - see if this will build/work on ARM
-  - rename SET to CAS (compare and swap)
-  - anything else?
-  - This is higher priority than mutexes (though not by much), because we want cyclone to work on both ARM and x86.
-
-- bring exceptions into local thread data? anything else?
-  also, will probably need to lock shared resources such as I/O...
+- create a branch and try to use CK atomics. - seems done, just keep an eye on this
 
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
@@ -26,6 +18,9 @@ TODO:
   - start making core stuff thread safe. for example, test.scm sometimes
     crashes, I think printing out result from (read)
   - assume I/O and eval both have threading issues
+
+- bring exceptions into local thread data? anything else?
+  also, will probably need to lock shared resources such as I/O...
 
 
 DONE:
