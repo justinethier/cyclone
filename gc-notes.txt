@@ -15,6 +15,9 @@ TODO:
   - add mutex type, and associated functions from SRFI-18
     when allocating a mutex, probably should do it on thread since by definition these are
     shared among multiple threads
+  - may be able to free mutex using mutex_destroy from within gc_sweep.
+    unfortunately it requires type checking each object before free, which is not ideal
+
   - start making core stuff thread safe. for example, test.scm sometimes
     crashes, I think printing out result from (read)
   - assume I/O and eval both have threading issues
