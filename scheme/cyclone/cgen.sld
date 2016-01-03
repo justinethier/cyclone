@@ -534,8 +534,8 @@
      ((eq? p 'string-set!)    "Cyc_string_set")
      ((eq? p 'substring)      "Cyc_substring")
      ((eq? p 'make-mutex)     "Cyc_make_mutex")
-     ((eq? p 'mutex-lock)     "Cyc_mutex_lock")
-     ((eq? p 'mutex-unlock)   "Cyc_mutex_unlock")
+     ((eq? p 'mutex-lock!)    "Cyc_mutex_lock")
+     ((eq? p 'mutex-unlock!)  "Cyc_mutex_unlock")
      ((eq? p 'mutex?)         "Cyc_is_mutex")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
@@ -621,8 +621,8 @@
     string-set!
     substring
     make-mutex
-    mutex-lock
-    mutex-unlock
+    mutex-lock!
+    mutex-unlock!
     Cyc-installation-dir
     command-line-arguments
     Cyc-minor-gc
@@ -672,8 +672,8 @@
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
     ((eq? p 'make-mutex) "object")
-    ((eq? p 'mutex-lock) "object")
-    ((eq? p 'mutex-unlock) "object")
+    ((eq? p 'mutex-lock!) "object")
+    ((eq? p 'mutex-unlock!) "object")
     ((eq? p 'Cyc-installation-dir) "object")
     (else #f)))
 
@@ -705,14 +705,14 @@
 (define (prim:cont? exp)
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments Cyc-minor-gc number->string 
-                     read-char peek-char
+                     read-char peek-char mutex-lock!
                      symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Primitive functions that pass a continuation but have no other arguments
 (define (prim:cont/no-args? exp)
   (and (prim? exp)
-       (member exp '(command-line-arguments Cyc-minor-gc))))
+       (member exp '(command-line-arguments make-mutex Cyc-minor-gc))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
