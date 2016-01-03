@@ -533,6 +533,10 @@
      ((eq? p 'string-ref)     "Cyc_string_ref")
      ((eq? p 'string-set!)    "Cyc_string_set")
      ((eq? p 'substring)      "Cyc_substring")
+     ((eq? p 'make-mutex)     "Cyc_make_mutex")
+     ((eq? p 'mutex-lock)     "Cyc_mutex_lock")
+     ((eq? p 'mutex-unlock)   "Cyc_mutex_unlock")
+     ((eq? p 'mutex?)         "Cyc_is_mutex")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
      ((eq? p 'Cyc-minor-gc)  "Cyc_trigger_minor_gc")
@@ -616,6 +620,9 @@
     string-ref
     string-set!
     substring
+    make-mutex
+    mutex-lock
+    mutex-unlock
     Cyc-installation-dir
     command-line-arguments
     Cyc-minor-gc
@@ -664,6 +671,9 @@
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
+    ((eq? p 'make-mutex) "object")
+    ((eq? p 'mutex-lock) "object")
+    ((eq? p 'mutex-unlock) "object")
     ((eq? p 'Cyc-installation-dir) "object")
     (else #f)))
 
