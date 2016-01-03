@@ -226,6 +226,7 @@
       (list 'make-mutex  make-mutex)
       (list 'mutex-lock! mutex-lock!)
       (list 'mutex-unlock! mutex-unlock!)
+      (list 'mutex? mutex?)
       (list 'boolean? boolean?)
       (list 'char? char?)
       (list 'eof-object? eof-object?)

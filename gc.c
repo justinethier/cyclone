@@ -480,6 +480,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == double_tag) return gc_heap_align(sizeof(double_type));
   if (t == port_tag) return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag) return gc_heap_align(sizeof(cvar_type));
+  if (t == mutex_tag) return gc_heap_align(sizeof(mutex_type));
   
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %ld\n", obj, t);
   exit(1);
