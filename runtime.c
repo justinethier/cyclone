@@ -1244,14 +1244,27 @@ object Cyc_make_mutex(void *data) {
   return lock;
 }
 
-object Cyc_mutex_lock(void *data, object obj) {
-  // TODO: set for cooperation
-  // TODO: actually lock
+object Cyc_mutex_lock(void *data, object cont, object obj) {
+  mutex m = (mutex) obj;
+  Cyc_check_mutex(data, obj);
+  gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+  if (pthread_mutex_lock(&(m->lock)) != 0) {
+    fprintf(stderr, "Error locking mutex\n");
+    exit(1);
+  }
+  gc_mutator_thread_runnable(
+    (gc_thread_data *)data, 
+    boolean_t);
   return boolean_t;
 }
 
 object Cyc_mutex_unlock(void *data, object obj) {
-  // TODO: actually unlock
+  mutex m = (mutex) obj;
+  Cyc_check_mutex(data, obj);
+  if (pthread_mutex_unlock(&(m->lock)) != 0) {
+    fprintf(stderr, "Error unlocking mutex\n");
+    exit(1);
+  }
   return boolean_t;
 }
 
@@ -1919,7 +1932,7 @@ void _Cyc_make_mutex(void *data, object cont, object args) {
       return_closcall1(data, cont, c); }}
 void _Cyc_mutex_lock(void *data, object cont, object args) {
     Cyc_check_num_args(data, "mutex-lock!", 1, args);
-    { object c = Cyc_mutex_lock(data, car(args));
+    { object c = Cyc_mutex_lock(data, cont, car(args));
       return_closcall1(data, cont, c); }}
 void _Cyc_mutex_unlock(void *data, object cont, object args) {
     Cyc_check_num_args(data, "mutex-unlock!", 1, args);

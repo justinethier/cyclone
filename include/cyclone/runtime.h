@@ -124,7 +124,7 @@ object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, object len, object fill);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_make_mutex(void *data);
-object Cyc_mutex_lock(void *data, object obj);
+object Cyc_mutex_lock(void *data, object cont, object obj);
 object Cyc_mutex_unlock(void *data, object obj);
 object Cyc_number2string(void *d, object cont, object n);
 object Cyc_symbol2string(void *d, object cont, object sym) ;
