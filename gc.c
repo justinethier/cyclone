@@ -333,6 +333,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       hp->pvar = ((cvar_type *) obj)->pvar;
       return (char *)hp;
     }
+    case mutex_tag: {
+      mutex_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = mutex_tag;
+      // NOTE: don't copy mutex itself, caller will do that (this is a special case)
+      return (char *)hp;
+    }
     case forward_tag:
       return (char *)forward(obj);
     case eof_tag:

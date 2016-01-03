@@ -239,10 +239,9 @@ typedef struct {gc_header_type hdr; tag_type tag; object *pvar;} cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) cvar_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cvar_tag; n.pvar = v;
 
-// TODO: mutex type
-// thinking about maybe using cvar_type with a mutex tag
-// add an alloc_mutex macro/function, because these will only go on the heap
-
+/* Define mutex type */
+typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;
+typedef mutex_type *mutex;
 
 /* Define boolean type. */
 typedef struct {gc_header_type hdr; const tag_type tag; const char *pname;} boolean_type;

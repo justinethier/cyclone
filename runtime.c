@@ -45,7 +45,7 @@ const char *tag_names[21] = { \
  , "C primitive" \
  , "vector" \
  , "macro" \
- , "Reserved for future use" \
+ , "mutex" \
  , "Reserved for future use" };
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
@@ -542,6 +542,9 @@ object Cyc_display(object x, FILE *port)
     case cvar_tag:
       Cyc_display(Cyc_get_cvar(x), port);
       break;
+    case mutex_tag:
+      fprintf(port, "<mutex %p>", x);
+      break;
     case boolean_tag:
       fprintf(port, "#%s",((boolean_type *) x)->pname);
       break;
@@ -820,6 +823,11 @@ object Cyc_is_vector(object o){
 
 object Cyc_is_port(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == port_tag)
+        return boolean_t;
+    return boolean_f;}
+
+object Cyc_is_mutex(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == mutex_tag)
         return boolean_t;
     return boolean_f;}
 
@@ -1213,6 +1221,36 @@ object Cyc_command_line_arguments(void *data, object cont) {
     lis = pl;
   }
   return_closcall1(data, cont, lis);
+}
+
+/**
+ * Create a new mutex by allocating it on the heap. This is different than 
+ * other types of objects because by definition a mutex will be used by
+ * multiple threads, so no need to risk having the non-creating thread pick
+ * up a stack object ref by mistake.
+ */
+object Cyc_make_mutex(void *data) {
+//typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;
+//typedef mutex_type *mutex;
+  int heap_grown;
+  mutex lock;
+  mutex_type tmp;
+  tmp.hdr.mark = gc_color_red;
+  tmp.hdr.grayed = 0;
+  tmp.tag = mutex_tag;
+  lock = gc_alloc(Cyc_heap, sizeof(mutex_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+  if (pthread_mutex_init(&(lock->lock), NULL) != 0) {
+    fprintf(stderr, "Unable to make mutex\n");
+    exit(1);
+  }
+}
+
+object Cyc_lock_mutex(void *data, object obj) {
+  return boolean_t;
+}
+
+object Cyc_unlock_mutex(void *data, object obj) {
+  return boolean_t;
 }
 
 object Cyc_make_vector(void *data, object cont, object len, object fill) {
