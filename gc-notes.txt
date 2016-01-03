@@ -6,17 +6,17 @@ Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC
 Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
-TODO:
-- create a branch and try to use CK atomics. - seems done, just keep an eye on this
-
-- multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
-  part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
-  next steps:
+Mutex TODO:
   - add mutex type, and associated functions from SRFI-18
     when allocating a mutex, probably should do it on thread since by definition these are
     shared among multiple threads
   - may be able to free mutex using mutex_destroy from within gc_sweep.
     unfortunately it requires type checking each object before free, which is not ideal
+
+TODO:
+- multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
+  part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
+  next steps:
 
   - start making core stuff thread safe. for example, test.scm sometimes
     crashes, I think printing out result from (read)

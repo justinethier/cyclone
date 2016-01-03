@@ -11,6 +11,10 @@
 ;      (foo))
 ;)
 
+(define tmp2 (make-mutex))
+(mutex-lock! tmp2)
+(mutex-unlock! tmp2)
+
 ;; A program to prove if cooperation is working, or if it
 ;; is blocked by another thread. The (read) causes the main
 ;; thread to block. The collector should be notified prior 
