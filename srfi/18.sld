@@ -9,6 +9,7 @@
     thread-start!
     thread-yield!
 ;    thread-terminate!
+    ; For now, these are built-ins. No need for them here: make-mutex mutex-lock! mutex-unlock!
   )
   (begin
     ;; Threading

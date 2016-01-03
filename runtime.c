@@ -1230,8 +1230,6 @@ object Cyc_command_line_arguments(void *data, object cont) {
  * up a stack object ref by mistake.
  */
 object Cyc_make_mutex(void *data) {
-//typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;
-//typedef mutex_type *mutex;
   int heap_grown;
   mutex lock;
   mutex_type tmp;
@@ -1243,13 +1241,17 @@ object Cyc_make_mutex(void *data) {
     fprintf(stderr, "Unable to make mutex\n");
     exit(1);
   }
+  return lock;
 }
 
-object Cyc_lock_mutex(void *data, object obj) {
+object Cyc_mutex_lock(void *data, object obj) {
+  // TODO: set for cooperation
+  // TODO: actually lock
   return boolean_t;
 }
 
-object Cyc_unlock_mutex(void *data, object obj) {
+object Cyc_mutex_unlock(void *data, object obj) {
+  // TODO: actually unlock
   return boolean_t;
 }
 
@@ -1912,6 +1914,20 @@ void _cyc_string_91ref(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string-ref", 2, args);
     { object c = Cyc_string_ref(data, car(args), cadr(args));
       return_closcall1(data, cont, c); }}
+void _Cyc_make_mutex(void *data, object cont, object args) {
+    { object c = Cyc_make_mutex(data);
+      return_closcall1(data, cont, c); }}
+void _Cyc_mutex_lock(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex-lock!", 1, args);
+    { object c = Cyc_mutex_lock(data, car(args));
+      return_closcall1(data, cont, c); }}
+void _Cyc_mutex_unlock(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex-unlock!", 1, args);
+    { object c = Cyc_mutex_unlock(data, car(args));
+      return_closcall1(data, cont, c); }}
+void _mutex_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex?", 1, args);
+    return_closcall1(data, cont, Cyc_is_mutex(car(args))); }
 void _Cyc_91installation_91dir(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-installation-dir", 1, args);
     Cyc_installation_dir(data, cont, car(args));}
@@ -2655,6 +2671,10 @@ static primitive_type string_91length_primitive = {{0}, primitive_tag, "string-l
 static primitive_type substring_primitive = {{0}, primitive_tag, "substring", &_cyc_substring};
 static primitive_type string_91ref_primitive = {{0}, primitive_tag, "string-ref", &_cyc_string_91ref};
 static primitive_type string_91set_67_primitive = {{0}, primitive_tag, "string-set!", &_cyc_string_91set_67};
+static primitive_type make_91mutex_primitive = {{0}, primitive_tag, "make-mutex", &_Cyc_make_mutex};
+static primitive_type mutex_91lock_67_primitive = {{0}, primitive_tag, "mutex-lock!", &_Cyc_mutex_lock};
+static primitive_type mutex_91unlock_67_primitive = {{0}, primitive_tag, "mutex-unlock!", &_Cyc_mutex_unlock};
+static primitive_type mutex_127_primitive = {{0}, primitive_tag, "mutex?", &_mutex_127};
 static primitive_type Cyc_91installation_91dir_primitive = {{0}, primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir};
 static primitive_type command_91line_91arguments_primitive = {{0}, primitive_tag, "command-line-arguments", &_command_91line_91arguments};
 static primitive_type system_primitive = {{0}, primitive_tag, "system", &_cyc_system};
@@ -2778,6 +2798,10 @@ const object primitive_string_91length = &string_91length_primitive;
 const object primitive_substring = &substring_primitive;
 const object primitive_string_91ref = &string_91ref_primitive;
 const object primitive_string_91set_67 = &string_91set_67_primitive;
+const object primitive_make_91mutex = &make_91mutex_primitive;
+const object primitive_mutex_91lock_67 = &mutex_91lock_67_primitive; 
+const object primitive_mutex_91unlock_67 = &mutex_91unlock_67_primitive;
+const object primitive_mutex_127 = &mutex_127_primitive;
 const object primitive_Cyc_91installation_91dir = &Cyc_91installation_91dir_primitive;
 const object primitive_command_91line_91arguments = &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;
