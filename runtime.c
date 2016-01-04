@@ -2176,9 +2176,6 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 
 /**
  * Start a thread's trampoline
-
-TODO: should rename this function to make it more clear what is really going on
-
  */
 void Cyc_start_trampoline(gc_thread_data *thd)
 {
