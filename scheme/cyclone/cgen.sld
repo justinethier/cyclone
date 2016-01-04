@@ -671,7 +671,7 @@
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
-    ((eq? p 'make-mutex) "object")
+    ;((eq? p 'make-mutex) "object")
     ((eq? p 'mutex-lock!) "object")
     ((eq? p 'mutex-unlock!) "object")
     ((eq? p 'Cyc-installation-dir) "object")
@@ -696,7 +696,8 @@
              string-length substring
              + - * / apply 
              command-line-arguments
-             make-mutex mutex-lock! mutex-unlock!
+             ;make-mutex 
+             mutex-lock! mutex-unlock!
              Cyc-minor-gc
              Cyc-read-line
              read-char peek-char
@@ -710,7 +711,7 @@
                      symbol->string list->string substring string-append
                      make-vector list->vector Cyc-installation-dir))))
 
-;; Primitive functions that pass a continuation but have no other arguments
+;; Primitive functions that pass a continuation or thread data but have no other arguments
 (define (prim:cont/no-args? exp)
   (and (prim? exp)
        (member exp '(command-line-arguments make-mutex Cyc-minor-gc))))
@@ -897,7 +898,8 @@
                 (c:append 
                   (let ()
                     ;; Add a comma if necessary
-                    (if (str-ending? (c:body c-fun) "(")
+                    (if (or (str-ending? (c:body c-fun) "(")
+                            (prim:cont/no-args? fun))
                       c-fun
                       (c:append c-fun (c-code ", "))))
                   c-args*)
