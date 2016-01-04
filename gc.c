@@ -413,28 +413,20 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
   size = gc_heap_align(size);
   result = gc_try_alloc(h, size, obj, thd);
   if (!result) {
-    // TODO: may want to consider not doing this now, and implementing gc_collect as
-    // part of the runtime, since we would have all of the roots, stack args, 
-    // etc available there.
-//    max_freed = gc_collect(h); TODO: this does not work yet!
-//
-//    total_size = gc_heap_total_size(h);
-//    if (((max_freed < size) ||
-//         ((total_size > sum_freed) &&
-//          (total_size - sum_freed) > (total_size * 0.75))) // Grow ratio
-//        && ((!h->max_size) || (total_size < h->max_size))) {
-      gc_grow_heap(h, size, 0);
-      *heap_grown = 1;
-//    }
+    // A vanilla mark&sweep collector would collect now, but unfortunately
+    // we can't do that because we have to go through multiple stages, some
+    // of which are asynchronous. So... no choice but to grow the heap.
+    gc_grow_heap(h, size, 0);
+    *heap_grown = 1;
     result = gc_try_alloc(h, size, obj, thd);
     if (!result) {
       fprintf(stderr, "out of memory error allocating %d bytes\n", size);
-      exit(1); // TODO: throw error???
+      exit(1); // could throw error, but OOM is a major issue, so...
     }
   }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "alloc %p size = %d, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
-  //// TODO: Debug check, remove (ifdef it) once GC is stabilized
+  // Debug check, should no longer be necessary
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
   //}
@@ -1072,8 +1064,6 @@ printf("DEBUG - collector is cooperating for blocked mutator\n");
       // At least for now, just give up quantum and come back to
       // this quickly to test again. This probably could be more
       // efficient.
-      // TODO: also need to consider mutators that are blocked and
-      // not cooperating.
       nanosleep(&tim, NULL);     
     }
   }
