@@ -26,7 +26,6 @@
 // variables shared between threads
 static int        gc_color_mark = 1; // Black, is swapped during GC
 static int        gc_color_clear = 3; // White, is swapped during GC
-//static const int  gc_color_grey = 4; // TODO: appears unused, clean up
 // unfortunately this had to be split up; const colors are located in types.h
 
 static int gc_status_col = STATUS_SYNC1;
@@ -403,11 +402,6 @@ void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd)
   return NULL; 
 }
 
-//TODO: need a heap lock.
-//lock during - alloc, sweep? but now sweep becomes a stop the world...
-// maybe only lock during each individual operation, not for a whole
-// sweep or alloc
-
 void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown) 
 {
   void *result = NULL;
@@ -678,95 +672,9 @@ void vpbuffer_free(void **buf)
 {
   free(buf);
 }
-
-
-// void gc_init()
-// {
-// }
 // END heap definitions
 
-
-/*
-Rough plan for how to implement new GC algorithm. We need to do this in
-phases in order to have any hope of getting everything working. Let's prove
-the algorithm out, then extend support to multiple mutators if everything
-looks good.
-
-PHASE 1 - separation of mutator and collector into separate threads
-
-need to syncronize access (preferably via atomics) for anything shared between the 
-collector and mutator threads.
-
-can cooperate be part of a minor gc? in that case, the 
-marking could be done as part of allocation
-
-but then what exactly does that mean, to mark gray? because
-objects moved to the heap will be set to mark color at that 
-point (until collector thread finishes). but would want
-objects on the heap referenced by them to be traced, so 
-I suppose that is the purpose of the gray, to indicate
-those still need to be traced. but need to think this through,
-do we need the markbuffer and last read/write? do those make
-  sense with mta approach (assume so)???
-
-ONLY CONCERN - what happens if an object on the stack 
-has a reference to an object on the heap that is collected?
-but how would this happen? collector marks global roots before
-telling mutators to go to async, and once mutators go async
-any allocations will not be collected. also once collectors go
-async they have a chance to markgray, which will include the write
-barrier. so given that, is it still possible for an old heap ref to 
-sneak into a stack object during the async phase?
-
-more questions on above point:
-- figure out how/if after cooperation/async, can a stack object pick
-  up a reference to a heap object that will be collected during that GC cycle?
-  need to be able to prevent this somehow...
-
-- need to figure out real world use case(s) where this could happen, to try and
-  figure out how to address this problem
-
-from my understanding of the paper, the write barrier prevents this. consider, at the
-start of async, the mutator's roots, global roots, and anything on the write barrier
-have been marked. any new objects will be allocated as marked. that way, anything the
-mutator could later access is either marked or will be after tracing. the only exception
-is if the mutator changes a reference such that tracing will no longer find an object.
-but the write barrier prevents this - during tracing a heap update causes the old
-object to be marked as well. so it will eventually be traced, and there should be no
-dangling objects after GC completes.
-
-PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
-
-- how does the collector handle stack objects that reference objects from 
-  another thread's stack?
-  * minor GC will only relocate that thread's objects, so another thread's would not
-    be moved. however, if another thread references one of the GC'd thread's
-    stack objects, it will now get a forwarding pointer. even worse, what if the
-    other thread is blocked and the reference becomes corrupt due to the stack
-    longjmp? there are major issues with one thread referencing another thread's
-    objects.
-  * had considered adding a stack bit to the object header. if we do this and
-    initialize it during object creation, a thread could in theory detect
-    if an object belongs to another thread. but it might be expensive because
-    a read barrier would have to be used to check the object's stack bit and
-    address (to see if it is on this heap).
-  * alternatively, how would one thread pick up a reference to another one's
-    objects? are there any ways to detect these events and deal with them?
-    it might be possible to detect such a case and allocate the object on the heap,
-    replacing it with a fwd pointer. unfortunately that means we need a read 
-    barrier (ick) to handle forwarding pointers in arbitrary places
-  * but does that mean we need a fwd pointer to be live for awhile? do we need
-    a read barrier to get this to work? obviously we want to avoid a read barrier
-    at all costs.
-- what are the real costs of allowing forwarding pointers to exist outside of just
-  minor GC? assume each runtime primitive would need to be updated to handle the
-  case where the obj is a fwd pointer - is it just a matter of each function 
-  detecting this and (possibly) calling itself again with the 'real' address?
-  obviously that makes the runtime slower due to more checks, but maybe it is
-  not *so* bad?
-*/
-
-// tri-color GC section, WIP
+// Tri-color GC section
 
 /////////////////////////////////////////////
 // GC functions called by the Mutator threads
@@ -784,29 +692,24 @@ int gc_is_stack_obj(gc_thread_data *thd, object obj)
 }
 
 /**
-Write barrier for updates to heap-allocated objects
-Plans:
-The key for this barrier is to identify stack objects that contain
-heap references, so they can be marked to avoid collection.
+ * Write barrier for updates to heap-allocated objects
+ * The key for this barrier is to identify stack objects that contain
+ * heap references, so they can be marked to avoid collection.
 */
 void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
 {
   int status = ck_pr_load_int(&gc_status_col),
       stage = ck_pr_load_int(&gc_stage);
   if (ck_pr_load_int(&(thd->gc_status)) != STATUS_ASYNC) {
-//fprintf(stderr, "DEBUG - GC sync marking heap obj %p ", old_obj);
-//Cyc_display(old_obj, stderr);
-//fprintf(stderr, " and new value %p ", value);
-//Cyc_display(value, stderr);
-////fprintf(stderr, " for heap object ");
-//fprintf(stderr, "\n");
     pthread_mutex_lock(&(thd->lock));
     gc_mark_gray(thd, old_obj);
-    // Check if value is on the heap. If so, mark gray right now,
-    // otherwise set it to be marked after moved to heap by next GC
     if (gc_is_stack_obj(thd, value)) {
+      // Set object to be marked after moved to heap by next GC.
+      // This avoids having to recursively examine the stack now, 
+      // which we have to do anyway during minor GC.
       grayed(value) = 1;
     } else {
+      // Value is on the heap, mark gray right now
       gc_mark_gray(thd, value);
     }
     pthread_mutex_unlock(&(thd->lock));
@@ -825,37 +728,8 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
     }
 #endif
   }
-// TODO: concerned there may be an issue here with a stack object
-// having a 'tree' of references that contains heap objects. these
-// objects would be skipped and would never be grayed by the current
-// code:
-//
-//  the paper marks both the heap location being written to and the
-//  value being written. not sure it makes sense to mark the value 
-//  as it will always be on the stack - issue is if any obj's it is
-//  referencing are on the heap. this is where that stack bit might
-//  come in handy.
-//
-//  do we want to mark gray immediately during add mutator, or wait
-//  until minor GC? YES - I think for mutators we need to mark the
-//  object gray immediately. otherwise if we delay until GC, a sweep
-//  may have already finished up and freed such an obj that would
-//  otherwise not have been freed if we had waited.
-//
-//  again, only potential issue seems to be if a stack obj could ref
-//  something else on the heap - can that happen? I think this can only
-//  happen if the heap obj it refs is linked to a root, because stack
-//  objs are so short lived??
-//
-//  also we already know if objects are on the stack due to their color (RED).
-//  so can use this to not mark red values. otherwise probably do want
-//  to mark the 'y' as well (per paper) to prevent timing issues when we wait
-//
-// do have some concern though that mark_gray will stop when a stack obj
-// is detected, and the code will not examine any refs held by the stack obj.
 }
 
-// TODO: still need to handle case where a mutator is blocked
 void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 {
   int i, status_c, status_m;
@@ -869,9 +743,9 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   thd->pending_writes = 0;
   pthread_mutex_unlock(&(thd->lock));
 
-  // TODO: I think below is thread safe, but this code is tricky.
-  //       worst case should be that some work is done twice if there is
-  //       a race condition
+  // I think below is thread safe, but this code is tricky.
+  // Worst case should be that some work is done twice if there is
+  // a race condition
   //
   // TODO: should use an atomic comparison here
   status_c = ck_pr_load_int(&gc_status_col);
@@ -971,27 +845,6 @@ void gc_mark_gray2(gc_thread_data *thd, object obj)
   }
 }
 
-// TODO: before doing this, may want to debug a bit and see what is
-// being passed to gc_mut_update. see if those objects tend to have
-// any heap refs. may need to add debug code to do that...
-//
-//
-//// This is called from the heap write barrier. The issue here is that
-//// this is not called during GC, so obj and some of its refs may be
-//// on the stack. So scan all refs and mark the ones that are on the heap
-//void gc_mark_gray_rec(gc_thread_data *thd, object obj)
-//{
-//  int mark;
-//
-//  if (is_object_type(obj)) {
-//    mark = mark(obj);
-//
-//// TODO: if we leave red as red and keep going, this could hang
-//// if there is a cycle!!
-//  }&& mark(obj) == gc_color_clear) { // TODO: sync??
-//
-//}
-
 void gc_collector_trace()
 {
   ck_array_iterator_t iterator;
@@ -1003,14 +856,6 @@ void gc_collector_trace()
     CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m){
 // TODO: ideally, want to use a lock-free data structure to prevent
 // having to use a mutex here. see corresponding code in gc_mark_gray
-
-//TODO: I think this locking is too coarse. observing immediate failures with the recent change to g_mark_gray locking and
-//wonder if the problem is that this locking will prevent a batch of changes from being seen.
-//you know, do we really need locking here? the last read/write can be made atomic, and any reads/writes to mark buffer can
-//be made atomic as well. I think we may need a dirty flag to let the collector know something is happening when the mark buffer
-//needs to be resized, but other than that it this good enough?
-//on the other hand, a central issue with this collector is when can we be sure that we are existing tracing at the right time, and
-//not too early? because an early exit here will surely mean that objects are incorrectly freed 
       pthread_mutex_lock(&(m->lock));
       while (m->last_read < m->last_write) {
         clean = 0;
@@ -1237,9 +1082,6 @@ printf("DEBUG - collector is cooperating for blocked mutator\n");
 /////////////////////////////////////////////
 // GC Collection cycle
 
-//TODO: create function to print globals, ideally want names and the mark flag.
-//then call before/after tracing to see if we can catch a global not being marked.
-//want to rule out an issue here, since we have seen globals that were corrupted (IE, appears they were collected)
 void debug_dump_globals();
 
 // Main collector function

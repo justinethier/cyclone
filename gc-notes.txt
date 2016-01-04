@@ -6,13 +6,6 @@ Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC
 Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
-Mutex TODO:
-  - add mutex type, and associated functions from SRFI-18
-    when allocating a mutex, probably should do it on thread since by definition these are
-    shared among multiple threads
-  - may be able to free mutex using mutex_destroy from within gc_sweep.
-    unfortunately it requires type checking each object before free, which is not ideal
-
 TODO:
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
@@ -119,3 +112,83 @@ DONE:
 
   this feature might end up being gc-dev7 (possibly the final phase)
 
+ORIGINAL notes migrated here from gc.c:
+/*
+Rough plan for how to implement new GC algorithm. We need to do this in
+phases in order to have any hope of getting everything working. Let's prove
+the algorithm out, then extend support to multiple mutators if everything
+looks good.
+
+PHASE 1 - separation of mutator and collector into separate threads
+
+need to syncronize access (preferably via atomics) for anything shared between the 
+collector and mutator threads.
+
+can cooperate be part of a minor gc? in that case, the 
+marking could be done as part of allocation
+
+but then what exactly does that mean, to mark gray? because
+objects moved to the heap will be set to mark color at that 
+point (until collector thread finishes). but would want
+objects on the heap referenced by them to be traced, so 
+I suppose that is the purpose of the gray, to indicate
+those still need to be traced. but need to think this through,
+do we need the markbuffer and last read/write? do those make
+  sense with mta approach (assume so)???
+
+ONLY CONCERN - what happens if an object on the stack 
+has a reference to an object on the heap that is collected?
+but how would this happen? collector marks global roots before
+telling mutators to go to async, and once mutators go async
+any allocations will not be collected. also once collectors go
+async they have a chance to markgray, which will include the write
+barrier. so given that, is it still possible for an old heap ref to 
+sneak into a stack object during the async phase?
+
+more questions on above point:
+- figure out how/if after cooperation/async, can a stack object pick
+  up a reference to a heap object that will be collected during that GC cycle?
+  need to be able to prevent this somehow...
+
+- need to figure out real world use case(s) where this could happen, to try and
+  figure out how to address this problem
+
+from my understanding of the paper, the write barrier prevents this. consider, at the
+start of async, the mutator's roots, global roots, and anything on the write barrier
+have been marked. any new objects will be allocated as marked. that way, anything the
+mutator could later access is either marked or will be after tracing. the only exception
+is if the mutator changes a reference such that tracing will no longer find an object.
+but the write barrier prevents this - during tracing a heap update causes the old
+object to be marked as well. so it will eventually be traced, and there should be no
+dangling objects after GC completes.
+
+PHASE 2 - multi-threaded mutator (IE, more than one stack thread):
+
+- how does the collector handle stack objects that reference objects from 
+  another thread's stack?
+  * minor GC will only relocate that thread's objects, so another thread's would not
+    be moved. however, if another thread references one of the GC'd thread's
+    stack objects, it will now get a forwarding pointer. even worse, what if the
+    other thread is blocked and the reference becomes corrupt due to the stack
+    longjmp? there are major issues with one thread referencing another thread's
+    objects.
+  * had considered adding a stack bit to the object header. if we do this and
+    initialize it during object creation, a thread could in theory detect
+    if an object belongs to another thread. but it might be expensive because
+    a read barrier would have to be used to check the object's stack bit and
+    address (to see if it is on this heap).
+  * alternatively, how would one thread pick up a reference to another one's
+    objects? are there any ways to detect these events and deal with them?
+    it might be possible to detect such a case and allocate the object on the heap,
+    replacing it with a fwd pointer. unfortunately that means we need a read 
+    barrier (ick) to handle forwarding pointers in arbitrary places
+  * but does that mean we need a fwd pointer to be live for awhile? do we need
+    a read barrier to get this to work? obviously we want to avoid a read barrier
+    at all costs.
+- what are the real costs of allowing forwarding pointers to exist outside of just
+  minor GC? assume each runtime primitive would need to be updated to handle the
+  case where the obj is a fwd pointer - is it just a matter of each function 
+  detecting this and (possibly) calling itself again with the 'real' address?
+  obviously that makes the runtime slower due to more checks, but maybe it is
+  not *so* bad?
+*/
