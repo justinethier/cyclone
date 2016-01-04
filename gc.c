@@ -573,6 +573,15 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
         fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %ld\n", p, type_of(p));
 #endif
         mark(p) = gc_color_blue; // Needed?
+        if (type_of(p) == mutex_tag) {
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "pthread_mutex_destroy from sweep\n");
+#endif
+          if (pthread_mutex_destroy(&(((mutex)p)->lock)) != 0) {
+            fprintf(stderr, "Error destroying mutex\n");
+            exit(1);
+          }
+        }
         // free p
         heap_freed += size;
         if (((((char *)q) + q->size) == (char *)p) && (q != h->free_list)) {
