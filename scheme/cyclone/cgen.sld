@@ -696,6 +696,7 @@
              string-length substring
              + - * / apply 
              command-line-arguments
+             make-mutex mutex-lock! mutex-unlock!
              Cyc-minor-gc
              Cyc-read-line
              read-char peek-char
