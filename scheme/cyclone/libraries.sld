@@ -126,7 +126,8 @@
             file-ext))
          (filename
            (substring filename* 1 (string-length filename*))))
-    (if (tagged-list? 'scheme import)
+    (if (or (tagged-list? 'scheme import)
+            (tagged-list? 'srfi import))
       (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
       filename)))
 
