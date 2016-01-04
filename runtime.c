@@ -2180,7 +2180,7 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
 TODO: should rename this function to make it more clear what is really going on
 
  */
-void Cyc_start_thread(gc_thread_data *thd)
+void Cyc_start_trampoline(gc_thread_data *thd)
 {
   // Tank, load the jump program
   setjmp(*(thd->jmp_start));
@@ -2873,7 +2873,7 @@ void *Cyc_init_thread(object thunk)
 //  would also need to update termination code to free that memory
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE); 
-  Cyc_start_thread(thd);
+  Cyc_start_trampoline(thd);
   return NULL;
 }
 

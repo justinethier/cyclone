@@ -192,7 +192,7 @@ object memberp(void *,object,list);
 object memqp(void *,object,list);
 
 object Cyc_spawn_thread(object thunk);
-void Cyc_start_thread(gc_thread_data *thd);
+void Cyc_start_trampoline(gc_thread_data *thd);
 void Cyc_end_thread(gc_thread_data *thd);
 void Cyc_exit_thread(gc_thread_data *thd);
 object Cyc_thread_sleep(void *data, object timeout);
