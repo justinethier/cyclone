@@ -8,7 +8,6 @@ Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation
 
 TODO:
 - merge everything back to master??? I think it's just about time
-- move mutations into local thread data
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
   next steps:
