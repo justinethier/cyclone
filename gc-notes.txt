@@ -7,7 +7,6 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
-- merge everything back to master??? I think it's just about time
 - need a legitimate test program that uses mutexes. am worried that when lock calls into a cont, the program will crash because it returns a boolean object, which the runtime does not handle
   maybe just a simple producer/consumer type program
 
