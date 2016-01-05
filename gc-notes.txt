@@ -8,6 +8,9 @@ Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation
 
 TODO:
 - merge everything back to master??? I think it's just about time
+- need a legitimate test program that uses mutexes. am worried that when lock calls into a cont, the program will crash because it returns a boolean object, which the runtime does not handle
+  maybe just a simple producer/consumer type program
+
 - multiple mutators, and threading functions/types.  probably want this on a new branch, when ready
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
   next steps:
@@ -18,11 +21,12 @@ TODO:
 
 - bring exceptions into local thread data? anything else?
   also, will probably need to lock shared resources such as I/O...
-- need a legitimate test program that uses mutexes. am worried that when lock calls into a cont, the program will crash because it returns a boolean object, which the runtime does not handle
 - user manual
   need to document everything, including:
   - how to use cyclone (meta files, compiling modules, etc)
   - what to be cognizant of when writing threading code. esp, how to deal with stack objects (initiating minor GC's, etc)
+- revisit features list, issues list, etc
+- FFI
 
 DONE:
 - need to cooperate when a mutator is blocked
