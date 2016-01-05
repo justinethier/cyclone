@@ -1270,27 +1270,13 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
     while(!ck_pr_cas_int((int *)&(thd->thread_state), 
                             CYC_THREAD_STATE_BLOCKED_COOPERATING, 
                             CYC_THREAD_STATE_RUNNABLE)){}
-    // transport result to heap, if necessary
-    if (is_object_type(result)) {
-      switch(type_of(result)) {
-        case eof_tag:
-        case primitive_tag:
-        case symbol_tag: 
-        case boolean_tag:
-          // these are not heap allocated
-          break;
-        default:
-          // TODO: need to move object to heap
-          // TODO: also, then need to gc_mark_gray heap obj
-          fprintf(stderr, "Unhandled object type result, TODO: implement\n");
-          exit(1);
-      }
-    }
     // Setup value to send to continuation
     thd->gc_args[0] = result;
     thd->gc_num_args = 1;
-    // Whoa.
+    // Move any remaining stack objects (should only be the result?) to heap
+    gc_minor(thd, thd->stack_limit, thd->stack_start, thd->gc_cont, thd->gc_args, thd->gc_num_args);
 //printf("DEBUG - Call into gc_cont after collector coop\n");
+    // Whoa.
     longjmp(*(thd->jmp_start), 1);
   } else {
     // Collector didn't do anything; make a normal continuation call
