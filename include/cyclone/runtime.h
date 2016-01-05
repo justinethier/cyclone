@@ -211,10 +211,6 @@ object find_or_add_symbol(const char *name);
 extern list global_table;
 void add_global(object *glo);
 
-void add_mutation(object var, object value);
-void clear_mutations();
-extern list mutation_table;
-
 void dispatch(void *data, int argc, function_type func, object clo, object cont, object args);
 void dispatch_va(void *data, int argc, function_type_va func, object clo, object cont, object args);
 void do_dispatch(void *data, int argc, function_type func, object clo, object *buffer);

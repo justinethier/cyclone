@@ -66,7 +66,8 @@ struct gc_thread_data_t {
   // Data needed to initiate stack-based minor GC
   char *stack_start;
   char *stack_limit;
-//TODO: store stack traces per thread
+  // Minor GC write barrier
+  void *mutations;
   // List of objects moved to heap during minor GC
   void **moveBuf;
   int moveBufLen;
@@ -451,5 +452,8 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont);
 void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 gc_heap *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
+
+void add_mutation(void *data, object var, object value);
+void clear_mutations(void *data);
 
 #endif /* CYCLONE_TYPES_H */

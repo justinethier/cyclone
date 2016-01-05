@@ -312,30 +312,33 @@ void debug_dump_globals()
 
 /* END Global table */
 
-/* Mutation table
+/* Mutation table functions
  *
  * Keep track of mutations (EG: set-car!) so that new
  * values are transported to the heap during GC.
+ * Note these functions and underlying data structure are only used by
+ * the calling thread, so locking is not required.
  */
-list mutation_table = nil;
 
-void add_mutation(object var, object value){
+void add_mutation(void *data, object var, object value){
+  gc_thread_data *thd = (gc_thread_data *)data;
   if (is_object_type(value)) {
-    mutation_table = mcons(var, mutation_table);
+    thd->mutations = mcons(var, thd->mutations);
   }
 }
 
 /* TODO: consider a more efficient implementation, such as reusing old nodes
          instead of reclaiming them each time
  */
-void clear_mutations() {
-  list l = mutation_table, next;
+void clear_mutations(void *data) {
+  gc_thread_data *thd = (gc_thread_data *)data;
+  list l = thd->mutations, next;
   while (!nullp(l)) {
     next = cdr(l);
     free(l);
     l = next;
   }
-  mutation_table = nil;
+  thd->mutations = nil;
 }
 /* END mutation table */
 
@@ -897,7 +900,7 @@ object Cyc_set_car(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     gc_mut_update((gc_thread_data *)data, car(l), val);
     car(l) = val;
-    add_mutation(l, val);
+    add_mutation(data, l, val);
     return l;
 }
 
@@ -905,7 +908,7 @@ object Cyc_set_cdr(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     gc_mut_update((gc_thread_data *)data, cdr(l), val);
     cdr(l) = val;
-    add_mutation(l, val);
+    add_mutation(data, l, val);
     return l;
 }
 
@@ -926,7 +929,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
   ((vector)v)->elts[idx] = obj;
   // TODO: probably could be more efficient here and also pass
   //       index, so only that one entry needs GC.
-  add_mutation(v, obj);
+  add_mutation(data, v, obj);
   return v;
 }
 
@@ -2366,7 +2369,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
   // Transport mutations
   {
     list l;
-    for (l = mutation_table; !nullp(l); l = cdr(l)) {
+    for (l = ((gc_thread_data *)data)->mutations; !nullp(l); l = cdr(l)) {
       object o = car(l);
       if (type_of(o) == cons_tag) {
           gc_move2heap(car(o));
@@ -2385,7 +2388,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       }
     }
   }
-  clear_mutations(); // Reset for next time
+  clear_mutations(data); // Reset for next time
 
   // Transport globals
   gc_move2heap(Cyc_global_variables); // Internal global used by the runtime

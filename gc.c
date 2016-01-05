@@ -1199,6 +1199,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;
+  thd->mutations = NULL;
 //  thd->thread = NULL;
   thd->thread_state = CYC_THREAD_STATE_NEW;
   //thd->mutator_num = mut_num;
@@ -1234,6 +1235,9 @@ void gc_thread_data_free(gc_thread_data *thd)
     if (thd->moveBuf) free(thd->moveBuf);
     if (thd->mark_buffer) free(thd->mark_buffer);
     if (thd->stack_traces) free(thd->stack_traces);
+    if (thd->mutations) {
+      clear_mutations(thd);
+    }
     free(thd);
   }
 }
