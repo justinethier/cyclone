@@ -1,3 +1,4 @@
+;; An example program to test mutexes during GC cooperation
 (import (scheme base)
         (scheme read)
         (scheme write)
@@ -7,11 +8,7 @@
 (mutex-lock! lock)
 (mutex-unlock! lock)
 
-;; A program to prove if cooperation is working, or if it
-;; is blocked by another thread. The (read) causes the main
-;; thread to block. The collector should be notified prior 
-;; to the blocking call being made, and the collector should
-;; be able to cooperate on the main thread's behalf:
+;; Spin up a thread to constantly allocate memory and trigger major GC's
 (define tmp '())
 (thread-start! 
   (make-thread 
@@ -29,6 +26,8 @@
       (loop))
     )))
 
+;; This thread is intended to block on mutex-lock, to test cooperation
+;; on behalf of this thread
 (thread-start! 
   (make-thread 
     (lambda () 
@@ -37,12 +36,12 @@
                       (let ((rv (mutex-lock! lock)))
                         (write (list 'mutex-result rv))
                         (mutex-unlock! lock))
-                      ;(loop)
-                      )))
+                        (thread-sleep! 1000)
+                      (loop))))
       (loop))
     )))
 
-; main thread loop
+;; Main thread loop, keep locking mutex and waiting for user input
 (letrec ((loop (lambda ()
                 (mutex-lock! lock)
                 (let ((rv (read)))

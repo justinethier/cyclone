@@ -143,18 +143,18 @@ void gc_free_old_thread_data()
 
   pthread_mutex_lock(&mutators_lock);
   CK_ARRAY_FOREACH(&old_mutators, &iterator, &m){
-printf("JAE DEBUG - freeing old thread data...");
+//printf("JAE DEBUG - freeing old thread data...");
     gc_thread_data_free(m);
     if (!ck_array_remove(&old_mutators, (void *)m)) {
       fprintf(stderr, "Error removing old mutator data\n");
       exit(1);
     }
     freed = 1;
-printf(" done\n");
+//printf(" done\n");
   }
   if (freed) {
     ck_array_commit(&old_mutators);
-printf("commited old mutator data deletions\n");
+//printf("commited old mutator data deletions\n");
   }
   pthread_mutex_unlock(&mutators_lock);
 }
@@ -1028,7 +1028,7 @@ void gc_wait_handshake()
         }else if (statusm == STATUS_SYNC1) {
           ck_pr_cas_int(&(m->gc_status), statusm, statusc);
         } else if (statusm == STATUS_SYNC2) {
-printf("DEBUG - is mutator still blocked?\n");
+//printf("DEBUG - is mutator still blocked?\n");
           // Check again, if thread is still blocked we need to cooperate
           if (ck_pr_cas_int((int *)&(m->thread_state), 
                                CYC_THREAD_STATE_BLOCKED,
@@ -1038,10 +1038,10 @@ printf("DEBUG - is mutator still blocked?\n");
                                CYC_THREAD_STATE_BLOCKED_COOPERATING,
                                CYC_THREAD_STATE_BLOCKED_COOPERATING)
               ) {
-printf("DEBUG - update mutator GC status\n");            
+//printf("DEBUG - update mutator GC status\n");            
             ck_pr_cas_int(&(m->gc_status), statusm, statusc);
             pthread_mutex_lock(&(m->lock));
-printf("DEBUG - collector is cooperating for blocked mutator\n");            
+//printf("DEBUG - collector is cooperating for blocked mutator\n");            
             buf_len = gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL, 0);
             // Mark thread "roots", based on code from mutator's cooperator
             gc_mark_gray(m, m->gc_cont);
@@ -1262,7 +1262,7 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
   if (!ck_pr_cas_int((int *)&(thd->thread_state), 
                    CYC_THREAD_STATE_BLOCKED, 
                    CYC_THREAD_STATE_RUNNABLE)){
-printf("DEBUG - Collector cooperated, wait for it to finish. status is %d\n", thd->thread_state);
+//printf("DEBUG - Collector cooperated, wait for it to finish. status is %d\n", thd->thread_state);
     // wait for the collector to finish
     pthread_mutex_lock(&(thd->lock));
     pthread_mutex_unlock(&(thd->lock));
@@ -1270,18 +1270,27 @@ printf("DEBUG - Collector cooperated, wait for it to finish. status is %d\n", th
     while(!ck_pr_cas_int((int *)&(thd->thread_state), 
                             CYC_THREAD_STATE_BLOCKED_COOPERATING, 
                             CYC_THREAD_STATE_RUNNABLE)){}
-    // transport result to heap, if necessary (IE, is not a value type)
+    // transport result to heap, if necessary
     if (is_object_type(result)) {
-      // TODO: need to move object to heap
-      // TODO: also, then need to gc_mark_gray heap obj
-      fprintf(stderr, "Unhandled object type result, TODO: implement\n");
-      exit(1);
+      switch(type_of(result)) {
+        case eof_tag:
+        case primitive_tag:
+        case symbol_tag: 
+        case boolean_tag:
+          // these are not heap allocated
+          break;
+        default:
+          // TODO: need to move object to heap
+          // TODO: also, then need to gc_mark_gray heap obj
+          fprintf(stderr, "Unhandled object type result, TODO: implement\n");
+          exit(1);
+      }
     }
     // Setup value to send to continuation
     thd->gc_args[0] = result;
     thd->gc_num_args = 1;
     // Whoa.
-printf("DEBUG - Call into gc_cont after collector coop\n");
+//printf("DEBUG - Call into gc_cont after collector coop\n");
     longjmp(*(thd->jmp_start), 1);
   } else {
     // Collector didn't do anything; make a normal continuation call
