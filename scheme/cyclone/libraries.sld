@@ -19,6 +19,7 @@
   )
   (export
     library?
+    lib:list->import-set
     lib:name
     lib:name->string
     lib:name->symbol
@@ -43,7 +44,19 @@
 (define (library? ast)
   (tagged-list? 'define-library ast))
 
-(define (lib:name ast) (cadr ast))
+;; Convert a raw list to an import set. For example, a list might be
+;; (srfi 18) containing the number 18. An import set contains only symbols.
+(define (lib:list->import-set lis)
+  (map
+    (lambda (atom)
+      (cond
+        ((number? atom)
+         (string->symbol (number->string atom)))
+        (else atom)))
+    lis))
+
+(define (lib:name ast) 
+  (lib:list->import-set (cadr ast)))
 
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
@@ -70,7 +83,7 @@
 (define (lib:imports ast)
   (lib:result
     (let ((code (assoc 'import (cddr ast))))
-      (if code (cdr code) #f))))
+      (if code (lib:list->import-set (cdr code)) #f))))
 (define (lib:body ast)
   (lib:result
     (let ((code (assoc 'begin (cddr ast))))
@@ -86,6 +99,15 @@
 
 ;; TODO: include-ci, cond-expand
 
+(define (lib:atom->string atom)
+  (cond
+    ((symbol? atom)
+     (symbol->string atom))
+    ((number? atom)
+     (number->string atom))
+    (else
+     (error "Unexpected type in import set"))))
+
 ;; Resolve library filename given an import. 
 ;; Assumes ".sld" file extension if one is not specified.
 (define (lib:import->filename import . ext)
@@ -99,12 +121,13 @@
               string-append
               (map 
                 (lambda (i) 
-                  (string-append "/" (symbol->string i)))
+                  (string-append "/" (lib:atom->string i)))
                 import))
             file-ext))
          (filename
            (substring filename* 1 (string-length filename*))))
-    (if (tagged-list? 'scheme import)
+    (if (or (tagged-list? 'scheme import)
+            (tagged-list? 'srfi import))
       (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
       filename)))
 
@@ -116,7 +139,7 @@
              string-append
              (map 
                (lambda (i) 
-                 (string-append (symbol->string i) "/"))
+                 (string-append (lib:atom->string i) "/"))
                import-path))))
     (if (tagged-list? 'scheme import)
       (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
@@ -164,7 +187,7 @@
    (map 
      (lambda (import)
        (lib:import->export-list import))
-     imports)))
+     (lib:list->import-set imports))))
 
 (define (lib:import->metalist import)
   (let ((file (lib:import->filename import ".meta"))
@@ -191,18 +214,19 @@
 (define (lib:get-all-import-deps imports)
   (letrec ((libraries/deps '())
          (find-deps! 
-          (lambda (import-set)
+          (lambda (import-sets)
             (for-each 
               (lambda (i)
-                (cond
-                 ;; Prevent cycles by only processing new libraries
-                 ((not (assoc i libraries/deps))
-                  ;; Find all dependencies of i (IE, libraries it imports)
-                  (let ((deps (lib:read-imports i))) 
-                   (set! libraries/deps (cons (cons i deps) libraries/deps))
-                   (find-deps! deps)
-                 ))))
-              import-set))))
+                (let ((import-set (lib:list->import-set i)))
+                  (cond
+                   ;; Prevent cycles by only processing new libraries
+                   ((not (assoc import-set libraries/deps))
+                    ;; Find all dependencies of i (IE, libraries it imports)
+                    (let ((deps (lib:read-imports import-set))) 
+                     (set! libraries/deps (cons (cons import-set deps) libraries/deps))
+                     (find-deps! deps)
+                   )))))
+              import-sets))))
    (find-deps! imports)
    ;`((deps ,libraries/deps) ; DEBUG
    ;  (result ,(lib:get-dep-list libraries/deps)))

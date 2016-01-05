@@ -451,6 +451,10 @@
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
      Cyc-has-cycle?
+     Cyc-spawn-thread!
+     Cyc-end-thread!
+     thread-sleep!
+     Cyc-minor-gc
      Cyc-stdout
      Cyc-stdin
      Cyc-stderr
@@ -512,6 +516,10 @@
      vector-length
      vector-ref
      vector-set!
+     make-mutex
+     mutex-lock!
+     mutex-unlock!
+     mutex?
      boolean?
      char?
      eof-object?
@@ -554,6 +562,10 @@
                   Cyc-get-cvar
                   Cyc-set-cvar!
                   Cyc-cvar?
+                  Cyc-spawn-thread!
+                  Cyc-end-thread!
+                  thread-sleep!
+                  Cyc-minor-gc
                   apply
                   %halt
                   exit
@@ -571,6 +583,10 @@
                   string-set!
                   string->symbol ;; Could be mistaken for an identifier
                   make-vector
+                  make-mutex
+                  mutex-lock!
+                  mutex-unlock!
+                  mutex?
                   ;; I/O must be done at runtime for side effects:
                   Cyc-stdout
                   Cyc-stdin

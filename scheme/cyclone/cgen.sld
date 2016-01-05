@@ -74,11 +74,23 @@
 
 (define *c-main-function*
 "main(int argc,char **argv)
-{long stack_size = global_stack_size = STACK_SIZE;
+{gc_thread_data *thd;
+ long stack_size = global_stack_size = STACK_SIZE;
  long heap_size = global_heap_size = HEAP_SIZE;
+ mclosure0(clos_halt,&Cyc_halt);  // Halt if final closure is reached
+ mclosure0(entry_pt,&c_entry_pt); // First function to execute
  _cyc_argc = argc;
  _cyc_argv = argv;
- Cyc_main(stack_size,heap_size,(char *) &stack_size);
+ gc_initialize();
+ thd = malloc(sizeof(gc_thread_data));
+ gc_thread_data_init(thd, 0, (char *) &stack_size, stack_size);
+ thd->gc_cont = &entry_pt;
+ thd->gc_args[0] = &clos_halt;
+ thd->gc_num_args = 1;
+ gc_add_mutator(thd);
+ Cyc_heap_init(heap_size);
+ thd->thread_state = CYC_THREAD_STATE_RUNNABLE;
+ Cyc_start_trampoline(thd);
  return 0;}")
 
 ;;; Auto-generation of C macros
@@ -110,12 +122,12 @@
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
       "/* Check for GC, then call given continuation closure */\n"
-      "#define return_closcall" n "(cfn" args ") \\\n"
+      "#define return_closcall" n "(td,cfn" args ") \\\n"
       "{char stack; \\\n"
-      " if (check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
-      "     GC(cfn,buf," n "); return; \\\n"
-      " } else {closcall" n "((closure) (cfn)" args "); return;}}\n")))
+      "     GC(td,cfn,buf," n "); return; \\\n"
+      " } else {closcall" n "(td,(closure) (cfn)" args "); return;}}\n")))
 
 (define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -123,13 +135,13 @@
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
       "/* Check for GC, then call C function directly */\n"
-      "#define return_direct" n "(_fn" args ") { \\\n"
+      "#define return_direct" n "(td,_fn" args ") { \\\n"
       " char stack; \\\n"
-      " if (check_overflow(&stack,stack_limit1)) { \\\n"
+      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
-      "     GC(&c1, buf, " n "); return; \\\n"
-      " } else { (_fn)(" n ",(closure)_fn" args "); }}\n")))
+      "     GC(td,&c1, buf, " n "); return; \\\n"
+      " } else { (_fn)(td," n ",(closure)_fn" args "); }}\n")))
 
 (define (c-macro-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -137,10 +149,10 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(cfn" args ") "
-        (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(" n-1 ", (closure)a1, cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
+      "#define closcall" n "(td,cfn" args ") "
+        (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td," n-1 ", (closure)a1, cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
         (wrap " else { ")
-        "((cfn)->fn)(" n ",cfn" args ")"
+        "((cfn)->fn)(td," n ",cfn" args ")"
         (wrap ";}")
         )))
 
@@ -172,7 +184,7 @@
           (null? (cdr trace)))
     ""
     (string-append 
-      "Cyc_st_add(\""
+      "Cyc_st_add(data, \""
       (car trace) 
       ":" 
       ;; TODO: escape backslashes
@@ -439,6 +451,9 @@
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
+     ((eq? p 'Cyc-spawn-thread!)     "Cyc_spawn_thread")
+     ((eq? p 'Cyc-end-thread!)       "Cyc_end_thread")
+     ((eq? p 'thread-sleep!)         "Cyc_thread_sleep")
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p 'Cyc-stdin)             "Cyc_stdin")
      ((eq? p 'Cyc-stderr)            "Cyc_stderr")
@@ -518,8 +533,13 @@
      ((eq? p 'string-ref)     "Cyc_string_ref")
      ((eq? p 'string-set!)    "Cyc_string_set")
      ((eq? p 'substring)      "Cyc_substring")
+     ((eq? p 'make-mutex)     "Cyc_make_mutex")
+     ((eq? p 'mutex-lock!)    "Cyc_mutex_lock")
+     ((eq? p 'mutex-unlock!)  "Cyc_mutex_unlock")
+     ((eq? p 'mutex?)         "Cyc_is_mutex")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
+     ((eq? p 'Cyc-minor-gc)  "Cyc_trigger_minor_gc")
      ((eq? p 'system)         "Cyc_system")
      ((eq? p 'assq)          "assq")
      ((eq? p 'assv)          "assq")
@@ -555,6 +575,69 @@
      (else
        (error "unhandled primitive: " p))))
 
+;; Does the primitive require passing thread data as its first argument?
+(define (prim/data-arg? p)
+  (member p '(
+    +
+    -
+    *
+    /
+    =
+    >
+    <
+    >=
+    <=
+    apply
+    Cyc-default-exception-handler
+    Cyc-end-thread!
+    thread-sleep!
+    open-input-file
+    open-output-file
+    close-port
+    close-input-port
+    close-output-port
+    Cyc-flush-output-port
+    file-exists?
+    delete-file
+    read-char
+    peek-char
+    Cyc-read-line
+    Cyc-write-char
+    integer->char
+    string->number
+    list->string
+    make-vector
+    list->vector
+    vector-length
+    vector-ref
+    vector-set!
+    string-append
+    string-cmp
+    string->symbol
+    symbol->string
+    number->string
+    string-length
+    string-ref
+    string-set!
+    substring
+    make-mutex
+    mutex-lock!
+    mutex-unlock!
+    Cyc-installation-dir
+    command-line-arguments
+    Cyc-minor-gc
+    assq
+    assv
+    assoc
+    memq
+    memv
+    member
+    length
+    set-car!
+    set-cdr!
+    procedure?
+    set-cell!)))
+
 ;; Determine if primitive assigns (allocates) a C variable
 ;; EG: int v = prim();
 (define (prim/c-var-assign p)
@@ -567,25 +650,31 @@
     ((eq? p 'length) "integer_type")
     ((eq? p 'vector-length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
-    ((eq? p 'Cyc-installation-dir) "string_type")
     ((eq? p 'system) "integer_type")
     ((eq? p '+) "common_type")
     ((eq? p '-) "common_type")
     ((eq? p '*) "common_type")
     ((eq? p '/) "common_type")
     ((eq? p 'string->number) "common_type")
-    ((eq? p 'list->string) "string_type")
     ((eq? p 'string-cmp) "integer_type")
-    ((eq? p 'string-append) "string_type")
-    ((eq? p 'symbol->string) "string_type")
-    ((eq? p 'number->string) "string_type")
+    ((eq? p 'string-append) "object")
     ((eq? p 'string-length) "integer_type")
-    ((eq? p 'substring) "string_type")
     ((eq? p 'apply)  "object")
     ((eq? p 'Cyc-read-line) "object")
+    ((eq? p 'read-char) "object")
+    ((eq? p 'peek-char) "object")
     ((eq? p 'command-line-arguments) "object")
+    ((eq? p 'Cyc-minor-gc) "object")
+    ((eq? p 'number->string) "object")
+    ((eq? p 'symbol->string) "object")
+    ((eq? p 'substring) "object")
     ((eq? p 'make-vector) "object")
+    ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
+    ;((eq? p 'make-mutex) "object")
+    ((eq? p 'mutex-lock!) "object")
+    ((eq? p 'mutex-unlock!) "object")
+    ((eq? p 'Cyc-installation-dir) "object")
     (else #f)))
 
 ;; Determine if primitive creates a C variable
@@ -607,18 +696,25 @@
              string-length substring
              + - * / apply 
              command-line-arguments
+             ;make-mutex 
+             mutex-lock! mutex-unlock!
+             Cyc-minor-gc
              Cyc-read-line
+             read-char peek-char
              cons length vector-length cell))))
 
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
   (and (prim? exp)
-       (member exp '(Cyc-read-line apply command-line-arguments make-vector list->vector))))
-;; TODO: this is a hack, right answer is to include information about
-;;  how many args each primitive is supposed to take
-(define (prim:cont-has-args? exp)
+       (member exp '(Cyc-read-line apply command-line-arguments Cyc-minor-gc number->string 
+                     read-char peek-char mutex-lock!
+                     symbol->string list->string substring string-append
+                     make-vector list->vector Cyc-installation-dir))))
+
+;; Primitive functions that pass a continuation or thread data but have no other arguments
+(define (prim:cont/no-args? exp)
   (and (prim? exp)
-       (member exp '(Cyc-read-line apply make-vector list->vector))))
+       (member exp '(command-line-arguments make-mutex Cyc-minor-gc))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
@@ -631,6 +727,13 @@
 (define (prim:allocates-object? exp)
     (and  (prim? exp)
           (member exp '())))
+
+;; Does string end with the given substring?
+;; EG: ("test(" "(") ==> #t
+(define (str-ending? str end)
+  (let ((len (string-length str)))
+    (and (> len 0)
+         (equal? end (substring str (- len 1) len)))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
@@ -652,6 +755,10 @@
                 "," cont "); "))
              (else #f)))
          ;; END apply defs
+         (tdata (cond
+                 ((prim/data-arg? p) "data")
+                 (else "")))
+         (tdata-comma (if (> (string-length tdata) 0) "," ""))
          (c-var-assign 
             (lambda (type)
               (let ((cv-name (mangle (gensym 'c))))
@@ -670,12 +777,14 @@
                       ;; Emit closure as first arg, if necessary (apply only)
                       (cond
                        (closure-def
-                        (string-append "&" closure-sym 
-                          (if (prim:cont-has-args? p) ", " "")))
+                        (string-append 
+                          tdata ","
+                          "&" closure-sym))
                        ((prim:cont? p) 
-                        (string-append cont
-                          (if (prim:cont-has-args? p) ", " "")))
-                       (else "")))))))))
+                        (string-append 
+                          tdata ","
+                          cont))
+                       (else tdata)))))))))
     (cond
      ((prim/c-var-assign p)
       (c-var-assign (prim/c-var-assign p)))
@@ -692,9 +801,9 @@
                 cv-name ;; Already a pointer
                 (string-append "&" cv-name)) ;; Point to data
             (list
-                (string-append c-func "(" cv-name)))))
+                (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
-        (c-code (string-append c-func "("))))))
+        (c-code (string-append c-func "(" tdata))))))
 
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -751,7 +860,7 @@
              (string-append
                (c:allocs->str (c:allocs cgen))
                "return_direct" (number->string num-cargs) 
-               "(" this-cont
+               "(data," this-cont
                (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
                   (c:body cgen) ");"))))
 
@@ -776,11 +885,24 @@
                   (c:allocs c-args*) ;; fun alloc depends upon arg allocs
                   (list (string-append 
                     (car (c:allocs c-fun)) 
-                         (if (prim/c-var-assign fun) "" ",") ; Allocating C var
-                         (c:body c-args*) ");"))))
+                    (if (prim/c-var-assign fun)
+                      ;; Add a comma if there were any args to the func added by comp-prim
+                      (if (or (str-ending? (car (c:allocs c-fun)) "(") 
+                              (prim:cont/no-args? fun))
+                        "" 
+                        ",")
+                      ",")
+                    (c:body c-args*) ");"))))
               ;; Args stay with body
               (c:append
-                (c:append c-fun c-args*)
+                (c:append 
+                  (let ()
+                    ;; Add a comma if necessary
+                    (if (or (str-ending? (c:body c-fun) "(")
+                            (prim:cont/no-args? fun))
+                      c-fun
+                      (c:append c-fun (c-code ", "))))
+                  c-args*)
                 (c-code ")")))))
 
         ((equal? '%closure-ref fun)
@@ -803,7 +925,7 @@
                (c:allocs->str (c:allocs cfun) "\n")
                (c:allocs->str (c:allocs cargs) "\n")
                "return_closcall" (number->string (c:num-args cargs))
-               "("
+               "(data,"
                this-cont
                (if (> (c:num-args cargs) 0) "," "")
                (c:body cargs)
@@ -822,7 +944,7 @@
                 (c:allocs->str (c:allocs cfun) "\n")
                 (c:allocs->str (c:allocs cargs) "\n")
                 "return_closcall" (number->string num-cargs)
-                "("
+                "(data,"
                 this-cont
                 (if (> num-cargs 0) "," "")
                 (c:body cargs)
@@ -992,6 +1114,8 @@
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
+             cv-name ".hdr.mark = gc_color_red;\n "
+             cv-name ".hdr.grayed = 0;\n"
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
              cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"
@@ -1083,7 +1207,7 @@
      (cons 
       (lambda (name)
         (string-append "static void " name 
-                       "(int argc, " 
+                       "(void *data, int argc, " 
                         formals*
                        ") {\n"
                        preamble
@@ -1169,7 +1293,7 @@
      (lambda (l)
        (emit*
          "static void __lambda_" 
-         (number->string (car l)) "(int argc, "
+         (number->string (car l)) "(void *data, int argc, "
          (cdadr l)
          ") ;"))
      lambdas)
@@ -1185,14 +1309,14 @@
     ; Emit entry point
     (cond
       (program?
-        (emit "static void c_entry_pt_first_lambda();")
+        (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);")
         (for-each
           (lambda (lib-name)
-            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(int argc, closure cont, object value);"))
+            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, closure cont, object value);"))
           required-libs)
-        (emit "static void c_entry_pt(argc, env,cont) int argc; closure env,cont; { "))
+        (emit "static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,cont; { "))
       (else
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(argc, cont,value) int argc; closure cont; object value;{ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
         ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
@@ -1295,9 +1419,9 @@
             (reverse required-libs)) ;; Init each lib's dependencies 1st
           (emit* 
             ;; Start cont chain, but do not assume closcall1 macro was defined
-            "(" this-clo ".fn)(0, &" this-clo ", &" this-clo ");")
+            "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
           (emit "}")
-          (emit "static void c_entry_pt_first_lambda(int argc, closure cont, object value) {")
+          (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {")
           ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)))
       (else
@@ -1307,7 +1431,7 @@
         (emit* 
             "(((closure)"
             (mangle-global (lib:name->symbol lib-name)) 
-            ")->fn)(1, cont, cont);")
+            ")->fn)(data, 1, cont, cont);")
       ))
 
     (emit "}")

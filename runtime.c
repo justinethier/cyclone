@@ -1,13 +1,27 @@
 /** 
  * Cyclone Scheme
- * Copyright (c) 2014, Justin Ethier
+ * Copyright (c) 2014-2016, Justin Ethier
  * All rights reserved.
  *
  * This file contains the C runtime used by compiled programs.
  */
 
+#include <ck_hs.h>
+#include <ck_pr.h>
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
+#include "cyclone/ck_ht_hash.h"
+//#include <signal.h> // TODO: only used for debugging!
+
+//int JAE_DEBUG = 0;
+//int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+object Cyc_global_set(void *thd, object *glo, object value)
+{
+  gc_mut_update((gc_thread_data *)thd, *glo, value);
+  *(glo) = value;
+  return value;
+}
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -31,109 +45,166 @@ const char *tag_names[21] = { \
  , "C primitive" \
  , "vector" \
  , "macro" \
- , "Reserved for future use" \
+ , "mutex" \
  , "Reserved for future use" };
 
-void Cyc_invalid_type_error(int tag, object found) {
+void Cyc_invalid_type_error(void *data, int tag, object found) {
   char buf[256];
-  snprintf(buf, 255, "Invalid type: expected %s, found", tag_names[tag]);
-  Cyc_rt_raise2(buf, found);
+  snprintf(buf, 255, "Invalid type: expected %s, found ", tag_names[tag]);
+  //snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
+  Cyc_rt_raise2(data, buf, found);
 }
 
-void Cyc_check_obj(int tag, object obj) {
+void Cyc_check_obj(void *data, int tag, object obj) {
   if (!is_object_type(obj)) {
-    Cyc_invalid_type_error(tag, obj);
+    Cyc_invalid_type_error(data, tag, obj);
   }
 }
 
-void Cyc_check_bounds(const char *label, int len, int index) {
+void Cyc_check_bounds(void *data, const char *label, int len, int index) {
   if (index < 0 || index >= len) {
     char buf[128];
     snprintf(buf, 127, "%s - invalid index %d", label, index);
-    Cyc_rt_raise_msg(buf);
+    Cyc_rt_raise_msg(data, buf);
   }
 }
 
 /* END error checking */
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(0, (closure)a1, cfn); } else { ((cfn)->fn)(1,cfn,a1);}
+#define closcall1(td,cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,0, (closure)a1, cfn); } else { ((cfn)->fn)(td,1,cfn,a1);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall1(cfn,a1) \
+#define return_closcall1(td,cfn,a1) \
 {char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
+ if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[1]; buf[0] = a1;\
-     GC(cfn,buf,1); return; \
- } else {closcall1((closure) (cfn),a1); return;}}
-#define closcall2(cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(2,cfn,a1,a2);}
+     GC(td,cfn,buf,1); return; \
+ } else {closcall1(td,(closure) (cfn),a1); return;}}
+#define closcall2(td,cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(td,2,cfn,a1,a2);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall2(cfn,a1,a2) \
+#define return_closcall2(td,cfn,a1,a2) \
 {char stack; \
- if (check_overflow(&stack,stack_limit1)) { \
+ if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[2]; buf[0] = a1;buf[1] = a2;\
-     GC(cfn,buf,2); return; \
- } else {closcall2((closure) (cfn),a1,a2); return;}}
+     GC(td,cfn,buf,2); return; \
+ } else {closcall2(td,(closure) (cfn),a1,a2); return;}}
 /*END closcall section */
 
 /* Global variables. */
-clock_t start;   /* Starting time. */
-char *stack_begin;   /* Initialized by main. */
-char *stack_limit1;  /* Initialized by main. */
-char *stack_limit2;
-char *bottom;    /* Bottom of tospace. */
-char *allocp;    /* Cheney allocate pointer. */
-char *alloc_end;
-/* TODO: not sure this is the best strategy for strings, especially if there 
-   are a lot of long, later gen strings because that will cause a lot of
-   copying to occur during GC */
-char *dhbottom; /* Bottom of data heap */
-char *dhallocp; /* Current place in data heap */
-char *dhalloc_limit; /* GC beyond this limit */ 
-char *dhalloc_end;
+static gc_heap *Cyc_heap;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
-object gc_cont;   /* GC continuation closure. */
-object gc_ans[NUM_GC_ANS];    /* argument for GC continuation closure. */
-int gc_num_ans;
-jmp_buf jmp_main; /* Where to jump to. */
 
 object Cyc_global_variables = nil;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
 
-static symbol_type __EOF = {eof_tag, "", nil}; // symbol_type in lieu of custom type
+static symbol_type __EOF = {{0}, eof_tag, "", nil}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
+static ck_hs_t symbol_table;
+static int symbol_table_size = 65536;
+static pthread_mutex_t symbol_table_lock;
+
+// Functions to support concurrency kit hashset
+// These are specifically for a table of symbols
+static void *hs_malloc(size_t r)
+{
+    return malloc(r);
+}
+
+static void hs_free(void *p, size_t b, bool r)
+{
+//    (void)b;
+//    (void)r;
+    free(p);
+//    return;
+}
+
+static struct ck_malloc my_allocator = {
+    .malloc = hs_malloc,
+    .free = hs_free
+};
+
+static unsigned long hs_hash(const void *object, unsigned long seed)
+{
+  const symbol_type *c = object;
+  unsigned long h;
+
+  h = (unsigned long)MurmurHash64A(c->pname, strlen(c->pname), seed);
+  return h;
+}
+
+static bool hs_compare(const void *previous, const void *compare)
+{
+  return strcmp(symbol_pname(previous), symbol_pname(compare)) == 0;
+}
+
+static void *set_get(ck_hs_t *hs, const void *value)
+{
+  unsigned long h;
+  void *v;
+
+  h = CK_HS_HASH(hs, hs_hash, value);
+  v = ck_hs_get(hs, h, value);
+  return v;
+}
+
+static bool set_insert(ck_hs_t *hs, const void *value)
+{
+  unsigned long h;
+
+  h = CK_HS_HASH(hs, hs_hash, value);
+  return ck_hs_put(hs, h, value);
+}
+// End supporting functions
+
+void gc_init_heap(long heap_size)
+{
+  Cyc_heap = gc_heap_create(heap_size, 0, 0);
+  if (!ck_hs_init(&symbol_table, 
+                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
+                  hs_hash, hs_compare,
+                  &my_allocator,
+                  symbol_table_size, 
+                  43423)){
+    fprintf(stderr, "Unable to initialize symbol table\n");
+    exit(1);
+  }
+  if (pthread_mutex_init(&(symbol_table_lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
+    exit(1);
+  }
+}
+
+gc_heap *gc_get_heap()
+{
+  return Cyc_heap;
+}
 
 object cell_get(object cell){
     return car(cell);
 }
 
-static boolean_type t_boolean = {boolean_tag, "t"};
-static boolean_type f_boolean = {boolean_tag, "f"};
+static boolean_type t_boolean = {{0}, boolean_tag, "t"};
+static boolean_type f_boolean = {{0}, boolean_tag, "f"};
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
 
-static symbol_type Cyc_void_symbol = {symbol_tag, "", nil};
+static symbol_type Cyc_void_symbol = {{0}, symbol_tag, "", nil};
 const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
-static const int MAX_STACK_TRACES = 10;
-static char **Cyc_Stack_Traces;
-static int Cyc_Stack_Trace_Idx = 0;
-
-void Cyc_st_init() { 
-  Cyc_Stack_Traces = calloc(MAX_STACK_TRACES, sizeof(char *));
-}
-
-void Cyc_st_add(char *frame) { 
+void Cyc_st_add(void *data, char *frame) { 
+  gc_thread_data *thd = (gc_thread_data *)data;
   // Do not allow recursion to remove older frames
-  if (frame != Cyc_Stack_Traces[(Cyc_Stack_Trace_Idx - 1) % MAX_STACK_TRACES]) {
-    Cyc_Stack_Traces[Cyc_Stack_Trace_Idx] = frame;
-    Cyc_Stack_Trace_Idx = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
+  if (frame != thd->stack_prev_frame) { 
+    thd->stack_prev_frame = frame;
+    thd->stack_traces[thd->stack_trace_idx] = frame;
+    thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
   }
 }
 
-void Cyc_st_print(FILE *out) {
+void Cyc_st_print(void *data, FILE *out) {
   /* print to stream, note it is possible that
      some traces could be on the stack after a GC.
      not sure what to do about it, may need to
@@ -141,10 +212,11 @@ void Cyc_st_print(FILE *out) {
      or, with the tbl being so small, maybe it will
      not be an issue in practice? a bit risky to ignore though
   */
-  int i = (Cyc_Stack_Trace_Idx + 1) % MAX_STACK_TRACES;
-  while (i != Cyc_Stack_Trace_Idx) {
-    if (Cyc_Stack_Traces[i]) {
-      fprintf(out, "%s\n", Cyc_Stack_Traces[i]);
+  gc_thread_data *thd = (gc_thread_data *)data;
+  int i = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
+  while (i != thd->stack_trace_idx) {
+    if (thd->stack_traces[i]) {
+      fprintf(out, "%s\n", thd->stack_traces[i]);
     }
     i = (i + 1) % MAX_STACK_TRACES;
   }
@@ -162,8 +234,6 @@ void Cyc_st_print(FILE *out) {
 
  For now, GC of symbols is missing. long-term it probably would be desirable
 */
-list symbol_table = nil;
-
 char *_strdup (const char *s) {
     char *d = malloc (strlen (s) + 1);
     if (d) { strcpy (d,s); }
@@ -171,21 +241,29 @@ char *_strdup (const char *s) {
 }
 
 object find_symbol_by_name(const char *name) {
-  list l = symbol_table;
-  for (; !nullp(l); l = cdr(l)) {
-    const char *str = symbol_pname(car(l));
-    if (strcmp(str, name) == 0) return car(l);
-  }
-  return nil;
+  symbol_type tmp = {{0}, symbol_tag, name, nil};
+  object result = set_get(&symbol_table, &tmp);
+  //if (result) {
+  //  printf("found symbol %s\n", symbol_pname(result));
+  //}
+  return result;
 }
 
 object add_symbol(symbol_type *psym) {
-  symbol_table = mcons(psym, symbol_table);
+  //printf("Adding symbol %s, table size = %ld\n", symbol_pname(psym), ck_hs_count(&symbol_table));
+  pthread_mutex_lock(&symbol_table_lock); // Only 1 "writer" allowed
+  if (ck_hs_count(&symbol_table) == symbol_table_size) {
+    // TODO: grow table if it is not big enough
+    fprintf(stderr, "Ran out of symbol table entries\n");
+    exit(1);
+  }
+  set_insert(&symbol_table, psym);
+  pthread_mutex_unlock(&symbol_table_lock);
   return psym;
 }
 
 object add_symbol_by_name(const char *name) {
-  symbol_type sym = {symbol_tag, _strdup(name), nil};
+  symbol_type sym = {{0}, symbol_tag, _strdup(name), nil};
   symbol_type *psym = malloc(sizeof(symbol_type));
   memcpy(psym, &sym, sizeof(symbol_type));
   return add_symbol(psym);
@@ -199,6 +277,7 @@ object find_or_add_symbol(const char *name){
     return add_symbol_by_name(name);
   }
 }
+
 /* END symbol table */
 
 /* Global table */
@@ -210,32 +289,56 @@ void add_global(object *glo) {
   // this is more expedient
   global_table = mcons(mcvar(glo), global_table);
 }
+
+void debug_dump_globals()
+{
+  list l = global_table;
+  for(; !nullp(l); l = cdr(l)){
+   cvar_type *c = (cvar_type *)car(l);
+   //gc_mark(h, *(c->pvar)); // Mark actual object the global points to
+   printf("DEBUG %p ", c->pvar);
+   if (*c->pvar){
+     printf("mark = %d ", mark(*c->pvar));
+     if (mark(*c->pvar) == gc_color_red) {
+       printf("obj = ");
+       Cyc_display(*c->pvar, stdout);
+     }
+     printf("\n");
+   } else { 
+     printf(" is NULL\n");
+   }
+  }
+}
+
 /* END Global table */
 
-/* Mutation table
+/* Mutation table functions
  *
  * Keep track of mutations (EG: set-car!) so that new
  * values are transported to the heap during GC.
+ * Note these functions and underlying data structure are only used by
+ * the calling thread, so locking is not required.
  */
-list mutation_table = nil;
 
-void add_mutation(object var, object value){
+void add_mutation(void *data, object var, object value){
+  gc_thread_data *thd = (gc_thread_data *)data;
   if (is_object_type(value)) {
-    mutation_table = mcons(var, mutation_table);
+    thd->mutations = mcons(var, thd->mutations);
   }
 }
 
 /* TODO: consider a more efficient implementation, such as reusing old nodes
          instead of reclaiming them each time
  */
-void clear_mutations() {
-  list l = mutation_table, next;
+void clear_mutations(void *data) {
+  gc_thread_data *thd = (gc_thread_data *)data;
+  list l = thd->mutations, next;
   while (!nullp(l)) {
     next = cdr(l);
     free(l);
     l = next;
   }
-  mutation_table = nil;
+  thd->mutations = nil;
 }
 /* END mutation table */
 
@@ -246,7 +349,7 @@ object Cyc_glo_eval = nil;
 /* Exception handler */
 object Cyc_exception_handler_stack = nil;
 
-object Cyc_default_exception_handler(int argc, closure _, object err) {
+object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
     fprintf(stderr, "Error: ");
 
     if (nullp(err) || is_value_type(err) || type_of(err) != cons_tag) {
@@ -261,8 +364,9 @@ object Cyc_default_exception_handler(int argc, closure _, object err) {
     }
 
     fprintf(stderr, "\nCall history:\n");
-    Cyc_st_print(stderr);
+    Cyc_st_print(data, stderr);
     fprintf(stderr, "\n");
+    //raise(SIGINT); // break into debugger, unix only
     exit(1);
     return nil;
 }
@@ -276,29 +380,29 @@ object Cyc_current_exception_handler() {
 }
 
 /* Raise an exception from the runtime code */
-void Cyc_rt_raise(object err) {
+void Cyc_rt_raise(void *data, object err) {
     make_cons(c2, err, nil);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
     exit(1);
 }
-void Cyc_rt_raise2(const char *msg, object err) {
+void Cyc_rt_raise2(void *data, const char *msg, object err) {
     make_string(s, msg);
     make_cons(c3, err, nil);
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler(), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
     exit(1);
 }
-void Cyc_rt_raise_msg(const char *err) {
+void Cyc_rt_raise_msg(void *data, const char *err) {
     make_string(s, err);
-    Cyc_rt_raise(&s);
+    Cyc_rt_raise(data, &s);
 }
 /* END exception handler */
 
@@ -384,13 +488,13 @@ object Cyc_has_cycle(object lst) {
 // to the value returned by (current-output-port). It is an
 // error to attempt an output operation on a closed port
 //
-object dispatch_display_va(int argc, object clo, object cont, object x, ...) {
+object dispatch_display_va(void *data, int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
   result = Cyc_display_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_closcall1(cont, result);
+  return_closcall1(data, cont, result);
 }
 
 object Cyc_display_va(int argc, object x, ...) {
@@ -440,6 +544,9 @@ object Cyc_display(object x, FILE *port)
       break;
     case cvar_tag:
       Cyc_display(Cyc_get_cvar(x), port);
+      break;
+    case mutex_tag:
+      fprintf(port, "<mutex %p>", x);
       break;
     case boolean_tag:
       fprintf(port, "#%s",((boolean_type *) x)->pname);
@@ -498,16 +605,18 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, ")");
       break;
     default:
-      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); getchar(); exit(0);}
+      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); 
+      exit(1);
+ }
  return quote_void;}
 
-object dispatch_write_va(int argc, object clo, object cont, object x, ...) {
+object dispatch_write_va(void *data, int argc, object clo, object cont, object x, ...) {
   object result;
   va_list ap;
   va_start(ap, x);
   result = Cyc_write_va_list(argc - 1, x, ap);
   va_end(ap);
-  return_closcall1(cont, result);
+  return_closcall1(data, cont, result);
 }
 
 object Cyc_write_va(int argc, object x, ...) {
@@ -580,24 +689,24 @@ object Cyc_write(object x, FILE *port)
  fprintf(port, "\n");
  return y;}
 
-object Cyc_write_char(object c, object port) 
+object Cyc_write_char(void *data, object c, object port) 
 {
   if (obj_is_char(c)) {
     fprintf(((port_type *)port)->fp, "%c", obj_obj2char(c));
   } else {
-    Cyc_rt_raise2("Argument is not a character", c);
+    Cyc_rt_raise2(data, "Argument is not a character", c);
   }
   return quote_void;
 }
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
-object memberp(x,l) object x; list l;
-{Cyc_check_cons_or_nil(l);
+object memberp(void *data, object x, list l)
+{Cyc_check_cons_or_nil(data, l);
  for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
  return boolean_f;}
 
-object memqp(x,l) object x; list l;
-{Cyc_check_cons_or_nil(l);
+object memqp(void *data, object x, list l)
+{Cyc_check_cons_or_nil(data, l);
  for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
@@ -619,55 +728,55 @@ object equalp(x,y) object x,y;
         type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;}}
 
-list assq(x,l) object x; list l;
+list assq(void *data, object x, list l)
 {if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
  for (; !nullp(l); l = cdr(l))
    {register list la = car(l); 
-    Cyc_check_cons(la);
+    Cyc_check_cons(data, la);
     if (eq(x,car(la))) return la;}
  return boolean_f;}
 
-list assoc(x,l) object x; list l;
+list assoc(void *data, object x, list l)
 {if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
  for (; !nullp(l); l = cdr(l))
    {register list la = car(l); 
-    Cyc_check_cons(la);
+    Cyc_check_cons(data, la);
     if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
 
 // TODO: generate these using macros???
-object __num_eq(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_eq(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value == ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_gt(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_gt(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value > ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_lt(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_lt(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value < ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_gte(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_gte(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value >= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
 
-object __num_lte(x, y) object x, y;
-{Cyc_check_num(x);
- Cyc_check_num(y);
+object __num_lte(void *data, object x, object y)
+{Cyc_check_num(data, x);
+ Cyc_check_num(data, y);
  if (((integer_type *)x)->value <= ((integer_type *)y)->value)
     return boolean_t;
  return boolean_f;}
@@ -720,6 +829,11 @@ object Cyc_is_port(object o){
         return boolean_t;
     return boolean_f;}
 
+object Cyc_is_mutex(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == mutex_tag)
+        return boolean_t;
+    return boolean_f;}
+
 object Cyc_is_string(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == string_tag)
         return boolean_t;
@@ -730,7 +844,7 @@ object Cyc_is_char(object o){
         return boolean_t;
     return boolean_f;}
 
-object Cyc_is_procedure(object o) {
+object Cyc_is_procedure(void *data, object o) {
     int tag;
     if (!nullp(o) && !is_value_type(o)) {
         tag = type_of(o);
@@ -743,7 +857,7 @@ object Cyc_is_procedure(object o) {
             tag == primitive_tag) {
             return boolean_t;
         } else if (tag == cons_tag) {
-          integer_type l = Cyc_length(o);
+          integer_type l = Cyc_length(data, o);
           if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
             if (strncmp(((symbol)car(o))->pname, "primitive", 10) == 0 ||
                 strncmp(((symbol)car(o))->pname, "procedure", 10) == 0 ) {
@@ -782,63 +896,69 @@ object Cyc_eq(object x, object y) {
     return boolean_f;
 }
 
-object Cyc_set_car(object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
+object Cyc_set_car(void *data, object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    gc_mut_update((gc_thread_data *)data, car(l), val);
     car(l) = val;
-    add_mutation(l, val);
+    add_mutation(data, l, val);
     return l;
 }
 
-object Cyc_set_cdr(object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(cons_tag, l);
+object Cyc_set_cdr(void *data, object l, object val) {
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    gc_mut_update((gc_thread_data *)data, cdr(l), val);
     cdr(l) = val;
-    add_mutation(l, val);
+    add_mutation(data, l, val);
     return l;
 }
 
-object Cyc_vector_set(object v, object k, object obj) {
+object Cyc_vector_set(void *data, object v, object k, object obj) {
   int idx;
-  Cyc_check_vec(v);
-  Cyc_check_int(k);
+  Cyc_check_vec(data, v);
+  Cyc_check_int(data, k);
   idx = ((integer_type *)k)->value;
 
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
-    Cyc_rt_raise2("vector-set! - invalid index", k);
+    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
   }
+
+  gc_mut_update((gc_thread_data *)data, 
+                ((vector)v)->elts[idx],
+                obj);
 
   ((vector)v)->elts[idx] = obj;
   // TODO: probably could be more efficient here and also pass
   //       index, so only that one entry needs GC.
-  add_mutation(v, obj);
+  add_mutation(data, v, obj);
   return v;
 }
 
-object Cyc_vector_ref(object v, object k) {
+object Cyc_vector_ref(void *data, object v, object k) {
   if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
-    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected vector\n"); 
+    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected vector\n"); 
   }
   if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
-    Cyc_rt_raise_msg("vector-ref - invalid parameter, expected integer\n"); 
+    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected integer\n"); 
   }
   if (integer_value(k) < 0 || integer_value(k) >= ((vector)v)->num_elt) {
-    Cyc_rt_raise2("vector-ref - invalid index", k);
+    Cyc_rt_raise2(data, "vector-ref - invalid index", k);
   }
 
   return ((vector)v)->elts[((integer_type *)k)->value];
 }
 
-integer_type Cyc_vector_length(object v) {
+integer_type Cyc_vector_length(void *data, object v) {
     if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
       make_int(len, ((vector)v)->num_elt);
       return len;
     }
-    Cyc_rt_raise_msg("vector-length - invalid parameter, expected vector\n"); }
+    Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
 
-integer_type Cyc_length(object l){
+integer_type Cyc_length(void *data, object l){
     make_int(len, 0);
     while(!nullp(l)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
-            Cyc_rt_raise_msg("length - invalid parameter, expected list\n");
+            Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
         l = cdr(l);
         len.value++;
@@ -846,28 +966,30 @@ integer_type Cyc_length(object l){
     return len;
 }
 
-string_type Cyc_number2string(object n) {
+object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
-    Cyc_check_num(n);
+    Cyc_check_num(data, n);
     if (type_of(n) == integer_tag) {
         snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
     } else if (type_of(n) == double_tag) {
         snprintf(buffer, 1024, "%lf", ((double_type *)n)->value);
     } else {
-        Cyc_rt_raise2("number->string - Unexpected object", n);
+        Cyc_rt_raise2(data, "number->string - Unexpected object", n);
     }
+    //make_string_noalloc(str, buffer, strlen(buffer));
     make_string(str, buffer);
-    return str;
+    return_closcall1(data, cont, &str);
 }
 
-string_type Cyc_symbol2string(object sym) {
-  Cyc_check_sym(sym);
-  { make_string(str, symbol_pname(sym));
-    return str; }}
+object Cyc_symbol2string(void *data, object cont, object sym) {
+  Cyc_check_sym(data, sym);
+  { const char *pname = symbol_pname(sym);
+    make_string(str, pname);
+    return_closcall1(data, cont, &str); }}
 
-object Cyc_string2symbol(object str) {
+object Cyc_string2symbol(void *data, object str) {
     object sym;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     sym = find_symbol_by_name(string_str(str));
     if (!sym) {
         sym = add_symbol_by_name(string_str(str));
@@ -875,14 +997,14 @@ object Cyc_string2symbol(object str) {
     return sym;
 }
 
-string_type Cyc_list2string(object lst){
+object Cyc_list2string(void *data, object cont, object lst){
     char *buf;
     int i = 0;
     integer_type len;
 
-    Cyc_check_cons_or_nil(lst);
+    Cyc_check_cons_or_nil(data, lst);
     
-    len = Cyc_length(lst); // Inefficient, walks whole list
+    len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (len.value + 1));
     while(!nullp(lst)){
         buf[i++] = obj_obj2char(car(lst));
@@ -890,24 +1012,29 @@ string_type Cyc_list2string(object lst){
     }
     buf[i] = '\0';
 
-    make_string(str, buf);
-    return str;
+    //{ make_string_noalloc(str, buf, i);
+    { make_string(str, buf);
+      return_closcall1(data, cont, &str);}
 }
 
-common_type Cyc_string2number(object str){
+common_type Cyc_string2number(void *data, object str){
     common_type result;
     double n;
-    Cyc_check_obj(string_tag, str);
-    Cyc_check_str(str);
+    Cyc_check_obj(data, string_tag, str);
+    Cyc_check_str(data, str);
     if (type_of(str) == string_tag &&
         ((string_type *) str)->str){
         n = atof(((string_type *) str)->str);
 
         if (ceilf(n) == n) {
+            result.integer_t.hdr.mark = gc_color_red;
+            result.integer_t.hdr.grayed = 0;
             result.integer_t.tag = integer_tag;
             result.integer_t.value = (int)n;
         }
         else {
+            result.double_t.hdr.mark = gc_color_red;
+            result.double_t.hdr.grayed = 0;
             result.double_t.tag = double_tag;
             result.double_t.value = n;
         }
@@ -919,9 +1046,9 @@ common_type Cyc_string2number(object str){
     return result;
 }
 
-integer_type Cyc_string_cmp(object str1, object str2) {
-  Cyc_check_str(str1);
-  Cyc_check_str(str2);
+integer_type Cyc_string_cmp(void *data, object str1, object str2) {
+  Cyc_check_str(data, str1);
+  Cyc_check_str(data, str2);
   {
     make_int(cmp, strcmp(((string_type *)str1)->str,
                         ((string_type *)str2)->str));
@@ -929,112 +1056,98 @@ integer_type Cyc_string_cmp(object str1, object str2) {
   }
 }
 
-void dispatch_string_91append(int argc, object clo, object cont, object str1, ...) {
-    string_type result;
+#define Cyc_string_append_va_list(data, argc) { \
+    int i = 0, total_len = 1; \
+    int *len = alloca(sizeof(int) * argc); \
+    char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc); \
+    object tmp; \
+    if (argc > 0) { \
+      Cyc_check_str(data, str1); \
+      str[i] = ((string_type *)str1)->str; \
+      len[i] = strlen(str[i]); \
+      total_len += len[i]; \
+    } \
+    for (i = 1; i < argc; i++) { \
+      tmp = va_arg(ap, object); \
+      Cyc_check_str(data, tmp); \
+      str[i] = ((string_type *)tmp)->str; \
+      len[i] = strlen(str[i]); \
+      total_len += len[i]; \
+    } \
+    buffer = bufferp = alloca(sizeof(char) * total_len); \
+    for (i = 0; i < argc; i++) { \
+        memcpy(bufferp, str[i], len[i]); \
+        bufferp += len[i]; \
+    } \
+    *bufferp = '\0'; \
+    make_string(result, buffer); \
+    va_end(ap); \
+    return_closcall1(data, cont, &result); \
+}
+
+void dispatch_string_91append(void *data, int _argc, object clo, object cont, object str1, ...) {
     va_list ap;
     va_start(ap, str1);
-    result = Cyc_string_append_va_list(argc - 1, str1, ap);
-    va_end(ap);
-    return_closcall1(cont, &result);
+    Cyc_string_append_va_list(data, _argc - 1);
 }
 
-string_type Cyc_string_append(int argc, object str1, ...) {
-    string_type result;
+object Cyc_string_append(void *data, object cont, int _argc, object str1, ...) {
     va_list ap;
     va_start(ap, str1);
-    result = Cyc_string_append_va_list(argc, str1, ap);
-    va_end(ap);
-    return result;
+    Cyc_string_append_va_list(data, _argc);
 }
 
-string_type Cyc_string_append_va_list(int argc, object str1, va_list ap) {
-    // TODO: one way to do this, perhaps not the most efficient:
-    //   compute lengths of the strings,
-    //   store lens and str ptrs
-    //   allocate buffer, memcpy each str to buffer
-    //   make_string using buffer
-
-    int i = 0, total_len = 1; // for null char
-    int *len = alloca(sizeof(int) * argc);
-    char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
-    object tmp;
-    
-    if (argc > 0) {
-      Cyc_check_str(str1);
-      str[i] = ((string_type *)str1)->str;
-      len[i] = strlen(str[i]);
-      total_len += len[i];
-    }
-
-    for (i = 1; i < argc; i++) {
-      tmp = va_arg(ap, object);
-      Cyc_check_str(tmp);
-      str[i] = ((string_type *)tmp)->str;
-      len[i] = strlen(str[i]);
-      total_len += len[i];
-    }
-
-    buffer = bufferp = alloca(sizeof(char) * total_len);
-    for (i = 0; i < argc; i++) {
-        memcpy(bufferp, str[i], len[i]);
-        bufferp += len[i];
-    }
-    *bufferp = '\0';
-    make_string(result, buffer);
-    return result;
-}
-
-integer_type Cyc_string_length(object str) {
-  Cyc_check_obj(string_tag, str);
-  Cyc_check_str(str);
+integer_type Cyc_string_length(void *data, object str) {
+  Cyc_check_obj(data, string_tag, str);
+  Cyc_check_str(data, str);
   { make_int(len, strlen(string_str(str)));
     return len; }}
 
-object Cyc_string_set(object str, object k, object chr) {
+object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
   int idx, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(k);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, k);
 
   if (!eq(boolean_t, Cyc_is_char(chr))) {
-    Cyc_rt_raise2("Expected char but received", chr);
+    Cyc_rt_raise2(data, "Expected char but received", chr);
   }
 
   raw = string_str(str);
   idx = integer_value(k),
   len = strlen(raw);
 
-  Cyc_check_bounds("string-set!", len, idx);
+  Cyc_check_bounds(data, "string-set!", len, idx);
   raw[idx] = obj_obj2char(chr);
   return str;
 }
 
-object Cyc_string_ref(object str, object k) {
+object Cyc_string_ref(void *data, object str, object k) {
   const char *raw;
   int idx, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(k);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, k);
 
   raw = string_str(str);
   idx = integer_value(k),
   len = strlen(raw);
 
   if (idx < 0 || idx >= len) {
-    Cyc_rt_raise2("string-ref - invalid index", k);
+    Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
 
   return obj_char2obj(raw[idx]);
 }
 
-string_type Cyc_substring(object str, object start, object end) {
+object Cyc_substring(void *data, object cont, object str, object start, object end) {
   const char *raw;
   int s, e, len;
 
-  Cyc_check_str(str);
-  Cyc_check_int(start);
-  Cyc_check_int(end);
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, start);
+  Cyc_check_int(data, end);
 
   raw = string_str(str);
   s = integer_value(start),
@@ -1042,18 +1155,18 @@ string_type Cyc_substring(object str, object start, object end) {
   len = strlen(raw);
 
   if (s > e) {
-    Cyc_rt_raise2("substring - start cannot be greater than end", start);
+    Cyc_rt_raise2(data, "substring - start cannot be greater than end", start);
   }
   if (s > len) {
-    Cyc_rt_raise2("substring - start cannot be greater than string length", start);
+    Cyc_rt_raise2(data, "substring - start cannot be greater than string length", start);
   }
   if (e > len) {
     e = len;
   }
 
   {
-    make_stringn(sub, raw + s, e - s);
-    return sub;
+    make_string_with_len(sub, raw + s, e - s);
+    return_closcall1(data, cont, &sub);
   }
 }
 
@@ -1061,28 +1174,28 @@ string_type Cyc_substring(object str, object start, object end) {
  * Return directory where cyclone is installed.
  * This is configured via the makefile during a build.
  */
-string_type Cyc_installation_dir(object type) {
+object Cyc_installation_dir(void *data, object cont, object type) {
   if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "sld", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
     make_string(str, buf);
-    return str;
+    return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
     make_string(str, buf);
-    return str;
+    return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
       strncmp(((symbol)type)->pname, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
     make_string(str, buf);
-    return str;
+    return_closcall1(data, cont, &str);
   } else {
     make_string(str, CYC_INSTALL_DIR);
-    return str;
+    return_closcall1(data, cont, &str);
   }
 }
 
@@ -1095,7 +1208,7 @@ string_type Cyc_installation_dir(object type) {
  *
  * For now, runtime options are not removed.
  */
-object Cyc_command_line_arguments(object cont) {
+object Cyc_command_line_arguments(void *data, object cont) {
   int i;
   object lis = nil;
   for (i = _cyc_argc; i > 1; i--) { // skip program name
@@ -1103,19 +1216,68 @@ object Cyc_command_line_arguments(object cont) {
     object pl = alloca(sizeof(cons_type));
     make_string(s, _cyc_argv[i - 1]);
     memcpy(ps, &s, sizeof(string_type));
+    ((list)pl)->hdr.mark = gc_color_red;
+    ((list)pl)->hdr.grayed = 0;
     ((list)pl)->tag = cons_tag;
     ((list)pl)->cons_car = ps;
     ((list)pl)->cons_cdr = lis;
     lis = pl;
   }
-  return_closcall1(cont, lis);
+  return_closcall1(data, cont, lis);
 }
 
-object Cyc_make_vector(object cont, object len, object fill) {
+/**
+ * Create a new mutex by allocating it on the heap. This is different than 
+ * other types of objects because by definition a mutex will be used by
+ * multiple threads, so no need to risk having the non-creating thread pick
+ * up a stack object ref by mistake.
+ */
+object Cyc_make_mutex(void *data) {
+  int heap_grown;
+  mutex lock;
+  mutex_type tmp;
+  tmp.hdr.mark = gc_color_red;
+  tmp.hdr.grayed = 0;
+  tmp.tag = mutex_tag;
+  lock = gc_alloc(Cyc_heap, sizeof(mutex_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+  if (pthread_mutex_init(&(lock->lock), NULL) != 0) {
+    fprintf(stderr, "Unable to make mutex\n");
+    exit(1);
+  }
+  return lock;
+}
+
+object Cyc_mutex_lock(void *data, object cont, object obj) {
+  mutex m = (mutex) obj;
+  Cyc_check_mutex(data, obj);
+  gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+  if (pthread_mutex_lock(&(m->lock)) != 0) {
+    fprintf(stderr, "Error locking mutex\n");
+    exit(1);
+  }
+  gc_mutator_thread_runnable(
+    (gc_thread_data *)data, 
+    boolean_t);
+  return boolean_t;
+}
+
+object Cyc_mutex_unlock(void *data, object obj) {
+  mutex m = (mutex) obj;
+  Cyc_check_mutex(data, obj);
+  if (pthread_mutex_unlock(&(m->lock)) != 0) {
+    fprintf(stderr, "Error unlocking mutex\n");
+    exit(1);
+  }
+  return boolean_t;
+}
+
+object Cyc_make_vector(void *data, object cont, object len, object fill) {
   object v = nil;
   int i;
-  Cyc_check_int(len);
+  Cyc_check_int(data, len);
   v = alloca(sizeof(vector_type));
+  ((vector)v)->hdr.mark = gc_color_red;
+  ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag;
   ((vector)v)->num_elt = ((integer_type *)len)->value;
   ((vector)v)->elts = 
@@ -1125,18 +1287,20 @@ object Cyc_make_vector(object cont, object len, object fill) {
   for (i = 0; i < ((vector)v)->num_elt; i++) {
     ((vector)v)->elts[i] = fill;
   }
-  return_closcall1(cont, v);
+  return_closcall1(data, cont, v);
 }
 
-object Cyc_list2vector(object cont, object l) {
+object Cyc_list2vector(void *data, object cont, object l) {
   object v = nil; 
   integer_type len;
   object lst = l; 
   int i = 0; 
 
-  Cyc_check_cons_or_nil(l); 
-  len = Cyc_length(l); 
+  Cyc_check_cons_or_nil(data, l); 
+  len = Cyc_length(data, l); 
   v = alloca(sizeof(vector_type)); 
+  ((vector)v)->hdr.mark = gc_color_red;
+  ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag; 
   ((vector)v)->num_elt = len.value; 
   ((vector)v)->elts = 
@@ -1147,7 +1311,7 @@ object Cyc_list2vector(object cont, object l) {
     ((vector)v)->elts[i++] = car(lst); 
     lst = cdr(lst);
   }
-  return_closcall1(cont, v);
+  return_closcall1(data, cont, v);
 }
 
 integer_type Cyc_system(object cmd) {
@@ -1165,10 +1329,10 @@ integer_type Cyc_char2integer(object chr){
     return n;
 }
 
-object Cyc_integer2char(object n){
+object Cyc_integer2char(void *data, object n){
     int val = 0;
 
-    Cyc_check_int(n);
+    Cyc_check_int(data, n);
     if (!nullp(n)) {
         val = ((integer_type *) n)->value;
     }
@@ -1191,16 +1355,20 @@ object __halt(object obj) {
 }
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
-common_type FUNC_OP(object x, object y) { \
+common_type FUNC_OP(void *data, object x, object y) { \
     common_type s; \
     int tx = type_of(x), ty = type_of(y); \
+    s.double_t.hdr.mark = gc_color_red; \
+    s.double_t.hdr.grayed = 0; \
     s.double_t.tag = double_tag; \
     if (DIV &&  \
         ((ty == integer_tag && integer_value(y) == 0) || \
         (ty == double_tag && double_value(y) == 0.0))) { \
-      Cyc_rt_raise_msg("Divide by zero"); \
+      Cyc_rt_raise_msg(data, "Divide by zero"); \
     } \
     if (tx == integer_tag && ty == integer_tag) { \
+        s.integer_t.hdr.mark = gc_color_red; \
+        s.integer_t.hdr.grayed = 0; \
         s.integer_t.tag = integer_tag; \
         s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
     } else if (tx == double_tag && ty == integer_tag) { \
@@ -1213,23 +1381,23 @@ common_type FUNC_OP(object x, object y) { \
         make_string(s, "Bad argument type"); \
         make_cons(c1, y, nil); \
         make_cons(c0, &s, &c1); \
-        Cyc_rt_raise(&c0); \
+        Cyc_rt_raise(data, &c0); \
     } \
     return s; \
 } \
-common_type FUNC(int argc, object n, ...) { \
+common_type FUNC(void *data, int argc, object n, ...) { \
     va_list ap; \
     va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(argc, FUNC_OP, n, ap); \
+    common_type result = Cyc_num_op_va_list(data, argc, FUNC_OP, n, ap); \
     va_end(ap); \
     return result; \
 } \
-void FUNC_APPLY(int argc, object clo, object cont, object n, ...) { \
+void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
     va_list ap; \
     va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(argc - 1, FUNC_OP, n, ap); \
+    common_type result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, n, ap); \
     va_end(ap); \
-    return_closcall1(cont, &result); \
+    return_closcall1(data, cont, &result); \
 }
 
 declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
@@ -1239,38 +1407,48 @@ declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
 //       result contains a decimal component?
 declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
 
-common_type Cyc_num_op_va_list(int argc, common_type (fn_op(object, object)), object n, va_list ns) {
+common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(void *, object, object)), object n, va_list ns) {
   common_type sum;
   int i;
   if (argc == 0) {
+    sum.integer_t.hdr.mark = gc_color_red;
+    sum.integer_t.hdr.grayed = 0;
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = 0;
     return sum;
   }
 
   if (type_of(n) == integer_tag) {
+    sum.integer_t.hdr.mark = gc_color_red;
+    sum.integer_t.hdr.grayed = 0; 
     sum.integer_t.tag = integer_tag;
     sum.integer_t.value = ((integer_type *)n)->value;
   } else if (type_of(n) == double_tag) {
+    sum.double_t.hdr.mark = gc_color_red;
+    sum.double_t.hdr.grayed = 0;
     sum.double_t.tag = double_tag;
     sum.double_t.value = ((double_type *)n)->value;
   } else {
       make_string(s, "Bad argument type");
       make_cons(c1, n, nil);
       make_cons(c0, &s, &c1);
-      Cyc_rt_raise(&c0);
+      Cyc_rt_raise(data, &c0);
   }
 
   for (i = 1; i < argc; i++) {
-    common_type result = fn_op(&sum, va_arg(ns, object));
+    common_type result = fn_op(data, &sum, va_arg(ns, object));
     if (type_of(&result) == integer_tag) {
+        sum.integer_t.hdr.mark = gc_color_red;
+        sum.integer_t.hdr.grayed = 0;
         sum.integer_t.tag = integer_tag;
         sum.integer_t.value = ((integer_type *) &result)->value;
     } else if (type_of(&result) == double_tag) {
+        sum.double_t.hdr.mark = gc_color_red;
+        sum.double_t.hdr.grayed = 0;
         sum.double_t.tag = double_tag;
         sum.double_t.value = ((double_type *) &result)->value;
     } else {
-        Cyc_rt_raise_msg("Internal error, invalid tag in Cyc_num_op_va_list");
+        Cyc_rt_raise_msg(data, "Internal error, invalid tag in Cyc_num_op_va_list");
     }
   }
 
@@ -1294,34 +1472,34 @@ port_type Cyc_stderr() {
     return p;
 }
 
-port_type Cyc_io_open_input_file(object str) {
+port_type Cyc_io_open_input_file(void *data, object str) {
     const char *fname;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 1);
     p.fp = fopen(fname, "r");
-    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
+    if (p.fp == NULL) { Cyc_rt_raise2(data, "Unable to open file", str); }
     return p;
 }
 
-port_type Cyc_io_open_output_file(object str) {
+port_type Cyc_io_open_output_file(void *data, object str) {
     const char *fname;
-    Cyc_check_str(str);
+    Cyc_check_str(data, str);
     fname = ((string_type *)str)->str;
     make_port(p, NULL, 0);
     p.fp = fopen(fname, "w");
-    if (p.fp == NULL) { Cyc_rt_raise2("Unable to open file", str); }
+    if (p.fp == NULL) { Cyc_rt_raise2(data, "Unable to open file", str); }
     return p;
 }
 
-object Cyc_io_close_input_port(object port) {
-  return Cyc_io_close_port(port); }
+object Cyc_io_close_input_port(void *data, object port) {
+  return Cyc_io_close_port(data, port); }
 
-object Cyc_io_close_output_port(object port) {
-  return Cyc_io_close_port(port); }
+object Cyc_io_close_output_port(void *data, object port) {
+  return Cyc_io_close_port(data, port); }
 
-object Cyc_io_close_port(object port) {
-  Cyc_check_port(port);
+object Cyc_io_close_port(void *data, object port) {
+  Cyc_check_port(data, port);
   {
     FILE *stream = ((port_type *)port)->fp;
     if (stream) fclose(stream);
@@ -1330,8 +1508,8 @@ object Cyc_io_close_port(object port) {
   return port;
 }
 
-object Cyc_io_flush_output_port(object port) {
-  Cyc_check_port(port);
+object Cyc_io_flush_output_port(void *data, object port) {
+  Cyc_check_port(data, port);
   {
     FILE *stream = ((port_type *)port)->fp;
     if (stream) { 
@@ -1342,18 +1520,18 @@ object Cyc_io_flush_output_port(object port) {
   return port;
 }
 
-object Cyc_io_delete_file(object filename) {
+object Cyc_io_delete_file(void *data, object filename) {
   const char *fname;
-  Cyc_check_str(filename);
+  Cyc_check_str(data, filename);
   fname = ((string_type *)filename)->str;
   if (remove(fname) == 0)
     return boolean_t; // Success
   return boolean_f;
 }
 
-object Cyc_io_file_exists(object filename) {
+object Cyc_io_file_exists(void *data, object filename) {
   const char *fname;
-  Cyc_check_str(filename);
+  Cyc_check_str(data, filename);
   fname = ((string_type *)filename)->str;
   FILE *file;
   // Possibly overkill, but portable
@@ -1365,10 +1543,15 @@ object Cyc_io_file_exists(object filename) {
 }
 
 //  TODO: port arg is optional! (maybe handle that in expansion section??)
-object Cyc_io_read_char(object port) {
-    Cyc_check_port(port);
+object Cyc_io_read_char(void *data, object cont, object port) {
+    int c;
+    Cyc_check_port(data, port);
     {
-        int c = fgetc(((port_type *) port)->fp);
+        gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+        c = fgetc(((port_type *) port)->fp);
+        gc_mutator_thread_runnable(
+          (gc_thread_data *)data, 
+          (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
         if (c != EOF) {
             return obj_char2obj(c);
         }
@@ -1377,20 +1560,23 @@ object Cyc_io_read_char(object port) {
 }
 
 /* TODO: this function needs some work, but approximates what is needed */
-object Cyc_io_read_line(object cont, object port) {
+object Cyc_io_read_line(void *data, object cont, object port) {
   FILE *stream = ((port_type *)port)->fp;
   char buf[1024];
   int i = 0, c;
   
+  gc_mutator_thread_blocked((gc_thread_data *)data, cont);
   while (1) {
     c = fgetc(stream);
     if (c == EOF && i == 0) {
-      return_closcall1(cont, Cyc_EOF);
+      gc_mutator_thread_runnable((gc_thread_data *)data, Cyc_EOF);
+      return_closcall1(data, cont, Cyc_EOF);
     } else if (c == EOF || i == 1023 || c == '\n') {
       buf[i] = '\0';
       {
         make_string(s, buf);
-        return_closcall1(cont, &s);
+        gc_mutator_thread_runnable((gc_thread_data *)data, &s);
+        return_closcall1(data, cont, &s);
       }
     }
 
@@ -1399,15 +1585,19 @@ object Cyc_io_read_line(object cont, object port) {
   return nil;
 }
 
-object Cyc_io_peek_char(object port) {
+object Cyc_io_peek_char(void *data, object cont, object port) {
     FILE *stream;
     int c;
 
-    Cyc_check_port(port);
+    Cyc_check_port(data, port);
     {
         stream = ((port_type *) port)->fp;
+        gc_mutator_thread_blocked((gc_thread_data *)data, cont);
         c = fgetc(stream);
         ungetc(c, stream);
+        gc_mutator_thread_runnable(
+          (gc_thread_data *)data, 
+          (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
         if (c != EOF) {
             return obj_char2obj(c);
         }
@@ -1418,424 +1608,451 @@ object Cyc_io_peek_char(object port) {
 /* This heap cons is used only for initialization. */
 list mcons(a,d) object a,d;
 {register cons_type *c = malloc(sizeof(cons_type));
+ c->hdr.mark = gc_color_red;
+ c->hdr.grayed = 0;
  c->tag = cons_tag; c->cons_car = a; c->cons_cdr = d;
  return c;}
 
 cvar_type *mcvar(object *var) {
   cvar_type *c = malloc(sizeof(cvar_type));
+  c->hdr.mark = gc_color_red;
+  c->hdr.grayed = 0;
   c->tag = cvar_tag; 
   c->pvar = var;
   return c;}
 
-void _Cyc_91global_91vars(object cont, object args){ 
-    return_closcall1(cont, Cyc_global_variables); } 
-void _car(object cont, object args) { 
-    Cyc_check_num_args("car", 1, args);
+void _Cyc_91global_91vars(void *data, object cont, object args){ 
+    return_closcall1(data, cont, Cyc_global_variables); } 
+void _car(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "car", 1, args);
     { object var = car(args);
-      Cyc_check_cons(var);
-      return_closcall1(cont, car(var)); }}
-void _cdr(object cont, object args) { 
-    Cyc_check_num_args("cdr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdr(car(args))); }
-void _caar(object cont, object args) { 
-    Cyc_check_num_args("caar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caar(car(args))); }
-void _cadr(object cont, object args) { 
-    Cyc_check_num_args("cadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cadr(car(args))); }
-void _cdar(object cont, object args) { 
-    Cyc_check_num_args("cdar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdar(car(args))); }
-void _cddr(object cont, object args) { 
-    Cyc_check_num_args("cddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cddr(car(args))); }
-void _caaar(object cont, object args) { 
-    Cyc_check_num_args("caaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caaar(car(args))); }
-void _caadr(object cont, object args) { 
-    Cyc_check_num_args("caadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caadr(car(args))); }
-void _cadar(object cont, object args) { 
-    Cyc_check_num_args("cadar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cadar(car(args))); }
-void _caddr(object cont, object args) { 
-    Cyc_check_num_args("caddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caddr(car(args))); }
-void _cdaar(object cont, object args) { 
-    Cyc_check_num_args("cdaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaar(car(args))); }
-void _cdadr(object cont, object args) { 
-    Cyc_check_num_args("cdadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdadr(car(args))); }
-void _cddar(object cont, object args) { 
-    Cyc_check_num_args("cddar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cddar(car(args))); }
-void _cdddr(object cont, object args) { 
-    Cyc_check_num_args("cdddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdddr(car(args))); }
-void _caaaar(object cont, object args) { 
-    Cyc_check_num_args("caaaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caaaar(car(args))); }
-void _caaadr(object cont, object args) { 
-    Cyc_check_num_args("caaadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caaadr(car(args))); }
-void _caadar(object cont, object args) { 
-    Cyc_check_num_args("caadar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caadar(car(args))); }
-void _caaddr(object cont, object args) { 
-    Cyc_check_num_args("caaddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caaddr(car(args))); }
-void _cadaar(object cont, object args) { 
-    Cyc_check_num_args("cadaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cadaar(car(args))); }
-void _cadadr(object cont, object args) { 
-    Cyc_check_num_args("cadadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cadadr(car(args))); }
-void _caddar(object cont, object args) { 
-    Cyc_check_num_args("caddar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, caddar(car(args))); }
-void _cadddr(object cont, object args) { 
-    Cyc_check_num_args("cadddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cadddr(car(args))); }
-void _cdaaar(object cont, object args) { 
-    Cyc_check_num_args("cdaaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaaar(car(args))); }
-void _cdaadr(object cont, object args) { 
-    Cyc_check_num_args("cdaadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaadr(car(args))); }
-void _cdadar(object cont, object args) { 
-    Cyc_check_num_args("cdadar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdadar(car(args))); }
-void _cdaddr(object cont, object args) { 
-    Cyc_check_num_args("cdaddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdaddr(car(args))); }
-void _cddaar(object cont, object args) { 
-    Cyc_check_num_args("cddaar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cddaar(car(args))); }
-void _cddadr(object cont, object args) { 
-    Cyc_check_num_args("cddadr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cddadr(car(args))); }
-void _cdddar(object cont, object args) { 
-    Cyc_check_num_args("cdddar", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cdddar(car(args))); }
-void _cddddr(object cont, object args) { 
-    Cyc_check_num_args("cddddr", 1, args);
-    Cyc_check_cons(car(args));
-    return_closcall1(cont, cddddr(car(args))); }
-void _cons(object cont, object args) { 
-    Cyc_check_num_args("cons", 2, args);
+      Cyc_check_cons(data, var);
+      return_closcall1(data, cont, car(var)); }}
+void _cdr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdr(car(args))); }
+void _caar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caar(car(args))); }
+void _cadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cadr(car(args))); }
+void _cdar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdar(car(args))); }
+void _cddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cddr(car(args))); }
+void _caaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caaar(car(args))); }
+void _caadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caadr(car(args))); }
+void _cadar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cadar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cadar(car(args))); }
+void _caddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caddr(car(args))); }
+void _cdaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdaar(car(args))); }
+void _cdadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdadr(car(args))); }
+void _cddar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cddar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cddar(car(args))); }
+void _cdddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdddr(car(args))); }
+void _caaaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caaaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caaaar(car(args))); }
+void _caaadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caaadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caaadr(car(args))); }
+void _caadar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caadar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caadar(car(args))); }
+void _caaddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caaddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caaddr(car(args))); }
+void _cadaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cadaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cadaar(car(args))); }
+void _cadadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cadadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cadadr(car(args))); }
+void _caddar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "caddar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, caddar(car(args))); }
+void _cadddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cadddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cadddr(car(args))); }
+void _cdaaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdaaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdaaar(car(args))); }
+void _cdaadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdaadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdaadr(car(args))); }
+void _cdadar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdadar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdadar(car(args))); }
+void _cdaddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdaddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdaddr(car(args))); }
+void _cddaar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cddaar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cddaar(car(args))); }
+void _cddadr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cddadr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cddadr(car(args))); }
+void _cdddar(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cdddar", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cdddar(car(args))); }
+void _cddddr(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cddddr", 1, args);
+    Cyc_check_cons(data, car(args));
+    return_closcall1(data, cont, cddddr(car(args))); }
+void _cons(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "cons", 2, args);
     { make_cons(c, car(args), cadr(args));
-      return_closcall1(cont, &c); }}
-void _eq_127(object cont, object args){ 
-    Cyc_check_num_args("eq?", 2, args);
-    return_closcall1(cont, Cyc_eq(car(args), cadr(args))); }
-void _eqv_127(object cont, object args){ 
-    Cyc_check_num_args("eqv?", 2, args);
-    _eq_127(cont, args); }
-void _equal_127(object cont, object args){ 
-    Cyc_check_num_args("equal?", 2, args);
-    return_closcall1(cont, equalp(car(args), cadr(args))); }
-void _length(object cont, object args){ 
-    Cyc_check_num_args("length", 1, args);
-    { integer_type i = Cyc_length(car(args));
-      return_closcall1(cont, &i); }}
-void _vector_91length(object cont, object args){ 
-    Cyc_check_num_args("vector_91length", 1, args);
-    { integer_type i = Cyc_vector_length(car(args));
-      return_closcall1(cont, &i); }}
-void _null_127(object cont, object args) { 
-    Cyc_check_num_args("null?", 1, args);
-    return_closcall1(cont, Cyc_is_null(car(args))); }
-void _set_91car_67(object cont, object args) { 
-    Cyc_check_num_args("set-car!", 2, args);
-    return_closcall1(cont, Cyc_set_car(car(args), cadr(args))); }
-void _set_91cdr_67(object cont, object args) { 
-    Cyc_check_num_args("set-cdr!", 2, args);
-    return_closcall1(cont, Cyc_set_cdr(car(args), cadr(args))); }
-void _Cyc_91has_91cycle_127(object cont, object args) { 
-    Cyc_check_num_args("Cyc-has-cycle?", 1, args);
-    return_closcall1(cont, Cyc_has_cycle(car(args))); }
-void __87(object cont, object args) {
-    integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_sum, cont, cont, args); }
-void __91(object cont, object args) {
-    Cyc_check_num_args("-", 1, args);
-    { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_sub, cont, cont, args); }}
-void __85(object cont, object args) {
-    integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_mul, cont, cont, args); }
-void __95(object cont, object args) {
-    Cyc_check_num_args("/", 1, args);
-    { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_div, cont, cont, args); }}
-void _Cyc_91cvar_127(object cont, object args) {
-    Cyc_check_num_args("Cyc-cvar?", 1, args);
-    return_closcall1(cont, Cyc_is_cvar(car(args))); }
-void _boolean_127(object cont, object args) {
-    Cyc_check_num_args("boolean?", 1, args);
-    return_closcall1(cont, Cyc_is_boolean(car(args))); }
-void _char_127(object cont, object args) {
-    Cyc_check_num_args("char?", 1, args);
-    return_closcall1(cont, Cyc_is_char(car(args))); }
-void _eof_91object_127(object cont, object args) {
-    Cyc_check_num_args("eof_91object?", 1, args);
-    return_closcall1(cont, Cyc_is_eof_object(car(args))); }
-void _number_127(object cont, object args) {
-    Cyc_check_num_args("number?", 1, args);
-    return_closcall1(cont, Cyc_is_number(car(args))); }
-void _real_127(object cont, object args) {
-    Cyc_check_num_args("real?", 1, args);
-    return_closcall1(cont, Cyc_is_real(car(args))); }
-void _integer_127(object cont, object args) {
-    Cyc_check_num_args("integer?", 1, args);
-    return_closcall1(cont, Cyc_is_integer(car(args))); }
-void _pair_127(object cont, object args) {
-    Cyc_check_num_args("pair?", 1, args);
-    return_closcall1(cont, Cyc_is_cons(car(args))); }
-void _procedure_127(object cont, object args) {
-    Cyc_check_num_args("procedure?", 1, args);
-    return_closcall1(cont, Cyc_is_procedure(car(args))); }
-void _macro_127(object cont, object args) {
-    Cyc_check_num_args("macro?", 1, args);
-    return_closcall1(cont, Cyc_is_macro(car(args))); }
-void _port_127(object cont, object args) {
-    Cyc_check_num_args("port?", 1, args);
-    return_closcall1(cont, Cyc_is_port(car(args))); }
-void _vector_127(object cont, object args) {
-    Cyc_check_num_args("vector?", 1, args);
-    return_closcall1(cont, Cyc_is_vector(car(args))); }
-void _string_127(object cont, object args) {
-    Cyc_check_num_args("string?", 1, args);
-    return_closcall1(cont, Cyc_is_string(car(args))); }
-void _symbol_127(object cont, object args) {
-    Cyc_check_num_args("symbol?", 1, args);
-    return_closcall1(cont, Cyc_is_symbol(car(args))); }
+      return_closcall1(data, cont, &c); }}
+void _eq_127(void *data, object cont, object args){ 
+    Cyc_check_num_args(data, "eq?", 2, args);
+    return_closcall1(data, cont, Cyc_eq(car(args), cadr(args))); }
+void _eqv_127(void *data, object cont, object args){ 
+    Cyc_check_num_args(data, "eqv?", 2, args);
+    _eq_127(data, cont, args); }
+void _equal_127(void *data, object cont, object args){ 
+    Cyc_check_num_args(data, "equal?", 2, args);
+    return_closcall1(data, cont, equalp(car(args), cadr(args))); }
+void _length(void *data, object cont, object args){ 
+    Cyc_check_num_args(data, "length", 1, args);
+    { integer_type i = Cyc_length(data, car(args));
+      return_closcall1(data, cont, &i); }}
+void _vector_91length(void *data, object cont, object args){ 
+    Cyc_check_num_args(data, "vector_91length", 1, args);
+    { integer_type i = Cyc_vector_length(data, car(args));
+      return_closcall1(data, cont, &i); }}
+void _null_127(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "null?", 1, args);
+    return_closcall1(data, cont, Cyc_is_null(car(args))); }
+void _set_91car_67(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "set-car!", 2, args);
+    return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args))); }
+void _set_91cdr_67(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "set-cdr!", 2, args);
+    return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args))); }
+void _Cyc_91has_91cycle_127(void *data, object cont, object args) { 
+    Cyc_check_num_args(data, "Cyc-has-cycle?", 1, args);
+    return_closcall1(data, cont, Cyc_has_cycle(car(args))); }
+void _Cyc_91spawn_91thread_67(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-spawn-thread!", 1, args);
+    // TODO: validate argument type?
+    return_closcall1(data, cont, Cyc_spawn_thread(car(args))); }
+void _Cyc_91end_91thread_67(void *data, object cont, object args) {
+    Cyc_end_thread((gc_thread_data *)data);
+    return_closcall1(data, cont, boolean_f); }
+void _thread_91sleep_67(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "thread-sleep!", 1, args);
+    return_closcall1(data, cont, Cyc_thread_sleep(data, car(args))); }
+void _Cyc_91minor_91gc_primitive(void *data, object cont, object args){
+    Cyc_trigger_minor_gc(data, cont); }
+void __87(void *data, object cont, object args) {
+    integer_type argc = Cyc_length(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
+void __91(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "-", 1, args);
+    { integer_type argc = Cyc_length(data, args);
+      dispatch(data, argc.value, (function_type)dispatch_sub, cont, cont, args); }}
+void __85(void *data, object cont, object args) {
+    integer_type argc = Cyc_length(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_mul, cont, cont, args); }
+void __95(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "/", 1, args);
+    { integer_type argc = Cyc_length(data, args);
+      dispatch(data, argc.value, (function_type)dispatch_div, cont, cont, args); }}
+void _Cyc_91cvar_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-cvar?", 1, args);
+    return_closcall1(data, cont, Cyc_is_cvar(car(args))); }
+void _boolean_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "boolean?", 1, args);
+    return_closcall1(data, cont, Cyc_is_boolean(car(args))); }
+void _char_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "char?", 1, args);
+    return_closcall1(data, cont, Cyc_is_char(car(args))); }
+void _eof_91object_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "eof_91object?", 1, args);
+    return_closcall1(data, cont, Cyc_is_eof_object(car(args))); }
+void _number_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "number?", 1, args);
+    return_closcall1(data, cont, Cyc_is_number(car(args))); }
+void _real_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "real?", 1, args);
+    return_closcall1(data, cont, Cyc_is_real(car(args))); }
+void _integer_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "integer?", 1, args);
+    return_closcall1(data, cont, Cyc_is_integer(car(args))); }
+void _pair_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "pair?", 1, args);
+    return_closcall1(data, cont, Cyc_is_cons(car(args))); }
+void _procedure_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "procedure?", 1, args);
+    return_closcall1(data, cont, Cyc_is_procedure(data, car(args))); }
+void _macro_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "macro?", 1, args);
+    return_closcall1(data, cont, Cyc_is_macro(car(args))); }
+void _port_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "port?", 1, args);
+    return_closcall1(data, cont, Cyc_is_port(car(args))); }
+void _vector_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "vector?", 1, args);
+    return_closcall1(data, cont, Cyc_is_vector(car(args))); }
+void _string_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "string?", 1, args);
+    return_closcall1(data, cont, Cyc_is_string(car(args))); }
+void _symbol_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "symbol?", 1, args);
+    return_closcall1(data, cont, Cyc_is_symbol(car(args))); }
 
-void _Cyc_91get_91cvar(object cont, object args) {  
+void _Cyc_91get_91cvar(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _Cyc_91set_91cvar_67(object cont, object args) {  
+void _Cyc_91set_91cvar_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 /* Note we cannot use _exit (per convention) because it is reserved by C */
-void _cyc_exit(object cont, object args) {  
+void _cyc_exit(void *data, object cont, object args) {  
     if(nullp(args))
         __halt(nil);
     __halt(car(args));
 }
-void __75halt(object cont, object args) {  
+void __75halt(void *data, object cont, object args) {  
     exit(0); }
-void _cell_91get(object cont, object args) {  
+void _cell_91get(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _set_91global_67(object cont, object args) {  
+void _set_91global_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _set_91cell_67(object cont, object args) {  
+void _set_91cell_67(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
-void _cell(object cont, object args) {  
+void _cell(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }
 
-void __123(object cont, object args) {  
-    Cyc_check_num_args("=", 2, args);
-    return_closcall1(cont, __num_eq(car(args), cadr(args)));}
-void __125(object cont, object args) {  
-    Cyc_check_num_args(">", 2, args);
-    return_closcall1(cont, __num_gt(car(args), cadr(args)));}
-void __121(object cont, object args) {
-    Cyc_check_num_args("<", 2, args);
-    return_closcall1(cont, __num_lt(car(args), cadr(args)));}
-void __125_123(object cont, object args) {
-    Cyc_check_num_args(">=", 2, args);
-    return_closcall1(cont, __num_gte(car(args), cadr(args)));}
-void __121_123(object cont, object args) {
-    Cyc_check_num_args("<=", 2, args);
-    return_closcall1(cont, __num_lte(car(args), cadr(args)));}
+void __123(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "=", 2, args);
+    return_closcall1(data, cont, __num_eq(data, car(args), cadr(args)));}
+void __125(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, ">", 2, args);
+    return_closcall1(data, cont, __num_gt(data, car(args), cadr(args)));}
+void __121(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "<", 2, args);
+    return_closcall1(data, cont, __num_lt(data, car(args), cadr(args)));}
+void __125_123(void *data, object cont, object args) {
+    Cyc_check_num_args(data, ">=", 2, args);
+    return_closcall1(data, cont, __num_gte(data, car(args), cadr(args)));}
+void __121_123(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "<=", 2, args);
+    return_closcall1(data, cont, __num_lte(data, car(args), cadr(args)));}
 
-void _apply(object cont, object args) {  
-    Cyc_check_num_args("apply", 2, args);
-    apply(cont, car(args), cadr(args)); }
-void _assoc (object cont, object args) {  
-    Cyc_check_num_args("assoc ", 2, args);
-    return_closcall1(cont, assoc(car(args), cadr(args)));}
-void _assq  (object cont, object args) {  
-    Cyc_check_num_args("assq  ", 2, args);
-    return_closcall1(cont, assq(car(args), cadr(args)));}
-void _assv  (object cont, object args) {  
-    Cyc_check_num_args("assv  ", 2, args);
-    return_closcall1(cont, assq(car(args), cadr(args)));}
-void _member(object cont, object args) {  
-    Cyc_check_num_args("member", 2, args);
-    return_closcall1(cont, memberp(car(args), cadr(args)));}
-void _memq(object cont, object args) {  
-    Cyc_check_num_args("memq", 2, args);
-    return_closcall1(cont, memqp(car(args), cadr(args)));}
-void _memv(object cont, object args) {  
-    Cyc_check_num_args("memv", 2, args);
-    return_closcall1(cont, memqp(car(args), cadr(args)));}
-void _char_91_125integer(object cont, object args) {  
-    Cyc_check_num_args("char->integer", 1, args);
+void _apply(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "apply", 2, args);
+    apply(data, cont, car(args), cadr(args)); }
+void _assoc (void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "assoc ", 2, args);
+    return_closcall1(data, cont, assoc(data, car(args), cadr(args)));}
+void _assq  (void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "assq  ", 2, args);
+    return_closcall1(data, cont, assq(data, car(args), cadr(args)));}
+void _assv  (void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "assv  ", 2, args);
+    return_closcall1(data, cont, assq(data, car(args), cadr(args)));}
+void _member(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "member", 2, args);
+    return_closcall1(data, cont, memberp(data, car(args), cadr(args)));}
+void _memq(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "memq", 2, args);
+    return_closcall1(data, cont, memqp(data, car(args), cadr(args)));}
+void _memv(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "memv", 2, args);
+    return_closcall1(data, cont, memqp(data, car(args), cadr(args)));}
+void _char_91_125integer(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "char->integer", 1, args);
     { integer_type i = Cyc_char2integer(car(args));
-      return_closcall1(cont, &i);}}
-void _integer_91_125char(object cont, object args) {  
-    Cyc_check_num_args("integer->char", 1, args);
-    return_closcall1(cont, Cyc_integer2char(car(args)));}
-void _string_91_125number(object cont, object args) {  
-    Cyc_check_num_args("string->number", 1, args);
-    { common_type i = Cyc_string2number(car(args));
-      return_closcall1(cont, &i);}}
-void _string_91length(object cont, object args) {
-    Cyc_check_num_args("string-length", 1, args);
-    { integer_type i = Cyc_string_length(car(args));
-      return_closcall1(cont, &i);}}
-void _cyc_substring(object cont, object args) {
-    Cyc_check_num_args("substring", 3, args);
-    { string_type s = Cyc_substring(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, &s);}}
-void _cyc_string_91set_67(object cont, object args) {
-    Cyc_check_num_args("string-set!", 3, args);
-    { object s = Cyc_string_set(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, s); }}
-void _cyc_string_91ref(object cont, object args) {
-    Cyc_check_num_args("string-ref", 2, args);
-    { object c = Cyc_string_ref(car(args), cadr(args));
-      return_closcall1(cont, c); }}
-void _Cyc_91installation_91dir(object cont, object args) {
-    Cyc_check_num_args("Cyc-installation-dir", 1, args);
-    { string_type dir = Cyc_installation_dir(car(args));
-      return_closcall1(cont, &dir);}}
-void _command_91line_91arguments(object cont, object args) {
-    object cmdline = Cyc_command_line_arguments(cont);
-    return_closcall1(cont, cmdline); }
-void _cyc_system(object cont, object args) {
-    Cyc_check_num_args("system", 1, args);
+      return_closcall1(data, cont, &i);}}
+void _integer_91_125char(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "integer->char", 1, args);
+    return_closcall1(data, cont, Cyc_integer2char(data, car(args)));}
+void _string_91_125number(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "string->number", 1, args);
+    { common_type i = Cyc_string2number(data, car(args));
+      return_closcall1(data, cont, &i);}}
+void _string_91length(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "string-length", 1, args);
+    { integer_type i = Cyc_string_length(data, car(args));
+      return_closcall1(data, cont, &i);}}
+void _cyc_substring(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "substring", 3, args);
+    Cyc_substring(data, cont, car(args), cadr(args), caddr(args));}
+void _cyc_string_91set_67(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "string-set!", 3, args);
+    { object s = Cyc_string_set(data, car(args), cadr(args), caddr(args));
+      return_closcall1(data, cont, s); }}
+void _cyc_string_91ref(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "string-ref", 2, args);
+    { object c = Cyc_string_ref(data, car(args), cadr(args));
+      return_closcall1(data, cont, c); }}
+void _Cyc_make_mutex(void *data, object cont, object args) {
+    { object c = Cyc_make_mutex(data);
+      return_closcall1(data, cont, c); }}
+void _Cyc_mutex_lock(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex-lock!", 1, args);
+    { object c = Cyc_mutex_lock(data, cont, car(args));
+      return_closcall1(data, cont, c); }}
+void _Cyc_mutex_unlock(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex-unlock!", 1, args);
+    { object c = Cyc_mutex_unlock(data, car(args));
+      return_closcall1(data, cont, c); }}
+void _mutex_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "mutex?", 1, args);
+    return_closcall1(data, cont, Cyc_is_mutex(car(args))); }
+void _Cyc_91installation_91dir(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-installation-dir", 1, args);
+    Cyc_installation_dir(data, cont, car(args));}
+void _command_91line_91arguments(void *data, object cont, object args) {
+    object cmdline = Cyc_command_line_arguments(data, cont);
+    return_closcall1(data, cont, cmdline); }
+void _cyc_system(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "system", 1, args);
     { integer_type i = Cyc_system(car(args));
-      return_closcall1(cont, &i);}}
-//void _error(object cont, object args) {
+      return_closcall1(data, cont, &i);}}
+//void _error(void *data, object cont, object args) {
 //    integer_type argc = Cyc_length(args);
-//    dispatch_va(argc.value, dispatch_error, cont, cont, args); }
-void _Cyc_91current_91exception_91handler(object cont, object args) {
+//    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
+void _Cyc_91current_91exception_91handler(void *data, object cont, object args) {
     object handler = Cyc_current_exception_handler();
-    return_closcall1(cont, handler); }
-void _Cyc_91default_91exception_91handler(object cont, object args) {
+    return_closcall1(data, cont, handler); }
+void _Cyc_91default_91exception_91handler(void *data, object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
-    Cyc_default_exception_handler(1, args, car(args));
+    Cyc_default_exception_handler(data, 1, args, car(args));
 }
-void _string_91cmp(object cont, object args) {  
-    Cyc_check_num_args("string-cmp", 2, args);
-    { integer_type cmp = Cyc_string_cmp(car(args), cadr(args));
-      return_closcall1(cont, &cmp);}}
-void _string_91append(object cont, object args) {  
-    integer_type argc = Cyc_length(args);
-    dispatch(argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
-void _make_91vector(object cont, object args) {
-    Cyc_check_num_args("make-vector", 1, args);
-    { integer_type argc = Cyc_length(args);
+void _string_91cmp(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "string-cmp", 2, args);
+    { integer_type cmp = Cyc_string_cmp(data, car(args), cadr(args));
+      return_closcall1(data, cont, &cmp);}}
+void _string_91append(void *data, object cont, object args) {  
+    integer_type argc = Cyc_length(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
+void _make_91vector(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "make-vector", 1, args);
+    { integer_type argc = Cyc_length(data, args);
       if (argc.value >= 2) {
-        Cyc_make_vector(cont, car(args), cadr(args));}
+        Cyc_make_vector(data, cont, car(args), cadr(args));}
       else {
-        Cyc_make_vector(cont, car(args), boolean_f);}}}
-void _vector_91ref(object cont, object args) {
-    Cyc_check_num_args("vector-ref", 2, args);
-    { object ref = Cyc_vector_ref(car(args), cadr(args));
-      return_closcall1(cont, ref);}}
-void _vector_91set_67(object cont, object args) {
-    Cyc_check_num_args("vector-set!", 3, args);
-    { object ref = Cyc_vector_set(car(args), cadr(args), caddr(args));
-      return_closcall1(cont, ref);}}
-void _list_91_125vector(object cont, object args) {
-    Cyc_check_num_args("list->vector", 1, args);
-    Cyc_list2vector(cont, car(args));}
-void _list_91_125string(object cont, object args) {  
-    Cyc_check_num_args("list->string", 1, args);
-    { string_type s = Cyc_list2string(car(args));
-      return_closcall1(cont, &s);}}
-void _string_91_125symbol(object cont, object args) {  
-    Cyc_check_num_args("string->symbol", 1, args);
-    return_closcall1(cont, Cyc_string2symbol(car(args)));}
-void _symbol_91_125string(object cont, object args) {  
-    Cyc_check_num_args("symbol->string", 1, args);
-    { string_type s = Cyc_symbol2string(car(args));
-      return_closcall1(cont, &s);}}
-void _number_91_125string(object cont, object args) {  
-    Cyc_check_num_args("number->string", 1, args);
-    { string_type s = Cyc_number2string(car(args));
-      return_closcall1(cont, &s);}}
-void _open_91input_91file(object cont, object args) {  
-    Cyc_check_num_args("open-input-file", 1, args);
-    { port_type p = Cyc_io_open_input_file(car(args));
-      return_closcall1(cont, &p);}}
-void _open_91output_91file(object cont, object args) {  
-    Cyc_check_num_args("open-output-file", 1, args);
-    { port_type p = Cyc_io_open_output_file(car(args));
-      return_closcall1(cont, &p);}}
-void _close_91port(object cont, object args) {  
-    Cyc_check_num_args("close-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_port(car(args)));}
-void _close_91input_91port(object cont, object args) {  
-    Cyc_check_num_args("close-input-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_input_port(car(args)));}
-void _close_91output_91port(object cont, object args) {  
-    Cyc_check_num_args("close-output-port", 1, args);
-    return_closcall1(cont, Cyc_io_close_output_port(car(args)));}
-void _Cyc_91flush_91output_91port(object cont, object args) {
-    Cyc_check_num_args("Cyc-flush-output-port", 1, args);
-    return_closcall1(cont, Cyc_io_flush_output_port(car(args)));}
-void _file_91exists_127(object cont, object args) {
-    Cyc_check_num_args("file-exists?", 1, args);
-    return_closcall1(cont, Cyc_io_file_exists(car(args)));}
-void _delete_91file(object cont, object args) {
-    Cyc_check_num_args("delete-file", 1, args);
-    return_closcall1(cont, Cyc_io_delete_file(car(args)));}
-void _read_91char(object cont, object args) {  
-    Cyc_check_num_args("read-char", 1, args);
-    return_closcall1(cont, Cyc_io_read_char(car(args)));}
-void _peek_91char(object cont, object args) {  
-    Cyc_check_num_args("peek-char", 1, args);
-    return_closcall1(cont, Cyc_io_peek_char(car(args)));}
-void _Cyc_91read_91line(object cont, object args) {  
-    Cyc_check_num_args("Cyc-read-line", 1, args);
-    Cyc_io_read_line(cont, car(args));}
-void _Cyc_91write_91char(object cont, object args) {  
-    Cyc_check_num_args("write-char", 2, args);
-    return_closcall1(cont, Cyc_write_char(car(args), cadr(args)));}
-void _Cyc_91write(object cont, object args) {  
-    Cyc_check_num_args("write", 1, args);
-    { integer_type argc = Cyc_length(args);
-     dispatch(argc.value, (function_type)dispatch_write_va, cont, cont, args); }}
-void _display(object cont, object args) {  
-    Cyc_check_num_args("display", 1, args);
-    { integer_type argc = Cyc_length(args);
-      dispatch(argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
-void _call_95cc(object cont, object args){
-    Cyc_check_num_args("call/cc", 1, args);
-    Cyc_check_fnc(car(args));
-    return_closcall2(__glo_call_95cc, cont, car(args));
+        Cyc_make_vector(data, cont, car(args), boolean_f);}}}
+void _vector_91ref(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "vector-ref", 2, args);
+    { object ref = Cyc_vector_ref(data, car(args), cadr(args));
+      return_closcall1(data, cont, ref);}}
+void _vector_91set_67(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "vector-set!", 3, args);
+    { object ref = Cyc_vector_set(data, car(args), cadr(args), caddr(args));
+      return_closcall1(data, cont, ref);}}
+void _list_91_125vector(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "list->vector", 1, args);
+    Cyc_list2vector(data, cont, car(args));}
+void _list_91_125string(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "list->string", 1, args);
+    Cyc_list2string(data, cont, car(args));}
+void _string_91_125symbol(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "string->symbol", 1, args);
+    return_closcall1(data, cont, Cyc_string2symbol(data, car(args)));}
+void _symbol_91_125string(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "symbol->string", 1, args);
+    Cyc_symbol2string(data, cont, car(args));}
+void _number_91_125string(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "number->string", 1, args);
+    Cyc_number2string(data, cont, car(args));}
+void _open_91input_91file(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "open-input-file", 1, args);
+    { port_type p = Cyc_io_open_input_file(data, car(args));
+      return_closcall1(data, cont, &p);}}
+void _open_91output_91file(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "open-output-file", 1, args);
+    { port_type p = Cyc_io_open_output_file(data, car(args));
+      return_closcall1(data, cont, &p);}}
+void _close_91port(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "close-port", 1, args);
+    return_closcall1(data, cont, Cyc_io_close_port(data, car(args)));}
+void _close_91input_91port(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "close-input-port", 1, args);
+    return_closcall1(data, cont, Cyc_io_close_input_port(data, car(args)));}
+void _close_91output_91port(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "close-output-port", 1, args);
+    return_closcall1(data, cont, Cyc_io_close_output_port(data, car(args)));}
+void _Cyc_91flush_91output_91port(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "Cyc-flush-output-port", 1, args);
+    return_closcall1(data, cont, Cyc_io_flush_output_port(data, car(args)));}
+void _file_91exists_127(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "file-exists?", 1, args);
+    return_closcall1(data, cont, Cyc_io_file_exists(data, car(args)));}
+void _delete_91file(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "delete-file", 1, args);
+    return_closcall1(data, cont, Cyc_io_delete_file(data, car(args)));}
+void _read_91char(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "read-char", 1, args);
+    return_closcall1(data, cont, Cyc_io_read_char(data, cont, car(args)));}
+void _peek_91char(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "peek-char", 1, args);
+    return_closcall1(data, cont, Cyc_io_peek_char(data, cont, car(args)));}
+void _Cyc_91read_91line(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "Cyc-read-line", 1, args);
+    Cyc_io_read_line(data, cont, car(args));}
+void _Cyc_91write_91char(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "write-char", 2, args);
+    return_closcall1(data, cont, Cyc_write_char(data, car(args), cadr(args)));}
+void _Cyc_91write(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "write", 1, args);
+    { integer_type argc = Cyc_length(data, args);
+     dispatch(data, argc.value, (function_type)dispatch_write_va, cont, cont, args); }}
+void _display(void *data, object cont, object args) {  
+    Cyc_check_num_args(data, "display", 1, args);
+    { integer_type argc = Cyc_length(data, args);
+      dispatch(data, argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
+void _call_95cc(void *data, object cont, object args){
+    Cyc_check_num_args(data, "call/cc", 1, args);
+    if (eq(boolean_f, Cyc_is_procedure(data, car(args)))) {
+      Cyc_invalid_type_error(data, closure2_tag, car(args)); 
+    }
+    return_closcall2(data, __glo_call_95cc, cont, car(args));
 }
 
 /*
@@ -1843,14 +2060,14 @@ void _call_95cc(object cont, object args){
  * @param func - Function to execute
  * @param args - A list of arguments to the function
  */
-object apply(object cont, object func, object args){
+object apply(void *data, object cont, object func, object args){
   common_type buf;
 
 //printf("DEBUG apply: ");
 //Cyc_display(args);
 //printf("\n");
   if (!is_object_type(func)) {
-     Cyc_rt_raise2("Call of non-procedure: ", func);
+     Cyc_rt_raise2(data, "Call of non-procedure: ", func);
   }
 
   // Causes problems...
@@ -1859,7 +2076,7 @@ object apply(object cont, object func, object args){
   switch(type_of(func)) {
     case primitive_tag:
       // TODO: should probably check arg counts and error out if needed
-      ((primitive_type *)func)->fn(cont, args);
+      ((primitive_type *)func)->fn(data, cont, args);
       break;
     case macro_tag:
     case closure0_tag:
@@ -1868,10 +2085,10 @@ object apply(object cont, object func, object args){
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      buf.integer_t = Cyc_length(args);
+      buf.integer_t = Cyc_length(data, args);
       // TODO: validate number of args provided:
-      Cyc_check_num_args("<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
-      dispatch(buf.integer_t.value, ((closure)func)->fn, func, cont, args);
+      Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
+      dispatch(data, buf.integer_t.value, ((closure)func)->fn, func, cont, args);
       break;
 
     case cons_tag:
@@ -1880,25 +2097,25 @@ object apply(object cont, object func, object args){
       object fobj = car(func);
 
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
-         Cyc_rt_raise2("Call of non-procedure: ", func);
+         Cyc_rt_raise2(data, "Call of non-procedure: ", func);
       } else if (strncmp(((symbol)fobj)->pname, "lambda", 7) == 0) {
           make_cons(c, func, args);
           //printf("JAE DEBUG, sending to eval: ");
           //Cyc_display(&c, stderr);
-          ((closure)__glo_eval)->fn(2, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 2, __glo_eval, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
           make_cons(c, cadr(func), args);
-          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
           make_cons(c, func, args);
-          ((closure)__glo_eval)->fn(3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
       } else {
           make_cons(c, func, args);
-          Cyc_rt_raise2("Unable to evaluate: ", &c);
+          Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
       }
     }
       
@@ -1910,7 +2127,7 @@ object apply(object cont, object func, object args){
 }
 
 // Version of apply meant to be called from within compiled code
-void Cyc_apply(int argc, closure cont, object prim, ...){
+void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     va_list ap;
     object tmp;
     int i;
@@ -1920,6 +2137,8 @@ void Cyc_apply(int argc, closure cont, object prim, ...){
 
     for (i = 0; i < argc; i++) {
         tmp = va_arg(ap, object);
+        args[i].hdr.mark = gc_color_red;
+        args[i].hdr.grayed = 0;
         args[i].tag = cons_tag;
         args[i].cons_car = tmp;
         args[i].cons_cdr = (i == (argc-1)) ? nil : &args[i + 1];
@@ -1929,12 +2148,12 @@ void Cyc_apply(int argc, closure cont, object prim, ...){
     //printf("\n");
 
     va_end(ap);
-    apply(cont, prim, (object)&args[0]);
+    apply(data, cont, prim, (object)&args[0]);
 }
 // END apply
 
 /* Extract args from given array, assuming cont is the first arg in buf */
-void Cyc_apply_from_buf(int argc, object prim, object *buf) {
+void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
     list args;
     object cont;
     int i;
@@ -1948,403 +2167,415 @@ void Cyc_apply_from_buf(int argc, object prim, object *buf) {
     cont = buf[0];
     
     for (i = 1; i < argc; i++) {
+        args[i - 1].hdr.mark = gc_color_red;
+        args[i - 1].hdr.grayed = 0;
         args[i - 1].tag = cons_tag;
         args[i - 1].cons_car = buf[i];
         args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
     }
 
-    apply(cont, prim, (object)&args[0]);
+    apply(data, cont, prim, (object)&args[0]);
 }
 
 /**
- * Copy an object to the GC heap
+ * Start a thread's trampoline
  */
-char *transport(x, gcgen) char *x; int gcgen;
+void Cyc_start_trampoline(gc_thread_data *thd)
 {
- if (nullp(x)) return x;
- if (obj_is_char(x)) return x;
+  // Tank, load the jump program
+  setjmp(*(thd->jmp_start));
+
 #if DEBUG_GC
- printf("entered transport ");
- printf("transport %ld\n", type_of(x));
+  printf("Done with GC\n");
 #endif
- switch (type_of(x))
-   {case cons_tag:
-      {register list nx = (list) allocp;
-       type_of(nx) = cons_tag; car(nx) = car(x); cdr(nx) = cdr(x);
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(cons_type);
-       return (char *) nx;}
-    case macro_tag:
-      {register macro nx = (macro) allocp;
-       type_of(nx) = macro_tag; nx->fn = ((macro) x)->fn;
-       nx->num_args = ((macro) x)->num_args;
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(macro_type);
-       return (char *) nx;}
-    case closure0_tag:
-      {register closure0 nx = (closure0) allocp;
-       type_of(nx) = closure0_tag; nx->fn = ((closure0) x)->fn;
-       nx->num_args = ((closure0) x)->num_args;
-       forward(x) = nx; type_of(x) = forward_tag;
-       allocp = ((char *) nx)+sizeof(closure0_type);
-       return (char *) nx;}
-    case closure1_tag:
-      {register closure1 nx = (closure1) allocp;
-       type_of(nx) = closure1_tag; nx->fn = ((closure1) x)->fn;
-       nx->num_args = ((closure1) x)->num_args;
-       nx->elt1 = ((closure1) x)->elt1;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure1_type);
-       return (char *) nx;}
-    case closure2_tag:
-      {register closure2 nx = (closure2) allocp;
-       type_of(nx) = closure2_tag; nx->fn = ((closure2) x)->fn;
-       nx->num_args = ((closure2) x)->num_args;
-       nx->elt1 = ((closure2) x)->elt1;
-       nx->elt2 = ((closure2) x)->elt2;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure2_type);
-       return (char *) nx;}
-    case closure3_tag:
-      {register closure3 nx = (closure3) allocp;
-       type_of(nx) = closure3_tag; nx->fn = ((closure3) x)->fn;
-       nx->num_args = ((closure3) x)->num_args;
-       nx->elt1 = ((closure3) x)->elt1;
-       nx->elt2 = ((closure3) x)->elt2;
-       nx->elt3 = ((closure3) x)->elt3;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure3_type);
-       return (char *) nx;}
-    case closure4_tag:
-      {register closure4 nx = (closure4) allocp;
-       type_of(nx) = closure4_tag; nx->fn = ((closure4) x)->fn;
-       nx->num_args = ((closure4) x)->num_args;
-       nx->elt1 = ((closure4) x)->elt1;
-       nx->elt2 = ((closure4) x)->elt2;
-       nx->elt3 = ((closure4) x)->elt3;
-       nx->elt4 = ((closure4) x)->elt4;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closure4_type);
-       return (char *) nx;}
-    case closureN_tag:
-      {register closureN nx = (closureN) allocp;
-       int i;
-       type_of(nx) = closureN_tag; nx->fn = ((closureN) x)->fn;
-       nx->num_args = ((closureN) x)->num_args;
-       nx->num_elt = ((closureN) x)->num_elt;
-       nx->elts = (object *)(((char *)nx) + sizeof(closureN_type));
-       for (i = 0; i < nx->num_elt; i++) {
-         nx->elts[i] = ((closureN) x)->elts[i];
-       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(closureN_type) + sizeof(object) * nx->num_elt;
-       return (char *) nx;}
-    case vector_tag:
-      {register vector nx = (vector) allocp;
-       int i;
-       type_of(nx) = vector_tag;
-       nx->num_elt = ((vector) x)->num_elt;
-       nx->elts = (object *)(((char *)nx) + sizeof(vector_type));
-       for (i = 0; i < nx->num_elt; i++) {
-         nx->elts[i] = ((vector) x)->elts[i];
-       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(vector_type) + sizeof(object) * nx->num_elt;
-       return (char *) nx;}
-    case string_tag:
-      {register string_type *nx = (string_type *) allocp;
-       type_of(nx) = string_tag; 
-       if (gcgen == 0) {
-         // Minor, data heap is not relocated
-         nx->str = ((string_type *)x)->str;
-       } else {
-         // Major collection, data heap is moving
-         nx->str = dhallocp;
-         int len = strlen(((string_type *) x)->str);
-         memcpy(dhallocp, ((string_type *) x)->str, len + 1);
-         dhallocp += len + 1;
-       }
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(string_type);
-       return (char *) nx;}
-    case integer_tag:
-      {register integer_type *nx = (integer_type *) allocp;
-       type_of(nx) = integer_tag; nx->value = ((integer_type *) x)->value;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(integer_type);
-       return (char *) nx;}
-    case double_tag:
-      {register double_type *nx = (double_type *) allocp;
-       type_of(nx) = double_tag; nx->value = ((double_type *) x)->value;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(double_type);
-       return (char *) nx;}
-    case port_tag:
-      {register port_type *nx = (port_type *) allocp;
-       type_of(nx) = port_tag; nx->fp = ((port_type *) x)->fp;
-       nx->mode = ((port_type *) x)->mode;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(port_type);
-       return (char *) nx;}
-    case cvar_tag:
-      {register cvar_type *nx = (cvar_type *) allocp;
-       type_of(nx) = cvar_tag; nx->pvar = ((cvar_type *) x)->pvar;
-       forward(x) = nx; type_of(x) = forward_tag;
-       x = (char *) nx; allocp = ((char *) nx)+sizeof(cvar_type);
-       return (char *) nx;}
+
+  if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
+    Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
+  } else {
+    do_dispatch(thd, thd->gc_num_args, ((closure)(thd->gc_cont))->fn, thd->gc_cont, thd->gc_args);
+  }
+
+  printf("Internal error: should never have reached this line\n"); 
+  exit(0);
+}
+
+// Mark globals as part of the tracing collector
+// This is called by the collector thread
+void gc_mark_globals()
+{
+#if GC_DEBUG_TRACE
+  //fprintf(stderr, "(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  fprintf(stderr, "Cyc_global_variables %p\n", Cyc_global_variables);
+#endif
+  // Mark global variables
+  gc_mark_black(Cyc_global_variables); // Internal global used by the runtime
+                                       // Marking it ensures all glos are marked
+  {
+    list l = global_table;
+    for(; !nullp(l); l = cdr(l)){
+     cvar_type *c = (cvar_type *)car(l);
+     object glo =  *(c->pvar);
+     if (!nullp(glo)) {
+#if GC_DEBUG_TRACE
+       fprintf(stderr, "global pvar %p\n", glo);
+#endif
+       gc_mark_black(glo); // Mark actual object the global points to
+     }
+    }
+  }
+}
+
+char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
+{
+  int acquired_lock = 0;
+  if (grayed(obj)) {
+    // Try to acquire the lock, because we are already locked if
+    // the collector is cooperating on behalf of the mutator
+    if (pthread_mutex_trylock(&(thd->lock)) == 0) {
+      acquired_lock = 1;
+    }
+    gc_mark_gray2(thd, hp);
+    if (acquired_lock){
+      pthread_mutex_unlock(&(thd->lock));
+    }
+  }
+
+  // hp ==> new heap object, point to it from old stack object
+  forward(obj) = hp;
+  type_of(obj) = forward_tag;
+  // keep track of each allocation so we can scan/move 
+  // the whole live object 'tree'
+  gc_thr_add_to_move_buffer(thd, alloci, hp);
+  return (char *)hp;
+}
+
+char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
+  if (!is_object_type(obj)) return obj;
+  switch(type_of(obj)){
+    case cons_tag: {
+      list hp = gc_alloc(Cyc_heap, sizeof(cons_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case macro_tag: {
+      macro_type *hp = gc_alloc(Cyc_heap, sizeof(macro_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closure0_tag: {
+      closure0_type *hp = gc_alloc(Cyc_heap, sizeof(closure0_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closure1_tag: {
+      closure1_type *hp = gc_alloc(Cyc_heap, sizeof(closure1_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closure2_tag: {
+      closure2_type *hp = gc_alloc(Cyc_heap, sizeof(closure2_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closure3_tag: {
+      closure3_type *hp = gc_alloc(Cyc_heap, sizeof(closure3_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closure4_tag: {
+      closure4_type *hp = gc_alloc(Cyc_heap, sizeof(closure4_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case closureN_tag: {
+      closureN_type *hp = gc_alloc(Cyc_heap, 
+                            sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elt), 
+                            obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case vector_tag: {
+      vector_type *hp = gc_alloc(Cyc_heap, 
+                            sizeof(vector_type) + sizeof(object) * (((vector) obj)->num_elt), 
+                            obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case string_tag: {
+      string_type *hp = gc_alloc(Cyc_heap, 
+        sizeof(string_type) + ((string_len(obj) + 1)), 
+        obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case integer_tag: {
+      integer_type *hp = gc_alloc(Cyc_heap, sizeof(integer_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case double_tag: {
+      double_type *hp = gc_alloc(Cyc_heap, sizeof(double_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case port_tag: {
+      port_type *hp = gc_alloc(Cyc_heap, sizeof(port_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+    case cvar_tag: {
+      cvar_type *hp = gc_alloc(Cyc_heap, sizeof(cvar_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
     case forward_tag:
-       return (char *) forward(x);
+      return (char *)forward(obj);
     case eof_tag: break;
     case primitive_tag: break;
     case boolean_tag: break;
     case symbol_tag: break; // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
     default:
-      printf("transport: bad tag x=%p x.tag=%ld\n",(void *)x,type_of(x)); exit(0);}
- return x;}
+      fprintf(stderr, "gc_move: bad tag obj=%p obj.tag=%ld\n",(object) obj, type_of(obj));
+      exit(1);
+  }
+  return (char *)obj;
+}
 
-/* Use overflow macro which already knows which way the stack goes. */
-/* Major collection, transport objects on stack or old heap */
-#define transp(p) \
-temp = (p); \
-if ((check_overflow(low_limit,temp) && \
-     check_overflow(temp,high_limit)) || \
-    (check_overflow(old_heap_low_limit - 1, temp) && \
-     check_overflow(temp,old_heap_high_limit + 1))) \
-   (p) = (object) transport(temp,major);
+#define gc_move2heap(obj) { \
+  temp = obj; \
+  if (check_overflow(low_limit, temp) && \
+      check_overflow(temp, high_limit)){ \
+    (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown); \
+  } \
+}
 
-void GC_loop(int major, closure cont, object *ans, int num_ans)
-{char foo;
- int i;
- register object temp;
- register object low_limit = &foo; /* Move live data above us. */
- register object high_limit = stack_begin;
- register char *scanp = allocp; /* Cheney scan pointer. */
- register object old_heap_low_limit = low_limit; // Minor-GC default
- register object old_heap_high_limit = high_limit; // Minor-GC default
+object Cyc_trigger_minor_gc(void *data, object cont) {
+  gc_thread_data* thd = (gc_thread_data *)data;
+  thd->gc_args = boolean_t;
+  GC(data, cont, thd->gc_args, 1);
+  return nil;
+}
 
- char *tmp_bottom = bottom;    /* Bottom of tospace. */
- char *tmp_allocp = allocp;    /* Cheney allocate pointer. */
- char *tmp_alloc_end = alloc_end;
- char *tmp_dhbottom = dhbottom;
- char *tmp_dhallocp = dhallocp;
- char *tmp_dhallocp_end = dhalloc_end;
+// Do a minor GC
+int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args)
+{ 
+  object temp;
+  int i;
+  int scani = 0, alloci = 0;
+  int heap_grown = 0;
 
- if (dhallocp > dhalloc_limit) {
-   // Upgrade to major GC
-   major = 1;
-   no_major_gcs++;
-   no_gcs--;
- }
+//fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
+  // Prevent overrunning buffer
+  if (num_args > NUM_GC_ANS) {
+    printf("Fatal error - too many arguments (%d) to GC\n", num_args);
+    exit(1);
+  }
 
- if (major) {
-    // Initialize new heap (TODO: make a function for this)
-    bottom = calloc(1,global_heap_size);
-    allocp = (char *) ((((long) bottom)+7) & -8);
-    alloc_end = allocp + global_heap_size - 8;
-    scanp = allocp;
-    old_heap_low_limit = tmp_bottom;
-    old_heap_high_limit = tmp_alloc_end;
-    
-    dhallocp = dhbottom = calloc(1, global_heap_size);
-    dhalloc_limit = dhallocp + (long)((global_heap_size - 8) * 0.90);
-    dhalloc_end = dhallocp + global_heap_size - 8;
- }
+  gc_move2heap(cont);
+  ((gc_thread_data *)data)->gc_cont = cont;
+  ((gc_thread_data *)data)->gc_num_args = num_args;
 
-#if DEBUG_GC
- printf("\n=== started GC type = %d === \n", major);
-#endif
- /* Transport GC's continuation and its argument. */
- transp(cont);
- gc_cont = cont;
- gc_num_ans = num_ans;
-#if DEBUG_GC
- printf("DEBUG done transporting cont\n");
-#endif
+  for (i = 0; i < num_args; i++){ 
+    gc_move2heap(args[i]);
+    ((gc_thread_data *)data)->gc_args[i] = args[i];
+  }
 
- /* Prevent overrunning buffer */
- if (num_ans > NUM_GC_ANS) {
-   printf("Fatal error - too many arguments (%d) to GC\n", num_ans);
-   exit(1);
- }
+  // Transport mutations
+  {
+    list l;
+    for (l = ((gc_thread_data *)data)->mutations; !nullp(l); l = cdr(l)) {
+      object o = car(l);
+      if (type_of(o) == cons_tag) {
+          gc_move2heap(car(o));
+          gc_move2heap(cdr(o));
+      } else if (type_of(o) == vector_tag) {
+        int i;
+        // TODO: probably too inefficient, try collecting single index
+        for (i = 0; i < ((vector)o)->num_elt; i++) {
+          gc_move2heap(((vector)o)->elts[i]);
+        }
+      } else if (type_of(o) == forward_tag) {
+          // Already transported, skip
+      } else {
+          printf("Unexpected type %ld transporting mutation\n", type_of(o));
+          exit(1);
+      }
+    }
+  }
+  clear_mutations(data); // Reset for next time
 
- for (i = 0; i < num_ans; i++){ 
-     transp(ans[i]);
-     gc_ans[i] = ans[i];
- }
-#if DEBUG_GC
- printf("DEBUG done transporting gc_ans\n");
-#endif
+  // Transport globals
+  gc_move2heap(Cyc_global_variables); // Internal global used by the runtime
+  {
+    list l = global_table;
+    for(; !nullp(l); l = cdr(l)){
+      cvar_type *c = (cvar_type *)car(l);
+      gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+    }
+  }
 
- /* Transport mutations. */
- {
-   list l;
-   for (l = mutation_table; !nullp(l); l = cdr(l)) {
-     object o = car(l);
-     if (type_of(o) == cons_tag) {
-         // Transport, if necessary
-         // TODO: need to test this with major GC, and 
-         //       GC's of list/car-cdr from same generation
-         transp(car(o));
-         transp(cdr(o));
-     } else if (type_of(o) == vector_tag) {
-       int i;
-       // TODO: probably too inefficient, try collecting single index
-       for (i = 0; i < ((vector)o)->num_elt; i++) {
-         transp(((vector)o)->elts[i]);
-       }
-     } else if (type_of(o) == forward_tag) {
-         // Already transported, skip
-     } else {
-         printf("Unexpected type %ld transporting mutation\n", type_of(o));
-         exit(1);
-     }
-   }
- }
- clear_mutations(); /* Reset for next time */
-
- /* Transport global variables. */
- transp(Cyc_global_variables); /* Internal global used by the runtime */
- {
-   list l = global_table;
-   for(; !nullp(l); l = cdr(l)){
-    cvar_type *c = (cvar_type *)car(l);
-    transp(*(c->pvar)); // GC global, not the pvar
-   }
- }
- while (scanp<allocp)       /* Scan the newspace. */
-   switch (type_of(scanp))
-     {case cons_tag:
-#if DEBUG_GC
- printf("DEBUG transport cons_tag\n");
-#endif
-        transp(car(scanp)); transp(cdr(scanp));
-        scanp += sizeof(cons_type); break;
-      case macro_tag:
-#if DEBUG_GC
- printf("DEBUG transport macro \n");
-#endif
-        scanp += sizeof(macro_type); break;
-      case closure0_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure0 \n");
-#endif
-        scanp += sizeof(closure0_type); break;
+  // Check allocated objects, moving additional objects as needed
+  while (scani < alloci) {
+    object obj = ((gc_thread_data *)data)->moveBuf[scani];
+    switch(type_of(obj)) {
+      case cons_tag: {
+        gc_move2heap(car(obj));
+        gc_move2heap(cdr(obj));
+        break;
+      }
       case closure1_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure1 \n");
-#endif
-        transp(((closure1) scanp)->elt1);
-        scanp += sizeof(closure1_type); break;
+        gc_move2heap(((closure1) obj)->elt1);
+        break;
       case closure2_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure2 \n");
-#endif
-        transp(((closure2) scanp)->elt1); transp(((closure2) scanp)->elt2);
-        scanp += sizeof(closure2_type); break;
+        gc_move2heap(((closure2) obj)->elt1);
+        gc_move2heap(((closure2) obj)->elt2);
       case closure3_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure3 \n");
-#endif
-        transp(((closure3) scanp)->elt1); transp(((closure3) scanp)->elt2);
-        transp(((closure3) scanp)->elt3);
-        scanp += sizeof(closure3_type); break;
+        gc_move2heap(((closure3) obj)->elt1);
+        gc_move2heap(((closure3) obj)->elt2);
+        gc_move2heap(((closure3) obj)->elt3);
       case closure4_tag:
-#if DEBUG_GC
- printf("DEBUG transport closure4 \n");
-#endif
-        transp(((closure4) scanp)->elt1); transp(((closure4) scanp)->elt2);
-        transp(((closure4) scanp)->elt3); transp(((closure4) scanp)->elt4);
-        scanp += sizeof(closure4_type); break;
-      case closureN_tag:
-#if DEBUG_GC
- printf("DEBUG transport closureN \n");
-#endif
-       {int i; int n = ((closureN) scanp)->num_elt;
+        gc_move2heap(((closure4) obj)->elt1);
+        gc_move2heap(((closure4) obj)->elt2);
+        gc_move2heap(((closure4) obj)->elt3);
+        gc_move2heap(((closure4) obj)->elt4);
+        break;
+      case closureN_tag: {
+        int i, n = ((closureN) obj)->num_elt;
         for (i = 0; i < n; i++) {
-          transp(((closureN) scanp)->elts[i]);
+          gc_move2heap(((closureN) obj)->elts[i]);
         }
-        scanp += sizeof(closureN_type) + sizeof(object) * n;
-       }
-       break;
-      case vector_tag:
-#if DEBUG_GC
- printf("DEBUG transport vector \n");
-#endif
-       {int i; int n = ((vector) scanp)->num_elt;
+        break;
+      }
+      case vector_tag: {
+        int i, n = ((vector) obj)->num_elt;
         for (i = 0; i < n; i++) {
-          transp(((vector) scanp)->elts[i]);
+          gc_move2heap(((vector) obj)->elts[i]);
         }
-        scanp += sizeof(vector_type) + sizeof(object) * n;
-       }
-       break;
+        break;
+      }
+      // No child objects to move
+      case closure0_tag:
+      case macro_tag:
       case string_tag:
-#if DEBUG_GC
- printf("DEBUG transport string \n");
-#endif
-        scanp += sizeof(string_type); break;
       case integer_tag:
-#if DEBUG_GC
- printf("DEBUG transport integer \n");
-#endif
-        scanp += sizeof(integer_type); break;
       case double_tag:
-#if DEBUG_GC
- printf("DEBUG transport double \n");
-#endif
-        scanp += sizeof(double_type); break;
       case port_tag:
-#if DEBUG_GC
- printf("DEBUG transport port \n");
-#endif
-        scanp += sizeof(port_type); break;
       case cvar_tag:
-#if DEBUG_GC
- printf("DEBUG transport cvar \n");
-#endif
-        scanp += sizeof(cvar_type); break;
+        break;
+      // These types are not heap-allocated
       case eof_tag:
       case primitive_tag:
       case symbol_tag: 
       case boolean_tag:
       default:
-        printf("GC: bad tag scanp=%p scanp.tag=%ld\n",(void *)scanp,type_of(scanp));
-        exit(0);}
-
- if (major) {
-     free(tmp_bottom);
-     free(tmp_dhbottom);
- }
+        fprintf(stderr, 
+          "GC: unexpected object type %ld for object %p\n", type_of(obj), obj);
+        exit(1);
+    }
+    scani++;
+  }
+  return alloci;
 }
 
-void GC(cont,ans,num_ans) closure cont; object *ans; int num_ans;
-{
- /* Only room for one more minor-GC, so do a major one.
-  * Not sure this is the best strategy, it may be better to do major
-  * ones sooner, perhaps after every x minor GC's.
-  *
-  * Also may need to consider dynamically increasing heap size, but
-  * by how much (1.3x, 1.5x, etc) and when? I suppose when heap usage
-  * after a collection is above a certain percentage, then it would be 
-  * necessary to increase heap size the next time.
-  */
- if (allocp >= (bottom + (global_heap_size - global_stack_size))) {
-     //printf("Possibly only room for one more minor GC. no_gcs = %ld\n", no_gcs);
-     no_major_gcs++;
-     GC_loop(1, cont, ans, num_ans);
- } else {
-     no_gcs++; /* Count the number of minor GC's. */
-     GC_loop(0, cont, ans, num_ans);
- }
-
- /* You have to let it all go, Neo. Fear, doubt, and disbelief. Free your mind... */
- longjmp(jmp_main,1); /* Return globals gc_cont, gc_ans. */
+/**
+ * Run a minor GC from a mutator thread.
+ * This function runs the core GC algorithm, cooperates with
+ * the collector, and then calls its continuation.
+ */
+void GC(void *data, closure cont, object *args, int num_args)
+{ 
+  char tmp;
+  object low_limit = &tmp; // This is one end of the stack...
+  object high_limit = ((gc_thread_data *)data)->stack_start;
+  int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
+  // Cooperate with the collector thread
+  gc_mut_cooperate((gc_thread_data *)data, alloci);
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "done with minor GC\n");
+#endif
+  // Let it all go, Neo...
+  longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
 
+
+ /* Overall GC notes:
+ note fwd pointers are only ever placed on the stack, never the heap
+ 
+ we now have 2 GC's:
+ - Stack GC, a minor collection where we move live stack objs to heap
+ - Heap GC, a major collection where we do mark&sweep
+
+ when replacing an object,
+ - only need to do this for objects on 'this' stack
+ - if object is a fwd pointer, return it's forwarding address
+ - otherwise, 
+   * allocate them on the heap
+   * return the new address
+   * leave a forwarding pointer on the stack with the new address
+ - may be able to modify transp macro to do this part
+
+ can still use write buffer to ensure any heap->stack references are handled
+ - also want to use this barrier to handle any globals that are re-assigned to 
+   locations on the stack, to ensure they are moved to the heap during GC.
+ - write barrier really should be per-stack, since OK to leave those items until
+   stack is collected
+ - TBD how this works with multiple threads, each with its own stack
+
+ need to transport:
+ - stack closure/args
+ - mutation write barrier
+ - globals
+
+ after transport is complete, we will not be scanning newspace but
+ do need to transport any stack objects referenced by the above
+ a couple of ideas:
+ - create a list of allocated objects, and pass over them in much
+   the same way the cheney algorithm does (2 "fingers"??). I think
+   this could actually just be a list of pointers since we want to
+   copy to the heap not the scan space. the goal is just to ensure
+   all live stack references are moved to the heap. trick here is to 
+   ensure scan space is large enough, although if it runs out
+   we can just allocate a new space (of say double the size), 
+   memcpy the old one, and update scanp/allocp accordingly.
+   * can use a bump pointer to build the list, so it should be
+     fairly efficient, especially if we don't have to resize too much
+   * will be writing all of this code from scratch, but can use
+     existing scan code as a guide
+ - or, during transport recursively transport objects that could
+   contain references (closures, lists, etc). This may be more
+   convenient to code, although it requires stack space to traverse
+   the structures. I think it might also get stuck processing circular
+   structures (!!!), so this approach is not an option
+ TBD how (or even if) this can scale to multiple threads...
+ is is possible to use write barrier(s) to detect if one thread is
+ working with another's data during GC? This will be an important
+ point to keep in mind as the code is being written
+
+!!!
+IMPORTANT - does the timing of GC matter? for example, if we GC before
+scanning all the stack space, there might be an object referenced by
+a live stack object that would get freed because we haven't gotten to
+it yet!
+
+so I think we have to scan all the stack space before doing a GC.
+alternatively, can we use a write barrier to keep track of when a
+stack object references one on the heap? that would effectively make
+the heap object into a root until stack GC
+
+Originally thought this, but now not so sure because it seems the above
+has to be taken into account:
+
+ Do not have to explicitly GC until heap is full enough for one to 
+ be initiated. do need to code gc_collect though, and ensure it is
+ called at the appropriate time.
+
+I think everything else will work as written, but not quite sure how
+to handle this detail yet. and it is very important to get right
+!!!!
+
+ thoughts:
+ - worth having a write barrier for globals? that is, only GC those that
+   were modified. just an idea...
+ - KEEP IN MIND AN OVERALL GOAL, that this should try to be as close as
+   possible to the cheney algorithm in terms of performance. so obviously we 
+   want to try and do as little work as necessary during each minor GC.
+   since we will use a write barrier to keep track of the heap's stack refs,
+   it seems reasonable that we could skip globals that live on the heap.
+ - To some extent, it should be possible to test changes that improve performance 
+   by coding something inefficient (but guaranteed to work) and then modifying it to
+   be more efficient (but not quite sure if idea will work).
+ */
 
 /**
  * Receive a list of arguments and apply them to the given function
  */
-void dispatch(int argc, function_type func, object clo, object cont, object args) {
+void dispatch(void *data, int argc, function_type func, object clo, object cont, object args) {
   object b[argc + 1]; // OK to do this? Is this portable?
   int i; 
 
@@ -2355,13 +2586,13 @@ void dispatch(int argc, function_type func, object clo, object cont, object args
     args = cdr(args); 
   } 
 
-  do_dispatch(argc, func, clo, b);
+  do_dispatch(data, argc, func, clo, b);
 }
 
 /**
  * Same as above but for a varargs C function
  */
-void dispatch_va(int argc, function_type_va func, object clo, object cont, object args) {
+void dispatch_va(void *data, int argc, function_type_va func, object clo, object cont, object args) {
   object b[argc + 1]; // OK to do this? Is this portable?
   int i; 
  
@@ -2372,131 +2603,143 @@ void dispatch_va(int argc, function_type_va func, object clo, object cont, objec
     args = cdr(args); 
   } 
 
-  do_dispatch(argc, (function_type)func, clo, b);
+  do_dispatch(data, argc, (function_type)func, clo, b);
 }
 
-static primitive_type Cyc_91global_91vars_primitive = {primitive_tag, "Cyc-global-vars", &_Cyc_91global_91vars};
-static primitive_type Cyc_91get_91cvar_primitive = {primitive_tag, "Cyc-get-cvar", &_Cyc_91get_91cvar};
-static primitive_type Cyc_91set_91cvar_67_primitive = {primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67};
-static primitive_type Cyc_91cvar_127_primitive = {primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127};
-static primitive_type Cyc_91has_91cycle_127_primitive = {primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
-static primitive_type _87_primitive = {primitive_tag, "+", &__87};
-static primitive_type _91_primitive = {primitive_tag, "-", &__91};
-static primitive_type _85_primitive = {primitive_tag, "*", &__85};
-static primitive_type _95_primitive = {primitive_tag, "/", &__95};
-static primitive_type _123_primitive = {primitive_tag, "=", &__123};
-static primitive_type _125_primitive = {primitive_tag, ">", &__125};
-static primitive_type _121_primitive = {primitive_tag, "<", &__121};
-static primitive_type _125_123_primitive = {primitive_tag, ">=", &__125_123};
-static primitive_type _121_123_primitive = {primitive_tag, "<=", &__121_123};
-static primitive_type apply_primitive = {primitive_tag, "apply", &_apply};
-static primitive_type _75halt_primitive = {primitive_tag, "%halt", &__75halt};
-static primitive_type exit_primitive = {primitive_tag, "exit", &_cyc_exit};
-static primitive_type Cyc_91current_91exception_91handler_primitive = {primitive_tag, "Cyc_current_exception_handler", &_Cyc_91current_91exception_91handler};
-static primitive_type Cyc_91default_91exception_91handler_primitive = {primitive_tag, "Cyc_default_exception_handler", &_Cyc_91default_91exception_91handler};
-static primitive_type cons_primitive = {primitive_tag, "cons", &_cons};
-static primitive_type cell_91get_primitive = {primitive_tag, "cell-get", &_cell_91get};
-static primitive_type set_91global_67_primitive = {primitive_tag, "set-global!", &_set_91global_67};
-static primitive_type set_91cell_67_primitive = {primitive_tag, "set-cell!", &_set_91cell_67};
-static primitive_type cell_primitive = {primitive_tag, "cell", &_cell};
-static primitive_type eq_127_primitive = {primitive_tag, "eq?", &_eq_127};
-static primitive_type eqv_127_primitive = {primitive_tag, "eqv?", &_eqv_127};
-static primitive_type equal_127_primitive = {primitive_tag, "equal?", &_equal_127};
-static primitive_type assoc_primitive = {primitive_tag, "assoc", &_assoc};
-static primitive_type assq_primitive = {primitive_tag, "assq", &_assq};
-static primitive_type assv_primitive = {primitive_tag, "assv", &_assv};
-static primitive_type member_primitive = {primitive_tag, "member", &_member};
-static primitive_type memq_primitive = {primitive_tag, "memq", &_memq};
-static primitive_type memv_primitive = {primitive_tag, "memv", &_memv};
-static primitive_type length_primitive = {primitive_tag, "length", &_length};
-static primitive_type vector_91length_primitive = {primitive_tag, "vector-length", &_vector_91length};
-static primitive_type set_91car_67_primitive = {primitive_tag, "set-car!", &_set_91car_67};
-static primitive_type set_91cdr_67_primitive = {primitive_tag, "set-cdr!", &_set_91cdr_67};
-static primitive_type car_primitive = {primitive_tag, "car", &_car};
-static primitive_type cdr_primitive = {primitive_tag, "cdr", &_cdr};
-static primitive_type caar_primitive = {primitive_tag, "caar", &_caar};
-static primitive_type cadr_primitive = {primitive_tag, "cadr", &_cadr};
-static primitive_type cdar_primitive = {primitive_tag, "cdar", &_cdar};
-static primitive_type cddr_primitive = {primitive_tag, "cddr", &_cddr};
-static primitive_type caaar_primitive = {primitive_tag, "caaar", &_caaar};
-static primitive_type caadr_primitive = {primitive_tag, "caadr", &_caadr};
-static primitive_type cadar_primitive = {primitive_tag, "cadar", &_cadar};
-static primitive_type caddr_primitive = {primitive_tag, "caddr", &_caddr};
-static primitive_type cdaar_primitive = {primitive_tag, "cdaar", &_cdaar};
-static primitive_type cdadr_primitive = {primitive_tag, "cdadr", &_cdadr};
-static primitive_type cddar_primitive = {primitive_tag, "cddar", &_cddar};
-static primitive_type cdddr_primitive = {primitive_tag, "cdddr", &_cdddr};
-static primitive_type caaaar_primitive = {primitive_tag, "caaaar", &_caaaar};
-static primitive_type caaadr_primitive = {primitive_tag, "caaadr", &_caaadr};
-static primitive_type caadar_primitive = {primitive_tag, "caadar", &_caadar};
-static primitive_type caaddr_primitive = {primitive_tag, "caaddr", &_caaddr};
-static primitive_type cadaar_primitive = {primitive_tag, "cadaar", &_cadaar};
-static primitive_type cadadr_primitive = {primitive_tag, "cadadr", &_cadadr};
-static primitive_type caddar_primitive = {primitive_tag, "caddar", &_caddar};
-static primitive_type cadddr_primitive = {primitive_tag, "cadddr", &_cadddr};
-static primitive_type cdaaar_primitive = {primitive_tag, "cdaaar", &_cdaaar};
-static primitive_type cdaadr_primitive = {primitive_tag, "cdaadr", &_cdaadr};
-static primitive_type cdadar_primitive = {primitive_tag, "cdadar", &_cdadar};
-static primitive_type cdaddr_primitive = {primitive_tag, "cdaddr", &_cdaddr};
-static primitive_type cddaar_primitive = {primitive_tag, "cddaar", &_cddaar};
-static primitive_type cddadr_primitive = {primitive_tag, "cddadr", &_cddadr};
-static primitive_type cdddar_primitive = {primitive_tag, "cdddar", &_cdddar};
-static primitive_type cddddr_primitive = {primitive_tag, "cddddr", &_cddddr};
-static primitive_type char_91_125integer_primitive = {primitive_tag, "char->integer", &_char_91_125integer};
-static primitive_type integer_91_125char_primitive = {primitive_tag, "integer->char", &_integer_91_125char};
-static primitive_type string_91_125number_primitive = {primitive_tag, "string->number", &_string_91_125number};
-static primitive_type string_91length_primitive = {primitive_tag, "string-length", &_string_91length};
-static primitive_type substring_primitive = {primitive_tag, "substring", &_cyc_substring};
-static primitive_type string_91ref_primitive = {primitive_tag, "string-ref", &_cyc_string_91ref};
-static primitive_type string_91set_67_primitive = {primitive_tag, "string-set!", &_cyc_string_91set_67};
-static primitive_type Cyc_91installation_91dir_primitive = {primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir};
-static primitive_type command_91line_91arguments_primitive = {primitive_tag, "command-line-arguments", &_command_91line_91arguments};
-static primitive_type system_primitive = {primitive_tag, "system", &_cyc_system};
-static primitive_type string_91cmp_primitive = {primitive_tag, "string-cmp", &_string_91cmp};
-static primitive_type string_91append_primitive = {primitive_tag, "string-append", &_string_91append};
-static primitive_type list_91_125string_primitive = {primitive_tag, "list->string", &_list_91_125string};
-static primitive_type string_91_125symbol_primitive = {primitive_tag, "string->symbol", &_string_91_125symbol};
-static primitive_type symbol_91_125string_primitive = {primitive_tag, "symbol->string", &_symbol_91_125string};
-static primitive_type number_91_125string_primitive = {primitive_tag, "number->string", &_number_91_125string};
-static primitive_type list_91_125vector_primitive = {primitive_tag, "list-vector", &_list_91_125vector};
-static primitive_type make_91vector_primitive = {primitive_tag, "make-vector", &_make_91vector};
-static primitive_type vector_91ref_primitive = {primitive_tag, "vector-ref", &_vector_91ref};
-static primitive_type vector_91set_67_primitive = {primitive_tag, "vector-set!", &_vector_91set_67};
-static primitive_type boolean_127_primitive = {primitive_tag, "boolean?", &_boolean_127};
-static primitive_type char_127_primitive = {primitive_tag, "char?", &_char_127};
-static primitive_type eof_91object_127_primitive = {primitive_tag, "eof-object?", &_eof_91object_127};
-static primitive_type null_127_primitive = {primitive_tag, "null?", &_null_127};
-static primitive_type number_127_primitive = {primitive_tag, "number?", &_number_127};
-static primitive_type real_127_primitive = {primitive_tag, "real?", &_real_127};
-static primitive_type integer_127_primitive = {primitive_tag, "integer?", &_integer_127};
-static primitive_type pair_127_primitive = {primitive_tag, "pair?", &_pair_127};
-static primitive_type procedure_127_primitive = {primitive_tag, "procedure?", &_procedure_127};
-static primitive_type macro_127_primitive = {primitive_tag, "macro?", &_macro_127};
-static primitive_type port_127_primitive = {primitive_tag, "port?", &_port_127};
-static primitive_type vector_127_primitive = {primitive_tag, "vector?", &_vector_127};
-static primitive_type string_127_primitive = {primitive_tag, "string?", &_string_127};
-static primitive_type symbol_127_primitive = {primitive_tag, "symbol?", &_symbol_127};
-static primitive_type open_91input_91file_primitive = {primitive_tag, "open-input-file", &_open_91input_91file};
-static primitive_type open_91output_91file_primitive = {primitive_tag, "open-output-file", &_open_91output_91file};
-static primitive_type close_91port_primitive = {primitive_tag, "close-port", &_close_91port};
-static primitive_type close_91input_91port_primitive = {primitive_tag, "close-input-port", &_close_91input_91port};
-static primitive_type close_91output_91port_primitive = {primitive_tag, "close-output-port", &_close_91output_91port};
-static primitive_type Cyc_91flush_91output_91port_primitive = {primitive_tag, "Cyc-flush-output-port", &_Cyc_91flush_91output_91port};
-static primitive_type file_91exists_127_primitive = {primitive_tag, "file-exists?", &_file_91exists_127};
-static primitive_type delete_91file_primitive = {primitive_tag, "delete-file", &_delete_91file};
-static primitive_type read_91char_primitive = {primitive_tag, "read-char", &_read_91char};
-static primitive_type peek_91char_primitive = {primitive_tag, "peek-char", &_peek_91char};
-static primitive_type Cyc_91read_91line_primitive = {primitive_tag, "Cyc-read-line", &_Cyc_91read_91line};
-static primitive_type Cyc_91write_primitive = {primitive_tag, "Cyc-write", &_Cyc_91write};
-static primitive_type Cyc_91write_91char_primitive = {primitive_tag, "Cyc-write-char", &_Cyc_91write_91char};
-static primitive_type Cyc_91display_primitive = {primitive_tag, "Cyc-display", &_display};
-static primitive_type call_95cc_primitive = {primitive_tag, "call/cc", &_call_95cc};
+static primitive_type Cyc_91global_91vars_primitive = {{0}, primitive_tag, "Cyc-global-vars", &_Cyc_91global_91vars};
+static primitive_type Cyc_91get_91cvar_primitive = {{0}, primitive_tag, "Cyc-get-cvar", &_Cyc_91get_91cvar};
+static primitive_type Cyc_91set_91cvar_67_primitive = {{0}, primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67};
+static primitive_type Cyc_91cvar_127_primitive = {{0}, primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127};
+static primitive_type Cyc_91has_91cycle_127_primitive = {{0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
+static primitive_type Cyc_91spawn_91thread_67_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_67};
+static primitive_type Cyc_91end_91thread_67_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_67};
+static primitive_type thread_91sleep_67_primitive = {{0}, primitive_tag, "thread-sleep!", &_thread_91sleep_67};
+static primitive_type Cyc_91minor_91gc_primitive = {{0}, primitive_tag, "Cyc-minor-gc", &_Cyc_91minor_91gc_primitive};
+static primitive_type _87_primitive = {{0}, primitive_tag, "+", &__87};
+static primitive_type _91_primitive = {{0}, primitive_tag, "-", &__91};
+static primitive_type _85_primitive = {{0}, primitive_tag, "*", &__85};
+static primitive_type _95_primitive = {{0}, primitive_tag, "/", &__95};
+static primitive_type _123_primitive = {{0}, primitive_tag, "=", &__123};
+static primitive_type _125_primitive = {{0}, primitive_tag, ">", &__125};
+static primitive_type _121_primitive = {{0}, primitive_tag, "<", &__121};
+static primitive_type _125_123_primitive = {{0}, primitive_tag, ">=", &__125_123};
+static primitive_type _121_123_primitive = {{0}, primitive_tag, "<=", &__121_123};
+static primitive_type apply_primitive = {{0}, primitive_tag, "apply", &_apply};
+static primitive_type _75halt_primitive = {{0}, primitive_tag, "%halt", &__75halt};
+static primitive_type exit_primitive = {{0}, primitive_tag, "exit", &_cyc_exit};
+static primitive_type Cyc_91current_91exception_91handler_primitive = {{0}, primitive_tag, "Cyc_current_exception_handler", &_Cyc_91current_91exception_91handler};
+static primitive_type Cyc_91default_91exception_91handler_primitive = {{0}, primitive_tag, "Cyc_default_exception_handler", &_Cyc_91default_91exception_91handler};
+static primitive_type cons_primitive = {{0}, primitive_tag, "cons", &_cons};
+static primitive_type cell_91get_primitive = {{0}, primitive_tag, "cell-get", &_cell_91get};
+static primitive_type set_91global_67_primitive = {{0}, primitive_tag, "set-global!", &_set_91global_67};
+static primitive_type set_91cell_67_primitive = {{0}, primitive_tag, "set-cell!", &_set_91cell_67};
+static primitive_type cell_primitive = {{0}, primitive_tag, "cell", &_cell};
+static primitive_type eq_127_primitive = {{0}, primitive_tag, "eq?", &_eq_127};
+static primitive_type eqv_127_primitive = {{0}, primitive_tag, "eqv?", &_eqv_127};
+static primitive_type equal_127_primitive = {{0}, primitive_tag, "equal?", &_equal_127};
+static primitive_type assoc_primitive = {{0}, primitive_tag, "assoc", &_assoc};
+static primitive_type assq_primitive = {{0}, primitive_tag, "assq", &_assq};
+static primitive_type assv_primitive = {{0}, primitive_tag, "assv", &_assv};
+static primitive_type member_primitive = {{0}, primitive_tag, "member", &_member};
+static primitive_type memq_primitive = {{0}, primitive_tag, "memq", &_memq};
+static primitive_type memv_primitive = {{0}, primitive_tag, "memv", &_memv};
+static primitive_type length_primitive = {{0}, primitive_tag, "length", &_length};
+static primitive_type vector_91length_primitive = {{0}, primitive_tag, "vector-length", &_vector_91length};
+static primitive_type set_91car_67_primitive = {{0}, primitive_tag, "set-car!", &_set_91car_67};
+static primitive_type set_91cdr_67_primitive = {{0}, primitive_tag, "set-cdr!", &_set_91cdr_67};
+static primitive_type car_primitive = {{0}, primitive_tag, "car", &_car};
+static primitive_type cdr_primitive = {{0}, primitive_tag, "cdr", &_cdr};
+static primitive_type caar_primitive = {{0}, primitive_tag, "caar", &_caar};
+static primitive_type cadr_primitive = {{0}, primitive_tag, "cadr", &_cadr};
+static primitive_type cdar_primitive = {{0}, primitive_tag, "cdar", &_cdar};
+static primitive_type cddr_primitive = {{0}, primitive_tag, "cddr", &_cddr};
+static primitive_type caaar_primitive = {{0}, primitive_tag, "caaar", &_caaar};
+static primitive_type caadr_primitive = {{0}, primitive_tag, "caadr", &_caadr};
+static primitive_type cadar_primitive = {{0}, primitive_tag, "cadar", &_cadar};
+static primitive_type caddr_primitive = {{0}, primitive_tag, "caddr", &_caddr};
+static primitive_type cdaar_primitive = {{0}, primitive_tag, "cdaar", &_cdaar};
+static primitive_type cdadr_primitive = {{0}, primitive_tag, "cdadr", &_cdadr};
+static primitive_type cddar_primitive = {{0}, primitive_tag, "cddar", &_cddar};
+static primitive_type cdddr_primitive = {{0}, primitive_tag, "cdddr", &_cdddr};
+static primitive_type caaaar_primitive = {{0}, primitive_tag, "caaaar", &_caaaar};
+static primitive_type caaadr_primitive = {{0}, primitive_tag, "caaadr", &_caaadr};
+static primitive_type caadar_primitive = {{0}, primitive_tag, "caadar", &_caadar};
+static primitive_type caaddr_primitive = {{0}, primitive_tag, "caaddr", &_caaddr};
+static primitive_type cadaar_primitive = {{0}, primitive_tag, "cadaar", &_cadaar};
+static primitive_type cadadr_primitive = {{0}, primitive_tag, "cadadr", &_cadadr};
+static primitive_type caddar_primitive = {{0}, primitive_tag, "caddar", &_caddar};
+static primitive_type cadddr_primitive = {{0}, primitive_tag, "cadddr", &_cadddr};
+static primitive_type cdaaar_primitive = {{0}, primitive_tag, "cdaaar", &_cdaaar};
+static primitive_type cdaadr_primitive = {{0}, primitive_tag, "cdaadr", &_cdaadr};
+static primitive_type cdadar_primitive = {{0}, primitive_tag, "cdadar", &_cdadar};
+static primitive_type cdaddr_primitive = {{0}, primitive_tag, "cdaddr", &_cdaddr};
+static primitive_type cddaar_primitive = {{0}, primitive_tag, "cddaar", &_cddaar};
+static primitive_type cddadr_primitive = {{0}, primitive_tag, "cddadr", &_cddadr};
+static primitive_type cdddar_primitive = {{0}, primitive_tag, "cdddar", &_cdddar};
+static primitive_type cddddr_primitive = {{0}, primitive_tag, "cddddr", &_cddddr};
+static primitive_type char_91_125integer_primitive = {{0}, primitive_tag, "char->integer", &_char_91_125integer};
+static primitive_type integer_91_125char_primitive = {{0}, primitive_tag, "integer->char", &_integer_91_125char};
+static primitive_type string_91_125number_primitive = {{0}, primitive_tag, "string->number", &_string_91_125number};
+static primitive_type string_91length_primitive = {{0}, primitive_tag, "string-length", &_string_91length};
+static primitive_type substring_primitive = {{0}, primitive_tag, "substring", &_cyc_substring};
+static primitive_type string_91ref_primitive = {{0}, primitive_tag, "string-ref", &_cyc_string_91ref};
+static primitive_type string_91set_67_primitive = {{0}, primitive_tag, "string-set!", &_cyc_string_91set_67};
+static primitive_type make_91mutex_primitive = {{0}, primitive_tag, "make-mutex", &_Cyc_make_mutex};
+static primitive_type mutex_91lock_67_primitive = {{0}, primitive_tag, "mutex-lock!", &_Cyc_mutex_lock};
+static primitive_type mutex_91unlock_67_primitive = {{0}, primitive_tag, "mutex-unlock!", &_Cyc_mutex_unlock};
+static primitive_type mutex_127_primitive = {{0}, primitive_tag, "mutex?", &_mutex_127};
+static primitive_type Cyc_91installation_91dir_primitive = {{0}, primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir};
+static primitive_type command_91line_91arguments_primitive = {{0}, primitive_tag, "command-line-arguments", &_command_91line_91arguments};
+static primitive_type system_primitive = {{0}, primitive_tag, "system", &_cyc_system};
+static primitive_type string_91cmp_primitive = {{0}, primitive_tag, "string-cmp", &_string_91cmp};
+static primitive_type string_91append_primitive = {{0}, primitive_tag, "string-append", &_string_91append};
+static primitive_type list_91_125string_primitive = {{0}, primitive_tag, "list->string", &_list_91_125string};
+static primitive_type string_91_125symbol_primitive = {{0}, primitive_tag, "string->symbol", &_string_91_125symbol};
+static primitive_type symbol_91_125string_primitive = {{0}, primitive_tag, "symbol->string", &_symbol_91_125string};
+static primitive_type number_91_125string_primitive = {{0}, primitive_tag, "number->string", &_number_91_125string};
+static primitive_type list_91_125vector_primitive = {{0}, primitive_tag, "list-vector", &_list_91_125vector};
+static primitive_type make_91vector_primitive = {{0}, primitive_tag, "make-vector", &_make_91vector};
+static primitive_type vector_91ref_primitive = {{0}, primitive_tag, "vector-ref", &_vector_91ref};
+static primitive_type vector_91set_67_primitive = {{0}, primitive_tag, "vector-set!", &_vector_91set_67};
+static primitive_type boolean_127_primitive = {{0}, primitive_tag, "boolean?", &_boolean_127};
+static primitive_type char_127_primitive = {{0}, primitive_tag, "char?", &_char_127};
+static primitive_type eof_91object_127_primitive = {{0}, primitive_tag, "eof-object?", &_eof_91object_127};
+static primitive_type null_127_primitive = {{0}, primitive_tag, "null?", &_null_127};
+static primitive_type number_127_primitive = {{0}, primitive_tag, "number?", &_number_127};
+static primitive_type real_127_primitive = {{0}, primitive_tag, "real?", &_real_127};
+static primitive_type integer_127_primitive = {{0}, primitive_tag, "integer?", &_integer_127};
+static primitive_type pair_127_primitive = {{0}, primitive_tag, "pair?", &_pair_127};
+static primitive_type procedure_127_primitive = {{0}, primitive_tag, "procedure?", &_procedure_127};
+static primitive_type macro_127_primitive = {{0}, primitive_tag, "macro?", &_macro_127};
+static primitive_type port_127_primitive = {{0}, primitive_tag, "port?", &_port_127};
+static primitive_type vector_127_primitive = {{0}, primitive_tag, "vector?", &_vector_127};
+static primitive_type string_127_primitive = {{0}, primitive_tag, "string?", &_string_127};
+static primitive_type symbol_127_primitive = {{0}, primitive_tag, "symbol?", &_symbol_127};
+static primitive_type open_91input_91file_primitive = {{0}, primitive_tag, "open-input-file", &_open_91input_91file};
+static primitive_type open_91output_91file_primitive = {{0}, primitive_tag, "open-output-file", &_open_91output_91file};
+static primitive_type close_91port_primitive = {{0}, primitive_tag, "close-port", &_close_91port};
+static primitive_type close_91input_91port_primitive = {{0}, primitive_tag, "close-input-port", &_close_91input_91port};
+static primitive_type close_91output_91port_primitive = {{0}, primitive_tag, "close-output-port", &_close_91output_91port};
+static primitive_type Cyc_91flush_91output_91port_primitive = {{0}, primitive_tag, "Cyc-flush-output-port", &_Cyc_91flush_91output_91port};
+static primitive_type file_91exists_127_primitive = {{0}, primitive_tag, "file-exists?", &_file_91exists_127};
+static primitive_type delete_91file_primitive = {{0}, primitive_tag, "delete-file", &_delete_91file};
+static primitive_type read_91char_primitive = {{0}, primitive_tag, "read-char", &_read_91char};
+static primitive_type peek_91char_primitive = {{0}, primitive_tag, "peek-char", &_peek_91char};
+static primitive_type Cyc_91read_91line_primitive = {{0}, primitive_tag, "Cyc-read-line", &_Cyc_91read_91line};
+static primitive_type Cyc_91write_primitive = {{0}, primitive_tag, "Cyc-write", &_Cyc_91write};
+static primitive_type Cyc_91write_91char_primitive = {{0}, primitive_tag, "Cyc-write-char", &_Cyc_91write_91char};
+static primitive_type Cyc_91display_primitive = {{0}, primitive_tag, "Cyc-display", &_display};
+static primitive_type call_95cc_primitive = {{0}, primitive_tag, "call/cc", &_call_95cc};
 
 const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
 const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
 const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
 const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
 const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
+const object primitive_Cyc_91spawn_91thread_67 = &Cyc_91spawn_91thread_67_primitive;
+const object primitive_Cyc_91end_91thread_67 = &Cyc_91end_91thread_67_primitive;
+const object primitive_thread_91sleep_67 = &thread_91sleep_67_primitive;
+const object primitive_Cyc_91minor_91gc = &Cyc_91minor_91gc_primitive;
 const object primitive__87 = &_87_primitive;
 const object primitive__91 = &_91_primitive;
 const object primitive__85 = &_85_primitive;
@@ -2568,6 +2811,10 @@ const object primitive_string_91length = &string_91length_primitive;
 const object primitive_substring = &substring_primitive;
 const object primitive_string_91ref = &string_91ref_primitive;
 const object primitive_string_91set_67 = &string_91set_67_primitive;
+const object primitive_make_91mutex = &make_91mutex_primitive;
+const object primitive_mutex_91lock_67 = &mutex_91lock_67_primitive; 
+const object primitive_mutex_91unlock_67 = &mutex_91unlock_67_primitive;
+const object primitive_mutex_127 = &mutex_127_primitive;
 const object primitive_Cyc_91installation_91dir = &Cyc_91installation_91dir_primitive;
 const object primitive_command_91line_91arguments = &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;
@@ -2608,4 +2855,101 @@ const object primitive_Cyc_91write_91char = &Cyc_91write_91char_primitive;
 const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
+
+/**
+ * Thread initialization function only called from within the runtime
+ */
+void *Cyc_init_thread(object thunk)
+{
+  long stack_start;
+  gc_thread_data *thd;
+  thd = malloc(sizeof(gc_thread_data));
+  gc_thread_data_init(thd, 0, (char *) &stack_start, global_stack_size);
+  thd->gc_cont = thunk;
+  thd->gc_num_args = 1;
+  thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
+//  thd->thread = pthread_self(); // TODO: ptr vs instance
+//  returns instance so would need to malloc here
+//  would also need to update termination code to free that memory
+  gc_add_mutator(thd);
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE); 
+  Cyc_start_trampoline(thd);
+  return NULL;
+}
+
+/**
+ * Spawn a new thread to execute the given thunk
+ */
+object Cyc_spawn_thread(object thunk)
+{
+// TODO: if we want to return mutator number to the caller, we need
+// to reserve a number here. need to figure out how we are going to
+// synchronize access to GC mutator fields, and then reserve one
+// here. will need to pass it, along with thunk, to Cyc_init_thread.
+// Then can use a new function up there to add the mutator, since we
+// already have the number.
+/*
+how to manage gc mutators. need to handle:
+- need to be able to allocate a thread but not run it yet.
+  maybe have a run level, or status
+- need to make mutators thread safe, ideally without major performance impacts
+- thread terminates
+  - should mark mutator as 'done'
+  - at an opportune moment, free mutator and set it back
+    to null
+
+what is the right data structure? is the array OK? or would it be better
+to look at the lock-free structures provided by ck?
+*/
+  pthread_t thread;
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  if (pthread_create(&thread, NULL, Cyc_init_thread, thunk)) {
+    fprintf(stderr, "Error creating a new thread\n");
+    exit(1);
+  }
+  return boolean_t;
+}
+
+/**
+ * Terminate a thread
+ */
+void Cyc_end_thread(gc_thread_data *thd) 
+{
+  // TODO: should we consider passing the current continuation (and args)
+  // as an argument? if we don't, will objects be collected that are still
+  // being used by active threads??
+  mclosure0(clo, Cyc_exit_thread);
+  GC(thd, &clo, thd->gc_args, 0);
+}
+
+void Cyc_exit_thread(gc_thread_data *thd)
+{
+  // alternatively could call longjmp with a null continuation, but that seems
+  // more complicated than necessary. or does it... see next comment:
+  
+  // TODO: what if there are any locals from the thread's stack still being
+  // referenced? might want to do one more minor GC to clear the stack before
+  // terminating the thread
+
+//printf("DEBUG - exiting thread\n");
+  // Remove thread from the list of mutators, and mark its data to be freed
+  gc_remove_mutator(thd);
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_TERMINATED);
+  pthread_exit(NULL); // For now, just a proof of concept
+}
+
+// For now, accept a number of milliseconds to sleep
+object Cyc_thread_sleep(void *data, object timeout)
+{
+  struct timespec tim;
+  long value;
+  Cyc_check_num(data, timeout);
+  value = ((integer_type *)timeout)->value;
+  tim.tv_sec = value / 1000;
+  tim.tv_nsec = (value % 1000) * NANOSECONDS_PER_MILLISECOND;
+  nanosleep(&tim, NULL);
+  return boolean_t;
+}
 

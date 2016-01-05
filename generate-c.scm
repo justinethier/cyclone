@@ -17,7 +17,7 @@
 #include \"cyclone/types.h\"
 #include \"cyclone/runtime.h\"
 
-void do_dispatch(int argc, function_type func, object clo, object *b) {
+void do_dispatch(void *data, int argc, function_type func, object clo, object *b) {
   switch(argc) {" )
 
     (define bs "")
@@ -25,6 +25,7 @@ void do_dispatch(int argc, function_type func, object clo, object *b) {
         (display "case " )
         (display i )
         (display ":func(" )
+        (display "data,")
         (display i )
         (display ",clo" )
         (display bs )
@@ -39,7 +40,7 @@ void do_dispatch(int argc, function_type func, object clo, object *b) {
   {
    char buf[1024];
    snprintf(buf, 1023, \"Unhandled number of function arguments: %d\\n\", argc); 
-   Cyc_rt_raise_msg(buf);
+   Cyc_rt_raise_msg(data, buf);
   }
   }
 }" )))
