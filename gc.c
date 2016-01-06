@@ -1242,6 +1242,10 @@ void gc_thread_data_free(gc_thread_data *thd)
   }
 }
 
+/**
+ * Called explicitly from a mutator thread to let the collector know
+ * it (may) block for an unknown period of time.
+ */
 void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
 {
   if(!ck_pr_cas_int((int *)&(thd->thread_state), 
@@ -1254,8 +1258,15 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
   thd->gc_num_args = 0; // Will be set later, after collection
 }
 
+/**
+ * Called explicitly from a mutator thread to let the collector know
+ * that it has finished blocking. In addition, if the collector 
+ * cooperated on behalf of the mutator while it was blocking, the mutator
+ * will move any remaining stack objects to the heap and longjmp.
+ */
 void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
 {
+  char stack_limit;
   // Transition from blocked back to runnable using CAS.
   // If we are unable to transition back, assume collector
   // has cooperated on behalf of this mutator thread.
@@ -1274,7 +1285,7 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
     thd->gc_args[0] = result;
     thd->gc_num_args = 1;
     // Move any remaining stack objects (should only be the result?) to heap
-    gc_minor(thd, thd->stack_limit, thd->stack_start, thd->gc_cont, thd->gc_args, thd->gc_num_args);
+    gc_minor(thd, &stack_limit, thd->stack_start, thd->gc_cont, thd->gc_args, thd->gc_num_args);
 //printf("DEBUG - Call into gc_cont after collector coop\n");
     // Whoa.
     longjmp(*(thd->jmp_start), 1);

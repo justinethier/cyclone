@@ -2337,7 +2337,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
 
 object Cyc_trigger_minor_gc(void *data, object cont) {
   gc_thread_data* thd = (gc_thread_data *)data;
-  thd->gc_args = boolean_t;
+  thd->gc_args[0] = boolean_t;
   GC(data, cont, thd->gc_args, 1);
   return nil;
 }
