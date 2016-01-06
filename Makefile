@@ -14,6 +14,7 @@ SMODULES = \
   scheme/char \
   scheme/eval \
   scheme/file \
+  scheme/load \
   scheme/read \
   scheme/write \
   scheme/cyclone/cgen \
@@ -79,6 +80,7 @@ bootstrap: icyc
 	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/eval.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/file.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/load.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/common.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
