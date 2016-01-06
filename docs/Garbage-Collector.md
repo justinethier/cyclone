@@ -1,11 +1,12 @@
-TODO: notes on how cyclone's GC works
+# Introduction
+
+Cyclone uses the Cheney on the MTA technique to implement tail calls, efficient continuations, and generational garbage collection. Objects are allocated directly on the stack and functions are never allowed to return, until eventually the stack grows too large and a minor garbage collection (GC) is performed. Live objects are then relocated from the stack to the heap and a longjmp is used to continue execution at the beginning of the stack.
+
+The original technique uses a Cheney copying collector for both the minor collection and a major collection. One of the drawbacks of using a copying collector for major GC is coordination among multiple threads...
+
+Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections.
 
 terms: mutators, collector, what else?
-
-two types:
-
-- minor GC (stack portion from Cheney on MTA)
-- major GC - Doligez-Leroy-Gonthier (DLG) collector
 
 motivations: 
 - extend baker's approach to support multiple mutators
@@ -63,6 +64,6 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 ETC
 
-# TODO: references
+# References
 
-include papers, etc here and link to bullet numbers above
+TODO: include papers, etc here and link to bullet numbers above
