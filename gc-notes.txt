@@ -12,12 +12,24 @@ TODO:
   part of this is implementing the beginnings of srfi-18, to create multiple threads, sync them, etc
   next steps:
 
+  - need a different set of exception handlers for each stack. 
+    Probably need to move *exception-handler-stack* from being a global
+    to being part of thread data
+    Will need to branch for this since there are going to be changes 
+    throughout many files... the actual change may not be so bad though,
+    and may simplify the code, which is kind of hacky right now.
   - start making core stuff thread safe. for example, test.scm sometimes
     crashes, I think printing out result from (read)
   - assume I/O and eval both have threading issues
 
 - bring exceptions into local thread data? anything else?
   also, will probably need to lock shared resources such as I/O...
+  Yes, anything global needs to be considered.
+  These will certainly need to change:
+  - read.sld in-port-table - obvious thread safety issue here
+      what is the performance impact of adding locks to all these funcs?
+      or do we need to rewrite the code somehow?
+  - eval.sld - ...
 - document at a high level how the GC works
   mostly what minor/major GC's are, and how they are interleaved.
 - user manual
