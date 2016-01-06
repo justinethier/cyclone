@@ -62,3 +62,7 @@ typedef enum { CYC_THREAD_STATE_NEW
 typedef struct gc_thread_data_t gc_thread_data;
 
 ETC
+
+# TODO: references
+
+include papers, etc here and link to bullet numbers above
