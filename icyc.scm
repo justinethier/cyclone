@@ -7,6 +7,7 @@
 (import (scheme cyclone common)
         (scheme base)
         (scheme char)
+        (scheme load)
         (scheme read)
         (scheme write)
         (scheme eval))
@@ -15,6 +16,7 @@
     (display *Cyc-version-banner*))
   (else #f))
 
+(define *icyc-env* (setup-environment))
 (define (repl:next-line)
   (call/cc
     (lambda (k)
@@ -38,7 +40,7 @@
 
 (define (repl)
   (display "cyclone> ")
-  (let ((c (eval (read))))
+  (let ((c (eval (read) *icyc-env*)))
     (cond
       ((not (eof-object? c))
        (write c)
