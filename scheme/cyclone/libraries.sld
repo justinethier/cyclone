@@ -282,7 +282,7 @@
                 (if (= idx-my-imports idx-imports-me)
                   idx-my-imports
                   (+ 1 idx-my-imports)))
-              (error "Internal error: unable to import library" lib/dep))))
+              (error "Unable to import library, possibly due to a circular dependency:" lib/dep))))
         ))
     libs/deps)
   (map car result)))
