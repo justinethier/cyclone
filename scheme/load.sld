@@ -5,11 +5,11 @@
           (scheme file)
           (scheme read))
   (begin
-    (define (load filename)
+    (define (load filename . env)
       (let ((exprs (call-with-input-file filename
                      (lambda (port)
                        (read-all port)))))
         (for-each
           (lambda (expr)
-            (eval expr))
+            (apply eval (cons expr env)))
           exprs)))))
