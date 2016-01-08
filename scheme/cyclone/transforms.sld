@@ -86,6 +86,7 @@
     define->lambda 
     define->var 
     define->exp 
+    define-c
     set!? 
     set!->var 
     set!->exp 
@@ -658,6 +659,9 @@
 (define (define->exp exp)
   (cddr exp))
 
+(define (define-c? exp)
+  (tagged-list? 'define-c exp))
+
 ; set! : exp -> boolean
 (define (set!? exp)
   (tagged-list? 'set! exp))
@@ -803,7 +807,7 @@
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
         `(define ,name ,(expand body env))))
-
+     ((define-c? exp) exp)
      ((symbol? (car exp))
       (let ((val (env:lookup (car exp) env #f)))
         (if (tagged-list? 'macro val)
