@@ -212,12 +212,16 @@
       (set! input-program 
         (map
           (lambda (expr)
-            (if (define? expr)
+            (cond
+             ((define? expr)
               ;; Global
-             `(define ,(define->var expr)
-                ,@(caddr (closure-convert (define->exp expr) globals)))
+              `(define ,(define->var expr)
+                 ,@(caddr (closure-convert (define->exp expr) globals))))
+             ((define-c? expr)
+              expr)
+             (else
               (caddr ;; Strip off superfluous lambda
-                (closure-convert expr globals))))
+                (closure-convert expr globals)))))
           input-program))
     ;    (caddr ;; Strip off superfluous lambda
     ;      (closure-convert input-program)))
