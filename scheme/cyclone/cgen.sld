@@ -298,6 +298,8 @@
     ; Global definition
     ((define? exp)
      (c-compile-global exp append-preamble cont trace))
+;    ((define-c? exp)
+;     (c-compile-raw-global-lambda exp append-preamble cont trace))
     ; Special case - global function w/out a closure. Create an empty closure
     ((tagged-list? 'lambda exp)
      (c-compile-exp
@@ -990,6 +992,20 @@
       body append-preamble cont
       (st:add-function! trace var)))
    (c-code/vars "" (list ""))))
+
+;; TODO: not tested, does not work yet:
+(define (c-compile-raw-global-lambda exp append-preamble cont trace)
+   (let* ((lid (allocate-lambda (c-compile-lambda lam trace)))
+          (fnc-name (string-append "static void __lambda_" (number->string lid))))
+     (add-global 
+       (define->var exp)
+       #t ;(lambda? body) 
+       (c-code (caddr exp)) 
+       ;(c-compile-exp 
+       ; body append-preamble cont
+       ; (st:add-function! trace var))
+       )
+     (c-code/vars "" (list ""))))
 
 ;; Symbol compilation
 
