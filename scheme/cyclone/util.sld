@@ -298,6 +298,7 @@
    '(
      (define . define)
      (define-syntax . define-syntax)
+     (define-c . define-c)
      (if . if)
      (lambda . lambda)
      (quote . quote)
