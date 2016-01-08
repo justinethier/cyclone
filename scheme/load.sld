@@ -15,12 +15,11 @@
       ;; lambda portion is computed, so we can't include that.
       ;; compiler would need to insert the "static void (lambda)" part
 ;; TODO: maybe break up into two args, one being the args list and the other being the function body??
-    (c-ffi:define prim-test  "
+    (define-c prim-test  "
       (void *data, int argc, closure _, object k, object arg1, object arg2) {
         return_closcall1(data,  k, arg1); 
       }
     ")
-    )
     ;; End FFI
     (define (load filename . env)
       (let ((exprs (call-with-input-file filename
