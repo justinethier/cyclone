@@ -86,7 +86,7 @@
     define->lambda 
     define->var 
     define->exp 
-    define-c
+    define-c?
     set!? 
     set!->var 
     set!->exp 
@@ -888,6 +888,12 @@
              (loop (cdr top-lvl)
                    (cons (car top-lvl) globals)
                    exprs))))
+         ((define-c? (car top-lvl))
+          ;; Add as a new global, for now keep things simple
+          ;; since this is compiler-specific
+          (loop (cdr top-lvl)
+                (cons (car top-lvl) globals)
+                exprs))
          (else
            (loop (cdr top-lvl)
                  globals
@@ -916,7 +922,8 @@
   (let ((globals '()))
     (for-each
       (lambda (e)
-        (if (define? e)
+        (if (or (define? e)
+                (define-c? e))
             (set! globals (cons (define->var e) globals))))
       exp)
     globals))
@@ -978,6 +985,7 @@
                                      (search (if->else exp)))))
       ((define? exp)     (union (list (define->var exp))
                               (search (define->exp exp))))
+      ((define-c? exp) (list (define->var exp)))
       ((set!? exp)     (union (list (set!->var exp)) 
                               (search (set!->exp exp))))
       ; Application:
@@ -1399,13 +1407,17 @@
 
   (let* ((global-def? (define? ast)) ;; No internal defines by this phase
          (ast-cps
-          (if global-def?
+          (cond
+           (global-def?
             (remove-unused
               `(define ,(define->var ast)
                 ,@(let ((k (gensym 'k))
                         (r (gensym 'r)))
-                   (cps (car (define->exp ast)) 'unused))))
-            (cps ast '%halt))))
+                   (cps (car (define->exp ast)) 'unused)))))
+            ((define-c? ast)
+             ast)
+            (else
+              (cps ast '%halt)))))
     ast-cps))
 
 
