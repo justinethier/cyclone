@@ -1002,16 +1002,21 @@
               ,(caddr exp) ;; Args
               ,(cadddr exp) ;; Body
           ))
-          (lid (allocate-lambda lambda-data))
+          (lid 999) ;; TODO: (allocate-lambda lambda-data))
          )
      (add-global 
        (define->var exp)
        #t ;(lambda? body) 
-       (c-code (cadddr exp)) 
-       ;(c-compile-exp 
-       ; body append-preamble cont
-       ; (st:add-function! trace var))
+       (let ((cv-name (mangle (gensym 'c))))
+         (c-code/vars 
+           (string-append "&" cv-name)
+           (list
+             (string-append "mclosure0(" cv-name ", (function_type)__lambda"
+               (number->string lid) ");" cv-name ".num_args = "
+               (number->string 2) ;; TODO: figure out number of args
+               ";")))
        )
+     )
      (c-code/vars "" (list ""))))
 
 ;; Symbol compilation
@@ -1342,7 +1347,8 @@
            (caddr l)
            " {"
            (cadddr l)
-           " }"))
+           " }"
+         ))
        (else
          (emit ((caadr l) (string-append "__lambda_" (number->string (car l))))))))
      lambdas)
