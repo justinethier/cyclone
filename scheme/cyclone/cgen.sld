@@ -1002,7 +1002,8 @@
               ,(caddr exp) ;; Args
               ,(cadddr exp) ;; Body
           ))
-          (lid 999) ;; TODO: (allocate-lambda lambda-data))
+          (lid (allocate-lambda lambda-data))
+          ;(lid 999) ;; TODO: (allocate-lambda lambda-data))
          )
      (add-global 
        (define->var exp)
@@ -1011,7 +1012,7 @@
          (c-code/vars 
            (string-append "&" cv-name)
            (list
-             (string-append "mclosure0(" cv-name ", (function_type)__lambda"
+             (string-append "mclosure0(" cv-name ", (function_type)__lambda_"
                (number->string lid) ");" cv-name ".num_args = "
                (number->string 2) ;; TODO: figure out number of args
                ";")))
@@ -1320,11 +1321,11 @@
     (for-each
      (lambda (l)
       (cond
-        ((equal? 'precompiled-lambda (cadr l))
+        ((equal? 'precompiled-lambda (caadr l))
          (emit*
            "static void __lambda_" 
            (number->string (car l))
-           (caddr l)
+           (cadadr l)
            " ;"))
         (else
          (emit*
@@ -1340,13 +1341,13 @@
     (for-each
      (lambda (l)
       (cond
-       ((equal? 'precompiled-lambda (cadr l))
+       ((equal? 'precompiled-lambda (caadr l))
          (emit*
            "static void __lambda_" 
            (number->string (car l))
-           (caddr l)
+           (cadadr l)
            " {"
-           (cadddr l)
+           (car (cddadr l))
            " }"
          ))
        (else
