@@ -995,16 +995,23 @@
 
 ;; TODO: not tested, does not work yet:
 (define (c-compile-raw-global-lambda exp append-preamble cont trace)
-   (let* (
-          ;(fnc-name (string-append "static void __lambda_" (number->string lid)))
-          (lambda-data
+   (let* ((lambda-data
             `(precompiled-lambda
               ,(caddr exp) ;; Args
               ,(cadddr exp) ;; Body
           ))
           (lid (allocate-lambda lambda-data))
-          ;(lid 999) ;; TODO: (allocate-lambda lambda-data))
-         )
+          (total-num-args
+            (let ((count 1)) ;; Start at 1 because there will be one less comma than args
+              (string-for-each 
+                (lambda (c) 
+                  (if (equal? #\, c) (set! count (+ count 1))))
+                (caddr exp))
+              count)) ;; args
+          ;; Subtract "internal" args added for runtime
+          (num-args
+            (- total-num-args 4))
+          )
      (add-global 
        (define->var exp)
        #t ;(lambda? body) 
@@ -1014,7 +1021,7 @@
            (list
              (string-append "mclosure0(" cv-name ", (function_type)__lambda_"
                (number->string lid) ");" cv-name ".num_args = "
-               (number->string 2) ;; TODO: figure out number of args
+               (number->string num-args)
                ";")))
        )
      )
