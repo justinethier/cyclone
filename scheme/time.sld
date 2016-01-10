@@ -6,6 +6,7 @@
   )
   (import (scheme base) 
   )
+;; TODO: get an FFI syntax for including C header files, even if it is not needed for this library
   (begin
     ;; Experimenting with what an FFI could look like
     ;; TODO: also need a way to add #include's, and later on compiler options (may already have that, need to check)
