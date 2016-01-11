@@ -10,6 +10,7 @@
         (scheme load)
         (scheme read)
         (scheme write)
+        (scheme time)
         (scheme eval))
 (cond-expand
   (cyclone

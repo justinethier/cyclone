@@ -172,13 +172,6 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 /* Define size of object tags */
 typedef long tag_type;
 
-#ifndef CLOCKS_PER_SEC
-/* gcc doesn't define this, even though ANSI requires it in <time.h>.. */
-#define CLOCKS_PER_SEC 0
-#define setjmp _setjmp
-#define longjmp _longjmp
-#endif
-
 /* Determine if stack has overflowed */
 #if STACK_GROWS_DOWNWARD
 #define check_overflow(x,y) ((x) < (y))
