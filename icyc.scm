@@ -10,6 +10,7 @@
         (scheme load)
         (scheme read)
         (scheme write)
+        (scheme process-context)
         (scheme time)
         (scheme eval))
 (cond-expand
