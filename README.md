@@ -1,6 +1,6 @@
 [<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://justinethier.github.com/cyclone)
 
-Cyclone is an experimental Scheme-to-C compiler that uses the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, and generational garbage collection.
+Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, generational garbage collection, and native threads.
 
 Getting Started
 ---------------
