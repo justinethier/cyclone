@@ -37,7 +37,6 @@ TODO:
   - how to use cyclone (meta files, compiling modules, etc)
   - what to be cognizant of when writing threading code. esp, how to deal with stack objects (initiating minor GC's, etc)
 - revisit features list, issues list, etc
-- FFI
 
 DONE:
 - need to cooperate when a mutator is blocked
