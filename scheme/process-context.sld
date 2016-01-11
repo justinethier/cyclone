@@ -1,13 +1,11 @@
 (define-library (scheme process-context)
   (export 
     command-line
-    ;exit - already defined as a primitive, at least for now
+    ;exit - not needed because already defined as a primitive, at least for now
     emergency-exit
     get-environment-variable
     ; TODO: get-environment-variables
   )
-;  (import (scheme base) 
-;  )
   (begin
     (define emergency-exit exit)
     (define-c command-line
