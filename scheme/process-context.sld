@@ -1,10 +1,15 @@
 (define-library (scheme process-context)
   (export 
     command-line
+    ;exit - already defined as a primitive, at least for now
+    emergency-exit
+    ; TODO: get-environment-variable
+    ; TODO: get-environment-variables
   )
 ;  (import (scheme base) 
 ;  )
   (begin
+    (define emergency-exit exit)
     (define-c command-line
       "(void *data, int argc, closure _, object k)"
       ;; TODO: consolidate with Cyc_command_line_arguments from runtime.c
