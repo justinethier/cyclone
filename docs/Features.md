@@ -2,9 +2,9 @@
 
 This page summarizes the Scheme language features implemented by Cyclone.
 
-## R<sup>7</sup>RS Compliance
+# R<sup>7</sup>RS Compliance
 
-This is the status of features implemented from the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki):
+This is the status of Scheme programming language features implemented from the [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki):
 
 Section | Status | Comments
 ------- | ------ | ---------
@@ -41,10 +41,19 @@ Section | Status | Comments
 6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports. Do not have support for input/output strings or bytevectors.
 6.14 System interface | Yes | 
 
-## Cyclone-specific
+# SRFI Support
+
+Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
+
+TODO: [SRFI 18 - Multithreading support](http://srfi.schemers.org/srfi-18/)
+
+# Cyclone-specific
 
 Cyclone also supports several non-standard features:
 
 - `system`
-- `command-line-arguments`
 - what else?
+
+## FFI
+
+TODO
