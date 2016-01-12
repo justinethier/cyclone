@@ -45,7 +45,7 @@ Section | Status | Comments
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
 
-TODO: [SRFI 18 - Multithreading support](http://srfi.schemers.org/srfi-18/)
+TODO: [SRFI 18 - Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
 
 # Cyclone-specific
 
