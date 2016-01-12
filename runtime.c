@@ -372,10 +372,11 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
 }
 
 object Cyc_current_exception_handler(void *data) {
-  if (nullp(Cyc_exception_handler_stack)) {
+  gc_thread_data *thd = (gc_thread_data *)data;
+  if (nullp(thd->exception_handler_stack)) {
     return primitive_Cyc_91default_91exception_91handler;
   } else {
-    return car(Cyc_exception_handler_stack);
+    return car(thd->exception_handler_stack);
   }
 }
 
@@ -2366,6 +2367,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
     ((gc_thread_data *)data)->gc_args[i] = args[i];
   }
 
+  // Transport exception stack
+  gc_move2heap(((gc_thread_data *)data)->exception_handler_stack);
+
   // Transport mutations
   {
     list l;
@@ -2482,95 +2486,6 @@ void GC(void *data, closure cont, object *args, int num_args)
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
-
-
- /* Overall GC notes:
- note fwd pointers are only ever placed on the stack, never the heap
- 
- we now have 2 GC's:
- - Stack GC, a minor collection where we move live stack objs to heap
- - Heap GC, a major collection where we do mark&sweep
-
- when replacing an object,
- - only need to do this for objects on 'this' stack
- - if object is a fwd pointer, return it's forwarding address
- - otherwise, 
-   * allocate them on the heap
-   * return the new address
-   * leave a forwarding pointer on the stack with the new address
- - may be able to modify transp macro to do this part
-
- can still use write buffer to ensure any heap->stack references are handled
- - also want to use this barrier to handle any globals that are re-assigned to 
-   locations on the stack, to ensure they are moved to the heap during GC.
- - write barrier really should be per-stack, since OK to leave those items until
-   stack is collected
- - TBD how this works with multiple threads, each with its own stack
-
- need to transport:
- - stack closure/args
- - mutation write barrier
- - globals
-
- after transport is complete, we will not be scanning newspace but
- do need to transport any stack objects referenced by the above
- a couple of ideas:
- - create a list of allocated objects, and pass over them in much
-   the same way the cheney algorithm does (2 "fingers"??). I think
-   this could actually just be a list of pointers since we want to
-   copy to the heap not the scan space. the goal is just to ensure
-   all live stack references are moved to the heap. trick here is to 
-   ensure scan space is large enough, although if it runs out
-   we can just allocate a new space (of say double the size), 
-   memcpy the old one, and update scanp/allocp accordingly.
-   * can use a bump pointer to build the list, so it should be
-     fairly efficient, especially if we don't have to resize too much
-   * will be writing all of this code from scratch, but can use
-     existing scan code as a guide
- - or, during transport recursively transport objects that could
-   contain references (closures, lists, etc). This may be more
-   convenient to code, although it requires stack space to traverse
-   the structures. I think it might also get stuck processing circular
-   structures (!!!), so this approach is not an option
- TBD how (or even if) this can scale to multiple threads...
- is is possible to use write barrier(s) to detect if one thread is
- working with another's data during GC? This will be an important
- point to keep in mind as the code is being written
-
-!!!
-IMPORTANT - does the timing of GC matter? for example, if we GC before
-scanning all the stack space, there might be an object referenced by
-a live stack object that would get freed because we haven't gotten to
-it yet!
-
-so I think we have to scan all the stack space before doing a GC.
-alternatively, can we use a write barrier to keep track of when a
-stack object references one on the heap? that would effectively make
-the heap object into a root until stack GC
-
-Originally thought this, but now not so sure because it seems the above
-has to be taken into account:
-
- Do not have to explicitly GC until heap is full enough for one to 
- be initiated. do need to code gc_collect though, and ensure it is
- called at the appropriate time.
-
-I think everything else will work as written, but not quite sure how
-to handle this detail yet. and it is very important to get right
-!!!!
-
- thoughts:
- - worth having a write barrier for globals? that is, only GC those that
-   were modified. just an idea...
- - KEEP IN MIND AN OVERALL GOAL, that this should try to be as close as
-   possible to the cheney algorithm in terms of performance. so obviously we 
-   want to try and do as little work as necessary during each minor GC.
-   since we will use a write barrier to keep track of the heap's stack refs,
-   it seems reasonable that we could skip globals that live on the heap.
- - To some extent, it should be possible to test changes that improve performance 
-   by coding something inefficient (but guaranteed to work) and then modifying it to
-   be more efficient (but not quite sure if idea will work).
- */
 
 /**
  * Receive a list of arguments and apply them to the given function

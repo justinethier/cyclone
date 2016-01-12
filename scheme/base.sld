@@ -619,15 +619,24 @@
       (Cyc-remove-exception-handler) ; Only reached if no ex raised
       result))
     (define *exception-handler-stack* '())
-    (define (Cyc-add-exception-handler h) 
-       (set! *exception-handler-stack* (cons h *exception-handler-stack*)))
-    (define (Cyc-remove-exception-handler)
-       (if (not (null? *exception-handler-stack*))
-          (set! *exception-handler-stack* (cdr *exception-handler-stack*))))
-  ;  (define (Cyc-current-exception-handler)
-  ;    (if (null? *exception-handler-stack*)
-  ;      Cyc-default-exception-handler
-  ;      (car *exception-handler-stack*)))
+;    (define (Cyc-add-exception-handler h) 
+;       (set! *exception-handler-stack* (cons h *exception-handler-stack*)))
+;    (define (Cyc-remove-exception-handler)
+;       (if (not (null? *exception-handler-stack*))
+;          (set! *exception-handler-stack* (cdr *exception-handler-stack*))))
+    (define-c Cyc-add-exception-handler
+      "(void *data, int argc, closure _, object k, object h)"
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        make_cons(c, h, thd->exception_handler_stack);
+        thd->exception_handler_stack = &c;
+        return_closcall1(data, k, &c); ")
+    (define-c Cyc-remove-exception-handler
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        if (thd->exception_handler_stack) {
+          thd->exception_handler_stack = cdr(thd->exception_handler_stack);
+        }
+        return_closcall1(data, k, thd->exception_handler_stack); ")
 
   ;; Simplified versions of every/any from SRFI-1
   (define (any pred lst)
