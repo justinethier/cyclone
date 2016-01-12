@@ -368,7 +368,7 @@ extern object Cyc_exception_handler_stack;
 #define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
 
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
-object Cyc_current_exception_handler();
+object Cyc_current_exception_handler(void *data);
 object Cyc_current_exception_handler2(void *data); // TODO: this is temporary, will consolidate with above function
 void Cyc_rt_raise(void *data, object err);
 void Cyc_rt_raise2(void *data, const char *msg, object err);

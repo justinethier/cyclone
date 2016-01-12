@@ -472,7 +472,7 @@
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
      ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
-     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler2")
+     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
      ((eq? p 'open-output-file)      "Cyc_io_open_output_file")
      ((eq? p 'close-port)            "Cyc_io_close_port")
