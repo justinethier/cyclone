@@ -12,7 +12,7 @@ The `(scheme read)` library provides procedures for reading Scheme objects.
 
 #read-all
 
-    (read)
-    (read port)
+    (read-all)
+    (read-all port)
 
 Read all objects from a port and return them as a list.
