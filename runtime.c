@@ -371,9 +371,6 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     return nil;
 }
 
-object Cyc_current_exception_handler2(void *data) {
-  return Cyc_current_exception_handler(data);
-}
 object Cyc_current_exception_handler(void *data) {
   if (nullp(Cyc_exception_handler_stack)) {
     return primitive_Cyc_91default_91exception_91handler;
