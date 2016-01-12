@@ -97,20 +97,6 @@ struct gc_thread_data_t {
 
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
-//  somehow this size param is being overwritten by a "mark() =".
-//  how could that happen?
-//somehow it appears free list pointers are being used where heap objects are
-//expected. could this be as simple as objects being sweeped that should not
-//have been? unfortunately it is harder to figure how why the objects were 
-//sweeped. were they not marked properly? is there a race condition? maybe
-//more than one issue? what is going on?
-//
-// the following line does not solve the problem. in fact, with this in
-// place there are still cases where the tag is a multiple of 32, implying
-// again that a free list node is being used as a heap object. IE, the
-// size value is being read into the tag field by code expecting a heap obj.
-//
-//unsigned int dummy; // just for testing/evaluation, this line is NOT a fix!!
   unsigned int size;
   gc_free_list *next;
 };
@@ -121,21 +107,20 @@ struct gc_heap_t {
   unsigned int chunk_size; // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
   //unsigned int free_size;
-  gc_free_list *free_list; // TBD
+  gc_free_list *free_list;
   gc_heap *next; // TBD, linked list is not very efficient, but easy to work with as a start
   char *data;
 };
 
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned int mark; // mark bits (only need 2)
+  unsigned int mark; // mark bits (TODO: only need 2, reduce size of type?)
   unsigned char grayed; // stack object to be grayed when moved to heap
 };
 #define mark(x) (((list) x)->hdr.mark)
 #define grayed(x) (((list) x)->hdr.grayed)
 
-/* HEAP definitions */
-// experimenting with a heap based off of the one in Chibi scheme
+/* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_end(h) ((object)((char*)h->data + h->size))
@@ -265,9 +250,6 @@ typedef struct {gc_header_type hdr; tag_type tag; double value;} double_type;
 
 /* Define string type */
 typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_type;
-//// TODO: new way to allocate strings, but this requires changes to 
-//// all functions that allocate strings, the GC, cgen, and maybe more.
-//// Because these strings are (at least for now) allocaed on the stack.
 #define make_string(cs, s) string_type cs; \
 { int len = strlen(s); cs.tag = string_tag; cs.len = len; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
@@ -445,7 +427,7 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont);
 void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 gc_heap *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
-
+/* Mutation table to support minor GC write barrier */
 void add_mutation(void *data, object var, object value);
 void clear_mutations(void *data);
 
