@@ -41,6 +41,10 @@ Section | Status | Comments
 6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports. Do not have support for input/output strings or bytevectors.
 6.14 System interface | Yes | 
 
+## R<sup>7</sup>RS Libraries
+
+TODO: list each supported library here, and link to a separate page with that library's API as implemented by Cyclone
+
 # SRFI Support
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
