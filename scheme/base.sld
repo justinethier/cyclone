@@ -72,7 +72,6 @@
     raise
     raise-continuable
     with-exception-handler
-    *exception-handler-stack*
     Cyc-add-exception-handler
     Cyc-remove-exception-handler
     newline
@@ -618,12 +617,6 @@
       (set! result (thunk))
       (Cyc-remove-exception-handler) ; Only reached if no ex raised
       result))
-    (define *exception-handler-stack* '())
-;    (define (Cyc-add-exception-handler h) 
-;       (set! *exception-handler-stack* (cons h *exception-handler-stack*)))
-;    (define (Cyc-remove-exception-handler)
-;       (if (not (null? *exception-handler-stack*))
-;          (set! *exception-handler-stack* (cdr *exception-handler-stack*))))
     (define-c Cyc-add-exception-handler
       "(void *data, int argc, closure _, object k, object h)"
       " gc_thread_data *thd = (gc_thread_data *)data;

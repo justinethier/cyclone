@@ -358,15 +358,6 @@ extern object Cyc_glo_call_cc;
 #define __glo_eval Cyc_glo_eval
 #define __glo_call_95cc Cyc_glo_call_cc
 
-/* Exception handler */
-extern object Cyc_exception_handler_stack;
-
-// Special case, use this one instead since we need it in the runtime
-// This also seems to "shadow" the corresponding C var definition, as
-// subsequent instances of it are replaced during preprocessing. Is that
-// behavior portable? If not, will have to modify cgen to not emit the var.
-#define __glo__85exception_91handler_91stack_85 Cyc_exception_handler_stack
-
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);

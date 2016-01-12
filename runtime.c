@@ -347,8 +347,6 @@ object Cyc_glo_call_cc = nil;
 object Cyc_glo_eval = nil;
 
 /* Exception handler */
-object Cyc_exception_handler_stack = nil;
-
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
     fprintf(stderr, "Error: ");
 
