@@ -1200,6 +1200,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;
   thd->mutations = NULL;
+  thd->exception_handler_stack = NULL;
 //  thd->thread = NULL;
   thd->thread_state = CYC_THREAD_STATE_NEW;
   //thd->mutator_num = mut_num;

@@ -472,7 +472,7 @@
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
      ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
-     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
+     ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler2")
      ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
      ((eq? p 'open-output-file)      "Cyc_io_open_output_file")
      ((eq? p 'close-port)            "Cyc_io_close_port")
@@ -591,6 +591,7 @@
     <=
     apply
     Cyc-default-exception-handler
+    Cyc-current-exception-handler
     Cyc-end-thread!
     thread-sleep!
     open-input-file
@@ -716,7 +717,7 @@
 ;; Primitive functions that pass a continuation or thread data but have no other arguments
 (define (prim:cont/no-args? exp)
   (and (prim? exp)
-       (member exp '(command-line-arguments make-mutex Cyc-minor-gc))))
+       (member exp '(command-line-arguments make-mutex Cyc-minor-gc Cyc-current-exception-handler))))
 
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)

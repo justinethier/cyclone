@@ -371,6 +371,9 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     return nil;
 }
 
+object Cyc_current_exception_handler2(void *data) {
+  return Cyc_current_exception_handler();
+}
 object Cyc_current_exception_handler() {
   if (nullp(Cyc_exception_handler_stack)) {
     return primitive_Cyc_91default_91exception_91handler;
@@ -384,7 +387,7 @@ void Cyc_rt_raise(void *data, object err) {
     make_cons(c2, err, nil);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(data, nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler2(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
     exit(1);
@@ -395,7 +398,7 @@ void Cyc_rt_raise2(void *data, const char *msg, object err) {
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
     make_cons(c0, &c1, nil);
-    apply(data, nil, Cyc_current_exception_handler(), &c0);
+    apply(data, nil, Cyc_current_exception_handler2(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
     exit(1);
@@ -1958,7 +1961,7 @@ void _cyc_system(void *data, object cont, object args) {
 //    integer_type argc = Cyc_length(args);
 //    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
 void _Cyc_91current_91exception_91handler(void *data, object cont, object args) {
-    object handler = Cyc_current_exception_handler();
+    object handler = Cyc_current_exception_handler2(data);
     return_closcall1(data, cont, handler); }
 void _Cyc_91default_91exception_91handler(void *data, object cont, object args) {
     // TODO: this is a quick-and-dirty implementation, may be a better way to write this
@@ -2627,7 +2630,7 @@ static primitive_type _121_123_primitive = {{0}, primitive_tag, "<=", &__121_123
 static primitive_type apply_primitive = {{0}, primitive_tag, "apply", &_apply};
 static primitive_type _75halt_primitive = {{0}, primitive_tag, "%halt", &__75halt};
 static primitive_type exit_primitive = {{0}, primitive_tag, "exit", &_cyc_exit};
-static primitive_type Cyc_91current_91exception_91handler_primitive = {{0}, primitive_tag, "Cyc_current_exception_handler", &_Cyc_91current_91exception_91handler};
+static primitive_type Cyc_91current_91exception_91handler_primitive = {{0}, primitive_tag, "Cyc_current_exception_handler2", &_Cyc_91current_91exception_91handler};
 static primitive_type Cyc_91default_91exception_91handler_primitive = {{0}, primitive_tag, "Cyc_default_exception_handler", &_Cyc_91default_91exception_91handler};
 static primitive_type cons_primitive = {{0}, primitive_tag, "cons", &_cons};
 static primitive_type cell_91get_primitive = {{0}, primitive_tag, "cell-get", &_cell_91get};
