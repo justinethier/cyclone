@@ -45,6 +45,16 @@ Section | Status | Comments
 
 TODO: list each supported library here, and link to a separate page with that library's API as implemented by Cyclone
 
+base
+char
+eval
+file
+load
+process-context
+[scheme read](docs/api/scheme/read.md)
+time
+write
+
 # SRFI Support
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
