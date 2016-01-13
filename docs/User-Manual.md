@@ -1,4 +1,6 @@
-# User Manual for the Cyclone Scheme-to-C Compiler
+[<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://justinethier.github.com/cyclone)
+
+# User Manual
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
