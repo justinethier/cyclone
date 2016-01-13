@@ -129,7 +129,7 @@ TODO
 
 # Foreign Function Interface
 
-Arbitrary C code can be called by using `define-c` to define a C function. For example:
+The `define-c` special form can be used to define a function containing user-defined C code. This code will be carried through from the Scheme file all the way to the compiled C file. For example:
 
      (define-c Cyc-add-exception-handler
        "(void *data, int argc, closure _, object k, object h)"
