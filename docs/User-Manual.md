@@ -36,9 +36,12 @@ Bug reports and patches are welcome! Please report any issues using the [Issues 
 
 # Requirements
 
-Tested on Linux, x86 (32-bit) and ARM
+Cyclone has been tested under Linux, on both x86 (32-bit) and ARM.
 
-Required packages:
+The following packages are required:
+
+- make
+- gcc
 - [Concurrency Kit](http://concurrencykit.org/)
 
     The best way to install libck is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.5.0` below with the latest version available from their website:
@@ -47,9 +50,6 @@ Required packages:
         tar xfz ck-0.5.0.tar.gz ; cd ck-0.5.0 ; ./configure && make all && sudo make install
         sudo ldconfig
     
-- make
-- gcc
-
 # Installation
 TODO: installation procedure for cyclone-bootstrap
 TODO: installation procedure for development????
