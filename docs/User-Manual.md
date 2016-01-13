@@ -36,7 +36,7 @@ Bug reports and patches are welcome! Please report any issues using the [Issues 
 
 # Requirements
 
-Cyclone has been tested under Linux, on both x86 (32-bit) and ARM.
+Cyclone has been tested under Linux on both x86 (32-bit) and ARM.
 
 The following packages are required:
 
@@ -129,7 +129,26 @@ TODO
 
 # Foreign Function Interface
 
-TODO
+Arbitrary C code can be called by using `define-c` to define a C function. For example:
+
+     (define-c Cyc-add-exception-handler
+       "(void *data, int argc, closure _, object k, object h)"
+       " gc_thread_data *thd = (gc_thread_data *)data;
+         make_cons(c, h, thd->exception_handler_stack);
+         thd->exception_handler_stack = &c;
+         return_closcall1(data, k, &c); ")
+
+The arguments to `define-c` are:
+
+- Function name. These functions can be used in Scheme code just like any other function.
+- A string with C function arguments, enclosed in parentheses. Some of these are required:
+  - `data` - Internal thread data. Do not modify this unless you know what you are doing!
+  - `argc` - Number of function arguments.
+  - A closure, typically unused in this context.
+  - `k` - Current continuation, typically the code will call into `k` with a result.
+- A string containing the C function body. Remember that runtime functions are not allowed to return. In the example above, the `return_closcall1` macro is used to "return" a newly-allocated list to the current continuation.
+
+The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be `runtime.c` and `types.h`.
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
