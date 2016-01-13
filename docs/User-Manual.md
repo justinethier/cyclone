@@ -63,12 +63,18 @@ A Scheme program may be compiled using the `cyclone` command:
 
 Scheme code can be organized into libraries that are compiled separately from programs. Cyclone intends a library to represent a single C module (or file) when compiled.
 
-Each library should be placed into a `.sld` file that corresponds to the library name. For example, the library `(scheme cyclone util)` would be defined in the `.sld` file as:
+Each library must be placed into a `.sld` file that corresponds to the library name. For example, the library 
+
+    (scheme cyclone util) 
+
+would be defined in its `.sld` file as:
 
     (define-library (scheme cyclone util)
       ... )
 
-And should be located in the file `scheme/cyclone/util.sld`.
+and should be located in the file
+
+    scheme/cyclone/util.sld
 
 Cyclone will not automatically generate libraries when compiling a program. Each library will need to be built separately prior to building the program.
 
