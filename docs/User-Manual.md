@@ -28,8 +28,11 @@
 # Introduction
 Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, generational garbage collection, and native threads.
 
-TODO: Contact
-  - include information on bug reports (or should that go towards the beginning?)
+Cyclone works by converting a Scheme program to continuation passing style and converting each continuation to a C function. At runtime these functions never return and are allowed to fill up the stack until they trigger a minor garbage collection. At this point live stack objects are copied to the heap and `longjmp` is used to return to the beginning of the stack. This is the same technique proposed by Henry Baker (Cheney on the M.T.A.) and implemented first by CHICKEN Scheme. The difference here is that multiple native threads (each with their own stack) are allowed. A tracing garbage collector is used to manage the second-generation heap and performs collections without a "stopping the world".
+
+Cyclone is developed by [Justin Ethier](https://github.com/justinethier). 
+
+Bug reports and patches are welcome! Please report any issues using the [Issues Page](https://github.com/justinethier/cyclone/issues).
 
 # Requirements
 
