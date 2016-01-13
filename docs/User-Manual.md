@@ -51,8 +51,18 @@ The following packages are required:
         sudo ldconfig
     
 # Installation
-TODO: installation procedure for cyclone-bootstrap
-TODO: installation procedure for development????
+
+Cyclone cannot be built directly on a system that does not have Cyclone binaries installed because the compiler is [self-hosting](https://en.wikipedia.org/wiki/Self-hosting). The easiest way to install Cyclone binaries is to build from source using [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap):
+
+    $ git clone git@github.com:justinethier/cyclone-bootstrap.git
+    $ cd cyclone-bootstrap
+    $ ./install.sh
+
+Once Cyclone is installed, it can be rebuilt directly from the cyclone repository:
+
+    $ make
+    $ make test
+    $ sudo make install
 
 # Usage
 
