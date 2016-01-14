@@ -7,6 +7,7 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
+- address ALL issues with the many-writes.scm example file
 - will probably need to lock shared resources such as I/O...
   Yes, anything global needs to be considered.
   These will certainly need to change:
