@@ -1,8 +1,6 @@
 
 # R<sup>7</sup>RS Libraries
 
-TODO:
-
 - [`scheme base`](api/scheme/base.md)
 - [`scheme char`](api/scheme/char.md)
 - [`scheme eval`](api/scheme/eval.md)
