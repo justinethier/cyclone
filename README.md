@@ -1,6 +1,6 @@
-[<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://justinethier.github.com/cyclone)
+[<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
-Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, generational garbage collection, and native threads.
+Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, generational garbage collection, and native threads. Unlike previous Cheney on the MTA compilers, Cyclone allows execution of multiple native threads. A tracing garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
 
 Getting Started
 ---------------
@@ -38,18 +38,18 @@ Getting Started
 
    You can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`.
 
-3. If you need help learning the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
-
-   Also, check out the [features](docs/Features.md) page for a list of language features currently implemented.
+3. Read the documentation below for detailed information on how to use Cyclone.
 
 Documentation
 -------------
 
-[Features](docs/Features.md) is a list of the language features implemented so far. For more information about the Scheme language implemented by Cyclone, see the [R<sup>7</sup>RS Scheme Specification](docs/r7rs.pdf).
+The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
 
 The [Development Guide](docs/Development.md) contains instructions for hacking on Cyclone.
 
 [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on how the compiler was written and how it works.
+
+Finally, if you need a place to start learning the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
 References
 ----------

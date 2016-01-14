@@ -1,4 +1,4 @@
-[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://justinethier.github.com/cyclone)
+[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
 # User Manual
 
@@ -12,15 +12,7 @@
   - [Generated Files](#generated-files)
   - [Interpreter](#interpreter)
 - [Language Details](#language-details)
-  - explain how programs are setup
-  - outline scheme language based on r7rs, link to it.
-    explain differences between cyclone implementation and r7rs, or again at least link to them
-  - provide API, or at least links to the API
-  - what else?
 - [Foreign Function Interface](#foreign-function-interface)
-- Debugging
-  include profiling instructions?
-- Limitations???
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -28,7 +20,7 @@
 # Introduction
 Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, generational garbage collection, and native threads.
 
-Cyclone works by converting a Scheme program to continuation passing style and compiling each continuation to a C function. At runtime these functions never return and are allowed to fill up the stack until they trigger a minor garbage collection. Live stack objects are then copied to the heap and `longjmp` is used to return to the beginning of the stack. This is the same technique proposed by Henry Baker (Cheney on the MTA) and implemented first by CHICKEN Scheme. The difference here is that multiple native threads are allowed, each with their own stack. A tracing garbage collector is used to manage the second-generation heap and performs major collections without "stopping the world".
+Cyclone works by converting a Scheme program to continuation passing style and compiling each continuation to a C function. At runtime these functions never return and are allowed to fill up the stack until they trigger a minor garbage collection. Live stack objects are then copied to the heap and `longjmp` is used to return to the beginning of the stack. This is the same technique proposed by Henry Baker (Cheney on the MTA) and implemented first by CHICKEN Scheme. The difference is that our compiler allows multiple native threads, each with their own stack. A tracing garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
 
 Cyclone is developed by [Justin Ethier](https://github.com/justinethier). 
 
@@ -125,7 +117,11 @@ Scheme code can be evaluated interactively using the `icyc` command:
 
 # Language Details
 
-TODO
+Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). 
+
+A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differences between the specification and Cyclone's implementation.
+
+[API Documentation](API.md) is available for the libraries provide by Cyclone.
 
 # Foreign Function Interface
 
@@ -148,7 +144,7 @@ The arguments to `define-c` are:
   - `k` - Current continuation, typically the code will call into `k` with a result.
 - A string containing the C function body. Remember that runtime functions are not allowed to return. In the example above, the `return_closcall1` macro is used to "return" a newly-allocated list to the current continuation.
 
-The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be `runtime.c` and `types.h`.
+The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).

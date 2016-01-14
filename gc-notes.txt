@@ -7,8 +7,7 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
-- bring exceptions into local thread data? anything else?
-  also, will probably need to lock shared resources such as I/O...
+- will probably need to lock shared resources such as I/O...
   Yes, anything global needs to be considered.
   These will certainly need to change:
   - read.sld in-port-table - obvious thread safety issue here
@@ -18,12 +17,16 @@ TODO:
     crashes, I think printing out result from (read)
   - assume I/O and eval both have threading issues
   - eval.sld - ...
+- In conjunction with above, write more programs that use multiple threads
+  - try a simple one with 3-6 threads just writing data to output, and then files
+  - simple multithreaded example such as producer/consumer
+  - find at least one more algorithm that can be parallelized
 - document at a high level how the GC works
   mostly what minor/major GC's are, and how they are interleaved.
 - user manual
   need to document everything, including:
-  - how to use cyclone (meta files, compiling modules, etc)
   - what to be cognizant of when writing threading code. esp, how to deal with stack objects (initiating minor GC's, etc)
+    this probably should be part of the user manual itself
 - revisit features list, issues list, etc
 
 DONE:
