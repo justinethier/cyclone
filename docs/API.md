@@ -1,7 +1,7 @@
 
 # R<sup>7</sup>RS Libraries
 
-TODO: list each supported library here, and link to a separate page with that library's API as implemented by Cyclone
+TODO:
 
 - scheme base
 - scheme char
@@ -17,7 +17,9 @@ TODO: list each supported library here, and link to a separate page with that li
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
 
-TODO: [SRFI 18 - Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
+## [SRFI 18 - Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
+
+TODO:
 
 # Cyclone-specific
 
@@ -29,6 +31,5 @@ Cyclone also supports several non-standard features:
 
 ## Cyclone API
 
-# FFI
+TODO:
 
-TODO
