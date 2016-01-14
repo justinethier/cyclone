@@ -3,15 +3,15 @@
 
 TODO:
 
-- [scheme base](api/scheme/base.md)
-- [scheme char](api/scheme/char.md)
-- [scheme eval](api/scheme/eval.md)
-- [scheme file](api/scheme/file.md)
-- [scheme load](api/scheme/load.md)
-- [scheme process-context](api/scheme/process-context.md)
-- [scheme read](api/scheme/read.md)
-- [scheme time](api/scheme/time.md)
-- [scheme write](api/scheme/write.md)
+- [`scheme base`](api/scheme/base.md)
+- [`scheme char`](api/scheme/char.md)
+- [`scheme eval`](api/scheme/eval.md)
+- [`scheme file`](api/scheme/file.md)
+- [`scheme load`](api/scheme/load.md)
+- [`scheme process-context`](api/scheme/process-context.md)
+- [`scheme read`](api/scheme/read.md)
+- [`scheme time`](api/scheme/time.md)
+- [`scheme write`](api/scheme/write.md)
 
 # SRFI Support
 

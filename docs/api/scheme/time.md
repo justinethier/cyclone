@@ -1,6 +1,6 @@
 # Time Library
 
-The `(scheme time` library provides access to time-related values.
+The `(scheme time)` library provides access to time-related values.
 
 - `current-jiffy`
 - `current-second`
