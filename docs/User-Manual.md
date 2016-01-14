@@ -13,9 +13,6 @@
   - [Interpreter](#interpreter)
 - [Language Details](#language-details)
 - [Foreign Function Interface](#foreign-function-interface)
-- Debugging
-  include profiling instructions?
-- Limitations???
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -122,7 +119,7 @@ Scheme code can be evaluated interactively using the `icyc` command:
 
 Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). 
 
-In addition there is a [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) that lists differences between the specification and Cyclone's implementation.
+A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differences between the specification and Cyclone's implementation.
 
 [API Documentation](API.md) is available for the libraries provide by Cyclone.
 
