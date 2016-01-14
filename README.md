@@ -38,7 +38,7 @@ Getting Started
 
    You can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`.
 
-3. Read the documentation for detailed information on how to use Cyclone.
+3. Read the documentation below for detailed information on how to use Cyclone.
 
 Documentation
 -------------
