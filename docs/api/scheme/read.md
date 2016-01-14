@@ -10,7 +10,7 @@ The `(scheme read)` library provides procedures for reading Scheme objects.
     (read)
     (read port)
 
-[test](../../../scheme/read.sld#L441)
+Read a single Scheme object from the input port.
 
 #read-all
 
