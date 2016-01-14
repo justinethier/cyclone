@@ -153,7 +153,7 @@ The arguments to `define-c` are:
   - `k` - Current continuation, typically the code will call into `k` with a result.
 - A string containing the C function body. Remember that runtime functions are not allowed to return. In the example above, the `return_closcall1` macro is used to "return" a newly-allocated list to the current continuation.
 
-The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be `runtime.c` and `types.h`.
+The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
