@@ -36,6 +36,9 @@
 ; TODO:
 ; current-thread - not sure how to look this up yet... may need a global list of running threads
     (define (thread-start! t)
+      ;; Initiate a GC prior to running the thread, in case
+      ;; t contains any closures on the "parent" thread's stack
+      (Cyc-minor-gc)
       (let* ((thunk (vector-ref t 1)) 
              (mutator-id (Cyc-spawn-thread! thunk)))
         (vector-set! t 2 mutator-id)))
