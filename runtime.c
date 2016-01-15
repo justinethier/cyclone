@@ -2866,3 +2866,16 @@ object Cyc_thread_sleep(void *data, object timeout)
   return boolean_t;
 }
 
+// WIP for something to use to debug/use for threads
+//object copy2heap(void *data, object obj) 
+//{
+//  char stack_pos;
+//  gc_thread_data *thd = (gc_thread_data *)data;
+//  int on_stack = check_overflow(&stack_pos, obj) &&
+//                 check_overflow(obj, thd->stack_start);
+//  if (!is_object_type(obj) || !on_stack) {
+//    return obj;
+//  }
+//
+//  return gc_alloc(Cyc_heap, gc_allocated_bytes(obj, NULL, NULL), obj, data, &on_stack);
+//}
