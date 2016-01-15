@@ -28,10 +28,10 @@
       ;(write 'a)
       (letrec ((loop (lambda ()
                       (set! tmp (cons "cons" tmp))
-                      ;(write tmp)
+                      (write tmp)
                       (cond
                        ((> (length tmp) 1000)
-                        ;(write "resetting tmp")
+                        (write "resetting tmp")
                         (set! tmp '()))
                        (else #f))
                       (loop))))
