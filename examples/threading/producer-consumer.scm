@@ -12,20 +12,22 @@
 
 
 (define *lock* (make-mutex))
-(define *queue* (list))
+(define *queue* (->heap (list)))
 
 (define (producer)
   (let loop ((n 10))
     (cond
       ((> n 0)
        (mutex-lock! *lock*)
-       (set! *queue* (cons n *queue*))
+       (set! *queue* (->heap (cons (->heap n) *queue*)))
        (mutex-unlock! *lock*)
-       (loop (- n 1))))))
+       (loop (- n 1)))
+      (else
+        (write "producer thread done")))))
 
 (define (consumer)
   (let loop ()
-    (write (list (null? *queue*) *queue*))
+    ;(write (list (null? *queue*) *queue*))
     (define sleep? #f)
     (mutex-lock! *lock*)`
     (cond
@@ -33,12 +35,14 @@
        (write (car *queue*))
        (set! *queue* (cdr *queue*)))
       (else
+       (write "consumer sleeping")
        (set! sleep? #t)))
     (mutex-unlock! *lock*)
     (if sleep? (thread-sleep! 1000))
-    (loop)))
+   ; (loop)
+    ))
 
-(thread-start! (make-thread producer))
-(producer)   
+;(thread-start! (make-thread producer))
+;(producer)   
 (consumer)
-
+;(read)
