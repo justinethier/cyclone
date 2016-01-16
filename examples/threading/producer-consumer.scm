@@ -29,6 +29,10 @@
   (let loop ()
     ;(write (list (null? *queue*) *queue*))
     (define sleep? #f)
+    ;; looks like the main issue is a macro expansion problem, because cond never expands below. WTF?
+    ;; above named let works fine, and this one does too if expressions are removed or re-ordered 
+    ;; between the named let and the cond.
+    ;;
     ;; 2 issues here:
     ;; - the mutex-lock seems to skip over cond; there is some kind of
     ;;   control flow problem
