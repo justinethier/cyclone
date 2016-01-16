@@ -29,6 +29,11 @@
   (let loop ()
     ;(write (list (null? *queue*) *queue*))
     (define sleep? #f)
+    ;; 2 issues here:
+    ;; - the mutex-lock seems to skip over cond; there is some kind of
+    ;;   control flow problem
+    ;; - try compiling this but commenting out the Cyc_mutex_lock
+    ;;   code in the C. there is a gc_move bag tag error at runtime
     (mutex-lock! *lock*)`
     (cond
       ((not (null? *queue*))
@@ -39,7 +44,7 @@
        (set! sleep? #t)))
     (mutex-unlock! *lock*)
     (if sleep? (thread-sleep! 1000))
-   ; (loop)
+    (loop)
     ))
 
 ;(thread-start! (make-thread producer))
