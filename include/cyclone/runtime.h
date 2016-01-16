@@ -198,6 +198,7 @@ void Cyc_exit_thread(gc_thread_data *thd);
 object Cyc_thread_sleep(void *data, object timeout);
 void GC(void *,closure,object*,int);
 object Cyc_trigger_minor_gc(void *data, object cont);
+object copy2heap(void *data, object obj);
 
 void Cyc_st_add(void *data, char *frame);
 void Cyc_st_print(void *data, FILE *out);

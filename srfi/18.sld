@@ -10,6 +10,7 @@
     thread-yield!
 ;    thread-terminate!
     ; For now, these are built-ins. No need for them here: make-mutex mutex-lock! mutex-unlock!
+    ->heap
   )
   (begin
     ;; Threading
@@ -45,4 +46,8 @@
     (define (thread-yield!) (thread-sleep! 1))
 ;    (define (thread-terminate!) (Cyc-end-thread!))
     ;; TODO: thread-join!
+    (define-c ->heap
+      "(void *data, int argc, closure _, object k, object obj)"
+      " object heap_obj = copy2heap(data, obj);
+        return_closcall1(data, k, heap_obj); ")
 ))
