@@ -92,7 +92,7 @@ Cyclone will not automatically generate libraries when compiling a program. Each
 Option | Notes
 ------ | -----
 `-t`            | Show intermediate trace output in generated C files
-`-d`            | Only generate intermediate C files, do not compile them
+`-d`            | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
 `-h, --help`    | Display usage information
 `-v`            | Display version information
 
