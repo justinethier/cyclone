@@ -15,10 +15,11 @@
 (define *queue* (->heap (list)))
 
 (define (producer)
-  (let loop ((n 10))
+  (let loop ((n 100))
     (cond
       ((> n 0)
        (mutex-lock! *lock*)
+       (write (cons 'a *queue*))
        (set! *queue* (->heap (cons (->heap n) *queue*)))
        (mutex-unlock! *lock*)
        (loop (- n 1)))
@@ -39,7 +40,7 @@
     ;; - try compiling this but commenting out the Cyc_mutex_lock
     ;;   code in the C. there is a gc_move bag tag error at runtime
     ;;   also get the same result by using read-char below... WTF?
-    (read-char) ;(mutex-lock! *lock*)`
+    (mutex-lock! *lock*)
     (cond
       ((not (null? *queue*))
        (write (car *queue*))
@@ -52,7 +53,9 @@
     (loop)
     ))
 
-;(thread-start! (make-thread producer))
-;(producer)   
+(thread-start! (make-thread producer))
+(thread-start! (make-thread producer))
+(thread-start! (make-thread producer))
+(producer)   
 (consumer)
 ;(read)
