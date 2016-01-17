@@ -10,6 +10,9 @@
     thread-yield!
 ;    thread-terminate!
     ; For now, these are built-ins. No need for them here: make-mutex mutex-lock! mutex-unlock!
+    ;; TODO: consolidate built-ins, and convert them from primitives to FFI functions
+    ;;       in this module.
+    ;; Non-standard functions:
     ->heap
   )
   (begin
@@ -46,6 +49,11 @@
     (define (thread-yield!) (thread-sleep! 1))
 ;    (define (thread-terminate!) (Cyc-end-thread!))
     ;; TODO: thread-join!
+
+    ;; Take a single object and if it is on the stack, return a copy
+    ;; of it that is allocated on the heap. NOTE the original object
+    ;; will still live on the stack, and will eventually be moved
+    ;; itself to the heap if it is referenced during minor GC.
     (define-c ->heap
       "(void *data, int argc, closure _, object k, object obj)"
       " object heap_obj = copy2heap(data, obj);

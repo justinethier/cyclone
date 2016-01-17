@@ -2866,6 +2866,8 @@ object Cyc_thread_sleep(void *data, object timeout)
   return boolean_t;
 }
 
+// Copy given object to the heap, if it is from the stack.
+// This function is intended to be called directly from application code
 object copy2heap(void *data, object obj) 
 {
   char stack_pos;
