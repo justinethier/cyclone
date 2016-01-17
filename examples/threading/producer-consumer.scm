@@ -1,18 +1,17 @@
-; TODO:
-; try having multiple producers writing to a queue, and 
-; a consumer reading from it
-; an important consideration is how to let the producers write values, since they would be on their stacks! 
-; ideally do not want the application to have to worry about what value came from what thread...
-
+;; An example program having multiple producers concurrently writing to a queue 
+;; and a single consumer reading from the queue.
 (import 
   (scheme base)
   (scheme read)
   (scheme write)
   (srfi 18))
 
-
-(define *lock* (make-mutex))
+;; Global queue and a lock to coordinate access to it.
+;; Note ->heap is used to ensure any objects accessed by multiple threads are 
+;; not on a thread's local stack, since those objects can be moved at any time
+;; by the thread's minor GC.
 (define *queue* (->heap (list)))
+(define *lock* (make-mutex))
 
 (define (producer)
   (let loop ((n 100))
@@ -30,10 +29,6 @@
   (let loop ()
     ;(write (list (null? *queue*) *queue*))
     (define sleep? #f)
-    ;; issues here:
-    ;; - try compiling this but commenting out the Cyc_mutex_lock
-    ;;   code in the C. there is a gc_move bag tag error at runtime
-    ;;   also get the same result by using read-char below... WTF?
     (mutex-lock! *lock*)
     (cond
       ((not (null? *queue*))
@@ -44,8 +39,7 @@
        (set! sleep? #t)))
     (mutex-unlock! *lock*)
     (if sleep? (thread-sleep! 1000))
-    (loop)
-    ))
+    (loop)))
 
 (thread-start! (make-thread producer))
 (thread-start! (make-thread producer))
