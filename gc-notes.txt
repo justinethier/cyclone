@@ -7,10 +7,6 @@ Phase 6 (gc-dev6) - Multiple mutators (application threads)
 Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
 
 TODO:
-- examples
-  many writes seems ok
-  producer/consumer has an intermittent ABORT error, seems like something with realloc.
-  need to run through GDB and figure out which realloc is having trouble.
 - will probably need to lock shared resources such as I/O...
   Yes, anything global needs to be considered.
   These will certainly need to change:
