@@ -1211,8 +1211,10 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   gc_thr_grow_move_buffer(thd);
   thd->gc_alloc_color = ck_pr_load_int(&gc_color_clear);
   thd->gc_status = ck_pr_load_int(&gc_status_col);
+  thd->pending_writes = 0;
   thd->last_write = 0;
   thd->last_read = 0;
+  thd->mark_buffer = NULL;
   thd->mark_buffer_len = 128;
   thd->mark_buffer = vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
   if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
