@@ -1783,8 +1783,6 @@ void _Cyc_91spawn_91thread_67(void *data, object cont, object args) {
 void _Cyc_91end_91thread_67(void *data, object cont, object args) {
     Cyc_end_thread((gc_thread_data *)data);
     return_closcall1(data, cont, boolean_f); }
-void _Cyc_91minor_91gc_primitive(void *data, object cont, object args){
-    Cyc_trigger_minor_gc(data, cont); }
 void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
     dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
@@ -2523,7 +2521,6 @@ static primitive_type Cyc_91cvar_127_primitive = {{0}, primitive_tag, "Cyc-cvar?
 static primitive_type Cyc_91has_91cycle_127_primitive = {{0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127};
 static primitive_type Cyc_91spawn_91thread_67_primitive = {{0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_67};
 static primitive_type Cyc_91end_91thread_67_primitive = {{0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_67};
-static primitive_type Cyc_91minor_91gc_primitive = {{0}, primitive_tag, "Cyc-minor-gc", &_Cyc_91minor_91gc_primitive};
 static primitive_type _87_primitive = {{0}, primitive_tag, "+", &__87};
 static primitive_type _91_primitive = {{0}, primitive_tag, "-", &__91};
 static primitive_type _85_primitive = {{0}, primitive_tag, "*", &__85};
@@ -2647,7 +2644,6 @@ const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
 const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
 const object primitive_Cyc_91spawn_91thread_67 = &Cyc_91spawn_91thread_67_primitive;
 const object primitive_Cyc_91end_91thread_67 = &Cyc_91end_91thread_67_primitive;
-const object primitive_Cyc_91minor_91gc = &Cyc_91minor_91gc_primitive;
 const object primitive__87 = &_87_primitive;
 const object primitive__91 = &_91_primitive;
 const object primitive__85 = &_85_primitive;

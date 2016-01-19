@@ -40,6 +40,7 @@
 
     ;; Non-standard functions:
     ->heap
+    Cyc-minor-gc
   )
   (begin
     ;; Threading
@@ -88,4 +89,10 @@
       "(void *data, int argc, closure _, object k, object obj)"
       " object heap_obj = copy2heap(data, obj);
         return_closcall1(data, k, heap_obj); ")
+    ;; Trigger a minor garbage collection.
+    ;; This is potentially useful to evacuate all objects from 
+    ;; a thread's stack to the heap.
+    (define-c Cyc-minor-gc
+      "(void *data, int argc, closure _, object k)"
+      " Cyc_trigger_minor_gc(data, k); ")
 ))

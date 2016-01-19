@@ -156,7 +156,6 @@
       (list 'Cyc-installation-dir Cyc-installation-dir)
       (list 'system system)
       (list 'command-line-arguments command-line-arguments)
-      (list 'Cyc-minor-gc Cyc-minor-gc)
       (list 'error error)
       (list 'cons cons)
       (list 'cell-get cell-get)
