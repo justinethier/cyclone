@@ -49,7 +49,7 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-The actual minor collection consists of the following steps:
+The actual minor collection algorithm consists of the following steps:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
@@ -60,32 +60,48 @@ The actual minor collection consists of the following steps:
 
 # Major Collection
 
-(DLG overview from paper)
+## Overview
 
-- single collector thread, multiple mutator threads
-- single heap
-- generally try to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation / deallocation
+A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection will be required to reclaim unused memory.
 
-GC stages / status:
-/* Enums for tri-color marking */
-typedef enum { STATUS_ASYNC 
-             , STATUS_SYNC1 
-             , STATUS_SYNC2 
-             } gc_status_type;
+Major GC is performed using the DLG algorithm with modifications from Domani et al. A single collector thread is used to perform the major GC, and coordinate with the application (or "mutator") threads.
 
+Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
+
+## DLG Algorithm
+
+Each object is assigned a color:
+
+- Blue - Unallocated memory.
+- Red - Objects on the stack.
+- White - Heap memory that has not been scanned by the collector. Memory that is still white after the collector finishes tracing is garbage.
+- Gray - Objects marked by the collector that may still have child objects that must be marked.
+- Black - Objects marked by the collector whose immediate child objects have also been marked.
+
+Each of the threads, and the collector itself, has a status variable:
+
+     typedef enum { STATUS_ASYNC 
+                  , STATUS_SYNC1 
+                  , STATUS_SYNC2 
+                  } gc_status_type;
+
+At the start of the collection cycle the collector changes its status to sync 1. The mutators periodically cooperate to check the collector's status, and perform a "handshake" by updating their status to sync 1. A second handshake is performed to transition to sync 2.
+
+Once all of the mutators are in sync 2, the collector transitions to async to perform tracing and sweep. Each mutator will respond to async by marking its roots. From this point the mutators will also allocate new objects as black to prevent them from being collected during this cycle. Once swep is complete all garbage has been collected and the collector will rest until the next collection cycle.
+
+## Mutator Functions
+
+Update(x,i,y)
+Create
+Cooperate
+
+## Collection Cycle
 typedef enum { STAGE_CLEAR_OR_MARKING 
              , STAGE_TRACING 
              //, STAGE_REF_PROCESSING 
              , STAGE_SWEEPING 
              , STAGE_RESTING
              } gc_stage_type;
-
-object colors:
-red
-blue
-white
-gray
-black
 
 
 important to explain how minor/major algorithms are interleaved. EG:
@@ -100,6 +116,10 @@ typedef enum { CYC_THREAD_STATE_NEW
 
 typedef struct gc_thread_data_t gc_thread_data;
 
+
+Collector Functions
+
+When to execute major GC?
 ETC
 
 # Limitations and Looking Ahead
