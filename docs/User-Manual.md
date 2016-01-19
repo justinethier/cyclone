@@ -130,9 +130,13 @@ The [`srfi 18`](api/srfi/18.md) library may be imported to provide support for m
 
 Due to how Cyclone's garbage collector is implemented objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent this race condition an object must be guaranteed to be on the heap prior to being used by another thread. There are two ways to meet this guarantee:
 
-- Use the `->heap` function to place a copy of an object on the heap. Note this will only create a copy of a single object. A vector of objects would not have the contents of the vector moved, and a list would only have its immediate cons cell copied.
+- Use the `->heap` function to place a copy of an object on the heap. Note this will only create a copy of a single object. A vector of objects would not have the contents of the vector moved, and a list would only have its immediate cons cell copied:
 
-- The `Cyc-minor-gc` function may be used to trigger a minor garbage collection for the executing thread. This is a more expensive operation than `->heap` but guarantees all objects on the thread's stack are copied to the heap.
+    (->heap (list))
+
+- The `Cyc-minor-gc` function may be used to trigger a minor garbage collection for the executing thread. This is a more expensive operation than `->heap` but guarantees all objects on the thread's stack are copied to the heap:
+
+    (Cyc-minor-gc)
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
