@@ -64,8 +64,10 @@
     (define (thread-name t) (vector-ref t 3))
     (define (thread-specific t) (vector-ref t 4))
     (define (thread-specific-set! t obj) (vector-set! t 4 obj))
-; TODO:
-; current-thread - not sure how to look this up yet... may need a global list of running threads
+
+    ; TODO:
+    ; current-thread - not sure how to look this up yet... may need a global list of running threads. Unfortunately need the vector here
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
       ;; t contains any closures on the "parent" thread's stack
