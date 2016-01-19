@@ -1,3 +1,13 @@
+[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+
+# Garbage Collector
+
+- [Introduction](#introduction)
+  - [Terms](#terms)
+- [Minor GC](#minor-gc)
+- [Major GC](#major-gc)
+- [Further Reading](#further-reading)
+
 # Introduction
 
 Cyclone uses the Cheney on the MTA technique to implement tail calls, efficient continuations, and generational garbage collection. Objects are allocated directly on the stack and functions are never allowed to return, until eventually the stack grows too large and a minor garbage collection (GC) is performed. Live objects are then relocated from the stack to the heap and a longjmp is used to continue execution at the beginning of the stack.
@@ -6,11 +16,11 @@ The original technique uses a Cheney copying collector for both the minor collec
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. And advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
 
-motivations: 
-- extend baker's approach to support multiple mutators
-- State of the art GC's are built on top of DLG (stopless, chicken, clover)
+Motivations: 
+- Extend baker's approach to support multiple mutators
+- Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
-limitations or potential issues:
+Limitations or potential issues:
 - DLG memory fragmentation could be an issue for long-running programs
 
 ## Terms
@@ -18,12 +28,12 @@ limitations or potential issues:
 - Collector - A single thread call the collector performs major garbage collections.
 - Mutator - Each thread running application code is called a mutator.
 
-# minor GC
+# Minor GC
 
 changes from Cheney on MTA:
 - each thread has its own stack
 
-# major GC
+# Major GC
 
 (DLG overview from paper)
 
