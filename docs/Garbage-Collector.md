@@ -85,9 +85,30 @@ Each of the threads, and the collector itself, has a status variable:
                   , STATUS_SYNC2 
                   } gc_status_type;
 
-At the start of the collection cycle the collector changes its status to sync 1. The mutators periodically cooperate to check the collector's status, and perform a "handshake" by updating their status to sync 1. A second handshake is performed to transition to sync 2.
+At the start of the collection cycle the collector changes its status to sync 1. The mutators periodically cooperate to check the collector's status, and perform a "handshake" by updating their status. Each mutator will now update to sync 1. A second handshake is performed to transition to sync 2.
 
-Once all of the mutators are in sync 2, the collector transitions to async to perform tracing and sweep. Each mutator will respond to async by marking its roots. From this point the mutators will also allocate new objects as black to prevent them from being collected during this cycle. Once swep is complete all garbage has been collected and the collector will rest until the next collection cycle.
+Once all of the mutators are in sync 2, the collector transitions to async to perform tracing and sweep. Each mutator will handshake and respond to the async by marking its roots. From this point the mutators will also allocate new objects as black to prevent them from being collected during this cycle. Once swep is complete all garbage has been collected and the collector will rest until the next collection cycle.
+
+## Collection Cycle
+
+During a GC cycle the collector transitions through the following states:
+
+### Clear
+The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object. The collector then transitions to sync 1.
+
+### Mark
+The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
+
+### Trace
+The collector traces all live objects.
+
+### Sweep
+The collector frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
+
+Any terminated threads will have their thread data freed now. ( TODO: Thread data is kept through the collection cycle to ... ensure live objects are not missed? double-check this)
+
+### Rest
+The collector cycle is complete and it rests until it is triggered again.
 
 ## Mutator Functions
 
@@ -95,15 +116,11 @@ Update(x,i,y)
 Create
 Cooperate
 
-## Collection Cycle
-typedef enum { STAGE_CLEAR_OR_MARKING 
-             , STAGE_TRACING 
-             //, STAGE_REF_PROCESSING 
-             , STAGE_SWEEPING 
-             , STAGE_RESTING
-             } gc_stage_type;
+## Collector Functions
 
+TODO
 
+## TODO
 important to explain how minor/major algorithms are interleaved. EG:
 
 thread states:
@@ -117,7 +134,6 @@ typedef enum { CYC_THREAD_STATE_NEW
 typedef struct gc_thread_data_t gc_thread_data;
 
 
-Collector Functions
 
 When to execute major GC?
 ETC
@@ -130,6 +146,7 @@ Motivations:
 
 Limitations or potential issues:
 - DLG memory fragmentation could be an issue for long-running programs
+- Improve performance?
 
 # Further Reading
 
