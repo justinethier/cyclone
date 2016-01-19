@@ -51,21 +51,6 @@ The [Development Guide](docs/Development.md) contains instructions for hacking o
 
 Finally, if you need a place to start learning the Scheme language try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
-References
-----------
-
-- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
-- [CHICKEN Scheme](http://www.call-cc.org/)
-- [Chibi Scheme](https://github.com/ashinn/chibi-scheme)
-- [Compiling Scheme to C with closure conversion](http://matt.might.net/articles/compiling-scheme-to-c/), by Matt Might
-- Implementing an on-the-fly garbage collector for Java, by Domani et al
-- [Lisp in Small Pieces](http://pagesperso-systeme.lip6.fr/Christian.Queinnec/WWW/LiSP.html), by Christian Queinnec
-- Portable, Unobtrusive Garbage Collection for Multiprocessor Systems, by Damien Doligez and Georges Gonthier
-- [R<sup>5</sup>RS Scheme Specification](http://www.schemers.org/Documents/Standards/R5RS/HTML/)
-- [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki)
-- [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html), by Harold Abelson and Gerald Jay Sussman
-- [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf), by Marc Feeley
-
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).

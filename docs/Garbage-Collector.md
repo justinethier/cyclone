@@ -64,6 +64,8 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 ETC
 
-# References
+# Further Reading
 
-TODO: include papers, etc here and link to bullet numbers above
+- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+- Implementing an on-the-fly garbage collector for Java, by Domani et al
+- Portable, Unobtrusive Garbage Collection for Multiprocessor Systems, by Damien Doligez and Georges Gonthier
