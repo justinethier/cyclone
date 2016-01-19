@@ -132,11 +132,11 @@ Due to how Cyclone's garbage collector is implemented objects are relocated in m
 
 - Use the `->heap` function to place a copy of an object on the heap. Note this will only create a copy of a single object. A vector of objects would not have the contents of the vector moved, and a list would only have its immediate cons cell copied:
 
-    (->heap (list))
+        (->heap (list))
 
 - The `Cyc-minor-gc` function may be used to trigger a minor garbage collection for the executing thread. This is a more expensive operation than `->heap` but guarantees all objects on the thread's stack are copied to the heap:
 
-    (Cyc-minor-gc)
+        (Cyc-minor-gc)
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
