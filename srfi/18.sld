@@ -10,10 +10,34 @@
     thread-start!
     thread-sleep!
     thread-yield!
-;    thread-terminate!
-    ; For now, these are built-ins. No need for them here: make-mutex mutex-lock! mutex-unlock!
-    ;; TODO: consolidate built-ins, and convert them from primitives to FFI functions
-    ;;       in this module.
+    ;; TODO: thread-terminate!
+    ;; TODO: thread-join!
+
+    ;; For now, these are built-ins. No need to export them here: 
+    ;; mutex?
+    ;; make-mutex 
+    ;; mutex-lock! 
+    ;; mutex-unlock!
+
+    ;; For now, these are not implemented:
+    ;; mutex-name
+    ;; mutex-specific
+    ;; mutex-specific-set!
+    ;; mutex-state
+
+    ;; TODO: condition variables are not implemented yet
+    ;; (condition-variable? obj)                             ;procedure
+    ;; (make-condition-variable [name])                      ;procedure
+    ;; (condition-variable-name condition-variable)          ;procedure
+    ;; (condition-variable-specific condition-variable)      ;procedure
+    ;; (condition-variable-specific-set! condition-variable obj) ;procedure
+    ;; (condition-variable-signal! condition-variable)       ;procedure
+    ;; (condition-variable-broadcast! condition-variable)    ;procedure
+
+    ;; Time functions are not implemented here, see (scheme time) instead
+   
+    ;; Exceptions are not implemented here, r7rs exceptions are used instead
+
     ;; Non-standard functions:
     ->heap
   )
