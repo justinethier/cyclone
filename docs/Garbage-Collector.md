@@ -6,6 +6,7 @@
   - [Terms](#terms)
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
+- [Limitations and Looking Ahead](#limitations-and-looking-ahead)
 - [Further Reading](#further-reading)
 
 # Introduction
@@ -16,26 +17,46 @@ The original technique uses a Cheney copying collector for both the minor collec
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. And advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
 
-Motivations: 
-- Extend baker's approach to support multiple mutators
-- Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
-
-Limitations or potential issues:
-- DLG memory fragmentation could be an issue for long-running programs
-
 ## Terms
 - Garbage Collection (GC)
 - Collector - A single thread call the collector performs major garbage collections.
 - Mutator - Each thread running application code is called a mutator.
+- Mutation - A modification to an object. 
+- Root - The collector begins tracing by marking one or more of these objects.
 
 # Minor Collection
 
-brief overview of cheney on the mta
+In Cheney on the MTA, the original program is converted to continuation passing style (CPS) and compiled as a series of C functions that never return. Instead the code periodically checks to see if the stack has exceeded a certain size. When this happens, a minor GC is started and the code traces though all of the live closures to copy stack objects to the heap.
 
-changes from Cheney on MTA:
-- each thread has its own stack
-- write barriers
-- cooperation, interleaving (save details for later section?)
+Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The thread data contains all of the necessary information to perform collections, including:
+
+- Thread state
+- Stack boundaries
+- Minor GC write barrier
+- Jump buffer
+- Current continuation and arguments
+- Major GC parameters
+- Call history buffer
+- Exception handler stack
+
+Although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-vector!` to change the contents of a vector slot. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
+
+Root objects are "live" objects the collector uses to begin the tracing process. A root object is guaranteed to survive a collection. Cyclone's minor collector treats the following as roots:
+
+- The current continuation
+- Arguments to the current continuation
+- Mutations contained in the write barrier
+- Closures from the exception stack
+- Global variables
+
+The actual minor collection consists of the following steps:
+
+- Move any root objects on the stack to the heap. 
+  - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
+  - Record each moved object in a buffer to serve as the Cheney "to-space".
+- Loop over the "to-space" buffer and move any child objects that are on the stack. This loop continues until all "live" objects are moved.
+- Cooperate with the collection thread (see next section).
+- Perform a `longjmp` to reset the stack and call into the current continuation.
 
 # Major Collection
 
@@ -81,8 +102,18 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 ETC
 
+# Limitations and Looking Ahead
+
+Motivations: 
+- Extend baker's approach to support multiple mutators
+- Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
+
+Limitations or potential issues:
+- DLG memory fragmentation could be an issue for long-running programs
+
 # Further Reading
 
+- [CHICKEN internals: the garbage collector](http://www.more-magic.net/posts/internals-gc.html)
 - [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
 - Fragmentation Tolerant Real Time Garbage Collection (PhD Dissertation), by Filip Pizlo
 - Implementing an on-the-fly garbage collector for Java, by Domani et al
