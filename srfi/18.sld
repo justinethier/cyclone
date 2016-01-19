@@ -1,12 +1,14 @@
 (define-library (srfi 18)
   (import (scheme base))
   (export
+    ;; TODO: current-thread
     thread?
     make-thread
     thread-name
     thread-specific
     thread-specific-set!
     thread-start!
+    thread-sleep!
     thread-yield!
 ;    thread-terminate!
     ; For now, these are built-ins. No need for them here: make-mutex mutex-lock! mutex-unlock!
@@ -49,6 +51,10 @@
     (define (thread-yield!) (thread-sleep! 1))
 ;    (define (thread-terminate!) (Cyc-end-thread!))
     ;; TODO: thread-join!
+
+    (define-c thread-sleep!
+      "(void *data, int argc, closure _, object k, object timeout)"
+      " return_closcall1(data, k, Cyc_thread_sleep(data, timeout)); ")
 
     ;; Take a single object and if it is on the stack, return a copy
     ;; of it that is allocated on the heap. NOTE the original object

@@ -233,7 +233,6 @@ extern const object primitive_Cyc_91cvar_127;
 extern const object primitive_Cyc_91has_91cycle_127;
 extern const object primitive_Cyc_91spawn_91thread_67;
 extern const object primitive_Cyc_91end_91thread_67;
-extern const object primitive_thread_91sleep_67;
 extern const object primitive_Cyc_91minor_91gc;
 extern const object primitive__87;
 extern const object primitive__91;

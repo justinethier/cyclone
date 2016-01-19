@@ -454,7 +454,6 @@
      Cyc-has-cycle?
      Cyc-spawn-thread!
      Cyc-end-thread!
-     thread-sleep!
      Cyc-minor-gc
      Cyc-stdout
      Cyc-stdin
@@ -565,7 +564,6 @@
                   Cyc-cvar?
                   Cyc-spawn-thread!
                   Cyc-end-thread!
-                  thread-sleep!
                   Cyc-minor-gc
                   apply
                   %halt
