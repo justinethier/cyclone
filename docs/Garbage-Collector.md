@@ -4,8 +4,8 @@
 
 - [Introduction](#introduction)
   - [Terms](#terms)
-- [Minor GC](#minor-gc)
-- [Major GC](#major-gc)
+- [Minor Collection](#minor-collection)
+- [Major Collection](#major-collection)
 - [Further Reading](#further-reading)
 
 # Introduction
@@ -28,12 +28,16 @@ Limitations or potential issues:
 - Collector - A single thread call the collector performs major garbage collections.
 - Mutator - Each thread running application code is called a mutator.
 
-# Minor GC
+# Minor Collection
+
+brief overview of cheney on the mta
 
 changes from Cheney on MTA:
 - each thread has its own stack
+- write barriers
+- cooperation, interleaving (save details for later section?)
 
-# Major GC
+# Major Collection
 
 (DLG overview from paper)
 
