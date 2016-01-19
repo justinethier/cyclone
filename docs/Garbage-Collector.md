@@ -2,11 +2,9 @@
 
 Cyclone uses the Cheney on the MTA technique to implement tail calls, efficient continuations, and generational garbage collection. Objects are allocated directly on the stack and functions are never allowed to return, until eventually the stack grows too large and a minor garbage collection (GC) is performed. Live objects are then relocated from the stack to the heap and a longjmp is used to continue execution at the beginning of the stack.
 
-The original technique uses a Cheney copying collector for both the minor collection and a major collection. One of the drawbacks of using a copying collector for major GC is coordination among multiple threads...
+The original technique uses a Cheney copying collector for both the minor collection and a major collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads would need to be stopped at the same time during major GC or a read barrier would need to be used - potentially introducing a high overhead. 
 
-Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections.
-
-terms: mutators, collector, what else?
+Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. And advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
 
 motivations: 
 - extend baker's approach to support multiple mutators
@@ -15,14 +13,19 @@ motivations:
 limitations or potential issues:
 - DLG memory fragmentation could be an issue for long-running programs
 
-## minor GC
+## Terms
+- Garbage Collection (GC)
+- Collector - A single thread call the collector performs major garbage collections.
+- Mutator - Each thread running application code is called a mutator.
+
+# minor GC
 
 changes from Cheney on MTA:
 - each thread has its own stack
 
-## major GC
+# major GC
 
-overview from paper
+(DLG overview from paper)
 
 - single collector thread, multiple mutator threads
 - single heap
@@ -67,5 +70,7 @@ ETC
 # Further Reading
 
 - [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+- Fragmentation Tolerant Real Time Garbage Collection (PhD Dissertation), by Filip Pizlo
 - Implementing an on-the-fly garbage collector for Java, by Domani et al
+- Incremental Parallel Garbage Collection, by Paul Thomas
 - Portable, Unobtrusive Garbage Collection for Multiprocessor Systems, by Damien Doligez and Georges Gonthier
