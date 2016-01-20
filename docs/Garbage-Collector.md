@@ -3,7 +3,7 @@
 # Garbage Collector
 
 - [Introduction](#introduction)
-  - [Terms](#terms)
+- [Terms](#terms)
 - [Data Structures](#data-structures)
   - [Heap](#heap)
   - [Thread Data](#thread-data)
@@ -20,13 +20,13 @@
 
 Cyclone uses a garbage collector (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. A generational collector is used to perform two types of collection. A minor GC executes frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less frequently to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA, a technique by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca`, so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
+Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
 
-The original Cheney technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is a problem when multiple threads are accessing shared objects; an object reference could become invalid at any time when GC relocates the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead. 
+Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is a problem when multiple threads are accessing shared objects; an object reference could become invalid at any time when GC relocates the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead. 
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
-## Terms
+# Terms
 - Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
 - Continuation Passing Style
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
@@ -72,7 +72,7 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-The minor GC algorithm is based on Cheney on the MTA and consists of the following:
+A minor collection is always performed for a single mutator thread, usually by the thread itself. The algorithm is based on Cheney on the MTA and consists of the following:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
@@ -80,8 +80,6 @@ The minor GC algorithm is based on Cheney on the MTA and consists of the followi
 - Loop over the "to-space" buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
-
-A minor collection is always performed for a single mutator thread, usually by the thread itself.
 
 Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
