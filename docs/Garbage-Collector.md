@@ -11,17 +11,20 @@
 
 # Introduction
 
-Cyclone uses Cheney on the MTA to implement the first generation of its garbage collector. The original technique uses a Cheney copying collector for both the minor and major genrations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads must be stopped at the same time during major GC or a read barrier must be used to access objects - potentially introducing a large overhead. 
+Cyclone uses a garbage collector (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. A generational collector is used to perform two types of collection. A minor GC executes frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less frequently to free longer-lived objects that are no longer being used by the application.
 
-Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. Threads can continue to run concurrently even during collections.
+Cheney on the MTA is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca`, so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
+
+The original Cheney technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is a problem when multiple threads are accessing shared objects; an object reference could become invalid at any time when GC relocates the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead. 
+
+Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 ## Terms
-- Garbage Collection (GC)
 - Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
-- Mutator - A thread running application code; there may be more than one mutator running concurrently.
+- Handshake - 
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
+- Mutator - A thread running application code; there may be more than one mutator running concurrently.
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
-- Handshake
 
 # Data Structures
 
