@@ -13,7 +13,7 @@
   - [Mutator Functions](#mutator-functions)
   - [Cooperation](#cooperation)
   - [Considerations](#considerations)
-- [Limitations and Looking Ahead](#limitations-and-looking-ahead)
+- [Looking Ahead](#looking-ahead)
 - [Further Reading](#further-reading)
 
 # Introduction
@@ -29,12 +29,11 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 ## Terms
 - Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
 - Continuation Passing Style
-- Handshake - 
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
 - Mutator - A thread running application code; there may be more than one mutator running concurrently.
+- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
 - Write Barrier - Code that is executed before writing to an object.
-- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 
 # Data Structures
 
@@ -161,9 +160,11 @@ A write barrier is used to ensure any modified objects are properly marked for t
 
 ### Cooperate
 
-Each mutator is required to periodically call this function to cooperate with the collector. This is done now after each minor GC.
+Each mutator is required to periodically call this function to cooperate with the collector. Cyclone does this after each minor GC.
 
-During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. In addition, when a mutator transitions to async it will:
+During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
+
+In addition, when a mutator transitions to async it will:
 
 - Mark all of its roots gray
 - Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
@@ -177,22 +178,20 @@ TODO: explain how collector cooperates on behalf of a mutator.
 important to explain how minor/major algorithms are interleaved. EG:
 
 thread states:
-typedef enum { CYC_THREAD_STATE_NEW
-             , CYC_THREAD_STATE_RUNNABLE
-             , CYC_THREAD_STATE_BLOCKED
-             , CYC_THREAD_STATE_BLOCKED_COOPERATING
-             , CYC_THREAD_STATE_TERMINATED
-             } cyc_thread_state_type;
 
-typedef struct gc_thread_data_t gc_thread_data;
-
+    typedef enum { CYC_THREAD_STATE_NEW
+                 , CYC_THREAD_STATE_RUNNABLE
+                 , CYC_THREAD_STATE_BLOCKED
+                 , CYC_THREAD_STATE_BLOCKED_COOPERATING
+                 , CYC_THREAD_STATE_TERMINATED
+                 } cyc_thread_state_type;
 
 
 ## Considerations
 
 Garbage collection papers are generally silent on when to actually start the collection cycle - presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
-# Limitations and Looking Ahead
+# Looking Ahead
 
 Motivations: 
 - Extend baker's approach to support multiple mutators
