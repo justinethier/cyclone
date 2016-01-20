@@ -13,7 +13,7 @@
 
 Cyclone uses a garbage collector (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. A generational collector is used to perform two types of collection. A minor GC executes frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less frequently to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca`, so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
+Cheney on the MTA, a technique by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca`, so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
 
 The original Cheney technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is a problem when multiple threads are accessing shared objects; an object reference could become invalid at any time when GC relocates the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead. 
 
@@ -21,10 +21,13 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 
 ## Terms
 - Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
+- Continuation Passing Style
 - Handshake - 
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
 - Mutator - A thread running application code; there may be more than one mutator running concurrently.
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
+- Write Barrier - Code that is executed before writing to an object.
+- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 
 # Data Structures
 
@@ -55,7 +58,7 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime the code periodically checks to see if the executing thread's stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
-Root objects are "live" objects the collector uses to begin the tracing process. A root object is guaranteed to survive a collection. Cyclone's minor collector treats the following as roots:
+Root objects are "live" objects the collector uses to begin the tracing process. Cyclone's minor collector treats the following as roots:
 
 - The current continuation
 - Arguments to the current continuation
@@ -63,7 +66,7 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-The minor collection algorithm consists of the following:
+The minor GC algorithm is based on Cheney on the MTA and consists of the following:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
@@ -72,17 +75,15 @@ The minor collection algorithm consists of the following:
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
 
-Minor collection is usually performed by a mutator.
+A minor collection is always performed for a single mutator thread, usually by the thread itself.
 
-Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-vector!` to change the contents of a vector slot. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
+Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
 # Major Collection
 
 ## Overview
 
-A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory.
-
-Major GC is performed using the DLG algorithm with modifications from Domani et al. A single collector thread is used to perform the major GC, and coordinate with the application (or "mutator") threads.
+A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform the major GC, with cooperation from the mutator threads.
 
 Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
 
