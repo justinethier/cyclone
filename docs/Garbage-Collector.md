@@ -83,13 +83,9 @@ Finally, although not mentioned in Baker's paper, a heap object can be modified 
 
 ## Overview
 
-A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform the major GC, with cooperation from the mutator threads.
+A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
-Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
-
-## DLG Algorithm
-
-Each object is assigned a color:
+Each object is assigned a color to indicate the status of its memory:
 
 - Blue - Unallocated memory.
 - Red - Objects on the stack.
@@ -97,16 +93,16 @@ Each object is assigned a color:
 - Gray - Objects marked by the collector that may still have child objects that must be marked.
 - Black - Objects marked by the collector whose immediate child objects have also been marked.
 
-Each of the threads, and the collector itself, has a status variable:
+White is also referred to as the clear color and black as the mark color. Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
+
+Each of the mutator threads, and the collector itself, has a status variable:
 
      typedef enum { STATUS_ASYNC 
                   , STATUS_SYNC1 
                   , STATUS_SYNC2 
                   } gc_status_type;
 
-At the start of the collection cycle the collector changes its status to sync 1. The mutators periodically cooperate to check the collector's status, and perform a "handshake" by updating their status. Each mutator will now update to sync 1. A second handshake is performed to transition to sync 2.
-
-Once all of the mutators are in sync 2, the collector transitions to async to perform tracing and sweep. Each mutator will handshake and respond to the async by marking its roots. From this point the mutators will also allocate new objects as black to prevent them from being collected during this cycle. Once swep is complete all garbage has been collected and the collector will rest until the next collection cycle.
+The collector performs a handshake with the mutators to change status. The collector will update its status variable and then wait for all of the collectors to change their status before continuing. The mutators periodically call a cooperate function to check in and update their status to match the collectors. A handshake is complete once all mutators have updated their status.
 
 ## Collection Cycle
 
@@ -126,7 +122,7 @@ The collector scans the heap and frees memory used by all white objects. If the 
 
 Any terminated threads will have their thread data freed now. ( TODO: Thread data is kept through the collection cycle to ... ensure live objects are not missed? double-check this)
 
-### Rest
+### Resting
 The collector cycle is complete and it rests until it is triggered again.
 
 ## Collector Functions
@@ -143,15 +139,13 @@ TODO: data structure used instead of explicit marking, to improve performance
 
 TODO: needed? should this just be part of the collector trace section?
 
-### Handshakes
-
 ## Mutator Functions
 
 Each mutator calls the following functions to coordinate with the collector.
 
 ### Create
 
-The `gc_alloc` function is called by a mutator to allocate memory on the heap for an object. This is generally only done during a minor GC as each object is relocated to the heap.
+This function is called by a mutator to allocate memory on the heap for an object. This is generally only done during a minor GC when each object is relocated to the heap.
 
 ### Update
 
@@ -191,7 +185,7 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 ## Considerations
 
-Garbage collection papers generally are silent on when to actually start the collection cycle, presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
+Garbage collection papers are generally silent on when to actually start the collection cycle - presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
 # Limitations and Looking Ahead
 
@@ -203,6 +197,8 @@ Limitations or potential issues:
 - DLG memory fragmentation could be an issue for long-running programs
 - Locking, atomics, etc
 - Improve performance?
+
+Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
 
 quote on this? - first priority must be correctness, can address performance over time
 
