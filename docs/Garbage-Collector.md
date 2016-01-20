@@ -11,18 +11,18 @@
 
 # Introduction
 
-Cyclone uses the Cheney on the MTA technique to implement tail calls, efficient continuations, and generational garbage collection. Objects are allocated directly on the stack and functions are never allowed to return, until eventually the stack grows too large and a minor garbage collection (GC) is performed. Live objects are then relocated from the stack to the heap and a longjmp is used to continue execution at the beginning of the stack.
+Cyclone uses Cheney on the MTA technique to implement the first generation of its garbage collector. The original technique uses a Cheney copying collector for both the minor and major genrations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads must be stopped at the same time during major GC or a read barrier must be used to access objects - potentially introducing a large overhead. 
 
-The original technique uses a Cheney copying collector for both the minor collection and a major collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads would need to be stopped at the same time during major GC or a read barrier would need to be used - potentially introducing a high overhead. 
-
-Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. And advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
+Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
 
 ## Terms
 - Garbage Collection (GC)
-- Collector - A single thread call the collector performs major garbage collections.
-- Mutator - Each thread running application code is called a mutator.
-- Mutation - A modification to an object. 
-- Root - The collector begins tracing by marking one or more of these objects.
+- Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
+- Mutator - A thread running application code; there may be more than one mutator running concurrently.
+- Mutation - A modification to an object. For example, changing a vector (array) entry.
+- Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
+- Handshake
+
 
 # Minor Collection
 
@@ -32,12 +32,12 @@ Cyclone passes the current continuation, number of arguments, and a thread data 
 
 - Thread state
 - Stack boundaries
-- Minor GC write barrier
-- Jump buffer
 - Current continuation and arguments
-- Major GC parameters
+- Jump buffer
 - Call history buffer
 - Exception handler stack
+- Contents of the minor GC write barrier
+- Major GC parameters
 
 Although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-vector!` to change the contents of a vector slot. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
@@ -49,7 +49,7 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-The actual minor collection algorithm consists of the following steps:
+The minor collection algorithm consists of the following steps:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
@@ -58,11 +58,13 @@ The actual minor collection algorithm consists of the following steps:
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
 
+Minor collection is usually performed by a mutator.
+
 # Major Collection
 
 ## Overview
 
-A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection will be required to reclaim unused memory.
+A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory.
 
 Major GC is performed using the DLG algorithm with modifications from Domani et al. A single collector thread is used to perform the major GC, and coordinate with the application (or "mutator") threads.
 
@@ -91,7 +93,7 @@ Once all of the mutators are in sync 2, the collector transitions to async to pe
 
 ## Collection Cycle
 
-During a GC cycle the collector transitions through the following states:
+During a GC cycle the collector thread transitions through the following states:
 
 ### Clear
 The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object. The collector then transitions to sync 1.
@@ -110,17 +112,24 @@ Any terminated threads will have their thread data freed now. ( TODO: Thread dat
 ### Rest
 The collector cycle is complete and it rests until it is triggered again.
 
-## Mutator Functions
-
-Update(x,i,y)
-Create
-Cooperate
-
 ## Collector Functions
 
-TODO
+TODO: necessary to enumerate these? maybe just summarize what is going on in the collection cycle sections
 
-## TODO
+## Mutator Functions
+
+Each mutator calls the following functions to coordinate with the collector.
+
+### Update(x,i,y)
+
+### Create
+
+### Cooperate
+
+TODO: go over cooperation, explain what is done by collector vs mutator. does this need a larger section?
+
+
+## Considerations
 important to explain how minor/major algorithms are interleaved. EG:
 
 thread states:
@@ -135,8 +144,9 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 
 
-When to execute major GC?
-ETC
+IMPORTANT: When to execute major GC?
+
+anything else?
 
 # Limitations and Looking Ahead
 
@@ -146,11 +156,14 @@ Motivations:
 
 Limitations or potential issues:
 - DLG memory fragmentation could be an issue for long-running programs
+- Locking, atomics, etc
 - Improve performance?
+
+quote on this? - first priority must be correctness, can address performance over time
 
 # Further Reading
 
-- [CHICKEN internals: the garbage collector](http://www.more-magic.net/posts/internals-gc.html)
+- [CHICKEN internals: the garbage collector](http://www.more-magic.net/posts/internals-gc.html), by Peter Bex
 - [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
 - Fragmentation Tolerant Real Time Garbage Collection (PhD Dissertation), by Filip Pizlo
 - Implementing an on-the-fly garbage collector for Java, by Domani et al
