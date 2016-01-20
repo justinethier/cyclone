@@ -4,8 +4,15 @@
 
 - [Introduction](#introduction)
   - [Terms](#terms)
+- [Data Structures](#data-structures)
+  - [Heap](#heap)
+  - [Thread Data](#thread-data)
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
+  - [Collection Cycle](#collection-cycle)
+  - [Mutator Functions](#mutator-functions)
+  - [Cooperation](#cooperation)
+  - [Considerations](#considerations)
 - [Limitations and Looking Ahead](#limitations-and-looking-ahead)
 - [Further Reading](#further-reading)
 
@@ -80,8 +87,6 @@ A minor collection is always performed for a single mutator thread, usually by t
 Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
 # Major Collection
-
-## Overview
 
 A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
