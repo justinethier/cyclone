@@ -11,9 +11,9 @@
 
 # Introduction
 
-Cyclone uses Cheney on the MTA technique to implement the first generation of its garbage collector. The original technique uses a Cheney copying collector for both the minor and major genrations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads must be stopped at the same time during major GC or a read barrier must be used to access objects - potentially introducing a large overhead. 
+Cyclone uses Cheney on the MTA to implement the first generation of its garbage collector. The original technique uses a Cheney copying collector for both the minor and major genrations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. In order to prevent corrupting references used by other threads, either all threads must be stopped at the same time during major GC or a read barrier must be used to access objects - potentially introducing a large overhead. 
 
-Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are allcated on the heap. Threads can continue to run concurrently even during collections.
+Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. Threads can continue to run concurrently even during collections.
 
 ## Terms
 - Garbage Collection (GC)
@@ -33,13 +33,9 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 - heap is locked during alloc and sweep (free)
 - heap is grown if necessary for alloc. collection process is async so no other choice (cannot collect immediately)
 
-## TODO: anything else?
+## Thread Data
 
-# Minor Collection
-
-In Cheney on the MTA, the original program is converted to continuation passing style (CPS) and compiled as a series of C functions that never return. Instead the code periodically checks to see if the stack has exceeded a certain size. When this happens, a minor GC is started and the code traces though all of the live closures to copy stack objects to the heap.
-
-Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The thread data contains all of the necessary information to perform collections, including:
+At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The thread data contains all of the necessary information to perform collections, including:
 
 - Thread state
 - Stack boundaries
@@ -50,7 +46,11 @@ Cyclone passes the current continuation, number of arguments, and a thread data 
 - Contents of the minor GC write barrier
 - Major GC parameters
 
-Although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-vector!` to change the contents of a vector slot. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
+## TODO: anything else? mutator/collector mark lists? write barrier lists?
+
+# Minor Collection
+
+Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime the code periodically checks to see if the executing thread's stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
 Root objects are "live" objects the collector uses to begin the tracing process. A root object is guaranteed to survive a collection. Cyclone's minor collector treats the following as roots:
 
@@ -60,16 +60,18 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-The minor collection algorithm consists of the following steps:
+The minor collection algorithm consists of the following:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
   - Record each moved object in a buffer to serve as the Cheney "to-space".
-- Loop over the "to-space" buffer and move any child objects that are on the stack. This loop continues until all "live" objects are moved.
+- Loop over the "to-space" buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
 
 Minor collection is usually performed by a mutator.
+
+Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-vector!` to change the contents of a vector slot. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
 # Major Collection
 
