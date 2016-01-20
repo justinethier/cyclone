@@ -23,6 +23,17 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
 - Handshake
 
+# Data Structures
+
+## Heap
+
+- based on implementation from chibi scheme
+- linked list of pages
+- requested memory always allocated in minimum chunk sizes
+- heap is locked during alloc and sweep (free)
+- heap is grown if necessary for alloc. collection process is async so no other choice (cannot collect immediately)
+
+## TODO: anything else?
 
 # Minor Collection
 
@@ -102,10 +113,10 @@ The collector swaps the values of the clear color (white) and the mark color (bl
 The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
 
 ### Trace
-The collector traces all live objects.
+The collector finds all live objects and marks them black.
 
 ### Sweep
-The collector frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
+The collector scans the heap and frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
 
 Any terminated threads will have their thread data freed now. ( TODO: Thread data is kept through the collection cycle to ... ensure live objects are not missed? double-check this)
 
@@ -114,22 +125,50 @@ The collector cycle is complete and it rests until it is triggered again.
 
 ## Collector Functions
 
-TODO: necessary to enumerate these? maybe just summarize what is going on in the collection cycle sections
+### Mark Gray
+
+TODO: data structure used instead of explicit marking, to improve performance
+
+### Collector Mark Gray
+
+### Mark Black
+
+### Collector Trace
+
+TODO: needed? should this just be part of the collector trace section?
+
+### Handshakes
 
 ## Mutator Functions
 
 Each mutator calls the following functions to coordinate with the collector.
 
-### Update(x,i,y)
-
 ### Create
+
+The `gc_alloc` function is called by a mutator to allocate memory on the heap for an object. This is generally only done during a minor GC as each object is relocated to the heap.
+
+### Update
+
+A write barrier is used to ensure any modified objects are properly marked for the current collection cycle. There are two cases:
+
+- Gray the object's new and old values if the mutator is in a synchronous status. Graying of the new value is a special case since it may still be on the stack. Instead of marking it directly, the object is tagged to be grayed when it is relocated to the heap.
+- Gray the object's old value if the collector is in the tracing stage.
 
 ### Cooperate
 
-TODO: go over cooperation, explain what is done by collector vs mutator. does this need a larger section?
+Each mutator is required to periodically call this function to cooperate with the collector. This is done now after each minor GC.
 
+During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. In addition, when a mutator transitions to async it will:
 
-## Considerations
+- Mark all of its roots gray
+- Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
+
+## Cooperation
+
+Unfortunately a mutator cannot cooperate with the collector if it is blocked. For example, a mutator could block forever waiting for user input reading from an I/O port.
+
+TODO: explain how collector cooperates on behalf of a mutator.
+
 important to explain how minor/major algorithms are interleaved. EG:
 
 thread states:
@@ -144,9 +183,9 @@ typedef struct gc_thread_data_t gc_thread_data;
 
 
 
-IMPORTANT: When to execute major GC?
+## Considerations
 
-anything else?
+Garbage collection papers generally are silent on when to actually start the collection cycle, presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
 # Limitations and Looking Ahead
 
