@@ -14,7 +14,7 @@
   - [Collector Functions](#collector-functions)
   - [Mutator Functions](#mutator-functions)
   - [Cooperation by the Collector](#cooperation-by-the-collector)
-  - [Considerations](#considerations)
+  - [Other Considerations](#other-considerations)
 - [Looking Ahead](#looking-ahead)
 - [Further Reading](#further-reading)
 
@@ -30,6 +30,8 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
+- Continuation - With respect to the collectors, this is a function that is called to resume execution. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
+- Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
@@ -168,7 +170,7 @@ A write barrier is used to ensure any modified objects are properly marked for t
 
 Each mutator is required to periodically call this function to cooperate with the collector. During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
 
-In addition, when a mutator transitions to async it will:
+In addition when a mutator transitions to async it will:
 
 - Mark all of its roots gray
 - Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
@@ -177,7 +179,7 @@ Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's ar
 
 ## Cooperation by the Collector
 
-In practice a mutator will not always be able to cooperate in a timely manner. For example, a thread can block indefinitely waiting for user input or reading from a network port. In the meantime the collector will never be able to complete a handshake with this mutator, and major GC will never be performed.
+In practice a mutator will not always be able to cooperate in a timely manner. For example, a thread can block indefinitely waiting for user input or reading from a network port. In the meantime the collector will never be able to complete a handshake with this mutator and major GC will never be performed.
 
 Cyclone solves this problem by requiring that a mutator let the collector know that it is (or could be) blocking. The mutator will call a function to update its thread state to `CYC_THREAD_STATE_BLOCKED`.
 
@@ -190,11 +192,11 @@ With this information the collector can cooperate on behalf of a blocked mutator
                  , CYC_THREAD_STATE_TERMINATED
                  } cyc_thread_state_type;
 
-By now you might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can they be marked gray and its allocation color can be flipped.
+By now you might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can then be marked gray and its allocation color can be flipped.
 
-When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator. If so, the mutator will perform a minor GC again to ensure any additional objects are moved to the heap - such as results from the blocking code - then it will `longjmp` back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
+When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator. If so, the mutator will perform a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap then it will `longjmp` back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
 
-## Considerations
+## Other Considerations
 
 Garbage collection papers are generally silent on when to start the collection cycle, presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
