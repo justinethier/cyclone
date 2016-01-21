@@ -4,6 +4,7 @@
 
 - [Introduction](#introduction)
 - [Terms](#terms)
+- [Code](#code)
 - [Data Structures](#data-structures)
   - [Heap](#heap)
   - [Thread Data](#thread-data)
@@ -34,6 +35,13 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 - Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
 - Write Barrier - Code that is executed before writing to an object.
+
+# Code
+
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The implementation code is available in this repository:
+
+- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
+- [`gc.c`](../gc.c) contains the major GC code.
 
 # Data Structures
 
