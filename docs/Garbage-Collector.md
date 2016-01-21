@@ -241,7 +241,7 @@ Limitations or potential issues:
 
 - Heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
 
-> instead of copying objects to evacuate fragmented regions of the heap, fragmentation is instead embraced. A fragmented heap is allowed to stay fragmented, but the collector ensures that it can still satisfy allocation requests even if no large enough contiguous free region of space exists.
+    > instead of copying objects to evacuate fragmented regions of the heap, fragmentation is instead embraced. A fragmented heap is allowed to stay fragmented, but the collector ensures that it can still satisfy allocation requests even if no large enough contiguous free region of space exists.
 
 - Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
 - There is probably too much heap locking going on, and this could be an issue for a large heap and/or a large number of mutators. Improvements can likely be made in this area.
