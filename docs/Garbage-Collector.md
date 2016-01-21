@@ -24,6 +24,8 @@
 
 Cyclone uses generational garbage collection (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. Our generational collector performs two types of collection. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
+TODO: mention goals of GC? native thread support, language featurs: tail calls/continuations?? not really directly supported because of GC though
+
 Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
@@ -78,7 +80,7 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 
 Mark buffers are used to hold gray objects instead of explicitly marking objects gray.
 
-Each mutator holds a mark buffer to hold their gray objects. A last write variable is used to keep track of the buffer size. There is also the concept of pending writes.
+Each mutator holds a mark buffer to hold their gray objects. A last write variable is used to keep track of the buffer size.
 
 The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal.
 pending writes
@@ -236,14 +238,17 @@ Motivations:
 - Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
 Limitations or potential issues:
-- DLG memory fragmentation could be an issue for long-running programs. either need a compaction process or a way to handle larger objects by breaking them up (pizlo phd)
-- Locking, atomics, etc
-- Improve performance?
-- handle large objects, need to be able to split them across pages
 
-Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
+- Heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
 
-quote on this? - first priority must be correctness, can address performance over time
+> instead of copying objects to evacuate fragmented regions of the heap, fragmentation is instead embraced. A fragmented heap is allowed to stay fragmented, but the collector ensures that it can still satisfy allocation requests even if no large enough contiguous free region of space exists.
+
+- Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
+- There is probably too much heap locking going on, and this could be an issue for a large heap and/or a large number of mutators. Improvements can likely be made in this area.
+
+Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
+
+TODO: should measure performance of Cyclone's collector, and improve it over time
 
 # Further Reading
 
