@@ -28,10 +28,9 @@ Baker's technique uses a copying collector for both the minor and major generati
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 # Terms
-- Collector - A dedicated thread coordinating and performing most of the work for major garbage collections.
-- Continuation Passing Style
+- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
-- Mutator - A thread running application code; there may be more than one mutator running concurrently.
+- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 - Root - The collector begins tracing by marking one or more of these objects. A root object is guaranteed to survive a collection cycle.
 - Write Barrier - Code that is executed before writing to an object.
