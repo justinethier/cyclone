@@ -10,6 +10,8 @@
   - [Thread Data](#thread-data)
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
+  - [Tri-color Marking](#tri-color-marking)
+  - [Handshakes](#handshakes)
   - [Collection Cycle](#collection-cycle)
   - [Collector Functions](#collector-functions)
   - [Mutator Functions](#mutator-functions)
@@ -72,8 +74,6 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 - Contents of the minor GC write barrier
 - Major GC parameters
 
-## TODO: anything else? mutator/collector mark lists? write barrier lists?
-
 # Minor Collection
 
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime the code periodically checks to see if the executing thread's stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
@@ -101,6 +101,8 @@ Finally, although not mentioned in Baker's paper, a heap object can be modified 
 
 A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
+## Tri-color Marking
+
 Each object is assigned a color to indicate the status of its memory:
 
 - Blue - Unallocated memory.
@@ -109,7 +111,15 @@ Each object is assigned a color to indicate the status of its memory:
 - Gray - Objects marked by the collector that may still have child objects that must be marked.
 - Black - Objects marked by the collector whose immediate child objects have also been marked.
 
-White is also referred to as the clear color and black as the mark color. Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
+Only objects marked as white, gray, and black participate in major collections:
+
+- White is also referred to as the clear color and black as the mark color. 
+- Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
+- Black objects survive the collection cycle.
+
+## Handshakes
+
+Instead of "stopping the world" and pausing all threads, when the collector needs to coordinate with the mutators it performs a handshake.
 
 Each of the mutator threads, and the collector itself, has a status variable:
 
@@ -118,7 +128,7 @@ Each of the mutator threads, and the collector itself, has a status variable:
                   , STATUS_SYNC2 
                   } gc_status_type;
 
-The collector performs a handshake with the mutators to change status. The collector will update its status variable and then wait for all of the collectors to change their status before continuing. The mutators periodically call a cooperate function to check in and update their status to match the collectors. A handshake is complete once all mutators have updated their status.
+The collector will update its status variable and then wait for all of the collectors to change their status before continuing. The mutators periodically call a cooperate function to check in and update their status to match the collectors. A handshake is complete once all mutators have updated their status.
 
 ## Collection Cycle
 
