@@ -11,8 +11,9 @@
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
   - [Collection Cycle](#collection-cycle)
+  - [Collector Functions](#collector-functions)
   - [Mutator Functions](#mutator-functions)
-  - [Cooperation](#cooperation)
+  - [Cooperation by the Collector](#cooperation-by-the-collector)
   - [Considerations](#considerations)
 - [Looking Ahead](#looking-ahead)
 - [Further Reading](#further-reading)
@@ -165,24 +166,22 @@ A write barrier is used to ensure any modified objects are properly marked for t
 
 ### Cooperate
 
-Each mutator is required to periodically call this function to cooperate with the collector. Cyclone does this after each minor GC.
-
-During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
+Each mutator is required to periodically call this function to cooperate with the collector. During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
 
 In addition, when a mutator transitions to async it will:
 
 - Mark all of its roots gray
 - Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
 
-## Cooperation
+Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's are frequent and immediately afterwards all of the mutator's live objects can be marked because they are on the heap.
 
-Unfortunately a mutator cannot cooperate with the collector if it is blocked. For example, a mutator could block forever waiting for user input reading from an I/O port.
+## Cooperation by the Collector
 
-TODO: explain how collector cooperates on behalf of a mutator.
+In practice a mutator will not always be able to cooperate in a timely manner. For example, a thread can block indefinitely waiting for user input or reading from a network port. In the meantime the collector will never be able to complete a handshake with this mutator, and major GC will never be performed.
 
-important to explain how minor/major algorithms are interleaved. EG:
+Cyclone solves this problem by requiring that a mutator let the collector know that it is (or could be) blocking. The mutator will call a function to update its thread state to `CYC_THREAD_STATE_BLOCKED`.
 
-thread states:
+With this information the collector can cooperate on behalf of a blocked mutator and do the work itself instead of waiting for the mutator. The possible thread states are:
 
     typedef enum { CYC_THREAD_STATE_NEW
                  , CYC_THREAD_STATE_RUNNABLE
@@ -191,10 +190,13 @@ thread states:
                  , CYC_THREAD_STATE_TERMINATED
                  } cyc_thread_state_type;
 
+By now you might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can they be marked gray and its allocation color can be flipped.
+
+When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator. If so, the mutator will perform a minor GC again to ensure any additional objects are moved to the heap - such as results from the blocking code - then it will `longjmp` back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
 
 ## Considerations
 
-Garbage collection papers are generally silent on when to actually start the collection cycle - presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
+Garbage collection papers are generally silent on when to start the collection cycle, presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
 # Looking Ahead
 
