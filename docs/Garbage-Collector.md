@@ -74,6 +74,17 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 - Contents of the minor GC write barrier
 - Major GC parameters
 
+## Mark Buffers
+
+Mark buffers are used to hold gray objects instead of explicitly marking objects gray.
+
+Each mutator holds a mark buffer to hold their gray objects. A last write variable is used to keep track of the buffer size. There is also the concept of pending writes.
+
+The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal.
+pending writes
+
+The collector also maintains a single mark stack of objects that the collector has marked gray.
+
 # Minor Collection
 
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime the code periodically checks to see if the executing thread's stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
@@ -107,15 +118,15 @@ Each object is assigned a color to indicate the status of its memory:
 
 - Blue - Unallocated memory.
 - Red - Objects on the stack.
-- White - Heap memory that has not been scanned by the collector. Memory that is still white after the collector finishes tracing is garbage.
+- White - Heap memory that has not been scanned by the collector. 
 - Gray - Objects marked by the collector that may still have child objects that must be marked.
 - Black - Objects marked by the collector whose immediate child objects have also been marked.
 
 Only objects marked as white, gray, and black participate in major collections:
 
-- White is also referred to as the clear color and black as the mark color. 
+- White objects are freed during the sweep state. White is sometimes also referred to as the clear color.
 - Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
-- Black objects survive the collection cycle.
+- Black objects survive the collection cycle. Black is sometimes referred to as the mark color as live objects are ultimately marked black.
 
 ## Handshakes
 
@@ -135,18 +146,18 @@ The collector will update its status variable and then wait for all of the colle
 During a GC cycle the collector thread transitions through the following states:
 
 ### Clear
-The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object. The collector then transitions to sync 1.
+The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1.
 
 ### Mark
 The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
 
 ### Trace
-The collector finds all live objects and marks them black.
+The collector finds all live objects using a breadth-first search and marks them black.
 
 ### Sweep
 The collector scans the heap and frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
 
-Any terminated threads will have their thread data freed now. ( TODO: Thread data is kept through the collection cycle to ... ensure live objects are not missed? double-check this)
+Also, to ensure a complete collection data for any terminated threads is not freed until now.
 
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
@@ -155,15 +166,19 @@ The collector cycle is complete and it rests until it is triggered again.
 
 ### Mark Gray
 
-TODO: data structure used instead of explicit marking, to improve performance
+Mutators call this function to add an object to their mark buffer.
 
 ### Collector Mark Gray
 
+The collector calls this function to add an object to the mark stack.
+
 ### Mark Black
+
+The collector calls this function to mark an object black and mark all of the object's children gray using Collector Mark Gray.
 
 ### Collector Trace
 
-TODO: needed? should this just be part of the collector trace section?
+This function performs tracing for the collector by looping over all of the mutator mark buffers. All of the remaining objects in each buffer are marked black, as well as all the remaining objects on the collector's mark stack. This function continues looping until there are no more objects to mark.
 
 ## Mutator Functions
 
