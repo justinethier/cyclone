@@ -38,7 +38,7 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 
 # Code
 
-The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The implementation code is available in this repository:
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The implementation code is available here:
 
 - [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
 - [`gc.c`](../gc.c) contains the major GC code.
