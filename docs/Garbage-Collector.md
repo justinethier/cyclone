@@ -20,11 +20,9 @@
 
 # Introduction
 
-Cyclone uses garbage collection (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. A generational collector is used to perform two types of collection. Cyclone performs minor GC frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less frequently to free longer-lived objects that are no longer being used by the application.
+Cyclone uses generational garbage collection (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. Our generational collector performs two types of collection. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
-
-Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is a problem when multiple threads are accessing shared objects; an object reference could become invalid at any time when GC relocates the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead, so instead another type of collector is used.
+Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
@@ -51,11 +49,15 @@ The implementation code is available here:
 
 ## Heap
 
-- based on implementation from chibi scheme
-- linked list of pages
-- requested memory always allocated in minimum chunk sizes
-- heap is locked during alloc and sweep (free)
-- heap is grown if necessary for alloc. collection process is async so no other choice (cannot collect immediately)
+Cyclone's heap is based on the implementation from chibi scheme. 
+
+The heap consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
+
+Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
+
+The heap is locked during allocation and sweep operations to protect against concurrent access.
+
+If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. There is no choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
 
 ## Thread Data
 
@@ -209,9 +211,10 @@ Motivations:
 - Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
 Limitations or potential issues:
-- DLG memory fragmentation could be an issue for long-running programs
+- DLG memory fragmentation could be an issue for long-running programs. either need a compaction process or a way to handle larger objects by breaking them up (pizlo phd)
 - Locking, atomics, etc
 - Improve performance?
+- handle large objects, need to be able to split them across pages
 
 Cyclone's implementation generally tries to use atomic operations, but there is some locking. In particular, heap is protected by lock during object allocation and deallocation. This is one area that could probably be improved.
 
