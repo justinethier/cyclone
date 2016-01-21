@@ -1248,6 +1248,9 @@ void gc_thread_data_free(gc_thread_data *thd)
 /**
  * Called explicitly from a mutator thread to let the collector know
  * it (may) block for an unknown period of time.
+ *
+ * The current continuation is required so that we can trace over it 
+ * in case the collector has to cooperate for the mutator.
  */
 void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
 {
