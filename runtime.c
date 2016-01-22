@@ -1249,15 +1249,12 @@ object Cyc_make_mutex(void *data) {
 object Cyc_mutex_lock(void *data, object cont, object obj) {
   mutex m = (mutex) obj;
   Cyc_check_mutex(data, obj);
-  gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+  set_thread_blocked(data, cont);
   if (pthread_mutex_lock(&(m->lock)) != 0) {
     fprintf(stderr, "Error locking mutex\n");
     exit(1);
   }
-  gc_mutator_thread_runnable(
-    (gc_thread_data *)data, 
-    boolean_t);
-  return boolean_t;
+  return_thread_runnable(data, boolean_t);
 }
 
 object Cyc_mutex_unlock(void *data, object obj) {
@@ -1546,14 +1543,9 @@ object Cyc_io_read_char(void *data, object cont, object port) {
     int c;
     Cyc_check_port(data, port);
     {
-        gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+        set_thread_blocked(data, cont);
         c = fgetc(((port_type *) port)->fp);
-        gc_mutator_thread_runnable(
-          (gc_thread_data *)data, 
-          (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
-        if (c != EOF) {
-            return obj_char2obj(c);
-        }
+        return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
     }
     return Cyc_EOF;
 }
@@ -1564,18 +1556,16 @@ object Cyc_io_read_line(void *data, object cont, object port) {
   char buf[1024];
   int i = 0, c;
   
-  gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+  set_thread_blocked(data, cont);
   while (1) {
     c = fgetc(stream);
     if (c == EOF && i == 0) {
-      gc_mutator_thread_runnable((gc_thread_data *)data, Cyc_EOF);
-      return_closcall1(data, cont, Cyc_EOF);
+      return_thread_runnable(data, Cyc_EOF);
     } else if (c == EOF || i == 1023 || c == '\n') {
       buf[i] = '\0';
       {
         make_string(s, buf);
-        gc_mutator_thread_runnable((gc_thread_data *)data, &s);
-        return_closcall1(data, cont, &s);
+        return_thread_runnable(data, &s);
       }
     }
 
@@ -1591,15 +1581,10 @@ object Cyc_io_peek_char(void *data, object cont, object port) {
     Cyc_check_port(data, port);
     {
         stream = ((port_type *) port)->fp;
-        gc_mutator_thread_blocked((gc_thread_data *)data, cont);
+        set_thread_blocked(data, cont);
         c = fgetc(stream);
         ungetc(c, stream);
-        gc_mutator_thread_runnable(
-          (gc_thread_data *)data, 
-          (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
-        if (c != EOF) {
-            return obj_char2obj(c);
-        }
+        return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
     }
     return Cyc_EOF;
 }
