@@ -8,6 +8,8 @@
 - [Data Structures](#data-structures)
   - [Heap](#heap)
   - [Thread Data](#thread-data)
+  - [Object Header](#object-header)
+  - [Mark Buffers](#mark-buffers)
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
   - [Tri-color Marking](#tri-color-marking)
@@ -88,7 +90,7 @@ Each object contains a header with the following information:
   - Red - Objects on the stack.
   - White - Heap memory that has not been scanned by the collector. 
   - Gray - Objects marked by the collector that may still have child objects that must be marked.
-- Black - Objects marked by the collector whose immediate child objects have also been marked.
+  - Black - Objects marked by the collector whose immediate child objects have also been marked.
 - Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet. This is only applicable for objects on the stack.
 
 ## Mark Buffers
@@ -121,6 +123,8 @@ A minor collection is always performed for a single mutator thread, usually by t
 - Loop over the "to-space" buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
+
+Any objects left on the stack after `longjmp` are considered garbage. There is no need to clean them up because the stack will just re-use the memory as it grows.
 
 Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
