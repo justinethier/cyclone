@@ -286,11 +286,12 @@ Garbage collection papers are generally silent on when to start the collection c
 
 # Looking Ahead
 
-Motivations: 
+The garbage collector is by far the most complex component of Cyclone. The primary motivations in developing it were to:
+
 - Extend baker's approach to support multiple mutators
 - Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
-Limitations or potential issues:
+Limitations or potential issues with the current implementation:
 
 - Heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
 
@@ -299,9 +300,9 @@ Limitations or potential issues:
 - Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
 - There is probably too much heap locking going on, and this could be an issue for a large heap and/or a large number of mutators. Improvements can likely be made in this area.
 
-Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
+Cyclone needs to be tested with large heap and large allocations. I believe it should work well for large heaps that do not allocate too many objects of irregular size. However, a program regularly allocating large strings or vectors could cause significant heap fragmentation over time.
 
-TODO: should measure performance of Cyclone's collector, and improve it over time
+Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
 
 # Further Reading
 
