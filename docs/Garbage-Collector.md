@@ -160,6 +160,8 @@ During a GC cycle the collector thread transitions through the following states:
 ### Clear
 The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1.
 
+<img src="images/gc-graph-clear.png" alt="Initial object graph">
+
 ### Mark
 The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
 
