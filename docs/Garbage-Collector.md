@@ -22,15 +22,17 @@
 
 # Introduction
 
-Cyclone uses generational garbage collection (GC) to automatically free allocated memory. In practice, most allocations consist of short-lived objects such as temporary variables. Our generational collector performs two types of collection. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection and remain in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The collector has the following requirements:
 
-TODO: mention goals of GC? native thread support, language featurs: tail calls/continuations?? not really directly supported because of GC though
+- Automatically free allocated memory.
+- Allow the language implementation to support tail calls and continuations.
+- Allow the language to support native multithreading.
+
+Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection because they are still referenced in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
 Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
-
-The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. 
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
@@ -53,8 +55,6 @@ The implementation code is available here:
 
 ## Heap
 
-Cyclone's heap is based on the implementation from chibi scheme. 
-
 The heap consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
 
 Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
@@ -62,6 +62,8 @@ Memory is always allocated in multiples of 32 bytes. On the one hand this helps 
 The heap is locked during allocation and sweep operations to protect against concurrent access.
 
 If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. There is no choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
+
+Cyclone's heap is based on the implementation from chibi scheme. 
 
 ## Thread Data
 
@@ -76,16 +78,28 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 - Contents of the minor GC write barrier
 - Major GC parameters
 
+## Object Header
+
+Each object contains a header with the following information:
+
+- Tag - A number indicating the object type: cons, vector, string, etc.
+- Mark - The status of the object's memory. Possible values are:
+  - Blue - Unallocated memory.
+  - Red - Objects on the stack.
+  - White - Heap memory that has not been scanned by the collector. 
+  - Gray - Objects marked by the collector that may still have child objects that must be marked.
+- Black - Objects marked by the collector whose immediate child objects have also been marked.
+- Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet. This is only applicable for objects on the stack.
+
 ## Mark Buffers
 
-Mark buffers are used to hold gray objects instead of explicitly marking objects gray.
+Mark buffers are used to hold gray objects instead of explicitly marking objects gray. Each mutator has a reference to a mark buffer holding their gray objects. A last write variable is used to keep track of the buffer size.
 
-Each mutator holds a mark buffer to hold their gray objects. A last write variable is used to keep track of the buffer size.
+The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal. The collector also maintains a single mark stack of objects that the collector has marked gray.
 
-The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal.
-pending writes
+These mark buffers consist of fixed-size pointer arrays that are increased in size as necessary using `realloc`.
 
-The collector also maintains a single mark stack of objects that the collector has marked gray.
+Finally, an object on the stack cannot be added to a mark buffer because the reference may become invalid before it can be processed by the collector.
 
 # Minor Collection
 
@@ -115,14 +129,6 @@ Finally, although not mentioned in Baker's paper, a heap object can be modified 
 A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
 ## Tri-color Marking
-
-Each object is assigned a color to indicate the status of its memory:
-
-- Blue - Unallocated memory.
-- Red - Objects on the stack.
-- White - Heap memory that has not been scanned by the collector. 
-- Gray - Objects marked by the collector that may still have child objects that must be marked.
-- Black - Objects marked by the collector whose immediate child objects have also been marked.
 
 Only objects marked as white, gray, and black participate in major collections:
 
