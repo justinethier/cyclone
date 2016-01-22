@@ -208,7 +208,7 @@ In addition when a mutator transitions to async it will:
 
 Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's are frequent and immediately afterwards all of the mutator's live objects can be marked because they are on the heap.
 
-## Mark Gray
+### Mark Gray
 
 Mutators call this function to add an object to their mark buffer.
 
@@ -238,7 +238,7 @@ The collector calls this function to mark an object black and mark all of the ob
         mark(obj) = mark_color
 
 
-## Empty Collector Mark Stack
+### Empty Collector Mark Stack
 
 This function removes and marks each object on the collector's mark stack.
 
