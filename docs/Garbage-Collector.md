@@ -165,13 +165,19 @@ The collector swaps the values of the clear color (white) and the mark color (bl
 ### Mark
 The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
 
+<img src="images/gc-graph-mark.png" alt="Initial object graph">
+
 ### Trace
 The collector finds all live objects using a breadth-first search and marks them black.
+
+<img src="images/gc-graph-trace.png" alt="Initial object graph">
 
 ### Sweep
 The collector scans the heap and frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
 
 Also, to ensure a complete collection data for any terminated threads is not freed until now.
+
+<img src="images/gc-graph-sweep.png" alt="Initial object graph">
 
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
