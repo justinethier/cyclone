@@ -15,8 +15,8 @@
   - [Tri-color Marking](#tri-color-marking)
   - [Handshakes](#handshakes)
   - [Collection Cycle](#collection-cycle)
-  - [Collector Functions](#collector-functions)
   - [Mutator Functions](#mutator-functions)
+  - [Collector Functions](#collector-functions)
   - [Cooperation by the Collector](#cooperation-by-the-collector)
   - [Other Considerations](#other-considerations)
 - [Looking Ahead](#looking-ahead)
@@ -182,9 +182,33 @@ If the heap is still low on memory at this point the heap will be increased in s
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
 
-## Collector Functions
+## Mutator Functions
 
-### Mark Gray
+Each mutator calls the following functions to coordinate with the collector.
+
+### Create
+
+This function is called by a mutator to allocate memory on the heap for an object. This is generally only done during a minor GC when each object is relocated to the heap.
+
+### Update
+
+A write barrier is used to ensure any modified objects are properly marked for the current collection cycle. There are two cases:
+
+- Gray the object's new and old values if the mutator is in a synchronous status. Graying of the new value is a special case since it may still be on the stack. Instead of marking it directly, the object is tagged to be grayed when it is relocated to the heap.
+- Gray the object's old value if the collector is in the tracing stage.
+
+### Cooperate
+
+Each mutator is required to periodically call this function to cooperate with the collector. During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
+
+In addition when a mutator transitions to async it will:
+
+- Mark all of its roots gray
+- Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
+
+Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's are frequent and immediately afterwards all of the mutator's live objects can be marked because they are on the heap.
+
+## Mark Gray
 
 Mutators call this function to add an object to their mark buffer.
 
@@ -192,6 +216,8 @@ Mutators call this function to add an object to their mark buffer.
       if obj != clear_color:
         m->mark_buffer[m->last_write]
         m->last_write++
+
+## Collector Functions
 
 ### Collector Mark Gray
 
@@ -224,7 +250,7 @@ This function removes and marks each object on the collector's mark stack.
 
 This function performs tracing for the collector by looping over all of the mutator mark buffers. All of the remaining objects in each buffer are marked black, as well as all the remaining objects on the collector's mark stack. This function continues looping until there are no more objects to mark:
 
-    collector_trace:
+    collector_trace():
       clean = 0
       while not clean:
         clean = 1
@@ -234,32 +260,6 @@ This function performs tracing for the collector by looping over all of the muta
             mark_black(m->mark_buffer[m->last_read])
             empty_collector_mark_stack()
             m->last_read++
-
-## Mutator Functions
-
-Each mutator calls the following functions to coordinate with the collector.
-
-### Create
-
-This function is called by a mutator to allocate memory on the heap for an object. This is generally only done during a minor GC when each object is relocated to the heap.
-
-### Update
-
-A write barrier is used to ensure any modified objects are properly marked for the current collection cycle. There are two cases:
-
-- Gray the object's new and old values if the mutator is in a synchronous status. Graying of the new value is a special case since it may still be on the stack. Instead of marking it directly, the object is tagged to be grayed when it is relocated to the heap.
-- Gray the object's old value if the collector is in the tracing stage.
-
-### Cooperate
-
-Each mutator is required to periodically call this function to cooperate with the collector. During cooperation a mutator will update its status to match the collector's status, to handshake with the collector. 
-
-In addition when a mutator transitions to async it will:
-
-- Mark all of its roots gray
-- Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
-
-Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's are frequent and immediately afterwards all of the mutator's live objects can be marked because they are on the heap.
 
 ## Cooperation by the Collector
 
