@@ -158,26 +158,26 @@ The collector will update its status variable and then wait for all of the colle
 During a GC cycle the collector thread transitions through the following states:
 
 ### Clear
-The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1.
+The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1. At this point no heap objects are marked, as demonstrated below:
 
 <img src="images/gc-graph-clear.png" alt="Initial object graph">
 
 ### Mark
-The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async.
+The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async:
 
 <img src="images/gc-graph-mark.png" alt="Initial object graph">
 
 ### Trace
-The collector finds all live objects using a breadth-first search and marks them black.
+The collector finds all live objects using a breadth-first search and marks them black:
 
 <img src="images/gc-graph-trace.png" alt="Initial object graph">
 
 ### Sweep
-The collector scans the heap and frees memory used by all white objects. If the heap is still low on memory at this point the heap will be increased in size.
-
-Also, to ensure a complete collection data for any terminated threads is not freed until now.
+The collector scans the heap and frees memory used by all white objects:
 
 <img src="images/gc-graph-sweep.png" alt="Initial object graph">
+
+If the heap is still low on memory at this point the heap will be increased in size. Also, to ensure a complete collection data for any terminated threads is not freed until now.
 
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
