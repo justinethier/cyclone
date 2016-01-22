@@ -188,27 +188,52 @@ The collector cycle is complete and it rests until it is triggered again.
 
 Mutators call this function to add an object to their mark buffer.
 
+    mark_gray(m, obj):
+      if obj != clear_color:
+        m->mark_buffer[m->last_write]
+        m->last_write++
+
 ### Collector Mark Gray
 
 The collector calls this function to add an object to the mark stack.
+
+    collector_mark_gray(obj):
+      if obj != clear_color:
+        mark_stack->push(obj)
 
 ### Mark Black
 
 The collector calls this function to mark an object black and mark all of the object's children gray using Collector Mark Gray.
 
+    mark_black(obj):
+      if mark(obj) != mark_color:
+        for each child(c):
+          collector_mark_gray(c)
+        mark(obj) = mark_color
+
+
+## Empty Collector Mark Stack
+
+This function removes and marks each object on the collector's mark stack.
+
+    empty_collector_mark_stack():
+      while not mark_stack->empty()
+        mark_black(mark_stack->pop())
+
 ### Collector Trace
 
 This function performs tracing for the collector by looping over all of the mutator mark buffers. All of the remaining objects in each buffer are marked black, as well as all the remaining objects on the collector's mark stack. This function continues looping until there are no more objects to mark:
 
-    clean = 0
-    while not clean:
-      clean = 1
-      for each mutator(m):
-        while m->last_read < m->last_write:
-          clean = 0
-          mark_black(m->mark_buffer[m->last_read])
-          empty_collector_mark_stack()
-          m->last_read++
+    collector_trace:
+      clean = 0
+      while not clean:
+        clean = 1
+        for each mutator(m):
+          while m->last_read < m->last_write:
+            clean = 0
+            mark_black(m->mark_buffer[m->last_read])
+            empty_collector_mark_stack()
+            m->last_read++
 
 ## Mutator Functions
 
