@@ -429,7 +429,7 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont);
 void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (r))
-#define return_runnable(d, r) \
+#define return_thread_runnable(d, r) \
   gc_mutator_thread_runnable(((gc_thread_data *)d), (r))
 gc_heap *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
