@@ -155,7 +155,7 @@ The collector will update its status variable and then wait for all of the colle
 
 ## Collection Cycle
 
-During a GC cycle the collector thread transitions through the following states:
+During a GC cycle the collector thread transitions through the following states.
 
 ### Clear
 The collector swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1. At this point no heap objects are marked, as demonstrated below:
@@ -198,7 +198,17 @@ The collector calls this function to mark an object black and mark all of the ob
 
 ### Collector Trace
 
-This function performs tracing for the collector by looping over all of the mutator mark buffers. All of the remaining objects in each buffer are marked black, as well as all the remaining objects on the collector's mark stack. This function continues looping until there are no more objects to mark.
+This function performs tracing for the collector by looping over all of the mutator mark buffers. All of the remaining objects in each buffer are marked black, as well as all the remaining objects on the collector's mark stack. This function continues looping until there are no more objects to mark:
+
+    clean = 0
+    while not clean:
+      clean = 1
+      for each mutator(m):
+        while m->last_read < m->last_write:
+          clean = 0
+          mark_black(m->mark_buffer[m->last_read])
+          empty_collector_mark_stack()
+          m->last_read++
 
 ## Mutator Functions
 
