@@ -83,6 +83,16 @@ object Cyc_global_set(void *thd, object *glo, object value);
     } \
   }
 
+#define return_inexact_double_op(data, cont, OP, z) \
+  make_double(d, 0.0); \
+  Cyc_check_num(data, z); \
+  if (type_of(z) == integer_tag) { \
+    d.value = OP(((integer_type *)z)->value); \
+  } else { \
+    d.value = OP(((double_type *)z)->value); \
+  } \
+  return_closcall1(data, cont, &d)
+
 /* Prototypes for primitive functions. */
 
 extern object Cyc_global_variables;

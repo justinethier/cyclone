@@ -15,6 +15,7 @@ SMODULES = \
   scheme/eval \
   scheme/file \
   scheme/load \
+  scheme/inexact \
   scheme/process-context \
   scheme/read \
   scheme/time \
@@ -82,6 +83,7 @@ bootstrap: icyc
 	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/eval.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/file.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/inexact.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/load.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/process-context.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/time.c $(BOOTSTRAP_DIR)/scheme
