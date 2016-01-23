@@ -69,16 +69,18 @@ Cyclone's heap is based on the implementation from chibi scheme.
 
 ## Thread Data
 
-At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The thread data contains all of the necessary information to perform collections, including:
+At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. Thread data is a structure that contains all of the necessary information to perform collections, including:
 
 - Thread state
 - Stack boundaries
 - Current continuation and arguments
 - Jump buffer
+- List of mutated objects detected by the minor GC write barrier
+- Major GC parameters - mark buffer, last read/write, etc (see next sections)
 - Call history buffer
 - Exception handler stack
-- Contents of the minor GC write barrier
-- Major GC parameters
+
+Each thread has its own instance of the thread data structure and its own stack (assigned by the C runtime/compiler).
 
 ## Object Header
 
@@ -105,7 +107,7 @@ Finally, an object on the stack cannot be added to a mark buffer because the ref
 
 # Minor Collection
 
-Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime the code periodically checks to see if the executing thread's stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
+Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
 Root objects are "live" objects the collector uses to begin the tracing process. Cyclone's minor collector treats the following as roots:
 
@@ -115,7 +117,7 @@ Root objects are "live" objects the collector uses to begin the tracing process.
 - Closures from the exception stack
 - Global variables
 
-A minor collection is always performed for a single mutator thread, usually by the thread itself. The algorithm is based on Cheney on the MTA and consists of the following:
+A minor collection is always performed for a single mutator thread, usually by the thread itself. The algorithm is based on Cheney on the MTA:
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
@@ -126,7 +128,7 @@ A minor collection is always performed for a single mutator thread, usually by t
 
 Any objects left on the stack after `longjmp` are considered garbage. There is no need to clean them up because the stack will just re-use the memory as it grows.
 
-Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC. We account for these "mutations" by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
+Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC, and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
 
 # Major Collection
 
@@ -276,9 +278,9 @@ With this information the collector can cooperate on behalf of a blocked mutator
                  , CYC_THREAD_STATE_TERMINATED
                  } cyc_thread_state_type;
 
-By now you might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can then be marked gray and its allocation color can be flipped.
+You might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can then be marked gray and its allocation color can be flipped.
 
-When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator. If so, the mutator will perform a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap then it will `longjmp` back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
+When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator by checking if its status is `CYC_THREAD_STATE_BLOCKED_COOPERATING`. If so, the mutator will perform a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap before calling `longjmp` to jump back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
 
 ## Other Considerations
 
