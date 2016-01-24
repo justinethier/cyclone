@@ -165,6 +165,19 @@ The arguments to `define-c` are:
   - `k` - Current continuation, typically the code will call into `k` with a result.
 - A string containing the C function body. Remember that runtime functions are not allowed to return. In the example above, the `return_closcall1` macro is used to "return" a newly-allocated list to the current continuation.
 
+Functions that may block must call the `set_thread_blocked` macro to let the system know the thread may block. After the blocking section is finished, the `return_thread_runnable` macro must be called to recover from the blocking operation and call into the current continuation. For example:
+
+    object Cyc_mutex_lock(void *data, object cont, object obj) {
+      mutex m = (mutex) obj;
+      Cyc_check_mutex(data, obj);
+      set_thread_blocked(data, cont);
+      if (pthread_mutex_lock(&(m->lock)) != 0) {
+        fprintf(stderr, "Error locking mutex\n");
+        exit(1);
+      }
+      return_thread_runnable(data, boolean_t);
+    }
+
 The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
 
 # Licensing
