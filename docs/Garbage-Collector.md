@@ -26,7 +26,7 @@
 
 The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The collector has the following requirements:
 
-- Automatically free allocated memory.
+- Efficiently free allocated memory.
 - Allow the language implementation to support tail calls and continuations.
 - Allow the language to support native multithreading.
 
@@ -59,13 +59,13 @@ The implementation code is available here:
 
 The heap consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
 
-Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
+Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
 
 The heap is locked during allocation and sweep operations to protect against concurrent access.
 
-If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. There is no choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
+If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. This is the only choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
 
-Cyclone's heap is based on the implementation from chibi scheme. 
+Cyclone's heap is based on the implementation from Chibi scheme. 
 
 ## Thread Data
 
@@ -97,19 +97,17 @@ Each object contains a header with the following information:
 
 ## Mark Buffers
 
-Mark buffers are used to hold gray objects instead of explicitly marking objects gray. Each mutator has a reference to a mark buffer holding their gray objects. A last write variable is used to keep track of the buffer size.
+Mark buffers are used to hold gray objects instead of explicitly marking objects gray. These mark buffers consist of fixed-size pointer arrays that are increased in size as necessary using `realloc`.  Each mutator has a reference to a mark buffer holding their gray objects. A last write variable is used to keep track of the buffer size.
 
 The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal. The collector also maintains a single mark stack of objects that the collector has marked gray.
 
-These mark buffers consist of fixed-size pointer arrays that are increased in size as necessary using `realloc`.
-
-Finally, an object on the stack cannot be added to a mark buffer because the reference may become invalid before it can be processed by the collector.
+An object on the stack cannot be added to a mark buffer because the reference may become invalid before it can be processed by the collector.
 
 # Minor Collection
 
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
-Root objects are "live" objects the collector uses to begin the tracing process. Cyclone's minor collector treats the following as roots:
+Root objects are live objects the collector uses to begin the tracing process. Cyclone's minor collector treats the following as roots:
 
 - The current continuation
 - Arguments to the current continuation
@@ -121,8 +119,8 @@ A minor collection is always performed for a single mutator thread, usually by t
 
 - Move any root objects on the stack to the heap. 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
-  - Record each moved object in a buffer to serve as the Cheney "to-space".
-- Loop over the "to-space" buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
+  - Record each moved object in a buffer to serve as the Cheney to-space.
+- Loop over the to-space buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
 - Cooperate with the collection thread (see next section).
 - Perform a `longjmp` to reset the stack and call into the current continuation.
 
@@ -136,7 +134,7 @@ A single heap is used to store objects relocated from the various thread stacks.
 
 ## Tri-color Marking
 
-Only objects marked as white, gray, and black participate in major collections:
+Only objects marked as white, gray, or black participate in major collections:
 
 - White objects are freed during the sweep state. White is sometimes also referred to as the clear color.
 - Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
@@ -144,7 +142,7 @@ Only objects marked as white, gray, and black participate in major collections:
 
 ## Handshakes
 
-Instead of "stopping the world" and pausing all threads, when the collector needs to coordinate with the mutators it performs a handshake.
+Instead of stopping the world and pausing all threads, when the collector needs to coordinate with the mutators it performs a handshake.
 
 Each of the mutator threads, and the collector itself, has a status variable:
 
@@ -245,7 +243,7 @@ The collector calls this function to mark an object black and mark all of the ob
 This function removes and marks each object on the collector's mark stack.
 
     empty_collector_mark_stack():
-      while not mark_stack->empty()
+      while not mark_stack->empty():
         mark_black(mark_stack->pop())
 
 ### Collector Trace
