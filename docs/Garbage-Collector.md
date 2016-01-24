@@ -306,6 +306,7 @@ Ultimately, a garbage collector is tricky to implement and the focus must primar
 
 # Further Reading
 
+- [Chibi-Scheme](https://github.com/ashinn/chibi-scheme)
 - [CHICKEN internals: the garbage collector](http://www.more-magic.net/posts/internals-gc.html), by Peter Bex
 - [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
 - Fragmentation Tolerant Real Time Garbage Collection (PhD Dissertation), by Filip Pizlo
