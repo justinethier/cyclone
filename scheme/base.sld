@@ -96,6 +96,8 @@
     ceiling
     truncate
     round
+    exact
+    inexact
   )
   (begin
     ;; Features implemented by this Scheme
@@ -664,4 +666,8 @@
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, round, z); ")
+  (define exact truncate)
+  (define-c inexact
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_inexact_double_op(data, k, (double), z); ")
 ))
