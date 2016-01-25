@@ -12,6 +12,7 @@ BOOTSTRAP_DIR = ../cyclone-bootstrap
 SMODULES = \
   scheme/base \
   scheme/char \
+  scheme/cxr \
   scheme/eval \
   scheme/file \
   scheme/load \
@@ -78,6 +79,7 @@ bootstrap: icyc
 	cp gc.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
 	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/cxr.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/read.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/write.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
