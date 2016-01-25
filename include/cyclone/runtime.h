@@ -93,6 +93,16 @@ object Cyc_global_set(void *thd, object *glo, object value);
   } \
   return_closcall1(data, cont, &d)
 
+#define return_exact_double_op(data, cont, OP, z) \
+  make_int(i, 0); \
+  Cyc_check_num(data, z); \
+  if (type_of(z) == integer_tag) { \
+    i.value = (int)OP(((integer_type *)z)->value); \
+  } else { \
+    i.value = (int)OP(((double_type *)z)->value); \
+  } \
+  return_closcall1(data, cont, &i)
+
 /* Prototypes for primitive functions. */
 
 extern object Cyc_global_variables;

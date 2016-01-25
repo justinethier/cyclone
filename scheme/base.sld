@@ -92,6 +92,10 @@
     cond-expand
     when
     quasiquote
+    floor
+    ceiling
+    truncate
+    round
   )
   (begin
     ;; Features implemented by this Scheme
@@ -648,4 +652,16 @@
           (else 
              #f))))
 
+  (define-c floor
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_exact_double_op(data, k, floor, z); ")
+  (define-c ceiling
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_exact_double_op(data, k, ceil, z); ")
+  (define-c truncate
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_exact_double_op(data, k, (int), z); ")
+  (define-c round
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_exact_double_op(data, k, round, z); ")
 ))
