@@ -314,19 +314,36 @@
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
     ;; TODO: this is from r7rs, but is not really good enough by itself
-    (define (values . things)
-      (call/cc
-        (lambda (cont) (apply cont things))))
+    ;(define (values . things)
+    ;  (call/cc
+    ;    (lambda (cont) (apply cont things))))
+    (define values 
+      (lambda args
+        (if (and (not (null? args)) (null? (cdr args)))
+            (car args)
+            (cons (cons 'multiple 'values) args)))) 
     ;; TODO: just need something good enough for bootstrapping (for now)
     ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
+;    (define call-with-values
+;      (lambda (producer consumer)
+;        (let ((x (producer)))
+;          (if ;(magic? x)
+;              (and (pair? x) (equal? (car x) (cons 'multiple 'values)))
+;              (apply consumer (cdr x))
+;              (consumer x)))))
+
     (define (dynamic-wind before thunk after)
       (before)
-      (call-with-values
-        thunk
-        (lambda (result) ;results
-          (after)
-          result)))
+      (let ((result (thunk)))
+        (after)
+        result)
+      ;(call-with-values
+      ;  thunk
+      ;  (lambda (result) ;results
+      ;    (after)
+      ;    result)))
           ;(apply values results))))
+    )
     (define (call-with-port port proc)
       (let ((result (proc port)))
         (close-port port)

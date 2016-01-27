@@ -151,17 +151,22 @@
                    input-program)))
         (cond
          ((and library? (equal? lib-name '(scheme base)))
-           (set! globals (append '(call-with-values call/cc) globals))
-           (set! module-globals (append '(call-with-values call/cc) module-globals))
+           (set! globals (append '(call/cc) globals))
+           (set! module-globals (append '(call/cc) module-globals))
            (set! input-program 
-             (cons
-              ;; Experimental version of call-with-values,
-              ;; seems OK in compiler but not in eval.
-              '(define call-with-values
-                (lambda (k producer consumer)
-                  (producer 
-                    (lambda (result)
-                      (consumer k result)))))
+             ;(cons
+             ; ;; Experimental version of call-with-values,
+             ; ;; seems OK in compiler but not in eval.
+             ; '(define call-with-values
+             ;   (lambda (k producer consumer)
+             ;     (let ((x (producer)))
+             ;       (if (and (pair? x) (equal? '(multiple values) (car x)))
+             ;         (apply consumer (cdr x))
+             ;         (consumer k x))))
+             ;   ;  (producer 
+             ;   ;    (lambda (result)
+             ;   ;      (consumer k result))))
+             ;   )
                     ;; multiple args requires more than just this.
                     ;; may want to look at:
                     ;; http://stackoverflow.com/questions/16674214/how-to-implement-call-with-values-to-match-the-values-example-in-r5rs
@@ -173,7 +178,7 @@
                ;; TODO: will this cause issues if another var is assigned to call/cc?
                '(define call/cc
                  (lambda (k f) (f k (lambda (_ result) (k result)))))
-                cps))))
+                cps)));)
          (else
            ;; No need for call/cc yet
            (set! input-program cps))))

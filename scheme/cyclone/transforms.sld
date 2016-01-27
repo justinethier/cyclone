@@ -136,7 +136,7 @@
 (define *defined-macros* (list))
 
 (define (built-in-syms)
-  '(call-with-values call/cc define))
+  '(call/cc define))
 
 ;; Tuning
 (define *do-code-gen* #t) ; Generate C code?
