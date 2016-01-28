@@ -7,6 +7,10 @@
     max
     min
     modulo
+    floor-remainder
+    even?
+;    exact-integer?
+    odd?
     call-with-current-continuation
     call/cc
     call-with-values
@@ -100,6 +104,7 @@
     round
     exact
     inexact
+
 ;;;;
 ; Possibly missing functions:
 ;
@@ -122,7 +127,6 @@
 ;    ;error-object?
 ;    ;file-error?
 ;    ;floor-quotient
-;    ;floor-remainder
 ;    ;floor/
 ;    ;guard
 ;    ;import
@@ -172,9 +176,7 @@
 ;    eq?
 ;    equal?
 ;    eqv?
-;    even?
 ;    exact-integer-sqrt
-;    exact-integer?
 ;    exact?
 ;    expt
 ;    foldl
@@ -201,7 +203,6 @@
 ;    number->string
 ;    number?
 ;    numerator
-;    odd?
 ;    open-input-bytevector
 ;    open-input-string
 ;    open-output-bytevector
@@ -863,6 +864,11 @@
         make_int(result, i % j);
         return_closcall1(data, k, &result); 
       }")
+  (define floor-remainder modulo)
+  (define (odd? num)   (= (modulo num 2) 1))
+  (define (even? num)  (= (modulo num 2) 0))
+; TODO:  (define (exact-integer? num)
+; TODO:    (and (exact? num) (integer? num)))
   (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
   (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
 ))
