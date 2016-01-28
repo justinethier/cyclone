@@ -3,13 +3,15 @@
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
+    abs
+    max
+    min
+    modulo
     call-with-current-continuation
     call/cc
     call-with-values
     dynamic-wind
     values
-    ;(Cyc-bin-op cmp x lst)
-    ;(Cyc-bin-op-char cmp c cs)
     char=?
     char<?
     char>?
@@ -98,6 +100,151 @@
     round
     exact
     inexact
+;;;;
+; Possibly missing functions:
+;
+;    ; TODO: error-object-irritants
+;    ; TODO: error-object-message
+;    ; TODO: error-object?
+;    ; TODO: file-error?
+;    ; TODO: read-error?
+;    ;(Cyc-bin-op cmp x lst)
+;    ;(Cyc-bin-op-char cmp c cs)
+;    ;=>
+;    ;bytevector-u8-set!
+;    ;current-error-port
+;    ;define
+;    ;define-syntax
+;    ;define-values
+;    ;else
+;    ;error-object-irritants
+;    ;error-object-message
+;    ;error-object?
+;    ;file-error?
+;    ;floor-quotient
+;    ;floor-remainder
+;    ;floor/
+;    ;guard
+;    ;import
+;    ;include-ci
+;    ;let-syntax
+;    ;letrec-syntax
+;    ;list-set!
+;    ;peek-u8
+;    ;port?
+;    ;raise
+;    ;raise-continuable
+;    ;read-bytevector!
+;    ;read-error?
+;    ;read-u8
+;    ;string-set!
+;    ;symbol=?
+;    ;syntax-rules
+;    ;truncate-quotient
+;    ;truncate-remainder
+;    ;truncate/
+;    ;u8-ready?
+;    ;unquote
+;    ;unquote-splicing
+;    ;write-u8
+;    apply
+;    binary-port?
+;    boolean?
+;    bytevector
+;    bytevector-append
+;    bytevector-copy
+;    bytevector-copy!
+;    bytevector-length
+;    bytevector-u8-ref
+;    bytevector?
+;    char->integer
+;    char-ready?
+;    close-input-port
+;    close-output-port
+;    close-port
+;    complex?
+;    current-error-port
+;    define-record-type
+;    denominator
+;    do
+;    eof-object
+;    eof-object?
+;    eq?
+;    equal?
+;    eqv?
+;    even?
+;    exact-integer-sqrt
+;    exact-integer?
+;    exact?
+;    expt
+;    foldl
+;    foldr
+;    gcd
+;    get-output-bytevector
+;    get-output-string
+;    include
+;    inexact?
+;    input-port-open?
+;    input-port?
+;    integer->char
+;    integer?
+;    lcm
+;    length
+;    let*-values
+;    let-values
+;    letrec*
+;    list->string
+;    list->vector
+;    list-set!
+;    make-bytevector
+;    make-vector
+;    number->string
+;    number?
+;    numerator
+;    odd?
+;    open-input-bytevector
+;    open-input-string
+;    open-output-bytevector
+;    open-output-string
+;    output-port-open?
+;    output-port?
+;    pair?
+;    parameterize
+;    peek-char
+;    procedure?
+;    quotient
+;    raise
+;    raise-continuable
+;    rational?
+;    rationalize
+;    read-bytevector
+;    read-char
+;    read-string
+;    real?
+;    record?
+;    remainder
+;    square
+;    string->number
+;    string->symbol
+;    string->utf8
+;    string-append
+;    string-length
+;    string-ref
+;    string?
+;    substring
+;    symbol->string
+;    symbol=?
+;    symbol?
+;    syntax-error
+;    textual-port?
+;    unless
+;    utf8->string
+;    vector-length
+;    vector-ref
+;    vector?
+;    write-bytevector
+;    write-string
+;;;;
   )
   (begin
     ;; Features implemented by this Scheme
@@ -322,16 +469,16 @@
         (if (and (not (null? args)) (null? (cdr args)))
             (car args)
             (cons (cons 'multiple 'values) args)))) 
-    (define call-with-values
-      (lambda (producer consumer)
-        (let ((x (producer)))
-          (if ;(magic? x)
-              (and (pair? x) (equal? (car x) (cons 'multiple 'values)))
-              (apply consumer (cdr x))
-              (consumer x)))))
-
     ;; TODO: just need something good enough for bootstrapping (for now)
     ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
+;    (define call-with-values
+;      (lambda (producer consumer)
+;        (let ((x (producer)))
+;          (if ;(magic? x)
+;              (and (pair? x) (equal? (car x) (cons 'multiple 'values)))
+;              (apply consumer (cdr x))
+;              (consumer x)))))
+
     (define (dynamic-wind before thunk after)
       (before)
       (let ((result (thunk)))
@@ -687,4 +834,35 @@
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
     " return_inexact_double_op(data, k, (double), z); ")
+  (define-c abs
+    "(void *data, int argc, closure _, object k, object num)"
+    " Cyc_check_num(data, num);
+      if (type_of(num) == integer_tag) {
+        make_int(i, abs(((integer_type *)num)->value));
+        return_closcall1(data, k, &i);
+      } else {
+        make_double(d, fabs(((double_type *)num)->value));
+        return_closcall1(data, k, &d);
+      } ")
+  (define-c modulo
+    "(void *data, int argc, closure _, object k, object num1, object num2)"
+    " int i, j;
+      Cyc_check_num(data, num1);
+      Cyc_check_num(data, num2);
+      if (type_of(num1) == integer_tag) { 
+        i = ((integer_type *)num1)->value; 
+      } else if (type_of(num1) == double_tag) { 
+        i = ((double_type *)num1)->value; 
+      }
+      if (type_of(num2) == integer_tag) { 
+        j = ((integer_type *)num2)->value; 
+      } else if (type_of(num2) == double_tag) { 
+        j = ((double_type *)num2)->value; 
+      }
+      {
+        make_int(result, i % j);
+        return_closcall1(data, k, &result); 
+      }")
+  (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
+  (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
 ))
