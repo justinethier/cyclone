@@ -322,16 +322,16 @@
         (if (and (not (null? args)) (null? (cdr args)))
             (car args)
             (cons (cons 'multiple 'values) args)))) 
+    (define call-with-values
+      (lambda (producer consumer)
+        (let ((x (producer)))
+          (if ;(magic? x)
+              (and (pair? x) (equal? (car x) (cons 'multiple 'values)))
+              (apply consumer (cdr x))
+              (consumer x)))))
+
     ;; TODO: just need something good enough for bootstrapping (for now)
     ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
-;    (define call-with-values
-;      (lambda (producer consumer)
-;        (let ((x (producer)))
-;          (if ;(magic? x)
-;              (and (pair? x) (equal? (car x) (cons 'multiple 'values)))
-;              (apply consumer (cdr x))
-;              (consumer x)))))
-
     (define (dynamic-wind before thunk after)
       (before)
       (let ((result (thunk)))
