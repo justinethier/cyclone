@@ -23,6 +23,8 @@
     floor-quotient 
     floor-remainder 
     floor/ 
+    square
+    expt
     call-with-current-continuation
     call/cc
     call-with-values
@@ -183,7 +185,6 @@
 ;    equal?
 ;    eqv?
 ;    exact-integer-sqrt
-;    expt
 ;    foldl
 ;    foldr
 ;    get-output-bytevector
@@ -226,7 +227,6 @@
 ;    real?
 ;    record?
 ;    remainder
-;    square
 ;    string->number
 ;    string->symbol
 ;    string->utf8
@@ -951,9 +951,16 @@
       (if (and (exact? n) (exact? m))
           (exact res)
           res)))
-  ;(define floor-remainder modulo)
   (define (floor-remainder n m)
     (- n (* m (floor-quotient n m))))
   (define (floor/ n m)
     (values (floor-quotient n m) (floor-remainder n m)))
+  (define (square z) (* z z))
+  (define-c expt
+    "(void *data, int argc, closure _, object k, object z1, object z2)"
+    " make_double(d, 0.0);
+      Cyc_check_num(data, z1);
+      Cyc_check_num(data, z2);
+      d.value = pow( unbox_number(z1), unbox_number(z2) );
+      return_closcall1(data, k, &d); ")
 ))

@@ -103,6 +103,11 @@ object Cyc_global_set(void *thd, object *glo, object value);
   } \
   return_closcall1(data, cont, &i)
 
+#define unbox_number(n) \
+  ((type_of(n) == integer_tag) ? \
+    ((integer_type *)n)->value : \
+    ((double_type *)n)->value)
+
 /* Prototypes for primitive functions. */
 
 extern object Cyc_global_variables;
