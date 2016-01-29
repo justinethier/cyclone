@@ -9,7 +9,9 @@
     modulo
     floor-remainder
     even?
-;    exact-integer?
+    exact-integer?
+    exact?
+    inexact?
     odd?
     call-with-current-continuation
     call/cc
@@ -177,7 +179,6 @@
 ;    equal?
 ;    eqv?
 ;    exact-integer-sqrt
-;    exact?
 ;    expt
 ;    foldl
 ;    foldr
@@ -185,7 +186,6 @@
 ;    get-output-bytevector
 ;    get-output-string
 ;    include
-;    inexact?
 ;    input-port-open?
 ;    input-port?
 ;    integer->char
@@ -867,8 +867,15 @@
   (define floor-remainder modulo)
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
-; TODO:  (define (exact-integer? num)
-; TODO:    (and (exact? num) (integer? num)))
+  (define (exact-integer? num)
+    (and (exact? num) (integer? num)))
+  (define-c exact?
+    "(void *data, int argc, closure _, object k, object num)"
+    " Cyc_check_num(data, num);
+      if (type_of(num) == integer_tag)
+        return_closcall1(data, k, boolean_t);
+      return_closcall1(data, k, boolean_f); ")
+  (define (inexact? num) (not (exact? num)))
   (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
   (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
 ))
