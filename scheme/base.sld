@@ -98,6 +98,7 @@
     case
     cond
     cond-expand
+    do
     when
     quasiquote
     floor
@@ -120,10 +121,7 @@
 ;    ;=>
 ;    ;bytevector-u8-set!
 ;    ;current-error-port
-;    ;define
-;    ;define-syntax
 ;    ;define-values
-;    ;else
 ;    ;error-object-irritants
 ;    ;error-object-message
 ;    ;error-object?
@@ -143,7 +141,6 @@
 ;    ;read-bytevector!
 ;    ;read-error?
 ;    ;read-u8
-;    ;string-set!
 ;    ;symbol=?
 ;    ;syntax-rules
 ;    ;truncate-quotient
@@ -153,9 +150,7 @@
 ;    ;unquote
 ;    ;unquote-splicing
 ;    ;write-u8
-;    apply
 ;    binary-port?
-;    boolean?
 ;    bytevector
 ;    bytevector-append
 ;    bytevector-copy
@@ -172,7 +167,6 @@
 ;    current-error-port
 ;    define-record-type
 ;    denominator
-;    do
 ;    eof-object
 ;    eof-object?
 ;    eq?
@@ -426,6 +420,33 @@
           `(if ,(cadr exp)
                ((lambda () ,@(cddr exp)))
                #f))))
+  (define-syntax do
+    (er-macro-transformer
+     (lambda (expr rename compare)
+       (let* ((body
+               `(,(rename 'begin)
+                 ,@(cdr (cddr expr))
+                 (,(rename 'lp)
+                  ,@(map (lambda (x)
+                           (if (pair? (cddr x))
+                               (if (pair? (cdr (cddr x)))
+                                   (error "too many forms in do iterator" x)
+                                   (car (cddr x)))
+                               (car x)))
+                         (cadr expr)))))
+              (check (car (cddr expr)))
+              (wrap
+               (if (null? (cdr check))
+                   `(,(rename 'let) ((,(rename 'tmp) ,(car check)))
+                     (,(rename 'if) ,(rename 'tmp)
+                      ,(rename 'tmp)
+                      ,body))
+                   `(,(rename 'if) ,(car check)
+                     (,(rename 'begin) ,@(cdr check))
+                     ,body))))
+         `(,(rename 'let) ,(rename 'lp)
+           ,(map (lambda (x) (list (car x) (cadr x))) (cadr expr))
+           ,wrap)))))
     (define-syntax quasiquote
       (er-macro-transformer
         ;; Based on the quasiquote macro from Chibi scheme
