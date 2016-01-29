@@ -23,7 +23,7 @@ Section | Status | Comments
 5.6 Libraries | Partial | Support is "good enough" but need to make it more robust
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes | `eqv?` is not implemented, it is just an alias to `eq?`
-6.2 Numbers | Partial | Integers and reals are supported, but most numeric functions are missing at this time.
+6.2 Numbers | Partial | Only integers and reals are supported at this time.
 6.3 Booleans | Yes | `#true` and `#false` are not recognized by parser.
 6.4 Pairs and lists | Yes | `member` functions are predicates, `member` and `assoc` do not accept `compare` argument.
 6.5 Symbols | Yes |
