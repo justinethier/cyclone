@@ -15,6 +15,14 @@
     odd?
     gcd
     lcm
+    quotient
+    remainder
+    truncate-quotient 
+    truncate-remainder 
+    truncate/ 
+    floor-quotient 
+    floor-remainder 
+    floor/ 
     call-with-current-continuation
     call/cc
     call-with-values
@@ -885,7 +893,6 @@
         make_int(result, i % j);
         return_closcall1(data, k, &result); 
       }")
-  (define floor-remainder modulo)
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
   (define (exact-integer? num)
@@ -929,4 +936,24 @@
       1
       (foldl lcm/main (car nums) (cdr nums))))
   ;; END gcd lcm
+
+  ;; TODO: neither of these two are correct, they are just placeholders
+  (define quotient /)
+  (define remainder modulo)
+
+  (define truncate-quotient quotient)
+  (define truncate-remainder remainder)
+  (define (truncate/ n m)
+    (values (truncate-quotient n m) (truncate-remainder n m)))
+  
+  (define (floor-quotient n m)
+    (let ((res (floor (/ n m))))
+      (if (and (exact? n) (exact? m))
+          (exact res)
+          res)))
+  ;(define floor-remainder modulo)
+  (define (floor-remainder n m)
+    (- n (* m (floor-quotient n m))))
+  (define (floor/ n m)
+    (values (floor-quotient n m) (floor-remainder n m)))
 ))
