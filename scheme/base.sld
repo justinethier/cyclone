@@ -161,9 +161,17 @@
 ;    numerator
 ;
 ;    ; need string ports
+;    ; may be able to use POSIX string steams for this, see: open_memstream
+;    ; however there may be portability issues with that. looks like BSD and windows don't have it
 ;    get-output-string
 ;    open-input-string
 ;    open-output-string
+;
+;    ; it seems like these should be very do-able??
+;    input-port-open?
+;    input-port?
+;    output-port-open?
+;    output-port?
 ;
 ; for a lot of the following, need begin-splicing, or syntax-rules
 ;    binary-port?
@@ -172,15 +180,11 @@
 ;    guard
 ;    import
 ;    include
-;    input-port-open?
-;    input-port?
 ;    let*-values
 ;    let-syntax
 ;    let-values
 ;    letrec*
 ;    letrec-syntax
-;    output-port-open?
-;    output-port?
 ;    parameterize
 ;    read-string
 ;    record?
