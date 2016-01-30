@@ -124,7 +124,7 @@
 ;;;;
 ; Possibly missing functions:
 ;
-;    binary-port?
+;    ; byte vectors are not implemented yet:
 ;    bytevector
 ;    bytevector-append
 ;    bytevector-copy
@@ -133,12 +133,20 @@
 ;    bytevector-u8-ref
 ;    bytevector-u8-set!
 ;    bytevector?
+;    get-output-bytevector
+;    make-bytevector
+;    open-input-bytevector
+;    open-output-bytevector
+;    read-bytevector
+;    read-bytevector!
+;    write-bytevector
+;
+;    binary-port?
 ;    complex?
 ;    define-record-type
 ;    define-values
 ;    denominator
 ;    eof-object
-;    get-output-bytevector
 ;    get-output-string
 ;    guard
 ;    import
@@ -153,11 +161,8 @@
 ;    list->string
 ;    list->vector
 ;    list-set!
-;    make-bytevector
 ;    numerator
-;    open-input-bytevector
 ;    open-input-string
-;    open-output-bytevector
 ;    open-output-string
 ;    output-port-open?
 ;    output-port?
@@ -167,8 +172,6 @@
 ;    raise-continuable
 ;    rational?
 ;    rationalize
-;    read-bytevector
-;    read-bytevector!
 ;    read-string
 ;    read-u8
 ;    record?
@@ -178,7 +181,6 @@
 ;    textual-port?
 ;    u8-ready?
 ;    utf8->string
-;    write-bytevector
 ;    write-string
 ;    write-u8
 ;;;;
