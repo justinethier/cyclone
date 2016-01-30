@@ -142,8 +142,20 @@
 ;    read-bytevector!
 ;    write-bytevector
 ;
-;    binary-port?
+;    : No unicode support at this time
+;    peek-u8
+;    string->utf8
+;    read-u8
+;    u8-ready?
+;    utf8->string
+;    write-u8
+;
+;    ; No complex or rational numbers at this time
 ;    complex?
+;    rational?
+;    rationalize
+;
+;    binary-port?
 ;    define-record-type
 ;    define-values
 ;    denominator
@@ -158,8 +170,6 @@
 ;    let-values
 ;    letrec*
 ;    letrec-syntax
-;    list->string
-;    list->vector
 ;    list-set!
 ;    numerator
 ;    open-input-string
@@ -167,22 +177,12 @@
 ;    output-port-open?
 ;    output-port?
 ;    parameterize
-;    peek-u8
-;    raise
-;    raise-continuable
-;    rational?
-;    rationalize
 ;    read-string
-;    read-u8
 ;    record?
-;    string->utf8
 ;    syntax-error
 ;    syntax-rules
 ;    textual-port?
-;    u8-ready?
-;    utf8->string
 ;    write-string
-;    write-u8
 ;;;;
   )
   (begin
@@ -913,7 +913,7 @@
       Cyc_check_num(data, z2);
       d.value = pow( unbox_number(z1), unbox_number(z2) );
       return_closcall1(data, k, &d); ")
-  (define eof-object
+  (define-c eof-object
     "(void *data, int argc, closure _, object k)"
     " return_closcall1(data, k, Cyc_EOF); ")
 ))
