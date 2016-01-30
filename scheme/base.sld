@@ -120,6 +120,7 @@
     round
     exact
     inexact
+    eof-object
 
 ;;;;
 ; Possibly missing functions:
@@ -146,7 +147,6 @@
 ;    define-record-type
 ;    define-values
 ;    denominator
-;    eof-object
 ;    get-output-string
 ;    guard
 ;    import
@@ -913,4 +913,7 @@
       Cyc_check_num(data, z2);
       d.value = pow( unbox_number(z1), unbox_number(z2) );
       return_closcall1(data, k, &d); ")
+  (define eof-object
+    "(void *data, int argc, closure _, object k)"
+    " return_closcall1(data, k, Cyc_EOF); ")
 ))
