@@ -156,11 +156,19 @@
 ;    rational?
 ;    rationalize
 ;
+;    ; Need to change how  integer? works, to include floatings points without any decimals
+;    denominator
+;    numerator
+;
+;    ; need string ports
+;    get-output-string
+;    open-input-string
+;    open-output-string
+;
+; for a lot of the following, need begin-splicing, or syntax-rules
 ;    binary-port?
 ;    define-record-type
 ;    define-values
-;    denominator
-;    get-output-string
 ;    guard
 ;    import
 ;    include
@@ -171,9 +179,6 @@
 ;    let-values
 ;    letrec*
 ;    letrec-syntax
-;    numerator
-;    open-input-string
-;    open-output-string
 ;    output-port-open?
 ;    output-port?
 ;    parameterize
