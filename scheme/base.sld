@@ -96,6 +96,7 @@
     Cyc-remove-exception-handler
     newline
     write-char
+    write-string
     flush-output-port
     read-line
     features
@@ -170,7 +171,6 @@
 ;    let-values
 ;    letrec*
 ;    letrec-syntax
-;    list-set!
 ;    numerator
 ;    open-input-string
 ;    open-output-string
@@ -182,7 +182,6 @@
 ;    syntax-error
 ;    syntax-rules
 ;    textual-port?
-;    write-string
 ;;;;
   )
   (begin
@@ -512,6 +511,10 @@
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))
         (Cyc-flush-output-port (car port))))
+    (define (write-string str . port)
+      (if (null? port)
+        (Cyc-display str (current-output-port))
+        (Cyc-display str (car port))))
     (define (write-char char . port)
       (if (null? port)
         (Cyc-write-char char (current-output-port))
