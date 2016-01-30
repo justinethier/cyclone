@@ -138,8 +138,6 @@
 ;    ;error-object-message
 ;    ;error-object?
 ;    ;file-error?
-;    ;floor-quotient
-;    ;floor/
 ;    ;guard
 ;    ;import
 ;    ;include-ci
@@ -155,9 +153,6 @@
 ;    ;read-u8
 ;    ;symbol=?
 ;    ;syntax-rules
-;    ;truncate-quotient
-;    ;truncate-remainder
-;    ;truncate/
 ;    ;u8-ready?
 ;    ;unquote
 ;    ;unquote-splicing
@@ -874,7 +869,8 @@
         make_double(d, fabs(((double_type *)num)->value));
         return_closcall1(data, k, &d);
       } ")
-  (define-c modulo
+  ;; Apparently C % is actually the remainder, not modulus
+  (define-c remainder
     "(void *data, int argc, closure _, object k, object num1, object num2)"
     " int i, j;
       Cyc_check_num(data, num1);
@@ -893,6 +889,12 @@
         make_int(result, i % j);
         return_closcall1(data, k, &result); 
       }")
+  ;; From chibi scheme. Cannot use C % operator
+  (define (modulo a b)
+    (let ((res (remainder a b)))
+      (if (< b 0)
+        (if (<= res 0) res (+ res b))
+        (if (>= res 0) res (+ res b)))))
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
   (define (exact-integer? num)
@@ -937,9 +939,8 @@
       (foldl lcm/main (car nums) (cdr nums))))
   ;; END gcd lcm
 
-  ;; TODO: neither of these two are correct, they are just placeholders
+  ;; TODO: possibly not correct, just a placeholder
   (define quotient /)
-  (define remainder modulo)
 
   (define truncate-quotient quotient)
   (define truncate-remainder remainder)
