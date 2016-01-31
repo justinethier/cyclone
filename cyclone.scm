@@ -233,10 +233,9 @@
       (trace:info "---------------- after closure-convert:")
       (trace:info input-program) ;pretty-print
       
-      (if (not *do-code-gen*)
-        (begin
-          (trace:error "DEBUG, existing program")
-          (exit 0)))
+      (when (not *do-code-gen*)
+        (trace:error "DEBUG, existing program")
+        (exit 0))
     
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 

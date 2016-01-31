@@ -117,13 +117,13 @@
 
 ; gensym : symbol -> symbol
 (define gensym (lambda params
-                 (if (null? params)
-                     (begin
+                 (cond
+                  ((null? params)
                        (set! gensym-count (+ gensym-count 1))
                        (string->symbol (string-append
                                         "$"
                                         (number->string gensym-count))))
-                     (begin
+                  (else
                        (set! gensym-count (+ gensym-count 1))
                        (string->symbol (string-append 
                                         (if (symbol? (car params))
