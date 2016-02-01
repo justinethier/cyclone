@@ -144,14 +144,13 @@
 ;; Trace
 (define *trace-level* 2)
 (define (trace level msg pp prefix)
-    (if (>= *trace-level* level)
-      (begin
+    (when (>= *trace-level* level)
         (display "/* ")
         (newline)
         (display prefix)
         (pp msg)
         (display " */")
-        (newline))))
+        (newline)))
 (define (trace:error msg) (trace 1 msg pretty-print ""))
 (define (trace:warn msg)  (trace 2 msg pretty-print ""))
 (define (trace:info msg)  (trace 3 msg pretty-print ""))
@@ -1041,34 +1040,36 @@
     ((prim? exp)     (void))
     ((ref? exp)      (void))
     ((quote? exp)    (void))
-    ((lambda? exp)   (begin
-                        (map analyze-mutable-variables (lambda->exp exp))
-                        (void)))
-    ((set!? exp)     (begin (mark-mutable (set!->var exp))
-                            (analyze-mutable-variables (set!->exp exp))))
-    ((if? exp)       (begin
-                       (analyze-mutable-variables (if->condition exp))
-                       (analyze-mutable-variables (if->then exp))
-                       (analyze-mutable-variables (if->else exp))))
+    ((lambda? exp)   
+     (map analyze-mutable-variables (lambda->exp exp))
+     (void))
+    ((set!? exp)     
+     (mark-mutable (set!->var exp))
+     (analyze-mutable-variables (set!->exp exp)))
+    ((if? exp)       
+     (analyze-mutable-variables (if->condition exp))
+     (analyze-mutable-variables (if->then exp))
+     (analyze-mutable-variables (if->else exp)))
     
     ; Sugar:
-    ((let? exp)      (begin
-                       (map analyze-mutable-variables (map cadr (let->bindings exp)))
-                       (map analyze-mutable-variables (let->exp exp))
-                       (void)))
-    ((letrec? exp)   (begin
-                       (map analyze-mutable-variables (map cadr (letrec->bindings exp)))
-                       (map analyze-mutable-variables (letrec->exp exp))
-                       (void)))
-    ((begin? exp)    (begin
-                       (map analyze-mutable-variables (begin->exps exp))
-                       (void)))
+    ((let? exp)
+     (map analyze-mutable-variables (map cadr (let->bindings exp)))
+     (map analyze-mutable-variables (let->exp exp))
+     (void))
+    ((letrec? exp)
+     (map analyze-mutable-variables (map cadr (letrec->bindings exp)))
+     (map analyze-mutable-variables (letrec->exp exp))
+     (void))
+    ((begin? exp)
+     (map analyze-mutable-variables (begin->exps exp))
+     (void))
     
     ; Application:
-    ((app? exp)      (begin 
-                       (map analyze-mutable-variables exp)
-                       (void)))
-    (else            (error "unknown expression type: " exp))))
+    ((app? exp)
+     (map analyze-mutable-variables exp)
+     (void))
+    (else
+     (error "unknown expression type: " exp))))
 
 
 ; wrap-mutables : exp -> exp

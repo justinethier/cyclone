@@ -817,17 +817,18 @@
   (letrec ((num-args 0)
          (_c-compile-args 
           (lambda (args append-preamble prefix cont)
-            (if (not (pair? args))
-                (c-code "")
-                (begin
-                  ;(trace:debug `(c-compile-args ,(car args)))
-                  (set! num-args (+ 1 num-args))
-                  (c:append/prefix
-                    prefix 
-                    (c-compile-exp (car args) 
-                      append-preamble cont trace)
-                    (_c-compile-args (cdr args) 
-                      append-preamble ", " cont)))))))
+            (cond
+             ((not (pair? args))
+              (c-code ""))
+             (else
+              ;(trace:debug `(c-compile-args ,(car args)))
+              (set! num-args (+ 1 num-args))
+              (c:append/prefix
+                prefix 
+                (c-compile-exp (car args) 
+                  append-preamble cont trace)
+                (_c-compile-args (cdr args) 
+                  append-preamble ", " cont)))))))
   (c:tuple/args
     (_c-compile-args args 
       append-preamble prefix cont)
