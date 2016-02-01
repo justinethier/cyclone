@@ -755,6 +755,8 @@
     ((prim? exp)       exp)
     ((ref? exp)        exp)
     ((quote? exp)      exp)
+;; TODO: need a way of taking a begin here and splicing its contents
+;; into the body
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
                           ,@(map 
                             ;; TODO: use extend env here?
