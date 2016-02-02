@@ -53,6 +53,21 @@
      (append result (reverse expanded-exprs))
      (cdr exp)
      env)))
+   ;; TODO: test concept of expanding/splicing begin here
+   ((and (app? (car exp))
+         (symbol? (caar exp))
+         (tagged-list? 'macro (env:lookup (caar exp) env #f)))
+    (let ((expanded (macro:expand (car exp) (env:lookup (caar exp) env #f) env)))
+(write `(DEBUG ,(cons expanded (cdr exp))))
+      ;; TODO: not enough to recursively call expand-body with commented-out code.
+      ;; maybe the thing that was missing is that still need to call inner-expand to 
+      ;; expand macros within????
+      (expand-body
+        (cons
+          (inner-expand expanded env)
+          result) ;; TODO: result?
+        (cdr exp) ;(cons expanded (cdr exp))
+        env)))
    (else
      (expand-body
       (cons 
