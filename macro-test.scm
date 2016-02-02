@@ -30,6 +30,29 @@
       (write "---------------- after macro expansion:")
       (write input-program) ;pretty-print
 
+;; A first step towards splicing begin, but this doesn't handle
+;; begin being introduced as part of a macro
+;; may need to add back the define-syntax code and introduce a macro
+;; that expands into a begin
+(define (expand-body result exp env)
+  (cond
+   ((null? exp) (reverse result))
+   ((begin? (car exp))
+    (let* ((expr (car exp))
+           (begin-exprs (begin->exps expr))
+           (expanded-exprs (map (lambda (expr) (my-expand expr env)) begin-exprs)))
+    (expand-body
+     (append result (reverse expanded-exprs))
+     (cdr exp)
+     env)))
+   (else
+     (expand-body
+      (cons 
+        (my-expand (car exp) env)
+        result)
+      (cdr exp)
+      env))))
+
 (define (my-expand exp env)
   (cond
     ((const? exp)      exp)
@@ -39,10 +62,12 @@
 ;; TODO: need a way of taking a begin here and splicing its contents
 ;; into the body
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
-                          ,@(map 
-                            ;; TODO: use extend env here?
-                            (lambda (expr) (my-expand expr env))
-                            (lambda->exp exp))))
+                          ,@(expand-body '() (lambda->exp exp) env)
+                          ;,@(map 
+                          ;  ;; TODO: use extend env here?
+                          ;  (lambda (expr) (my-expand expr env))
+                          ;  (lambda->exp exp))
+                        ))
     ((define? exp)     (if (define-lambda? exp)
                            (my-expand (define->lambda exp) env)
                           `(define ,(my-expand (define->var exp) env)
