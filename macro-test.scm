@@ -48,7 +48,7 @@
    ((begin? (car exp))
     (let* ((expr (car exp))
            (begin-exprs (begin->exps expr))
-           (expanded-exprs (map (lambda (expr) (my-expand expr env)) begin-exprs)))
+           (expanded-exprs (map (lambda (expr) (inner-expand expr env)) begin-exprs)))
     (expand-body
      (append result (reverse expanded-exprs))
      (cdr exp)
@@ -56,19 +56,18 @@
    (else
      (expand-body
       (cons 
-        (my-expand (car exp) env)
+        (inner-expand (car exp) env)
         result)
       (cdr exp)
       env))))
 
 (define (my-expand exp env)
-  (inner-expand exp env #f))
+  (inner-expand exp env))
 
-;; TODO: replace my-expand's below (and above in expand-body) with inner-expand. still trying to figure out how to use body? arg though.
 ;; TODO: need to be able to splice expanded begins somehow.
 ;; maybe pass built up exp list to it and splice the begin into that before
 ;; continuing expansion
-(define (inner-expand exp env body?)
+(define (inner-expand exp env) ; body?)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
@@ -84,15 +83,15 @@
                           ;  (lambda->exp exp))
                         ))
     ((define? exp)     (if (define-lambda? exp)
-                           (my-expand (define->lambda exp) env)
-                          `(define ,(my-expand (define->var exp) env)
-                                ,@(my-expand (define->exp exp) env))))
-    ((set!? exp)       `(set! ,(my-expand (set!->var exp) env)
-                              ,(my-expand (set!->exp exp) env)))
-    ((if? exp)         `(if ,(my-expand (if->condition exp) env)
-                            ,(my-expand (if->then exp) env)
+                           (inner-expand (define->lambda exp) env)
+                          `(define ,(inner-expand (define->var exp) env)
+                                ,@(inner-expand (define->exp exp) env))))
+    ((set!? exp)       `(set! ,(inner-expand (set!->var exp) env)
+                              ,(inner-expand (set!->exp exp) env)))
+    ((if? exp)         `(if ,(inner-expand (if->condition exp) env)
+                            ,(inner-expand (if->then exp) env)
                             ,(if (if-else? exp)
-                                 (my-expand (if->else exp) env)
+                                 (inner-expand (if->else exp) env)
                                  ;; Insert default value for missing else clause
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
@@ -110,16 +109,16 @@
      ((symbol? (car exp))
       (let ((val (env:lookup (car exp) env #f)))
         (if (tagged-list? 'macro val)
-          (my-expand ; Could expand into another macro
+          (inner-expand ; Could expand into another macro
             (macro:expand exp val env)
             env)
           (map
-            (lambda (expr) (my-expand expr env))
+            (lambda (expr) (inner-expand expr env))
             exp))))
 
      (else
        (map 
-        (lambda (expr) (my-expand expr env))
+        (lambda (expr) (inner-expand expr env))
         exp))))
     (else
       (error "unknown exp: " exp))))
