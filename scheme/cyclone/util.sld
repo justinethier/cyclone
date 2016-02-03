@@ -315,6 +315,7 @@
      (lambda . lambda)
      (quote . quote)
      (set! . set!)
+     (begin . begin) ;; TODO: just a quick-fix, not a long-term solution
     )))
 
 (define (Cyc-er-compare? a b)
