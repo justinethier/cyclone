@@ -755,13 +755,13 @@
     ((prim? exp)       exp)
     ((ref? exp)        exp)
     ((quote? exp)      exp)
-;; TODO: need a way of taking a begin here and splicing its contents
-;; into the body
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
-                          ,@(map 
-                            ;; TODO: use extend env here?
-                            (lambda (expr) (expand expr env))
-                            (lambda->exp exp))))
+                          ,@(expand-body '() (lambda->exp exp) env)
+                          ;,@(map 
+                          ;  ;; TODO: use extend env here?
+                          ;  (lambda (expr) (expand expr env))
+                          ;  (lambda->exp exp))
+                         ))
     ((define? exp)     (if (define-lambda? exp)
                            (expand (define->lambda exp) env)
                           `(define ,(expand (define->var exp) env)
@@ -821,6 +821,40 @@
         exp))))
     (else
       (error "unknown exp: " exp))))
+
+;; Helper to expand a lambda body, so we can splice in any begin's
+(define (expand-body result exp env)
+  (cond
+   ((null? exp) (reverse result))
+   ;; Splice in begin contents and keep expanding body
+   ((begin? (car exp))
+    (let* ((expr (car exp))
+           (begin-exprs (begin->exps expr)))
+    (expand-body
+     result
+     (append begin-exprs (cdr exp))
+     env)))
+   (else
+    (let ((macro #f))
+      (when (and (app? (car exp))
+                 (symbol? (caar exp)))
+        (set! macro (env:lookup (caar exp) env #f)))
+      (if (tagged-list? 'macro macro)
+          ;; Expand macro here so we can catch begins in the expanded code,
+          ;; including nested begins
+          (let ((expanded (macro:expand (car exp) macro env)))
+            ;; Call with expanded macro in case we need to expand again
+            (expand-body
+              result
+              (cons expanded (cdr exp))
+              env))
+          ;; No macro, use main expand function to process
+          (expand-body
+           (cons 
+             (expand (car exp) env)
+             result)
+           (cdr exp)
+           env))))))
 
 ;; Top-level analysis
 
