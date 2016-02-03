@@ -18,9 +18,9 @@
     (define-syntax test
       (er-macro-transformer
        (lambda (expr rename compare)
-         `(begin 1 (define tmp #t) 3))))
-    (test)
-    (test)
+         `(begin ,(if (cadr expr) '(test #f) 1) (define tmp #t) 3))))
+    (test #t)
+    (test #f)
     (write tmp)
     )))
 
@@ -49,8 +49,9 @@
     (let* ((expr (car exp))
            (begin-exprs (begin->exps expr))
            (expanded-exprs (map (lambda (expr) (inner-expand expr env)) begin-exprs)))
+;(write `(begin-DEBUG result: ,result begin-exprs: ,begin-exprs expanded-exprs: ,expanded-exprs))
     (expand-body
-     (append result (reverse expanded-exprs))
+     (append (reverse expanded-exprs) result)
      (cdr exp)
      env)))
    ;; TODO: test concept of expanding/splicing begin here
@@ -59,14 +60,9 @@
          (tagged-list? 'macro (env:lookup (caar exp) env #f)))
     (let ((expanded (macro:expand (car exp) (env:lookup (caar exp) env #f) env)))
 (write `(DEBUG ,(cons expanded (cdr exp))))
-      ;; TODO: not enough to recursively call expand-body with commented-out code.
-      ;; maybe the thing that was missing is that still need to call inner-expand to 
-      ;; expand macros within????
       (expand-body
-        (cons
-          (inner-expand expanded env)
-          result) ;; TODO: result?
-        (cdr exp) ;(cons expanded (cdr exp))
+        result
+        (cons expanded (cdr exp))
         env)))
    (else
      (expand-body
