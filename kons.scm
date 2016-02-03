@@ -1,7 +1,8 @@
 ;; A temporary test file
 (import (scheme base)
         (scheme write)
-        (srfi 9))
+        (srfi 9)
+        )
 
 ;((lambda ()
 ;
@@ -23,7 +24,7 @@
 ;))
 ;))
 
-;(define <pare> (register-simple-type <pare> #f (quote (x y)))) 
+(define <pare> (register-simple-type <pare> #f (quote (x y)))) 
 ;(define pare? vector?) ;(make-type-predicate pare? <pare>)) 
 ;(define kons 
 ;  ((lambda (%make) 
@@ -34,11 +35,11 @@
 ;          res) 
 ;        (%make)))) 
 ;   (make-constructor "kons" <pare>))) 
-(write 
+;(write 
 ;  (list 
 ;    (pare? (kons 1 2)) 
-    (pair? (cons 1 2))
-);)
+;    (pare? (cons 1 4))
+;))
 
 ;(define (make-lambda)
 ;  (lambda (a b c) (write (+ a b c))))
