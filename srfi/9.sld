@@ -8,6 +8,8 @@
     register-simple-type
     make-type-predicate
     make-constructor
+    make-getter
+    make-setter
     slot-set!
     type-slot-offset
   )
@@ -42,6 +44,10 @@
     (define (slot-set! name obj idx val)
       (let ((vec obj)) ;; TODO: get actual slots from obj
         (vector-set! (vector-ref vec 2) idx val)))
+    (define (make-getter sym name idx)
+      'TODO) ;; return the getter function
+    (define (make-setter sym name idx)
+      'TODO) ;; return the setter function
 
     (define-syntax define-record-type
       (er-macro-transformer
@@ -74,29 +80,29 @@
              (,_define ,pred (,(rename 'make-type-predicate)
                               ,pred ;(symbol->string pred) ;(identifier->symbol pred))
                               ,name))
-;             ;; fields
-;             ,@(map (lambda (f)
-;                      (and (pair? f) (pair? (cdr f))
-;                           `(,_define ,(cadr f)
-;                              (,(rename 'make-getter)
-;                               ,(symbol->string
-;                                 (cadr f)
-;                                 ;(identifier->symbol (cadr f))
-;                                )
-;                               ,name
-;                               (,_type_slot_offset ,name ',(car f))))))
-;                    fields)
-;             ,@(map (lambda (f)
-;                      (and (pair? f) (pair? (cdr f)) (pair? (cddr f))
-;                           `(,_define ,(car (cddr f))
-;                              (,(rename 'make-setter)
-;                               ,(symbol->string
-;                                 (car (cddr f))
-;                                 ;(identifier->symbol (car (cddr f)))
-;                                )
-;                               ,name
-;                               (,_type_slot_offset ,name ',(car f))))))
-;                    fields)
+             ;; fields
+             ,@(map (lambda (f)
+                      (and (pair? f) (pair? (cdr f))
+                           `(,_define ,(cadr f)
+                              (,(rename 'make-getter)
+                               ,(symbol->string
+                                 (cadr f)
+                                 ;(identifier->symbol (cadr f))
+                                )
+                               ,name
+                               (,_type_slot_offset ,name ',(car f))))))
+                    fields)
+             ,@(map (lambda (f)
+                      (and (pair? f) (pair? (cdr f)) (pair? (cddr f))
+                           `(,_define ,(car (cddr f))
+                              (,(rename 'make-setter)
+                               ,(symbol->string
+                                 (car (cddr f))
+                                 ;(identifier->symbol (car (cddr f)))
+                                )
+                               ,name
+                               (,_type_slot_offset ,name ',(car f))))))
+                    fields)
              ;; constructor
              (,_define ,make
                ,(let lp ((ls make-fields) (sets '()))

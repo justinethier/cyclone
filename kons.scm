@@ -10,7 +10,7 @@
 (define-record-type <pare>
   (kons x y)
   pare?
-  (x kar) ;TODO: set-kar!)
+  (x kar set-kar!)
   (y kdr))
 
 (write
