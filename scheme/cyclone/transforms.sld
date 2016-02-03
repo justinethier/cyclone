@@ -574,6 +574,7 @@
                   set-global!
                   set-cell!
                   cell
+                  cons
                   set-car!
                   set-cdr!
                   string-set!
