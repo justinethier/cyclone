@@ -27,6 +27,7 @@ SMODULES = \
   scheme/cyclone/macros \
   scheme/cyclone/transforms \
   scheme/cyclone/util \
+  srfi/9
   srfi/18
 SLDFILES = $(addsuffix .sld, $(SMODULES))
 COBJECTS=$(SLDFILES:.sld=.o)
@@ -97,6 +98,7 @@ bootstrap: icyc
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp srfi/9.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
