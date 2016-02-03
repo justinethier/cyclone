@@ -40,6 +40,7 @@
     delete
     delete-duplicates
     list-insert-at!
+    list-index2
     filter)
   (begin
 
@@ -111,6 +112,17 @@
       (set-cdr! lis (cons old-car (cdr lis)))))
    (else
     (list-insert-at! (cdr lis) obj (- k 1)))))
+
+;; Find index of element in list, or -1 if not found
+(define list-index2
+  (lambda (e lst)
+    (if (null? lst)
+      -1
+      (if (eq? (car lst) e)
+        0
+        (if (= (list-index2 e (cdr lst)) -1) 
+          -1
+          (+ 1 (list-index2 e (cdr lst))))))))
 
 ; gensym-count : integer
 (define gensym-count 0)
