@@ -52,23 +52,27 @@
      result
      (append begin-exprs (cdr exp))
      env)))
-   ;; Expand macro here so we can catch begins in the expanded code,
-   ;; including nested begins
-   ((and (app? (car exp))
-         (symbol? (caar exp))
-         (tagged-list? 'macro (env:lookup (caar exp) env #f)))
-    (let ((expanded (macro:expand (car exp) (env:lookup (caar exp) env #f) env)))
-      (expand-body
-        result
-        (cons expanded (cdr exp))
-        env)))
    (else
-     (expand-body
-      (cons 
-        (inner-expand (car exp) env)
-        result)
-      (cdr exp)
-      env))))
+    (let ((macro #f))
+      (when (and (app? (car exp))
+                 (symbol? (caar exp)))
+        (set! macro (env:lookup (caar exp) env #f)))
+      (if (tagged-list? 'macro macro)
+          ;; Expand macro here so we can catch begins in the expanded code,
+          ;; including nested begins
+          (let ((expanded (macro:expand (car exp) macro env)))
+            ;; Call with expanded macro in case we need to expand again
+            (expand-body
+              result
+              (cons expanded (cdr exp))
+              env))
+          ;; No macro, use main expand function to process
+          (expand-body
+           (cons 
+             (inner-expand (car exp) env)
+             result)
+           (cdr exp)
+           env))))))
 
 (define (my-expand exp env)
   (inner-expand exp env))
