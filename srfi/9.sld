@@ -4,7 +4,7 @@
 ;;; This is based on the implementation of SRFI 9 from chibi scheme
 (define-library (srfi 9)
   (export define-record-type)
-  ;(import (scheme base))
+  (import (scheme base))
   (begin
     (define-syntax define-record-type
       (er-macro-transformer
