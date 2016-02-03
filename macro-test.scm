@@ -40,26 +40,24 @@
       (write "---------------- after macro expansion:")
       (write input-program) ;pretty-print
 
-;; A first step towards splicing begin, but this doesn't handle
-;; begin being introduced as part of a macro
+;; Expand lambda body here so we can splice in any begin's
 (define (expand-body result exp env)
   (cond
    ((null? exp) (reverse result))
+   ;; Splice in begin contents and keep expanding body
    ((begin? (car exp))
     (let* ((expr (car exp))
-           (begin-exprs (begin->exps expr))
-           (expanded-exprs (map (lambda (expr) (inner-expand expr env)) begin-exprs)))
-;(write `(begin-DEBUG result: ,result begin-exprs: ,begin-exprs expanded-exprs: ,expanded-exprs))
+           (begin-exprs (begin->exps expr)))
     (expand-body
-     (append (reverse expanded-exprs) result)
-     (cdr exp)
+     result
+     (append begin-exprs (cdr exp))
      env)))
-   ;; TODO: test concept of expanding/splicing begin here
+   ;; Expand macro here so we can catch begins in the expanded code,
+   ;; including nested begins
    ((and (app? (car exp))
          (symbol? (caar exp))
          (tagged-list? 'macro (env:lookup (caar exp) env #f)))
     (let ((expanded (macro:expand (car exp) (env:lookup (caar exp) env #f) env)))
-(write `(DEBUG ,(cons expanded (cdr exp))))
       (expand-body
         result
         (cons expanded (cdr exp))
