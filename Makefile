@@ -27,7 +27,7 @@ SMODULES = \
   scheme/cyclone/macros \
   scheme/cyclone/transforms \
   scheme/cyclone/util \
-  srfi/9
+  srfi/9 \
   srfi/18
 SLDFILES = $(addsuffix .sld, $(SMODULES))
 COBJECTS=$(SLDFILES:.sld=.o)
