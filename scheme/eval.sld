@@ -53,10 +53,23 @@
   (let ((env (if (null? _env) *global-environment* (car _env))))
     (eval (wrapc exp) env)))
 
+;; Expressions received from C code are already evaluated, but sometimes too much so.
+;; Try to wrap 
 (define (wrapc exp)
   (cond 
-    ((symbol? exp)
-     `(quote ,exp))
+    ((application? exp)
+     (cond
+       ((compound-procedure? (car exp))
+        (cons 
+          (car exp)
+          (map 
+            (lambda (e)
+              (if (self-evaluating? e)
+                  e
+                  `(quote ,e)))
+            (cdr exp))))
+       (else
+        exp)))
     (else
       exp)))
 
