@@ -45,9 +45,11 @@
       (let ((vec obj)) ;; TODO: get actual slots from obj
         (vector-set! (vector-ref vec 2) idx val)))
     (define (make-getter sym name idx)
-      'TODO) ;; return the getter function
+      (lambda (obj)
+        (vector-ref (vector-ref obj 2) idx)))
     (define (make-setter sym name idx)
-      'TODO) ;; return the setter function
+      (lambda (obj val)
+        (vector-set! (vector-ref obj 2) idx val)))
 
     (define-syntax define-record-type
       (er-macro-transformer
