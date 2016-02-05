@@ -16,6 +16,7 @@
   (export
     ;environment
     eval
+    eval-from-c ; non-standard
     create-environment ; non-standard
     setup-environment ; non-standard
   )
@@ -47,6 +48,17 @@
   (if (null? env)
       ((analyze exp *global-environment*) *global-environment*)
       ((analyze exp (car env)) (car env))))
+
+(define (eval-from-c exp . _env)
+  (let ((env (if (null? _env) *global-environment* (car _env))))
+    (eval (wrapc exp) env)))
+
+(define (wrapc exp)
+  (cond 
+    ((symbol? exp)
+     `(quote ,exp))
+    (else
+      exp)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression handling helper functions

@@ -377,9 +377,11 @@ extern const object primitive_call_95cc;
 
 /* Globals that are needed by the runtime */
 extern object Cyc_glo_eval;
+extern object Cyc_glo_eval_from_c;
 extern object Cyc_glo_call_cc;
 
 #define __glo_eval Cyc_glo_eval
+#define __glo_eval_91from_91c Cyc_glo_eval_from_c
 #define __glo_call_95cc Cyc_glo_call_cc
 
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err);

@@ -348,6 +348,7 @@ void clear_mutations(void *data) {
 /* Runtime globals */
 object Cyc_glo_call_cc = nil;
 object Cyc_glo_eval = nil;
+object Cyc_glo_eval_from_c = nil;
 
 /* Exception handler */
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
@@ -2094,7 +2095,7 @@ object apply(void *data, object cont, object func, object args){
           make_cons(c, func, args);
           //printf("JAE DEBUG, sending to eval: ");
           //Cyc_display(&c, stderr);
-          ((closure)__glo_eval)->fn(data, 2, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval_91from_91c)->fn(data, 2, __glo_eval_91from_91c, cont, &c, nil);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
@@ -2103,10 +2104,10 @@ object apply(void *data, object cont, object func, object args){
 //TODO: need to quote certain object types (symbols and null at a minimum) in the args list
 //      before passing everything to eval.
           make_cons(c, cadr(func), args);
-          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval_91from_91c)->fn(data, 3, __glo_eval_91from_91c, cont, &c, nil);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
           make_cons(c, func, args);
-          ((closure)__glo_eval)->fn(data, 3, __glo_eval, cont, &c, nil);
+          ((closure)__glo_eval_91from_91c)->fn(data, 3, __glo_eval_91from_91c, cont, &c, nil);
       } else {
           make_cons(c, func, args);
           Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
