@@ -109,6 +109,10 @@
     write-string
     flush-output-port
     read-line
+    input-port?
+    output-port?
+    input-port-open?
+    output-port-open?
     features
     any
     every
@@ -176,12 +180,6 @@
 ;    get-output-string
 ;    open-input-string
 ;    open-output-string
-;
-;    ; it seems like these should be very do-able??
-;    input-port-open?
-;    input-port?
-;    output-port-open?
-;    output-port?
 ;
 ; for a lot of the following, need begin-splicing, or syntax-rules
 ;    binary-port?
@@ -937,4 +935,36 @@
   (define-c eof-object
     "(void *data, int argc, closure _, object k)"
     " return_closcall1(data, k, Cyc_EOF); ")
+  (define-c input-port?
+    "(void *data, int argc, closure _, object k, object port)"
+    " port_type *p = (port_type *)port;
+      Cyc_check_port(data, port);
+      return_closcall1(
+        data, 
+        k, 
+       (p->mode == 1) ? boolean_t : boolean_f); ")
+  (define-c output-port?
+    "(void *data, int argc, closure _, object k, object port)"
+    " port_type *p = (port_type *)port;
+      Cyc_check_port(data, port);
+      return_closcall1(
+        data, 
+        k, 
+       (p->mode == 0) ? boolean_t : boolean_f); ")
+  (define-c input-port-open?
+    "(void *data, int argc, closure _, object k, object port)"
+    " port_type *p = (port_type *)port;
+      Cyc_check_port(data, port);
+      return_closcall1(
+        data, 
+        k, 
+       (p->mode == 1 && p->fp != NULL) ? boolean_t : boolean_f); ")
+  (define-c output-port-open?
+    "(void *data, int argc, closure _, object k, object port)"
+    " port_type *p = (port_type *)port;
+      Cyc_check_port(data, port);
+      return_closcall1(
+        data, 
+        k, 
+       (p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f); ")
 ))
