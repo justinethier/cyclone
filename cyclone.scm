@@ -7,6 +7,7 @@
 (import (scheme base)
         (scheme eval)
         (scheme file)
+        (scheme lazy)
         (scheme read)
         (scheme write)
         (scheme cyclone common)
