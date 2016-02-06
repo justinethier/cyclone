@@ -104,7 +104,6 @@ const object Cyc_EOF = &__EOF;
 static ck_hs_t symbol_table;
 static int symbol_table_size = 65536;
 static pthread_mutex_t symbol_table_lock;
-object quote_quote = nil;
 
 // Functions to support concurrency kit hashset
 // These are specifically for a table of symbols
@@ -175,8 +174,6 @@ void gc_init_heap(long heap_size)
     fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
     exit(1);
   }
-  // Do one-time initialization here
-  quote_quote = find_or_add_symbol("quote");
 }
 
 gc_heap *gc_get_heap()
@@ -2038,16 +2035,6 @@ void _call_95cc(void *data, object cont, object args){
     return_closcall2(data, __glo_call_95cc, cont, car(args));
 }
 
-// Function to test out quoting certain const objs before passing them to eval
-void quote_args(object args) 
-{
-//  list l = args;
-//  list lr = nil;
-//  while (!nullp(l)) {
-//    l = cdr(l);
-//  }
-}
-
 /*
  * @param cont - Continuation for the function to call into
  * @param func - Function to execute
@@ -2101,8 +2088,6 @@ object apply(void *data, object cont, object func, object args){
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
-//TODO: need to quote certain object types (symbols and null at a minimum) in the args list
-//      before passing everything to eval.
           make_cons(c, cadr(func), args);
           ((closure)__glo_eval_91from_91c)->fn(data, 3, __glo_eval_91from_91c, cont, &c, nil);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
