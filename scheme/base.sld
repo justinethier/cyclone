@@ -109,6 +109,7 @@
     write-string
     flush-output-port
     read-line
+    read-string
     input-port?
     output-port?
     input-port-open?
@@ -193,7 +194,6 @@
 ;    letrec*
 ;    letrec-syntax
 ;    parameterize
-;    read-string
 ;    record?
 ;    syntax-error
 ;    syntax-rules
@@ -521,8 +521,27 @@
         (func (car lst) (foldr func end (cdr lst)))))
     (define (read-line . port)
       (if (null? port)
-        (Cyc-read-line (current-output-port))
+        (Cyc-read-line (current-input-port))
         (Cyc-read-line (car port))))
+    (define (read-string k . opts)
+      (let ((port (if (null? opts)
+                      (current-input-port)
+                      (car opts))))
+        (let loop ((acc '())
+                   (i k)
+                   (chr #f))
+          (cond
+            ((eof-object? chr)
+             (list->string 
+               (reverse acc)))
+            ((zero? i)
+             (list->string 
+               (reverse 
+                 (if chr (cons chr acc) acc))))
+            (else
+             (loop (if chr (cons chr acc) acc)
+                   (- i 1)
+                   (read-char port)))))))
     (define (flush-output-port . port)
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))
