@@ -3,7 +3,9 @@
         (scheme file)
         (scheme read)
         (scheme write)
-        (scheme eval))
+        (scheme eval)
+        (srfi 9)
+)
 
 (define *num-passed* 0)
 (define (assert:equal msg actual expected)
@@ -317,6 +319,24 @@
 (assert:equal "macro: test" (test 1 2 3) 3)
 (assert:equal "macro: eval test" (eval '(test 1 2 x)) x)
 ;; END macros
+
+;; Record types
+(define-record-type <pare>
+  (kons x y)
+  pare?
+  (x kar set-kar!)
+  (y kdr))
+
+(assert:equal "Records predicate (t)" (pare? (kons 1 2)) #t)
+(assert:equal "Records predicate (f)" (pare? (cons 1 2)) #f)
+(assert:equal "Records kar" (kar (kons 1 2)) 1)
+(assert:equal "Records kdr" (kdr (kons 1 2)) 2)
+(assert:equal "Records setter"
+  (let ((k (kons 1 2)))
+    (set-kar! k 3)
+    (kar k))
+  3)
+;; END records
 
 ; TODO: use display, output without surrounding quotes
 (write (list *num-passed* " tests passed with no errors"))
