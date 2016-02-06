@@ -110,6 +110,7 @@
     cell-get? 
     cell-get->cell 
     expand 
+    expand-lambda-body
     let=>lambda 
     isolate-globals 
     has-global? 
@@ -822,6 +823,10 @@
         exp))))
     (else
       (error "unknown exp: " exp))))
+
+;; Nicer interface to expand-body
+(define (expand-lambda-body exp env)
+  (expand-body '() exp env))
 
 ;; Helper to expand a lambda body, so we can splice in any begin's
 (define (expand-body result exp env)
