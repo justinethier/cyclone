@@ -185,7 +185,6 @@
 ;
 ; for a lot of the following, need begin-splicing, or syntax-rules
 ;    binary-port?
-;    define-record-type
 ;    define-values
 ;    guard
 ;    import
