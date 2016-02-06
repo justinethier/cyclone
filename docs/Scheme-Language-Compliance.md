@@ -19,7 +19,7 @@ Section | Status | Comments
 5.2 Import declarations | Partial |
 5.3 Variable definitions | Partial | `define-values` is not implemented yet.
 5.4 Syntax definitions | |
-5.5 Record-type definitions | |
+5.5 Record-type definitions | Yes | Located in the `(srfi 9)` library.
 5.6 Libraries | Partial | Support is "good enough" but need to make it more robust
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes | `eqv?` is not implemented, it is just an alias to `eq?`
