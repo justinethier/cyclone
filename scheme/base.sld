@@ -1,8 +1,18 @@
 (define-library (scheme base)
+  ;; In the future, may include this here: (include "../srfi/9.scm")
   (export
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
+    ;; TODO: possibly relocating here in the future
+    ;define-record-type
+    ;  register-simple-type
+    ;  make-type-predicate
+    ;  make-constructor
+    ;  make-getter
+    ;  make-setter
+    ;  slot-set!
+    ;  type-slot-offset
     abs
     max
     min
