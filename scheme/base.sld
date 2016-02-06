@@ -191,15 +191,15 @@
 ;    syntax-rules
 ;    parameterize
 ;    define-values
-;
-; for a lot of the following, need begin-splicing, or syntax-rules
 ;    guard
+;    letrec*
+;
+; unclassified TODO's:
 ;    import
 ;    include
 ;    let*-values
-;    let-syntax
 ;    let-values
-;    letrec*
+;    let-syntax
 ;    letrec-syntax
 ;;;;
   )
