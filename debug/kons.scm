@@ -22,6 +22,8 @@
     (let ((k (kons 1 2)))
       (set-kar! k 3)
       (kar k)) ;=. 3
+    (record? (kons 1 2))
+    (record? (cons 1 2))
 ))
 
 ;(define <pare> (register-simple-type <pare> #f (quote (x y)))) 

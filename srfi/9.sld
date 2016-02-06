@@ -4,6 +4,7 @@
 ;;; This is based on the implementation of SRFI 9 from chibi scheme
 (define-library (srfi 9)
   (export 
+    record?
     define-record-type
     register-simple-type
     make-type-predicate
@@ -50,6 +51,11 @@
     (define (make-setter sym name idx)
       (lambda (obj val)
         (vector-set! (vector-ref obj 2) idx val)))
+
+    (define (record? obj)
+      (and (vector? obj)
+           (> (vector-length obj) 0)
+           (equal? record-marker (vector-ref obj 0))))
 
     (define-syntax define-record-type
       (er-macro-transformer

@@ -336,6 +336,8 @@
     (set-kar! k 3)
     (kar k))
   3)
+(assert:equal "Record type predicate (t)" (record? (kons 1 2)) #t)
+(assert:equal "Record type predicate (f)" (record? (cons 1 2)) #f)
 ;; END records
 
 ; TODO: use display, output without surrounding quotes

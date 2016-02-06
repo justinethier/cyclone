@@ -182,9 +182,17 @@
 ;    open-input-string
 ;    open-output-string
 ;
-; for a lot of the following, need begin-splicing, or syntax-rules
+;    ;; no binary/text ports yet
 ;    binary-port?
+;    textual-port?
+;
+;    ;; syntax-rules
+;    syntax-error
+;    syntax-rules
+;    parameterize
 ;    define-values
+;
+; for a lot of the following, need begin-splicing, or syntax-rules
 ;    guard
 ;    import
 ;    include
@@ -193,11 +201,6 @@
 ;    let-values
 ;    letrec*
 ;    letrec-syntax
-;    parameterize
-;    record?
-;    syntax-error
-;    syntax-rules
-;    textual-port?
 ;;;;
   )
   (begin
