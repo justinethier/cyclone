@@ -7,6 +7,7 @@
 (import (scheme cyclone common)
         (scheme base)
         (scheme char)
+        (scheme lazy)
         (scheme load)
         (scheme read)
         (scheme write)
