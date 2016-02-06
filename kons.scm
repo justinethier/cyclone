@@ -5,7 +5,7 @@
         )
 
 ;; TODO: seems begins are not spliced when part of an applied lambda??
-((lambda ()
+;;((lambda ()
 
 (define-record-type <pare>
   (kons x y)
@@ -41,7 +41,7 @@
 ;    (pare? (kons 1 2)) 
 ;    (pare? (cons 1 4))
 ;))
-))
+;;))
 
 ;(((lambda () 
 ;(define <pare> (register-simple-type <pare> #f (quote (x y)))) 
