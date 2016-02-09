@@ -16,9 +16,9 @@ Section | Status | Comments
 4.2 Derived expression types | Partial | 
 4.2.1 Conditionals | Yes | 
 4.2.2 Binding constructs | Partial | Missing `letrec*`, `let-values`, and `let*-values`
-4.2.3 Sequencing | Yes | Begin may not sequence properly as part of a library though
+4.2.3 Sequencing | Yes | Begin may not sequence properly as part of a library definition
 4.2.4 Iteration | Yes |
-4.2.5 Delayed evaluation | |
+4.2.5 Delayed evaluation | Yes |
 4.2.6 Dynamic bindings | |
 4.2.7 Exception handling | |
 4.2.8 Quasiquotation | Yes |
