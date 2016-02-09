@@ -87,13 +87,8 @@ Each thread has its own instance of the thread data structure and its own stack 
 Each object contains a header with the following information:
 
 - Tag - A number indicating the object type: cons, vector, string, etc.
-- Mark - The status of the object's memory. Possible values are:
-  - Blue - Unallocated memory.
-  - Red - Objects on the stack.
-  - White - Heap memory that has not been scanned by the collector. 
-  - Gray - Objects marked by the collector that may still have child objects that must be marked.
-  - Black - Objects marked by the collector whose immediate child objects have also been marked.
-- Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet. This is only applicable for objects on the stack.
+- Mark - The status of the object's memory.
+- Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet (see major GC sections below). This is only applicable for objects on the stack.
 
 ## Mark Buffers
 
@@ -133,6 +128,14 @@ Finally, although not mentioned in Baker's paper, a heap object can be modified 
 A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
 ## Tri-color Marking
+
+An object can be marked using any of the following colors to indicate the status of its memory:
+
+  - Blue - Unallocated memory.
+  - Red - An object on the stack.
+  - White - Heap memory that has not been scanned by the collector. 
+  - Gray - Objects marked by the collector that may still have child objects that must be marked.
+  - Black - Objects marked by the collector whose immediate child objects have also been marked.
 
 Only objects marked as white, gray, or black participate in major collections:
 
