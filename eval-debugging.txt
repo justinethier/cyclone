@@ -1,0 +1,28 @@
+tested with nothing checked out on cyclone-bootstrap
+used the (delay (force  test case
+
+eval.c:23791 lambda 19 - self_731184[1][0][2]
+
+eval lambda 20 - k_73700
+p ((closureN)((closureN)((closureN)k_73700 )->elts[0]))->elts[2]
+
+
+(define (foldr func end lst)
+lst is bad in debugger:
+
+(gdb) p *((list)lst_73538 )
+$56 = {hdr = {mark = 3221189204, grayed = 0 '\000'}, tag = -1073779712, cons_car = 0x8,
+  cons_cdr = 0xbffdf7f0}
+
+  this is lambda_706 in base.c
+  so... wtf?
+
+  (cdr exp) in wrapc seems corrupt - WTF?
+
+  (gdb) p *((list)((list)((closureN)self_731181)->elts[0])->cons_cdr)
+  $67 = {hdr = {mark = 3221189204, grayed = 0 '\000'}, tag = -1073779712, cons_car = 0x8,
+    cons_cdr = 0xbffdf7f0}
+
+    presumably the cdr is corrupt in eval-from-c as well? need to check that next
+
+
