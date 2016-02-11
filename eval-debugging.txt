@@ -1,5 +1,7 @@
 tested with nothing checked out on cyclone-bootstrap
-used the (delay (force  test case
+used the case:
+
+  (force (delay (+ 1 2)))
 
 eval.c:23791 lambda 19 - self_731184[1][0][2]
 
