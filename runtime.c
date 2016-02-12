@@ -2128,7 +2128,10 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     //printf("\n");
 
     va_end(ap);
-    apply(data, cont, prim, (object)&args[0]);
+    apply(data, cont, prim, 
+          (argc > 0) 
+            ? (object)&args[0]
+            : nil);
 }
 // END apply
 
