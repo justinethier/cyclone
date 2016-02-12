@@ -1,6 +1,7 @@
 (import (scheme base)
         (scheme char)
         (scheme file)
+        (scheme lazy)
         (scheme read)
         (scheme write)
         (scheme eval)
@@ -339,6 +340,25 @@
 (assert:equal "Record type predicate (t)" (record? (kons 1 2)) #t)
 (assert:equal "Record type predicate (f)" (record? (cons 1 2)) #f)
 ;; END records
+
+;; Lazy evaluation
+(assert:equal "Basic lazy" (force (delay (+ 1 2))) 3)
+(assert:equal "Lazy test #2"
+  (let ((p (delay (+ 1 2))))
+    (list (force p) (force p)))
+  '(3 3))
+((lambda ()
+  (define integers
+    (letrec ((next
+              (lambda (n)
+                (delay (cons n (next (+ n 1)))))))
+      (next 0)))
+  (define head
+    (lambda (stream) (car (force stream))))
+  (define tail
+    (lambda (stream) (cdr (force stream))))
+  (assert:equal "Lazy #3" (head (tail (tail integers))) 2)))
+
 
 ; TODO: use display, output without surrounding quotes
 (write (list *num-passed* " tests passed with no errors"))
