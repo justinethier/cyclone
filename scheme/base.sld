@@ -137,6 +137,7 @@
     exact
     inexact
     eof-object
+    syntax-error
 
 ;;;;
 ; Possibly missing functions:
@@ -187,7 +188,6 @@
 ;    textual-port?
 ;
 ;    ;; syntax-rules
-;    syntax-error
 ;    syntax-rules
 ;    parameterize
 ;    define-values
@@ -449,6 +449,11 @@
              ((if (symbol? x) #t (null? x)) (list (rename 'quote) x))
              (else x)))
           (qq (cadr expr) 0))))
+
+    (define-syntax syntax-error
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (apply error (cdr expr)))))
 
     ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
