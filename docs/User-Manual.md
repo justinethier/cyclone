@@ -128,7 +128,7 @@ A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differ
 
 The [`srfi 18`](api/srfi/18.md) library may be imported to provide support for multithreaded programs. See the [SRFI 18 specification](http://srfi.schemers.org/srfi-18/srfi-18.html) for more background information.
 
-Due to how Cyclone's garbage collector is implemented objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent this race condition an object must be guaranteed to be on the heap prior to being used by another thread. There are two ways to meet this guarantee:
+Due to how Cyclone's garbage collector is implemented, objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. There are two ways to meet this guarantee:
 
 - Use the `->heap` function to place a copy of an object on the heap. Note this will only create a copy of a single object. A vector of objects would not have the contents of the vector moved, and a list would only have its immediate cons cell copied:
 
