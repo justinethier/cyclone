@@ -752,6 +752,7 @@
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
 (define (expand exp env)
+  ;(trace:error `(expand ,exp))
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
@@ -789,6 +790,12 @@
       (let* ((name (cadr exp))
              (trans (caddr exp))
              (body (cadr trans)))
+        (cond
+         ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
+          (expand
+            `(define-syntax ,name ,(expand trans env))
+            env))
+         (else
         (set! *defined-macros* (cons (cons name body) *defined-macros*))
         ;; Keep track of macros added during compilation.
         ;; Previous list should eventually go away once macros are
@@ -805,7 +812,7 @@
         ;;  - no, we need to do this here so code is carried though all transforms
         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
         ;;
-        `(define ,name ,(expand body env))))
+        `(define ,name ,(expand body env))))))
      ((define-c? exp) exp)
      ((symbol? (car exp))
       (let ((val (env:lookup (car exp) env #f)))
