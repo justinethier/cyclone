@@ -8,6 +8,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
+(define identifier? symbol?)
+(define (identifier->symbol obj) obj)
+(define (find-tail pred ls)
+  (and (pair? ls) (if (pred (car ls)) ls (find-tail pred (cdr ls)))))
+
+(define (find pred ls)
+  (cond ((find-tail pred ls) => car) (else #f)))
 
 (define-syntax syntax-rules
   (er-macro-transformer
@@ -26,7 +33,7 @@
            (_quote (rename 'syntax-quote)) (_apply (rename 'apply))
            (_append (rename 'append))      (_map (rename 'map))
            (_vector? (rename 'vector?))    (_list? (rename 'list?))
-           (_len (rename'len))             (_length (rename 'length*))
+           (_len (rename'len))             (_length (rename 'length))
            (_- (rename '-))   (_>= (rename '>=))   (_error (rename 'error))
            (_ls (rename 'ls)) (_res (rename 'res)) (_i (rename 'i))
            (_reverse (rename 'reverse))
@@ -38,7 +45,7 @@
        (define forms (if ellipsis-specified? (cdr (cddr expr)) (cddr expr)))
        (define (next-symbol s)
          (set! count (+ count 1))
-         (rename (string->symbol (string-append s (%number->string count)))))
+         (rename (string->symbol (string-append s (number->string count)))))
        (define (expand-pattern pat tmpl)
          (let lp ((p (cdr pat))
                   (x (list _cdr _expr))
@@ -64,7 +71,7 @@
                          (cddr p))
                     (error "multiple ellipses" p))
                    (else
-                    (let ((len (length* (cdr (cdr p))))
+                    (let ((len (length (cdr (cdr p))))
                           (_lp (next-symbol "lp.")))
                       `(,_let ((,_len (,_length ,v)))
                          (,_and (,_>= ,_len ,len)
