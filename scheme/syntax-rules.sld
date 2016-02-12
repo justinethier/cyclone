@@ -1,4 +1,10 @@
 ; A temporary file to test syntax-rules integration
+(define-library (scheme syntax-rules)
+  (import (scheme base))
+  (export 
+    syntax-rules
+  )
+  (begin
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
@@ -228,5 +234,6 @@
                         (list _error "no expansion for"
                               (list (rename 'strip-syntactic-closures) _expr))
                         #f)))))))))))
+))
 
 
