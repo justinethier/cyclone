@@ -13,20 +13,12 @@ TODO:
   - read.sld in-port-table - obvious thread safety issue here
       what is the performance impact of adding locks to all these funcs?
       or do we need to rewrite the code somehow?
-  - start making core stuff thread safe. for example, test.scm sometimes
-    crashes, I think printing out result from (read)
+  - start making core stuff thread safe
   - assume I/O and eval both have threading issues
   - eval.sld - ...
 - In conjunction with above, write more programs that use multiple threads
-  - try a simple one with 3-6 threads just writing data to output, and then files
   - simple multithreaded example such as producer/consumer
   - find at least one more algorithm that can be parallelized
-- document at a high level how the GC works
-  mostly what minor/major GC's are, and how they are interleaved.
-- user manual
-  need to document everything, including:
-  - what to be cognizant of when writing threading code. esp, how to deal with stack objects (initiating minor GC's, etc)
-    this probably should be part of the user manual itself
 - revisit features list, issues list, etc
 
 DONE:
