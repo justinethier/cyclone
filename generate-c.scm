@@ -32,7 +32,7 @@ void do_dispatch(void *data, int argc, function_type func, object clo, object *b
         (display ");" )
 
         (set! bs (string-append bs ",*(b+" (number->string i) ")"))
-        (if (< i 129)
+        (if (< i 149)
           (loop (+ i 1))))
 
     (display "
