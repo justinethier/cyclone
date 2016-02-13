@@ -606,14 +606,6 @@
       (make k x)))
     (define (list-copy lst)
       (foldr (lambda (x y) (cons x y)) '() lst))
-;    (define (map func lst)
-;      (foldr (lambda (x y) (cons (func x) y)) '() lst))
-    (define (for-each f lst)
-      (cond
-       ((null? lst) #t)
-       (else
-         (f (car lst))
-         (for-each f (cdr lst)))))
     ;; Implementation of receive from SRFI 8
     (define-syntax receive
       (er-macro-transformer
@@ -651,32 +643,32 @@
           (values '() '()))))))
 ; END support functions
 
-(define (map f lis1 . lists)
-;  (check-arg procedure? f map-in-order)
-  (if (pair? lists)
-      (let recur ((lists (cons lis1 lists)))
-        (receive (cars cdrs) (%cars+cdrs lists)
-          (if (pair? cars)
-              (let ((x (apply f cars)))		; Do head first,
-                (cons x (recur cdrs)))		; then tail.
-              '())))
-      ;; Fast path.
-     (foldr (lambda (x y) (cons (f x) y)) '() lis1)))
+    (define (map f lis1 . lists)
+    ;  (check-arg procedure? f map-in-order)
+      (if (pair? lists)
+          (let recur ((lists (cons lis1 lists)))
+            (receive (cars cdrs) (%cars+cdrs lists)
+              (if (pair? cars)
+                  (let ((x (apply f cars)))		; Do head first,
+                    (cons x (recur cdrs)))		; then tail.
+                  '())))
+          ;; Fast path.
+         (foldr (lambda (x y) (cons (f x) y)) '() lis1)))
 
-;;(define (for-each f lis1 . lists)
-;;  (if (not (null? lis1))
-;;    (if (pair? lists)
-;;      (let recur ((lists (cons lis1 lists)))
-;;        (receive (cars cdrs) (%cars+cdrs lists)
-;;          (if (pair? cars)
-;;              (begin
-;;                (apply f cars)
-;;                (recur cdrs)))))
-;;      ;; Fast path.
-;;      (if (eq? 1 (length lis1))
-;;        (f (car lis1))
-;;        (begin (f (car lis1))
-;;               (for-each f (cdr lis1)))))))
+    (define (for-each f lis1 . lists)
+      (if (not (null? lis1))
+        (if (pair? lists)
+          (let recur ((lists (cons lis1 lists)))
+            (receive (cars cdrs) (%cars+cdrs lists)
+              (if (pair? cars)
+                  (begin
+                    (apply f cars)
+                    (recur cdrs)))))
+          ;; Fast path.
+          (if (eq? 1 (length lis1))
+            (f (car lis1))
+            (begin (f (car lis1))
+                   (for-each f (cdr lis1)))))))
     (define (list-tail lst k) 
       (if (zero? k)
         lst
