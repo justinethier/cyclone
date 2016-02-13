@@ -738,12 +738,13 @@
     (define (string-map func str1 . strs)
       (list->string
         (apply map `(,func ,(string->list str1) ,@(map string->list strs)))))
-    (define (string-for-each func str)
-      (for-each func (string->list str)))
-    (define (vector-map func vec)
-      (list->vector (map func (vector->list vec)))) 
-    (define (vector-for-each func vec)
-      (for-each func (vector->list vec)))
+    (define (string-for-each func str1 . strs)
+      (apply for-each `(,func ,(string->list str1) ,@(map string->list strs))))
+    (define (vector-map func vec1 . vecs)
+      (list->vector
+        (apply map `(,func ,(vector->list vec1) ,@(map vector->list vecs)))))
+    (define (vector-for-each func vec1 . vecs)
+      (apply for-each `(,func ,(vector->list vec1) ,@(map vector->list vecs))))
     (define (vector-append . vecs)
       (list->vector
         (apply append (map vector->list vecs))))
