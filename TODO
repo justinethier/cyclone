@@ -1,10 +1,11 @@
 Initiatives:
 
-- syntax-rules integration
+- syntax-rules integration (WIP)
 - r7rs missing features
 - srfi 18 - conditional vars, and missing thread functions
 - more complex threading examples
 - test on a 64-bit platform/vm
 - online docs via read-the-docs
 - api documentation
+- revisit macro hygiene issues
 - library issues (name conflicts and limited feature set)
