@@ -735,8 +735,9 @@
                           (string-set! str i fill)
                           (loop (+ i 1)))))))
         (loop start)))
-    (define (string-map func str)
-      (list->string (map func (string->list str))))
+    (define (string-map func str1 . strs)
+      (list->string
+        (apply map `(,func ,(string->list str1) ,@(map string->list strs)))))
     (define (string-for-each func str)
       (for-each func (string->list str)))
     (define (vector-map func vec)
