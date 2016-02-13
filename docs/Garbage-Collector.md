@@ -65,8 +65,6 @@ The heap is locked during allocation and sweep operations to protect against con
 
 If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. This is the only choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
 
-Cyclone's heap is based on the implementation from Chibi scheme. 
-
 ## Thread Data
 
 At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. Thread data is a structure that contains all of the necessary information to perform collections, including:
