@@ -46,6 +46,26 @@
          (begin result1 result2 ...)
          (guard-aux reraise clause1 clause2 ...)))))
 
+   (define-syntax %case
+     (syntax-rules ()
+       ((%case args len n p ((params ...) . body) . rest)
+        (if (= len (length '(params ...)))
+            (apply (lambda (params ...) . body) args)
+            (%case args len 0 () . rest)))
+       ((%case args len n (p ...) ((x . y) . body) . rest)
+        (%case args len (+ n 1) (p ... x) (y . body) . rest))
+       ((%case args len n (p ...) (y . body) . rest)
+        (if (>= len n)
+            (apply (lambda (p ... . y) . body) args)
+            (%case args len 0 () . rest)))
+       ((%case args len n p)
+        (error "case-lambda: no cases matched"))))
+   (define-syntax case-lambda
+     (syntax-rules ()
+       ((case-lambda . clauses)
+        (lambda args (let ((len (length args))) (%case args len 0 () . clauses))))))
+        ;(lambda args (let ((len (length* args))) (%case args len 0 () . clauses))))))
+
 (write
   (letrec* ((x 1)) x))
 
@@ -60,4 +80,15 @@
           ((assq 'a condition) => cdr)
           ((assq 'b condition)))
     (raise (list (cons 'b 23))))) ;=> (b . 23)
+
+(define range
+  (case-lambda
+    ((e) (range 0 e))
+    ((b e) (do ((r '() (cons e r))
+                (e (- e 1) (- e 1)))
+               ((< e b) r)))))
+(write
+  (range 3)) ; => (0 1 2)
+(write
+  (range 3 5)) ; => (3 4)
 
