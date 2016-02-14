@@ -22,8 +22,8 @@ Section | Status | Comments
 4.2.6 Dynamic bindings | |
 4.2.7 Exception handling | Yes |
 4.2.8 Quasiquotation | Yes |
-4.2.9 Case-lambda | |
-4.3 Macros | Partial | No support for `syntax-rules` but a lower-level explicit renaming macro system is implemented.
+4.2.9 Case-lambda | Yes |
+4.3 Macros | Yes | Support for `syntax-rules` and a lower-level explicit renaming macro system.
 5.1 Programs | Yes |
 5.2 Import declarations | Partial |
 5.3 Variable definitions | Partial | `define-values` is not implemented yet.
