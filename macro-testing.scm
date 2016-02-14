@@ -138,3 +138,50 @@
 ;  (let ()
 ;    (define-values (x y) (values 1 2))
 ;    (+ x y))) ;=> 3
+
+
+; TODO: parameter objects
+;(define (parameter-convert param value)
+;  (let ((proc (parameter-converter param)))
+;    (if (procedure? proc)
+;        (proc value)
+;        value)))
+;
+;(define (make-parameter init . o)
+;  (let ((conv (and (pair? o) (car o))))
+;    (%make-parameter (if conv (conv init) init) conv)))
+;
+;(define-syntax parameterize
+;  (syntax-rules ()
+;    ((parameterize ("step") old cons-new ((param value ptmp vtmp) ...) () body)
+;     (let ((ptmp param) ...)
+;       (let ((vtmp (parameter-convert ptmp value)) ...)
+;         (let ((old (thread-parameters)))
+;           (let ((new cons-new))
+;             (dynamic-wind
+;                 (lambda () (thread-parameters-set! new))
+;                 (lambda () . body)
+;                 (lambda () (thread-parameters-set! old))))))))
+;    ((parameterize ("step") old cons-new args ((param value) . rest) body)
+;     (parameterize ("step") old (cons (cons ptmp vtmp) cons-new) ((param value ptmp vtmp) . args) rest body))
+;    ((parameterize ((param value) ...) . body)
+;     (parameterize ("step") old (thread-parameters) () ((param value) ...) body))))
+;
+;(define radix
+;  (make-parameter
+;    10
+;    (lambda (x)
+;      (if (and (exact-integer? x) (<= 2 x 16))
+;          x
+;          (error "invalid radix")))))
+;(define (f n) (number->string n (radix)))
+;
+;(write
+;  (f 12)) ;=> "12"
+;
+;(write
+;  (parameterize ((radix 2))
+;    (f 12))) ;=> "1100"
+;
+;(write
+;  (f 12)) ;=> "12"
