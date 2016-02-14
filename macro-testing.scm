@@ -1,4 +1,4 @@
-(import (scheme base) (scheme write))
+(import (scheme base) (scheme write) (scheme case-lambda))
 
 ;(call-with-values (lambda () (values 1 2)) (lambda (x y) (write `(,x ,y))))
 ;(define-syntax letrec*
