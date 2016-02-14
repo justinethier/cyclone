@@ -15,12 +15,12 @@ Section | Status | Comments
 4.1 Primitive expression types | Partial | `include` and `include-ci` are not implemented, although `include` may be specified as part of a library definition.
 4.2 Derived expression types | Partial | 
 4.2.1 Conditionals | Yes | 
-4.2.2 Binding constructs | Partial | Missing `letrec*`, `let-values`, and `let*-values`
+4.2.2 Binding constructs | Partial | Missing `let-values` and `let*-values`
 4.2.3 Sequencing | Yes | Begin may not sequence properly as part of a library definition
 4.2.4 Iteration | Yes |
 4.2.5 Delayed evaluation | Yes |
 4.2.6 Dynamic bindings | |
-4.2.7 Exception handling | |
+4.2.7 Exception handling | Yes |
 4.2.8 Quasiquotation | Yes |
 4.2.9 Case-lambda | |
 4.3 Macros | Partial | No support for `syntax-rules` but a lower-level explicit renaming macro system is implemented.
