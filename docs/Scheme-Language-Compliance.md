@@ -40,7 +40,7 @@ Section | Status | Comments
 6.7 Strings | Partial | No unicode support, `string-ci` functions are not implemented.
 6.8 Vectors | Yes |
 6.9 Bytevectors | | Not supported yet.
-6.10 Control features | Partial | `dynamic-wind` is limited, and does not work across calls to continuations.
+6.10 Control features | Yes | `dynamic-wind` is limited, and does not work across calls to continuations.
 6.11 Exceptions | Partial | Exceptions are implemented but error objects (and associated functions `error-object`, etc) are not at this time. 
 6.12 Environments and evaluation | Partial | Only `eval` is implemented at this time.
 6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports. Do not have support for input/output strings or bytevectors.
