@@ -5,6 +5,7 @@
 ;; This module contains a front-end for the compiler itself.
 ;;
 (import (scheme base)
+        (scheme case-lambda)
         (scheme eval)
         (scheme file)
         (scheme lazy)
