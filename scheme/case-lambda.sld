@@ -2,6 +2,7 @@
   (import (scheme base))
   (export 
     case-lambda
+;    %case
   )
   (begin
 
