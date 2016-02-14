@@ -196,8 +196,6 @@
 ;    ;; syntax-rules
 ;    parameterize
 ;    define-values
-;    guard
-;    letrec*
 ;
 ; unclassified TODO's:
 ;    import
