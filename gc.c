@@ -1,5 +1,7 @@
 /** 
  * Cyclone Scheme
+ * https://github.com/justinethier/cyclone
+ *
  * Copyright (c) 2015-2016, Justin Ethier
  * All rights reserved.
  *

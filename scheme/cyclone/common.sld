@@ -1,3 +1,11 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module contains definitions used by the compiler and interpreter.
+;;;;
 (define-library (scheme cyclone common)
   (export 
     *Cyc-version-banner*

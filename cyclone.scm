@@ -1,9 +1,11 @@
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; This module contains a front-end for the compiler itself.
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module contains a front-end for the compiler itself.
+;;;;
 (import (scheme base)
         (scheme case-lambda)
         (scheme eval)

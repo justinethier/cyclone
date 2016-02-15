@@ -1,9 +1,11 @@
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; This module contains a simple Read-Eval-Print Loop
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module contains a simple Read-Eval-Print Loop
+;;;;
 (import (scheme cyclone common)
         (scheme base)
         (scheme char)

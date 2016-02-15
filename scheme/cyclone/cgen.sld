@@ -1,10 +1,11 @@
-;;
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; This module compiles scheme code to a Cheney-on-the-MTA C runtime.
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module compiles scheme code to a Cheney-on-the-MTA C runtime.
+;;;;
 (define-library (scheme cyclone cgen)
   (import (scheme base)
           (scheme char)

@@ -1,11 +1,13 @@
-;; Cyclone Scheme
-;; Copyright (c) 2015, Justin Ethier
-;; All rights reserved.
-;;
-;; This module automatically generates the following files:
-;;
-;; - dispatch.c => Used by apply to call native C functions.
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module automatically generates the following files:
+;;;;
+;;;; - dispatch.c => Used by apply to call native C functions.
+;;;;
 (import (scheme base)
         (scheme file)
         (scheme write))

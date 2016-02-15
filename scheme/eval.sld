@@ -1,10 +1,12 @@
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; The Cyclone interpreter, based on the meta-circular evaluator from SICP 4.1:
-;; http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; The Cyclone interpreter, based on the meta-circular evaluator from SICP 4.1:
+;;;; http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1
+;;;;
 (define-library (scheme eval)
   (import 
     (scheme cyclone util)

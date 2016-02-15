@@ -1,3 +1,11 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module contains the base library from r7rs.
+;;;;
 (define-library (scheme base)
   ;; In the future, may include this here: (include "../srfi/9.scm")
   (export

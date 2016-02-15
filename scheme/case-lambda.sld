@@ -1,3 +1,8 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; A case-lambda implementation, based off the one from chibi scheme.
+;;;;
 (define-library (scheme case-lambda)
   (import (scheme base))
   (export 

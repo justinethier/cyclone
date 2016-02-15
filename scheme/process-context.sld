@@ -1,3 +1,11 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module contains the process-context r7rs.
+;;;;
 (define-library (scheme process-context)
   (export 
     command-line

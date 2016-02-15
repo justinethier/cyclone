@@ -1,7 +1,11 @@
-;; TODO: this does not work yet, need (begin) to be able to inject
-;; define's in its outer scope
-;;
-;;; This is based on the implementation of SRFI 9 from chibi scheme
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This is based on the implementation of SRFI 9 from chibi scheme.
+;;;;
 (define-library (srfi 9)
   (export 
     record?

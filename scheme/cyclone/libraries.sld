@@ -1,17 +1,18 @@
-;;
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; This module implements r7rs libraries. In our compiler, these are used to
-;; encapsulate C modules.
-;;
-;; Initially, this a quicky-and-dirty (for now) implementation of r7rs libraries.
-;;
-;; TODO: go through functions and ensure consistent naming conventions.
-;;   probably should also clean up some of the function names, this is
-;;   not a very clean or nice API at the moment.
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module implements r7rs libraries. In our compiler, these are used to
+;;;; encapsulate C modules.
+;;;;
+;;;; Initially, this a quicky-and-dirty (for now) implementation of r7rs libraries.
+;;;;
+;;;; TODO: go through functions and ensure consistent naming conventions.
+;;;;   probably should also clean up some of the function names, this is
+;;;;   not a very clean or nice API at the moment.
+;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
           (scheme read)

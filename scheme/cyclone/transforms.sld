@@ -1,11 +1,12 @@
-;;
-;; Cyclone Scheme
-;; Copyright (c) 2014, Justin Ethier
-;; All rights reserved.
-;;
-;; This module performs Scheme-to-Scheme transformations, and also contains
-;; various utility functions used by the compiler.
-;;
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module performs Scheme-to-Scheme transformations, and also contains
+;;;; various utility functions used by the compiler.
+;;;;
 
 (define-library (scheme cyclone transforms)
   (import (scheme base)
