@@ -27,7 +27,7 @@ object Cyc_global_set(void *thd, object *glo, object value)
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
-const char *tag_names[21] = { \
+const char *tag_names[22] = { \
    "pair" \
  , "symbol" \
  , "" \
@@ -48,6 +48,7 @@ const char *tag_names[21] = { \
  , "vector" \
  , "macro" \
  , "mutex" \
+ , "condition variable" \
  , "Reserved for future use" };
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
@@ -550,6 +551,9 @@ object Cyc_display(object x, FILE *port)
     case mutex_tag:
       fprintf(port, "<mutex %p>", x);
       break;
+    case cond_var_tag:
+      fprintf(port, "<condition variable %p>", x);
+      break;
     case boolean_tag:
       fprintf(port, "#%s",((boolean_type *) x)->pname);
       break;
@@ -833,6 +837,11 @@ object Cyc_is_port(object o){
 
 object Cyc_is_mutex(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == mutex_tag)
+        return boolean_t;
+    return boolean_f;}
+
+object Cyc_is_cond_var(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == cond_var_tag)
         return boolean_t;
     return boolean_f;}
 

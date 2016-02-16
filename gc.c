@@ -341,6 +341,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       // NOTE: don't copy mutex itself, caller will do that (this is a special case)
       return (char *)hp;
     }
+    case cond_var_tag: {
+      cond_var_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = cond_var_tag;
+      // NOTE: don't copy cond_var itself, caller will do that (this is a special case)
+      return (char *)hp;
+    }
     case forward_tag:
       return (char *)forward(obj);
     case eof_tag:
@@ -469,6 +476,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == port_tag) return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag) return gc_heap_align(sizeof(cvar_type));
   if (t == mutex_tag) return gc_heap_align(sizeof(mutex_type));
+  if (t == cond_var_tag) return gc_heap_align(sizeof(cond_var_type));
   
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %ld\n", obj, t);
   exit(1);
@@ -567,6 +575,14 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 #endif
           if (pthread_mutex_destroy(&(((mutex)p)->lock)) != 0) {
             fprintf(stderr, "Error destroying mutex\n");
+            exit(1);
+          }
+        } else if (type_of(p) == cond_var_tag) {
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "pthread_cond_destroy from sweep\n");
+#endif
+          if (pthread_cond_destroy(&(((cond_var)p)->lock)) != 0) {
+            fprintf(stderr, "Error destroying condition variable\n");
             exit(1);
           }
         }

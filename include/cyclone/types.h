@@ -188,6 +188,7 @@ typedef long tag_type;
 #define vector_tag 17
 #define macro_tag 18
 #define mutex_tag 19
+#define cond_var_tag 20
 
 #define nil NULL
 #define eq(x,y) (x == y)
@@ -223,6 +224,10 @@ typedef cvar_type *cvar;
 /* Define mutex type */
 typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;
 typedef mutex_type *mutex;
+
+/* Define condition variable type */
+typedef struct {gc_header_type hdr; tag_type tag; pthread_cond_t lock;} cond_var_type;
+typedef cond_var_type *cond_var;
 
 /* Define boolean type. */
 typedef struct {gc_header_type hdr; const tag_type tag; const char *pname;} boolean_type;
