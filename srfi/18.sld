@@ -34,8 +34,8 @@
     ;; mutex-state
 
     ;; TODO: condition variables are not implemented yet
-    ;; (condition-variable? obj)                             ;procedure
-    ;; (make-condition-variable [name])                      ;procedure
+    condition-variable?
+    make-condition-variable
     ;; (condition-variable-name condition-variable)          ;procedure
     ;; (condition-variable-specific condition-variable)      ;procedure
     ;; (condition-variable-specific-set! condition-variable obj) ;procedure
@@ -105,4 +105,24 @@
     (define-c Cyc-minor-gc
       "(void *data, int argc, closure _, object k)"
       " Cyc_trigger_minor_gc(data, k); ")
+
+    (define-c condition-variable?
+      "(void *data, int argc, closure _, object k, object obj)"
+      " object result = Cyc_is_cond_var(obj);
+        return_closcall1(data, k, result); ")
+    ;; (make-condition-variable [name])                      ;procedure
+;    (define-c make-condition-variable
+;      "(void *data, int argc, closure _, object k)"
+;      " int heap_grown;
+;        cond_var cond;
+;        cond_var_type tmp;
+;        tmp.hdr.mark = gc_color_red;
+;        tmp.hdr.grayed = 0;
+;        tmp.tag = cond_var_tag;
+;        cond = gc_alloc(Cyc_heap, sizeof(cond_var_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+;        if (pthread_cond_init(&(cond->cond), NULL) != 0) {
+;          fprintf(stderr, "Unable to make condition variable\n");
+;          exit(1);
+;        }
+;        return_closcall1(data, k, cond); ")
 ))
