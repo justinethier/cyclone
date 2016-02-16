@@ -226,7 +226,7 @@ typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_t
 typedef mutex_type *mutex;
 
 /* Define condition variable type */
-typedef struct {gc_header_type hdr; tag_type tag; pthread_cond_t lock;} cond_var_type;
+typedef struct {gc_header_type hdr; tag_type tag; pthread_cond_t cond;} cond_var_type;
 typedef cond_var_type *cond_var;
 
 /* Define boolean type. */
