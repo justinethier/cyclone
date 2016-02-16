@@ -39,8 +39,8 @@
     ;; (condition-variable-name condition-variable)          ;procedure
     ;; (condition-variable-specific condition-variable)      ;procedure
     ;; (condition-variable-specific-set! condition-variable obj) ;procedure
-    ;; (condition-variable-signal! condition-variable)       ;procedure
-    ;; (condition-variable-broadcast! condition-variable)    ;procedure
+    condition-variable-signal!
+    condition-variable-broadcast!
 
     ;; Time functions are not implemented here, see (scheme time) instead
    
@@ -111,18 +111,36 @@
       " object result = Cyc_is_cond_var(obj);
         return_closcall1(data, k, result); ")
     ;; (make-condition-variable [name])                      ;procedure
-;    (define-c make-condition-variable
-;      "(void *data, int argc, closure _, object k)"
-;      " int heap_grown;
-;        cond_var cond;
-;        cond_var_type tmp;
-;        tmp.hdr.mark = gc_color_red;
-;        tmp.hdr.grayed = 0;
-;        tmp.tag = cond_var_tag;
-;        cond = gc_alloc(Cyc_heap, sizeof(cond_var_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
-;        if (pthread_cond_init(&(cond->cond), NULL) != 0) {
-;          fprintf(stderr, "Unable to make condition variable\n");
-;          exit(1);
-;        }
-;        return_closcall1(data, k, cond); ")
+    (define-c make-condition-variable
+      "(void *data, int argc, closure _, object k)"
+      " int heap_grown;
+        cond_var cond;
+        cond_var_type tmp;
+        tmp.hdr.mark = gc_color_red;
+        tmp.hdr.grayed = 0;
+        tmp.tag = cond_var_tag;
+        cond = gc_alloc(gc_get_heap(), sizeof(cond_var_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+        if (pthread_cond_init(&(cond->cond), NULL) != 0) {
+          fprintf(stderr, \"Unable to make condition variable\\n\");
+          exit(1);
+        }
+        return_closcall1(data, k, cond); ")
+    ;; (condition-variable-signal! condition-variable)       ;procedure
+    ;; (condition-variable-broadcast! condition-variable)    ;procedure
+    (define-c condition-variable-signal!
+      "(void *data, int argc, closure _, object k, object cond)"
+      " Cyc_check_cond_var(data, cond);
+        if (pthread_cond_signal(&(((cond_var)cond)->cond)) != 0) {
+          fprintf(stderr, \"Unable to signal condition variable\\n\");
+          exit(1);
+        }
+        return_closcall1(data, k, boolean_t); ")
+    (define-c condition-variable-broadcast!
+      "(void *data, int argc, closure _, object k, object cond)"
+      " Cyc_check_cond_var(data, cond);
+        if (pthread_cond_broadcast(&(((cond_var)cond)->cond)) != 0) {
+          fprintf(stderr, \"Unable to broadcast condition variable\\n\");
+          exit(1);
+        }
+        return_closcall1(data, k, boolean_t); ")
 ))
