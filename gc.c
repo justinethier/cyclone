@@ -581,7 +581,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 #if GC_DEBUG_VERBOSE
           fprintf(stderr, "pthread_cond_destroy from sweep\n");
 #endif
-          if (pthread_cond_destroy(&(((cond_var)p)->lock)) != 0) {
+          if (pthread_cond_destroy(&(((cond_var)p)->cond)) != 0) {
             fprintf(stderr, "Error destroying condition variable\n");
             exit(1);
           }
