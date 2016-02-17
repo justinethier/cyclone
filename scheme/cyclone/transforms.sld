@@ -516,10 +516,6 @@
      vector-length
      vector-ref
      vector-set!
-     make-mutex
-     mutex-lock!
-     mutex-unlock!
-     mutex?
      boolean?
      char?
      eof-object?
@@ -582,10 +578,6 @@
                   string-set!
                   string->symbol ;; Could be mistaken for an identifier
                   make-vector
-                  make-mutex
-                  mutex-lock!
-                  mutex-unlock!
-                  mutex?
                   ;; I/O must be done at runtime for side effects:
                   Cyc-stdout
                   Cyc-stdin
