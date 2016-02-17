@@ -38,6 +38,7 @@
     ;; (condition-variable-name condition-variable)          ;procedure
     ;; (condition-variable-specific condition-variable)      ;procedure
     ;; (condition-variable-specific-set! condition-variable obj) ;procedure
+    condition-variable-wait! ;; Non-standard
     condition-variable-signal!
     condition-variable-broadcast!
 
@@ -142,7 +143,17 @@
         }
         return_thread_runnable(data, boolean_t); ")
 
-    (define-c mutex-unlock!
+    (define (mutex-unlock! mutex . opts)
+      (cond
+        ((null? opts)
+         (Cyc-mutex-unlock! mutex))
+        ((condition-variable? (car opts))
+         (let ((cond-var (car opts)))
+           (condition-variable-wait! cond-var mutex)))
+        (else
+         (error "mutex-unlock! - unhandled args" mutex opts))))
+
+    (define-c Cyc-mutex-unlock!
       "(void *data, int argc, closure _, object k, object obj)"
       " mutex m = (mutex) obj;
         Cyc_check_mutex(data, obj);
@@ -172,8 +183,17 @@
           exit(1);
         }
         return_closcall1(data, k, cond); ")
-    ;; (condition-variable-signal! condition-variable)       ;procedure
-    ;; (condition-variable-broadcast! condition-variable)    ;procedure
+    (define-c condition-variable-wait!
+      "(void *data, int argc, closure _, object k, object cond, object lock)"
+      " Cyc_check_cond_var(data, cond);
+        Cyc_check_mutex(data, lock);
+        if (pthread_cond_wait(
+            &(((cond_var)cond)->cond),
+            &(((mutex)lock)->lock)) != 0) {
+          fprintf(stderr, \"Unable to wait for condition variable\\n\");
+          exit(1);
+        }
+        return_closcall1(data, k, boolean_t); ")
     (define-c condition-variable-signal!
       "(void *data, int argc, closure _, object k, object cond)"
       " Cyc_check_cond_var(data, cond);
