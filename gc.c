@@ -29,7 +29,7 @@
 #define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
 #define gc_free_chunk_size (sizeof(gc_free_list))
 
-#define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((unsigned long)-1)-((1<<(bits))-1)))
+#define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((uintptr_t)-1)-((1<<(bits))-1)))
 // 64-bit is 3, 32-bit is 2
 //#define gc_word_align(n) gc_align((n), 2)
 #define gc_heap_align(n) gc_align(n, 5)
