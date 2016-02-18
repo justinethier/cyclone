@@ -22,6 +22,18 @@
 #include <stdint.h>
 #include <time.h>
 
+/* HEAP definitions, based off heap from Chibi scheme */
+#define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
+#define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
+#define gc_heap_end(h) ((object)((char*)h->data + h->size))
+#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
+#define gc_free_chunk_size (sizeof(gc_free_list))
+
+#define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((unsigned long)-1)-((1<<(bits))-1)))
+// 64-bit is 3, 32-bit is 2
+//#define gc_word_align(n) gc_align((n), 2)
+#define gc_heap_align(n) gc_align(n, 5)
+
 ////////////////////
 // Global variables
 
@@ -166,8 +178,8 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
 {
   gc_free_list *free, *next;
   gc_heap *h;
-  // TODO: mmap?
-  h = malloc(gc_heap_pad_size(size));
+  size_t padded_size = gc_heap_pad_size(size); 
+  h = malloc(padded_size); // TODO: mmap?
   if (!h) return NULL;
   h->size = size;
   //h->free_size = size;
@@ -450,7 +462,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
 #if GC_SAFETY_CHECKS
   if (is_value_type(obj)) {
     fprintf(stderr, 
-      "gc_allocated_bytes - passed value type %p q=[%p, %zu] r=[%p, %zu]\n", 
+      "gc_allocated_bytes - passed value type %p q=[%p, %d] r=[%p, %d]\n", 
       obj, q, q->size, r, r->size);
     exit(1);
   }

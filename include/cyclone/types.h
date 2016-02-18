@@ -122,18 +122,6 @@ struct gc_header_type_t {
 #define mark(x) (((list) x)->hdr.mark)
 #define grayed(x) (((list) x)->hdr.grayed)
 
-/* HEAP definitions, based off heap from Chibi scheme */
-#define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
-#define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
-#define gc_heap_end(h) ((object)((char*)h->data + h->size))
-#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
-#define gc_free_chunk_size (sizeof(gc_free_list))
-
-#define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((unsigned int)-1)-((1<<(bits))-1)))
-// 64-bit is 3, 32-bit is 2
-#define gc_word_align(n) gc_align((n), 2)
-#define gc_heap_align(n) gc_align(n, 5)
-
 /* Enums for tri-color marking */
 typedef enum { STATUS_ASYNC 
              , STATUS_SYNC1 
