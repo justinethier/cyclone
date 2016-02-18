@@ -1026,7 +1026,7 @@
       return_closcall1(
         data, 
         k, 
-       (p->mode == 1) ? boolean_t : boolean_f); ")
+       ((p->mode == 1) ? boolean_t : boolean_f)); ")
   (define-c output-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
@@ -1034,7 +1034,7 @@
       return_closcall1(
         data, 
         k, 
-       (p->mode == 0) ? boolean_t : boolean_f); ")
+       ((p->mode == 0) ? boolean_t : boolean_f)); ")
   (define-c input-port-open?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
@@ -1042,7 +1042,7 @@
       return_closcall1(
         data, 
         k, 
-       (p->mode == 1 && p->fp != NULL) ? boolean_t : boolean_f); ")
+       ((p->mode == 1 && p->fp != NULL) ? boolean_t : boolean_f)); ")
   (define-c output-port-open?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
@@ -1050,7 +1050,7 @@
       return_closcall1(
         data, 
         k, 
-       (p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f); ")
+       ((p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f)); ")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
 (define identifier? symbol?)
