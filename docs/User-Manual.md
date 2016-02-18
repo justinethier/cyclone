@@ -1,4 +1,4 @@
-[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
 # User Manual
 
@@ -29,7 +29,7 @@ Bug reports and patches are welcome! Please report any issues using the [Issues 
 
 # Requirements
 
-Cyclone has been tested under Linux on both x86 (32-bit) and ARM.
+Cyclone has been tested under Linux on the x86, x86-64, and ARM platforms.
 
 The following packages are required:
 
