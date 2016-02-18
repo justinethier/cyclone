@@ -19,6 +19,7 @@
 #include <ck_array.h>
 #include <ck_pr.h>
 #include "cyclone/types.h"
+#include <stdint.h>
 #include <time.h>
 
 ////////////////////
@@ -174,7 +175,7 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   cached_heap_free_size += size;
   h->chunk_size = chunk_size;
   h->max_size = max_size;
-  h->data = (char *) gc_heap_align(sizeof(h->data) + (unsigned int)&(h->data)); 
+  h->data = (char *) gc_heap_align(sizeof(h->data) + (uintptr_t)&(h->data)); 
   h->next = NULL;
   free = h->free_list = (gc_free_list *)h->data;
   next = (gc_free_list *)(((char *) free) + gc_heap_align(gc_free_chunk_size));
@@ -185,7 +186,7 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
 #if GC_DEBUG_PRINTFS
   fprintf(stderr, "DEBUG h->data addr: %p\n", &(h->data));
   fprintf(stderr, "DEBUG h->data addr: %p\n", h->data);
-  fprintf(stderr, ("heap: %p-%p data: %p-%p size: %d\n"),
+  fprintf(stderr, ("heap: %p-%p data: %p-%p size: %zu\n"),
           h, ((char*)h)+gc_heap_pad_size(size), h->data, h->data + size, size);
   fprintf(stderr, ("first: %p end: %p\n"),
           (object)gc_heap_first_block(h), (object)gc_heap_end(h));
@@ -429,12 +430,12 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
     *heap_grown = 1;
     result = gc_try_alloc(h, size, obj, thd);
     if (!result) {
-      fprintf(stderr, "out of memory error allocating %d bytes\n", size);
+      fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
       exit(1); // could throw error, but OOM is a major issue, so...
     }
   }
 #if GC_DEBUG_TRACE
-  fprintf(stderr, "alloc %p size = %d, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
+  fprintf(stderr, "alloc %p size = %zu, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
   // Debug check, should no longer be necessary
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
@@ -449,7 +450,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
 #if GC_SAFETY_CHECKS
   if (is_value_type(obj)) {
     fprintf(stderr, 
-      "gc_allocated_bytes - passed value type %p q=[%p, %d] r=[%p, %d]\n", 
+      "gc_allocated_bytes - passed value type %p q=[%p, %zu] r=[%p, %zu]\n", 
       obj, q, q->size, r, r->size);
     exit(1);
   }
@@ -531,7 +532,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   pthread_mutex_lock(&heap_lock);
   for (; h; h = h->next) { // All heaps
 #if GC_DEBUG_TRACE
-    fprintf(stderr, "sweep heap %p, size = %d\n", h, h->size);
+    fprintf(stderr, "sweep heap %p, size = %zu\n", h, h->size);
 #endif
     p = gc_heap_first_block(h);
     q = h->free_list;
@@ -543,7 +544,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
 #if GC_DEBUG_TRACE
-        fprintf(stderr, "skip free block %p size = %d\n", p, r->size);
+        fprintf(stderr, "skip free block %p size = %zu\n", p, r->size);
 #endif
         continue;
       }
@@ -559,7 +560,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
         exit(1);
       }
       if (r && ((char *)p) + size > (char *)r) {
-        fprintf(stderr, "sweep: bad size at %p + %d > %p", p, size, r);
+        fprintf(stderr, "sweep: bad size at %p + %zu > %p", p, size, r);
         exit(1);
       }
 #endif
@@ -1158,7 +1159,7 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
     gc_grow_heap(gc_get_heap(), 0, 0);
   }
 #if GC_DEBUG_TRACE
-  fprintf(stderr, "sweep done, total_size = %d, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
+  fprintf(stderr, "sweep done, total_size = %zu, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
     total_size, total_free, 
     freed, max_freed, time(NULL) - sweep_start);
 #endif
