@@ -88,6 +88,7 @@
       "(void *data, int argc, closure _, object k)"
       " Cyc_end_thread(data); ")
     ;; TODO: thread-join!
+    ;; TODO: possible to do this using mutator ID to get the pthread_t ??
 
     (define-c thread-sleep!
       "(void *data, int argc, closure _, object k, object timeout)"
