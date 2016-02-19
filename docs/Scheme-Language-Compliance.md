@@ -19,7 +19,7 @@ Section | Status | Comments
 4.2.3 Sequencing | Yes | Begin may not sequence properly as part of a library definition
 4.2.4 Iteration | Yes |
 4.2.5 Delayed evaluation | Yes |
-4.2.6 Dynamic bindings | |
+4.2.6 Dynamic bindings | | Not supported yet.
 4.2.7 Exception handling | Yes |
 4.2.8 Quasiquotation | Yes |
 4.2.9 Case-lambda | Yes |
