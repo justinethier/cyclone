@@ -9,7 +9,6 @@
 (define-library (srfi 18)
   (import (scheme base))
   (export
-    ;; TODO: current-thread
     thread?
     make-thread
     thread-name
@@ -19,28 +18,28 @@
     thread-sleep!
     thread-yield!
     thread-terminate!
+    ;; TODO: current-thread
     ;; TODO: thread-join!
 
     mutex?
     make-mutex 
     mutex-lock! 
     mutex-unlock!
-
     ;; For now, these are not implemented:
     ;; mutex-name
     ;; mutex-specific
     ;; mutex-specific-set!
     ;; mutex-state
 
-    ;; TODO: condition variables are not implemented yet
     condition-variable?
     make-condition-variable
-    ;; (condition-variable-name condition-variable)          ;procedure
-    ;; (condition-variable-specific condition-variable)      ;procedure
-    ;; (condition-variable-specific-set! condition-variable obj) ;procedure
     condition-variable-wait! ;; Non-standard
     condition-variable-signal!
     condition-variable-broadcast!
+    ;; Not implemented yet:
+    ;; (condition-variable-name condition-variable)          ;procedure
+    ;; (condition-variable-specific condition-variable)      ;procedure
+    ;; (condition-variable-specific-set! condition-variable obj) ;procedure
 
     ;; Time functions are not implemented here, see (scheme time) instead
    
