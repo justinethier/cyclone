@@ -75,7 +75,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* END error checking */
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(td,cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,0, (closure)a1, cfn); } else { ((cfn)->fn)(td,1,cfn,a1);}
+#define closcall1(td,cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,0, (closure)(a1), cfn); } else { ((cfn)->fn)(td,1,cfn,a1);}
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall1(td,cfn,a1) \
 {char stack; \
@@ -83,7 +83,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
      object buf[1]; buf[0] = a1;\
      GC(td,cfn,buf,1); return; \
  } else {closcall1(td,(closure) (cfn),a1); return;}}
-#define closcall2(td,cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,1, (closure)a1, cfn,a2); } else { ((cfn)->fn)(td,2,cfn,a1,a2);}
+#define closcall2(td,cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,1, (closure)(a1), cfn,a2); } else { ((cfn)->fn)(td,2,cfn,a1,a2);}
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall2(td,cfn,a1,a2) \
 {char stack; \

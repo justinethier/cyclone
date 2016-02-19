@@ -151,7 +151,7 @@
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
       "#define closcall" n "(td,cfn" args ") "
-        (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td," n-1 ", (closure)a1, cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
+        (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td," n-1 ", (closure)(a1), cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
         (wrap " else { ")
         "((cfn)->fn)(td," n ",cfn" args ")"
         (wrap ";}")
