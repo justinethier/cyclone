@@ -18,7 +18,7 @@
     thread-start!
     thread-sleep!
     thread-yield!
-    ;; TODO: thread-terminate!
+    thread-terminate!
     ;; TODO: thread-join!
 
     mutex?
@@ -84,7 +84,9 @@
              (mutator-id (Cyc-spawn-thread! thunk)))
         (vector-set! t 2 mutator-id)))
     (define (thread-yield!) (thread-sleep! 1))
-;    (define (thread-terminate!) (Cyc-end-thread!))
+    (define-c thread-terminate!
+      "(void *data, int argc, closure _, object k)"
+      " Cyc_end_thread(data); ")
     ;; TODO: thread-join!
 
     (define-c thread-sleep!

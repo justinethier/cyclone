@@ -1,7 +1,6 @@
 Initiatives:
 
 - srfi 18 - missing thread functions, more complex threading examples
-- test on a 64-bit platform/vm
 - api documentation
 - syntax-rules integration (WIP, works sometimes but needs to compile smaller)
 - r7rs missing features
