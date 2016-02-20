@@ -451,7 +451,8 @@
 (define (token-numeric? a)
     (or (char-numeric? (car a))
         (and (> (length a) 1)
-             (char-numeric? (cadr a)))))
+             (char-numeric? (cadr a))
+             (sign? (car a)))))
 
 ;; parse-atom -> [chars] -> literal
 (define (parse-atom a)
