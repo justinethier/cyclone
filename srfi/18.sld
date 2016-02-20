@@ -151,7 +151,8 @@
          (Cyc-mutex-unlock! mutex))
         ((condition-variable? (car opts))
          (let ((cond-var (car opts)))
-           (condition-variable-wait! cond-var mutex)))
+           (condition-variable-wait! cond-var mutex)
+           (Cyc-mutex-unlock! mutex))) ;; Per SRFI, leave mutex unlocked
         (else
          (error "mutex-unlock! - unhandled args" mutex opts))))
 
