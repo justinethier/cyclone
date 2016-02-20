@@ -1057,6 +1057,43 @@ common_type Cyc_string2number(void *data, object str){
     return result;
 }
 
+int binstr2int(const char *str)
+{
+  int num = 0;
+  while (*str) {
+    num <<= 1;
+    if (*str++ == '1') num++;
+  }
+  return num;
+}
+
+int octstr2int(const char *str)
+{
+  int num = 0;
+  while (*str) {
+    num <<= 3;
+    num += ((*str++) - '0');
+  }
+  return num;
+}
+
+int hexstr2int(const char *str)
+{
+  int num = 0;
+  while (*str) {
+    num <<= 4;
+    if (*str >= 'A' && *str <= 'F'){
+      num += (((*str) - 'A') + 10);
+    } else if (*str >= 'a' && *str <= 'f'){
+      num += (((*str) - 'a') + 10);
+    } else {
+      num += ((*str) - '0');
+    }
+    *str++;
+  }
+  return num;
+}
+
 integer_type Cyc_string_cmp(void *data, object str1, object str2) {
   Cyc_check_str(data, str1);
   Cyc_check_str(data, str2);
