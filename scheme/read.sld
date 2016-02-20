@@ -313,18 +313,15 @@
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
               ;; Numbers
-;; TODO: technically broken for #e because allows whitespace between "#e" and the number itself
 ;; TODO: #b (binary), #o (octal), #d (decimal), and #x (hexadecimal) also #i for inexact
-;; TODO: cleanup code to support above. hex may be tricky and require
-;; a specialized parsing pass. actually, bin and oct do too because
-;; otherwise they would be parsed as decimal numbers
               ((eq? #\e next-c)
                ;(write `(DEBUG ,next-c ,toks))
-               (let ((sub (parse fp '() '() #f #f parens ptbl)))
-                 ;(write `(DEBUG2 ,sub ,(string? sub)))
+               (let ((num (parse-number 10 fp '() ptbl)))
+                 ;(write `(DEBUG2 ,num ,(string? num)))
                  (cond
-                   ((number? sub)
-                    (let ((result (exact sub)))
+                   ((and (not (null? num))
+                         (token-numeric? num))
+                    (let ((result (exact (parse-atom num))))
                       (if all?
                           (parse fp '() (cons result toks) all? #f parens ptbl)
                           result)))
@@ -450,17 +447,40 @@
     (equal? c #\+)
     (equal? c #\-)))
 
+;; token-numeric? -> [chars] -> boolean
+(define (token-numeric? a)
+    (or (char-numeric? (car a))
+        (and (> (length a) 1)
+             (char-numeric? (cadr a)))))
+
 ;; parse-atom -> [chars] -> literal
 (define (parse-atom a)
   (cond 
-    ((or (char-numeric? (car a))
-         (and (> (length a) 1)
-              (char-numeric? (cadr a))
-              (sign? (car a))))
+    ((token-numeric? a)
      (string->number (list->string a)))
     (else
      (string->symbol (list->string a)))))
 
+;;;;;
+;; Read next character from port, using buffered char if available
+(define (get-next-char fp ptbl)
+  (if (in-port:get-buf ptbl)
+      (in-port:read-buf! ptbl) ;; Already buffered
+      (read-char fp)))
+
+(define (parse-number base fp tok ptbl)
+  (let ((c (get-next-char fp ptbl))
+        (next (lambda (c) (parse-number base fp (cons c tok) ptbl))))
+    (cond
+      ((sign? c) (next c))
+      ((eq? #\. c) (next c))
+      ((char-numeric? c) (next c))
+      (else
+        ;; We are done parsing a number
+        (in-port:set-buf! ptbl c) ;; rebuffer unprocessed char
+        (reverse tok))))) ;; Return token
+;;;;;
+  
 ;; Main lexer/parser
 (define cyc-read ;; TODO: should be (read), but that is breaking on csi 4.8.0.5
   (lambda args
