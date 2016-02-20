@@ -8,6 +8,7 @@
 ;;;;
 (define-library (scheme read)
   (import (scheme base)
+          ;(scheme write)
           (scheme char))
   (export
     read
@@ -311,6 +312,27 @@
                (if all?
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
+              ;; Numbers
+;; TODO: technically broken for #e because allows whitespace between "#e" and the number itself
+;; TODO: #b (binary), #o (octal), #d (decimal), and #x (hexadecimal) also #i for inexact
+;; TODO: cleanup code to support above. hex may be tricky and require
+;; a specialized parsing pass. actually, bin and oct do too because
+;; otherwise they would be parsed as decimal numbers
+              ((eq? #\e next-c)
+               ;(write `(DEBUG ,next-c ,toks))
+               (let ((sub (parse fp '() '() #f #f parens ptbl)))
+                 ;(write `(DEBUG2 ,sub ,(string? sub)))
+                 (cond
+                   ((number? sub)
+                    (let ((result (exact sub)))
+                      (if all?
+                          (parse fp '() (cons result toks) all? #f parens ptbl)
+                          result)))
+                   (else
+                    (parse-error
+                      "Illegal number syntax"
+                      (in-port:get-lnum ptbl)
+                      (in-port:get-cnum ptbl))))))
               ;; Vector
               ((eq? #\( next-c)
                (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
