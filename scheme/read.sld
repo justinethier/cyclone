@@ -313,23 +313,19 @@
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
               ;; Numbers
-;; TODO: #b (binary), #o (octal), #d (decimal), and #x (hexadecimal) also #i for inexact
+;; TODO: #b (binary), #o (octal), #d (decimal), and #x (hexadecimal)
               ((eq? #\e next-c)
-               ;(write `(DEBUG ,next-c ,toks))
-               (let ((num (parse-number 10 fp '() ptbl)))
-                 ;(write `(DEBUG2 ,num ,(string? num)))
-                 (cond
-                   ((and (not (null? num))
-                         (token-numeric? num))
-                    (let ((result (exact (parse-atom num))))
-                      (if all?
-                          (parse fp '() (cons result toks) all? #f parens ptbl)
-                          result)))
-                   (else
-                    (parse-error
-                      "Illegal number syntax"
-                      (in-port:get-lnum ptbl)
-                      (in-port:get-cnum ptbl))))))
+               (parse-number 
+                 fp toks all? parens ptbl 
+                 10 (lambda (num)
+                      (exact
+                        (parse-atom num)))))
+              ((eq? #\i next-c)
+               (parse-number 
+                 fp toks all? parens ptbl 
+                 10 (lambda (num)
+                      (inexact
+                        (parse-atom num)))))
               ;; Vector
               ((eq? #\( next-c)
                (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
@@ -469,9 +465,26 @@
       (in-port:read-buf! ptbl) ;; Already buffered
       (read-char fp)))
 
-(define (parse-number base fp tok ptbl)
+(define (parse-number fp toks all? parens ptbl base tok->num)
+;  (parse-number-rec base fp '() ptbl))
+  (let ((num (parse-number-rec 10 fp '() ptbl)))
+    ;(write `(DEBUG2 ,num ,(string? num)))
+    (cond
+      ((and (not (null? num))
+            (token-numeric? num))
+       (let ((result (tok->num num)))
+         (if all?
+             (parse fp '() (cons result toks) all? #f parens ptbl)
+             result)))
+      (else
+       (parse-error
+         "Illegal number syntax"
+         (in-port:get-lnum ptbl)
+         (in-port:get-cnum ptbl))))))
+
+(define (parse-number-rec base fp tok ptbl)
   (let ((c (get-next-char fp ptbl))
-        (next (lambda (c) (parse-number base fp (cons c tok) ptbl))))
+        (next (lambda (c) (parse-number-rec base fp (cons c tok) ptbl))))
     (cond
       ((sign? c) (next c))
       ((eq? #\. c) (next c))
