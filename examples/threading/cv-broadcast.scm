@@ -1,4 +1,4 @@
-;;;; A simple example of using a condition variable to simulate thread-join
+;;;; An example of using condition variable broadcast to wake other threads.
 (import (scheme base)
         (scheme read)
         (scheme write)
@@ -7,14 +7,16 @@
 (define cv (make-condition-variable))
 (define m (make-mutex))
 
+;; Thread - Sleep, then wake other threads up via broadcast
 (thread-start!
   (make-thread
     (lambda ()
       (write "started thread")
-      (thread-sleep! 5000)
+      (thread-sleep! 3000)
       (condition-variable-broadcast! cv)
       (write "thread done"))))
 
+;; Thread - wait for broadcast
 (thread-start!
   (make-thread
     (lambda ()
@@ -22,9 +24,9 @@
       (mutex-lock! m)
       (write "register waiting thread cv")
       (mutex-unlock! m cv)
-;; TODO: think this is never printed because mutex is locked after waking up..
       (write "waiting thread done"))))
 
+;; Main thread - wait for broadcast
 (mutex-lock! m)
 (mutex-unlock! m cv) ;; Wait on cv
 (write "main thread done")
