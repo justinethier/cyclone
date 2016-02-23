@@ -9,7 +9,6 @@
 (define-library (scheme base)
   ;; In the future, may include this here: (include "../srfi/9.scm")
   (export
-    string->number2 ;; TODO: should replace string->number primitive
     cons-source
     syntax-rules
     letrec*
@@ -1052,30 +1051,6 @@
         data, 
         k, 
        ((p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f)); ")
-  (define-c Cyc-string->number
-    "(void *data, int argc, closure _, object k, object str, object base)"
-    " make_int(result, 0);
-      Cyc_check_str(data, str);
-      Cyc_check_int(data, base);
-      
-      if (integer_value(base) == 2) {
-        result.value = binstr2int(string_str(str));
-      }else if (integer_value(base) == 8) {
-        result.value = octstr2int(string_str(str));
-      }else {
-        result.value = hexstr2int(string_str(str));
-      }
-      return_closcall1(data, k, &result); ")
-  ;; TODO: this should become the real string->number
-  (define (string->number2 str . base)
-    (if (or (null? base) (not (integer? (car base))))
-        (string->number str)
-        (let ((b (car base)))
-          (cond
-            ((or (= b 2) (= b 8) (= b 16))
-             (Cyc-string->number str b))
-            (else
-              (string->number str))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
