@@ -91,7 +91,8 @@
 
     (define-c thread-sleep!
       "(void *data, int argc, closure _, object k, object timeout)"
-      " return_closcall1(data, k, Cyc_thread_sleep(data, timeout)); ")
+      " Cyc_thread_sleep(data, timeout);
+        return_closcall1(data, k, boolean_t); ")
 
     ;; Take a single object and if it is on the stack, return a copy
     ;; of it that is allocated on the heap. NOTE the original object
