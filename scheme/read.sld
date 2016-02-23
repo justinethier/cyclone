@@ -305,10 +305,12 @@
               ;; Booleans
               ;; Do not use add-tok below, no need to quote a bool
               ((eq? #\t next-c) 
+;; TODO: read in rest of #true if it is there
                (if all?
                    (parse fp '() (cons #t toks) all? #f parens ptbl)
                    #t))
               ((eq? #\f next-c) 
+;; TODO: read in rest of #false if it is there
                (if all?
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
