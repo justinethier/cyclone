@@ -519,7 +519,7 @@
      ((eq? p 'cddddr)        "cddddr")
      ((eq? p 'char->integer) "Cyc_char2integer")
      ((eq? p 'integer->char) "Cyc_integer2char")
-     ((eq? p 'string->number)"Cyc_string2number")
+     ((eq? p 'string->number)"Cyc_string2number2")
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
@@ -705,7 +705,9 @@
 ;; Pass an integer arg count as the function's first parameter?
 (define (prim:arg-count? exp)
     (and (prim? exp)
-         (member exp '(error Cyc-write Cyc-display string-append + - * /))))
+         (member exp '(error Cyc-write Cyc-display 
+                       string->number string-append 
+                       + - * /))))
 
 ;; Does primitive allocate an object?
 ;; TODO: these are the functions that are defined via macros. This method

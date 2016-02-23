@@ -1028,6 +1028,36 @@ object Cyc_list2string(void *data, object cont, object lst){
       return_closcall1(data, cont, &str);}
 }
 
+common_type Cyc_string2number2(void *data, int argc, object str, ...) 
+{
+  object base = nil;
+  common_type result;
+  va_list ap;
+  va_start(ap, str);
+  if (argc > 1) {
+    base = va_arg(ap, object);
+    Cyc_check_int(data, base);
+  }
+  va_end(ap);
+  if (base) {
+    Cyc_check_str(data, str);
+    result.integer_t.hdr.mark = gc_color_red;
+    result.integer_t.hdr.grayed = 0;
+    result.integer_t.tag = integer_tag;
+    if (integer_value(base) == 2) {
+      result.integer_t.value = binstr2int(string_str(str));
+      return result;
+    }else if (integer_value(base) == 8) {
+      result.integer_t.value = octstr2int(string_str(str));
+      return result;
+    }else if (integer_value(base) == 16) {
+      result.integer_t.value = hexstr2int(string_str(str));
+      return result;
+    }
+  }
+  return Cyc_string2number(data, str);
+}
+
 common_type Cyc_string2number(void *data, object str){
     common_type result;
     double n;
@@ -1900,8 +1930,13 @@ void _integer_91_125char(void *data, object cont, object args) {
     return_closcall1(data, cont, Cyc_integer2char(data, car(args)));}
 void _string_91_125number(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "string->number", 1, args);
-    { common_type i = Cyc_string2number(data, car(args));
-      return_closcall1(data, cont, &i);}}
+    { object tail = cdr(args);
+      if (tail) {
+        common_type i = Cyc_string2number2(data, 2, car(args), cadr(args));
+        return_closcall1(data, cont, &i);
+      } else {
+        common_type i = Cyc_string2number(data, car(args));
+        return_closcall1(data, cont, &i);}}}
 void _string_91length(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string-length", 1, args);
     { integer_type i = Cyc_string_length(data, car(args));
