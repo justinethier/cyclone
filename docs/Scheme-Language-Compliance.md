@@ -5,7 +5,7 @@ This is the status of Scheme programming language features implemented from the 
 Section | Status | Comments
 ------- | ------ | ---------
 2.2 Whitespace and comments | Partial | No datum or block comments
-2.3 Other notations | Partial |  Not all of these notations are implemented
+2.3 Other notations | Yes | 
 2.4 Datum labels | No |
 3.1 Variables, syntactic keywords, and regions | Yes |
 3.2 Disjointness of types | Yes |
