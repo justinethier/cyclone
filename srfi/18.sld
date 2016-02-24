@@ -91,8 +91,9 @@
 
     (define-c thread-sleep!
       "(void *data, int argc, closure _, object k, object timeout)"
-      " Cyc_thread_sleep(data, timeout);
-        return_closcall1(data, k, boolean_t); ")
+      " set_thread_blocked(data, k);
+        Cyc_thread_sleep(data, timeout);
+        return_thread_runnable(data, boolean_t); ")
 
     ;; Take a single object and if it is on the stack, return a copy
     ;; of it that is allocated on the heap. NOTE the original object
@@ -191,13 +192,14 @@
       "(void *data, int argc, closure _, object k, object cond, object lock)"
       " Cyc_check_cond_var(data, cond);
         Cyc_check_mutex(data, lock);
+        set_thread_blocked(data, k);
         if (pthread_cond_wait(
             &(((cond_var)cond)->cond),
             &(((mutex)lock)->lock)) != 0) {
           fprintf(stderr, \"Unable to wait for condition variable\\n\");
           exit(1);
         }
-        return_closcall1(data, k, boolean_t); ")
+        return_thread_runnable(data, boolean_t); ")
     (define-c condition-variable-signal!
       "(void *data, int argc, closure _, object k, object cond)"
       " Cyc_check_cond_var(data, cond);
