@@ -302,6 +302,10 @@
             (in-port:set-cnum! ptbl
                 (+ 1 (in-port:get-cnum ptbl)))
             (cond
+              ;; Block comments
+              ((eq? #\| next-c)
+               (read-block-comment fp ptbl)
+               (parse fp '() toks all? #f parens ptbl))
               ;; Booleans
               ;; Do not use add-tok below, no need to quote a bool
               ((eq? #\t next-c) 
@@ -472,6 +476,21 @@
   (if (in-port:get-buf ptbl)
       (in-port:read-buf! ptbl) ;; Already buffered
       (read-char fp)))
+
+;; Read chars in the middle of a block comment
+(define (read-block-comment fp ptbl)
+  (let ((c (get-next-char fp ptbl)))
+    (cond
+      ((eq? #\| c) (read-block-terminator fp ptbl))
+      (else (read-block-comment fp ptbl)))))
+
+;; Read (possibly) the end of a block comment
+(define (read-block-terminator fp ptbl)
+  (let ((c (get-next-char fp ptbl)))
+    (cond
+      ((eq? #\# c) #t)
+      ((eq? #\| c) (read-block-terminator fp ptbl))
+      (else (read-block-comment fp ptbl)))))
 
 (define (parse-number fp toks all? parens ptbl base tok->num)
 ;  (parse-number-rec base fp '() ptbl))
