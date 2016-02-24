@@ -1303,6 +1303,8 @@ void gc_mutator_thread_blocked(gc_thread_data *thd, object cont)
   thd->gc_num_args = 0; // Will be set later, after collection
 }
 
+void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf);
+
 /**
  * Called explicitly from a mutator thread to let the collector know
  * that it has finished blocking. In addition, if the collector 
@@ -1336,7 +1338,13 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
     longjmp(*(thd->jmp_start), 1);
   } else {
     // Collector didn't do anything; make a normal continuation call
-    (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
+    if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
+      object buf[1];
+      buf[0] = result;
+      Cyc_apply_from_buf(thd, 1, thd->gc_cont, buf);
+    } else {
+      (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
+    }
   }
 }
 
