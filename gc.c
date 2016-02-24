@@ -907,7 +907,9 @@ void gc_collector_trace()
       if (clean) {
         pthread_mutex_lock(&(m->lock));
         if (m->last_read < m->last_write) {
+#if GC_SAFETY_CHECKS
           fprintf(stderr, "JAE DEBUG - might have exited trace early\n");
+#endif
           clean = 0;
         }
         else if (m->pending_writes) {
