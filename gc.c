@@ -446,7 +446,7 @@ void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *hea
       exit(1); // could throw error, but OOM is a major issue, so...
     }
   }
-#if GC_DEBUG_TRACE
+#if GC_DEBUG_VERBOSE
   fprintf(stderr, "alloc %p size = %zu, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
   // Debug check, should no longer be necessary
   //if (is_value_type(result)) {

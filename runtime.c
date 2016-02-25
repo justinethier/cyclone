@@ -2361,6 +2361,10 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
   int scani = 0, alloci = 0;
   int heap_grown = 0;
 
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "started minor GC\n");
+#endif
+
 //fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer
   if (num_args > NUM_GC_ANS) {
@@ -2474,6 +2478,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
     }
     scani++;
   }
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "done with minor GC\n");
+#endif
   return alloci;
 }
 
@@ -2490,9 +2497,6 @@ void GC(void *data, closure cont, object *args, int num_args)
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *)data, alloci);
-#if GC_DEBUG_TRACE
-  fprintf(stderr, "done with minor GC\n");
-#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *)data)->jmp_start), 1);
 }
