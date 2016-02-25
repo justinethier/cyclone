@@ -1341,9 +1341,8 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
   } else {
     // Collector didn't do anything; make a normal continuation call
     if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
-      object buf[1];
-      buf[0] = result;
-      Cyc_apply_from_buf(thd, 1, thd->gc_cont, buf);
+      thd->gc_args[0] = result;
+      Cyc_apply_from_buf(thd, 1, thd->gc_cont, thd->gc_args);
     } else {
       (((closure)(thd->gc_cont))->fn)(thd, 1, thd->gc_cont, result);
     }
