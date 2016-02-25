@@ -235,7 +235,7 @@ typedef symbol_type *symbol;
 static object quote_##name = nil;
 
 /* Define numeric types */
-typedef struct {gc_header_type hdr; tag_type tag; int value;} integer_type;
+typedef struct {gc_header_type hdr; tag_type tag; int value; int padding;} integer_type;
 #define make_int(n,v) integer_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = integer_tag; n.value = v;
 typedef struct {gc_header_type hdr; tag_type tag; double value;} double_type;
 #define make_double(n,v) double_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = double_tag; n.value = v;
