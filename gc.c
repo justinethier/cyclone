@@ -717,12 +717,16 @@ void gc_zero_read_write_counts(gc_thread_data *thd)
 /**
  * Move pending writes to last_write
  */
-void gc_sum_pending_writes(gc_thread_data *thd)
+void gc_sum_pending_writes(gc_thread_data *thd, int locked)
 {
-  pthread_mutex_lock(&(thd->lock));
+  if (!locked){ 
+    pthread_mutex_lock(&(thd->lock)); 
+  }
   thd->last_write += thd->pending_writes;
   thd->pending_writes = 0;
-  pthread_mutex_unlock(&(thd->lock));
+  if (!locked) { 
+    pthread_mutex_unlock(&(thd->lock)); 
+  }
 }
 
 /**
@@ -784,7 +788,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 #endif
 
   // Handle any pending marks from write barrier
-  gc_sum_pending_writes(thd);
+  gc_sum_pending_writes(thd, 0);
 
   // I think below is thread safe, but this code is tricky.
   // Worst case should be that some work is done twice if there is
@@ -1096,6 +1100,8 @@ void gc_wait_handshake()
             pthread_mutex_lock(&(m->lock));
 //printf("DEBUG - collector is cooperating for blocked mutator\n");            
             buf_len = gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL, 0);
+            // Handle any pending marks from write barrier
+            gc_sum_pending_writes(m, 1);
             // Mark thread "roots", based on code from mutator's cooperator
             gc_mark_gray(m, m->gc_cont);
             //for (i = 0; i < m->gc_num_args; i++) {
@@ -1347,6 +1353,8 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
     thd->gc_num_args = 1;
     // Move any remaining stack objects (should only be the result?) to heap
     gc_minor(thd, &stack_limit, thd->stack_start, thd->gc_cont, thd->gc_args, thd->gc_num_args);
+    // Handle any pending marks from write barrier
+    gc_sum_pending_writes(thd, 0);
 //printf("DEBUG - Call into gc_cont after collector coop\n");
     // Whoa.
     longjmp(*(thd->jmp_start), 1);
