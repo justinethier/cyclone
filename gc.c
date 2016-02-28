@@ -703,6 +703,29 @@ void vpbuffer_free(void **buf)
 // GC functions called by the Mutator threads
 
 /**
+ * Clear thread data read/write fields
+ */
+void gc_zero_read_write_counts(gc_thread_data *thd)
+{
+  pthread_mutex_lock(&(thd->lock));
+  thd->last_write = 0;
+  thd->last_read = 0;
+  thd->pending_writes = 0;
+  pthread_mutex_unlock(&(thd->lock));
+}
+
+/**
+ * Move pending writes to last_write
+ */
+void gc_sum_pending_writes(gc_thread_data *thd)
+{
+  pthread_mutex_lock(&(thd->lock));
+  thd->last_write += thd->pending_writes;
+  thd->pending_writes = 0;
+  pthread_mutex_unlock(&(thd->lock));
+}
+
+/**
  * Determine if object lives on the thread's stack
  */
 int gc_is_stack_obj(gc_thread_data *thd, object obj)
@@ -761,10 +784,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
 #endif
 
   // Handle any pending marks from write barrier
-  pthread_mutex_lock(&(thd->lock));
-  thd->last_write += thd->pending_writes;
-  thd->pending_writes = 0;
-  pthread_mutex_unlock(&(thd->lock));
+  gc_sum_pending_writes(thd);
 
   // I think below is thread safe, but this code is tricky.
   // Worst case should be that some work is done twice if there is
@@ -777,11 +797,7 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
     ck_pr_cas_int(&(thd->gc_status), status_m, status_c); 
     if (status_m == STATUS_ASYNC) {
       // Async is done, so clean up old mark data from the last collection
-      pthread_mutex_lock(&(thd->lock));
-      thd->last_write = 0;
-      thd->last_read = 0;
-      thd->pending_writes = 0;
-      pthread_mutex_unlock(&(thd->lock));
+      gc_zero_read_write_counts(thd);
     }
     else if (status_m == STATUS_SYNC2) {
 #if GC_DEBUG_VERBOSE
@@ -1061,11 +1077,7 @@ void gc_wait_handshake()
         if (statusm == STATUS_ASYNC) { // Prev state
           ck_pr_cas_int(&(m->gc_status), statusm, statusc);
           // Async is done, so clean up old mark data from the last collection
-          pthread_mutex_lock(&(m->lock));
-          m->last_write = 0;
-          m->last_read = 0;
-          m->pending_writes = 0;
-          pthread_mutex_unlock(&(m->lock));
+          gc_zero_read_write_counts(m);
         }else if (statusm == STATUS_SYNC1) {
           ck_pr_cas_int(&(m->gc_status), statusm, statusc);
         } else if (statusm == STATUS_SYNC2) {
