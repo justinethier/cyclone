@@ -752,7 +752,11 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
       stage = ck_pr_load_int(&gc_stage);
   if (ck_pr_load_int(&(thd->gc_status)) != STATUS_ASYNC) {
     pthread_mutex_lock(&(thd->lock));
-    gc_mark_gray(thd, old_obj);
+    if (gc_is_stack_obj(thd, old_obj)) {
+      grayed(old_obj) = 1;
+    } else {
+      gc_mark_gray(thd, old_obj);
+    }
     if (gc_is_stack_obj(thd, value)) {
       // Set object to be marked after moved to heap by next GC.
       // This avoids having to recursively examine the stack now, 
