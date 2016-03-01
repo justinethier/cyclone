@@ -57,7 +57,7 @@ The implementation code is available here:
 
 ## Heap
 
-The heap consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
+The heap is used to store all objects that survive minor GC, and consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
 
 Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
 
@@ -71,7 +71,6 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 
 - Thread state
 - Stack boundaries
-- Current continuation and arguments
 - Jump buffer
 - List of mutated objects detected by the minor GC write barrier
 - Major GC parameters - mark buffer, last read/write, etc (see next sections)
@@ -110,7 +109,7 @@ Root objects are live objects the collector uses to begin the tracing process. C
 
 A minor collection is always performed for a single mutator thread, usually by the thread itself. The algorithm is based on Cheney on the MTA:
 
-- Move any root objects on the stack to the heap. 
+- Move any root objects on the stack to the heap. For each object moved: 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
   - Record each moved object in a buffer to serve as the Cheney to-space.
 - Loop over the to-space buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
@@ -217,7 +216,7 @@ Mutators call this function to add an object to their mark buffer.
 
     mark_gray(m, obj):
       if obj != clear_color:
-        m->mark_buffer[m->last_write]
+        m->mark_buffer[m->last_write] = obj
         m->last_write++
 
 ## Collector Functions
@@ -286,7 +285,7 @@ When a mutator exits a (potentially) blocking section of code, it must call anot
 
 ## Other Considerations
 
-Garbage collection papers are generally silent on when to start the collection cycle, presumably leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
+Garbage collection papers are generally silent on when to start the collection cycle, instead leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
 
 # Looking Ahead
 
@@ -295,7 +294,7 @@ The garbage collector is by far the most complex component of Cyclone. The prima
 - Extend baker's approach to support multiple mutators
 - Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
-Limitations or potential issues with the current implementation:
+There are a few limitations or potential issues with the current implementation:
 
 - Heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
 
