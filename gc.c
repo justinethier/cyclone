@@ -742,6 +742,22 @@ int gc_is_stack_obj(gc_thread_data *thd, object obj)
 }
 
 /**
+ * Helper function for gc_mut_update
+ */
+static void mark_stack_or_heap_obj(gc_thread_data *thd, object obj)
+{
+  if (gc_is_stack_obj(thd, obj)) {
+    // Set object to be marked after moved to heap by next GC.
+    // This avoids having to recursively examine the stack now, 
+    // which we have to do anyway during minor GC.
+    grayed(obj) = 1;
+  } else {
+    // Value is on the heap, mark gray right now
+    gc_mark_gray(thd, obj);
+  }
+}
+
+/**
  * Write barrier for updates to heap-allocated objects
  * The key for this barrier is to identify stack objects that contain
  * heap references, so they can be marked to avoid collection.
@@ -752,27 +768,15 @@ void gc_mut_update(gc_thread_data *thd, object old_obj, object value)
       stage = ck_pr_load_int(&gc_stage);
   if (ck_pr_load_int(&(thd->gc_status)) != STATUS_ASYNC) {
     pthread_mutex_lock(&(thd->lock));
-    if (gc_is_stack_obj(thd, old_obj)) {
-      grayed(old_obj) = 1;
-    } else {
-      gc_mark_gray(thd, old_obj);
-    }
-    if (gc_is_stack_obj(thd, value)) {
-      // Set object to be marked after moved to heap by next GC.
-      // This avoids having to recursively examine the stack now, 
-      // which we have to do anyway during minor GC.
-      grayed(value) = 1;
-    } else {
-      // Value is on the heap, mark gray right now
-      gc_mark_gray(thd, value);
-    }
+    mark_stack_or_heap_obj(thd, old_obj);
+    mark_stack_or_heap_obj(thd, value);
     pthread_mutex_unlock(&(thd->lock));
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
 //fprintf(stderr, "\n");
     pthread_mutex_lock(&(thd->lock));
-    gc_mark_gray(thd, old_obj);
+    mark_stack_or_heap_obj(thd, old_obj);
     pthread_mutex_unlock(&(thd->lock));
 #if GC_DEBUG_VERBOSE
     if (is_object_type(old_obj) && mark(old_obj) == gc_color_clear) {
