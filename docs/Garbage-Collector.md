@@ -24,7 +24,9 @@
 
 # Introduction
 
-The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The collector has the following requirements:
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The explanation is still fairly technical; it might be helpful to have some background in programming. There are also a couple of introductory articles included in the further reading at the end of this paper.
+
+Anyway, with that out of the way - the collector has the following requirements:
 
 - Efficiently free allocated memory.
 - Allow the language implementation to support tail calls and continuations.
