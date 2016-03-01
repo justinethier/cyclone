@@ -38,7 +38,7 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
-- Continuation - With respect to the collectors, this is a function that is called to resume execution. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
+- Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
 - Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
