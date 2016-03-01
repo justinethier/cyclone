@@ -268,20 +268,21 @@ This function performs tracing for the collector by looping over all of the muta
 
 In practice a mutator will not always be able to cooperate in a timely manner. For example, a thread can block indefinitely waiting for user input or reading from a network port. In the meantime the collector will never be able to complete a handshake with this mutator and major GC will never be performed.
 
-Cyclone solves this problem by requiring that a mutator let the collector know that it is (or could be) blocking. The mutator will call a function to update its thread state to `CYC_THREAD_STATE_BLOCKED`.
+Cyclone solves this problem by requiring that a mutator keep track of its thread state. With this information the collector can cooperate on behalf of a blocked mutator and do the work itself instead of waiting for the mutator. 
 
-With this information the collector can cooperate on behalf of a blocked mutator and do the work itself instead of waiting for the mutator. The possible thread states are:
+The possible thread states are:
 
-    typedef enum { CYC_THREAD_STATE_NEW
-                 , CYC_THREAD_STATE_RUNNABLE
-                 , CYC_THREAD_STATE_BLOCKED
-                 , CYC_THREAD_STATE_BLOCKED_COOPERATING
-                 , CYC_THREAD_STATE_TERMINATED
-                 } cyc_thread_state_type;
+- `CYC_THREAD_STATE_NEW` - A new thread not yet running.
+- `CYC_THREAD_STATE_RUNNABLE` - A thread that can be scheduled to run by the OS.
+- `CYC_THREAD_STATE_BLOCKED` - A thread that could be blocked.
+- `CYC_THREAD_STATE_BLOCKED_COOPERATING` - A blocked thread that the collector is cooperating with on behalf of the mutator.
+- `CYC_THREAD_STATE_TERMINATED` - A thread that has been terminated by the application but its resources have not been freed up yet.
 
-You might be wondering about `BLOCKED_COOPERATING`. Unfortunately, if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING` and performs a minor collection for the thread. The mutator's objects can then be marked gray and its allocation color can be flipped.
+Before entering a C function that could block the mutator must call a function to update its thread state to `CYC_THREAD_STATE_BLOCKED`. This indicates to the collector that the thread may be blocked.
 
-When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator by checking if its status is `CYC_THREAD_STATE_BLOCKED_COOPERATING`. If so, the mutator will perform a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap before calling `longjmp` to jump back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
+When the collector handshakes it will check each mutator to see if it is blocked. Normally in this case the collector can just update the blocked mutator's status and move on to the next one. But if the mutator is transitioning to async all of its objects need to be relocated from the stack so they can be marked. In this case the collector changes the thread's state to `CYC_THREAD_STATE_BLOCKED_COOPERATING`, locks the mutator's mutex, and performs a minor collection for the thread. The mutator's objects can then be marked gray and its allocation color can be flipped. When it is finished cooperating for the mutator the collector releases its mutex.
+
+When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator by checking if its status is `CYC_THREAD_STATE_BLOCKED_COOPERATING`. If so, the mutator waits for its mutex to be released to ensure the collector has finished cooperating. The mutator then performs a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap before calling `longjmp` to jump back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
 
 ## Other Considerations
 
