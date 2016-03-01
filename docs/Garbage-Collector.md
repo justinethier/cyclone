@@ -195,8 +195,10 @@ This function is called by a mutator to allocate memory on the heap for an objec
 
 A write barrier is used to ensure any modified objects are properly marked for the current collection cycle. There are two cases:
 
-- Gray the object's new and old values if the mutator is in a synchronous status. Graying of the new value is a special case since it may still be on the stack. Instead of marking it directly, the object is tagged to be grayed when it is relocated to the heap.
+- Gray the object's new and old values if the mutator is in a synchronous status. 
 - Gray the object's old value if the collector is in the tracing stage.
+
+Because updates can occur at any time a modified object may still live on the stack. In this case the object is tagged to be grayed when it is relocated to the heap.
 
 ### Cooperate
 
