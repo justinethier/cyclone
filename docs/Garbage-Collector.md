@@ -24,7 +24,7 @@
 
 # Introduction
 
-The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The explanation is still fairly technical, but for more details this paper includes links to the implementation code and white papers that were used as references. Also, there are a few introductory articles on garbage collection in the further reading section at the end of this paper that are worthwhile to read in their own right.
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The explanation is fairly technical; there are some introductory articles on garbage collection in the [further reading section](#further-reading) that may provide more familiarity with the concepts and that are worthwhile to read in their own right.
 
 Anyway, with that out of the way, the collector has the following requirements:
 
