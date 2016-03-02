@@ -222,25 +222,26 @@
 (define (c:num-args c-tuple) (caddr c-tuple))
 
 (define (c:allocs->str c-allocs . prefix)
-  (apply
-    string-append
-    (map
-        (lambda (c)
-           (string-append 
+  (foldr
+    (lambda (x y)
+      (string-append
+        (string-append
             (if (null? prefix)
                 ""
                 (car prefix))
-            c 
-            "\n"))
-        c-allocs)))
+            x 
+            "\n")
+        y))
+    ""
+    c-allocs))
 
 (define (c:allocs->str2 c-allocs prefix suffix)
-  (apply
-    string-append
-    (map
-        (lambda (c)
-           (string-append prefix c suffix))
-        c-allocs)))
+  (foldr
+    (lambda (x y)
+      (string-append
+        (string-append prefix x suffix)))
+    ""
+    c-allocs))
 
 (define (c:append cp1 cp2)
   (c-code/vars 
@@ -1280,7 +1281,7 @@
 
     ;; Get top-level string
     (set! compiled-program
-      (apply string-append (reverse compiled-program-lst)))
+      (foldr string-append "" (reverse compiled-program-lst)))
 
     (emit-c-arity-macros 0)
     (emit "#include \"cyclone/types.h\"")
