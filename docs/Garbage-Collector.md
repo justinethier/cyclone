@@ -24,9 +24,9 @@
 
 # Introduction
 
-The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The explanation is still fairly technical; it might be helpful to have some background in programming. There are also a couple of introductory articles included in the further reading at the end of this paper.
+The goal of this paper is to provide a high-level overview of Cyclone's garbage collector. The explanation is still fairly technical, but for more details this paper includes links to the implementation code and white papers that were used as references. Also, there are a few introductory articles on garbage collection in the further reading section at the end of this paper that are worthwhile to read in their own right.
 
-Anyway, with that out of the way - the collector has the following requirements:
+Anyway, with that out of the way, the collector has the following requirements:
 
 - Efficiently free allocated memory.
 - Allow the language implementation to support tail calls and continuations.
@@ -69,7 +69,7 @@ If there is not enough free memory to fulfill a request a new page is allocated 
 
 ## Thread Data
 
-At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. Thread data is a structure that contains all of the necessary information to perform collections, including:
+At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The continuation and arguments are used by the application code to call into its next function with a result. Thread data is a structure that contains all of the necessary information to perform collections, including:
 
 - Thread state
 - Stack boundaries
