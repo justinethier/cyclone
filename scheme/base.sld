@@ -735,6 +735,8 @@
                           (loop (+ i-at 1) (+ i-from 1)))))))
         (loop at start)))
     (define (string-fill! str fill . opts)
+      ;; TODO: technically this is not per spec, because end references len.
+      ;;       Should change to use letrec*
       (letrec ((len (string-length str))
                (start (if (> (length opts) 0) (car opts) 0))
                (end (if (> (length opts) 1) (cadr opts) len))
