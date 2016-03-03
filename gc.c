@@ -708,6 +708,19 @@ void vpbuffer_free(void **buf)
 void gc_zero_read_write_counts(gc_thread_data *thd)
 {
   pthread_mutex_lock(&(thd->lock));
+#if GC_SAFETY_CHECKS
+  if (thd->last_read < thd->last_write) {
+    fprintf(stderr, 
+      "gc_zero_read_write_counts - last_read (%d) < last_write (%d)\n", 
+      thd->last_read, 
+      thd->last_write);
+  }
+  else if (thd->pending_writes) {
+    fprintf(stderr, 
+      "gc_zero_read_write_counts - pending_writes (%d) is not zero\n", 
+      thd->pending_writes);
+  }
+#endif
   thd->last_write = 0;
   thd->last_read = 0;
   thd->pending_writes = 0;
@@ -936,7 +949,7 @@ void gc_collector_trace()
         pthread_mutex_lock(&(m->lock));
         if (m->last_read < m->last_write) {
 #if GC_SAFETY_CHECKS
-          fprintf(stderr, "JAE DEBUG - might have exited trace early\n");
+          fprintf(stderr, "gc_collector_trace - might have exited trace early\n");
 #endif
           clean = 0;
         }
