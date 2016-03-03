@@ -559,7 +559,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
 
       if ((char *)r == (char *)p) { // this is a free block, skip it
         p = (object) (((char *)p) + r->size);
-#if GC_DEBUG_TRACE
+#if GC_DEBUG_VERBOSE
         fprintf(stderr, "skip free block %p size = %zu\n", p, r->size);
 #endif
         continue;

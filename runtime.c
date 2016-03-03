@@ -2227,7 +2227,7 @@ void gc_mark_globals()
      cvar_type *c = (cvar_type *)car(l);
      object glo =  *(c->pvar);
      if (!nullp(glo)) {
-#if GC_DEBUG_TRACE
+#if GC_DEBUG_VERBOSE
        fprintf(stderr, "global pvar %p\n", glo);
 #endif
        gc_mark_black(glo); // Mark actual object the global points to
