@@ -21,6 +21,10 @@
 #include "cyclone/types.h"
 #include <stdint.h>
 #include <time.h>
+#define DEBUG_THREADS // Debugging!!!
+#ifdef DEBUG_THREADS
+#include <sys/syscall.h> /* Linux-only? */
+#endif
 
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
@@ -1228,6 +1232,13 @@ void *collector_main(void *arg)
 {
   int stage;
   struct timespec tim;
+
+#ifdef DEBUG_THREADS
+  pthread_t tid = pthread_self();
+  int sid = syscall(SYS_gettid);
+  printf("GC thread LWP id is %d\n", sid);
+  printf("GC thread POSIX thread id is %d\n", tid);
+#endif
   tim.tv_sec = 0;
 //JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
 //alternatively, may want to consider shrinking the heap if possible after a collection, if it is
