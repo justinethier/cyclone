@@ -864,9 +864,9 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   // Threshold is intentially low because we have to go through an
   // entire handshake/trace/sweep cycle, ideally without growing heap.
   if (ck_pr_load_int(&gc_stage) == STAGE_RESTING &&
-      (cached_heap_free_size < (cached_heap_total_size * 0.50))){
+      (cached_heap_free_size < (cached_heap_total_size * 0.10))){
 #if GC_DEBUG_TRACE
-    fprintf(stdout, "Less than 50%% of the heap is free, initiating collector\n");
+    fprintf(stdout, "Less than 10%% of the heap is free, initiating collector\n");
 #endif
     ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
 
@@ -1164,7 +1164,7 @@ void gc_collector()
   int old_clear, old_mark;
   size_t freed = 0, max_freed = 0, total_size, total_free;
 #if GC_DEBUG_TRACE
-  time_t sweep_start = time(NULL);
+  time_t gc_collector_start = time(NULL);
 #endif
   //clear : 
   ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
@@ -1218,7 +1218,7 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
 #if GC_DEBUG_TRACE
   fprintf(stderr, "sweep done, total_size = %zu, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
     total_size, total_free, 
-    freed, max_freed, time(NULL) - sweep_start);
+    freed, max_freed, time(NULL) - gc_collector_start);
 #endif
 #if GC_DEBUG_TRACE
   fprintf(stderr, "cleaning up any old thread data\n");

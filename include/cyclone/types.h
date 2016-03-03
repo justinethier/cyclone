@@ -26,16 +26,16 @@
 
 // Size of the stack buffer, in bytes.
 // This is used as the first generation of the GC.
-#define STACK_SIZE 250000
+#define STACK_SIZE 500000
 
 // Size of a "page" on the heap (the second generation), in bytes.
-#define HEAP_SIZE 6000000
+#define HEAP_SIZE (10 * 1024 * 1024)
 
 // Number of functions to save for printing call history
 #define MAX_STACK_TRACES 10
 
 // GC debugging flags
-#define GC_DEBUG_TRACE 0
+#define GC_DEBUG_TRACE 1
 #define GC_DEBUG_VERBOSE 0
 
 /* Additional runtime checking of the GC system.
