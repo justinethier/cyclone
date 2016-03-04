@@ -31,6 +31,17 @@
 // Size of a "page" on the heap (the second generation), in bytes.
 #define HEAP_SIZE (10 * 1024 * 1024)
 
+/////////////////////////////
+// Major GC tuning parameters
+
+// Start GC cycle if % heap space free below this percentage
+#define GC_COLLECTION_THRESHOLD 0.05
+
+// After major GC, grow the heap so at least this percentage is free
+#define GC_FREE_THRESHOLD 0.40
+// END GC tuning
+/////////////////////////////
+
 // Number of functions to save for printing call history
 #define MAX_STACK_TRACES 10
 

@@ -864,9 +864,10 @@ void gc_mut_cooperate(gc_thread_data *thd, int buf_len)
   // Threshold is intentially low because we have to go through an
   // entire handshake/trace/sweep cycle, ideally without growing heap.
   if (ck_pr_load_int(&gc_stage) == STAGE_RESTING &&
-      (cached_heap_free_size < (cached_heap_total_size * 0.10))){
+      (cached_heap_free_size < (cached_heap_total_size * 
+                                GC_COLLECTION_THRESHOLD))){
 #if GC_DEBUG_TRACE
-    fprintf(stdout, "Less than 10%% of the heap is free, initiating collector\n");
+    fprintf(stdout, "Less than %f%% of the heap is free, initiating collector\n", 100.0 * GC_COLLECTION_THRESHOLD);
 #endif
     ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
 
@@ -1208,12 +1209,15 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   total_size = cached_heap_total_size; //gc_heap_total_size(gc_get_heap());
   total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 
-  if (total_free < (total_size * 0.10)) {
+//TODO: want stats on how much of each heap page is used
+  while (total_free < (total_size * GC_FREE_THRESHOLD)) {
 #if GC_DEBUG_TRACE
-    fprintf(stdout, "Less than 10%% of the heap is free, growing it\n", 
-      total_free, total_size);
+    fprintf(stdout, "Less than %f%% of the heap is free, growing it\n", 
+      100.0 * GC_FREE_THRESHOLD);
 #endif
     gc_grow_heap(gc_get_heap(), 0, 0);
+    total_size = cached_heap_total_size;
+    total_free = cached_heap_free_size;
   }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "sweep done, total_size = %zu, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
