@@ -46,7 +46,7 @@
 #define MAX_STACK_TRACES 10
 
 // GC debugging flags
-#define GC_DEBUG_TRACE 1
+#define GC_DEBUG_TRACE 0
 #define GC_DEBUG_VERBOSE 0
 
 /* Additional runtime checking of the GC system.
