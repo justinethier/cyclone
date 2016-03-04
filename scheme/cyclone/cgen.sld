@@ -1253,7 +1253,9 @@
                          "") ; No varargs, skip
                        (c:serialize
                          (c:append
-                           (c-code (st:->code trace))
+                           (c-code 
+                             ;; Only trace when entering initial defined function
+                             (if has-closure? "" (st:->code trace)))
                            body)
                          "  ")
                        "; \n"
