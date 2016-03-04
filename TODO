@@ -1,5 +1,8 @@
 Initiatives:
 
+- Performance
+  - tune GC
+  - test without  gc safety checks, -g, etc. And add optimization flag
 - srfi 18 - more complex threading examples
 - api documentation
 - syntax-rules integration (WIP, works sometimes but needs to compile smaller)
