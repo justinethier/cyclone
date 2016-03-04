@@ -21,7 +21,7 @@
 #include "cyclone/types.h"
 #include <stdint.h>
 #include <time.h>
-#define DEBUG_THREADS // Debugging!!!
+//#define DEBUG_THREADS // Debugging!!!
 #ifdef DEBUG_THREADS
 #include <sys/syscall.h> /* Linux-only? */
 #endif
@@ -1241,7 +1241,7 @@ void *collector_main(void *arg)
   pthread_t tid = pthread_self();
   int sid = syscall(SYS_gettid);
   printf("GC thread LWP id is %d\n", sid);
-  printf("GC thread POSIX thread id is %d\n", tid);
+  //printf("GC thread POSIX thread id is %d\n", tid);
 #endif
   tim.tv_sec = 0;
 //JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
