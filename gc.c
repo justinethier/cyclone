@@ -548,7 +548,7 @@ size_t gc_sweep(gc_heap *h, size_t *sum_freed_ptr)
   pthread_mutex_lock(&heap_lock);
   for (; h; h = h->next) { // All heaps
 #if GC_DEBUG_TRACE
-    fprintf(stderr, "sweep heap %p, size = %zu\n", h, h->size);
+    fprintf(stderr, "sweep heap %p, size = %zu\n", h, (size_t)h->size);
 #endif
     p = gc_heap_first_block(h);
     q = h->free_list;
@@ -1220,7 +1220,7 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
     total_free = cached_heap_free_size;
   }
 #if GC_DEBUG_TRACE
-  fprintf(stderr, "sweep done, total_size = %zu, total_free = %d, freed = %d, max_freed = %d, elapsed = %ld\n", 
+  fprintf(stderr, "sweep done, total_size = %zu, total_free = %zu, freed = %zu, max_freed = %zu, elapsed = %zu\n", 
     total_size, total_free, 
     freed, max_freed, time(NULL) - gc_collector_start);
 #endif
