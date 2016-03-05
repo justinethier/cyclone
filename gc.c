@@ -1112,6 +1112,7 @@ void gc_wait_handshake()
           ck_pr_cas_int(&(m->gc_status), statusm, statusc);
         } else if (statusm == STATUS_SYNC2) {
 //printf("DEBUG - is mutator still blocked?\n");
+          pthread_mutex_lock(&(m->lock));
           // Check again, if thread is still blocked we need to cooperate
           if (ck_pr_cas_int((int *)&(m->thread_state), 
                                CYC_THREAD_STATE_BLOCKED,
@@ -1123,7 +1124,6 @@ void gc_wait_handshake()
               ) {
 //printf("DEBUG - update mutator GC status\n");            
             ck_pr_cas_int(&(m->gc_status), statusm, statusc);
-            pthread_mutex_lock(&(m->lock));
 //printf("DEBUG - collector is cooperating for blocked mutator\n");            
             buf_len = gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL, 0);
             // Handle any pending marks from write barrier
@@ -1138,8 +1138,8 @@ void gc_wait_handshake()
               gc_mark_gray(m, m->moveBuf[i]);
             }
             m->gc_alloc_color = ck_pr_load_int(&gc_color_mark);
-            pthread_mutex_unlock(&(m->lock));
           }
+          pthread_mutex_unlock(&(m->lock));
         }
       } else if (thread_status == CYC_THREAD_STATE_TERMINATED) {
         // Thread is no longer running
