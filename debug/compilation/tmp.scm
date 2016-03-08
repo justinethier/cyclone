@@ -83,7 +83,7 @@
            (error "unknown ast" ast))))
 
   (define (cps-list asts inner)
-(trace:error `(cps-list ,asts ,inner))
+;(trace:error `(cps-list ,asts ,inner))
     (define (body x)
       (cps-list (cdr asts)
                 (lambda (new-asts)
@@ -95,8 +95,9 @@
                (ref? (car asts)))
            (body (car asts)))
           ;; testing, probably won't work if prim calls into a cont
-          ;((prim-call? (car asts))
-          ; (body (car asts))) ;; TODO: does nothing, not what we want!
+          ((prim-call? (car asts))
+           (body (car asts))
+          ) ;; TODO: does nothing, not what we want!
           ;; END testing
           (else
            (let ((r (gensym 'r)))
@@ -136,13 +137,10 @@
 
 (trace:error
   (my-cps-convert
-   '((define test (lambda (a$3 b$2 c$1) (write (cons (+ a$3 b$2 c$1) (- a$3 b$2 c$1))))) ((lambda () 0 (test 1 2 3))))
+   '(write (cons (list (list 1 2 3)) (cons 2 3)))
 ))
 
 (trace:error
   (my-cps-convert
-   '((define test (lambda (a$3 b$2 c$1) (write 
-    (cons
-      ((lambda (x y z) (list x y z)) 1 2 3)
-      (cons (+ a$3 b$2 c$1) (- a$3 b$2 c$1))))) ((lambda () 0 (test 1 2 3))))
-)))
+    '(list 
+      (list 1 2 3))))
