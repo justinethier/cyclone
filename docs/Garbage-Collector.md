@@ -18,7 +18,7 @@
   - [Mutator Functions](#mutator-functions)
   - [Collector Functions](#collector-functions)
   - [Cooperation by the Collector](#cooperation-by-the-collector)
-  - [Other Considerations](#other-considerations)
+  - [Running the Collector](#running-the-collector)
 - [Looking Ahead](#looking-ahead)
 - [Further Reading](#further-reading)
 
@@ -285,9 +285,9 @@ When the collector handshakes it will check each mutator to see if it is blocked
 
 When a mutator exits a (potentially) blocking section of code, it must call another function to update its thread state to `CYC_THREAD_STATE_RUNNABLE`. In addition, the function will detect if the collector cooperated for this mutator by checking if its status is `CYC_THREAD_STATE_BLOCKED_COOPERATING`. If so, the mutator waits for its mutex to be released to ensure the collector has finished cooperating. The mutator then performs a minor GC again to ensure any additional objects - such as results from the blocking code - are moved to the heap before calling `longjmp` to jump back to the beginning of its stack. Either way, the mutator now calls into its continuation and resumes normal operations.
 
-## Other Considerations
+## Running the Collector
 
-Garbage collection papers are generally silent on when to start the collection cycle, instead leaving this up to the implementation. Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold.
+Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold. The goal is to run major collections infrequently, but at the same time we want to prevent unnecessary allocations.
 
 # Looking Ahead
 
