@@ -1,3 +1,5 @@
+; may need to look at closure output, but consider __lambda_229
+; seems like it is unnecessary. could it have been optimized out?
 
 CHICKEN
 (c)2008-2011 The Chicken Team
