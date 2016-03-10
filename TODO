@@ -1,12 +1,13 @@
 Initiatives:
 
-- Performance
-  - tune GC
-  - test without  gc safety checks, -g, etc. And add optimization flag
-- srfi 18 - more complex threading examples
-- api documentation
-- syntax-rules integration (WIP, works sometimes but needs to compile smaller)
-- r7rs missing features
+Tier 1:
+- Performance - most likely need CPS optimization and closure elimination
+- pass larceny benchmarks (will require some bugfixes)
+
+Tier 2:
+- srfi 18 - more complex threading examples (probably can wait)
+- api documentation (can wait?)
 - online docs via read-the-docs?
-- revisit macro hygiene issues
-- library issues (name conflicts and limited feature set)
+- higher priority issues (need to be resolved, but can wait?)
+  - revisit macro hygiene issues
+  - library issues (name conflicts and limited feature set)
