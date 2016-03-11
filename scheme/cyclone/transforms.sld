@@ -125,6 +125,7 @@
     wrap-mutables 
     alpha-convert 
     cps-convert 
+    cps-optimize-01
     pos-in-list 
     closure-convert 
   )
@@ -1458,7 +1459,55 @@
             (else
               (cps ast '%halt)))))
     ast-cps))
+;; TODO: use for temporary testing of optimizations
+;    (cps-optimize-01 ast-cps)))
 
+;; CPS optimizations
+
+;; TODO: don't think we can assume lambda body is single expr, if we want
+;;       to do optimizations such as inlining
+(define (cps-optimize-01 exp)
+  (define (opt-lambda exp)
+    (let ((body (car (lambda->exp exp)))) ;; Single expr after CPS
+      (trace:error `(DEBUG 
+        ,exp
+        ,body
+        ,(if (and (pair? body) (app? body) (lambda? (car body)))
+          (list (app->args body)
+                (lambda->formals exp))
+          #f)))
+      (cond
+        ;; Does the function just call its continuation?
+        ((and (pair? body) 
+              (app? body)
+              (lambda? (car body))
+              ;; TODO: need to check body length if we allow >1 expr in a body
+              ;; TODO: not sure this is good enough for all cases
+              (equal? (app->args body)
+                      ;(lambda->formals (car body))
+                      (lambda->formals exp)
+                      ))
+          (cps-optimize-01 (car body)))
+        (else
+          `(lambda ,(lambda->formals exp)
+             ,(cps-optimize-01 (car (lambda->exp exp)))) ;; Assume single expr in lambda body, since after CPS phase
+  ))))
+  (cond
+    ; Core forms:
+    ((const? exp)    exp)
+    ((ref? exp)      exp)
+    ((prim? exp)     exp)
+    ((quote? exp)    exp)
+    ((lambda? exp)   (opt-lambda exp)) 
+    ((set!? exp)     `(set!
+                        ,(set!->var exp) 
+                        ,(cps-optimize-01 (set!->exp exp))))
+    ((if? exp)       `(if ,(cps-optimize-01 (if->condition exp))
+                          ,(cps-optimize-01 (if->then exp))
+                          ,(cps-optimize-01 (if->else exp))))
+    ; Application:
+    ((app? exp)      (map (lambda (e) (cps-optimize-01 e)) exp))
+    (else            (error "CPS optimize unknown expression type: " exp))))
 
 ;; Closure-conversion.
 ;;
