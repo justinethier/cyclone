@@ -211,7 +211,12 @@
       ;; phase 5 - common subexpression elimination
       ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
       ;; END CPS optimization
-
+      (set! input-program
+        (map
+          cps-optimize-01
+          input-program))
+      (trace:info "---------------- after cps optimizations:")
+      (trace:info input-program) ;pretty-print
     
       (set! input-program
         (map

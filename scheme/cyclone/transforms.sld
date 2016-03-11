@@ -1458,10 +1458,7 @@
              ast)
             (else
               (cps ast '%halt)))))
-;    ast-cps))
-;; TODO: use for temporary testing of optimizations
-;; eventually will want to call this explicitly from cyclone.scm
-    (cps-optimize-01 ast-cps)))
+    ast-cps))
 
 ;; CPS optimizations
 
