@@ -1219,9 +1219,18 @@
        ;; Add a failsafe here in case macro expansion added more
        ;; incomplete if expressions.
        ;; FUTURE: append the empty (unprinted) value instead of #f
-       (if (if-else? ast)
-          `(if ,@(map (lambda (a) (convert a renamed)) (cdr ast)))
-          (convert (append ast '(#f)) renamed)))
+       (let ((new-ast (if (if-else? ast)
+                          `(if ,@(map (lambda (a) (convert a renamed)) (cdr ast)))
+                          (convert (append ast '(#f)) renamed))))
+         ;; Optimization - convert (if (not a) b c) into (if a c b)
+         (cond
+          ((and (app? (if->condition new-ast))
+                (equal? 'not (app->fun (if->condition new-ast))))
+           `(if ,@(app->args (if->condition new-ast))
+                ,(if->else new-ast)
+                ,(if->then new-ast)))
+          (else
+            new-ast))))
       ((prim-call? ast)
        (let ((converted
                (cons (car ast) 
