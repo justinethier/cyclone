@@ -1,0 +1,13 @@
+Before:
+
+ (let ((k158 (##core#lambda (r159)
+   (let ((a157 r159)) (ok?3 k150 row12 a153 a157)))))
+   (cdr k158 placed14))
+
+After (???):
+
+(let ((k158 (##core#lambda (r159)
+  (ok?3 k131 row12 r155 r159))))
+  (cdr k158 placed14))
+
+Not sure if this is the same optimization, but an anonymous lambda was removed.
