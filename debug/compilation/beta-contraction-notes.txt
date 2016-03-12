@@ -1,3 +1,47 @@
+Original version of dec-to1:
+ (lambda (k41 n4)
+  (let ((k42 (##core#lambda (r43) (k41 r43))))
+  (let ((loop5 (##core#undefined)))
+  (let ((t45 (set! loop5
+  (lambda (k47 i6 l7)
+  (let ((k48 (##core#lambda (r49) (k47 r49))))
+  (let ((k51 (##core#lambda (r52)
+  (if r52
+  (k48 l7)
+  (let ((k54 (##core#lambda (r55) (k48 r55))))
+  (let ((k58 (##core#lambda (r59)
+  (let ((a57 r59))
+  (let ((k62 (##core#lambda (r63)
+  (let ((a61 r63)) (loop5 k54 a57 a61)))))
+  (cons k62 i6 l7))))))
+  (- k58 i6 '1)))))))
+  (= k51 i6 '0)))))))
+  (let ((t8 t45)) (loop5 k42 n4 '()))))))
+call site was (dec-to1 k189 n0)
+
+Optimized version, replaces call site:
+
+(let ((k41 k189))
+  (let ((n4 n0))
+  (let ((loop5 (##core#undefined)))
+  (let ((t45 (set! loop5
+  (lambda (k47 i6 l7)
+  (let ((k51 (##core#lambda (r52)
+  (if r52
+  (k47 l7)
+  (let ((k58 (##core#lambda (r59)
+  (let ((k62 (##core#lambda (r63) (loop5 k47 r59 r63))))
+  (cons k62 i6 l7)))))
+  (- k58 i6 '1))))))
+  (= k51 i6 '0))))))
+  (loop5 k41 n4 '())))))
+
+optimized code from cyclone's nqueens:
+
+((define nqueens (lambda (k$30 n$4) ((lambda (dec-to$10 ok?$9 try$8) ((lambda (dec-to$13 try$12 ok?$11) ((lambda (r$67) ((lambda (r$31) ((lambda (r$50) ((lambda (r$32) ((lambda (r$37) ((lambda (r$33) (dec-to$10 (lambda (r$34) ((lambda (r$35) ((lambda (r$36) (try$8 k$30 r$34 r$35 r$36)) (quote ()))) (quote ()))) n$4)) (set! ok?$9 r$37))) (lambda (k$38 row$16 dist$15 placed$14) ((lambda (r$39) (if r$39 (k$38 #t) ((lambda (r$48) ((lambda (r$49) ((lambda (r$47) (not (lambda (r$40) (if r$40 ((lambda (r$45) ((lambda (r$46) ((lambda (r$44) (not (lambda (r$41) (if r$41 ((lambda (r$42) ((lambda (r$43) (ok?$9 k$38 row$16 r$42 r$43)) (cdr placed$14))) (+ dist$15 1)) (k$38 #f))) r$44)) (= r$45 r$46))) (- row$16 dist$15))) (car placed$14)) (k$38 #f))) r$47)) (= r$48 r$49))) (+ row$16 dist$15))) (car placed$14)))) (null? placed$14))))) (set! try$8 r$50))) (lambda (k$51 x$19 y$18 z$17) ((lambda (r$52) (if r$52 ((lambda (r$53) (if r$53 (k$51 1) (k$51 0))) (null? y$18)) ((lambda (k$59) ((lambda (r$66) (ok?$9 (lambda (r$60) (if r$60 ((lambda (r$65) (append (lambda (r$61) ((lambda (r$62) ((lambda (r$64) ((lambda (r$63) (try$8 k$59 r$61 r$62 r$63)) (cons r$64 z$17))) (car x$19))) (quote ()))) r$65 y$18)) (cdr x$19)) (k$59 0))) r$66 1 z$17)) (car x$19))) (lambda (r$54) ((lambda (r$56) ((lambda (r$58) ((lambda (r$57) (try$8 (lambda (r$55) (k$51 (+ r$54 r$55))) r$56 r$57 z$17)) (cons r$58 y$18))) (car x$19))) (cdr x$19)))))) (null? x$19))))) (set! dec-to$10 r$67))) (lambda (k$68 n$20) ((lambda (r$69) ((lambda (i$22 l$21) ((lambda (loop$23) ((lambda (r$71) ((lambda (r$70) (loop$23 k$68 i$22 l$21)) (set! loop$23 r$71))) (lambda (k$72 i$25 l$24) ((lambda (r$73) (if r$73 (k$72 l$24) ((lambda (r$74) ((lambda (r$75) (loop$23 k$72 r$74 r$75)) (cons i$25 l$24))) (- i$25 1)))) (= i$25 0))))) #f)) n$20 r$69)) (quote ()))))) #f #f #f)) #f #f #f))) ((lambda () ((lambda (r$26) (nqueens (lambda (r$27) (write %halt r$27)) 8)) 0))))
+
+
+------------------------------------
 Before:
 
  (let ((k158 (##core#lambda (r159)
@@ -10,4 +54,11 @@ After (???):
   (ok?3 k131 row12 r155 r159))))
   (cdr k158 placed14))
 
-Not sure if this is the same optimization, but an anonymous lambda was removed.
+Not sure if this is the same optimization, but an anonymous lambda was removed. Or maybe not, isn't this the optimization we already did?
+
+((lambda (r$42) 
+  ((lambda (r$43) (ok?$9 k$38 row$16 r$42 r$43)) 
+   (cdr placed$14))) 
+ (+ dist$15 1))
+
+((lambda (r$42) ((lambda (r$43) (ok?$9 k$38 row$16 r$42 r$43)) (cdr placed$14))) (+ dist$15 1))
