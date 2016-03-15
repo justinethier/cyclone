@@ -2,7 +2,67 @@ Initiatives:
 
 Tier 1:
 - Performance - most likely need CPS optimization and closure elimination
-- pass larceny benchmarks (will require some bugfixes)
+- pass larceny benchmarks (will require some bugfixes):
+
+    - ack.scm
+    - array1.scm
+    - browse.scm
+    - bv2string.scm
+    - cat.scm
+    - common.scm
+    - compiler.scm
+    - conform.scm
+    - cpstak.scm
+    - ctak.scm
+    - deriv.scm
+    - destruc.scm
+    - diviter.scm
+    - divrec.scm
+    - dynamic.scm
+    - earley.scm
+    - equal.scm
+    - fft.scm
+    - fibc.scm
+    - fibfp.scm
+    - fib.scm
+    - gcbench.scm
+    - graphs.scm
+    - lattice.scm
+    - matrix.scm
+    - mazefun.scm
+    - maze.scm
+    - mbrot.scm
+    - mbrotZ.scm
+    - mperm.scm
+    - nboyer.scm
+    - nqueens.scm
+    - ntakl.scm
+    - nucleic.scm
+    - paraffins.scm
+    - parsing.scm
+    - peval.scm
+    - pi.scm
+    - pnpoly.scm
+    - primes.scm
+    - puzzle.scm
+    - quicksort.scm
+    - ray.scm
+    - read0.scm
+    - read1.scm
+    - sboyer.scm
+    - scheme.scm
+    - simplex.scm
+    - slatex.scm
+    - string.scm
+    - sum1.scm
+    - sumfp.scm
+    - sum.scm
+    - tail.scm
+    - takl.scm
+    - tak.scm
+    - triangl.scm
+    - wc.scm
+
 
 Tier 2:
 - srfi 18 - more complex threading examples (probably can wait)
