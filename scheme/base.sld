@@ -916,7 +916,9 @@
   (define-c abs
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
-      if (type_of(num) == integer_tag) {
+      if (obj_is_int(num)) {
+        return_closcall1(data, k, obj_int2obj( abs( obj_obj2int(num))));
+      } else if (type_of(num) == integer_tag) {
         make_int(i, abs(((integer_type *)num)->value));
         return_closcall1(data, k, &i);
       } else {
@@ -929,12 +931,16 @@
     " int i, j;
       Cyc_check_num(data, num1);
       Cyc_check_num(data, num2);
-      if (type_of(num1) == integer_tag) { 
+      if (obj_is_int(num1)) {
+        i = obj_obj2int(num1);
+      } else if (type_of(num1) == integer_tag) { 
         i = ((integer_type *)num1)->value; 
       } else if (type_of(num1) == double_tag) { 
         i = ((double_type *)num1)->value; 
       }
-      if (type_of(num2) == integer_tag) { 
+      if (obj_is_int(num2)) {
+        j = obj_obj2int(num2);
+      } else if (type_of(num2) == integer_tag) { 
         j = ((integer_type *)num2)->value; 
       } else if (type_of(num2) == double_tag) { 
         j = ((double_type *)num2)->value; 
@@ -956,7 +962,7 @@
   (define-c exact?
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
-      if (type_of(num) == integer_tag)
+      if (obj_is_int(num) || type_of(num) == integer_tag)
         return_closcall1(data, k, boolean_t);
       return_closcall1(data, k, boolean_f); ")
   (define (inexact? num) (not (exact? num)))

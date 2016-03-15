@@ -11,10 +11,10 @@
 
 /* Error checking definitions */
 #define Cyc_check_num_args(data, fnc_name, num_args, args) { \
-  integer_type l = Cyc_length(data, args); \
-  if (num_args > l.value) { \
+  object l = Cyc_length2(data, args); \
+  if (num_args > obj_obj2int(l)) { \
     char buf[128]; \
-    snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, l.value);  \
+    snprintf(buf, 127, "Expected %d arguments but received %d.", num_args, obj_obj2int(l));  \
     Cyc_rt_raise_msg(data, buf); \
   } \
 }
@@ -87,7 +87,9 @@ object Cyc_global_set(void *thd, object *glo, object value);
 #define return_inexact_double_op(data, cont, OP, z) \
   make_double(d, 0.0); \
   Cyc_check_num(data, z); \
-  if (type_of(z) == integer_tag) { \
+  if (obj_is_int(z)) { \
+    d.value = OP(obj_obj2int(z)); \
+  } else if (type_of(z) == integer_tag) { \
     d.value = OP(((integer_type *)z)->value); \
   } else { \
     d.value = OP(((double_type *)z)->value); \
@@ -97,7 +99,9 @@ object Cyc_global_set(void *thd, object *glo, object value);
 #define return_exact_double_op(data, cont, OP, z) \
   make_int(i, 0); \
   Cyc_check_num(data, z); \
-  if (type_of(z) == integer_tag) { \
+  if (obj_is_int(z)) { \
+    i.value = obj_obj2int(z); \
+  } else if (type_of(z) == integer_tag) { \
     i.value = (int)OP(((integer_type *)z)->value); \
   } else { \
     i.value = (int)OP(((double_type *)z)->value); \
@@ -105,9 +109,10 @@ object Cyc_global_set(void *thd, object *glo, object value);
   return_closcall1(data, cont, &i)
 
 #define unbox_number(n) \
-  ((type_of(n) == integer_tag) ? \
-    ((integer_type *)n)->value : \
-    ((double_type *)n)->value)
+  ((obj_is_int(n) ? obj_obj2int(n) : \
+                    ((type_of(n) == integer_tag) ? \
+                       ((integer_type *)n)->value : \
+                       ((double_type *)n)->value)))
 
 /* Prototypes for primitive functions. */
 
@@ -121,6 +126,7 @@ object Cyc_set_cvar(object var, object value);
 object apply(void *data, object cont, object func, object args);
 void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
 integer_type Cyc_string_cmp(void *data, object str1, object str2);
+object Cyc_string_cmp2(void *data, object str1, object str2);
 void dispatch_string_91append(void *data, int argc, object clo, object cont, object str1, ...);
 list mcons(object,object);
 cvar_type *mcvar(object *var);
@@ -145,6 +151,8 @@ object Cyc_set_car(void *, object l, object val) ;
 object Cyc_set_cdr(void *, object l, object val) ;
 integer_type Cyc_length(void *d, object l);
 integer_type Cyc_vector_length(void *data, object v);
+object Cyc_length2(void *d, object l);
+object Cyc_vector_length2(void *data, object v);
 object Cyc_vector_ref(void *d, object v, object k);
 object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, object len, object fill);
@@ -160,13 +168,16 @@ int octstr2int(const char *str);
 int hexstr2int(const char *str);
 object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
 integer_type Cyc_string_length(void *data, object str);
+object Cyc_string_length2(void *data, object str);
 object Cyc_substring(void *data, object cont, object str, object start, object end);
 object Cyc_string_ref(void *data, object str, object k);
 object Cyc_string_set(void *data, object str, object k, object chr);
 object Cyc_installation_dir(void *data, object cont, object type);
 object Cyc_command_line_arguments(void *data, object cont);
 integer_type Cyc_system(object cmd);
+object Cyc_system2(object cmd);
 integer_type Cyc_char2integer(object chr);
+object Cyc_char2integer2(object chr);
 object Cyc_integer2char(void *data, object n);
 void Cyc_halt(closure);
 object __halt(object obj);
