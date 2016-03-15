@@ -208,6 +208,8 @@ typedef long tag_type;
  *  0x01 - integer (in progress)
  *  0x10 - char
  */
+
+// TODO: does this break negative numbers (IE, overwrite sign bit in 2's comp?)? may need a more sophisticated scheme to handle 31-bit numbers. also, ideally want to use 63 bits on a 64-bit system
 #define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
 #define obj_obj2int(x) ((int)(x)>>1)
 #define obj_int2obj(c) ((void *)((((int)c)<<1) | 1))

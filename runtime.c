@@ -949,17 +949,23 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
 }
 
 object Cyc_vector_ref(void *data, object v, object k) {
+  int idx;
   if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
     Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected vector\n"); 
   }
-  if (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag) {
+  if ((!obj_is_int(k)) && (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag)) {
     Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected integer\n"); 
   }
-  if (integer_value(k) < 0 || integer_value(k) >= ((vector)v)->num_elt) {
-    Cyc_rt_raise2(data, "vector-ref - invalid index", k);
+  if (obj_is_int(k)) {
+    idx = obj_obj2int(k);
+  } else {
+    idx = integer_value(k);
+  }
+  if (idx < 0 || idx >= ((vector)v)->num_elt) {
+    Cyc_rt_raise2(data, "vector-ref - invalid index", obj_int2obj(idx));
   }
 
-  return ((vector)v)->elts[((integer_type *)k)->value];
+  return ((vector)v)->elts[idx];
 }
 
 integer_type Cyc_vector_length(void *data, object v) {
@@ -981,10 +987,30 @@ integer_type Cyc_length(void *data, object l){
     return len;
 }
 
+object Cyc_vector_length2(void *data, object v) {
+    if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
+      return obj_int2obj(((vector)v)->num_elt);
+    }
+    Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
+
+object Cyc_length2(void *data, object l){
+    int len = 0;
+    while(!nullp(l)){
+        if (is_value_type(l) || ((list)l)->tag != cons_tag){
+            Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
+        }
+        l = cdr(l);
+        len++;
+    }
+    return obj_int2obj(len);
+}
+
 object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
     Cyc_check_num(data, n);
-    if (type_of(n) == integer_tag) {
+    if (obj_is_int(n)) {
+        snprintf(buffer, 1024, "%d", obj_obj2int(n));
+    }else if (type_of(n) == integer_tag) {
         snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
     } else if (type_of(n) == double_tag) {
         snprintf(buffer, 1024, "%f", ((double_type *)n)->value);
@@ -1015,12 +1041,12 @@ object Cyc_string2symbol(void *data, object str) {
 object Cyc_list2string(void *data, object cont, object lst){
     char *buf;
     int i = 0;
-    integer_type len;
+    object len;
 
     Cyc_check_cons_or_nil(data, lst);
     
-    len = Cyc_length(data, lst); // Inefficient, walks whole list
-    buf = alloca(sizeof(char) * (len.value + 1));
+    len = Cyc_length2(data, lst); // Inefficient, walks whole list
+    buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
     while(!nullp(lst)){
         buf[i++] = obj_obj2char(car(lst));
         lst = cdr(lst);
@@ -1032,6 +1058,7 @@ object Cyc_list2string(void *data, object cont, object lst){
       return_closcall1(data, cont, &str);}
 }
 
+// TODO: need new versions of string->number that handle int value types
 common_type Cyc_string2number2(void *data, int argc, object str, ...) 
 {
   object base = nil;
@@ -1138,6 +1165,13 @@ integer_type Cyc_string_cmp(void *data, object str1, object str2) {
   }
 }
 
+object Cyc_string_cmp2(void *data, object str1, object str2) {
+  Cyc_check_str(data, str1);
+  Cyc_check_str(data, str2);
+  return obj_int2obj( strcmp(((string_type *)str1)->str,
+                             ((string_type *)str2)->str) );
+}
+
 #define Cyc_string_append_va_list(data, argc) { \
     int i = 0, total_len = 1; \
     int *len = alloca(sizeof(int) * argc); \
@@ -1185,6 +1219,11 @@ integer_type Cyc_string_length(void *data, object str) {
   { make_int(len, strlen(string_str(str)));
     return len; }}
 
+object Cyc_string_length2(void *data, object str) {
+  Cyc_check_obj(data, string_tag, str);
+  Cyc_check_str(data, str);
+  return obj_int2obj(strlen(string_str(str))); }
+
 object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
   int idx, len;
@@ -1197,7 +1236,7 @@ object Cyc_string_set(void *data, object str, object k, object chr) {
   }
 
   raw = string_str(str);
-  idx = integer_value(k),
+  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
   len = strlen(raw);
 
   Cyc_check_bounds(data, "string-set!", len, idx);
@@ -1213,7 +1252,7 @@ object Cyc_string_ref(void *data, object str, object k) {
   Cyc_check_int(data, k);
 
   raw = string_str(str);
-  idx = integer_value(k),
+  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
   len = strlen(raw);
 
   if (idx < 0 || idx >= len) {
@@ -1232,8 +1271,8 @@ object Cyc_substring(void *data, object cont, object str, object start, object e
   Cyc_check_int(data, end);
 
   raw = string_str(str);
-  s = integer_value(start),
-  e = integer_value(end),
+  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start),
+  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end),
   len = strlen(raw);
 
   if (s > e) {
@@ -1317,7 +1356,7 @@ object Cyc_make_vector(void *data, object cont, object len, object fill) {
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag;
-  ((vector)v)->num_elt = ((integer_type *)len)->value;
+  ((vector)v)->num_elt = obj_is_int(len) ? obj_obj2int(len) : ((integer_type *)len)->value;
   ((vector)v)->elts = 
     (((vector)v)->num_elt > 0) ? 
      (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
@@ -1330,17 +1369,17 @@ object Cyc_make_vector(void *data, object cont, object len, object fill) {
 
 object Cyc_list2vector(void *data, object cont, object l) {
   object v = nil; 
-  integer_type len;
+  object len;
   object lst = l; 
   int i = 0; 
 
   Cyc_check_cons_or_nil(data, l); 
-  len = Cyc_length(data, l); 
+  len = Cyc_length2(data, l); 
   v = alloca(sizeof(vector_type)); 
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag; 
-  ((vector)v)->num_elt = len.value; 
+  ((vector)v)->num_elt = obj_obj2int(len);
   ((vector)v)->elts = 
     (((vector)v)->num_elt > 0) ? 
        (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
@@ -1362,19 +1401,27 @@ integer_type Cyc_system(object cmd) {
   }
 }
 
+object Cyc_system2(object cmd) {
+  if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
+    return obj_int2obj(-1);
+  }
+  return obj_int2obj(system(((string_type *)cmd)->str));
+}
+
 integer_type Cyc_char2integer(object chr){
     make_int(n, obj_obj2char(chr));
     return n;
+}
+
+object Cyc_char2integer2(object chr){
+    return obj_int2obj(obj_obj2char(chr));
 }
 
 object Cyc_integer2char(void *data, object n){
     int val = 0;
 
     Cyc_check_int(data, n);
-    if (!nullp(n)) {
-        val = ((integer_type *) n)->value;
-    }
-
+    val = (obj_is_int(n) ? obj_obj2int(n) : integer_value(n));
     return obj_char2obj(val);
 }
 
@@ -1392,6 +1439,7 @@ object __halt(object obj) {
     return nil;
 }
 
+// TODO: support for integer value types
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 common_type FUNC_OP(void *data, object x, object y) { \
     common_type s; \
@@ -1981,12 +2029,12 @@ void _string_91cmp(void *data, object cont, object args) {
     { integer_type cmp = Cyc_string_cmp(data, car(args), cadr(args));
       return_closcall1(data, cont, &cmp);}}
 void _string_91append(void *data, object cont, object args) {  
-    integer_type argc = Cyc_length(data, args);
-    dispatch(data, argc.value, (function_type)dispatch_string_91append, cont, cont, args); }
+    object argc = Cyc_length2(data, args);
+    dispatch(data, obj_obj2int(argc), (function_type)dispatch_string_91append, cont, cont, args); }
 void _make_91vector(void *data, object cont, object args) {
     Cyc_check_num_args(data, "make-vector", 1, args);
-    { integer_type argc = Cyc_length(data, args);
-      if (argc.value >= 2) {
+    { object argc = Cyc_length2(data, args);
+      if (obj_obj2int(argc) >= 2) {
         Cyc_make_vector(data, cont, car(args), cadr(args));}
       else {
         Cyc_make_vector(data, cont, car(args), boolean_f);}}}
@@ -2053,12 +2101,12 @@ void _Cyc_91write_91char(void *data, object cont, object args) {
     return_closcall1(data, cont, Cyc_write_char(data, car(args), cadr(args)));}
 void _Cyc_91write(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "write", 1, args);
-    { integer_type argc = Cyc_length(data, args);
-     dispatch(data, argc.value, (function_type)dispatch_write_va, cont, cont, args); }}
+    { object argc = Cyc_length2(data, args);
+     dispatch(data, obj_obj2int(argc), (function_type)dispatch_write_va, cont, cont, args); }}
 void _display(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "display", 1, args);
-    { integer_type argc = Cyc_length(data, args);
-      dispatch(data, argc.value, (function_type)dispatch_display_va, cont, cont, args); }}
+    { object argc = Cyc_length2(data, args);
+      dispatch(data, obj_obj2int(argc), (function_type)dispatch_display_va, cont, cont, args); }}
 void _call_95cc(void *data, object cont, object args){
     Cyc_check_num_args(data, "call/cc", 1, args);
     if (eq(boolean_f, Cyc_is_procedure(data, car(args)))) {
@@ -2074,6 +2122,7 @@ void _call_95cc(void *data, object cont, object args){
  */
 object apply(void *data, object cont, object func, object args){
   common_type buf;
+  object count;
 
 //printf("DEBUG apply: ");
 //Cyc_display(args);
@@ -2097,10 +2146,10 @@ object apply(void *data, object cont, object func, object args){
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      buf.integer_t = Cyc_length(data, args);
+      count = Cyc_length2(data, args);
       // TODO: validate number of args provided:
       Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
-      dispatch(data, buf.integer_t.value, ((closure)func)->fn, func, cont, args);
+      dispatch(data, obj_obj2int(count), ((closure)func)->fn, func, cont, args);
       break;
 
     case cons_tag:
@@ -2866,8 +2915,8 @@ object Cyc_thread_sleep(void *data, object timeout)
 {
   struct timespec tim;
   long value;
-  Cyc_check_num(data, timeout);
-  value = ((integer_type *)timeout)->value;
+  Cyc_check_int(data, timeout);
+  value = (obj_is_int(timeout) ? obj_obj2int(timeout) : integer_value(timeout));
   tim.tv_sec = value / 1000;
   tim.tv_nsec = (value % 1000) * NANOSECONDS_PER_MILLISECOND;
   nanosleep(&tim, NULL);
