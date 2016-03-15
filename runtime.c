@@ -810,8 +810,8 @@ object Cyc_is_null(object o){
     return boolean_f;}
 
 object Cyc_is_number(object o){
-    if (!nullp(o) && !is_value_type(o) && 
-        (type_of(o) == integer_tag || type_of(o) == double_tag))
+    if (!nullp(o) && (obj_is_int(o) || 
+        (!is_value_type(o) && (type_of(o) == integer_tag || type_of(o) == double_tag))))
         return boolean_t;
     return boolean_f;}
 
@@ -819,7 +819,8 @@ object Cyc_is_real(object o){
     return Cyc_is_number(o);}
 
 object Cyc_is_integer(object o){
-    if (!nullp(o) && !is_value_type(o) && type_of(o) == integer_tag)
+    if (!nullp(o) && (obj_is_int(o) ||
+        (!is_value_type(o) && type_of(o) == integer_tag)))
         return boolean_t;
     return boolean_f;}
 
@@ -930,7 +931,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
   int idx;
   Cyc_check_vec(data, v);
   Cyc_check_int(data, k);
-  idx = ((integer_type *)k)->value;
+  idx = obj_is_int(k) ? obj_obj2int(k) : ((integer_type *)k)->value;
 
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
