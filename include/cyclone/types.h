@@ -216,7 +216,7 @@ typedef long tag_type;
 #define obj_obj2char(x) (char)((long)(x)>>2)
 #define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
 
-#define is_value_type(x) ((unsigned long)(x) | (unsigned long)3)
+#define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
 /* Define function type. */
