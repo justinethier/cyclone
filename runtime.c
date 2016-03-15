@@ -414,6 +414,7 @@ int equal(x, y) object x, y;
     if (nullp(x)) return nullp(y);
     if (nullp(y)) return nullp(x);
     if (obj_is_char(x)) return obj_is_char(y) && x == y;
+    if (obj_is_int(x)) return obj_is_int(y) && x == y;
     switch(type_of(x)) {
     case integer_tag:
       return (type_of(y) == integer_tag &&
@@ -524,6 +525,7 @@ object Cyc_display(object x, FILE *port)
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
+ if (obj_is_int(x)) { fprintf(port, "%d", obj_obj2int(x)); return quote_void; }
  switch (type_of(x))
    {case macro_tag:
       fprintf(port, "<macro %p>",(void *)((closure) x)->fn);
@@ -751,43 +753,44 @@ list assoc(void *data, object x, list l)
  return boolean_f;}
 
 
-// TODO: generate these using macros???
-object __num_eq(void *data, object x, object y)
-{Cyc_check_num(data, x);
- Cyc_check_num(data, y);
- if (((integer_type *)x)->value == ((integer_type *)y)->value)
-    return boolean_t;
- return boolean_f;}
+#define declare_num_cmp(FUNC_CMP, OP) \
+object FUNC_CMP(void *data, object x, object y) { \
+    Cyc_check_num(data, x); \
+    Cyc_check_num(data, y); \
+    if (obj_is_int(x)) { \
+      if (obj_is_int(y)) { \
+        return (obj_obj2int(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
+      } else if (type_of(y) == integer_tag) { \
+        return (obj_obj2int(x) OP integer_value(y)) ? boolean_t : boolean_f; \
+      } else { \
+        return (obj_obj2int(x) OP double_value(y)) ? boolean_t : boolean_f; \
+      } \
+    } else if (type_of(x) == integer_tag) { \
+      if (obj_is_int(y)) { \
+        return (integer_value(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
+      } else if (type_of(y) == integer_tag) { \
+        return (integer_value(x) OP integer_value(y)) ? boolean_t : boolean_f; \
+      } else { \
+        return (integer_value(x) OP double_value(y)) ? boolean_t : boolean_f; \
+      } \
+    } else { \
+      if (obj_is_int(y)) { \
+        return (double_value(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
+      } else if (type_of(y) == integer_tag) { \
+        return (double_value(x) OP integer_value(y)) ? boolean_t : boolean_f; \
+      } else { \
+        return (double_value(x) OP double_value(y)) ? boolean_t : boolean_f; \
+      } \
+    } \
+    return boolean_f; \
+}
 
-object __num_gt(void *data, object x, object y)
-{Cyc_check_num(data, x);
- Cyc_check_num(data, y);
- if (((integer_type *)x)->value > ((integer_type *)y)->value)
-    return boolean_t;
- return boolean_f;}
+declare_num_cmp(__num_eq, ==);
+declare_num_cmp(__num_gt, >);
+declare_num_cmp(__num_lt, <);
+declare_num_cmp(__num_gte, >=);
+declare_num_cmp(__num_lte, <=);
 
-object __num_lt(void *data, object x, object y)
-{Cyc_check_num(data, x);
- Cyc_check_num(data, y);
- if (((integer_type *)x)->value < ((integer_type *)y)->value)
-    return boolean_t;
- return boolean_f;}
-
-object __num_gte(void *data, object x, object y)
-{Cyc_check_num(data, x);
- Cyc_check_num(data, y);
- if (((integer_type *)x)->value >= ((integer_type *)y)->value)
-    return boolean_t;
- return boolean_f;}
-
-object __num_lte(void *data, object x, object y)
-{Cyc_check_num(data, x);
- Cyc_check_num(data, y);
- if (((integer_type *)x)->value <= ((integer_type *)y)->value)
-    return boolean_t;
- return boolean_f;}
-
-// TODO: object Cyc_is_eq(x, y) object x, y)
 object Cyc_is_boolean(object o){
     if (!nullp(o) && 
         !is_value_type(o) &&
