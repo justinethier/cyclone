@@ -196,18 +196,27 @@ typedef long tag_type;
 #define type_of(x) (((list) x)->tag)
 #define forward(x) (((list) x)->cons_car)
 
-/* Define value types. 
-   Depending on the underlying architecture, compiler, etc these types
-   have extra least significant bits that can be used to mark them as
-   values instead of objects (IE, pointer to a tagged object).
-   On many machines, addresses are multiples of four, leaving the two
-   least significant bits free - from lisp in small pieces.
-*/
-#define obj_is_char(x)  ((unsigned long)(x) & (unsigned long)1)
-#define obj_obj2char(x) (char)((long)(x)>>1)
-#define obj_char2obj(c) ((void *)((((unsigned long)c)<<1) | 1))
+/** Define value types. 
+ *  Depending on the underlying architecture, compiler, etc these types
+ *  have extra least significant bits that can be used to mark them as
+ *  values instead of objects (IE, pointer to a tagged object).
+ *  On many machines, addresses are multiples of four, leaving the two
+ *  least significant bits free - from lisp in small pieces.
+ *
+ *  Types:
+ *  0x00 - pointer (an object type)
+ *  0x01 - integer (in progress)
+ *  0x10 - char
+ */
+#define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
+#define obj_obj2int(x) ((int)(x)>>1)
+#define obj_int2obj(c) ((void *)((((int)c)<<1) | 1))
 
-#define is_value_type(x) obj_is_char(x)
+#define obj_is_char(x)  ((unsigned long)(x) & (unsigned long)2)
+#define obj_obj2char(x) (char)((long)(x)>>2)
+#define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
+
+#define is_value_type(x) ((unsigned long)(x) | (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
 /* Define function type. */
