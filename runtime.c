@@ -1062,24 +1062,25 @@ object Cyc_list2string(void *data, object cont, object lst){
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...) 
 {
   object base = nil;
+  int base_num;
   va_list ap;
   va_start(ap, str);
-  make_int(result, 0);
   if (argc > 1) {
     base = va_arg(ap, object);
     Cyc_check_int(data, base);
   }
   va_end(ap);
   if (base) {
+    base_num = obj_is_int(base) ? obj_obj2int(base) : integer_value(base);
     Cyc_check_str(data, str);
-    if (integer_value(base) == 2) {
-      integer_value(&result) = binstr2int(string_str(str));
+    if (base_num == 2) {
+      make_int(result, binstr2int(string_str(str)));
       return_closcall1(data, cont, &result);
-    }else if (integer_value(base) == 8) {
-      integer_value(&result) = octstr2int(string_str(str));
+    }else if (base_num == 8) {
+      make_int(result, octstr2int(string_str(str)));
       return_closcall1(data, cont, &result);
-    }else if (integer_value(base) == 16) {
-      integer_value(&result) = hexstr2int(string_str(str));
+    }else if (base_num == 16) {
+      make_int(result, hexstr2int(string_str(str)));
       return_closcall1(data, cont, &result);
     }
   }
