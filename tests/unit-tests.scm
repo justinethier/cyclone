@@ -181,10 +181,10 @@
 (assert:equal "" (string-append "test") "test")
 (assert:equal "" (string-append "ab" "cdefgh ij" "klmno" "p" "q" "rs  " "tuv" "w" " x " "yz")
   "abcdefgh ijklmnopqrs  tuvw x yz")
-(assert:equal "" (string->number "0") 0)
-(assert:equal "" (string->number "42") 42)
-;(assert:equal "" (string->number "343243243232") ;; Note no bignum support
-(assert:equal "" (string->number "3.14159") 3.14159)
+(assert:equal "" (string->number2 "0") 0)
+(assert:equal "" (string->number2 "42") 42)
+;(assert:equal "" (string->number2 "343243243232") ;; Note no bignum support
+(assert:equal "" (string->number2 "3.14159") 3.14159)
 (assert:equal "" (list->string (list #\A #\B #\C)) "ABC")
 (assert:equal "" (list->string (list #\A)) "A")
 (assert:equal "" (list->string (list)) "") 

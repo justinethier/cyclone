@@ -233,6 +233,7 @@
       (list 'char->integer char->integer)
       (list 'integer->char integer->char)
       (list 'string->number string->number)
+      (list 'string->number2 string->number2)
       (list 'string-cmp string-cmp)
       (list 'string-append string-append)
       (list 'list->string list->string)

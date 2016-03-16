@@ -502,6 +502,7 @@
      char->integer
      integer->char
      string->number
+     string->number2
      string-append
      string-cmp
      list->string
