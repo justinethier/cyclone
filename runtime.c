@@ -1059,6 +1059,57 @@ object Cyc_list2string(void *data, object cont, object lst){
 }
 
 // TODO: need new versions of string->number that handle int value types
+object Cyc_string2number2_(void *data, object cont, int argc, object str, ...) 
+{
+  object base = nil;
+  va_list ap;
+  va_start(ap, str);
+  make_int(result, 0);
+  if (argc > 1) {
+    base = va_arg(ap, object);
+    Cyc_check_int(data, base);
+  }
+  va_end(ap);
+  if (base) {
+    Cyc_check_str(data, str);
+    if (integer_value(base) == 2) {
+      integer_value(&result) = binstr2int(string_str(str));
+      return_closcall1(data, cont, &result);
+    }else if (integer_value(base) == 8) {
+      integer_value(&result) = octstr2int(string_str(str));
+      return_closcall1(data, cont, &result);
+    }else if (integer_value(base) == 16) {
+      integer_value(&result) = hexstr2int(string_str(str));
+      return_closcall1(data, cont, &result);
+    }
+  }
+  Cyc_string2number_(data, cont, str);
+}
+
+object Cyc_string2number_(void *data, object cont, object str){
+    double n;
+    Cyc_check_obj(data, string_tag, str);
+    Cyc_check_str(data, str);
+    if (type_of(str) == string_tag &&
+        ((string_type *) str)->str){
+        n = atof(((string_type *) str)->str);
+
+        if (ceilf(n) == n) {
+            make_int(result, (int)n);
+            return_closcall1(data, cont, &result);
+        }
+        else {
+            make_double(result, n);
+            return_closcall1(data, cont, &result);
+        }
+    } else {
+        // TODO: not good enough because we do pointer comparisons to #f
+        //result.boolean_t = boolean_f;
+    }
+
+    Cyc_rt_raise2(data, "Expected string but received", str);
+}
+
 common_type Cyc_string2number2(void *data, int argc, object str, ...) 
 {
   object base = nil;

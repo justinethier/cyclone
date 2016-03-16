@@ -163,6 +163,8 @@ object Cyc_string2symbol(void *d, object str);
 object Cyc_list2string(void *d, object cont, object lst);
 common_type Cyc_string2number(void *d, object str);
 common_type Cyc_string2number2(void *data, int argc, object str, ...);
+object Cyc_string2number_(void *d, object cont, object str);
+object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
 int binstr2int(const char *str);
 int octstr2int(const char *str);
 int hexstr2int(const char *str);
