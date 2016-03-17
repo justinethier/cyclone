@@ -2036,18 +2036,11 @@ void _string_91_125number(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string->number", 1, args);
     { object tail = cdr(args);
       if (tail) {
-        common_type i = Cyc_string2number2(data, 2, car(args), cadr(args));
-        return_closcall1(data, cont, &i);
-      } else {
-        common_type i = Cyc_string2number(data, car(args));
-        return_closcall1(data, cont, &i);}}}
-void _string_91_125number2(void *data, object cont, object args) {  
-    Cyc_check_num_args(data, "string->number2", 1, args);
-    { object tail = cdr(args);
-      if (tail) {
         Cyc_string2number2_(data, cont, 2, car(args), cadr(args));
       } else {
         Cyc_string2number_(data, cont, car(args)); }}}
+void _string_91_125number2(void *data, object cont, object args) {  
+    _string_91_125number(data, cont, args); }
 void _string_91length(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string-length", 1, args);
     { integer_type i = Cyc_string_length(data, car(args));

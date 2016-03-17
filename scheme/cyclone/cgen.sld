@@ -520,7 +520,7 @@
      ((eq? p 'cddddr)        "cddddr")
      ((eq? p 'char->integer) "Cyc_char2integer")
      ((eq? p 'integer->char) "Cyc_integer2char")
-     ((eq? p 'string->number)"Cyc_string2number2")
+     ((eq? p 'string->number)"Cyc_string2number2_")
      ((eq? p 'string->number2)"Cyc_string2number2_")
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-vector)   "Cyc_make_vector")
@@ -651,7 +651,7 @@
     ((eq? p '-) "common_type")
     ((eq? p '*) "common_type")
     ((eq? p '/) "common_type")
-    ((eq? p 'string->number) "common_type")
+    ((eq? p 'string->number) "object")
     ((eq? p 'string->number2) "object")
     ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "object")
@@ -699,7 +699,7 @@
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
                      read-char peek-char 
-                     symbol->string list->string substring string-append string->number2
+                     symbol->string list->string substring string-append string->number string->number2
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Primitive functions that pass a continuation or thread data but have no other arguments
