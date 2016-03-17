@@ -1111,65 +1111,6 @@ object Cyc_string2number_(void *data, object cont, object str){
     Cyc_rt_raise2(data, "Expected string but received", str);
 }
 
-common_type Cyc_string2number2(void *data, int argc, object str, ...) 
-{
-  object base = nil;
-  common_type result;
-  va_list ap;
-  va_start(ap, str);
-  if (argc > 1) {
-    base = va_arg(ap, object);
-    Cyc_check_int(data, base);
-  }
-  va_end(ap);
-  if (base) {
-    Cyc_check_str(data, str);
-    result.integer_t.hdr.mark = gc_color_red;
-    result.integer_t.hdr.grayed = 0;
-    result.integer_t.tag = integer_tag;
-    if (integer_value(base) == 2) {
-      result.integer_t.value = binstr2int(string_str(str));
-      return result;
-    }else if (integer_value(base) == 8) {
-      result.integer_t.value = octstr2int(string_str(str));
-      return result;
-    }else if (integer_value(base) == 16) {
-      result.integer_t.value = hexstr2int(string_str(str));
-      return result;
-    }
-  }
-  return Cyc_string2number(data, str);
-}
-
-common_type Cyc_string2number(void *data, object str){
-    common_type result;
-    double n;
-    Cyc_check_obj(data, string_tag, str);
-    Cyc_check_str(data, str);
-    if (type_of(str) == string_tag &&
-        ((string_type *) str)->str){
-        n = atof(((string_type *) str)->str);
-
-        if (ceilf(n) == n) {
-            result.integer_t.hdr.mark = gc_color_red;
-            result.integer_t.hdr.grayed = 0;
-            result.integer_t.tag = integer_tag;
-            result.integer_t.value = (int)n;
-        }
-        else {
-            result.double_t.hdr.mark = gc_color_red;
-            result.double_t.hdr.grayed = 0;
-            result.double_t.tag = double_tag;
-            result.double_t.value = n;
-        }
-    } else {
-        // TODO: not good enough because we do pointer comparisons to #f
-        //result.boolean_t = boolean_f;
-    }
-
-    return result;
-}
-
 int binstr2int(const char *str)
 {
   int num = 0;
@@ -2171,7 +2112,6 @@ void _call_95cc(void *data, object cont, object args){
  * @param args - A list of arguments to the function
  */
 object apply(void *data, object cont, object func, object args){
-  common_type buf;
   object count;
 
 //printf("DEBUG apply: ");
