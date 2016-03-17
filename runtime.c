@@ -1432,6 +1432,90 @@ object __halt(object obj) {
     return nil;
 }
 
+#define declare_num_op2(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
+object FUNC_OP(void *data, common_type *x, object y) { \
+    int tx = type_of(x), ty = type_of(y); \
+    if (DIV &&  \
+        ((ty == integer_tag && integer_value(y) == 0) || \
+        (ty == double_tag && double_value(y) == 0.0))) { \
+      Cyc_rt_raise_msg(data, "Divide by zero"); \
+    } \
+    if (tx == integer_tag && ty == integer_tag) { \
+        x->integer_t.value = (x->integer_t.value) OP ((integer_type *)y)->value; \
+    } else if (tx == double_tag && ty == integer_tag) { \
+        x->double_t.value = x->double_t.value OP ((integer_type *)y)->value; \
+    } else if (tx == integer_tag && ty == double_tag) { \
+        x->double_t.hdr.mark = gc_color_red; \
+        x->double_t.hdr.grayed = 0; \
+        x->double_t.tag = double_tag; \
+        x->double_t.value = x->integer_t.value OP ((double_type *)y)->value; \
+    } else if (tx == double_tag && ty == double_tag) { \
+        x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
+    } else { \
+        make_string(s, "Bad argument type"); \
+        make_cons(c1, y, nil); \
+        make_cons(c0, &s, &c1); \
+        Cyc_rt_raise(data, &c0); \
+    } \
+    return x; \
+} \
+object FUNC(void *data, object cont, int argc, object n, ...) { \
+    common_type buffer; \
+    object result; \
+    va_list ap; \
+    va_start(ap, n); \
+    result = Cyc_num_op_va_list2(data, argc, FUNC_OP, n, ap, &buffer); \
+    va_end(ap); \
+    return result; \
+} \
+void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
+    common_type buffer; \
+    object result; \
+    va_list ap; \
+    va_start(ap, n); \
+    result = Cyc_num_op_va_list2(data, argc - 1, FUNC_OP, n, ap, &buffer); \
+    va_end(ap); \
+    return_closcall1(data, cont, &result); \
+}
+
+declare_num_op2(Cyc_sum2, Cyc_sum_op2, dispatch_sum2, +, 0);
+declare_num_op2(Cyc_sub2, Cyc_sub_op2, dispatch_sub2, -, 0);
+declare_num_op2(Cyc_mul2, Cyc_mul_op2, dispatch_mul2, *, 0);
+declare_num_op2(Cyc_div2, Cyc_div_op2, dispatch_div2, /, 1);
+
+object Cyc_num_op_va_list2(void *data, int argc, object (fn_op(void *, common_type *, object)), object n, va_list ns, common_type *buf) {
+  int i;
+  if (argc == 0) {
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0;
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = 0;
+    return buf;
+  }
+
+  if (type_of(n) == integer_tag) {
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0; 
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = ((integer_type *)n)->value;
+  } else if (type_of(n) == double_tag) {
+    buf->double_t.hdr.mark = gc_color_red;
+    buf->double_t.hdr.grayed = 0;
+    buf->double_t.tag = double_tag;
+    buf->double_t.value = ((double_type *)n)->value;
+  } else {
+      make_string(s, "Bad argument type");
+      make_cons(c1, n, nil);
+      make_cons(c0, &s, &c1);
+      Cyc_rt_raise(data, &c0);
+  }
+
+  for (i = 1; i < argc; i++) {
+    fn_op(data, buf, va_arg(ns, object));
+  }
+
+  return buf;
+}
 // TODO: support for integer value types
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 common_type FUNC_OP(void *data, object x, object y) { \
