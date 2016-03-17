@@ -521,7 +521,6 @@
      ((eq? p 'char->integer) "Cyc_char2integer")
      ((eq? p 'integer->char) "Cyc_integer2char")
      ((eq? p 'string->number)"Cyc_string2number2_")
-     ((eq? p 'string->number2)"Cyc_string2number2_")
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
@@ -604,7 +603,6 @@
     Cyc-write-char
     integer->char
     string->number
-    string->number2
     list->string
     make-vector
     list->vector
@@ -652,7 +650,6 @@
     ((eq? p '*) "common_type")
     ((eq? p '/) "common_type")
     ((eq? p 'string->number) "object")
-    ((eq? p 'string->number2) "object")
     ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "object")
     ((eq? p 'string-length) "integer_type")
@@ -683,7 +680,6 @@
              system 
              Cyc-installation-dir
              string->number 
-             string->number2 
              string-append string-cmp list->string
              make-vector list->vector
              symbol->string number->string 
@@ -699,7 +695,7 @@
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
                      read-char peek-char 
-                     symbol->string list->string substring string-append string->number string->number2
+                     symbol->string list->string substring string-append string->number
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Primitive functions that pass a continuation or thread data but have no other arguments
@@ -711,7 +707,7 @@
 (define (prim:arg-count? exp)
     (and (prim? exp)
          (member exp '(error Cyc-write Cyc-display 
-                       string->number2 string->number string-append 
+                       string->number string-append 
                        + - * /))))
 
 ;; Does primitive allocate an object?

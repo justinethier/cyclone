@@ -339,7 +339,6 @@ extern const object primitive_cddddr;
 extern const object primitive_char_91_125integer;
 extern const object primitive_integer_91_125char;
 extern const object primitive_string_91_125number;
-extern const object primitive_string_91_125number2;
 extern const object primitive_string_91cmp;
 extern const object primitive_string_91append;
 extern const object primitive_list_91_125string;

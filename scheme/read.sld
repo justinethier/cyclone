@@ -331,13 +331,13 @@
                         (parse-atom num)))))
               ((eq? #\b next-c)
                (parse-number fp toks all? parens ptbl 
-                 2 (lambda (num) (string->number2 (list->string num) 2))))
+                 2 (lambda (num) (string->number (list->string num) 2))))
               ((eq? #\o next-c)
                (parse-number fp toks all? parens ptbl 
-                 8 (lambda (num) (string->number2 (list->string num) 8))))
+                 8 (lambda (num) (string->number (list->string num) 8))))
               ((eq? #\x next-c)
                (parse-number fp toks all? parens ptbl 
-                 16 (lambda (num) (string->number2 (list->string num) 16))))
+                 16 (lambda (num) (string->number (list->string num) 16))))
               ;; Vector
               ((eq? #\( next-c)
                (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
@@ -466,7 +466,7 @@
 (define (parse-atom a)
   (cond 
     ((token-numeric? a)
-     (string->number2 (list->string a)))
+     (string->number (list->string a)))
     (else
      (string->symbol (list->string a)))))
 
