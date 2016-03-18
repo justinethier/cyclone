@@ -1434,13 +1434,18 @@ object __halt(object obj) {
 
 #define declare_num_op2(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
-    int tx = type_of(x), ty = type_of(y); \
+    int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y)); \
     if (DIV &&  \
-        ((ty == integer_tag && integer_value(y) == 0) || \
-        (ty == double_tag && double_value(y) == 0.0))) { \
+        ((ty == -1 && (obj_obj2int(y) == 0)) || \
+         (ty == integer_tag && integer_value(y) == 0) || \
+         (ty == double_tag && double_value(y) == 0.0))) { \
       Cyc_rt_raise_msg(data, "Divide by zero"); \
     } \
-    if (tx == integer_tag && ty == integer_tag) { \
+    if (tx == integer_tag && ty == -1) { \
+        x->integer_t.value = (x->integer_t.value) OP (obj_obj2int(y)); \
+    } else if (tx == double_tag && ty == -1) { \
+        x->double_t.value = x->double_t.value OP (obj_obj2int(y)); \
+    } else if (tx == integer_tag && ty == integer_tag) { \
         x->integer_t.value = (x->integer_t.value) OP ((integer_type *)y)->value; \
     } else if (tx == double_tag && ty == integer_tag) { \
         x->double_t.value = x->double_t.value OP ((integer_type *)y)->value; \
@@ -1466,7 +1471,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     va_start(ap, n); \
     result = Cyc_num_op_va_list2(data, argc, FUNC_OP, n, ap, &buffer); \
     va_end(ap); \
-    return result; \
+    return_closcall1(data, cont, result); \
 } \
 void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
     common_type buffer; \
@@ -1475,7 +1480,7 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     va_start(ap, n); \
     result = Cyc_num_op_va_list2(data, argc - 1, FUNC_OP, n, ap, &buffer); \
     va_end(ap); \
-    return_closcall1(data, cont, &result); \
+    return_closcall1(data, cont, result); \
 }
 
 declare_num_op2(Cyc_sum2, Cyc_sum_op2, dispatch_sum2, +, 0);
@@ -1493,7 +1498,12 @@ object Cyc_num_op_va_list2(void *data, int argc, object (fn_op(void *, common_ty
     return buf;
   }
 
-  if (type_of(n) == integer_tag) {
+  if (obj_is_int(n)) {
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0; 
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = obj_obj2int(n);
+  } else if (type_of(n) == integer_tag) {
     buf->integer_t.hdr.mark = gc_color_red;
     buf->integer_t.hdr.grayed = 0; 
     buf->integer_t.tag = integer_tag;
@@ -1513,6 +1523,8 @@ object Cyc_num_op_va_list2(void *data, int argc, object (fn_op(void *, common_ty
   for (i = 1; i < argc; i++) {
     fn_op(data, buf, va_arg(ns, object));
   }
+
+  // TODO: if result is integer, could convert to an immediate here
 
   return buf;
 }
