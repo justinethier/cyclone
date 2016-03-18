@@ -460,10 +460,10 @@
      ((eq? p 'Cyc-stdout)            "Cyc_stdout")
      ((eq? p 'Cyc-stdin)             "Cyc_stdin")
      ((eq? p 'Cyc-stderr)            "Cyc_stderr")
-     ((eq? p '+)                     "Cyc_sum")
-     ((eq? p '-)                     "Cyc_sub")
-     ((eq? p '*)                     "Cyc_mul")
-     ((eq? p '/)                     "Cyc_div")
+     ((eq? p '+)                     "Cyc_sum2")
+     ((eq? p '-)                     "Cyc_sub2")
+     ((eq? p '*)                     "Cyc_mul2")
+     ((eq? p '/)                     "Cyc_div2")
      ((eq? p '=)                     "__num_eq")
      ((eq? p '>)                     "__num_gt")
      ((eq? p '<)                     "__num_lt")
@@ -645,10 +645,10 @@
     ((eq? p 'vector-length) "integer_type")
     ((eq? p 'char->integer) "integer_type")
     ((eq? p 'system) "integer_type")
-    ((eq? p '+) "common_type")
-    ((eq? p '-) "common_type")
-    ((eq? p '*) "common_type")
-    ((eq? p '/) "common_type")
+    ((eq? p '+) "object")
+    ((eq? p '-) "object")
+    ((eq? p '*) "object")
+    ((eq? p '/) "object")
     ((eq? p 'string->number) "object")
     ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "object")
@@ -694,6 +694,7 @@
 (define (prim:cont? exp)
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
+                     + - * /
                      read-char peek-char 
                      symbol->string list->string substring string-append string->number
                      make-vector list->vector Cyc-installation-dir))))
