@@ -417,17 +417,21 @@ int equal(x, y) object x, y;
     if (obj_is_int(x)) return obj_is_int(y) && x == y;
     switch(type_of(x)) {
     case integer_tag:
-      return (type_of(y) == integer_tag &&
+      return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
+             (type_of(y) == integer_tag &&
               ((integer_type *) x)->value == ((integer_type *) y)->value);
     case double_tag:
-      return (type_of(y) == double_tag &&
+      return (is_object_type(y) &&
+              type_of(y) == double_tag &&
               ((double_type *) x)->value == ((double_type *) y)->value);
     case string_tag:
-      return (type_of(y) == string_tag &&
+      return (is_object_type(y) &&
+              type_of(y) == string_tag &&
               strcmp(((string_type *) x)->str,
                      ((string_type *) y)->str) == 0);
     case vector_tag:
-      if (type_of(y) == vector_tag && 
+      if (is_object_type(y) &&
+          type_of(y) == vector_tag && 
           ((vector)x)->num_elt == ((vector)y)->num_elt) {
         int i;
         for (i = 0; i < ((vector)x)->num_elt; i++) { 
@@ -652,6 +656,7 @@ static object _Cyc_write(object x, FILE *port)
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "#\\%c", obj_obj2char(x)); return quote_void;}
+ if (obj_is_int(x)) {Cyc_display(x, port); return quote_void;}
  switch (type_of(x))
    {case string_tag:
       fprintf(port, "\"%s\"", ((string_type *) x)->str);
@@ -731,7 +736,7 @@ object get(x,i) object x,i;
 object equalp(x,y) object x,y;
 {for (; ; x = cdr(x), y = cdr(y))
    {if (equal(x,y)) return boolean_t;
-    if (obj_is_char(x) || obj_is_char(y) || 
+    if (is_value_type(x) || is_value_type(y) ||
         nullp(x) || nullp(y) ||
         type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;}}
@@ -1525,6 +1530,9 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
   }
 
   // TODO: if result is integer, could convert to an immediate here
+  if (type_of(buf) == integer_tag) {
+    return obj_int2obj(buf->integer_t.value);
+  }
 
   return buf;
 }

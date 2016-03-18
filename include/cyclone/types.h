@@ -214,7 +214,7 @@ typedef long tag_type;
 #define obj_obj2int(x) ((int)(x)>>1)
 #define obj_int2obj(c) ((void *)((((int)c)<<1) | 1))
 
-#define obj_is_char(x)  ((unsigned long)(x) & (unsigned long)2)
+#define obj_is_char(x)  (((unsigned long)(x) & (unsigned long)3) == 2)
 #define obj_obj2char(x) (char)((long)(x)>>2)
 #define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
 
