@@ -1432,7 +1432,7 @@ object __halt(object obj) {
     return nil;
 }
 
-#define declare_num_op2(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
     int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y)); \
     if (DIV &&  \
@@ -1469,7 +1469,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     object result; \
     va_list ap; \
     va_start(ap, n); \
-    result = Cyc_num_op_va_list2(data, argc, FUNC_OP, n, ap, &buffer); \
+    result = Cyc_num_op_va_list(data, argc, FUNC_OP, n, ap, &buffer); \
     va_end(ap); \
     return_closcall1(data, cont, result); \
 } \
@@ -1478,17 +1478,17 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     object result; \
     va_list ap; \
     va_start(ap, n); \
-    result = Cyc_num_op_va_list2(data, argc - 1, FUNC_OP, n, ap, &buffer); \
+    result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, n, ap, &buffer); \
     va_end(ap); \
     return_closcall1(data, cont, result); \
 }
 
-declare_num_op2(Cyc_sum2, Cyc_sum_op2, dispatch_sum2, +, 0);
-declare_num_op2(Cyc_sub2, Cyc_sub_op2, dispatch_sub2, -, 0);
-declare_num_op2(Cyc_mul2, Cyc_mul_op2, dispatch_mul2, *, 0);
-declare_num_op2(Cyc_div2, Cyc_div_op2, dispatch_div2, /, 1);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
+declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
 
-object Cyc_num_op_va_list2(void *data, int argc, object (fn_op(void *, common_type *, object)), object n, va_list ns, common_type *buf) {
+object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_type *, object)), object n, va_list ns, common_type *buf) {
   int i;
   if (argc == 0) {
     buf->integer_t.hdr.mark = gc_color_red;
@@ -1527,107 +1527,6 @@ object Cyc_num_op_va_list2(void *data, int argc, object (fn_op(void *, common_ty
   // TODO: if result is integer, could convert to an immediate here
 
   return buf;
-}
-// TODO: support for integer value types
-#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
-common_type FUNC_OP(void *data, object x, object y) { \
-    common_type s; \
-    int tx = type_of(x), ty = type_of(y); \
-    s.double_t.hdr.mark = gc_color_red; \
-    s.double_t.hdr.grayed = 0; \
-    s.double_t.tag = double_tag; \
-    if (DIV &&  \
-        ((ty == integer_tag && integer_value(y) == 0) || \
-        (ty == double_tag && double_value(y) == 0.0))) { \
-      Cyc_rt_raise_msg(data, "Divide by zero"); \
-    } \
-    if (tx == integer_tag && ty == integer_tag) { \
-        s.integer_t.hdr.mark = gc_color_red; \
-        s.integer_t.hdr.grayed = 0; \
-        s.integer_t.tag = integer_tag; \
-        s.integer_t.value = ((integer_type *)x)->value OP ((integer_type *)y)->value; \
-    } else if (tx == double_tag && ty == integer_tag) { \
-        s.double_t.value = ((double_type *)x)->value OP ((integer_type *)y)->value; \
-    } else if (tx == integer_tag && ty == double_tag) { \
-        s.double_t.value = ((integer_type *)x)->value OP ((double_type *)y)->value; \
-    } else if (tx == double_tag && ty == double_tag) { \
-        s.double_t.value = ((double_type *)x)->value OP ((double_type *)y)->value; \
-    } else { \
-        make_string(s, "Bad argument type"); \
-        make_cons(c1, y, nil); \
-        make_cons(c0, &s, &c1); \
-        Cyc_rt_raise(data, &c0); \
-    } \
-    return s; \
-} \
-common_type FUNC(void *data, int argc, object n, ...) { \
-    va_list ap; \
-    va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(data, argc, FUNC_OP, n, ap); \
-    va_end(ap); \
-    return result; \
-} \
-void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
-    va_list ap; \
-    va_start(ap, n); \
-    common_type result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, n, ap); \
-    va_end(ap); \
-    return_closcall1(data, cont, &result); \
-}
-
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
-// TODO: what about divide-by-zero, and casting to double when
-//       result contains a decimal component?
-declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
-
-common_type Cyc_num_op_va_list(void *data, int argc, common_type (fn_op(void *, object, object)), object n, va_list ns) {
-  common_type sum;
-  int i;
-  if (argc == 0) {
-    sum.integer_t.hdr.mark = gc_color_red;
-    sum.integer_t.hdr.grayed = 0;
-    sum.integer_t.tag = integer_tag;
-    sum.integer_t.value = 0;
-    return sum;
-  }
-
-  if (type_of(n) == integer_tag) {
-    sum.integer_t.hdr.mark = gc_color_red;
-    sum.integer_t.hdr.grayed = 0; 
-    sum.integer_t.tag = integer_tag;
-    sum.integer_t.value = ((integer_type *)n)->value;
-  } else if (type_of(n) == double_tag) {
-    sum.double_t.hdr.mark = gc_color_red;
-    sum.double_t.hdr.grayed = 0;
-    sum.double_t.tag = double_tag;
-    sum.double_t.value = ((double_type *)n)->value;
-  } else {
-      make_string(s, "Bad argument type");
-      make_cons(c1, n, nil);
-      make_cons(c0, &s, &c1);
-      Cyc_rt_raise(data, &c0);
-  }
-
-  for (i = 1; i < argc; i++) {
-    common_type result = fn_op(data, &sum, va_arg(ns, object));
-    if (type_of(&result) == integer_tag) {
-        sum.integer_t.hdr.mark = gc_color_red;
-        sum.integer_t.hdr.grayed = 0;
-        sum.integer_t.tag = integer_tag;
-        sum.integer_t.value = ((integer_type *) &result)->value;
-    } else if (type_of(&result) == double_tag) {
-        sum.double_t.hdr.mark = gc_color_red;
-        sum.double_t.hdr.grayed = 0;
-        sum.double_t.tag = double_tag;
-        sum.double_t.value = ((double_type *) &result)->value;
-    } else {
-        Cyc_rt_raise_msg(data, "Internal error, invalid tag in Cyc_num_op_va_list");
-    }
-  }
-
-  return sum;
 }
 
 /* I/O functions */
@@ -1949,18 +1848,18 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args) {
     return_closcall1(data, cont, boolean_f); }
 void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
-    dispatch(data, argc.value, (function_type)dispatch_sum2, cont, cont, args); }
+    dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
 void __91(void *data, object cont, object args) {
     Cyc_check_num_args(data, "-", 1, args);
     { integer_type argc = Cyc_length(data, args);
-      dispatch(data, argc.value, (function_type)dispatch_sub2, cont, cont, args); }}
+      dispatch(data, argc.value, (function_type)dispatch_sub, cont, cont, args); }}
 void __85(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
-    dispatch(data, argc.value, (function_type)dispatch_mul2, cont, cont, args); }
+    dispatch(data, argc.value, (function_type)dispatch_mul, cont, cont, args); }
 void __95(void *data, object cont, object args) {
     Cyc_check_num_args(data, "/", 1, args);
     { integer_type argc = Cyc_length(data, args);
-      dispatch(data, argc.value, (function_type)dispatch_div2, cont, cont, args); }}
+      dispatch(data, argc.value, (function_type)dispatch_div, cont, cont, args); }}
 void _Cyc_91cvar_127(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-cvar?", 1, args);
     return_closcall1(data, cont, Cyc_is_cvar(car(args))); }
