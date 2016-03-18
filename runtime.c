@@ -1949,18 +1949,18 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args) {
     return_closcall1(data, cont, boolean_f); }
 void __87(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
-    dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
+    dispatch(data, argc.value, (function_type)dispatch_sum2, cont, cont, args); }
 void __91(void *data, object cont, object args) {
     Cyc_check_num_args(data, "-", 1, args);
     { integer_type argc = Cyc_length(data, args);
-      dispatch(data, argc.value, (function_type)dispatch_sub, cont, cont, args); }}
+      dispatch(data, argc.value, (function_type)dispatch_sub2, cont, cont, args); }}
 void __85(void *data, object cont, object args) {
     integer_type argc = Cyc_length(data, args);
-    dispatch(data, argc.value, (function_type)dispatch_mul, cont, cont, args); }
+    dispatch(data, argc.value, (function_type)dispatch_mul2, cont, cont, args); }
 void __95(void *data, object cont, object args) {
     Cyc_check_num_args(data, "/", 1, args);
     { integer_type argc = Cyc_length(data, args);
-      dispatch(data, argc.value, (function_type)dispatch_div, cont, cont, args); }}
+      dispatch(data, argc.value, (function_type)dispatch_div2, cont, cont, args); }}
 void _Cyc_91cvar_127(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-cvar?", 1, args);
     return_closcall1(data, cont, Cyc_is_cvar(car(args))); }
