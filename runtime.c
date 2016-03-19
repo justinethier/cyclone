@@ -1829,12 +1829,12 @@ void _equal_127(void *data, object cont, object args){
     return_closcall1(data, cont, equalp(car(args), cadr(args))); }
 void _length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "length", 1, args);
-    { integer_type i = Cyc_length(data, car(args));
-      return_closcall1(data, cont, &i); }}
+    { object obj = Cyc_length2(data, car(args));
+      return_closcall1(data, cont, obj); }}
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
-    { integer_type i = Cyc_vector_length(data, car(args));
-      return_closcall1(data, cont, &i); }}
+    { object obj = Cyc_vector_length2(data, car(args));
+      return_closcall1(data, cont, obj); }}
 void _null_127(void *data, object cont, object args) { 
     Cyc_check_num_args(data, "null?", 1, args);
     return_closcall1(data, cont, Cyc_is_null(car(args))); }
@@ -1971,8 +1971,8 @@ void _memv(void *data, object cont, object args) {
     return_closcall1(data, cont, memqp(data, car(args), cadr(args)));}
 void _char_91_125integer(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "char->integer", 1, args);
-    { integer_type i = Cyc_char2integer(car(args));
-      return_closcall1(data, cont, &i);}}
+    { object obj = Cyc_char2integer2(car(args));
+      return_closcall1(data, cont, obj);}}
 void _integer_91_125char(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "integer->char", 1, args);
     return_closcall1(data, cont, Cyc_integer2char(data, car(args)));}
@@ -1985,8 +1985,8 @@ void _string_91_125number(void *data, object cont, object args) {
         Cyc_string2number_(data, cont, car(args)); }}}
 void _string_91length(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string-length", 1, args);
-    { integer_type i = Cyc_string_length(data, car(args));
-      return_closcall1(data, cont, &i);}}
+    { object obj = Cyc_string_length2(data, car(args));
+      return_closcall1(data, cont, obj);}}
 void _cyc_substring(void *data, object cont, object args) {
     Cyc_check_num_args(data, "substring", 3, args);
     Cyc_substring(data, cont, car(args), cadr(args), caddr(args));}
@@ -2006,8 +2006,8 @@ void _command_91line_91arguments(void *data, object cont, object args) {
     return_closcall1(data, cont, cmdline); }
 void _cyc_system(void *data, object cont, object args) {
     Cyc_check_num_args(data, "system", 1, args);
-    { integer_type i = Cyc_system(car(args));
-      return_closcall1(data, cont, &i);}}
+    { object obj = Cyc_system2(car(args));
+      return_closcall1(data, cont, obj);}}
 //void _error(void *data, object cont, object args) {
 //    integer_type argc = Cyc_length(args);
 //    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
@@ -2020,8 +2020,8 @@ void _Cyc_91default_91exception_91handler(void *data, object cont, object args) 
 }
 void _string_91cmp(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "string-cmp", 2, args);
-    { integer_type cmp = Cyc_string_cmp(data, car(args), cadr(args));
-      return_closcall1(data, cont, &cmp);}}
+    { object obj = Cyc_string_cmp2(data, car(args), cadr(args));
+      return_closcall1(data, cont, obj);}}
 void _string_91append(void *data, object cont, object args) {  
     object argc = Cyc_length2(data, args);
     dispatch(data, obj_obj2int(argc), (function_type)dispatch_string_91append, cont, cont, args); }
