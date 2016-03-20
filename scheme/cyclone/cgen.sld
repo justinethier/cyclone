@@ -405,14 +405,14 @@
     ((vector? exp)
      (c-compile-vector exp))
     ((integer? exp) 
-     (let ((cvar-name (mangle (gensym 'c))))
-        (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
-            (list     ; Allocate integer on the C stack
-              (string-append 
-                "make_int(" cvar-name ", " (number->string exp) ");")))))
-;     (c-code (string-append "obj_int2obj(" 
-;               (number->string exp) ")")))
+;     (let ((cvar-name (mangle (gensym 'c))))
+;        (c-code/vars
+;            (string-append "&" cvar-name) ; Code is just the variable name
+;            (list     ; Allocate integer on the C stack
+;              (string-append 
+;                "make_int(" cvar-name ", " (number->string exp) ");")))))
+     (c-code (string-append "obj_int2obj(" 
+               (number->string exp) ")")))
     ((real? exp)
       (let ((cvar-name (mangle (gensym 'c))))
         (c-code/vars

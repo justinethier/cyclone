@@ -1533,10 +1533,10 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
     fn_op(data, buf, va_arg(ns, object));
   }
 
-//  // TODO: if result is integer, could convert to an immediate here
-//  if (type_of(buf) == integer_tag) {
-//    return obj_int2obj(buf->integer_t.value);
-//  }
+  // TODO: if result is integer, could convert to an immediate here
+  if (type_of(buf) == integer_tag) {
+    return obj_int2obj(buf->integer_t.value);
+  }
 
   return buf;
 }
