@@ -414,11 +414,15 @@ int equal(x, y) object x, y;
     if (nullp(x)) return nullp(y);
     if (nullp(y)) return nullp(x);
     if (obj_is_char(x)) return obj_is_char(y) && x == y;
-    if (obj_is_int(x)) return obj_is_int(y) && x == y;
+    if (obj_is_int(x)) return (obj_is_int(y) && x == y) ||
+                              (is_object_type(y) && 
+                               type_of(y) == integer_tag &&
+                               integer_value(y) == obj_obj2int(x));
     switch(type_of(x)) {
     case integer_tag:
       return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
-             (type_of(y) == integer_tag &&
+             (is_object_type(y) && 
+              type_of(y) == integer_tag &&
               ((integer_type *) x)->value == ((integer_type *) y)->value);
     case double_tag:
       return (is_object_type(y) &&
@@ -1529,10 +1533,10 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
     fn_op(data, buf, va_arg(ns, object));
   }
 
-  // TODO: if result is integer, could convert to an immediate here
-  if (type_of(buf) == integer_tag) {
-    return obj_int2obj(buf->integer_t.value);
-  }
+//  // TODO: if result is integer, could convert to an immediate here
+//  if (type_of(buf) == integer_tag) {
+//    return obj_int2obj(buf->integer_t.value);
+//  }
 
   return buf;
 }
