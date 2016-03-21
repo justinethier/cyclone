@@ -533,7 +533,7 @@ object Cyc_display(object x, FILE *port)
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
- if (obj_is_int(x)) { fprintf(port, "%d", obj_obj2int(x)); return quote_void; }
+ if (obj_is_int(x)) { fprintf(port, "%ld", obj_obj2int(x)); return quote_void; }
  switch (type_of(x))
    {case macro_tag:
       fprintf(port, "<macro %p>",(void *)((closure) x)->fn);
@@ -1018,7 +1018,7 @@ object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
     Cyc_check_num(data, n);
     if (obj_is_int(n)) {
-        snprintf(buffer, 1024, "%d", obj_obj2int(n));
+        snprintf(buffer, 1024, "%ld", obj_obj2int(n));
     }else if (type_of(n) == integer_tag) {
         snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
     } else if (type_of(n) == double_tag) {
