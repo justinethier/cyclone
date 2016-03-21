@@ -30,6 +30,7 @@
         return_closcall1(data, k, &box); ")
     (define-c jiffies-per-second
       "(void *data, int argc, closure _, object k)"
-      " make_int(box, CLOCKS_PER_SEC);
-        return_closcall1(data, k, &box); ")
+      " int n = CLOCKS_PER_SEC;
+        object obj = obj_int2obj(n);
+        return_closcall1(data, k, obj); ")
   ))
