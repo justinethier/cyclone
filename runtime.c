@@ -995,8 +995,6 @@ object Cyc_vector_length(void *data, object v) {
     }
     Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
 
-object Cyc_vector_length2(void *data, object v) {
-  return Cyc_vector_length(data, v); }
 
 object Cyc_length2(void *data, object l){
     int len = 0;
@@ -1160,8 +1158,6 @@ object Cyc_string_cmp(void *data, object str1, object str2) {
                              ((string_type *)str2)->str) );
 }
 
-object Cyc_string_cmp2(void *data, object str1, object str2) {
-  return Cyc_string_cmp(data, str1, str2); }
 
 #define Cyc_string_append_va_list(data, argc) { \
     int i = 0, total_len = 1; \
@@ -1208,9 +1204,6 @@ object Cyc_string_length(void *data, object str) {
   Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
   return obj_int2obj(strlen(string_str(str))); }
-
-object Cyc_string_length2(void *data, object str) {
-  return Cyc_string_length(data, str); }
 
 object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
@@ -1386,15 +1379,9 @@ object Cyc_system(object cmd) {
   return obj_int2obj(system(((string_type *)cmd)->str));
 }
 
-object Cyc_system2(object cmd) {
-  return Cyc_system(cmd); }
-
 object Cyc_char2integer(object chr){
     return obj_int2obj(obj_obj2char(chr));
 }
-
-object Cyc_char2integer2(object chr){
-  return Cyc_char2integer(chr); }
 
 object Cyc_integer2char(void *data, object n){
     int val = 0;
@@ -1814,7 +1801,7 @@ void _length(void *data, object cont, object args){
       return_closcall1(data, cont, obj); }}
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
-    { object obj = Cyc_vector_length2(data, car(args));
+    { object obj = Cyc_vector_length(data, car(args));
       return_closcall1(data, cont, obj); }}
 void _null_127(void *data, object cont, object args) { 
     Cyc_check_num_args(data, "null?", 1, args);
@@ -1952,7 +1939,7 @@ void _memv(void *data, object cont, object args) {
     return_closcall1(data, cont, memqp(data, car(args), cadr(args)));}
 void _char_91_125integer(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "char->integer", 1, args);
-    { object obj = Cyc_char2integer2(car(args));
+    { object obj = Cyc_char2integer(car(args));
       return_closcall1(data, cont, obj);}}
 void _integer_91_125char(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "integer->char", 1, args);
@@ -1966,7 +1953,7 @@ void _string_91_125number(void *data, object cont, object args) {
         Cyc_string2number_(data, cont, car(args)); }}}
 void _string_91length(void *data, object cont, object args) {
     Cyc_check_num_args(data, "string-length", 1, args);
-    { object obj = Cyc_string_length2(data, car(args));
+    { object obj = Cyc_string_length(data, car(args));
       return_closcall1(data, cont, obj);}}
 void _cyc_substring(void *data, object cont, object args) {
     Cyc_check_num_args(data, "substring", 3, args);
@@ -1987,7 +1974,7 @@ void _command_91line_91arguments(void *data, object cont, object args) {
     return_closcall1(data, cont, cmdline); }
 void _cyc_system(void *data, object cont, object args) {
     Cyc_check_num_args(data, "system", 1, args);
-    { object obj = Cyc_system2(car(args));
+    { object obj = Cyc_system(car(args));
       return_closcall1(data, cont, obj);}}
 //void _error(void *data, object cont, object args) {
 //    integer_type argc = Cyc_length(args);
@@ -2001,7 +1988,7 @@ void _Cyc_91default_91exception_91handler(void *data, object cont, object args) 
 }
 void _string_91cmp(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "string-cmp", 2, args);
-    { object obj = Cyc_string_cmp2(data, car(args), cadr(args));
+    { object obj = Cyc_string_cmp(data, car(args), cadr(args));
       return_closcall1(data, cont, obj);}}
 void _string_91append(void *data, object cont, object args) {  
     object argc = Cyc_length2(data, args);
