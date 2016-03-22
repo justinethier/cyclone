@@ -520,34 +520,34 @@
      ((eq? p 'cddadr)        "cddadr")
      ((eq? p 'cdddar)        "cdddar")
      ((eq? p 'cddddr)        "cddddr")
-     ((eq? p 'char->integer) "Cyc_char2integer")
+     ((eq? p 'char->integer) "Cyc_char2integer2")
      ((eq? p 'integer->char) "Cyc_integer2char")
      ((eq? p 'string->number)"Cyc_string2number2_")
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
-     ((eq? p 'vector-length) "Cyc_vector_length")
+     ((eq? p 'vector-length) "Cyc_vector_length2")
      ((eq? p 'vector-ref)    "Cyc_vector_ref")
      ((eq? p 'vector-set!)   "Cyc_vector_set")
      ((eq? p 'string-append) "Cyc_string_append")
-     ((eq? p 'string-cmp)    "Cyc_string_cmp")
+     ((eq? p 'string-cmp)    "Cyc_string_cmp2")
      ((eq? p 'string->symbol) "Cyc_string2symbol")
      ((eq? p 'symbol->string) "Cyc_symbol2string")
      ((eq? p 'number->string) "Cyc_number2string")
-     ((eq? p 'string-length)  "Cyc_string_length")
+     ((eq? p 'string-length)  "Cyc_string_length2")
      ((eq? p 'string-ref)     "Cyc_string_ref")
      ((eq? p 'string-set!)    "Cyc_string_set")
      ((eq? p 'substring)      "Cyc_substring")
      ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
      ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
-     ((eq? p 'system)         "Cyc_system")
+     ((eq? p 'system)         "Cyc_system2")
      ((eq? p 'assq)          "assq")
      ((eq? p 'assv)          "assq")
      ((eq? p 'assoc)         "assoc")
      ((eq? p 'memq)          "memqp")
      ((eq? p 'memv)          "memqp")
      ((eq? p 'member)        "memberp")
-     ((eq? p 'length)        "Cyc_length")
+     ((eq? p 'length)        "Cyc_length2")
      ((eq? p 'set-car!)      "Cyc_set_car")
      ((eq? p 'set-cdr!)      "Cyc_set_cdr")
      ((eq? p 'eq?)           "Cyc_eq")
@@ -643,18 +643,12 @@
     ((eq? p 'Cyc-stderr) "port_type")
     ((eq? p 'open-input-file) "port_type")
     ((eq? p 'open-output-file) "port_type")
-    ((eq? p 'length) "integer_type")
-    ((eq? p 'vector-length) "integer_type")
-    ((eq? p 'char->integer) "integer_type")
-    ((eq? p 'system) "integer_type")
     ((eq? p '+) "object")
     ((eq? p '-) "object")
     ((eq? p '*) "object")
     ((eq? p '/) "object")
     ((eq? p 'string->number) "object")
-    ((eq? p 'string-cmp) "integer_type")
     ((eq? p 'string-append) "object")
-    ((eq? p 'string-length) "integer_type")
     ((eq? p 'apply)  "object")
     ((eq? p 'Cyc-read-line) "object")
     ((eq? p 'read-char) "object")
@@ -678,19 +672,17 @@
              Cyc-stderr
              open-input-file
              open-output-file
-             char->integer 
-             system 
              Cyc-installation-dir
              string->number 
-             string-append string-cmp list->string
+             string-append list->string
              make-vector list->vector
              symbol->string number->string 
-             string-length substring
+             substring
              + - * / apply 
              command-line-arguments
              Cyc-read-line
              read-char peek-char
-             cons length vector-length cell))))
+             cons cell))))
 
 ;; Pass continuation as the function's first parameter?
 (define (prim:cont? exp)
