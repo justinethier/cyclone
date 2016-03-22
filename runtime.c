@@ -881,7 +881,7 @@ object Cyc_is_procedure(void *data, object o) {
             tag == primitive_tag) {
             return boolean_t;
         } else if (tag == cons_tag) {
-          integer_type l = Cyc_length(data, o);
+          integer_type l = Cyc_length_as_object(data, o);
           if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
             if (strncmp(((symbol)car(o))->pname, "primitive", 10) == 0 ||
                 strncmp(((symbol)car(o))->pname, "procedure", 10) == 0 ) {
@@ -977,7 +977,7 @@ object Cyc_vector_ref(void *data, object v, object k) {
   return ((vector)v)->elts[idx];
 }
 
-integer_type Cyc_length(void *data, object l){
+integer_type Cyc_length_as_object(void *data, object l){
     make_int(len, 0);
     while(!nullp(l)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
@@ -1823,18 +1823,18 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args) {
     Cyc_end_thread((gc_thread_data *)data);
     return_closcall1(data, cont, boolean_f); }
 void __87(void *data, object cont, object args) {
-    integer_type argc = Cyc_length(data, args);
+    integer_type argc = Cyc_length_as_object(data, args);
     dispatch(data, argc.value, (function_type)dispatch_sum, cont, cont, args); }
 void __91(void *data, object cont, object args) {
     Cyc_check_num_args(data, "-", 1, args);
-    { integer_type argc = Cyc_length(data, args);
+    { integer_type argc = Cyc_length_as_object(data, args);
       dispatch(data, argc.value, (function_type)dispatch_sub, cont, cont, args); }}
 void __85(void *data, object cont, object args) {
-    integer_type argc = Cyc_length(data, args);
+    integer_type argc = Cyc_length_as_object(data, args);
     dispatch(data, argc.value, (function_type)dispatch_mul, cont, cont, args); }
 void __95(void *data, object cont, object args) {
     Cyc_check_num_args(data, "/", 1, args);
-    { integer_type argc = Cyc_length(data, args);
+    { integer_type argc = Cyc_length_as_object(data, args);
       dispatch(data, argc.value, (function_type)dispatch_div, cont, cont, args); }}
 void _Cyc_91cvar_127(void *data, object cont, object args) {
     Cyc_check_num_args(data, "Cyc-cvar?", 1, args);
@@ -1977,7 +1977,7 @@ void _cyc_system(void *data, object cont, object args) {
     { object obj = Cyc_system(car(args));
       return_closcall1(data, cont, obj);}}
 //void _error(void *data, object cont, object args) {
-//    integer_type argc = Cyc_length(args);
+//    integer_type argc = Cyc_length_as_object(args);
 //    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
 void _Cyc_91current_91exception_91handler(void *data, object cont, object args) {
     object handler = Cyc_current_exception_handler(data);
