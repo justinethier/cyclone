@@ -977,13 +977,6 @@ object Cyc_vector_ref(void *data, object v, object k) {
   return ((vector)v)->elts[idx];
 }
 
-integer_type Cyc_vector_length(void *data, object v) {
-    if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
-      make_int(len, ((vector)v)->num_elt);
-      return len;
-    }
-    Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
-
 integer_type Cyc_length(void *data, object l){
     make_int(len, 0);
     while(!nullp(l)){
@@ -996,11 +989,14 @@ integer_type Cyc_length(void *data, object l){
     return len;
 }
 
-object Cyc_vector_length2(void *data, object v) {
+object Cyc_vector_length(void *data, object v) {
     if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
       return obj_int2obj(((vector)v)->num_elt);
     }
     Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
+
+object Cyc_vector_length2(void *data, object v) {
+  return Cyc_vector_length(data, v); }
 
 object Cyc_length2(void *data, object l){
     int len = 0;
@@ -1157,22 +1153,15 @@ int hexstr2int(const char *str)
   return num;
 }
 
-integer_type Cyc_string_cmp(void *data, object str1, object str2) {
-  Cyc_check_str(data, str1);
-  Cyc_check_str(data, str2);
-  {
-    make_int(cmp, strcmp(((string_type *)str1)->str,
-                        ((string_type *)str2)->str));
-    return cmp;
-  }
-}
-
-object Cyc_string_cmp2(void *data, object str1, object str2) {
+object Cyc_string_cmp(void *data, object str1, object str2) {
   Cyc_check_str(data, str1);
   Cyc_check_str(data, str2);
   return obj_int2obj( strcmp(((string_type *)str1)->str,
                              ((string_type *)str2)->str) );
 }
+
+object Cyc_string_cmp2(void *data, object str1, object str2) {
+  return Cyc_string_cmp(data, str1, str2); }
 
 #define Cyc_string_append_va_list(data, argc) { \
     int i = 0, total_len = 1; \
@@ -1215,16 +1204,13 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...) {
     Cyc_string_append_va_list(data, _argc);
 }
 
-integer_type Cyc_string_length(void *data, object str) {
-  Cyc_check_obj(data, string_tag, str);
-  Cyc_check_str(data, str);
-  { make_int(len, strlen(string_str(str)));
-    return len; }}
-
-object Cyc_string_length2(void *data, object str) {
+object Cyc_string_length(void *data, object str) {
   Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
   return obj_int2obj(strlen(string_str(str))); }
+
+object Cyc_string_length2(void *data, object str) {
+  return Cyc_string_length(data, str); }
 
 object Cyc_string_set(void *data, object str, object k, object chr) {
   char *raw;
@@ -1393,31 +1379,22 @@ object Cyc_list2vector(void *data, object cont, object l) {
   return_closcall1(data, cont, v);
 }
 
-integer_type Cyc_system(object cmd) {
-  if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
-    make_int(n, -1);
-    return n;
-  } else {
-    make_int(n, system(((string_type *)cmd)->str));
-    return n;
-  }
-}
-
-object Cyc_system2(object cmd) {
+object Cyc_system(object cmd) {
   if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
     return obj_int2obj(-1);
   }
   return obj_int2obj(system(((string_type *)cmd)->str));
 }
 
-integer_type Cyc_char2integer(object chr){
-    make_int(n, obj_obj2char(chr));
-    return n;
+object Cyc_system2(object cmd) {
+  return Cyc_system(cmd); }
+
+object Cyc_char2integer(object chr){
+    return obj_int2obj(obj_obj2char(chr));
 }
 
 object Cyc_char2integer2(object chr){
-    return obj_int2obj(obj_obj2char(chr));
-}
+  return Cyc_char2integer(chr); }
 
 object Cyc_integer2char(void *data, object n){
     int val = 0;
