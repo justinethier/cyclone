@@ -996,7 +996,7 @@ object Cyc_vector_length(void *data, object v) {
     Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
 
 
-object Cyc_length2(void *data, object l){
+object Cyc_length(void *data, object l){
     int len = 0;
     while(!nullp(l)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
@@ -1007,6 +1007,8 @@ object Cyc_length2(void *data, object l){
     }
     return obj_int2obj(len);
 }
+object Cyc_length2(void *data, object l){
+  return Cyc_length(data, l); }
 
 object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
@@ -1048,7 +1050,7 @@ object Cyc_list2string(void *data, object cont, object lst){
 
     Cyc_check_cons_or_nil(data, lst);
     
-    len = Cyc_length2(data, lst); // Inefficient, walks whole list
+    len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
     while(!nullp(lst)){
         buf[i++] = obj_obj2char(car(lst));
@@ -1355,7 +1357,7 @@ object Cyc_list2vector(void *data, object cont, object l) {
   int i = 0; 
 
   Cyc_check_cons_or_nil(data, l); 
-  len = Cyc_length2(data, l); 
+  len = Cyc_length(data, l); 
   v = alloca(sizeof(vector_type)); 
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->hdr.grayed = 0;
@@ -1797,7 +1799,7 @@ void _equal_127(void *data, object cont, object args){
     return_closcall1(data, cont, equalp(car(args), cadr(args))); }
 void _length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "length", 1, args);
-    { object obj = Cyc_length2(data, car(args));
+    { object obj = Cyc_length(data, car(args));
       return_closcall1(data, cont, obj); }}
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
@@ -1991,11 +1993,11 @@ void _string_91cmp(void *data, object cont, object args) {
     { object obj = Cyc_string_cmp(data, car(args), cadr(args));
       return_closcall1(data, cont, obj);}}
 void _string_91append(void *data, object cont, object args) {  
-    object argc = Cyc_length2(data, args);
+    object argc = Cyc_length(data, args);
     dispatch(data, obj_obj2int(argc), (function_type)dispatch_string_91append, cont, cont, args); }
 void _make_91vector(void *data, object cont, object args) {
     Cyc_check_num_args(data, "make-vector", 1, args);
-    { object argc = Cyc_length2(data, args);
+    { object argc = Cyc_length(data, args);
       if (obj_obj2int(argc) >= 2) {
         Cyc_make_vector(data, cont, car(args), cadr(args));}
       else {
@@ -2063,11 +2065,11 @@ void _Cyc_91write_91char(void *data, object cont, object args) {
     return_closcall1(data, cont, Cyc_write_char(data, car(args), cadr(args)));}
 void _Cyc_91write(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "write", 1, args);
-    { object argc = Cyc_length2(data, args);
+    { object argc = Cyc_length(data, args);
      dispatch(data, obj_obj2int(argc), (function_type)dispatch_write_va, cont, cont, args); }}
 void _display(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "display", 1, args);
-    { object argc = Cyc_length2(data, args);
+    { object argc = Cyc_length(data, args);
       dispatch(data, obj_obj2int(argc), (function_type)dispatch_display_va, cont, cont, args); }}
 void _call_95cc(void *data, object cont, object args){
     Cyc_check_num_args(data, "call/cc", 1, args);
@@ -2107,7 +2109,7 @@ object apply(void *data, object cont, object func, object args){
     case closure3_tag:
     case closure4_tag:
     case closureN_tag:
-      count = Cyc_length2(data, args);
+      count = Cyc_length(data, args);
       // TODO: validate number of args provided:
       Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.
       dispatch(data, obj_obj2int(count), ((closure)func)->fn, func, cont, args);

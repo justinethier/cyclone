@@ -11,7 +11,7 @@
 
 /* Error checking definitions */
 #define Cyc_check_num_args(data, fnc_name, num_args, args) { \
-  object l = Cyc_length2(data, args); \
+  object l = Cyc_length(data, args); \
   if (num_args > obj_obj2int(l)) { \
     char buf[128]; \
     snprintf(buf, 127, "Expected %d arguments but received %ld.", num_args, obj_obj2int(l));  \
@@ -148,6 +148,7 @@ object __num_lte(void *, object x, object y);
 object Cyc_eq(object x, object y);
 object Cyc_set_car(void *, object l, object val) ;
 object Cyc_set_cdr(void *, object l, object val) ;
+object Cyc_length(void *d, object l);
 object Cyc_length2(void *d, object l);
 integer_type Cyc_length_as_object(void *d, object l);
 object Cyc_vector_length(void *data, object v);
