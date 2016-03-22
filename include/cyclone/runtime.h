@@ -154,6 +154,7 @@ object Cyc_vector_length(void *data, object v);
 object Cyc_vector_ref(void *d, object v, object k);
 object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, object len, object fill);
+object Cyc_make_vector2(void *data, object cont, int argc, object len, ...);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_number2string(void *d, object cont, object n);
 object Cyc_symbol2string(void *d, object cont, object sym) ;

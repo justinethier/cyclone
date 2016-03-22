@@ -1348,6 +1348,32 @@ object Cyc_make_vector(void *data, object cont, object len, object fill) {
   return_closcall1(data, cont, v);
 }
 
+object Cyc_make_vector2(void *data, object cont, int argc, object len, ...) {
+  object v = nil;
+  object fill = boolean_f;
+  int i;
+  va_list ap;
+  va_start(ap, len);
+  if (argc > 1) {
+    fill = va_arg(ap, object);
+  }
+  va_end(ap);
+  Cyc_check_int(data, len);
+  v = alloca(sizeof(vector_type));
+  ((vector)v)->hdr.mark = gc_color_red;
+  ((vector)v)->hdr.grayed = 0;
+  ((vector)v)->tag = vector_tag;
+  ((vector)v)->num_elt = obj_is_int(len) ? obj_obj2int(len) : ((integer_type *)len)->value;
+  ((vector)v)->elts = 
+    (((vector)v)->num_elt > 0) ? 
+     (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
+     NULL;
+  for (i = 0; i < ((vector)v)->num_elt; i++) {
+    ((vector)v)->elts[i] = fill;
+  }
+  return_closcall1(data, cont, v);
+}
+
 object Cyc_list2vector(void *data, object cont, object l) {
   object v = nil; 
   object len;
@@ -1997,9 +2023,9 @@ void _make_91vector(void *data, object cont, object args) {
     Cyc_check_num_args(data, "make-vector", 1, args);
     { object argc = Cyc_length(data, args);
       if (obj_obj2int(argc) >= 2) {
-        Cyc_make_vector(data, cont, car(args), cadr(args));}
+        Cyc_make_vector2(data, cont, 2, car(args), cadr(args));}
       else {
-        Cyc_make_vector(data, cont, car(args), boolean_f);}}}
+        Cyc_make_vector2(data, cont, 2, car(args), boolean_f);}}}
 void _vector_91ref(void *data, object cont, object args) {
     Cyc_check_num_args(data, "vector-ref", 2, args);
     { object ref = Cyc_vector_ref(data, car(args), cadr(args));
