@@ -1007,8 +1007,6 @@ object Cyc_length(void *data, object l){
     }
     return obj_int2obj(len);
 }
-object Cyc_length2(void *data, object l){
-  return Cyc_length(data, l); }
 
 object Cyc_number2string(void *data, object cont, object n) {
     char buffer[1024];
