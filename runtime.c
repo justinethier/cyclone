@@ -27,15 +27,15 @@ object Cyc_global_set(void *thd, object *glo, object value)
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
-const char *tag_names[22] = { \
+const char *tag_names[23] = { \
    "pair" \
  , "symbol" \
  , "" \
  , "procedure" \
  , "procedure" \
- , "procedure" \
- , "procedure" \
- , "procedure" \
+ , "" \
+ , "" \
+ , "" \
  , "procedure" \
  , "number" \
  , "number" \
@@ -49,6 +49,7 @@ const char *tag_names[22] = { \
  , "macro" \
  , "mutex" \
  , "condition variable" \
+ , "bytevector" \
  , "Reserved for future use" };
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
@@ -837,6 +838,11 @@ object Cyc_is_symbol(object o){
 
 object Cyc_is_vector(object o){
     if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == vector_tag)
+        return boolean_t;
+    return boolean_f;}
+
+object Cyc_is_bytevector(object o){
+    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == bytevector_tag)
         return boolean_t;
     return boolean_f;}
 

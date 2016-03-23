@@ -29,6 +29,7 @@
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
 #define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj);
 #define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj);
+#define Cyc_check_bvec(d,obj) Cyc_check_type(d,Cyc_is_bytevector, bytevector_tag, obj);
 #define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj);
 #define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj);
 #define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj);
@@ -198,6 +199,7 @@ object Cyc_is_number(object o);
 object Cyc_is_real(object o);
 object Cyc_is_integer(object o);
 object Cyc_is_vector(object o);
+object Cyc_is_bytevector(object o);
 object Cyc_is_port(object o);
 object Cyc_is_mutex(object o);
 object Cyc_is_cond_var(object o);

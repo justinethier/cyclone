@@ -185,6 +185,7 @@ typedef long tag_type;
 #define macro_tag 18
 #define mutex_tag 19
 #define cond_var_tag 20
+#define bytevector_tag 21
 
 #define nil NULL
 #define eq(x,y) (x == y)
@@ -296,6 +297,11 @@ typedef struct {gc_header_type hdr; tag_type tag; int num_elt; object *elts;} ve
 typedef vector_type *vector;
 
 #define make_empty_vector(v) vector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
+
+/* Bytevector type */
+
+typedef struct {gc_header_type hdr; tag_type tag; int len; char *data;} bytevector_type;
+typedef bytevector_type *bytevector;
 
 /* Define cons type. */
 
