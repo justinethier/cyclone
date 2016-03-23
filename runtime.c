@@ -587,6 +587,16 @@ object Cyc_display(object x, FILE *port)
       }
       fprintf(port, ")");
       break;
+    case bytevector_tag:
+      fprintf(port, "#u8(");
+      for (i = 0; i < ((bytevector) x)->len; i++) {
+        if (i > 0) { 
+          fprintf(port, " "); 
+        }
+        fprintf(port, "%d", (int)(((bytevector)x)->data[i]));
+      }
+      fprintf(port, ")");
+      break;
     case cons_tag:
       has_cycle = Cyc_has_cycle(x);
       fprintf(port, "("); 
