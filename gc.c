@@ -278,6 +278,16 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       }
       return (char *)hp;
     }
+    case bytevector_tag: {
+      int i;
+      bytevector_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = bytevector_tag;
+      hp->len = ((bytevector) obj)->len;
+      hp->data = (((char *)hp) + sizeof(bytevector_type));
+      memcpy(hp->data, ((bytevector) obj)->data, hp->len);
+      return (char *)hp;
+    }
     case string_tag: {
       char *s;
       string_type *hp = dest;
@@ -448,6 +458,9 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   }
   if (t == vector_tag){
     return gc_heap_align(sizeof(vector_type) + sizeof(object) * ((vector_type *)obj)->num_elt);
+  }
+  if (t == bytevector_tag) {
+    return gc_heap_align(sizeof(bytevector_type) + sizeof(char) * ((bytevector)obj)->len);
   }
   if (t == string_tag){
     return gc_heap_align(sizeof(string_type) + string_len(obj) + 1);

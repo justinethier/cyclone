@@ -2366,6 +2366,12 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
                             obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
+    case bytevector_tag: {
+      bytevector_type *hp = gc_alloc(Cyc_heap, 
+                              sizeof(bytevector_type) + sizeof(char) * (((bytevector) obj)->len), 
+                              obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
     case string_tag: {
       string_type *hp = gc_alloc(Cyc_heap, 
         sizeof(string_type) + ((string_len(obj) + 1)), 
@@ -2510,6 +2516,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       // No child objects to move
       case closure0_tag:
       case macro_tag:
+      case bytevector_tag:
       case string_tag:
       case integer_tag:
       case double_tag:
