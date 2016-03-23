@@ -252,39 +252,6 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       hp->elt1 = ((closure1) obj)->elt1;
       return (char *)hp;
     }
-    case closure2_tag: {
-      closure2_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure2_tag;
-      hp->fn = ((closure2) obj)->fn;
-      hp->num_args = ((closure2) obj)->num_args;
-      hp->elt1 = ((closure2) obj)->elt1;
-      hp->elt2 = ((closure2) obj)->elt2;
-      return (char *)hp;
-    }
-    case closure3_tag: {
-      closure3_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure3_tag;
-      hp->fn = ((closure3) obj)->fn;
-      hp->num_args = ((closure3) obj)->num_args;
-      hp->elt1 = ((closure3) obj)->elt1;
-      hp->elt2 = ((closure3) obj)->elt2;
-      hp->elt3 = ((closure3) obj)->elt3;
-      return (char *)hp;
-    }
-    case closure4_tag: {
-      closure4_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure4_tag;
-      hp->fn = ((closure4) obj)->fn;
-      hp->num_args = ((closure4) obj)->num_args;
-      hp->elt1 = ((closure4) obj)->elt1;
-      hp->elt2 = ((closure4) obj)->elt2;
-      hp->elt3 = ((closure4) obj)->elt3;
-      hp->elt4 = ((closure4) obj)->elt4;
-      return (char *)hp;
-    }
     case closureN_tag: {
       int i;
       closureN_type *hp = dest;
@@ -476,9 +443,6 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == macro_tag) return gc_heap_align(sizeof(macro_type));
   if (t == closure0_tag) return gc_heap_align(sizeof(closure0_type));
   if (t == closure1_tag) return gc_heap_align(sizeof(closure1_type));
-  if (t == closure2_tag) return gc_heap_align(sizeof(closure2_type));
-  if (t == closure3_tag) return gc_heap_align(sizeof(closure3_type));
-  if (t == closure4_tag) return gc_heap_align(sizeof(closure4_type));
   if (t == closureN_tag){
     return gc_heap_align(sizeof(closureN_type) + sizeof(object) * ((closureN_type *)obj)->num_elt);
   }
@@ -989,19 +953,6 @@ void gc_mark_black(object obj)
       }
       case closure1_tag:
         gc_collector_mark_gray(obj, ((closure1) obj)->elt1);
-        break;
-      case closure2_tag:
-        gc_collector_mark_gray(obj, ((closure2) obj)->elt1);
-        gc_collector_mark_gray(obj, ((closure2) obj)->elt2);
-      case closure3_tag:
-        gc_collector_mark_gray(obj, ((closure3) obj)->elt1);
-        gc_collector_mark_gray(obj, ((closure3) obj)->elt2);
-        gc_collector_mark_gray(obj, ((closure3) obj)->elt3);
-      case closure4_tag:
-        gc_collector_mark_gray(obj, ((closure4) obj)->elt1);
-        gc_collector_mark_gray(obj, ((closure4) obj)->elt2);
-        gc_collector_mark_gray(obj, ((closure4) obj)->elt3);
-        gc_collector_mark_gray(obj, ((closure4) obj)->elt4);
         break;
       case closureN_tag: {
         int i, n = ((closureN) obj)->num_elt;

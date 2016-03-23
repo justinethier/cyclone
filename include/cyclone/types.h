@@ -172,9 +172,6 @@ typedef long tag_type;
 #define forward_tag 2
 #define closure0_tag 3
 #define closure1_tag 4
-#define closure2_tag 5
-#define closure3_tag 6
-#define closure4_tag 7
 #define closureN_tag 8
 #define integer_tag 9
 #define double_tag 10
@@ -344,16 +341,10 @@ cons_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cons_tag; n.co
 typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } macro_type;
 typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } closure0_type;
 typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2;} closure2_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3;} closure3_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1,elt2,elt3,elt4;} closure4_type;
 typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; int num_elt; object *elts;} closureN_type;
 
 typedef closure0_type *closure0;
 typedef closure1_type *closure1;
-typedef closure2_type *closure2;
-typedef closure3_type *closure3;
-typedef closure4_type *closure4;
 typedef closureN_type *closureN;
 typedef closure0_type *closure;
 typedef closure0_type *macro;
@@ -362,12 +353,6 @@ typedef closure0_type *macro;
 #define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
 #define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;
-#define mclosure2(c,f,a1,a2) closure2_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure2_tag; \
-   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2;
-#define mclosure3(c,f,a1,a2,a3) closure3_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure3_tag; \
-   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3;
-#define mclosure4(c,f,a1,a2,a3,a4) closure4_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure4_tag; \
-   c.fn = f; c.num_args = -1; c.elt1 = a1; c.elt2 = a2; c.elt3 = a3; c.elt4 = a4;
 
 #define mlist1(e1) (mcons(e1,nil))
 #define mlist2(e2,e1) (mcons(e2,mlist1(e1)))

@@ -540,9 +540,6 @@ object Cyc_display(object x, FILE *port)
       break;
     case closure0_tag:
     case closure1_tag:
-    case closure2_tag:
-    case closure3_tag:
-    case closure4_tag:
     case closureN_tag:
       fprintf(port, "<procedure %p>",(void *)((closure) x)->fn);
       break;
@@ -874,9 +871,6 @@ object Cyc_is_procedure(void *data, object o) {
         tag = type_of(o);
         if (tag == closure0_tag ||
             tag == closure1_tag ||
-            tag == closure2_tag ||
-            tag == closure3_tag ||
-            tag == closure4_tag ||
             tag == closureN_tag ||
             tag == primitive_tag) {
             return boolean_t;
@@ -2079,7 +2073,7 @@ void _display(void *data, object cont, object args) {
 void _call_95cc(void *data, object cont, object args){
     Cyc_check_num_args(data, "call/cc", 1, args);
     if (eq(boolean_f, Cyc_is_procedure(data, car(args)))) {
-      Cyc_invalid_type_error(data, closure2_tag, car(args)); 
+      Cyc_invalid_type_error(data, closure1_tag, car(args)); 
     }
     return_closcall2(data, __glo_call_95cc, cont, car(args));
 }
@@ -2110,9 +2104,6 @@ object apply(void *data, object cont, object func, object args){
     case macro_tag:
     case closure0_tag:
     case closure1_tag:
-    case closure2_tag:
-    case closure3_tag:
-    case closure4_tag:
     case closureN_tag:
       count = Cyc_length(data, args);
       // TODO: validate number of args provided:
@@ -2300,18 +2291,6 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       closure1_type *hp = gc_alloc(Cyc_heap, sizeof(closure1_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
-    case closure2_tag: {
-      closure2_type *hp = gc_alloc(Cyc_heap, sizeof(closure2_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
-    case closure3_tag: {
-      closure3_type *hp = gc_alloc(Cyc_heap, sizeof(closure3_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
-    case closure4_tag: {
-      closure4_type *hp = gc_alloc(Cyc_heap, sizeof(closure4_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
     case closureN_tag: {
       closureN_type *hp = gc_alloc(Cyc_heap, 
                             sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elt), 
@@ -2450,19 +2429,6 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       }
       case closure1_tag:
         gc_move2heap(((closure1) obj)->elt1);
-        break;
-      case closure2_tag:
-        gc_move2heap(((closure2) obj)->elt1);
-        gc_move2heap(((closure2) obj)->elt2);
-      case closure3_tag:
-        gc_move2heap(((closure3) obj)->elt1);
-        gc_move2heap(((closure3) obj)->elt2);
-        gc_move2heap(((closure3) obj)->elt3);
-      case closure4_tag:
-        gc_move2heap(((closure4) obj)->elt1);
-        gc_move2heap(((closure4) obj)->elt2);
-        gc_move2heap(((closure4) obj)->elt3);
-        gc_move2heap(((closure4) obj)->elt4);
         break;
       case closureN_tag: {
         int i, n = ((closureN) obj)->num_elt;
