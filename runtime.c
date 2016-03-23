@@ -1911,6 +1911,18 @@ void _bytevector_91length(void *data, object cont, object args){
     Cyc_check_num_args(data, "bytevector_91length", 1, args);
     { object obj = Cyc_bytevector_length(data, car(args));
       return_closcall1(data, cont, obj); }}
+void _bytevector_91u8_91ref(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "bytevector-u8-ref", 2, args);
+    { object c = Cyc_bytevector_u8_ref(data, car(args), cadr(args));
+      return_closcall1(data, cont, c); }}
+void _bytevector_91u8_91set_67(void *data, object cont, object args) {
+    Cyc_check_num_args(data, "bytevector-u8-set!", 3, args);
+    { object bv = Cyc_bytevector_u8_set(data, car(args), cadr(args), caddr(args));
+      return_closcall1(data, cont, bv); }}
+
+void _bytevector(void *data, object cont, object args) {
+  return_closcall1(data, cont, boolean_f); } // TODO
+
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
     { object obj = Cyc_vector_length(data, car(args));
@@ -2738,6 +2750,11 @@ static primitive_type symbol_91_125string_primitive = {{0}, primitive_tag, "symb
 static primitive_type number_91_125string_primitive = {{0}, primitive_tag, "number->string", &_number_91_125string};
 static primitive_type list_91_125vector_primitive = {{0}, primitive_tag, "list-vector", &_list_91_125vector};
 static primitive_type make_91bytevector_primitive = {{0}, primitive_tag, "make-bytevector", &_make_91bytevector};
+
+static primitive_type bytevector_primitive = {{0}, primitive_tag, "bytevector", &_bytevector};
+static primitive_type bytevector_91u8_91ref_primitive = {{0}, primitive_tag, "bytevector-u8-ref", &_bytevector_91u8_91ref};
+static primitive_type bytevector_91u8_91set_67_primitive = {{0}, primitive_tag, "bytevector-u8-set!", &_bytevector_91u8_91set_67};
+
 static primitive_type make_91vector_primitive = {{0}, primitive_tag, "make-vector", &_make_91vector};
 static primitive_type vector_91ref_primitive = {{0}, primitive_tag, "vector-ref", &_vector_91ref};
 static primitive_type vector_91set_67_primitive = {{0}, primitive_tag, "vector-set!", &_vector_91set_67};
@@ -2862,6 +2879,9 @@ const object primitive_symbol_91_125string = &symbol_91_125string_primitive;
 const object primitive_number_91_125string = &number_91_125string_primitive;
 const object primitive_make_91bytevector = &make_91bytevector_primitive;
 const object primitive_make_91vector = &make_91vector_primitive;
+const object primitive_bytevector = &bytevector_primitive;
+const object primitive_bytevector_91u8_91ref = &bytevector_91u8_91ref_primitive;
+const object primitive_bytevector_91u8_91set_67 = &bytevector_91u8_91set_67_primitive;
 const object primitive_list_91_125vector = &list_91_125vector_primitive;
 const object primitive_boolean_127 = &boolean_127_primitive;
 const object primitive_char_127 = &char_127_primitive;

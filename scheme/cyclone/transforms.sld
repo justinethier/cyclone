@@ -514,6 +514,9 @@
      substring
      make-bytevector
      bytevector-length
+     bytevector
+     bytevector-u8-ref
+     bytevector-u8-set!
      bytevector?
      make-vector
      list->vector
