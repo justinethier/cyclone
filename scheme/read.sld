@@ -338,6 +338,32 @@
               ((eq? #\x next-c)
                (parse-number fp toks all? parens ptbl 
                  16 (lambda (num) (string->number (list->string num) 16))))
+              ;; Bytevector (TODO: this is just a placeholder for now)
+              ((eq? #\u next-c)
+                (set! next-c (read-char fp))
+                (if (not (eq? #\8 next-c))
+                    (parse-error "Unhandled input sequence" 
+                      (in-port:get-lnum ptbl)
+                      (in-port:get-cnum ptbl)))
+                (set! next-c (read-char fp))
+                (if (not (eq? #\( next-c))
+                    (parse-error "Unhandled input sequence" 
+                      (in-port:get-lnum ptbl)
+                      (in-port:get-cnum ptbl)))
+               (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
+                     (toks* (get-toks tok toks)))
+                 (define new-toks 
+                   (add-tok 
+                     (if (and (pair? sub) (dotted? sub))
+                         (parse-error 
+                            "Invalid vector syntax" ;(->dotted-list sub)
+                            (in-port:get-lnum ptbl)
+                            (in-port:get-cnum ptbl))
+                         (list->vector sub))
+                     toks*)) 
+                 (if all?
+                  (parse fp '() new-toks all? #f parens ptbl)
+                  (car new-toks))))
               ;; Vector
               ((eq? #\( next-c)
                (let ((sub (parse fp '() '() #t #f (+ parens 1) ptbl))
