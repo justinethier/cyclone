@@ -524,7 +524,7 @@
      ((eq? p 'integer->char) "Cyc_integer2char")
      ((eq? p 'string->number)"Cyc_string2number2_")
      ((eq? p 'list->string)  "Cyc_list2string")
-     ((eq? p 'make-vector)   "Cyc_make_vector2")
+     ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
      ((eq? p 'vector-length) "Cyc_vector_length")
      ((eq? p 'vector-ref)    "Cyc_vector_ref")
