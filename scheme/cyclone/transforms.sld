@@ -512,6 +512,9 @@
      string-ref
      string-set!
      substring
+     make-bytevector
+     bytevector-length
+     bytevector?
      make-vector
      list->vector
      vector-length
@@ -578,6 +581,7 @@
                   set-cdr!
                   string-set!
                   string->symbol ;; Could be mistaken for an identifier
+                  make-bytevector
                   make-vector
                   ;; I/O must be done at runtime for side effects:
                   Cyc-stdout
