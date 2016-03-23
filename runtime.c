@@ -1392,6 +1392,64 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
   return_closcall1(data, cont, bv);
 }
 
+object Cyc_bytevector(void *data, object cont, int argc, object bval, ...) {
+  int i = 0, val;
+  va_list ap;
+  object tmp;
+  char *buffer;
+  make_empty_bytevector(bv);
+  if (argc > 0) {
+    Cyc_check_int(data, bval);
+    buffer = alloca(sizeof(char) * argc);
+    val = obj_is_int(bval) ? obj_obj2int(bval) : integer_value(bval);
+    buffer[i] = val;
+    va_start(ap, bval);
+    for(i = 1; i < argc; i++) {
+      tmp = va_arg(ap, object);
+      Cyc_check_int(data, tmp);
+      val = obj_is_int(tmp) ? obj_obj2int(tmp) : integer_value(tmp);
+      buffer[i] = val;
+    }
+    va_end(ap);
+  }
+  return_closcall1(data, cont, &bv);
+}
+
+object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
+  const char *buf;
+  int idx, val;
+
+  Cyc_check_bvec(data, bv);
+  Cyc_check_int(data, k);
+
+  buf = ((bytevector)bv)->data;
+  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k);
+
+  if (idx < 0 || idx >= ((bytevector)bv)->len) {
+    Cyc_rt_raise2(data, "bytevector-u8-ref - invalid index", k);
+  }
+
+  val = buf[idx];
+  return obj_int2obj(val);
+}
+
+object Cyc_bytevector_u8_set(void *data, object bv, object k, object b) {
+  char *buf;
+  int idx, len, val;
+
+  Cyc_check_bvec(data, bv);
+  Cyc_check_int(data, k);
+  Cyc_check_int(data, b);
+
+  buf = ((bytevector)bv)->data;
+  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
+  len = ((bytevector)bv)->len;
+
+  Cyc_check_bounds(data, "bytevector-u8-set!", len, idx);
+  buf[idx] = obj_obj2int(b);
+  return bv;
+}
+
 object Cyc_bytevector_length(void *data, object bv) {
     if (!nullp(bv) && !is_value_type(bv) && ((list)bv)->tag == bytevector_tag) {
       return obj_int2obj(((bytevector)bv)->len);

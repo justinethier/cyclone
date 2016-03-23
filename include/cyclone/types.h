@@ -303,6 +303,8 @@ typedef vector_type *vector;
 typedef struct {gc_header_type hdr; tag_type tag; int len; char *data;} bytevector_type;
 typedef bytevector_type *bytevector;
 
+#define make_empty_bytevector(v) bytevector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = bytevector_tag; v.len = 0; v.data = NULL;
+
 /* Define cons type. */
 
 typedef struct {gc_header_type hdr; tag_type tag; object cons_car,cons_cdr;} cons_type;
