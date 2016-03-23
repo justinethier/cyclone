@@ -524,6 +524,8 @@
      ((eq? p 'integer->char) "Cyc_integer2char")
      ((eq? p 'string->number)"Cyc_string2number2_")
      ((eq? p 'list->string)  "Cyc_list2string")
+     ((eq? p 'make-bytevector)   "Cyc_make_bytevector")
+     ((eq? p 'bytevector-length) "Cyc_bytevector_length")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
      ((eq? p 'vector-length) "Cyc_vector_length")
@@ -564,6 +566,7 @@
      ((eq? p 'macro?)        "Cyc_is_macro")
      ((eq? p 'port?)         "Cyc_is_port")
      ((eq? p 'vector?)       "Cyc_is_vector")
+     ((eq? p 'bytevector?)   "Cyc_is_bytevector")
      ((eq? p 'string?)       "Cyc_is_string")
      ((eq? p 'eof-object?)   "Cyc_is_eof_object")
      ((eq? p 'symbol?)       "Cyc_is_symbol")
@@ -606,6 +609,8 @@
     integer->char
     string->number
     list->string
+    make-bytevector
+    bytevector-length
     make-vector
     list->vector
     vector-length
@@ -657,6 +662,7 @@
     ((eq? p 'number->string) "object")
     ((eq? p 'symbol->string) "object")
     ((eq? p 'substring) "object")
+    ((eq? p 'make-bytevector) "object")
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
@@ -675,6 +681,7 @@
              Cyc-installation-dir
              string->number 
              string-append list->string
+             make-bytevector
              make-vector list->vector
              symbol->string number->string 
              substring
@@ -691,6 +698,7 @@
                      + - * /
                      read-char peek-char 
                      symbol->string list->string substring string-append string->number
+                     make-bytevector
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Primitive functions that pass a continuation or thread data but have no other arguments
@@ -703,6 +711,7 @@
     (and (prim? exp)
          (member exp '(error Cyc-write Cyc-display 
                        string->number string-append 
+                       make-bytevector
                        make-vector
                        + - * /))))
 
