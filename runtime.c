@@ -1468,6 +1468,35 @@ object Cyc_bytevector_append(void *data, object cont, int _argc, object bv, ...)
   Cyc_bytevector_append_va_list(_argc);
 }
 
+object Cyc_bytevector_copy(void *data, object cont, object bv, object start, object end) {
+  const char *buf;
+  int s, e;
+  int len;
+  make_empty_bytevector(result);
+
+  Cyc_check_bvec(data, bv);
+  Cyc_check_int(data, start);
+  Cyc_check_int(data, end);
+
+  buf = ((bytevector)bv)->data;
+  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
+  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+
+  if (s < 0 || s >= ((bytevector)bv)->len) {
+    Cyc_rt_raise2(data, "bytevector-copy - invalid start", start);
+  }
+
+  if (e < 0 || e >= ((bytevector)bv)->len) {
+    Cyc_rt_raise2(data, "bytevector-copy - invalid end", end);
+  }
+
+  len = e - s + 1;
+  result.len = len;
+  result.data = alloca(sizeof(char) * len);
+  memcpy(result.data, &(((bytevector)bv)->data)[s], len);
+  return_closcall1(data, cont, &result);
+}
+
 object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
   const char *buf;
   int idx;
@@ -1980,6 +2009,10 @@ void _bytevector(void *data, object cont, object args) {
 void _bytevector_91append(void *data, object cont, object args) {
     object argc = Cyc_length(data, args);
     dispatch(data, obj_obj2int(argc), (function_type)dispatch_bytevector_91append, cont, cont, args); }
+void _Cyc_91bytevector_91copy(void *data, object cont, object args) {
+    object argc = Cyc_length(data, args);
+    Cyc_check_num_args(data, "Cyc-bytevector-copy", 3, args);
+    Cyc_bytevector_copy(data, cont, car(args), cadr(args), caddr(args)); }
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
     { object obj = Cyc_vector_length(data, car(args));
@@ -2810,6 +2843,7 @@ static primitive_type make_91bytevector_primitive = {{0}, primitive_tag, "make-b
 
 static primitive_type bytevector_primitive = {{0}, primitive_tag, "bytevector", &_bytevector};
 static primitive_type bytevector_91append_primitive = {{0}, primitive_tag, "bytevector-append", &_bytevector_91append};
+static primitive_type Cyc_91bytevector_91copy_primitive = {{0}, primitive_tag, "Cyc-bytevector-copy", &_Cyc_91bytevector_91copy};
 static primitive_type bytevector_91u8_91ref_primitive = {{0}, primitive_tag, "bytevector-u8-ref", &_bytevector_91u8_91ref};
 static primitive_type bytevector_91u8_91set_67_primitive = {{0}, primitive_tag, "bytevector-u8-set!", &_bytevector_91u8_91set_67};
 
@@ -2939,6 +2973,7 @@ const object primitive_make_91bytevector = &make_91bytevector_primitive;
 const object primitive_make_91vector = &make_91vector_primitive;
 const object primitive_bytevector = &bytevector_primitive;
 const object primitive_bytevector_91append = &bytevector_91append_primitive;
+const object primitive_Cyc_91bytevector_91copy = &Cyc_91bytevector_91copy_primitive;
 const object primitive_bytevector_91u8_91ref = &bytevector_91u8_91ref_primitive;
 const object primitive_bytevector_91u8_91set_67 = &bytevector_91u8_91set_67_primitive;
 const object primitive_list_91_125vector = &list_91_125vector_primitive;
