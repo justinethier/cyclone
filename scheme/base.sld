@@ -157,16 +157,9 @@
 ;;;;
 ; Possibly missing functions:
 ;
-;    ; byte vectors are not implemented yet:
-;    bytevector
-;    bytevector-append
+;    ; following byte vector functions are not implemented yet:
 ;    bytevector-copy!
-;    bytevector-length
-;    bytevector-u8-ref
-;    bytevector-u8-set!
-;    bytevector?
 ;    get-output-bytevector
-;    make-bytevector
 ;    open-input-bytevector
 ;    open-output-bytevector
 ;    read-bytevector
