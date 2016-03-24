@@ -22,6 +22,6 @@
 (let ((x 1))
   (define a #u8(1 2 3 4 5))
   (define b #(1 2 3 4 5))
-  (write (Cyc-bytevector-copy a 2 4)) ; =⇒ #u8(3 4)
+  (write (bytevector-copy a 2 4)) ; =⇒ #u8(3 4)
   (write b)
 )

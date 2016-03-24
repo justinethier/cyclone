@@ -152,6 +152,7 @@
     inexact
     eof-object
     syntax-error
+    bytevector-copy
 
 ;;;;
 ; Possibly missing functions:
@@ -159,7 +160,6 @@
 ;    ; byte vectors are not implemented yet:
 ;    bytevector
 ;    bytevector-append
-;    bytevector-copy
 ;    bytevector-copy!
 ;    bytevector-length
 ;    bytevector-u8-ref
@@ -700,6 +700,11 @@
                            (loop (+ i 1) 
                                  (cons (vector-ref vec i) lst))))))
         (loop start '())))
+    (define (bytevector-copy bv . opts)
+      (letrec ((len (bytevector-length bv))
+               (start (if (> (length opts) 0) (car opts) 0))
+               (end (if (> (length opts) 1) (cadr opts) len)))
+        (Cyc-bytevector-copy bv start end)))
     (define (vector->string vec . opts)
       (let ((lst (apply vector->list (cons vec opts))))
         (list->string lst)))
