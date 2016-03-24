@@ -515,6 +515,7 @@
      make-bytevector
      bytevector-length
      bytevector
+     bytevector-append
      bytevector-u8-ref
      bytevector-u8-set!
      bytevector?

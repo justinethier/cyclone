@@ -354,6 +354,7 @@ extern const object primitive_list_91_125vector;
 extern const object primitive_vector_91ref;
 extern const object primitive_vector_91set_67;
 extern const object primitive_bytevector;
+extern const object primitive_bytevector_91append;
 extern const object primitive_bytevector_91u8_91ref;
 extern const object primitive_bytevector_91u8_91set_67;
 extern const object primitive_string_91ref;

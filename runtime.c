@@ -1425,6 +1425,52 @@ object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...) {
   Cyc_bytevector_va_list(_argc);
 }
 
+#define Cyc_bytevector_append_va_list(argc) { \
+}
+
+void dispatch_bytevector_91append(void *data, int _argc, object clo, object cont, object bv, ...) {
+  //Cyc_bytevector_append_va_list((_argc - 1));
+  int argc = _argc - 1; // TODO: temporary
+
+
+  int i = 0, buf_idx = 0, val, total_length = 0;
+  va_list ap;
+  object tmp;
+  char *buffer;
+  char **buffers = NULL;
+  int *lengths = NULL;
+  make_empty_bytevector(result);
+  if (argc > 0) {
+    buffers = alloca(sizeof(char *) * argc);
+    lengths = alloca(sizeof(int) * argc);
+    Cyc_check_bvec(data, bv);
+    total_length = ((bytevector)bv)->len;
+    lengths[0] = ((bytevector)bv)->len;
+    buffers[0] = ((bytevector)bv)->data;
+    va_start(ap, bv);
+    for(i = 1; i < argc; i++) {
+      tmp = va_arg(ap, object);
+      Cyc_check_bvec(data, tmp);
+      total_length += ((bytevector)tmp)->len;
+      lengths[i] = ((bytevector)tmp)->len;
+      buffers[i] = ((bytevector)tmp)->data;
+    }
+    va_end(ap);
+    buffer = alloca(sizeof(char) * total_length);
+    for (i = 0; i < argc; i++) {
+      memcpy(&buffer[buf_idx], buffers[i], lengths[i]);
+      buf_idx += lengths[i];
+    }
+    result.len = argc;
+    result.data = buffer;
+  }
+  return_closcall1(data, cont, &result);
+}
+
+object Cyc_bytevector_append(void *data, object cont, int _argc, object bval, ...) {
+  Cyc_bytevector_append_va_list(_argc);
+}
+
 object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
   const char *buf;
   int idx;
@@ -1930,11 +1976,12 @@ void _bytevector_91u8_91set_67(void *data, object cont, object args) {
     Cyc_check_num_args(data, "bytevector-u8-set!", 3, args);
     { object bv = Cyc_bytevector_u8_set(data, car(args), cadr(args), caddr(args));
       return_closcall1(data, cont, bv); }}
-
 void _bytevector(void *data, object cont, object args) {
     object argc = Cyc_length(data, args);
     dispatch(data, obj_obj2int(argc), (function_type)dispatch_bytevector, cont, cont, args); }
-
+void _bytevector_91append(void *data, object cont, object args) {
+    object argc = Cyc_length(data, args);
+    dispatch(data, obj_obj2int(argc), (function_type)dispatch_bytevector_91append, cont, cont, args); }
 void _vector_91length(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "vector_91length", 1, args);
     { object obj = Cyc_vector_length(data, car(args));
@@ -2764,6 +2811,7 @@ static primitive_type list_91_125vector_primitive = {{0}, primitive_tag, "list-v
 static primitive_type make_91bytevector_primitive = {{0}, primitive_tag, "make-bytevector", &_make_91bytevector};
 
 static primitive_type bytevector_primitive = {{0}, primitive_tag, "bytevector", &_bytevector};
+static primitive_type bytevector_91append_primitive = {{0}, primitive_tag, "bytevector-append", &_bytevector_91append};
 static primitive_type bytevector_91u8_91ref_primitive = {{0}, primitive_tag, "bytevector-u8-ref", &_bytevector_91u8_91ref};
 static primitive_type bytevector_91u8_91set_67_primitive = {{0}, primitive_tag, "bytevector-u8-set!", &_bytevector_91u8_91set_67};
 
@@ -2892,6 +2940,7 @@ const object primitive_number_91_125string = &number_91_125string_primitive;
 const object primitive_make_91bytevector = &make_91bytevector_primitive;
 const object primitive_make_91vector = &make_91vector_primitive;
 const object primitive_bytevector = &bytevector_primitive;
+const object primitive_bytevector_91append = &bytevector_91append_primitive;
 const object primitive_bytevector_91u8_91ref = &bytevector_91u8_91ref_primitive;
 const object primitive_bytevector_91u8_91set_67 = &bytevector_91u8_91set_67_primitive;
 const object primitive_list_91_125vector = &list_91_125vector_primitive;
