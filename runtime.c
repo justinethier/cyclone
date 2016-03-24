@@ -1493,7 +1493,7 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
   len = e - s;
   result.len = len;
   result.data = alloca(sizeof(char) * len);
-  memcpy(result.data, &(((bytevector)bv)->data)[s], len);
+  memcpy(&result.data[0], &(((bytevector)bv)->data)[s], len);
   return_closcall1(data, cont, &result);
 }
 
