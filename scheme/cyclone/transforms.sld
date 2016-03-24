@@ -1503,7 +1503,13 @@
               (equal? (app->args body)
                       ;(lambda->formals (car body))
                       (lambda->formals exp)
-                      ))
+                      )
+              ;; TODO: don't do it if args are used in the body
+              ;; this won't work if we have any num other than 1 arg
+              (not (member 
+                      (car (lambda->formals exp))
+                      (free-vars (car body))))
+              )
           (cps-optimize-01 (car body)))
         (else
           `(lambda ,(lambda->formals exp)
