@@ -526,6 +526,9 @@
      ((eq? p 'list->string)  "Cyc_list2string")
      ((eq? p 'make-bytevector)   "Cyc_make_bytevector")
      ((eq? p 'bytevector-length) "Cyc_bytevector_length")
+     ((eq? p 'bytevector)    "Cyc_bytevector")
+     ((eq? p 'bytevector-u8-ref)    "Cyc_bytevector_u8_ref")
+     ((eq? p 'bytevector-u8-set!)   "Cyc_bytevector_u8_set")
      ((eq? p 'make-vector)   "Cyc_make_vector")
      ((eq? p 'list->vector)  "Cyc_list2vector")
      ((eq? p 'vector-length) "Cyc_vector_length")
@@ -611,6 +614,9 @@
     list->string
     make-bytevector
     bytevector-length
+    bytevector
+    bytevector-u8-ref
+    bytevector-u8-set!
     make-vector
     list->vector
     vector-length
@@ -663,6 +669,7 @@
     ((eq? p 'symbol->string) "object")
     ((eq? p 'substring) "object")
     ((eq? p 'make-bytevector) "object")
+    ;((eq? p 'bytevector) "object")
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
@@ -699,6 +706,9 @@
                      read-char peek-char 
                      symbol->string list->string substring string-append string->number
                      make-bytevector
+                     bytevector
+                     bytevector-u8-ref
+                     bytevector-u8-set!
                      make-vector list->vector Cyc-installation-dir))))
 
 ;; Primitive functions that pass a continuation or thread data but have no other arguments
@@ -712,6 +722,7 @@
          (member exp '(error Cyc-write Cyc-display 
                        string->number string-append 
                        make-bytevector
+                       bytevector
                        make-vector
                        + - * /))))
 
