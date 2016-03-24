@@ -1461,7 +1461,7 @@ void dispatch_bytevector_91append(void *data, int _argc, object clo, object cont
       memcpy(&buffer[buf_idx], buffers[i], lengths[i]);
       buf_idx += lengths[i];
     }
-    result.len = argc;
+    result.len = total_length;
     result.data = buffer;
   }
   return_closcall1(data, cont, &result);
