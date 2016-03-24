@@ -277,6 +277,7 @@
       (real? exp)
       (string? exp)
       (vector? exp)
+      (bytevector? exp)
       (char? exp)
       (boolean? exp)))
 

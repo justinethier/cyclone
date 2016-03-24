@@ -391,6 +391,50 @@
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
+(define (c-compile-bytevector exp)
+  (letrec ((cvar-name (mangle (gensym 'vec)))
+           (len (bytevector-length exp))
+           ;; Generate code for each member of the vector 
+           (loop 
+            (lambda (i code)
+              (if (= i len)
+                code
+                (let ((byte-val (number->string (bytevector-u8-ref exp i))))
+                  (loop 
+                    (+ i 1)
+                    (c-code/vars
+                      ;; The bytevector's C variable
+                      (c:body code)
+                      ;; Allocations
+                      (append
+                        (c:allocs code) ;; Vector alloc
+                        (list ;; Assign this member to vector
+                          (string-append 
+                            cvar-name ".data[" (number->string i) "] = (unsigned char)"
+                            byte-val
+                            ";"))))
+                    ))))
+            )
+          )
+    (cond
+      ((zero? len)
+        (c-code/vars
+            (string-append "&" cvar-name) ; Code is just the variable name
+            (list ; Allocate empty vector
+              (string-append 
+                "make_empty_bytevector(" cvar-name ");"))))
+      (else
+        (let ((code
+                (c-code/vars
+                  (string-append "&" cvar-name) ; Code body is just var name
+                  (list ; Allocate the vector
+                    (string-append 
+                      "make_empty_bytevector(" cvar-name ");"
+                      cvar-name ".len = " (number->string len) ";"
+                      cvar-name ".data = alloca(sizeof(char) * " 
+                                         (number->string len) ");")))))
+        (loop 0 code))))))
+
 ;; c-compile-const : const-exp -> c-pair
 ;;
 ;; Typically this function is used to compile constant values such as
@@ -404,6 +448,8 @@
      (c-compile-scalars exp))
     ((vector? exp)
      (c-compile-vector exp))
+    ((bytevector? exp)
+     (c-compile-bytevector exp))
     ((integer? exp) 
 ;     (let ((cvar-name (mangle (gensym 'c))))
 ;        (c-code/vars
@@ -671,6 +717,8 @@
     ((eq? p 'symbol->string) "object")
     ((eq? p 'substring) "object")
     ((eq? p 'make-bytevector) "object")
+    ((eq? p 'bytevector) "object")
+    ((eq? p 'bytevector-append) "object")
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
@@ -690,6 +738,8 @@
              string->number 
              string-append list->string
              make-bytevector
+             bytevector
+             bytevector-append
              make-vector list->vector
              symbol->string number->string 
              substring

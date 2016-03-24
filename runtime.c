@@ -1464,7 +1464,7 @@ void dispatch_bytevector_91append(void *data, int _argc, object clo, object cont
   Cyc_bytevector_append_va_list((_argc - 1));
 }
 
-object Cyc_bytevector_append(void *data, object cont, int _argc, object bval, ...) {
+object Cyc_bytevector_append(void *data, object cont, int _argc, object bv, ...) {
   Cyc_bytevector_append_va_list(_argc);
 }
 

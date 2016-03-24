@@ -158,6 +158,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...);
 object Cyc_bytevector(void *data, object cont, int argc, object bval, ...);
 object Cyc_bytevector_length(void *data, object bv);
+object Cyc_bytevector_append(void *data, object cont, int _argc, object bv, ...);
 object Cyc_bytevector_u8_ref(void *data, object bv, object k);
 object Cyc_bytevector_u8_set(void *data, object bv, object k, object b);
 object Cyc_list2vector(void *data, object cont, object l);

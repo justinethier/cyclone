@@ -1,5 +1,6 @@
 (import (scheme base) (scheme write))
 
+(write #u8(1 2 3 4 5))
 (write (make-bytevector 2 12)) ; =⇒ #u8(12 12)
 ;(write (bytevector 1 3 5 1 3 5)) ; =⇒ #u8(1 3 5 1 3 5)
 ;(write (bytevector)) ;=⇒ #u8()
