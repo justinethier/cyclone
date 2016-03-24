@@ -1426,45 +1426,42 @@ object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...) {
 }
 
 #define Cyc_bytevector_append_va_list(argc) { \
+  int i = 0, buf_idx = 0, val, total_length = 0; \
+  va_list ap; \
+  object tmp; \
+  char *buffer; \
+  char **buffers = NULL; \
+  int *lengths = NULL; \
+  make_empty_bytevector(result); \
+  if (argc > 0) { \
+    buffers = alloca(sizeof(char *) * argc); \
+    lengths = alloca(sizeof(int) * argc); \
+    Cyc_check_bvec(data, bv); \
+    total_length = ((bytevector)bv)->len; \
+    lengths[0] = ((bytevector)bv)->len; \
+    buffers[0] = ((bytevector)bv)->data; \
+    va_start(ap, bv); \
+    for(i = 1; i < argc; i++) { \
+      tmp = va_arg(ap, object); \
+      Cyc_check_bvec(data, tmp); \
+      total_length += ((bytevector)tmp)->len; \
+      lengths[i] = ((bytevector)tmp)->len; \
+      buffers[i] = ((bytevector)tmp)->data; \
+    } \
+    va_end(ap); \
+    buffer = alloca(sizeof(char) * total_length); \
+    for (i = 0; i < argc; i++) { \
+      memcpy(&buffer[buf_idx], buffers[i], lengths[i]); \
+      buf_idx += lengths[i]; \
+    } \
+    result.len = total_length; \
+    result.data = buffer; \
+  } \
+  return_closcall1(data, cont, &result); \
 }
 
 void dispatch_bytevector_91append(void *data, int _argc, object clo, object cont, object bv, ...) {
-  //Cyc_bytevector_append_va_list((_argc - 1));
-  int argc = _argc - 1; // TODO: temporary
-
-
-  int i = 0, buf_idx = 0, val, total_length = 0;
-  va_list ap;
-  object tmp;
-  char *buffer;
-  char **buffers = NULL;
-  int *lengths = NULL;
-  make_empty_bytevector(result);
-  if (argc > 0) {
-    buffers = alloca(sizeof(char *) * argc);
-    lengths = alloca(sizeof(int) * argc);
-    Cyc_check_bvec(data, bv);
-    total_length = ((bytevector)bv)->len;
-    lengths[0] = ((bytevector)bv)->len;
-    buffers[0] = ((bytevector)bv)->data;
-    va_start(ap, bv);
-    for(i = 1; i < argc; i++) {
-      tmp = va_arg(ap, object);
-      Cyc_check_bvec(data, tmp);
-      total_length += ((bytevector)tmp)->len;
-      lengths[i] = ((bytevector)tmp)->len;
-      buffers[i] = ((bytevector)tmp)->data;
-    }
-    va_end(ap);
-    buffer = alloca(sizeof(char) * total_length);
-    for (i = 0; i < argc; i++) {
-      memcpy(&buffer[buf_idx], buffers[i], lengths[i]);
-      buf_idx += lengths[i];
-    }
-    result.len = total_length;
-    result.data = buffer;
-  }
-  return_closcall1(data, cont, &result);
+  Cyc_bytevector_append_va_list((_argc - 1));
 }
 
 object Cyc_bytevector_append(void *data, object cont, int _argc, object bval, ...) {
