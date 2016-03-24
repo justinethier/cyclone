@@ -1490,7 +1490,7 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
     Cyc_rt_raise2(data, "bytevector-copy - invalid end", end);
   }
 
-  len = e - s + 1;
+  len = e - s;
   result.len = len;
   result.data = alloca(sizeof(char) * len);
   memcpy(result.data, &(((bytevector)bv)->data)[s], len);

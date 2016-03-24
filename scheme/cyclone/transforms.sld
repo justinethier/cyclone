@@ -517,7 +517,7 @@
      bytevector-length
      bytevector
      bytevector-append
-     bytevector-copy
+     Cyc-bytevector-copy
      bytevector-u8-ref
      bytevector-u8-set!
      bytevector?
