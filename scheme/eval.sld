@@ -246,6 +246,7 @@
       (list 'substring substring)
       (list 'make-bytevector make-bytevector)
       (list 'bytevector-length bytevector-length)
+      (list 'bytevector-append bytevector-append)
       (list 'bytevector          bytevector)
       (list 'bytevector-u8-ref   bytevector-u8-ref)
       (list 'bytevector-u8-set!  bytevector-u8-set!)
