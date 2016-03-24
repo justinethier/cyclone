@@ -593,7 +593,7 @@ object Cyc_display(object x, FILE *port)
         if (i > 0) { 
           fprintf(port, " "); 
         }
-        fprintf(port, "%u", (int)(((bytevector)x)->data[i]));
+        fprintf(port, "%u", (unsigned char)(((bytevector)x)->data[i]));
       }
       fprintf(port, ")");
       break;
@@ -1387,7 +1387,7 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
   if (argc > 1) {
     Cyc_check_int(data, fill);
     fill_val = obj_is_int(fill) ? obj_obj2int(fill) : integer_value(fill);
-    memset(((bytevector)bv)->data, fill_val, length);
+    memset(((bytevector)bv)->data, (unsigned char)fill_val, length);
   }
   return_closcall1(data, cont, bv);
 }
@@ -1408,7 +1408,7 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
       tmp = va_arg(ap, object); \
       Cyc_check_int(data, tmp); \
       val = obj_is_int(tmp) ? obj_obj2int(tmp) : integer_value(tmp); \
-      buffer[i] = val; \
+      buffer[i] = (unsigned char)val; \
     } \
     va_end(ap); \
     bv.len = argc; \
@@ -1434,7 +1434,7 @@ void dispatch_bytevector(void *data, int _argc, object clo, object cont, object 
       tmp = va_arg(ap, object);
       Cyc_check_int(data, tmp);
       val = obj_is_int(tmp) ? obj_obj2int(tmp) : integer_value(tmp);
-      buffer[i] = val;
+      buffer[i] = (unsigned char) val;
     }
     va_end(ap);
     bv.len = argc;
@@ -1450,7 +1450,7 @@ object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...) {
 object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
   const char *buf;
   int idx;
-  unsigned int val;
+  int val;
 
   Cyc_check_bvec(data, bv);
   Cyc_check_int(data, k);
@@ -1462,7 +1462,7 @@ object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
     Cyc_rt_raise2(data, "bytevector-u8-ref - invalid index", k);
   }
 
-  val = buf[idx];
+  val = (unsigned char)(buf[idx]);
   return obj_int2obj(val);
 }
 
