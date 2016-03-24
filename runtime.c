@@ -1486,7 +1486,7 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
     Cyc_rt_raise2(data, "bytevector-copy - invalid start", start);
   }
 
-  if (e < 0 || e >= ((bytevector)bv)->len) {
+  if (e < 0 || e < s || e > ((bytevector)bv)->len) {
     Cyc_rt_raise2(data, "bytevector-copy - invalid end", end);
   }
 
