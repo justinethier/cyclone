@@ -1496,11 +1496,12 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b) {
   Cyc_check_int(data, b);
 
   buf = ((bytevector)bv)->data;
-  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
+  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k);
+  val = obj_is_int(b) ? obj_obj2int(b) : integer_value(b);
   len = ((bytevector)bv)->len;
 
   Cyc_check_bounds(data, "bytevector-u8-set!", len, idx);
-  buf[idx] = (unsigned char)(obj_obj2int(b));
+  buf[idx] = (unsigned char)val;
   return bv;
 }
 
