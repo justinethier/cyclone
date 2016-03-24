@@ -338,7 +338,7 @@
               ((eq? #\x next-c)
                (parse-number fp toks all? parens ptbl 
                  16 (lambda (num) (string->number (list->string num) 16))))
-              ;; Bytevector (TODO: this is just a placeholder for now)
+              ;; Bytevector
               ((eq? #\u next-c)
                 (set! next-c (read-char fp))
                 (if (not (eq? #\8 next-c))
@@ -359,7 +359,7 @@
                             "Invalid vector syntax" ;(->dotted-list sub)
                             (in-port:get-lnum ptbl)
                             (in-port:get-cnum ptbl))
-                         (list->vector sub))
+                         (apply bytevector sub))
                      toks*)) 
                  (if all?
                   (parse fp '() new-toks all? #f parens ptbl)
