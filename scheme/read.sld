@@ -392,6 +392,8 @@
                   (in-port:get-cnum ptbl)))))
          ;; just another char...
          (parse fp (cons c tok) toks all? #f parens ptbl)))
+      ((eq? c #\|)
+       (parse-literal-identifier fp toks all? parens ptbl))
       (else
         (parse fp (cons c tok) toks all? #f parens ptbl)))))
 
@@ -517,6 +519,31 @@
       ((eq? #\# c) #t)
       ((eq? #\| c) (read-block-terminator fp ptbl))
       (else (read-block-comment fp ptbl)))))
+
+;; Parse literal identifier encountered within pipes
+(define (parse-literal-identifier fp toks all? parens ptbl)
+  (let ((sym (parse-li-rec fp '() ptbl)))
+    (if all?
+      (parse fp '() (cons sym toks) all? #f parens ptbl)
+      sym)))
+
+;; Helper for parse-literal-identifier
+(define (parse-li-rec fp tok ptbl)
+  (let ((c (get-next-char fp ptbl))
+        (next (lambda (c) (parse-li-rec fp (cons c tok) ptbl))))
+    (cond
+      ((eq? #\| c) 
+       (let ((str (if (null? tok) 
+                      "||"
+                      (list->string 
+                        (reverse tok)))))
+        (string->symbol str)))
+      ((eof-object? c) 
+       (parse-error "EOF encountered parsing literal identifier" 
+         (in-port:get-lnum ptbl)
+         (in-port:get-cnum ptbl)))
+      (else
+        (next c)))))
 
 (define (parse-number fp toks all? parens ptbl base tok->num)
 ;  (parse-number-rec base fp '() ptbl))
