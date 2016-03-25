@@ -386,6 +386,17 @@
                  (if all?
                    (parse fp '() new-toks all? #f parens ptbl)
                    (car new-toks))))
+              ;; Datum comment
+              ((eq? #\; next-c)
+               ; Read and discard next datum
+               (parse fp '() '() #f #f 0 ptbl)
+               (cond
+                 ((and (not all?) (not (null? tok)))
+                  ;; Reached a terminal char, read out previous token
+                  (in-port:set-buf! ptbl c)
+                  (car (add-tok (->tok tok) toks)))
+                 (else
+                  (parse fp tok toks all? #f parens ptbl))))
               (else
                 (parse-error "Unhandled input sequence" 
                   (in-port:get-lnum ptbl)
