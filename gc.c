@@ -224,7 +224,7 @@ void gc_print_stats(gc_heap *h)
     for (f = h->free_list; f; f = f->next) {
       free += f->size;
       free_chunks++;
-      if (f->size < free_min) free_min = f->size;
+      if (f->size < free_min && f->size > 0) free_min = f->size;
       if (f->size > free_max) free_max = f->size;
     } 
     fprintf(stdout, 
