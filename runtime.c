@@ -1586,9 +1586,7 @@ object Cyc_integer2char(void *data, object n){
 void Cyc_halt(closure);
 void Cyc_halt(env) closure env; {
 #if DEBUG_SHOW_DIAG
-    printf("Cyc_halt: heap bytes allocated=%d  time=%ld ticks  no_gcs=%ld no_m_gcs=%ld\n",
-        allocp-bottom,clock()-start,no_gcs,no_major_gcs);
- printf("Cyc_halt: ticks/second=%ld\n",(long) CLOCKS_PER_SEC);
+ gc_print_stats(Cyc_heap);
 #endif
  exit(0);}
 
@@ -2107,6 +2105,9 @@ void _cyc_exit(void *data, object cont, object args) {
     __halt(car(args));
 }
 void __75halt(void *data, object cont, object args) {  
+#if DEBUG_SHOW_DIAG
+    gc_print_stats(Cyc_heap);
+#endif
     exit(0); }
 void _cell_91get(void *data, object cont, object args) {  
     printf("not implemented\n"); exit(1); }

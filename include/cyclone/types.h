@@ -45,6 +45,9 @@
 // Number of functions to save for printing call history
 #define MAX_STACK_TRACES 10
 
+// Show diagnostic information for the GC when program terminates
+#define DEBUG_SHOW_DIAG 0
+
 // GC debugging flags
 #define GC_DEBUG_TRACE 0
 #define GC_DEBUG_VERBOSE 0
@@ -151,9 +154,6 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 // the collector swaps their values as an optimization.
 #define gc_color_red  0 // Memory not to be GC'd, such as on the stack
 #define gc_color_blue 2 // Unallocated memory
-
-/* Show diagnostic information for the GC when program terminates */
-#define DEBUG_SHOW_DIAG 0
 
 /* Define size of object tags */
 typedef long tag_type;
