@@ -212,6 +212,27 @@ gc_heap *gc_heap_create(size_t size, size_t max_size, size_t chunk_size)
   return h;
 }
 
+void gc_print_stats(gc_heap *h)
+{
+  gc_free_list *f;
+  unsigned int free, free_chunks, free_min, free_max;
+  for (; h; h = h->next) {
+    free = 0;
+    free_chunks = 0;
+    free_min = h->size;
+    free_max = 0;
+    for (f = h->free_list; f; f = f->next) {
+      free += f->size;
+      free_chunks++;
+      if (f->size < free_min) free_min = f->size;
+      if (f->size > free_max) free_max = f->size;
+    } 
+    fprintf(stdout, 
+      "Heap page size=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
+      h->size, free, free_chunks, free_min, free_max);
+  }
+}
+
 // Copy given object into given heap object
 char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
 {
