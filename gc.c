@@ -228,8 +228,8 @@ void gc_print_stats(gc_heap *h)
       if (f->size > free_max) free_max = f->size;
     } 
     fprintf(stdout, 
-      "Heap page size=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
-      h->size, free, free_chunks, free_min, free_max);
+      "Heap page size=%u, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
+      h->size, h->size - free, free, free_chunks, free_min, free_max);
   }
 }
 
