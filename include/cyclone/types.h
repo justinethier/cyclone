@@ -29,7 +29,7 @@
 #define STACK_SIZE 500000
 
 // Size of a "page" on the heap (the second generation), in bytes.
-#define HEAP_SIZE (32 * 1024 * 1024)
+#define HEAP_SIZE (16 * 1024 * 1024)
 
 /////////////////////////////
 // Major GC tuning parameters
