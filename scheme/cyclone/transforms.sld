@@ -518,6 +518,8 @@
      bytevector
      bytevector-append
      Cyc-bytevector-copy
+     Cyc-utf8->string
+     Cyc-string->utf8
      bytevector-u8-ref
      bytevector-u8-set!
      bytevector?

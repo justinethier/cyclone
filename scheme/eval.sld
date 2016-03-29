@@ -248,6 +248,8 @@
       (list 'bytevector-length bytevector-length)
       (list 'bytevector-append bytevector-append)
       (list 'Cyc-bytevector-copy Cyc-bytevector-copy)
+      ;(list 'Cyc-utf8->string Cyc-utf8->string)
+      ;(list 'Cyc-string->utf8 Cyc-string->utf8)
       (list 'bytevector          bytevector)
       (list 'bytevector-u8-ref   bytevector-u8-ref)
       (list 'bytevector-u8-set!  bytevector-u8-set!)

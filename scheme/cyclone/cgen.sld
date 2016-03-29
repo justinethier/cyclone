@@ -575,6 +575,8 @@
      ((eq? p 'bytevector)        "Cyc_bytevector")
      ((eq? p 'bytevector-append)    "Cyc_bytevector_append")
      ((eq? p 'Cyc-bytevector-copy)    "Cyc_bytevector_copy")
+     ((eq? p 'Cyc-utf8->string)    "Cyc_utf82string")
+     ((eq? p 'Cyc-string->utf8)    "Cyc_string2utf8")
      ((eq? p 'bytevector-u8-ref)    "Cyc_bytevector_u8_ref")
      ((eq? p 'bytevector-u8-set!)   "Cyc_bytevector_u8_set")
      ((eq? p 'make-vector)   "Cyc_make_vector")
@@ -664,6 +666,8 @@
     bytevector-length
     bytevector-append
     Cyc-bytevector-copy
+    Cyc-utf8->string
+    Cyc-string->utf8
     bytevector
     bytevector-u8-ref
     bytevector-u8-set!
@@ -722,6 +726,8 @@
     ((eq? p 'bytevector) "object")
     ((eq? p 'bytevector-append) "object")
     ((eq? p 'Cyc-bytevector-copy) "object")
+    ((eq? p 'Cyc-utf8->string) "object")
+    ((eq? p 'Cyc-string->utf8) "object")
     ((eq? p 'make-vector) "object")
     ((eq? p 'list->string) "object")
     ((eq? p 'list->vector) "object")
@@ -744,6 +750,8 @@
              bytevector
              bytevector-append
              Cyc-bytevector-copy
+             Cyc-utf8->string
+             Cyc-string->utf8
              make-vector list->vector
              symbol->string number->string 
              substring
@@ -763,6 +771,8 @@
                      make-bytevector
                      bytevector-append
                      Cyc-bytevector-copy
+                     Cyc-utf8->string
+                     Cyc-string->utf8
                      bytevector
                      bytevector-u8-ref
                      bytevector-u8-set!
