@@ -157,7 +157,8 @@
 (define (primitive-implementation proc) (cadr proc))
 
 (define primitive-procedures
-  (list 
+  (append
+    (list 
       (list 'call/cc call/cc)
       (list 'Cyc-global-vars Cyc-global-vars)
       (list 'Cyc-get-cvar Cyc-get-cvar)
@@ -231,6 +232,8 @@
       (list 'cddadr cddadr)
       (list 'cdddar cdddar)
       (list 'cddddr cddddr)
+      )
+    (list
       (list 'char->integer char->integer)
       (list 'integer->char integer->char)
       (list 'string->number string->number)
@@ -248,8 +251,8 @@
       (list 'bytevector-length bytevector-length)
       (list 'bytevector-append bytevector-append)
       (list 'Cyc-bytevector-copy Cyc-bytevector-copy)
-      ;(list 'Cyc-utf8->string Cyc-utf8->string)
-      ;(list 'Cyc-string->utf8 Cyc-string->utf8)
+      (list 'Cyc-utf8->string Cyc-utf8->string)
+      (list 'Cyc-string->utf8 Cyc-string->utf8)
       (list 'bytevector          bytevector)
       (list 'bytevector-u8-ref   bytevector-u8-ref)
       (list 'bytevector-u8-set!  bytevector-u8-set!)
@@ -285,7 +288,7 @@
       (list 'Cyc-read-line Cyc-read-line)
       (list 'Cyc-write-char Cyc-write-char)
       (list 'Cyc-write Cyc-write)
-      (list 'Cyc-display Cyc-display)))
+      (list 'Cyc-display Cyc-display))))
 
 (define (primitive-procedure-names)
   (foldr 

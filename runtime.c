@@ -2071,11 +2071,11 @@ void _Cyc_91bytevector_91copy(void *data, object cont, object args) {
     object argc = Cyc_length(data, args);
     Cyc_check_num_args(data, "Cyc-bytevector-copy", 3, args);
     Cyc_bytevector_copy(data, cont, car(args), cadr(args), caddr(args)); }
-void _Cyc_string_91_125utf8(void *data, object cont, object args) {
+void _Cyc_91string_91_125utf8(void *data, object cont, object args) {
     object argc = Cyc_length(data, args);
     Cyc_check_num_args(data, "Cyc-string->utf8", 3, args);
     Cyc_string2utf8(data, cont, car(args), cadr(args), caddr(args)); }
-void _Cyc_utf8_91_125string(void *data, object cont, object args) {
+void _Cyc_91utf8_91_125string(void *data, object cont, object args) {
     object argc = Cyc_length(data, args);
     Cyc_check_num_args(data, "Cyc-utf8->string", 3, args);
     Cyc_utf82string(data, cont, car(args), cadr(args), caddr(args)); }
@@ -2915,8 +2915,8 @@ static primitive_type bytevector_91append_primitive = {{0}, primitive_tag, "byte
 static primitive_type Cyc_91bytevector_91copy_primitive = {{0}, primitive_tag, "Cyc-bytevector-copy", &_Cyc_91bytevector_91copy};
 static primitive_type bytevector_91u8_91ref_primitive = {{0}, primitive_tag, "bytevector-u8-ref", &_bytevector_91u8_91ref};
 static primitive_type bytevector_91u8_91set_67_primitive = {{0}, primitive_tag, "bytevector-u8-set!", &_bytevector_91u8_91set_67};
-static primitive_type Cyc_string_91_125utf8_primitive = {{0}, primitive_tag, "Cyc-string->utf8", &_Cyc_string_91_125utf8};
-static primitive_type Cyc_utf8_91_125string_primitive = {{0}, primitive_tag, "Cyc-utf8->string", &_Cyc_utf8_91_125string};
+static primitive_type Cyc_91string_91_125utf8_primitive = {{0}, primitive_tag, "Cyc-string->utf8", &_Cyc_91string_91_125utf8};
+static primitive_type Cyc_91utf8_91_125string_primitive = {{0}, primitive_tag, "Cyc-utf8->string", &_Cyc_91utf8_91_125string};
 static primitive_type make_91vector_primitive = {{0}, primitive_tag, "make-vector", &_make_91vector};
 static primitive_type vector_91ref_primitive = {{0}, primitive_tag, "vector-ref", &_vector_91ref};
 static primitive_type vector_91set_67_primitive = {{0}, primitive_tag, "vector-set!", &_vector_91set_67};
@@ -3046,8 +3046,8 @@ const object primitive_bytevector_91append = &bytevector_91append_primitive;
 const object primitive_Cyc_91bytevector_91copy = &Cyc_91bytevector_91copy_primitive;
 const object primitive_bytevector_91u8_91ref = &bytevector_91u8_91ref_primitive;
 const object primitive_bytevector_91u8_91set_67 = &bytevector_91u8_91set_67_primitive;
-const object primitive_Cyc_string_91_125utf8 = & Cyc_string_91_125utf8_primitive;
-const object primitive_Cyc_utf8_91_125string = &Cyc_utf8_91_125string_primitive;
+const object primitive_Cyc_91string_91_125utf8 = & Cyc_91string_91_125utf8_primitive;
+const object primitive_Cyc_91utf8_91_125string = &Cyc_91utf8_91_125string_primitive;
 const object primitive_list_91_125vector = &list_91_125vector_primitive;
 const object primitive_boolean_127 = &boolean_127_primitive;
 const object primitive_char_127 = &char_127_primitive;
