@@ -3,6 +3,7 @@ Initiatives:
 Tier 1:
 - Performance - most likely need CPS optimization and closure elimination
 - pass larceny benchmarks (will require some bugfixes):
+  TODO: keep track of which ones will not run, and why
 
     - ack.scm
     - array1.scm
