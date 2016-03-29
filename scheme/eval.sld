@@ -288,12 +288,18 @@
       (list 'Cyc-display Cyc-display)))
 
 (define (primitive-procedure-names)
-  (map car
-       primitive-procedures))
+  (foldr 
+    (lambda (x y) 
+      (cons (car x) y)) 
+   '() 
+    primitive-procedures))
 
 (define (primitive-procedure-objects)
-  (map (lambda (proc) (list 'primitive (cadr proc)))
-       primitive-procedures))
+  (foldr
+    (lambda (proc rest) 
+      (cons (list 'primitive (cadr proc)) rest))
+   '()
+    primitive-procedures))
 
 (define (apply-primitive-procedure proc args)
   (apply ;apply-in-underlying-scheme
