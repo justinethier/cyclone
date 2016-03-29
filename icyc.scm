@@ -50,6 +50,7 @@
     (cond
       ((not (eof-object? c))
        (write c)
+       (newline)
        (repl:next-line))
       (else 
         (display "\n")

@@ -711,7 +711,7 @@ static object _Cyc_write(object x, FILE *port)
 
 object Cyc_write(object x, FILE *port)
 {object y = _Cyc_write(x, port);
- fprintf(port, "\n");
+ //fprintf(port, "\n");
  return y;}
 
 object Cyc_write_char(void *data, object c, object port) 

@@ -361,5 +361,6 @@
 
 
 ; TODO: use display, output without surrounding quotes
-(write (list *num-passed* " tests passed with no errors"))
+(display (list *num-passed* "tests passed with no errors"))
+(newline)
 ;;
