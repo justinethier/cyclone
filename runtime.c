@@ -1481,6 +1481,7 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
   buf = ((bytevector)bv)->data;
   s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
   e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  len = e - s;
 
   if (s < 0 || s >= ((bytevector)bv)->len) {
     Cyc_rt_raise2(data, "bytevector-copy - invalid start", start);
@@ -1490,7 +1491,6 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
     Cyc_rt_raise2(data, "bytevector-copy - invalid end", end);
   }
 
-  len = e - s;
   result.len = len;
   result.data = alloca(sizeof(char) * len);
   memcpy(&result.data[0], &(((bytevector)bv)->data)[s], len);
@@ -1509,8 +1509,9 @@ object Cyc_utf82string(void *data, object cont, object bv, object start, object 
   buf = ((bytevector)bv)->data;
   s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
   e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  len = e - s;
 
-  if (s < 0 || s >= ((bytevector)bv)->len) {
+  if (s < 0 || (s >= ((bytevector)bv)->len && len > 0)) {
     Cyc_rt_raise2(data, "utf8->string - invalid start", start);
   }
 
@@ -1518,7 +1519,6 @@ object Cyc_utf82string(void *data, object cont, object bv, object start, object 
     Cyc_rt_raise2(data, "utf8->string - invalid end", end);
   }
 
-  len = e - s;
   {
     make_string_noalloc(st, NULL, len);
     st.str = alloca(sizeof(char) * (len + 1));
@@ -1541,8 +1541,9 @@ object Cyc_string2utf8(void *data, object cont, object str, object start, object
   buf = string_str(str);
   s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
   e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  len = e - s;
 
-  if (s < 0 || s >= string_len(str)) {
+  if (s < 0 || (s >= string_len(str) && len > 0)) {
     Cyc_rt_raise2(data, "string->utf8 - invalid start", start);
   }
 
@@ -1550,7 +1551,6 @@ object Cyc_string2utf8(void *data, object cont, object str, object start, object
     Cyc_rt_raise2(data, "string->utf8 - invalid end", end);
   }
 
-  len = e - s;
   result.len = len;
   result.data = alloca(sizeof(char) * len);
   memcpy(&result.data[0], &(string_str(str))[s], len);
