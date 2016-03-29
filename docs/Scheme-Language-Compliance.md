@@ -39,7 +39,7 @@ Section | Status | Comments
 6.6 Characters | Partial | No unicode support, `char-ci` predicates are not implemented.
 6.7 Strings | Partial | No unicode support, `string-ci` functions are not implemented.
 6.8 Vectors | Yes |
-6.9 Bytevectors | Yes | UTF-8 functions are not provided at this time.
+6.9 Bytevectors | Yes | 
 6.10 Control features | Yes | `dynamic-wind` is limited, and does not work across calls to continuations.
 6.11 Exceptions | Partial | Exceptions are implemented but error objects (and associated functions `error-object`, etc) are not at this time. 
 6.12 Environments and evaluation | Partial | Only `eval` is implemented at this time.
