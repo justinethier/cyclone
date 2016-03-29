@@ -1520,8 +1520,11 @@ object Cyc_utf82string(void *data, object cont, object bv, object start, object 
 
   len = e - s;
   {
-    make_string_with_len(str, &(((bytevector)bv)->data)[s], len);
-    return_closcall1(data, cont, &str);
+    make_string_noalloc(st, NULL, len);
+    st.str = alloca(sizeof(char) * (len + 1));
+    memcpy(st.str, &buf[s], len);
+    st.str[len] = '\0';
+    return_closcall1(data, cont, &st);
   }
 }
 
