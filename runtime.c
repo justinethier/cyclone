@@ -1497,6 +1497,63 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
   return_closcall1(data, cont, &result);
 }
 
+object Cyc_utf82string(void *data, object cont, object bv, object start, object end) {
+  const char *buf;
+  int s, e;
+  int len;
+
+  Cyc_check_bvec(data, bv);
+  Cyc_check_int(data, start);
+  Cyc_check_int(data, end);
+
+  buf = ((bytevector)bv)->data;
+  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
+  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+
+  if (s < 0 || s >= ((bytevector)bv)->len) {
+    Cyc_rt_raise2(data, "utf8->string - invalid start", start);
+  }
+
+  if (e < 0 || e < s || e > ((bytevector)bv)->len) {
+    Cyc_rt_raise2(data, "utf8->string - invalid end", end);
+  }
+
+  len = e - s;
+  {
+    make_string_with_len(str, &(((bytevector)bv)->data)[s], len);
+    return_closcall1(data, cont, &str);
+  }
+}
+
+object Cyc_string2utf8(void *data, object cont, object str, object start, object end) {
+  const char *buf;
+  int s, e;
+  int len;
+  make_empty_bytevector(result);
+
+  Cyc_check_str(data, str);
+  Cyc_check_int(data, start);
+  Cyc_check_int(data, end);
+
+  buf = string_str(str);
+  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
+  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+
+  if (s < 0 || s >= string_len(str)) {
+    Cyc_rt_raise2(data, "string->utf8 - invalid start", start);
+  }
+
+  if (e < 0 || e < s || e > string_len(str)) {
+    Cyc_rt_raise2(data, "string->utf8 - invalid end", end);
+  }
+
+  len = e - s;
+  result.len = len;
+  result.data = alloca(sizeof(char) * len);
+  memcpy(&result.data[0], &(string_str(str))[s], len);
+  return_closcall1(data, cont, &result);
+}
+
 object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
   const char *buf;
   int idx;
