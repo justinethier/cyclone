@@ -38,7 +38,7 @@
                  (char->integer #\A))))
         c))
     ; TODO: char-foldcase
-    (define (char-alphabetic? c) (and (char>=? c #\A) (char<=? c #\z))) ;; ASCII-only
+    (define (char-alphabetic? c) (or (char-upper-case? c) (char-lower-case? c)))
     (define (char-upper-case? c) (and (char>=? c #\A) (char<=? c #\Z))) ;; ASCII-only
     (define (char-lower-case? c) (and (char>=? c #\a) (char<=? c #\z))) ;; ASCII-only
     (define (char-numeric? c) (member c '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
