@@ -885,7 +885,7 @@
 (define (c-compile-ref exp)
   (c-code 
     (if (member exp *global-syms*)
-      (mangle-global exp)
+      (cgen:mangle-global exp)
       (mangle exp))))
 
 ; c-compile-args : list[exp] (string -> void) -> string
@@ -1346,6 +1346,8 @@
                        "}\n"))
       formals*))))
   
+(define cgen:mangle-global #f)
+
 (define (mta:code-gen input-program 
                       program? 
                       lib-name 
@@ -1355,6 +1357,9 @@
                       required-libs
                       src-file)
   (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
+  (set! cgen:mangle-global
+    (lambda (ident)
+      (mangle-global ident)))
   (let ((compiled-program-lst '())
         (compiled-program #f))
     ;; Compile program, using for-each to guarantee execution order,
@@ -1376,14 +1381,14 @@
     (for-each
         (lambda (global)
           (emits "object ")
-          (emits (mangle-global (car global)))
+          (emits (cgen:mangle-global (car global)))
           (emits " = nil;\n"))
         *globals*)
     ;; Globals defined by another module
     (for-each
         (lambda (global)
           (emits "extern object ")
-          (emits (mangle-global global))
+          (emits (cgen:mangle-global global))
           (emits ";\n"))
         (lib:idb:ids imported-globals))
     (emit "#include \"cyclone/runtime.h\"")
@@ -1461,7 +1466,7 @@
     (for-each
       (lambda (global)
         (emits "\n  add_global((object *) &")
-        (emits (mangle-global (car global)))
+        (emits (cgen:mangle-global (car global)))
         (emits ");"))
       *globals*)
     (emit "")
@@ -1478,7 +1483,7 @@
              (lambda (global)
                (emits (c:allocs->str2 (c:allocs (caddr global)) prefix " \n"))
                (emits prefix)
-               (emits (mangle-global (car global)))
+               (emits (cgen:mangle-global (car global)))
                (emits " = ")
                (emits (c:body (caddr global)))
                (emit "; "))))
@@ -1496,7 +1501,7 @@
                   (pair-sym (mangle (gensym 'pair))))
              (emits* 
                  "  make_cvar(" cvar-sym 
-                 ", (object *)&" (mangle-global (car g)) ");")
+                 ", (object *)&" (cgen:mangle-global (car g)) ");")
              (emits*
                  "make_cons(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
                  "\"), &" cvar-sym ");\n")
@@ -1559,7 +1564,7 @@
         ;(emit "((cont)->fn)(1, cont, cont);")
         (emit* 
             "(((closure)"
-            (mangle-global (lib:name->symbol lib-name)) 
+            (cgen:mangle-global (lib:name->symbol lib-name)) 
             ")->fn)(data, 1, cont, cont);")
       ))
 
