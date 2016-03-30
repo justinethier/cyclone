@@ -1354,7 +1354,7 @@
                       globals
                       required-libs
                       src-file)
-  (set! *global-syms* (append globals imported-globals))
+  (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
   (let ((compiled-program-lst '())
         (compiled-program #f))
     ;; Compile program, using for-each to guarantee execution order,
@@ -1385,7 +1385,7 @@
           (emits "extern object ")
           (emits (mangle-global global))
           (emits ";\n"))
-        imported-globals)
+        (lib:idb:ids imported-globals))
     (emit "#include \"cyclone/runtime.h\"")
 
     (if program?

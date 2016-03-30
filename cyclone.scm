@@ -91,7 +91,7 @@
       ;; As of now, that will have to be dealt with later.
       (trace:info "imports:")
       (trace:info imports)
-      (set! imported-vars (lib:resolve-imports imports))
+      (set! imported-vars (lib:imports->idb imports))
       (trace:info "resolved imports:")
       (trace:info imported-vars)
       (let ((meta (lib:resolve-meta imports)))
@@ -145,7 +145,7 @@
       ;
       ; TODO: consider moving some of this alpha-conv logic below back into trans?
       (set! module-globals (global-vars input-program))
-      (set! globals (append imported-vars module-globals))
+      (set! globals (append (lib:idb:ids imported-vars) module-globals))
       (set! input-program 
         (map
           (lambda (expr)
