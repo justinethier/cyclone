@@ -7,6 +7,7 @@
 ;;;; This module contains a simple Read-Eval-Print Loop
 ;;;;
 (import (scheme cyclone common)
+        (scheme cyclone libraries)
         (scheme base)
         (scheme char)
         (scheme lazy)
