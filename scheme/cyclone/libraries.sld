@@ -195,15 +195,14 @@
 
 ;; Take a list of imports and create a "database" from them
 ;; consisting of maps between each exported identifier and the
-;; library that imports that identifier. An exception is raised
-;; if the same identifier is exported from more than one library.
+;; library that imports that identifier. 
+;;
+;; TODO: Raise an exception if the same identifier is exported 
+;; from more than one library???
 ;;
 ;; TODO: convert this to use a hashtable. Initially a-lists
 ;; will be used to prove out the concept, but this is inefficient
 (define (lib:imports->idb imports)
-
-;; TODO: build the list, then check for duplicate keys before returning
-
  (apply
    append
    (map 
