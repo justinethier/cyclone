@@ -1348,6 +1348,12 @@
   
 (define cgen:mangle-global #f)
 
+(define (import->string import)
+  (foldr (lambda (id s) 
+           (string-append "_" (mangle id) s)) 
+         "" 
+         import))
+
 (define (mta:code-gen input-program 
                       program? 
                       lib-name 
@@ -1359,7 +1365,27 @@
   (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
   (set! cgen:mangle-global
     (lambda (ident)
-      (mangle-global ident)))
+      (cond
+        ;; Do not perform additional mangling for top-level globals
+        ((and program? 
+              (member ident globals))
+         (mangle-global ident))
+        ;; Identifier exported by the library being compiled
+        ((member ident globals)
+         (let ((suffix (import->string lib-name))
+               (prefix (mangle-global ident)))
+           (string-append prefix suffix)))
+        ;; Identifier exported by another library
+        (else
+          (let ((import (lib:idb:id->import imported-globals ident)))
+            (cond
+              ((not import)
+               (error `(Unable to find a library importing ,ident)))
+              (else
+               (let ((suffix (import->string import))
+                     (prefix (mangle-global ident)))
+                 (string-append prefix suffix)))))))))
+
   (let ((compiled-program-lst '())
         (compiled-program #f))
     ;; Compile program, using for-each to guarantee execution order,
