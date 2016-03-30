@@ -38,6 +38,9 @@
     lib:resolve-meta
     lib:get-all-import-deps
     lib:get-dep-list
+    lib:imports->idb
+    lib:idb:ids
+    lib:idb:id->import
   )
   (begin
   ;  (define read cyc-read)
@@ -189,6 +192,46 @@
      (lambda (import)
        (lib:import->export-list import))
      (lib:list->import-set imports))))
+
+;; Take a list of imports and create a "database" from them
+;; consisting of maps between each exported identifier and the
+;; library that imports that identifier. An exception is raised
+;; if the same identifier is exported from more than one library.
+;;
+;; TODO: convert this to use a hashtable. Initially a-lists
+;; will be used to prove out the concept, but this is inefficient
+(define (lib:imports->idb imports)
+
+;; TODO: build the list, then check for duplicate keys before returning
+
+ (apply
+   append
+   (map 
+     (lambda (import)
+       (foldr
+         (lambda (id ids)
+          (cons
+            (cons id import)
+            ids))
+        '()
+         (lib:import->export-list import))
+     )
+     (lib:list->import-set imports))))
+
+;; Convert from the import DB to a list of identifiers that are imported.
+;; EG: '((call/cc . (scheme base))) ==> '(call/cc)
+(define (lib:idb:ids db)
+  (foldr 
+    (lambda (i is) (cons (car i) is))
+   '() 
+    db))
+
+;; Map from identifier to the library that imported it
+(define (lib:idb:id->import db identifier)
+  (let ((entry (assoc identifier db)))
+    (if entry
+        (cdr entry)
+        #f)))
 
 (define (lib:import->metalist import)
   (let ((file (lib:import->filename import ".meta"))
