@@ -57,7 +57,6 @@
     letrec->exp 
     letrec->bound-vars 
     letrec->args 
-    lambda? 
     lambda-varargs? 
     lambda->formals 
     lambda-varargs? 
@@ -69,7 +68,6 @@
     pair->list 
     list->pair 
     lambda->exp 
-    if? 
     if->condition 
     if->then 
     if-else? 
@@ -80,7 +78,6 @@
     prim? 
     precompute-prim-app? 
     prim-call? 
-    begin? 
     begin->exps 
     define? 
     define-lambda? 
