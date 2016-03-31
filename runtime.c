@@ -2403,7 +2403,7 @@ object apply(void *data, object cont, object func, object args){
 //        args = &c;
 //Cyc_display(&c, stderr);
         count = Cyc_length(data, args);
-//        Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args);
+        Cyc_check_num_args(data, "<procedure>", 1, args);
         dispatch(data, obj_obj2int(count), ((closure)func)->fn, func, cont, args);
       }
       count = Cyc_length(data, args);
