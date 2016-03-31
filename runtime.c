@@ -2397,6 +2397,15 @@ object apply(void *data, object cont, object func, object args){
     case closure0_tag:
     case closure1_tag:
     case closureN_tag:
+      if (func == Cyc_glo_call_cc) {
+        make_cons(c, cont, args);
+//Cyc_display(args, stderr);
+//        args = &c;
+//Cyc_display(&c, stderr);
+        count = Cyc_length(data, args);
+//        Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args);
+        dispatch(data, obj_obj2int(count), ((closure)func)->fn, func, cont, args);
+      }
       count = Cyc_length(data, args);
       // TODO: validate number of args provided:
       Cyc_check_num_args(data, "<procedure>", ((closure)func)->num_args, args); // TODO: could be more efficient, eg: cyc_length(args) is called twice.

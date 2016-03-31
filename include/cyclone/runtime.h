@@ -401,7 +401,15 @@ extern const object primitive_Cyc_91display;
 extern const object primitive_call_95cc;
 /* -------------------------------------------- */
 
-/* Globals that are needed by the runtime */
+/** Globals that are needed by the runtime 
+ *  What's going on here is the globals are defined by a module, but
+ *  are also used by the runtime. At least for now, these macros are
+ *  used to point everybody to the objects, which are used by both
+ *  those libraries and this module.
+ *
+ *  The assumption for now is that a program that does not include
+ *  the necessary libray would never use the corresponding function.
+ */
 extern object Cyc_glo_eval;
 extern object Cyc_glo_eval_from_c;
 extern object Cyc_glo_call_cc;
