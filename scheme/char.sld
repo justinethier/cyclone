@@ -10,16 +10,25 @@
   (export
     char-alphabetic?
     char-downcase
+    char-foldcase
     char-lower-case?
     char-numeric?
     char-upcase
     char-upper-case?
     char-whitespace?
+    char-ci<=?
+    char-ci<? 
+    char-ci=?
+    char-ci>=? 
+    char-ci>?
     digit-value
     string-upcase
     string-downcase
     ; TODO:
     ;string-foldcase
+    ;string-ci<=? string-ci<?
+    ;string-ci=? string-ci>=?
+    ;string-ci>? 
   )
   (import (scheme base))
   (begin
@@ -37,7 +46,12 @@
               (- (char->integer #\a)
                  (char->integer #\A))))
         c))
-    ; TODO: char-foldcase
+    (define char-foldcase char-downcase) ;; Good enough for now, since no Unicode yet
+    (define (char-ci=? c1 c2 . cs)  (apply char=? (map char-foldcase (cons c1 (cons c2 cs)))))
+    (define (char-ci<=? c1 c2 . cs) (apply char<=? (map char-foldcase (cons c1 (cons c2 cs)))))
+    (define (char-ci<? c1 c2 . cs)  (apply char<? (map char-foldcase (cons c1 (cons c2 cs)))))
+    (define (char-ci>=? c1 c2 . cs) (apply char>=? (map char-foldcase (cons c1 (cons c2 cs)))))
+    (define (char-ci>? c1 c2 . cs)  (apply char>? (map char-foldcase (cons c1 (cons c2 cs)))))
     (define (char-alphabetic? c) (or (char-upper-case? c) (char-lower-case? c)))
     (define (char-upper-case? c) (and (char>=? c #\A) (char<=? c #\Z))) ;; ASCII-only
     (define (char-lower-case? c) (and (char>=? c #\a) (char<=? c #\z))) ;; ASCII-only
