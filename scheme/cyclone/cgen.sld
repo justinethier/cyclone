@@ -1356,6 +1356,8 @@
   
 (define cgen:mangle-global #f)
 
+;; Convert a library name to string, so it can be 
+;; appended to the identifiers it exports.
 (define (import->string import)
   (foldr (lambda (id s) 
            (string-append "_" (mangle id) s)) 
