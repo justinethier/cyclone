@@ -50,7 +50,7 @@ Tier 1:
     - read0.scm - Error (line 170, char 25): unable to parse character: x3bb
     - read1.scm
     - sboyer.scm
-    - scheme.scm - Fails, no string-ci or char-ci functions
+    - scheme.scm - Problem with (macro?) being a primitive and defined in application code
     - simplex.scm - Compiles but quickly throws error Error: Divide by zero
     - slatex.scm - Unhandled number of function arguments: 188
     - string.scm
