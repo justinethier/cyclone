@@ -2259,20 +2259,20 @@ void _cell(void *data, object cont, object args) {
     printf("not implemented\n"); exit(1); }
 
 void __123(void *data, object cont, object args) {  
-    Cyc_check_num_args(data, "=", 2, args);
-    return_closcall1(data, cont, __num_eq(data, car(args), cadr(args)));}
+    integer_type argc = Cyc_length_as_object(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_num_eq, cont, cont, args); }
 void __125(void *data, object cont, object args) {  
-    Cyc_check_num_args(data, ">", 2, args);
-    return_closcall1(data, cont, __num_gt(data, car(args), cadr(args)));}
+    integer_type argc = Cyc_length_as_object(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_num_gt, cont, cont, args); }
 void __121(void *data, object cont, object args) {
-    Cyc_check_num_args(data, "<", 2, args);
-    return_closcall1(data, cont, __num_lt(data, car(args), cadr(args)));}
+    integer_type argc = Cyc_length_as_object(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_num_lt, cont, cont, args); }
 void __125_123(void *data, object cont, object args) {
-    Cyc_check_num_args(data, ">=", 2, args);
-    return_closcall1(data, cont, __num_gte(data, car(args), cadr(args)));}
+    integer_type argc = Cyc_length_as_object(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_num_gte, cont, cont, args); }
 void __121_123(void *data, object cont, object args) {
-    Cyc_check_num_args(data, "<=", 2, args);
-    return_closcall1(data, cont, __num_lte(data, car(args), cadr(args)));}
+    integer_type argc = Cyc_length_as_object(data, args);
+    dispatch(data, argc.value, (function_type)dispatch_num_lte, cont, cont, args); }
 
 void _apply(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "apply", 2, args);
