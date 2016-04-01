@@ -141,11 +141,6 @@ object Cyc_write_va(int argc, object x, ...);
 object Cyc_write_va_list(int argc, object x, va_list ap);
 
 object Cyc_has_cycle(object lst);
-object __num_eq(void *, object x, object y);
-object __num_gt(void *, object x, object y);
-object __num_lt(void *, object x, object y);
-object __num_gte(void *, object x, object y);
-object __num_lte(void *, object x, object y);
 object Cyc_num_eq(void *, object cont, int argc, object n, ...);
 object Cyc_num_gt(void *, object cont, int argc, object n, ...);
 object Cyc_num_lt(void *, object cont, int argc, object n, ...);

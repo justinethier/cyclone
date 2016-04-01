@@ -768,45 +768,6 @@ list assoc(void *data, object x, list l)
     if (boolean_f != equalp(x,car(la))) return la;}
  return boolean_f;}
 
-
-#define declare_num_cmp(FUNC_CMP, OP) \
-object FUNC_CMP(void *data, object x, object y) { \
-    Cyc_check_num(data, x); \
-    Cyc_check_num(data, y); \
-    if (obj_is_int(x)) { \
-      if (obj_is_int(y)) { \
-        return (obj_obj2int(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
-      } else if (type_of(y) == integer_tag) { \
-        return (obj_obj2int(x) OP integer_value(y)) ? boolean_t : boolean_f; \
-      } else { \
-        return (obj_obj2int(x) OP double_value(y)) ? boolean_t : boolean_f; \
-      } \
-    } else if (type_of(x) == integer_tag) { \
-      if (obj_is_int(y)) { \
-        return (integer_value(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
-      } else if (type_of(y) == integer_tag) { \
-        return (integer_value(x) OP integer_value(y)) ? boolean_t : boolean_f; \
-      } else { \
-        return (integer_value(x) OP double_value(y)) ? boolean_t : boolean_f; \
-      } \
-    } else { \
-      if (obj_is_int(y)) { \
-        return (double_value(x) OP obj_obj2int(y)) ? boolean_t : boolean_f; \
-      } else if (type_of(y) == integer_tag) { \
-        return (double_value(x) OP integer_value(y)) ? boolean_t : boolean_f; \
-      } else { \
-        return (double_value(x) OP double_value(y)) ? boolean_t : boolean_f; \
-      } \
-    } \
-    return boolean_f; \
-}
-
-declare_num_cmp(__num_eq, ==);
-declare_num_cmp(__num_gt, >);
-declare_num_cmp(__num_lt, <);
-declare_num_cmp(__num_gte, >=);
-declare_num_cmp(__num_lte, <=);
-
 object Cyc_num_cmp_va_list(void *data, int argc, int (fn_op(void *, object, object)), object n, va_list ns) {
   int i;
   object next; 
@@ -826,7 +787,7 @@ object Cyc_num_cmp_va_list(void *data, int argc, int (fn_op(void *, object, obje
   return boolean_t;
 }
 
-#define declare_num_cmp2(FUNC, FUNC_OP, FUNC_APPLY, OP) \
+#define declare_num_cmp(FUNC, FUNC_OP, FUNC_APPLY, OP) \
 int FUNC_OP(void *data, object x, object y) { \
     int result = 0, \
         tx = (obj_is_int(x) ? -1 : type_of(x)), \
@@ -874,11 +835,11 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     return_closcall1(data, cont, result); \
 }
 
-declare_num_cmp2(Cyc_num_eq,  Cyc_num_eq_op,  dispatch_num_eq,  ==);
-declare_num_cmp2(Cyc_num_gt,  Cyc_num_gt_op,  dispatch_num_gt,  >);
-declare_num_cmp2(Cyc_num_lt,  Cyc_num_lt_op,  dispatch_num_lt,  <);
-declare_num_cmp2(Cyc_num_gte, Cyc_num_gte_op, dispatch_num_gte, >=);
-declare_num_cmp2(Cyc_num_lte, Cyc_num_lte_op, dispatch_num_lte, <=);
+declare_num_cmp(Cyc_num_eq,  Cyc_num_eq_op,  dispatch_num_eq,  ==);
+declare_num_cmp(Cyc_num_gt,  Cyc_num_gt_op,  dispatch_num_gt,  >);
+declare_num_cmp(Cyc_num_lt,  Cyc_num_lt_op,  dispatch_num_lt,  <);
+declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, dispatch_num_gte, >=);
+declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, dispatch_num_lte, <=);
 
 object Cyc_is_boolean(object o){
     if (!nullp(o) && 
