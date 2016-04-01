@@ -9,9 +9,8 @@ Tier 1:
     - array1.scm
     - browse.scm
     - bv2string.scm
-    - cat.scm
-    - common.scm
-    - compiler.scm
+    - cat.scm - Fails, unable to open outputs/cat.output. Seems opening a file in a directory that does not exist is failing. Is that behavior specified?
+    - compiler.scm - No complex library
     - conform.scm
     - cpstak.scm
     - ctak.scm
@@ -19,26 +18,26 @@ Tier 1:
     - destruc.scm
     - diviter.scm
     - divrec.scm
-    - dynamic.scm
+    - dynamic.scm - Unhandled number of function arguments: 234
     - earley.scm
     - equal.scm
     - fft.scm
     - fibc.scm
     - fibfp.scm
     - fib.scm
-    - gcbench.scm
+    - gcbench.scm - Needed to manually import (srfi 9)
     - graphs.scm
-    - lattice.scm
+    - lattice.scm - Error: run: unanticipated problem size 44. may be a problem with numbers and (case)
     - matrix.scm
     - mazefun.scm
-    - maze.scm
+    - maze.scm - There is a problem reading the input file
     - mbrot.scm
-    - mbrotZ.scm
+    - mbrotZ.scm - No complex library
     - mperm.scm
     - nboyer.scm
     - nqueens.scm
     - ntakl.scm
-    - nucleic.scm
+    - nucleic.scm - Unhandled number of function arguments: 266
     - paraffins.scm
     - parsing.scm
     - peval.scm
@@ -47,18 +46,18 @@ Tier 1:
     - primes.scm
     - puzzle.scm
     - quicksort.scm
-    - ray.scm
-    - read0.scm
+    - ray.scm -  Error: Unable to open file outputs/ray.output. similar issue to above?
+    - read0.scm - Error (line 170, char 25): unable to parse character: x3bb
     - read1.scm
     - sboyer.scm
-    - scheme.scm
-    - simplex.scm
-    - slatex.scm
+    - scheme.scm - Fails, no string-ci or char-ci functions
+    - simplex.scm - Compiles but quickly throws error Error: Divide by zero
+    - slatex.scm - Unhandled number of function arguments: 188
     - string.scm
     - sum1.scm
     - sumfp.scm
     - sum.scm
-    - tail.scm
+    - tail.scm - Unable to open file outputs/tail.output
     - takl.scm
     - tak.scm
     - triangl.scm
