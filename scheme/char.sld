@@ -24,11 +24,12 @@
     digit-value
     string-upcase
     string-downcase
-    ; TODO:
-    ;string-foldcase
-    ;string-ci<=? string-ci<?
-    ;string-ci=? string-ci>=?
-    ;string-ci>? 
+    string-foldcase
+    string-ci<=? 
+    string-ci<?
+    string-ci=? 
+    string-ci>=?
+    string-ci>? 
   )
   (import (scheme base))
   (begin
@@ -52,6 +53,11 @@
     (define (char-ci<? c1 c2 . cs)  (apply char<? (map char-foldcase (cons c1 (cons c2 cs)))))
     (define (char-ci>=? c1 c2 . cs) (apply char>=? (map char-foldcase (cons c1 (cons c2 cs)))))
     (define (char-ci>? c1 c2 . cs)  (apply char>? (map char-foldcase (cons c1 (cons c2 cs)))))
+    (define (string-ci=? s1 s2) (apply string=? (map string-foldcase (list s1 s2))))
+    (define (string-ci<? s1 s2) (apply string<? (map string-foldcase (list s1 s2))))
+    (define (string-ci<=? s1 s2) (apply string<=? (map string-foldcase (list s1 s2))))
+    (define (string-ci>? s1 s2) (apply string>? (map string-foldcase (list s1 s2))))
+    (define (string-ci>=? s1 s2) (apply string>=? (map string-foldcase (list s1 s2))))
     (define (char-alphabetic? c) (or (char-upper-case? c) (char-lower-case? c)))
     (define (char-upper-case? c) (and (char>=? c #\A) (char<=? c #\Z))) ;; ASCII-only
     (define (char-lower-case? c) (and (char>=? c #\a) (char<=? c #\z))) ;; ASCII-only
@@ -63,4 +69,5 @@
           #f))
     (define (string-upcase str) (string-map char-upcase str))
     (define (string-downcase str) (string-map char-downcase str))
+    (define (string-foldcase str) (string-map char-foldcase str))
 ))
