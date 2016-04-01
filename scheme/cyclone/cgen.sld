@@ -512,11 +512,11 @@
      ((eq? p '-)                     "Cyc_sub")
      ((eq? p '*)                     "Cyc_mul")
      ((eq? p '/)                     "Cyc_div")
-     ((eq? p '=)                     "__num_eq")
-     ((eq? p '>)                     "__num_gt")
-     ((eq? p '<)                     "__num_lt")
-     ((eq? p '>=)                    "__num_gte")
-     ((eq? p '<=)                    "__num_lte")
+     ((eq? p '=)                     "Cyc_num_eq")
+     ((eq? p '>)                     "Cyc_num_gt")
+     ((eq? p '<)                     "Cyc_num_lt")
+     ((eq? p '>=)                    "Cyc_num_gte")
+     ((eq? p '<=)                    "Cyc_num_lte")
      ((eq? p 'apply)                 "apply")
      ((eq? p '%halt)                 "__halt")
      ((eq? p 'exit)                  "__halt")
@@ -712,6 +712,11 @@
     ((eq? p '-) "object")
     ((eq? p '*) "object")
     ((eq? p '/) "object")
+    ((eq? p '=) "object")
+    ((eq? p '>) "object")
+    ((eq? p '<) "object")
+    ((eq? p '>=) "object")
+    ((eq? p '<=) "object")
     ((eq? p 'string->number) "object")
     ((eq? p 'string-append) "object")
     ((eq? p 'apply)  "object")
@@ -756,6 +761,7 @@
              symbol->string number->string 
              substring
              + - * / apply 
+             = > < >= <=
              command-line-arguments
              Cyc-read-line
              read-char peek-char
@@ -766,6 +772,7 @@
   (and (prim? exp)
        (member exp '(Cyc-read-line apply command-line-arguments number->string 
                      + - * /
+                     = > < >= <=
                      read-char peek-char 
                      symbol->string list->string substring string-append string->number
                      make-bytevector
@@ -792,6 +799,7 @@
                        bytevector
                        bytevector-append
                        make-vector
+                       = > < >= <=
                        + - * /))))
 
 ;; Does primitive allocate an object?
