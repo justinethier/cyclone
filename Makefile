@@ -13,6 +13,7 @@ SMODULES = \
   scheme/base \
   scheme/case-lambda \
   scheme/char \
+  scheme/complex \
   scheme/cxr \
   scheme/eval \
   scheme/file \
@@ -87,6 +88,7 @@ bootstrap: icyc
 	cp scheme/read.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/write.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/complex.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/eval.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/file.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/inexact.c $(BOOTSTRAP_DIR)/scheme
