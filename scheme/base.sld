@@ -37,6 +37,8 @@
     exact?
     inexact?
     odd?
+    complex?
+    rational?
     gcd
     lcm
     quotient
@@ -175,8 +177,6 @@
 ;    write-u8
 ;
 ;    ; No complex or rational numbers at this time
-;    complex?
-;    rational?
 ;    rationalize
 ;
 ;    ; Need to change how  integer? works, to include floatings points without any decimals
@@ -974,6 +974,8 @@
         return_closcall1(data, k, boolean_t);
       return_closcall1(data, k, boolean_f); ")
   (define (inexact? num) (not (exact? num)))
+  (define complex? number?) 
+  (define rational? number?)
   (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
   (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
   ; Implementations of gcd and lcm using Euclid's algorithm
