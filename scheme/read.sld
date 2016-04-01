@@ -498,7 +498,11 @@
 (define (token-numeric? a)
     (or (char-numeric? (car a))
         (and (> (length a) 1)
-             (char-numeric? (cadr a))
+             (eq? #\. (car a))
+             (char-numeric? (cadr a)))
+        (and (> (length a) 1)
+             (or (char-numeric? (cadr a))
+                 (eq? #\. (cadr a)))
              (sign? (car a)))))
 
 ;; parse-atom -> [chars] -> literal
