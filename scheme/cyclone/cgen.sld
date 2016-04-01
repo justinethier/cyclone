@@ -1352,7 +1352,7 @@
   (foldr (lambda (id s) 
            (string-append "_" (mangle id) s)) 
          "" 
-         import))
+         (lib:list->import-set import)))
 
 (define (mta:code-gen input-program 
                       program? 
