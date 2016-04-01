@@ -10,7 +10,7 @@ Tier 1:
     - browse.scm
     - bv2string.scm
     - cat.scm - Fails, unable to open outputs/cat.output. Seems opening a file in a directory that does not exist is failing. Is that behavior specified?
-    - compiler.scm - No complex library
+    - compiler.scm - Error: Unhandled number of function arguments: 1348
     - conform.scm
     - cpstak.scm
     - ctak.scm
