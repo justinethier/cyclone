@@ -403,26 +403,23 @@ extern const object primitive_call_95cc;
 
 /** Globals that are needed by the runtime 
  *  What's going on here is the globals are defined by a module, but
- *  are also used by the runtime. At least for now, these macros are
- *  used to point everybody to the objects, which are used by both
- *  those libraries and this module.
+ *  are also used by the runtime. At least for now, macros below are
+ *  used to point everybody to the objects.
  *
  *  The assumption for now is that a program that does not include
  *  the necessary libray would never use the corresponding function.
  */
-extern object Cyc_glo_eval;
 extern object Cyc_glo_eval_from_c;
 extern object Cyc_glo_call_cc;
 
-#define __glo_eval Cyc_glo_eval
-#define __glo_eval_91from_91c Cyc_glo_eval_from_c
-#define __glo_call_95cc Cyc_glo_call_cc
+#define __glo_eval_91from_91c_scheme_eval Cyc_glo_eval_from_c
+#define __glo_call_95cc_scheme_base Cyc_glo_call_cc
 
+/* Exception handling */
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);
 void Cyc_rt_raise2(void *data, const char *msg, object err);
 void Cyc_rt_raise_msg(void *data, const char *err);
-/* END exception handler */
 
 #endif /* CYCLONE_RUNTIME_H */
