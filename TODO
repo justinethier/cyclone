@@ -5,11 +5,13 @@ Tier 1:
 - pass larceny benchmarks (will require some bugfixes):
   TODO: keep track of which ones will not run, and why
 
+  OK if test errors out if outputs directory is missing, chibi does the same thing.
+
     - ack.scm
     - array1.scm
     - browse.scm
     - bv2string.scm
-    - cat.scm - Fails, unable to open outputs/cat.output. Seems opening a file in a directory that does not exist is failing. Is that behavior specified?
+    - cat.scm
     - compiler.scm - unbound vars: (denominator numerator)
     - conform.scm
     - cpstak.scm
@@ -46,7 +48,7 @@ Tier 1:
     - primes.scm
     - puzzle.scm
     - quicksort.scm
-    - ray.scm -  Error: Unable to open file outputs/ray.output. similar issue to above?
+    - ray.scm
     - read0.scm - needs open-input-string
     - read1.scm
     - sboyer.scm
@@ -57,7 +59,7 @@ Tier 1:
     - sum1.scm
     - sumfp.scm
     - sum.scm
-    - tail.scm - Unable to open file outputs/tail.output
+    - tail.scm
     - takl.scm
     - tak.scm
     - triangl.scm
