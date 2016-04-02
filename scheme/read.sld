@@ -448,12 +448,14 @@
                       (in-port:get-cnum ptbl))))))
   (define (loop buf)
     (let ((c (peek-char fp)))
-      (if (or (eof-object? c)
-              (char-whitespace? c)
-              (and (> (length buf) 0)
-                   (equal? c #\))))
-         (done buf)
-         (loop (cons (read-char fp) buf)))))
+      (cond
+        ((or (eof-object? c)
+             (and (char-whitespace? c) (> (length buf) 0))
+             (and (> (length buf) 0)
+                  (equal? c #\))))
+         (done buf))
+       (else
+         (loop (cons (read-char fp) buf))))))
   (loop '()))
 
 (define (read-str fp buf ptbl)
