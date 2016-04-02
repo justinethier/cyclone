@@ -27,7 +27,7 @@ Tier 1:
     - fib.scm
     - gcbench.scm - Needed to manually import (srfi 9)
     - graphs.scm
-    - lattice.scm - Error: run: unanticipated problem size 44. may be a problem with numbers and (case)
+    - lattice.scm
     - matrix.scm
     - mazefun.scm
     - maze.scm - There is a problem reading the input file

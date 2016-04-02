@@ -437,6 +437,9 @@
          (integer->char 32))
         ((equal? buf '(#\t #\a #\b))
          (integer->char 9))
+        ((and (> (length buf) 1)
+              (equal? (car buf) #\x))
+         (integer->char (string->number (list->string (cdr buf)) 16)))
         (else
          (parse-error (string-append 
                         "unable to parse character: "
