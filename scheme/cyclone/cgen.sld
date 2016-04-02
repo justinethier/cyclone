@@ -123,8 +123,8 @@
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
       ;"/* Check for GC, then call given continuation closure */\n"
-      "#define return_closcall" n "(td, clo" args ") \\\n"
-      "{char top; \\\n"
+      "#define return_closcall" n "(td, clo" args ") { \\\n"
+      " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td,clo,buf," n "); return; \\\n"
