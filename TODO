@@ -10,7 +10,7 @@ Tier 1:
     - browse.scm
     - bv2string.scm
     - cat.scm - Fails, unable to open outputs/cat.output. Seems opening a file in a directory that does not exist is failing. Is that behavior specified?
-    - compiler.scm - Error: Unhandled number of function arguments: 1348
+    - compiler.scm - unbound vars: (denominator numerator)
     - conform.scm
     - cpstak.scm
     - ctak.scm
@@ -18,7 +18,7 @@ Tier 1:
     - destruc.scm
     - diviter.scm
     - divrec.scm
-    - dynamic.scm - Unhandled number of function arguments: 234
+    - dynamic.scm - Need to handle optional radix argument to number->string
     - earley.scm
     - equal.scm
     - fft.scm
@@ -37,7 +37,7 @@ Tier 1:
     - nboyer.scm
     - nqueens.scm
     - ntakl.scm
-    - nucleic.scm - Unhandled number of function arguments: 266
+    - nucleic.scm - Runs now, but segfaults
     - paraffins.scm
     - parsing.scm
     - peval.scm
@@ -52,7 +52,7 @@ Tier 1:
     - sboyer.scm
     - scheme.scm - Problem with (macro?) being a primitive and defined in application code
     - simplex.scm - Compiles but quickly throws error Error: Divide by zero
-    - slatex.scm - Unhandled number of function arguments: 188
+    - slatex.scm - Need to handle more than one "args" argument to apply
     - string.scm
     - sum1.scm
     - sumfp.scm
