@@ -32,7 +32,7 @@ Tier 1:
     - lattice.scm
     - matrix.scm
     - mazefun.scm
-    - maze.scm - There is a problem reading the input file
+    - maze.scm - vector-ref invalid index -6
     - mbrot.scm
     - mbrotZ.scm - No complex library
     - mperm.scm
