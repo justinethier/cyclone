@@ -981,8 +981,12 @@
 ;; TODO: remove unused locals
 (define (filter-unused-variables asts lib-exports)
   (define (do-filter code)
-    (let ((all-fv (apply      ;; More efficient way to do this?
-                    append    ;; Could use delete-duplicates
+    (let ((all-fv ;(apply      ;; More efficient way to do this?
+                  ;  append    ;; Could use delete-duplicates
+                  (foldr
+                    (lambda (l ls)
+                      (append ls l))
+                   '()
                     (map 
                       (lambda (ast)
                         (if (define? ast)

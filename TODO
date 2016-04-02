@@ -47,7 +47,7 @@ Tier 1:
     - puzzle.scm
     - quicksort.scm
     - ray.scm -  Error: Unable to open file outputs/ray.output. similar issue to above?
-    - read0.scm - Error (line 170, char 25): unable to parse character: x3bb
+    - read0.scm - needs open-input-string
     - read1.scm
     - sboyer.scm
     - scheme.scm - Problem with (macro?) being a primitive and defined in application code
