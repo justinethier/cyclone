@@ -22,7 +22,7 @@
 #define NUM_GC_ANS 128
 
 // Which way does the CPU grow its stack?
-#define STACK_GROWS_DOWNWARD 1
+#define STACK_GROWTH_IS_DOWNWARD 1
 
 // Size of the stack buffer, in bytes.
 // This is used as the first generation of the GC.
@@ -159,7 +159,7 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 typedef long tag_type;
 
 /* Determine if stack has overflowed */
-#if STACK_GROWS_DOWNWARD
+#if STACK_GROWTH_IS_DOWNWARD
 #define check_overflow(x,y) ((x) < (y))
 #else
 #define check_overflow(x,y) ((x) > (y))

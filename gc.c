@@ -1265,15 +1265,15 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
 {
   char stack_ref;
   thd->stack_start = stack_base;
-#if STACK_GROWS_DOWNWARD
+#if STACK_GROWTH_IS_DOWNWARD
   thd->stack_limit = stack_base - stack_size;
 #else
   thd->stack_limit = stack_base + stack_size;
 #endif
   if (check_overflow(stack_base, &stack_ref)){
     fprintf(stderr, 
-      "Error: recompile with STACK_GROWS_DOWNWARD set to %d\n",
-      (1 - STACK_GROWS_DOWNWARD));
+      "Error: Stack is growing in the wrong direction! Rebuild with STACK_GROWTH_IS_DOWNWARD changed to %d\n",
+      (1 - STACK_GROWTH_IS_DOWNWARD));
     exit(1);
   }
   thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
