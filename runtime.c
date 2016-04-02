@@ -1108,7 +1108,7 @@ object Cyc_list2string(void *data, object cont, object lst){
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...) 
 {
   object base = nil;
-  int base_num;
+  int base_num, result;
   va_list ap;
   va_start(ap, str);
   if (argc > 1) {
@@ -1120,20 +1120,21 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
     base_num = obj_is_int(base) ? obj_obj2int(base) : integer_value(base);
     Cyc_check_str(data, str);
     if (base_num == 2) {
-      make_int(result, binstr2int(string_str(str)));
-      return_closcall1(data, cont, &result);
+      result = binstr2int(string_str(str));
+      return_closcall1(data, cont, obj_int2obj(result));
     }else if (base_num == 8) {
-      make_int(result, octstr2int(string_str(str)));
-      return_closcall1(data, cont, &result);
+      result = octstr2int(string_str(str));
+      return_closcall1(data, cont, obj_int2obj(result));
     }else if (base_num == 16) {
-      make_int(result, hexstr2int(string_str(str)));
-      return_closcall1(data, cont, &result);
+      result = hexstr2int(string_str(str));
+      return_closcall1(data, cont, obj_int2obj(result));
     }
   }
   Cyc_string2number_(data, cont, str);
 }
 
 object Cyc_string2number_(void *data, object cont, object str){
+    int result;
     double n;
     Cyc_check_obj(data, string_tag, str);
     Cyc_check_str(data, str);
@@ -1142,8 +1143,8 @@ object Cyc_string2number_(void *data, object cont, object str){
         n = atof(((string_type *) str)->str);
 
         if (ceilf(n) == n) {
-            make_int(result, (int)n);
-            return_closcall1(data, cont, &result);
+            result = (int)n;
+            return_closcall1(data, cont, obj_int2obj(result));
         }
         else {
             make_double(result, n);
