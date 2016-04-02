@@ -122,26 +122,26 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      "/* Check for GC, then call given continuation closure */\n"
-      "#define return_closcall" n "(td,cfn" args ") \\\n"
-      "{char stack; \\\n"
-      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
+      ;"/* Check for GC, then call given continuation closure */\n"
+      "#define return_closcall" n "(td, clo" args ") \\\n"
+      "{char top; \\\n"
+      " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
-      "     GC(td,cfn,buf," n "); return; \\\n"
-      " } else {closcall" n "(td,(closure) (cfn)" args "); return;}}\n")))
+      "     GC(td,clo,buf," n "); return; \\\n"
+      " } else {closcall" n "(td,(closure) (clo)" args "); return;}}\n")))
 
 (define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      "/* Check for GC, then call C function directly */\n"
-      "#define return_direct" n "(td,_fn" args ") { \\\n"
-      " char stack; \\\n"
-      " if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \\\n"
+      ;"/* Check for GC, then call C function directly */\n"
+      "#define return_direct" n "(td, _fn" args ") { \\\n"
+      " char top; \\\n"
+      " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
-      "     GC(td,&c1, buf, " n "); return; \\\n"
+      "     GC(td, &c1, buf, " n "); return; \\\n"
       " } else { (_fn)(td," n ",(closure)_fn" args "); }}\n")))
 
 (define (c-macro-closcall num-args)
@@ -150,10 +150,10 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(td,cfn" args ") "
-        (wrap (string-append "if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td," n-1 ", (closure)(a1), cfn" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
+      "#define closcall" n "(td,clo" args ") "
+        (wrap (string-append "if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td," n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
         (wrap " else { ")
-        "((cfn)->fn)(td," n ",cfn" args ")"
+        "((clo)->fn)(td," n ",clo" args ")"
         (wrap ";}")
         )))
 

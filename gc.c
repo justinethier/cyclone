@@ -752,8 +752,8 @@ int gc_is_stack_obj(gc_thread_data *thd, object obj)
   char tmp;
   object low_limit = &tmp;
   object high_limit = thd->stack_start;
-  return (check_overflow(low_limit, obj) && 
-          check_overflow(obj, high_limit));
+  return (stack_overflow(low_limit, obj) && 
+          stack_overflow(obj, high_limit));
 }
 
 /**
@@ -1270,7 +1270,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
 #else
   thd->stack_limit = stack_base + stack_size;
 #endif
-  if (check_overflow(stack_base, &stack_ref)){
+  if (stack_overflow(stack_base, &stack_ref)){
     fprintf(stderr, 
       "Error: Stack is growing in the wrong direction! Rebuild with STACK_GROWTH_IS_DOWNWARD changed to %d\n",
       (1 - STACK_GROWTH_IS_DOWNWARD));

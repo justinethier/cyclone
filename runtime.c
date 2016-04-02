@@ -76,22 +76,22 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* END error checking */
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(td,cfn,a1) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,0, (closure)(a1), cfn); } else { ((cfn)->fn)(td,1,cfn,a1);}
+#define closcall1(td,clo,a1) if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td,0, (closure)(a1), clo); } else { ((clo)->fn)(td,1,clo,a1);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall1(td,cfn,a1) \
-{char stack; \
- if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
+#define return_closcall1(td,clo,a1) \
+{char top; \
+ if (stack_overflow(&top,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[1]; buf[0] = a1;\
-     GC(td,cfn,buf,1); return; \
- } else {closcall1(td,(closure) (cfn),a1); return;}}
-#define closcall2(td,cfn,a1,a2) if (type_of(cfn) == cons_tag || prim(cfn)) { Cyc_apply(td,1, (closure)(a1), cfn,a2); } else { ((cfn)->fn)(td,2,cfn,a1,a2);}
+     GC(td,clo,buf,1); return; \
+ } else {closcall1(td,(closure) (clo),a1); return;}}
+#define closcall2(td,clo,a1,a2) if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td,1, (closure)(a1), clo,a2); } else { ((clo)->fn)(td,2,clo,a1,a2);}
 /* Return to continuation after checking for stack overflow. */
-#define return_closcall2(td,cfn,a1,a2) \
-{char stack; \
- if (check_overflow(&stack,(((gc_thread_data *)data)->stack_limit))) { \
+#define return_closcall2(td,clo,a1,a2) \
+{char top; \
+ if (stack_overflow(&top,(((gc_thread_data *)data)->stack_limit))) { \
      object buf[2]; buf[0] = a1;buf[1] = a2;\
-     GC(td,cfn,buf,2); return; \
- } else {closcall2(td,(closure) (cfn),a1,a2); return;}}
+     GC(td,clo,buf,2); return; \
+ } else {closcall2(td,(closure) (clo),a1,a2); return;}}
 /*END closcall section */
 
 /* Global variables. */
@@ -2680,8 +2680,8 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
 
 #define gc_move2heap(obj) { \
   temp = obj; \
-  if (check_overflow(low_limit, temp) && \
-      check_overflow(temp, high_limit)){ \
+  if (stack_overflow(low_limit, temp) && \
+      stack_overflow(temp, high_limit)){ \
     (obj) = (object) gc_move(temp, (gc_thread_data *)data, &alloci, &heap_grown); \
   } \
 }
@@ -3225,8 +3225,8 @@ object copy2heap(void *data, object obj)
 {
   char stack_pos;
   gc_thread_data *thd = (gc_thread_data *)data;
-  int on_stack = check_overflow((object)(&stack_pos), obj) &&
-                 check_overflow(obj, (object)thd->stack_start);
+  int on_stack = stack_overflow((object)(&stack_pos), obj) &&
+                 stack_overflow(obj, (object)thd->stack_start);
   if (!is_object_type(obj) || !on_stack) {
     return obj;
   }

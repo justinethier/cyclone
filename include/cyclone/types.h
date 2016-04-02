@@ -160,9 +160,9 @@ typedef long tag_type;
 
 /* Determine if stack has overflowed */
 #if STACK_GROWTH_IS_DOWNWARD
-#define check_overflow(x,y) ((x) < (y))
+#define stack_overflow(x,y) ((x) < (y))
 #else
-#define check_overflow(x,y) ((x) > (y))
+#define stack_overflow(x,y) ((x) > (y))
 #endif
 
 /* Define object tag values. Could be an enum...
@@ -207,7 +207,6 @@ typedef long tag_type;
  *  0x10 - char
  */
 
-// TODO: does this break negative numbers (IE, overwrite sign bit in 2's comp?)? may need a more sophisticated scheme to handle 31-bit numbers. also, ideally want to use 63 bits on a 64-bit system
 #define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
 #define obj_obj2int(x) ((long)(x)>>1)
 #define obj_int2obj(c) ((void *)((((long)c)<<1) | 1))
@@ -219,7 +218,7 @@ typedef long tag_type;
 #define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
-/* Define function type. */
+/* Function type */
 
 typedef void (*function_type)();
 typedef void (*function_type_va)(int, object, object, object, ...);
@@ -305,7 +304,7 @@ typedef bytevector_type *bytevector;
 
 #define make_empty_bytevector(v) bytevector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = bytevector_tag; v.len = 0; v.data = NULL;
 
-/* Define cons type. */
+/* Pair (cons) type */
 
 typedef struct {gc_header_type hdr; tag_type tag; object cons_car,cons_cdr;} cons_type;
 typedef cons_type *list;
@@ -361,14 +360,6 @@ typedef closure0_type *macro;
 #define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
 #define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;
-
-#define mlist1(e1) (mcons(e1,nil))
-#define mlist2(e2,e1) (mcons(e2,mlist1(e1)))
-#define mlist3(e3,e2,e1) (mcons(e3,mlist2(e2,e1)))
-#define mlist4(e4,e3,e2,e1) (mcons(e4,mlist3(e3,e2,e1)))
-#define mlist5(e5,e4,e3,e2,e1) (mcons(e5,mlist4(e4,e3,e2,e1)))
-#define mlist6(e6,e5,e4,e3,e2,e1) (mcons(e6,mlist5(e5,e4,e3,e2,e1)))
-#define mlist7(e7,e6,e5,e4,e3,e2,e1) (mcons(e7,mlist6(e6,e5,e4,e3,e2,e1)))
 
 #define make_cell(n,a) make_cons(n,a,nil);
 
