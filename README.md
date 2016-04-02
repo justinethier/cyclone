@@ -51,6 +51,11 @@ Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high
 
 Finally, if you need another resource to start learning the Scheme language please try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
+Benchmarks
+----------
+
+<img src="docs/images/bench-gabriel.png">
+
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
