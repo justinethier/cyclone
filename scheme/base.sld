@@ -207,7 +207,9 @@
   )
   (begin
     ;; Features implemented by this Scheme
-    (define (features) '(cyclone r7rs exact-closed))
+    (define (features) '(cyclone r7rs exact-closed 
+                         ieee-float
+                         posix))
 
     (define-syntax and
       (er-macro-transformer
