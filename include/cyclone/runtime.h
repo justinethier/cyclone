@@ -172,6 +172,7 @@ object Cyc_utf82string(void *data, object cont, object bv, object start, object 
 object Cyc_string2utf8(void *data, object cont, object str, object start, object end);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_number2string(void *d, object cont, object n);
+object Cyc_number2string2(void *data, object cont, int argc, object n, ...);
 object Cyc_symbol2string(void *d, object cont, object sym) ;
 object Cyc_string2symbol(void *d, object str);
 object Cyc_list2string(void *d, object cont, object lst);

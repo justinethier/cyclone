@@ -1068,6 +1068,53 @@ object Cyc_number2string(void *data, object cont, object n) {
     return_closcall1(data, cont, &str);
 }
 
+object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
+    object base = nil;
+    int base_num = 10, val;
+    char buffer[1024];
+    va_list ap;
+    va_start(ap, n);
+    if (argc > 1) {
+      base = va_arg(ap, object);
+      Cyc_check_int(data, base);
+    }
+    va_end(ap);
+    Cyc_check_num(data, n);
+    if (base) {
+      base_num = obj_is_int(base) ? obj_obj2int(base) : integer_value(base);
+    }
+
+    if (base_num == 2) {
+      // TODO
+    } else if (base_num == 8) {
+      val = obj_is_int(n) ?
+              obj_obj2int(n) :
+              type_of(n) == integer_tag ?
+                integer_value(n) :
+                ((int)double_value(n));
+      snprintf(buffer, 1024, "%o", val);
+    } else if (base_num == 16) {
+      val = obj_is_int(n) ?
+              obj_obj2int(n) :
+              type_of(n) == integer_tag ?
+                integer_value(n) :
+                ((int)double_value(n));
+      snprintf(buffer, 1024, "%X", val);
+    } else {
+      if (obj_is_int(n)) {
+          snprintf(buffer, 1024, "%ld", obj_obj2int(n));
+      }else if (type_of(n) == integer_tag) {
+          snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
+      } else if (type_of(n) == double_tag) {
+          snprintf(buffer, 1024, "%f", ((double_type *)n)->value);
+      } else {
+          Cyc_rt_raise2(data, "number->string - Unexpected object", n);
+      }
+    }
+    make_string(str, buffer);
+    return_closcall1(data, cont, &str);
+}
+
 object Cyc_symbol2string(void *data, object cont, object sym) {
   Cyc_check_sym(data, sym);
   { const char *pname = symbol_pname(sym);
@@ -1104,7 +1151,6 @@ object Cyc_list2string(void *data, object cont, object lst){
       return_closcall1(data, cont, &str);}
 }
 
-// TODO: need new versions of string->number that handle int value types
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...) 
 {
   object base = nil;
@@ -2349,7 +2395,11 @@ void _symbol_91_125string(void *data, object cont, object args) {
     Cyc_symbol2string(data, cont, car(args));}
 void _number_91_125string(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "number->string", 1, args);
-    Cyc_number2string(data, cont, car(args));}
+    { object tail = cdr(args);
+      if (tail) {
+        Cyc_number2string2(data, cont, 2, car(args), cadr(args));
+      } else {
+        Cyc_number2string2(data, cont, 1, car(args)); }}}
 void _open_91input_91file(void *data, object cont, object args) {  
     Cyc_check_num_args(data, "open-input-file", 1, args);
     { port_type p = Cyc_io_open_input_file(data, car(args));
