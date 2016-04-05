@@ -588,7 +588,7 @@
      ((eq? p 'string-cmp)    "Cyc_string_cmp")
      ((eq? p 'string->symbol) "Cyc_string2symbol")
      ((eq? p 'symbol->string) "Cyc_symbol2string")
-     ((eq? p 'number->string) "Cyc_number2string")
+     ((eq? p 'number->string) "Cyc_number2string2")
      ((eq? p 'string-length)  "Cyc_string_length")
      ((eq? p 'string-ref)     "Cyc_string_ref")
      ((eq? p 'string-set!)    "Cyc_string_set")
@@ -794,7 +794,7 @@
 (define (prim:arg-count? exp)
     (and (prim? exp)
          (member exp '(error Cyc-write Cyc-display 
-                       string->number string-append 
+                       number->string string->number string-append 
                        make-bytevector
                        bytevector
                        bytevector-append
