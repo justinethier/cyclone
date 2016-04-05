@@ -1787,10 +1787,61 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     return_closcall1(data, cont, result); \
 }
 
+object Cyc_div_op(void *data, common_type *x, object y) {
+    int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y));
+    if (1 && 
+        ((ty == -1 && (obj_obj2int(y) == 0)) ||
+         (ty == integer_tag && integer_value(y) == 0) ||
+         (ty == double_tag && double_value(y) == 0.0))) {
+      Cyc_rt_raise_msg(data, "Divide by zero");
+    }
+    if (tx == integer_tag && ty == -1) {
+        x->double_t.tag = double_tag;
+        x->double_t.value = ((double)x->integer_t.value) / (obj_obj2int(y));
+    } else if (tx == double_tag && ty == -1) {
+        x->double_t.value = x->double_t.value / (obj_obj2int(y));
+    } else if (tx == integer_tag && ty == integer_tag) {
+        x->double_t.tag = double_tag;
+        x->double_t.value = ((double)x->integer_t.value) / ((integer_type *)y)->value;
+    } else if (tx == double_tag && ty == integer_tag) {
+        x->double_t.value = x->double_t.value / ((integer_type *)y)->value;
+    } else if (tx == integer_tag && ty == double_tag) {
+        x->double_t.hdr.mark = gc_color_red;
+        x->double_t.hdr.grayed = 0;
+        x->double_t.tag = double_tag;
+        x->double_t.value = x->integer_t.value / ((double_type *)y)->value;
+    } else if (tx == double_tag && ty == double_tag) {
+        x->double_t.value = x->double_t.value / ((double_type *)y)->value;
+    } else {
+        make_string(s, "Bad argument type");
+        make_cons(c1, y, nil);
+        make_cons(c0, &s, &c1);
+        Cyc_rt_raise(data, &c0);
+    }
+    return x;
+}
+object Cyc_div(void *data, object cont, int argc, object n, ...) {
+    common_type buffer;
+    object result;
+    va_list ap;
+    va_start(ap, n);
+    result = Cyc_num_op_va_list(data, argc, Cyc_div_op, n, ap, &buffer);
+    va_end(ap);
+    return_closcall1(data, cont, result);
+}
+void dispatch_div(void *data, int argc, object clo, object cont, object n, ...) {
+    common_type buffer;
+    object result;
+    va_list ap;
+    va_start(ap, n);
+    result = Cyc_num_op_va_list(data, argc - 1, Cyc_div_op, n, ap, &buffer);
+    va_end(ap);
+    return_closcall1(data, cont, result);
+}
 declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
 declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
 declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
-declare_num_op(Cyc_div, Cyc_div_op, dispatch_div, /, 1);
+//declare_num_op(Cyc_div, Cyc_div_op2, dispatch_div, /, 1);
 
 object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_type *, object)), object n, va_list ns, common_type *buf) {
   int i;
