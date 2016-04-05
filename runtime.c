@@ -1068,6 +1068,19 @@ object Cyc_number2string(void *data, object cont, object n) {
     return_closcall1(data, cont, &str);
 }
 
+char *int_to_binary(char *b, int x)
+{
+    b[0] = '\0';
+
+    int z;
+    for (z = 65536; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
     object base = nil;
     int base_num = 10, val;
@@ -1085,7 +1098,12 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
     }
 
     if (base_num == 2) {
-      // TODO
+      val = obj_is_int(n) ?
+              obj_obj2int(n) :
+              type_of(n) == integer_tag ?
+                integer_value(n) :
+                ((int)double_value(n));
+      int_to_binary(buffer, val);
     } else if (base_num == 8) {
       val = obj_is_int(n) ?
               obj_obj2int(n) :
