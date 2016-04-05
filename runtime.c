@@ -571,7 +571,7 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, "%d", ((integer_type *) x)->value);
       break;
     case double_tag:
-      fprintf(port, "%f", ((double_type *) x)->value);
+      fprintf(port, "%.16f", ((double_type *) x)->value);
       break;
     case string_tag:
       fprintf(port, "%s", ((string_type *) x)->str);
@@ -1107,7 +1107,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
       }else if (type_of(n) == integer_tag) {
           snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
       } else if (type_of(n) == double_tag) {
-          snprintf(buffer, 1024, "%f", ((double_type *)n)->value);
+          snprintf(buffer, 1024, "%.16f", ((double_type *)n)->value);
       } else {
           Cyc_rt_raise2(data, "number->string - Unexpected object", n);
       }
