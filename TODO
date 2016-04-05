@@ -20,7 +20,7 @@ Tier 1:
     - destruc.scm
     - diviter.scm
     - divrec.scm
-    - dynamic.scm - Need to handle optional radix argument to number->string
+    - dynamic.scm
     - earley.scm
     - equal.scm
     - fft.scm

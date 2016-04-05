@@ -157,6 +157,8 @@
     bytevector-copy
     utf8->string
     string->utf8
+    denominator
+    numerator
 
 ;;;;
 ; Possibly missing functions:
@@ -178,10 +180,6 @@
 ;
 ;    ; No complex or rational numbers at this time
 ;    rationalize
-;
-;    ; Need to change how  integer? works, to include floatings points without any decimals
-;    denominator
-;    numerator
 ;
 ;    ; need string ports
 ;    ; may be able to use POSIX string steams for this, see: open_memstream
@@ -1008,6 +1006,10 @@
       1
       (foldl lcm/main (car nums) (cdr nums))))
   ;; END gcd lcm
+
+  ;; Placeholders
+  (define (denominator n) 1)
+  (define (numerator n) n)
 
   ;; TODO: possibly not correct, just a placeholder
   (define quotient /)
