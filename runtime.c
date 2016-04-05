@@ -1051,23 +1051,6 @@ object Cyc_length(void *data, object l){
     return obj_int2obj(len);
 }
 
-object Cyc_number2string(void *data, object cont, object n) {
-    char buffer[1024];
-    Cyc_check_num(data, n);
-    if (obj_is_int(n)) {
-        snprintf(buffer, 1024, "%ld", obj_obj2int(n));
-    }else if (type_of(n) == integer_tag) {
-        snprintf(buffer, 1024, "%d", ((integer_type *)n)->value);
-    } else if (type_of(n) == double_tag) {
-        snprintf(buffer, 1024, "%f", ((double_type *)n)->value);
-    } else {
-        Cyc_rt_raise2(data, "number->string - Unexpected object", n);
-    }
-    //make_string_noalloc(str, buffer, strlen(buffer));
-    make_string(str, buffer);
-    return_closcall1(data, cont, &str);
-}
-
 char *int_to_binary(char *b, int x)
 {
     b[0] = '\0';
