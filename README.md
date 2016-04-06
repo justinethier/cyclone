@@ -51,6 +51,15 @@ Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high
 
 Finally, if you need another resource to start learning the Scheme language please try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
+Benchmarks
+----------
+
+The following benchmarks give an indication how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. 
+
+The benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz, and indicate elapsed time. A longer bar indicates worse performance, however if a benchmark could not be completed in a reasonable amount of time there is no bar at all for that Scheme.
+
+<img src="docs/images/benchmarks/gabriel.png">
+
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
