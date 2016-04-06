@@ -1013,8 +1013,8 @@
   (define (denominator n) 1)
   (define (numerator n) n)
 
-  ;; TODO: possibly not correct, just a placeholder
-  (define quotient /)
+  (define (quotient x y)
+    (truncate (/ x y)))
 
   (define truncate-quotient quotient)
   (define truncate-remainder remainder)
