@@ -1507,6 +1507,7 @@
                       ;(lambda->formals (car body))
                       (lambda->formals exp)
                       )
+              (> (length (lambda->formals exp)) 0)
               ;; TODO: don't do it if args are used in the body
               ;; this won't work if we have any num other than 1 arg
               (not (member 
