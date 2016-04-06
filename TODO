@@ -12,7 +12,7 @@ Tier 1:
     - browse.scm
     - bv2string.scm
     - cat.scm
-    - compiler.scm - unbound vars: (denominator numerator)
+    - compiler.scm - segfaults during compilation
     - conform.scm
     - cpstak.scm
     - ctak.scm
