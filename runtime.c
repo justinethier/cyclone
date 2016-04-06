@@ -775,9 +775,11 @@ object Cyc_num_cmp_va_list(void *data, int argc, int (fn_op(void *, object, obje
   if (argc < 2) {
     Cyc_rt_raise_msg(data, "Not enough arguments for boolean operator\n");
   }
+  Cyc_check_num(data, n);
 
   for (i = 1; i < argc; i++) {
     next = va_arg(ns, object);
+    Cyc_check_num(data, next);
     if (!fn_op(data, n, next)) {
       return boolean_f;
     }
@@ -792,24 +794,24 @@ int FUNC_OP(void *data, object x, object y) { \
     int result = 0, \
         tx = (obj_is_int(x) ? -1 : type_of(x)), \
         ty = (obj_is_int(y) ? -1 : type_of(y)); \
-      if (tx == -1 && ty == -1) { \
-        result = (obj_obj2int(x)) OP (obj_obj2int(y)); \
-      } else if (tx == -1 && ty == integer_tag) { \
-        result = (obj_obj2int(x)) OP (integer_value(y)); \
-      } else if (tx == -1 && ty == double_tag) { \
-        result = (obj_obj2int(x)) OP (double_value(y)); \
-      } else if (tx == integer_tag && ty == -1) { \
-        result = (integer_value(x)) OP (obj_obj2int(y)); \
-      } else if (tx == integer_tag && ty == integer_tag) { \
-        result = (integer_value(x)) OP (integer_value(y)); \
-      } else if (tx == integer_tag && ty == double_tag) { \
-        result = (integer_value(x)) OP (double_value(y)); \
-      } else if (tx == double_tag && ty == -1) { \
-        result = (double_value(x)) OP (obj_obj2int(y)); \
-      } else if (tx == double_tag && ty == integer_tag) { \
-        result = (double_value(x)) OP (integer_value(y)); \
-      } else if (tx == double_tag && ty == double_tag) { \
-        result = (double_value(x)) OP (double_value(y)); \
+    if (tx == -1 && ty == -1) { \
+      result = (obj_obj2int(x)) OP (obj_obj2int(y)); \
+    } else if (tx == -1 && ty == integer_tag) { \
+      result = (obj_obj2int(x)) OP (integer_value(y)); \
+    } else if (tx == -1 && ty == double_tag) { \
+      result = (obj_obj2int(x)) OP (double_value(y)); \
+    } else if (tx == integer_tag && ty == -1) { \
+      result = (integer_value(x)) OP (obj_obj2int(y)); \
+    } else if (tx == integer_tag && ty == integer_tag) { \
+      result = (integer_value(x)) OP (integer_value(y)); \
+    } else if (tx == integer_tag && ty == double_tag) { \
+      result = (integer_value(x)) OP (double_value(y)); \
+    } else if (tx == double_tag && ty == -1) { \
+      result = (double_value(x)) OP (obj_obj2int(y)); \
+    } else if (tx == double_tag && ty == integer_tag) { \
+      result = (double_value(x)) OP (integer_value(y)); \
+    } else if (tx == double_tag && ty == double_tag) { \
+      result = (double_value(x)) OP (double_value(y)); \
     } else { \
         make_string(s, "Bad argument type"); \
         make_cons(c1, y, nil); \
