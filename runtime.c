@@ -1738,7 +1738,7 @@ object __halt(object obj) {
     return nil;
 }
 
-#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, DIV) \
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
     int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y)); \
     if (DIV &&  \
@@ -1775,7 +1775,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     object result; \
     va_list ap; \
     va_start(ap, n); \
-    result = Cyc_num_op_va_list(data, argc, FUNC_OP, n, ap, &buffer); \
+    result = Cyc_num_op_va_list(data, argc, FUNC_OP, NO_ARG, ONE_ARG, n, ap, &buffer); \
     va_end(ap); \
     return_closcall1(data, cont, result); \
 } \
@@ -1784,7 +1784,7 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     object result; \
     va_list ap; \
     va_start(ap, n); \
-    result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, n, ap, &buffer); \
+    result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, NO_ARG, ONE_ARG, n, ap, &buffer); \
     va_end(ap); \
     return_closcall1(data, cont, result); \
 }
@@ -1827,7 +1827,7 @@ object Cyc_div(void *data, object cont, int argc, object n, ...) {
     object result;
     va_list ap;
     va_start(ap, n);
-    result = Cyc_num_op_va_list(data, argc, Cyc_div_op, n, ap, &buffer);
+    result = Cyc_num_op_va_list(data, argc, Cyc_div_op, -1, 1, n, ap, &buffer);
     va_end(ap);
     return_closcall1(data, cont, result);
 }
@@ -1836,22 +1836,25 @@ void dispatch_div(void *data, int argc, object clo, object cont, object n, ...) 
     object result;
     va_list ap;
     va_start(ap, n);
-    result = Cyc_num_op_va_list(data, argc - 1, Cyc_div_op, n, ap, &buffer);
+    result = Cyc_num_op_va_list(data, argc - 1, Cyc_div_op, -1, 1, n, ap, &buffer);
     va_end(ap);
     return_closcall1(data, cont, result);
 }
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 0);
-//declare_num_op(Cyc_div, Cyc_div_op2, dispatch_div, /, 1);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0, 0, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, -1, 0, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 1, 1, 0);
+//declare_num_op(Cyc_div, Cyc_div_op2, dispatch_div, /, -1, 1, 1);
 
-object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_type *, object)), object n, va_list ns, common_type *buf) {
+object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_type *, object)), int default_no_args, int default_one_arg, object n, va_list ns, common_type *buf) {
   int i;
   if (argc == 0) {
+    if (default_no_args < 0) {
+      Cyc_rt_raise_msg(data, "No arguments for numeric operation");
+    }
     buf->integer_t.hdr.mark = gc_color_red;
     buf->integer_t.hdr.grayed = 0;
     buf->integer_t.tag = integer_tag;
-    buf->integer_t.value = 0;
+    buf->integer_t.value = default_no_args;
     return buf;
   }
 
@@ -1877,11 +1880,28 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
       Cyc_rt_raise(data, &c0);
   }
 
-  for (i = 1; i < argc; i++) {
-    fn_op(data, buf, va_arg(ns, object));
+  if (argc == 1) {
+    common_type tmp;
+    tmp.integer_t.hdr.mark = gc_color_red;
+    tmp.integer_t.hdr.grayed = 0;
+    tmp.integer_t.tag = integer_tag;
+    tmp.integer_t.value = default_one_arg;
+
+    fn_op(data, &tmp, (object)buf);
+    if (type_of(&tmp) == integer_tag) {
+      buf->integer_t.tag = integer_tag;
+      buf->integer_t.value = integer_value(&tmp);
+    } else {
+      buf->double_t.tag = double_tag;
+      buf->double_t.value = double_value(&tmp);
+    }
+  } else {
+    for (i = 1; i < argc; i++) {
+      fn_op(data, buf, va_arg(ns, object));
+    }
   }
 
-  // TODO: if result is integer, could convert to an immediate here
+  // Convert to immediate int
   if (type_of(buf) == integer_tag) {
     return obj_int2obj(buf->integer_t.value);
   }
