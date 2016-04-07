@@ -13,9 +13,6 @@ Tier 1:
     - slatex.scm - Need to handle more than one "args" argument to apply
   crashes:
     - compiler.scm - segfaults during compilation
-    - maze.scm - vector-ref invalid index -6
-    - nucleic.scm - Runs now, but segfaults
-    - simplex.scm - Compiles but quickly throws error Error: Divide by zero
 
   OK if test errors out if outputs directory is missing, chibi does the same thing.
   List of all benchmarks, along with comments if they are failing:
@@ -45,14 +42,14 @@ Tier 1:
     - lattice.scm
     - matrix.scm
     - mazefun.scm
-    - maze.scm - vector-ref invalid index -6
+    - maze.scm
     - mbrot.scm
     - mbrotZ.scm - No complex library
     - mperm.scm
     - nboyer.scm
     - nqueens.scm
     - ntakl.scm
-    - nucleic.scm - Runs now, but segfaults
+    - nucleic.scm
     - paraffins.scm
     - parsing.scm
     - peval.scm
@@ -66,7 +63,7 @@ Tier 1:
     - read1.scm
     - sboyer.scm
     - scheme.scm - Problem with (macro?) being a primitive and defined in application code
-    - simplex.scm - Compiles but quickly throws error Error: Divide by zero
+    - simplex.scm
     - slatex.scm - Need to handle more than one "args" argument to apply
     - string.scm
     - sum1.scm
