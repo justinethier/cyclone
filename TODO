@@ -12,7 +12,7 @@ Tier 1:
     - scheme.scm - Problem with (macro?) being a primitive and defined in application code
     - slatex.scm - Need to handle more than one "args" argument to apply
   crashes:
-    - compiler.scm - segfaults during compilation
+    - compiler.scm - Needs to be able to dynamically grow symbol table. needed to hardcode symbol table to 20x its size to be able to generate the C file. Then C file cannot compile; there may be issues with defining functions with the same name as a primitive.
 
   OK if test errors out if outputs directory is missing, chibi does the same thing.
   List of all benchmarks, along with comments if they are failing:
@@ -22,7 +22,7 @@ Tier 1:
     - browse.scm
     - bv2string.scm
     - cat.scm
-    - compiler.scm - segfaults during compilation
+    - compiler.scm - Issues with symbol table and possibly lexical scoping
     - conform.scm
     - cpstak.scm
     - ctak.scm
