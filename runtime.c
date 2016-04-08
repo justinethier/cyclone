@@ -984,8 +984,8 @@ object Cyc_set_cdr(void *data, object l, object val) {
 object Cyc_vector_set(void *data, object v, object k, object obj) {
   int idx;
   Cyc_check_vec(data, v);
-  Cyc_check_int(data, k);
-  idx = obj_is_int(k) ? obj_obj2int(k) : ((integer_type *)k)->value;
+  Cyc_check_num(data, k);
+  idx = unbox_number(k);
 
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
@@ -1004,17 +1004,10 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
 
 object Cyc_vector_ref(void *data, object v, object k) {
   int idx;
-  if (nullp(v) || is_value_type(v) || ((list)v)->tag != vector_tag) {
-    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected vector\n"); 
-  }
-  if ((!obj_is_int(k)) && (nullp(k) || is_value_type(k) || ((list)k)->tag != integer_tag)) {
-    Cyc_rt_raise_msg(data, "vector-ref - invalid parameter, expected integer\n"); 
-  }
-  if (obj_is_int(k)) {
-    idx = obj_obj2int(k);
-  } else {
-    idx = integer_value(k);
-  }
+  Cyc_check_vec(data, v);
+  Cyc_check_num(data, k);
+
+  idx = unbox_number(k);
   if (idx < 0 || idx >= ((vector)v)->num_elt) {
     Cyc_rt_raise2(data, "vector-ref - invalid index", obj_int2obj(idx));
   }
@@ -1074,12 +1067,12 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
     va_start(ap, n);
     if (argc > 1) {
       base = va_arg(ap, object);
-      Cyc_check_int(data, base);
+      Cyc_check_num(data, base);
     }
     va_end(ap);
     Cyc_check_num(data, n);
     if (base) {
-      base_num = obj_is_int(base) ? obj_obj2int(base) : integer_value(base);
+      base_num = unbox_number(base);
     }
 
     if (base_num == 2) {
@@ -1162,11 +1155,11 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
   va_start(ap, str);
   if (argc > 1) {
     base = va_arg(ap, object);
-    Cyc_check_int(data, base);
+    Cyc_check_num(data, base);
   }
   va_end(ap);
   if (base) {
-    base_num = obj_is_int(base) ? obj_obj2int(base) : integer_value(base);
+    base_num = unbox_number(base);
     Cyc_check_str(data, str);
     if (base_num == 2) {
       result = binstr2int(string_str(str));
@@ -1303,14 +1296,14 @@ object Cyc_string_set(void *data, object str, object k, object chr) {
   int idx, len;
 
   Cyc_check_str(data, str);
-  Cyc_check_int(data, k);
+  Cyc_check_num(data, k);
 
   if (!eq(boolean_t, Cyc_is_char(chr))) {
     Cyc_rt_raise2(data, "Expected char but received", chr);
   }
 
   raw = string_str(str);
-  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
+  idx = unbox_number(k);
   len = strlen(raw);
 
   Cyc_check_bounds(data, "string-set!", len, idx);
@@ -1323,10 +1316,10 @@ object Cyc_string_ref(void *data, object str, object k) {
   int idx, len;
 
   Cyc_check_str(data, str);
-  Cyc_check_int(data, k);
+  Cyc_check_num(data, k);
 
   raw = string_str(str);
-  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k),
+  idx = unbox_number(k);
   len = strlen(raw);
 
   if (idx < 0 || idx >= len) {
@@ -1341,12 +1334,12 @@ object Cyc_substring(void *data, object cont, object str, object start, object e
   int s, e, len;
 
   Cyc_check_str(data, str);
-  Cyc_check_int(data, start);
-  Cyc_check_int(data, end);
+  Cyc_check_num(data, start);
+  Cyc_check_num(data, end);
 
   raw = string_str(str);
-  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start),
-  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end),
+  s = unbox_number(start);
+  e = unbox_number(end);
   len = strlen(raw);
 
   if (s > e) {
@@ -1432,12 +1425,12 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...) {
     fill = va_arg(ap, object);
   }
   va_end(ap);
-  Cyc_check_int(data, len);
+  Cyc_check_num(data, len);
   v = alloca(sizeof(vector_type));
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag;
-  ((vector)v)->num_elt = obj_is_int(len) ? obj_obj2int(len) : ((integer_type *)len)->value;
+  ((vector)v)->num_elt = unbox_number(len);
   ((vector)v)->elts = 
     (((vector)v)->num_elt > 0) ? 
      (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
@@ -1458,8 +1451,8 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
     fill = va_arg(ap, object);
   }
   va_end(ap);
-  Cyc_check_int(data, len);
-  length = obj_is_int(len) ? obj_obj2int(len) : integer_value(len);
+  Cyc_check_num(data, len);
+  length = unbox_number(len);
 
   bv = alloca(sizeof(bytevector_type));
   ((bytevector)bv)->hdr.mark = gc_color_red;
@@ -1468,8 +1461,8 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
   ((bytevector)bv)->len = length;
   ((bytevector)bv)->data = alloca(sizeof(char) * length);
   if (argc > 1) {
-    Cyc_check_int(data, fill);
-    fill_val = obj_is_int(fill) ? obj_obj2int(fill) : integer_value(fill);
+    Cyc_check_num(data, fill);
+    fill_val = unbox_number(fill);
     memset(((bytevector)bv)->data, (unsigned char)fill_val, length);
   }
   return_closcall1(data, cont, bv);
@@ -1482,15 +1475,15 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
   char *buffer; \
   make_empty_bytevector(bv); \
   if (argc > 0) { \
-    Cyc_check_int(data, bval); \
+    Cyc_check_num(data, bval); \
     buffer = alloca(sizeof(char) * argc); \
-    val = obj_is_int(bval) ? obj_obj2int(bval) : integer_value(bval); \
+    val = unbox_number(bval); \
     buffer[i] = val; \
     va_start(ap, bval); \
     for(i = 1; i < argc; i++) { \
       tmp = va_arg(ap, object); \
-      Cyc_check_int(data, tmp); \
-      val = obj_is_int(tmp) ? obj_obj2int(tmp) : integer_value(tmp); \
+      Cyc_check_num(data, tmp); \
+      val = unbox_number(tmp); \
       buffer[i] = (unsigned char)val; \
     } \
     va_end(ap); \
@@ -1558,12 +1551,12 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start, obj
   make_empty_bytevector(result);
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_int(data, start);
-  Cyc_check_int(data, end);
+  Cyc_check_num(data, start);
+  Cyc_check_num(data, end);
 
   buf = ((bytevector)bv)->data;
-  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
-  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  s = unbox_number(start);
+  e = unbox_number(end);
   len = e - s;
 
   if (s < 0 || s >= ((bytevector)bv)->len) {
@@ -1586,12 +1579,12 @@ object Cyc_utf82string(void *data, object cont, object bv, object start, object 
   int len;
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_int(data, start);
-  Cyc_check_int(data, end);
+  Cyc_check_num(data, start);
+  Cyc_check_num(data, end);
 
   buf = ((bytevector)bv)->data;
-  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
-  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  s = unbox_number(start);
+  e = unbox_number(end);
   len = e - s;
 
   if (s < 0 || (s >= ((bytevector)bv)->len && len > 0)) {
@@ -1618,12 +1611,12 @@ object Cyc_string2utf8(void *data, object cont, object str, object start, object
   make_empty_bytevector(result);
 
   Cyc_check_str(data, str);
-  Cyc_check_int(data, start);
-  Cyc_check_int(data, end);
+  Cyc_check_num(data, start);
+  Cyc_check_num(data, end);
 
   buf = string_str(str);
-  s = obj_is_int(start) ? obj_obj2int(start) : integer_value(start);
-  e = obj_is_int(end) ? obj_obj2int(end) : integer_value(end);
+  s = unbox_number(start);
+  e = unbox_number(end);
   len = e - s;
 
   if (s < 0 || (s >= string_len(str) && len > 0)) {
@@ -1646,10 +1639,10 @@ object Cyc_bytevector_u8_ref(void *data, object bv, object k) {
   int val;
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_int(data, k);
+  Cyc_check_num(data, k);
 
   buf = ((bytevector)bv)->data;
-  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k);
+  idx = unbox_number(k);
 
   if (idx < 0 || idx >= ((bytevector)bv)->len) {
     Cyc_rt_raise2(data, "bytevector-u8-ref - invalid index", k);
@@ -1664,12 +1657,12 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b) {
   int idx, len, val;
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_int(data, k);
-  Cyc_check_int(data, b);
+  Cyc_check_num(data, k);
+  Cyc_check_num(data, b);
 
   buf = ((bytevector)bv)->data;
-  idx = obj_is_int(k) ? obj_obj2int(k) : integer_value(k);
-  val = obj_is_int(b) ? obj_obj2int(b) : integer_value(b);
+  idx = unbox_number(k);
+  val = unbox_number(b);
   len = ((bytevector)bv)->len;
 
   Cyc_check_bounds(data, "bytevector-u8-set!", len, idx);
@@ -1721,8 +1714,8 @@ object Cyc_char2integer(object chr){
 object Cyc_integer2char(void *data, object n){
     int val = 0;
 
-    Cyc_check_int(data, n);
-    val = (obj_is_int(n) ? obj_obj2int(n) : integer_value(n));
+    Cyc_check_num(data, n);
+    val = unbox_number(n);
     return obj_char2obj(val);
 }
 
@@ -3336,8 +3329,8 @@ object Cyc_thread_sleep(void *data, object timeout)
 {
   struct timespec tim;
   long value;
-  Cyc_check_int(data, timeout);
-  value = (obj_is_int(timeout) ? obj_obj2int(timeout) : integer_value(timeout));
+  Cyc_check_num(data, timeout);
+  value = unbox_number(timeout);
   tim.tv_sec = value / 1000;
   tim.tv_nsec = (value % 1000) * NANOSECONDS_PER_MILLISECOND;
   nanosleep(&tim, NULL);
