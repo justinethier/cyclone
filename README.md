@@ -54,9 +54,9 @@ Finally, if you need another resource to start learning the Scheme language plea
 Benchmarks
 ----------
 
-The following benchmarks give an indication how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. 
+The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html) give an indication how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. 
 
-The benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz, and indicate elapsed time. A longer bar indicates worse performance, however if a benchmark could not be completed in a reasonable amount of time there is no bar at all for that Scheme.
+These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time. A longer bar indicates worse performance - however if there is no bar at all it means the benchmark could not be completed in a reasonable amount of time.
 
 <img src="docs/images/benchmarks/gabriel.png">
 
