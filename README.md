@@ -60,6 +60,21 @@ These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz 
 
 <img src="docs/images/benchmarks/gabriel.png">
 
+Benchmark | Cyclone | Chibi | Chicken
+--------- | ------- | ----- | -------
+browse    | 77      | 439   | 30
+deriv     | 39      | 212   | 13
+destruc   | 136     | 197   | 20
+diviter   | 51      | 122.9 | 8
+divrec    | 70      | 108   | 29
+puzzle    | 184     | -     | 32
+triangl   | 95      | 201   | 26.6
+tak       | 70      | 105   | 28.9
+takl      | 132     | -     | 78.7
+ntakl     | 152     | 193   | 77.9
+cpstak    | 92      | -     | 35
+ctak      | 7.884   | -     | 8.6
+
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
