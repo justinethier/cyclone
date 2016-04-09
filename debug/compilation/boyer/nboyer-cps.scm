@@ -1,12 +1,4 @@
-
-CHICKEN
-(c)2008-2011 The Chicken Team
-(c)2000-2007 Felix L. Winkelmann
-Version 4.7.0 
-linux-unix-gnu-x86 [ manyargs dload ptables ]
-compiled 2011-10-17 on roseapple (Linux)
-
-; loading tmp.scm ...
+;; nboyer cps conversion
 ((define main
    (lambda (k$633)
      (read (lambda (r$634)
