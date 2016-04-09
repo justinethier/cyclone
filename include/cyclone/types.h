@@ -438,7 +438,7 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 gc_heap *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
 /* Mutation table to support minor GC write barrier */
-void add_mutation(void *data, object var, object value);
+void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
 
 #endif /* CYCLONE_TYPES_H */

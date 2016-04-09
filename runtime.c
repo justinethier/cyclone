@@ -324,9 +324,14 @@ void debug_dump_globals()
  * the calling thread, so locking is not required.
  */
 
-void add_mutation(void *data, object var, object value){
+void add_mutation(void *data, object var, int index, object value){
   gc_thread_data *thd = (gc_thread_data *)data;
   if (is_object_type(value)) {
+    if (index >= 0) {
+      // For vectors only, mcons index as another var. That way
+      // the write barrier only needs to inspect the mutated index.
+      thd->mutations = mcons(obj_int2obj(index), thd->mutations);
+    }
     thd->mutations = mcons(var, thd->mutations);
   }
 }
@@ -969,7 +974,7 @@ object Cyc_set_car(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     gc_mut_update((gc_thread_data *)data, car(l), val);
     car(l) = val;
-    add_mutation(data, l, val);
+    add_mutation(data, l, -1, val);
     return l;
 }
 
@@ -977,7 +982,7 @@ object Cyc_set_cdr(void *data, object l, object val) {
     if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
     gc_mut_update((gc_thread_data *)data, cdr(l), val);
     cdr(l) = val;
-    add_mutation(data, l, val);
+    add_mutation(data, l, -1, val);
     return l;
 }
 
@@ -996,9 +1001,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
                 obj);
 
   ((vector)v)->elts[idx] = obj;
-  // TODO: probably could be more efficient here and also pass
-  //       index, so only that one entry needs GC.
-  add_mutation(data, v, obj);
+  add_mutation(data, v, idx, obj);
   return v;
 }
 
@@ -2847,15 +2850,20 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
     list l;
     for (l = ((gc_thread_data *)data)->mutations; !nullp(l); l = cdr(l)) {
       object o = car(l);
-      if (type_of(o) == cons_tag) {
+      if (is_value_type(o)) {
+          // Can happen if a vector element was already
+          // moved and we found an index. Just ignore it
+      } else if (type_of(o) == cons_tag) {
           gc_move2heap(car(o));
           gc_move2heap(cdr(o));
       } else if (type_of(o) == vector_tag) {
-        int i;
-        // TODO: probably too inefficient, try collecting single index
-        for (i = 0; i < ((vector)o)->num_elt; i++) {
+          int i;
+          object idx;
+          // For vectors, index is encoded as the next mutation
+          l = cdr(l);
+          idx = car(l);
+          i = obj_obj2int(idx);
           gc_move2heap(((vector)o)->elts[i]);
-        }
       } else if (type_of(o) == forward_tag) {
           // Already transported, skip
       } else {
