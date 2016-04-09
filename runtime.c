@@ -739,39 +739,50 @@ object memqp(void *data, object x, list l)
  for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
-object get(x,i) object x,i;
-{register object plist; register object plistd;
- if (nullp(x)) return x;
- if (type_of(x)!=symbol_tag) {printf("get: bad x=%ld\n",((closure)x)->tag); exit(0);}
- plist = symbol_plist(x);
- for (; !nullp(plist); plist = cdr(plistd))
-   {plistd = cdr(plist);
-    if (eq(car(plist),i)) return car(plistd);}
- return nil;}
+object get(object x, object i)
+{
+  object plist, plistd;
+  if (nullp(x)) return x;
+  if (type_of(x)!=symbol_tag) {printf("get: bad x=%ld\n",((closure)x)->tag); exit(0);}
+  plist = symbol_plist(x);
+  for (; !nullp(plist); plist = cdr(plistd))
+    {plistd = cdr(plist);
+     if (eq(car(plist),i)) return car(plistd);}
+  return nil;
+}
 
-object equalp(x,y) object x,y;
-{for (; ; x = cdr(x), y = cdr(y))
-   {if (equal(x,y)) return boolean_t;
+object equalp(object x, object y)
+{
+  for (; ; x = cdr(x), y = cdr(y)) {
+    if (equal(x,y)) return boolean_t;
     if (is_value_type(x) || is_value_type(y) ||
         nullp(x) || nullp(y) ||
         type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
-    if (boolean_f == equalp(car(x),car(y))) return boolean_f;}}
+    if (boolean_f == equalp(car(x),car(y))) return boolean_f;
+  }
+}
 
 list assq(void *data, object x, list l)
-{if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
- for (; !nullp(l); l = cdr(l))
-   {register list la = car(l); 
-    Cyc_check_cons(data, la);
-    if (eq(x,car(la))) return la;}
- return boolean_f;}
+{
+  if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  for (; !nullp(l); l = cdr(l)) {
+     list la = car(l); 
+     Cyc_check_cons(data, la);
+     if (eq(x,car(la))) return la;
+  }
+  return boolean_f;
+}
 
 list assoc(void *data, object x, list l)
-{if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
- for (; !nullp(l); l = cdr(l))
-   {register list la = car(l); 
-    Cyc_check_cons(data, la);
-    if (boolean_f != equalp(x,car(la))) return la;}
- return boolean_f;}
+{
+  if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  for (; !nullp(l); l = cdr(l)){
+     list la = car(l); 
+     Cyc_check_cons(data, la);
+     if (boolean_f != equalp(x,car(la))) return la;
+  }
+  return boolean_f;
+}
 
 object Cyc_num_cmp_va_list(void *data, int argc, int (fn_op(void *, object, object)), object n, va_list ns) {
   int i;
@@ -2043,21 +2054,27 @@ object Cyc_io_peek_char(void *data, object cont, object port) {
     return Cyc_EOF;
 }
 
-/* This heap cons is used only for initialization. */
-list mcons(a,d) object a,d;
-{register cons_type *c = malloc(sizeof(cons_type));
- c->hdr.mark = gc_color_red;
- c->hdr.grayed = 0;
- c->tag = cons_tag; c->cons_car = a; c->cons_cdr = d;
- return c;}
+// Functions internal to the runtime that use malloc
+list mcons(object a, object d)
+{
+  cons_type *c = malloc(sizeof(cons_type));
+  c->hdr.mark = gc_color_red;
+  c->hdr.grayed = 0;
+  c->tag = cons_tag; 
+  c->cons_car = a; 
+  c->cons_cdr = d;
+  return c;
+}
 
-cvar_type *mcvar(object *var) {
+cvar_type *mcvar(object *var) 
+{
   cvar_type *c = malloc(sizeof(cvar_type));
   c->hdr.mark = gc_color_red;
   c->hdr.grayed = 0;
   c->tag = cvar_tag; 
   c->pvar = var;
-  return c;}
+  return c;
+}
 
 void _Cyc_91global_91vars(void *data, object cont, object args){ 
     return_closcall1(data, cont, Cyc_global_variables); } 
