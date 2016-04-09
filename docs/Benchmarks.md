@@ -6,7 +6,7 @@ The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenu
 
 These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time. A longer bar indicates worse performance - however if there is no bar at all it means the benchmark could not be completed in a reasonable amount of time.
 
-<img src="docs/images/benchmarks/gabriel.png">
+<img src="images/benchmarks/gabriel.png">
 
 Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
