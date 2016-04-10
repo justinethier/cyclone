@@ -2,9 +2,9 @@
 
 # Benchmarks
 
-The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html) give an indication how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. 
+The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html) give an indication of how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. 
 
-These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time. A longer bar indicates worse performance - however if there is no bar at all it means the benchmark could not be completed in a reasonable amount of time.
+These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time in seconds. Longer bars indicate worse performance, although a bar is not displayed if the benchmark could not be completed in a reasonable amount of time.
 
 <img src="images/benchmarks/gabriel.png">
 
