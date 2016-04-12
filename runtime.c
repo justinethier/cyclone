@@ -95,7 +95,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /*END closcall section */
 
 /* Global variables. */
-static gc_heap *Cyc_heap;
+static gc_heap_root *Cyc_heap;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
 
@@ -164,7 +164,11 @@ static bool set_insert(ck_hs_t *hs, const void *value)
 
 void gc_init_heap(long heap_size)
 {
-  Cyc_heap = gc_heap_create(heap_size, 0, 0);
+
+  Cyc_heap = malloc(sizeof(gc_heap_root));
+  Cyc_heap->heap = gc_heap_create(heap_size, 0, 0);
+  Cyc_heap->small_obj_heap = gc_heap_create(heap_size, 0, 0);
+
   if (!ck_hs_init(&symbol_table, 
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
@@ -180,7 +184,7 @@ void gc_init_heap(long heap_size)
   }
 }
 
-gc_heap *gc_get_heap()
+gc_heap_root *gc_get_heap()
 {
   return Cyc_heap;
 }

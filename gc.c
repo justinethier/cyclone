@@ -426,15 +426,22 @@ void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd)
   return NULL; 
 }
 
-void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown) 
+void *gc_alloc(gc_heap_root *hrt, size_t size, char *obj, gc_thread_data *thd, int *heap_grown) 
 {
   void *result = NULL;
+  gc_heap *h = NULL;
   size_t max_freed = 0, sum_freed = 0, total_size;
   // TODO: check return value, if null (could not alloc) then 
   // run a collection and check how much free space there is. if less
   // the allowed ratio, try growing heap.
   // then try realloc. if cannot alloc now, then throw out of memory error
   size = gc_heap_align(size);
+  if (size <= 32){
+    h = hrt->small_obj_heap;
+  } else {
+    h = hrt->heap;
+  }
+
   result = gc_try_alloc(h, size, obj, thd);
   if (!result) {
     // A vanilla mark&sweep collector would collect now, but unfortunately
@@ -1190,7 +1197,8 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
-  max_freed = gc_sweep(gc_get_heap(), &freed);
+  max_freed = gc_sweep(gc_get_heap()->heap, &freed);
+  max_freed = gc_sweep(gc_get_heap()->small_obj_heap, &freed);
   total_size = cached_heap_total_size; //gc_heap_total_size(gc_get_heap());
   total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 
@@ -1200,6 +1208,7 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
     fprintf(stdout, "Less than %f%% of the heap is free, growing it\n", 
       100.0 * GC_FREE_THRESHOLD);
 #endif
+    TODO: how do we know which heap to grow???
     gc_grow_heap(gc_get_heap(), 0, 0);
     total_size = cached_heap_total_size;
     total_free = cached_heap_free_size;

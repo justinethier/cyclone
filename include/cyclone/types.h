@@ -128,6 +128,12 @@ struct gc_heap_t {
   char *data;
 };
 
+typedef struct gc_heap_root_t gc_heap_root;
+struct gc_heap_root_t {
+  gc_heap *small_obj_heap;
+  gc_heap *heap;
+};
+
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
   unsigned int mark; // mark bits (TODO: only need 2, reduce size of type?)
@@ -398,7 +404,7 @@ void gc_print_stats(gc_heap *h);
 int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
 void *gc_try_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
-void *gc_alloc(gc_heap *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
+void *gc_alloc(gc_heap_root *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
 size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
 gc_heap *gc_heap_last(gc_heap *h);
 size_t gc_heap_total_size(gc_heap *h);
@@ -435,7 +441,7 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 //  set_thread_blocked((data), (cont)); \
 //  body \
 //  return_thread_runnable((data), (result));
-gc_heap *gc_get_heap();
+gc_heap_root *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
 /* Mutation table to support minor GC write barrier */
 void add_mutation(void *data, object var, int index, object value);
