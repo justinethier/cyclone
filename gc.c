@@ -1202,17 +1202,18 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   total_size = cached_heap_total_size; //gc_heap_total_size(gc_get_heap());
   total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 
-//TODO: want stats on how much of each heap page is used
-  while (total_free < (total_size * GC_FREE_THRESHOLD)) {
-#if GC_DEBUG_TRACE
-    fprintf(stdout, "Less than %f%% of the heap is free, growing it\n", 
-      100.0 * GC_FREE_THRESHOLD);
-#endif
-    TODO: how do we know which heap to grow???
-    gc_grow_heap(gc_get_heap(), 0, 0);
-    total_size = cached_heap_total_size;
-    total_free = cached_heap_free_size;
-  }
+// TODO: disabling for now
+////TODO: want stats on how much of each heap page is used
+//  while (total_free < (total_size * GC_FREE_THRESHOLD)) {
+//#if GC_DEBUG_TRACE
+//    fprintf(stdout, "Less than %f%% of the heap is free, growing it\n", 
+//      100.0 * GC_FREE_THRESHOLD);
+//#endif
+//    //TODO: how do we know which heap to grow???
+//    gc_grow_heap(gc_get_heap(), 0, 0);
+//    total_size = cached_heap_total_size;
+//    total_free = cached_heap_free_size;
+//  }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "sweep done, total_size = %zu, total_free = %zu, freed = %zu, max_freed = %zu, elapsed = %zu\n", 
     total_size, total_free, 
