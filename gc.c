@@ -438,6 +438,8 @@ void *gc_alloc(gc_heap_root *hrt, size_t size, char *obj, gc_thread_data *thd, i
   size = gc_heap_align(size);
   if (size <= 32){
     h = hrt->small_obj_heap;
+  } else if (size <= 64) {
+    h = hrt->medium_obj_heap;
   } else {
     h = hrt->heap;
   }
@@ -1199,6 +1201,7 @@ fprintf(stderr, "DEBUG - after wait_handshake async\n");
   //sweep : 
   max_freed = gc_sweep(gc_get_heap()->heap, &freed);
   max_freed = gc_sweep(gc_get_heap()->small_obj_heap, &freed);
+  max_freed = gc_sweep(gc_get_heap()->medium_obj_heap, &freed);
   total_size = cached_heap_total_size; //gc_heap_total_size(gc_get_heap());
   total_free = cached_heap_free_size; //gc_heap_total_free_size(gc_get_heap());
 

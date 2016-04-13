@@ -131,6 +131,7 @@ struct gc_heap_t {
 typedef struct gc_heap_root_t gc_heap_root;
 struct gc_heap_root_t {
   gc_heap *small_obj_heap;
+  gc_heap *medium_obj_heap;
   gc_heap *heap;
 };
 
