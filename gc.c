@@ -382,10 +382,32 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   size_t cur_size, new_size;
   gc_heap *h_last, *h_new;
   pthread_mutex_lock(&heap_lock);
-  h_last = gc_heap_last(h);
-  cur_size = h_last->size;
-  // JAE - For now, just add a new page
-  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
+  // TODO: experiment with
+  // 1) growing heap gradually using a fibonnaci sequence growth
+  // 2) cap at HEAP_SIZE
+  // 3) allocate larger pages if heap aligned size is > page size?
+  {
+    size_t prev_size = 0;
+    new_size = 0;
+    h_last = h;
+    while (h_last->next) {
+      if (new_size < HEAP_SIZE){
+        new_size = prev_size + h_last->size;
+        prev_size = h_last->size;
+      } else {
+        new_size = HEAP_SIZE;
+      }
+      h_last = h_last->next;
+    }
+    if (new_size == 0) 
+      new_size = h_last->size;
+    //fprintf(stderr, "Growing heap new page size = %zu\n", new_size);
+  }
+// OLD code:
+//  h_last = gc_heap_last(h);
+//  cur_size = h_last->size;
+//  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
+// END TODO
   h_new = gc_heap_create(new_size, h_last->max_size, chunk_size);
   h_last->next = h_new;
   pthread_mutex_unlock(&heap_lock);
