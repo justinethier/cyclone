@@ -385,26 +385,28 @@ int gc_grow_heap(gc_heap *h, int heap_type, size_t size, size_t chunk_size)
 // but with boyer benchmarks there is more thrashing with this method,
 // so for now it is not used. If it is used again, the initial heaps will
 // need to start at a lower size (EG 1 MB).
-//  {
-//    size_t prev_size = 0;
-//    new_size = 0;
-//    h_last = h;
-//    while (h_last->next) {
-//      if (new_size < HEAP_SIZE){
-//        new_size = prev_size + h_last->size;
-//        prev_size = h_last->size;
-//      } else {
-//        new_size = HEAP_SIZE;
-//      }
-//      h_last = h_last->next;
-//    }
-//    if (new_size == 0) 
-//      new_size = h_last->size;
-//    //fprintf(stderr, "Growing heap new page size = %zu\n", new_size);
-//  }
-  h_last = gc_heap_last(h);
-  cur_size = h_last->size;
-  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
+  {
+    size_t prev_size = 0 * 1024 * 1024;
+    new_size = 0;
+    h_last = h;
+    while (h_last->next) {
+      if (new_size < HEAP_SIZE){
+        new_size = prev_size + h_last->size;
+        prev_size = h_last->size;
+      } else {
+        new_size = HEAP_SIZE;
+      }
+      h_last = h_last->next;
+    }
+    if (new_size == 0) 
+      new_size = prev_size + h_last->size;
+//#if GC_DEBUG_TRACE
+    fprintf(stderr, "Growing heap %d new page size = %zu\n", heap_type, new_size);
+//#endif
+  }
+//  h_last = gc_heap_last(h);
+//  cur_size = h_last->size;
+//  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
   // allocate larger pages if size will not fit on the page
   //new_size = gc_heap_align(((cur_size > size) ? cur_size : size));
   // Done with computing new page size
