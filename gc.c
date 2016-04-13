@@ -400,9 +400,9 @@ int gc_grow_heap(gc_heap *h, int heap_type, size_t size, size_t chunk_size)
     }
     if (new_size == 0) 
       new_size = prev_size + h_last->size;
-//#if GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
     fprintf(stderr, "Growing heap %d new page size = %zu\n", heap_type, new_size);
-//#endif
+#endif
   }
 //  h_last = gc_heap_last(h);
 //  cur_size = h_last->size;
