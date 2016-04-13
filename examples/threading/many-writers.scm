@@ -6,7 +6,7 @@
   (srfi 18))
 
 (define (write-forever val)
-  (write val)
+  (display val)
   (write-forever val))
 
 (define (make-writer val)
