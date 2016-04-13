@@ -166,9 +166,9 @@ void gc_init_heap(long heap_size)
 {
 
   Cyc_heap = malloc(sizeof(gc_heap_root));
-  Cyc_heap->heap = gc_heap_create(heap_size, 0, 0);
-  Cyc_heap->small_obj_heap = gc_heap_create(heap_size, 0, 0);
-  Cyc_heap->medium_obj_heap = gc_heap_create(heap_size, 0, 0);
+  Cyc_heap->heap = gc_heap_create(HEAP_REST, heap_size, 0, 0);
+  Cyc_heap->small_obj_heap = gc_heap_create(HEAP_SM, heap_size, 0, 0);
+  Cyc_heap->medium_obj_heap = gc_heap_create(HEAP_MED, heap_size, 0, 0);
 
   if (!ck_hs_init(&symbol_table, 
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
