@@ -382,32 +382,34 @@ int gc_grow_heap(gc_heap *h, size_t size, size_t chunk_size)
   size_t cur_size, new_size;
   gc_heap *h_last, *h_new;
   pthread_mutex_lock(&heap_lock);
-  // TODO: experiment with
-  // 1) growing heap gradually using a fibonnaci sequence growth
-  // 2) cap at HEAP_SIZE
-  // 3) allocate larger pages if heap aligned size is > page size?
-  {
-    size_t prev_size = 0;
-    new_size = 0;
-    h_last = h;
-    while (h_last->next) {
-      if (new_size < HEAP_SIZE){
-        new_size = prev_size + h_last->size;
-        prev_size = h_last->size;
-      } else {
-        new_size = HEAP_SIZE;
-      }
-      h_last = h_last->next;
-    }
-    if (new_size == 0) 
-      new_size = h_last->size;
-    //fprintf(stderr, "Growing heap new page size = %zu\n", new_size);
-  }
-// OLD code:
-//  h_last = gc_heap_last(h);
-//  cur_size = h_last->size;
-//  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
-// END TODO
+  // Compute size of new heap page
+// experimental code for growing heap gradually using fibonnaci sequence.
+// but with boyer benchmarks there is more thrashing with this method,
+// so for now it is not used. If it is used again, the initial heaps will
+// need to start at a lower size (EG 1 MB).
+//  {
+//    size_t prev_size = 0;
+//    new_size = 0;
+//    h_last = h;
+//    while (h_last->next) {
+//      if (new_size < HEAP_SIZE){
+//        new_size = prev_size + h_last->size;
+//        prev_size = h_last->size;
+//      } else {
+//        new_size = HEAP_SIZE;
+//      }
+//      h_last = h_last->next;
+//    }
+//    if (new_size == 0) 
+//      new_size = h_last->size;
+//    //fprintf(stderr, "Growing heap new page size = %zu\n", new_size);
+//  }
+  h_last = gc_heap_last(h);
+  cur_size = h_last->size;
+  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
+  // allocate larger pages if size will not fit on the page
+  //new_size = gc_heap_align(((cur_size > size) ? cur_size : size));
+  // Done with computing new page size
   h_new = gc_heap_create(new_size, h_last->max_size, chunk_size);
   h_last->next = h_new;
   pthread_mutex_unlock(&heap_lock);
