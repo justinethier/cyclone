@@ -4,6 +4,12 @@ Tier 1:
 - Performance - most likely need CPS optimization and closure elimination
 - pass larceny benchmarks (will require some bugfixes):
 
+TODO: sboyer finishes in a reasonable amount of time now, but the collector's memory growth is
+      not being limited. need to test, but I think disabling the growth code after collection
+      is throwing off the collector's memory ratios and causing each major collection to first
+      'bump' gc_grow_heap. anyway, need to figure this out
+
+
   benchmarks that do not finish due to
   missing features:
     - gcbench.scm - Needed to manually import (srfi 9)
