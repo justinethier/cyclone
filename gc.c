@@ -386,7 +386,7 @@ int gc_grow_heap(gc_heap *h, int heap_type, size_t size, size_t chunk_size)
 // so for now it is not used. If it is used again, the initial heaps will
 // need to start at a lower size (EG 1 MB).
   {
-    size_t prev_size = 0 * 1024 * 1024;
+    size_t prev_size = 2 * 1024 * 1024;
     new_size = 0;
     h_last = h;
     while (h_last->next) {

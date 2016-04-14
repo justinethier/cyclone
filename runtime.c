@@ -164,7 +164,7 @@ static bool set_insert(ck_hs_t *hs, const void *value)
 
 void gc_init_heap(long heap_size)
 {
-  size_t initial_heap_size = 1 * 1024 * 1024;
+  size_t initial_heap_size = 3 * 1024 * 1024;
   Cyc_heap = malloc(sizeof(gc_heap_root));
   Cyc_heap->heap = gc_heap_create(HEAP_REST, initial_heap_size, 0, 0);
   Cyc_heap->small_obj_heap = gc_heap_create(HEAP_SM, initial_heap_size, 0, 0);
