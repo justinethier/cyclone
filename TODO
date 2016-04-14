@@ -4,7 +4,7 @@ add rename support to library syntax, start by looking at lib:exports.
 will need a way of compiling this into the library, and for progs/libs importing the library (although
 those may just be able to simply each rename to refer to the renamed identifier)
 
-Tier 1:
+Tier 0:
 - Library support
   Library syntax (5.6):
    supported:
@@ -25,7 +25,13 @@ Tier 1:
     - except
     - rename
     - prefix
+- FFI
+  - want to create an example program (lib?) that does something interesting, like make a cURL request
+    for that, will need to be able to include the appropriate C header(s), and link to the appropriate C libraries
 
+
+
+Tier 1:
 - Performance - most likely need CPS optimization and closure elimination
 - pass larceny benchmarks (will require some bugfixes):
 
