@@ -1,5 +1,9 @@
 Initiatives:
 
+add rename support to library syntax, start by looking at lib:exports.
+will need a way of compiling this into the library, and for progs/libs importing the library (although
+those may just be able to simply each rename to refer to the renamed identifier)
+
 Tier 1:
 - Library support
   Library syntax (5.6):
