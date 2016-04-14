@@ -1,6 +1,27 @@
 Initiatives:
 
 Tier 1:
+- Library support
+  Library syntax (5.6):
+   supported:
+    - export
+    - import
+    - begin
+    - include
+    - cond-expand??????
+   not supported:
+    - rename
+    - export-all (but this is not standard!)
+
+  Import sets (importing libraries, section 5.2):
+   supported:
+    - library name
+   not supported (not these are defined recursively, and can be nested):
+    - only
+    - except
+    - rename
+    - prefix
+
 - Performance - most likely need CPS optimization and closure elimination
 - pass larceny benchmarks (will require some bugfixes):
 
