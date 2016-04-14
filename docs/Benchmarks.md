@@ -7,6 +7,8 @@ The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenu
 These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time in seconds. Longer bars indicate worse performance, although a bar is not displayed if the benchmark could not be completed in a reasonable amount of time.
 
 <img src="images/benchmarks/gabriel.png">
+<img src="images/benchmarks/kvw.png">
+<img src="images/benchmarks/gc.png">
 
 Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
@@ -22,4 +24,16 @@ takl      | 132     | -     | 78.7
 ntakl     | 152     | 193   | 77.9
 cpstak    | 92      | -     | 35
 ctak      | 7.9     | -     | 8.6
-
+          |         |       |
+ack       | 288     | 161   | 116
+array1    | 167     | 130   | 29.4
+string    | 1       | 8.478 | 1.584
+sum1      | 27      | 74    | 7.737
+cat       | 43.669  | 132   | 55
+tail      | 367     | 674   | -
+wc        | 202     | 1072  | 36.4
+          |         |       |
+nboyer    | 67.783  | 73.516  | 39.377
+sboyer    | 48.044  | 69.243  | 23.628
+gcbench   | 143.478 | -       | 16.75
+mperm     | 328.741 | 260.358 | 57.5
