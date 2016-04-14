@@ -28,7 +28,6 @@ Tier 0:
 - FFI
   - want to create an example program (lib?) that does something interesting, like make a cURL request
     for that, will need to be able to include the appropriate C header(s), and link to the appropriate C libraries
-- game of life demo - need to fix this up (one way or the other) so it runs
 
 
 Tier 1:
