@@ -36,8 +36,8 @@ Section | Status | Comments
 6.3 Booleans | Yes | `#true` and `#false` are not recognized by parser.
 6.4 Pairs and lists | Yes | `member` functions are predicates, `member` and `assoc` do not accept `compare` argument.
 6.5 Symbols | Yes |
-6.6 Characters | Partial | No unicode support, `char-ci` predicates are not implemented.
-6.7 Strings | Partial | No unicode support, `string-ci` functions are not implemented.
+6.6 Characters | Partial | No unicode support.
+6.7 Strings | Partial | No unicode support.
 6.8 Vectors | Yes |
 6.9 Bytevectors | Yes | 
 6.10 Control features | Yes | `dynamic-wind` is limited, and does not work across calls to continuations.
