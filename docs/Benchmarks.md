@@ -4,7 +4,9 @@
 
 The following [benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html) give an indication of how well Cyclone performs compared with other R<sup>7</sup>RS Schemes. These benchmarks were recorded on a system with an Intel Core i5 CPU @ 2.20 GHz and indicate elapsed time in seconds. Longer bars indicate worse performance, although a bar is not displayed if the benchmark could not be completed in a reasonable amount of time.
 
-# <img src="images/benchmarks/gabriel.png">
+# Gabriel Benchmarks
+
+<img src="images/benchmarks/gabriel.png">
 
 Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
@@ -21,7 +23,9 @@ ntakl     | 152     | 193   | 77.9
 cpstak    | 92      | -     | 35
 ctak      | 7.9     | -     | 8.6
 
-# <img src="images/benchmarks/kvw.png">
+# Kernighan and Van Wyk Benchmarks
+
+<img src="images/benchmarks/kvw.png">
 
 Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
@@ -33,7 +37,9 @@ cat       | 43.669  | 132   | 55
 tail      | 367     | 674   | -
 wc        | 202     | 1072  | 36.4
 
-# <img src="images/benchmarks/gc.png">
+# Garbage Collection Benchmarks
+
+<img src="images/benchmarks/gc.png">
 
 Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
