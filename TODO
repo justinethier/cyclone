@@ -12,10 +12,11 @@ Tier 0:
     - import
     - begin
     - include
-    - cond-expand??????
    not supported:
     - rename
-    - export-all (but this is not standard!)
+    - cond-expand
+    - include-ci
+    - export-all (but this is not standard, so ok!)
 
   Import sets (importing libraries, section 5.2):
    supported:
