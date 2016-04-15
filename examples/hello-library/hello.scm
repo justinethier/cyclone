@@ -9,7 +9,7 @@
 (write "hello")
 (newline)
 
-(lib1-test-renamed)
+(write lib1-test-renamed)
 (newline)
 
 (write (lib1-hello))
