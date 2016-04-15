@@ -15,13 +15,13 @@ deriv     | 39      | 212   | 13
 destruc   | 136     | 197   | 20
 diviter   | 51      | 122.9 | 8
 divrec    | 70      | 108   | 29
-puzzle    | 184     | -     | 32
+puzzle    | 184     | Timeout     | 32
 triangl   | 95      | 201   | 26.6
 tak       | 70      | 105   | 28.9
-takl      | 132     | -     | 78.7
+takl      | 132     | Timeout     | 78.7
 ntakl     | 152     | 193   | 77.9
-cpstak    | 92      | -     | 35
-ctak      | 7.9     | -     | 8.6
+cpstak    | 92      | Timeout     | 35
+ctak      | 7.9     | Timeout     | 8.6
 
 ## Kernighan and Van Wyk Benchmarks
 
@@ -45,5 +45,5 @@ Benchmark | Cyclone | Chibi | Chicken
 --------- | ------- | ----- | -------
 nboyer    | 67.783  | 73.516  | 39.377
 sboyer    | 48.044  | 69.243  | 23.628
-gcbench   | 143.478 | -       | 16.75
+gcbench   | 143.478 | Timeout       | 16.75
 mperm     | 328.741 | 260.358 | 57.5
