@@ -7,6 +7,13 @@
         )
 
 (write "hello")
-;(test-lib1-hello)
+(newline)
+
+(lib1-test-renamed)
+(newline)
+
 (write (lib1-hello))
+(newline)
+
 (write "world")
+(newline)
