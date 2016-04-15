@@ -4,12 +4,12 @@ TARGETS = \
   begin-splicing \
   fac \
   long-running-process \
-  game-of-life/life \
-  hello-library/hello \
   threading/cv-broadcast \
   threading/many-writers \
   threading/producer-consumer \
   threading/thread-join \
+  game-of-life/life \
+  hello-library/hello \
 
 SRCFILES = $(addsuffix .scm, $(TARGETS))
 
