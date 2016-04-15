@@ -20,23 +20,23 @@
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
-(cond-expand
- (chicken
-   (define (Cyc-installation-dir . opt) 
-     (if (equal? '(inc) opt)
-       "/home/justin/Documents/cyclone/include"
-       ;; Ignore opt and always assume current dir for chicken, since it is just dev
-       "/home/justin/Documents/cyclone"))
-   (require-extension extras) ;; pretty-print
-   (require-extension chicken-syntax) ;; when
-   (require-extension srfi-1) ;; every
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
- (else #f))
+;;(cond-expand
+;; (chicken
+;;   (define (Cyc-installation-dir . opt) 
+;;     (if (equal? '(inc) opt)
+;;       "/home/justin/Documents/cyclone/include"
+;;       ;; Ignore opt and always assume current dir for chicken, since it is just dev
+;;       "/home/justin/Documents/cyclone"))
+;;   (require-extension extras) ;; pretty-print
+;;   (require-extension chicken-syntax) ;; when
+;;   (require-extension srfi-1) ;; every
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
+;; (else #f))
 
 ;; Code emission.
   
@@ -51,6 +51,7 @@
       (define imported-vars '())
       (define lib-name '())
       (define lib-exports '())
+      (define lib-renamed-exports '())
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
@@ -66,17 +67,18 @@
              (cons
                (lib:name->symbol lib-name)
                (lib:exports (car input-program))))
+           (set! lib-renamed-exports 
+             (lib:rename-exports (car input-program)))
            (set! imports (lib:imports (car input-program)))
            (set! input-program (lib:body (car input-program)))
            ;; Add any renamed exports to the begin section
-           (let ((renames (lib:rename-exports (car input-program))))
-             (set! input-program
-                   (append
-                     (map 
-                       (lambda (r) 
-                        `(define ,(caddr r) ,(cadr r)))
-                       renames)   
-                     input-program)))
+           (set! input-program
+                 (append
+                   (map 
+                     (lambda (r) 
+                      `(define ,(caddr r) ,(cadr r)))
+                     lib-renamed-exports)   
+                   input-program))
            ;; Prepend any included files into the begin section
            (if (not (null? includes))
              (for-each
