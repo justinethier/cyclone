@@ -26,6 +26,7 @@
     lib:name->symbol
     lib:result
     lib:exports
+    lib:rename-exports
     lib:imports
     lib:body
     lib:includes
@@ -80,10 +81,23 @@
 ;; TODO: most of these below assume 0 or 1 instances of the directive.
 ;; may need to replace some of these later with filter operations to
 ;; support more than 1 instance.
-(define (lib:exports ast)
+(define (lib:raw-exports ast)
   (lib:result 
     (let ((code (assoc 'export (cddr ast))))
       (if code (cdr code) #f))))
+(define (lib:rename-exports ast)
+  (filter
+    (lambda (ex)
+      (tagged-list? 'rename ex))
+    (lib:raw-exports ast)))
+(define (lib:exports ast)
+  (map
+    (lambda (ex)
+      ;; Replace any renamed exports
+      (if (tagged-list? 'rename ex)
+          (caddr ex)
+          ex))
+    (lib:raw-exports ast)))
 (define (lib:imports ast)
   (lib:result
     (let ((code (assoc 'import (cddr ast))))
