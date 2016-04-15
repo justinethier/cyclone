@@ -139,6 +139,7 @@ img {
   max-width: 739px;
   padding: 5px;
   margin: 10px 0 10px 0;
+  /*
   border: 1px solid #ebebeb;
 
   box-shadow: 0 0 5px #ebebeb;
@@ -146,6 +147,7 @@ img {
   -moz-box-shadow: 0 0 5px #ebebeb;
   -o-box-shadow: 0 0 5px #ebebeb;
   -ms-box-shadow: 0 0 5px #ebebeb;
+  */
 }
 
 p img {
@@ -279,7 +281,7 @@ Full-Width Styles
   z-index: 10;
   padding: 10px 50px 10px 10px;
   color: #fff;
-  background: url('../images/blacktocat.png') #0090ff no-repeat 95% 50%;
+  background: url('../images/blacktocat.png') #000000 no-repeat 95% 50%;
   font-weight: 700;
   box-shadow: 0 0 10px rgba(0,0,0,.5);
   border-bottom-left-radius: 2px;
@@ -287,12 +289,12 @@ Full-Width Styles
 }
 
 #header_wrap {
-  background: #212121;
-  background: -moz-linear-gradient(top, #373737, #212121);
-  background: -webkit-linear-gradient(top, #373737, #212121);
-  background: -ms-linear-gradient(top, #373737, #212121);
-  background: -o-linear-gradient(top, #373737, #212121);
-  background: linear-gradient(top, #373737, #212121);
+  background: #f2f2f2;
+  background: -moz-linear-gradient(top, #f2f2f2, #007edf);
+  background: -webkit-linear-gradient(top, #f2f2f2, #007edf);
+  background: -ms-linear-gradient(top, #f2f2f2, #007edf);
+  background: -o-linear-gradient(top, #f2f2f2, #007edf);
+  background: linear-gradient(top, #f2f2f2, #007edf);
 }
 
 #header_wrap .inner {
