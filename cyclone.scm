@@ -68,6 +68,15 @@
                (lib:exports (car input-program))))
            (set! imports (lib:imports (car input-program)))
            (set! input-program (lib:body (car input-program)))
+           ; Add any renamed exports to the begin section
+           ;(let ((renames (lib:rename-exports (car input-program))))
+           ;  (set! input-program
+           ;        (append
+           ;          (map 
+           ;            (lambda (r) 
+           ;             `(define ,(caddr r) ,(cadr r)))
+           ;            renames)   
+           ;          input-program)))
            ;; Prepend any included files into the begin section
            (if (not (null? includes))
              (for-each
