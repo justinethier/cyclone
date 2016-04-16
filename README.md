@@ -46,13 +46,13 @@ Getting Started
 Documentation
 -------------
 
-- The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
+- The [User Manual](docs/User-Manual) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
 
-- Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
+- Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
-- The [Benchmarks](docs/Benchmarks.md) page compares the performance of Cyclone with other R<sup>7</sup>RS Schemes using a common set of benchmarks.
+- The [Benchmarks](docs/Benchmarks) page compares the performance of Cyclone with other R<sup>7</sup>RS Schemes using a common set of benchmarks.
 
-- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on how the compiler was written and how it works.
+- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler) provides high-level details on how the compiler was written and how it works.
 
 - Finally, if you need another resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
@@ -61,7 +61,7 @@ Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Game of Life](examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
+- [Game of Life]({{ page.ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
 
 - [Threading](examples/threading) - Various examples of multi-threaded programs.
 
