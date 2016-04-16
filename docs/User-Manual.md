@@ -1,3 +1,7 @@
+---
+layout: post
+title: Cyclone Scheme | User Manual
+---
 [<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
 # User Manual
