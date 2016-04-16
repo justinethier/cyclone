@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Cyclone Scheme
+ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 ---
 
 Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, and generational garbage collection. Unlike previous Cheney on the MTA compilers, Cyclone also allows execution of multiple native threads. An on-the-fly garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
@@ -61,13 +62,13 @@ Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Game of Life]({{ ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
+- [Game of Life]({{ page.ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
 
 - [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
 
 - [Tail Call Optimization]({{ page.ghproj }}examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
 
-- Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`](cyclone.scm) and [`icyc.scm`](icyc.scm) to create executables for Cyclone's compiler and interpreter.
+- Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`]({{ page.ghproj }}cyclone.scm) and [`icyc.scm`]({{ page.ghproj }}icyc.scm) to create executables for Cyclone's compiler and interpreter.
 
 License
 -------
