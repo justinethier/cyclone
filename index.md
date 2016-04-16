@@ -61,7 +61,7 @@ Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Game of Life]({{ page.ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
+- [Game of Life]({{ ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
 
 - [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
 
