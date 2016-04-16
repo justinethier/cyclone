@@ -1,3 +1,8 @@
+---
+layout: post
+title: Writing the Cyclone Scheme Compiler
+---
+
 # Writing the Cyclone Scheme Compiler
 
 ###### by [Justin Ethier](https://github.com/justinethier)

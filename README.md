@@ -63,9 +63,9 @@ Cyclone provides several example programs, including:
 
 - [Game of Life]({{ page.ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
 
-- [Threading](examples/threading) - Various examples of multi-threaded programs.
+- [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
 
-- [Tail Call Optimization](examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
+- [Tail Call Optimization]({{ page.ghproj }}examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
 
 - Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`](cyclone.scm) and [`icyc.scm`](icyc.scm) to create executables for Cyclone's compiler and interpreter.
 

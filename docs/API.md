@@ -1,3 +1,7 @@
+---
+layout: post
+title: API
+---
 
 # R<sup>7</sup>RS Libraries
 

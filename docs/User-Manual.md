@@ -123,9 +123,9 @@ Scheme code can be evaluated interactively using the `icyc` command:
 
 Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). 
 
-A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differences between the specification and Cyclone's implementation.
+A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance) lists differences between the specification and Cyclone's implementation.
 
-[API Documentation](API.md) is available for the libraries provide by Cyclone.
+[API Documentation](API) is available for the libraries provide by Cyclone.
 
 # Multithreaded Programming
 
