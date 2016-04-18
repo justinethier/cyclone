@@ -8,6 +8,11 @@ Tier 0:
 - FFI
   - want to create an example program (lib?) that does something interesting, like make a cURL request
     for that, will need to be able to include the appropriate C header(s), and link to the appropriate C libraries
+  - Program idea - it would be cool if we could interface with libpng.
+    then, extend game-of-life example with new libraries (as needed) and master
+    program that support output of each frame to a PNG file. then we can string 
+    them all together as an animated gif and post that to the cyclone repo.
+
 - Library support
 
   Import sets (importing libraries, section 5.2):
