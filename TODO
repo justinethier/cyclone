@@ -9,17 +9,6 @@ Tier 0:
   - want to create an example program (lib?) that does something interesting, like make a cURL request
     for that, will need to be able to include the appropriate C header(s), and link to the appropriate C libraries
 - Library support
-  Library syntax (5.6):
-   supported:
-    - export
-    - import
-    - begin
-    - include
-    - rename
-   not supported:
-    - cond-expand
-    - include-ci
-    - export-all (but this is not standard, so ok!)
 
   Import sets (importing libraries, section 5.2):
    supported:
