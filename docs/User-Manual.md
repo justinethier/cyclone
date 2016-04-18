@@ -125,7 +125,7 @@ Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Sch
 
 A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance) lists differences between the specification and Cyclone's implementation.
 
-[API Documentation](API) is available for the libraries provide by Cyclone.
+[API Documentation](API) is available for the libraries provided by Cyclone.
 
 # Multithreaded Programming
 
@@ -143,7 +143,7 @@ Due to how Cyclone's garbage collector is implemented, objects are relocated in 
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
-- Characters are stored using value types and do not need to be garbage collected.
+- Characters and integers are stored using value types and do not need to be garbage collected.
 - Symbols are stored in a global table rather than the stack/heap.
 - Mutexes are always allocated on the heap since by definition they are used by more than one thread.
 
