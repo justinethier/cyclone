@@ -17,18 +17,10 @@ typedef struct _RGBBitmap {
     RGBPixel *pixels;
     size_t width;
     size_t height;
-    size_t bytewidth;
     uint8_t bytes_per_pixel;
 } RGBBitmap;
 
 /* Returns pixel of bitmap at given point. */
-//#define RGBPixelAtPoint(image, x, y) \
-//    *(((image)->pixels) + (((image)->bytewidth * (y)) \
-//                        + ((x) * (image)->bytes_per_pixel)))
-//
-//#define RGBBufferAtPoint(image, x, y) \
-//    (((image)->pixels) + (((image)->bytewidth * (y)) \
-//                        + ((x) * (image)->bytes_per_pixel)))
 #define RGBPixelAtPoint(image, x, y) \
     *(((image)->pixels) + (((image)->width * (y)) \
                         + ((x))))
@@ -86,7 +78,7 @@ int save_png_to_file(RGBBitmap *bitmap, const char *path)
     bytes_per_row = bitmap->width * bitmap->bytes_per_pixel;
     row_pointers = png_malloc(png_ptr, bitmap->height * sizeof(png_byte *));
     for (y = 0; y < bitmap->height; ++y) {
-      uint8_t *row = png_malloc(png_ptr, sizeof(uint8_t) * bytes_per_row); //bitmap->bytes_per_pixel * bitmap->width);
+      uint8_t *row = png_malloc(png_ptr, sizeof(uint8_t) * bytes_per_row);
       row_pointers[y] = (png_byte *)row;
       for (x = 0; x < bitmap->width; ++x) {
         RGBPixel color = RGBPixelAtPoint(bitmap, x, y);
@@ -113,47 +105,40 @@ int save_png_to_file(RGBBitmap *bitmap, const char *path)
     return 0;
 }
 
+int bitmap_init(RGBBitmap *img, int width, int height)
+{
+  img->width = width;
+  img->height = height;
+  img->bytes_per_pixel = 3;
+  img->pixels = calloc(1, sizeof(RGBPixel) * img->width * img->height);
+  return 0;
+}
+
+void bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b)
+{
+  RGBPixel *pixel = RGBBufferAtPoint(img, x, y);
+  pixel->red = r;
+  pixel->green = g;
+  pixel->blue = b;
+}
+
 int main()
 {
   const char path[] = "test.png";
   int status = 0, x, y;
   RGBBitmap img;
-  RGBPixel *pixel;
 
-  img.width = 100;
-  img.height = 100;
-  img.bytewidth = img.width; // ????
-  img.bytes_per_pixel = 3;
-  img.pixels = calloc(1, sizeof(RGBPixel) * img.width * img.height);
-
+  bitmap_init(&img, 100, 100);
   for (y = 0; y < img.height; y++) {
     for (x = 0; x < img.height; x++) {
-      pixel = RGBBufferAtPoint(&img, x, y);
-      pixel->red = 255;
-      pixel->green = 255;
-      pixel->blue = 255;
+      bitmap_set(&img, x, y, 255, 255, 255);
     }
   }
-  pixel = RGBBufferAtPoint(&img, 50, 50);
-  pixel->red = 0;
-  pixel->green = 0;
-  pixel->blue = 255;
-  pixel = RGBBufferAtPoint(&img, 0, 0);
-  pixel->red = 0;
-  pixel->green = 0;
-  pixel->blue = 255;
-  pixel = RGBBufferAtPoint(&img, 99, 0);
-  pixel->red = 0;
-  pixel->green = 0;
-  pixel->blue = 255;
-  pixel = RGBBufferAtPoint(&img, 0, 99);
-  pixel->red = 0;
-  pixel->green = 0;
-  pixel->blue = 255;
-  pixel = RGBBufferAtPoint(&img, 99, 99);
-  pixel->red = 0;
-  pixel->green = 0;
-  pixel->blue = 255;
+  bitmap_set(&img, 50, 50, 0, 0, 255);
+  bitmap_set(&img, 0,  0, 0, 0, 255);
+  bitmap_set(&img, 99, 0, 0, 0, 255);
+  bitmap_set(&img, 0,  99, 0, 0, 255);
+  bitmap_set(&img, 99, 99, 0, 0, 255);
 
   status = save_png_to_file(&img, path);
   if (!status){
