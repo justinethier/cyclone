@@ -1,36 +1,9 @@
 // Based on example program from
 // http://stackoverflow.com/q/1821806/101258
-#include <png.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-/* Pixels in this bitmap structure are stored as BGR. */
-typedef struct _RGBPixel {
-    uint8_t blue;
-    uint8_t green;
-    uint8_t red;
-} RGBPixel;
-
-/* Structure for containing decompressed bitmaps. */
-typedef struct _RGBBitmap {
-    RGBPixel *pixels;
-    size_t width;
-    size_t height;
-    uint8_t bytes_per_pixel;
-} RGBBitmap;
-
-/* Returns pixel of bitmap at given point. */
-#define RGBPixelAtPoint(image, x, y) \
-    *(((image)->pixels) + (((image)->width * (y)) \
-                        + ((x))))
-
-#define RGBBufferAtPoint(image, x, y) \
-    (((image)->pixels) + (((image)->width * (y)) \
-                        + ((x))))
+#include "write-png.h"
 
 /* Attempts to save PNG to file; returns 0 on success, non-zero on error. */
-int save_png_to_file(RGBBitmap *bitmap, const char *path)
+int bitmap_save_to_png(RGBBitmap *bitmap, const char *path)
 {
     FILE *fp = fopen(path, "wb");
     png_structp png_ptr = NULL;
@@ -114,12 +87,13 @@ int bitmap_init(RGBBitmap *img, int width, int height)
   return 0;
 }
 
-void bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b)
+int bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b)
 {
   RGBPixel *pixel = RGBBufferAtPoint(img, x, y);
   pixel->red = r;
   pixel->green = g;
   pixel->blue = b;
+  return 0;
 }
 
 int main()
@@ -140,7 +114,7 @@ int main()
   bitmap_set(&img, 0,  99, 0, 0, 255);
   bitmap_set(&img, 99, 99, 0, 0, 255);
 
-  status = save_png_to_file(&img, path);
+  status = bitmap_save_to_png(&img, path);
   if (!status){
     printf("Successfully saved %s\n", path);
   } else {
