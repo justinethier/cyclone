@@ -7,16 +7,16 @@ META_FILES = $(addsuffix .meta, $(SCM_LIBS))
 GENC_FILES = $(addsuffix .c, $(SCM_LIBS))
 COBJECTS=$(SLD_FILES:.sld=.o)
 
-all: $(SCM_PROGRAM) write-png
+all: $(SCM_PROGRAM) #write-png
 
 %.o: %.sld
 	cyclone $<
 
-$(SCM_PROGRAM): $(SCM_FILE) $(COBJECTS)
+$(SCM_PROGRAM): $(SCM_FILE) $(COBJECTS) write-png.o
 	cyclone $<
 
-write-png: write-png.o
-	gcc -o write-png write-png.o -lpng
+#write-png: write-png.o
+#	gcc -o write-png write-png.o -lpng
 
 write-png.o: write-png.c write-png.h
 	gcc -c write-png.c

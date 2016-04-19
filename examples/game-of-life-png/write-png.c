@@ -96,29 +96,29 @@ int bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b)
   return 0;
 }
 
-int main()
-{
-  const char path[] = "test.png";
-  int status = 0, x, y;
-  RGBBitmap img;
-
-  bitmap_init(&img, 100, 100);
-  for (y = 0; y < img.height; y++) {
-    for (x = 0; x < img.height; x++) {
-      bitmap_set(&img, x, y, 255, 255, 255);
-    }
-  }
-  bitmap_set(&img, 50, 50, 0, 0, 255);
-  bitmap_set(&img, 0,  0, 0, 0, 255);
-  bitmap_set(&img, 99, 0, 0, 0, 255);
-  bitmap_set(&img, 0,  99, 0, 0, 255);
-  bitmap_set(&img, 99, 99, 0, 0, 255);
-
-  status = bitmap_save_to_png(&img, path);
-  if (!status){
-    printf("Successfully saved %s\n", path);
-  } else {
-    printf("Unable to save %s\n", path);
-  }
-  return status;
-}
+//int main()
+//{
+//  const char path[] = "test.png";
+//  int status = 0, x, y;
+//  RGBBitmap img;
+//
+//  bitmap_init(&img, 100, 100);
+//  for (y = 0; y < img.height; y++) {
+//    for (x = 0; x < img.height; x++) {
+//      bitmap_set(&img, x, y, 255, 255, 255);
+//    }
+//  }
+//  bitmap_set(&img, 50, 50, 0, 0, 255);
+//  bitmap_set(&img, 0,  0, 0, 0, 255);
+//  bitmap_set(&img, 99, 0, 0, 0, 255);
+//  bitmap_set(&img, 0,  99, 0, 0, 255);
+//  bitmap_set(&img, 99, 99, 0, 0, 255);
+//
+//  status = bitmap_save_to_png(&img, path);
+//  if (!status){
+//    printf("Successfully saved %s\n", path);
+//  } else {
+//    printf("Unable to save %s\n", path);
+//  }
+//  return status;
+//}
