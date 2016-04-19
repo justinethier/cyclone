@@ -197,6 +197,7 @@ typedef long tag_type;
 #define mutex_tag 19
 #define cond_var_tag 20
 #define bytevector_tag 21
+#define c_opaque_tag 22
 
 #define nil NULL
 #define eq(x,y) (x == y)
@@ -238,6 +239,15 @@ typedef void (*function_type_va)(int, object, object, object, ...);
 typedef struct {gc_header_type hdr; tag_type tag; object *pvar;} cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) cvar_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cvar_tag; n.pvar = v;
+
+/* C Opaque type - a wrapper around a pointer of any type.
+   Note this requires application code to free any memory
+   before an object is collected by GC.  */
+typedef struct {gc_header_type hdr; tag_type tag; void *ptr;} c_opaque_type;
+typedef c_opaque_type *c_opaque;
+#define make_c_opaque(var, ptr) c_opaque_type var; var.hdr.mark = gc_color_red; n.ndr.grayed = 0; n.tag = c_opaque_type; n.ptr = ptr;
+
+#define opaque_ptr(x) (((c_opaque)x)->ptr)
 
 /* Define mutex type */
 typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;

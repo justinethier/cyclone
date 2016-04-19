@@ -27,7 +27,7 @@ object Cyc_global_set(void *thd, object *glo, object value)
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
-const char *tag_names[23] = { \
+const char *tag_names[24] = { \
    "pair" \
  , "symbol" \
  , "" \
@@ -50,6 +50,7 @@ const char *tag_names[23] = { \
  , "mutex" \
  , "condition variable" \
  , "bytevector" \
+ , "opaque" \
  , "Reserved for future use" };
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
@@ -564,6 +565,9 @@ object Cyc_display(object x, FILE *port)
       break;
     case cvar_tag:
       Cyc_display(Cyc_get_cvar(x), port);
+      break;
+    case c_opaque_tag:
+      fprintf(port, "<C opaque %p>", opaque_ptr(x));
       break;
     case mutex_tag:
       fprintf(port, "<mutex %p>", x);
