@@ -20,7 +20,7 @@
 }
 
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
-  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
+  if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 
 #define Cyc_check_cons_or_null(d,obj) { if (obj != NULL) { Cyc_check_cons(d,obj); }}
 #define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, cons_tag, obj);

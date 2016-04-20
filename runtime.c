@@ -491,7 +491,7 @@ object Cyc_has_cycle(object lst) {
         if (is_object_type(car(slow_lst)) && 
             boolean_f == Cyc_is_boolean(car(slow_lst)) && // Avoid expected dupes
             //boolean_f == Cyc_is_symbol(car(slow_lst)) &&  // 
-            eq(car(slow_lst), car(fast_lst))) return boolean_t;
+            (car(slow_lst) == car(fast_lst))) return boolean_t;
 
         slow_lst = cdr(slow_lst);
         fast_lst = cddr(fast_lst);
@@ -742,7 +742,7 @@ object memberp(void *data, object x, list l)
 
 object memqp(void *data, object x, list l)
 {Cyc_check_cons_or_null(data, l);
- for (; l != NULL; l = cdr(l)) if (eq(x,car(l))) return boolean_t;
+ for (; l != NULL; l = cdr(l)) if ((x == car(l))) return boolean_t;
  return boolean_f;}
 
 object equalp(object x, object y)
@@ -762,7 +762,7 @@ list assq(void *data, object x, list l)
   for (; (l != NULL); l = cdr(l)) {
      list la = car(l); 
      Cyc_check_cons(data, la);
-     if (eq(x,car(la))) return la;
+     if ((x == car(la))) return la;
   }
   return boolean_f;
 }
@@ -857,7 +857,7 @@ object Cyc_is_boolean(object o){
     if ((o != NULL) && 
         !is_value_type(o) &&
         ((list)o)->tag == boolean_tag &&
-        (eq(boolean_f, o) || eq(boolean_t, o)))
+        ((boolean_f == o) || (boolean_t == o)))
         return boolean_t;
     return boolean_f;}
 
@@ -970,7 +970,7 @@ object Cyc_is_cvar(object o) {
     return boolean_f;}
 
 object Cyc_eq(object x, object y) {
-    if (eq(x, y))
+    if (x == y)
         return boolean_t;
     return boolean_f;
 }
@@ -1306,7 +1306,7 @@ object Cyc_string_set(void *data, object str, object k, object chr) {
   Cyc_check_str(data, str);
   Cyc_check_num(data, k);
 
-  if (!eq(boolean_t, Cyc_is_char(chr))) {
+  if (boolean_t != Cyc_is_char(chr)) {
     Cyc_rt_raise2(data, "Expected char but received", chr);
   }
 

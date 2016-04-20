@@ -1044,7 +1044,7 @@
          (els (compile (if->else exp))))
   (c-code (string-append
    (c:allocs->str (c:allocs test) "  ")
-   "if( !eq(boolean_f, "
+   "if( (boolean_f != "
    (c:body test)
    ") ){ \n"
    (c:serialize then "  ")
