@@ -22,11 +22,11 @@ write-png.o: write-png.c write-png.h
 	gcc -c write-png.c
 
 clean:
-	rm -f *.o $(SCM_PROGRAM).c $(SCM_PROGRAM) $(META_FILES) $(GENC_FILES) $(COBJECTS) write-png *.png
+	rm -f *.o $(SCM_PROGRAM).c $(SCM_PROGRAM) $(META_FILES) $(GENC_FILES) $(COBJECTS) write-png *.png *.gif
+	rm -rf tmp
 
 convert:
-	convert -resize 400x *.png
-	convert -delay 10 -loop 0 *.png animated.gif
+	./convert.sh
 
 # A temporary directive to build the life program using GCC directly
 # For now, need to manually add "#include "../write-png.h"" to example/life.c to get it to build
