@@ -303,7 +303,7 @@ void add_global(object *glo) {
 void debug_dump_globals()
 {
   list l = global_table;
-  for(; !nullp(l); l = cdr(l)){
+  for(; l != NULL; l = cdr(l)){
    cvar_type *c = (cvar_type *)car(l);
    //gc_mark(h, *(c->pvar)); // Mark actual object the global points to
    printf("DEBUG %p ", c->pvar);
@@ -348,7 +348,7 @@ void add_mutation(void *data, object var, int index, object value){
 void clear_mutations(void *data) {
   gc_thread_data *thd = (gc_thread_data *)data;
   list l = thd->mutations, next;
-  while (!nullp(l)) {
+  while (l != NULL) {
     next = cdr(l);
     free(l);
     l = next;
@@ -365,12 +365,12 @@ object Cyc_glo_eval_from_c = NULL;
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
     fprintf(stderr, "Error: ");
 
-    if (nullp(err) || is_value_type(err) || type_of(err) != cons_tag) {
+    if ((err == NULL) || is_value_type(err) || type_of(err) != cons_tag) {
       Cyc_display(err, stderr);
     } else {
       // Error is list of form (type arg1 ... argn)
       err = cdr(err); // skip type field
-      for (; !nullp(err); err = cdr(err)){ // output with no enclosing parens
+      for (; (err != NULL); err = cdr(err)){ // output with no enclosing parens
         Cyc_display(car(err), stderr);
         fprintf(stderr, " ");
       }
@@ -386,7 +386,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
 
 object Cyc_current_exception_handler(void *data) {
   gc_thread_data *thd = (gc_thread_data *)data;
-  if (nullp(thd->exception_handler_stack)) {
+  if (thd->exception_handler_stack == NULL) {
     return primitive_Cyc_91default_91exception_91handler;
   } else {
     return car(thd->exception_handler_stack);
@@ -422,8 +422,8 @@ void Cyc_rt_raise_msg(void *data, const char *err) {
 
 int equal(x, y) object x, y;
 {
-    if (nullp(x)) return nullp(y);
-    if (nullp(y)) return nullp(x);
+    if (x == NULL) return (y == NULL);
+    if (y == NULL) return (x == NULL);
     if (obj_is_char(x)) return obj_is_char(y) && x == y;
     if (obj_is_int(x)) return (obj_is_int(y) && x == y) ||
                               (is_object_type(y) && 
@@ -480,16 +480,16 @@ object Cyc_set_cvar(object var, object value) {
 
 object Cyc_has_cycle(object lst) {
     object slow_lst, fast_lst;
-    if (nullp(lst) || is_value_type(lst) ||
+    if ((lst == NULL) || is_value_type(lst) ||
         (is_object_type(lst) && type_of(lst) != cons_tag)) {
         return (boolean_f);
     }
     slow_lst = lst;
     fast_lst = cdr(lst);
     while(1) {
-        if (nullp(fast_lst)) return boolean_f;
+        if ((fast_lst == NULL)) return boolean_f;
         if (Cyc_is_cons(fast_lst) == boolean_f) return boolean_f;
-        if (nullp(cdr(fast_lst))) return boolean_f;
+        if ((cdr(fast_lst)) == NULL) return boolean_f;
         if (Cyc_is_cons(cdr(fast_lst)) == boolean_f) return boolean_f;
         if (is_object_type(car(slow_lst)) && 
             boolean_f == Cyc_is_boolean(car(slow_lst)) && // Avoid expected dupes
@@ -542,7 +542,7 @@ object Cyc_display(object x, FILE *port)
 {object tmp = NULL;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {fprintf(port, "()"); return quote_void;}
+ if (x == NULL) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "%c", obj_obj2char(x)); return quote_void;}
  if (obj_is_int(x)) { fprintf(port, "%ld", obj_obj2int(x)); return quote_void; }
  switch (type_of(x))
@@ -679,7 +679,7 @@ static object _Cyc_write(object x, FILE *port)
 {object tmp = NULL;
  object has_cycle = boolean_f;
  int i = 0;
- if (nullp(x)) {fprintf(port, "()"); return quote_void;}
+ if (x == NULL) {fprintf(port, "()"); return quote_void;}
  if (obj_is_char(x)) {fprintf(port, "#\\%c", obj_obj2char(x)); return quote_void;}
  if (obj_is_int(x)) {Cyc_display(x, port); return quote_void;}
  switch (type_of(x))
@@ -740,32 +740,32 @@ object Cyc_write_char(void *data, object c, object port)
 // TODO: should not be a predicate, may end up moving these to Scheme code
 object memberp(void *data, object x, list l)
 {Cyc_check_cons_or_null(data, l);
- for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
+ for (; l != NULL; l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
  return boolean_f;}
 
 object memqp(void *data, object x, list l)
 {Cyc_check_cons_or_null(data, l);
- for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
+ for (; l != NULL; l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
-object get(object x, object i)
-{
-  object plist, plistd;
-  if (nullp(x)) return x;
-  if (type_of(x)!=symbol_tag) {printf("get: bad x=%ld\n",((closure)x)->tag); exit(0);}
-  plist = symbol_plist(x);
-  for (; !nullp(plist); plist = cdr(plistd))
-    {plistd = cdr(plist);
-     if (eq(car(plist),i)) return car(plistd);}
-  return NULL;
-}
+//object get(object x, object i)
+//{
+//  object plist, plistd;
+//  if (x == NULL) return x;
+//  if (type_of(x)!=symbol_tag) {printf("get: bad x=%ld\n",((closure)x)->tag); exit(0);}
+//  plist = symbol_plist(x);
+//  for (; (plist != NULL); plist = cdr(plistd))
+//    {plistd = cdr(plist);
+//     if (eq(car(plist),i)) return car(plistd);}
+//  return NULL;
+//}
 
 object equalp(object x, object y)
 {
   for (; ; x = cdr(x), y = cdr(y)) {
     if (equal(x,y)) return boolean_t;
     if (is_value_type(x) || is_value_type(y) ||
-        nullp(x) || nullp(y) ||
+        (x == NULL) || (y == NULL) ||
         type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;
   }
@@ -773,8 +773,8 @@ object equalp(object x, object y)
 
 list assq(void *data, object x, list l)
 {
-  if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
-  for (; !nullp(l); l = cdr(l)) {
+  if ((l == NULL) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  for (; (l != NULL); l = cdr(l)) {
      list la = car(l); 
      Cyc_check_cons(data, la);
      if (eq(x,car(la))) return la;
@@ -784,8 +784,8 @@ list assq(void *data, object x, list l)
 
 list assoc(void *data, object x, list l)
 {
-  if (nullp(l) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
-  for (; !nullp(l); l = cdr(l)){
+  if ((l == NULL) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  for (; (l != NULL); l = cdr(l)){
      list la = car(l); 
      Cyc_check_cons(data, la);
      if (boolean_f != equalp(x,car(la))) return la;
@@ -869,7 +869,7 @@ declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, dispatch_num_gte, >=);
 declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, dispatch_num_lte, <=);
 
 object Cyc_is_boolean(object o){
-    if (!nullp(o) && 
+    if ((o != NULL) && 
         !is_value_type(o) &&
         ((list)o)->tag == boolean_tag &&
         (eq(boolean_f, o) || eq(boolean_t, o)))
@@ -877,17 +877,17 @@ object Cyc_is_boolean(object o){
     return boolean_f;}
 
 object Cyc_is_cons(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == cons_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == cons_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_null(object o){
-    if (nullp(o)) 
+    if (o == NULL) 
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_number(object o){
-    if (!nullp(o) && (obj_is_int(o) || 
+    if ((o != NULL) && (obj_is_int(o) || 
         (!is_value_type(o) && (type_of(o) == integer_tag || type_of(o) == double_tag))))
         return boolean_t;
     return boolean_f;}
@@ -896,43 +896,43 @@ object Cyc_is_real(object o){
     return Cyc_is_number(o);}
 
 object Cyc_is_integer(object o){
-    if (!nullp(o) && (obj_is_int(o) ||
+    if ((o != NULL) && (obj_is_int(o) ||
         (!is_value_type(o) && type_of(o) == integer_tag)))
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_symbol(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == symbol_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == symbol_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_vector(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == vector_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == vector_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_bytevector(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == bytevector_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == bytevector_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_port(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == port_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == port_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_mutex(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == mutex_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == mutex_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_cond_var(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == cond_var_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == cond_var_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_string(object o){
-    if (!nullp(o) && !is_value_type(o) && ((list)o)->tag == string_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == string_tag)
         return boolean_t;
     return boolean_f;}
 
@@ -943,7 +943,7 @@ object Cyc_is_char(object o){
 
 object Cyc_is_procedure(void *data, object o) {
     int tag;
-    if (!nullp(o) && !is_value_type(o)) {
+    if ((o != NULL) && !is_value_type(o)) {
         tag = type_of(o);
         if (tag == closure0_tag ||
             tag == closure1_tag ||
@@ -965,7 +965,7 @@ object Cyc_is_procedure(void *data, object o) {
 
 object Cyc_is_macro(object o) {
     int tag;
-    if (!nullp(o) && !is_value_type(o)) {
+    if ((o != NULL) && !is_value_type(o)) {
         tag = type_of(o);
         if (tag == macro_tag) {
           return boolean_t;
@@ -975,12 +975,12 @@ object Cyc_is_macro(object o) {
 }
 
 object Cyc_is_eof_object(object o) {
-    if (!nullp(o) && !is_value_type(o) && type_of(o) == eof_tag)
+    if ((o != NULL) && !is_value_type(o) && type_of(o) == eof_tag)
         return boolean_t;
     return boolean_f;}
 
 object Cyc_is_cvar(object o) {
-    if (!nullp(o) && !is_value_type(o) && type_of(o) == cvar_tag)
+    if ((o != NULL) && !is_value_type(o) && type_of(o) == cvar_tag)
         return boolean_t;
     return boolean_f;}
 
@@ -1040,7 +1040,7 @@ object Cyc_vector_ref(void *data, object v, object k) {
 
 integer_type Cyc_length_as_object(void *data, object l){
     make_int(len, 0);
-    while(!nullp(l)){
+    while((l != NULL)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
             Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
@@ -1051,7 +1051,7 @@ integer_type Cyc_length_as_object(void *data, object l){
 }
 
 object Cyc_vector_length(void *data, object v) {
-    if (!nullp(v) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
+    if ((v != NULL) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
       return obj_int2obj(((vector)v)->num_elt);
     }
     Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
@@ -1059,7 +1059,7 @@ object Cyc_vector_length(void *data, object v) {
 
 object Cyc_length(void *data, object l){
     int len = 0;
-    while(!nullp(l)){
+    while((l != NULL)){
         if (is_value_type(l) || ((list)l)->tag != cons_tag){
             Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
@@ -1159,7 +1159,7 @@ object Cyc_list2string(void *data, object cont, object lst){
     
     len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
-    while(!nullp(lst)){
+    while((lst != NULL)){
         buf[i++] = obj_obj2char(car(lst));
         lst = cdr(lst);
     }
@@ -1713,7 +1713,7 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b) {
 }
 
 object Cyc_bytevector_length(void *data, object bv) {
-    if (!nullp(bv) && !is_value_type(bv) && ((list)bv)->tag == bytevector_tag) {
+    if ((bv != NULL) && !is_value_type(bv) && ((list)bv)->tag == bytevector_tag) {
       return obj_int2obj(((bytevector)bv)->len);
     }
     Cyc_rt_raise_msg(data, "bytevector-length - invalid parameter, expected bytevector\n"); }
@@ -1735,7 +1735,7 @@ object Cyc_list2vector(void *data, object cont, object l) {
     (((vector)v)->num_elt > 0) ? 
        (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
        NULL; 
-  while(!nullp(lst)) {
+  while((lst != NULL)) {
     ((vector)v)->elts[i++] = car(lst); 
     lst = cdr(lst);
   }
@@ -1743,7 +1743,7 @@ object Cyc_list2vector(void *data, object cont, object l) {
 }
 
 object Cyc_system(object cmd) {
-  if (nullp(cmd) || is_value_type(cmd) || type_of(cmd) != string_tag) {
+  if ((cmd == NULL) || is_value_type(cmd) || type_of(cmd) != string_tag) {
     return obj_int2obj(-1);
   }
   return obj_int2obj(system(((string_type *)cmd)->str));
@@ -2363,7 +2363,7 @@ void _Cyc_91set_91cvar_67(void *data, object cont, object args) {
     printf("not implemented\n"); exit(1); }
 /* Note we cannot use _exit (per convention) because it is reserved by C */
 void _cyc_exit(void *data, object cont, object args) {  
-    if(nullp(args))
+    if(args == NULL)
         __halt(NULL);
     __halt(car(args));
 }
@@ -2735,10 +2735,10 @@ void gc_mark_globals()
                                        // Marking it ensures all glos are marked
   {
     list l = global_table;
-    for(; !nullp(l); l = cdr(l)){
+    for(; l != NULL; l = cdr(l)){
      cvar_type *c = (cvar_type *)car(l);
      object glo =  *(c->pvar);
-     if (!nullp(glo)) {
+     if (glo != NULL) {
 #if GC_DEBUG_VERBOSE
        fprintf(stderr, "global pvar %p\n", glo);
 #endif
@@ -2897,7 +2897,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
   // Transport mutations
   {
     list l;
-    for (l = ((gc_thread_data *)data)->mutations; !nullp(l); l = cdr(l)) {
+    for (l = ((gc_thread_data *)data)->mutations; l != NULL; l = cdr(l)) {
       object o = car(l);
       if (is_value_type(o)) {
           // Can happen if a vector element was already
@@ -2927,7 +2927,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
   gc_move2heap(Cyc_global_variables); // Internal global used by the runtime
   {
     list l = global_table;
-    for(; !nullp(l); l = cdr(l)){
+    for(; l != NULL; l = cdr(l)){
       cvar_type *c = (cvar_type *)car(l);
       gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
     }

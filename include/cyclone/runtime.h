@@ -237,7 +237,7 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
 int equal(object,object);
 list assq(void *,object,list);
 list assoc(void *,object x, list l);
-object get(object,object);
+//object get(object,object);
 object equalp(object,object);
 object memberp(void *,object,list);
 object memqp(void *,object,list);
