@@ -64,7 +64,7 @@ Cyclone provides several example programs, including:
 
 - [Game of Life]({{ page.ghproj }}examples/game-of-life) - The [game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
 
-- [Game of Life - PNG Image Generator]({{ page.ghproj }}examples/game-of-life-png) - An modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI):
+- [Game of Life - PNG Image Generator]({{ page.ghproj }}examples/game-of-life-png) - A modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI):
 
 <img class="doc" src="docs/images/game-of-life-gliders.gif">
 
