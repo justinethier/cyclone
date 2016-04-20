@@ -30,6 +30,7 @@
     lib:imports
     lib:body
     lib:includes
+    lib:include-c-headers
     lib:import->filename
     lib:import->metalist
     lib:import->path
@@ -113,6 +114,15 @@
     (filter
       (lambda (code)
         (tagged-list? 'include code))
+      (cddr ast))))
+
+(define (lib:include-c-headers ast)
+  (map
+    (lambda (inc-lst)
+      (cadr inc-lst))
+    (filter
+      (lambda (code)
+        (tagged-list? 'include-c-header code))
       (cddr ast))))
 
 ;; TODO: include-ci, cond-expand

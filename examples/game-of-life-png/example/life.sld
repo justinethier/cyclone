@@ -1,4 +1,5 @@
 (define-library (example life)
+  (include-c-header "../write-png.h")
   (export life)
   (import (scheme base) ;TODO: (except (scheme base) set!)
           (scheme write)
