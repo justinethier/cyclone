@@ -732,15 +732,25 @@ object Cyc_write_char(void *data, object c, object port)
 }
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
-object memberp(void *data, object x, list l)
-{Cyc_check_cons_or_null(data, l);
- for (; l != NULL; l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
- return boolean_f;}
+object memberp(void *data, object x, list l) 
+{
+  Cyc_check_cons_or_null(data, l);
+  for (; l != NULL; l = cdr(l)) {
+    if (boolean_f != equalp(x,car(l))) 
+       return boolean_t;
+  }
+  return boolean_f;
+}
 
-object memqp(void *data, object x, list l)
-{Cyc_check_cons_or_null(data, l);
- for (; l != NULL; l = cdr(l)) if ((x == car(l))) return boolean_t;
- return boolean_f;}
+object memqp(void *data, object x, list l) 
+{
+  Cyc_check_cons_or_null(data, l);
+  for (; l != NULL; l = cdr(l)){ 
+    if ((x == car(l))) 
+       return boolean_t; 
+  }
+  return boolean_f;
+}
 
 object equalp(object x, object y)
 {

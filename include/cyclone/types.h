@@ -201,9 +201,8 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 #define stack_overflow(x,y) ((x) > (y))
 #endif
 
-#define eq(x,y) (x == y)
-#define type_of(x) (((list) x)->tag)
-#define forward(x) (((list) x)->cons_car)
+#define type_of(obj) (((pair_type *) obj)->tag)
+#define forward(obj) (((pair_type *) obj)->cons_car)
 
 /** Define value types. 
  *  Depending on the underlying architecture, compiler, etc these types
@@ -326,11 +325,13 @@ typedef bytevector_type *bytevector;
 
 /* Pair (cons) type */
 
-typedef struct {gc_header_type hdr; tag_type tag; object cons_car,cons_cdr;} cons_type;
+typedef struct {gc_header_type hdr; tag_type tag; object cons_car; object cons_cdr;} cons_type;
 typedef cons_type *list;
+typedef cons_type pair_type;
+typedef pair_type *pair;
 
-#define car(x) (((list) x)->cons_car)
-#define cdr(x) (((list) x)->cons_cdr)
+#define car(x)    (((pair_type *) x)->cons_car)
+#define cdr(x)    (((pair_type *) x)->cons_cdr)
 #define caar(x)   (car(car(x)))
 #define cadr(x)   (car(cdr(x)))
 #define cdar(x)   (cdr(car(x)))
