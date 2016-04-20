@@ -52,6 +52,7 @@
       (define lib-name '())
       (define lib-exports '())
       (define lib-renamed-exports '())
+      (define c-headers '())
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
@@ -63,6 +64,7 @@
          (let ((includes (lib:includes (car input-program))))
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
+           (set! c-headers (lib:include-c-headers (car input-program)))
            (set! lib-exports
              (cons
                (lib:name->symbol lib-name)
@@ -262,6 +264,9 @@
         (trace:error "DEBUG, existing program")
         (exit 0))
     
+      (trace:info "---------------- C headers: ")
+      (trace:info c-headers)
+
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 
                     program? 
@@ -269,6 +274,7 @@
                     lib-exports 
                     imported-vars
                     module-globals
+                    c-headers
                     lib-deps
                     src-file) 
       (return '())))) ;; No codes to return

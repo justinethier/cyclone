@@ -1370,6 +1370,7 @@
                       lib-exports 
                       imported-globals
                       globals
+                      c-headers
                       required-libs
                       src-file)
   (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
