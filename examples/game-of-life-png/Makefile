@@ -25,8 +25,8 @@ clean:
 	rm -f *.o $(SCM_PROGRAM).c $(SCM_PROGRAM) $(META_FILES) $(GENC_FILES) $(COBJECTS) write-png *.png
 
 convert:
-	convert -resize 400x test.png out.png
-#	convert -delay 120 -loop 0 *.png animated.gif
+	convert -resize 400x *.png
+	convert -delay 10 -loop 0 *.png animated.gif
 
 # A temporary directive to build the life program using GCC directly
 # For now, need to manually add "#include "../write-png.h"" to example/life.c to get it to build
