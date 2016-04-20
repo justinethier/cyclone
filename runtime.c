@@ -2545,7 +2545,7 @@ void _display(void *data, object cont, object args) {
       dispatch(data, obj_obj2int(argc), (function_type)dispatch_display_va, cont, cont, args); }}
 void _call_95cc(void *data, object cont, object args){
     Cyc_check_num_args(data, "call/cc", 1, args);
-    if (eq(boolean_f, Cyc_is_procedure(data, car(args)))) {
+    if ((boolean_f == Cyc_is_procedure(data, car(args)))) {
       Cyc_invalid_type_error(data, closure1_tag, car(args)); 
     }
     return_closcall2(data, __glo_call_95cc_scheme_base, cont, car(args));
