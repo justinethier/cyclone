@@ -64,6 +64,10 @@ Cyclone provides several example programs, including:
 
 - [Game of Life]({{ page.ghproj }}examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
 
+- [Game of Life - PNG Image Generator]({{ page.ghproj }}examples/game-of-life-png) - An modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI).
+
+<img src="docs/images/game-of-life-gliders.gif">
+
 - [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
 
 - [Tail Call Optimization]({{ page.ghproj }}examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
