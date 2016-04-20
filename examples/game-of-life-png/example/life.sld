@@ -22,17 +22,7 @@
             ((3) #t)
             ((2) (ref grid i j))
             (else #f)))
-;    (define (clear-vt100)
-;        (display
-;            (string 
-;                (integer->char #x1B) 
-;                #\[
-;                #\H
-;                (integer->char #x1B)
-;                #\[
-;                #\J)))
     (define (life-print grid iteration)
-      ;(clear-vt100)
       (let ((img (png:init (cols grid) (rows grid)))
             (path (string-append 
                     "life-" 
@@ -41,9 +31,6 @@
                     ".png")))
         (each grid
           (lambda (i j v)
-            ;(display (if v "*" " "))
-            ;(when (= j (- (cols grid) 1))
-            ;  (newline))
             (if v
               (png:set! img i j 0 250 0))
           ))
