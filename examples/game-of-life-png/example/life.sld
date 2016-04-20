@@ -31,8 +31,12 @@
 ;                #\J)))
     (define (life-print grid iteration)
       ;(clear-vt100)
-      (let ((img (png:init 100 100))
-            (path (string-append "life-" (number->string iteration) ".png")))
+      (let ((img (png:init (cols grid) (rows grid)))
+            (path (string-append 
+                    "life-" 
+                    (if (< iteration 10) "0" "")
+                    (number->string iteration) 
+                    ".png")))
         (each grid
           (lambda (i j v)
             ;(display (if v "*" " "))
