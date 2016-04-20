@@ -1412,6 +1412,16 @@
       (foldr string-append "" (reverse compiled-program-lst)))
 
     (emit-c-arity-macros 0)
+    (for-each 
+      (lambda (h)
+        (cond 
+          ((and (string? h)
+                (> (string-length h) 0)
+                (equal? (string-ref h 0) #\<))
+           (emit* "#include " h ""))
+          (else
+           (emit* "#include \"" h "\""))))
+      c-headers)
     (emit "#include \"cyclone/types.h\"")
 
     ;; Globals defined in this module

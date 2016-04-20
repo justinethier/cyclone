@@ -1,5 +1,6 @@
 (define-library (example life)
   (include-c-header "../write-png.h")
+  ;Or, if you want angle brackets: (include-c-header "<stdio.h>")
   (export life)
   (import (scheme base) ;TODO: (except (scheme base) set!)
           (scheme write)
