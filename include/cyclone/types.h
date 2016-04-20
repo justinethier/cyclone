@@ -272,7 +272,7 @@ typedef symbol_type *symbol;
 #define symbol_plist(x) (((symbol_type *) x)->plist)
 
 #define defsymbol(name) \
-static object quote_##name = nil;
+static object quote_##name = NULL;
 
 /* Define numeric types */
 typedef struct {gc_header_type hdr; tag_type tag; int value; int padding;} integer_type;
@@ -382,7 +382,7 @@ typedef closure0_type *macro;
 #define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;
 
-#define make_cell(n,a) make_cons(n,a,nil);
+#define make_cell(n,a) make_cons(n,a,NULL);
 
 /* Primitive types */
 typedef struct {gc_header_type hdr; tag_type tag; const char *pname; function_type fn;} primitive_type;

@@ -100,11 +100,11 @@ static gc_heap_root *Cyc_heap;
 long no_gcs = 0; /* Count the number of GC's. */
 long no_major_gcs = 0; /* Count the number of GC's. */
 
-object Cyc_global_variables = nil;
+object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
 
-static symbol_type __EOF = {{0}, eof_tag, "", nil}; // symbol_type in lieu of custom type
+static symbol_type __EOF = {{0}, eof_tag, "", NULL}; // symbol_type in lieu of custom type
 const object Cyc_EOF = &__EOF;
 static ck_hs_t symbol_table;
 static int symbol_table_size = 65536;
@@ -200,7 +200,7 @@ static boolean_type f_boolean = {{0}, boolean_tag, "f"};
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
 
-static symbol_type Cyc_void_symbol = {{0}, symbol_tag, "", nil};
+static symbol_type Cyc_void_symbol = {{0}, symbol_tag, "", NULL};
 const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
@@ -251,7 +251,7 @@ char *_strdup (const char *s) {
 }
 
 object find_symbol_by_name(const char *name) {
-  symbol_type tmp = {{0}, symbol_tag, name, nil};
+  symbol_type tmp = {{0}, symbol_tag, name, NULL};
   object result = set_get(&symbol_table, &tmp);
   //if (result) {
   //  printf("found symbol %s\n", symbol_pname(result));
@@ -273,7 +273,7 @@ object add_symbol(symbol_type *psym) {
 }
 
 object add_symbol_by_name(const char *name) {
-  symbol_type sym = {{0}, symbol_tag, _strdup(name), nil};
+  symbol_type sym = {{0}, symbol_tag, _strdup(name), NULL};
   symbol_type *psym = malloc(sizeof(symbol_type));
   memcpy(psym, &sym, sizeof(symbol_type));
   return add_symbol(psym);
@@ -291,7 +291,7 @@ object find_or_add_symbol(const char *name){
 /* END symbol table */
 
 /* Global table */
-list global_table = nil;
+list global_table = NULL;
 
 void add_global(object *glo) {
   // It would probably be more efficient to allocate
@@ -353,13 +353,13 @@ void clear_mutations(void *data) {
     free(l);
     l = next;
   }
-  thd->mutations = nil;
+  thd->mutations = NULL;
 }
 /* END mutation table */
 
 /* Runtime globals */
-object Cyc_glo_call_cc = nil;
-object Cyc_glo_eval_from_c = nil;
+object Cyc_glo_call_cc = NULL;
+object Cyc_glo_eval_from_c = NULL;
 
 /* Exception handler */
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
@@ -381,7 +381,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _, object err
     fprintf(stderr, "\n");
     //raise(SIGINT); // break into debugger, unix only
     exit(1);
-    return nil;
+    return NULL;
 }
 
 object Cyc_current_exception_handler(void *data) {
@@ -395,21 +395,21 @@ object Cyc_current_exception_handler(void *data) {
 
 /* Raise an exception from the runtime code */
 void Cyc_rt_raise(void *data, object err) {
-    make_cons(c2, err, nil);
+    make_cons(c2, err, NULL);
     make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, nil);
-    apply(data, nil, Cyc_current_exception_handler(data), &c0);
+    make_cons(c0, &c1, NULL);
+    apply(data, NULL, Cyc_current_exception_handler(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
     exit(1);
 }
 void Cyc_rt_raise2(void *data, const char *msg, object err) {
     make_string(s, msg);
-    make_cons(c3, err, nil);
+    make_cons(c3, err, NULL);
     make_cons(c2, &s, &c3);
     make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, nil);
-    apply(data, nil, Cyc_current_exception_handler(data), &c0);
+    make_cons(c0, &c1, NULL);
+    apply(data, NULL, Cyc_current_exception_handler(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
     exit(1);
@@ -539,7 +539,7 @@ object Cyc_display_va_list(int argc, object x, va_list ap) {
   return Cyc_display(x, fp);}
 
 object Cyc_display(object x, FILE *port)
-{object tmp = nil;
+{object tmp = NULL;
  object has_cycle = boolean_f;
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
@@ -676,7 +676,7 @@ object Cyc_write_va_list(int argc, object x, va_list ap) {
   return Cyc_write(x, fp);}
 
 static object _Cyc_write(object x, FILE *port)
-{object tmp = nil;
+{object tmp = NULL;
  object has_cycle = boolean_f;
  int i = 0;
  if (nullp(x)) {fprintf(port, "()"); return quote_void;}
@@ -739,12 +739,12 @@ object Cyc_write_char(void *data, object c, object port)
 
 // TODO: should not be a predicate, may end up moving these to Scheme code
 object memberp(void *data, object x, list l)
-{Cyc_check_cons_or_nil(data, l);
+{Cyc_check_cons_or_null(data, l);
  for (; !nullp(l); l = cdr(l)) if (boolean_f != equalp(x,car(l))) return boolean_t;
  return boolean_f;}
 
 object memqp(void *data, object x, list l)
-{Cyc_check_cons_or_nil(data, l);
+{Cyc_check_cons_or_null(data, l);
  for (; !nullp(l); l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
@@ -757,7 +757,7 @@ object get(object x, object i)
   for (; !nullp(plist); plist = cdr(plistd))
     {plistd = cdr(plist);
      if (eq(car(plist),i)) return car(plistd);}
-  return nil;
+  return NULL;
 }
 
 object equalp(object x, object y)
@@ -839,7 +839,7 @@ int FUNC_OP(void *data, object x, object y) { \
       result = (double_value(x)) OP (double_value(y)); \
     } else { \
         make_string(s, "Bad argument type"); \
-        make_cons(c1, y, nil); \
+        make_cons(c1, y, NULL); \
         make_cons(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
     } \
@@ -1083,7 +1083,7 @@ char *int_to_binary(char *b, int x)
 }
 
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...) {
-    object base = nil;
+    object base = NULL;
     int base_num = 10, val;
     char buffer[1024];
     va_list ap;
@@ -1155,7 +1155,7 @@ object Cyc_list2string(void *data, object cont, object lst){
     int i = 0;
     object len;
 
-    Cyc_check_cons_or_nil(data, lst);
+    Cyc_check_cons_or_null(data, lst);
     
     len = Cyc_length(data, lst); // Inefficient, walks whole list
     buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
@@ -1172,7 +1172,7 @@ object Cyc_list2string(void *data, object cont, object lst){
 
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...) 
 {
-  object base = nil;
+  object base = NULL;
   int base_num, result;
   va_list ap;
   va_start(ap, str);
@@ -1421,7 +1421,7 @@ object Cyc_installation_dir(void *data, object cont, object type) {
  */
 object Cyc_command_line_arguments(void *data, object cont) {
   int i;
-  object lis = nil;
+  object lis = NULL;
   for (i = _cyc_argc; i > 1; i--) { // skip program name
     object ps = alloca(sizeof(string_type));
     object pl = alloca(sizeof(cons_type));
@@ -1439,7 +1439,7 @@ object Cyc_command_line_arguments(void *data, object cont) {
 
 
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...) {
-  object v = nil;
+  object v = NULL;
   object fill = boolean_f;
   int i, ulen;
   va_list ap;
@@ -1484,7 +1484,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...) {
 }
 
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...) {
-  object bv = nil;
+  object bv = NULL;
   object fill;
   int i, length, fill_val;
   va_list ap;
@@ -1719,12 +1719,12 @@ object Cyc_bytevector_length(void *data, object bv) {
     Cyc_rt_raise_msg(data, "bytevector-length - invalid parameter, expected bytevector\n"); }
 
 object Cyc_list2vector(void *data, object cont, object l) {
-  object v = nil; 
+  object v = NULL; 
   object len;
   object lst = l; 
   int i = 0; 
 
-  Cyc_check_cons_or_nil(data, l); 
+  Cyc_check_cons_or_null(data, l); 
   len = Cyc_length(data, l); 
   v = alloca(sizeof(vector_type)); 
   ((vector)v)->hdr.mark = gc_color_red;
@@ -1770,7 +1770,7 @@ void Cyc_halt(env) closure env; {
 
 object __halt(object obj) {
     Cyc_halt(obj);
-    return nil;
+    return NULL;
 }
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, NO_ARG, ONE_ARG, DIV) \
@@ -1799,7 +1799,7 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else { \
         make_string(s, "Bad argument type"); \
-        make_cons(c1, y, nil); \
+        make_cons(c1, y, NULL); \
         make_cons(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
     } \
@@ -1851,7 +1851,7 @@ object Cyc_div_op(void *data, common_type *x, object y) {
         x->double_t.value = x->double_t.value / ((double_type *)y)->value;
     } else {
         make_string(s, "Bad argument type");
-        make_cons(c1, y, nil);
+        make_cons(c1, y, NULL);
         make_cons(c0, &s, &c1);
         Cyc_rt_raise(data, &c0);
     }
@@ -1910,7 +1910,7 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
     buf->double_t.value = ((double_type *)n)->value;
   } else {
       make_string(s, "Bad argument type");
-      make_cons(c1, n, nil);
+      make_cons(c1, n, NULL);
       make_cons(c0, &s, &c1);
       Cyc_rt_raise(data, &c0);
   }
@@ -2064,7 +2064,7 @@ object Cyc_io_read_line(void *data, object cont, object port) {
 
     buf[i++] = c;
   }
-  return nil;
+  return NULL;
 }
 
 object Cyc_io_peek_char(void *data, object cont, object port) {
@@ -2364,7 +2364,7 @@ void _Cyc_91set_91cvar_67(void *data, object cont, object args) {
 /* Note we cannot use _exit (per convention) because it is reserved by C */
 void _cyc_exit(void *data, object cont, object args) {  
     if(nullp(args))
-        __halt(nil);
+        __halt(NULL);
     __halt(car(args));
 }
 void __75halt(void *data, object cont, object args) {  
@@ -2585,7 +2585,7 @@ object apply(void *data, object cont, object func, object args){
   }
 
   // Causes problems...
-  //Cyc_check_cons_or_nil(args);
+  //Cyc_check_cons_or_null(args);
 
   switch(type_of(func)) {
     case primitive_tag:
@@ -2622,17 +2622,17 @@ object apply(void *data, object cont, object func, object args){
           make_cons(c, func, args);
           //printf("JAE DEBUG, sending to eval: ");
           //Cyc_display(&c, stderr);
-          ((closure)Cyc_glo_eval_from_c)->fn(data, 2, Cyc_glo_eval_from_c, cont, &c, nil);
+          ((closure)Cyc_glo_eval_from_c)->fn(data, 2, Cyc_glo_eval_from_c, cont, &c, NULL);
 
       // TODO: would be better to compare directly against symbols here,
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
           make_cons(c, cadr(func), args);
-          ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, nil);
+          ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, NULL);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
           make_cons(c, func, args);
-          ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, nil);
+          ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, NULL);
       } else {
           make_cons(c, func, args);
           Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
@@ -2643,7 +2643,7 @@ object apply(void *data, object cont, object func, object args){
       printf("Invalid object type %ld\n", type_of(func));
       exit(1);
   }
-  return nil; // Never reached
+  return NULL; // Never reached
 }
 
 // Version of apply meant to be called from within compiled code
@@ -2661,7 +2661,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
         args[i].hdr.grayed = 0;
         args[i].tag = cons_tag;
         args[i].cons_car = tmp;
-        args[i].cons_cdr = (i == (argc-1)) ? nil : &args[i + 1];
+        args[i].cons_cdr = (i == (argc-1)) ? NULL : &args[i + 1];
     }
     //printf("DEBUG applying primitive to ");
     //Cyc_display((object)&args[0]);
@@ -2671,7 +2671,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     apply(data, cont, prim, 
           (argc > 0) 
             ? (object)&args[0]
-            : nil);
+            : NULL);
 }
 // END apply
 
@@ -2694,7 +2694,7 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
         args[i - 1].hdr.grayed = 0;
         args[i - 1].tag = cons_tag;
         args[i - 1].cons_car = buf[i];
-        args[i - 1].cons_cdr = (i == (argc-1)) ? nil : &args[i];
+        args[i - 1].cons_cdr = (i == (argc-1)) ? NULL : &args[i];
     }
 
     apply(data, cont, prim, (object)&args[0]);
@@ -2860,7 +2860,7 @@ object Cyc_trigger_minor_gc(void *data, object cont) {
   gc_thread_data* thd = (gc_thread_data *)data;
   thd->gc_args[0] = boolean_t;
   GC(data, cont, thd->gc_args, 1);
-  return nil;
+  return NULL;
 }
 
 // Do a minor GC

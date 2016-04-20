@@ -20,7 +20,7 @@
       "(void *data, int argc, closure _, object k)"
       ;; TODO: consolidate with Cyc_command_line_arguments from runtime.c
       " int i;
-        object lis = nil;
+        object lis = NULL;
         for (i = _cyc_argc; i > 0; i--) {
           object ps = alloca(sizeof(string_type));
           object pl = alloca(sizeof(cons_type));

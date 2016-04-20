@@ -282,7 +282,7 @@
 ;;        this is experimental and probably needs refinement
 ;; trace - trace information. presently a pair containing:
 ;;         * source file
-;;         * function name (or nil if none)
+;;         * function name (or NULL if none)
 (define (c-compile-exp exp append-preamble cont trace)
   (cond
     ; Core forms:
@@ -329,7 +329,7 @@
      (lambda (args)
        (cond
         ((null? args)
-           (c-code "nil"))
+           (c-code "NULL"))
         ((not (pair? args))
          (c-compile-const args))
         (else
@@ -443,7 +443,7 @@
 (define (c-compile-const exp)
   (cond
     ((null? exp)
-     (c-code "nil"))
+     (c-code "NULL"))
     ((pair? exp)
      (c-compile-scalars exp))
     ((vector? exp)
@@ -1429,7 +1429,7 @@
         (lambda (global)
           (emits "object ")
           (emits (cgen:mangle-global (car global)))
-          (emits " = nil;\n"))
+          (emits " = NULL;\n"))
         *globals*)
     ;; Globals defined by another module
     (for-each

@@ -85,7 +85,7 @@ After GC is finished, the C stack pointer is reset using [`longjmp`](http://man7
 Here is a snippet demonstrating how C functions may be written using Baker's approach:
 
     object Cyc_make_vector(object cont, object len, object fill) {
-      object v = nil;
+      object v = NULL;
       int i;
       Cyc_check_int(len);
 

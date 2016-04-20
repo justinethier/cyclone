@@ -22,7 +22,7 @@
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
   if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 
-#define Cyc_check_cons_or_nil(d,obj) { if (!nullp(obj)) { Cyc_check_cons(d,obj); }}
+#define Cyc_check_cons_or_null(d,obj) { if (obj != NULL) { Cyc_check_cons(d,obj); }}
 #define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, cons_tag, obj);
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
@@ -62,7 +62,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
    args and the number of provided ones, and pass the difference as 'count'
  */
 #define load_varargs(var, arg_var, count) \
-  list var = (count > 0) ? alloca(sizeof(cons_type)*count) : nil; \
+  list var = (count > 0) ? alloca(sizeof(cons_type)*count) : NULL; \
   { \
     int i; \
     object tmp; \
@@ -79,7 +79,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
         var[i].hdr.grayed = 0; \
         var[i].tag = cons_tag; \
         var[i].cons_car = tmp; \
-        var[i].cons_cdr = (i == (count-1)) ? nil : &var[i + 1]; \
+        var[i].cons_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
       } \
       va_end(va); \
     } \
