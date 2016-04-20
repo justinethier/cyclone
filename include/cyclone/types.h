@@ -9,13 +9,13 @@
 #ifndef CYCLONE_TYPES_H
 #define CYCLONE_TYPES_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
+#include <math.h>
 #include <setjmp.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include <time.h>
 #include <pthread.h>
 
 // Maximum number of args that GC will accept

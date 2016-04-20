@@ -745,18 +745,6 @@ object memqp(void *data, object x, list l)
  for (; l != NULL; l = cdr(l)) if (eq(x,car(l))) return boolean_t;
  return boolean_f;}
 
-//object get(object x, object i)
-//{
-//  object plist, plistd;
-//  if (x == NULL) return x;
-//  if (type_of(x)!=symbol_tag) {printf("get: bad x=%ld\n",((closure)x)->tag); exit(0);}
-//  plist = symbol_plist(x);
-//  for (; (plist != NULL); plist = cdr(plistd))
-//    {plistd = cdr(plist);
-//     if (eq(car(plist),i)) return car(plistd);}
-//  return NULL;
-//}
-
 object equalp(object x, object y)
 {
   for (; ; x = cdr(x), y = cdr(y)) {
