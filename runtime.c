@@ -94,9 +94,6 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 
 /* Global variables. */
 static gc_heap_root *Cyc_heap;
-long no_gcs = 0; /* Count the number of GC's. */
-long no_major_gcs = 0; /* Count the number of GC's. */
-
 object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
