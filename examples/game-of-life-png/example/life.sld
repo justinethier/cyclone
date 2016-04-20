@@ -39,7 +39,7 @@
             ;(when (= j (- (cols grid) 1))
             ;  (newline))
             (if v
-              (png:set! i j 0 250 0))
+              (png:set! img i j 0 250 0))
           ))
         (png:save img path)
         (png:free img)
@@ -57,22 +57,22 @@
               ;(set! grid1 j k a))))
         (life-print grid1 i)))
     (define-c png:init
-      "(void *data, int argc, closure _, object width, object height)"
+      "(void *data, int argc, closure _, object k, object width, object height)"
       " RGBBitmap *img = malloc(sizeof(RGBBitmap)); 
         make_c_opaque(opq, (void *)img);
         bitmap_init(img, (int)(unbox_number(width)), (int)(unbox_number(height)));
         return_closcall1(data, k, &opq);
       ")
     (define-c png:free
-      "(void *data, int argc, closure _, object opq)"
-      " RGBBitmap *img = opaque_ptr(opq);
+      "(void *data, int argc, closure _, object k, object opq)"
+      " RGBBitmap *img = (RGBBitmap *)opaque_ptr(opq);
         free(img->pixels);
         free(img);
         return_closcall1(data, k, boolean_t);
       ")
     (define-c png:set!
-      "(void *data, int argc, closure _, object opq, object x, object y, object r, object g, object b)"
-      " RGBBitmap *img = opaque_ptr(opq);
+      "(void *data, int argc, closure _, object k, object opq, object x, object y, object r, object g, object b)"
+      " RGBBitmap *img = (RGBBitmap *)opaque_ptr(opq);
         bitmap_set(img, 
           ((int)(unbox_number(x))),
           ((int)(unbox_number(y))),
@@ -81,8 +81,8 @@
           ((int)(unbox_number(b))));
         return_closcall1(data, k, boolean_t); ")
     (define-c png:save
-      "(void *data, int argc, closure _, object opq, object path)"
-      " RGBBitmap *img = opaque_ptr(opq);
+      "(void *data, int argc, closure _, object k, object opq, object path)"
+      " RGBBitmap *img = (RGBBitmap *)opaque_ptr(opq);
         bitmap_save_to_png(img, string_str(path));
         return_closcall1(data, k, boolean_t);
       ")
