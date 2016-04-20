@@ -32,5 +32,6 @@ typedef struct _RGBBitmap {
 int bitmap_init(RGBBitmap *img, int width, int height);
 int bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b);
 int bitmap_save_to_png(RGBBitmap *bitmap, const char *path);
+void bitmap_fill(RGBBitmap *img, int r, int g, int b);
 
 #endif /* WRITE_PNG_H */

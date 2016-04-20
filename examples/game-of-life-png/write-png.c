@@ -96,6 +96,18 @@ int bitmap_set(RGBBitmap *img, int x, int y, int r, int g, int b)
   return 0;
 }
 
+void bitmap_fill(RGBBitmap *img, int r, int g, int b)
+{
+  int x, y;
+  // TODO: could use pointers directly or even memcpy
+  //       to make this faster
+  for (y = 0; y < img->height; y++) {
+    for (x = 0; x < img->height; x++) {
+      bitmap_set(img, x, y, r, g, b);
+    }
+  }
+}
+
 //int main()
 //{
 //  const char path[] = "test.png";
