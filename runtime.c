@@ -27,15 +27,12 @@ object Cyc_global_set(void *thd, object *glo, object value)
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
-const char *tag_names[24] = { \
+const char *tag_names[] = { \
    "pair" \
  , "symbol" \
  , "" \
  , "procedure" \
  , "procedure" \
- , "" \
- , "" \
- , "" \
  , "procedure" \
  , "number" \
  , "number" \

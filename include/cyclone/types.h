@@ -176,33 +176,32 @@ typedef long tag_type;
 #define stack_overflow(x,y) ((x) > (y))
 #endif
 
-/* Define object tag values. Could be an enum...
-   Remember to update tag_names in runtime.c when adding new tags */
-#define cons_tag 0
-#define symbol_tag 1
-#define forward_tag 2
-#define closure0_tag 3
-#define closure1_tag 4
-#define closureN_tag 8
-#define integer_tag 9
-#define double_tag 10
-#define string_tag 11
-#define primitive_tag 12
-#define eof_tag 13
-#define port_tag 14
-#define boolean_tag 15
-#define cvar_tag 16
-#define vector_tag 17
-#define macro_tag 18
-#define mutex_tag 19
-#define cond_var_tag 20
-#define bytevector_tag 21
-#define c_opaque_tag 22
+// Types of objects
+// Remember to update tag_names in runtime.c when adding new tags
+enum object_type 
+  { cons_tag = 0
+  , symbol_tag     // 1
+  , forward_tag    // 2
+  , closure0_tag   // 3
+  , closure1_tag   // 4
+  , closureN_tag   // 5
+  , integer_tag    // 6
+  , double_tag     // 7
+  , string_tag     // 8 
+  , primitive_tag  // 9
+  , eof_tag        // 10
+  , port_tag       // 11 
+  , boolean_tag    // 12
+  , cvar_tag       // 13
+  , vector_tag     // 14
+  , macro_tag      // 15
+  , mutex_tag      // 16
+  , cond_var_tag   // 17
+  , bytevector_tag // 18
+  , c_opaque_tag   // 19
+};
 
-#define nil NULL
 #define eq(x,y) (x == y)
-#define nullp(x) (x == NULL)
-
 #define type_of(x) (((list) x)->tag)
 #define forward(x) (((list) x)->cons_car)
 
