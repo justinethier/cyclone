@@ -245,7 +245,7 @@ typedef cvar_type *cvar;
    before an object is collected by GC.  */
 typedef struct {gc_header_type hdr; tag_type tag; void *ptr;} c_opaque_type;
 typedef c_opaque_type *c_opaque;
-#define make_c_opaque(var, ptr) c_opaque_type var; var.hdr.mark = gc_color_red; var.ndr.grayed = 0; var.tag = c_opaque_type; var.ptr = ptr;
+#define make_c_opaque(var, ptr) c_opaque_type var; var.hdr.mark = gc_color_red; var.hdr.grayed = 0; var.tag = c_opaque_type; var.ptr = ptr;
 
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
 
