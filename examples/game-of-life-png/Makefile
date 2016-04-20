@@ -27,3 +27,10 @@ clean:
 convert:
 	convert -resize 400x test.png out.png
 #	convert -delay 120 -loop 0 *.png animated.gif
+
+# A temporary directive to build the life program using GCC directly
+# For now, need to manually add "#include "../write-png.h"" to example/life.c to get it to build
+debug:
+	gcc example/life.c -g -c -o example/life.o
+	gcc life.c -g -c -o life.o
+	gcc life.o  /usr/local/share/cyclone/scheme/base.o  example/grid.o  /usr/local/share/cyclone/scheme/write.o  example/life.o write-png.o -pthread -lcyclone -lck -lm -lpng -g -o life
