@@ -60,8 +60,36 @@
 // General constants
 #define NANOSECONDS_PER_MILLISECOND 1000000
 
-/* Define general object type. */
+// Generic object type
 typedef void *object;
+
+// Define a tag for each possible type of object.
+// Remember to update tag_names in runtime.c when adding new tags
+enum object_tag
+  { cons_tag = 0
+  , symbol_tag     // 1
+  , forward_tag    // 2
+  , closure0_tag   // 3
+  , closure1_tag   // 4
+  , closureN_tag   // 5
+  , integer_tag    // 6
+  , double_tag     // 7
+  , string_tag     // 8 
+  , primitive_tag  // 9
+  , eof_tag        // 10
+  , port_tag       // 11 
+  , boolean_tag    // 12
+  , cvar_tag       // 13
+  , vector_tag     // 14
+  , macro_tag      // 15
+  , mutex_tag      // 16
+  , cond_var_tag   // 17
+  , bytevector_tag // 18
+  , c_opaque_tag   // 19
+};
+
+// Define the size of object tags
+typedef long tag_type;
 
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW
@@ -166,40 +194,12 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 #define gc_color_red  0 // Memory not to be GC'd, such as on the stack
 #define gc_color_blue 2 // Unallocated memory
 
-/* Define size of object tags */
-typedef long tag_type;
-
-/* Determine if stack has overflowed */
+// Determine if stack has overflowed
 #if STACK_GROWTH_IS_DOWNWARD
 #define stack_overflow(x,y) ((x) < (y))
 #else
 #define stack_overflow(x,y) ((x) > (y))
 #endif
-
-// Types of objects
-// Remember to update tag_names in runtime.c when adding new tags
-enum object_type 
-  { cons_tag = 0
-  , symbol_tag     // 1
-  , forward_tag    // 2
-  , closure0_tag   // 3
-  , closure1_tag   // 4
-  , closureN_tag   // 5
-  , integer_tag    // 6
-  , double_tag     // 7
-  , string_tag     // 8 
-  , primitive_tag  // 9
-  , eof_tag        // 10
-  , port_tag       // 11 
-  , boolean_tag    // 12
-  , cvar_tag       // 13
-  , vector_tag     // 14
-  , macro_tag      // 15
-  , mutex_tag      // 16
-  , cond_var_tag   // 17
-  , bytevector_tag // 18
-  , c_opaque_tag   // 19
-};
 
 #define eq(x,y) (x == y)
 #define type_of(x) (((list) x)->tag)
