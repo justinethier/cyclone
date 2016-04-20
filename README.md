@@ -58,7 +58,11 @@ Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Game of Life](examples/game-of-life) - The game of life example program and libraries from R<sup>7</sup>RS.
+- [Game of Life](examples/game-of-life) - The [game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
+
+- [Game of Life - PNG Image Generator](examples/game-of-life-png) - An modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI):
+
+<img class="doc" src="docs/images/game-of-life-gliders.gif">
 
 - [Threading](examples/threading) - Various examples of multi-threaded programs.
 
