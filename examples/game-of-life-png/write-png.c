@@ -102,7 +102,7 @@ void bitmap_fill(RGBBitmap *img, int r, int g, int b)
   // TODO: could use pointers directly or even memcpy
   //       to make this faster
   for (y = 0; y < img->height; y++) {
-    for (x = 0; x < img->height; x++) {
+    for (x = 0; x < img->width; x++) {
       bitmap_set(img, x, y, r, g, b);
     }
   }
