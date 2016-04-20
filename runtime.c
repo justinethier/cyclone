@@ -2831,9 +2831,12 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
       cvar_type *hp = gc_alloc(Cyc_heap, sizeof(cvar_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
+    case c_opaque_tag: {
+      c_opaque_type *hp = gc_alloc(Cyc_heap, sizeof(c_opaque_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
     case forward_tag:
       return (char *)forward(obj);
-    case c_opaque_tag: break;
     case eof_tag: break;
     case primitive_tag: break;
     case boolean_tag: break;
@@ -2965,9 +2968,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       case double_tag:
       case port_tag:
       case cvar_tag:
+      case c_opaque_tag:
         break;
       // These types are not heap-allocated
-      case c_opaque_tag:
       case eof_tag:
       case primitive_tag:
       case symbol_tag: 

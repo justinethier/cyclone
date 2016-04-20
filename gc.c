@@ -347,6 +347,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       hp->pvar = ((cvar_type *) obj)->pvar;
       return (char *)hp;
     }
+    case c_opaque_tag: {
+      c_opaque_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = c_opaque_tag;
+      hp->ptr = ((c_opaque_type *) obj)->ptr;
+      return (char *)hp;
+    }
     case mutex_tag: {
       mutex_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
@@ -527,6 +534,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == double_tag) return gc_heap_align(sizeof(double_type));
   if (t == port_tag) return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag) return gc_heap_align(sizeof(cvar_type));
+  if (t == c_opaque_tag) return gc_heap_align(sizeof(c_opaque_type));
   if (t == mutex_tag) return gc_heap_align(sizeof(mutex_type));
   if (t == cond_var_tag) return gc_heap_align(sizeof(cond_var_type));
   
