@@ -29,10 +29,11 @@
                     (if (< iteration 10) "0" "")
                     (number->string iteration) 
                     ".png")))
+        (png:fill! img 255 255 255)
         (each grid
           (lambda (i j v)
             (if v
-              (png:set! img i j 0 250 0))
+              (png:set! img i j 0 250 (* 3 iteration))) ; 250 0))
           ))
         (png:save img path)
         (png:free img)
@@ -69,6 +70,14 @@
         bitmap_set(img, 
           ((int)(unbox_number(x))),
           ((int)(unbox_number(y))),
+          ((int)(unbox_number(r))),
+          ((int)(unbox_number(g))),
+          ((int)(unbox_number(b))));
+        return_closcall1(data, k, boolean_t); ")
+    (define-c png:fill!
+      "(void *data, int argc, closure _, object k, object opq, object r, object g, object b)"
+      " RGBBitmap *img = (RGBBitmap *)opaque_ptr(opq);
+        bitmap_fill(img, 
           ((int)(unbox_number(r))),
           ((int)(unbox_number(g))),
           ((int)(unbox_number(b))));

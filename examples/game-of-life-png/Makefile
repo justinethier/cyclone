@@ -1,3 +1,7 @@
+#
+# Need to install ImageMagick, libpng, and libpng headers to build this project.
+# To install these packages on Ubuntu: sudo apt-get install imagemagick libpng-dev
+#
 SCM_PROGRAM = life
 SCM_LIBS = example/grid example/life
 

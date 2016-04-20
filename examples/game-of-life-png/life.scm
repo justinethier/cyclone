@@ -31,5 +31,32 @@
 (put! grid 3 0 #t)
 (put! grid 3 1 #t)
 (put! grid 3 2 #t)
+
+(put! grid 11 11 #t)
+(put! grid 12 12 #t)
+(put! grid 13 10 #t)
+(put! grid 13 11 #t)
+(put! grid 13 12 #t)
+
+(put! grid 6 6 #t)
+(put! grid 7 7 #t)
+(put! grid 8 5 #t)
+(put! grid 8 6 #t)
+(put! grid 8 7 #t)
+
+(put! grid 1 11 #t)
+(put! grid 2 12 #t)
+(put! grid 3 10 #t)
+(put! grid 3 11 #t)
+(put! grid 3 12 #t)
+
+(put! grid 15 0 #t)
+(put! grid 15 1 #t)
+(put! grid 16 1 #t)
+(put! grid 16 2 #t)
+(put! grid 17 2 #t)
+(put! grid 17 3 #t)
+(put! grid 18 2 #t)
+(put! grid 18 3 #t)
 ;; Run for x iterations.
-(life grid 80)
+(life grid 100)
