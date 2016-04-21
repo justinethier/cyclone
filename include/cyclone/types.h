@@ -65,39 +65,37 @@ typedef void *object;
 
 // Define a tag for each possible type of object.
 // Remember to update tag_names in runtime.c when adding new tags
-enum object_tag
-  { cons_tag = 0
-  , symbol_tag     // 1
-  , forward_tag    // 2
-  , closure0_tag   // 3
-  , closure1_tag   // 4
-  , closureN_tag   // 5
-  , integer_tag    // 6
-  , double_tag     // 7
-  , string_tag     // 8 
-  , primitive_tag  // 9
-  , eof_tag        // 10
-  , port_tag       // 11 
-  , boolean_tag    // 12
-  , cvar_tag       // 13
-  , vector_tag     // 14
-  , macro_tag      // 15
-  , mutex_tag      // 16
-  , cond_var_tag   // 17
-  , bytevector_tag // 18
-  , c_opaque_tag   // 19
+enum object_tag { 
+        cons_tag = 0
+      , symbol_tag              // 1
+      , forward_tag             // 2
+      , closure0_tag            // 3
+      , closure1_tag            // 4
+      , closureN_tag            // 5
+      , integer_tag             // 6
+      , double_tag              // 7
+      , string_tag              // 8 
+      , primitive_tag           // 9
+      , eof_tag                 // 10
+      , port_tag                // 11 
+      , boolean_tag             // 12
+      , cvar_tag                // 13
+      , vector_tag              // 14
+      , macro_tag               // 15
+      , mutex_tag               // 16
+      , cond_var_tag            // 17
+      , bytevector_tag          // 18
+      , c_opaque_tag            // 19
 };
 
 // Define the size of object tags
 typedef long tag_type;
 
 /* Threading */
-typedef enum { CYC_THREAD_STATE_NEW
-             , CYC_THREAD_STATE_RUNNABLE
-             , CYC_THREAD_STATE_BLOCKED
-             , CYC_THREAD_STATE_BLOCKED_COOPERATING
-             , CYC_THREAD_STATE_TERMINATED
-             } cyc_thread_state_type;
+typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
+      CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
+      CYC_THREAD_STATE_TERMINATED
+} cyc_thread_state_type;
 
 /* Thread data structures */
 typedef struct gc_thread_data_t gc_thread_data;
@@ -139,9 +137,8 @@ struct gc_thread_data_t {
 
 /* GC data structures */
 
-typedef enum { HEAP_SM = 0
-             , HEAP_MED
-             , HEAP_REST } cached_heap_type;
+typedef enum { HEAP_SM = 0, HEAP_MED, HEAP_REST
+} cached_heap_type;
 
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
@@ -152,11 +149,11 @@ struct gc_free_list_t {
 typedef struct gc_heap_t gc_heap;
 struct gc_heap_t {
   unsigned int size;
-  unsigned int chunk_size; // 0 for any size, other and heap will only alloc chunks of that size
+  unsigned int chunk_size;      // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
   //unsigned int free_size;
   gc_free_list *free_list;
-  gc_heap *next; // TBD, linked list is not very efficient, but easy to work with as a start
+  gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
   char *data;
 };
 
@@ -169,30 +166,26 @@ struct gc_heap_root_t {
 
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned int mark; // mark bits (TODO: only need 2, reduce size of type?)
-  unsigned char grayed; // stack object to be grayed when moved to heap
+  unsigned int mark;            // mark bits (TODO: only need 2, reduce size of type?)
+  unsigned char grayed;         // stack object to be grayed when moved to heap
 };
 #define mark(x) (((list) x)->hdr.mark)
 #define grayed(x) (((list) x)->hdr.grayed)
 
 /* Enums for tri-color marking */
-typedef enum { STATUS_ASYNC 
-             , STATUS_SYNC1 
-             , STATUS_SYNC2 
-             } gc_status_type;
+typedef enum { STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2
+} gc_status_type;
 
-typedef enum { STAGE_CLEAR_OR_MARKING 
-             , STAGE_TRACING 
-             //, STAGE_REF_PROCESSING 
-             , STAGE_SWEEPING 
-             , STAGE_RESTING
-             } gc_stage_type;
+typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
+      //, STAGE_REF_PROCESSING 
+  , STAGE_SWEEPING, STAGE_RESTING
+} gc_stage_type;
 
 // Constant colors are defined here.
 // The mark/clear colors are defined in the gc module because
 // the collector swaps their values as an optimization.
-#define gc_color_red  0 // Memory not to be GC'd, such as on the stack
-#define gc_color_blue 2 // Unallocated memory
+#define gc_color_red  0         // Memory not to be GC'd, such as on the stack
+#define gc_color_blue 2         // Unallocated memory
 
 // Determine if stack has overflowed
 #if STACK_GROWTH_IS_DOWNWARD
@@ -230,40 +223,65 @@ typedef enum { STAGE_CLEAR_OR_MARKING
 
 /* Function type */
 
-typedef void (*function_type)();
-typedef void (*function_type_va)(int, object, object, object, ...);
+typedef void (*function_type) ();
+typedef void (*function_type_va) (int, object, object, object, ...);
 
 /* Define C-variable integration type */
-typedef struct {gc_header_type hdr; tag_type tag; object *pvar;} cvar_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  object *pvar;
+} cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) cvar_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cvar_tag; n.pvar = v;
 
 /* C Opaque type - a wrapper around a pointer of any type.
    Note this requires application code to free any memory
    before an object is collected by GC.  */
-typedef struct {gc_header_type hdr; tag_type tag; void *ptr;} c_opaque_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  void *ptr;
+} c_opaque_type;
 typedef c_opaque_type *c_opaque;
 #define make_c_opaque(var, p) c_opaque_type var; var.hdr.mark = gc_color_red; var.hdr.grayed = 0; var.tag = c_opaque_tag; var.ptr = p;
 
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
 
 /* Define mutex type */
-typedef struct {gc_header_type hdr; tag_type tag; pthread_mutex_t lock;} mutex_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  pthread_mutex_t lock;
+} mutex_type;
 typedef mutex_type *mutex;
 
 /* Define condition variable type */
-typedef struct {gc_header_type hdr; tag_type tag; pthread_cond_t cond;} cond_var_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  pthread_cond_t cond;
+} cond_var_type;
 typedef cond_var_type *cond_var;
 
 /* Define boolean type. */
-typedef struct {gc_header_type hdr; const tag_type tag; const char *pname;} boolean_type;
+typedef struct {
+  gc_header_type hdr;
+  const tag_type tag;
+  const char *pname;
+} boolean_type;
 typedef boolean_type *boolean;
 
 #define boolean_pname(x) (((boolean_type *) x)->pname)
 
 /* Define symbol type. */
 
-typedef struct {gc_header_type hdr; const tag_type tag; const char *pname; object plist;} symbol_type;
+typedef struct {
+  gc_header_type hdr;
+  const tag_type tag;
+  const char *pname;
+  object plist;
+} symbol_type;
 typedef symbol_type *symbol;
 
 #define symbol_pname(x) (((symbol_type *) x)->pname)
@@ -273,16 +291,33 @@ typedef symbol_type *symbol;
 static object quote_##name = NULL;
 
 /* Define numeric types */
-typedef struct {gc_header_type hdr; tag_type tag; int value; int padding;} integer_type;
+
+// Integer object type is still included for now, but ints
+// should be stored using value types instead.
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  int value;
+  int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
+} integer_type;
 #define make_int(n,v) integer_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = integer_tag; n.value = v;
-typedef struct {gc_header_type hdr; tag_type tag; double value;} double_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  double value;
+} double_type;
 #define make_double(n,v) double_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = double_tag; n.value = v;
 
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
 
 /* Define string type */
-typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  int len;
+  char *str;
+} string_type;
 #define make_string(cs, s) string_type cs; \
 { int len = strlen(s); cs.tag = string_tag; cs.len = len; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
@@ -306,26 +341,46 @@ typedef struct {gc_header_type hdr; tag_type tag; int len; char *str;} string_ty
 //       consider http://stackoverflow.com/questions/6206893/how-to-implement-char-ready-in-c
 // TODO: a simple wrapper around FILE may not be good enough long-term
 // TODO: how exactly mode will be used. need to know r/w, bin/txt
-typedef struct {gc_header_type hdr; tag_type tag; FILE *fp; int mode;} port_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  FILE *fp;
+  int mode;
+} port_type;
 #define make_port(p,f,m) port_type p; p.hdr.mark = gc_color_red; p.hdr.grayed = 0; p.tag = port_tag; p.fp = f; p.mode = m;
 
 /* Vector type */
 
-typedef struct {gc_header_type hdr; tag_type tag; int num_elt; object *elts;} vector_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  int num_elt;
+  object *elts;
+} vector_type;
 typedef vector_type *vector;
 
 #define make_empty_vector(v) vector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
 
 /* Bytevector type */
 
-typedef struct {gc_header_type hdr; tag_type tag; int len; char *data;} bytevector_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  int len;
+  char *data;
+} bytevector_type;
 typedef bytevector_type *bytevector;
 
 #define make_empty_bytevector(v) bytevector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = bytevector_tag; v.len = 0; v.data = NULL;
 
 /* Pair (cons) type */
 
-typedef struct {gc_header_type hdr; tag_type tag; object cons_car; object cons_cdr;} cons_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  object cons_car;
+  object cons_cdr;
+} cons_type;
 typedef cons_type *list;
 typedef cons_type pair_type;
 typedef pair_type *pair;
@@ -366,10 +421,33 @@ cons_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cons_tag; n.co
 
 /* Closure types */
 
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } macro_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; } closure0_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; object elt1;} closure1_type;
-typedef struct {gc_header_type hdr; tag_type tag; function_type fn; int num_args; int num_elt; object *elts;} closureN_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  function_type fn;
+  int num_args;
+} macro_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  function_type fn;
+  int num_args;
+} closure0_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  function_type fn;
+  int num_args;
+  object elt1;
+} closure1_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  function_type fn;
+  int num_args;
+  int num_elt;
+  object *elts;
+} closureN_type;
 
 typedef closure0_type *closure0;
 typedef closure1_type *closure1;
@@ -385,7 +463,12 @@ typedef closure0_type *macro;
 #define make_cell(n,a) make_cons(n,a,NULL);
 
 /* Primitive types */
-typedef struct {gc_header_type hdr; tag_type tag; const char *pname; function_type fn;} primitive_type;
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  const char *pname;
+  function_type fn;
+} primitive_type;
 typedef primitive_type *primitive;
 
 #define defprimitive(name, pname, fnc) \
@@ -412,32 +495,36 @@ void vpbuffer_free(void **buf);
 
 /* GC prototypes */
 void gc_initialize();
-void gc_add_mutator(gc_thread_data *thd);
-void gc_remove_mutator(gc_thread_data *thd);
-gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size, size_t chunk_size);
-void gc_print_stats(gc_heap *h);
-int gc_grow_heap(gc_heap *h, int heap_type, size_t size, size_t chunk_size);
-char *gc_copy_obj(object hp, char *obj, gc_thread_data *thd);
-void *gc_try_alloc(gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd);
-void *gc_alloc(gc_heap_root *h, size_t size, char *obj, gc_thread_data *thd, int *heap_grown);
-size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r);
-gc_heap *gc_heap_last(gc_heap *h);
-size_t gc_heap_total_size(gc_heap *h);
+void gc_add_mutator(gc_thread_data * thd);
+void gc_remove_mutator(gc_thread_data * thd);
+gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
+                        size_t chunk_size);
+void gc_print_stats(gc_heap * h);
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size);
+char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
+void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
+                   gc_thread_data * thd);
+void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
+               int *heap_grown);
+size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
+gc_heap *gc_heap_last(gc_heap * h);
+size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);
 //void gc_mark(gc_heap *h, object obj);
 void gc_mark_globals(void);
-size_t gc_sweep(gc_heap *h, int heap_type, size_t *sum_freed_ptr);
-void gc_thr_grow_move_buffer(gc_thread_data *d);
-void gc_thr_add_to_move_buffer(gc_thread_data *d, int *alloci, object obj);
-void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, long stack_size);
-void gc_thread_data_free(gc_thread_data *thd);
+size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr);
+void gc_thr_grow_move_buffer(gc_thread_data * d);
+void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
+void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
+                         long stack_size);
+void gc_thread_data_free(gc_thread_data * thd);
 // Prototypes for mutator/collector:
-int gc_is_stack_obj(gc_thread_data *thd, object obj);
-void gc_mut_update(gc_thread_data *thd, object old_obj, object value);
-void gc_mut_cooperate(gc_thread_data *thd, int buf_len);
-void gc_mark_gray(gc_thread_data *thd, object obj);
-void gc_mark_gray2(gc_thread_data *thd, object obj);
+int gc_is_stack_obj(gc_thread_data * thd, object obj);
+void gc_mut_update(gc_thread_data * thd, object old_obj, object value);
+void gc_mut_cooperate(gc_thread_data * thd, int buf_len);
+void gc_mark_gray(gc_thread_data * thd, object obj);
+void gc_mark_gray2(gc_thread_data * thd, object obj);
 void gc_collector_trace();
 void gc_mark_black(object obj);
 void gc_collector_mark_gray(object parent, object obj);
@@ -446,8 +533,8 @@ void gc_handshake(gc_status_type s);
 void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
-void gc_mutator_thread_blocked(gc_thread_data *thd, object cont);
-void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
+void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
+void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
 #define return_thread_runnable(d, r) \
@@ -457,9 +544,10 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result);
 //  body \
 //  return_thread_runnable((data), (result));
 gc_heap_root *gc_get_heap();
-int gc_minor(void *data, object low_limit, object high_limit, closure cont, object *args, int num_args);
+int gc_minor(void *data, object low_limit, object high_limit, closure cont,
+             object * args, int num_args);
 /* Mutation table to support minor GC write barrier */
 void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
 
-#endif /* CYCLONE_TYPES_H */
+#endif                          /* CYCLONE_TYPES_H */
