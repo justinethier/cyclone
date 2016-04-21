@@ -24,6 +24,8 @@
 
 #define Cyc_check_cons_or_null(d,obj) { if (obj != NULL) { Cyc_check_cons(d,obj); }}
 #define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, pair_tag, obj);
+#define Cyc_check_pair_or_null(d,obj) { if (obj != NULL) { Cyc_check_pair(d,obj); }}
+#define Cyc_check_pair(d,obj) Cyc_check_type(d,Cyc_is_pair, pair_tag, obj);
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
@@ -209,6 +211,7 @@ object Cyc_io_read_line(void *data, object cont, object port);
 
 object Cyc_is_boolean(object o);
 object Cyc_is_cons(object o);
+object Cyc_is_pair(object o);
 object Cyc_is_null(object o);
 object Cyc_is_number(object o);
 object Cyc_is_real(object o);

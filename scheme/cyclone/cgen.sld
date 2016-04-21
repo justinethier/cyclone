@@ -614,7 +614,7 @@
      ((eq? p 'number?)       "Cyc_is_number")
      ((eq? p 'real?)         "Cyc_is_real")
      ((eq? p 'integer?)      "Cyc_is_integer")
-     ((eq? p 'pair?)         "Cyc_is_cons")
+     ((eq? p 'pair?)         "Cyc_is_pair")
      ((eq? p 'procedure?)    "Cyc_is_procedure")
      ((eq? p 'macro?)        "Cyc_is_macro")
      ((eq? p 'port?)         "Cyc_is_port")
