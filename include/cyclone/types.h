@@ -66,26 +66,26 @@ typedef void *object;
 // Define a tag for each possible type of object.
 // Remember to update tag_names in runtime.c when adding new tags
 enum object_tag { 
-        pair_tag = 0
-      , symbol_tag              // 1
-      , forward_tag             // 2
+        boolean_tag = 0         // 0
+      , bytevector_tag          // 1
+      , c_opaque_tag            // 2
       , closure0_tag            // 3
       , closure1_tag            // 4
       , closureN_tag            // 5
-      , integer_tag             // 6
-      , double_tag              // 7
-      , string_tag              // 8 
-      , primitive_tag           // 9
-      , eof_tag                 // 10
-      , port_tag                // 11 
-      , boolean_tag             // 12
-      , cvar_tag                // 13
-      , vector_tag              // 14
-      , macro_tag               // 15
-      , mutex_tag               // 16
-      , cond_var_tag            // 17
-      , bytevector_tag          // 18
-      , c_opaque_tag            // 19
+      , cond_var_tag            // 6
+      , cvar_tag                // 7
+      , double_tag              // 8
+      , eof_tag                 // 9
+      , forward_tag             // 10
+      , integer_tag             // 11
+      , macro_tag               // 12
+      , mutex_tag               // 13
+      , pair_tag                // 14
+      , port_tag                // 15 
+      , primitive_tag           // 16
+      , string_tag              // 17
+      , symbol_tag              // 18
+      , vector_tag              // 19
 };
 
 // Define the size of object tags

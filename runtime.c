@@ -28,26 +28,26 @@ object Cyc_global_set(void *thd, object *glo, object value)
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[] = { \
-   "pair" \
- , "symbol" \
- , "" \
- , "procedure" \
- , "procedure" \
- , "procedure" \
- , "number" \
- , "number" \
- , "string" \
- , "primitive" \
- , "eof" \
- , "port" \
- , "boolean" \
- , "C primitive" \
- , "vector" \
- , "macro" \
- , "mutex" \
- , "condition variable" \
- , "bytevector" \
- , "opaque" \
+  /*boolean_tag   */   "boolean" \
+  /*bytevector_tag*/ , "bytevector" \
+  /*c_opaque_tag  */ , "opaque" \
+  /*closure0_tag  */ , "procedure" \
+  /*closure1_tag  */ , "procedure" \
+  /*closureN_tag  */ , "procedure" \
+  /*cond_var_tag  */ , "condition variable" \
+  /*cvar_tag      */ , "C primitive" \
+  /*double_tag    */ , "number" \
+  /*eof_tag       */ , "eof" \
+  /*forward_tag   */ , "" \
+  /*integer_tag   */ , "number" \
+  /*macro_tag     */ , "macro" \
+  /*mutex_tag     */ , "mutex" \
+  /*pair_tag      */ , "pair" \
+  /*port_tag      */ , "port" \
+  /*primitive_tag */ , "primitive" \
+  /*string_tag    */ , "string" \
+  /*symbol_tag    */ , "symbol" \
+  /*vector_tag    */ , "vector" \
  , "Reserved for future use" };
 
 void Cyc_invalid_type_error(void *data, int tag, object found) {
