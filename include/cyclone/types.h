@@ -423,20 +423,20 @@ typedef struct {
   tag_type tag;
   object cons_car;
   object cons_cdr;
-} cons_type;
-typedef cons_type *list;
-typedef cons_type pair_type;
+} pair_type;
+typedef pair_type *list;
+typedef pair_type cons_type;
 typedef pair_type *pair;
 
 #define make_pair(n,a,d) \
-  cons_type n; \
+  pair_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
   n.tag = pair_tag; \
   n.cons_car = a; \
   n.cons_cdr = d;
 #define make_cons(n,a,d) \
-  cons_type n; \
+  pair_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
   n.tag = pair_tag; \
@@ -536,7 +536,7 @@ static const object primitive_##name = &name##_primitive
 /* All constant-size objects */
 typedef union {
   boolean_type boolean_t;
-  cons_type cons_t;
+  pair_type cons_t;
   symbol_type symbol_t;
   primitive_type primitive_t;
   integer_type integer_t;

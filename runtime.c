@@ -1416,7 +1416,7 @@ object Cyc_command_line_arguments(void *data, object cont) {
   object lis = NULL;
   for (i = _cyc_argc; i > 1; i--) { // skip program name
     object ps = alloca(sizeof(string_type));
-    object pl = alloca(sizeof(cons_type));
+    object pl = alloca(sizeof(pair_type));
     make_string(s, _cyc_argv[i - 1]);
     memcpy(ps, &s, sizeof(string_type));
     ((list)pl)->hdr.mark = gc_color_red;
@@ -2077,7 +2077,7 @@ object Cyc_io_peek_char(void *data, object cont, object port) {
 // Functions internal to the runtime that use malloc
 list mcons(object a, object d)
 {
-  cons_type *c = malloc(sizeof(cons_type));
+  pair_type *c = malloc(sizeof(pair_type));
   c->hdr.mark = gc_color_red;
   c->hdr.grayed = 0;
   c->tag = pair_tag; 
@@ -2643,7 +2643,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
     va_list ap;
     object tmp;
     int i;
-    list args = alloca(sizeof(cons_type) * argc);
+    list args = alloca(sizeof(pair_type) * argc);
     
     va_start(ap, prim);
 
@@ -2678,7 +2678,7 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
       exit(1);
     }
 
-    args = alloca(sizeof(cons_type) * (argc - 1));
+    args = alloca(sizeof(pair_type) * (argc - 1));
     cont = buf[0];
     
     for (i = 1; i < argc; i++) {
@@ -2768,7 +2768,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
   switch(type_of(obj)){
     case pair_tag: {
-      list hp = gc_alloc(Cyc_heap, sizeof(cons_type), obj, thd, heap_grown);
+      list hp = gc_alloc(Cyc_heap, sizeof(pair_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
     case macro_tag: {

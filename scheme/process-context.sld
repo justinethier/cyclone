@@ -23,7 +23,7 @@
         object lis = NULL;
         for (i = _cyc_argc; i > 0; i--) {
           object ps = alloca(sizeof(string_type));
-          object pl = alloca(sizeof(cons_type));
+          object pl = alloca(sizeof(pair_type));
           make_string(s, _cyc_argv[i - 1]);
           memcpy(ps, &s, sizeof(string_type));
           ((list)pl)->hdr.mark = gc_color_red;

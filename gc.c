@@ -514,7 +514,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   }
 #endif
   t = type_of(obj); 
-  if (t == pair_tag) return gc_heap_align(sizeof(cons_type));
+  if (t == pair_tag) return gc_heap_align(sizeof(pair_type));
   if (t == macro_tag) return gc_heap_align(sizeof(macro_type));
   if (t == closure0_tag) return gc_heap_align(sizeof(closure0_type));
   if (t == closure1_tag) return gc_heap_align(sizeof(closure1_type));

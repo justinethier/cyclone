@@ -62,7 +62,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
    args and the number of provided ones, and pass the difference as 'count'
  */
 #define load_varargs(var, arg_var, count) \
-  list var = (count > 0) ? alloca(sizeof(cons_type)*count) : NULL; \
+  list var = (count > 0) ? alloca(sizeof(pair_type)*count) : NULL; \
   { \
     int i; \
     object tmp; \
