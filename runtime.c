@@ -868,11 +868,6 @@ object Cyc_is_boolean(object o){
         return boolean_t;
     return boolean_f;}
 
-object Cyc_is_cons(object o){
-    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == pair_tag)
-        return boolean_t;
-    return boolean_f;}
-
 object Cyc_is_pair(object o){
     if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == pair_tag)
         return boolean_t;
