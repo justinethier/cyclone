@@ -230,7 +230,7 @@ typedef void (*function_type_va) (int, object, object, object, ...);
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  object *pvar;
+  object *pvar; /* GC assumes this is a Cyclone object! */
 } cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) \
@@ -246,7 +246,7 @@ typedef cvar_type *cvar;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  void *ptr;
+  void *ptr; /* Can be anything, GC will not collect it */
 } c_opaque_type;
 typedef c_opaque_type *c_opaque;
 #define make_c_opaque(var, p) \
