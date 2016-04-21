@@ -1,10 +1,3 @@
-#
-# Need to install ImageMagick, libpng, and libpng headers to build this project.
-# To install these packages on Ubuntu: sudo apt-get install imagemagick libpng-dev
-#
-# To create PNG outputs and convert to an animation, run:
-# make && ./life && ./convert.sh
-#
 SCM_PROGRAM = life
 SCM_LIBS = example/grid example/life
 
