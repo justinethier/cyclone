@@ -376,7 +376,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
     case symbol_tag:
       break;
     default:
-      fprintf(stderr, "gc_copy_obj: bad tag obj=%p obj.tag=%ld\n",(object) obj, type_of(obj));
+      fprintf(stderr, "gc_copy_obj: bad tag obj=%p obj.tag=%d\n",(object) obj, type_of(obj));
       exit(1);
   }
   return (char *)obj;
@@ -493,7 +493,7 @@ void *gc_alloc(gc_heap_root *hrt, size_t size, char *obj, gc_thread_data *thd, i
     }
   }
 #if GC_DEBUG_VERBOSE
-  fprintf(stderr, "alloc %p size = %zu, obj=%p, tag=%ld, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
+  fprintf(stderr, "alloc %p size = %zu, obj=%p, tag=%d, mark=%d\n", result, size, obj, type_of(obj), mark(((object)result)));
   // Debug check, should no longer be necessary
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
@@ -538,7 +538,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == mutex_tag) return gc_heap_align(sizeof(mutex_type));
   if (t == cond_var_tag) return gc_heap_align(sizeof(cond_var_type));
   
-  fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %ld\n", obj, t);
+  fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %d\n", obj, t);
   exit(1);
   return 0;
 }
@@ -626,7 +626,7 @@ size_t gc_sweep(gc_heap *h, int heap_type, size_t *sum_freed_ptr)
 
       if (mark(p) == gc_color_clear) {
 #if GC_DEBUG_VERBOSE
-        fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %ld\n", p, type_of(p));
+        fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %d\n", p, type_of(p));
 #endif
         mark(p) = gc_color_blue; // Needed?
         if (type_of(p) == mutex_tag) {
@@ -1086,7 +1086,7 @@ void gc_collector_mark_gray(object parent, object obj)
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
 #if GC_DEBUG_VERBOSE
-    fprintf(stderr, "mark gray parent = %p (%ld) obj = %p\n", parent, type_of(parent), obj);
+    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent, type_of(parent), obj);
 #endif
   }
 }

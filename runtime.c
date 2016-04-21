@@ -636,7 +636,7 @@ object Cyc_display(object x, FILE *port)
       fprintf(port, ")");
       break;
     default:
-      fprintf(port, "Cyc_display: bad tag x=%ld\n", ((closure)x)->tag); 
+      fprintf(port, "Cyc_display: bad tag x=%d\n", ((closure)x)->tag); 
       exit(1);
  }
  return quote_void;}
@@ -2632,7 +2632,7 @@ object apply(void *data, object cont, object func, object args){
     }
       
     default:
-      printf("Invalid object type %ld\n", type_of(func));
+      printf("Invalid object type %d\n", type_of(func));
       exit(1);
   }
   return NULL; // Never reached
@@ -2834,7 +2834,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
     case boolean_tag: break;
     case symbol_tag: break; // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
     default:
-      fprintf(stderr, "gc_move: bad tag obj=%p obj.tag=%ld\n",(object) obj, type_of(obj));
+      fprintf(stderr, "gc_move: bad tag obj=%p obj.tag=%d\n",(object) obj, type_of(obj));
       exit(1);
   }
   return (char *)obj;
@@ -2908,7 +2908,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       } else if (type_of(o) == forward_tag) {
           // Already transported, skip
       } else {
-          printf("Unexpected type %ld transporting mutation\n", type_of(o));
+          printf("Unexpected type %d transporting mutation\n", type_of(o));
           exit(1);
       }
     }
@@ -2969,7 +2969,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       case boolean_tag:
       default:
         fprintf(stderr, 
-          "GC: unexpected object type %ld for object %p\n", type_of(obj), obj);
+          "GC: unexpected object type %d for object %p\n", type_of(obj), obj);
         exit(1);
     }
     scani++;

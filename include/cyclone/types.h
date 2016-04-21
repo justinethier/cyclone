@@ -89,7 +89,7 @@ enum object_tag {
 };
 
 // Define the size of object tags
-typedef long tag_type;
+typedef unsigned char tag_type;
 
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
@@ -166,7 +166,7 @@ struct gc_heap_root_t {
 
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned int mark;            // mark bits (TODO: only need 2, reduce size of type?)
+  unsigned char mark;           // mark bits (only need 2)
   unsigned char grayed;         // stack object to be grayed when moved to heap
 };
 #define mark(x) (((list) x)->hdr.mark)
