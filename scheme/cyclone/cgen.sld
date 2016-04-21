@@ -151,7 +151,7 @@
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
       "#define closcall" n "(td,clo" args ") "
-        (wrap (string-append "if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td," n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
+        (wrap (string-append "if (type_of(clo) == pair_tag || prim(clo)) { Cyc_apply(td," n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
         (wrap " else { ")
         "((clo)->fn)(td," n ",clo" args ")"
         (wrap ";}")
@@ -322,7 +322,7 @@
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append "make_cons(" cvar "," (c:body a) "," (c:body b) ");")
+          (string-append "make_pair(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b))))
     )
     (_c-compile-scalars 
@@ -623,7 +623,7 @@
      ((eq? p 'string?)       "Cyc_is_string")
      ((eq? p 'eof-object?)   "Cyc_is_eof_object")
      ((eq? p 'symbol?)       "Cyc_is_symbol")
-     ((eq? p 'cons)          "make_cons")
+     ((eq? p 'cons)          "make_pair")
      ((eq? p 'cell)          "make_cell")
      ((eq? p 'cell-get)      "cell_get")
      ((eq? p 'set-cell!)     "Cyc_set_car")
@@ -1550,7 +1550,7 @@
                  "  make_cvar(" cvar-sym 
                  ", (object *)&" (cgen:mangle-global (car g)) ");")
              (emits*
-                 "make_cons(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
+                 "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
                  "\"), &" cvar-sym ");\n")
              (set! pairs (cons pair-sym pairs))
           ))
@@ -1567,13 +1567,13 @@
               ((null? (cdr ps))
                (if (not head-pair)
                    (set! head-pair (car cs)))
-               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
+               (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
                      (cdr ps)
                      (cdr cs)))
               (else
                (if (not head-pair)
                    (set! head-pair (car cs)))
-               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
+               (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                      (cdr ps) 
                      (cdr cs)))))
         (if head-pair

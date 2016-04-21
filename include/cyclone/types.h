@@ -66,7 +66,7 @@ typedef void *object;
 // Define a tag for each possible type of object.
 // Remember to update tag_names in runtime.c when adding new tags
 enum object_tag { 
-        cons_tag = 0
+        pair_tag = 0
       , symbol_tag              // 1
       , forward_tag             // 2
       , closure0_tag            // 3
@@ -90,6 +90,10 @@ enum object_tag {
 
 // Define the size of object tags
 typedef unsigned char tag_type;
+
+// Temporary defines!
+#define cons_tag  0
+// END
 
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
@@ -424,15 +428,22 @@ typedef cons_type *list;
 typedef cons_type pair_type;
 typedef pair_type *pair;
 
+#define make_pair(n,a,d) \
+  cons_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = pair_tag; \
+  n.cons_car = a; \
+  n.cons_cdr = d;
 #define make_cons(n,a,d) \
   cons_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
-  n.tag = cons_tag; \
+  n.tag = pair_tag; \
   n.cons_car = a; \
   n.cons_cdr = d;
 
-#define make_cell(n,a) make_cons(n,a,NULL);
+#define make_cell(n,a) make_pair(n,a,NULL);
 
 #define car(x)    (((pair_type *) x)->cons_car)
 #define cdr(x)    (((pair_type *) x)->cons_cdr)

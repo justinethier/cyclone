@@ -23,7 +23,7 @@
   if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 
 #define Cyc_check_cons_or_null(d,obj) { if (obj != NULL) { Cyc_check_cons(d,obj); }}
-#define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, cons_tag, obj);
+#define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, pair_tag, obj);
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
@@ -77,7 +77,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
         } \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
-        var[i].tag = cons_tag; \
+        var[i].tag = pair_tag; \
         var[i].cons_car = tmp; \
         var[i].cons_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
       } \

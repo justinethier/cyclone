@@ -28,7 +28,7 @@
           memcpy(ps, &s, sizeof(string_type));
           ((list)pl)->hdr.mark = gc_color_red;
           ((list)pl)->hdr.grayed = 0;
-          ((list)pl)->tag = cons_tag;
+          ((list)pl)->tag = pair_tag;
           ((list)pl)->cons_car = ps;
           ((list)pl)->cons_cdr = lis;
           lis = pl;

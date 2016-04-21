@@ -877,7 +877,7 @@
     (define-c Cyc-add-exception-handler
       "(void *data, int argc, closure _, object k, object h)"
       " gc_thread_data *thd = (gc_thread_data *)data;
-        make_cons(c, h, thd->exception_handler_stack);
+        make_pair(c, h, thd->exception_handler_stack);
         thd->exception_handler_stack = &c;
         return_closcall1(data, k, &c); ")
     (define-c Cyc-remove-exception-handler

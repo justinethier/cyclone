@@ -238,10 +238,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
   // which already does that
 
   switch(type_of(obj)){
-    case cons_tag: {
+    case pair_tag: {
       list hp = dest;
       hp->hdr.mark = thd->gc_alloc_color;
-      type_of(hp) = cons_tag;
+      type_of(hp) = pair_tag;
       car(hp) = car(obj);
       cdr(hp) = cdr(obj);
       return (char *)hp;
@@ -514,7 +514,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   }
 #endif
   t = type_of(obj); 
-  if (t == cons_tag) return gc_heap_align(sizeof(cons_type));
+  if (t == pair_tag) return gc_heap_align(sizeof(cons_type));
   if (t == macro_tag) return gc_heap_align(sizeof(macro_type));
   if (t == closure0_tag) return gc_heap_align(sizeof(closure0_type));
   if (t == closure1_tag) return gc_heap_align(sizeof(closure1_type));
@@ -1029,7 +1029,7 @@ void gc_mark_black(object obj)
     // Note we probably should use some form of atomics/synchronization
     // for cons and vector types, as these pointers could change.
     switch(type_of(obj)) {
-      case cons_tag: {
+      case pair_tag: {
         gc_collector_mark_gray(obj, car(obj));
         gc_collector_mark_gray(obj, cdr(obj));
         break;
@@ -1441,7 +1441,7 @@ void gc_mutator_thread_runnable(gc_thread_data *thd, object result)
     longjmp(*(thd->jmp_start), 1);
   } else {
     // Collector didn't do anything; make a normal continuation call
-    if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
+    if (type_of(thd->gc_cont) == pair_tag || prim(thd->gc_cont)) {
       thd->gc_args[0] = result;
       Cyc_apply_from_buf(thd, 1, thd->gc_cont, thd->gc_args);
     } else {

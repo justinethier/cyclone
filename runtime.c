@@ -74,7 +74,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
 /* END error checking */
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(td,clo,a1) if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td,0, (closure)(a1), clo); } else { ((clo)->fn)(td,1,clo,a1);}
+#define closcall1(td,clo,a1) if (type_of(clo) == pair_tag || prim(clo)) { Cyc_apply(td,0, (closure)(a1), clo); } else { ((clo)->fn)(td,1,clo,a1);}
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall1(td,clo,a1) { \
  char top; \
@@ -82,7 +82,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index) {
      object buf[1]; buf[0] = a1;\
      GC(td,clo,buf,1); return; \
  } else {closcall1(td,(closure) (clo),a1); return;}}
-#define closcall2(td,clo,a1,a2) if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td,1, (closure)(a1), clo,a2); } else { ((clo)->fn)(td,2,clo,a1,a2);}
+#define closcall2(td,clo,a1,a2) if (type_of(clo) == pair_tag || prim(clo)) { Cyc_apply(td,1, (closure)(a1), clo,a2); } else { ((clo)->fn)(td,2,clo,a1,a2);}
 /* Return to continuation after checking for stack overflow. */
 #define return_closcall2(td,clo,a1,a2) { \
  char top; \
@@ -359,7 +359,7 @@ object Cyc_glo_eval_from_c = NULL;
 object Cyc_default_exception_handler(void *data, int argc, closure _, object err) {
     fprintf(stderr, "Error: ");
 
-    if ((err == NULL) || is_value_type(err) || type_of(err) != cons_tag) {
+    if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag) {
       Cyc_display(err, stderr);
     } else {
       // Error is list of form (type arg1 ... argn)
@@ -389,9 +389,9 @@ object Cyc_current_exception_handler(void *data) {
 
 /* Raise an exception from the runtime code */
 void Cyc_rt_raise(void *data, object err) {
-    make_cons(c2, err, NULL);
-    make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, NULL);
+    make_pair(c2, err, NULL);
+    make_pair(c1, boolean_f, &c2);
+    make_pair(c0, &c1, NULL);
     apply(data, NULL, Cyc_current_exception_handler(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise\n");
@@ -399,10 +399,10 @@ void Cyc_rt_raise(void *data, object err) {
 }
 void Cyc_rt_raise2(void *data, const char *msg, object err) {
     make_string(s, msg);
-    make_cons(c3, err, NULL);
-    make_cons(c2, &s, &c3);
-    make_cons(c1, boolean_f, &c2);
-    make_cons(c0, &c1, NULL);
+    make_pair(c3, err, NULL);
+    make_pair(c2, &s, &c3);
+    make_pair(c1, boolean_f, &c2);
+    make_pair(c0, &c1, NULL);
     apply(data, NULL, Cyc_current_exception_handler(data), &c0);
     // Should never get here
     fprintf(stderr, "Internal error in Cyc_rt_raise2\n");
@@ -475,7 +475,7 @@ object Cyc_set_cvar(object var, object value) {
 object Cyc_has_cycle(object lst) {
     object slow_lst, fast_lst;
     if ((lst == NULL) || is_value_type(lst) ||
-        (is_object_type(lst) && type_of(lst) != cons_tag)) {
+        (is_object_type(lst) && type_of(lst) != pair_tag)) {
         return (boolean_f);
     }
     slow_lst = lst;
@@ -604,7 +604,7 @@ object Cyc_display(object x, FILE *port)
       }
       fprintf(port, ")");
       break;
-    case cons_tag:
+    case pair_tag:
       has_cycle = Cyc_has_cycle(x);
       fprintf(port, "("); 
       Cyc_display(car(x), port);
@@ -620,7 +620,7 @@ object Cyc_display(object x, FILE *port)
           break;
       }
 
-      for (tmp = cdr(x); tmp && ((closure) tmp)->tag == cons_tag; tmp = cdr(tmp)) {
+      for (tmp = cdr(x); tmp && ((closure) tmp)->tag == pair_tag; tmp = cdr(tmp)) {
           if (has_cycle == boolean_t) {
               if (i++ > 20) break; /* arbitrary number, for now */
           }
@@ -681,7 +681,7 @@ static object _Cyc_write(object x, FILE *port)
       fprintf(port, "\"%s\"", ((string_type *) x)->str);
       break;
     // TODO: what about a list? contents should be displayed per (write)
-    case cons_tag:
+    case pair_tag:
       has_cycle = Cyc_has_cycle(x);
       fprintf(port, "("); 
       _Cyc_write(car(x), port);
@@ -697,7 +697,7 @@ static object _Cyc_write(object x, FILE *port)
           break;
       }
 
-      for (tmp = cdr(x); tmp && ((closure) tmp)->tag == cons_tag; tmp = cdr(tmp)) {
+      for (tmp = cdr(x); tmp && ((closure) tmp)->tag == pair_tag; tmp = cdr(tmp)) {
           if (has_cycle == boolean_t) {
               if (i++ > 20) break; /* arbitrary number, for now */
           }
@@ -758,14 +758,14 @@ object equalp(object x, object y)
     if (equal(x,y)) return boolean_t;
     if (is_value_type(x) || is_value_type(y) ||
         (x == NULL) || (y == NULL) ||
-        type_of(x)!=cons_tag || type_of(y)!=cons_tag) return boolean_f;
+        type_of(x)!=pair_tag || type_of(y)!=pair_tag) return boolean_f;
     if (boolean_f == equalp(car(x),car(y))) return boolean_f;
   }
 }
 
 list assq(void *data, object x, list l)
 {
-  if ((l == NULL) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag) return boolean_f;
   for (; (l != NULL); l = cdr(l)) {
      list la = car(l); 
      Cyc_check_cons(data, la);
@@ -776,7 +776,7 @@ list assq(void *data, object x, list l)
 
 list assoc(void *data, object x, list l)
 {
-  if ((l == NULL) || is_value_type(l) || type_of(l) != cons_tag) return boolean_f;
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag) return boolean_f;
   for (; (l != NULL); l = cdr(l)){
      list la = car(l); 
      Cyc_check_cons(data, la);
@@ -831,8 +831,8 @@ int FUNC_OP(void *data, object x, object y) { \
       result = (double_value(x)) OP (double_value(y)); \
     } else { \
         make_string(s, "Bad argument type"); \
-        make_cons(c1, y, NULL); \
-        make_cons(c0, &s, &c1); \
+        make_pair(c1, y, NULL); \
+        make_pair(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
     } \
     return result; \
@@ -869,7 +869,7 @@ object Cyc_is_boolean(object o){
     return boolean_f;}
 
 object Cyc_is_cons(object o){
-    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == cons_tag)
+    if ((o != NULL) && !is_value_type(o) && ((list)o)->tag == pair_tag)
         return boolean_t;
     return boolean_f;}
 
@@ -942,7 +942,7 @@ object Cyc_is_procedure(void *data, object o) {
             tag == closureN_tag ||
             tag == primitive_tag) {
             return boolean_t;
-        } else if (tag == cons_tag) {
+        } else if (tag == pair_tag) {
           integer_type l = Cyc_length_as_object(data, o);
           if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
             if (strncmp(((symbol)car(o))->pname, "primitive", 10) == 0 ||
@@ -983,7 +983,7 @@ object Cyc_eq(object x, object y) {
 }
 
 object Cyc_set_car(void *data, object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, pair_tag, l);
     gc_mut_update((gc_thread_data *)data, car(l), val);
     car(l) = val;
     add_mutation(data, l, -1, val);
@@ -991,7 +991,7 @@ object Cyc_set_car(void *data, object l, object val) {
 }
 
 object Cyc_set_cdr(void *data, object l, object val) {
-    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, cons_tag, l);
+    if (Cyc_is_cons(l) == boolean_f) Cyc_invalid_type_error(data, pair_tag, l);
     gc_mut_update((gc_thread_data *)data, cdr(l), val);
     cdr(l) = val;
     add_mutation(data, l, -1, val);
@@ -1033,7 +1033,7 @@ object Cyc_vector_ref(void *data, object v, object k) {
 integer_type Cyc_length_as_object(void *data, object l){
     make_int(len, 0);
     while((l != NULL)){
-        if (is_value_type(l) || ((list)l)->tag != cons_tag){
+        if (is_value_type(l) || ((list)l)->tag != pair_tag){
             Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
         l = cdr(l);
@@ -1052,7 +1052,7 @@ object Cyc_vector_length(void *data, object v) {
 object Cyc_length(void *data, object l){
     int len = 0;
     while((l != NULL)){
-        if (is_value_type(l) || ((list)l)->tag != cons_tag){
+        if (is_value_type(l) || ((list)l)->tag != pair_tag){
             Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
         }
         l = cdr(l);
@@ -1421,7 +1421,7 @@ object Cyc_command_line_arguments(void *data, object cont) {
     memcpy(ps, &s, sizeof(string_type));
     ((list)pl)->hdr.mark = gc_color_red;
     ((list)pl)->hdr.grayed = 0;
-    ((list)pl)->tag = cons_tag;
+    ((list)pl)->tag = pair_tag;
     ((list)pl)->cons_car = ps;
     ((list)pl)->cons_cdr = lis;
     lis = pl;
@@ -1791,8 +1791,8 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else { \
         make_string(s, "Bad argument type"); \
-        make_cons(c1, y, NULL); \
-        make_cons(c0, &s, &c1); \
+        make_pair(c1, y, NULL); \
+        make_pair(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
     } \
     return x; \
@@ -1843,8 +1843,8 @@ object Cyc_div_op(void *data, common_type *x, object y) {
         x->double_t.value = x->double_t.value / ((double_type *)y)->value;
     } else {
         make_string(s, "Bad argument type");
-        make_cons(c1, y, NULL);
-        make_cons(c0, &s, &c1);
+        make_pair(c1, y, NULL);
+        make_pair(c0, &s, &c1);
         Cyc_rt_raise(data, &c0);
     }
     return x;
@@ -1902,8 +1902,8 @@ object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_typ
     buf->double_t.value = ((double_type *)n)->value;
   } else {
       make_string(s, "Bad argument type");
-      make_cons(c1, n, NULL);
-      make_cons(c0, &s, &c1);
+      make_pair(c1, n, NULL);
+      make_pair(c0, &s, &c1);
       Cyc_rt_raise(data, &c0);
   }
 
@@ -2080,7 +2080,7 @@ list mcons(object a, object d)
   cons_type *c = malloc(sizeof(cons_type));
   c->hdr.mark = gc_color_red;
   c->hdr.grayed = 0;
-  c->tag = cons_tag; 
+  c->tag = pair_tag; 
   c->cons_car = a; 
   c->cons_cdr = d;
   return c;
@@ -2221,7 +2221,7 @@ void _cddddr(void *data, object cont, object args) {
     return_closcall1(data, cont, cddddr(car(args))); }
 void _cons(void *data, object cont, object args) { 
     Cyc_check_num_args(data, "cons", 2, args);
-    { make_cons(c, car(args), cadr(args));
+    { make_pair(c, car(args), cadr(args));
       return_closcall1(data, cont, &c); }}
 void _eq_127(void *data, object cont, object args){ 
     Cyc_check_num_args(data, "eq?", 2, args);
@@ -2589,7 +2589,7 @@ object apply(void *data, object cont, object func, object args){
     case closure1_tag:
     case closureN_tag:
       if (func == Cyc_glo_call_cc) {
-        make_cons(c, cont, args);
+        make_pair(c, cont, args);
 //Cyc_display(args, stderr);
 //        args = &c;
 //Cyc_display(&c, stderr);
@@ -2603,7 +2603,7 @@ object apply(void *data, object cont, object func, object args){
       dispatch(data, obj_obj2int(count), ((closure)func)->fn, func, cont, args);
       break;
 
-    case cons_tag:
+    case pair_tag:
     {
       // TODO: should add more error checking here, make sure car(func) is a symbol
       object fobj = car(func);
@@ -2611,7 +2611,7 @@ object apply(void *data, object cont, object func, object args){
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
          Cyc_rt_raise2(data, "Call of non-procedure: ", func);
       } else if (strncmp(((symbol)fobj)->pname, "lambda", 7) == 0) {
-          make_cons(c, func, args);
+          make_pair(c, func, args);
           //printf("JAE DEBUG, sending to eval: ");
           //Cyc_display(&c, stderr);
           ((closure)Cyc_glo_eval_from_c)->fn(data, 2, Cyc_glo_eval_from_c, cont, &c, NULL);
@@ -2620,13 +2620,13 @@ object apply(void *data, object cont, object func, object args){
       //       but need a way of looking them up ahead of time.
       //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol)fobj)->pname, "primitive", 10) == 0) {
-          make_cons(c, cadr(func), args);
+          make_pair(c, cadr(func), args);
           ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, NULL);
       } else if (strncmp(((symbol)fobj)->pname, "procedure", 10) == 0) {
-          make_cons(c, func, args);
+          make_pair(c, func, args);
           ((closure)Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont, &c, NULL);
       } else {
-          make_cons(c, func, args);
+          make_pair(c, func, args);
           Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
       }
     }
@@ -2651,7 +2651,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
         tmp = va_arg(ap, object);
         args[i].hdr.mark = gc_color_red;
         args[i].hdr.grayed = 0;
-        args[i].tag = cons_tag;
+        args[i].tag = pair_tag;
         args[i].cons_car = tmp;
         args[i].cons_cdr = (i == (argc-1)) ? NULL : &args[i + 1];
     }
@@ -2684,7 +2684,7 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
     for (i = 1; i < argc; i++) {
         args[i - 1].hdr.mark = gc_color_red;
         args[i - 1].hdr.grayed = 0;
-        args[i - 1].tag = cons_tag;
+        args[i - 1].tag = pair_tag;
         args[i - 1].cons_car = buf[i];
         args[i - 1].cons_cdr = (i == (argc-1)) ? NULL : &args[i];
     }
@@ -2704,7 +2704,7 @@ void Cyc_start_trampoline(gc_thread_data *thd)
   printf("Done with GC\n");
 #endif
 
-  if (type_of(thd->gc_cont) == cons_tag || prim(thd->gc_cont)) {
+  if (type_of(thd->gc_cont) == pair_tag || prim(thd->gc_cont)) {
     Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
   } else {
     do_dispatch(thd, thd->gc_num_args, ((closure)(thd->gc_cont))->fn, thd->gc_cont, thd->gc_args);
@@ -2767,7 +2767,7 @@ char *gc_fixup_moved_obj(gc_thread_data *thd, int *alloci, char *obj, object hp)
 char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
   if (!is_object_type(obj)) return obj;
   switch(type_of(obj)){
-    case cons_tag: {
+    case pair_tag: {
       list hp = gc_alloc(Cyc_heap, sizeof(cons_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
@@ -2894,7 +2894,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
       if (is_value_type(o)) {
           // Can happen if a vector element was already
           // moved and we found an index. Just ignore it
-      } else if (type_of(o) == cons_tag) {
+      } else if (type_of(o) == pair_tag) {
           gc_move2heap(car(o));
           gc_move2heap(cdr(o));
       } else if (type_of(o) == vector_tag) {
@@ -2929,7 +2929,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
   while (scani < alloci) {
     object obj = ((gc_thread_data *)data)->moveBuf[scani];
     switch(type_of(obj)) {
-      case cons_tag: {
+      case pair_tag: {
         gc_move2heap(car(obj));
         gc_move2heap(cdr(obj));
         break;
