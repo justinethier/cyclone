@@ -233,7 +233,12 @@ typedef struct {
   object *pvar;
 } cvar_type;
 typedef cvar_type *cvar;
-#define make_cvar(n,v) cvar_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cvar_tag; n.pvar = v;
+#define make_cvar(n,v) \
+  cvar_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = cvar_tag; \
+  n.pvar = v;
 
 /* C Opaque type - a wrapper around a pointer of any type.
    Note this requires application code to free any memory
@@ -244,7 +249,12 @@ typedef struct {
   void *ptr;
 } c_opaque_type;
 typedef c_opaque_type *c_opaque;
-#define make_c_opaque(var, p) c_opaque_type var; var.hdr.mark = gc_color_red; var.hdr.grayed = 0; var.tag = c_opaque_tag; var.ptr = p;
+#define make_c_opaque(var, p) \
+  c_opaque_type var; \
+  var.hdr.mark = gc_color_red; \
+  var.hdr.grayed = 0; \
+  var.tag = c_opaque_tag; \
+  var.ptr = p;
 
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
 
@@ -300,13 +310,24 @@ typedef struct {
   int value;
   int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
 } integer_type;
-#define make_int(n,v) integer_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = integer_tag; n.value = v;
+#define make_int(n,v) \
+  integer_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = integer_tag; \
+  n.value = v;
+
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   double value;
 } double_type;
-#define make_double(n,v) double_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = double_tag; n.value = v;
+#define make_double(n,v) \
+  double_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = double_tag; \
+  n.value = v;
 
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
@@ -347,7 +368,13 @@ typedef struct {
   FILE *fp;
   int mode;
 } port_type;
-#define make_port(p,f,m) port_type p; p.hdr.mark = gc_color_red; p.hdr.grayed = 0; p.tag = port_tag; p.fp = f; p.mode = m;
+#define make_port(p,f,m) \
+  port_type p; \
+  p.hdr.mark = gc_color_red; \
+  p.hdr.grayed = 0; \
+  p.tag = port_tag; \
+  p.fp = f; \
+  p.mode = m;
 
 /* Vector type */
 
@@ -359,7 +386,13 @@ typedef struct {
 } vector_type;
 typedef vector_type *vector;
 
-#define make_empty_vector(v) vector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = vector_tag; v.num_elt = 0; v.elts = NULL;
+#define make_empty_vector(v) \
+  vector_type v; \
+  v.hdr.mark = gc_color_red; \
+  v.hdr.grayed = 0; \
+  v.tag = vector_tag; \
+  v.num_elt = 0; \
+  v.elts = NULL;
 
 /* Bytevector type */
 
@@ -371,7 +404,13 @@ typedef struct {
 } bytevector_type;
 typedef bytevector_type *bytevector;
 
-#define make_empty_bytevector(v) bytevector_type v; v.hdr.mark = gc_color_red; v.hdr.grayed = 0; v.tag = bytevector_tag; v.len = 0; v.data = NULL;
+#define make_empty_bytevector(v) \
+  bytevector_type v; \
+  v.hdr.mark = gc_color_red; \
+  v.hdr.grayed = 0; \
+  v.tag = bytevector_tag; \
+  v.len = 0; \
+  v.data = NULL;
 
 /* Pair (cons) type */
 
@@ -384,6 +423,16 @@ typedef struct {
 typedef cons_type *list;
 typedef cons_type pair_type;
 typedef pair_type *pair;
+
+#define make_cons(n,a,d) \
+  cons_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = cons_tag; \
+  n.cons_car = a; \
+  n.cons_cdr = d;
+
+#define make_cell(n,a) make_cons(n,a,NULL);
 
 #define car(x)    (((pair_type *) x)->cons_car)
 #define cdr(x)    (((pair_type *) x)->cons_cdr)
@@ -415,9 +464,6 @@ typedef pair_type *pair;
 #define cddadr(x) (cdr(cdr(car(cdr(x)))))
 #define cdddar(x) (cdr(cdr(cdr(car(x)))))
 #define cddddr(x) (cdr(cdr(cdr(cdr(x)))))
-
-#define make_cons(n,a,d) \
-cons_type n; n.hdr.mark = gc_color_red; n.hdr.grayed = 0; n.tag = cons_tag; n.cons_car = a; n.cons_cdr = d;
 
 /* Closure types */
 
@@ -459,8 +505,6 @@ typedef closure0_type *macro;
 #define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
 #define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
    c.fn = f; c.num_args = -1; c.elt1 = a;
-
-#define make_cell(n,a) make_cons(n,a,NULL);
 
 /* Primitive types */
 typedef struct {
