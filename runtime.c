@@ -441,10 +441,10 @@ int equal(x, y) object x, y;
     case vector_tag:
       if (is_object_type(y) &&
           type_of(y) == vector_tag && 
-          ((vector)x)->num_elt == ((vector)y)->num_elt) {
+          ((vector)x)->num_elements == ((vector)y)->num_elements) {
         int i;
-        for (i = 0; i < ((vector)x)->num_elt; i++) { 
-          if (equalp(((vector)x)->elts[i], ((vector)y)->elts[i]) == boolean_f)
+        for (i = 0; i < ((vector)x)->num_elements; i++) { 
+          if (equalp(((vector)x)->elements[i], ((vector)y)->elements[i]) == boolean_f)
             return 0;
         }
         return 1;
@@ -586,11 +586,11 @@ object Cyc_display(object x, FILE *port)
       break;
     case vector_tag:
       fprintf(port, "#(");
-      for (i = 0; i < ((vector) x)->num_elt; i++) {
+      for (i = 0; i < ((vector) x)->num_elements; i++) {
         if (i > 0) { 
           fprintf(port, " "); 
         }
-        Cyc_display(((vector)x)->elts[i], port);
+        Cyc_display(((vector)x)->elements[i], port);
       }
       fprintf(port, ")");
       break;
@@ -1004,15 +1004,15 @@ object Cyc_vector_set(void *data, object v, object k, object obj) {
   Cyc_check_num(data, k);
   idx = unbox_number(k);
 
-  if (idx < 0 || idx >= ((vector)v)->num_elt) {
+  if (idx < 0 || idx >= ((vector)v)->num_elements) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
   }
 
   gc_mut_update((gc_thread_data *)data, 
-                ((vector)v)->elts[idx],
+                ((vector)v)->elements[idx],
                 obj);
 
-  ((vector)v)->elts[idx] = obj;
+  ((vector)v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
   return v;
 }
@@ -1023,11 +1023,11 @@ object Cyc_vector_ref(void *data, object v, object k) {
   Cyc_check_num(data, k);
 
   idx = unbox_number(k);
-  if (idx < 0 || idx >= ((vector)v)->num_elt) {
+  if (idx < 0 || idx >= ((vector)v)->num_elements) {
     Cyc_rt_raise2(data, "vector-ref - invalid index", obj_int2obj(idx));
   }
 
-  return ((vector)v)->elts[idx];
+  return ((vector)v)->elements[idx];
 }
 
 integer_type Cyc_length_as_object(void *data, object l){
@@ -1044,7 +1044,7 @@ integer_type Cyc_length_as_object(void *data, object l){
 
 object Cyc_vector_length(void *data, object v) {
     if ((v != NULL) && !is_value_type(v) && ((list)v)->tag == vector_tag) {
-      return obj_int2obj(((vector)v)->num_elt);
+      return obj_int2obj(((vector)v)->num_elements);
     }
     Cyc_rt_raise_msg(data, "vector-length - invalid parameter, expected vector\n"); }
 
@@ -1449,13 +1449,13 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...) {
     ((vector)v)->hdr.mark = gc_color_red;
     ((vector)v)->hdr.grayed = 0;
     ((vector)v)->tag = vector_tag;
-    ((vector)v)->num_elt = ulen;
-    ((vector)v)->elts = 
-      (((vector)v)->num_elt > 0) ? 
-       (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
+    ((vector)v)->num_elements = ulen;
+    ((vector)v)->elements = 
+      (((vector)v)->num_elements > 0) ? 
+       (object *)alloca(sizeof(object) * ((vector)v)->num_elements) : 
        NULL;
-    for (i = 0; i < ((vector)v)->num_elt; i++) {
-      ((vector)v)->elts[i] = fill;
+    for (i = 0; i < ((vector)v)->num_elements; i++) {
+      ((vector)v)->elements[i] = fill;
     }
 //  } else {
 //    // Experimenting with heap allocation if vector is too large
@@ -1465,10 +1465,10 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...) {
 //                               boolean_f, (gc_thread_data *)data, &heap_grown);
 //    mark(vt) = ((gc_thread_data *)data)->gc_alloc_color;
 //    type_of(vt) = vector_tag;
-//    vt->num_elt = ulen;
-//    vt->elts = (object *)((char *)vt) + sizeof(vector_type);
+//    vt->num_elements = ulen;
+//    vt->elements = (object *)((char *)vt) + sizeof(vector_type);
 //    for (i = 0; i < ulen; i++) {
-//      vt->elts[i] = fill;
+//      vt->elements[i] = fill;
 //    }
 //    v = vt;
 //  }
@@ -1722,13 +1722,13 @@ object Cyc_list2vector(void *data, object cont, object l) {
   ((vector)v)->hdr.mark = gc_color_red;
   ((vector)v)->hdr.grayed = 0;
   ((vector)v)->tag = vector_tag; 
-  ((vector)v)->num_elt = obj_obj2int(len);
-  ((vector)v)->elts = 
-    (((vector)v)->num_elt > 0) ? 
-       (object *)alloca(sizeof(object) * ((vector)v)->num_elt) : 
+  ((vector)v)->num_elements = obj_obj2int(len);
+  ((vector)v)->elements = 
+    (((vector)v)->num_elements > 0) ? 
+       (object *)alloca(sizeof(object) * ((vector)v)->num_elements) : 
        NULL; 
   while((lst != NULL)) {
-    ((vector)v)->elts[i++] = car(lst); 
+    ((vector)v)->elements[i++] = car(lst); 
     lst = cdr(lst);
   }
   return_closcall1(data, cont, v);
@@ -2791,7 +2791,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
     }
     case vector_tag: {
       vector_type *hp = gc_alloc(Cyc_heap, 
-                            sizeof(vector_type) + sizeof(object) * (((vector) obj)->num_elt), 
+                            sizeof(vector_type) + sizeof(object) * (((vector) obj)->num_elements), 
                             obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
@@ -2904,7 +2904,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
           l = cdr(l);
           idx = car(l);
           i = obj_obj2int(idx);
-          gc_move2heap(((vector)o)->elts[i]);
+          gc_move2heap(((vector)o)->elements[i]);
       } else if (type_of(o) == forward_tag) {
           // Already transported, skip
       } else {
@@ -2945,9 +2945,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
         break;
       }
       case vector_tag: {
-        int i, n = ((vector) obj)->num_elt;
+        int i, n = ((vector) obj)->num_elements;
         for (i = 0; i < n; i++) {
-          gc_move2heap(((vector) obj)->elts[i]);
+          gc_move2heap(((vector) obj)->elements[i]);
         }
         break;
       }

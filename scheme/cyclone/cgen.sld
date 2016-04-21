@@ -368,7 +368,7 @@
                         (c:allocs idx-code) ;; Member alloc at index i
                         (list ;; Assign this member to vector
                           (string-append 
-                            cvar-name ".elts[" (number->string i) "] = "
+                            cvar-name ".elements[" (number->string i) "] = "
                             (c:body idx-code)
                             ";")))))))))
           )
@@ -386,8 +386,8 @@
                   (list ; Allocate the vector
                     (string-append 
                       "make_empty_vector(" cvar-name ");"
-                      cvar-name ".num_elt = " (number->string len) ";"
-                      cvar-name ".elts = (object *)alloca(sizeof(object) * " 
+                      cvar-name ".num_elements = " (number->string len) ";"
+                      cvar-name ".elements = (object *)alloca(sizeof(object) * " 
                                          (number->string len) ");")))))
         (loop 0 code))))))
 

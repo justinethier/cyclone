@@ -290,10 +290,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       vector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = vector_tag;
-      hp->num_elt = ((vector) obj)-> num_elt;
-      hp->elts = (object *)(((char *)hp) + sizeof(vector_type));
-      for (i = 0; i < hp->num_elt; i++) {
-        hp->elts[i] = ((vector) obj)->elts[i];
+      hp->num_elements = ((vector) obj)-> num_elements;
+      hp->elements = (object *)(((char *)hp) + sizeof(vector_type));
+      for (i = 0; i < hp->num_elements; i++) {
+        hp->elements[i] = ((vector) obj)->elements[i];
       }
       return (char *)hp;
     }
@@ -522,7 +522,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
     return gc_heap_align(sizeof(closureN_type) + sizeof(object) * ((closureN_type *)obj)->num_elt);
   }
   if (t == vector_tag){
-    return gc_heap_align(sizeof(vector_type) + sizeof(object) * ((vector_type *)obj)->num_elt);
+    return gc_heap_align(sizeof(vector_type) + sizeof(object) * ((vector_type *)obj)->num_elements);
   }
   if (t == bytevector_tag) {
     return gc_heap_align(sizeof(bytevector_type) + sizeof(char) * ((bytevector)obj)->len);
@@ -1045,9 +1045,9 @@ void gc_mark_black(object obj)
         break;
       }
       case vector_tag: {
-        int i, n = ((vector) obj)->num_elt;
+        int i, n = ((vector) obj)->num_elements;
         for (i = 0; i < n; i++) {
-          gc_collector_mark_gray(obj, ((vector) obj)->elts[i]);
+          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]);
         }
         break;
       }

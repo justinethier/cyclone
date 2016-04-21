@@ -390,8 +390,8 @@ typedef struct {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  int num_elt;
-  object *elts;
+  int num_elements;
+  object *elements;
 } vector_type;
 typedef vector_type *vector;
 
@@ -400,8 +400,8 @@ typedef vector_type *vector;
   v.hdr.mark = gc_color_red; \
   v.hdr.grayed = 0; \
   v.tag = vector_tag; \
-  v.num_elt = 0; \
-  v.elts = NULL;
+  v.num_elements = 0; \
+  v.elements = NULL;
 
 /* Bytevector type */
 
