@@ -195,7 +195,7 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 #endif
 
 #define type_of(obj) (((pair_type *) obj)->tag)
-#define forward(obj) (((pair_type *) obj)->cons_car)
+#define forward(obj) (((pair_type *) obj)->pair_car)
 
 /** Define value types. 
  *  Depending on the underlying architecture, compiler, etc these types
@@ -417,8 +417,8 @@ typedef bytevector_type *bytevector;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  object cons_car;
-  object cons_cdr;
+  object pair_car;
+  object pair_cdr;
 } pair_type;
 typedef pair_type *list;
 typedef pair_type *pair;
@@ -428,13 +428,13 @@ typedef pair_type *pair;
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
   n.tag = pair_tag; \
-  n.cons_car = a; \
-  n.cons_cdr = d;
+  n.pair_car = a; \
+  n.pair_cdr = d;
 
 #define make_cell(n,a) make_pair(n,a,NULL);
 
-#define car(x)    (((pair_type *) x)->cons_car)
-#define cdr(x)    (((pair_type *) x)->cons_cdr)
+#define car(x)    (((pair_type *) x)->pair_car)
+#define cdr(x)    (((pair_type *) x)->pair_cdr)
 #define caar(x)   (car(car(x)))
 #define cadr(x)   (car(cdr(x)))
 #define cdar(x)   (cdr(car(x)))

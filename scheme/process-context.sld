@@ -29,8 +29,8 @@
           ((list)pl)->hdr.mark = gc_color_red;
           ((list)pl)->hdr.grayed = 0;
           ((list)pl)->tag = pair_tag;
-          ((list)pl)->cons_car = ps;
-          ((list)pl)->cons_cdr = lis;
+          ((list)pl)->pair_car = ps;
+          ((list)pl)->pair_cdr = lis;
           lis = pl;
         }
         return_closcall1(data, k, lis); ")

@@ -1422,8 +1422,8 @@ object Cyc_command_line_arguments(void *data, object cont) {
     ((list)pl)->hdr.mark = gc_color_red;
     ((list)pl)->hdr.grayed = 0;
     ((list)pl)->tag = pair_tag;
-    ((list)pl)->cons_car = ps;
-    ((list)pl)->cons_cdr = lis;
+    ((list)pl)->pair_car = ps;
+    ((list)pl)->pair_cdr = lis;
     lis = pl;
   }
   return_closcall1(data, cont, lis);
@@ -2081,8 +2081,8 @@ list mcons(object a, object d)
   c->hdr.mark = gc_color_red;
   c->hdr.grayed = 0;
   c->tag = pair_tag; 
-  c->cons_car = a; 
-  c->cons_cdr = d;
+  c->pair_car = a; 
+  c->pair_cdr = d;
   return c;
 }
 
@@ -2652,8 +2652,8 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...){
         args[i].hdr.mark = gc_color_red;
         args[i].hdr.grayed = 0;
         args[i].tag = pair_tag;
-        args[i].cons_car = tmp;
-        args[i].cons_cdr = (i == (argc-1)) ? NULL : &args[i + 1];
+        args[i].pair_car = tmp;
+        args[i].pair_cdr = (i == (argc-1)) ? NULL : &args[i + 1];
     }
     //printf("DEBUG applying primitive to ");
     //Cyc_display((object)&args[0]);
@@ -2685,8 +2685,8 @@ void Cyc_apply_from_buf(void *data, int argc, object prim, object *buf) {
         args[i - 1].hdr.mark = gc_color_red;
         args[i - 1].hdr.grayed = 0;
         args[i - 1].tag = pair_tag;
-        args[i - 1].cons_car = buf[i];
-        args[i - 1].cons_cdr = (i == (argc-1)) ? NULL : &args[i];
+        args[i - 1].pair_car = buf[i];
+        args[i - 1].pair_cdr = (i == (argc-1)) ? NULL : &args[i];
     }
 
     apply(data, cont, prim, (object)&args[0]);
