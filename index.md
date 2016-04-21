@@ -62,9 +62,9 @@ Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
-
 - [Tail Call Optimization]({{ page.ghproj }}examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
+
+- [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
 
 - [Game of Life]({{ page.ghproj }}examples/game-of-life) - The [Conway's game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
 
