@@ -340,17 +340,24 @@ typedef struct {
   char *str;
 } string_type;
 #define make_string(cs, s) string_type cs; \
-{ int len = strlen(s); cs.tag = string_tag; cs.len = len; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+{ int len = strlen(s); \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
+  cs.tag = string_tag; \
+  cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
-#define make_string_with_len(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+#define make_string_with_len(cs, s, length) string_type cs;  \
 { int len = length; \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
-#define make_string_noalloc(cs, s, length) string_type cs; cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
-{ cs.tag = string_tag; cs.len = length; \
+#define make_string_noalloc(cs, s, length) string_type cs; \
+{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+  cs.tag = string_tag; cs.len = length; \
   cs.str = s; }
 
 #define string_len(x) (((string_type *) x)->len)
@@ -500,10 +507,30 @@ typedef closureN_type *closureN;
 typedef closure0_type *closure;
 typedef closure0_type *macro;
 
-#define mmacro(c,f) macro_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = macro_tag; c.fn = f; c.num_args = -1;
-#define mclosure0(c,f) closure0_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure0_tag; c.fn = f; c.num_args = -1;
-#define mclosure1(c,f,a) closure1_type c; c.hdr.mark = gc_color_red; c.hdr.grayed = 0; c.tag = closure1_tag; \
-   c.fn = f; c.num_args = -1; c.elt1 = a;
+#define mmacro(c,f) \
+  macro_type c; \
+  c.hdr.mark = gc_color_red; \
+  c.hdr.grayed = 0; \
+  c.tag = macro_tag; \
+  c.fn = f; \
+  c.num_args = -1;
+
+#define mclosure0(c,f) \
+  closure0_type c; \
+  c.hdr.mark = gc_color_red; \
+  c.hdr.grayed = 0; \
+  c.tag = closure0_tag; \
+  c.fn = f; \
+  c.num_args = -1;
+
+#define mclosure1(c,f,a) \
+  closure1_type c; \
+  c.hdr.mark = gc_color_red; \
+  c.hdr.grayed = 0; \
+  c.tag = closure1_tag; \
+  c.fn = f; \
+  c.num_args = -1; \
+  c.elt1 = a;
 
 /* Primitive types */
 typedef struct {
