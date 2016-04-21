@@ -492,7 +492,7 @@ typedef struct {
   tag_type tag;
   function_type fn;
   int num_args;
-  object elt1;
+  object element;
 } closure1_type;
 typedef struct {
   gc_header_type hdr;
@@ -532,7 +532,7 @@ typedef closure0_type *macro;
   c.tag = closure1_tag; \
   c.fn = f; \
   c.num_args = -1; \
-  c.elt1 = a;
+  c.element = a;
 
 /* Primitive types */
 typedef struct {

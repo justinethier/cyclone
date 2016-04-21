@@ -2935,7 +2935,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
         break;
       }
       case closure1_tag:
-        gc_move2heap(((closure1) obj)->elt1);
+        gc_move2heap(((closure1) obj)->element);
         break;
       case closureN_tag: {
         int i, n = ((closureN) obj)->num_elt;

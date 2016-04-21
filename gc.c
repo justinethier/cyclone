@@ -268,7 +268,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       type_of(hp) = closure1_tag;
       hp->fn = ((closure1) obj)->fn;
       hp->num_args = ((closure1) obj)->num_args;
-      hp->elt1 = ((closure1) obj)->elt1;
+      hp->element = ((closure1) obj)->element;
       return (char *)hp;
     }
     case closureN_tag: {
@@ -1035,7 +1035,7 @@ void gc_mark_black(object obj)
         break;
       }
       case closure1_tag:
-        gc_collector_mark_gray(obj, ((closure1) obj)->elt1);
+        gc_collector_mark_gray(obj, ((closure1) obj)->element);
         break;
       case closureN_tag: {
         int i, n = ((closureN) obj)->num_elt;

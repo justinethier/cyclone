@@ -1607,7 +1607,7 @@
           (emit compiled-program)))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
-        (emit "cont = ((closure1_type *)cont)->elt1;")
+        (emit "cont = ((closure1_type *)cont)->element;")
         ;(emit "((cont)->fn)(1, cont, cont);")
         (emit* 
             "(((closure)"
