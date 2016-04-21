@@ -28,8 +28,10 @@
 // This is used as the first generation of the GC.
 #define STACK_SIZE 500000
 
-// Size of a "page" on the heap (the second generation), in bytes.
-#define HEAP_SIZE (16 * 1024 * 1024)
+// Parameters for size of a "page" on the heap (the second generation GC), in bytes.
+#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)  // Grow first page by adding this amount to it
+#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)  // Size of the first page
+#define HEAP_SIZE (16 * 1024 * 1024)         // Normal size of a page
 
 /////////////////////////////
 // Major GC tuning parameters
