@@ -91,10 +91,6 @@ enum object_tag {
 // Define the size of object tags
 typedef unsigned char tag_type;
 
-// Temporary defines!
-#define cons_tag  0
-// END
-
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
       CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
@@ -425,17 +421,9 @@ typedef struct {
   object cons_cdr;
 } pair_type;
 typedef pair_type *list;
-typedef pair_type cons_type;
 typedef pair_type *pair;
 
 #define make_pair(n,a,d) \
-  pair_type n; \
-  n.hdr.mark = gc_color_red; \
-  n.hdr.grayed = 0; \
-  n.tag = pair_tag; \
-  n.cons_car = a; \
-  n.cons_cdr = d;
-#define make_cons(n,a,d) \
   pair_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
@@ -536,7 +524,7 @@ static const object primitive_##name = &name##_primitive
 /* All constant-size objects */
 typedef union {
   boolean_type boolean_t;
-  pair_type cons_t;
+  pair_type pair_t;
   symbol_type symbol_t;
   primitive_type primitive_t;
   integer_type integer_t;
