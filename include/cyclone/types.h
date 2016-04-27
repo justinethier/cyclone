@@ -29,9 +29,9 @@
 #define STACK_SIZE 500000
 
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
-#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)  // Grow first page by adding this amount to it
-#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)  // Size of the first page
-#define HEAP_SIZE (16 * 1024 * 1024)         // Normal size of a page
+#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)     // Grow first page by adding this amount to it
+#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     // Size of the first page
+#define HEAP_SIZE (16 * 1024 * 1024)    // Normal size of a page
 
 /////////////////////////////
 // Major GC tuning parameters
@@ -67,8 +67,8 @@ typedef void *object;
 
 // Define a tag for each possible type of object.
 // Remember to update tag_names in runtime.c when adding new tags
-enum object_tag { 
-        boolean_tag = 0         // 0
+enum object_tag {
+  boolean_tag = 0               // 0
       , bytevector_tag          // 1
       , c_opaque_tag            // 2
       , closure0_tag            // 3
@@ -95,8 +95,8 @@ typedef unsigned char tag_type;
 
 /* Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
-      CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
-      CYC_THREAD_STATE_TERMINATED
+  CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
+  CYC_THREAD_STATE_TERMINATED
 } cyc_thread_state_type;
 
 /* Thread data structures */
@@ -232,7 +232,7 @@ typedef void (*function_type_va) (int, object, object, object, ...);
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  object *pvar; /* GC assumes this is a Cyclone object! */
+  object *pvar;                 /* GC assumes this is a Cyclone object! */
 } cvar_type;
 typedef cvar_type *cvar;
 #define make_cvar(n,v) \
@@ -248,7 +248,7 @@ typedef cvar_type *cvar;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  void *ptr; /* Can be anything, GC will not collect it */
+  void *ptr;                    /* Can be anything, GC will not collect it */
 } c_opaque_type;
 typedef c_opaque_type *c_opaque;
 #define make_c_opaque(var, p) \

@@ -14,7 +14,7 @@
 long global_stack_size = 0;
 long global_heap_size = 0;
 
-static void c_entry_pt(void *,int,closure,closure);
+static void c_entry_pt(void *, int, closure, closure);
 static void Cyc_heap_init(long heap_size);
 
 static void Cyc_heap_init(long heap_size)
@@ -27,4 +27,4 @@ static void Cyc_heap_init(long heap_size)
   gc_start_collector();
 }
 
-#endif /* CYCLONE_RUNTIME_MAIN_H */
+#endif                          /* CYCLONE_RUNTIME_MAIN_H */
