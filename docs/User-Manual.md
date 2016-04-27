@@ -14,6 +14,8 @@
 - [Language Details](#language-details)
 - [Multithreaded Programming](#multithreaded-programming)
 - [Foreign Function Interface](#foreign-function-interface)
+  - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
+  - [Including a C Header File](#including-a-c-header-file)
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -146,7 +148,7 @@ Finally, note there are some objects that are not relocated so the above does no
 
 # Foreign Function Interface
 
-## Writing a Scheme function in C
+## Writing a Scheme Function in C
 
 The `define-c` special form can be used to define a function containing user-defined C code. This code will be carried through from the Scheme file all the way to the compiled C file. For example:
 
@@ -182,7 +184,7 @@ Functions that may block must call the `set_thread_blocked` macro to let the sys
 
 The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
 
-## Including a C header
+## Including a C Header File
 
 A C header may be included using the `include-c-header` special form. This special form may be used either as part of a library definition:
 
