@@ -280,6 +280,12 @@ Full-Width Styles
   margin: 0 auto;
 }
 
+.inner-top {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 #forkme_banner {
   display: block;
   position: absolute;
@@ -295,9 +301,10 @@ Full-Width Styles
   border-bottom-right-radius: 2px;
 }
 
-p.banner {
+#top-banner {
   color: #fff;
   font-weight: 700;
+  margin: 0px;
 }
 
 #header_wrap {
