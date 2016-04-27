@@ -2785,7 +2785,7 @@ char *gc_move(char *obj, gc_thread_data *thd, int *alloci, int *heap_grown) {
     }
     case closureN_tag: {
       closureN_type *hp = gc_alloc(Cyc_heap, 
-                            sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elt), 
+                            sizeof(closureN_type) + sizeof(object) * (((closureN) obj)->num_elements), 
                             obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
@@ -2938,9 +2938,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
         gc_move2heap(((closure1) obj)->element);
         break;
       case closureN_tag: {
-        int i, n = ((closureN) obj)->num_elt;
+        int i, n = ((closureN) obj)->num_elements;
         for (i = 0; i < n; i++) {
-          gc_move2heap(((closureN) obj)->elts[i]);
+          gc_move2heap(((closureN) obj)->elements[i]);
         }
         break;
       }

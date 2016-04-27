@@ -499,8 +499,8 @@ typedef struct {
   tag_type tag;
   function_type fn;
   int num_args;
-  int num_elt;
-  object *elts;
+  int num_elements;
+  object *elements;
 } closureN_type;
 
 typedef closure0_type *closure0;

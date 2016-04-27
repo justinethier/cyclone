@@ -278,10 +278,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data *thd)
       type_of(hp) = closureN_tag;
       hp->fn = ((closureN) obj)->fn;
       hp->num_args = ((closureN) obj)->num_args;
-      hp->num_elt = ((closureN) obj)-> num_elt;
-      hp->elts = (object *)(((char *)hp) + sizeof(closureN_type));
-      for (i = 0; i < hp->num_elt; i++) {
-        hp->elts[i] = ((closureN) obj)->elts[i];
+      hp->num_elements = ((closureN) obj)-> num_elements;
+      hp->elements = (object *)(((char *)hp) + sizeof(closureN_type));
+      for (i = 0; i < hp->num_elements; i++) {
+        hp->elements[i] = ((closureN) obj)->elements[i];
       }
       return (char *)hp;
     }
@@ -519,7 +519,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r)
   if (t == closure0_tag) return gc_heap_align(sizeof(closure0_type));
   if (t == closure1_tag) return gc_heap_align(sizeof(closure1_type));
   if (t == closureN_tag){
-    return gc_heap_align(sizeof(closureN_type) + sizeof(object) * ((closureN_type *)obj)->num_elt);
+    return gc_heap_align(sizeof(closureN_type) + sizeof(object) * ((closureN_type *)obj)->num_elements);
   }
   if (t == vector_tag){
     return gc_heap_align(sizeof(vector_type) + sizeof(object) * ((vector_type *)obj)->num_elements);
@@ -1038,9 +1038,9 @@ void gc_mark_black(object obj)
         gc_collector_mark_gray(obj, ((closure1) obj)->element);
         break;
       case closureN_tag: {
-        int i, n = ((closureN) obj)->num_elt;
+        int i, n = ((closureN) obj)->num_elements;
         for (i = 0; i < n; i++) {
-          gc_collector_mark_gray(obj, ((closureN) obj)->elts[i]);
+          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]);
         }
         break;
       }

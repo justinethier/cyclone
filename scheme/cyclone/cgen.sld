@@ -993,10 +993,10 @@
             ;; TODO: probably not the ideal solution, but works for now
             "(closureN)"
             (mangle (car args))
-            ")->elts["
+            ")->elements["
             (number->string (- (cadr args) 1))"]"))))
 
-        ;; TODO: may not be good enough, closure app could be from an elt
+        ;; TODO: may not be good enough, closure app could be from an element
         ((tagged-list? '%closure-ref fun)
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace))
                 (this-cont (c:body cfun))
@@ -1221,7 +1221,7 @@
                     (let ((var (cadr free-var))
                           (idx (number->string (- (caddr free-var) 1))))
                         (string-append 
-                            "((closureN)" (mangle var) ")->elts[" idx "]"))
+                            "((closureN)" (mangle var) ")->elements[" idx "]"))
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
@@ -1235,15 +1235,15 @@
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
              cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"
-             cv-name ".num_elt = " (number->string (length free-vars)) ";\n"
-             cv-name ".elts = (object *)alloca(sizeof(object) * " 
+             cv-name ".num_elements = " (number->string (length free-vars)) ";\n"
+             cv-name ".elements = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
              (let loop ((i 0) 
                         (vars free-vars))
                (if  (null? vars)
                  ""
                  (string-append 
-                   cv-name ".elts[" (number->string i) "] = " 
+                   cv-name ".elements[" (number->string i) "] = " 
                            (car vars) ";\n"
                    (loop (+ i 1) (cdr vars))))))))
          (create-mclosure (lambda () 
