@@ -305,6 +305,8 @@ Full-Width Styles
   color: #fff;
   font-weight: 700;
   margin: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 #header_wrap {
