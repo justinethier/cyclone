@@ -1115,6 +1115,13 @@ object Cyc_is_cvar(object o)
   return boolean_f;
 }
 
+object Cyc_is_opaque(object o)
+{
+  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == c_opaque_tag)
+    return boolean_t;
+  return boolean_f;
+}
+
 object Cyc_eq(object x, object y)
 {
   if (x == y)

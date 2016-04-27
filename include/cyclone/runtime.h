@@ -235,6 +235,7 @@ object Cyc_is_procedure(void *data, object o);
 object Cyc_is_macro(object o);
 object Cyc_is_eof_object(object o);
 object Cyc_is_cvar(object o);
+object Cyc_is_opaque(object o);
 object Cyc_sum_op(void *data, common_type * x, object y);
 object Cyc_sub_op(void *data, common_type * x, object y);
 object Cyc_mul_op(void *data, common_type * x, object y);
