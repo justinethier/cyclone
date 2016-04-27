@@ -2709,6 +2709,12 @@ void _Cyc_91cvar_127(void *data, object cont, object args)
   return_closcall1(data, cont, Cyc_is_cvar(car(args)));
 }
 
+void _Cyc_91opaque_127(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "Cyc-opaque?", 1, args);
+  return_closcall1(data, cont, Cyc_is_opaque(car(args)));
+}
+
 void _boolean_127(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "boolean?", 1, args);
@@ -3720,6 +3726,8 @@ static primitive_type Cyc_91set_91cvar_67_primitive =
     { {0}, primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67 };
 static primitive_type Cyc_91cvar_127_primitive =
     { {0}, primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127 };
+static primitive_type Cyc_91opaque_127_primitive =
+    { {0}, primitive_tag, "Cyc-opaque?", &_Cyc_91opaque_127 };
 static primitive_type Cyc_91has_91cycle_127_primitive =
     { {0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127 };
 static primitive_type Cyc_91spawn_91thread_67_primitive =
@@ -3963,6 +3971,7 @@ const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
 const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;
 const object primitive_Cyc_91set_91cvar_67 = &Cyc_91set_91cvar_67_primitive;
 const object primitive_Cyc_91cvar_127 = &Cyc_91cvar_127_primitive;
+const object primitive_Cyc_91opaque_127 = &Cyc_91opaque_127_primitive;
 const object primitive_Cyc_91has_91cycle_127 = &Cyc_91has_91cycle_127_primitive;
 const object primitive_Cyc_91spawn_91thread_67 =
     &Cyc_91spawn_91thread_67_primitive;

@@ -164,6 +164,7 @@
       (list 'Cyc-get-cvar Cyc-get-cvar)
       (list 'Cyc-set-cvar! Cyc-set-cvar!)
       (list 'Cyc-cvar? Cyc-cvar?)
+      (list 'Cyc-opaque? Cyc-opaque?)
       (list 'Cyc-has-cycle? Cyc-has-cycle?)
       (list 'Cyc-spawn-thread! Cyc-spawn-thread!)
       (list 'Cyc-end-thread! Cyc-end-thread!)

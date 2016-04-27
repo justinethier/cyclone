@@ -292,6 +292,7 @@ extern const object primitive_Cyc_91global_91vars;
 extern const object primitive_Cyc_91get_91cvar;
 extern const object primitive_Cyc_91set_91cvar_67;
 extern const object primitive_Cyc_91cvar_127;
+extern const object primitive_Cyc_91opaque_127;
 extern const object primitive_Cyc_91has_91cycle_127;
 extern const object primitive_Cyc_91spawn_91thread_67;
 extern const object primitive_Cyc_91end_91thread_67;

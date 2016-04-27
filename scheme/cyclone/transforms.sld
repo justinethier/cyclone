@@ -451,6 +451,7 @@
      Cyc-get-cvar
      Cyc-set-cvar!
      Cyc-cvar? ;; Cyclone-specific
+     Cyc-opaque?
      Cyc-has-cycle?
      Cyc-spawn-thread!
      Cyc-end-thread!
@@ -567,6 +568,7 @@
                   Cyc-get-cvar
                   Cyc-set-cvar!
                   Cyc-cvar?
+                  Cyc-opaque?
                   Cyc-spawn-thread!
                   Cyc-end-thread!
                   apply
