@@ -1,14 +1,6 @@
 Initiatives:
 
-add rename support to library syntax, start by looking at lib:exports.
-will need a way of compiling this into the library, and for progs/libs importing the library (although
-those may just be able to simply each rename to refer to the renamed identifier)
-
 Tier 0:
-- FFI
-  - want to create an example program (lib?) that does something interesting, like make a cURL request
-    for that, will need to be able to include the appropriate C header(s), and link to the appropriate C libraries
-
 - Library support
 
   Import sets (importing libraries, section 5.2):
