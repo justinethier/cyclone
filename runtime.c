@@ -462,8 +462,7 @@ void Cyc_rt_raise_msg(void *data, const char *err)
 
 /* END exception handler */
 
-int equal(x, y)
-object x, y;
+int equal(object x, object y)
 {
   if (x == NULL)
     return (y == NULL);
