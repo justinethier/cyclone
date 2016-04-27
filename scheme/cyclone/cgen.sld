@@ -127,8 +127,13 @@
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
-      "     GC(td,clo,buf," n "); return; \\\n"
-      " } else {closcall" n "(td,(closure) (clo)" args "); return;}}\n")))
+      "     GC(td, clo, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else {\\\n"
+      "     closcall" n "(td, (closure) (clo)" args "); \\\n"
+      "     return;\\\n"
+      " } \\\n"
+      "}\n")))
 
 (define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -141,8 +146,11 @@
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
-      "     GC(td, &c1, buf, " n "); return; \\\n"
-      " } else { (_fn)(td," n ",(closure)_fn" args "); }}\n")))
+      "     GC(td, &c1, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else { \\\n"
+      "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
+      " }}\n")))
 
 (define (c-macro-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -150,11 +158,13 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(td,clo" args ") "
-        (wrap (string-append "if (type_of(clo) == pair_tag || prim(clo)) { Cyc_apply(td," n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
-        (wrap " else { ")
-        "((clo)->fn)(td," n ",clo" args ")"
-        (wrap ";}")
+      "#define closcall" n "(td, clo" args ") \\\n"
+        (wrap (string-append "if (type_of(clo) == pair_tag || prim(clo)) { \\\n"
+                             "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
+                             "}"))
+        (wrap " else { \\\n")
+        "   ((clo)->fn)(td, " n ", clo" args ")"
+        (wrap ";\\\n}")
         )))
 
 (define (c-macro-n-prefix n prefix)
