@@ -146,6 +146,8 @@ Finally, note there are some objects that are not relocated so the above does no
 
 # Foreign Function Interface
 
+## Writing a Scheme function in C
+
 The `define-c` special form can be used to define a function containing user-defined C code. This code will be carried through from the Scheme file all the way to the compiled C file. For example:
 
      (define-c Cyc-add-exception-handler
@@ -179,6 +181,25 @@ Functions that may block must call the `set_thread_blocked` macro to let the sys
     }
 
 The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
+
+## Including a C header
+
+A C header may be included using the `include-c-header` special form. This special form may be used either as part of a library definition:
+
+    (define-library (example life)
+      (include-c-header "../write-png.h")
+      (export life)
+      ... )
+
+Or as part of a program (add any includes immediately after the `import` expression, if one is present):
+
+    (import (scheme base)
+            (example life)
+            (example grid))
+    (include-c-header "stdlib.h")
+    (include-c-header "<stdio.h>")
+
+By default this will generate an `#include` preprocessor directive with the name of the header file in double quotes. However, if `include-c-header` is passed a text string with angle brackets (EG: `"<stdio.h>"`), the generated C code will use angle brackets instead.
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
