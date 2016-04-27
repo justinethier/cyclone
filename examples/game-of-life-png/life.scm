@@ -17,6 +17,8 @@
 ;        (only (example life) life)
 ;        (rename (prefix (example grid) grid-)
 ;                (grid-make make-grid)))
+(include-c-header "stdlib.h")
+(include-c-header "<stdio.h>")
 
 ;; Initialize a grid with a glider.
 ;(define grid (make-grid 24 24))
