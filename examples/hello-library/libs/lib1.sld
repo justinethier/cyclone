@@ -5,7 +5,9 @@
 ;;; A sample library
 ;;;
 (define-library (libs lib1)
-    (export lib1-hello lib1-test)
+    (export 
+      lib1-hello 
+      (rename lib1-test lib1-test-renamed))
     (include "lib1.scm")
     (import (scheme base)
             (scheme write)

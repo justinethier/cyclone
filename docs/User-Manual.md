@@ -14,6 +14,8 @@
 - [Language Details](#language-details)
 - [Multithreaded Programming](#multithreaded-programming)
 - [Foreign Function Interface](#foreign-function-interface)
+  - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
+  - [Including a C Header File](#including-a-c-header-file)
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -122,7 +124,7 @@ Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Sch
 
 A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differences between the specification and Cyclone's implementation.
 
-[API Documentation](API.md) is available for the libraries provide by Cyclone.
+[API Documentation](API.md) is available for the libraries provided by Cyclone.
 
 # Multithreaded Programming
 
@@ -140,18 +142,20 @@ Due to how Cyclone's garbage collector is implemented, objects are relocated in 
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
-- Characters are stored using value types and do not need to be garbage collected.
+- Characters and integers are stored using value types and do not need to be garbage collected.
 - Symbols are stored in a global table rather than the stack/heap.
 - Mutexes are always allocated on the heap since by definition they are used by more than one thread.
 
 # Foreign Function Interface
+
+## Writing a Scheme Function in C
 
 The `define-c` special form can be used to define a function containing user-defined C code. This code will be carried through from the Scheme file all the way to the compiled C file. For example:
 
      (define-c Cyc-add-exception-handler
        "(void *data, int argc, closure _, object k, object h)"
        " gc_thread_data *thd = (gc_thread_data *)data;
-         make_cons(c, h, thd->exception_handler_stack);
+         make_pair(c, h, thd->exception_handler_stack);
          thd->exception_handler_stack = &c;
          return_closcall1(data, k, &c); ")
 
@@ -179,6 +183,25 @@ Functions that may block must call the `set_thread_blocked` macro to let the sys
     }
 
 The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
+
+## Including a C Header File
+
+A C header may be included using the `include-c-header` special form. This special form may be used either as part of a library definition:
+
+    (define-library (example life)
+      (include-c-header "../write-png.h")
+      (export life)
+      ... )
+
+Or as part of a program (add any includes immediately after the `import` expression, if one is present):
+
+    (import (scheme base)
+            (example life)
+            (example grid))
+    (include-c-header "stdlib.h")
+    (include-c-header "<stdio.h>")
+
+By default this will generate an `#include` preprocessor directive with the name of the header file in double quotes. However, if `include-c-header` is passed a text string with angle brackets (EG: `"<stdio.h>"`), the generated C code will use angle brackets instead.
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).

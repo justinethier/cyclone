@@ -311,7 +311,7 @@
 ;; TODO: temporary testing
 ;; also, it would be nice to pass around something other than
 ;; symbols for primitives. could the runtime inject something into the env?
-;; of course that is a problem for stuff like make_cons, that is just a
+;; of course that is a problem for stuff like make_pair, that is just a
 ;; C macro...
 ;; (define (primitive-procedure? proc)
 ;;   (equal? proc 'cons))

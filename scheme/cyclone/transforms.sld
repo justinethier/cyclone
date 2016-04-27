@@ -786,7 +786,7 @@
      (cond
 ;; TODO: could check for a define-syntax here and load into memory
 ;; if found. would then want to continue expanding. may need to 
-;; return some value such as #t or nil as a placeholder, since the
+;; return some value such as #t or NULL as a placeholder, since the
 ;; define-syntax form would not be carried forward in the compiled code
      ((define-syntax? exp) ;; TODO: not good enough, should do error checking, and make sure list is big enough for cadr
       ;(trace:info `(define-syntax ,exp))
@@ -917,7 +917,7 @@
             ;; handled by the existing CPS conversion.
             ((or 
                ;; TODO: the following line may not be good enough, a global assigned to another
-               ;; global may still be init'd to nil if the order is incorrect in the "top level"
+               ;; global may still be init'd to NULL if the order is incorrect in the "top level"
                ;; initialization code.
                (symbol? (car (define->exp (car top-lvl)))) ;; TODO: put these at the end of top-lvl???
                (and (list? (car (define->exp (car top-lvl))))

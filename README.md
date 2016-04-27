@@ -53,6 +53,21 @@ Documentation
 
 - Finally, if you need another resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
+Example Programs
+----------------
+
+Cyclone provides several example programs, including:
+
+- [Tail Call Optimization](examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
+
+- [Threading](examples/threading) - Various examples of multi-threaded programs.
+
+- [Game of Life](examples/game-of-life) - The [Conway's game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
+
+- [Game of Life PNG Image Generator](examples/game-of-life-png) - A modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI).
+
+- Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`](cyclone.scm) and [`icyc.scm`](icyc.scm) to create executables for Cyclone's compiler and interpreter.
+
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).

@@ -127,8 +127,13 @@
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
-      "     GC(td,clo,buf," n "); return; \\\n"
-      " } else {closcall" n "(td,(closure) (clo)" args "); return;}}\n")))
+      "     GC(td, clo, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else {\\\n"
+      "     closcall" n "(td, (closure) (clo)" args "); \\\n"
+      "     return;\\\n"
+      " } \\\n"
+      "}\n")))
 
 (define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -141,8 +146,11 @@
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, _fn); \\\n"
-      "     GC(td, &c1, buf, " n "); return; \\\n"
-      " } else { (_fn)(td," n ",(closure)_fn" args "); }}\n")))
+      "     GC(td, &c1, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else { \\\n"
+      "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
+      " }}\n")))
 
 (define (c-macro-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
@@ -150,11 +158,13 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(td,clo" args ") "
-        (wrap (string-append "if (type_of(clo) == cons_tag || prim(clo)) { Cyc_apply(td," n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); }"))
-        (wrap " else { ")
-        "((clo)->fn)(td," n ",clo" args ")"
-        (wrap ";}")
+      "#define closcall" n "(td, clo" args ") \\\n"
+        (wrap (string-append "if (type_of(clo) == pair_tag || prim(clo)) { \\\n"
+                             "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
+                             "}"))
+        (wrap " else { \\\n")
+        "   ((clo)->fn)(td, " n ", clo" args ")"
+        (wrap ";\\\n}")
         )))
 
 (define (c-macro-n-prefix n prefix)
@@ -282,7 +292,7 @@
 ;;        this is experimental and probably needs refinement
 ;; trace - trace information. presently a pair containing:
 ;;         * source file
-;;         * function name (or nil if none)
+;;         * function name (or NULL if none)
 (define (c-compile-exp exp append-preamble cont trace)
   (cond
     ; Core forms:
@@ -322,14 +332,14 @@
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append "make_cons(" cvar "," (c:body a) "," (c:body b) ");")
+          (string-append "make_pair(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b))))
     )
     (_c-compile-scalars 
      (lambda (args)
        (cond
         ((null? args)
-           (c-code "nil"))
+           (c-code "NULL"))
         ((not (pair? args))
          (c-compile-const args))
         (else
@@ -368,7 +378,7 @@
                         (c:allocs idx-code) ;; Member alloc at index i
                         (list ;; Assign this member to vector
                           (string-append 
-                            cvar-name ".elts[" (number->string i) "] = "
+                            cvar-name ".elements[" (number->string i) "] = "
                             (c:body idx-code)
                             ";")))))))))
           )
@@ -386,8 +396,8 @@
                   (list ; Allocate the vector
                     (string-append 
                       "make_empty_vector(" cvar-name ");"
-                      cvar-name ".num_elt = " (number->string len) ";"
-                      cvar-name ".elts = (object *)alloca(sizeof(object) * " 
+                      cvar-name ".num_elements = " (number->string len) ";"
+                      cvar-name ".elements = (object *)alloca(sizeof(object) * " 
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
@@ -443,7 +453,7 @@
 (define (c-compile-const exp)
   (cond
     ((null? exp)
-     (c-code "nil"))
+     (c-code "NULL"))
     ((pair? exp)
      (c-compile-scalars exp))
     ((vector? exp)
@@ -502,6 +512,7 @@
      ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
      ((eq? p 'Cyc-set-cvar!)         "Cyc_set_cvar")
      ((eq? p 'Cyc-cvar?)             "Cyc_is_cvar")
+     ; TODO: ((eq? p 'Cyc-opaque?)           "Cyc_is_opaque")
      ((eq? p 'Cyc-has-cycle?)        "Cyc_has_cycle")
      ((eq? p 'Cyc-spawn-thread!)     "Cyc_spawn_thread")
      ((eq? p 'Cyc-end-thread!)       "Cyc_end_thread")
@@ -614,7 +625,7 @@
      ((eq? p 'number?)       "Cyc_is_number")
      ((eq? p 'real?)         "Cyc_is_real")
      ((eq? p 'integer?)      "Cyc_is_integer")
-     ((eq? p 'pair?)         "Cyc_is_cons")
+     ((eq? p 'pair?)         "Cyc_is_pair")
      ((eq? p 'procedure?)    "Cyc_is_procedure")
      ((eq? p 'macro?)        "Cyc_is_macro")
      ((eq? p 'port?)         "Cyc_is_port")
@@ -623,7 +634,7 @@
      ((eq? p 'string?)       "Cyc_is_string")
      ((eq? p 'eof-object?)   "Cyc_is_eof_object")
      ((eq? p 'symbol?)       "Cyc_is_symbol")
-     ((eq? p 'cons)          "make_cons")
+     ((eq? p 'cons)          "make_pair")
      ((eq? p 'cell)          "make_cell")
      ((eq? p 'cell-get)      "cell_get")
      ((eq? p 'set-cell!)     "Cyc_set_car")
@@ -993,10 +1004,10 @@
             ;; TODO: probably not the ideal solution, but works for now
             "(closureN)"
             (mangle (car args))
-            ")->elts["
+            ")->elements["
             (number->string (- (cadr args) 1))"]"))))
 
-        ;; TODO: may not be good enough, closure app could be from an elt
+        ;; TODO: may not be good enough, closure app could be from an element
         ((tagged-list? '%closure-ref fun)
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace))
                 (this-cont (c:body cfun))
@@ -1044,7 +1055,7 @@
          (els (compile (if->else exp))))
   (c-code (string-append
    (c:allocs->str (c:allocs test) "  ")
-   "if( !eq(boolean_f, "
+   "if( (boolean_f != "
    (c:body test)
    ") ){ \n"
    (c:serialize then "  ")
@@ -1221,7 +1232,7 @@
                     (let ((var (cadr free-var))
                           (idx (number->string (- (caddr free-var) 1))))
                         (string-append 
-                            "((closureN)" (mangle var) ")->elts[" idx "]"))
+                            "((closureN)" (mangle var) ")->elements[" idx "]"))
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
@@ -1235,15 +1246,15 @@
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
              cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"
-             cv-name ".num_elt = " (number->string (length free-vars)) ";\n"
-             cv-name ".elts = (object *)alloca(sizeof(object) * " 
+             cv-name ".num_elements = " (number->string (length free-vars)) ";\n"
+             cv-name ".elements = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
              (let loop ((i 0) 
                         (vars free-vars))
                (if  (null? vars)
                  ""
                  (string-append 
-                   cv-name ".elts[" (number->string i) "] = " 
+                   cv-name ".elements[" (number->string i) "] = " 
                            (car vars) ";\n"
                    (loop (+ i 1) (cdr vars))))))))
          (create-mclosure (lambda () 
@@ -1370,6 +1381,7 @@
                       lib-exports 
                       imported-globals
                       globals
+                      c-headers
                       required-libs
                       src-file)
   (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
@@ -1411,6 +1423,16 @@
       (foldr string-append "" (reverse compiled-program-lst)))
 
     (emit-c-arity-macros 0)
+    (for-each 
+      (lambda (h)
+        (cond 
+          ((and (string? h)
+                (> (string-length h) 0)
+                (equal? (string-ref h 0) #\<))
+           (emit* "#include " h ""))
+          (else
+           (emit* "#include \"" h "\""))))
+      c-headers)
     (emit "#include \"cyclone/types.h\"")
 
     ;; Globals defined in this module
@@ -1418,7 +1440,7 @@
         (lambda (global)
           (emits "object ")
           (emits (cgen:mangle-global (car global)))
-          (emits " = nil;\n"))
+          (emits " = NULL;\n"))
         *globals*)
     ;; Globals defined by another module
     (for-each
@@ -1539,7 +1561,7 @@
                  "  make_cvar(" cvar-sym 
                  ", (object *)&" (cgen:mangle-global (car g)) ");")
              (emits*
-                 "make_cons(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
+                 "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
                  "\"), &" cvar-sym ");\n")
              (set! pairs (cons pair-sym pairs))
           ))
@@ -1556,13 +1578,13 @@
               ((null? (cdr ps))
                (if (not head-pair)
                    (set! head-pair (car cs)))
-               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
+               (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ",Cyc_global_variables);\n") code)
                      (cdr ps)
                      (cdr cs)))
               (else
                (if (not head-pair)
                    (set! head-pair (car cs)))
-               (loop (cons (string-append "make_cons(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
+               (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                      (cdr ps) 
                      (cdr cs)))))
         (if head-pair
@@ -1596,7 +1618,7 @@
           (emit compiled-program)))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
-        (emit "cont = ((closure1_type *)cont)->elt1;")
+        (emit "cont = ((closure1_type *)cont)->element;")
         ;(emit "((cont)->fn)(1, cont, cont);")
         (emit* 
             "(((closure)"

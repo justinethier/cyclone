@@ -20,23 +20,23 @@
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
-(cond-expand
- (chicken
-   (define (Cyc-installation-dir . opt) 
-     (if (equal? '(inc) opt)
-       "/home/justin/Documents/cyclone/include"
-       ;; Ignore opt and always assume current dir for chicken, since it is just dev
-       "/home/justin/Documents/cyclone"))
-   (require-extension extras) ;; pretty-print
-   (require-extension chicken-syntax) ;; when
-   (require-extension srfi-1) ;; every
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
-   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
- (else #f))
+;;(cond-expand
+;; (chicken
+;;   (define (Cyc-installation-dir . opt) 
+;;     (if (equal? '(inc) opt)
+;;       "/home/justin/Documents/cyclone/include"
+;;       ;; Ignore opt and always assume current dir for chicken, since it is just dev
+;;       "/home/justin/Documents/cyclone"))
+;;   (require-extension extras) ;; pretty-print
+;;   (require-extension chicken-syntax) ;; when
+;;   (require-extension srfi-1) ;; every
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
+;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
+;; (else #f))
 
 ;; Code emission.
   
@@ -51,6 +51,8 @@
       (define imported-vars '())
       (define lib-name '())
       (define lib-exports '())
+      (define lib-renamed-exports '())
+      (define c-headers '())
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
@@ -62,12 +64,23 @@
          (let ((includes (lib:includes (car input-program))))
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
+           (set! c-headers (lib:include-c-headers (car input-program)))
            (set! lib-exports
              (cons
                (lib:name->symbol lib-name)
                (lib:exports (car input-program))))
+           (set! lib-renamed-exports 
+             (lib:rename-exports (car input-program)))
            (set! imports (lib:imports (car input-program)))
            (set! input-program (lib:body (car input-program)))
+           ;; Add any renamed exports to the begin section
+           (set! input-program
+                 (append
+                   (map 
+                     (lambda (r) 
+                      `(define ,(caddr r) ,(cadr r)))
+                     lib-renamed-exports)   
+                   input-program))
            ;; Prepend any included files into the begin section
            (if (not (null? includes))
              (for-each
@@ -78,10 +91,24 @@
                                             include)) 
                                input-program)))
                includes))))
-        ((tagged-list? 'import (car input-program))
-         (set! imports (cdar input-program))
-         (set! input-program (cdr input-program))
-         ;(error (list 'imports (cdar input-program)))
+        (else
+          ;; Handle import, if present
+          (cond
+            ((tagged-list? 'import (car input-program))
+             (set! imports (cdar input-program))
+             (set! input-program (cdr input-program))
+             ;(error (list 'imports (cdar input-program)))
+            ))
+          ;; Handle any C headers
+          (let ((headers (lib:include-c-headers `(dummy dummy ,@input-program))))
+            (cond
+              ((not (null? headers))
+               (set! c-headers headers)
+               (set! input-program 
+                     (filter 
+                       (lambda (expr)
+                         (not (tagged-list? 'include-c-header expr)))
+                       input-program)))))
         ))
 
       ;; Process library imports
@@ -251,6 +278,9 @@
         (trace:error "DEBUG, existing program")
         (exit 0))
     
+      (trace:info "---------------- C headers: ")
+      (trace:info c-headers)
+
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 
                     program? 
@@ -258,6 +288,7 @@
                     lib-exports 
                     imported-vars
                     module-globals
+                    c-headers
                     lib-deps
                     src-file) 
       (return '())))) ;; No codes to return

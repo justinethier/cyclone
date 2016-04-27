@@ -20,10 +20,10 @@
 }
 
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
-  if (eq(boolean_f, fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
+  if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 
-#define Cyc_check_cons_or_nil(d,obj) { if (!nullp(obj)) { Cyc_check_cons(d,obj); }}
-#define Cyc_check_cons(d,obj) Cyc_check_type(d,Cyc_is_cons, cons_tag, obj);
+#define Cyc_check_pair_or_null(d,obj) { if (obj != NULL) { Cyc_check_pair(d,obj); }}
+#define Cyc_check_pair(d,obj) Cyc_check_type(d,Cyc_is_pair, pair_tag, obj);
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
@@ -45,7 +45,7 @@ extern const object Cyc_EOF;
 object cell_get(object cell);
 
 #define global_set(glo,value) Cyc_global_set(data, (object *)&glo, value)
-object Cyc_global_set(void *thd, object *glo, object value);
+object Cyc_global_set(void *thd, object * glo, object value);
 
 /* Variable argument count support 
 
@@ -62,7 +62,7 @@ object Cyc_global_set(void *thd, object *glo, object value);
    args and the number of provided ones, and pass the difference as 'count'
  */
 #define load_varargs(var, arg_var, count) \
-  list var = (count > 0) ? alloca(sizeof(cons_type)*count) : nil; \
+  list var = (count > 0) ? alloca(sizeof(pair_type)*count) : NULL; \
   { \
     int i; \
     object tmp; \
@@ -77,9 +77,9 @@ object Cyc_global_set(void *thd, object *glo, object value);
         } \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
-        var[i].tag = cons_tag; \
-        var[i].cons_car = tmp; \
-        var[i].cons_cdr = (i == (count-1)) ? nil : &var[i + 1]; \
+        var[i].tag = pair_tag; \
+        var[i].pair_car = tmp; \
+        var[i].pair_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
       } \
       va_end(va); \
     } \
@@ -127,16 +127,19 @@ object Cyc_set_cvar(object var, object value);
 object apply(void *data, object cont, object func, object args);
 void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
 object Cyc_string_cmp(void *data, object str1, object str2);
-void dispatch_string_91append(void *data, int argc, object clo, object cont, object str1, ...);
-list mcons(object,object);
-cvar_type *mcvar(object *var);
-object Cyc_display(object, FILE *port);
-object dispatch_display_va(void *data, int argc, object clo, object cont, object x, ...);
+void dispatch_string_91append(void *data, int argc, object clo, object cont,
+                              object str1, ...);
+list mcons(object, object);
+cvar_type *mcvar(object * var);
+object Cyc_display(object, FILE * port);
+object dispatch_display_va(void *data, int argc, object clo, object cont,
+                           object x, ...);
 object Cyc_display_va(int argc, object x, ...);
 object Cyc_display_va_list(int argc, object x, va_list ap);
-object Cyc_write_char(void *data, object c, object port); 
-object Cyc_write(object, FILE *port);
-object dispatch_write_va(void *data, int argc, object clo, object cont, object x, ...);
+object Cyc_write_char(void *data, object c, object port);
+object Cyc_write(object, FILE * port);
+object dispatch_write_va(void *data, int argc, object clo, object cont,
+                         object x, ...);
 object Cyc_write_va(int argc, object x, ...);
 object Cyc_write_va_list(int argc, object x, va_list ap);
 
@@ -144,17 +147,19 @@ object Cyc_has_cycle(object lst);
 object Cyc_num_eq(void *, object cont, int argc, object n, ...);
 object Cyc_num_gt(void *, object cont, int argc, object n, ...);
 object Cyc_num_lt(void *, object cont, int argc, object n, ...);
-object Cyc_num_gte(void *,object cont, int argc, object n, ...);
-object Cyc_num_lte(void *,object cont, int argc, object n, ...);
+object Cyc_num_gte(void *, object cont, int argc, object n, ...);
+object Cyc_num_lte(void *, object cont, int argc, object n, ...);
 int Cyc_num_eq_op(void *, object x, object y);
 int Cyc_num_gt_op(void *, object x, object y);
 int Cyc_num_lt_op(void *, object x, object y);
-int Cyc_num_gte_op(void *,object x, object y);
-int Cyc_num_lte_op(void *,object x, object y);
-object Cyc_num_cmp_va_list(void *data, int argc, int (fn_op(void *, object, object)), object n, va_list ns);
+int Cyc_num_gte_op(void *, object x, object y);
+int Cyc_num_lte_op(void *, object x, object y);
+object Cyc_num_cmp_va_list(void *data, int argc,
+                           int (fn_op(void *, object, object)), object n,
+                           va_list ns);
 object Cyc_eq(object x, object y);
-object Cyc_set_car(void *, object l, object val) ;
-object Cyc_set_cdr(void *, object l, object val) ;
+object Cyc_set_car(void *, object l, object val);
+object Cyc_set_cdr(void *, object l, object val);
 object Cyc_length(void *d, object l);
 integer_type Cyc_length_as_object(void *d, object l);
 object Cyc_vector_length(void *data, object v);
@@ -164,15 +169,19 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...);
 object Cyc_bytevector(void *data, object cont, int argc, object bval, ...);
 object Cyc_bytevector_length(void *data, object bv);
-object Cyc_bytevector_append(void *data, object cont, int _argc, object bv, ...);
-object Cyc_bytevector_copy(void *data, object cont, object bv, object start, object end);
+object Cyc_bytevector_append(void *data, object cont, int _argc, object bv,
+                             ...);
+object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
+                           object end);
 object Cyc_bytevector_u8_ref(void *data, object bv, object k);
 object Cyc_bytevector_u8_set(void *data, object bv, object k, object b);
-object Cyc_utf82string(void *data, object cont, object bv, object start, object end);
-object Cyc_string2utf8(void *data, object cont, object str, object start, object end);
+object Cyc_utf82string(void *data, object cont, object bv, object start,
+                       object end);
+object Cyc_string2utf8(void *data, object cont, object str, object start,
+                       object end);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...);
-object Cyc_symbol2string(void *d, object cont, object sym) ;
+object Cyc_symbol2string(void *d, object cont, object sym);
 object Cyc_string2symbol(void *d, object str);
 object Cyc_list2string(void *d, object cont, object lst);
 object Cyc_string2number_(void *d, object cont, object str);
@@ -182,7 +191,8 @@ int octstr2int(const char *str);
 int hexstr2int(const char *str);
 object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
 object Cyc_string_length(void *data, object str);
-object Cyc_substring(void *data, object cont, object str, object start, object end);
+object Cyc_substring(void *data, object cont, object str, object start,
+                     object end);
 object Cyc_string_ref(void *data, object str, object k);
 object Cyc_string_set(void *data, object str, object k, object chr);
 object Cyc_installation_dir(void *data, object cont, object type);
@@ -190,7 +200,7 @@ object Cyc_command_line_arguments(void *data, object cont);
 object Cyc_system(object cmd);
 object Cyc_char2integer(object chr);
 object Cyc_integer2char(void *data, object n);
-void Cyc_halt(closure);
+void Cyc_halt(object obj);
 object __halt(object obj);
 port_type Cyc_stdout(void);
 port_type Cyc_stdin(void);
@@ -208,7 +218,7 @@ object Cyc_io_peek_char(void *data, object cont, object port);
 object Cyc_io_read_line(void *data, object cont, object port);
 
 object Cyc_is_boolean(object o);
-object Cyc_is_cons(object o);
+object Cyc_is_pair(object o);
 object Cyc_is_null(object o);
 object Cyc_is_number(object o);
 object Cyc_is_real(object o);
@@ -225,53 +235,54 @@ object Cyc_is_procedure(void *data, object o);
 object Cyc_is_macro(object o);
 object Cyc_is_eof_object(object o);
 object Cyc_is_cvar(object o);
-object Cyc_sum_op(void *data, common_type *x, object y);
-object Cyc_sub_op(void *data, common_type *x, object y);
-object Cyc_mul_op(void *data, common_type *x, object y);
-object Cyc_div_op(void *data, common_type *x, object y);
+object Cyc_is_opaque(object o);
+object Cyc_sum_op(void *data, common_type * x, object y);
+object Cyc_sub_op(void *data, common_type * x, object y);
+object Cyc_mul_op(void *data, common_type * x, object y);
+object Cyc_div_op(void *data, common_type * x, object y);
 object Cyc_sum(void *data, object cont, int argc, object n, ...);
 object Cyc_sub(void *data, object cont, int argc, object n, ...);
 object Cyc_mul(void *data, object cont, int argc, object n, ...);
 object Cyc_div(void *data, object cont, int argc, object n, ...);
-object Cyc_num_op_va_list(void *data, int argc, object (fn_op(void *, common_type *, object)), int default_no_args, int default_one_arg, object n, va_list ns, common_type *buf);
-int equal(object,object);
-list assq(void *,object,list);
-list assoc(void *,object x, list l);
-object get(object,object);
-object equalp(object,object);
-object memberp(void *,object,list);
-object memqp(void *,object,list);
+object Cyc_num_op_va_list(void *data, int argc,
+                          object(fn_op(void *, common_type *, object)),
+                          int default_no_args, int default_one_arg, object n,
+                          va_list ns, common_type * buf);
+int equal(object, object);
+list assq(void *, object, list);
+list assoc(void *, object x, list l);
+object equalp(object, object);
+object memberp(void *, object, list);
+object memqp(void *, object, list);
 
 object Cyc_spawn_thread(object thunk);
-void Cyc_start_trampoline(gc_thread_data *thd);
-void Cyc_end_thread(gc_thread_data *thd);
-void Cyc_exit_thread(gc_thread_data *thd);
+void Cyc_start_trampoline(gc_thread_data * thd);
+void Cyc_end_thread(gc_thread_data * thd);
+void Cyc_exit_thread(gc_thread_data * thd);
 object Cyc_thread_sleep(void *data, object timeout);
-void GC(void *,closure,object*,int);
+void GC(void *, closure, object *, int);
 object Cyc_trigger_minor_gc(void *data, object cont);
 object copy2heap(void *data, object obj);
 
 void Cyc_st_add(void *data, char *frame);
-void Cyc_st_print(void *data, FILE *out);
+void Cyc_st_print(void *data, FILE * out);
 
-char *_strdup (const char *s);
-object add_symbol(symbol_type *psym);
+char *_strdup(const char *s);
+object add_symbol(symbol_type * psym);
 object add_symbol_by_name(const char *name);
 object find_symbol_by_name(const char *name);
 object find_or_add_symbol(const char *name);
 
 extern list global_table;
-void add_global(object *glo);
+void add_global(object * glo);
 
-void dispatch(void *data, int argc, function_type func, object clo, object cont, object args);
-void dispatch_va(void *data, int argc, function_type_va func, object clo, object cont, object args);
-void do_dispatch(void *data, int argc, function_type func, object clo, object *buffer);
+void dispatch(void *data, int argc, function_type func, object clo, object cont,
+              object args);
+void dispatch_va(void *data, int argc, function_type_va func, object clo,
+                 object cont, object args);
+void do_dispatch(void *data, int argc, function_type func, object clo,
+                 object * buffer);
 
-/* Global variables. */
-extern long no_gcs; /* Count the number of GC's. */
-extern long no_major_gcs; /* Count the number of GC's. */
-
-/* Define Lisp constants we need. */
 extern const object boolean_t;
 extern const object boolean_f;
 extern const object quote_void;
@@ -422,10 +433,11 @@ extern object Cyc_glo_call_cc;
 #define __glo_call_95cc_scheme_base Cyc_glo_call_cc
 
 /* Exception handling */
-object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
+object Cyc_default_exception_handler(void *data, int argc, closure _,
+                                     object err);
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);
 void Cyc_rt_raise2(void *data, const char *msg, object err);
 void Cyc_rt_raise_msg(void *data, const char *err);
 
-#endif /* CYCLONE_RUNTIME_H */
+#endif                          /* CYCLONE_RUNTIME_H */

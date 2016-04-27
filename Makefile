@@ -110,6 +110,9 @@ bootstrap: icyc
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
+.PHONY: examples
+examples:
+	cd examples ; make
 
 .PHONY: test
 test: $(TESTFILES) $(CYCLONE)
@@ -119,10 +122,17 @@ test: $(TESTFILES) $(CYCLONE)
 tags:
 	ctags -R *
 
+.PHONY: indent
+indent:
+	indent -linux -l80 -i2 -nut gc.c
+	indent -linux -l80 -i2 -nut runtime.c
+	indent -linux -l80 -i2 -nut include/cyclone/*.h
+
 .PHONY: clean
 clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
+	cd examples ; make clean
 
 install-includes:
 	$(MKDIR) $(DESTDIR)$(INCDIR)

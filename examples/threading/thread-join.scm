@@ -11,13 +11,16 @@
 (thread-start!
   (make-thread
     (lambda ()
-      (write "started thread")
+      (display "started thread")
+      (newline)
       (thread-sleep! 3000)
-      (write "thread done")
+      (display "thread done")
+      (newline)
       (condition-variable-broadcast! cv))))
 
 ;; Main thread - wait for thread to broadcast it is done
 (mutex-lock! m)
 (mutex-unlock! m cv) ;; Wait on cv
-(write "main thread done")
+(display "main thread done")
+(newline)
 (thread-sleep! 500)
