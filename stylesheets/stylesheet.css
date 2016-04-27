@@ -295,6 +295,7 @@ Full-Width Styles
   border-bottom-right-radius: 2px;
 }
 
+/*
 .banner {
   display: block;
   position: absolute;
@@ -307,6 +308,10 @@ Full-Width Styles
   box-shadow: 0 0 10px rgba(0,0,0,.5);
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
+}*/
+
+#header_wrap {
+  background: #000000;
 }
 
 #header_wrap {
