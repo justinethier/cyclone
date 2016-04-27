@@ -2869,7 +2869,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont, obje
 
 //fprintf(stdout, "DEBUG, started minor GC\n"); // JAE DEBUG
   // Prevent overrunning buffer
-  if (num_args > NUM_GC_ANS) {
+  if (num_args > NUM_GC_ARGS) {
     printf("Fatal error - too many arguments (%d) to GC\n", num_args);
     exit(1);
   }

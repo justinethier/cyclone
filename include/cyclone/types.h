@@ -19,7 +19,7 @@
 #include <pthread.h>
 
 // Maximum number of args that GC will accept
-#define NUM_GC_ANS 128
+#define NUM_GC_ARGS 128
 
 // Which way does the CPU grow its stack?
 #define STACK_GROWTH_IS_DOWNWARD 1

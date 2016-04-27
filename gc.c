@@ -1345,7 +1345,7 @@ void gc_thread_data_init(gc_thread_data *thd, int mut_num, char *stack_base, lon
   thd->thread_state = CYC_THREAD_STATE_NEW;
   //thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));
-  thd->gc_args = malloc(sizeof(object) * NUM_GC_ANS);
+  thd->gc_args = malloc(sizeof(object) * NUM_GC_ARGS);
   thd->gc_num_args = 0;
   thd->moveBufLen = 0;
   gc_thr_grow_move_buffer(thd);
