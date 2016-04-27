@@ -1935,9 +1935,7 @@ object Cyc_integer2char(void *data, object n)
   return obj_char2obj(val);
 }
 
-void Cyc_halt(closure);
-void Cyc_halt(env)
-closure env;
+void Cyc_halt(object obj)
 {
 #if DEBUG_SHOW_DIAG
   gc_print_stats(Cyc_heap);

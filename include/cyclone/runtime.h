@@ -200,7 +200,7 @@ object Cyc_command_line_arguments(void *data, object cont);
 object Cyc_system(object cmd);
 object Cyc_char2integer(object chr);
 object Cyc_integer2char(void *data, object n);
-void Cyc_halt(closure);
+void Cyc_halt(object obj);
 object __halt(object obj);
 port_type Cyc_stdout(void);
 port_type Cyc_stdin(void);
