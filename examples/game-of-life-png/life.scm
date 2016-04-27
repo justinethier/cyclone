@@ -17,8 +17,13 @@
 ;        (only (example life) life)
 ;        (rename (prefix (example grid) grid-)
 ;                (grid-make make-grid)))
+
+;; Simple example of including headers in a program.
+;; Just place them here in the top-level, after 
+;; the (import) expression, if any.
 (include-c-header "stdlib.h")
 (include-c-header "<stdio.h>")
+;; END C headers
 
 ;; Initialize a grid with a glider.
 ;(define grid (make-grid 24 24))

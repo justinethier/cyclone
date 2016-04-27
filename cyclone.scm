@@ -91,10 +91,24 @@
                                             include)) 
                                input-program)))
                includes))))
-        ((tagged-list? 'import (car input-program))
-         (set! imports (cdar input-program))
-         (set! input-program (cdr input-program))
-         ;(error (list 'imports (cdar input-program)))
+        (else
+          ;; Handle import, if present
+          (cond
+            ((tagged-list? 'import (car input-program))
+             (set! imports (cdar input-program))
+             (set! input-program (cdr input-program))
+             ;(error (list 'imports (cdar input-program)))
+            ))
+          ;; Handle any C headers
+          (let ((headers (lib:include-c-headers `(dummy dummy ,@input-program))))
+            (cond
+              ((not (null? headers))
+               (set! c-headers headers)
+               (set! input-program 
+                     (filter 
+                       (lambda (expr)
+                         (not (tagged-list? 'include-c-header expr)))
+                       input-program)))))
         ))
 
       ;; Process library imports
