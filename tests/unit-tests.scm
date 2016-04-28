@@ -5,7 +5,7 @@
         (scheme read)
         (scheme write)
         (scheme eval)
-        (srfi 9)
+        ;(srfi 9)
 )
 
 (define *num-passed* 0)

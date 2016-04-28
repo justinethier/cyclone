@@ -17,16 +17,17 @@
     ; TODO: need filter for the next two. also, they really belong in SRFI-1, not here
     ;delete
     ;delete-duplicates
-    ;; TODO: possibly relocating here in the future
+    ;; Record types
     define-record-type
     record?
-    ;  register-simple-type
-    ;  make-type-predicate
-    ;  make-constructor
-    ;  make-getter
-    ;  make-setter
-    ;  slot-set!
-    ;  type-slot-offset
+    register-simple-type
+    make-type-predicate
+    make-constructor
+    make-getter
+    make-setter
+    slot-set!
+    type-slot-offset
+    ;; END records
     receive
     abs
     max
@@ -1385,7 +1386,7 @@
       new)))
 (define (type-slot-offset name sym)
   (let ((field-tags (vector-ref name 2)))
-    (list-index2 sym field-tags)))
+    (_list-index sym field-tags)))
 (define (slot-set! name obj idx val)
   (let ((vec obj)) ;; TODO: get actual slots from obj
     (vector-set! (vector-ref vec 2) idx val)))
@@ -1395,6 +1396,17 @@
 (define (make-setter sym name idx)
   (lambda (obj val)
     (vector-set! (vector-ref obj 2) idx val)))
+
+;; Find index of element in list, or -1 if not found
+(define _list-index
+  (lambda (e lst)
+    (if (null? lst)
+      -1
+      (if (eq? (car lst) e)
+        0
+        (if (= (_list-index e (cdr lst)) -1) 
+          -1
+          (+ 1 (_list-index e (cdr lst))))))))
 
 (define (record? obj)
   (and (vector? obj)

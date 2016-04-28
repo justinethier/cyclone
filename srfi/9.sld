@@ -45,7 +45,7 @@
           new)))
     (define (type-slot-offset name sym)
       (let ((field-tags (vector-ref name 2)))
-        (list-index2 sym field-tags)))
+        (_list-index sym field-tags)))
     (define (slot-set! name obj idx val)
       (let ((vec obj)) ;; TODO: get actual slots from obj
         (vector-set! (vector-ref vec 2) idx val)))
@@ -60,6 +60,17 @@
       (and (vector? obj)
            (> (vector-length obj) 0)
            (equal? record-marker (vector-ref obj 0))))
+
+    ;; Find index of element in list, or -1 if not found
+    (define _list-index
+      (lambda (e lst)
+        (if (null? lst)
+          -1
+          (if (eq? (car lst) e)
+            0
+            (if (= (_list-index e (cdr lst)) -1) 
+              -1
+              (+ 1 (_list-index e (cdr lst))))))))
 
     (define-syntax define-record-type
       (er-macro-transformer

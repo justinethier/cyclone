@@ -1,7 +1,7 @@
 ;; A temporary test file
 (import (scheme base)
         (scheme write)
-        (srfi 9)
+        ;(srfi 9)
         )
 
 ;; TODO: seems begins are not spliced when part of an applied lambda??
