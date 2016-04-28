@@ -347,8 +347,10 @@
              (if (equal? 0 (system comp-prog-cmd))
                (system comp-objs-cmd)))
             (else
-              (write comp-prog-cmd)
-              (write comp-objs-cmd)))))
+              (display comp-prog-cmd)
+              (newline)
+              (display comp-objs-cmd)
+              (newline)))))
       (else
         ;; Emit .meta file
         (with-output-to-file
@@ -364,7 +366,8 @@
             (cc?
               (system comp-lib-cmd))
             (else
-              (write comp-lib-cmd))))))))
+              (display comp-lib-cmd)
+              (newline))))))))
           
 
 ;; Handle command line arguments
