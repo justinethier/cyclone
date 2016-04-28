@@ -1,6 +1,18 @@
 Initiatives:
 
 Tier 0:
+- CPS optimization - goal is to improve performance through CPS optimization and closure elimination
+  Phases:
+  1) use an AST to represent code instead of direct scheme.
+     the first benefit to this is to allow each lambda to be assigned a 
+     unique ID. there may be other benefits.
+     for now, probably only need an AST node for each type of object that
+     will benefit from it
+  2) build an analysis database to collect information on the code,
+     see chicken internals for ideas
+  3) perform optimizations on the CPS using analysis information
+  4) code size and performance comparison between this and baseline (the master branch, for now)
+
 - Library support
 
   Import sets (importing libraries, section 5.2):
@@ -14,7 +26,6 @@ Tier 0:
 
 
 Tier 1:
-- Performance - most likely need CPS optimization and closure elimination
 - pass larceny benchmarks (will require some bugfixes):
 
 TODO: sboyer finishes in a reasonable amount of time now, but the collector's memory growth is
