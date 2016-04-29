@@ -11,14 +11,15 @@
 (define-library (scheme cyclone transforms)
   (import (scheme base)
           (scheme char)
-          (scheme file)
           (scheme eval)
+          (scheme file)
           (scheme read)
           (scheme write)
           (scheme cyclone common)
-          (scheme cyclone util)
           (scheme cyclone libraries)
           (scheme cyclone macros)
+          (scheme cyclone pretty-print)
+          (scheme cyclone util)
   )
   (export
     *defined-macros* 
@@ -127,9 +128,6 @@
     closure-convert 
   )
   (begin
-
-;; Temporary work-around for pp not being implemented yet
-(define pretty-print write)
 
 ;; Container for built-in macros
 (define (get-macros) *defined-macros*)
