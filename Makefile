@@ -28,6 +28,7 @@ SMODULES = \
   scheme/cyclone/common \
   scheme/cyclone/libraries \
   scheme/cyclone/macros \
+  scheme/cyclone/pretty-print \
   scheme/cyclone/transforms \
   scheme/cyclone/util \
   srfi/9 \
@@ -101,6 +102,7 @@ bootstrap: icyc
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/pretty-print.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
