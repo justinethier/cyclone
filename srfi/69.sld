@@ -40,6 +40,7 @@
   )
   (import (scheme base)
           (scheme char)
+          (scheme complex)
           ;(scheme cyclone util)
   )
   (begin
