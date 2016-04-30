@@ -755,6 +755,10 @@
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
 (define (expand exp env)
+  (define (log e)
+    (display (list 'expand e) (current-error-port))
+    (newline (current-error-port)))
+  (log exp)
   ;(trace:error `(expand ,exp))
   (cond
     ((const? exp)      exp)
@@ -871,6 +875,10 @@
 ;;       out why there is an infinite loop when we use this in cyclone.scm
 ;;       for library compilation (in particular, for scheme base).
 (define (expand-body result exp env)
+  (define (log e)
+    (display (list 'expand-body e) (current-error-port))
+    (newline (current-error-port)))
+
   (if (null? exp) 
     (reverse result)
     (let ((this-exp (car exp)))
@@ -882,12 +890,21 @@
             (ref? this-exp)
             (quote? this-exp)
             (define-c? this-exp))
+(log this-exp)
         (expand-body (cons this-exp result) (cdr exp) env))
-       ((or (define? this-exp)
-            (define-syntax? this-exp)
+       ((define? this-exp)
+(log this-exp)
+        (expand-body 
+          (cons
+            (expand this-exp env)
+            result)
+          (cdr exp)
+          env))
+       ((or (define-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
             (if? this-exp))
+(log (car this-exp))
         (expand-body 
           (cons
             (expand this-exp env)
@@ -898,6 +915,7 @@
        ((begin? this-exp)
         (let* ((expr this-exp)
                (begin-exprs (begin->exps expr)))
+(log (car this-exp))
         (expand-body
          result
          (append begin-exprs (cdr exp))
@@ -905,16 +923,20 @@
        ((app? this-exp)
         (cond
           ((symbol? (caar exp))
+(log (car this-exp))
            (let ((val (env:lookup (caar exp) env #f)))
+(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
-              (expand-body
-                result
-                (cons 
-                  (macro:expand this-exp val env)
-                  (cdr exp))
-                env)
+              (let ((expanded (macro:expand this-exp val env)))
+(log `(DONE WITH macro:expand))
+                (expand-body
+                  result
+                  (cons 
+                    expanded ;(macro:expand this-exp val env)
+                    (cdr exp))
+                  env))
               ;; No macro, use main expand function to process
               (expand-body
                (cons 
@@ -925,6 +947,7 @@
                (cdr exp)
                env))))
           (else
+(log 'app)
            (expand-body
              (cons 
                (map

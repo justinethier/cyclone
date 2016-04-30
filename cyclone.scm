@@ -144,12 +144,21 @@
       (macro:load-env! *defined-macros* (create-environment '() '()))
 
       ;; Expand macros
+      ; New code, does not compile scheme/base.sld yet:
       (set! input-program 
-        ((if program? 
-             expand-lambda-body
-             expand)
-         input-program 
-         (macro:get-env)))
+        (cond
+          (program?
+            (expand-lambda-body input-program (macro:get-env)))
+          (else
+            (lambda->exp (car
+              (expand `(begin ,@input-program) (macro:get-env)))))))
+      ; Old code, works
+      ;(set! input-program 
+      ;  ((if program? 
+      ;       expand-lambda-body
+      ;       expand)
+      ;   input-program 
+      ;   (macro:get-env)))
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
 
