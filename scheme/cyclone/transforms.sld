@@ -782,55 +782,50 @@
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
                                  #f)))
+    ((define-c? exp) exp)
+    ((define-syntax? exp)
+     ;(trace:info `(define-syntax ,exp))
+     (let* ((name (cadr exp))
+            (trans (caddr exp))
+            (body (cadr trans)))
+       (cond
+        ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
+         (expand
+           `(define-syntax ,name ,(expand trans env))
+           env))
+        (else
+         (set! *defined-macros* (cons (cons name body) *defined-macros*))
+         ;; Keep track of macros added during compilation.
+         ;; Previous list should eventually go away once macros are
+         ;; moved from that static list to libraries
+         (macro:add! name body)
+         (env:define-variable! name (list 'macro body) env)
+         ;; Keep as a 'define' form so available at runtime
+         ;; TODO: may run into issues with expanding now, before some
+         ;; of the macros are defined. may need to make a special pass
+         ;; to do loading or expansion of macro bodies
+         ;; TODO: would it be better to use *define-macros* directly instead
+         ;; of trying to define it here? that might help prevent issues where
+         ;; an expand is called here before all macros are defined yet
+         ;;  - no, we need to do this here so code is carried though all transforms
+         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
+         ;;
+         `(define ,name ,(expand body env))))))
     ((app? exp)
      (cond
-;; TODO: could check for a define-syntax here and load into memory
-;; if found. would then want to continue expanding. may need to 
-;; return some value such as #t or NULL as a placeholder, since the
-;; define-syntax form would not be carried forward in the compiled code
-     ((define-syntax? exp) ;; TODO: not good enough, should do error checking, and make sure list is big enough for cadr
-      ;(trace:info `(define-syntax ,exp))
-      (let* ((name (cadr exp))
-             (trans (caddr exp))
-             (body (cadr trans)))
-        (cond
-         ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
-          (expand
-            `(define-syntax ,name ,(expand trans env))
-            env))
-         (else
-        (set! *defined-macros* (cons (cons name body) *defined-macros*))
-        ;; Keep track of macros added during compilation.
-        ;; Previous list should eventually go away once macros are
-        ;; moved from that static list to libraries
-        (macro:add! name body)
-        (env:define-variable! name (list 'macro body) env)
-        ;; Keep as a 'define' form so available at runtime
-        ;; TODO: may run into issues with expanding now, before some
-        ;; of the macros are defined. may need to make a special pass
-        ;; to do loading or expansion of macro bodies
-        ;; TODO: would it be better to use *define-macros* directly instead
-        ;; of trying to define it here? that might help prevent issues where
-        ;; an expand is called here before all macros are defined yet
-        ;;  - no, we need to do this here so code is carried though all transforms
-        ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
-        ;;
-        `(define ,name ,(expand body env))))))
-     ((define-c? exp) exp)
-     ((symbol? (car exp))
-      (let ((val (env:lookup (car exp) env #f)))
-        (if (tagged-list? 'macro val)
-          (expand ; Could expand into another macro
-            (macro:expand exp val env)
-            env)
-          (map
-            (lambda (expr) (expand expr env))
-            exp))))
-
-     (else
-       (map 
-        (lambda (expr) (expand expr env))
-        exp))))
+       ((symbol? (car exp))
+        (let ((val (env:lookup (car exp) env #f)))
+          (if (tagged-list? 'macro val)
+            (expand ; Could expand into another macro
+              (macro:expand exp val env)
+              env)
+            (map
+              (lambda (expr) (expand expr env))
+              exp))))
+       (else
+         (map 
+          (lambda (expr) (expand expr env))
+          exp))))
     (else
       (error "unknown exp: " exp))))
 
@@ -885,10 +880,10 @@
        ((or (const? this-exp)
             (prim? this-exp)
             (ref? this-exp)
-            (quote? this-exp))
+            (quote? this-exp)
+            (define-c? this-exp))
         (expand-body (cons this-exp result) (cdr exp) env))
        ((or (define? this-exp)
-            (define-c? this-exp)
             (define-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
