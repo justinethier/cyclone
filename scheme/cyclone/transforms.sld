@@ -839,89 +839,94 @@
   (expand-body '() exp env))
 
 ;; Helper to expand a lambda body, so we can splice in any begin's
+;(define (expand-body result exp env)
+;  (cond
+;   ((null? exp) (reverse result))
+;   ;; Splice in begin contents and keep expanding body
+;   ((begin? (car exp))
+;    (let* ((expr (car exp))
+;           (begin-exprs (begin->exps expr)))
+;    (expand-body
+;     result
+;     (append begin-exprs (cdr exp))
+;     env)))
+;   (else
+;    (let ((macro #f))
+;      (when (and (app? (car exp))
+;                 (symbol? (caar exp)))
+;        (set! macro (env:lookup (caar exp) env #f)))
+;      (if (tagged-list? 'macro macro)
+;          ;; Expand macro here so we can catch begins in the expanded code,
+;          ;; including nested begins
+;          (let ((expanded (macro:expand (car exp) macro env)))
+;            ;; Call with expanded macro in case we need to expand again
+;            (expand-body
+;              result
+;              (cons expanded (cdr exp))
+;              env))
+;          ;; No macro, use main expand function to process
+;          (expand-body
+;           (cons 
+;             (expand (car exp) env)
+;             result)
+;           (cdr exp)
+;           env))))))
+
+;; TODO: plan is, rewrite this to enhance it, test, commit, then figure
+;;       out why there is an infinite loop when we use this in cyclone.scm
+;;       for library compilation (in particular, for scheme base).
 (define (expand-body result exp env)
-  (cond
-   ((null? exp) (reverse result))
-   ;; Splice in begin contents and keep expanding body
-   ((begin? (car exp))
-    (let* ((expr (car exp))
-           (begin-exprs (begin->exps expr)))
-    (expand-body
-     result
-     (append begin-exprs (cdr exp))
-     env)))
-   (else
-    (let ((macro #f))
-      (when (and (app? (car exp))
-                 (symbol? (caar exp)))
-        (set! macro (env:lookup (caar exp) env #f)))
-      (if (tagged-list? 'macro macro)
-          ;; Expand macro here so we can catch begins in the expanded code,
-          ;; including nested begins
-          (let ((expanded (macro:expand (car exp) macro env)))
-            ;; Call with expanded macro in case we need to expand again
-            (expand-body
-              result
-              (cons expanded (cdr exp))
-              env))
-          ;; No macro, use main expand function to process
-          (expand-body
-           (cons 
-             (expand (car exp) env)
-             result)
-           (cdr exp)
-           env))))))
-;;(define (expand-body result exp env)
-;;  (if (null? exp) 
-;;    (reverse result)
-;;    (let ((this-exp (car exp)))
-;;      (cond
-;;       ;; Splice in begin contents and keep expanding body
-;;       ((begin? (car exp))
-;;        (let* ((expr (car exp))
-;;               (begin-exprs (begin->exps expr)))
-;;        (expand-body
-;;         result
-;;         (append begin-exprs (cdr exp))
-;;         env)))
-;;       ((or (const? this-exp)
-;;            (prim? this-exp)
-;;            (ref? this-exp)
-;;            (quote? this-exp))
-;;        (expand-body (cons this-exp result) (cdr exp) env))
-;;       ((or (define? this-exp)
-;;            (define-c? this-exp)
-;;            (define-syntax? this-exp)
-;;            (lambda? this-exp)
-;;            (set!? this-exp)
-;;            (if? this-exp))
-;;        (expand-body 
-;;          (cons
-;;            (expand this-exp env)
-;;            result)
-;;          (cdr exp)
-;;          env))
-;;       (else
-;;        (let ((macro #f))
-;;          (when (and (app? (car exp))
-;;                     (symbol? (caar exp)))
-;;            (set! macro (env:lookup (caar exp) env #f)))
-;;          (if (tagged-list? 'macro macro)
-;;              ;; Expand macro here so we can catch begins in the expanded code,
-;;              ;; including nested begins
-;;              (let ((expanded (macro:expand (car exp) macro env)))
-;;                ;; Call with expanded macro in case we need to expand again
-;;                (expand-body
-;;                  result
-;;                  (cons expanded (cdr exp))
-;;                  env))
-;;              ;; No macro, use main expand function to process
-;;              (expand-body
-;;               (cons 
-;;                 (expand (car exp) env)
-;;                 result)
-;;               (cdr exp)
-;;               env))))))))
+  ;(display `(expand-body ,exp) (current-error-port))
+  (if (null? exp) 
+    (reverse result)
+    (let ((this-exp (car exp)))
+      (cond
+       ((or (const? this-exp)
+            (prim? this-exp)
+            (ref? this-exp)
+            (quote? this-exp))
+        (expand-body (cons this-exp result) (cdr exp) env))
+       ((or (define? this-exp)
+            (define-c? this-exp)
+            (define-syntax? this-exp)
+            (lambda? this-exp)
+            (set!? this-exp)
+            (if? this-exp))
+        (expand-body 
+          (cons
+            (expand this-exp env)
+            result)
+          (cdr exp)
+          env))
+       ;; Splice in begin contents and keep expanding body
+       ((begin? (car exp))
+        (let* ((expr (car exp))
+               (begin-exprs (begin->exps expr)))
+        (expand-body
+         result
+         (append begin-exprs (cdr exp))
+         env)))
+       (else
+        (let ((macro #f))
+          (when (and (app? (car exp))
+                     (symbol? (caar exp)))
+            (set! macro (env:lookup (caar exp) env #f)))
+          (if (tagged-list? 'macro macro)
+              ;; Expand macro here so we can catch begins in the expanded code,
+              ;; including nested begins
+              (let ((expanded (macro:expand (car exp) macro env)))
+                ;; Call with expanded macro in case we need to expand again
+                (expand-body
+                  result
+                  (cons expanded (cdr exp))
+                  env))
+              ;; No macro, use main expand function to process
+              (expand-body
+               (cons 
+                 (expand (car exp) env)
+                 result)
+               (cdr exp)
+               env))))))))
 
 
 ;; Top-level analysis
