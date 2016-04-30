@@ -903,19 +903,18 @@
          (append begin-exprs (cdr exp))
          env)))
        ((app? this-exp)
-        (let ((macro #f))
-          (when (and (app? this-exp)
-                     (symbol? (caar exp)))
-            (set! macro (env:lookup (caar exp) env #f)))
-          (if (tagged-list? 'macro macro)
+        (cond
+          ((symbol? (caar exp))
+           (let ((val (env:lookup (caar exp) env #f)))
+            (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
-              (let ((expanded (macro:expand this-exp macro env)))
-                ;; Call with expanded macro in case we need to expand again
-                (expand-body
-                  result
-                  (cons expanded (cdr exp))
-                  env))
+              (expand-body
+                result
+                (cons 
+                  (macro:expand this-exp val env)
+                  (cdr exp))
+                env)
               ;; No macro, use main expand function to process
               (expand-body
                (cons 
@@ -925,6 +924,15 @@
                  result)
                (cdr exp)
                env))))
+          (else
+           (expand-body
+             (cons 
+               (map
+                (lambda (expr) (expand expr env))
+                this-exp)
+               result)
+             (cdr exp)
+             env))))
        (else
         (error "unknown exp: " this-exp))))))
 
