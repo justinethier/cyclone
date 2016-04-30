@@ -876,10 +876,11 @@
 ;;       out why there is an infinite loop when we use this in cyclone.scm
 ;;       for library compilation (in particular, for scheme base).
 (define (expand-body result exp env)
-  ;(display `(expand-body ,exp) (current-error-port))
   (if (null? exp) 
     (reverse result)
     (let ((this-exp (car exp)))
+;(display (list 'expand-body this-exp) (current-error-port))
+;(newline (current-error-port))
       (cond
        ((or (const? this-exp)
             (prim? this-exp)
@@ -899,22 +900,22 @@
           (cdr exp)
           env))
        ;; Splice in begin contents and keep expanding body
-       ((begin? (car exp))
-        (let* ((expr (car exp))
+       ((begin? this-exp)
+        (let* ((expr this-exp)
                (begin-exprs (begin->exps expr)))
         (expand-body
          result
          (append begin-exprs (cdr exp))
          env)))
-       (else
+       ((app? this-exp)
         (let ((macro #f))
-          (when (and (app? (car exp))
+          (when (and (app? this-exp)
                      (symbol? (caar exp)))
             (set! macro (env:lookup (caar exp) env #f)))
           (if (tagged-list? 'macro macro)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
-              (let ((expanded (macro:expand (car exp) macro env)))
+              (let ((expanded (macro:expand this-exp macro env)))
                 ;; Call with expanded macro in case we need to expand again
                 (expand-body
                   result
@@ -923,10 +924,14 @@
               ;; No macro, use main expand function to process
               (expand-body
                (cons 
-                 (expand (car exp) env)
+                 (map
+                  (lambda (expr) (expand expr env))
+                  this-exp)
                  result)
                (cdr exp)
-               env))))))))
+               env))))
+       (else
+        (error "unknown exp: " this-exp))))))
 
 
 ;; Top-level analysis
