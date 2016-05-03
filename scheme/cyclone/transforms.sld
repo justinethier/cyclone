@@ -756,9 +756,12 @@
 ; expand : exp -> exp
 (define (expand exp env)
   (define (log e)
-    (display (list 'expand e) (current-error-port))
+    (display  
+      (list 'expand e 'env 
+        (env:frame-variables (env:first-frame env))) 
+      (current-error-port))
     (newline (current-error-port)))
-  (log exp)
+  ;(log exp)
   ;(trace:error `(expand ,exp))
   (cond
     ((const? exp)      exp)
@@ -876,7 +879,9 @@
 ;;       for library compilation (in particular, for scheme base).
 (define (expand-body result exp env)
   (define (log e)
-    (display (list 'expand-body e) (current-error-port))
+    (display (list 'expand-body e 'env 
+              (env:frame-variables (env:first-frame env))) 
+             (current-error-port))
     (newline (current-error-port)))
 
   (if (null? exp) 
@@ -890,10 +895,10 @@
             (ref? this-exp)
             (quote? this-exp)
             (define-c? this-exp))
-(log this-exp)
+;(log this-exp)
         (expand-body (cons this-exp result) (cdr exp) env))
        ((define? this-exp)
-(log this-exp)
+;(log this-exp)
         (expand-body 
           (cons
             (expand this-exp env)
@@ -904,7 +909,7 @@
             (lambda? this-exp)
             (set!? this-exp)
             (if? this-exp))
-(log (car this-exp))
+;(log (car this-exp))
         (expand-body 
           (cons
             (expand this-exp env)
@@ -915,7 +920,7 @@
        ((begin? this-exp)
         (let* ((expr this-exp)
                (begin-exprs (begin->exps expr)))
-(log (car this-exp))
+;(log (car this-exp))
         (expand-body
          result
          (append begin-exprs (cdr exp))
@@ -923,14 +928,21 @@
        ((app? this-exp)
         (cond
           ((symbol? (caar exp))
-(log (car this-exp))
+;(log (car this-exp))
            (let ((val (env:lookup (caar exp) env #f)))
-(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
+;; This step is taking a long time on (scheme base) - possibly because
+;; it is not using compiled macros???
+;;
+;; Note that with (expand) the top-level expressions are expanded in 
+;; reverse order due to the map, whereas they are expanded in-order
+;; by expand-body due to the explicit recursion.
+;;
+;(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
               (let ((expanded (macro:expand this-exp val env)))
-(log `(DONE WITH macro:expand))
+;(log `(DONE WITH macro:expand))
                 (expand-body
                   result
                   (cons 
@@ -947,7 +959,7 @@
                (cdr exp)
                env))))
           (else
-(log 'app)
+;(log 'app)
            (expand-body
              (cons 
                (map
