@@ -20,24 +20,6 @@
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
-;;(cond-expand
-;; (chicken
-;;   (define (Cyc-installation-dir . opt) 
-;;     (if (equal? '(inc) opt)
-;;       "/home/justin/Documents/cyclone/include"
-;;       ;; Ignore opt and always assume current dir for chicken, since it is just dev
-;;       "/home/justin/Documents/cyclone"))
-;;   (require-extension extras) ;; pretty-print
-;;   (require-extension chicken-syntax) ;; when
-;;   (require-extension srfi-1) ;; every
-;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/common.so"))
-;;   (load (string-append (Cyc-installation-dir) "/scheme/parser.so"))
-;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/util.so"))
-;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/libraries.so"))
-;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/transforms.so"))
-;;   (load (string-append (Cyc-installation-dir) "/scheme/cyclone/cgen.so")))
-;; (else #f))
-
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
