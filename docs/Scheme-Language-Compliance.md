@@ -1,8 +1,3 @@
----
-layout: post
-title: Language Compliance
----
-
 # R<sup>7</sup>RS Compliance
 
 This is the status of Scheme programming language features implemented from the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
@@ -21,7 +16,7 @@ Section | Status | Comments
 4.2 Derived expression types | Partial | 
 4.2.1 Conditionals | Yes | 
 4.2.2 Binding constructs | Partial | Missing `let-values` and `let*-values`
-4.2.3 Sequencing | Yes | Begin may not sequence properly as part of a library definition
+4.2.3 Sequencing | Yes | 
 4.2.4 Iteration | Yes |
 4.2.5 Delayed evaluation | Yes |
 4.2.6 Dynamic bindings | | Not supported yet.
@@ -33,7 +28,7 @@ Section | Status | Comments
 5.2 Import declarations | Partial |
 5.3 Variable definitions | Partial | `define-values` is not implemented yet.
 5.4 Syntax definitions | Yes |
-5.5 Record-type definitions | Yes | Located in the `(srfi 9)` library.
+5.5 Record-type definitions | Yes | 
 5.6 Libraries | Partial | Support is "good enough" but need to make it more robust
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes | `eqv?` is not implemented, it is just an alias to `eq?`
