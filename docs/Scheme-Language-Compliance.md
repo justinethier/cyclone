@@ -1,3 +1,8 @@
+---
+layout: post
+title: Scheme R7RS Compliance
+---
+
 # R<sup>7</sup>RS Compliance
 
 This is the status of Scheme programming language features implemented from the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
