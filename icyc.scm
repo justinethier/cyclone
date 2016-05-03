@@ -17,7 +17,8 @@
         (scheme inexact)
         (scheme process-context)
         (scheme time)
-        (scheme eval))
+        (scheme eval)
+        (srfi 69))
 (cond-expand
   (cyclone
     (display *Cyc-version-banner*))
