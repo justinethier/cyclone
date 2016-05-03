@@ -13,6 +13,9 @@ Tier 0:
   3) perform optimizations on the CPS using analysis information
   4) code size and performance comparison between this and baseline (the master branch, for now)
 
+- Performance
+  1) Can we replace alists in any places with hashtables? Will want to measure any improvements obtained this way
+
 - Library support
 
   Import sets (importing libraries, section 5.2):
