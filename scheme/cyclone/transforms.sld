@@ -833,6 +833,10 @@
               (lambda (expr) (expand expr env))
               exp))))
        (else
+         ;; TODO: note that map does not guarantee that expressions are
+         ;; evaluated in order. For example, the list might be processed
+         ;; in reverse order. Might be better to use a fold here and
+         ;; elsewhere in (expand).
          (map 
           (lambda (expr) (expand expr env))
           exp))))
@@ -844,42 +848,6 @@
   (expand-body '() exp env))
 
 ;; Helper to expand a lambda body, so we can splice in any begin's
-;(define (expand-body result exp env)
-;  (cond
-;   ((null? exp) (reverse result))
-;   ;; Splice in begin contents and keep expanding body
-;   ((begin? (car exp))
-;    (let* ((expr (car exp))
-;           (begin-exprs (begin->exps expr)))
-;    (expand-body
-;     result
-;     (append begin-exprs (cdr exp))
-;     env)))
-;   (else
-;    (let ((macro #f))
-;      (when (and (app? (car exp))
-;                 (symbol? (caar exp)))
-;        (set! macro (env:lookup (caar exp) env #f)))
-;      (if (tagged-list? 'macro macro)
-;          ;; Expand macro here so we can catch begins in the expanded code,
-;          ;; including nested begins
-;          (let ((expanded (macro:expand (car exp) macro env)))
-;            ;; Call with expanded macro in case we need to expand again
-;            (expand-body
-;              result
-;              (cons expanded (cdr exp))
-;              env))
-;          ;; No macro, use main expand function to process
-;          (expand-body
-;           (cons 
-;             (expand (car exp) env)
-;             result)
-;           (cdr exp)
-;           env))))))
-
-;; TODO: plan is, rewrite this to enhance it, test, commit, then figure
-;;       out why there is an infinite loop when we use this in cyclone.scm
-;;       for library compilation (in particular, for scheme base).
 (define (expand-body result exp env)
   (define (log e)
     (display (list 'expand-body e 'env 
@@ -933,13 +901,6 @@
           ((symbol? (caar exp))
 ;(log (car this-exp))
            (let ((val (env:lookup (caar exp) env #f)))
-;; This step is taking a long time on (scheme base) - possibly because
-;; it is not using compiled macros???
-;;
-;; Note that with (expand) the top-level expressions are expanded in 
-;; reverse order due to the map, whereas they are expanded in-order
-;; by expand-body due to the explicit recursion.
-;;
 ;(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
