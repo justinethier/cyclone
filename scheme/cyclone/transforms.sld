@@ -801,23 +801,26 @@
            `(define-syntax ,name ,(expand trans env))
            env))
         (else
-         (set! *defined-macros* (cons (cons name body) *defined-macros*))
-         ;; Keep track of macros added during compilation.
-         ;; Previous list should eventually go away once macros are
-         ;; moved from that static list to libraries
-         (macro:add! name body)
-         (env:define-variable! name (list 'macro body) env)
-         ;; Keep as a 'define' form so available at runtime
-         ;; TODO: may run into issues with expanding now, before some
-         ;; of the macros are defined. may need to make a special pass
-         ;; to do loading or expansion of macro bodies
-         ;; TODO: would it be better to use *define-macros* directly instead
-         ;; of trying to define it here? that might help prevent issues where
-         ;; an expand is called here before all macros are defined yet
-         ;;  - no, we need to do this here so code is carried though all transforms
-         ;;    (alpha, cps, closure, etc). otherwise code has to be interpreted during expansion
-         ;;
-         `(define ,name ,(expand body env))))))
+         ;; TODO: for now, do not let a compiled macro be re-defined.
+         ;; this is a hack for performance compiling (scheme base)
+         (let ((macro (env:lookup name env #f)))
+          (cond
+            ((and (tagged-list? 'macro macro)
+                  (or (macro? (Cyc-get-cvar (cadr macro)))
+                      (procedure? (cadr macro))))
+             (trace:info `(DEBUG compiled macro ,name do not redefine)))
+            (else
+             ;; Use this to keep track of macros for filtering unused defines
+             (set! *defined-macros* (cons (cons name body) *defined-macros*))
+             ;; Keep track of macros added during compilation.
+             ;; TODO: why in both places?
+             (macro:add! name body)
+             (env:define-variable! name (list 'macro body) env)))
+          ;; Keep as a 'define' form so available at runtime
+          ;; TODO: may run into issues with expanding now, before some
+          ;; of the macros are defined. may need to make a special pass
+          ;; to do loading or expansion of macro bodies
+          `(define ,name ,(expand body env)))))))
     ((app? exp)
      (cond
        ((symbol? (car exp))
