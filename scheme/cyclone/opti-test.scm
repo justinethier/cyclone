@@ -3,6 +3,7 @@
         (scheme write)
         (scheme base))
 
+(adb:init!)
 (adb:set! 'v (adb:make-var))
 
 (let ((v (adb:get 'v)))

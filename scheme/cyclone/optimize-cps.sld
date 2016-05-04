@@ -42,9 +42,11 @@
       adbf:unused-params adbf:set-unused-params!
   )
   (begin
-    (define *adb* #f) ;(make-hash-table))
+    (define *adb* (make-hash-table))
+    ;(define *adb* #f) ;(make-hash-table))
     (define (adb:init!)
-      (set! *adb* (make-hash-table)))
+      ;(set! *adb* (make-hash-table)))
+      'TODO)
     (define (adb:get key) (hash-table-ref *adb* key))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
