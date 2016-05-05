@@ -24,6 +24,8 @@ SMODULES = \
   scheme/read \
   scheme/time \
   scheme/write \
+  scheme/cyclone/ast \
+  scheme/cyclone/optimize-cps \
   scheme/cyclone/cgen \
   scheme/cyclone/common \
   scheme/cyclone/libraries \
@@ -101,6 +103,8 @@ bootstrap: icyc
 	cp scheme/cyclone/common.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
+	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/optimize-cps.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/pretty-print.c $(BOOTSTRAP_DIR)/scheme/cyclone

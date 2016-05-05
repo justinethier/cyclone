@@ -15,6 +15,7 @@
           (scheme file)
           (scheme read)
           (scheme write)
+          (scheme cyclone ast)
           (scheme cyclone common)
           (scheme cyclone libraries)
           (scheme cyclone macros)

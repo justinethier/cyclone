@@ -17,6 +17,9 @@
   (newline))
 
 
-(define l (ast:make-lambda 0 '() '((write 1) (write 2) (write 3))))
+(define l (ast:make-lambda '() '((write 1) (write 2) (write 3))))
 (write l)
+(newline)
+(set! l (ast:make-lambda '() '((write 1) (write 2) (write 3))))
+(write `(l is now ,l))
 (newline)
