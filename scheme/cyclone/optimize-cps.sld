@@ -7,6 +7,16 @@
 ;;;; This module performs CPS analysis and optimizations.
 ;;;;
 
+;; TODO:
+;- add 'analyze' function, can base it on expand or another transform to start
+;- modify cps to use ast for lambda's
+;  will need analyze to use the ast, and will need
+;  closure conversion to recognize it, too.
+;  at least for now, closure conversion can output 
+;  regular lambda's, though.
+;  can write initial analyze, but can't get too far without being able
+;  to uniquely ID each lambda
+
 (define-library (optimize-cps)
 ;(define-library (scheme cyclone optimize-cps)
   (import (scheme base)
