@@ -1,5 +1,6 @@
 ;; Temporary file to test changes to the optimization library
 (import (optimize-cps)
+        (ast)
         (scheme write)
         (scheme base))
 
@@ -14,3 +15,8 @@
   (newline)
   (display (adbv:defined-by v))
   (newline))
+
+
+(define l (ast:make-lambda 0 '() '((write 1) (write 2) (write 3))))
+(write l)
+(newline)
