@@ -102,7 +102,8 @@
 (define (lib:imports ast)
   (lib:result
     (let ((code (assoc 'import (cddr ast))))
-      (if code (lib:list->import-set (cdr code)) #f))))
+      (if code (map lib:list->import-set (cdr code)) 
+               #f))))
 (define (lib:body ast)
   (lib:result
     (let ((code (assoc 'begin (cddr ast))))
@@ -215,7 +216,7 @@
    (map 
      (lambda (import)
        (lib:import->export-list import))
-     (lib:list->import-set imports))))
+     (map lib:list->import-set imports))))
 
 ;; Take a list of imports and create a "database" from them
 ;; consisting of maps between each exported identifier and the
@@ -239,7 +240,7 @@
         '()
          (lib:import->export-list import))
      )
-     (lib:list->import-set imports))))
+     (map lib:list->import-set imports))))
 
 ;; Convert from the import DB to a list of identifiers that are imported.
 ;; EG: '((call/cc . (scheme base))) ==> '(call/cc)
