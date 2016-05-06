@@ -13,6 +13,7 @@
         (scheme lazy)
         (scheme read)
         (scheme write)
+        (scheme cyclone ast)
         (scheme cyclone common)
         (scheme cyclone util)
         (scheme cyclone cgen)
@@ -205,8 +206,13 @@
                ;; call/cc must be written in CPS form, so it is added here
                ;; TODO: prevents this from being optimized-out
                ;; TODO: will this cause issues if another var is assigned to call/cc?
-               '(define call/cc
-                 (lambda (k f) (f k (lambda (_ result) (k result)))))
+               `(define call/cc
+                 ,(ast:make-lambda 
+                    '(k f) 
+                    (list 'f 'k 
+                          (ast:make-lambda '(_ result) 
+                                           '(k result)))))
+                 ;(lambda (k f) (f k (lambda (_ result) (k result)))))
                 cps)));)
          (else
            ;; No need for call/cc yet

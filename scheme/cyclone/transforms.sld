@@ -348,6 +348,9 @@
         (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
     #f))
 
+(define (ast:lambda-formals-type ast)
+  (lambda-formals-type `(#f ,(ast:lambda-args ast) #f)))
+
 (define (lambda-formals-type exp)
  (let ((args (lambda->formals exp)))
    (cond
@@ -356,6 +359,9 @@
      ((pair? args)   'args:fixed-with-varargs)
      (else
        (error `(Unexpected formals list in lambda-formals-type: ,args))))))
+
+(define (ast:lambda-formals->list ast)
+  (lambda-formals->list `(#f ,(ast:lambda-args ast) #f)))
 
 (define (lambda-formals->list exp)
   (if (lambda-varargs? exp)
@@ -1165,6 +1171,9 @@
     ((lambda? exp)   
      (map analyze-mutable-variables (lambda->exp exp))
      (void))
+    ((ast:lambda? exp)
+     (map analyze-mutable-variables (ast:lambda-body exp))
+     (void))
     ((set!? exp)     
      (mark-mutable (set!->var exp))
      (analyze-mutable-variables (set!->exp exp)))
@@ -1172,20 +1181,6 @@
      (analyze-mutable-variables (if->condition exp))
      (analyze-mutable-variables (if->then exp))
      (analyze-mutable-variables (if->else exp)))
-    
-    ; Sugar:
-    ((let? exp)
-     (map analyze-mutable-variables (map cadr (let->bindings exp)))
-     (map analyze-mutable-variables (let->exp exp))
-     (void))
-    ((letrec? exp)
-     (map analyze-mutable-variables (map cadr (letrec->bindings exp)))
-     (map analyze-mutable-variables (letrec->exp exp))
-     (void))
-    ((begin? exp)
-     (map analyze-mutable-variables (begin->exps exp))
-     (void))
-    
     ; Application:
     ((app? exp)
      (map analyze-mutable-variables exp)
@@ -1450,7 +1445,7 @@
              (if (ref? cont-ast) ; prevent combinatorial explosion
                  (xform cont-ast)
                  (let ((k (gensym 'k)))
-                    (list (list 'lambda
+                    (list (ast:make-lambda
                            (list k)
                            (xform k))
                           cont-ast)))))
@@ -1466,13 +1461,13 @@
            (let ((k (gensym 'k))
                  (ltype (lambda-formals-type ast)))
              (list cont-ast
-                   `(lambda
-                      ,(list->lambda-formals
+                   (ast:make-lambda
+                      (list->lambda-formals
                          (cons k (cadr ast)) ; lam params
                          (if (equal? ltype 'args:varargs)
                              'args:fixed-with-varargs ;; OK? promote due to k
                              ltype))
-                      ,(cps-seq (cddr ast) k)))))
+                      (cps-seq (cddr ast) k)))))
 
 ;
 ; TODO: begin is expanded already by desugar code... better to do it here?
@@ -1485,8 +1480,7 @@
               ((lambda? fn)
                  (cps-list (app->args ast)
                            (lambda (vals)
-                             (cons (list
-                                     'lambda
+                             (cons (ast:make-lambda
                                      (lambda->formals fn)
                                      (cps-seq (cddr fn) ;(ast-subx fn)
                                                     cont-ast))
@@ -1515,7 +1509,7 @@
           (else
            (let ((r (gensym 'r))) ;(new-var 'r)))
              (cps (car asts)
-                  `(lambda (,r) ,(body r)))))))
+                  (ast:make-lambda (list r) (body r)))))))
 
   (define (cps-seq asts cont-ast)
     (cond ((null? asts)
@@ -1525,9 +1519,9 @@
           (else
            (let ((r (gensym 'r)))
              (cps (car asts)
-                  `(lambda
-                     (,r)
-                    ,(cps-seq (cdr asts) cont-ast)))))))
+                  (ast:make-lambda
+                     (list r)
+                     (cps-seq (cdr asts) cont-ast)))))))
 
   ;; Remove dummy symbol inserted into define forms converted to CPS
   (define (remove-unused ast)
@@ -1553,54 +1547,55 @@
 ;; TODO: don't think we can assume lambda body is single expr, if we want
 ;;       to do optimizations such as inlining
 (define (cps-optimize-01 exp)
-  (define (opt-lambda exp)
-    (let ((body (car (lambda->exp exp)))) ;; Single expr after CPS
-      ;(trace:error `(DEBUG 
-      ;  ,exp
-      ;  ,body
-      ;  ,(if (and (pair? body) (app? body) (lambda? (car body)))
-      ;    (list (app->args body)
-      ;          (lambda->formals exp))
-      ;    #f)))
-      (cond
-        ;; Does the function just call its continuation?
-        ((and (pair? body) 
-              (app? body)
-              (lambda? (car body))
-              ;; TODO: need to check body length if we allow >1 expr in a body
-              ;; TODO: not sure this is good enough for all cases
-              (equal? (app->args body)
-                      ;(lambda->formals (car body))
-                      (lambda->formals exp)
-                      )
-              (> (length (lambda->formals exp)) 0)
-              ;; TODO: don't do it if args are used in the body
-              ;; this won't work if we have any num other than 1 arg
-              (not (member 
-                      (car (lambda->formals exp))
-                      (free-vars (car body))))
-              )
-          (cps-optimize-01 (car body)))
-        (else
-          `(lambda ,(lambda->formals exp)
-             ,(cps-optimize-01 (car (lambda->exp exp)))) ;; Assume single expr in lambda body, since after CPS phase
-  ))))
-  (cond
-    ; Core forms:
-    ((const? exp)    exp)
-    ((ref? exp)      exp)
-    ((prim? exp)     exp)
-    ((quote? exp)    exp)
-    ((lambda? exp)   (opt-lambda exp)) 
-    ((set!? exp)     `(set!
-                        ,(set!->var exp) 
-                        ,(cps-optimize-01 (set!->exp exp))))
-    ((if? exp)       `(if ,(cps-optimize-01 (if->condition exp))
-                          ,(cps-optimize-01 (if->then exp))
-                          ,(cps-optimize-01 (if->else exp))))
-    ; Application:
-    ((app? exp)      (map (lambda (e) (cps-optimize-01 e)) exp))
-    (else            (error "CPS optimize unknown expression type: " exp))))
+  exp) ;; Temporarily disabling while this is reworked.
+;  (define (opt-lambda exp)
+;    (let ((body (car (lambda->exp exp)))) ;; Single expr after CPS
+;      ;(trace:error `(DEBUG 
+;      ;  ,exp
+;      ;  ,body
+;      ;  ,(if (and (pair? body) (app? body) (lambda? (car body)))
+;      ;    (list (app->args body)
+;      ;          (lambda->formals exp))
+;      ;    #f)))
+;      (cond
+;        ;; Does the function just call its continuation?
+;        ((and (pair? body) 
+;              (app? body)
+;              (lambda? (car body))
+;              ;; TODO: need to check body length if we allow >1 expr in a body
+;              ;; TODO: not sure this is good enough for all cases
+;              (equal? (app->args body)
+;                      ;(lambda->formals (car body))
+;                      (lambda->formals exp)
+;                      )
+;              (> (length (lambda->formals exp)) 0)
+;              ;; TODO: don't do it if args are used in the body
+;              ;; this won't work if we have any num other than 1 arg
+;              (not (member 
+;                      (car (lambda->formals exp))
+;                      (free-vars (car body))))
+;              )
+;          (cps-optimize-01 (car body)))
+;        (else
+;          `(lambda ,(lambda->formals exp)
+;             ,(cps-optimize-01 (car (lambda->exp exp)))) ;; Assume single expr in lambda body, since after CPS phase
+;  ))))
+;  (cond
+;    ; Core forms:
+;    ((const? exp)    exp)
+;    ((ref? exp)      exp)
+;    ((prim? exp)     exp)
+;    ((quote? exp)    exp)
+;    ((lambda? exp)   (opt-lambda exp)) 
+;    ((set!? exp)     `(set!
+;                        ,(set!->var exp) 
+;                        ,(cps-optimize-01 (set!->exp exp))))
+;    ((if? exp)       `(if ,(cps-optimize-01 (if->condition exp))
+;                          ,(cps-optimize-01 (if->then exp))
+;                          ,(cps-optimize-01 (if->else exp))))
+;    ; Application:
+;    ((app? exp)      (map (lambda (e) (cps-optimize-01 e)) exp))
+;    (else            (error "CPS optimize unknown expression type: " exp))))
 
 ;; Closure-conversion.
 ;;
@@ -1639,18 +1634,18 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
-    ((lambda? exp)
+    ((ast:lambda? exp)
      (let* ((new-self-var (gensym 'self))
-            (body  (lambda->exp exp))
+            (body  (ast:lambda-body exp))
             (new-free-vars 
               (difference 
-                (difference (free-vars body) (lambda-formals->list exp))
+                (difference (free-vars body) (ast:lambda-formals->list exp))
                 globals)))
        `(%closure
           (lambda
             ,(list->lambda-formals
-               (cons new-self-var (lambda-formals->list exp))
-               (lambda-formals-type exp))
+               (cons new-self-var (ast:lambda-formals->list exp))
+               (ast:lambda-formals-type exp))
             ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
           ,@(map (lambda (v) ;; TODO: splice here?
                     (cc v))
@@ -1663,11 +1658,11 @@
     ((app? exp)
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
-       (if (lambda? fn)
-           (let* ((body  (lambda->exp fn))
+       (if (ast:lambda? fn)
+           (let* ((body  (ast:lambda-body fn))
                   (new-free-vars 
                     (difference
-                      (difference (free-vars body) (lambda-formals->list fn))
+                      (difference (free-vars body) (ast:lambda-formals->list fn))
                       globals))
                   (new-free-vars? (> (length new-free-vars) 0)))
                (if new-free-vars?
@@ -1676,14 +1671,14 @@
                    `((%closure 
                         (lambda
                           ,(list->lambda-formals
-                             (cons new-self-var (lambda-formals->list fn))
-                             (lambda-formals-type fn))
+                             (cons new-self-var (ast:lambda-formals->list fn))
+                             (ast:lambda-formals-type fn))
                           ,(convert (car body) new-self-var new-free-vars))
                         ,@(map (lambda (v) (cc v))
                                new-free-vars))
                      ,@args))
                  ; No free vars, just create simple lambda
-                 `((lambda ,(lambda->formals fn)
+                 `((lambda ,(ast:lambda-args fn)
                            ,@(map cc body))
                    ,@args)))
            (let ((f (cc fn)))
