@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-(define-library (optimize-cps)
-;(define-library (scheme cyclone optimize-cps)
+;(define-library (optimize-cps)
+(define-library (scheme cyclone optimize-cps)
   (import (scheme base)
           (srfi 69)
           ;(scheme char)

@@ -7,8 +7,8 @@
 ;;;; This module defines abstract syntax tree types used during compilation.
 ;;;;
 
-(define-library (ast)
-;(define-library (scheme cyclone ast)
+;(define-library (ast)
+(define-library (scheme cyclone ast)
   (import (scheme base)
           (scheme cyclone util)
   )
