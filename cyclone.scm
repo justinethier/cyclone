@@ -209,9 +209,10 @@
                `(define call/cc
                  ,(ast:make-lambda 
                     '(k f) 
-                    (list 'f 'k 
-                          (ast:make-lambda '(_ result) 
-                                           '(k result)))))
+                    (list 
+                      (list 'f 'k 
+                            (ast:make-lambda '(_ result) 
+                                             (list '(k result)))))))
                  ;(lambda (k f) (f k (lambda (_ result) (k result)))))
                 cps)));)
          (else
