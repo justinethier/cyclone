@@ -1203,6 +1203,11 @@
   
   (cond
     ; Core forms:
+    ((ast:lambda? exp)
+     `(lambda ,(ast:lambda-args exp)
+       ,(wrap-mutable-formals 
+         (ast:lambda-formals->list exp)
+         (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
     ((const? exp)    exp)
     ((ref? exp)      (if (and (not (member exp globals))
                               (is-mutable? exp))
@@ -1447,7 +1452,7 @@
                  (let ((k (gensym 'k)))
                     (list (ast:make-lambda
                            (list k)
-                           (xform k))
+                           (list (xform k)))
                           cont-ast)))))
 
           ((prim-call? ast)
@@ -1467,7 +1472,7 @@
                          (if (equal? ltype 'args:varargs)
                              'args:fixed-with-varargs ;; OK? promote due to k
                              ltype))
-                      (cps-seq (cddr ast) k)))))
+                      (list (cps-seq (cddr ast) k))))))
 
 ;
 ; TODO: begin is expanded already by desugar code... better to do it here?
@@ -1482,8 +1487,8 @@
                            (lambda (vals)
                              (cons (ast:make-lambda
                                      (lambda->formals fn)
-                                     (cps-seq (cddr fn) ;(ast-subx fn)
-                                                    cont-ast))
+                                     (list (cps-seq (cddr fn) ;(ast-subx fn)
+                                                    cont-ast)))
                                     vals))))
               (else
                  (cps-list ast ;(ast-subx ast)
@@ -1509,7 +1514,7 @@
           (else
            (let ((r (gensym 'r))) ;(new-var 'r)))
              (cps (car asts)
-                  (ast:make-lambda (list r) (body r)))))))
+                  (ast:make-lambda (list r) (list (body r))))))))
 
   (define (cps-seq asts cont-ast)
     (cond ((null? asts)
@@ -1521,7 +1526,7 @@
              (cps (car asts)
                   (ast:make-lambda
                      (list r)
-                     (cps-seq (cdr asts) cont-ast)))))))
+                     (list (cps-seq (cdr asts) cont-ast))))))))
 
   ;; Remove dummy symbol inserted into define forms converted to CPS
   (define (remove-unused ast)
@@ -1617,23 +1622,6 @@
  (define (convert exp self-var free-var-lst)
   (define (cc exp)
    (cond
-    ((ast:lambda? exp)
-     (let* ((new-self-var (gensym 'self))
-            (body  (ast:lambda-body exp))
-            (new-free-vars 
-              (difference 
-                (difference (free-vars body) (ast:lambda-formals->list exp))
-                globals)))
-       `(%closure
-          (lambda
-            ,(list->lambda-formals
-               (cons new-self-var (ast:lambda-formals->list exp))
-               (ast:lambda-formals-type exp))
-            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
-            ;,(convert body new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
-          ,@(map (lambda (v) ;; TODO: splice here?
-                    (cc v))
-            new-free-vars))))
     ((const? exp)        exp)
     ((quote? exp)        exp)
     ((ref? exp)
@@ -1651,6 +1639,22 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
+    ((lambda? exp)
+     (let* ((new-self-var (gensym 'self))
+            (body  (lambda->exp exp))
+            (new-free-vars 
+              (difference 
+                (difference (free-vars body) (lambda-formals->list exp))
+                globals)))
+       `(%closure
+          (lambda
+            ,(list->lambda-formals
+               (cons new-self-var (lambda-formals->list exp))
+               (lambda-formals-type exp))
+            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
+          ,@(map (lambda (v) ;; TODO: splice here?
+                    (cc v))
+            new-free-vars))))
     ((if? exp)  `(if ,@(map cc (cdr exp))))
     ((cell? exp)       `(cell ,(cc (cell->value exp))))
     ((cell-get? exp)   `(cell-get ,(cc (cell-get->cell exp))))
@@ -1659,11 +1663,11 @@
     ((app? exp)
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
-       (if (ast:lambda? fn)
-           (let* ((body  (ast:lambda-body fn))
+       (if (lambda? fn)
+           (let* ((body  (lambda->exp fn))
                   (new-free-vars 
                     (difference
-                      (difference (free-vars body) (ast:lambda-formals->list fn))
+                      (difference (free-vars body) (lambda-formals->list fn))
                       globals))
                   (new-free-vars? (> (length new-free-vars) 0)))
                (if new-free-vars?
@@ -1672,14 +1676,14 @@
                    `((%closure 
                         (lambda
                           ,(list->lambda-formals
-                             (cons new-self-var (ast:lambda-formals->list fn))
-                             (ast:lambda-formals-type fn))
+                             (cons new-self-var (lambda-formals->list fn))
+                             (lambda-formals-type fn))
                           ,(convert (car body) new-self-var new-free-vars))
                         ,@(map (lambda (v) (cc v))
                                new-free-vars))
                      ,@args))
                  ; No free vars, just create simple lambda
-                 `((lambda ,(ast:lambda-args fn)
+                 `((lambda ,(lambda->formals fn)
                            ,@(map cc body))
                    ,@args)))
            (let ((f (cc fn)))
