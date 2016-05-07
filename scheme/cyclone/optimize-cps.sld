@@ -89,10 +89,6 @@
                (lambda (expr)
                  (analyze expr id))
                (ast:lambda-body))))
-;TODO:           `(lambda ,(ast:lambda-args exp)
-;TODO:             ,(wrap-mutable-formals 
-;TODO:               (ast:lambda-formals->list exp)
-;TODO:               (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
 ;TODO:          ((ref? exp)      (if (and (not (member exp globals))
 ;TODO:                                    (is-mutable? exp))
 ;TODO:                               `(cell-get ,exp)
