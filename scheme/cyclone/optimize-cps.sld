@@ -32,6 +32,7 @@
           ;(scheme cyclone transforms)
   )
   (export
+      analyze-cps
       ;adb:init!
       adb:get key
       adb:set! key val
@@ -78,4 +79,46 @@
     )
     (define (adb:make-fnc)
       (%adb:make-fnc #f #f))
+
+; TODO: analyze-cps
+;    (define (wrap-mutables exp globals)
+;    
+;    (define (wrap-mutable-formals formals body-exp)
+;      (if (not (pair? formals))
+;          body-exp
+;          (if (is-mutable? (car formals))
+;              `((lambda (,(car formals))
+;                  ,(wrap-mutable-formals (cdr formals) body-exp))
+;                (cell ,(car formals)))
+;              (wrap-mutable-formals (cdr formals) body-exp))))
+;    
+;    (cond
+;      ; Core forms:
+;      ((ast:lambda? exp)
+;       `(lambda ,(ast:lambda-args exp)
+;         ,(wrap-mutable-formals 
+;           (ast:lambda-formals->list exp)
+;           (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
+;      ((const? exp)    exp)
+;      ((ref? exp)      (if (and (not (member exp globals))
+;                                (is-mutable? exp))
+;                           `(cell-get ,exp)
+;                           exp))
+;      ((prim? exp)     exp)
+;      ((quote? exp)    exp)
+;      ((lambda? exp)   `(lambda ,(lambda->formals exp)
+;                          ,(wrap-mutable-formals (lambda-formals->list exp)
+;                                                 (wrap-mutables (car (lambda->exp exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
+;      ((set!? exp)     `(,(if (member (set!->var exp) globals)
+;                              'set-global!
+;                              'set-cell!) 
+;                          ,(set!->var exp) 
+;                          ,(wrap-mutables (set!->exp exp) globals)))
+;      ((if? exp)       `(if ,(wrap-mutables (if->condition exp) globals)
+;                            ,(wrap-mutables (if->then exp) globals)
+;                            ,(wrap-mutables (if->else exp) globals)))
+;      
+;      ; Application:
+;      ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
+;      (else            (error "unknown expression type: " exp))))
 ))
