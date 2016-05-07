@@ -20,17 +20,11 @@
 ;(define-library (optimize-cps)
 (define-library (scheme cyclone optimize-cps)
   (import (scheme base)
-          (srfi 69)
-          ;(scheme char)
-          ;(scheme read)
-          ;(scheme write)
-          ;(scheme cyclone common)
-          ;(scheme cyclone libraries)
-          ;(scheme cyclone macros)
-          ;(scheme cyclone pretty-print)
-          ;(scheme cyclone util)
-          ;(scheme cyclone transforms)
-  )
+          (scheme cyclone util)
+          (scheme cyclone ast)
+          (scheme cyclone optimize-cps)
+          (scheme cyclone transforms)
+          (srfi 69))
   (export
       analyze-cps
       ;adb:init!
@@ -81,44 +75,48 @@
       (%adb:make-fnc #f #f))
 
 ; TODO: analyze-cps
-;    (define (wrap-mutables exp globals)
-;    
-;    (define (wrap-mutable-formals formals body-exp)
-;      (if (not (pair? formals))
-;          body-exp
-;          (if (is-mutable? (car formals))
-;              `((lambda (,(car formals))
-;                  ,(wrap-mutable-formals (cdr formals) body-exp))
-;                (cell ,(car formals)))
-;              (wrap-mutable-formals (cdr formals) body-exp))))
-;    
-;    (cond
-;      ; Core forms:
-;      ((ast:lambda? exp)
-;       `(lambda ,(ast:lambda-args exp)
-;         ,(wrap-mutable-formals 
-;           (ast:lambda-formals->list exp)
-;           (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
-;      ((const? exp)    exp)
-;      ((ref? exp)      (if (and (not (member exp globals))
-;                                (is-mutable? exp))
-;                           `(cell-get ,exp)
-;                           exp))
-;      ((prim? exp)     exp)
-;      ((quote? exp)    exp)
-;      ((lambda? exp)   `(lambda ,(lambda->formals exp)
-;                          ,(wrap-mutable-formals (lambda-formals->list exp)
-;                                                 (wrap-mutables (car (lambda->exp exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
-;      ((set!? exp)     `(,(if (member (set!->var exp) globals)
-;                              'set-global!
-;                              'set-cell!) 
-;                          ,(set!->var exp) 
-;                          ,(wrap-mutables (set!->exp exp) globals)))
-;      ((if? exp)       `(if ,(wrap-mutables (if->condition exp) globals)
-;                            ,(wrap-mutables (if->then exp) globals)
-;                            ,(wrap-mutables (if->else exp) globals)))
-;      
-;      ; Application:
-;      ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
-;      (else            (error "unknown expression type: " exp))))
+    (define (analyze-cps exp)
+      (define (analyze exp lid)
+        (cond
+          ; Core forms:
+          ((ast:lambda? exp)
+           (let ((id (ast:lambda-id exp)))
+             ;; save lambda to adb
+             (adb:set!
+               id
+               (adb:make-fnc)) ;; TODO: anything to record???? params?
+             (for-each
+               (lambda (expr)
+                 (analyze expr id))
+               (ast:lambda-body))))
+;TODO:           `(lambda ,(ast:lambda-args exp)
+;TODO:             ,(wrap-mutable-formals 
+;TODO:               (ast:lambda-formals->list exp)
+;TODO:               (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
+;TODO:          ((ref? exp)      (if (and (not (member exp globals))
+;TODO:                                    (is-mutable? exp))
+;TODO:                               `(cell-get ,exp)
+;TODO:                               exp))
+;TODO:          ((set!? exp)     `(,(if (member (set!->var exp) globals)
+;TODO:                                  'set-global!
+;TODO:                                  'set-cell!) 
+;TODO:                              ,(set!->var exp) 
+;TODO:                              ,(wrap-mutables (set!->exp exp) globals)))
+          ((if? exp)       `(if ,(analyze (if->condition exp) lid)
+                                ,(analyze (if->then exp) lid)
+                                ,(analyze (if->else exp) lid)))
+          
+          ; Application:
+;TODO:          ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
+
+          ; Nothing to analyze for these?
+          ;((prim? exp)     exp)
+          ;((quote? exp)    exp)
+          ; Should never see vanilla lambda's in this function, only AST's
+          ;((lambda? exp)
+          ;; Nothing to analyze for expressions that fall into this branch
+          (else
+            #f)))
+      (analyze exp -1) ;; Top-level is lambda ID -1
+    )
 ))
