@@ -22,14 +22,14 @@
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
-          (scheme cyclone optimize-cps)
           (scheme cyclone transforms)
           (srfi 69))
   (export
       analyze-cps
       ;adb:init!
-      adb:get key
-      adb:set! key val
+      adb:get
+      adb:get/default
+      adb:set!
       ;; Variables
       adb:make-var
       %adb:make-var
@@ -53,6 +53,7 @@
     ;  ;(set! *adb* (make-hash-table)))
     ;  'TODO)
     (define (adb:get key) (hash-table-ref *adb* key))
+    (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var global defined-by assigned assigned-locally)
@@ -85,6 +86,13 @@
              (adb:set!
                id
                (adb:make-fnc)) ;; TODO: anything to record???? params?
+             (for-each
+              (lambda (arg)
+                (let ((var (adb:get/default arg (adb:make-var))))
+                  (adbv:set-global! var #f)
+                  (adbv:set-defined-by! var lid)
+                  (adb:set! arg var)))
+              (ast:lambda-formals->list exp))
              (for-each
                (lambda (expr)
                  (analyze expr id))

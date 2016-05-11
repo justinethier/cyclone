@@ -67,6 +67,8 @@
     lambda-formals-type 
     lambda-formals->list 
     lambda-num-args
+    ast:lambda-formals-type
+    ast:lambda-formals->list
     list->lambda-formals 
     pair->list 
     list->pair 
