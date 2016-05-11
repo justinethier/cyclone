@@ -103,6 +103,10 @@
                                 ,(analyze (if->else exp) lid)))
           
           ; Application:
+          ((app? exp)
+           (map (lambda (e)
+                  (analyze-cps e lid))
+                exp))
 ;TODO:          ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
 
           ; Nothing to analyze for these?
