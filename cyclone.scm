@@ -18,6 +18,7 @@
         (scheme cyclone util)
         (scheme cyclone cgen)
         (scheme cyclone transforms)
+        (scheme cyclone optimize-cps)
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
@@ -239,9 +240,9 @@
       ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
       ;; END CPS optimization
 
-;      (analyze-cps input-program)
-;      (trace:info "---------------- cps analysis db:")
-;      (trace:info (adb:get-db))
+      (analyze-cps input-program)
+      (trace:info "---------------- cps analysis db:")
+      (trace:info (adb:get-db))
 
 ;      (set! input-program
 ;        (map
