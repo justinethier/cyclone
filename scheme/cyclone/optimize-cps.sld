@@ -30,6 +30,7 @@
       adb:get
       adb:get/default
       adb:set!
+      adb:get-db
       ;; Variables
       adb:make-var
       %adb:make-var
@@ -48,6 +49,7 @@
   )
   (begin
     (define *adb* (make-hash-table))
+    (define (adb:get-db) *adb*)
     ;(define *adb* #f) ;(make-hash-table))
     ;(define (adb:init!)
     ;  ;(set! *adb* (make-hash-table)))
@@ -103,15 +105,15 @@
             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            ))
           ((define? exp)
-           (let ((var (adb:get/default exp (adb:make-var))))
+           (let ((var (adb:get/default (define->var exp) (adb:make-var))))
              ;; TODO:
-             'TODO
-          ))
+
+             (analyze (define->exp exp) lid)))
           ((set!? exp)
-           (let ((var (adb:get/default exp (adb:make-var))))
+           (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
              ;; TODO:
-             'TODO
-          ))
+
+             (analyze (set!->exp exp) lid)))
           ((if? exp)       `(if ,(analyze (if->condition exp) lid)
                                 ,(analyze (if->then exp) lid)
                                 ,(analyze (if->else exp) lid)))
