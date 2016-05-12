@@ -99,7 +99,7 @@
              (for-each
                (lambda (expr)
                  (analyze expr id))
-               (ast:lambda-body))))
+               (ast:lambda-body exp))))
           ((ref? exp)
            (let ((var (adb:get/default exp (adb:make-var))))
             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
