@@ -62,9 +62,10 @@
       (defined-by adbv:defined-by adbv:set-defined-by!)
       (assigned adbv:assigned adbv:set-assigned!)
       (assigned-locally adbv:assigned-locally adbv:set-assigned-locally!)
+      (ref-by adbv:ref-by adbv:set-ref-by!)
     )
     (define (adb:make-var)
-      (%adb:make-var #f #f #f #f))
+      (%adb:make-var #f #f #f #t '()))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params)
@@ -97,15 +98,20 @@
                (lambda (expr)
                  (analyze expr id))
                (ast:lambda-body))))
-;TODO:          ((ref? exp)      (if (and (not (member exp globals))
-;TODO:                                    (is-mutable? exp))
-;TODO:                               `(cell-get ,exp)
-;TODO:                               exp))
-;TODO:          ((set!? exp)     `(,(if (member (set!->var exp) globals)
-;TODO:                                  'set-global!
-;TODO:                                  'set-cell!) 
-;TODO:                              ,(set!->var exp) 
-;TODO:                              ,(wrap-mutables (set!->exp exp) globals)))
+          ((ref? exp)
+           (let ((var (adb:get/default exp (adb:make-var))))
+            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           ))
+          ((define? exp)
+           (let ((var (adb:get/default exp (adb:make-var))))
+             ;; TODO:
+             'TODO
+          ))
+          ((set!? exp)
+           (let ((var (adb:get/default exp (adb:make-var))))
+             ;; TODO:
+             'TODO
+          ))
           ((if? exp)       `(if ,(analyze (if->condition exp) lid)
                                 ,(analyze (if->then exp) lid)
                                 ,(analyze (if->else exp) lid)))
