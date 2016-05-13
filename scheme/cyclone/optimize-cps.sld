@@ -82,65 +82,95 @@
       (%adb:make-fnc '? '?))
 
     (define (analyze-cps exp)
-      (define (analyze exp lid)
-;(trace:error `(analyze ,lid ,exp))
-        (cond
-          ; Core forms:
-          ((ast:lambda? exp)
-           (let ((id (ast:lambda-id exp))
-                  (fnc (adb:make-fnc)))
-             ;; save lambda to adb
-             (adb:set! id fnc)
-             ;; Analyze the lambda
-             (for-each
-              (lambda (arg)
-                (let ((var (adb:get/default arg (adb:make-var))))
-                  (adbv:set-global! var #f)
-                  (adbv:set-defined-by! var id)
-                  (adb:set! arg var)))
-              (ast:lambda-formals->list exp))
-             (for-each
-               (lambda (expr)
-                 (analyze expr id))
-               (ast:lambda-body exp))))
-          ((ref? exp)
-           (let ((var (adb:get/default exp (adb:make-var))))
-            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
-           ))
-          ((define? exp)
-           (let ((var (adb:get/default (define->var exp) (adb:make-var))))
-             ;; TODO:
-             (adbv:set-defined-by! var lid)
-             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
-
-             (analyze (define->exp exp) lid)))
-          ((set!? exp)
-           (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
-             ;; TODO:
-             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
-
-             (analyze (set!->exp exp) lid)))
-          ((if? exp)       `(if ,(analyze (if->condition exp) lid)
-                                ,(analyze (if->then exp) lid)
-                                ,(analyze (if->else exp) lid)))
-          
-          ; Application:
-          ((app? exp)
-           (map (lambda (e)
-                  (analyze e lid))
-                exp))
-;TODO:          ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
-
-          ; Nothing to analyze for these?
-          ;((prim? exp)     exp)
-          ;((quote? exp)    exp)
-          ; Should never see vanilla lambda's in this function, only AST's
-          ;((lambda? exp)
-          ;; Nothing to analyze for expressions that fall into this branch
-          (else
-            #f)))
       (analyze exp -1) ;; Top-level is lambda ID -1
+      (analyze2 exp) ;; Second pass
     )
+
+    (define (analyze exp lid)
+;(tre:error `(analyze ,lid ,exp))
+      (cond
+        ; Core forms:
+        ((ast:lambda? exp)
+         (let ((id (ast:lambda-id exp))
+                (fnc (adb:make-fnc)))
+           ;; save lambda to adb
+           (adb:set! id fnc)
+           ;; Analyze the lambda
+           (for-each
+            (lambda (arg)
+              (let ((var (adb:get/default arg (adb:make-var))))
+                (adbv:set-global! var #f)
+                (adbv:set-defined-by! var id)
+                (adb:set! arg var)))
+            (ast:lambda-formals->list exp))
+           (for-each
+             (lambda (expr)
+               (analyze expr id))
+             (ast:lambda-body exp))))
+        ((ref? exp)
+         (let ((var (adb:get/default exp (adb:make-var))))
+          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+         ))
+        ((define? exp)
+         (let ((var (adb:get/default (define->var exp) (adb:make-var))))
+           ;; TODO:
+           (adbv:set-defined-by! var lid)
+           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+
+           (analyze (define->exp exp) lid)))
+        ((set!? exp)
+         (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
+           ;; TODO:
+           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+
+           (analyze (set!->exp exp) lid)))
+        ((if? exp)       `(if ,(analyze (if->condition exp) lid)
+                              ,(analyze (if->then exp) lid)
+                              ,(analyze (if->else exp) lid)))
+        
+        ; Application:
+        ((app? exp)
+         (map (lambda (e)
+                (analyze e lid))
+              exp))
+;TODO         ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
+
+        ; Nothing to analyze for these?
+        ;((prim? exp)     exp)
+        ;((quote? exp)    exp)
+        ; Should never see vanilla lambda's in this function, only AST's
+        ;((lambda? exp)
+        ;; Nothing to analyze for expressions that fall into this branch
+        (else
+          #f)))
+
+    (define (analyze2 exp)
+      (cond
+        ; Core forms:
+        ((ast:lambda? exp)
+         (let ((id (ast:lambda-id exp)))
+           (for-each
+             (lambda (expr)
+               (analyze2 expr))
+             (ast:lambda-body exp))))
+;; TODO:
+;        ((ref? exp)
+;         (let ((var (adb:get/default exp (adb:make-var))))
+;          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+;         ))
+        ((define? exp)
+         ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
+           (analyze2 (define->exp exp)))
+        ((set!? exp)
+         ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
+           (analyze2 (set!->exp exp)))
+        ((if? exp)       `(if ,(analyze2 (if->condition exp))
+                              ,(analyze2 (if->then exp))
+                              ,(analyze2 (if->else exp))))
+        ; Application:
+        ((app? exp)
+         (map (lambda (e) (analyze2 e)) exp))
+        (else #f)))
 
     ;; TODO: make another pass for simple lambda's
     ;can use similar logic to cps-optimize-01:
@@ -150,6 +180,22 @@
     ;
     ; Need to check analysis DB against CPS generated and make sure
     ; things like ref-by make sense (ref by seems like its only -1 right now??)
-    (define (simple-lambda? exp)
-      #f)
+;    (define (simple-lambda? ast)
+;      (let ((body (ast:lambda-body ast)))
+;        (and (pair? body)
+;             (app? body)
+;             (ast:lambda? (car body))
+;             (> (length (ast:lambda-formals->list ast)) 0)
+;;; TODO: rewrite these last 2 using the analysis DB
+;;              ;; TODO: not sure this is good enough for all cases
+;;              (equal? (app->args body)
+;;                      ;(lambda->formals (car body))
+;;                      (lambda->formals exp)
+;;                      )
+;;              ;; TODO: don't do it if args are used in the body
+;;              ;; this won't work if we have any num other than 1 arg
+;;              (not (member 
+;;                      (car (lambda->formals exp))
+;;                      (free-vars (car body))))
+;      #f)
 ))
