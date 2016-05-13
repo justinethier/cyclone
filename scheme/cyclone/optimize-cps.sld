@@ -41,6 +41,8 @@
       adbv:defined-by adbv:set-defined-by!
       adbv:assigned adbv:set-assigned!
       adbv:assigned-locally adbv:set-assigned-locally!
+      adbv:ref-by
+      adbv:set-ref-by!
       ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
@@ -81,6 +83,7 @@
 
     (define (analyze-cps exp)
       (define (analyze exp lid)
+;(trace:error `(analyze ,lid ,exp))
         (cond
           ; Core forms:
           ((ast:lambda? exp)
@@ -93,7 +96,7 @@
               (lambda (arg)
                 (let ((var (adb:get/default arg (adb:make-var))))
                   (adbv:set-global! var #f)
-                  (adbv:set-defined-by! var lid)
+                  (adbv:set-defined-by! var id)
                   (adb:set! arg var)))
               (ast:lambda-formals->list exp))
              (for-each
@@ -107,11 +110,14 @@
           ((define? exp)
            (let ((var (adb:get/default (define->var exp) (adb:make-var))))
              ;; TODO:
+             (adbv:set-defined-by! var lid)
+             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
 
              (analyze (define->exp exp) lid)))
           ((set!? exp)
            (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
              ;; TODO:
+             (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
 
              (analyze (set!->exp exp) lid)))
           ((if? exp)       `(if ,(analyze (if->condition exp) lid)
@@ -121,7 +127,7 @@
           ; Application:
           ((app? exp)
            (map (lambda (e)
-                  (analyze-cps e lid))
+                  (analyze e lid))
                 exp))
 ;TODO:          ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
 
