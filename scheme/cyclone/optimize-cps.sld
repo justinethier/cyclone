@@ -31,7 +31,8 @@
       adb:get/default
       adb:set!
       adb:get-db
-      ;; Variables
+      simple-lambda?
+      ;; Analyze variables
       adb:make-var
       %adb:make-var
       adb:variable?
@@ -40,7 +41,7 @@
       adbv:defined-by adbv:set-defined-by!
       adbv:assigned adbv:set-assigned!
       adbv:assigned-locally adbv:set-assigned-locally!
-      ;; Functions
+      ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
       adb:function?
@@ -67,7 +68,7 @@
       (ref-by adbv:ref-by adbv:set-ref-by!)
     )
     (define (adb:make-var)
-      (%adb:make-var #f #f #f #t '()))
+      (%adb:make-var '? '? '? '? '()))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params)
@@ -76,19 +77,18 @@
       (unused-params adbf:unused-params adbf:set-unused-params!)
     )
     (define (adb:make-fnc)
-      (%adb:make-fnc #f #f))
+      (%adb:make-fnc '? '?))
 
-; TODO: analyze-cps
     (define (analyze-cps exp)
       (define (analyze exp lid)
         (cond
           ; Core forms:
           ((ast:lambda? exp)
-           (let ((id (ast:lambda-id exp)))
+           (let ((id (ast:lambda-id exp))
+                  (fnc (adb:make-fnc)))
              ;; save lambda to adb
-             (adb:set!
-               id
-               (adb:make-fnc)) ;; TODO: anything to record???? params?
+             (adb:set! id fnc)
+             ;; Analyze the lambda
              (for-each
               (lambda (arg)
                 (let ((var (adb:get/default arg (adb:make-var))))
@@ -135,4 +135,15 @@
             #f)))
       (analyze exp -1) ;; Top-level is lambda ID -1
     )
+
+    ;; TODO: make another pass for simple lambda's
+    ;can use similar logic to cps-optimize-01:
+    ;- body is a lambda app
+    ;- no lambda args are referenced in the body of that lambda app
+    ;  (ref-by is empty or the defining lid)
+    ;
+    ; Need to check analysis DB against CPS generated and make sure
+    ; things like ref-by make sense (ref by seems like its only -1 right now??)
+    (define (simple-lambda? exp)
+      #f)
 ))
