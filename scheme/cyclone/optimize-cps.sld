@@ -180,22 +180,40 @@
     ;
     ; Need to check analysis DB against CPS generated and make sure
     ; things like ref-by make sense (ref by seems like its only -1 right now??)
-;    (define (simple-lambda? ast)
-;      (let ((body (ast:lambda-body ast)))
-;        (and (pair? body)
-;             (app? body)
-;             (ast:lambda? (car body))
-;             (> (length (ast:lambda-formals->list ast)) 0)
-;;; TODO: rewrite these last 2 using the analysis DB
-;;              ;; TODO: not sure this is good enough for all cases
-;;              (equal? (app->args body)
-;;                      ;(lambda->formals (car body))
-;;                      (lambda->formals exp)
-;;                      )
-;;              ;; TODO: don't do it if args are used in the body
-;;              ;; this won't work if we have any num other than 1 arg
-;;              (not (member 
-;;                      (car (lambda->formals exp))
-;;                      (free-vars (car body))))
-;      #f)
+    ;; Does ref-by list contains references to lambdas other than owner?
+    ;; int -> ast-variable -> boolean
+    (define (nonlocal-ref? owner-id adb-var)
+      (define (loop ref-by-ids)
+        (cond
+          ((null? ref-by-ids) #f)
+          (else
+            (let ((ref (car ref-by-ids)))
+              (if (and (number? ref) (not (= owner-id ref)))
+                  #t ;; Another lambda uses this variable
+                  (loop (cdr ref-by-ids)))))))
+      (loop (adbv:ref-by adb-var)))
+      
+    ;; int -> [symbol] -> boolean
+    (define (any-nonlocal-refs? owner-id vars)
+      (call/cc 
+        (lambda (return)
+          (for-each
+            (lambda (var)
+              (if (nonlocal-ref? owner-id (adb:get var))
+                  (return #t)))
+            vars)
+          (return #f))))
+
+    ;; ast-function -> boolean
+    (define (simple-lambda? ast)
+      (let ((body (ast:lambda-body ast))
+            (formals (ast:lambda-formals->list ast))
+            (id (ast:lambda-id ast)))
+        (and (pair? body)
+             (app? body)
+             (ast:lambda? (car body))
+             (> (length formals) 0)
+             (equal? (app->args body)
+                     formals)
+             (not (any-nonlocal-refs? id formals)))))
 ))
