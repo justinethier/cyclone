@@ -148,7 +148,9 @@
       (cond
         ; Core forms:
         ((ast:lambda? exp)
-         (let ((id (ast:lambda-id exp)))
+         (let* ((id (ast:lambda-id exp))
+                (fnc (adb:get id)))
+           (adbf:set-simple! (simple-lambda? exp))
            (for-each
              (lambda (expr)
                (analyze2 expr))
