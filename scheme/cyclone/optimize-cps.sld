@@ -189,6 +189,7 @@
       (define (loop ref-by-ids)
         (cond
           ((null? ref-by-ids) #f)
+          ((not (pair? ref-by-ids)) #f)
           (else
             (let ((ref (car ref-by-ids)))
               (if (and (number? ref) (not (= owner-id ref)))
@@ -212,12 +213,15 @@
       (let ((body (ast:lambda-body ast))
             (formals (ast:lambda-formals->list ast))
             (id (ast:lambda-id ast)))
+        (if (pair? body)
+            (set! body (car body)))
 ;(trace:error `(simple-lambda? ,id ,formals 
 ;,(and (pair? body)
 ;     (app? body)
 ;     (ast:lambda? (car body)))
 ;,(length formals)
-;,body))
+;;,body
+;))
         (and (pair? body)
              (app? body)
              (ast:lambda? (car body))
