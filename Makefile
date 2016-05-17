@@ -104,7 +104,7 @@ bootstrap: icyc
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/optimize-cps.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/pretty-print.c $(BOOTSTRAP_DIR)/scheme/cyclone

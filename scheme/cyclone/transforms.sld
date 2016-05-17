@@ -19,7 +19,7 @@
           (scheme cyclone common)
           (scheme cyclone libraries)
           (scheme cyclone macros)
-          (scheme cyclone optimize-cps)
+          ;(scheme cyclone optimize-cps)
           (scheme cyclone pretty-print)
           (scheme cyclone util)
   )

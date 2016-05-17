@@ -26,6 +26,7 @@
           (srfi 69))
   (export
       analyze-cps
+      opt:contract
       ;adb:init!
       adb:get
       adb:get/default
@@ -80,11 +81,6 @@
     )
     (define (adb:make-fnc)
       (%adb:make-fnc '? '?))
-
-    (define (analyze-cps exp)
-      (analyze exp -1) ;; Top-level is lambda ID -1
-      (analyze2 exp) ;; Second pass
-    )
 
     (define (analyze exp lid)
 ;(tre:error `(analyze ,lid ,exp))
@@ -230,4 +226,20 @@
                      formals)
              (not (any-nonlocal-refs? id formals))
     )))
+
+    ;; Perform contraction phase of CPS optimizations
+    (define (opt:contract ast)
+      ast) ;'TODO)
+
+    (define (analyze-cps exp)
+      (analyze exp -1) ;; Top-level is lambda ID -1
+      (analyze2 exp) ;; Second pass
+    )
+
+    (define (optimize-cps ast)
+      (analyze-cps input-program)
+      (trace:info "---------------- cps analysis db:")
+      (trace:info (adb:get-db))
+      (opt:contract ast)
+    )
 ))

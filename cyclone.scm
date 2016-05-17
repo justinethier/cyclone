@@ -18,7 +18,7 @@
         (scheme cyclone util)
         (scheme cyclone cgen)
         (scheme cyclone transforms)
-        (scheme cyclone cps-optimizations)
+;        (scheme cyclone cps-optimizations)
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
@@ -222,11 +222,6 @@
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
 
-      
-      ;; TODO: do not run this if eval is in play, or (better) only do opts that are safe in that case (will be much more limited)
-      ;; because of this, programs such as icyc can only be so optimized. it would be much more beneficial if modules like
-      ;; eval.scm could be compiled separately and then linked to by a program such as icyc.scm. that would save a *lot* of compile
-      ;; time. in fact, it might be more beneficial than adding these optimizations.
       ;;
       ;; TODO: run CPS optimization (not all of these phases may apply)
       ;; phase 1 - constant folding, function-argument expansion, beta-contraction of functions called once,
@@ -240,9 +235,10 @@
       ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
       ;; END CPS optimization
 
-      (analyze-cps input-program)
-      (trace:info "---------------- cps analysis db:")
-      (trace:info (adb:get-db))
+;      (set! input-program
+;        (optimize-cps input-program))
+;      (trace:info "---------------- after cps optimizations:")
+;      (trace:info input-program)
 
 ;      (set! input-program
 ;        (map
