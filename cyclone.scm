@@ -18,7 +18,7 @@
         (scheme cyclone util)
         (scheme cyclone cgen)
         (scheme cyclone transforms)
-;        (scheme cyclone cps-optimizations)
+        (scheme cyclone cps-optimizations)
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
@@ -235,10 +235,10 @@
       ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
       ;; END CPS optimization
 
-;      (set! input-program
-;        (optimize-cps input-program))
-;      (trace:info "---------------- after cps optimizations:")
-;      (trace:info input-program)
+      (set! input-program
+        (optimize-cps input-program))
+      (trace:info "---------------- after cps optimizations:")
+      (trace:info input-program)
 
 ;      (set! input-program
 ;        (map
