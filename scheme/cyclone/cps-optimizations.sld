@@ -228,8 +228,32 @@
     )))
 
     ;; Perform contraction phase of CPS optimizations
-    (define (opt:contract ast)
-      ast) ;'TODO)
+    (define (opt:contract exp)
+      (cond
+        ; Core forms:
+        ((ast:lambda? exp)
+         ;(let ((fnc (adb:get id)))
+           ;; TODO: simplify if necessary
+           (ast:%make-lambda
+            (ast:lambda-id exp)
+            (ast:lambda-args exp)
+            (ast:lambda-body exp)));)
+        ((ref? exp) exp)
+        ((const? exp) exp)
+        ((define? exp)
+         `(define ,(opt:contract (define->var exp))
+                  ,(opt:contract (define->exp exp))))
+        ((set!? exp)
+         `(set! ,(opt:contract (set!->var exp))
+                ,(opt:contract (set!->exp exp))))
+        ((if? exp)       `(if ,(opt:contract (if->condition exp))
+                              ,(opt:contract (if->then exp))
+                              ,(opt:contract (if->else exp))))
+        ; Application:
+        ((app? exp)
+         (map (lambda (e) (opt:contract e)) exp))
+        (else 
+          (error "CPS optimize [1] - Unknown expression" exp))))
 
     (define (analyze-cps exp)
       (analyze exp -1) ;; Top-level is lambda ID -1
