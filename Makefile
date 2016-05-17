@@ -25,7 +25,7 @@ SMODULES = \
   scheme/time \
   scheme/write \
   scheme/cyclone/ast \
-  scheme/cyclone/optimize-cps \
+  scheme/cyclone/cps-optimizations \
   scheme/cyclone/cgen \
   scheme/cyclone/common \
   scheme/cyclone/libraries \

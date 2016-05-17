@@ -18,7 +18,7 @@
         (scheme cyclone util)
         (scheme cyclone cgen)
         (scheme cyclone transforms)
-        (scheme cyclone optimize-cps)
+        (scheme cyclone cps-optimizations)
         (scheme cyclone macros)
         (scheme cyclone libraries))
 

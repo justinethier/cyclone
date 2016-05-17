@@ -18,7 +18,7 @@
 ;  to uniquely ID each lambda
 
 ;(define-library (optimize-cps)
-(define-library (scheme cyclone optimize-cps)
+(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
