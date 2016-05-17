@@ -25,6 +25,7 @@
           (scheme cyclone transforms)
           (srfi 69))
   (export
+      optimize-cps 
       analyze-cps
       opt:contract
       ;adb:init!
@@ -237,9 +238,11 @@
            (ast:%make-lambda
             (ast:lambda-id exp)
             (ast:lambda-args exp)
-            (ast:lambda-body exp)));)
-        ((ref? exp) exp)
+            (opt:contract (ast:lambda-body exp))));)
         ((const? exp) exp)
+        ((ref? exp) exp)
+        ((prim? exp) exp)
+        ((quote? exp) exp)
         ((define? exp)
          `(define ,(opt:contract (define->var exp))
                   ,(opt:contract (define->exp exp))))
@@ -261,7 +264,7 @@
     )
 
     (define (optimize-cps ast)
-      (analyze-cps input-program)
+      (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
       (opt:contract ast)
