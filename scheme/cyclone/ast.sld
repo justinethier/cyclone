@@ -14,12 +14,13 @@
   )
   (export
      ast:make-lambda
+     ast:%make-lambda
      ast:lambda?
      ast:lambda-id
      ast:lambda-args 
      ast:set-lambda-args!
      ast:lambda-body 
-     ast:se-lambda-body!
+     ast:set-lambda-body!
   )
   (begin
     (define *lambda-id* 0)
@@ -28,7 +29,7 @@
      ast:lambda?
      (id ast:lambda-id)
      (args ast:lambda-args ast:set-lambda-args!)
-     (body ast:lambda-body ast:se-lambda-body!))
+     (body ast:lambda-body ast:set-lambda-body!))
     (define (ast:make-lambda args body)
       (set! *lambda-id* (+ 1 *lambda-id*))
       (ast:%make-lambda *lambda-id* args body))
