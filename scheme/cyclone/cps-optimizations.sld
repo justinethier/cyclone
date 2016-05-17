@@ -245,7 +245,7 @@
         ((quote? exp) exp)
         ((define? exp)
          `(define ,(opt:contract (define->var exp))
-                  ,(opt:contract (define->exp exp))))
+                  ,@(opt:contract (define->exp exp))))
         ((set!? exp)
          `(set! ,(opt:contract (set!->var exp))
                 ,(opt:contract (set!->exp exp))))
