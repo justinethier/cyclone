@@ -104,6 +104,8 @@
              (lambda (expr)
                (analyze expr id))
              (ast:lambda-body exp))))
+        ((const? exp) #f)
+        ((quote? exp) #f)
         ((ref? exp)
          (let ((var (adb:get/default exp (adb:make-var))))
           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
@@ -127,9 +129,10 @@
         
         ; Application:
         ((app? exp)
-         (map (lambda (e)
-                (analyze e lid))
-              exp))
+         (for-each
+           (lambda (e)
+             (analyze e lid))
+           exp))
 ;TODO         ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
 
         ; Nothing to analyze for these?
@@ -153,6 +156,8 @@
              (lambda (expr)
                (analyze2 expr))
              (ast:lambda-body exp))))
+        ((const? exp) #f)
+        ((quote? exp) #f)
 ;; TODO:
 ;        ((ref? exp)
 ;         (let ((var (adb:get/default exp (adb:make-var))))
@@ -169,7 +174,7 @@
                               ,(analyze2 (if->else exp))))
         ; Application:
         ((app? exp)
-         (map (lambda (e) (analyze2 e)) exp))
+         (for-each (lambda (e) (analyze2 e)) exp))
         (else #f)))
 
     ;; TODO: make another pass for simple lambda's
