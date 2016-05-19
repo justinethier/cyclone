@@ -233,12 +233,14 @@
       (cond
         ; Core forms:
         ((ast:lambda? exp)
-         ;(let ((fnc (adb:get id)))
-           ;; TODO: simplify if necessary
-           (ast:%make-lambda
-            (ast:lambda-id exp)
-            (ast:lambda-args exp)
-            (opt:contract (ast:lambda-body exp))));)
+         (let* ((id (ast:lambda-id exp))
+                (fnc (adb:get id)))
+           (if (adbf:simple fnc)
+               (opt:contract (caar (ast:lambda-body exp))) ;; Optimize-out the lambda
+               (ast:%make-lambda
+                 (ast:lambda-id exp)
+                 (ast:lambda-args exp)
+                 (opt:contract (ast:lambda-body exp))))))
         ((const? exp) exp)
         ((ref? exp) exp)
         ((prim? exp) exp)
@@ -267,6 +269,7 @@
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
+      ;ast ;; DEBUGGING!!!
       (opt:contract ast)
     )
 ))
