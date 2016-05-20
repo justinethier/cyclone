@@ -222,30 +222,10 @@
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
 
-      ;;
-      ;; TODO: run CPS optimization (not all of these phases may apply)
-      ;; phase 1 - constant folding, function-argument expansion, beta-contraction of functions called once,
-      ;;           and other "contractions". some of this is already done in previous phases. we will leave
-      ;;           that alone for now
-;      (set! input-program (cps-opt:contractions input-program))
-      ;; phase 2 - beta expansion
-      ;; phase 3 - eta reduction
-      ;; phase 4 - hoisting
-      ;; phase 5 - common subexpression elimination
-      ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
-      ;; END CPS optimization
-
       (set! input-program
         (optimize-cps input-program))
       (trace:info "---------------- after cps optimizations:")
       (trace:info input-program)
-
-;      (set! input-program
-;        (map
-;          cps-optimize-01
-;          input-program))
-;      (trace:info "---------------- after cps optimizations:")
-;      (trace:info input-program) ;pretty-print
     
       (set! input-program
         (map

@@ -270,6 +270,19 @@
       (analyze2 exp) ;; Second pass
     )
 
+    ;; NOTES:
+    ;;
+    ;; TODO: run CPS optimization (not all of these phases may apply)
+    ;; phase 1 - constant folding, function-argument expansion, beta-contraction of functions called once,
+    ;;           and other "contractions". some of this is already done in previous phases. we will leave
+    ;;           that alone for now
+    ;; phase 2 - beta expansion
+    ;; phase 3 - eta reduction
+    ;; phase 4 - hoisting
+    ;; phase 5 - common subexpression elimination
+    ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
+    ;; END notes
+
     (define (optimize-cps ast)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
