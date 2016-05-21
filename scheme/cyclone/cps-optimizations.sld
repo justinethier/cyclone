@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-(define-library (cps-optimizations)
-;(define-library (scheme cyclone cps-optimizations)
+;(define-library (cps-optimizations)
+(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -166,7 +166,8 @@
          ;;
          ;; obviously need to add code later on to reset const if mutated
          (cond
-          ((ast:lambda? (car exp))
+          ((and (ast:lambda? (car exp))
+                (list? (ast:lambda-args (car exp)))) ;; For now, avoid complications with optional/extra args
            (let ((params (ast:lambda-args (car exp))))
              (for-each
               (lambda (arg)
@@ -318,6 +319,7 @@
         ((app? exp)
          (cond
           ((and (ast:lambda? (car exp))
+                (list? (ast:lambda-args (car exp))) ;; Avoid optional/extra args
                 (= (length (ast:lambda-args (car exp)))
                    (length (app->args exp))))
            (let ((new-params '())
