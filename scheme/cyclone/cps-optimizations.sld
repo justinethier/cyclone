@@ -46,7 +46,9 @@
       adbv:set-assigned!
       adbv:assigned-locally? 
       adbv:set-assigned-locally!
-      adbv:const-value? 
+      adbv:const? 
+      adbv:set-const!
+      adbv:const-value
       adbv:set-const-value!
       adbv:ref-by
       adbv:set-ref-by!
@@ -75,7 +77,7 @@
       (assigned adbv:assigned? adbv:set-assigned!)
       (assigned-locally adbv:assigned-locally? adbv:set-assigned-locally!)
       (const adbv:const? adbv:set-const!)
-      (const-value adbv:const-value? adbv:set-const-value!)
+      (const-value adbv:const-value adbv:set-const-value!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
     )
     (define (adb:make-var)
@@ -296,7 +298,11 @@
                  (ast:lambda-args exp)
                  (opt:contract (ast:lambda-body exp))))))
         ((const? exp) exp)
-        ((ref? exp) exp)
+        ((ref? exp) 
+         (let ((var (adb:get/default exp #f)))
+           (if (and var (adbv:const? var))
+               (adbv:const-value var)
+               exp)))
         ((prim? exp) exp)
         ((quote? exp) exp)
         ((define? exp)
@@ -310,6 +316,9 @@
                               ,(opt:contract (if->else exp))))
         ; Application:
         ((app? exp)
+;; TODO: check for ast:lambda, and if so check for any const args.
+;; if there are any, need to remove them from lambda args and
+;; calling params
          (map (lambda (e) (opt:contract e)) exp))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
