@@ -8,10 +8,11 @@
 
 (import (scheme base) (scheme write))
 
-(let ((x 1))
+(let ((x 1) (z 3))
   (define y 2)
+  (define w 4)
   (write
-    (+ x y)))
+    (+ w x y z)))
 
 (define (test a)
   (write 3))

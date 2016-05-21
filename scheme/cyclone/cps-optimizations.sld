@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-;(define-library (optimize-cps)
-(define-library (scheme cyclone cps-optimizations)
+(define-library (cps-optimizations)
+;(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -38,11 +38,16 @@
       adb:make-var
       %adb:make-var
       adb:variable?
-      adbv:global 
+      adbv:global?  
       adbv:set-global!
-      adbv:defined-by adbv:set-defined-by!
-      adbv:assigned adbv:set-assigned!
-      adbv:assigned-locally adbv:set-assigned-locally!
+      adbv:defined-by 
+      adbv:set-defined-by!
+      adbv:assigned? 
+      adbv:set-assigned!
+      adbv:assigned-locally? 
+      adbv:set-assigned-locally!
+      adbv:const-value? 
+      adbv:set-const-value!
       adbv:ref-by
       adbv:set-ref-by!
       ;; Analyze functions
@@ -65,14 +70,16 @@
     (define-record-type <analysis-db-variable>
       (%adb:make-var global defined-by assigned assigned-locally)
       adb:variable?
-      (global adbv:global adbv:set-global!)
+      (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
-      (assigned adbv:assigned adbv:set-assigned!)
-      (assigned-locally adbv:assigned-locally adbv:set-assigned-locally!)
+      (assigned adbv:assigned? adbv:set-assigned!)
+      (assigned-locally adbv:assigned-locally? adbv:set-assigned-locally!)
+      (const adbv:const? adbv:set-const!)
+      (const-value adbv:const-value? adbv:set-const-value!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
     )
     (define (adb:make-var)
-      (%adb:make-var '? '? '? '? '()))
+      (%adb:make-var '? '? '? '? #f #f '()))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params)
@@ -83,6 +90,20 @@
     (define (adb:make-fnc)
       (%adb:make-fnc '? '?))
 
+    ;; A constant value that cannot be mutated
+    ;; A variable only ever assigned to one of these could have all
+    ;; instances of itself replaced with the value.
+    (define (const-atomic? exp)
+      (or (integer? exp)
+          (real? exp)
+          ;(string? exp)
+          ;(vector? exp)
+          ;(bytevector? exp)
+          (char? exp)
+          (boolean? exp)))
+
+;; TODO: check app for const/const-value, also (for now) reset them
+;; if the variable is modified via set/define
     (define (analyze exp lid)
 ;(tre:error `(analyze ,lid ,exp))
       (cond
@@ -129,6 +150,14 @@
         
         ; Application:
         ((app? exp)
+
+         ;; TODO: if ast-lambda (car),
+         ;; for each arg
+         ;;  if arg is const-atomic
+         ;;     mark the parameter (variable) as const and give it const-val
+         ;;
+         ;; obviously need to add code later on to reset const if mutated
+
          (for-each
            (lambda (e)
              (analyze e lid))
