@@ -105,7 +105,7 @@
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
     (define (analyze exp lid)
-;(tre:error `(analyze ,lid ,exp))
+;(trace:error `(analyze ,lid ,exp ,(app? exp)))
       (cond
         ; Core forms:
         ((ast:lambda? exp)
@@ -136,12 +136,18 @@
            ;; TODO:
            (adbv:set-defined-by! var lid)
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           (adbv:set-const! var #f)
+           (adbv:set-const-value! var #f)
+           (adb:set! (define->var exp) var)
 
            (analyze (define->exp exp) lid)))
         ((set!? exp)
          (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
            ;; TODO:
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           (adbv:set-const! var #f)
+           (adbv:set-const-value! var #f)
+           (adb:set! (set!->var exp) var)
 
            (analyze (set!->exp exp) lid)))
         ((if? exp)       `(if ,(analyze (if->condition exp) lid)
@@ -157,7 +163,21 @@
          ;;     mark the parameter (variable) as const and give it const-val
          ;;
          ;; obviously need to add code later on to reset const if mutated
-
+         (cond
+          ((ast:lambda? (car exp))
+           (let ((params (ast:lambda-args (car exp))))
+             (for-each
+              (lambda (arg)
+;(trace:error `(app check arg ,arg ,(car params) ,(const-atomic? arg)))
+                (cond
+                 ((const-atomic? arg)
+                  (let ((var (adb:get/default (car params) (adb:make-var))))
+                    (adbv:set-const! var #t)
+                    (adbv:set-const-value! var arg)
+                    (adb:set! (car params) var))))
+                ;; Walk this list, too
+                (set! params (cdr params)))
+              (app->args exp)))))
          (for-each
            (lambda (e)
              (analyze e lid))
