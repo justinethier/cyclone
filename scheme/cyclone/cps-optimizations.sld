@@ -317,11 +317,33 @@
         ; Application:
         ((app? exp)
          (cond
-          ((ast:lambda? exp)
-TODO: walk param/arg lists, checking for any const args.
-if there are any, need to remove them from lambda args and
-calling params
-          )
+          ((and (ast:lambda? (car exp))
+                (= (length (ast:lambda-args (car exp)))
+                   (length (app->args exp))))
+           (let ((new-params '())
+                 (new-args '())
+                 (args (cdr exp)))
+;(trace:error `(DEBUG contract ,args ,(ast:lambda-args (car exp)) ,exp))
+             (for-each
+               (lambda (param)
+                 (let ((var (adb:get/default param #f)))
+                   (cond
+                    ((and var (adbv:const? var))
+                     #f)
+                    (else
+                     ;; Collect the params/args not optimized-out
+                     (set! new-args (cons (car args) new-args))
+                     (set! new-params (cons param new-params))))
+                   (set! args (cdr args))))
+               (ast:lambda-args (car exp)))
+             (map 
+               opt:contract
+               (cons
+                 (ast:%make-lambda
+                   (ast:lambda-id (car exp))
+                   (reverse new-params)
+                   (ast:lambda-body (car exp)))
+                 (reverse new-args)))))
           (else
            (map (lambda (e) (opt:contract e)) exp))))
         (else 
