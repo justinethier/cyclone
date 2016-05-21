@@ -316,10 +316,14 @@
                               ,(opt:contract (if->else exp))))
         ; Application:
         ((app? exp)
-;; TODO: check for ast:lambda, and if so check for any const args.
-;; if there are any, need to remove them from lambda args and
-;; calling params
-         (map (lambda (e) (opt:contract e)) exp))
+         (cond
+          ((ast:lambda? exp)
+TODO: walk param/arg lists, checking for any const args.
+if there are any, need to remove them from lambda args and
+calling params
+          )
+          (else
+           (map (lambda (e) (opt:contract e)) exp))))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
 
