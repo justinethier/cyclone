@@ -325,7 +325,6 @@
            (let ((new-params '())
                  (new-args '())
                  (args (cdr exp)))
-;(trace:error `(DEBUG contract ,args ,(ast:lambda-args (car exp)) ,exp))
              (for-each
                (lambda (param)
                  (let ((var (adb:get/default param #f)))
@@ -338,6 +337,10 @@
                      (set! new-params (cons param new-params))))
                    (set! args (cdr args))))
                (ast:lambda-args (car exp)))
+;(trace:error `(DEBUG contract args ,(app->args exp) 
+;                              new-args ,new-args
+;                              params ,(ast:lambda-args (car exp)) 
+;                              new-params ,new-params))
              (map 
                opt:contract
                (cons
