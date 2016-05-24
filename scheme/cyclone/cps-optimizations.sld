@@ -317,40 +317,43 @@
                               ,(opt:contract (if->else exp))))
         ; Application:
         ((app? exp)
-         (cond
-          ((and (ast:lambda? (car exp))
-                (list? (ast:lambda-args (car exp))) ;; Avoid optional/extra args
-                (= (length (ast:lambda-args (car exp)))
-                   (length (app->args exp))))
-           (let ((new-params '())
-                 (new-args '())
-                 (args (cdr exp)))
-             (for-each
-               (lambda (param)
-                 (let ((var (adb:get/default param #f)))
-                   (cond
-                    ((and var (adbv:const? var))
-                     #f)
-                    (else
-                     ;; Collect the params/args not optimized-out
-                     (set! new-args (cons (car args) new-args))
-                     (set! new-params (cons param new-params))))
-                   (set! args (cdr args))))
-               (ast:lambda-args (car exp)))
-;(trace:error `(DEBUG contract args ,(app->args exp) 
-;                              new-args ,new-args
-;                              params ,(ast:lambda-args (car exp)) 
-;                              new-params ,new-params))
-             (map 
-               opt:contract
+         (let* ((fnc (opt:contract (car exp))))
+           (cond
+            ((and (ast:lambda? fnc)
+                  (list? (ast:lambda-args fnc)) ;; Avoid optional/extra args
+                  (= (length (ast:lambda-args fnc))
+                     (length (app->args exp))))
+             (let ((new-params '())
+                   (new-args '())
+                   (args (cdr exp)))
+               (for-each
+                 (lambda (param)
+                   (let ((var (adb:get/default param #f)))
+                     (cond
+                      ((and var (adbv:const? var))
+                       #f)
+                      (else
+                       ;; Collect the params/args not optimized-out
+                       (set! new-args (cons (car args) new-args))
+                       (set! new-params (cons param new-params))))
+                     (set! args (cdr args))))
+                 (ast:lambda-args fnc))
+;(trace:e  rror `(DEBUG contract args ,(app->args exp) 
+;                                new-args ,new-args
+;                                params ,(ast:lambda-args fnc) 
+;                                new-params ,new-params))
                (cons
                  (ast:%make-lambda
-                   (ast:lambda-id (car exp))
+                   (ast:lambda-id fnc)
                    (reverse new-params)
-                   (ast:lambda-body (car exp)))
-                 (reverse new-args)))))
-          (else
-           (map (lambda (e) (opt:contract e)) exp))))
+                   (ast:lambda-body fnc))
+                 (map 
+                   opt:contract
+                     (reverse new-args)))))
+            (else
+             (cons 
+               fnc
+               (map (lambda (e) (opt:contract e)) (cdr exp)))))))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
 
