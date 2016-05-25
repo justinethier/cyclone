@@ -28,7 +28,7 @@
       optimize-cps 
       analyze-cps
       opt:contract
-      ;adb:init!
+      adb:clear!
       adb:get
       adb:get/default
       adb:set!
@@ -62,10 +62,8 @@
   (begin
     (define *adb* (make-hash-table))
     (define (adb:get-db) *adb*)
-    ;(define *adb* #f) ;(make-hash-table))
-    ;(define (adb:init!)
-    ;  ;(set! *adb* (make-hash-table)))
-    ;  'TODO)
+    (define (adb:clear!)
+      (set! *adb* (make-hash-table)))
     (define (adb:get key) (hash-table-ref *adb* key))
     (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
@@ -375,7 +373,15 @@
     ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
     ;; END notes
 
+    ;(define (optimize-cps ast)
+    ;  (define (loop ast n)
+    ;    (if (= n 0)
+    ;        (do-optimize-cps ast)
+    ;        (loop (do-optimize-cps ast) (- n 1))))
+    ;   (loop ast 2))
+
     (define (optimize-cps ast)
+      (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
