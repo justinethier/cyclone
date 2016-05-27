@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-;(define-library (cps-optimizations)
-(define-library (scheme cyclone cps-optimizations)
+(define-library (cps-optimizations)
+;(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -68,7 +68,8 @@
     (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
-      (%adb:make-var global defined-by assigned assigned-locally)
+      (%adb:make-var global defined-by const const-value  ref-by
+                     assigned assigned-locally app-fnc-count app-arg-count)
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
@@ -89,7 +90,7 @@
       (%adb:make-var '? '? #f #f '() '? '? 0 0))
 
     (define-record-type <analysis-db-function>
-      (%adb:make-fnc simple unused-params)
+      (%adb:make-fnc simple unused-params assigned-to-var)
       adb:function?
       (simple adbf:simple adbf:set-simple!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
@@ -164,6 +165,16 @@
         
         ; Application:
         ((app? exp)
+         (if (ref? (car exp))
+             (let ((var (adb:get/default (car exp) (adb:make-var))))
+               (adbv:set-app-fnc-count! var (+ 1 (adbv:app-fnc-count var)))
+               (adb:set! (car exp) var)))
+         (for-each
+          (lambda (arg)
+             (if (ref? arg)
+                 (let ((var (adb:get/default arg (adb:make-var))))
+                   (adbv:set-app-arg-count! var (+ 1 (adbv:app-arg-count var))))))
+          (app->args exp))
 
          ;; TODO: if ast-lambda (car),
          ;; for each arg
