@@ -72,23 +72,31 @@
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
-      (assigned adbv:assigned? adbv:set-assigned!)
-      (assigned-locally adbv:assigned-locally? adbv:set-assigned-locally!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
+      ;; TODO: need to set assigned flag if variable is SET, however there is at least
+      ;; one exception for local define's, which are initialized to #f and then assigned
+      ;; a single time via set
+      (assigned adbv:assigned? adbv:set-assigned!)
+      (assigned-locally adbv:assigned-locally? adbv:set-assigned-locally!)
+      ;; Number of times variable appears as an app-function
+      (app-fnc-count adbv:app-fnc-count adbv:set-app-fnc-count!)
+      ;; Number of times variable is passed as an app-argument
+      (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
     )
     (define (adb:make-var)
-      (%adb:make-var '? '? '? '? #f #f '()))
+      (%adb:make-var '? '? #f #f '() '? '? 0 0))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params)
       adb:function?
       (simple adbf:simple adbf:set-simple!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
+      (assigned-to-var adbf:assigned-to-var adbf:set-assigned-to-var!)
     )
     (define (adb:make-fnc)
-      (%adb:make-fnc '? '?))
+      (%adb:make-fnc '? '? '()))
 
     ;; A constant value that cannot be mutated
     ;; A variable only ever assigned to one of these could have all
