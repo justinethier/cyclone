@@ -44,8 +44,8 @@
       adbv:set-defined-by!
       adbv:assigned? 
       adbv:set-assigned!
-      adbv:assigned-locally? 
-      adbv:set-assigned-locally!
+      adbv:assigned-value
+      adbv:set-assigned-value!
       adbv:const? 
       adbv:set-const!
       adbv:const-value
@@ -69,7 +69,7 @@
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var global defined-by const const-value  ref-by
-                     assigned assigned-locally app-fnc-count app-arg-count)
+                     assigned assigned-value app-fnc-count app-arg-count)
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
@@ -80,14 +80,14 @@
       ;; one exception for local define's, which are initialized to #f and then assigned
       ;; a single time via set
       (assigned adbv:assigned? adbv:set-assigned!)
-      (assigned-locally adbv:assigned-locally? adbv:set-assigned-locally!)
+      (assigned-value adbv:assigned-value adbv:set-assigned-value!)
       ;; Number of times variable appears as an app-function
       (app-fnc-count adbv:app-fnc-count adbv:set-app-fnc-count!)
       ;; Number of times variable is passed as an app-argument
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
     )
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f '() '? '? 0 0))
+      (%adb:make-var '? '? #f #f '() '? #f 0 0))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var)
@@ -110,6 +110,17 @@
           ;(bytevector? exp)
           (char? exp)
           (boolean? exp)))
+
+    ;; Helper to retrieve the Analysis DB Variable referenced
+    ;; by sym (or use a default if none is found), and call
+    ;; fnc with that ADBV.
+    ;;
+    ;; The analysis DB is updated with the variable, in case
+    ;; it was not found.
+    (define (with-var! sym fnc)
+      (let ((var (adb:get/default sym (adb:make-var))))
+        (fnc var)
+        (adb:set! sym var)))
 
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
@@ -166,14 +177,13 @@
         ; Application:
         ((app? exp)
          (if (ref? (car exp))
-             (let ((var (adb:get/default (car exp) (adb:make-var))))
-               (adbv:set-app-fnc-count! var (+ 1 (adbv:app-fnc-count var)))
-               (adb:set! (car exp) var)))
+             (with-var! (car exp) (lambda (var)
+               (adbv:set-app-fnc-count! var (+ 1 (adbv:app-fnc-count var))))))
          (for-each
           (lambda (arg)
              (if (ref? arg)
-                 (let ((var (adb:get/default arg (adb:make-var))))
-                   (adbv:set-app-arg-count! var (+ 1 (adbv:app-arg-count var))))))
+                 (with-var! arg (lambda (var)
+                   (adbv:set-app-arg-count! var (+ 1 (adbv:app-arg-count var)))))))
           (app->args exp))
 
          ;; TODO: if ast-lambda (car),
