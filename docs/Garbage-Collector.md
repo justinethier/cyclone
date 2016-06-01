@@ -182,7 +182,7 @@ The collector scans the heap and frees memory used by all white objects:
 
 <img src="images/gc-graph-sweep.png" alt="Initial object graph">
 
-If the heap is still low on memory at this point the heap will be increased in size. Also, to ensure a complete collection data for any terminated threads is not freed until now.
+If the heap is still low on memory at this point the heap will be increased in size. Also, to ensure a complete collection, data for any terminated threads is not freed until now.
 
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
