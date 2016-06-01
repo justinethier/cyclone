@@ -86,6 +86,14 @@
       ;; Number of times variable is passed as an app-argument
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
     )
+
+    (define (adbv-set-assigned-value-helper! var value)
+      (adbv:set-assigned-value! var value)
+      ;; TODO: if value is a lambda, update the lambda's var ref's
+      ;; BUT, what if other vars point to var? do we need to add
+      ;; them to the lambda's list as well?
+    )
+
     (define (adb:make-var)
       (%adb:make-var '? '? #f #f '() #f #f 0 0))
 
@@ -157,7 +165,7 @@
          (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
-           (adbv:set-assigned-value! var (define->exp exp))
+           (adbv-set-assigned-value-helper! var (define->exp exp))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
          (analyze (define->exp exp) lid))
@@ -166,7 +174,7 @@
          (with-var! (set!->var exp) (lambda (var)
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
-           (adbv:set-assigned-value! var (set!->exp exp))
+           (adbv-set-assigned-value-helper! var (set!->exp exp))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
@@ -201,7 +209,7 @@
               (lambda (arg)
 ;(trace:error `(app check arg ,arg ,(car params) ,(const-atomic? arg)))
                 (with-var! (car params) (lambda (var)
-                  (adbv:set-assigned-value! var arg)
+                  (adbv-set-assigned-value-helper! var arg)
                   (cond
                    ((const-atomic? arg)
                     (adbv:set-const! var #t)
