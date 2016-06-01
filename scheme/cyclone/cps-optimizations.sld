@@ -42,8 +42,8 @@
       adbv:set-global!
       adbv:defined-by 
       adbv:set-defined-by!
-      adbv:assigned? 
-      adbv:set-assigned!
+      adbv:reassigned? 
+      adbv:set-reassigned!
       adbv:assigned-value
       adbv:set-assigned-value!
       adbv:const? 
@@ -69,17 +69,17 @@
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var global defined-by const const-value  ref-by
-                     assigned assigned-value app-fnc-count app-arg-count)
+                     reassigned assigned-value app-fnc-count app-arg-count)
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
-      ;; TODO: need to set assigned flag if variable is SET, however there is at least
+      ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
       ;; a single time via set
-      (assigned adbv:assigned? adbv:set-assigned!)
+      (reassigned adbv:reassigned? adbv:set-reassigned!)
       (assigned-value adbv:assigned-value adbv:set-assigned-value!)
       ;; Number of times variable appears as an app-function
       (app-fnc-count adbv:app-fnc-count adbv:set-app-fnc-count!)
@@ -87,7 +87,7 @@
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
     )
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f '() '? #f 0 0))
+      (%adb:make-var '? '? #f #f '() #f #f 0 0))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var)
@@ -95,6 +95,7 @@
       (simple adbf:simple adbf:set-simple!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
       (assigned-to-var adbf:assigned-to-var adbf:set-assigned-to-var!)
+      ;; TODO: top-level-define ?
     )
     (define (adb:make-fnc)
       (%adb:make-fnc '? '? '()))
@@ -136,10 +137,10 @@
            ;; Analyze the lambda
            (for-each
             (lambda (arg)
-              (let ((var (adb:get/default arg (adb:make-var))))
+              ;(let ((var (adb:get/default arg (adb:make-var))))
+              (with-var! arg (lambda (var)
                 (adbv:set-global! var #f)
-                (adbv:set-defined-by! var id)
-                (adb:set! arg var)))
+                (adbv:set-defined-by! var id))))
             (ast:lambda-formals->list exp))
            (for-each
              (lambda (expr)
@@ -152,24 +153,24 @@
           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
          ))
         ((define? exp)
-         (let ((var (adb:get/default (define->var exp) (adb:make-var))))
-           ;; TODO:
+         ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
+         (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           (adbv:set-assigned-value! var (define->exp exp))
            (adbv:set-const! var #f)
-           (adbv:set-const-value! var #f)
-           (adb:set! (define->var exp) var)
-
-           (analyze (define->exp exp) lid)))
+           (adbv:set-const-value! var #f)))
+         (analyze (define->exp exp) lid))
         ((set!? exp)
-         (let ((var (adb:get/default (set!->var exp) (adb:make-var))))
-           ;; TODO:
+         ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
+         (with-var! (set!->var exp) (lambda (var)
+           (if (adbv:assigned-value var)
+               (adbv:set-reassigned! var #t))
+           (adbv:set-assigned-value! var (set!->exp exp))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
-           (adbv:set-const-value! var #f)
-           (adb:set! (set!->var exp) var)
-
-           (analyze (set!->exp exp) lid)))
+           (adbv:set-const-value! var #f)))
+         (analyze (set!->exp exp) lid))
         ((if? exp)       `(if ,(analyze (if->condition exp) lid)
                               ,(analyze (if->then exp) lid)
                               ,(analyze (if->else exp) lid)))
@@ -199,12 +200,12 @@
              (for-each
               (lambda (arg)
 ;(trace:error `(app check arg ,arg ,(car params) ,(const-atomic? arg)))
-                (cond
-                 ((const-atomic? arg)
-                  (let ((var (adb:get/default (car params) (adb:make-var))))
+                (with-var! (car params) (lambda (var)
+                  (adbv:set-assigned-value! var arg)
+                  (cond
+                   ((const-atomic? arg)
                     (adbv:set-const! var #t)
-                    (adbv:set-const-value! var arg)
-                    (adb:set! (car params) var))))
+                    (adbv:set-const-value! var arg)))))
                 ;; Walk this list, too
                 (set! params (cdr params)))
               (app->args exp)))))
