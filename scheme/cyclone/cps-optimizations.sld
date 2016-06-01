@@ -89,16 +89,18 @@
 
     (define (adbv-set-assigned-value-helper! sym var value)
       (define (update-lambda-atv! syms value)
+(trace:error `(update-lambda-atv! ,syms ,value))
         (cond
           ((ast:lambda? value)
            (let ((id (ast:lambda-id value)))
-             (with-var! id (lambda (fnc)
+             (with-fnc! id (lambda (fnc)
                (adbf:set-assigned-to-var! 
                  fnc 
                  (append syms (adbf:assigned-to-var fnc)))))))
-          ;; TODO: follow references
-          ;((ref? value)
-          ; (update-lambda-atv! (cons value
+          ;; Follow references
+          ((ref? value)
+           (with-var! value (lambda (var)
+             (update-lambda-atv! (cons value syms) (adbv:assigned-value var)))))
           (else
             #f))
       )
@@ -146,6 +148,11 @@
         (fnc var)
         (adb:set! sym var)))
 
+    (define (with-fnc! id callback)
+      (let ((fnc (adb:get/default id (adb:make-fnc))))
+        (callback fnc)
+        (adb:set! id fnc)))
+
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
     (define (analyze exp lid)
@@ -153,8 +160,8 @@
       (cond
         ; Core forms:
         ((ast:lambda? exp)
-         (let ((id (ast:lambda-id exp))
-                (fnc (adb:make-fnc)))
+         (let* ((id (ast:lambda-id exp))
+                (fnc (adb:get/default id (adb:make-fnc))))
            ;; save lambda to adb
            (adb:set! id fnc)
            ;; Analyze the lambda
