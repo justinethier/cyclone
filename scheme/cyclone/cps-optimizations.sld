@@ -87,11 +87,26 @@
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
     )
 
-    (define (adbv-set-assigned-value-helper! var value)
+    (define (adbv-set-assigned-value-helper! sym var value)
+      (define (update-lambda-atv! syms value)
+        (cond
+          ((ast:lambda? value)
+           (let ((id (ast:lambda-id value)))
+             (with-var! id (lambda (fnc)
+               (adbf:set-assigned-to-var! 
+                 fnc 
+                 (append syms (adbf:assigned-to-var fnc)))))))
+          ;; TODO: follow references
+          ;((ref? value)
+          ; (update-lambda-atv! (cons value
+          (else
+            #f))
+      )
       (adbv:set-assigned-value! var value)
       ;; TODO: if value is a lambda, update the lambda's var ref's
       ;; BUT, what if other vars point to var? do we need to add
       ;; them to the lambda's list as well?
+      (update-lambda-atv! (list sym) value)
     )
 
     (define (adb:make-var)
@@ -165,7 +180,7 @@
          (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
-           (adbv-set-assigned-value-helper! var (define->exp exp))
+           (adbv-set-assigned-value-helper! (define->var exp) var (define->exp exp))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
          (analyze (define->exp exp) lid))
@@ -174,7 +189,7 @@
          (with-var! (set!->var exp) (lambda (var)
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
-           (adbv-set-assigned-value-helper! var (set!->exp exp))
+           (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
@@ -209,7 +224,7 @@
               (lambda (arg)
 ;(trace:error `(app check arg ,arg ,(car params) ,(const-atomic? arg)))
                 (with-var! (car params) (lambda (var)
-                  (adbv-set-assigned-value-helper! var arg)
+                  (adbv-set-assigned-value-helper! (car params) var arg)
                   (cond
                    ((const-atomic? arg)
                     (adbv:set-const! var #t)
