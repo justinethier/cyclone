@@ -418,6 +418,31 @@
     (define (analyze-cps exp)
       (analyze exp -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
+      ;; TODO:
+      ;; Find candidates for beta expansion
+      (for-each
+        (lambda (id)
+          (cond
+            ((number? id)
+             ;; TODO: this is just exploratory code, can be more efficient
+             (let ((app-count 0)
+                   (app-arg-count 0)
+                   (reassigned-count 0))
+              (with-fnc! id (lambda (fnc)
+                (for-each
+                  (lambda (sym)
+                    (with-var! sym (lambda (var)
+                      (set! app-count (+ app-count (adbv:app-fnc-count var)))
+                      (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
+                      (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
+                    ))
+                  )
+                  (adbf:assigned-to-var fnc))
+              ))
+              (trace:error `(candidate ,id ,app-count ,app-arg-count ,reassigned-count))
+             ))))
+        (hash-table->alist *adb*))
+      ;; END TODO
     )
 
     ;; NOTES:
