@@ -421,24 +421,25 @@
       ;; TODO:
       ;; Find candidates for beta expansion
       (for-each
-        (lambda (id)
+        (lambda (db-entry)
+;(trace:error `(check for lambda candidate
           (cond
-            ((number? id)
+            ((number? (car db-entry))
              ;; TODO: this is just exploratory code, can be more efficient
-             (let ((app-count 0)
+             (let ((id (car db-entry))
+                   (fnc (cdr db-entry))
+                   (app-count 0)
                    (app-arg-count 0)
                    (reassigned-count 0))
-              (with-fnc! id (lambda (fnc)
-                (for-each
-                  (lambda (sym)
-                    (with-var! sym (lambda (var)
-                      (set! app-count (+ app-count (adbv:app-fnc-count var)))
-                      (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
-                      (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
-                    ))
-                  )
-                  (adbf:assigned-to-var fnc))
-              ))
+              (for-each
+                (lambda (sym)
+                  (with-var! sym (lambda (var)
+                    (set! app-count (+ app-count (adbv:app-fnc-count var)))
+                    (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
+                    (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
+                  ))
+                )
+                (adbf:assigned-to-var fnc))
               (trace:error `(candidate ,id ,app-count ,app-arg-count ,reassigned-count))
              ))))
         (hash-table->alist *adb*))
