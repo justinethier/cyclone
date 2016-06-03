@@ -438,7 +438,8 @@
         ; Application:
         ((app? exp)
          (cond
-          ((ast:lambda? exp)
+          ((and (ast:lambda? (car exp))
+                (all-prim-calls? (cdr exp)))
            'TODO)
           (else
             (map contract-prims exp))))
