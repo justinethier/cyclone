@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-(define-library (cps-optimizations)
-;(define-library (scheme cyclone cps-optimizations)
+;(define-library (cps-optimizations)
+(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -418,32 +418,33 @@
     (define (analyze-cps exp)
       (analyze exp -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
-      ;; TODO:
-      ;; Find candidates for beta expansion
-      (for-each
-        (lambda (db-entry)
-;(trace:error `(check for lambda candidate
-          (cond
-            ((number? (car db-entry))
-             ;; TODO: this is just exploratory code, can be more efficient
-             (let ((id (car db-entry))
-                   (fnc (cdr db-entry))
-                   (app-count 0)
-                   (app-arg-count 0)
-                   (reassigned-count 0))
-              (for-each
-                (lambda (sym)
-                  (with-var! sym (lambda (var)
-                    (set! app-count (+ app-count (adbv:app-fnc-count var)))
-                    (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
-                    (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
-                  ))
-                )
-                (adbf:assigned-to-var fnc))
-              (trace:error `(candidate ,id ,app-count ,app-arg-count ,reassigned-count))
-             ))))
-        (hash-table->alist *adb*))
-      ;; END TODO
+;; For now, beta expansion finds so few candidates it is not worth optimizing
+;;      ;; TODO:
+;;      ;; Find candidates for beta expansion
+;;      (for-each
+;;        (lambda (db-entry)
+;;;(trace:error `(check for lambda candidate
+;;          (cond
+;;            ((number? (car db-entry))
+;;             ;; TODO: this is just exploratory code, can be more efficient
+;;             (let ((id (car db-entry))
+;;                   (fnc (cdr db-entry))
+;;                   (app-count 0)
+;;                   (app-arg-count 0)
+;;                   (reassigned-count 0))
+;;              (for-each
+;;                (lambda (sym)
+;;                  (with-var! sym (lambda (var)
+;;                    (set! app-count (+ app-count (adbv:app-fnc-count var)))
+;;                    (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
+;;                    (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
+;;                  ))
+;;                )
+;;                (adbf:assigned-to-var fnc))
+;;(trace:error `(candidate ,id ,app-count ,app-arg-count ,reassigned-count))
+;;             ))))
+;;        (hash-table->alist *adb*))
+;;      ;; END TODO
     )
 
     ;; NOTES:
