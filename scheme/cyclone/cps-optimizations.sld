@@ -28,6 +28,7 @@
       optimize-cps 
       analyze-cps
       opt:contract
+      contract-prims
       adb:clear!
       adb:get
       adb:get/default
@@ -414,6 +415,44 @@
                (map (lambda (e) (opt:contract e)) (cdr exp)))))))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
+
+    (define (contract-prims exp)
+      (cond
+        ((const? exp) exp)
+        ((quote? exp) exp)
+        ((ref? exp) exp)
+        ((ast:lambda? exp)
+         (ast:%make-lambda
+          (ast:lambda-id exp)
+          (ast:lambda-args exp)
+          (map contract-prims (ast:lambda-body exp))))
+        ((define? exp)
+         `(define ,(define->var exp)
+                  ,(contract-prims (define->exp exp))))
+        ((set!? exp)
+         `(set! ,(set!->var exp)
+                ,(contract-prims (set!->exp exp))))
+        ((if? exp)       `(if ,(contract-prims (if->condition exp))
+                              ,(contract-prims (if->then exp))
+                              ,(contract-prims (if->else exp))))
+        ; Application:
+        ((app? exp)
+         (cond
+          ((ast:lambda? exp)
+           'TODO)
+          (else
+            (map contract-prims exp))))
+        (else 
+          (error `(Unexpected expression passed to contract-prims ,exp)))))
+
+    ;; Do all the expressions contain prim calls?
+;; TODO: check for prim calls accepting no continuation
+    (define (all-prim-calls? exps)
+      (cond
+        ((null? exps) #t)
+        ((prim-call? (car exps))
+         (all-prim-calls? (cdr exps)))
+        (else #f)))
 
     (define (analyze-cps exp)
       (analyze exp -1) ;; Top-level is lambda ID -1

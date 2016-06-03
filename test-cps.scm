@@ -76,7 +76,7 @@ makes some assumptions about there only being one prim per function, I believe
        0)))))
 
 ;; TODO: update
-#;(#((record-marker)
+(#((record-marker)
    #((record-marker) #f (id args body))
    #(6
      ()
@@ -88,20 +88,10 @@ makes some assumptions about there only being one prim per function, I believe
                #((record-marker) #f (id args body))
                #(4
                  (x$3 y$2 z$1)
-                 ((#((record-marker)
-                     #((record-marker) #f (id args body))
-                     #(3
-                       (r$4)
-                       ((#((record-marker)
+                 ((write #((record-marker)
                            #((record-marker) #f (id args body))
-                           #(2
-                             (r$3)
-                             ((write #((record-marker)
-                                       #((record-marker) #f (id args body))
-                                       #(1 (r$1) ((r$1 %halt))))
-                                     r$3))))
-                         (cons x$3 r$4)))))
-                   (cons y$2 z$1)))))
+                           #(1 (r$1) ((r$1 %halt))))
+                         (cons x$3 (cons y$2 z$1))))))
              1
              2
              3))))
