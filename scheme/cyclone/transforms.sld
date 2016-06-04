@@ -19,7 +19,7 @@
           (scheme cyclone common)
           (scheme cyclone libraries)
           (scheme cyclone macros)
-          ;(scheme cyclone optimize-cps)
+          (scheme cyclone primitives)
           (scheme cyclone pretty-print)
           (scheme cyclone util)
   )
@@ -80,9 +80,7 @@
     app? 
     app->fun 
     app->args 
-    prim? 
     precompute-prim-app? 
-    prim-call? 
     begin->exps 
     define? 
     define-lambda? 
@@ -449,119 +447,6 @@
 (define (app->args exp)
   (cdr exp))
   
-; prim? : exp -> boolean
-(define (prim? exp)
-  (member exp *primitives*))
-
-(define *primitives* '(
-     Cyc-global-vars
-     Cyc-get-cvar
-     Cyc-set-cvar!
-     Cyc-cvar? ;; Cyclone-specific
-     Cyc-opaque?
-     Cyc-has-cycle?
-     Cyc-spawn-thread!
-     Cyc-end-thread!
-     Cyc-stdout
-     Cyc-stdin
-     Cyc-stderr
-     +
-     -
-     *
-     /
-     =
-     >
-     <
-     >=
-     <=
-     apply
-     %halt
-     exit
-     system
-     command-line-arguments
-     Cyc-installation-dir
-     Cyc-default-exception-handler
-     Cyc-current-exception-handler
-     cons
-     cell-get
-     set-global!
-     set-cell!
-     cell
-     eq?
-     eqv?
-     equal?
-     assoc
-     assq
-     assv
-     memq
-     memv
-     member
-     length
-     set-car!
-     set-cdr!
-     car
-     cdr
-     caar cadr cdar cddr
-     caaar caadr cadar caddr cdaar cdadr cddar cdddr
-     caaaar caaadr caadar caaddr cadaar cadadr
-     caddar cadddr cdaaar cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr
-     char->integer
-     integer->char
-     string->number
-     string-append
-     string-cmp
-     list->string
-     string->symbol
-     symbol->string
-     number->string
-     string-length
-     string-ref
-     string-set!
-     substring
-     make-bytevector
-     bytevector-length
-     bytevector
-     bytevector-append
-     Cyc-bytevector-copy
-     Cyc-utf8->string
-     Cyc-string->utf8
-     bytevector-u8-ref
-     bytevector-u8-set!
-     bytevector?
-     make-vector
-     list->vector
-     vector-length
-     vector-ref
-     vector-set!
-     boolean?
-     char?
-     eof-object?
-     null?
-     number?
-     real?
-     integer?
-     pair?
-     port?
-     procedure?
-     macro?
-     vector?
-     string?
-     symbol?
-     open-input-file
-     open-output-file
-     close-port
-     close-input-port
-     close-output-port
-     Cyc-flush-output-port
-     file-exists?
-     delete-file
-     read-char
-     peek-char
-     Cyc-read-line
-     Cyc-write-char
-     Cyc-write
-     Cyc-display))
-
 ;; Constant Folding
 ;; Is a primitive being applied in such a way that it can be
 ;; evaluated at compile time?
@@ -624,9 +509,6 @@
               (return #f)))
           (cdr ast))
         #t))))
-
-(define (prim-call? exp)
-  (and (list? exp) (prim? (car exp))))
 
 ; begin->exps : begin-exp -> list[exp]
 (define (begin->exps exp)
