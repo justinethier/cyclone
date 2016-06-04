@@ -416,35 +416,57 @@
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
 
-    (define (contract-prims exp)
-      (cond
-        ((const? exp) exp)
-        ((quote? exp) exp)
-        ((ref? exp) exp)
-        ((ast:lambda? exp)
-         (ast:%make-lambda
-          (ast:lambda-id exp)
-          (ast:lambda-args exp)
-          (map contract-prims (ast:lambda-body exp))))
-        ((define? exp)
-         `(define ,(define->var exp)
-                  ,(contract-prims (define->exp exp))))
-        ((set!? exp)
-         `(set! ,(set!->var exp)
-                ,(contract-prims (set!->exp exp))))
-        ((if? exp)       `(if ,(contract-prims (if->condition exp))
-                              ,(contract-prims (if->then exp))
-                              ,(contract-prims (if->else exp))))
-        ; Application:
-        ((app? exp)
-         (cond
-          ((and (ast:lambda? (car exp))
-                (all-prim-calls? (cdr exp)))
-           'TODO)
-          (else
-            (map contract-prims exp))))
-        (else 
-          (error `(Unexpected expression passed to contract-prims ,exp)))))
+    (define (contract-prims exp . refs*)
+      (let ((refs (if (null? refs*)
+                      (make-hash-table)
+                      (car refs*))))
+;(trace:error `(contract-prims ,exp))
+        (cond
+          ((ref? exp) 
+           ;; Replace lambda variables, if necessary
+           (let ((key (hash-table-ref/default refs exp #f)))
+             (if key
+                 (contract-prims key refs)
+                 exp)))
+          ((ast:lambda? exp)
+           (ast:%make-lambda
+            (ast:lambda-id exp)
+            (ast:lambda-args exp)
+            (map (lambda (b) (contract-prims b refs)) (ast:lambda-body exp))))
+          ((const? exp) exp)
+          ((quote? exp) exp)
+          ((define? exp)
+           `(define ,(define->var exp)
+                    ,(contract-prims (define->exp exp) refs)))
+          ((set!? exp)
+           `(set! ,(set!->var exp)
+                  ,(contract-prims (set!->exp exp) refs)))
+          ((if? exp)       `(if ,(contract-prims (if->condition exp) refs)
+                                ,(contract-prims (if->then exp) refs)
+                                ,(contract-prims (if->else exp) refs)))
+          ; Application:
+          ((app? exp)
+;(trace:error `(app? ,exp ,(ast:lambda? (car exp))
+;              ,(length (cdr exp))
+;              ,(length (ast:lambda-formals->list (car exp)))
+;              ,(all-prim-calls? (cdr exp))))
+           (cond
+            ((and (ast:lambda? (car exp))
+                  ;; TODO: check for more than one arg??
+                  (equal? (length (cdr exp))
+                          (length (ast:lambda-formals->list (car exp))))
+                  (all-prim-calls? (cdr exp)))
+             (let ((args (cdr exp)))
+               (for-each
+                (lambda (param)
+                  (hash-table-set! refs param (car args))
+                  (set! args (cdr args)))
+                (ast:lambda-formals->list (car exp))))
+             (contract-prims (car (ast:lambda-body (car exp))) refs))
+            (else
+              (map (lambda (e) (contract-prims e refs)) exp))))
+          (else 
+            (error `(Unexpected expression passed to contract-prims ,exp))))))
 
     ;; Do all the expressions contain prim calls?
 ;; TODO: check for prim calls accepting no continuation
