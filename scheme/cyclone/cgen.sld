@@ -10,6 +10,7 @@
   (import (scheme base)
           (scheme char)
           (scheme write)
+          (scheme cyclone primitives)
           (scheme cyclone transforms)
           (scheme cyclone util)
           (scheme cyclone libraries)
