@@ -456,7 +456,11 @@
                   ;; TODO: check for more than one arg??
                   (equal? (length (cdr exp))
                           (length (ast:lambda-formals->list (car exp))))
-                  (all-prim-calls? (cdr exp)))
+                  (every
+                    (lambda (arg)
+                      (and (prim-call? arg)
+                           (not (prim:cont? (car arg)))))
+                    (cdr exp)))
              (let ((args (cdr exp)))
                (for-each
                 (lambda (param)
@@ -536,7 +540,8 @@
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
       ;ast ;; DEBUGGING!!!
-      (opt:contract ast)
+      ;(contract-prims 
+      ;  (opt:contract ast))
     )
 
 ;; Older code, delete this soon
