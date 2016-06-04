@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-;(define-library (cps-optimizations)
-(define-library (scheme cyclone cps-optimizations)
+(define-library (cps-optimizations)
+;(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -438,7 +438,7 @@
           ((quote? exp) exp)
           ((define? exp)
            `(define ,(define->var exp)
-                    ,(contract-prims (define->exp exp) refs)))
+                    ,@(contract-prims (define->exp exp) refs))) ;; TODO: map????
           ((set!? exp)
            `(set! ,(set!->var exp)
                   ,(contract-prims (set!->exp exp) refs)))
