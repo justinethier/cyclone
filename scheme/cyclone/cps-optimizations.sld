@@ -91,7 +91,7 @@
 
     (define (adbv-set-assigned-value-helper! sym var value)
       (define (update-lambda-atv! syms value)
-(trace:error `(update-lambda-atv! ,syms ,value))
+;(trace:error `(update-lambda-atv! ,syms ,value))
         (cond
           ((ast:lambda? value)
            (let ((id (ast:lambda-id value)))
