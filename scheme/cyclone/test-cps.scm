@@ -98,37 +98,96 @@
 ;             3))))
 ;       0)))))
 
+;(define code
+;'(#((record-marker)
+;   #((record-marker) #f (id args body))
+;   #(6
+;     ()
+;     ((#((record-marker)
+;         #((record-marker) #f (id args body))
+;         #(5
+;           (r$2)
+;           ((#((record-marker)
+;               #((record-marker) #f (id args body))
+;               #(4
+;                 (x$3 y$2 z$1)
+;                 ((#((record-marker)
+;                     #((record-marker) #f (id args body))
+;                     #(3
+;                       (r$4)
+;                       ((#((record-marker)
+;                           #((record-marker) #f (id args body))
+;                           #(2
+;                             (r$3)
+;                             ((write #((record-marker)
+;                                       #((record-marker) #f (id args body))
+;                                       #(1 (r$1) ((r$1 %halt))))
+;                                     r$3))))
+;                         (cons x$3 r$4)))))
+;                   (cons y$2 z$1)))))
+;             1
+;             2
+;             3))))
+;       0)))))
+;)
+
 (define code
-'(#((record-marker)
-   #((record-marker) #f (id args body))
-   #(6
-     ()
-     ((#((record-marker)
-         #((record-marker) #f (id args body))
-         #(5
-           (r$2)
-           ((#((record-marker)
-               #((record-marker) #f (id args body))
-               #(4
-                 (x$3 y$2 z$1)
-                 ((#((record-marker)
-                     #((record-marker) #f (id args body))
-                     #(3
-                       (r$4)
-                       ((#((record-marker)
-                           #((record-marker) #f (id args body))
-                           #(2
-                             (r$3)
-                             ((write #((record-marker)
-                                       #((record-marker) #f (id args body))
-                                       #(1 (r$1) ((r$1 %halt))))
-                                     r$3))))
-                         (cons x$3 r$4)))))
-                   (cons y$2 z$1)))))
-             1
-             2
-             3))))
-       0)))))
+'((define reg-port
+   #((record-marker)
+     #((record-marker) #f (id args body))
+     #(630
+       (k$812 fp$262)
+       ((#((record-marker)
+           #((record-marker) #f (id args body))
+           #(629
+             (r$813)
+             ((#((record-marker)
+                 #((record-marker) #f (id args body))
+                 #(628
+                   (r$263)
+                   ((if r$263
+                      (#((record-marker)
+                         #((record-marker) #f (id args body))
+                         #(622 () ((k$812 r$263)))))
+                      (#((record-marker)
+                         #((record-marker) #f (id args body))
+                         #(627
+                           ()
+                           ((list #((record-marker)
+                                    #((record-marker) #f (id args body))
+                                    #(626
+                                      (r$817)
+                                      ((#((record-marker)
+                                          #((record-marker) #f (id args body))
+                                          #(625
+                                            (r$814)
+                                            ((#((record-marker)
+                                                #((record-marker)
+                                                  #f
+                                                  (id args body))
+                                                #(624
+                                                  (r$816)
+                                                  ((#((record-marker)
+                                                      #((record-marker)
+                                                        #f
+                                                        (id args body))
+                                                      #(623
+                                                        (r$815)
+                                                        ((k$812 r$263))))
+                                                    (set! *in-port-table*
+                                                      r$816)))))
+                                              (cons r$263 *in-port-table*)))))
+                                        (set! r$263 r$817)))))
+                                  fp$262
+                                  #f
+                                  1
+                                  0)))))))))
+               r$813))))
+         (assoc fp$262 *in-port-table*)))))))
 )
+
 (pretty-print
-  (contract-prims code))
+  (optimize-cps code))
+  ;(contract-prims code))
+(write "---------------- cps analysis db:")
+(pretty-print (adb:get-db))
