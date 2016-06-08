@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-;(define-library (cps-optimizations)
-(define-library (scheme cyclone cps-optimizations)
+(define-library (cps-optimizations)
+;(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -503,6 +503,58 @@
         ((prim-call? (car exps))
          (all-prim-calls? (cdr exps)))
         (else #f)))
+
+    ;; Find variables passed to a primitive
+    (define (prim-call->arg-variables exp)
+      (filter symbol? (cdr exp)))
+
+    ;; Helper for the next function
+    (define (inline-prim-call? exp ivars args)
+      (call/cc
+        (lambda (return)
+          (inline-ok? exp ivars args (list #f) return)
+          (return #t))))
+
+    ;; Make sure inlining a primitive call will not cause out-of-order execution
+    ;; exp - expression to search
+    ;; ivars - vars to be inlined
+    ;; args - list of variable args (should be small)
+    ;; arg-used - has a variable been used? if this is true and we find an ivar,
+    ;;            it cannot be optimized-out and we have to bail.
+    ;;            This is a cons "box" so it can be mutated.
+    ;; return - call into this continuation to return early
+    (define (inline-ok? exp ivars args arg-used return)
+      (cond
+        ((ref? exp)
+         'TODO)
+        ((ast:lambda? exp)
+         (for-each
+          (lambda (e)
+            (inline-ok? e ivars args arg-used return))
+          (ast:lambda-formals->list exp))
+         (for-each
+          (lambda (e)
+            (inline-ok? e ivars args arg-used return))
+          (ast:lambda-body exp)))
+        ((const? exp) #t)
+        ((quote? exp) #t)
+        ((define? exp)
+         (inline-ok? (define->var exp) ivars args arg-used return)
+         (inline-ok? (define->exp exp) ivars args arg-used return))
+        ((set!? exp)
+         (inline-ok? (set!->var exp) ivars args arg-used return)
+         (inline-ok? (set!->exp exp) ivars args arg-used return))
+        ((if? exp)
+          (inline-ok? (if->condition exp) ivars args arg-used return)
+          (inline-ok? (if->then exp) ivars args arg-used return)
+          (inline-ok? (if->else exp) ivars args arg-used return))
+        ((app? exp)
+         (for-each
+          (lambda (e)
+            (inline-ok? e ivars args arg-used return))
+          (reverse exp))) ;; Ensure args are examined before function
+        (else
+          (error `(Unexpected expression passed to inline prim check ,exp)))))
 
     (define (analyze-cps exp)
       (analyze exp -1) ;; Top-level is lambda ID -1

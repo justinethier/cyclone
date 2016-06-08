@@ -132,58 +132,22 @@
 ;)
 
 (define code
-'((define reg-port
+'((define in-port:read-buf!
    #((record-marker)
      #((record-marker) #f (id args body))
-     #(630
-       (k$812 fp$262)
+     #(621
+       (k$807 ptbl$260)
        ((#((record-marker)
            #((record-marker) #f (id args body))
-           #(629
-             (r$813)
-             ((#((record-marker)
-                 #((record-marker) #f (id args body))
-                 #(628
-                   (r$263)
-                   ((if r$263
-                      (#((record-marker)
-                         #((record-marker) #f (id args body))
-                         #(622 () ((k$812 r$263)))))
-                      (#((record-marker)
-                         #((record-marker) #f (id args body))
-                         #(627
-                           ()
-                           ((list #((record-marker)
-                                    #((record-marker) #f (id args body))
-                                    #(626
-                                      (r$817)
-                                      ((#((record-marker)
-                                          #((record-marker) #f (id args body))
-                                          #(625
-                                            (r$814)
-                                            ((#((record-marker)
-                                                #((record-marker)
-                                                  #f
-                                                  (id args body))
-                                                #(624
-                                                  (r$816)
-                                                  ((#((record-marker)
-                                                      #((record-marker)
-                                                        #f
-                                                        (id args body))
-                                                      #(623
-                                                        (r$815)
-                                                        ((k$812 r$263))))
-                                                    (set! *in-port-table*
-                                                      r$816)))))
-                                              (cons r$263 *in-port-table*)))))
-                                        (set! r$263 r$817)))))
-                                  fp$262
-                                  #f
-                                  1
-                                  0)))))))))
-               r$813))))
-         (assoc fp$262 *in-port-table*)))))))
+           #(619
+             (result$261)
+             ((in-port:set-buf!
+                #((record-marker)
+                  #((record-marker) #f (id args body))
+                  #(618 (r$809) ((k$807 result$261))))
+                ptbl$260
+                #f))))
+         (cadr ptbl$260)))))))
 )
 
 (pretty-print
