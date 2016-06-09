@@ -7,17 +7,7 @@
 ;;;; This module performs CPS analysis and optimizations.
 ;;;;
 
-;; TODO:
-;- add 'analyze' function, can base it on expand or another transform to start
-;- modify cps to use ast for lambda's
-;  will need analyze to use the ast, and will need
-;  closure conversion to recognize it, too.
-;  at least for now, closure conversion can output 
-;  regular lambda's, though.
-;  can write initial analyze, but can't get too far without being able
-;  to uniquely ID each lambda
-
-;(define-library (cps-optimizations)
+;(define-library (cps-optimizations) ;; For debugging via local unit tests
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
@@ -29,7 +19,7 @@
       optimize-cps 
       analyze-cps
       opt:contract
-      contract-prims
+      opt:inline-prims
       adb:clear!
       adb:get
       adb:get/default
@@ -426,34 +416,34 @@
     ;; Uses analysis DB, so must be executed after analysis phase
     ;;
     ;; TBD: better to enhance CPS conversion to do this??
-    (define (contract-prims exp . refs*)
+    (define (opt:inline-prims exp . refs*)
       (let ((refs (if (null? refs*)
                       (make-hash-table)
                       (car refs*))))
-;(trace:error `(contract-prims ,exp))
+;(trace:error `(opt:inline-prims ,exp))
         (cond
           ((ref? exp) 
            ;; Replace lambda variables, if necessary
            (let ((key (hash-table-ref/default refs exp #f)))
              (if key
-                 (contract-prims key refs)
+                 (opt:inline-prims key refs)
                  exp)))
           ((ast:lambda? exp)
            (ast:%make-lambda
             (ast:lambda-id exp)
             (ast:lambda-args exp)
-            (map (lambda (b) (contract-prims b refs)) (ast:lambda-body exp))))
+            (map (lambda (b) (opt:inline-prims b refs)) (ast:lambda-body exp))))
           ((const? exp) exp)
           ((quote? exp) exp)
           ((define? exp)
            `(define ,(define->var exp)
-                    ,@(contract-prims (define->exp exp) refs))) ;; TODO: map????
+                    ,@(opt:inline-prims (define->exp exp) refs))) ;; TODO: map????
           ((set!? exp)
            `(set! ,(set!->var exp)
-                  ,(contract-prims (set!->exp exp) refs)))
-          ((if? exp)       `(if ,(contract-prims (if->condition exp) refs)
-                                ,(contract-prims (if->then exp) refs)
-                                ,(contract-prims (if->else exp) refs)))
+                  ,(opt:inline-prims (set!->exp exp) refs)))
+          ((if? exp)       `(if ,(opt:inline-prims (if->condition exp) refs)
+                                ,(opt:inline-prims (if->then exp) refs)
+                                ,(opt:inline-prims (if->else exp) refs)))
           ; Application:
           ((app? exp)
 ;(trace:error `(app? ,exp ,(ast:lambda? (car exp))
@@ -494,14 +484,13 @@
                   (hash-table-set! refs param (car args))
                   (set! args (cdr args)))
                 (ast:lambda-formals->list (car exp))))
-             (contract-prims (car (ast:lambda-body (car exp))) refs))
+             (opt:inline-prims (car (ast:lambda-body (car exp))) refs))
             (else
-              (map (lambda (e) (contract-prims e refs)) exp))))
+              (map (lambda (e) (opt:inline-prims e refs)) exp))))
           (else 
-            (error `(Unexpected expression passed to contract-prims ,exp))))))
+            (error `(Unexpected expression passed to opt:inline-prims ,exp))))))
 
     ;; Do all the expressions contain prim calls?
-;; TODO: check for prim calls accepting no continuation
     (define (all-prim-calls? exps)
       (cond
         ((null? exps) #t)
@@ -645,10 +634,9 @@
     (define (optimize-cps ast)
       (adb:clear!)
       (analyze-cps ast)
-      ;(trace:info "---------------- cps analysis db:")
-      ;(trace:info (adb:get-db))
-      ;ast ;; DEBUGGING!!!
-      (contract-prims 
+      (trace:info "---------------- cps analysis db:")
+      (trace:info (adb:get-db))
+      (opt:inline-prims 
         (opt:contract ast))
     )
 
