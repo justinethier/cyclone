@@ -98,57 +98,57 @@
 ;             3))))
 ;       0)))))
 
-;(define code
-;'(#((record-marker)
-;   #((record-marker) #f (id args body))
-;   #(6
-;     ()
-;     ((#((record-marker)
-;         #((record-marker) #f (id args body))
-;         #(5
-;           (r$2)
-;           ((#((record-marker)
-;               #((record-marker) #f (id args body))
-;               #(4
-;                 (x$3 y$2 z$1)
-;                 ((#((record-marker)
-;                     #((record-marker) #f (id args body))
-;                     #(3
-;                       (r$4)
-;                       ((#((record-marker)
-;                           #((record-marker) #f (id args body))
-;                           #(2
-;                             (r$3)
-;                             ((write #((record-marker)
-;                                       #((record-marker) #f (id args body))
-;                                       #(1 (r$1) ((r$1 %halt))))
-;                                     r$3))))
-;                         (cons x$3 r$4)))))
-;                   (cons y$2 z$1)))))
-;             1
-;             2
-;             3))))
-;       0)))))
-;)
-
 (define code
-'((define in-port:read-buf!
-   #((record-marker)
-     #((record-marker) #f (id args body))
-     #(621
-       (k$807 ptbl$260)
-       ((#((record-marker)
-           #((record-marker) #f (id args body))
-           #(619
-             (result$261)
-             ((in-port:set-buf!
-                #((record-marker)
-                  #((record-marker) #f (id args body))
-                  #(618 (r$809) ((k$807 result$261))))
-                ptbl$260
-                #f))))
-         (cadr ptbl$260)))))))
+'(#((record-marker)
+   #((record-marker) #f (id args body))
+   #(6
+     ()
+     ((#((record-marker)
+         #((record-marker) #f (id args body))
+         #(5
+           (r$2)
+           ((#((record-marker)
+               #((record-marker) #f (id args body))
+               #(4
+                 (x$3 y$2 z$1)
+                 ((#((record-marker)
+                     #((record-marker) #f (id args body))
+                     #(3
+                       (r$4)
+                       ((#((record-marker)
+                           #((record-marker) #f (id args body))
+                           #(2
+                             (r$3)
+                             ((write #((record-marker)
+                                       #((record-marker) #f (id args body))
+                                       #(1 (r$1) ((r$1 %halt))))
+                                     r$3))))
+                         (cons x$3 r$4)))))
+                   (cons y$2 z$1)))))
+             1
+             2
+             3))))
+       0)))))
 )
+
+;(define code
+;'((define in-port:read-buf!
+;   #((record-marker)
+;     #((record-marker) #f (id args body))
+;     #(621
+;       (k$807 ptbl$260)
+;       ((#((record-marker)
+;           #((record-marker) #f (id args body))
+;           #(619
+;             (result$261)
+;             ((in-port:set-buf!
+;                #((record-marker)
+;                  #((record-marker) #f (id args body))
+;                  #(618 (r$809) ((k$807 result$261))))
+;                ptbl$260
+;                #f))))
+;         (cadr ptbl$260)))))))
+;)
 
 (pretty-print
   (optimize-cps code))
