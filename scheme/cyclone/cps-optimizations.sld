@@ -573,10 +573,20 @@
           (inline-ok? (if->then exp) ivars args arg-used return)
           (inline-ok? (if->else exp) ivars args arg-used return))
         ((app? exp)
-         (for-each
-          (lambda (e)
-            (inline-ok? e ivars args arg-used return))
-          (reverse exp))) ;; Ensure args are examined before function
+         (cond
+          ((and (prim? (car exp))
+                (not (prim:mutates? (car exp))))
+           ;; If primitive does not mutate its args, ignore if ivar is used
+           (for-each
+            (lambda (e)
+              (if (not (ref? e))
+                  (inline-ok? e ivars args arg-used return)))
+            (reverse (cdr exp))))
+          (else
+           (for-each
+            (lambda (e)
+              (inline-ok? e ivars args arg-used return))
+            (reverse exp))))) ;; Ensure args are examined before function
         (else
           (error `(Unexpected expression passed to inline prim check ,exp)))))
 
