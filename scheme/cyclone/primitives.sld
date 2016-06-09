@@ -17,6 +17,7 @@
     prim/data-arg?
     prim/c-var-assign
     prim/cvar?
+    prim:mutates?
     prim:cont?
     prim:cont/no-args?
     prim:arg-count?
@@ -25,6 +26,22 @@
     ; prim? : exp -> boolean
     (define (prim? exp)
       (member exp *primitives*))
+    
+    ;; Does primitive mutate any of its arguments?
+    (define (prim:mutates? exp)
+      (member 
+        exp
+       '(
+         Cyc-set-cvar!
+         Cyc-spawn-thread!
+         Cyc-end-thread!
+         set-global!
+         set-cell!
+         set-car!
+         set-cdr!
+         string-set!
+         bytevector-u8-set!
+         vector-set!)))
 
     (define *primitives* '(
          Cyc-global-vars
