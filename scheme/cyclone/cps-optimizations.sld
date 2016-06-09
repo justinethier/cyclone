@@ -541,7 +541,7 @@
     ;;            This is a cons "box" so it can be mutated.
     ;; return - call into this continuation to return early
     (define (inline-ok? exp ivars args arg-used return)
-(trace:error `(inline-ok? ,exp ,ivars ,args ,arg-used))
+      ;(trace:error `(inline-ok? ,exp ,ivars ,args ,arg-used))
       (cond
         ((ref? exp)
          (cond
