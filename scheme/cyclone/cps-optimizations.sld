@@ -17,8 +17,8 @@
 ;  can write initial analyze, but can't get too far without being able
 ;  to uniquely ID each lambda
 
-(define-library (cps-optimizations)
-;(define-library (scheme cyclone cps-optimizations)
+;(define-library (cps-optimizations)
+(define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme cyclone util)
           (scheme cyclone ast)
@@ -482,7 +482,12 @@
                     (lambda (arg)
                       (and (prim-call? arg)
                            (not (prim:cont? (car arg)))))
-                    (cdr exp)))
+                    (cdr exp))
+                  (inline-prim-call? 
+                    (ast:lambda-body (car exp))
+                    (prim-calls->arg-variables (cdr exp))
+                    (ast:lambda-formals->list (car exp)))
+             )
              (let ((args (cdr exp)))
                (for-each
                 (lambda (param)
@@ -504,6 +509,18 @@
          (all-prim-calls? (cdr exps)))
         (else #f)))
 
+    ;; Find all variables passed to all prim calls
+    (define (prim-calls->arg-variables exps)
+      (apply
+        append
+        (map
+          (lambda (exp)
+            (cond
+              ((pair? exp)
+               (filter symbol? (cdr exp)))
+              (else '())))
+          exps)))
+
     ;; Find variables passed to a primitive
     (define (prim-call->arg-variables exp)
       (filter symbol? (cdr exp)))
@@ -524,9 +541,16 @@
     ;;            This is a cons "box" so it can be mutated.
     ;; return - call into this continuation to return early
     (define (inline-ok? exp ivars args arg-used return)
+(trace:error `(inline-ok? ,exp ,ivars ,args ,arg-used))
       (cond
         ((ref? exp)
-         'TODO)
+         (cond
+          ((member exp args)
+           (set-car! arg-used #t))
+          ((member exp ivars)
+           (return #f))
+          (else 
+           #t)))
         ((ast:lambda? exp)
          (for-each
           (lambda (e)
@@ -611,8 +635,8 @@
     (define (optimize-cps ast)
       (adb:clear!)
       (analyze-cps ast)
-      (trace:info "---------------- cps analysis db:")
-      (trace:info (adb:get-db))
+      ;(trace:info "---------------- cps analysis db:")
+      ;(trace:info (adb:get-db))
       ;ast ;; DEBUGGING!!!
       (contract-prims 
         (opt:contract ast))
