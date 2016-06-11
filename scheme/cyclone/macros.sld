@@ -8,11 +8,11 @@
 ;;;;
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          (scheme write) ;; Debug only
+          ;(scheme write) ;; Debug only
           (scheme eval) ;; TODO: without this line, compilation just
                         ;; silently fails. WTF??
-          (scheme cyclone util))
-  ; TODO: really need export-all for these cyclone libs!!
+          (scheme cyclone util)
+  )
   (export
     define-syntax?
     macro:macro?
