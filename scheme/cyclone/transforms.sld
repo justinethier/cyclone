@@ -1234,11 +1234,12 @@
     (cond
      ((> (length unknown-vars) 0)
       (let ((unbound-to-return (list)))
-        (if (member 'eval unknown-vars) 
-            (set! unbound-to-return (cons 'eval unbound-to-return)))
-        (if (or (member 'read unknown-vars) 
-                (member 'read-all unknown-vars))
-            (set! unbound-to-return (cons 'read unbound-to-return)))
+        ;; Legacy? Should not be any reason to return early at this point
+        ;(if (member 'eval unknown-vars) 
+        ;    (set! unbound-to-return (cons 'eval unbound-to-return)))
+        ;(if (or (member 'read unknown-vars) 
+        ;        (member 'read-all unknown-vars))
+        ;    (set! unbound-to-return (cons 'read unbound-to-return)))
         (if (and (> (length unbound-to-return) 0) 
                  (= (length unknown-vars) (length unbound-to-return)))
             (return-unbound unbound-to-return)
