@@ -925,6 +925,11 @@
          (cv-name (mangle (gensym 'c)))
          (lid (allocate-lambda (c-compile-lambda lam trace)))
          (macro? (assoc (st:->var trace) (get-macros)))
+         (num-args-str 
+          (if (and (equal? (car trace) "scheme/base.sld")
+                   (equal? (st:->var trace) 'call/cc))
+            "1" ;; Special case, need to change runtime checks for call/cc
+            (number->string (compute-num-args lam))))
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
@@ -932,7 +937,7 @@
              cv-name ".hdr.grayed = 0;\n"
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
-             cv-name ".num_args = " (number->string (compute-num-args lam)) ";\n"
+             cv-name ".num_args = " num-args-str ";\n"
              cv-name ".num_elements = " (number->string (length free-vars)) ";\n"
              cv-name ".elements = (object *)alloca(sizeof(object) * " 
                      (number->string (length free-vars)) ");\n"
