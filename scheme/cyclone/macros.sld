@@ -9,8 +9,7 @@
 (define-library (scheme cyclone macros)
   (import (scheme base)
           ;(scheme write) ;; Debug only
-          (scheme eval) ;; TODO: without this line, compilation just
-                        ;; silently fails. WTF??
+          (scheme eval)
           (scheme cyclone util)
   )
   (export
