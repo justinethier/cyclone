@@ -773,6 +773,16 @@ static object _Cyc_write(object x, FILE * port)
     fprintf(port, "\"%s\"", ((string_type *) x)->str);
     break;
     // TODO: what about a list? contents should be displayed per (write)
+  case vector_tag:
+    fprintf(port, "#(");
+    for (i = 0; i < ((vector) x)->num_elements; i++) {
+      if (i > 0) {
+        fprintf(port, " ");
+      }
+      _Cyc_write(((vector) x)->elements[i], port);
+    }
+    fprintf(port, ")");
+    break;
   case pair_tag:
     has_cycle = Cyc_has_cycle(x);
     fprintf(port, "(");
