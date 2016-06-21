@@ -1,10 +1,12 @@
-
-;; Copyright 2016 Jason K. MacDuffie
-;; License: MIT (Expat) License
-;;
-;; Right now this uses an LCG, and should probably be replaced
-;; with a higher-quality implementation as soon as possible.
-;; For casual use this will work OK.
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright 2016 Jason K. MacDuffie
+;;;; License: MIT (Expat) License
+;;;;
+;;;; Right now this uses an LCG, and should probably be replaced
+;;;; with a higher-quality implementation as soon as possible.
+;;;; For casual use this will work OK.
 
 (define-library (srfi 27)
   (import (scheme base)
