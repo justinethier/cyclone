@@ -441,4 +441,5 @@ void Cyc_rt_raise(void *data, object err);
 void Cyc_rt_raise2(void *data, const char *msg, object err);
 void Cyc_rt_raise_msg(void *data, const char *err);
 
+double MRG32k3a (double seed);
 #endif                          /* CYCLONE_RUNTIME_H */

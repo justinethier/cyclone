@@ -11,17 +11,18 @@
           (scheme case-lambda)
           (scheme time))
   (export random-integer random-real default-random-source
+          next-mrg32k3a ;; TODO: only here for testing
           make-random-source random-source?
           random-source-state-ref random-source-state-set!
           random-source-randomize! random-source-pseudo-randomize!
           random-source-make-integers random-source-make-reals)
   (begin
     ;; Numbers taken from bsd random
-    (define mult 1103515245)
+    ;(define mult 1103515245)
     (define incr 12345)
     (define m 536870912)
     ;; Cutting off seems like a good idea
-    (define cutoff 100)
+    ;(define cutoff 100)
 
     (define-c next-lcg
       "(void *data, int argc, closure _, object k, object seed)"
@@ -33,6 +34,16 @@
        unsigned int next_seed = ((s * mult) + incr) % m;
        result = obj_int2obj(next_seed);
        return_closcall1(data, k, result);")
+
+    ;; Testing this out
+    ;; TODO: handle ints, too. of course that also adds overhead...
+    (define-c next-mrg32k3a
+      "(void *data, int argc, closure _, object k, object seed)"
+      "double dval = MRG32k3a( double_value(seed) );
+       {
+        make_double(result, dval);
+        return_closcall1(data, k, &result);
+       }")
 
     (define-record-type <random-source>
       (raw-random-source n)
