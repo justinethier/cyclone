@@ -1,41 +1,11 @@
 Initiatives:
 
 Tier 0:
-- CPS optimization - goal is to improve performance through CPS optimization and closure elimination
-  Phases:
-  1) use an AST to represent code instead of direct scheme.
-     the first benefit to this is to allow each lambda to be assigned a 
-     unique ID. there may be other benefits.
-     for now, probably only need an AST node for each type of object that
-     will benefit from it
-  2) build an analysis database to collect information on the code,
-     see chicken internals for ideas
-  3) perform optimizations on the CPS using analysis information
-  4) code size and performance comparison between this and baseline (the master branch, for now)
-
 - Performance
   1) Can we replace alists in any places with hashtables? Will want to measure any improvements obtained this way
 
-- Library support
-
-  Import sets (importing libraries, section 5.2):
-   supported:
-    - library name
-   not supported (not these are defined recursively, and can be nested):
-    - only
-    - except
-    - rename
-    - prefix
-
-
 Tier 1:
 - pass larceny benchmarks (will require some bugfixes):
-
-TODO: sboyer finishes in a reasonable amount of time now, but the collector's memory growth is
-      not being limited. need to test, but I think disabling the growth code after collection
-      is throwing off the collector's memory ratios and causing each major collection to first
-      'bump' gc_grow_heap. anyway, need to figure this out
-
 
   benchmarks that do not finish due to
   missing features:
@@ -47,72 +17,8 @@ TODO: sboyer finishes in a reasonable amount of time now, but the collector's me
   crashes:
     - compiler.scm - Needs to be able to dynamically grow symbol table. needed to hardcode symbol table to 20x its size to be able to generate the C file. Then C file cannot compile; there may be issues with defining functions with the same name as a primitive.
 
-  OK if test errors out if outputs directory is missing, chibi does the same thing.
-  List of all benchmarks, along with comments if they are failing:
-
-    - ack.scm
-    - array1.scm
-    - browse.scm
-    - bv2string.scm
-    - cat.scm
-    - compiler.scm - Issues with symbol table and possibly lexical scoping
-    - conform.scm
-    - cpstak.scm
-    - ctak.scm
-    - deriv.scm
-    - destruc.scm
-    - diviter.scm
-    - divrec.scm
-    - dynamic.scm
-    - earley.scm
-    - equal.scm
-    - fft.scm
-    - fibc.scm
-    - fibfp.scm
-    - fib.scm
-    - gcbench.scm - Needed to manually import (srfi 9)
-    - graphs.scm
-    - lattice.scm
-    - matrix.scm
-    - mazefun.scm
-    - maze.scm
-    - mbrot.scm
-    - mbrotZ.scm - No complex library
-    - mperm.scm
-    - nboyer.scm
-    - nqueens.scm
-    - ntakl.scm
-    - nucleic.scm
-    - paraffins.scm
-    - parsing.scm
-    - peval.scm
-    - pi.scm
-    - pnpoly.scm
-    - primes.scm
-    - puzzle.scm
-    - quicksort.scm
-    - ray.scm
-    - read0.scm - needs open-input-string
-    - read1.scm
-    - sboyer.scm
-    - scheme.scm - Problem with (macro?) being a primitive and defined in application code
-    - simplex.scm
-    - slatex.scm - Need to handle more than one "args" argument to apply
-    - string.scm
-    - sum1.scm
-    - sumfp.scm
-    - sum.scm
-    - tail.scm
-    - takl.scm
-    - tak.scm
-    - triangl.scm
-    - wc.scm
-
-
 Tier 2:
 - srfi 18 - more complex threading examples (probably can wait)
 - api documentation (can wait?)
-- online docs via read-the-docs?
 - higher priority issues (need to be resolved, but can wait?)
   - revisit macro hygiene issues
-  - library issues (name conflicts and limited feature set)
