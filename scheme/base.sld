@@ -157,6 +157,7 @@
     eof-object
     syntax-error
     bytevector-copy
+    bytevector-copy!
     utf8->string
     string->utf8
     denominator
@@ -166,7 +167,6 @@
 ; Possibly missing functions:
 ;
 ;    ; following byte vector functions are not implemented yet:
-;    bytevector-copy!
 ;    get-output-bytevector
 ;    open-input-bytevector
 ;    open-output-bytevector
@@ -700,6 +700,19 @@
                (start (if (> (length opts) 0) (car opts) 0))
                (end (if (> (length opts) 1) (cadr opts) len)))
         (Cyc-bytevector-copy bv start end)))
+    (define (bytevector-copy! to at from . o)
+      (let* ((start (if (pair? o) (car o) 0))
+             (end (if (and (pair? o) (pair? (cdr o)))
+                      (cadr o)
+                      (bytevector-length from)))
+             (limit (min end (+ start (- (bytevector-length to) at)))))
+        (if (<= at start)
+            (do ((i at (+ i 1)) (j start (+ j 1)))
+                ((>= j limit))
+              (bytevector-u8-set! to i (bytevector-u8-ref from j)))
+            (do ((i (+ at (- end start 1)) (- i 1)) (j (- limit 1) (- j 1)))
+                ((< j start))
+              (bytevector-u8-set! to i (bytevector-u8-ref from j))))))
     (define (utf8->string bv . opts)
       (letrec ((len (bytevector-length bv))
                (start (if (> (length opts) 0) (car opts) 0))
