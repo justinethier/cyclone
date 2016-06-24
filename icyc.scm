@@ -8,6 +8,7 @@
 ;;;;
 (import (scheme cyclone common)
         (scheme cyclone libraries)
+        (scheme cyclone util)
         (scheme base)
         (scheme char)
         (scheme lazy)
@@ -57,6 +58,11 @@
       (else 
         (display "\n")
         (exit 0)))))
+
+;; Use a special version of load to pull defs into the repl's env
+(define (load2 f)
+  (load f *icyc-env*))
+(env:define-variable! 'load load2 *icyc-env*)
 
 (let ((args (command-line-arguments)))
   (if (= (length args) 1)
