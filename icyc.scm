@@ -58,4 +58,7 @@
         (display "\n")
         (exit 0)))))
 
-(repl:next-line)
+(let ((args (command-line-arguments)))
+  (if (= (length args) 1)
+      (load (car args) *icyc-env*))
+  (repl:next-line))
