@@ -212,6 +212,10 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   return h;
 }
 
+/**
+ * Print heap usage information.
+ * Before calling this function the current thread must have the heap lock
+ */
 void gc_print_stats(gc_heap * h)
 {
   gc_free_list *f;
@@ -229,7 +233,13 @@ void gc_print_stats(gc_heap * h)
       if (f->size > free_max)
         free_max = f->size;
     }
-    fprintf(stdout,
+    if (free == 0){
+      // Page is completely unused
+      free = h->size;
+      free_chunks = 1;
+      free_min = free_max = h->size;
+    }
+    fprintf(stderr,
             "Heap page size=%u, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
             h->size, h->size - free, free, free_chunks, free_min, free_max);
   }
@@ -605,6 +615,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
   object p, end;
   gc_free_list *q, *r, *s;
+  gc_heap *orig_heap_ptr = h;
 
   //
   // Lock the heap to prevent issues with allocations during sweep
@@ -717,6 +728,11 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     sum_freed += heap_freed;
     heap_freed = 0;
   }
+
+// DEBUGGING:
+//fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
+//gc_print_stats(orig_heap_ptr);
+
   pthread_mutex_unlock(&heap_lock);
   if (sum_freed_ptr)
     *sum_freed_ptr = sum_freed;
