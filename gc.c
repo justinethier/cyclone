@@ -264,6 +264,7 @@ void gc_print_stats(gc_heap * h)
     fprintf(stderr,
             "Heap page size=%u, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
             h->size, h->size - free, free, free_chunks, free_min, free_max);
+    TODO: include gc_is_heap_empty in this printf
   }
 }
 
