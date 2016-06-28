@@ -225,9 +225,9 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
   if (prev_page == NULL || page == NULL) {
     return NULL;
   }
-#if GC_DEBUG_PRINTFS
+//#if GC_DEBUG_PRINTFS
   fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
-#endif
+//#endif
 
   prev_page->next = page->next;
   free(page);
@@ -265,6 +265,15 @@ void gc_print_stats(gc_heap * h)
             "Heap page size=%u, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
             h->size, h->size - free, free, free_chunks, free_min, free_max);
   }
+}
+
+int gc_is_heap_empty(gc_heap *h) 
+{
+  return (h && (h->free_list == NULL) ||
+               (h->free_list->next &&
+               // TODO: think this case is busted, need to debug
+                h->free_list->next->next == NULL &&
+                h->free_list->next->size == h->size));
 }
 
 // Copy given object into given heap object
@@ -637,7 +646,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
   object p, end;
   gc_free_list *q, *r, *s;
-  gc_heap *orig_heap_ptr = h, *prev_h = h;
+  gc_heap *orig_heap_ptr = h, *prev_h = NULL;
 
   //
   // Lock the heap to prevent issues with allocations during sweep
@@ -648,7 +657,13 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   // how much time is even spent sweeping
   //
   pthread_mutex_lock(&heap_lock);
-  for (; h; h = h->next) {      // All heaps
+//
+//// DEBUGGING:
+//fprintf(stderr, "\nBefore sweep -------------------------\n");
+//fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
+//gc_print_stats(orig_heap_ptr);
+//
+  for (; h; prev_h = h, h = h->next) {      // All heaps
 #if GC_DEBUG_TRACE
     fprintf(stderr, "sweep heap %p, size = %zu\n", h, (size_t) h->size);
 #endif
@@ -747,11 +762,18 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     }
     //h->free_size += heap_freed;
     cached_heap_free_sizes[heap_type] += heap_freed;
+//    if (gc_is_heap_empty(h)){
+//        unsigned int h_size = h->size;
+//        gc_heap_free(h, prev_h);
+//        cached_heap_free_sizes[heap_type] -= h_size;
+//        cached_heap_total_sizes[heap_type] -= h_size;
+//    }
     sum_freed += heap_freed;
     heap_freed = 0;
   }
 
-// DEBUGGING:
+//// DEBUGGING:
+//fprintf(stderr, "\nAfter sweep -------------------------\n");
 //fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
 //gc_print_stats(orig_heap_ptr);
 
