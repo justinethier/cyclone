@@ -242,6 +242,7 @@ void gc_print_stats(gc_heap * h)
 {
   gc_free_list *f;
   unsigned int free, free_chunks, free_min, free_max;
+  int heap_is_empty;
   for (; h; h = h->next) {
     free = 0;
     free_chunks = 0;
@@ -255,16 +256,16 @@ void gc_print_stats(gc_heap * h)
       if (f->size > free_max)
         free_max = f->size;
     }
-    if (free == 0){
-      // Page is completely unused
-      free = h->size;
-      free_chunks = 1;
-      free_min = free_max = h->size;
-    }
+    //if (free == 0){
+    //  // Page is completely unused
+    //  free = h->size;
+    //  free_chunks = 1;
+    //  free_min = free_max = h->size;
+    //}
+    heap_is_empty = gc_is_heap_empty(h);
     fprintf(stderr,
-            "Heap page size=%u, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
-            h->size, h->size - free, free, free_chunks, free_min, free_max);
-    TODO: include gc_is_heap_empty in this printf
+            "Heap page size=%u, is empty=%d, used=%u, free=%u, free chunks=%u, min=%u, max=%u\n",
+            h->size, heap_is_empty, h->size - free, free, free_chunks, free_min, free_max);
   }
 }
 
@@ -658,12 +659,12 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   // how much time is even spent sweeping
   //
   pthread_mutex_lock(&heap_lock);
-//
-//// DEBUGGING:
-//fprintf(stderr, "\nBefore sweep -------------------------\n");
-//fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
-//gc_print_stats(orig_heap_ptr);
-//
+
+// DEBUGGING:
+fprintf(stderr, "\nBefore sweep -------------------------\n");
+fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
+gc_print_stats(orig_heap_ptr);
+
   for (; h; prev_h = h, h = h->next) {      // All heaps
 #if GC_DEBUG_TRACE
     fprintf(stderr, "sweep heap %p, size = %zu\n", h, (size_t) h->size);
@@ -773,10 +774,10 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     heap_freed = 0;
   }
 
-//// DEBUGGING:
-//fprintf(stderr, "\nAfter sweep -------------------------\n");
-//fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
-//gc_print_stats(orig_heap_ptr);
+// DEBUGGING:
+fprintf(stderr, "\nAfter sweep -------------------------\n");
+fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
+gc_print_stats(orig_heap_ptr);
 
   pthread_mutex_unlock(&heap_lock);
   if (sum_freed_ptr)
