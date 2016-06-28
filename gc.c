@@ -213,6 +213,28 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
 }
 
 /**
+ * @brief   Free a page of the heap
+ * @usage
+ * @param   page        Page to free
+ * @param   prev_page   Previous page in the heap
+ * @return  Previous page if successful, NULL otherwise
+ */
+gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
+{
+  // At least for now, do not free first page
+  if (prev_page == NULL || page == NULL) {
+    return NULL;
+  }
+#if GC_DEBUG_PRINTFS
+  fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
+#endif
+
+  prev_page->next = page->next;
+  free(page);
+  return prev_page;
+}
+
+/**
  * Print heap usage information.
  * Before calling this function the current thread must have the heap lock
  */
@@ -615,7 +637,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
   object p, end;
   gc_free_list *q, *r, *s;
-  gc_heap *orig_heap_ptr = h;
+  gc_heap *orig_heap_ptr = h, *prev_h = h;
 
   //
   // Lock the heap to prevent issues with allocations during sweep
