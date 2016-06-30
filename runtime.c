@@ -3253,8 +3253,14 @@ void dispatch_apply_va(void *data, int argc, object clo, object cont, object fun
   object tmp = NULL;
   int i;
   va_list ap;
+  argc = argc - 1; // Required for "dispatch" function
+  // TODO: pack all this up in a macro, and use it for apply_va also
+  // TODO: validate last arg is a list
+  // TODO: if only one non-func arg, just call apply with it (fast path)
+  // TODO: else, append all args to a new list (local allocs via alloca),
+  //             and apply that list
   va_start(ap, func);
-  for (i = 1; i < argc - 1; i++) {
+  for (i = 1; i < argc; i++) {
     tmp = va_arg(ap, object);
   }
   va_end(ap);
