@@ -3248,28 +3248,80 @@ void apply_va(void *data, object cont, int argc, object func, ...)
   apply(data, cont, func, tmp);
 }
 
+#define stack_append(lis, value) { \
+  pair_type *tmp2 = alloca(sizeof(pair_type)); \
+  set_pair(tmp2, value, lis); \
+  lis = tmp2; \
+}
+
+#define stack_list_prepend(src, dest) { \
+  while (src) { \
+    pair_type *tmp2 = alloca(sizeof(pair_type)); \
+    set_pair(tmp2, car(src), dest); \
+    dest = tmp2; \
+    src = cdr(src); \
+  } \
+}
+
 void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...)
 {
-  object tmp = NULL;
+  list lis = NULL, tmp, l;
   int i;
   va_list ap;
   argc = argc - 1; // Required for "dispatch" function
   // TODO: pack all this up in a macro, and use it for apply_va also
   // TODO: validate last arg is a list
-  // TODO: if only one non-func arg, just call apply with it (fast path)
-  // TODO: else, append all args to a new list (local allocs via alloca),
-  //             and apply that list
   va_start(ap, func);
-  for (i = 1; i < argc; i++) {
-    tmp = va_arg(ap, object);
+  if (argc == 2) {
+    // Fast path, nothing to append
+    lis = va_arg(ap, object);
+    Cyc_check_pair_or_null(data, lis);
+  } else {
+    for (i = 1; i < argc; i++) {
+      tmp = va_arg(ap, object);
+      if (tmp == NULL){
+        continue;
+      } else if (is_object_type(tmp)) {
+        if (type_of(tmp) == pair_tag) {
+          l = tmp;
+          stack_list_prepend(l, lis);
+          //while (l) {
+          //  pair_type *tmp2 = alloca(sizeof(pair_type));
+          //  set_pair(tmp2, car(l), lis);
+          //  lis = tmp2;
+          //  l = cdr(l);
+          //}
+        } else {
+          stack_append(lis, tmp);
+          //pair_type *tmp2 = alloca(sizeof(pair_type));
+          //set_pair(tmp2, tmp, lis);
+          //lis = tmp2;
+        }
+      } else {
+        stack_append(lis, tmp);
+        //pair_type *tmp2 = alloca(sizeof(pair_type));
+        //set_pair(tmp2, tmp, lis);
+        //lis = tmp2;
+      }
+    }
+    // Reverse lis
+    l = lis;
+    lis = NULL;
+    stack_list_prepend(l, lis);
+    //while (l) {
+    //  pair_type *tmp2 = alloca(sizeof(pair_type));
+    //  set_pair(tmp2, car(l), lis);
+    //  lis = tmp2;
+    //  l = cdr(l);
+    //}
   }
   va_end(ap);
-//  fprintf(stdout, "DEBUG applying argc %d, func ", argc);
-//  Cyc_display(func, stdout);
-//  fprintf(stdout, " to values ");
-//  Cyc_display(tmp, stdout);
-//  fprintf(stdout, "\n");
-  apply(data, cont, func, tmp);
+  //fprintf(stdout, "DEBUG applying argc %d, func ", argc);
+  //Cyc_display(func, stdout);
+  //fprintf(stdout, " to values ");
+  //Cyc_display(lis, stdout);
+  //fprintf(stdout, "\n");
+  apply(data, cont, func, lis);
 }
 
 /*

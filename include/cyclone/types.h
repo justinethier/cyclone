@@ -440,6 +440,13 @@ typedef pair_type *pair;
   n.pair_car = a; \
   n.pair_cdr = d;
 
+#define set_pair(n,a,d) \
+  n->hdr.mark = gc_color_red; \
+  n->hdr.grayed = 0; \
+  n->tag = pair_tag; \
+  n->pair_car = a; \
+  n->pair_cdr = d;
+
 #define make_cell(n,a) make_pair(n,a,NULL);
 
 #define car(x)    (((pair_type *) x)->pair_car)
