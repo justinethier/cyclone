@@ -126,6 +126,8 @@ object Cyc_get_cvar(object var);
 object Cyc_set_cvar(object var, object value);
 object apply(void *data, object cont, object func, object args);
 void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
+void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
+void apply_va(void *data, object cont, int argc, object func, ...);
 object Cyc_string_cmp(void *data, object str1, object str2);
 void dispatch_string_91append(void *data, int argc, object clo, object cont,
                               object str1, ...);
