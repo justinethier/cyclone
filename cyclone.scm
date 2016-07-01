@@ -365,9 +365,6 @@
   (if (member "-d" args)
      (set! compile? #f)) ;; Debug, do not run GCC
   (cond
-    ((< (length args) 1)
-     (display "cyclone: no input file")
-     (newline))
     ((or (member "-h" args)
          (member "--help" args))
      (display "
@@ -387,6 +384,10 @@
      (display *version-banner*))
     ((member "--autogen" args)
      (autogen "autogen.out"))
+    ((or (< (length args) 1)
+         (null? non-opts))
+     (display "cyclone: no input file")
+     (newline))
     (else
       (run-compiler non-opts compile?))))
 
