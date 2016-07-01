@@ -241,7 +241,7 @@
          ((eq? p '<)                     "Cyc_num_lt")
          ((eq? p '>=)                    "Cyc_num_gte")
          ((eq? p '<=)                    "Cyc_num_lte")
-         ((eq? p 'apply)                 "apply")
+         ((eq? p 'apply)                 "apply_va")
          ((eq? p '%halt)                 "__halt")
          ((eq? p 'exit)                  "__halt")
          ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
@@ -519,6 +519,7 @@
         (and (prim? exp)
              (member exp '(error Cyc-write Cyc-display 
                            number->string string->number string-append 
+                           apply
                            make-bytevector
                            bytevector
                            bytevector-append
