@@ -3291,14 +3291,14 @@ void dispatch_apply_va(void *data, int argc, object clo, object cont, object fun
   apply(data, cont, func, lis);
 }
 
-void apply_va(void *data, object cont, int argc, object func, ...)
+object apply_va(void *data, object cont, int argc, object func, ...)
 {
   list lis = NULL, l;
   object tmp;
   int i;
   va_list ap;
   do_apply_va
-  apply(data, cont, func, tmp);
+  return apply(data, cont, func, lis); // Never actually returns
 }
 
 /*
