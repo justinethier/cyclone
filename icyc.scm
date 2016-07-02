@@ -8,6 +8,7 @@
 ;;;;
 (import (scheme cyclone common)
         (scheme cyclone libraries)
+        (scheme cyclone pretty-print)
         (scheme cyclone util)
         (scheme base)
         (scheme char)
