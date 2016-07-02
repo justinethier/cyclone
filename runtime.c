@@ -124,7 +124,7 @@ static symbol_type __EOF = { {0}, eof_tag, "", NULL };  // symbol_type in lieu o
 
 const object Cyc_EOF = &__EOF;
 static ck_hs_t symbol_table;
-static int symbol_table_size = 65536;
+static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
 
 // Functions to support concurrency kit hashset
@@ -192,7 +192,7 @@ void gc_init_heap(long heap_size)
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
-                  &my_allocator, symbol_table_size, 43423)) {
+                  &my_allocator, symbol_table_initial_size, 43423)) {
     fprintf(stderr, "Unable to initialize symbol table\n");
     exit(1);
   }
@@ -289,11 +289,6 @@ object add_symbol(symbol_type * psym)
 {
   //printf("Adding symbol %s, table size = %ld\n", symbol_pname(psym), ck_hs_count(&symbol_table));
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
-  if (ck_hs_count(&symbol_table) == symbol_table_size) {
-    // TODO: grow table if it is not big enough
-    fprintf(stderr, "Ran out of symbol table entries\n");
-    exit(1);
-  }
   set_insert(&symbol_table, psym);
   pthread_mutex_unlock(&symbol_table_lock);
   return psym;
