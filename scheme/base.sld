@@ -843,6 +843,38 @@
                       fill)))
         (list->string
           (apply make-list (cons k fill*)))))
+    ;(define-syntax parameterize
+    ;  (syntax-rules ()
+    ;    ((parameterize
+    ;       ("step")
+    ;       ((param value p old new) ...)
+    ;       ()
+    ;       body)
+    ;     (let ((p param) ...)
+    ;       (let ((old (p))
+    ;             ...
+    ;             (new ((p <param-convert>) value))
+    ;             ...)
+    ;         (dynamic-wind
+    ;           (lambda () (p <param-set!> new) ...)
+    ;           (lambda () . body)
+    ;           (lambda () (p <param-set!> old) ...)))))
+    ;    ((parameterize
+    ;       ("step")
+    ;       args
+    ;       ((param value) . rest)
+    ;       body)
+    ;     (parameterize
+    ;       ("step")
+    ;       ((param value p old new) . args)
+    ;       rest
+    ;       body))
+    ;    ((parameterize ((param value) ...) . body)
+    ;     (parameterize
+    ;       ("step")
+    ;       ()
+    ;       ((param value) ...)
+    ;       body))))
     (define (make-parameter init . o)
       (let* ((converter
                (if (pair? o) (car o) (lambda (x) x)))
@@ -856,7 +888,7 @@
             ((eq? (car args) '<param-convert>)
              converter)
            (else
-             (error "bad parameter syntax"))))))
+             (error "bad parameter syntax" args))))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
     (define current-input-port
