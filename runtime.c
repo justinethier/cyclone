@@ -79,7 +79,7 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index)
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, a1) \
-if (type_of(clo) == pair_tag || prim(clo)) { \
+if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 0, (closure)(a1), clo); \
 } else { \
    ((clo)->fn)(td, 1, clo, a1);\
@@ -96,7 +96,7 @@ if (type_of(clo) == pair_tag || prim(clo)) { \
  } \
 }
 #define closcall2(td, clo, a1, a2) \
-if (type_of(clo) == pair_tag || prim(clo)) { \
+if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 1, (closure)(a1), clo,a2); \
 } else { \
   ((clo)->fn)(td, 2, clo, a1, a2);\

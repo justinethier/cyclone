@@ -90,6 +90,9 @@ enum object_tag {
       , vector_tag              // 19
 };
 
+#define type_is_pair_prim(clo) \
+  (type_of(clo) >= pair_tag)
+
 // Define the size of object tags
 typedef unsigned char tag_type;
 
