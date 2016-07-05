@@ -38,12 +38,14 @@ My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C 
 As outlined in the presentation, some of the difficulties in compiling to C are:
 
 > Scheme has, and C does not have
+>
 >  -  tail-calls a.k.a. tail-recursion optimization
 >  -  first-class continuations
 >  -  closures of indefinite extent
 >  -  automatic memory management i.e. garbage collection (GC)
 >
 > Implications
+>
 >  -  cannot translate (all) Scheme calls into C calls
 >  -  have to implement continuations
 >  -  have to implement closures
