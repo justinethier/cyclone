@@ -3443,7 +3443,7 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   printf("Done with GC\n");
 #endif
 
-  if (type_of(thd->gc_cont) == pair_tag || prim(thd->gc_cont)) {
+  if (type_is_pair_prim(thd->gc_cont)) {
     Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
   } else {
     do_dispatch(thd, thd->gc_num_args, ((closure) (thd->gc_cont))->fn,
