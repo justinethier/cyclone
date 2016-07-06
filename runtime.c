@@ -550,6 +550,24 @@ object Cyc_has_cycle(object lst)
   }
 }
 
+/**
+ * Write string representation of a double to a buffer.
+ * Added code from Chibi Scheme to print a ".0" if the 
+ * double is a whole number (EG: 3.0) to avoid confusion
+ * in the output (EG: was "3").
+ */
+int double2buffer(char *buf, int buf_size, double num)
+{
+  int i;
+  i = snprintf(buf, buf_size, "%.15g", num);
+  if (!strchr(buf, '.') && !strchr(buf, 'e')) {
+    buf[i++] = '.';
+    buf[i++] = '0';
+    buf[i++] = '\0';
+  }
+  return i;
+}
+
 // TODO: need to change I/O functions (including display/write below)
 // to accept an optional port arg. also, if port is not specified, should
 // use (current-output-port) instead of stdout. will need to expose the
@@ -648,18 +666,12 @@ object Cyc_display(object x, FILE * port)
   case integer_tag:
     fprintf(port, "%d", ((integer_type *) x)->value);
     break;
-  case double_tag:
-    fprintf(port, "%.16g", ((double_type *) x)->value);
-
-// TODO: extract this out into a common function, and call it here and in number->string.
-    // From chibi-scheme. g minimizes the amount of displayed information, and no decimal point is
-    // printed for whole-number doubles (EG: 3.0 is printed as 3). so detect those cases and add ".0"
-//    i = snprintf(numbuf, NUMBUF_LEN, "%.15g", f); // buflen is 32
-//    if (!strchr(numbuf, '.') && !strchr(numbuf, 'e')) {
-//      numbuf[i++] = '.'; numbuf[i++] = '0'; numbuf[i++] = '\0';
-//    }
-
+  case double_tag: {
+    char buf[33];
+    double2buffer(buf, 32, ((double_type *) x)->value);
+    fprintf(port, "%s", buf);
     break;
+  }
   case string_tag:
     fprintf(port, "%s", ((string_type *) x)->str);
     break;
@@ -1280,7 +1292,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
     } else if (type_of(n) == integer_tag) {
       snprintf(buffer, 1024, "%d", ((integer_type *) n)->value);
     } else if (type_of(n) == double_tag) {
-      snprintf(buffer, 1024, "%.16g", ((double_type *) n)->value);
+      double2buffer(buffer, 1024, ((double_type *) n)->value);
     } else {
       Cyc_rt_raise2(data, "number->string - Unexpected object", n);
     }
