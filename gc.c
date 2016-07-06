@@ -448,8 +448,13 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
       }
       h_last = h_last->next;
     }
-    if (new_size == 0)
+    if (new_size == 0) {
       new_size = prev_size + h_last->size;
+    }
+    // Fast-track heap page size if allocating a large block
+    if (new_size < size && size < HEAP_SIZE) {
+      new_size = HEAP_SIZE;
+    }
 #if GC_DEBUG_TRACE
     fprintf(stderr, "Growing heap %d new page size = %zu\n", heap_type,
             new_size);
