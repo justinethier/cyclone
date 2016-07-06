@@ -650,6 +650,15 @@ object Cyc_display(object x, FILE * port)
     break;
   case double_tag:
     fprintf(port, "%.16g", ((double_type *) x)->value);
+
+// TODO: extract this out into a common function, and call it here and in number->string.
+    // From chibi-scheme. g minimizes the amount of displayed information, and no decimal point is
+    // printed for whole-number doubles (EG: 3.0 is printed as 3). so detect those cases and add ".0"
+//    i = snprintf(numbuf, NUMBUF_LEN, "%.15g", f); // buflen is 32
+//    if (!strchr(numbuf, '.') && !strchr(numbuf, 'e')) {
+//      numbuf[i++] = '.'; numbuf[i++] = '0'; numbuf[i++] = '\0';
+//    }
+
     break;
   case string_tag:
     fprintf(port, "%s", ((string_type *) x)->str);
