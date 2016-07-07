@@ -1687,6 +1687,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   object v = NULL;
   object fill = boolean_f;
   int i, ulen;
+  size_t element_vec_size;
   va_list ap;
   va_start(ap, len);
   if (argc > 1) {
@@ -1695,35 +1696,41 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   va_end(ap);
   Cyc_check_num(data, len);
   ulen = unbox_number(len);
+  element_vec_size = sizeof(object) * ulen;
 
-// TODO: if vector is too big, would need to alloc directly on the heap
-//  if (ulen < 10000) {
-  v = alloca(sizeof(vector_type));
-  ((vector) v)->hdr.mark = gc_color_red;
-  ((vector) v)->hdr.grayed = 0;
-  ((vector) v)->tag = vector_tag;
-  ((vector) v)->num_elements = ulen;
-  ((vector) v)->elements =
-      (((vector) v)->num_elements > 0) ?
-      (object *) alloca(sizeof(object) * ((vector) v)->num_elements) : NULL;
+  if (element_vec_size >= MAX_STACK_OBJ) {
+    // If vector is too large to allocate on the stack, allocate on heap
+    //
+    // TODO: mark this thread as potentially blocking before doing
+    //       the allocation????
+    int heap_grown;
+    v = gc_alloc(Cyc_heap, 
+                 sizeof(vector_type) + element_vec_size,
+                 boolean_f, // OK to populate manually over here
+                 (gc_thread_data *)data, 
+                 &heap_grown);
+    ((vector) v)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    ((vector) v)->hdr.grayed = 0;
+    ((vector) v)->tag = vector_tag;
+    ((vector) v)->num_elements = ulen;
+    ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
+  } else {
+    v = alloca(sizeof(vector_type));
+    ((vector) v)->hdr.mark = gc_color_red;
+    ((vector) v)->hdr.grayed = 0;
+    ((vector) v)->tag = vector_tag;
+    ((vector) v)->num_elements = ulen;
+    ((vector) v)->elements = NULL;
+
+    if (ulen > 0) {
+      ((vector) v)->elements = 
+        (object *) alloca(sizeof(object) * ((vector) v)->num_elements);
+    }
+  }
+
   for (i = 0; i < ((vector) v)->num_elements; i++) {
     ((vector) v)->elements[i] = fill;
   }
-//  } else {
-//    // Experimenting with heap allocation if vector is too large
-//    int heap_grown;
-//    vector_type *vt = gc_alloc(Cyc_heap,
-//                               sizeof(vector_type) + sizeof(object) * ulen,
-//                               boolean_f, (gc_thread_data *)data, &heap_grown);
-//    mark(vt) = ((gc_thread_data *)data)->gc_alloc_color;
-//    type_of(vt) = vector_tag;
-//    vt->num_elements = ulen;
-//    vt->elements = (object *)((char *)vt) + sizeof(vector_type);
-//    for (i = 0; i < ulen; i++) {
-//      vt->elements[i] = fill;
-//    }
-//    v = vt;
-//  }
   return_closcall1(data, cont, v);
 }
 

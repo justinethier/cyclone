@@ -433,7 +433,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
   pthread_mutex_lock(&heap_lock);
   // Compute size of new heap page
   if (heap_type == HEAP_HUGE) {
-    new_size = size;
+    new_size = gc_heap_align(size);
   } else {
     // Grow heap gradually using fibonnaci sequence.
     size_t prev_size = GROW_HEAP_BY_SIZE;

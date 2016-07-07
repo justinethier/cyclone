@@ -54,7 +54,7 @@
 #define DEBUG_SHOW_DIAG 0
 
 // Show diagnostic information before/after sweeping
-#define GC_DEBUG_SHOW_SWEEP_DIAG 1
+#define GC_DEBUG_SHOW_SWEEP_DIAG 0
 
 // GC debugging flags
 #define GC_DEBUG_TRACE 0
