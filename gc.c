@@ -433,7 +433,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
   pthread_mutex_lock(&heap_lock);
   // Compute size of new heap page
   if (heap_type == HEAP_HUGE) {
-    new_size = gc_heap_align(size);
+    new_size = gc_heap_align(size) + 128;
     while (h_last->next) {
       h_last = h_last->next;
     }
@@ -496,11 +496,14 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
         } else {                /* Take the whole chunk */
           f1->next = f2->next;
         }
-        // Copy object into heap now to avoid any uninitialized memory issues
-        gc_copy_obj(f2, obj, thd);
-        //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
-        cached_heap_free_sizes[heap_type] -=
-            gc_allocated_bytes(obj, NULL, NULL);
+
+        if (heap_type != HEAP_HUGE) {
+          // Copy object into heap now to avoid any uninitialized memory issues
+          gc_copy_obj(f2, obj, thd);
+          //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
+          cached_heap_free_sizes[heap_type] -=
+              gc_allocated_bytes(obj, NULL, NULL);
+        }
         pthread_mutex_unlock(&heap_lock);
         return f2;
       }
