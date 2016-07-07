@@ -224,7 +224,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
 {
   // At least for now, do not free first page
   if (prev_page == NULL || page == NULL) {
-    return NULL;
+    return page;
   }
 //#if GC_DEBUG_PRINTFS
   fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
@@ -237,9 +237,14 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
 
 int gc_is_heap_empty(gc_heap *h) 
 {
-  // TODO: this function does not work yet!!
-  if (h == NULL || h->free_list == NULL) return 1;
-  return 0;
+  gc_free_list *f;
+  if (!h || !h->free_list) return 0;
+
+  f = h->free_list;
+  if (f->size != 0 || !f->next) return 0;
+
+  f = f->next;
+  return (f->size + gc_heap_align(gc_free_chunk_size)) == h->size;
 }
 
 /**
@@ -776,12 +781,12 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
 // TODO: with huge heaps, this becomes more important. one of the huge
 //       pages only has one object, so it is likely that the page
 //       will become free at some point and could be reclaimed.
-//    if (gc_is_heap_empty(h)){
-//        unsigned int h_size = h->size;
-//        gc_heap_free(h, prev_h);
-//        cached_heap_free_sizes[heap_type] -= h_size;
-//        cached_heap_total_sizes[heap_type] -= h_size;
-//    }
+    if (gc_is_heap_empty(h)){
+        unsigned int h_size = h->size;
+        h = gc_heap_free(h, prev_h);
+        cached_heap_free_sizes[heap_type] -= h_size;
+        cached_heap_total_sizes[heap_type] -= h_size;
+    }
     sum_freed += heap_freed;
     heap_freed = 0;
   }
