@@ -429,16 +429,18 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
 int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
 {
   size_t cur_size, new_size;
-  gc_heap *h_last, *h_new;
+  gc_heap *h_last = h, *h_new;
   pthread_mutex_lock(&heap_lock);
   // Compute size of new heap page
   if (heap_type == HEAP_HUGE) {
     new_size = gc_heap_align(size);
+    while (h_last->next) {
+      h_last = h_last->next;
+    }
   } else {
     // Grow heap gradually using fibonnaci sequence.
     size_t prev_size = GROW_HEAP_BY_SIZE;
     new_size = 0;
-    h_last = h;
     while (h_last->next) {
       if (new_size < HEAP_SIZE) {
         new_size = prev_size + h_last->size;
