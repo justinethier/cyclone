@@ -184,6 +184,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h = malloc(padded_size);      // TODO: mmap?
   if (!h)
     return NULL;
+  h->type = heap_type;
   h->size = size;
   //h->free_size = size;
   cached_heap_total_sizes[heap_type] += size;

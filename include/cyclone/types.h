@@ -142,8 +142,16 @@ struct gc_thread_data_t {
 
 /* GC data structures */
 
-typedef enum { HEAP_SM = 0, HEAP_MED, HEAP_REST
-} cached_heap_type;
+/**
+ * Group heap pages by type, to attempt to limit fragmentation
+ * and improve performance.
+ */
+typedef enum { 
+    HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
+  , HEAP_MED     // 64 byte objects (twice the min)
+  , HEAP_HUGE    // Huge objects, 1 per page
+  , HEAP_REST    // Everything else
+} gc_heap_type;
 
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
@@ -153,6 +161,7 @@ struct gc_free_list_t {
 
 typedef struct gc_heap_t gc_heap;
 struct gc_heap_t {
+  gc_heap_type type;
   unsigned int size;
   unsigned int chunk_size;      // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
