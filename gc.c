@@ -226,9 +226,9 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
   if (prev_page == NULL || page == NULL) {
     return page;
   }
-//#if GC_DEBUG_PRINTFS
+#if GC_DEBUG_PRINTFS
   fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
-//#endif
+#endif
 
   prev_page->next = page->next;
   free(page);
