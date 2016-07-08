@@ -877,11 +877,13 @@ object memqp(void *data, object x, list l)
 }
 
 /**
+ * Check two objects for deep equality
  */
 object equalp(object x, object y)
 {
-  object slow_lis = x, fast_lis = NULL;
   int second_cycle = 0;
+  object slow_lis = x, fast_lis = NULL;
+  object pcar_x = &second_cycle, pcar_y = &second_cycle; // never a car value
 
   if (Cyc_is_pair(x) == boolean_t &&
       Cyc_is_pair(cdr(x)) == boolean_t){
@@ -897,8 +899,15 @@ object equalp(object x, object y)
       return boolean_f;
 
     // Both objects are lists at this point, compare cars
-    if (boolean_f == equalp(car(x), car(y)))
-      return boolean_f;
+    if (pcar_x == car(x) &&
+        pcar_y == car(y)) {
+      // do nothing, already equal
+    } else {
+      if (boolean_f == equalp(car(x), car(y)))
+        return boolean_f;
+      pcar_x = car(x);
+      pcar_y = car(y);
+    }
 
     // If there is no cycle, keep checking equality
     if (fast_lis == NULL ||
