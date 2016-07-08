@@ -1,3 +1,11 @@
+; 1
+; (())
+; 2
+; ((()) (()))
+; 3
+; (((()) (())) ((()) (())) ((()) (())))
+;4
+;((((()) (())) ((()) (())) ((()) (()))) (((()) (())) ((()) (())) ((()) (()))) (((()) (())) ((()) (())) ((()) (()))) (((()) (())) ((()) (())) ((()) (()))))
 
 (import (scheme base)
         (scheme read)
@@ -39,14 +47,10 @@
   (let ((x (make-test-tree1 n))
         (y (make-test-tree1 n)))
 
-(write 1) (newline)
-(write (make-test-tree1 1)) (newline)
-(write 2) (newline)
-(write (make-test-tree1 2)) (newline)
-(write 3) (newline)
-(write (make-test-tree1 3)) (newline)
-    (write x) 
-    (newline)
+;(write 10) (newline)
+;(write (make-test-tree1 10)) (newline)
+;    (write x) 
+;    (newline)
     (equal? x y)))
     ;(iterate n (hide n (lambda () (equal? x y))))))
 
@@ -58,7 +62,7 @@
 
 (define (main)
   (let* ((input0 100)
-         (input1 1) ;100)
+         (input1 50) ;100)
          (input2 8)
          (input3 1000)
          (input4 2000)
