@@ -1364,6 +1364,10 @@
 ;           (cps-seq (ast-subx ast) cont-ast))
 
           ((app? ast)
+           ;; Syntax check the function
+           (if (const? (car ast))
+               (error "Call of non-procedure: " ast))
+           ;; Do conversion
            (let ((fn (app->fun ast)))
              (cond
               ((lambda? fn)
