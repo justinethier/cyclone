@@ -7,7 +7,9 @@
 ;;;; This module contains information about Cyclone's scheme primitives.
 ;;;;
 (define-library (scheme cyclone primitives)
-  (import (scheme base))
+  (import (scheme base)
+;          (srfii 69)
+  )
   (export
     prim?
     *primitives*
@@ -151,6 +153,19 @@
          Cyc-write-char
          Cyc-write
          Cyc-display))
+
+;    ;; Keep track of how many args are required for each primitive.
+;    ;; For each primitive, define:
+;    ;;  - number of args
+;    ;;  - min number of required args (for a func that takes optional args)
+;    ;; If the number is not applicable then the primitive is not listed or the value is #f
+;    (define *primitives-num-args*
+;      '()
+;    )
+;
+;    (define (prim:num-args prim) 'TODO)
+;    (define (prim:min-num-args prim) 'TODO)
+      
 
 ;; TODO: dont' put this here, just the list
 ;    ;; Constant Folding
