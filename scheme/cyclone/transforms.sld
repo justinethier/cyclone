@@ -22,6 +22,7 @@
           (scheme cyclone primitives)
           (scheme cyclone pretty-print)
           (scheme cyclone util)
+;          (srfi 69)
   )
   (export
     *defined-macros* 
@@ -1293,6 +1294,12 @@
                  (difference fv (built-in-syms)))
                (list))))))
 
+;;
+;; Helpers to syntax check primitive calls
+;;
+;(define *prim-args-table*
+;  (alist->hash-table *primitives-num-args*))
+
 ;; CPS conversion 
 ;;
 ;; This is a port of code from the 90-minute Scheme->C Compiler by Marc Feeley
@@ -1340,6 +1347,13 @@
                           cont-ast)))))
 
           ((prim-call? ast)
+           ;(prim:check-arg-count
+           ;      (car ast)
+           ;      (- (length ast) 1)
+           ;      (hash-table-ref/default 
+           ;        *prim-args-table*
+           ;        (car ast)
+           ;        #f))
            (cps-list (cdr ast) ; args to primitive function
                      (lambda (args)
                         (list cont-ast
