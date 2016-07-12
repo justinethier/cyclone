@@ -164,137 +164,135 @@
     ;; can take any number of arguments then no validation is
     ;; required and the primitive does not need to be listed.
     (define *primitives-num-args* '(
-;         (Cyc-global-vars
-;         (Cyc-get-cvar
-;         (Cyc-set-cvar!
-;         (Cyc-cvar?
-;         (Cyc-opaque?
-;         (Cyc-has-cycle?
-;         (Cyc-spawn-thread!
-;         (Cyc-end-thread!
-;         (Cyc-stdout
-;         (Cyc-stdin
-;         (Cyc-stderr
-;         (+
+         (Cyc-global-vars 0 0)
+         (Cyc-get-cvar 1 1)
+         (Cyc-set-cvar! 2 2)
+         (Cyc-cvar? 1 1)
+         (Cyc-opaque? 1 1)
+         (Cyc-has-cycle? 1 1)
+         (Cyc-spawn-thread! 1 1)
+         (Cyc-end-thread! 0 0)
+         (Cyc-stdout 0 0)
+         (Cyc-stdin 0 0)
+         (Cyc-stderr 0 0)
          (- 1 #f)
-;         (*
-;         (/
-;         (=
-;         (>
-;         (<
-;         (>=
-;         (<=
-;         (apply
-;         (%halt
-;         (exit
-;         (system
-;         (command-line-arguments
-;         (Cyc-installation-dir
-;         (Cyc-default-exception-handler
-;         (Cyc-current-exception-handler
-;         (cons
-;         (cell-get
-;         (set-global!
-;         (set-cell!
-;         (cell
-;         (eq?
-;         (eqv?
-;         (equal?
-;         (assoc
-;         (assq
-;         (assv
-;         (memq
-;         (memv
-;         (member
-;         (length
-;         (set-car!
-;         (set-cdr!
-;         (car
-;         (cdr
-;         (caar 
-;         (cadr 
-;         (cdar 
-;         (cddr
-;         (caaar 
-;         (caadr 
-;         (cadar 
-;         (caddr 
-;         (cdaar 
-;         (cdadr 
-;         (cddar 
-;         (cdddr
-;         (caaaar 
-;         (caaadr 
-;         (caadar 
-;         (caaddr 
-;         (cadaar 
-;         (cadadr
-;         (caddar 
-;         (cadddr 
-;         (cdaaar 
-;         (cdaadr 
-;         (cdadar 
-;         (cdaddr 
-;         (cddaar 
-;         (cddadr 
-;         (cdddar 
-;         (cddddr
-;         (char->integer
-;         (integer->char
-;         (string->number
-;         (string-append
-;         (string-cmp
-;         (list->string
-;         (string->symbol
-;         (symbol->string
-;         (number->string
-;         (string-length
-;         (string-ref
-;         (string-set!
-;         (substring
-;         (make-bytevector
-;         (bytevector-length
-;         (bytevector
-;         (bytevector-append
-;         (Cyc-bytevector-copy
-;         (Cyc-utf8->string
-;         (Cyc-string->utf8
-;         (bytevector-u8-ref
-;         (bytevector-u8-set!
-;         (bytevector?
-;         (make-vector
-;         (list->vector
-;         (vector-length
-;         (vector-ref
-;         (vector-set!
-;         (boolean?
-;         (char?
-;         (eof-object?
-;         (null?
-;         (number?
-;         (real?
-;         (integer?
-;         (pair?
-;         (port?
-;         (procedure?
-;         (macro?
-;         (vector?
-;         (string?
-;         (symbol?
-;         (open-input-file
-;         (open-output-file
-;         (close-port
-;         (close-input-port
-;         (close-output-port
-;         (Cyc-flush-output-port
-;         (file-exists?
-;         (delete-file
-;         (read-char
-;         (peek-char
-;         (Cyc-read-line
-;         (Cyc-write-char
-;         (Cyc-write
-;         (Cyc-display
+         (/ 1 #f)
+         (= 2 #f)
+         (> 2 #f)
+         (< 2 #f)
+         (>= 2 #f)
+         (<= 2 #f)
+         (apply 1 #f)
+         (%halt 1 1)
+         (exit 1 1)
+         (system 1 1)
+         (command-line-arguments 0 0)
+         (Cyc-installation-dir 1 1)
+         (Cyc-default-exception-handler 1 1)
+         (Cyc-current-exception-handler 0 0)
+         (cons 2 2)
+         (cell-get 1 1)
+         (set-global! 2 2)
+         (set-cell! 2 2)
+         (cell 1 1)
+         (eq? 2 2)
+         (eqv? 2 2)
+         (equal? 2 2)
+         (assoc 2 2)
+         (assq 2 2)
+         (assv 2 2)
+         (memq 2 2)
+         (memv 2 2)
+         (member 2 2)
+         (length 1 1)
+         (set-car! 2 2)
+         (set-cdr! 2 2)
+         (car 1 1)
+         (cdr 1 1)
+         (caar    1 1)
+         (cadr    1 1)
+         (cdar    1 1)
+         (cddr    1 1)
+         (caaar   1 1)
+         (caadr   1 1)
+         (cadar   1 1)
+         (caddr   1 1)
+         (cdaar   1 1)
+         (cdadr   1 1)
+         (cddar   1 1)
+         (cdddr   1 1)
+         (caaaar  1 1)
+         (caaadr  1 1)
+         (caadar  1 1)
+         (caaddr  1 1)
+         (cadaar  1 1)
+         (cadadr  1 1)
+         (caddar  1 1)
+         (cadddr  1 1)
+         (cdaaar  1 1)
+         (cdaadr  1 1)
+         (cdadar  1 1)
+         (cdaddr  1 1)
+         (cddaar  1 1)
+         (cddadr  1 1)
+         (cdddar  1 1)
+         (cddddr  1 1)
+         (char->integer 1 1)
+         (integer->char 1 1)
+         (string->number 1 2)
+         (string-append #f #f)
+         (string-cmp 2 2)
+         (list->string 1 1)
+         (string->symbol 1 1)
+         (symbol->string 1 1)
+         (number->string 1 2)
+         (string-length 1 1)
+         (string-ref 2 2)
+         (string-set! 3 3)
+         (substring 3 3)
+         (make-bytevector 1 #f)
+         (bytevector-length 1 1)
+         (bytevector #f #f)
+         (bytevector-append #f #f)
+         (Cyc-bytevector-copy 3 3)
+         (Cyc-utf8->string 3 3)
+         (Cyc-string->utf8 3 3)
+         (bytevector-u8-ref 2 2)
+         (bytevector-u8-set! 3 3)
+         (bytevector? 1 1)
+         (make-vector 1 #f)
+         (list->vector 1 1)
+         (vector-length 1 1)
+         (vector-ref 2 2)
+         (vector-set! 3 3)
+         (boolean? 1 1)
+         (char? 1 1)
+         (eof-object? 1 1)
+         (null? 1 1)
+         (number? 1 1)
+         (real? 1 1)
+         (integer? 1 1)
+         (pair? 1 1)
+         (port? 1 1)
+         (procedure? 1 1)
+         (macro? 1 1)
+         (vector? 1 1)
+         (string? 1 1)
+         (symbol? 1 1)
+         (open-input-file 1 1)
+         (open-output-file 1 1)
+         (close-port 1 1)
+         (close-input-port 1 1)
+         (close-output-port 1 1)
+         (Cyc-flush-output-port 1 1)
+         (file-exists? 1 1)
+         (delete-file 1 1)
+         (read-char 1 1)
+         (peek-char 1 1)
+         (Cyc-read-line 1 1)
+         (Cyc-write-char 1 2)
+         (Cyc-write 1 2)
+         (Cyc-display 1 2)
     ))
 
     ;; Return #f the primitive cannot accept the given number of
@@ -315,10 +313,10 @@
           ((and (not (null? (cdr expected)))
                 (cadr expected)
                 (> num-args (cadr expected)))
-           (error (build-error-str "Expected " (car expected) num-args) sym))
+           (error (build-error-str "Expected " (car expected) num-args)))
           ((and (car expected)
                 (< num-args (car expected)))
-           (error (build-error-str "Expected at least " (car expected) num-args) sym))
+           (error (build-error-str "Expected at least " (car expected) num-args)))
           (else #t))))
       
 
