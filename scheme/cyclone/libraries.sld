@@ -304,55 +304,46 @@
 ;; Given a list of alists (library-name . imports), return an ordered
 ;; list of library names such that each lib is encounted after the
 ;; libraries it imports (it's dependencies).
-(define (lib:get-dep-list libs/deps)
- ; Overall strategy is:
- ; for each library
- ;  compute index of result that is after any libs that lib imports
- ;  compute index of result that is before any libs that import lib
- ;   if there is a 'hole' then insert lib into result in that space
- ;   otherwise, throw an error (unfortunate but will identify problems)
- ;
- ; To test, run this from hello directory: 
- ; (pp (lib:get-all-import-deps '((scheme base) (scheme eval) (scheme base)
- ;       (scheme read) (scheme eval) (libs lib1) (libs lib2))))
- ;
- (let ((result '()))
-  (for-each
-    (lambda (lib/dep)
-      (cond
-        ((null? result)
-         (set! result (cons lib/dep '())))
-        (else
-          (let ((idx-my-imports 0) ; lib must be placed after this
-                (idx-imports-me (length result))) ; lib must be before any libs that import it
-            (define (loop i)
-              (cond
-                ((= i (length result))
-                 'done)
-                (else
-                  ;; Does lib import this one?
-                  (if (and
-                        (> i idx-my-imports)
-                        (member (car (list-ref result i)) (cdr lib/dep)))
-                    (set! idx-my-imports i))
+(define lib:get-dep-list resolve-dependencies)
 
-                  ;; Does this one import lib?
-                  (if (and
-                        (< i idx-imports-me)
-                        (member (car lib/dep) (cdr (list-ref result i))))
-                    (set! idx-imports-me i))
+;; Goal is to resolve a list of dependencies into the appropriate order such 
+;; that no node is encountered before its dependencies.
+;; We also need to raise an error if a circular dependency is found
+;; 
+;; A dependency list consists of: (name . edges)
+;; Where edges are all of the dependencies of name.
+;; 
+;; nodes is a list of many dependency lists.
+;;
+;; Based on code from:
+;; http://www.electricmonk.nl/log/2008/08/07/dependency-resolving-algorithm/
+(define (resolve-dependencies nodes)
+  (define (append-cell! cell value) (set-cdr! cell (cons value (cdr cell))))
+  (define (make-cell) (cons #f '()))
+  (define get-cell cdr)
+  (define (node->edges name) (assoc name nodes))
 
-                  (loop (+ i 1)))))
-            (loop 0)
-            ;(pp `(JAE DEBUG ,result ,lib/dep ,idx-imports-me ,idx-my-imports))
-            (if (<= idx-my-imports idx-imports-me)
-              (list-insert-at! result lib/dep 
-                (if (= idx-my-imports idx-imports-me)
-                  idx-my-imports
-                  (+ 1 idx-my-imports)))
-              (error "Unable to import library, possibly due to a circular dependency:" lib/dep))))
-        ))
-    libs/deps)
-  (map car result)))
+  ;; Create a new node that depends on all the others
+  (define (master-dependency)
+    (cons '(#f) (map car nodes)))
+
+  (define (dep-resolve node resolved seen)
+    ; DEBUG: (write node) (newline)
+    (append-cell! seen node)
+    (for-each
+      (lambda (edge)
+        (cond
+          ((not (assoc edge (get-cell resolved)))
+           (if (assoc edge (get-cell seen))
+               (error "Circular dependency detected" node edge))
+           (dep-resolve (node->edges edge) resolved seen))))
+      (cdr (node->edges (car node))))
+    (append-cell! resolved node)
+    resolved)
+
+  (set! nodes (cons (master-dependency) nodes))
+  (let* ((resolved (dep-resolve (node->edges '(#f)) (make-cell) (make-cell)))
+         (deps (reverse (cdr (get-cell resolved))))) ;; cdr to get rid of master list
+    (map car deps)))
 
 ))
