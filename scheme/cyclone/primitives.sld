@@ -7,18 +7,18 @@
 ;;;; This module contains information about Cyclone's scheme primitives.
 ;;;;
 (define-library (scheme cyclone primitives)
-  (import (scheme base)
-;          (srfii 69)
-  )
+  (import (scheme base))
   (export
     prim?
     *primitives*
+    *primitives-num-args*
     ;; TODO: replace w/list that cannot be precomputed: precompute-prim-app?
     prim-call?
     prim->c-func
     prim/data-arg?
     prim/c-var-assign
     prim/cvar?
+    prim:check-arg-count
     prim:mutates?
     prim:cont?
     prim:cont/no-args?
@@ -154,17 +154,170 @@
          Cyc-write
          Cyc-display))
 
-;    ;; Keep track of how many args are required for each primitive.
-;    ;; For each primitive, define:
-;    ;;  - number of args
-;    ;;  - min number of required args (for a func that takes optional args)
-;    ;; If the number is not applicable then the primitive is not listed or the value is #f
-;    (define *primitives-num-args*
-;      '()
-;    )
-;
-;    (define (prim:num-args prim) 'TODO)
-;    (define (prim:min-num-args prim) 'TODO)
+    ;; Keep track of how many args are required for each primitive.
+    ;; For each primitive, define:
+    ;;  - minimum number of args
+    ;;  - maximum number of args
+    ;; Normally these will be the same unless the function takes an
+    ;; optional number of arguments. If a number is not 
+    ;; applicable then it should be set to #f. If a primitive
+    ;; can take any number of arguments then no validation is
+    ;; required and the primitive does not need to be listed.
+    (define *primitives-num-args* '(
+;         (Cyc-global-vars
+;         (Cyc-get-cvar
+;         (Cyc-set-cvar!
+;         (Cyc-cvar?
+;         (Cyc-opaque?
+;         (Cyc-has-cycle?
+;         (Cyc-spawn-thread!
+;         (Cyc-end-thread!
+;         (Cyc-stdout
+;         (Cyc-stdin
+;         (Cyc-stderr
+;         (+
+         (- 1 #f)
+;         (*
+;         (/
+;         (=
+;         (>
+;         (<
+;         (>=
+;         (<=
+;         (apply
+;         (%halt
+;         (exit
+;         (system
+;         (command-line-arguments
+;         (Cyc-installation-dir
+;         (Cyc-default-exception-handler
+;         (Cyc-current-exception-handler
+;         (cons
+;         (cell-get
+;         (set-global!
+;         (set-cell!
+;         (cell
+;         (eq?
+;         (eqv?
+;         (equal?
+;         (assoc
+;         (assq
+;         (assv
+;         (memq
+;         (memv
+;         (member
+;         (length
+;         (set-car!
+;         (set-cdr!
+;         (car
+;         (cdr
+;         (caar 
+;         (cadr 
+;         (cdar 
+;         (cddr
+;         (caaar 
+;         (caadr 
+;         (cadar 
+;         (caddr 
+;         (cdaar 
+;         (cdadr 
+;         (cddar 
+;         (cdddr
+;         (caaaar 
+;         (caaadr 
+;         (caadar 
+;         (caaddr 
+;         (cadaar 
+;         (cadadr
+;         (caddar 
+;         (cadddr 
+;         (cdaaar 
+;         (cdaadr 
+;         (cdadar 
+;         (cdaddr 
+;         (cddaar 
+;         (cddadr 
+;         (cdddar 
+;         (cddddr
+;         (char->integer
+;         (integer->char
+;         (string->number
+;         (string-append
+;         (string-cmp
+;         (list->string
+;         (string->symbol
+;         (symbol->string
+;         (number->string
+;         (string-length
+;         (string-ref
+;         (string-set!
+;         (substring
+;         (make-bytevector
+;         (bytevector-length
+;         (bytevector
+;         (bytevector-append
+;         (Cyc-bytevector-copy
+;         (Cyc-utf8->string
+;         (Cyc-string->utf8
+;         (bytevector-u8-ref
+;         (bytevector-u8-set!
+;         (bytevector?
+;         (make-vector
+;         (list->vector
+;         (vector-length
+;         (vector-ref
+;         (vector-set!
+;         (boolean?
+;         (char?
+;         (eof-object?
+;         (null?
+;         (number?
+;         (real?
+;         (integer?
+;         (pair?
+;         (port?
+;         (procedure?
+;         (macro?
+;         (vector?
+;         (string?
+;         (symbol?
+;         (open-input-file
+;         (open-output-file
+;         (close-port
+;         (close-input-port
+;         (close-output-port
+;         (Cyc-flush-output-port
+;         (file-exists?
+;         (delete-file
+;         (read-char
+;         (peek-char
+;         (Cyc-read-line
+;         (Cyc-write-char
+;         (Cyc-write
+;         (Cyc-display
+    ))
+
+    ;; Return #f the primitive cannot accept the given number of
+    ;; arguments, and #t otherwise.
+    (define (prim:check-arg-count sym num-args expected)
+      (let ((build-error-str 
+              (lambda (prefix expected actual)
+                (string-append
+                  prefix
+                  (number->string expected)
+                  " args but received "
+                  (number->string actual)
+                ))))
+        (cond
+          ((not expected) #t)
+          ((and (car expected)
+                (> num-args (car expected)))
+           (error (build-error-str "Expected " (car expected) num-args) sym))
+          ((and (not (null? (cdr expected)))
+                (cadr expected)
+                (< num-args (cadr expected)))
+           (error (build-error-str "Expected at least " (car expected) num-args) sym))
+          (else #t))))
       
 
 ;; TODO: dont' put this here, just the list
