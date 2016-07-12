@@ -305,17 +305,19 @@
                 (string-append
                   prefix
                   (number->string expected)
-                  " args but received "
+                  " arguments to " 
+                  (symbol->string sym)
+                  " but received "
                   (number->string actual)
                 ))))
         (cond
           ((not expected) #t)
-          ((and (car expected)
-                (> num-args (car expected)))
-           (error (build-error-str "Expected " (car expected) num-args) sym))
           ((and (not (null? (cdr expected)))
                 (cadr expected)
-                (< num-args (cadr expected)))
+                (> num-args (cadr expected)))
+           (error (build-error-str "Expected " (car expected) num-args) sym))
+          ((and (car expected)
+                (< num-args (car expected)))
            (error (build-error-str "Expected at least " (car expected) num-args) sym))
           (else #t))))
       

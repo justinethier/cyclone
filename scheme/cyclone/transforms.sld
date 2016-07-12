@@ -22,7 +22,7 @@
           (scheme cyclone primitives)
           (scheme cyclone pretty-print)
           (scheme cyclone util)
-;          (srfi 69)
+          (srfi 69)
   )
   (export
     *defined-macros* 
@@ -1297,8 +1297,8 @@
 ;;
 ;; Helpers to syntax check primitive calls
 ;;
-;(define *prim-args-table*
-;  (alist->hash-table *primitives-num-args*))
+(define *prim-args-table*
+  (alist->hash-table *primitives-num-args*))
 
 ;; CPS conversion 
 ;;
@@ -1347,13 +1347,13 @@
                           cont-ast)))))
 
           ((prim-call? ast)
-           ;(prim:check-arg-count
-           ;      (car ast)
-           ;      (- (length ast) 1)
-           ;      (hash-table-ref/default 
-           ;        *prim-args-table*
-           ;        (car ast)
-           ;        #f))
+           (prim:check-arg-count
+                 (car ast)
+                 (- (length ast) 1)
+                 (hash-table-ref/default 
+                   *prim-args-table*
+                   (car ast)
+                   #f))
            (cps-list (cdr ast) ; args to primitive function
                      (lambda (args)
                         (list cont-ast
