@@ -1385,13 +1385,40 @@
            (let ((fn (app->fun ast)))
              (cond
               ((lambda? fn)
-                 (cps-list (app->args ast)
-                           (lambda (vals)
-                             (cons (ast:make-lambda
-                                     (lambda->formals fn)
-                                     (list (cps-seq (cddr fn) ;(ast-subx fn)
-                                                    cont-ast)))
-                                    vals))))
+               ;; Check number of arguments to the lambda
+               (let ((lam-min-num-args (lambda-num-args fn))
+                     (num-args (length (app->args ast))))
+                (cond
+                 ((< num-args lam-min-num-args)
+                  (error 
+                    (string-append
+                      "Not enough arguments passed to anonymous lambda. "
+                      "Expected "
+                      (number->string lam-min-num-args)
+                      " but received "
+                      (number->string num-args) 
+                      ":")
+                    fn))
+                 ((and (> num-args lam-min-num-args)
+                       (equal? 'args:fixed (lambda-formals-type fn)))
+                  (error 
+                    (string-append
+                      "Too many arguments passed to anonymous lambda. "
+                      "Expected "
+                      (number->string lam-min-num-args)
+                      " but received "
+                      (number->string num-args)
+                      ":")
+                    fn))
+               ))
+               ;; Do conversion
+               (cps-list (app->args ast)
+                         (lambda (vals)
+                           (cons (ast:make-lambda
+                                   (lambda->formals fn)
+                                   (list (cps-seq (cddr fn) ;(ast-subx fn)
+                                                  cont-ast)))
+                                  vals))))
               (else
                  (cps-list ast ;(ast-subx ast)
                            (lambda (args)
