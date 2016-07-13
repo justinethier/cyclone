@@ -1372,11 +1372,6 @@
                              ltype))
                       (list (cps-seq (cddr ast) k))))))
 
-;
-; TODO: begin is expanded already by desugar code... better to do it here?
-;          ((seq? ast)
-;           (cps-seq (ast-subx ast) cont-ast))
-
           ((app? ast)
            ;; Syntax check the function
            (if (const? (car ast))
