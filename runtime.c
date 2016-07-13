@@ -2711,7 +2711,7 @@ void _length(void *data, object cont, object args)
 
 void _bytevector_91length(void *data, object cont, object args)
 {
-  Cyc_check_num_args(data, "bytevector_91length", 1, args);
+  Cyc_check_num_args(data, "bytevector-length", 1, args);
   {
     object obj = Cyc_bytevector_length(data, car(args));
     return_closcall1(data, cont, obj);
@@ -2770,7 +2770,7 @@ void _Cyc_91utf8_91_125string(void *data, object cont, object args)
 
 void _vector_91length(void *data, object cont, object args)
 {
-  Cyc_check_num_args(data, "vector_91length", 1, args);
+  Cyc_check_num_args(data, "vector-length", 1, args);
   {
     object obj = Cyc_vector_length(data, car(args));
     return_closcall1(data, cont, obj);

@@ -14,7 +14,8 @@
   object l = Cyc_length(data, args); \
   if (num_args > obj_obj2int(l)) { \
     char buf[128]; \
-    snprintf(buf, 127, "Expected %d arguments but received %ld.", num_args, obj_obj2int(l));  \
+    snprintf(buf, 127, "Expected %d arguments to %s but received %ld.", \
+             num_args, fnc_name, obj_obj2int(l));  \
     Cyc_rt_raise_msg(data, buf); \
   } \
 }
