@@ -1555,14 +1555,14 @@ object Cyc_string_cmp(void *data, object str1, object str2)
     if (argc > 0) { \
       Cyc_check_str(data, str1); \
       str[i] = ((string_type *)str1)->str; \
-      len[i] = strlen(str[i]); \
+      len[i] = string_len((str1)); \
       total_len += len[i]; \
     } \
     for (i = 1; i < argc; i++) { \
       tmp = va_arg(ap, object); \
       Cyc_check_str(data, tmp); \
       str[i] = ((string_type *)tmp)->str; \
-      len[i] = strlen(str[i]); \
+      len[i] = string_len((tmp)); \
       total_len += len[i]; \
     } \
     buffer = bufferp = alloca(sizeof(char) * total_len); \
@@ -1595,7 +1595,7 @@ object Cyc_string_length(void *data, object str)
 {
   Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
-  return obj_int2obj(strlen(string_str(str)));
+  return obj_int2obj(string_len(str));
 }
 
 object Cyc_string_set(void *data, object str, object k, object chr)
@@ -1612,7 +1612,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
 
   raw = string_str(str);
   idx = unbox_number(k);
-  len = strlen(raw);
+  len = string_len(str);
 
   Cyc_check_bounds(data, "string-set!", len, idx);
   raw[idx] = obj_obj2char(chr);
@@ -1629,7 +1629,7 @@ object Cyc_string_ref(void *data, object str, object k)
 
   raw = string_str(str);
   idx = unbox_number(k);
-  len = strlen(raw);
+  len = string_len(str);
 
   if (idx < 0 || idx >= len) {
     Cyc_rt_raise2(data, "string-ref - invalid index", k);
@@ -1651,7 +1651,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
   raw = string_str(str);
   s = unbox_number(start);
   e = unbox_number(end);
-  len = strlen(raw);
+  len = string_len(str);
 
   if (s > e) {
     Cyc_rt_raise2(data, "substring - start cannot be greater than end", start);
