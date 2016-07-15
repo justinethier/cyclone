@@ -529,6 +529,29 @@
         prim
         '(cons make-vector make-bytevector)))
 
+    ;; Check each pair of primitive call / corresponding lambda arg,
+    ;; and verify that if the primitive call creates a new mutable
+    ;; object, that only one instance of the object will be created.
+    (define (one-instance-of-new-mutable-obj? prim-calls lam-formals)
+      (let ((calls/args (map list prim-calls lam-formals)))
+        (call/cc 
+          (lambda (return)
+            (for-each
+              (lambda (call/arg)
+                (let ((call (car call/arg))
+                      (arg (cadr call/arg)))
+                  ;; Cannot inline prim call if the arg is used
+                  ;; more than once and it creates a new mutable object,
+                  ;; because otherwise if the object is mutated then
+                  ;; only one of the instances will be affected.
+                  (if (and (prim-call? call)
+                           (prim-creates-mutable-obj? (car call))
+                           ;; TODO: arg used more than once
+                      )
+                      (return #f))))
+              calls/args)
+            #t))))
+
     ;; Find variables passed to a primitive
     (define (prim-call->arg-variables exp)
       (filter symbol? (cdr exp)))
