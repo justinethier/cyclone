@@ -400,6 +400,7 @@ extern const object primitive_integer_127;
 extern const object primitive_pair_127;
 extern const object primitive_procedure_127;
 extern const object primitive_macro_127;
+extern const object primitive_Cyc_91macro_127;
 extern const object primitive_port_127;
 extern const object primitive_vector_127;
 extern const object primitive_bytevector_127;

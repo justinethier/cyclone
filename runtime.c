@@ -2907,6 +2907,12 @@ void _macro_127(void *data, object cont, object args)
   return_closcall1(data, cont, Cyc_is_macro(car(args)));
 }
 
+void _Cyc_91macro_127(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "Cyc-macro?", 1, args);
+  return_closcall1(data, cont, Cyc_is_macro(car(args)));
+}
+
 void _port_127(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "port?", 1, args);
@@ -4139,6 +4145,8 @@ static primitive_type procedure_127_primitive =
     { {0}, primitive_tag, "procedure?", &_procedure_127 };
 static primitive_type macro_127_primitive =
     { {0}, primitive_tag, "macro?", &_macro_127 };
+static primitive_type Cyc_91macro_127_primitive =
+    { {0}, primitive_tag, "Cyc-macro?", &_Cyc_91macro_127 };
 static primitive_type port_127_primitive =
     { {0}, primitive_tag, "port?", &_port_127 };
 static primitive_type bytevector_127_primitive =
@@ -4300,6 +4308,7 @@ const object primitive_integer_127 = &integer_127_primitive;
 const object primitive_pair_127 = &pair_127_primitive;
 const object primitive_procedure_127 = &procedure_127_primitive;
 const object primitive_macro_127 = &macro_127_primitive;
+const object primitive_Cyc_91macro_127 = &Cyc_91macro_127_primitive;
 const object primitive_string_127 = &string_127_primitive;
 const object primitive_port_127 = &port_127_primitive;
 const object primitive_vector_127 = &vector_127_primitive;

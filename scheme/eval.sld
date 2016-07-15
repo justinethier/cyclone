@@ -273,6 +273,7 @@
       (list 'port? port?)
       (list 'procedure? procedure?)
       (list 'macro? macro?)
+      (list 'Cyc-macro? Cyc-macro?)
       (list 'vector? vector?)
       (list 'bytevector? bytevector?)
       (list 'string? string?)
