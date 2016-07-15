@@ -26,6 +26,7 @@
       adb:set!
       adb:get-db
       simple-lambda?
+      one-instance-of-new-mutable-obj?
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -472,16 +473,14 @@
                   (every
                     (lambda (arg)
                       (and (prim-call? arg)
-                           (not (prim:cont? (car arg)))
-                           ;; Disallow primitives that allocate a new obj,
-                           ;; because if the object is mutated all copies
-                           ;; must be modified. 
-                           ;;
-                           ;; TODO: Technically this could be allowed if 
-                           ;; there is only one reference of the variable
-                           ;(not (prim-creates-mutable-obj? (car arg)))
-                           ))
+                           (not (prim:cont? (car arg)))))
                     (cdr exp))
+                  ;; Disallow primitives that allocate a new obj,
+                  ;; because if the object is mutated all copies
+                  ;; must be modified. 
+                  (one-instance-of-new-mutable-obj?
+                    (cdr exp)
+                    (ast:lambda-formals->list (car exp)))
                   (inline-prim-call? 
                     (ast:lambda-body (car exp))
                     (prim-calls->arg-variables (cdr exp))
@@ -546,7 +545,9 @@
                   ;; only one of the instances will be affected.
                   (if (and (prim-call? call)
                            (prim-creates-mutable-obj? (car call))
-                           ;; TODO: arg used more than once
+                           ;; Make sure arg is not used more than once
+                           (with-var arg (lambda (var)
+                             (> (adbv:app-arg-count var) 1)))
                       )
                       (return #f))))
               calls/args)
