@@ -272,7 +272,6 @@
       (list 'pair? pair?)
       (list 'port? port?)
       (list 'procedure? procedure?)
-      (list 'macro? macro?)
       (list 'Cyc-macro? Cyc-macro?)
       (list 'vector? vector?)
       (list 'bytevector? bytevector?)
@@ -436,7 +435,7 @@
                   #f))
          (expand 
            (lambda (macro-op)
-             (if (macro? macro-op)
+             (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
@@ -455,7 +454,7 @@
                    a-env))))))
     (cond
       ;; compiled macro
-      ((macro? var)
+      ((Cyc-macro? var)
        (expand var))
       ;; compiled or interpreted macro in compound form
       ((compound-macro? var)

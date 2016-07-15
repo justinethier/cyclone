@@ -698,7 +698,7 @@
          (let ((macro (env:lookup name env #f)))
           (cond
             ((and (tagged-list? 'macro macro)
-                  (or (macro? (Cyc-get-cvar (cadr macro)))
+                  (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                       (procedure? (cadr macro))))
              (trace:info `(DEBUG compiled macro ,name do not redefine)))
             (else

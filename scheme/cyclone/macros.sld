@@ -52,7 +52,7 @@
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
     (define (macro:expand exp macro mac-env)
-      (let* ((compiled-macro? (or (macro? (Cyc-get-cvar (cadr macro)))
+      (let* ((compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro)))))
         ;(newline)
         ;(display "/* ")
