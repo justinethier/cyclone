@@ -135,7 +135,6 @@
          pair?
          port?
          procedure?
-         macro?
          Cyc-macro?
          vector?
          string?
@@ -276,7 +275,6 @@
          (pair? 1 1)
          (port? 1 1)
          (procedure? 1 1)
-         (macro? 1 1)
          (Cyc-macro? 1 1)
          (vector? 1 1)
          (string? 1 1)
@@ -510,7 +508,6 @@
          ((eq? p 'integer?)      "Cyc_is_integer")
          ((eq? p 'pair?)         "Cyc_is_pair")
          ((eq? p 'procedure?)    "Cyc_is_procedure")
-         ((eq? p 'macro?)        "Cyc_is_macro")
          ((eq? p 'Cyc-macro?)    "Cyc_is_macro")
          ((eq? p 'port?)         "Cyc_is_port")
          ((eq? p 'vector?)       "Cyc_is_vector")
