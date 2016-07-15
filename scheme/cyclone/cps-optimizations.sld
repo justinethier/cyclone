@@ -468,10 +468,19 @@
                           (not (adbv:reassigned? var))
                     ))))
                     (ast:lambda-formals->list (car exp)))
+                  ;; Check all args are valid primitives that can be inlined
                   (every
                     (lambda (arg)
                       (and (prim-call? arg)
-                           (not (prim:cont? (car arg)))))
+                           (not (prim:cont? (car arg)))
+                           ;; Disallow primitives that allocate a new obj,
+                           ;; because if the object is mutated all copies
+                           ;; must be modified. 
+                           ;;
+                           ;; TODO: Technically this could be allowed if 
+                           ;; there is only one reference of the variable
+                           ;(not (prim-creates-mutable-obj? (car arg)))
+                           ))
                     (cdr exp))
                   (inline-prim-call? 
                     (ast:lambda-body (car exp))
@@ -509,6 +518,16 @@
                (filter symbol? (cdr exp)))
               (else '())))
           exps)))
+
+    ;; Does the given primitive return a new instance of an object that
+    ;; can be mutated?
+    ;;
+    ;; TODO: strings are a problem because there are
+    ;; a lot of primitives that allocate them fresh!
+    (define (prim-creates-mutable-obj? prim)
+      (member 
+        prim
+        '(cons make-vector make-bytevector)))
 
     ;; Find variables passed to a primitive
     (define (prim-call->arg-variables exp)
