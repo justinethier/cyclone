@@ -526,7 +526,13 @@
     (define (prim-creates-mutable-obj? prim)
       (member 
         prim
-        '(cons make-vector make-bytevector)))
+        '(cons 
+          make-vector 
+          make-bytevector
+          bytevector bytevector-append bytevector-copy
+          string->utf8 number->string symbol->string list->string utf8->string
+          string-append string substring Cyc-installation-dir read-line
+          )))
 
     ;; Check each pair of primitive call / corresponding lambda arg,
     ;; and verify that if the primitive call creates a new mutable
