@@ -325,7 +325,7 @@ void add_global(object * glo)
   // It would probably be more efficient to allocate
   // a contiguous block of memory for this... for now
   // this is more expedient
-  global_table = mcons(mcvar(glo), global_table);
+  global_table = malloc_make_pair(mcvar(glo), global_table);
 }
 
 void debug_dump_globals()
@@ -363,11 +363,11 @@ void add_mutation(void *data, object var, int index, object value)
   gc_thread_data *thd = (gc_thread_data *) data;
   if (is_object_type(value)) {
     if (index >= 0) {
-      // For vectors only, mcons index as another var. That way
+      // For vectors only, malloc_make_pair index as another var. That way
       // the write barrier only needs to inspect the mutated index.
-      thd->mutations = mcons(obj_int2obj(index), thd->mutations);
+      thd->mutations = malloc_make_pair(obj_int2obj(index), thd->mutations);
     }
-    thd->mutations = mcons(var, thd->mutations);
+    thd->mutations = malloc_make_pair(var, thd->mutations);
   }
 }
 
@@ -2437,7 +2437,7 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 }
 
 // Functions internal to the runtime that use malloc
-list mcons(object a, object d)
+list malloc_make_pair(object a, object d)
 {
   pair_type *c = malloc(sizeof(pair_type));
   c->hdr.mark = gc_color_red;

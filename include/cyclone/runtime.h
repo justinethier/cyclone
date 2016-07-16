@@ -132,7 +132,7 @@ object apply_va(void *data, object cont, int argc, object func, ...);
 object Cyc_string_cmp(void *data, object str1, object str2);
 void dispatch_string_91append(void *data, int argc, object clo, object cont,
                               object str1, ...);
-list mcons(object, object);
+list malloc_make_pair(object, object);
 cvar_type *mcvar(object * var);
 object Cyc_display(object, FILE * port);
 object dispatch_display_va(void *data, int argc, object clo, object cont,
