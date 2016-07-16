@@ -1194,7 +1194,9 @@
                 ,(if->then new-ast)))
           (else
             new-ast))))
-      ((prim-call? ast)
+      ((and (prim-call? ast)
+            ;; Not a primitive if the identifier has been redefined
+            (not assoc (car ast) renamed))
        (let ((converted
                (cons (car ast) 
                      (map (lambda (a) (convert a renamed))
