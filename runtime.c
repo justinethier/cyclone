@@ -361,12 +361,18 @@ void add_mutation(void *data, object var, int index, object value)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
   if (is_object_type(value)) {
-    thd->mutations = vpbuffer_add(thd->mutations, &(thd->mutation_buflen), thd->mutation_count, var);
+    thd->mutations = vpbuffer_add(thd->mutations, 
+                                  &(thd->mutation_buflen), 
+                                  thd->mutation_count, 
+                                  var);
     thd->mutation_count++;
     if (index >= 0) {
       // For vectors only, add index as another var. That way
       // the write barrier only needs to inspect the mutated index.
-      thd->mutations = vpbuffer_add(thd->mutations, &(thd->mutation_buflen), thd->mutation_count, obj_int2obj(index));
+      thd->mutations = vpbuffer_add(thd->mutations, 
+                                     &(thd->mutation_buflen), 
+                                     thd->mutation_count, 
+                                     obj_int2obj(index));
       thd->mutation_count++;
     }
   }
@@ -3786,7 +3792,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
   {
     int l = 0;
     while (l < ((gc_thread_data *) data)->mutation_count) {
-      object o = ((gc_thread_data *) data)->mutations[l++]; //car(l);
+      object o = ((gc_thread_data *) data)->mutations[l++];
       if (is_value_type(o)) {
         // Can happen if a vector element was already
         // moved and we found an index. Just ignore it
