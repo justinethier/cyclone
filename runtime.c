@@ -357,33 +357,26 @@ void debug_dump_globals()
  * Note these functions and underlying data structure are only used by
  * the calling thread, so locking is not required.
  */
-
 void add_mutation(void *data, object var, int index, object value)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
   if (is_object_type(value)) {
+    thd->mutations = vpbuffer_add(thd->mutations, &(thd->mutation_buflen), thd->mutation_count, var);
+    thd->mutation_count++;
     if (index >= 0) {
-      // For vectors only, malloc_make_pair index as another var. That way
+      // For vectors only, add index as another var. That way
       // the write barrier only needs to inspect the mutated index.
-      thd->mutations = malloc_make_pair(obj_int2obj(index), thd->mutations);
+      thd->mutations = vpbuffer_add(thd->mutations, &(thd->mutation_buflen), thd->mutation_count, obj_int2obj(index));
+      thd->mutation_count++;
     }
-    thd->mutations = malloc_make_pair(var, thd->mutations);
   }
 }
 
-/* TODO: consider a more efficient implementation, such as reusing old nodes
-         instead of reclaiming them each time
- */
 void clear_mutations(void *data)
 {
+  // Not clearing memory, just resetting count
   gc_thread_data *thd = (gc_thread_data *) data;
-  list l = thd->mutations, next;
-  while (l != NULL) {
-    next = cdr(l);
-    free(l);
-    l = next;
-  }
-  thd->mutations = NULL;
+  thd->mutation_count = 0;
 }
 
 /* END mutation table */
@@ -3791,9 +3784,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
 
   // Transport mutations
   {
-    list l;
-    for (l = ((gc_thread_data *) data)->mutations; l != NULL; l = cdr(l)) {
-      object o = car(l);
+    int l = 0;
+    while (l < ((gc_thread_data *) data)->mutation_count) {
+      object o = ((gc_thread_data *) data)->mutations[l++]; //car(l);
       if (is_value_type(o)) {
         // Can happen if a vector element was already
         // moved and we found an index. Just ignore it
@@ -3804,8 +3797,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         int i;
         object idx;
         // For vectors, index is encoded as the next mutation
-        l = cdr(l);
-        idx = car(l);
+        idx = ((gc_thread_data *) data)->mutations[l++];
         i = obj_obj2int(idx);
         gc_move2heap(((vector) o)->elements[i]);
       } else if (type_of(o) == forward_tag) {
@@ -4444,6 +4436,27 @@ object copy2heap(void *data, object obj)
 
   return gc_alloc(Cyc_heap, gc_allocated_bytes(obj, NULL, NULL), obj, data,
                   &on_stack);
+}
+
+// Generic buffer functions
+void **vpbuffer_realloc(void **buf, int *len)
+{
+  return realloc(buf, (*len) * sizeof(void *));
+}
+
+void **vpbuffer_add(void **buf, int *len, int i, void *obj)
+{
+  if (i == *len) {
+    *len *= 2;
+    buf = vpbuffer_realloc(buf, len);
+  }
+  buf[i] = obj;
+  return buf;
+}
+
+void vpbuffer_free(void **buf)
+{
+  free(buf);
 }
 
 /* RNG section */

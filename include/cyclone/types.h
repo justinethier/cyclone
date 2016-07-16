@@ -118,7 +118,9 @@ struct gc_thread_data_t {
   char *stack_start;
   char *stack_limit;
   // Minor GC write barrier
-  void *mutations;
+  void **mutations;
+  int mutation_buflen;
+  int mutation_count;
   // List of objects moved to heap during minor GC
   void **moveBuf;
   int moveBufLen;

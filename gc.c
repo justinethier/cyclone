@@ -831,27 +831,6 @@ void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
   (*alloci)++;
 }
 
-// Generic buffer functions
-void **vpbuffer_realloc(void **buf, int *len)
-{
-  return realloc(buf, (*len) * sizeof(void *));
-}
-
-void **vpbuffer_add(void **buf, int *len, int i, void *obj)
-{
-  if (i == *len) {
-    *len *= 2;
-    buf = vpbuffer_realloc(buf, len);
-  }
-  buf[i] = obj;
-  return buf;
-}
-
-void vpbuffer_free(void **buf)
-{
-  free(buf);
-}
-
 // END heap definitions
 
 // Tri-color GC section
@@ -1458,6 +1437,10 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;
   thd->mutations = NULL;
+  thd->mutation_buflen = 128;
+  thd->mutation_count = 0;
+  thd->mutations = 
+      vpbuffer_realloc(thd->mutations, &(thd->mutation_buflen));
   thd->exception_handler_stack = NULL;
 //  thd->thread = NULL;
   thd->thread_state = CYC_THREAD_STATE_NEW;
@@ -1503,7 +1486,7 @@ void gc_thread_data_free(gc_thread_data * thd)
     if (thd->stack_traces)
       free(thd->stack_traces);
     if (thd->mutations) {
-      clear_mutations(thd);
+      free(thd->mutations);
     }
     free(thd);
   }
