@@ -7,7 +7,7 @@
 ;;;; This module contains the base library from r7rs.
 ;;;;
 (define-library (scheme base)
-  ;; In the future, may include this here: (include "../srfi/9.scm")
+  (import (scheme cyclone common))
   (export
     cons-source
     syntax-rules
@@ -133,6 +133,7 @@
     input-port-open?
     output-port-open?
     features
+    Cyc-version
     any
     every
     and
@@ -209,9 +210,17 @@
   )
   (begin
     ;; Features implemented by this Scheme
-    (define (features) '(cyclone r7rs exact-closed 
-                         ieee-float
-                         posix))
+    (define (features) 
+      (cons 
+        'cyclone
+        (cons
+          (string->symbol *version-number*)
+          '(r7rs 
+            ;exact-closed 
+            ieee-float
+            posix))))
+
+    (define (Cyc-version) *version-number*)
 
     (define-syntax and
       (er-macro-transformer

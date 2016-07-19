@@ -10,10 +10,14 @@
   (export 
     *Cyc-version-banner*
     *version*
+    *version-number*
+    *version-name*
     *version-banner*
     *c-file-header-comment*)
   (begin
-(define *version* "0.1.4 (alpha)")
+(define *version-number* "0.1.4")
+(define *version-name* "alpha")
+(define *version* (string-append *version-number* " (" *version-name* ")"))
 
 (define *version-banner* 
  (string-append "
