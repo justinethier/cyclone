@@ -346,7 +346,6 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       return (char *)hp;
     }
   case bytevector_tag:{
-      int i;
       bytevector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = bytevector_tag;
@@ -433,7 +432,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
 
 int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
 {
-  size_t cur_size, new_size;
+  size_t /*cur_size,*/ new_size;
   gc_heap *h_last = h, *h_new;
   pthread_mutex_lock(&heap_lock);
   // Compute size of new heap page
@@ -524,7 +523,6 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   void *result = NULL;
   gc_heap *h = NULL;
   int heap_type;
-  size_t max_freed = 0, sum_freed = 0, total_size;
   // TODO: check return value, if null (could not alloc) then 
   // run a collection and check how much free space there is. if less
   // the allowed ratio, try growing heap.
@@ -661,7 +659,10 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
   object p, end;
   gc_free_list *q, *r, *s;
-  gc_heap *orig_heap_ptr = h, *prev_h = NULL;
+#if GC_DEBUG_SHOW_SWEEP_DIAG
+  gc_heap *orig_heap_ptr = h;
+#endif
+  gc_heap *prev_h = NULL;
 
   //
   // Lock the heap to prevent issues with allocations during sweep
@@ -910,7 +911,7 @@ static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj)
 */
 void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
 {
-  int status = ck_pr_load_int(&gc_status_col),
+  int //status = ck_pr_load_int(&gc_status_col),
       stage = ck_pr_load_int(&gc_stage);
   if (ck_pr_load_int(&(thd->gc_status)) != STATUS_ASYNC) {
     pthread_mutex_lock(&(thd->lock));
@@ -1288,8 +1289,10 @@ void debug_dump_globals();
 void gc_collector()
 {
   int old_clear, old_mark, heap_type;
-  size_t freed = 0, max_freed = 0, total_size, total_free;
+  size_t freed = 0;
 #if GC_DEBUG_TRACE
+  size_t total_size;
+  size_t total_free;
   time_t gc_collector_start = time(NULL);
 #endif
   //clear : 
@@ -1333,10 +1336,10 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
-  max_freed = gc_sweep(gc_get_heap()->heap, HEAP_REST, &freed);
-  max_freed = gc_sweep(gc_get_heap()->small_obj_heap, HEAP_SM, &freed);
-  max_freed = gc_sweep(gc_get_heap()->medium_obj_heap, HEAP_MED, &freed);
-  max_freed = gc_sweep(gc_get_heap()->huge_obj_heap, HEAP_HUGE, &freed);
+  gc_sweep(gc_get_heap()->heap, HEAP_REST, &freed);
+  gc_sweep(gc_get_heap()->small_obj_heap, HEAP_SM, &freed);
+  gc_sweep(gc_get_heap()->medium_obj_heap, HEAP_MED, &freed);
+  gc_sweep(gc_get_heap()->huge_obj_heap, HEAP_HUGE, &freed);
 
   // TODO: this loop only includes smallest 2 heaps, is that sufficient??
   for (heap_type = 0; heap_type < 2; heap_type++) {
@@ -1361,8 +1364,8 @@ void gc_collector()
   total_free = cached_heap_free_sizes[HEAP_SM] +
       cached_heap_free_sizes[HEAP_MED] + cached_heap_free_sizes[HEAP_REST];
   fprintf(stderr,
-          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, max_freed = %zu, elapsed = %zu\n",
-          total_size, total_free, freed, max_freed,
+          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %zu\n",
+          total_size, total_free, freed,
           time(NULL) - gc_collector_start);
 #endif
 #if GC_DEBUG_TRACE

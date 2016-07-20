@@ -640,10 +640,12 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
 #define return_thread_runnable(d, r) \
   gc_mutator_thread_runnable(((gc_thread_data *)d), (r))
+/*
 //#define do_with_blocked_thread(data, cont, result, body) \
 //  set_thread_blocked((data), (cont)); \
 //  body \
 //  return_thread_runnable((data), (result));
+*/
 gc_heap_root *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);

@@ -15,6 +15,7 @@
 #include "cyclone/ck_ht_hash.h"
 #include <errno.h>
 #include <limits.h>
+#include <ctype.h>
 //#include <signal.h> // TODO: only used for debugging!
 
 //int JAE_DEBUG = 0;
@@ -97,6 +98,17 @@ if (type_is_pair_prim(clo)) { \
      return;\
  } \
 }
+#define _return_closcall1(td, clo, a1) { \
+ char top; \
+ if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
+     object buf[1]; buf[0] = a1;\
+     GC(td, clo, buf, 1); \
+     return NULL; \
+ } else {\
+     closcall1(td, (closure) (clo), a1); \
+     return NULL;\
+ } \
+}
 #define closcall2(td, clo, a1, a2) \
 if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 1, (closure)(a1), clo,a2); \
@@ -112,6 +124,17 @@ if (type_is_pair_prim(clo)) { \
  } else {\
      closcall2(td, (closure) (clo), a1, a2); \
      return;\
+ } \
+}
+#define _return_closcall2(td, clo, a1, a2) { \
+ char top; \
+ if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
+     object buf[2]; buf[0] = a1;buf[1] = a2;\
+     GC(td, clo, buf, 2); \
+     return NULL; \
+ } else {\
+     closcall2(td, (closure) (clo), a1, a2); \
+     return NULL;\
  } \
 }
 /*END closcall section */
@@ -578,7 +601,7 @@ int double2buffer(char *buf, int buf_size, double num)
 // to the value returned by (current-output-port). It is an
 // error to attempt an output operation on a closed port
 //
-object dispatch_display_va(void *data, int argc, object clo, object cont,
+void dispatch_display_va(void *data, int argc, object clo, object cont,
                            object x, ...)
 {
   object result;
@@ -734,7 +757,7 @@ object Cyc_display(object x, FILE * port)
   return quote_void;
 }
 
-object dispatch_write_va(void *data, int argc, object clo, object cont,
+void dispatch_write_va(void *data, int argc, object clo, object cont,
                          object x, ...)
 {
   object result;
@@ -1023,7 +1046,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     va_start(ap, n); \
     result = Cyc_num_cmp_va_list(data, argc, FUNC_OP, n, ap); \
     va_end(ap); \
-    return_closcall1(data, cont, result); \
+    _return_closcall1(data, cont, result); \
 } \
 void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
     object result; \
@@ -1274,6 +1297,7 @@ object Cyc_vector_length(void *data, object v)
   }
   Cyc_rt_raise_msg(data,
                    "vector-length - invalid parameter, expected vector\n");
+  return NULL;
 }
 
 object Cyc_length(void *data, object l)
@@ -1345,7 +1369,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
     }
   }
   make_string(str, buffer);
-  return_closcall1(data, cont, &str);
+  _return_closcall1(data, cont, &str);
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
@@ -1354,7 +1378,7 @@ object Cyc_symbol2string(void *data, object cont, object sym)
   {
     const char *pname = symbol_pname(sym);
     make_string(str, pname);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
 }}
 
 object Cyc_string2symbol(void *data, object str)
@@ -1387,7 +1411,7 @@ object Cyc_list2string(void *data, object cont, object lst)
   //{ make_string_noalloc(str, buf, i);
   {
     make_string(str, buf);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
   }
 }
 
@@ -1407,16 +1431,17 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
     Cyc_check_str(data, str);
     if (base_num == 2) {
       result = binstr2int(string_str(str));
-      return_closcall1(data, cont, obj_int2obj(result));
+      _return_closcall1(data, cont, obj_int2obj(result));
     } else if (base_num == 8) {
       result = octstr2int(string_str(str));
-      return_closcall1(data, cont, obj_int2obj(result));
+      _return_closcall1(data, cont, obj_int2obj(result));
     } else if (base_num == 16) {
       result = hexstr2int(string_str(str));
-      return_closcall1(data, cont, obj_int2obj(result));
+      _return_closcall1(data, cont, obj_int2obj(result));
     }
   }
   Cyc_string2number_(data, cont, str);
+  return NULL;
 }
 
 typedef enum {
@@ -1474,9 +1499,8 @@ int str2double(double *out, char *s)
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
-  long l;
   double n;
-  char *s, *end;
+  char *s;
   Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
   if (type_of(str) == string_tag && ((string_type *) str)->str) {
@@ -1484,12 +1508,12 @@ object Cyc_string2number_(void *data, object cont, object str)
 
     rv = str2int(&result, s, 10);
     if (rv == STR2INT_SUCCESS) {
-      return_closcall1(data, cont, obj_int2obj(result));
+      _return_closcall1(data, cont, obj_int2obj(result));
     } else {
       str2double(&n, s);
       {
         make_double(result, n);
-        return_closcall1(data, cont, &result);
+        _return_closcall1(data, cont, &result);
       }
     }
   } else {
@@ -1498,6 +1522,7 @@ object Cyc_string2number_(void *data, object cont, object str)
   }
 
   Cyc_rt_raise2(data, "Expected string but received", str);
+  return NULL;
 }
 
 int binstr2int(const char *str)
@@ -1572,10 +1597,10 @@ object Cyc_string_cmp(void *data, object str1, object str2)
     *bufferp = '\0'; \
     make_string(result, buffer); \
     va_end(ap); \
-    return_closcall1(data, cont, &result); \
+    _return_closcall1(data, cont, &result); \
 }
 
-void dispatch_string_91append(void *data, int _argc, object clo, object cont,
+object dispatch_string_91append(void *data, int _argc, object clo, object cont,
                               object str1, ...)
 {
   va_list ap;
@@ -1666,7 +1691,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
 
   {
     make_string_with_len(sub, raw + s, e - s);
-    return_closcall1(data, cont, &sub);
+    _return_closcall1(data, cont, &sub);
   }
 }
 
@@ -1681,22 +1706,22 @@ object Cyc_installation_dir(void *data, object cont, object type)
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
     make_string(str, buf);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
              strncmp(((symbol) type)->pname, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
     make_string(str, buf);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
              strncmp(((symbol) type)->pname, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
     make_string(str, buf);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
   } else {
     make_string(str, CYC_INSTALL_DIR);
-    return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, &str);
   }
 }
 
@@ -1725,7 +1750,7 @@ object Cyc_command_line_arguments(void *data, object cont)
     ((list) pl)->pair_cdr = lis;
     lis = pl;
   }
-  return_closcall1(data, cont, lis);
+  _return_closcall1(data, cont, lis);
 }
 
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
@@ -1777,14 +1802,14 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   for (i = 0; i < ((vector) v)->num_elements; i++) {
     ((vector) v)->elements[i] = fill;
   }
-  return_closcall1(data, cont, v);
+  _return_closcall1(data, cont, v);
 }
 
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 {
   object bv = NULL;
   object fill;
-  int i, length, fill_val;
+  int length, fill_val;
   va_list ap;
   va_start(ap, len);
   if (argc > 1) {
@@ -1805,7 +1830,7 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
     fill_val = unbox_number(fill);
     memset(((bytevector) bv)->data, (unsigned char)fill_val, length);
   }
-  return_closcall1(data, cont, bv);
+  _return_closcall1(data, cont, bv);
 }
 
 #define Cyc_bytevector_va_list(argc) { \
@@ -1830,10 +1855,10 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
     bv.len = argc; \
     bv.data = buffer; \
   } \
-  return_closcall1(data, cont, &bv); \
+  _return_closcall1(data, cont, &bv); \
 }
 
-void dispatch_bytevector(void *data, int _argc, object clo, object cont,
+object dispatch_bytevector(void *data, int _argc, object clo, object cont,
                          object bval, ...)
 {
   Cyc_bytevector_va_list((_argc - 1));
@@ -1845,7 +1870,7 @@ object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...)
 }
 
 #define Cyc_bytevector_append_va_list(argc) { \
-  int i = 0, buf_idx = 0, val, total_length = 0; \
+  int i = 0, buf_idx = 0, total_length = 0; \
   va_list ap; \
   object tmp; \
   char *buffer; \
@@ -1876,10 +1901,10 @@ object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...)
     result.len = total_length; \
     result.data = buffer; \
   } \
-  return_closcall1(data, cont, &result); \
+  _return_closcall1(data, cont, &result); \
 }
 
-void dispatch_bytevector_91append(void *data, int _argc, object clo,
+object dispatch_bytevector_91append(void *data, int _argc, object clo,
                                   object cont, object bv, ...)
 {
   Cyc_bytevector_append_va_list((_argc - 1));
@@ -1893,7 +1918,6 @@ object Cyc_bytevector_append(void *data, object cont, int _argc, object bv, ...)
 object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
                            object end)
 {
-  const char *buf;
   int s, e;
   int len;
   make_empty_bytevector(result);
@@ -1902,7 +1926,6 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
   Cyc_check_num(data, start);
   Cyc_check_num(data, end);
 
-  buf = ((bytevector) bv)->data;
   s = unbox_number(start);
   e = unbox_number(end);
   len = e - s;
@@ -1918,7 +1941,7 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
   result.len = len;
   result.data = alloca(sizeof(char) * len);
   memcpy(&result.data[0], &(((bytevector) bv)->data)[s], len);
-  return_closcall1(data, cont, &result);
+  _return_closcall1(data, cont, &result);
 }
 
 object Cyc_utf82string(void *data, object cont, object bv, object start,
@@ -1950,14 +1973,13 @@ object Cyc_utf82string(void *data, object cont, object bv, object start,
     st.str = alloca(sizeof(char) * (len + 1));
     memcpy(st.str, &buf[s], len);
     st.str[len] = '\0';
-    return_closcall1(data, cont, &st);
+    _return_closcall1(data, cont, &st);
   }
 }
 
 object Cyc_string2utf8(void *data, object cont, object str, object start,
                        object end)
 {
-  const char *buf;
   int s, e;
   int len;
   make_empty_bytevector(result);
@@ -1966,7 +1988,6 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   Cyc_check_num(data, start);
   Cyc_check_num(data, end);
 
-  buf = string_str(str);
   s = unbox_number(start);
   e = unbox_number(end);
   len = e - s;
@@ -1982,7 +2003,7 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   result.len = len;
   result.data = alloca(sizeof(char) * len);
   memcpy(&result.data[0], &(string_str(str))[s], len);
-  return_closcall1(data, cont, &result);
+  _return_closcall1(data, cont, &result);
 }
 
 object Cyc_bytevector_u8_ref(void *data, object bv, object k)
@@ -2031,6 +2052,7 @@ object Cyc_bytevector_length(void *data, object bv)
   }
   Cyc_rt_raise_msg(data,
                    "bytevector-length - invalid parameter, expected bytevector\n");
+  return NULL;
 }
 
 object Cyc_list2vector(void *data, object cont, object l)
@@ -2054,7 +2076,7 @@ object Cyc_list2vector(void *data, object cont, object l)
     ((vector) v)->elements[i++] = car(lst);
     lst = cdr(lst);
   }
-  return_closcall1(data, cont, v);
+  _return_closcall1(data, cont, v);
 }
 
 object Cyc_system(object cmd)
@@ -2132,7 +2154,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     va_start(ap, n); \
     result = Cyc_num_op_va_list(data, argc, FUNC_OP, NO_ARG, ONE_ARG, n, ap, &buffer); \
     va_end(ap); \
-    return_closcall1(data, cont, result); \
+    _return_closcall1(data, cont, result); \
 } \
 void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
     common_type buffer; \
@@ -2188,7 +2210,7 @@ object Cyc_div(void *data, object cont, int argc, object n, ...)
   va_start(ap, n);
   result = Cyc_num_op_va_list(data, argc, Cyc_div_op, -1, 1, n, ap, &buffer);
   va_end(ap);
-  return_closcall1(data, cont, result);
+  _return_closcall1(data, cont, result);
 }
 
 void dispatch_div(void *data, int argc, object clo, object cont, object n, ...)
@@ -2350,7 +2372,8 @@ object Cyc_io_flush_output_port(void *data, object port)
   {
     FILE *stream = ((port_type *) port)->fp;
     if (stream) {
-      int rv = fflush(stream);
+      //int rv = 
+      fflush(stream);
       // TODO: handle error if non-zero value returned
     }
   }
@@ -2374,7 +2397,7 @@ object Cyc_io_file_exists(void *data, object filename)
   fname = ((string_type *) filename)->str;
   FILE *file;
   // Possibly overkill, but portable
-  if (file = fopen(fname, "r")) {
+  if ((file = fopen(fname, "r"))) {
     fclose(file);
     return boolean_t;
   }
@@ -2748,21 +2771,18 @@ void _bytevector_91append(void *data, object cont, object args)
 
 void _Cyc_91bytevector_91copy(void *data, object cont, object args)
 {
-  object argc = Cyc_length(data, args);
   Cyc_check_num_args(data, "Cyc-bytevector-copy", 3, args);
   Cyc_bytevector_copy(data, cont, car(args), cadr(args), caddr(args));
 }
 
 void _Cyc_91string_91_125utf8(void *data, object cont, object args)
 {
-  object argc = Cyc_length(data, args);
   Cyc_check_num_args(data, "Cyc-string->utf8", 3, args);
   Cyc_string2utf8(data, cont, car(args), cadr(args), caddr(args));
 }
 
 void _Cyc_91utf8_91_125string(void *data, object cont, object args)
 {
-  object argc = Cyc_length(data, args);
   Cyc_check_num_args(data, "Cyc-utf8->string", 3, args);
   Cyc_utf82string(data, cont, car(args), cadr(args), caddr(args));
 }
@@ -3462,7 +3482,7 @@ object apply(void *data, object cont, object func, object args)
   case closure1_tag:
   case closureN_tag:
     if (func == Cyc_glo_call_cc) {
-      make_pair(c, cont, args);
+//      make_pair(c, cont, args);
 //Cyc_display(args, stderr);
 //        args = &c;
 //Cyc_display(&c, stderr);

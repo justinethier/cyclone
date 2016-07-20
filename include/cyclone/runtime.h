@@ -130,19 +130,19 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
 void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
 object apply_va(void *data, object cont, int argc, object func, ...);
 object Cyc_string_cmp(void *data, object str1, object str2);
-void dispatch_string_91append(void *data, int argc, object clo, object cont,
-                              object str1, ...);
+object dispatch_string_91append(void *data, int argc, object clo, object cont,
+                                object str1, ...);
 list malloc_make_pair(object, object);
 cvar_type *mcvar(object * var);
 object Cyc_display(object, FILE * port);
-object dispatch_display_va(void *data, int argc, object clo, object cont,
-                           object x, ...);
+void dispatch_display_va(void *data, int argc, object clo, object cont,
+                         object x, ...);
 object Cyc_display_va(int argc, object x, ...);
 object Cyc_display_va_list(int argc, object x, va_list ap);
 object Cyc_write_char(void *data, object c, object port);
 object Cyc_write(object, FILE * port);
-object dispatch_write_va(void *data, int argc, object clo, object cont,
-                         object x, ...);
+void dispatch_write_va(void *data, int argc, object clo, object cont,
+                       object x, ...);
 object Cyc_write_va(int argc, object x, ...);
 object Cyc_write_va_list(int argc, object x, va_list ap);
 
