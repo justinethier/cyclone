@@ -75,7 +75,7 @@
     (next (string->list str) '())))
 
 (define *c-main-function*
-"main(int argc,char **argv)
+"int main(int argc,char **argv)
 {gc_thread_data *thd;
  long stack_size = global_stack_size = STACK_SIZE;
  long heap_size = global_heap_size = HEAP_SIZE;
