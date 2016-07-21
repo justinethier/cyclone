@@ -191,7 +191,6 @@ object Cyc_string2number_(void *d, object cont, object str);
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
 int binstr2int(const char *str);
 int octstr2int(const char *str);
-int hexstr2int(const char *str);
 object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
 object Cyc_string_length(void *data, object str);
 object Cyc_substring(void *data, object cont, object str, object start,
