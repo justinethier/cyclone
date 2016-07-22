@@ -31,7 +31,7 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 
 Cyclone has a similar architecture to other modern compilers:
 
-<img src="images/compiler.png" alt="flowchart of cyclone compiler">
+<img class="doc" src="images/compiler.png" alt="flowchart of cyclone compiler">
 
 First, an input file containing Scheme code is received on the command line and loaded into an abstract syntax tree (AST) by Cyclone's parser. From there a series of source-to-source transformations are performed on the AST to expand macros, perform optimizations, and make the code easier to compile to C. These intermediate representations (IR) can be printed out in a readable format to aid debugging. The final AST is then output as a `.c` file and the C compiler is invoked to create the final executable or object file.
 
