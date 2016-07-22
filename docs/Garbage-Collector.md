@@ -55,8 +55,8 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 
 The implementation code is available here:
 
-- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
-- [`gc.c`](../gc.c) contains the major GC code.
+- [`runtime.c`](https://github.com/justinethier/cyclone/blob/master/runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
+- [`gc.c`](https://github.com/justinethier/cyclone/blob/master/gc.c) contains the major GC code.
 
 # Data Structures
 
