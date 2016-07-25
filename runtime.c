@@ -3593,8 +3593,8 @@ void Cyc_start_trampoline(gc_thread_data * thd)
                 thd->gc_cont, thd->gc_args);
   }
 
-  printf("Internal error: should never have reached this line\n");
-  exit(0);
+  fprintf(stderr, "Internal error: should never have reached this line\n");
+  exit(1);
 }
 
 // Mark globals as part of the tracing collector
