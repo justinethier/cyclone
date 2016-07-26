@@ -235,6 +235,7 @@ gc_heap_root *gc_get_heap()
 
 object cell_get(object cell)
 {
+  // FUTURE: always use unsafe car here, since computed by compiler
   return car(cell);
 }
 
@@ -1223,6 +1224,15 @@ object Cyc_eq(object x, object y)
   if (x == y)
     return boolean_t;
   return boolean_f;
+}
+
+object Cyc_set_cell(void *data, object l, object val)
+{
+  // FUTURE: always use "unsafe" car here, since set-cell is added by cyclone
+  gc_mut_update((gc_thread_data *) data, car(l), val);
+  car(l) = val;
+  add_mutation(data, l, -1, val);
+  return l;
 }
 
 object Cyc_set_car(void *data, object l, object val)
