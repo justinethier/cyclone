@@ -2415,22 +2415,21 @@ object Cyc_io_read_line(void *data, object cont, object port)
 {
   FILE *stream = ((port_type *) port)->fp;
   char buf[1024];
-  int i = 0, c;
+  //int i = 0, c;
 
   set_thread_blocked(data, cont);
-  while (1) {
-    c = fgetc(stream);
-    if (c == EOF && i == 0) {
+  errno = 0;
+  if (fgets(buf, 1023, stream) != NULL) {
+    make_string(s, buf);
+    return_thread_runnable(data, &s);
+  } else {
+    if (feof(stream)) {
       return_thread_runnable(data, Cyc_EOF);
-    } else if (c == EOF || i == 1023 || c == '\n') {
-      buf[i] = '\0';
-      {
-        make_string(s, buf);
-        return_thread_runnable(data, &s);
-      }
+    } else {
+      // TODO: can't do this because we said thread could be blocked
+      //Cyc_rt_raise2(data, "Error reading from file: ", obj_int2obj(errno));
+      return_thread_runnable(data, Cyc_EOF);
     }
-
-    buf[i++] = c;
   }
   return NULL;
 }
