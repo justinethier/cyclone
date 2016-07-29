@@ -527,6 +527,18 @@ int equal(object x, object y)
   }
 }
 
+object Cyc_car(void *data, object lis)
+{
+  Cyc_check_pair(data, lis);
+  return car(lis);
+}
+
+object Cyc_cdr(void *data, object lis)
+{
+  Cyc_check_pair(data, lis);
+  return cdr(lis);
+}
+
 object Cyc_get_global_variables()
 {
   return Cyc_global_variables;
