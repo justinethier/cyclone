@@ -639,6 +639,7 @@
         ((eq? p 'list->string) "object")
         ((eq? p 'list->vector) "object")
         ((eq? p 'Cyc-installation-dir) "object")
+        ((eq? p 'Cyc-compilation-environment) "object")
         (else #f)))
 
     ;; Determine if primitive creates a C variable
@@ -651,6 +652,7 @@
                  open-input-file
                  open-output-file
                  Cyc-installation-dir
+                 Cyc-compilation-environment
                  string->number 
                  string-append list->string
                  make-bytevector

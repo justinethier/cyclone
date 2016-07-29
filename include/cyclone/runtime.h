@@ -201,7 +201,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
 object Cyc_string_ref(void *data, object str, object k);
 object Cyc_string_set(void *data, object str, object k, object chr);
 object Cyc_installation_dir(void *data, object cont, object type);
-void Cyc_compilation_environment(void *data, object cont, object var);
+object Cyc_compilation_environment(void *data, object cont, object var);
 object Cyc_command_line_arguments(void *data, object cont);
 object Cyc_system(object cmd);
 object Cyc_char2integer(object chr);
