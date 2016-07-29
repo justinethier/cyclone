@@ -428,8 +428,8 @@
          ((eq? p 'Cyc-display)           "Cyc_display_va")
          ((eq? p 'Cyc-write)             "Cyc_write_va")
          ((eq? p 'Cyc-write-char)        "Cyc_write_char")
-         ((eq? p 'car)           "car")
-         ((eq? p 'cdr)           "cdr")
+         ((eq? p 'car)           "Cyc_car")
+         ((eq? p 'cdr)           "Cyc_cdr")
          ((eq? p 'caar)          "caar")
          ((eq? p 'cadr)          "cadr")
          ((eq? p 'cdar)          "cdar")
@@ -536,6 +536,8 @@
         >=
         <=
         apply
+        car
+        cdr
         Cyc-default-exception-handler
         Cyc-current-exception-handler
         Cyc-end-thread!
