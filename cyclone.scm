@@ -319,9 +319,19 @@
                         (string-append " " (lib:import->filename i ".o") " "))
                       lib-deps)))
                  (comp-prog-cmd 
-                   (string-append "gcc " src-file " -g -c -o " exec-file ".o"))
+                   (string-replace-all 
+                     (string-replace-all 
+                       (Cyc-compilation-environment 'cc-prog) 
+                       "~src-file~" src-file)
+                     "~exec-file~" exec-file))
                  (comp-objs-cmd 
-                   (string-append "gcc " exec-file ".o " objs-str " -pthread -lcyclone -lck -lm -g -o " exec-file)))
+                   (string-replace-all
+                     (string-replace-all
+                       (string-replace-all
+                         (Cyc-compilation-environment 'cc-exec)
+                         "~exec-file~" exec-file)
+                       "~obj-files~" objs-str)
+                     "~exec-file~" exec-file)))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond
@@ -343,7 +353,11 @@
             (write (macro:get-defined-macros))))
         ;; Compile library
         (let ((comp-lib-cmd
-                (string-append "gcc " src-file " -g -c -o " exec-file ".o")))
+                (string-replace-all 
+                  (string-replace-all 
+                    (Cyc-compilation-environment 'cc-lib)
+                    "~src-file~" src-file)
+                  "~exec-file~" exec-file)))
           (cond
             (cc?
               (system comp-lib-cmd))
