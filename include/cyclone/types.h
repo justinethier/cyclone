@@ -501,6 +501,36 @@ typedef pair_type *pair;
 #define cdddar(x) (cdr(cdr(cdr(car(x)))))
 #define cddddr(x) (cdr(cdr(cdr(cdr(x)))))
 
+// Safe versions of the above:
+#define Cyc_caar(d, x) (Cyc_car(d, Cyc_car(d, x)))
+#define Cyc_cadr(d, x) (Cyc_car(d, Cyc_cdr(d, x)))
+#define Cyc_cdar(d, x) (Cyc_cdr(d, Cyc_car(d, x)))
+#define Cyc_cddr(d, x) (Cyc_cdr(d, Cyc_cdr(d, x)))
+#define Cyc_caaar(d, x) (Cyc_car(d, Cyc_car(d, Cyc_car(d, x))))
+#define Cyc_caadr(d, x) (Cyc_car(d, Cyc_car(d, Cyc_cdr(d, x))))
+#define Cyc_cadar(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_car(d, x))))
+#define Cyc_caddr(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_cdr(d, x))))
+#define Cyc_cdaar(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_car(d, x))))
+#define Cyc_cdadr(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, x))))
+#define Cyc_cddar(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, x))))
+#define Cyc_cdddr(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, x))))
+#define Cyc_caaaar(d, x) (Cyc_car(d, Cyc_car(d, Cyc_car(d, Cyc_car(d, x)))))
+#define Cyc_caaadr(d, x) (Cyc_car(d, Cyc_car(d, Cyc_car(d, Cyc_cdr(d, x)))))
+#define Cyc_caadar(d, x) (Cyc_car(d, Cyc_car(d, Cyc_cdr(d, Cyc_car(d, x)))))
+#define Cyc_caaddr(d, x) (Cyc_car(d, Cyc_car(d, Cyc_cdr(d, Cyc_cdr(d, x)))))
+#define Cyc_cadaar(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_car(d, Cyc_car(d, x)))))
+#define Cyc_cadadr(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, x)))))
+#define Cyc_caddar(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, x)))))
+#define Cyc_cadddr(d, x) (Cyc_car(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, x)))))
+#define Cyc_cdaaar(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_car(d, Cyc_car(d, x)))))
+#define Cyc_cdaadr(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_car(d, Cyc_cdr(d, x)))))
+#define Cyc_cdadar(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, Cyc_car(d, x)))))
+#define Cyc_cdaddr(d, x) (Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, Cyc_cdr(d, x)))))
+#define Cyc_cddaar(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, Cyc_car(d, x)))))
+#define Cyc_cddadr(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, x)))))
+#define Cyc_cdddar(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, x)))))
+#define Cyc_cddddr(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, x)))))
+
 /* Closure types */
 
 typedef struct {
