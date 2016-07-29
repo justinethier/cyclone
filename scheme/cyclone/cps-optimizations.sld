@@ -450,7 +450,9 @@
           ((if? exp)       
            (cond
             ((not (if->condition exp))
-             (opt:contract (if->else exp)))
+             (opt:inline-prims (if->else exp) refs)) ;; Always false, so replace with else
+            ((const? (if->condition exp))
+             (opt:inline-prims (if->then exp) refs)) ;; Always true, replace with then
             (else
               `(if ,(opt:inline-prims (if->condition exp) refs)
                    ,(opt:inline-prims (if->then exp) refs)
