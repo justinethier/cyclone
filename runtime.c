@@ -1813,7 +1813,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 {
   object bv = NULL;
-  object fill;
+  object fill = obj_int2obj(0);
   int length, fill_val;
   va_list ap;
   va_start(ap, len);
