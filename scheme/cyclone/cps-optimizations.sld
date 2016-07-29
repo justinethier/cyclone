@@ -368,9 +368,14 @@
         ((set!? exp)
          `(set! ,(opt:contract (set!->var exp))
                 ,(opt:contract (set!->exp exp))))
-        ((if? exp)       `(if ,(opt:contract (if->condition exp))
-                              ,(opt:contract (if->then exp))
-                              ,(opt:contract (if->else exp))))
+        ((if? exp)
+         (cond
+          ((not (if->condition exp))
+           (opt:contract (if->else exp)))
+          (else 
+            `(if ,(opt:contract (if->condition exp))
+                 ,(opt:contract (if->then exp))
+                 ,(opt:contract (if->else exp))))))
         ; Application:
         ((app? exp)
          (let* ((fnc (opt:contract (car exp))))
@@ -442,9 +447,14 @@
           ((set!? exp)
            `(set! ,(set!->var exp)
                   ,(opt:inline-prims (set!->exp exp) refs)))
-          ((if? exp)       `(if ,(opt:inline-prims (if->condition exp) refs)
-                                ,(opt:inline-prims (if->then exp) refs)
-                                ,(opt:inline-prims (if->else exp) refs)))
+          ((if? exp)       
+           (cond
+            ((not (if->condition exp))
+             (opt:contract (if->else exp)))
+            (else
+              `(if ,(opt:inline-prims (if->condition exp) refs)
+                   ,(opt:inline-prims (if->then exp) refs)
+                   ,(opt:inline-prims (if->else exp) refs)))))
           ; Application:
           ((app? exp)
 ;(trace:error `(app? ,exp ,(ast:lambda? (car exp))
