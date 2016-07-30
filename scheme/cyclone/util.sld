@@ -40,8 +40,10 @@
     gensym
     delete
     delete-duplicates
-    list-insert-at!
     list-index2
+    list-insert-at!
+    list-prefix?
+    string-replace-all
     filter)
   (begin
 
@@ -124,6 +126,43 @@
         (if (= (list-index2 e (cdr lst)) -1) 
           -1
           (+ 1 (list-index2 e (cdr lst))))))))
+
+;; Replace all instances of needle within haystack.
+;; Based on code from: 
+;; http://stackoverflow.com/a/32320936/101258
+(define (string-replace-all haystack needle replacement)    
+  ;; most of the processing works on lists 
+  ;; of char, not strings.
+  (let ((haystack (string->list haystack))
+        (needle (string->list needle))
+        (replacement (string->list replacement))
+        (needle-len (string-length needle)))
+    (let loop ((haystack haystack) (acc '()))
+      (cond ((null? haystack)
+             (list->string (reverse acc)))
+            ((list-prefix? haystack needle)
+             (loop (list-tail haystack needle-len)
+                   (reverse-append replacement acc)))
+            (else
+             (loop (cdr haystack) (cons (car haystack) acc)))))))
+
+(define (reverse-append pre lis)
+  (append (reverse pre) lis))
+
+(define (list-prefix? lis prefix)
+  (call/cc 
+    (lambda (return)
+      (for-each
+        (lambda (x y)
+          (if (not (equal? x y))
+              (return #f)))
+        lis
+        prefix)
+      (return #t))))
+; Tests -
+;(write (list-prefix? '(1 2 3 4 5) '(1 2)))
+;(write (list-prefix? '(1 2 3) '(a 1 2 3 4)))
+;(write (string-replace-all "The cat looks like a cat." "cat" "dog"))
 
 ; gensym-count : integer
 (define gensym-count 0)
