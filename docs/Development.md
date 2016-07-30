@@ -41,4 +41,3 @@ To make sure everything works, install a modified copy of Cyclone and run the fo
 
 This confirms that the compiler - with any changes - can still be built from source, and syncs any changes up to `cyclone-bootstrap`. Before checking in a set of changes or releasing a build it is also a good idea to do a rebuild of the bootstrap repo also, to make sure it still works.
 
-- 
