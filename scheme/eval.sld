@@ -182,6 +182,7 @@
       (list 'apply apply)
       (list '%halt %halt)
       (list 'exit exit)
+      (list 'Cyc-compilation-environment Cyc-compilation-environment)
       (list 'Cyc-installation-dir Cyc-installation-dir)
       (list 'system system)
       (list 'command-line-arguments command-line-arguments)

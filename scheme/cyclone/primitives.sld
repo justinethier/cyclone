@@ -72,6 +72,7 @@
          system
          command-line-arguments
          Cyc-installation-dir
+         Cyc-compilation-environment
          Cyc-default-exception-handler
          Cyc-current-exception-handler
          cons
@@ -188,6 +189,7 @@
          (system 1 1)
          (command-line-arguments 0 0)
          (Cyc-installation-dir 1 1)
+         (Cyc-compilation-environment 1 1)
          (Cyc-default-exception-handler 1 1)
          (Cyc-current-exception-handler 0 0)
          (cons 2 2)
@@ -486,6 +488,7 @@
          ((eq? p 'string-set!)    "Cyc_string_set")
          ((eq? p 'substring)      "Cyc_substring")
          ((eq? p 'Cyc-installation-dir) "Cyc_installation_dir")
+         ((eq? p 'Cyc-compilation-environment) "Cyc_compilation_environment")
          ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
          ((eq? p 'system)         "Cyc_system")
          ((eq? p 'assq)          "assq")
@@ -584,6 +587,7 @@
         string-set!
         substring
         Cyc-installation-dir
+        Cyc-compilation-environment
         command-line-arguments
         assq
         assv
@@ -681,7 +685,10 @@
                          bytevector
                          bytevector-u8-ref
                          bytevector-u8-set!
-                         make-vector list->vector Cyc-installation-dir))))
+                         make-vector 
+                         list->vector 
+                         Cyc-compilation-environment
+                         Cyc-installation-dir))))
 
     ;; Primitive functions that pass a continuation or thread data but have no other arguments
     (define (prim:cont/no-args? exp)

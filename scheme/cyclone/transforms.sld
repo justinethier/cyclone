@@ -470,6 +470,7 @@
                   system
                   command-line-arguments
                   Cyc-installation-dir
+                  Cyc-compilation-environment
                   Cyc-default-exception-handler
                   Cyc-current-exception-handler
                   cell-get

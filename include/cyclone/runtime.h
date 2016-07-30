@@ -391,6 +391,7 @@ extern const object primitive_bytevector_91u8_91set_67;
 extern const object primitive_string_91ref;
 extern const object primitive_string_91set_67;
 extern const object primitive_Cyc_91installation_91dir;
+extern const object primitive_Cyc_91compilation_91environment;
 extern const object primitive_command_91line_91arguments;
 extern const object primitive_system;
 extern const object primitive_boolean_127;

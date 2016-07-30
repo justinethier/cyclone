@@ -3189,6 +3189,12 @@ void _Cyc_91installation_91dir(void *data, object cont, object args)
   Cyc_installation_dir(data, cont, car(args));
 }
 
+void _Cyc_91compilation_91environment(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "Cyc-compilation-environment", 1, args);
+  Cyc_compilation_environment(data, cont, car(args));
+}
+
 void _command_91line_91arguments(void *data, object cont, object args)
 {
   object cmdline = Cyc_command_line_arguments(data, cont);
@@ -4132,6 +4138,8 @@ static primitive_type string_91set_67_primitive =
     { {0}, primitive_tag, "string-set!", &_cyc_string_91set_67 };
 static primitive_type Cyc_91installation_91dir_primitive =
     { {0}, primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir };
+static primitive_type Cyc_91compilation_91environment_primitive =
+    { {0}, primitive_tag, "Cyc-compilation-environment", &_Cyc_91compilation_91environment };
 static primitive_type command_91line_91arguments_primitive =
     { {0}, primitive_tag, "command-line-arguments",
 &_command_91line_91arguments
@@ -4325,6 +4333,8 @@ const object primitive_string_91ref = &string_91ref_primitive;
 const object primitive_string_91set_67 = &string_91set_67_primitive;
 const object primitive_Cyc_91installation_91dir =
     &Cyc_91installation_91dir_primitive;
+const object primitive_Cyc_91compilation_91environment =
+    &Cyc_91compilation_91environment_primitive;
 const object primitive_command_91line_91arguments =
     &command_91line_91arguments_primitive;
 const object primitive_system = &system_primitive;

@@ -532,6 +532,7 @@
           bytevector bytevector-append bytevector-copy
           string->utf8 number->string symbol->string list->string utf8->string
           string-append string substring Cyc-installation-dir read-line
+          Cyc-compilation-environment
           )))
 
     ;; Check each pair of primitive call / corresponding lambda arg,
