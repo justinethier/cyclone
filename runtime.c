@@ -1731,6 +1731,34 @@ object Cyc_installation_dir(void *data, object cont, object type)
 }
 
 /**
+ * Retrieve a value set during Cyclone compilation
+ */
+void Cyc_compilation_environment(void *data, object cont, object var)
+{
+  if (Cyc_is_symbol(var) == boolean_t){
+    if (strncmp(((symbol) var)->pname, "cc-prog", 8) == 0) {
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s", CYC_CC_PROG);
+      make_string(str, buf);
+      return_closcall1(data, cont, &str);
+    } else if (strncmp(((symbol) var)->pname, "cc-exec", 8) == 0) {
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s", CYC_CC_EXEC);
+      make_string(str, buf);
+      return_closcall1(data, cont, &str);
+    } else if (strncmp(((symbol) var)->pname, "cc-lib", 7) == 0) {
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s", CYC_CC_LIB);
+      make_string(str, buf);
+      return_closcall1(data, cont, &str);
+    }
+  }
+  Cyc_rt_raise2(data, 
+    "Cyc-compilation-environment - unrecognized symbol", 
+    var);
+}
+
+/**
  * Perform same role as the CHICKEN function:
  *
  * Contains the list of arguments passed to this program, with the name 

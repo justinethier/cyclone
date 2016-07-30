@@ -62,9 +62,9 @@ libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 
 libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c dispatch.c
-	echo $(CC_PROG)
-	echo $(CC_EXEC)
-	echo $(CC_LIB)
+#	echo $(CC_PROG)
+#	echo $(CC_EXEC)
+#	echo $(CC_LIB)
 	$(CC) $(CFLAGS) -c -Iinclude dispatch.c -o dispatch.o
 	$(CC) $(CFLAGS) -std=gnu99 -c -Iinclude gc.c -o gc.o
 	$(CC) $(CFLAGS) -c -Iinclude \
@@ -72,6 +72,9 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
                   -DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
                   -DCYC_INSTALL_INC=\"$(INCDIR)\" \
                   -DCYC_INSTALL_SLD=\"$(DATADIR)\" \
+                  -DCYC_CC_PROG=\"$(CC_PROG)\" \
+                  -DCYC_CC_EXEC=\"$(CC_EXEC)\" \
+                  -DCYC_CC_LIB=\"$(CC_LIB)\" \
                   runtime.c -o runtime.o
 	$(AR) rcs libcyclone.a runtime.o gc.o dispatch.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
