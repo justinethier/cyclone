@@ -199,7 +199,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   free->next = next;
   next->size = size - gc_heap_align(gc_free_chunk_size);
   next->next = NULL;
-#if GC_DEBUG_PRINTFS
+#if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG h->data addr: %p\n", &(h->data));
   fprintf(stderr, "DEBUG h->data addr: %p\n", h->data);
   fprintf(stderr, ("heap: %p-%p data: %p-%p size: %zu\n"),
@@ -226,7 +226,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
   if (prev_page == NULL || page == NULL) {
     return page;
   }
-#if GC_DEBUG_PRINTFS
+#if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
 #endif
 
