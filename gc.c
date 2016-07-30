@@ -1002,7 +1002,7 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
        (cached_heap_free_sizes[HEAP_REST] <
         cached_heap_total_sizes[HEAP_REST] * GC_COLLECTION_THRESHOLD))) {
 #if GC_DEBUG_TRACE
-    fprintf(stdout,
+    fprintf(stderr,
             "Less than %f%% of the heap is free, initiating collector\n",
             100.0 * GC_COLLECTION_THRESHOLD);
 #endif
@@ -1289,7 +1289,7 @@ void debug_dump_globals();
 void gc_collector()
 {
   int old_clear, old_mark, heap_type;
-  size_t freed = 0;
+  size_t freed_tmp = 0, freed = 0;
 #if GC_DEBUG_TRACE
   size_t total_size;
   size_t total_free;
@@ -1336,17 +1336,21 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
-  gc_sweep(gc_get_heap()->heap, HEAP_REST, &freed);
-  gc_sweep(gc_get_heap()->small_obj_heap, HEAP_SM, &freed);
-  gc_sweep(gc_get_heap()->medium_obj_heap, HEAP_MED, &freed);
-  gc_sweep(gc_get_heap()->huge_obj_heap, HEAP_HUGE, &freed);
+  gc_sweep(gc_get_heap()->heap, HEAP_REST, &freed_tmp);
+  freed += freed_tmp;
+  gc_sweep(gc_get_heap()->small_obj_heap, HEAP_SM, &freed_tmp);
+  freed += freed_tmp;
+  gc_sweep(gc_get_heap()->medium_obj_heap, HEAP_MED, &freed_tmp);
+  freed += freed_tmp;
+  gc_sweep(gc_get_heap()->huge_obj_heap, HEAP_HUGE, &freed_tmp);
+  freed += freed_tmp;
 
   // TODO: this loop only includes smallest 2 heaps, is that sufficient??
   for (heap_type = 0; heap_type < 2; heap_type++) {
     while (cached_heap_free_sizes[heap_type] <
            (cached_heap_total_sizes[heap_type] * GC_FREE_THRESHOLD)) {
 #if GC_DEBUG_TRACE
-      fprintf(stdout, "Less than %f%% of the heap %d is free, growing it\n",
+      fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
               100.0 * GC_FREE_THRESHOLD, heap_type);
 #endif
       if (heap_type == HEAP_SM) {
