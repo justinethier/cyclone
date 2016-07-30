@@ -14,6 +14,7 @@ Please use cyclone-bootstrap if you are installing Cyclone on a machine for the 
 
 The following prerequisites are required:
 
+- libck (see install instructions)
 - make
 - gcc
 
