@@ -156,16 +156,15 @@ struct gc_thread_data_t {
  */
 typedef enum { 
     HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
-  , HEAP_MED     // 64 byte objects (twice the min)
-// TODO: branch to car4-dev first!
-// TODO: replace above with:
-//, HEAP_64
-//, HEAP_92
-//, HEAP_128
-//, HEAP_160
+  , HEAP_64
+  , HEAP_96
+//  , HEAP_128
+//  , HEAP_160
   , HEAP_REST    // Everything else
   , HEAP_HUGE    // Huge objects, 1 per page
 } gc_heap_type;
+
+#define NUM_HEAP_TYPES (HEAP_HUGE + 1)
 
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
@@ -188,10 +187,7 @@ struct gc_heap_t {
 
 typedef struct gc_heap_root_t gc_heap_root;
 struct gc_heap_root_t {
-  gc_heap *small_obj_heap;
-  gc_heap *medium_obj_heap;
-  gc_heap *huge_obj_heap;
-  gc_heap *heap;
+  gc_heap **heap;
 };
 
 typedef struct gc_header_type_t gc_header_type;

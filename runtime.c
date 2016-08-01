@@ -210,10 +210,14 @@ void gc_init_heap(long heap_size)
 {
   size_t initial_heap_size = INITIAL_HEAP_SIZE;
   Cyc_heap = malloc(sizeof(gc_heap_root));
-  Cyc_heap->heap = gc_heap_create(HEAP_REST, initial_heap_size, 0, 0);
-  Cyc_heap->small_obj_heap = gc_heap_create(HEAP_SM, initial_heap_size, 0, 0);
-  Cyc_heap->medium_obj_heap = gc_heap_create(HEAP_MED, initial_heap_size, 0, 0);
-  Cyc_heap->huge_obj_heap = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
+  Cyc_heap->heap = malloc(sizeof(gc_heap *) * NUM_HEAP_TYPES);
+  Cyc_heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, initial_heap_size, 0, 0);
+  Cyc_heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, initial_heap_size, 0, 0);
+  Cyc_heap->heap[HEAP_64] = gc_heap_create(HEAP_64, initial_heap_size, 0, 0);
+  Cyc_heap->heap[HEAP_96] = gc_heap_create(HEAP_96, initial_heap_size, 0, 0);
+//  Cyc_heap->heap[HEAP_128] = gc_heap_create(HEAP_128, initial_heap_size, 0, 0);
+//  Cyc_heap->heap[HEAP_160] = gc_heap_create(HEAP_160, initial_heap_size, 0, 0);
+  Cyc_heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
 
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,

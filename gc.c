@@ -59,8 +59,8 @@ static int mark_stack_i = 0;
 static pthread_mutex_t heap_lock;
 
 // Cached heap statistics
-static int cached_heap_free_sizes[4] = { 0, 0, 0, 0 };
-static int cached_heap_total_sizes[4] = { 0, 0, 0, 0 };
+static int cached_heap_free_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
+static int cached_heap_total_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
 
 // Data for each individual mutator thread
 ck_array_t Cyc_mutators, old_mutators;
@@ -569,18 +569,21 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   // then try realloc. if cannot alloc now, then throw out of memory error
   size = gc_heap_align(size);
   if (size <= 32) {
-    h = hrt->small_obj_heap;
     heap_type = HEAP_SM;
   } else if (size <= 64) {
-    h = hrt->medium_obj_heap;
-    heap_type = HEAP_MED;
+    heap_type = HEAP_64;
+  } else if (size <= 96) {
+    heap_type = HEAP_96;
+//  } else if (size <= 128) {
+//    heap_type = HEAP_128;
+//  } else if (size <= 160) {
+//    heap_type = HEAP_160;
   } else if (size >= MAX_STACK_OBJ) {
-    h = hrt->huge_obj_heap;
     heap_type = HEAP_HUGE;
   } else {
-    h = hrt->heap;
     heap_type = HEAP_REST;
   }
+  h = hrt->heap[heap_type];
 #if GC_DEBUG_TRACE
   allocated_heap_counts[heap_type]++;
 #endif
@@ -1050,8 +1053,14 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
   if (ck_pr_load_int(&gc_stage) == STAGE_RESTING &&
       ((cached_heap_free_sizes[HEAP_SM] <
         cached_heap_total_sizes[HEAP_SM] * GC_COLLECTION_THRESHOLD) ||
-       (cached_heap_free_sizes[HEAP_MED] <
-        cached_heap_total_sizes[HEAP_MED] * GC_COLLECTION_THRESHOLD) ||
+       (cached_heap_free_sizes[HEAP_64] <
+        cached_heap_total_sizes[HEAP_64] * GC_COLLECTION_THRESHOLD) ||
+       (cached_heap_free_sizes[HEAP_96] <
+        cached_heap_total_sizes[HEAP_96] * GC_COLLECTION_THRESHOLD) ||
+//       (cached_heap_free_sizes[HEAP_128] <
+//        cached_heap_total_sizes[HEAP_128] * GC_COLLECTION_THRESHOLD) ||
+//       (cached_heap_free_sizes[HEAP_160] <
+//        cached_heap_total_sizes[HEAP_160] * GC_COLLECTION_THRESHOLD) ||
        (cached_heap_free_sizes[HEAP_REST] <
         cached_heap_total_sizes[HEAP_REST] * GC_COLLECTION_THRESHOLD))) {
 #if GC_DEBUG_TRACE
@@ -1392,14 +1401,11 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
-  gc_sweep(gc_get_heap()->heap, HEAP_REST, &freed_tmp);
-  freed += freed_tmp;
-  gc_sweep(gc_get_heap()->small_obj_heap, HEAP_SM, &freed_tmp);
-  freed += freed_tmp;
-  gc_sweep(gc_get_heap()->medium_obj_heap, HEAP_MED, &freed_tmp);
-  freed += freed_tmp;
-  gc_sweep(gc_get_heap()->huge_obj_heap, HEAP_HUGE, &freed_tmp);
-  freed += freed_tmp;
+
+  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+    gc_sweep(gc_get_heap()->heap[heap_type], heap_type, &freed_tmp);
+    freed += freed_tmp;
+  }
 
   // TODO: this loop only includes smallest 2 heaps, is that sufficient??
   for (heap_type = 0; heap_type < 2; heap_type++) {
@@ -1410,19 +1416,27 @@ void gc_collector()
               100.0 * GC_FREE_THRESHOLD, heap_type);
 #endif
       if (heap_type == HEAP_SM) {
-        gc_grow_heap(gc_get_heap()->small_obj_heap, heap_type, 0, 0);
-      } else if (heap_type == HEAP_MED) {
-        gc_grow_heap(gc_get_heap()->medium_obj_heap, heap_type, 0, 0);
+        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
+      } else if (heap_type == HEAP_64) {
+        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
       } else if (heap_type == HEAP_REST) {
-        gc_grow_heap(gc_get_heap()->heap, heap_type, 0, 0);
+        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
       }
     }
   }
 #if GC_DEBUG_TRACE
   total_size = cached_heap_total_sizes[HEAP_SM] +
-      cached_heap_total_sizes[HEAP_MED] + cached_heap_total_sizes[HEAP_REST];
+               cached_heap_total_sizes[HEAP_64] + 
+               cached_heap_total_sizes[HEAP_96] + 
+//               cached_heap_total_sizes[HEAP_128] + 
+//               cached_heap_total_sizes[HEAP_160] + 
+               cached_heap_total_sizes[HEAP_REST];
   total_free = cached_heap_free_sizes[HEAP_SM] +
-      cached_heap_free_sizes[HEAP_MED] + cached_heap_free_sizes[HEAP_REST];
+               cached_heap_free_sizes[HEAP_64] + 
+               cached_heap_free_sizes[HEAP_96] + 
+//               cached_heap_free_sizes[HEAP_128] + 
+//               cached_heap_free_sizes[HEAP_160] + 
+               cached_heap_free_sizes[HEAP_REST];
   fprintf(stderr,
           "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
           total_size, total_free, freed,
