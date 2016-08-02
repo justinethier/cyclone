@@ -96,6 +96,8 @@ static double allocated_obj_counts[25] = {
   0,0,0,0,0,
   0,0,0,0,0};
 
+static double allocated_heap_counts[4] = {0, 0, 0, 0};
+
 void print_allocated_obj_counts()
 {
   int i;
@@ -103,6 +105,11 @@ void print_allocated_obj_counts()
   fprintf(stderr, "Tag, Allocations\n");
   for (i = 0; i < 25; i++){
     fprintf(stderr, "%d, %lf\n", i, allocated_obj_counts[i]);
+  }
+  fprintf(stderr, "Allocated heaps:\n");
+  fprintf(stderr, "Heap, Allocations\n");
+  for (i = 0; i < 4; i++){
+    fprintf(stderr, "%d, %lf\n", i, allocated_heap_counts[i]);
   }
 }
 
@@ -215,6 +222,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
     return NULL;
   h->type = heap_type;
   h->size = size;
+  h->newly_created = 1;
   //h->free_size = size;
   cached_heap_total_sizes[heap_type] += size;
   cached_heap_free_sizes[heap_type] += size;
@@ -573,6 +581,9 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     h = hrt->heap;
     heap_type = HEAP_REST;
   }
+#if GC_DEBUG_TRACE
+  allocated_heap_counts[heap_type]++;
+#endif
 
   result = gc_try_alloc(h, heap_type, size, obj, thd);
   if (!result) {
@@ -620,7 +631,7 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(closure1_type));
   if (t == closureN_tag) {
     return gc_heap_align(sizeof(closureN_type) +
-                         sizeof(object) *
+                         sizeof(object) * 
                          ((closureN_type *) obj)->num_elements);
   }
   if (t == vector_tag) {
@@ -811,15 +822,25 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     }
     //h->free_size += heap_freed;
     cached_heap_free_sizes[heap_type] += heap_freed;
-// TODO: with huge heaps, this becomes more important. one of the huge
-//       pages only has one object, so it is likely that the page
-//       will become free at some point and could be reclaimed.
-    if (gc_is_heap_empty(h)){
+    // Free the heap page if possible.
+    //
+    // With huge heaps, this becomes more important. one of the huge
+    // pages only has one object, so it is likely that the page
+    // will become free at some point and could be reclaimed.
+    //
+    // The newly created flag is used to attempt to avoid situtaions
+    // where a page is allocated because there is not enough free space,
+    // but then we do a sweep and see it is empty so we free it, and
+    // so forth. A better solution might be to keep empty heap pages
+    // off to the side and only free them if there is enough free space
+    // remaining without them.
+    if (gc_is_heap_empty(h) && !h->newly_created){
         unsigned int h_size = h->size;
         h = gc_heap_free(h, prev_h);
         cached_heap_free_sizes[heap_type] -= h_size;
         cached_heap_total_sizes[heap_type] -= h_size;
     }
+    h->newly_created = 0;
     sum_freed += heap_freed;
     heap_freed = 0;
   }
@@ -1328,7 +1349,7 @@ void gc_collector()
   time_t gc_collector_start = time(NULL);
   print_allocated_obj_counts();
   print_current_time();
-  fprintf(stderr, "Starting gc_collector\n");
+  fprintf(stderr, " - Starting gc_collector\n");
 #endif
   //clear : 
   ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
