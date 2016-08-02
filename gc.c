@@ -88,6 +88,35 @@ static struct ck_malloc my_allocator = {
   .realloc = my_realloc
 };
 
+#if GC_DEBUG_TRACE
+static double allocated_obj_counts[25] = {
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0};
+
+void print_allocated_obj_counts()
+{
+  int i;
+  fprintf(stderr, "Allocated objects:\n");
+  fprintf(stderr, "Tag, Allocations\n");
+  for (i = 0; i < 25; i++){
+    fprintf(stderr, "%d, %lf\n", i, allocated_obj_counts[i]);
+  }
+}
+
+void print_current_time()
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  fprintf(stderr, "%s", asctime (timeinfo));
+}
+#endif
+
 /////////////
 // Functions
 
@@ -284,6 +313,9 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
 {
   // NOTE: no additional type checking because this is called from gc_move
   // which already does that
+  #if GC_DEBUG_TRACE
+  allocated_obj_counts[type_of(obj)]++;
+  #endif
 
   switch (type_of(obj)) {
   case pair_tag:{
@@ -1294,6 +1326,9 @@ void gc_collector()
   size_t total_size;
   size_t total_free;
   time_t gc_collector_start = time(NULL);
+  print_allocated_obj_counts();
+  print_current_time();
+  fprintf(stderr, "Starting gc_collector\n");
 #endif
   //clear : 
   ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
@@ -1368,9 +1403,9 @@ void gc_collector()
   total_free = cached_heap_free_sizes[HEAP_SM] +
       cached_heap_free_sizes[HEAP_MED] + cached_heap_free_sizes[HEAP_REST];
   fprintf(stderr,
-          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %zu\n",
+          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
           total_size, total_free, freed,
-          time(NULL) - gc_collector_start);
+          (time(NULL) - gc_collector_start));
 #endif
 #if GC_DEBUG_TRACE
   fprintf(stderr, "cleaning up any old thread data\n");
