@@ -157,6 +157,12 @@ struct gc_thread_data_t {
 typedef enum { 
     HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
   , HEAP_MED     // 64 byte objects (twice the min)
+// TODO: branch to car4-dev first!
+// TODO: replace above with:
+//, HEAP_64
+//, HEAP_92
+//, HEAP_128
+//, HEAP_160
   , HEAP_REST    // Everything else
   , HEAP_HUGE    // Huge objects, 1 per page
 } gc_heap_type;
