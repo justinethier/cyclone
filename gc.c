@@ -95,7 +95,7 @@ static double allocated_obj_counts[25] = {
   0,0,0,0,0,
   0,0,0,0,0,
   0,0,0,0,0};
-
+// TODO: allocated object sizes (EG: 32, 64, etc).
 static double allocated_heap_counts[4] = {0, 0, 0, 0};
 
 void print_allocated_obj_counts()
