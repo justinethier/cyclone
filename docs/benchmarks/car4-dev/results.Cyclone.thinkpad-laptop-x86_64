@@ -676,3 +676,60 @@ Testing takl under Cyclone
 Compiling...
 Running...
 Running takl:40:20:12:1
+Elapsed time: 33.00492 seconds (33.0) for takl:40:20:12:1
+
+real	0m33.017s
+user	0m32.980s
+sys	0m0.030s
+
+****************************
+Benchmarking Cyclone on Tue Aug 2 18:24:47 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing tak under Cyclone
+Compiling...
+Running...
+Running tak:40:20:11:1
+Elapsed time: 52.899934 seconds (53.0) for tak:40:20:11:1
+
+real	0m52.931s
+user	0m52.843s
+sys	0m0.057s
+
+****************************
+Benchmarking Cyclone on Tue Aug 2 18:25:42 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing triangl under Cyclone
+Compiling...
+Running...
+Running triangl:22:1:50
+Elapsed time: 53.389877 seconds (53.0) for triangl:22:1:50
+
+real	0m53.434s
+user	0m53.373s
+sys	0m0.017s
+
+****************************
+Benchmarking Cyclone on Tue Aug 2 18:26:37 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing wc under Cyclone
+Compiling...
+Running...
+Running wc:inputs/bib:50
+Elapsed time: 89.416207 seconds (90.0) for wc:inputs/bib:50
+
+real	1m29.473s
+user	1m29.230s
+sys	0m0.190s
+
+****************************
+Benchmarking Cyclone on Tue Aug 2 18:28:56 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing earley under Cyclone
+Compiling...
+Running...
+Running earley:1
+Elapsed time: 532.605379 seconds (532.0) for earley:1
+
+real	8m52.786s
+user	8m48.547s
+sys	0m4.070s

@@ -13,10 +13,10 @@ TBD. will either fail or take a long time to finish:
 - pi.scm - Needs bignum support
 - slatex.scm - Cyclone hangs during the CPS optimization phase
 
+Not Tested yet:
 Fail:
 Pass:
 - graphs.scm
-Not Tested yet:
 - ack.scm
 - array1.scm
 - browse.scm
