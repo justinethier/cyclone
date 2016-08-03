@@ -172,8 +172,6 @@ typedef enum {
     HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
   , HEAP_64
   , HEAP_96
-//  , HEAP_128
-//  , HEAP_160
   , HEAP_REST    // Everything else
   , HEAP_HUGE    // Huge objects, 1 per page
 } gc_heap_type;

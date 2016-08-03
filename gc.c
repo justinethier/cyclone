@@ -572,23 +572,12 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     heap_type = HEAP_SM;
   } else if (size <= 64) {
     heap_type = HEAP_64;
-/*
-TODO:
-from http://stackoverflow.com/a/32717129/101258
+// Only use this heap on 64-bit platforms, where larger objs are used more often
+// Code from http://stackoverflow.com/a/32717129/101258
 #if INTPTR_MAX == INT64_MAX
-// 64-bit
-#elif INTPTR_MAX == INT32_MAX
-// 32-bit
-#else
-#error Unknown pointer size or missing size macros!
-#endif
-*/
   } else if (size <= 96) {
     heap_type = HEAP_96;
-//  } else if (size <= 128) {
-//    heap_type = HEAP_128;
-//  } else if (size <= 160) {
-//    heap_type = HEAP_160;
+#endif
   } else if (size >= MAX_STACK_OBJ) {
     heap_type = HEAP_HUGE;
   } else {
@@ -1066,12 +1055,10 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
         cached_heap_total_sizes[HEAP_SM] * GC_COLLECTION_THRESHOLD) ||
        (cached_heap_free_sizes[HEAP_64] <
         cached_heap_total_sizes[HEAP_64] * GC_COLLECTION_THRESHOLD) ||
+#if INTPTR_MAX == INT64_MAX
        (cached_heap_free_sizes[HEAP_96] <
         cached_heap_total_sizes[HEAP_96] * GC_COLLECTION_THRESHOLD) ||
-//       (cached_heap_free_sizes[HEAP_128] <
-//        cached_heap_total_sizes[HEAP_128] * GC_COLLECTION_THRESHOLD) ||
-//       (cached_heap_free_sizes[HEAP_160] <
-//        cached_heap_total_sizes[HEAP_160] * GC_COLLECTION_THRESHOLD) ||
+#endif
        (cached_heap_free_sizes[HEAP_REST] <
         cached_heap_total_sizes[HEAP_REST] * GC_COLLECTION_THRESHOLD))) {
 #if GC_DEBUG_TRACE
@@ -1438,15 +1425,15 @@ void gc_collector()
 #if GC_DEBUG_TRACE
   total_size = cached_heap_total_sizes[HEAP_SM] +
                cached_heap_total_sizes[HEAP_64] + 
+#if INTPTR_MAX == INT64_MAX
                cached_heap_total_sizes[HEAP_96] + 
-//               cached_heap_total_sizes[HEAP_128] + 
-//               cached_heap_total_sizes[HEAP_160] + 
+#endif
                cached_heap_total_sizes[HEAP_REST];
   total_free = cached_heap_free_sizes[HEAP_SM] +
                cached_heap_free_sizes[HEAP_64] + 
+#if INTPTR_MAX == INT64_MAX
                cached_heap_free_sizes[HEAP_96] + 
-//               cached_heap_free_sizes[HEAP_128] + 
-//               cached_heap_free_sizes[HEAP_160] + 
+#endif
                cached_heap_free_sizes[HEAP_REST];
   fprintf(stderr,
           "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
