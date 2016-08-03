@@ -572,6 +572,17 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     heap_type = HEAP_SM;
   } else if (size <= 64) {
     heap_type = HEAP_64;
+/*
+TODO:
+from http://stackoverflow.com/a/32717129/101258
+#if INTPTR_MAX == INT64_MAX
+// 64-bit
+#elif INTPTR_MAX == INT32_MAX
+// 32-bit
+#else
+#error Unknown pointer size or missing size macros!
+#endif
+*/
   } else if (size <= 96) {
     heap_type = HEAP_96;
 //  } else if (size <= 128) {
