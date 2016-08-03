@@ -4,7 +4,7 @@ title: Cyclone Scheme
 ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 ---
 
-Cyclone is a brand-new, R<sup>7</sup>RS Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) technique to implement full tail recursion, continuations, and generational garbage collection. In addition, Cyclone extends the Cheney on the MTA concept to allow execution of multiple native threads. An on-the-fly garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
+Cyclone is a brand-new, R<sup>7</sup>RS Scheme-to-C compiler that uses [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) to implement full tail recursion, continuations, and generational garbage collection. In addition, Cyclone extends the Cheney on the MTA concept to allow execution of multiple native threads. An on-the-fly garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
 
 Getting Started
 ---------------
