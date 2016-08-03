@@ -153,6 +153,20 @@ struct gc_thread_data_t {
 /**
  * Group heap pages by type, to attempt to limit fragmentation
  * and improve performance.
+
+ TODO: starting to run into problems when adding additional "sizes" of heap page,
+ possibly due to increasing amounts of page faults due to non-locality???
+ 
+ Basically for X86_64 everything works great when a 96 byte heap is added, but slows way down when additional
+ heaps (128, 160) are also added.
+
+ 32 bit x86 is starting to have trouble with just a 96 byte heap added.
+
+ In the future, a better solution might be to allocate arrays (closureN's, vectors, bytevectors, and strings)
+ as fixed-size chunks to prevent heap fragmentation. The advantage is then we have no fragmentation directly.
+ But, an array will no longer be contiguous so they may cause other problems, and the runtime has to change
+ to work with non-contiguous arrays. This would also cause a lot of problems for strings since the built-in
+ functions would no longer work (EG: strlen, etc).
  */
 typedef enum { 
     HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
