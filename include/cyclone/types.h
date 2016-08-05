@@ -316,24 +316,22 @@ typedef cond_var_type *cond_var;
 typedef struct {
   gc_header_type hdr;
   const tag_type tag;
-  const char *pname;
+  const char *desc;
 } boolean_type;
 typedef boolean_type *boolean;
 
-#define boolean_pname(x) (((boolean_type *) x)->pname)
+#define boolean_desc(x) (((boolean_type *) x)->desc)
 
 /* Define symbol type. */
 
 typedef struct {
   gc_header_type hdr;
   const tag_type tag;
-  const char *pname;
-  object plist;
+  const char *desc;
 } symbol_type;
 typedef symbol_type *symbol;
 
-#define symbol_pname(x) (((symbol_type *) x)->pname)
-#define symbol_plist(x) (((symbol_type *) x)->plist)
+#define symbol_desc(x) (((symbol_type *) x)->desc)
 
 #define defsymbol(name) \
 static object quote_##name = NULL;
@@ -611,17 +609,17 @@ typedef closure0_type *macro;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  const char *pname;
+  const char *desc;
   function_type fn;
 } primitive_type;
 typedef primitive_type *primitive;
 
-#define defprimitive(name, pname, fnc) \
-static primitive_type name##_primitive = {primitive_tag, #pname, fnc}; \
+#define defprimitive(name, desc, fnc) \
+static primitive_type name##_primitive = {primitive_tag, #desc, fnc}; \
 static const object primitive_##name = &name##_primitive
 
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
-#define prim_name(x) (((primitive_type *) x)->pname)
+#define prim_name(x) (((primitive_type *) x)->desc)
 
 /* All constant-size objects */
 typedef union {

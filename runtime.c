@@ -145,7 +145,7 @@ object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
 
-static symbol_type __EOF = { {0}, eof_tag, "", NULL };  // symbol_type in lieu of custom type
+static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custom type
 
 const object Cyc_EOF = &__EOF;
 static ck_hs_t symbol_table;
@@ -177,13 +177,13 @@ static unsigned long hs_hash(const void *object, unsigned long seed)
   const symbol_type *c = object;
   unsigned long h;
 
-  h = (unsigned long)MurmurHash64A(c->pname, strlen(c->pname), seed);
+  h = (unsigned long)MurmurHash64A(c->desc, strlen(c->desc), seed);
   return h;
 }
 
 static bool hs_compare(const void *previous, const void *compare)
 {
-  return strcmp(symbol_pname(previous), symbol_pname(compare)) == 0;
+  return strcmp(symbol_desc(previous), symbol_desc(compare)) == 0;
 }
 
 static void *set_get(ck_hs_t * hs, const void *value)
@@ -249,7 +249,7 @@ static boolean_type f_boolean = { {0}, boolean_tag, "f" };
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
 
-static symbol_type Cyc_void_symbol = { {0}, symbol_tag, "", NULL };
+static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
 
 const object quote_void = &Cyc_void_symbol;
 
@@ -308,17 +308,17 @@ char *_strdup(const char *s)
 
 object find_symbol_by_name(const char *name)
 {
-  symbol_type tmp = { {0}, symbol_tag, name, NULL };
+  symbol_type tmp = { {0}, symbol_tag, name};
   object result = set_get(&symbol_table, &tmp);
   //if (result) {
-  //  printf("found symbol %s\n", symbol_pname(result));
+  //  printf("found symbol %s\n", symbol_desc(result));
   //}
   return result;
 }
 
 object add_symbol(symbol_type * psym)
 {
-  //printf("Adding symbol %s, table size = %ld\n", symbol_pname(psym), ck_hs_count(&symbol_table));
+  //printf("Adding symbol %s, table size = %ld\n", symbol_desc(psym), ck_hs_count(&symbol_table));
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
   set_insert(&symbol_table, psym);
   pthread_mutex_unlock(&symbol_table_lock);
@@ -327,7 +327,7 @@ object add_symbol(symbol_type * psym)
 
 object add_symbol_by_name(const char *name)
 {
-  symbol_type sym = { {0}, symbol_tag, _strdup(name), NULL };
+  symbol_type sym = { {0}, symbol_tag, _strdup(name)};
   symbol_type *psym = malloc(sizeof(symbol_type));
   memcpy(psym, &sym, sizeof(symbol_type));
   return add_symbol(psym);
@@ -698,10 +698,10 @@ object Cyc_display(object x, FILE * port)
     fprintf(port, "<condition variable %p>", x);
     break;
   case boolean_tag:
-    fprintf(port, "#%s", ((boolean_type *) x)->pname);
+    fprintf(port, "#%s", ((boolean_type *) x)->desc);
     break;
   case symbol_tag:
-    fprintf(port, "%s", ((symbol_type *) x)->pname);
+    fprintf(port, "%s", ((symbol_type *) x)->desc);
     break;
   case integer_tag:
     fprintf(port, "%d", ((integer_type *) x)->value);
@@ -744,7 +744,7 @@ object Cyc_display(object x, FILE * port)
     // not good enough but this is a start. would probably need
     // the same code in write()
     if (Cyc_is_symbol(car(x)) == boolean_t &&
-        strncmp(((symbol) car(x))->pname, "procedure", 10) == 0) {
+        strncmp(((symbol) car(x))->desc, "procedure", 10) == 0) {
       fprintf(port, " ");
       Cyc_display(cadr(x), port);
       fprintf(port, " ...)");   /* skip body and env for now */
@@ -848,7 +848,7 @@ static object _Cyc_write(object x, FILE * port)
     // not good enough but this is a start. would probably need
     // the same code in write()
     if (Cyc_is_symbol(car(x)) == boolean_t &&
-        strncmp(((symbol) car(x))->pname, "procedure", 10) == 0) {
+        strncmp(((symbol) car(x))->desc, "procedure", 10) == 0) {
       fprintf(port, " ");
       _Cyc_write(cadr(x), port);
       fprintf(port, " ...)");   /* skip body and env for now */
@@ -1192,8 +1192,8 @@ object Cyc_is_procedure(void *data, object o)
     } else if (tag == pair_tag) {
       integer_type l = Cyc_length_as_object(data, o);
       if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
-        if (strncmp(((symbol) car(o))->pname, "primitive", 10) == 0 ||
-            strncmp(((symbol) car(o))->pname, "procedure", 10) == 0) {
+        if (strncmp(((symbol) car(o))->desc, "primitive", 10) == 0 ||
+            strncmp(((symbol) car(o))->desc, "procedure", 10) == 0) {
           return boolean_t;
         }
       }
@@ -1402,8 +1402,8 @@ object Cyc_symbol2string(void *data, object cont, object sym)
 {
   Cyc_check_sym(data, sym);
   {
-    const char *pname = symbol_pname(sym);
-    make_string(str, pname);
+    const char *desc = symbol_desc(sym);
+    make_string(str, desc);
     _return_closcall1(data, cont, &str);
 }}
 
@@ -1711,19 +1711,19 @@ object Cyc_substring(void *data, object cont, object str, object start,
 object Cyc_installation_dir(void *data, object cont, object type)
 {
   if (Cyc_is_symbol(type) == boolean_t &&
-      strncmp(((symbol) type)->pname, "sld", 5) == 0) {
+      strncmp(((symbol) type)->desc, "sld", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
     make_string(str, buf);
     _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
-             strncmp(((symbol) type)->pname, "lib", 5) == 0) {
+             strncmp(((symbol) type)->desc, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
     make_string(str, buf);
     _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
-             strncmp(((symbol) type)->pname, "inc", 5) == 0) {
+             strncmp(((symbol) type)->desc, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
     make_string(str, buf);
@@ -1740,17 +1740,17 @@ object Cyc_installation_dir(void *data, object cont, object type)
 object Cyc_compilation_environment(void *data, object cont, object var)
 {
   if (Cyc_is_symbol(var) == boolean_t){
-    if (strncmp(((symbol) var)->pname, "cc-prog", 8) == 0) {
+    if (strncmp(((symbol) var)->desc, "cc-prog", 8) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_PROG);
       make_string(str, buf);
       _return_closcall1(data, cont, &str);
-    } else if (strncmp(((symbol) var)->pname, "cc-exec", 8) == 0) {
+    } else if (strncmp(((symbol) var)->desc, "cc-exec", 8) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_EXEC);
       make_string(str, buf);
       _return_closcall1(data, cont, &str);
-    } else if (strncmp(((symbol) var)->pname, "cc-lib", 7) == 0) {
+    } else if (strncmp(((symbol) var)->desc, "cc-lib", 7) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_LIB);
       make_string(str, buf);
@@ -3547,7 +3547,7 @@ object apply(void *data, object cont, object func, object args)
 
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
         Cyc_rt_raise2(data, "Call of non-procedure: ", func);
-      } else if (strncmp(((symbol) fobj)->pname, "lambda", 7) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0) {
         make_pair(c, func, args);
         //printf("JAE DEBUG, sending to eval: ");
         //Cyc_display(&c, stderr);
@@ -3557,11 +3557,11 @@ object apply(void *data, object cont, object func, object args)
         // TODO: would be better to compare directly against symbols here,
         //       but need a way of looking them up ahead of time.
         //       maybe a libinit() or such is required.
-      } else if (strncmp(((symbol) fobj)->pname, "primitive", 10) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0) {
         make_pair(c, cadr(func), args);
         ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
                                             &c, NULL);
-      } else if (strncmp(((symbol) fobj)->pname, "procedure", 10) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0) {
         make_pair(c, func, args);
         ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
                                             &c, NULL);
