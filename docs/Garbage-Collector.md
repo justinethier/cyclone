@@ -42,10 +42,13 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
 - Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
 - Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
+- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
+- Heap - A section of memory used to store longer-lived variables. In C, heap memory is allocated using built-in functions such as `malloc`, and memory must be explicitly deallocated using `free`.
 - Mutation - A modification to an object. For example, changing a vector (array) entry.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
+- Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
 - Write Barrier - Code that is executed before writing to an object.
 
 # Code
