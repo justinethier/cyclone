@@ -24,6 +24,7 @@
     env:frame-variables
     env:frame-values 
     env:add-binding-to-frame! 
+    env:all-variables
     env:extend-environment 
     env:lookup
     env:lookup-variable-value 
@@ -203,6 +204,11 @@
 (define (env:add-binding-to-frame! var val frame)
   (set-car! frame (cons var (car frame)))
   (set-cdr! frame (cons val (cdr frame))))
+
+(define (env:all-variables env)
+  (flatten 
+    (env:frame-variables
+      (env:first-frame env))))
 
 (define (env:extend-environment vars vals base-env)
   (if (= (length vars) (length vals))
