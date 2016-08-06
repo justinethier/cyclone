@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: main
 title: Cyclone Scheme
 ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 ---

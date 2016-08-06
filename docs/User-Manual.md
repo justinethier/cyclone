@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: main
 title: User Manual
 ---
 

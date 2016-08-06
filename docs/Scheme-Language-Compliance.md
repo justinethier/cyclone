@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: main
 title: Scheme R7RS Compliance
 ---
 
