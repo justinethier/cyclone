@@ -925,14 +925,17 @@
          (cv-name (mangle (gensym 'c)))
          (lid (allocate-lambda (c-compile-lambda lam trace)))
          (macro? (assoc (st:->var trace) (get-macros)))
+         (call/cc? (and (equal? (car trace) "scheme/base.sld")
+                        (equal? (st:->var trace) 'call/cc)))
          (num-args-str 
-          (if (and (equal? (car trace) "scheme/base.sld")
-                   (equal? (st:->var trace) 'call/cc))
+          (if call/cc?
             "1" ;; Special case, need to change runtime checks for call/cc
             (number->string (compute-num-args lam))))
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
+             ;; Not ideal, but one more special case to type check call/cc
+             (if call/cc?  "Cyc_check_proc(data, f);\n" "")
              cv-name ".hdr.mark = gc_color_red;\n "
              cv-name ".hdr.grayed = 0;\n"
              cv-name ".tag = closureN_tag;\n "
