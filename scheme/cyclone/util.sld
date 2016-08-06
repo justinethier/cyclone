@@ -40,6 +40,7 @@
     gensym
     delete
     delete-duplicates
+    flatten
     list-index2
     list-insert-at!
     list-prefix?
@@ -102,6 +103,11 @@
                (new-tail (recur (delete x tail))))
           (if (eq? tail new-tail) lis (cons x new-tail)))))
   (recur lis))
+
+(define (flatten x)
+  (cond ((null? x) '())
+        ((pair? x) (append (flatten (car x)) (flatten (cdr x))))
+        (else (list x))))
 
 ;; Insert obj at index k of list, increasing length of list by one.
 (define (list-insert-at! lis obj k)
