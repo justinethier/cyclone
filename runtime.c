@@ -825,10 +825,30 @@ static object _Cyc_write(object x, FILE * port)
     return quote_void;
   }
   switch (type_of(x)) {
-  case string_tag:
-    fprintf(port, "\"%s\"", ((string_type *) x)->str);
+  case string_tag: {
+    //fprintf(port, "\"%s\"", ((string_type *) x)->str);
+    char *s = string_str(x);
+    fputc('"', port);
+    while (*s){
+      switch(*s){
+      case '\a': fprintf(port, "\\a"); break;
+      case '\b': fprintf(port, "\\b"); break;
+      case '\f': fprintf(port, "\\f"); break;
+      case '\n': fprintf(port, "\\n"); break;
+      case '\r': fprintf(port, "\\r"); break;
+      case '\t': fprintf(port, "\\t"); break;
+      case '\v': fprintf(port, "\\v"); break;
+      case '\\': fprintf(port, "\\\\"); break;
+      default:
+        fputc(*s, port);
+        break;
+      }
+      s++;
+    }
+    fputc('"', port);
     break;
-    // TODO: what about a list? contents should be displayed per (write)
+  }
+  // TODO: what about a list? contents should be displayed per (write)
   case vector_tag:
     fprintf(port, "#(");
     for (i = 0; i < ((vector) x)->num_elements; i++) {
