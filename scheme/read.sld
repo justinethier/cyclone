@@ -482,10 +482,15 @@
          (in-port:get-lnum ptbl)
          (in-port:get-cnum ptbl)))
       ((or (equal? #\" c)
+           (equal? #\' c)
+           (equal? #\? c)
            (equal? #\\ c))
        (cons c buf))
-      ((equal? #\n c)
-       (cons #\newline buf))
+      ((equal? #\a c) (cons #\alarm buf))
+      ((equal? #\b c) (cons #\backspace buf))
+      ((equal? #\n c) (cons #\newline buf))
+      ((equal? #\r c) (cons #\return buf))
+      ((equal? #\t c) (cons #\tab buf))
       (else
         (parse-error (string-append 
                        "invalid escape character [" 
