@@ -65,9 +65,9 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
 #	echo $(CC_PROG)
 #	echo $(CC_EXEC)
 #	echo $(CC_LIB)
-	$(CC) $(CFLAGS) -c -Iinclude dispatch.c -o dispatch.o
-	$(CC) $(CFLAGS) -std=gnu99 -c -Iinclude gc.c -o gc.o
-	$(CC) $(CFLAGS) -c -Iinclude \
+	$(CC) $(CFLAGS) -c dispatch.c -o dispatch.o
+	$(CC) $(CFLAGS) -std=gnu99 -c gc.c -o gc.o
+	$(CC) $(CFLAGS) -c \
                   -DCYC_INSTALL_DIR=\"$(PREFIX)\" \
                   -DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
                   -DCYC_INSTALL_INC=\"$(INCDIR)\" \
