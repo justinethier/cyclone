@@ -307,6 +307,7 @@ Full-Width Styles
   margin: 0px;
   padding-left: 10px;
   padding-right: 10px;
+  white-space: nowrap;
 }
 
 #header_wrap {
