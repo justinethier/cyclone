@@ -21,18 +21,19 @@
           <p class="banner">
             <!-- <a class="banner" href="{{ base }}index">Cyclone</a> -->
             <a class="banner 
-               {% if page.title == "Cyclone Scheme" %}
-               banner-highlight
-               {% endif %}
-               "
+               {% if page.title == "Cyclone Scheme" %}banner-highlight{% endif %}"
                href="{{ base }}">Get Cyclone</a> -
-            <a class="banner" 
+            <a class="banner 
+               {% if page.title == "User Manual" %}banner-highlight{% endif %}"
                href="{{ base }}docs/User-Manual">Manual</a> -
-            <a class="banner" 
+            <a class="banner 
+               {% if page.title == "API" %}banner-highlight{% endif %}"
                href="{{ base }}docs/API">API</a> - 
-            <a class="banner" 
+            <a class="banner 
+               {% if page.title == "Scheme R7RS Compliance" %}banner-highlight{% endif %}"
                href="{{ base }}docs/Scheme-Language-Compliance">R<sup>7</sup>RS Compliance</a> -
-            <a class="banner" 
+            <a class="banner 
+               {% if page.title == "News" %}banner-highlight{% endif %}"
                href="{{ base }}news">News</a>
           </p>
         </header>
