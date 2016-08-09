@@ -20,11 +20,19 @@
         <header class="inner-top">
           <p class="banner">
             <!-- <a class="banner" href="{{ base }}index">Cyclone</a> -->
-            <a class="banner" href="{{ base }}">Get Cyclone</a> -
-            <a class="banner" href="{{ base }}docs/User-Manual">Manual</a> -
-            <a class="banner" href="{{ base }}docs/API">API</a> - 
-            <a class="banner" href="{{ base }}docs/Scheme-Language-Compliance">R<sup>7</sup>RS Compliance</a> -
-            <a class="banner" href="{{ base }}news">News</a>
+            <a class="banner" 
+               {% if page.id == "index" %}
+               class="banner-highlight"
+               {% endif %}
+               href="{{ base }}">Get Cyclone</a> -
+            <a class="banner" 
+               href="{{ base }}docs/User-Manual">Manual</a> -
+            <a class="banner" 
+               href="{{ base }}docs/API">API</a> - 
+            <a class="banner" 
+               href="{{ base }}docs/Scheme-Language-Compliance">R<sup>7</sup>RS Compliance</a> -
+            <a class="banner" 
+               href="{{ base }}news">News</a>
           </p>
         </header>
     </div>

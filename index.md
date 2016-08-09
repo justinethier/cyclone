@@ -1,6 +1,7 @@
 ---
 layout: main
 title: Cyclone Scheme
+id: index
 ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 ---
 
