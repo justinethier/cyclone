@@ -385,6 +385,7 @@ Full-Width Styles
   background: #f2f2f2;
   border-top: 1px solid #111;
   border-bottom: 1px solid #111;
+  min-height: 200px;
 }
 
 #main_content {
