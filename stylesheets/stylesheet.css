@@ -310,6 +310,9 @@ Full-Width Styles
   white-space: nowrap;
 }
 
+.banner-highlight:before{content:"("}
+.banner-highlight:after{content:")"}
+
 #header_wrap {
   background: #000000;
 }
