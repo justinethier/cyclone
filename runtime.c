@@ -645,7 +645,13 @@ object Cyc_display_va_list(int argc, object x, va_list ap)
   if (argc > 1) {
     object tmp;
     tmp = va_arg(ap, object);
-    fp = ((port_type *) tmp)->fp;
+    if (Cyc_is_port(tmp) == boolean_t) {
+      fp = ((port_type *) tmp)->fp;
+    } else {
+      // TODO: need a data arg, and should raise an error here instead
+      fprintf(stderr, "Bad argument: expected port\n");
+      exit(1);
+    }
   }
   return Cyc_display(x, fp);
 }
@@ -802,7 +808,13 @@ object Cyc_write_va_list(int argc, object x, va_list ap)
   if (argc > 1) {
     object tmp;
     tmp = va_arg(ap, object);
-    fp = ((port_type *) tmp)->fp;
+    if (Cyc_is_port(tmp) == boolean_t) {
+      fp = ((port_type *) tmp)->fp;
+    } else {
+      // TODO: need a data arg, and should raise an error here instead
+      fprintf(stderr, "Bad argument: expected port\n");
+      exit(1);
+    }
   }
   return Cyc_write(x, fp);
 }
