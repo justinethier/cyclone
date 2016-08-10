@@ -8,7 +8,7 @@ excerpt: Initial announcement to comp.lang.scheme
 
 Today I would like to announce the Cyclone Scheme-to-C compiler: 
 
-http://justinethier.github.io/cyclone/ 
+[http://justinethier.github.io/cyclone/](http://justinethier.github.io/cyclone/)
 
 Cyclone consists of a compiler and interpreter written entirely in R7RS Scheme, as well as a C runtime. A large portion of the R7RS is supported including libraries, exceptions, continuations, and macros. 
 
@@ -41,11 +41,14 @@ Justin
 
 ----------------- 
 User Manual 
-http://justinethier.github.io/cyclone/docs/User-Manual 
+
+[http://justinethier.github.io/cyclone/docs/User-Manual](http://justinethier.github.io/cyclone/docs/User-Manual)
 
 R7RS Compatibility 
-http://justinethier.github.io/cyclone/docs/Scheme-Language-Compliance 
+
+[http://justinethier.github.io/cyclone/docs/Scheme-Language-Compliance](http://justinethier.github.io/cyclone/docs/Scheme-Language-Compliance)
 
 Bug Tracker 
-https://github.com/justinethier/cyclone/issues 
+
+[https://github.com/justinethier/cyclone/issues](https://github.com/justinethier/cyclone/issues)
 
