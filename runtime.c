@@ -751,7 +751,7 @@ object Cyc_display(object x, FILE * port)
       break;
     }
 
-    for (tmp = cdr(x); tmp && ((closure) tmp)->tag == pair_tag; tmp = cdr(tmp)) {
+    for (tmp = cdr(x); Cyc_is_pair(tmp) == boolean_t; tmp = cdr(tmp)) {
       if (has_cycle == boolean_t) {
         if (i++ > 20)
           break;                /* arbitrary number, for now */
@@ -875,7 +875,7 @@ static object _Cyc_write(object x, FILE * port)
       break;
     }
 
-    for (tmp = cdr(x); tmp && !is_value_type(tmp) && ((closure) tmp)->tag == pair_tag; tmp = cdr(tmp)) {
+    for (tmp = cdr(x); Cyc_is_pair(tmp) == boolean_t; tmp = cdr(tmp)) {
       if (has_cycle == boolean_t) {
         if (i++ > 20)
           break;                /* arbitrary number, for now */
