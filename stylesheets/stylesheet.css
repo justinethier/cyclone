@@ -450,3 +450,12 @@ Small Device Styles
   }
 
 }
+
+/*******************************************************************************
+Custom Styles
+*******************************************************************************/
+.date-labels {
+  color: #aaa;
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  font-size: 14px;
+}
