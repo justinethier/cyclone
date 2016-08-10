@@ -1,9 +1,0 @@
----
-layout: post
-title: Test 2
-excerpt: test 2
----
-
-# {{ page.title }}
-
-testing, 1, 2, 3...
