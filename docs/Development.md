@@ -1,9 +1,14 @@
 # Development Guide
 
+- [Introduction](#introduction)
 - [Environment](#environment)
 - [Building](#building)
 - [Testing a Build](#testing-a-build)
 - [Debugging the Runtime](#debugging-the-runtime)
+
+## Introduction
+
+This document provides some basic instructions for developing Cyclone itself - the compiler, interpreter, and libraries. Some of this information may also be applicable when troubleshooting problems with the runtime and/or compiled programs.
 
 ## Environment
 

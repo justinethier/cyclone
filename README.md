@@ -45,6 +45,8 @@ Documentation
 
 - The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
 
+- There is a [Development Guide](docs/Development.md) with instructions for common tasks when hacking on the compiler itself.
+
 - Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
 - The [Benchmarks](docs/Benchmarks.md) page compares the performance of Cyclone with other R<sup>7</sup>RS Schemes using a common set of benchmarks.
