@@ -1452,7 +1452,6 @@ void *collector_main(void *arg)
 {
   int stage;
   struct timespec tim;
-
 #ifdef DEBUG_THREADS
   pthread_t tid = pthread_self();
   int sid = syscall(SYS_gettid);
@@ -1460,9 +1459,6 @@ void *collector_main(void *arg)
   //printf("GC thread POSIX thread id is %d\n", tid);
 #endif
   tim.tv_sec = 0;
-//JAE TODO: this is still not good enough, seems memory grows still grows fast with this.
-//alternatively, may want to consider shrinking the heap if possible after a collection, if it is
-//sparse enough (would be difficult to do without relocations, though
   tim.tv_nsec = 100 * NANOSECONDS_PER_MILLISECOND;
   while (1) {
     stage = ck_pr_load_int(&gc_stage);
