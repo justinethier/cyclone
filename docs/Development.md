@@ -45,14 +45,16 @@ This confirms that the compiler - with any changes - can still be built from sou
 
 ## Debugging the Runtime
 
-Cyclone should never segfault unless there is a bug in the runtime/compiler. To debug a segfault using the C compiler's tools, first rebuilt Cyclone with debugging turned on. With GCC, you can do this by changing two lines at the top of `Makefile.config` to use the `-g` option instead of `-O2`. For example:
+Cyclone should never segfault unless there is a bug in the runtime/compiler. To debug a segfault using the C compiler's tools, first rebuilt Cyclone with debugging turned on. With GCC, you can do this by changing two lines at the top of `Makefile.config` to use the `-g` option instead of `-O2`. 
+
+For example:
 
     CFLAGS       ?= -g -Wall -Iinclude -L.
     COMP_CFLAGS  ?= -g -Wall -I$(PREFIX)/include -L$(PREFIX)/lib
 
-Then rebuild/reinstall everything. This may be easier to do using the cyclone-bootstrap repository.
+Then rebuild/reinstall everything. This may be easiest to do using the [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap) repository: just modify `Makefile.config` and follow the install instructions.
 
-Anyway, now that the C compiler is producing debugging information, you can use `gdb` to debug the segfault directly:
+Now that the C compiler is producing debugging information, you can use `gdb` to debug the segfault directly:
 
     $ gdb ./crashing-program
     (gdb) run
