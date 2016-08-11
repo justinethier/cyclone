@@ -216,7 +216,6 @@
         (cons
           (string->symbol *version-number*)
           '(r7rs 
-            ;exact-closed 
             ieee-float
             posix))))
 
