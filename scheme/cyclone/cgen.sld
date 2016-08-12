@@ -1310,7 +1310,8 @@
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {")
           ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
-          (emit compiled-program)))
+          (emit compiled-program)
+          (emit ";")))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->element;")
