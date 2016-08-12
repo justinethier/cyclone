@@ -146,7 +146,7 @@
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign " \\\n"
-      "     mclosure0(c1, _fn); \\\n"
+      "     mclosure0(c1, (function_type) _fn); \\\n"
       "     GC(td, &c1, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
