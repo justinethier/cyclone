@@ -982,18 +982,23 @@
 
 ; c-compile-formals : list[symbol] -> string
 (define (c-compile-formals formals type)
-  (if (not (pair? formals))
-      ""
-      (string-append
-       "object "
-       (mangle (car formals))
-       (cond
-         ((pair? (cdr formals))
-          (string-append ", " (c-compile-formals (cdr formals) type)))
-         ((not (equal? 'args:fixed type)) 
-          (string-append ", object " (mangle (cdr formals)) "_raw, ..."))
-         (else
-          "")))))
+  (cond
+   ((and (not (pair? formals))
+         (equal? type 'args:varargs))
+    (string-append "object " (mangle formals) "_raw, ..."))
+   ((not (pair? formals))
+    "")
+   (else
+    (string-append
+     "object "
+     (mangle (car formals))
+     (cond
+       ((pair? (cdr formals))
+        (string-append ", " (c-compile-formals (cdr formals) type)))
+       ((not (equal? 'args:fixed type)) 
+        (string-append ", object " (mangle (cdr formals)) "_raw, ..."))
+       (else
+        ""))))))
 
 ; c-compile-lambda : lamda-exp (string -> void) -> (string -> string)
 (define (c-compile-lambda exp trace)
