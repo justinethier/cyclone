@@ -17,6 +17,11 @@
     begin?
     lambda?
     pair->list 
+;    lambda-formals->list
+;    lambda-varargs?
+;    lambda->formals
+;    lambda-formals-type
+;    lambda-varargs-var
     ;; Environments
     env:enclosing-environment
     env:first-frame
@@ -74,6 +79,45 @@
     (if (not (pair? lst))
         (cons lst '())
         (cons (car lst) (loop (cdr lst))))))
+
+;; lambda->formals : lambda-exp -> list[symbol]
+;(define (lambda->formals exp)
+;  (cadr exp))
+;
+;(define (lambda-varargs-var exp)
+;  (if (lambda-varargs? exp)
+;    (if (equal? (lambda-formals-type exp) 'args:varargs)
+;        (lambda->formals exp) ; take symbol directly
+;        (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
+;    #f))
+;
+;;(define (lambda-varargs? exp)
+;;  (and (lambda? exp)
+;;       (or (symbol? (lambda->formals exp))
+;;           (and (pair? (lambda->formals exp))
+;;                (not (list? (lambda->formals exp)))))))
+;; Alternate definition:
+;(define (lambda-varargs? exp)
+;  (let ((type (lambda-formals-type exp)))
+;    (or (equal? type 'args:varargs)
+;        (equal? type 'args:fixed-with-varargs))))
+;
+;(define (lambda-formals-type exp)
+; (let ((args (lambda->formals exp)))
+;   (cond
+;     ((symbol? args) 'args:varargs)
+;     ((list? args)   'args:fixed)
+;     ((pair? args)   'args:fixed-with-varargs)
+;     (else
+;       (error `(Unexpected formals list in lambda-formals-type: ,args))))))
+;
+;(define (lambda-formals->list exp)
+;  (if (lambda-varargs? exp)
+;      (let ((args (lambda->formals exp)))
+;        (if (symbol? args)
+;            (list args)
+;            (pair->list args)))
+;      (lambda->formals exp)))
 
 ; char->natural : char -> natural
 (define (char->natural c)
