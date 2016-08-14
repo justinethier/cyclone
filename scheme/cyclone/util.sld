@@ -16,6 +16,7 @@
     if?
     begin?
     lambda?
+    pair->list 
     ;; Environments
     env:enclosing-environment
     env:first-frame
@@ -65,6 +66,14 @@
 ; lambda? : exp -> boolean
 (define (lambda? exp)
   (tagged-list? 'lambda exp))
+
+;; Create a proper copy of an improper list
+;; EG: (1 2 . 3) ==> (1 2 3)
+(define (pair->list p)
+  (let loop ((lst p))
+    (if (not (pair? lst))
+        (cons lst '())
+        (cons (car lst) (loop (cdr lst))))))
 
 ; char->natural : char -> natural
 (define (char->natural c)

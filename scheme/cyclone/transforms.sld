@@ -71,7 +71,6 @@
     ast:lambda-formals-type
     ast:lambda-formals->list
     list->lambda-formals 
-    pair->list 
     list->pair 
     lambda->exp 
     if->condition 
@@ -394,14 +393,6 @@
          (error `(Too many args for varargs ,args))
          (car args)))
     (else (error `(Unexpected type ,type)))))
-
-;; Create a proper copy of an improper list
-;; EG: (1 2 . 3) ==> (1 2 3)
-(define (pair->list p)
-  (let loop ((lst p))
-    (if (not (pair? lst))
-        (cons lst '())
-        (cons (car lst) (loop (cdr lst))))))
 
 ;; Create an improper copy of a proper list
 (define (list->pair l)
