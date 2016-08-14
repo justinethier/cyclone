@@ -91,6 +91,8 @@
 ;        (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
 ;    #f))
 ;
+TODO: WTF, which version of lambda-varargs? to use? does it matter? figure this out in transforms.sld first
+TODO: why the fuck do we get a circular dep error after these functions are removed from transforms? what is going on with that?
 ;;(define (lambda-varargs? exp)
 ;;  (and (lambda? exp)
 ;;       (or (symbol? (lambda->formals exp))
