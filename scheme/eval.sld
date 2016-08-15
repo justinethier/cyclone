@@ -486,8 +486,8 @@
             ;; TODO: need to pass lambdas as a list (depending on type), and 
             ;; split up args accordingly (create a list for varargs)
 
-            ;(lambda-formals->list
-              (procedure-parameters proc);)
+            (lambda-formals->list
+              `(lambda ,(procedure-parameters proc) #f))
             args
             (procedure-environment proc))))
         ((procedure? proc)
