@@ -91,16 +91,16 @@
         (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
     #f))
 
-(define (lambda-varargs? exp)
-  (and (lambda? exp)
-       (or (symbol? (lambda->formals exp))
-           (and (pair? (lambda->formals exp))
-                (not (list? (lambda->formals exp)))))))
-; Alternate definition:
 ;(define (lambda-varargs? exp)
-;  (let ((type (lambda-formals-type exp)))
-;    (or (equal? type 'args:varargs)
-;        (equal? type 'args:fixed-with-varargs))))
+;  (and (lambda? exp)
+;       (or (symbol? (lambda->formals exp))
+;           (and (pair? (lambda->formals exp))
+;                (not (list? (lambda->formals exp)))))))
+; Alternate definition:
+(define (lambda-varargs? exp)
+  (let ((type (lambda-formals-type exp)))
+    (or (equal? type 'args:varargs)
+        (equal? type 'args:fixed-with-varargs))))
 
 (define (lambda-formals-type exp)
  (let ((args (lambda->formals exp)))
