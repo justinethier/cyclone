@@ -44,6 +44,7 @@
     mangle
     mangle-global
     ;; Scheme library functions
+    util:take
     gensym
     delete
     delete-duplicates
@@ -129,13 +130,26 @@
    (else (pair->list args))))
 
 ;; Take arguments for a lambda and pack them depending upon lambda type
-;(define (pack-lambda-arguments formals args)
-;  (cond
-;    ((symbol? formals) 
-;     (list args))
-;    ((list? formals) 
-;     args)
-;    (else
+(define (pack-lambda-arguments formals-type formals args)
+  (case
+    formals-type
+    ((args:varargs)
+     (list args))
+    ((args:fixed-with-varargs)
+     (let ((num-req-args (length/obj formals)))
+       ; required - (util:take args num-req-args)
+       ; optionals - reverse args, take remaining
+
+       ;; TODO: take required args, then take optionals
+       ;;  pack all optionals as a (possibly empty) list,
+       ;; then append it as the last arg
+
+       ;; TODO: need to be careful about performance, are doing a lot
+       ;; of list traversals for a single function call
+       'TODO))
+    (else
+     args)))
+
 (define (length/obj l)
   (let loop ((lis l)
              (len 0))
@@ -144,7 +158,13 @@
        (loop (cdr lis) (+ len 1)))
       (else
        len))))
-     
+
+(define (util:take lis k)
+  ;(check-arg integer? k take)
+  (let recur ((lis lis) (k k))
+    (if (zero? k) '()
+        (cons (car lis)
+              (recur (cdr lis) (- k 1))))))
 
 ; char->natural : char -> natural
 (define (char->natural c)
