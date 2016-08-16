@@ -163,6 +163,8 @@
            ;; save lambda to adb
            (adb:set! id fnc)
            ;; Analyze the lambda
+;(trace:error `(DEBUG-exp ,exp))
+;(trace:error `(DEUBG-ast ,(ast:lambda-formals->list exp)))
            (for-each
             (lambda (arg)
               ;(let ((var (adb:get/default arg (adb:make-var))))
