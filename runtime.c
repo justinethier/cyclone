@@ -1340,7 +1340,7 @@ integer_type Cyc_length_as_object(void *data, object l)
   make_int(len, 0);
   while ((l != NULL)) {
     if (is_value_type(l) || ((list) l)->tag != pair_tag) {
-      Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
+      Cyc_rt_raise2(data, "length - invalid parameter, expected list", l);
     }
     l = cdr(l);
     len.value++;
@@ -1363,7 +1363,7 @@ object Cyc_length(void *data, object l)
   int len = 0;
   while ((l != NULL)) {
     if (is_value_type(l) || ((list) l)->tag != pair_tag) {
-      Cyc_rt_raise_msg(data, "length - invalid parameter, expected list\n");
+      Cyc_rt_raise2(data, "length - invalid parameter, expected list", l);
     }
     l = cdr(l);
     len++;
