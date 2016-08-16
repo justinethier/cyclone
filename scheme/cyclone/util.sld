@@ -17,11 +17,11 @@
     begin?
     lambda?
     pair->list 
-;    lambda-formals->list
-;    lambda-varargs?
-;    lambda->formals
-;    lambda-formals-type
-;    lambda-varargs-var
+    lambda-formals->list
+    lambda-varargs?
+    lambda->formals
+    lambda-formals-type
+    lambda-varargs-var
     ;; Environments
     env:enclosing-environment
     env:first-frame
@@ -80,46 +80,44 @@
         (cons lst '())
         (cons (car lst) (loop (cdr lst))))))
 
-;; lambda->formals : lambda-exp -> list[symbol]
-;(define (lambda->formals exp)
-;  (cadr exp))
-;
-;(define (lambda-varargs-var exp)
-;  (if (lambda-varargs? exp)
-;    (if (equal? (lambda-formals-type exp) 'args:varargs)
-;        (lambda->formals exp) ; take symbol directly
-;        (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
-;    #f))
-;
-TODO: WTF, which version of lambda-varargs? to use? does it matter? figure this out in transforms.sld first
-TODO: why the fuck do we get a circular dep error after these functions are removed from transforms? what is going on with that?
-;;(define (lambda-varargs? exp)
-;;  (and (lambda? exp)
-;;       (or (symbol? (lambda->formals exp))
-;;           (and (pair? (lambda->formals exp))
-;;                (not (list? (lambda->formals exp)))))))
-;; Alternate definition:
+; lambda->formals : lambda-exp -> list[symbol]
+(define (lambda->formals exp)
+  (cadr exp))
+
+(define (lambda-varargs-var exp)
+  (if (lambda-varargs? exp)
+    (if (equal? (lambda-formals-type exp) 'args:varargs)
+        (lambda->formals exp) ; take symbol directly
+        (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
+    #f))
+
+(define (lambda-varargs? exp)
+  (and (lambda? exp)
+       (or (symbol? (lambda->formals exp))
+           (and (pair? (lambda->formals exp))
+                (not (list? (lambda->formals exp)))))))
+; Alternate definition:
 ;(define (lambda-varargs? exp)
 ;  (let ((type (lambda-formals-type exp)))
 ;    (or (equal? type 'args:varargs)
 ;        (equal? type 'args:fixed-with-varargs))))
-;
-;(define (lambda-formals-type exp)
-; (let ((args (lambda->formals exp)))
-;   (cond
-;     ((symbol? args) 'args:varargs)
-;     ((list? args)   'args:fixed)
-;     ((pair? args)   'args:fixed-with-varargs)
-;     (else
-;       (error `(Unexpected formals list in lambda-formals-type: ,args))))))
-;
-;(define (lambda-formals->list exp)
-;  (if (lambda-varargs? exp)
-;      (let ((args (lambda->formals exp)))
-;        (if (symbol? args)
-;            (list args)
-;            (pair->list args)))
-;      (lambda->formals exp)))
+
+(define (lambda-formals-type exp)
+ (let ((args (lambda->formals exp)))
+   (cond
+     ((symbol? args) 'args:varargs)
+     ((list? args)   'args:fixed)
+     ((pair? args)   'args:fixed-with-varargs)
+     (else
+       (error `(Unexpected formals list in lambda-formals-type: ,args))))))
+
+(define (lambda-formals->list exp)
+  (if (lambda-varargs? exp)
+      (let ((args (lambda->formals exp)))
+        (if (symbol? args)
+            (list args)
+            (pair->list args)))
+      (lambda->formals exp)))
 
 ; char->natural : char -> natural
 (define (char->natural c)
