@@ -9,7 +9,6 @@
 (define-library (scheme cyclone util)
   (import (scheme base)
           (scheme char))
-  ; TODO: really need export-all for these cyclone libs!!
   (export
     ;; Code analysis
     tagged-list?
@@ -17,6 +16,7 @@
     begin?
     lambda?
     pair->list 
+    formals->list
     lambda-formals->list
     lambda-varargs?
     lambda->formals
@@ -96,7 +96,7 @@
 ;       (or (symbol? (lambda->formals exp))
 ;           (and (pair? (lambda->formals exp))
 ;                (not (list? (lambda->formals exp)))))))
-; Alternate definition:
+; Alternate definition, works even if exp is not a lambda (IE, an AST):
 (define (lambda-varargs? exp)
   (let ((type (lambda-formals-type exp)))
     (or (equal? type 'args:varargs)
@@ -118,6 +118,14 @@
             (list args)
             (pair->list args)))
       (lambda->formals exp)))
+
+;; object -> list
+;; Accept only args instead of a whole lambda
+(define (formals->list args)
+  (cond
+   ((symbol? args) (list args))
+   ((list? args) args)
+   (else (pair->list args))))
 
 ; char->natural : char -> natural
 (define (char->natural c)
