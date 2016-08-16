@@ -48,6 +48,7 @@
     delete
     delete-duplicates
     flatten
+    length/obj
     list-index2
     list-insert-at!
     list-prefix?
@@ -126,6 +127,24 @@
    ((symbol? args) (list args))
    ((list? args) args)
    (else (pair->list args))))
+
+;; Take arguments for a lambda and pack them depending upon lambda type
+;(define (pack-lambda-arguments formals args)
+;  (cond
+;    ((symbol? formals) 
+;     (list args))
+;    ((list? formals) 
+;     args)
+;    (else
+(define (length/obj l)
+  (let loop ((lis l)
+             (len 0))
+    (cond
+      ((pair? lis)
+       (loop (cdr lis) (+ len 1)))
+      (else
+       len))))
+     
 
 ; char->natural : char -> natural
 (define (char->natural c)
