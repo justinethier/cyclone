@@ -10,7 +10,6 @@
 (define-library (scheme eval)
   (import 
     (scheme cyclone util)
-    (scheme cyclone transforms)
     ;(scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
