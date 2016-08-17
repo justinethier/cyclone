@@ -10,3 +10,5 @@ Bug Fixes:
 - Fixed the compiler to allow application of a function that can take any number of arguments. For example:
 
          ((lambda test (write test)) 1 2 3 4)
+
+- Updated `eval` to handle functions that take an optional number of arguments.
