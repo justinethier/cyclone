@@ -138,10 +138,14 @@
     ((list? formals)
      args)
     (else
-     (let* ((num-req-args (length/obj formals))
-            (areq (take args num-req-args))
-            (aopt (list-tail args num-req-args)))
-      (append areq (list aopt))))))
+     (let ((num-req-args (length/obj formals))
+           (num-args (length args)))
+      (if (> num-req-args num-args)
+          (error "Too few arguments supplied" formals args))
+      (append 
+        (take args num-req-args) ;; Required args
+        (list (list-tail args num-req-args)) ;; Optional args
+      )))))
 
 (define (length/obj l)
   (let loop ((lis l)
