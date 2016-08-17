@@ -61,12 +61,6 @@
     letrec->exp 
     letrec->bound-vars 
     letrec->args 
-    ;lambda-varargs? 
-    ;lambda->formals 
-    ;lambda-varargs? 
-    ;lambda-varargs-var 
-    ;lambda-formals-type 
-    ;lambda-formals->list 
     lambda-num-args
     ast:lambda-formals-type
     ast:lambda-formals->list
@@ -325,50 +319,11 @@
 (define (letrec->args exp)
   (map cadr (cadr exp)))
 
-;(define (lambda-varargs? exp)
-;  (and (lambda? exp)
-;       (or (symbol? (lambda->formals exp))
-;           (and (pair? (lambda->formals exp))
-;                (not (list? (lambda->formals exp)))))))
-;
-;; lambda->formals : lambda-exp -> list[symbol]
-;(define (lambda->formals exp)
-;  (cadr exp))
-;
-;(define (lambda-varargs? exp)
-;  (let ((type (lambda-formals-type exp)))
-;    (or (equal? type 'args:varargs)
-;        (equal? type 'args:fixed-with-varargs))))
-;
-;(define (lambda-varargs-var exp)
-;  (if (lambda-varargs? exp)
-;    (if (equal? (lambda-formals-type exp) 'args:varargs)
-;        (lambda->formals exp) ; take symbol directly
-;        (car (reverse (lambda-formals->list exp)))) ; Last arg is varargs
-;    #f))
-
 (define (ast:lambda-formals-type ast)
   (lambda-formals-type `(#f ,(ast:lambda-args ast) #f)))
 
-;(define (lambda-formals-type exp)
-; (let ((args (lambda->formals exp)))
-;   (cond
-;     ((symbol? args) 'args:varargs)
-;     ((list? args)   'args:fixed)
-;     ((pair? args)   'args:fixed-with-varargs)
-;     (else
-;       (error `(Unexpected formals list in lambda-formals-type: ,args))))))
-
 (define (ast:lambda-formals->list ast)
   (lambda-formals->list `(#f ,(ast:lambda-args ast) #f)))
-
-;(define (lambda-formals->list exp)
-;  (if (lambda-varargs? exp)
-;      (let ((args (lambda->formals exp)))
-;        (if (symbol? args)
-;            (list args)
-;            (pair->list args)))
-;      (lambda->formals exp)))
 
 ;; Minimum number of required arguments for a lambda
 (define (lambda-num-args exp)
