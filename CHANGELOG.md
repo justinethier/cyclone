@@ -14,3 +14,4 @@ Bug Fixes:
          ((lambda test (write test)) 1 2 3 4)
 
 - Updated `eval` to handle functions that take an optional number of arguments.
+- Updated `number->string` to omit leading zeros for binary conversions.
