@@ -2,6 +2,8 @@
 
 Features:
 
+- Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
+
 Bug Fixes:
 
 - Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`.
