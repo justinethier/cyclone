@@ -131,18 +131,17 @@
    (else (pair->list args))))
 
 ;; Take arguments for a lambda and pack them depending upon lambda type
-(define (pack-lambda-arguments formals-type formals args)
-  (case
-    formals-type
-    ((args:varargs)
+(define (pack-lambda-arguments formals args)
+  (cond
+    ((symbol? formals)
      (list args))
-    ((args:fixed-with-varargs)
+    ((list? formals)
+     args)
+    (else
      (let* ((num-req-args (length/obj formals))
             (areq (take args num-req-args))
             (aopt (list-tail args num-req-args)))
-      (append areq (list aopt))))
-    (else
-     args)))
+      (append areq (list aopt))))))
 
 (define (length/obj l)
   (let loop ((lis l)
