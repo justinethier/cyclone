@@ -19,7 +19,7 @@ Section | Status | Comments
 4.2.3 Sequencing | Yes | 
 4.2.4 Iteration | Yes |
 4.2.5 Delayed evaluation | Yes |
-4.2.6 Dynamic bindings | | Not supported yet.
+4.2.6 Dynamic bindings | Yes |
 4.2.7 Exception handling | Yes |
 4.2.8 Quasiquotation | Yes |
 4.2.9 Case-lambda | Yes |
@@ -31,7 +31,7 @@ Section | Status | Comments
 5.5 Record-type definitions | Yes | 
 5.6 Libraries | Partial | The following import set forms are not supported yet: `only`, `except`, `rename`, `prefix`.
 5.7 The REPL | Yes |
-6.1 Equivalence predicates | Yes | `eqv?` is not implemented, it is just an alias to `eq?`
+6.1 Equivalence predicates | Yes |
 6.2 Numbers | Partial | Only integers and reals are supported at this time.
 6.3 Booleans | Yes | `#true` and `#false` are not recognized by parser.
 6.4 Pairs and lists | Yes | `member` functions are predicates, `member` and `assoc` do not accept `compare` argument.

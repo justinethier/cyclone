@@ -187,3 +187,6 @@
 
 (display
   (f 12)) ;=> "12"
+
+;(display (radix 16))
+;(display (parameterize ((radix 0)) (f 12)))
