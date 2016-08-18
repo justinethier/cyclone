@@ -482,13 +482,12 @@
          (apply-primitive-procedure proc args))
         ((compound-procedure? proc)
          ((procedure-body proc)
-          (let ((
           (env:extend-environment 
             (formals->list 
               (procedure-parameters proc))
-            ;(pack-lambda-arguments 
-               ;(procedure-parameters proc)
-               args ;)
+            (pack-lambda-arguments 
+               (procedure-parameters proc)
+               args)
             (procedure-environment proc))))
         ((procedure? proc)
          (apply 
