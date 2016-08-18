@@ -20,8 +20,10 @@
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
 
-- [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
+- [`srfi 8`](api/srfi/8.md) - [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
 - [`srfi 18`](api/srfi/18.md) - [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
+- [`srfi 27`](api/srfi/27.md) - [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
+- [`srfi 69`](api/srfi/69.md) - [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
 
 # Cyclone-specific
 
