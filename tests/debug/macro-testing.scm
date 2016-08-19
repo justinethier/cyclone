@@ -103,33 +103,33 @@
 ;    ((define-values var expr)
 ;     (define var
 ;       (call-with-values (lambda () expr) list)))))
-
-(write
-  (letrec* ((x 1)) x))
-
-(write
-  (guard (condition
-          ((assq 'a condition) => cdr)
-          ((assq 'b condition)))
-    (raise (list (cons 'a 42))))) ;=> 42
-
-(write
-  (guard (condition
-          ((assq 'a condition) => cdr)
-          ((assq 'b condition)))
-    (raise (list (cons 'b 23))))) ;=> (b . 23)
-
-(define range
-  (case-lambda
-    ((e) (range 0 e))
-    ((b e) (do ((r '() (cons e r))
-                (e (- e 1) (- e 1)))
-               ((< e b) r)))))
-(write
-  (range 3)) ; => (0 1 2)
-(write
-  (range 3 5)) ; => (3 4)
-
+;
+;(write
+;  (letrec* ((x 1)) x))
+;
+;(write
+;  (guard (condition
+;          ((assq 'a condition) => cdr)
+;          ((assq 'b condition)))
+;    (raise (list (cons 'a 42))))) ;=> 42
+;
+;(write
+;  (guard (condition
+;          ((assq 'a condition) => cdr)
+;          ((assq 'b condition)))
+;    (raise (list (cons 'b 23))))) ;=> (b . 23)
+;
+;(define range
+;  (case-lambda
+;    ((e) (range 0 e))
+;    ((b e) (do ((r '() (cons e r))
+;                (e (- e 1) (- e 1)))
+;               ((< e b) r)))))
+;(write
+;  (range 3)) ; => (0 1 2)
+;(write
+;  (range 3 5)) ; => (3 4)
+;
 ;(define-values (x y) (integer-sqrt 17))
 ;(write
 ;  (list x y)) ; => (4 1)
@@ -166,22 +166,24 @@
 ;     (parameterize ("step") old (cons (cons ptmp vtmp) cons-new) ((param value ptmp vtmp) . args) rest body))
 ;    ((parameterize ((param value) ...) . body)
 ;     (parameterize ("step") old (thread-parameters) () ((param value) ...) body))))
-;
-;(define radix
-;  (make-parameter
-;    10
-;    (lambda (x)
-;      (if (and (exact-integer? x) (<= 2 x 16))
-;          x
-;          (error "invalid radix")))))
-;(define (f n) (number->string n (radix)))
-;
-;(write
-;  (f 12)) ;=> "12"
-;
-;(write
-;  (parameterize ((radix 2))
-;    (f 12))) ;=> "1100"
-;
-;(write
-;  (f 12)) ;=> "12"
+
+(define radix
+  (make-parameter
+    10
+    (lambda (x)
+      (if (and (exact-integer? x) (<= 2 x 16))
+          x
+          (error "invalid radix")))))
+(define (f n) (number->string n (radix)))
+
+(display
+  (f 12)) ;=> "12"
+(newline)
+
+(display
+  (parameterize ((radix 2))
+    (f 12))) ;=> "1100"
+(newline)
+
+(display
+  (f 12)) ;=> "12"
