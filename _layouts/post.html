@@ -58,7 +58,17 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h1>{{ page.title }}</h1>
-        <h2 class="date-labels">{{ page.date | date: "%b %d %Y" }}</h2>
+        <h2 class="date-labels">
+          {% assign d = page.date | date: "%-d"  %}
+          {{ page.date | date: "%B" }} 
+          {% case d %}
+            {% when '1' or '21' or '31' %}{{ d }}st
+            {% when '2' or '22' %}{{ d }}nd
+            {% when '3' or '23' %}{{ d }}rd
+            {% else %}{{ d }}th
+            {% endcase %}, 
+          {{ page.date | date: "%Y" }}
+        </h2>
       {{ content }}
       </section>
     </div>
