@@ -1373,13 +1373,23 @@ object Cyc_length(void *data, object l)
 
 char *int_to_binary(char *b, int x)
 {
-  b[0] = '\0';
-
-  int z;
-  for (z = 65536; z > 0; z >>= 1) {
-    strcat(b, ((x & z) == z) ? "1" : "0");
+  unsigned int i = 0x80000000, leading_zeros = 1;
+  if (x == 0) {
+    *b++ = '0';
+    *b = '\0';
+    return b;
   }
 
+  while (i){
+    if (x & i) {
+      *b++ = '1';
+      leading_zeros = 0;
+    } else if (!leading_zeros) {
+      *b++ = '0';
+    }
+    i >>= 1;
+  }
+  *b = '\0';
   return b;
 }
 
