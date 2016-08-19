@@ -4,8 +4,6 @@ title: Announcing the Cyclone Scheme Compiler
 excerpt: Initial announcement to comp.lang.scheme
 ---
 
-# {{ page.title }}
-
 Today I would like to announce the Cyclone Scheme-to-C compiler: 
 
 [http://justinethier.github.io/cyclone/](http://justinethier.github.io/cyclone/)
