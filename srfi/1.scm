@@ -208,6 +208,13 @@
 ;;;
 ;;; The SRFI discussion record contains more discussion on this topic.
 
+(define-syntax :optional
+  (syntax-rules ()
+    ((:optional rest default-exp)
+     (let ((maybe-arg rest))
+       (cond ((null? maybe-arg) default-exp)
+             ((null? (cdr maybe-arg)) (car maybe-arg))
+             (else (error "too many optional arguments" maybe-arg)))))))
 
 ;;; Constructors
 ;;;;;;;;;;;;;;;;
@@ -271,7 +278,13 @@
 (define (iota count . maybe-start+step)
   (check-arg integer? count iota)
   (if (< count 0) (error "Negative step count" iota count))
-  (let-optionals maybe-start+step ((start 0) (step 1))
+  (let ((start 0) 
+        (step 1))
+    (cond
+      ((not (null? maybe-start+step))
+       (set! start (car maybe-start+step))
+       (if (not (null? (cdr maybe-start+step)))
+           (set! step (cadr maybe-start+step)))))
     (check-arg number? start iota)
     (check-arg number? step iota)
     (let loop ((n 0) (r '()))
