@@ -16,7 +16,7 @@
 - [`scheme time`](api/scheme/time.md)
 - [`scheme write`](api/scheme/write.md)
 
-# SRFI Support
+# SRFI Library Support
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
 
