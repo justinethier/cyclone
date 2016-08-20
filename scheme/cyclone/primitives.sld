@@ -83,12 +83,12 @@
          eq?
          eqv?
          equal?
-         assoc
-         assq
-         assv
-         memq
-         memv
-         member
+         ;assoc
+         ;assq
+         ;assv
+         ;memq
+         ;memv
+         ;member
          length
          set-car!
          set-cdr!
@@ -200,12 +200,12 @@
          (eq? 2 2)
          (eqv? 2 2)
          (equal? 2 2)
-         (assoc 2 2)
-         (assq 2 2)
-         (assv 2 2)
-         (memq 2 2)
-         (memv 2 2)
-         (member 2 2)
+         ;(assoc 2 2)
+         ;(assq 2 2)
+         ;(assv 2 2)
+         ;(memq 2 2)
+         ;(memv 2 2)
+         ;(member 2 2)
          (length 1 1)
          (set-car! 2 2)
          (set-cdr! 2 2)
@@ -491,12 +491,12 @@
          ((eq? p 'Cyc-compilation-environment) "Cyc_compilation_environment")
          ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
          ((eq? p 'system)         "Cyc_system")
-         ((eq? p 'assq)          "assq")
-         ((eq? p 'assv)          "assq")
-         ((eq? p 'assoc)         "assoc")
-         ((eq? p 'memq)          "memqp")
-         ((eq? p 'memv)          "memqp")
-         ((eq? p 'member)        "memberp")
+         ;((eq? p 'assq)          "assq")
+         ;((eq? p 'assv)          "assq")
+         ;((eq? p 'assoc)         "assoc")
+         ;((eq? p 'memq)          "memqp")
+         ;((eq? p 'memv)          "memqp")
+         ;((eq? p 'member)        "memberp")
          ((eq? p 'length)        "Cyc_length")
          ((eq? p 'set-car!)      "Cyc_set_car")
          ((eq? p 'set-cdr!)      "Cyc_set_cdr")
@@ -589,12 +589,12 @@
         Cyc-installation-dir
         Cyc-compilation-environment
         command-line-arguments
-        assq
-        assv
-        assoc
-        memq
-        memv
-        member
+        ;assq
+        ;assv
+        ;assoc
+        ;memq
+        ;memv
+        ;member
         length
         set-car!
         set-cdr!
