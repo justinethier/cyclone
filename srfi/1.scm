@@ -1222,10 +1222,10 @@
     (filter! (lambda (y) (not (= x y))) lis)))
 
 ;;; Extended from R4RS to take an optional comparison argument.
-(define (member x lis . maybe-=)
-  (let ((= (:optional maybe-= equal?)))
-    (find-tail (lambda (y) (= x y)) lis)))
-
+;;(define (member x lis . maybe-=)
+;;  (let ((= (:optional maybe-= equal?)))
+;;    (find-tail (lambda (y) (= x y)) lis)))
+;;
 ;;; R4RS, hence we don't bother to define.
 ;;; The MEMBER and then FIND-TAIL call should definitely
 ;;; be inlined for MEMQ & MEMV.
@@ -1267,9 +1267,9 @@
 ;;;;;;;;;;;;;;;
 
 ;;; Extended from R4RS to take an optional comparison argument.
-(define (assoc x lis . maybe-=)
-  (let ((= (:optional maybe-= equal?)))
-    (find (lambda (entry) (= x (car entry))) lis)))
+;;(define (assoc x lis . maybe-=)
+;;  (let ((= (:optional maybe-= equal?)))
+;;    (find (lambda (entry) (= x (car entry))) lis)))
 
 (define (alist-cons key datum alist) (cons (cons key datum) alist))
 
