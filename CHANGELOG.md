@@ -2,6 +2,8 @@
 
 Features:
 
+- Added the SRFI 1 list library
+- Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
 
 Bug Fixes:
@@ -15,3 +17,4 @@ Bug Fixes:
 
 - Updated `eval` to handle functions that take an optional number of arguments.
 - Updated `number->string` to omit leading zeros for binary conversions.
+- Changed the `assoc` and `member` functions to accept an optional comparison function, and modified both families of functions to be native Scheme functions instead of C primitives.
