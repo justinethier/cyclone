@@ -20,6 +20,8 @@
         (scheme process-context)
         (scheme time)
         (scheme eval)
+        (srfi 1)
+        (srfi 2)
         (srfi 69))
 (cond-expand
   (cyclone
