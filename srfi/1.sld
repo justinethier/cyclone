@@ -1,4 +1,12 @@
-(define-library (1) ; (srfi 1)
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module is an interface to the list library.
+;;;;
+(define-library (srfi 1)
   (import (scheme base))
   (export
     xcons tree-copy make-list list-tabulate cons* list-copy 
