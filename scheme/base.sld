@@ -9,6 +9,12 @@
 (define-library (scheme base)
   (import (scheme cyclone common))
   (export
+    member
+    memv
+    memq
+    assoc
+    assv
+    assq
     cons-source
     syntax-rules
     letrec*
@@ -532,6 +538,33 @@
     (define (string>? str1 str2)  (>  (string-cmp str1 str2) 0))
     (define (string>=? str1 str2) (>= (string-cmp str1 str2) 0))
     ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
+
+    (define (member-helper obj lst cmp-proc)
+     (cond 
+       ((null? lst) #f)
+       ((cmp-proc obj (car lst)) lst)
+       (else (member-helper obj (cdr lst) cmp-proc))))
+    (define (member obj lst . compare) 
+        (if (pair? compare)
+            (member-helper obj lst (car compare))
+            (member-helper obj lst equal?)))
+    (define (memq obj lst) (member-helper obj lst eq?))
+    (define (memv obj lst) (member-helper obj lst eqv?))
+    
+    (define (assoc-helper obj lst cmp?)
+     (cond 
+       ((null? lst) #f)
+       ((and (pair? (car lst))
+             (cmp? obj (car (car lst))))
+        (car lst))
+       (else (assoc-helper obj (cdr lst) cmp?))))
+      
+    (define (assoc obj alist . compare)
+        (if (pair? compare)
+            (assoc-helper obj alist (car compare))
+            (assoc-helper obj alist equal?)))
+    (define (assq obj alist) (assoc-helper obj alist eq?))
+    (define (assv obj alist) (assoc-helper obj alist eqv?))
 
     (define (foldl func accum lst)
       (if (null? lst)
