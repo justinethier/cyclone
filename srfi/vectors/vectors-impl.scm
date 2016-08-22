@@ -75,7 +75,6 @@
 ;;; Efficiency of the actual algorithms is a rather mundane point to
 ;;; mention; vector operations are rarely beyond being straightforward.
 
-
 
 ;;; --------------------
 ;;; Utilities
@@ -132,7 +131,6 @@
 (define (vectors-ref vectors i)
   (map (lambda (v) (vector-ref v i)) vectors))
 
-
 
 ;;; --------------------
 ;;; Error checking
@@ -250,7 +248,6 @@
           (else
            (values start end)))))
 
-
 
 ;;; --------------------
 ;;; Internal routines
@@ -436,7 +433,6 @@
     (lambda (f target vectors len)
       (loop f target vectors len))))
 
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;; ***** vector-lib ***** ;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -689,7 +685,6 @@
   (receive (vecs starts ends) (gather-args args)
     (define result (make-vector (total-length starts ends)))
     (copy-each! result vecs starts ends)))
-
 
 ;;; --------------------
 ;;; Predicates
@@ -752,12 +747,10 @@
           (and (= length-a length-b)
                (loop 0))))))
 
-
 
 ;;; --------------------
 ;;; Selectors
 
-
 
 ;;; --------------------
 ;;; Iteration
@@ -933,7 +926,6 @@
           (vector-set! result i r)
           (loop (+ i 1) r))))))
 
-
 
 ;;; --------------------
 ;;; Searching
@@ -1132,7 +1124,6 @@
               (vector-set! result no elem)
               (loop (+ i 1) yes (+ no 1)))))))))
 
-
 
 ;;; --------------------
 ;;; Mutators
@@ -1244,7 +1235,6 @@
                         (start end)
     (%vector-reverse! vec start end)))
 
-
 
 ;;; --------------------
 ;;; Conversion
