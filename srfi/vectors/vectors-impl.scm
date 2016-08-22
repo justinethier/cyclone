@@ -80,11 +80,11 @@
 ;;; Utilities
 
 ;;; SRFI 8, too trivial to put in the dependencies list.
-(define-syntax receive
-  (syntax-rules ()
-    ((receive ?formals ?producer ?body1 ?body2 ...)
-     (call-with-values (lambda () ?producer)
-       (lambda ?formals ?body1 ?body2 ...)))))
+;(define-syntax receive
+;  (syntax-rules ()
+;    ((receive ?formals ?producer ?body1 ?body2 ...)
+;     (call-with-values (lambda () ?producer)
+;       (lambda ?formals ?body1 ?body2 ...)))))
 
 ;;; Not the best LET*-OPTIONALS, but not the worst, either.  Use Olin's
 ;;; if it's available to you.
