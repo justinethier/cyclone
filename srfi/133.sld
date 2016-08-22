@@ -17,5 +17,5 @@
           vector-reverse-copy! vector-unfold! vector-unfold-right!)
   ;; Conversion 
   (export reverse-vector->list reverse-list->vector)
-  (include "vectors/vectors-impl.scm")
+  (include "vectors-impl.scm")
 )
