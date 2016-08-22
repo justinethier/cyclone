@@ -19,3 +19,4 @@ Bug Fixes:
 - Updated `number->string` to omit leading zeros for binary conversions.
 - Fixed `apply` to use the proper semantics when receiving more than one data argument.
 - Changed the `assoc` and `member` functions to accept an optional comparison function, and modified both families of functions to be native Scheme functions instead of C primitives.
+- Allow libraries to contain multiple `import`, `begin`, and `export` sections.
