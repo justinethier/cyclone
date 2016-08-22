@@ -118,6 +118,7 @@ bootstrap: icyc
 	cp scheme/time.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/common.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp icyc.scm $(BOOTSTRAP_DIR)
+	cp icyc.c $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
