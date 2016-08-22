@@ -1,4 +1,5 @@
 (cond-expand
+  (cyclone (import (scheme base) (srfi 133)))
   (chicken (use test srfi-133))
   (chibi (import (scheme base) (chibi test) (vectors))))
 (test-group "vectors"
