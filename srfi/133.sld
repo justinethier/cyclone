@@ -1,4 +1,4 @@
-(define-library (vectors)
+(define-library (srfi 133) ;vectors)
   (import (scheme base))
   (import (scheme cxr))
   ;; Constructors 
@@ -17,5 +17,5 @@
           vector-reverse-copy! vector-unfold! vector-unfold-right!)
   ;; Conversion 
   (export reverse-vector->list reverse-list->vector)
-  (include "vectors-impl.scm")
+  (include "vectors/vectors-impl.scm")
 )
