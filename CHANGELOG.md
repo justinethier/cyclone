@@ -6,10 +6,11 @@ Features:
 - Added the SRFI 133 vector library
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
+- Modified the makefile to also search current working directories for headers and libraries.
 
 Bug Fixes:
 
-- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`. In addition, the makefile has been modified to also search current working directories for headers and libraries.
+- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`. 
 - Updated `write` to display escaped character sequences (EG: `\t`) instead of literal characters.
 - Prevent C compilation errors when building a program that only contains basic primitives or a constant at the top level.
 - Fixed the compiler to allow application of a function that can take any number of arguments. For example:
