@@ -39,7 +39,8 @@ SMODULES = \
   srfi/9 \
   srfi/18 \
   srfi/27 \
-  srfi/69
+  srfi/69 \
+  srfi/133
 SLDFILES = $(addsuffix .sld, $(SMODULES))
 COBJECTS=$(SLDFILES:.sld=.o)
 
@@ -137,6 +138,7 @@ bootstrap: icyc
 	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/133.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
