@@ -3,6 +3,7 @@
 Features:
 
 - Added the SRFI 1 list library
+- Added the SRFI 133 vector library
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
 
