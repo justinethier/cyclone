@@ -90,11 +90,12 @@
   (foldr append '()
     (map cdr 
       (filter (lambda (l) (tagged-list? tag l)) (cddr ast)))))
-
-(define (lib:raw-exports ast)
-  (lib:result 
-    (let ((code (assoc 'export (cddr ast))))
-      (if code (cdr code) #f))))
+(define (lib:body ast) 
+  (lib:get-all ast 'begin))
+(define (lib:imports ast) 
+  (map lib:list->import-set (lib:get-all ast 'import)))
+(define (lib:raw-exports ast) 
+  (lib:get-all ast 'export))
 (define (lib:rename-exports ast)
   (filter
     (lambda (ex)
@@ -108,15 +109,6 @@
           (caddr ex)
           ex))
     (lib:raw-exports ast)))
-(define (lib:imports ast)
-  (lib:result
-    (let ((code (assoc 'import (cddr ast))))
-      (if code (map lib:list->import-set (cdr code)) 
-               #f))))
-(define (lib:body ast)
-  (lib:result
-    (let ((code (assoc 'begin (cddr ast))))
-      (if code (cdr code) #f))))
 (define (lib:includes ast)
   (map
     (lambda (inc-lst)
