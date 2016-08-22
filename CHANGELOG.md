@@ -9,7 +9,7 @@ Features:
 
 Bug Fixes:
 
-- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`.
+- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`. In addition, the makefile has been modified to also search current working directories for headers and libraries.
 - Updated `write` to display escaped character sequences (EG: `\t`) instead of literal characters.
 - Prevent C compilation errors when building a program that only contains basic primitives or a constant at the top level.
 - Fixed the compiler to allow application of a function that can take any number of arguments. For example:
