@@ -215,6 +215,8 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/sorting/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/*.*
