@@ -3468,23 +3468,6 @@ void _call_95cc(void *data, object cont, object args)
   return_closcall2(data, __glo_call_95cc_scheme_base, cont, car(args));
 }
 
-// Prepend value to the given list
-#define stack_prepend(lis, value) { \
-  pair_type *tmp2 = alloca(sizeof(pair_type)); \
-  set_pair(tmp2, value, lis); \
-  lis = tmp2; \
-}
-
-// Prepend each element of src to dest list
-#define stack_list_prepend(src, dest) { \
-  while (src) { \
-    pair_type *tmp2 = alloca(sizeof(pair_type)); \
-    set_pair(tmp2, car(src), dest); \
-    dest = tmp2; \
-    src = cdr(src); \
-  } \
-}
-
 // Front-end to apply
 //
 // Core of va processing is done here, because we need different
@@ -3501,26 +3484,25 @@ void _call_95cc(void *data, object cont, object args)
     lis = va_arg(ap, object); \
     Cyc_check_pair_or_null(data, lis); \
   } else { \
-    for (i = 1; i < argc; i++) { \
+    lis = alloca(sizeof(pair_type)); \
+    tmp = va_arg(ap, object); \
+    set_pair(lis, tmp, NULL); \
+    prev = lis; \
+    for (i = 2; i < argc - 1; i++) { \
+      pair_type *next = alloca(sizeof(pair_type)); \
       tmp = va_arg(ap, object); \
-      if (tmp == NULL){ \
-        continue; \
-      } else if (is_object_type(tmp) && type_of(tmp) == pair_tag) { \
-        l = tmp; \
-        stack_list_prepend(l, lis); \
-      } else { \
-        stack_prepend(lis, tmp); \
-      } \
+      set_pair(next, tmp, NULL); \
+      cdr(prev) = next; \
+      prev = next; \
     } \
-    l = lis; \
-    lis = NULL; \
-    stack_list_prepend(l, lis); \
+    tmp = va_arg(ap, object); \
+    cdr(prev) = tmp; \
   } \
   va_end(ap);
 
 void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...)
 {
-  list lis = NULL, l;
+  list lis = NULL, prev = NULL;
   object tmp;
   int i;
   va_list ap;
@@ -3531,7 +3513,7 @@ void dispatch_apply_va(void *data, int argc, object clo, object cont, object fun
 
 object apply_va(void *data, object cont, int argc, object func, ...)
 {
-  list lis = NULL, l;
+  list lis = NULL, prev = NULL;
   object tmp;
   int i;
   va_list ap;
