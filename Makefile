@@ -41,6 +41,7 @@ SMODULES = \
   srfi/27 \
   srfi/69 \
   srfi/111 \
+  srfi/132 \
   srfi/133
 SLDFILES = $(addsuffix .sld, $(SMODULES))
 COBJECTS=$(SLDFILES:.sld=.o)
@@ -140,6 +141,8 @@ bootstrap: icyc
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/sorting/*.scm $(BOOTSTRAP_DIR)/srfi/sorting
 	cp srfi/133.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
@@ -190,6 +193,7 @@ install:
 	$(MKDIR) $(DESTDIR)$(DATADIR)
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
@@ -199,6 +203,7 @@ install:
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.meta $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/sorting/*.scm $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
 

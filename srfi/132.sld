@@ -1,4 +1,4 @@
-(define-library (srfi-132)
+(define-library (srfi 132)
   (import (scheme base))
   (import (scheme cxr))
   (export list-sorted? vector-sorted? list-merge vector-merge list-sort vector-sort
@@ -6,14 +6,14 @@
           list-stable-sort! vector-stable-sort!
           list-delete-neighbor-dups vector-delete-neighbor-dups
           list-delete-neighbor-dups! vector-delete-neighbor-dups!)
-  (include "delndups.scm")
-  (include "lmsort.scm")
-  (include "sortp.scm")
-  (include "vector-util.scm")
-  (include "vhsort.scm")
-  (include "visort.scm")
-  (include "vmsort.scm")
-  (include "vqsort2.scm")
-  (include "vqsort3.scm")
-  (include "sort.scm") ; must be last
+  (include "sorting/delndups.scm")
+  (include "sorting/lmsort.scm")
+  (include "sorting/sortp.scm")
+  (include "sorting/vector-util.scm")
+  (include "sorting/vhsort.scm")
+  (include "sorting/visort.scm")
+  (include "sorting/vmsort.scm")
+  (include "sorting/vqsort2.scm")
+  (include "sorting/vqsort3.scm")
+  (include "sorting/sort.scm") ; must be last
 )
