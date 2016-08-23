@@ -89,7 +89,7 @@
 (define (lib:get-all ast tag)
   (foldr append '()
     (map cdr 
-      (filter (lambda (l) (tagged-list? 'import l)) (cddr ast)))))
+      (filter (lambda (l) (tagged-list? tag l)) (cddr ast)))))
 
 (define (lib:raw-exports ast)
   (lib:result 
