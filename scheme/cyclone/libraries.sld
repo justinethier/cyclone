@@ -38,6 +38,7 @@
     lib:import->export-list
     lib:resolve-imports
     lib:resolve-meta
+    lib:get-all
     lib:get-all-import-deps
     lib:get-dep-list
     lib:imports->idb
@@ -82,6 +83,14 @@
 ;; TODO: most of these below assume 0 or 1 instances of the directive.
 ;; may need to replace some of these later with filter operations to
 ;; support more than 1 instance.
+
+;; Get all instances of given tagged list from a library definition,
+;; and collect the contents of them into a single list.
+(define (lib:get-all ast tag)
+  (foldr append '()
+    (map cdr 
+      (filter (lambda (l) (tagged-list? 'import l)) (cddr ast)))))
+
 (define (lib:raw-exports ast)
   (lib:result 
     (let ((code (assoc 'export (cddr ast))))
