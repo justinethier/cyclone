@@ -1,5 +1,7 @@
 # Next Release - Date TBD
 
+TODO: SRFI 111, 132
+
 Features:
 
 - Added the SRFI 1 list library
