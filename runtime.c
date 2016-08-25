@@ -927,13 +927,13 @@ object Cyc_write_char(void *data, object c, object port)
 }
 
 // Internal function, do not use this anywhere outside the runtime
-object Cyc_heap_alloc_port(void *data)
+object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 {
   object p = NULL;
   int heap_grown;
   p = gc_alloc(Cyc_heap, 
                sizeof(port_type),
-TODO: no, need an actual port object for this guy... guess we'll pass it in?               //boolean_f, // OK to populate manually over here
+               (char *)stack_p,
                (gc_thread_data *)data, 
                &heap_grown);
   return p;
