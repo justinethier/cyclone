@@ -1,5 +1,7 @@
 # Next Release - Date TBD
 
+TODO: SRFI 113, SRFI 117, a way to run tests for all new SRFI's, if possible. may want to port the (chibi test) library to cyclone
+
 Features:
 
 - Added the following libraries from R7RS-large red edition (data structures):
