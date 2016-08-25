@@ -6,6 +6,7 @@ Features:
     - SRFI 1 list library
     - SRFI 133 vector library
     - SRFI 111 boxes
+    - SRFI 132 sorting library
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
 - Modified the makefile to also search current working directories for headers and libraries.
