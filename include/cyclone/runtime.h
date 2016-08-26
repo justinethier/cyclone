@@ -216,6 +216,8 @@ port_type Cyc_stdin(void);
 port_type Cyc_stderr(void);
 port_type Cyc_io_open_input_file(void *data, object str);
 port_type Cyc_io_open_output_file(void *data, object str);
+port_type Cyc_io_open_output_string(void *data);
+void Cyc_io_get_output_string(void *data, object cont, object port);
 object Cyc_io_close_port(void *data, object port);
 object Cyc_io_close_input_port(void *data, object port);
 object Cyc_io_close_output_port(void *data, object port);

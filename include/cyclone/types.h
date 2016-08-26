@@ -410,14 +410,19 @@ typedef struct {
   tag_type tag;
   FILE *fp;
   int mode;
+  char *mem_buf;
+  size_t mem_buf_len;
 } port_type;
+
 #define make_port(p,f,m) \
   port_type p; \
   p.hdr.mark = gc_color_red; \
   p.hdr.grayed = 0; \
   p.tag = port_tag; \
   p.fp = f; \
-  p.mode = m;
+  p.mode = m; \
+  p.mem_buf = NULL; \
+  p.mem_buf_len = 0;
 
 /* Vector type */
 

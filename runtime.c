@@ -2537,35 +2537,6 @@ object Cyc_io_peek_char(void *data, object cont, object port)
   return Cyc_EOF;
 }
 
-// Hacky approach to a minimal string buffer implementation. This may change in the future
-// For background see: http://stackoverflow.com/questions/539537/memory-buffer-as-file
-port_type Cyc_io_open_output_string(void *data)
-
-// TODO: no, this is too hacky. fuck it, just use fmemopen or open_memstream
-// for non-supported platforms we'll raise an error and not do anything
-{
-    FILE *f = fopen("/dev/null", "w");
-    int i;
-    int written = 0;
-    char *buf = malloc(100000);
-    make_port(p, NULL, 0); // TODO: probably wrong params, need to add buf to port obj and type
-    //setbuffer(f, buf, 100000);
-    if (0 != setvbuf (f, buf, _IOFBF, 100000)){
-      // TODO: raise() instead?
-      fprintf(stderr, "Unable to setvbuf!\n");
-      exit(1);
-    }
-    for (i = 0; i < 1000; i++) {
-        written += fprintf(f, "Number %d\n", i);
-    }
-    for (i = 0; i < written; i++) {
-        printf("%c", buf[i]);
-    }
-    return p;
-}
-
-// END string buffers
-
 // Functions internal to the runtime that use malloc
 list malloc_make_pair(object a, object d)
 {

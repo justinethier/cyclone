@@ -425,6 +425,8 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       type_of(hp) = port_tag;
       hp->fp = ((port_type *) obj)->fp;
       hp->mode = ((port_type *) obj)->mode;
+      hp->mem_buf = ((port_type *)obj)->mem_buf;
+      hp->mem_buf_len = ((port_type *)obj)->mem_buf_len;
       return (char *)hp;
     }
   case cvar_tag:{

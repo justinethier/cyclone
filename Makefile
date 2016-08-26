@@ -66,11 +66,12 @@ libcyclone.so.1: runtime.c include/cyclone/runtime.h
 	gcc $(CFLAGS) -c -fPIC runtime.c -o runtime.o
 	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
 
-libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c dispatch.c
+libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c dispatch.c mem-streams.c
 #	echo $(CC_PROG)
 #	echo $(CC_EXEC)
 #	echo $(CC_LIB)
 	$(CC) $(CFLAGS) -c dispatch.c -o dispatch.o
+	$(CC) $(CFLAGS) -c mem-streams.c -o mem-streams.o
 	$(CC) $(CFLAGS) -std=gnu99 -c gc.c -o gc.o
 	$(CC) $(CFLAGS) -c \
                   -DCYC_INSTALL_DIR=\"$(PREFIX)\" \
@@ -81,7 +82,7 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
                   -DCYC_CC_EXEC=\"$(CC_EXEC)\" \
                   -DCYC_CC_LIB=\"$(CC_LIB)\" \
                   runtime.c -o runtime.o
-	$(AR) rcs libcyclone.a runtime.o gc.o dispatch.o
+	$(AR) rcs libcyclone.a runtime.o gc.o dispatch.o mem-streams.o
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library
@@ -103,6 +104,7 @@ bootstrap: icyc
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp srfi/*.scm $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
+	cp mem-streams.c $(BOOTSTRAP_DIR)
 	cp gc.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
 	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
@@ -163,6 +165,7 @@ tags:
 indent:
 	indent -linux -l80 -i2 -nut gc.c
 	indent -linux -l80 -i2 -nut runtime.c
+	indent -linux -l80 -i2 -nut mem-streams.c
 	indent -linux -l80 -i2 -nut include/cyclone/*.h
 
 .PHONY: clean
