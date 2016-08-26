@@ -2442,6 +2442,12 @@ object Cyc_io_close_port(void *data, object port)
     if (stream)
       fclose(stream);
     ((port_type *) port)->fp = NULL;
+   
+    if (((port_type *)port)->mem_buf != NULL){
+      free( ((port_type *)port)->mem_buf );
+      ((port_type *)port)->mem_buf = NULL;
+      ((port_type *)port)->mem_buf_len = 0;
+    }
   }
   return port;
 }
