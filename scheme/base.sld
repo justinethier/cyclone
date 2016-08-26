@@ -1163,8 +1163,8 @@
        ((p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f)); ")
   (define-c open-output-string
     "(void *data, int argc, closure _, object k)"
-    " port_type p = Cyc_io_open_output_string(data);
-      return_closcall1(data, k, &p); ")
+    " port_type *p = Cyc_io_open_output_string(data);
+      return_closcall1(data, k, p); ")
   (define-c get-output-string
     "(void *data, int argc, closure _, object k, object port)"
     " Cyc_io_get_output_string(data, k, port);

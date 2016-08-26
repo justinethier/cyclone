@@ -33,14 +33,24 @@ if (type_is_pair_prim(clo)) { \
  } \
 }
 
-port_type Cyc_io_open_output_string(void *data)
+object Cyc_heap_alloc_port(void *data);
+port_type *Cyc_io_open_output_string(void *data)
 {
-  make_port(p, NULL, 0);
+  // Allocate port on the heap so the location of mem_buf does not change
+  // make_port(p, NULL, 0);
+  port_type *p = (port_type *)Cyc_heap_alloc_port(data);
+  p->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+  p->hdr.grayed = 0;
+  p->tag = port_tag;
+  p->fp = NULL;
+  p->mode = 0; // Output
+  p->mem_buf = NULL;
+  p->mem_buf_len = 0;
   errno = 0;
 #if CYC_HAVE_OPEN_MEMSTREAM
-  p.fp = open_memstream(&(p.mem_buf), &(p.mem_buf_len));
+  p->fp = open_memstream(&(p->mem_buf), &(p->mem_buf_len));
 #endif
-  if (p.fp == NULL){
+  if (p->fp == NULL){
     Cyc_rt_raise2(data, "Unable to open memory stream", obj_int2obj(errno));
   }
   return p;

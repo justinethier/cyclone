@@ -926,6 +926,19 @@ object Cyc_write_char(void *data, object c, object port)
   return quote_void;
 }
 
+// Internal function, do not use this anywhere outside the runtime
+object Cyc_heap_alloc_port(void *data)
+{
+  object p = NULL;
+  int heap_grown;
+  p = gc_alloc(Cyc_heap, 
+               sizeof(port_type),
+               boolean_f, // OK to populate manually over here
+               (gc_thread_data *)data, 
+               &heap_grown);
+  return p;
+}
+
 // TODO: should not be a predicate, may end up moving these to Scheme code
 object memberp(void *data, object x, list l)
 {
