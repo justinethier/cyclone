@@ -647,6 +647,10 @@ object Cyc_display_va_list(int argc, object x, va_list ap)
     tmp = va_arg(ap, object);
     if (Cyc_is_port(tmp) == boolean_t) {
       fp = ((port_type *) tmp)->fp;
+      if (fp == NULL) {
+        //Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+        return quote_void;
+      }
     } else {
       // TODO: need a data arg, and should raise an error here instead
       fprintf(stderr, "Bad argument: expected port\n");
@@ -810,6 +814,10 @@ object Cyc_write_va_list(int argc, object x, va_list ap)
     tmp = va_arg(ap, object);
     if (Cyc_is_port(tmp) == boolean_t) {
       fp = ((port_type *) tmp)->fp;
+      if (fp == NULL) {
+        //Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+        return quote_void;
+      }
     } else {
       // TODO: need a data arg, and should raise an error here instead
       fprintf(stderr, "Bad argument: expected port\n");
@@ -918,8 +926,12 @@ object Cyc_write(object x, FILE * port)
 
 object Cyc_write_char(void *data, object c, object port)
 {
+  Cyc_check_port(data, port);
   if (obj_is_char(c)) {
-    fprintf(((port_type *) port)->fp, "%c", obj_obj2char(c));
+    FILE *fp = ((port_type *) port)->fp;
+    if (fp){
+      fprintf(fp, "%c", obj_obj2char(c));
+    }
   } else {
     Cyc_rt_raise2(data, "Argument is not a character", c);
   }
@@ -2506,8 +2518,12 @@ object Cyc_io_file_exists(void *data, object filename)
 //  TODO: port arg is optional! (maybe handle that in expansion section??)
 object Cyc_io_read_char(void *data, object cont, object port)
 {
+  port_type *p = (port_type *)port;
   int c;
   Cyc_check_port(data, port);
+  if (p->fp == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
   {
     set_thread_blocked(data, cont);
     c = fgetc(((port_type *) port)->fp);
@@ -2523,6 +2539,9 @@ object Cyc_io_read_line(void *data, object cont, object port)
   char buf[1024];
   //int i = 0, c;
 
+  if (stream == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
   set_thread_blocked(data, cont);
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
@@ -2548,6 +2567,9 @@ object Cyc_io_peek_char(void *data, object cont, object port)
   Cyc_check_port(data, port);
   {
     stream = ((port_type *) port)->fp;
+    if (stream == NULL) {
+      Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+    }
     set_thread_blocked(data, cont);
     c = fgetc(stream);
     ungetc(c, stream);
