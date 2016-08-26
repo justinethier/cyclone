@@ -48,46 +48,18 @@ port_type Cyc_io_open_output_string(void *data)
 
 void Cyc_io_get_output_string(void *data, object cont, object port)
 {
+  port_type *p;
   Cyc_check_port(data, port);
   if (((port_type *)port)->mem_buf == NULL) {
     Cyc_rt_raise2(data, "Not an in-memory port", port);
   }
+  p = (port_type *)port;
+  if (p->fp) {
+    fflush(p->fp);
+  }
   {
-    port_type *p = (port_type *)port;
     make_string_with_len(s, p->mem_buf, p->mem_buf_len);
     return_closcall1(data, cont, &s);
   }
 }
-
-// TODO: when closing a memory port, need to free mem_buf if != NULL
-
-
-// Hacky approach to a minimal string buffer implementation. This may change in the future
-// For background see: http://stackoverflow.com/questions/539537/memory-buffer-as-file
-//port_type Cyc_io_open_output_string(void *data)
-//
-//// TODO: no, this is too hacky. fuck it, just use fmemopen or open_memstream
-//// for non-supported platforms we'll raise an error and not do anything
-//{
-//    FILE *f = fopen("/dev/null", "w");
-//    int i;
-//    int written = 0;
-//    char *buf = malloc(100000);
-//    make_port(p, NULL, 0); // TODO: probably wrong params, need to add buf to port obj and type
-//    //setbuffer(f, buf, 100000);
-//    if (0 != setvbuf (f, buf, _IOFBF, 100000)){
-//      // TODO: raise() instead?
-//      fprintf(stderr, "Unable to setvbuf!\n");
-//      exit(1);
-//    }
-//    for (i = 0; i < 1000; i++) {
-//        written += fprintf(f, "Number %d\n", i);
-//    }
-//    for (i = 0; i < written; i++) {
-//        printf("%c", buf[i]);
-//    }
-//    return p;
-//}
-//
-//// END string buffers
 
