@@ -933,7 +933,7 @@ object Cyc_heap_alloc_port(void *data)
   int heap_grown;
   p = gc_alloc(Cyc_heap, 
                sizeof(port_type),
-               boolean_f, // OK to populate manually over here
+TODO: no, need an actual port object for this guy... guess we'll pass it in?               //boolean_f, // OK to populate manually over here
                (gc_thread_data *)data, 
                &heap_grown);
   return p;
