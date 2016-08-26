@@ -53,6 +53,27 @@ port_type *Cyc_io_open_input_string(void *data, object str)
   return p;
 }
 
+port_type *Cyc_io_open_input_bytevector(void *data, object bv)
+{
+//  // Allocate port on the heap so the location of mem_buf does not change
+  port_type *p;
+  make_port(sp, NULL, 0);
+
+  Cyc_check_bvec(data, bv);
+  p = (port_type *)Cyc_heap_alloc_port(data, &sp);
+  errno = 0;
+#if CYC_HAVE_FMEMOPEN
+  p->mem_buf = malloc(sizeof(char) * ((bytevector)bv)->len);
+  p->mem_buf_len = ((bytevector)bv)->len;
+  memcpy(p->mem_buf, ((bytevector)bv)->data, ((bytevector)bv)->len);
+  p->fp = fmemopen(p->mem_buf, ((bytevector)bv)->len, "r");
+#endif
+  if (p->fp == NULL){
+    Cyc_rt_raise2(data, "Unable to open input memory stream", obj_int2obj(errno));
+  }
+  return p;
+}
+
 port_type *Cyc_io_open_output_string(void *data)
 {
   // Allocate port on the heap so the location of mem_buf does not change
@@ -82,6 +103,25 @@ void Cyc_io_get_output_string(void *data, object cont, object port)
   {
     make_string_with_len(s, p->mem_buf, p->mem_buf_len);
     return_closcall1(data, cont, &s);
+  }
+}
+
+void Cyc_io_get_output_bytevector(void *data, object cont, object port)
+{
+  port_type *p = (port_type *)port;
+  Cyc_check_port(data, port);
+  if (p->fp) {
+    fflush(p->fp);
+  }
+  if (p->mem_buf == NULL) {
+    Cyc_rt_raise2(data, "Not an in-memory port", port);
+  }
+  {
+    make_empty_bytevector(bv);
+    bv.len = p->mem_buf_len;
+    bv.data = alloca(sizeof(char) * bv.len);
+    memcpy(bv.data, p->mem_buf, p->mem_buf_len);
+    return_closcall1(data, cont, &bv);
   }
 }
 

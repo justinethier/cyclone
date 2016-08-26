@@ -141,6 +141,9 @@
     get-output-string
     open-output-string
     open-input-string
+    get-output-bytevector
+    open-input-bytevector
+    open-output-bytevector
     features
     Cyc-version
     any
@@ -179,9 +182,6 @@
 ; Possibly missing functions:
 ;
 ;    ; following byte vector functions are not implemented yet:
-;    get-output-bytevector
-;    open-input-bytevector
-;    open-output-bytevector
 ;    read-bytevector
 ;    read-bytevector!
 ;    write-bytevector
@@ -1169,6 +1169,15 @@
     "(void *data, int argc, closure _, object k, object port)"
     " Cyc_io_get_output_string(data, k, port);
     ")
+  (define-c get-output-bytevector
+    "(void *data, int argc, closure _, object k, object port)"
+    " Cyc_io_get_output_bytevector(data, k, port);
+    ")
+  (define-c open-input-bytevector
+    "(void *data, int argc, closure _, object k, object bv)"
+    " port_type *p = Cyc_io_open_input_bytevector(data, bv);
+      return_closcall1(data, k, p); ")
+  (define open-output-bytevector open-output-string)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
