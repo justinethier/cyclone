@@ -37,7 +37,9 @@ port_type Cyc_io_open_output_string(void *data)
 {
   make_port(p, NULL, 0);
   errno = 0;
+#if CYC_HAVE_OPEN_MEMSTREAM
   p.fp = open_memstream(&(p.mem_buf), &(p.mem_buf_len));
+#endif
   if (p.fp == NULL){
     Cyc_rt_raise2(data, "Unable to open memory stream", obj_int2obj(errno));
   }

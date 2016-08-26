@@ -71,8 +71,10 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
 #	echo $(CC_EXEC)
 #	echo $(CC_LIB)
 	$(CC) $(CFLAGS) -c dispatch.c -o dispatch.o
-	$(CC) $(CFLAGS) -c mem-streams.c -o mem-streams.o
 	$(CC) $(CFLAGS) -std=gnu99 -c gc.c -o gc.o
+	$(CC) $(CFLAGS) -c \
+                  -DCYC_HAVE_OPEN_MEMSTREAM=$(CYC_PLATFORM_HAS_MEMSTREAM) \
+                  mem-streams.c -o mem-streams.o
 	$(CC) $(CFLAGS) -c \
                   -DCYC_INSTALL_DIR=\"$(PREFIX)\" \
                   -DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
