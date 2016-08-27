@@ -34,6 +34,7 @@ SMODULES = \
   scheme/cyclone/primitives \
   scheme/cyclone/transforms \
   scheme/cyclone/util \
+  scheme/cyclone/test \
   srfi/1 \
   srfi/2 \
   srfi/9 \
@@ -136,6 +137,7 @@ bootstrap: icyc
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/test.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp srfi/1.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.meta $(BOOTSTRAP_DIR)/srfi
