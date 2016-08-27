@@ -1,5 +1,10 @@
-;; Ported from chibi's test library
-(define-library (test)
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; This module contains a testing framework ported from (chibi test)
+;;;; which in turn was ported from CHICKEN.
+;;;;
+(define-library (scheme cyclone test)
   (export
    test test-equal test-error test-assert test-not test-values
    test-group current-test-group
