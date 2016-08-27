@@ -75,6 +75,7 @@ libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c d
 	$(CC) $(CFLAGS) -std=gnu99 -c gc.c -o gc.o
 	$(CC) $(CFLAGS) -c \
                   -DCYC_HAVE_OPEN_MEMSTREAM=$(CYC_PLATFORM_HAS_MEMSTREAM) \
+                  -DCYC_HAVE_FMEMOPEN=$(CYC_PLATFORM_HAS_FMEMOPEN) \
                   mstreams.c -o mstreams.o
 	$(CC) $(CFLAGS) -c \
                   -DCYC_INSTALL_DIR=\"$(PREFIX)\" \

@@ -140,6 +140,7 @@
     output-port-open?
     get-output-string
     open-output-string
+    open-input-string
     features
     Cyc-version
     any
@@ -193,11 +194,6 @@
 ;
 ;    ; No complex or rational numbers at this time
 ;    rationalize
-;
-;    ; need string ports
-;    ; may be able to use POSIX string steams for this, see: open_memstream
-;    ; however there may be portability issues with that. looks like BSD and windows don't have it
-;    open-input-string
 ;
 ;    ;; no binary/text ports yet
 ;    binary-port?
@@ -1161,6 +1157,10 @@
         data, 
         k, 
        ((p->mode == 0 && p->fp != NULL) ? boolean_t : boolean_f)); ")
+  (define-c open-input-string
+    "(void *data, int argc, closure _, object k, object str)"
+    " port_type *p = Cyc_io_open_input_string(data, str);
+      return_closcall1(data, k, p); ")
   (define-c open-output-string
     "(void *data, int argc, closure _, object k)"
     " port_type *p = Cyc_io_open_output_string(data);

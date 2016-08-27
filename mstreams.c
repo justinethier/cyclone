@@ -11,8 +11,6 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 #include <errno.h>
-//#include <limits.h>
-//#include <ctype.h>
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, a1) \
@@ -34,6 +32,27 @@ if (type_is_pair_prim(clo)) { \
 }
 
 object Cyc_heap_alloc_port(void *data, port_type *p);
+port_type *Cyc_io_open_input_string(void *data, object str)
+{
+//  // Allocate port on the heap so the location of mem_buf does not change
+  port_type *p;
+  make_port(sp, NULL, 0);
+
+  Cyc_check_str(data, str);
+  p = (port_type *)Cyc_heap_alloc_port(data, &sp);
+  errno = 0;
+#if CYC_HAVE_FMEMOPEN
+  p->mem_buf = malloc(sizeof(char) * (string_len(str) + 1));
+  p->mem_buf_len = string_len(str);
+  memcpy(p->mem_buf, string_str(str), string_len(str));
+  p->fp = fmemopen(p->mem_buf, string_len(str) + 1, "r");
+#endif
+  if (p->fp == NULL){
+    Cyc_rt_raise2(data, "Unable to open input memory stream", obj_int2obj(errno));
+  }
+  return p;
+}
+
 port_type *Cyc_io_open_output_string(void *data)
 {
   // Allocate port on the heap so the location of mem_buf does not change
@@ -45,7 +64,7 @@ port_type *Cyc_io_open_output_string(void *data)
   p->fp = open_memstream(&(p->mem_buf), &(p->mem_buf_len));
 #endif
   if (p->fp == NULL){
-    Cyc_rt_raise2(data, "Unable to open memory stream", obj_int2obj(errno));
+    Cyc_rt_raise2(data, "Unable to open output memory stream", obj_int2obj(errno));
   }
   return p;
 }
