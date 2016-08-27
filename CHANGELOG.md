@@ -1,5 +1,6 @@
 # Next Release - Date TBD
 
+TODO: bytevector ports
 TODO: SRFI 113, SRFI 117, a way to run tests for all new SRFI's, if possible. may want to port the (chibi test) library to cyclone
 
 Features:
@@ -12,6 +13,7 @@ Features:
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
 - Added ` let-values` and ` let*-values` to `(scheme base)`.
+- Added string ports to `(scheme base)` - `open-input-string`, `open-output-string`, and `get-output-string`.
 - Modified the makefile to also search current working directories for headers and libraries.
 
 Bug Fixes:
