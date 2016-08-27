@@ -15,7 +15,7 @@ Section | Status | Comments
 4.1 Primitive expression types | Partial | `include` and `include-ci` are not implemented, although `include` may be specified as part of a library definition.
 4.2 Derived expression types | Partial | 
 4.2.1 Conditionals | Yes | 
-4.2.2 Binding constructs | Partial | Missing `let-values` and `let*-values`
+4.2.2 Binding constructs | Yes |
 4.2.3 Sequencing | Yes | 
 4.2.4 Iteration | Yes |
 4.2.5 Delayed evaluation | Yes |

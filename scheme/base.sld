@@ -149,6 +149,8 @@
     let
     let*
     letrec
+    let*-values
+    let-values
     begin
     case
     cond
@@ -208,8 +210,6 @@
 ; unclassified TODO's:
 ;    import
 ;    include
-;    let*-values
-;    let-values
 ;    let-syntax
 ;    letrec-syntax
 ;;;;
@@ -1414,6 +1414,30 @@
   (syntax-rules ()
     ((letrec* ((var val) ...) . body)
      (let () (define var val) ... . body))))
+
+(define-syntax let*-values
+  (syntax-rules ()
+    ((let*-values () . body)
+     (begin . body))
+    ((let*-values (((a) expr) . rest) . body)
+     (let ((a expr)) (let*-values rest . body)))
+    ((let*-values ((params expr) . rest) . body)
+     (call-with-values (lambda () expr)
+       (lambda params (let*-values rest . body))))))
+
+(define-syntax let-values
+  (syntax-rules ()
+    ((let-values ("step") (binds ...) bind expr maps () () . body)
+     (let*-values (binds ... (bind expr)) (let maps . body)))
+    ((let-values ("step") (binds ...) bind old-expr maps () ((params expr) . rest) . body)
+     (let-values ("step") (binds ... (bind old-expr)) () expr maps params rest . body))
+    ((let-values ("step") binds (bind ...) expr (maps ...) (x . y) rest . body)
+     (let-values ("step") binds (bind ... tmp) expr (maps ... (x tmp)) y rest . body))
+    ((let-values ("step") binds (bind ...) expr (maps ...) x rest . body)
+     (let-values ("step") binds (bind ... . tmp) expr (maps ... (x tmp)) () rest . body))
+    ((let-values ((params expr) . rest) . body)
+     (let-values ("step") () () expr () params rest . body))
+    ))
 
 (define-syntax guard
   (syntax-rules ()
