@@ -773,11 +773,9 @@
                            (loop (+ i 1) 
                                  (cons (string-ref str i) lst))))))
         (loop start '())))
-    ;; TODO: need to extend string->list to take optional start/end args, 
-    ;; then modify this function to work with optional args, too
     (define (string->vector str . opts)
       (list->vector
-        (string->list str)))
+        (apply string->list (cons str opts))))
     (define (string-copy str . opts)
       (letrec ((len (string-length str))
                (start (if (> (length opts) 0) (car opts) 0))
