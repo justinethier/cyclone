@@ -2,6 +2,7 @@
 
 TODO: pass vector library tests
 TODO: SRFI 113, SRFI 117
+TODO: performance improvements, but those might come in version after the next
 
 Features:
 
