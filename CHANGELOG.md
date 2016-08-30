@@ -1,7 +1,7 @@
 # Next Release - Date TBD
 
-TODO: bytevector ports
-TODO: SRFI 113, SRFI 117, a way to run tests for all new SRFI's, if possible. may want to port the (chibi test) library to cyclone
+TODO: pass vector library tests
+TODO: SRFI 113, SRFI 117
 
 Features:
 
