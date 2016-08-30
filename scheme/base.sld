@@ -827,7 +827,7 @@
                         ((= i end)
                          new-vec)
                         (else
-                           (vector-set! new-vec i (vector-ref vec i))
+                           (vector-set! new-vec (- i start) (vector-ref vec i))
                            (loop (+ i 1) new-vec))))))
         (loop start (make-vector (- end start) #f))))
     ;; TODO: does not quite meet r7rs spec, should check if vectors overlap
