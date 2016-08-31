@@ -925,7 +925,9 @@
             ((eq? (car args) '<param-convert>)
              converter)
            (else
-             (error "bad parameter syntax" args))))))
+             ;(error "bad parameter syntax" args)
+             (set! value (converter (car args)))
+           )))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
     (define current-input-port
