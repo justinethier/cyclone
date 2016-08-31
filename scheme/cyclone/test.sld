@@ -6,6 +6,10 @@
 ;;;;
 (define-library (scheme cyclone test)
   (export
+   warning test-group-inc! print-exception ;; TODO: should not be needed here
+                         ;; must be a problem with referential transparency
+                         ;; because a syntax-rules macro expands into code
+                         ;; that is using these
    test test-equal test-error test-assert test-not test-values
    test-group current-test-group
    test-begin test-end test-syntax-error test-propagate-info

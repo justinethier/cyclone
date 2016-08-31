@@ -139,6 +139,8 @@ bootstrap: icyc
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/test.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/test.meta $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/test.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp srfi/1.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.meta $(BOOTSTRAP_DIR)/srfi
@@ -208,6 +210,7 @@ install:
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
