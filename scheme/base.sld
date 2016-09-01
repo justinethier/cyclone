@@ -1357,7 +1357,7 @@
            (cond
             ((identifier? t)
              (cond
-              ((find (lambda (v) (compare t (car v))) vars)
+              ((find (lambda (v) (eq? t (car v))) vars)
                => (lambda (cell)
                     (if (<= (cdr cell) dim)
                         t
