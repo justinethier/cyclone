@@ -1229,6 +1229,8 @@
                   (vars '())
                   (k (lambda (vars)
                        (list _cons (expand-template tmpl vars) #f))))
+;(Cyc-write (list 'PATTERN p 'vars vars) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
            (let ((v (next-symbol "v.")))
              (list
               _let (list (list v x))
@@ -1354,6 +1356,8 @@
             (else free))))
        (define (expand-template tmpl vars)
          (let lp ((t tmpl) (dim 0))
+;(Cyc-write (list 'TMPL tmpl 'vars vars) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
            (cond
             ((identifier? t)
              (cond
