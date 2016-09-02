@@ -54,7 +54,7 @@ Documentation
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
-- The [Benchmarks](docs/Benchmarks) page compares the performance of Cyclone with other R<sup>7</sup>RS Schemes using a common set of benchmarks.
+- This [Benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other R<sup>7</sup>RS and R<sup>6</sup>RS Schemes using a common set of benchmarks.
 
 - [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler) provides high-level details on how the compiler was written and how it works.
 
