@@ -20,12 +20,16 @@
      (my-let-values ("step") binds (bind ... tmp) expr (maps ... (x tmp)) y rest . body))
     ((my-let-values ("step") binds (bind ...) expr (maps ...) x rest . body)
      (my-let-values ("step") binds (bind ... . tmp) expr (maps ... (x tmp)) () rest . body))
-    ((my-let-values ((params expr) . rest) . body)
-     (my-let-values ("step") () () expr () params rest . body))
+;    ((my-let-values ((params expr) . rest) . body)
+;     (my-let-values ("step") () () expr () params rest . body))
     ))
 
 ;(list
 ;  (my-let-values))
 
 (write
-  (my-let-values (((a b c) (values 1 2 3))) (list a b c)))
+;  (my-let-values (((a b c) (values 1 2 3))) (list a b c)))
+  (my-let-values ("step") () () (values 1 2 3) () (a b c) () (list a b c)))
+;   (my-let-values ("step") () (tmp) (values 1 2 3) (((a b c) tmp)) () () (list a b c)))
+;   (my-let-values ("step") () tmp (values 1 2 3) (((a b c) tmp)) () () (list a b c)))
+;   (my-let-values ("step") () (tmp tmp tmp . tmp) (values 1 2 3) ((a tmp) (b tmp) (c tmp) (() tmp)) () () (list a b c)))
