@@ -1356,10 +1356,14 @@
             (else free))))
        (define (expand-template tmpl vars)
          (let lp ((t tmpl) (dim 0))
-;(Cyc-write (list 'TMPL tmpl 'vars vars) (current-output-port))
+;(Cyc-write (list 't t) (current-output-port))
+;(Cyc-display "\n" (current-output-port))
+;(Cyc-write (list 'vars vars 'TMPL tmpl ) (current-output-port))
 ;(Cyc-display "\n"  (current-output-port))
            (cond
             ((identifier? t)
+;(Cyc-write (list 't t 'vars vars) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
              (cond
               ((find (lambda (v) (eq? t (car v))) vars)
                => (lambda (cell)
