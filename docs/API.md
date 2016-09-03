@@ -26,6 +26,9 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 - [`srfi 18`](api/srfi/18.md) - [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
 - [`srfi 27`](api/srfi/27.md) - [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
 - [`srfi 69`](api/srfi/69.md) - [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
+- [`srfi 111`](api/srfi/111.md) - [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
+- [`srfi 132`](api/srfi/132.md) - [Sort Libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
+- [`srfi 133`](api/srfi/133.md) - [Vector Library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
 
 # Cyclone-specific
 
