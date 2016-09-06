@@ -1,24 +1,5 @@
 ;;;; Implementation of list-queue SRFI
 
-;;; R7RS shims.  Comment these out on an R7RS system.
-;;; I stole this code from Chibi Scheme, which is BSD-licensed.
-
-(define (make-list n . o)
-  (let ((default (if (pair? o) (car o))))
-    (let lp ((n n) (res '()))
-      (if (<= n 0) res (lp (- n 1) (cons default res))))))
-
-(define (list-copy ls)
-  (let lp ((ls ls) (res '()))
-    (if (pair? ls)
-        (lp (cdr ls) (cons (car ls) res))
-        (append (reverse res) ls))))
-
-(define (list-set! ls k x)
-  (cond ((null? ls) (error "invalid list index"))
-        ((zero? k) (set-car! ls x))
-        (else (list-set! (cdr ls) (- k 1) x))))
-
 ;;; This definition is from Chibi's SRFI-1 implementation.
 
 (define (last-pair ls) (if (null? (cdr ls)) ls (last-pair (cdr ls))))
