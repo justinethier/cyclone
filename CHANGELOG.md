@@ -14,6 +14,7 @@ Features:
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
 - Added ` let-values` and ` let*-values` to `(scheme base)`.
+- Added `infinite?`, `finite?`, and `nan?` to `(scheme inexact)`.
 - Added string ports to `(scheme base)` - `open-input-string`, `open-output-string`, and `get-output-string`.
 - Added bytevector ports to `(scheme base)` - `get-output-bytevector`, `open-input-bytevector`, and `open-output-bytevector`.
 - Modified the makefile to also search current working directories for headers and libraries.
