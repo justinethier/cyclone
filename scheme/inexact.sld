@@ -13,15 +13,45 @@
     atan 
     cos
     exp 
-    ;finite?
-    ;infinite? 
+    finite?
+    infinite? 
     log
-    ;nan? 
+    nan? 
     sin
     sqrt 
     tan
   )
   (begin
+    (define-c nan?
+      "(void *data, int argc, closure _, object k, object z)"
+      " Cyc_check_num(data, z);
+        if (obj_is_int(z) || 
+            type_of(z) == integer_tag ||
+            !isnan(((double_type *)z)->value)) 
+        {
+          return_closcall1(data, k, boolean_f);
+        }
+        return_closcall1(data, k, boolean_t);")
+    (define-c infinite?
+      "(void *data, int argc, closure _, object k, object z)"
+      " Cyc_check_num(data, z);
+        if (obj_is_int(z) || 
+            type_of(z) == integer_tag ||
+            !isinf(((double_type *)z)->value)) 
+        {
+          return_closcall1(data, k, boolean_f);
+        }
+        return_closcall1(data, k, boolean_t);")
+    (define-c finite?
+      "(void *data, int argc, closure _, object k, object z)"
+      " Cyc_check_num(data, z);
+        if (obj_is_int(z) || 
+            type_of(z) == integer_tag ||
+            !isfinite(((double_type *)z)->value)) 
+        {
+          return_closcall1(data, k, boolean_f);
+        }
+        return_closcall1(data, k, boolean_t);")
     (define-c acos
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, acos, z);")
