@@ -1,7 +1,6 @@
 # Next Release - Date TBD
 
-TODO: pass vector library tests
-TODO: SRFI 113, SRFI 117
+TODO: SRFI 113
 TODO: performance improvements, but those might come in version after the next
 
 Features:
@@ -10,6 +9,7 @@ Features:
     - SRFI 1 list library
     - SRFI 133 vector library
     - SRFI 111 boxes
+    - SRFI 117 mutable queues
     - SRFI 132 sorting library
 - Added SRFI 2, `and-let*`
 - Added `parameterize` from section 4.2.6 of R7RS to the `(scheme base)` library.
