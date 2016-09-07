@@ -1,7 +1,8 @@
-(cond-expand
-  (chicken (use test srfi-117))
-  (chibi (import (chibi test) (list-queues)))
-)
+(import (scheme base) (scheme cyclone test) (srfi 117))
+;(cond-expand
+;  (chicken (use test srfi-117))
+;  (chibi (import (chibi test) (list-queues)))
+;)
 
 (test-group "list-queues"
 
@@ -66,9 +67,13 @@
   (define d (list 1 2 3))
   (define e (cddr d))
   (define f (make-list-queue d e))
-  (define-values (dx ex) (list-queue-first-last f))
-  (test-assert (eq? d dx))
-  (test-assert (eq? e ex))
+  ; JAE - replaced define-values since cyclone does not support it yet
+  (let*-values (((dx ex) (list-queue-first-last f)))
+    (test-assert (eq? d dx))
+    (test-assert (eq? e ex)))
+  ;(define-values (dx ex) (list-queue-first-last f))
+  ;(test-assert (eq? d dx))
+  ;(test-assert (eq? e ex))
   (test '(1 2 3) (list-queue-list f))
   (list-queue-add-front! f 0)
   (list-queue-add-back! f 4)
