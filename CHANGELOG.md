@@ -5,7 +5,7 @@ TODO: performance improvements
 TODO: SRFI 113, 128
 TODO: macro improvements (ref trans.) to support SRFI 128 and `let-values`
 
-# 0.2 - Date TBD
+# 0.2 - September 7, 2016
 
 Features:
 
