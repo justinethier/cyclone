@@ -196,8 +196,6 @@ install-bin:
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
 
-# TODO: rewrite install to be in terms of incremental steps above.
-#       also want to propagate this change to cyclone-bootstrap
 install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
