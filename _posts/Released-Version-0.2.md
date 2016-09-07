@@ -1,14 +1,16 @@
 ---
 layout: post
-title: Released Version 0.2
-excerpt: Release of Cyclone Scheme version 0.2
+title: Released Cyclone Scheme 0.2
+excerpt: Cyclone Scheme 0.2 is now available.
 ---
 
-Today version 0.2 of the Cyclone Scheme-to-C compiler has been released: 
+Cyclone Scheme 0.2 is now available:
 
 [http://justinethier.github.io/cyclone/](http://justinethier.github.io/cyclone/)
 
-New features:
+Cyclone consists of a compiler and interpreter targeting as well as written in R7RS Scheme. A garbage collector inspired by Cheney on the M.T.A. is also provided, with support for native threads. 
+
+New features in this release:
 
 - Added the following libraries from R7RS-large red edition (data structures):
     - SRFI 1 list library
@@ -38,8 +40,6 @@ Bug fixes:
 - Fixed `apply` to use the proper semantics when receiving more than one data argument.
 - Changed the `assoc` and `member` functions to accept an optional comparison function, and modified both families of functions to be native Scheme functions instead of C primitives.
 - Allow libraries to contain multiple `import`, `begin`, and `export` sections.
-
-Cyclone consists of a compiler and interpreter written entirely in R7RS Scheme, as well as a C runtime. A large portion of the R7RS is supported including libraries, exceptions, continuations, and macros. 
 
 Thanks, 
 
