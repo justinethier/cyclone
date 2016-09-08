@@ -21,7 +21,7 @@ Features:
 - Added `infinite?`, `finite?`, and `nan?` to `(scheme inexact)`.
 - Added string ports to `(scheme base)` - `open-input-string`, `open-output-string`, and `get-output-string`.
 - Added bytevector ports to `(scheme base)` - `get-output-bytevector`, `open-input-bytevector`, and `open-output-bytevector`.
-- Modified the makefile to also search current working directories for headers and libraries.
+- Modified `cyclone` to also search the current working directory for built-in headers and libraries.
 
 Bug Fixes:
 
