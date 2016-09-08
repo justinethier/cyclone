@@ -151,6 +151,7 @@ bootstrap: icyc
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/117.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/list-queues/*.scm $(BOOTSTRAP_DIR)/srfi/list-queues
 	cp srfi/sorting/*.scm $(BOOTSTRAP_DIR)/srfi/sorting
