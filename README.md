@@ -2,7 +2,7 @@
 
 Cyclone is a brand-new Scheme-to-C compiler that uses [Cheney on the MTA](http://www.pipeline.com/~hbaker1/CheneyMTA.html) to implement full tail recursion, continuations, and generational garbage collection. In addition, Cyclone extends the Cheney on the MTA concept to allow execution of multiple native threads. An on-the-fly garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
 
-Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard. A large portion of the language is supported and the goal is for Cyclone to allow the practical development of applications using R<sup>7</sup>RS.
+Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard. A large portion of the language is supported and the goal is for Cyclone to allow practical development of applications using R<sup>7</sup>RS.
 
 Getting Started
 ---------------
