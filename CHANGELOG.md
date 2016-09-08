@@ -1,7 +1,11 @@
-# Next Release - Date TBD
+# Next Release (tentatively 0.2.1) - Date TBD
 
-TODO: SRFI 113
-TODO: performance improvements, but those might come in version after the next
+TODO: performance improvements
+      need to improve both runtime speed and compiler optimizations
+TODO: SRFI 113, 128
+TODO: macro improvements (ref trans.) to support SRFI 128 and `let-values`
+
+# 0.2 - Date TBD
 
 Features:
 
