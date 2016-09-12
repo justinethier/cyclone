@@ -38,6 +38,12 @@
     env:_lookup-variable-value 
     env:set-variable-value! 
     env:define-variable! 
+    ;; Syntactic closures
+    make-syntactic-closure
+    strip-syntactic-closures
+    identifier->symbol
+    identifier?
+    identifier=?
     ;; ER macro supporting functions
     Cyc-er-rename
     Cyc-er-compare?
@@ -380,6 +386,15 @@
           (env:frame-values frame))))
 ;;;; END Environments
 
+
+;;;; Syntactic closures
+
+;; TODO: use vectors in the short term?
+; TODO: make-syntactic-closure
+; TODO: strip-syntactic-closures
+; TODO: identifier->symbol
+; TODO: identifier?
+; TODO: identifier=?
 
 ;;; Explicit renaming macros
 
