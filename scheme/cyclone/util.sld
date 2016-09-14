@@ -423,7 +423,6 @@
 ;;; Explicit renaming macros
 
 ;; ER macro rename function, based on code from Chibi scheme
-(define (Cyc-er-rename mac-env)
 ;  (lambda (sym) sym)) ; TODO: temporary placeholder, see below
 
 ;TODO: I think we're ready to cut back over to this now?
@@ -465,8 +464,11 @@
 ;    a new lambda scope is introduced?
 ;  - need to keep track of it for compiled macro expansion
 ;
+(define (Cyc-er-rename use-env mac-env)
   ((lambda (renames)
      (lambda (identifier)
+;(Cyc-write `(ER rename ,identifier) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
        ((lambda (cell)
           (if cell
               (cdr cell)
@@ -508,10 +510,11 @@
      (begin . begin) ;; TODO: just a quick-fix, not a long-term solution
     )))
 
-(define (Cyc-er-compare? a b)
+(define (Cyc-er-compare? use-env)
   ;; TODO: this is not good enough, need to determine if these symbols
   ;; are the same identifier in their *environment of use*
-  (eq? a b))
+  (lambda (a b)
+    (eq? a b)))
 
 ;; Name-mangling.
 

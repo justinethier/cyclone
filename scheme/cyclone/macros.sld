@@ -66,15 +66,15 @@
             (compiled-macro?
               ((Cyc-get-cvar (cadr macro))
                 exp
-                (Cyc-er-rename mac-env)
-                Cyc-er-compare?))
+                (Cyc-er-rename mac-env mac-env) ;; TODO: use-env
+                (Cyc-er-compare? mac-env))) ;; TODO: wrong env (?)
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
-                  (Cyc-er-rename mac-env)
-                  Cyc-er-compare?)
+                  (Cyc-er-rename mac-env mac-env)
+                  (Cyc-er-compare? mac-env))
                 mac-env)))))
 
     ; TODO: get macro name, transformer

@@ -440,16 +440,16 @@
                ;; Compiled macro, call directly
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
-                                    (Cyc-er-rename a-env)
-                                    Cyc-er-compare?)) 
+                                    (Cyc-er-rename a-env a-env)
+                                    (Cyc-er-compare? a-env))) 
                         a-env)
                ;; Interpreted macro, build expression and eval
                (let ((expr (cons macro-op 
                              (list (cons 'quote 
                                          (list (cons (car exp) 
                                                      (operands exp))))
-                                   (Cyc-er-rename a-env)
-                                   Cyc-er-compare?))))
+                                   (Cyc-er-rename a-env a-env)
+                                   (Cyc-er-compare? a-env)))))
                  (analyze
                    (eval expr a-env) ;; Expand macro
                    a-env))))))
