@@ -1194,6 +1194,8 @@
 (define-syntax syntax-rules
   (er-macro-transformer
    (lambda (expr rename compare)
+;(Cyc-write `(syntax-rules expand ,expr) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
      (let ((ellipsis-specified? (identifier? (cadr expr)))
            (count 0)
            (_er-macro-transformer (rename 'er-macro-transformer))
@@ -1412,6 +1414,10 @@
        (list
         _er-macro-transformer
         (list _lambda (list _expr _rename _compare)
+;(Cyc-write `(syntax-rules expand ,_expr) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
+;(list 'Cyc-write (list 'syntax-rules 'expand _expr) (list 'current-output-port))
+;(list 'Cyc-display "\n"  (list 'current-output-port))
               (list
                _car
                (cons

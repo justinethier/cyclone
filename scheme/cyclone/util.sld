@@ -404,6 +404,7 @@
   ;; TODO: what if expr is a syn closure?
   (make-sc env free-names expr))
 (define (strip-syntactic-closures expr)
+  ;; TODO: no, recursively traverse form and replace the sc's
   (identifier->symbol expr))
 (define (identifier? expr)
   (or (symbol? expr)
