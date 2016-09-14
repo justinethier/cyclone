@@ -951,27 +951,6 @@ object Cyc_heap_alloc_port(void *data, port_type *stack_p)
   return p;
 }
 
-// TODO: should not be a predicate, may end up moving these to Scheme code
-object memberp(void *data, object x, list l)
-{
-  Cyc_check_pair_or_null(data, l);
-  for (; l != NULL; l = cdr(l)) {
-    if (boolean_f != equalp(x, car(l)))
-      return boolean_t;
-  }
-  return boolean_f;
-}
-
-object memqp(void *data, object x, list l)
-{
-  Cyc_check_pair_or_null(data, l);
-  for (; l != NULL; l = cdr(l)) {
-    if ((x == car(l)))
-      return boolean_t;
-  }
-  return boolean_f;
-}
-
 /**
  * Check two objects for deep equality
  */
@@ -1031,32 +1010,6 @@ object equalp(object x, object y)
     slow_lis = cdr(slow_lis);
     fast_lis = cddr(fast_lis);
   }
-}
-
-list assq(void *data, object x, list l)
-{
-  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
-    return boolean_f;
-  for (; (l != NULL); l = cdr(l)) {
-    list la = car(l);
-    Cyc_check_pair(data, la);
-    if ((x == car(la)))
-      return la;
-  }
-  return boolean_f;
-}
-
-list assoc(void *data, object x, list l)
-{
-  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
-    return boolean_f;
-  for (; (l != NULL); l = cdr(l)) {
-    list la = car(l);
-    Cyc_check_pair(data, la);
-    if (boolean_f != equalp(x, car(la)))
-      return la;
-  }
-  return boolean_f;
 }
 
 object Cyc_num_cmp_va_list(void *data, int argc,
@@ -3178,42 +3131,6 @@ void _apply(void *data, object cont, object args)
   dispatch(data, obj_obj2int(argc), (function_type)dispatch_apply_va, cont, cont, args);
 }
 
-void _assoc(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "assoc ", 2, args);
-  return_closcall1(data, cont, assoc(data, car(args), cadr(args)));
-}
-
-void _assq(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "assq  ", 2, args);
-  return_closcall1(data, cont, assq(data, car(args), cadr(args)));
-}
-
-void _assv(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "assv  ", 2, args);
-  return_closcall1(data, cont, assq(data, car(args), cadr(args)));
-}
-
-void _member(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "member", 2, args);
-  return_closcall1(data, cont, memberp(data, car(args), cadr(args)));
-}
-
-void _memq(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "memq", 2, args);
-  return_closcall1(data, cont, memqp(data, car(args), cadr(args)));
-}
-
-void _memv(void *data, object cont, object args)
-{
-  Cyc_check_num_args(data, "memv", 2, args);
-  return_closcall1(data, cont, memqp(data, car(args), cadr(args)));
-}
-
 void _char_91_125integer(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "char->integer", 1, args);
@@ -4120,14 +4037,6 @@ static primitive_type eqv_127_primitive =
     { {0}, primitive_tag, "eqv?", &_eqv_127 };
 static primitive_type equal_127_primitive =
     { {0}, primitive_tag, "equal?", &_equal_127 };
-static primitive_type assoc_primitive =
-    { {0}, primitive_tag, "assoc", &_assoc };
-static primitive_type assq_primitive = { {0}, primitive_tag, "assq", &_assq };
-static primitive_type assv_primitive = { {0}, primitive_tag, "assv", &_assv };
-static primitive_type member_primitive =
-    { {0}, primitive_tag, "member", &_member };
-static primitive_type memq_primitive = { {0}, primitive_tag, "memq", &_memq };
-static primitive_type memv_primitive = { {0}, primitive_tag, "memv", &_memv };
 static primitive_type length_primitive =
     { {0}, primitive_tag, "length", &_length };
 static primitive_type bytevector_91length_primitive =
@@ -4351,12 +4260,6 @@ const object primitive_cell = &cell_primitive;
 const object primitive_eq_127 = &eq_127_primitive;
 const object primitive_eqv_127 = &eqv_127_primitive;
 const object primitive_equal_127 = &equal_127_primitive;
-const object primitive_assoc = &assoc_primitive;
-const object primitive_assq = &assq_primitive;
-const object primitive_assv = &assv_primitive;
-const object primitive_member = &member_primitive;
-const object primitive_memq = &memq_primitive;
-const object primitive_memv = &memv_primitive;
 const object primitive_length = &length_primitive;
 const object primitive_bytevector_91length = &bytevector_91length_primitive;
 const object primitive_vector_91length = &vector_91length_primitive;

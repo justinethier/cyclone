@@ -263,11 +263,7 @@ object Cyc_num_op_va_list(void *data, int argc,
                           int default_no_args, int default_one_arg, object n,
                           va_list ns, common_type * buf);
 int equal(object, object);
-list assq(void *, object, list);
-list assoc(void *, object x, list l);
 object equalp(object, object);
-object memberp(void *, object, list);
-object memqp(void *, object, list);
 
 object Cyc_spawn_thread(object thunk);
 void Cyc_start_trampoline(gc_thread_data * thd);
@@ -332,12 +328,6 @@ extern const object primitive_cell;
 extern const object primitive_eq_127;
 extern const object primitive_eqv_127;
 extern const object primitive_equal_127;
-extern const object primitive_assoc;
-extern const object primitive_assq;
-extern const object primitive_assv;
-extern const object primitive_member;
-extern const object primitive_memq;
-extern const object primitive_memv;
 extern const object primitive_length;
 extern const object primitive_vector_91length;
 extern const object primitive_bytevector_91length;
