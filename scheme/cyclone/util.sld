@@ -388,13 +388,36 @@
 
 
 ;;;; Syntactic closures
+;;
+;; For now, we are implementing a limited form of SC that only accepts
+;; a symbol as the expression. This is good enough for explicit renaming
+;; macros, but more work is needed if we ever wanted to have a stand alone
+;; syntactic closures macro system.
 
-;; TODO: use vectors in the short term?
-; TODO: make-syntactic-closure
-; TODO: strip-syntactic-closures
-; TODO: identifier->symbol
-; TODO: identifier?
-; TODO: identifier=?
+(define-record-type <syn-clo>
+  (make-sc env free-names expr)
+  sc?
+  (env sc-env)
+  (free-names sc-free-names)
+  (expr sc-expr))
+(define (make-syntactic-closure env free-names expr)
+  ;; TODO: what if expr is a syn closure?
+  (make-sc env free-names expr))
+(define (strip-syntactic-closures expr)
+  (identifier->symbol expr))
+(define (identifier? expr)
+  (or (symbol? expr)
+      (sc? expr)))
+(define (identifier->symbol id)
+  (cond
+    ((sc? id) (sc-expr id))
+    ((symbol? id) id)
+    (else
+      (error "Invalid parameter to identifier->symbol" id))))
+(define (identifier=? env1 id1 env2 id2)
+  (let ((val1 (env:lookup (identifier->symbol id1) env1 #f))
+        (val2 (env:lookup (identifier->symbol id2) env2 #f)))
+    (eq? val1 val2)))
 
 ;;; Explicit renaming macros
 
