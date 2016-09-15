@@ -483,11 +483,11 @@
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
                       renamed))
-                   #;((not (eq? val 'not-defined))
+                   #;((eq? val 'not-defined)
                      ;; Unrenamed variable identifier
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
-                       (env:define-variable! renamed val mac-env)
+                       ;(env:define-variable! renamed val mac-env)
 (Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
 (Cyc-display "\n"  (current-output-port))
                        renamed)
@@ -524,7 +524,11 @@
   ;; TODO: this is not good enough, need to determine if these symbols
   ;; are the same identifier in their *environment of use*
   (lambda (a b)
-    (eq? a b)))
+    (let ((aval (env:lookup a use-env #f))
+          (bval (env:lookup b use-env #f)))
+      (if (and aval bval)
+          (eq? aval bval)
+          (eq? a b)))))
 
 ;; Name-mangling.
 

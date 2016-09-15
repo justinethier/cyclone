@@ -13,7 +13,7 @@
     ;(scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
-    ;(scheme write) ;; Only used for debugging
+    (scheme write) ;; Only used for debugging
     (scheme read))
   (export
     ;environment
@@ -341,7 +341,7 @@
 (define (analyze exp env)
 ;(newline)
 ;(display "/* ")
-;(display (list 'analyze exp))
+;(write (list 'analyze exp))
 ;(display " */")
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
@@ -436,20 +436,21 @@
                   #f))
          (expand 
            (lambda (macro-op)
+             (define use-env (env:extend-environment '() '() '()))
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
-                                    (Cyc-er-rename a-env a-env)
-                                    (Cyc-er-compare? a-env))) 
+                                    (Cyc-er-rename use-env a-env)
+                                    (Cyc-er-compare? use-env))) 
                         a-env)
                ;; Interpreted macro, build expression and eval
                (let ((expr (cons macro-op 
                              (list (cons 'quote 
                                          (list (cons (car exp) 
                                                      (operands exp))))
-                                   (Cyc-er-rename a-env a-env)
-                                   (Cyc-er-compare? a-env)))))
+                                   (Cyc-er-rename use-env a-env)
+                                   (Cyc-er-compare? use-env)))))
                  (analyze
                    (eval expr a-env) ;; Expand macro
                    a-env))))))
