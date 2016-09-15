@@ -10,16 +10,32 @@
 ;     (call-with-values (lambda () expr)
 ;       (lambda params (let*-values rest . body))))))
 
+;; From http://okmij.org/ftp/Scheme/macros.html
+(define-syntax mtrace
+  (syntax-rules ()
+    ((mtrace x)
+     (begin 
+      (display "Trace: ") (write 'x) (newline)
+      x))))
+
 (define-syntax my-let-values
   (syntax-rules ()
     ((my-let-values ("step") (binds ...) bind expr maps () () . body)
+     (mtrace
      (let*-values (binds ... (bind expr)) (let maps . body)))
+     )
     ((my-let-values ("step") (binds ...) bind old-expr maps () ((params expr) . rest) . body)
+     (mtrace
      (my-let-values ("step") (binds ... (bind old-expr)) () expr maps params rest . body))
+     )
     ((my-let-values ("step") binds (bind ...) expr (maps ...) (x . y) rest . body)
+     (mtrace
      (my-let-values ("step") binds (bind ... tmp) expr (maps ... (x tmp)) y rest . body))
+     )
     ((my-let-values ("step") binds (bind ...) expr (maps ...) x rest . body)
+     (mtrace
      (my-let-values ("step") binds (bind ... . tmp) expr (maps ... (x tmp)) () rest . body))
+     )
 ;    ((my-let-values ((params expr) . rest) . body)
 ;     (my-let-values ("step") () () expr () params rest . body))
     ))
