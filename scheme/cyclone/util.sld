@@ -487,7 +487,7 @@
                      ;; Unrenamed variable identifier
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
-;                       (env:define-variable! renamed identifier mac-env) ;; TODO: renamed val?
+                       (env:define-variable! renamed val mac-env)
 (Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
 (Cyc-display "\n"  (current-output-port))
                        renamed)
