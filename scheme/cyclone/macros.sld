@@ -101,6 +101,11 @@
 
     (define (macro:cleanup expr)
       (define (clean expr bv) ;; Bound variables
+(newline)
+(display "/* macro:cleanup->clean\n ")
+(write expr)
+(newline)
+(display "*/ ")
          (cond 
            ((const? expr)      expr)
            ;((prim? expr)       expr)
@@ -141,8 +146,8 @@
             (map (lambda (e) (clean e bv)) 
                  expr))
            (else
-            (error "macro cleanup unexpected expression: " expr)))
-      (clean expr '())))
+            (error "macro cleanup unexpected expression: " expr))))
+      (clean expr '()))
       
     ; TODO: get macro name, transformer
     ; TODO: let-syntax forms
