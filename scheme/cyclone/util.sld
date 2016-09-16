@@ -476,15 +476,20 @@
                  (set! renames (cons (cons identifier name) renames))
                  name)
 
+;; TODO: rename variables in use-env. do we need a cleanup env as well?
                (let ((val (env:lookup identifier mac-env 'not-defined)))
                  (cond
-                   ((or (not (tagged-list? 'macro val)) ;; TODO: For now only rename macros, but should support anything
-                        (eq? val 'not-defined))
-                    identifier)
-                   (else
+                   ((tagged-list? 'macro val)
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
-                      renamed))))
+                      renamed))
+                   (else
+                     ;; Unrenamed variable identifier
+                     (let ((renamed (gensym identifier)))
+                       (env:define-variable! renamed identifier use-env)
+                       renamed)
+                     identifier ;; TESTING!
+                     )))
                ; 
                ;(gensym identifier)
                ; gensym not good enough, need to also preserve ref trans.

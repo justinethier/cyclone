@@ -52,7 +52,8 @@
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
     (define (macro:expand exp macro mac-env)
-      (let* ((compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
+      (let* ((use-env (env:extend-environment '() '() '()))
+             (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro)))))
         ;(newline)
         ;(display "/* ")
@@ -66,15 +67,15 @@
             (compiled-macro?
               ((Cyc-get-cvar (cadr macro))
                 exp
-                (Cyc-er-rename mac-env mac-env) ;; TODO: use-env
-                (Cyc-er-compare? mac-env))) ;; TODO: wrong env (?)
+                (Cyc-er-rename use-env mac-env)
+                (Cyc-er-compare? use-env)))
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
-                  (Cyc-er-rename mac-env mac-env)
-                  (Cyc-er-compare? mac-env))
+                  (Cyc-er-rename use-env mac-env)
+                  (Cyc-er-compare? use-env))
                 mac-env)))))
 
     ; TODO: get macro name, transformer
