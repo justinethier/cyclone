@@ -8,7 +8,7 @@
 ;;;;
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          ;(scheme write) ;; Debug only
+          (scheme write) ;; Debug only
           (scheme eval)
           (scheme cyclone util)
   )
@@ -54,13 +54,15 @@
     (define (macro:expand exp macro mac-env)
       (let* ((use-env (env:extend-environment '() '() '()))
              (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
-                                  (procedure? (cadr macro)))))
+                                  (procedure? (cadr macro))))
+             (result #f))
         ;(newline)
         ;(display "/* ")
         ;(display (list 'macro:expand exp macro compiled-macro?))
         ;(display "*/ ")
 
           ;; Invoke ER macro
+        (set! result
           (cond
             ((not macro)
               (error "macro not found" exp))
@@ -76,7 +78,14 @@
                   (list 'quote exp)
                   (Cyc-er-rename use-env mac-env)
                   (Cyc-er-compare? use-env))
-                mac-env)))))
+                mac-env))))
+;        (newline)
+;        (display "/* ")
+;        (display (list 'macro:expand exp macro compiled-macro?))
+;        (newline)
+;        (display (list result))
+;        (display "*/ ")
+          result))
 
     ; TODO: get macro name, transformer
     ; TODO: let-syntax forms

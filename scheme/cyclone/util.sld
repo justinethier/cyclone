@@ -483,13 +483,18 @@
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
                       renamed))
-                   (else
+                   #;((not (eq? val 'not-defined))
                      ;; Unrenamed variable identifier
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
+;                       (env:define-variable! renamed identifier mac-env) ;; TODO: renamed val?
+(Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
+(Cyc-display "\n"  (current-output-port))
                        renamed)
-                     identifier ;; TESTING!
-                     )))
+                     ;identifier ;; TESTING!
+                   )
+                   (else
+                     identifier)))
                ; 
                ;(gensym identifier)
                ; gensym not good enough, need to also preserve ref trans.
