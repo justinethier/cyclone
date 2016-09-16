@@ -99,17 +99,20 @@
           (env:all-values env)
           *macro:renamed-variables*)))
 
-    #;(define (macro:cleanup expr)
+    (define (macro:cleanup expr)
       (define (clean expr bv) ;; Bound variables
          (cond 
            ((const? expr)      expr)
-           ((prim? expr)       expr)
+           ;((prim? expr)       expr)
            ((quote? expr)      expr)
            ((define-c? expr)   expr)
            ((ref? expr)        
-            ;; TODO: if symbol has been renamed and is not a bound variable,
-            ;;       undo the rename
-            expr)
+            ;; if symbol has been renamed and is not a bound variable,
+            ;; undo the rename
+            (let ((val (env:lookup expr *macro:renamed-variables* #f)))
+              (if (and val (not (member val bv)))
+                  (clean val bv)
+                  expr)))
            ((if? expr)
             `(if ,(clean (if->condition expr) bv)
                  ,(clean (if->then expr) bv)
