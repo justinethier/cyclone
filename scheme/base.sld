@@ -216,7 +216,8 @@
       (cons 
         'cyclone
         (cons
-          (string->symbol *version-number*)
+          (string->symbol 
+            (string-append "version-" *version-number*))
           '(r7rs 
             ieee-float
             posix))))
