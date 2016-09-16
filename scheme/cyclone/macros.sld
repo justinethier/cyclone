@@ -17,6 +17,7 @@
     macro:macro?
     macro:expand
     macro:add!
+    macro:cleanup
     macro:load-env!
     macro:get-env
     macro:get-defined-macros

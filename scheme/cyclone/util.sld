@@ -20,6 +20,7 @@
     lambda-formals->list
     lambda-varargs?
     lambda->formals
+    lambda->exp 
     lambda-formals-type
     lambda-varargs-var
     pack-lambda-arguments
@@ -199,6 +200,10 @@
 ; lambda->formals : lambda-exp -> list[symbol]
 (define (lambda->formals exp)
   (cadr exp))
+
+; lambda->exp : lambda-exp -> exp
+(define (lambda->exp exp)
+  (cddr exp)) ;; JAE - changed from caddr, so we can handle multiple expressions
 
 (define (lambda-varargs-var exp)
   (if (lambda-varargs? exp)

@@ -63,7 +63,6 @@
     ast:lambda-formals->list
     list->lambda-formals 
     list->pair 
-    lambda->exp 
     app->fun 
     app->args 
     precompute-prim-app? 
@@ -326,10 +325,6 @@
      (car lst))
     (else
      (cons (car lst) (loop (cdr lst)))))))
-
-; lambda->exp : lambda-exp -> exp
-(define (lambda->exp exp)
-  (cddr exp)) ;; JAE - changed from caddr, so we can handle multiple expressions
 
 ; app->fun : app-exp -> exp
 (define (app->fun exp)
