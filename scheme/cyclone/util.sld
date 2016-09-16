@@ -23,23 +23,21 @@
     lambda-formals-type
     lambda-varargs-var
     pack-lambda-arguments
-;; TODO:
-;    if->condition 
-;    if->then 
-;    if-else? 
-;    if->else 
-;    const? 
-;    ref? 
-;    quote? 
-;    define-c?
-;    set!? 
-;    set!->var 
-;    set!->exp 
-;    define? 
-;    define->var 
-;    define->exp 
-;    app?
-
+    if->condition 
+    if->then 
+    if-else? 
+    if->else 
+    const? 
+    ref? 
+    quote? 
+    define-c?
+    set!? 
+    set!->var 
+    set!->exp 
+    define? 
+    define->var 
+    define->exp 
+    app?
     ;; Environments
     env:enclosing-environment
     env:first-frame
@@ -99,104 +97,96 @@
 (define (lambda? exp)
   (tagged-list? 'lambda exp))
 
+; if->condition : if-exp -> exp
+(define (if->condition exp)
+  (cadr exp))
 
+; if->then : if-exp -> exp
+(define (if->then exp)
+  (caddr exp))
 
+;; if-else? : if-exp -> bool
+;; Determines whether an if expression has an else clause
+(define (if-else? exp)
+  (and (tagged-list? 'if exp)
+       (> (length exp) 3)))
 
-;
-;
-;; if->condition : if-exp -> exp
-;(define (if->condition exp)
-;  (cadr exp))
-;
-;; if->then : if-exp -> exp
-;(define (if->then exp)
-;  (caddr exp))
-;
-;;; if-else? : if-exp -> bool
-;;; Determines whether an if expression has an else clause
-;(define (if-else? exp)
-;  (and (tagged-list? 'if exp)
-;       (> (length exp) 3)))
-;
-;; if->else : if-exp -> exp
-;(define (if->else exp)
-;  (cadddr exp))
-;
-;; app? : exp -> boolean
-;(define (app? exp)
-;  (pair? exp))
-;
-;; const? : exp -> boolean
-;(define (const? exp)
-;  (or (integer? exp)
-;      (real? exp)
-;      (string? exp)
-;      (vector? exp)
-;      (bytevector? exp)
-;      (char? exp)
-;      (boolean? exp)))
-;
-;; ref? : exp -> boolean
-;(define (ref? exp)
-;  (symbol? exp))
-;
-;; quote? : exp -> boolean
-;(define (quote? exp)
-;  (tagged-list? 'quote exp))
-;
-;; set! : exp -> boolean
-;(define (set!? exp)
-;  (tagged-list? 'set! exp))
-;
-;; set!->var : set!-exp -> var
-;(define (set!->var exp)
-;  (cadr exp))
-;
-;; set!->exp : set!-exp -> exp
-;(define (set!->exp exp)
-;  (caddr exp))
-;
-;; define : exp -> boolean
-;(define (define? exp)
-;  (tagged-list? 'define exp))
-;
-;(define (define-lambda? exp)
-;  (let ((var (cadr exp)))
-;    (or
-;      ;; Standard function
-;      (and (list? var) 
-;           (> (length var) 0)
-;           (symbol? (car var)))
-;      ;; Varargs function
-;      (and (pair? var)
-;           (symbol? (car var))))))
-;
-;(define (define->lambda exp)
-;  (cond
-;    ((define-lambda? exp)
-;     (let ((var (caadr exp))
-;           (args (cdadr exp))
-;           (body (cddr exp)))
-;       `(define ,var (lambda ,args ,@body))))
-;    (else exp)))
-;
-;; define->var : define-exp -> var
-;(define (define->var exp)
-;  (cond
-;    ((define-lambda? exp)
-;     (caadr exp))
-;    (else 
-;     (cadr exp))))
-;
-;; define->exp : define-exp -> exp
-;(define (define->exp exp)
-;  (cddr exp))
-;
-;(define (define-c? exp)
-;  (tagged-list? 'define-c exp))
+; if->else : if-exp -> exp
+(define (if->else exp)
+  (cadddr exp))
 
+; app? : exp -> boolean
+(define (app? exp)
+  (pair? exp))
 
+; const? : exp -> boolean
+(define (const? exp)
+  (or (integer? exp)
+      (real? exp)
+      (string? exp)
+      (vector? exp)
+      (bytevector? exp)
+      (char? exp)
+      (boolean? exp)))
 
+; ref? : exp -> boolean
+(define (ref? exp)
+  (symbol? exp))
+
+; quote? : exp -> boolean
+(define (quote? exp)
+  (tagged-list? 'quote exp))
+
+; set! : exp -> boolean
+(define (set!? exp)
+  (tagged-list? 'set! exp))
+
+; set!->var : set!-exp -> var
+(define (set!->var exp)
+  (cadr exp))
+
+; set!->exp : set!-exp -> exp
+(define (set!->exp exp)
+  (caddr exp))
+
+; define : exp -> boolean
+(define (define? exp)
+  (tagged-list? 'define exp))
+
+(define (define-lambda? exp)
+  (let ((var (cadr exp)))
+    (or
+      ;; Standard function
+      (and (list? var) 
+           (> (length var) 0)
+           (symbol? (car var)))
+      ;; Varargs function
+      (and (pair? var)
+           (symbol? (car var))))))
+
+(define (define->lambda exp)
+  (cond
+    ((define-lambda? exp)
+     (let ((var (caadr exp))
+           (args (cdadr exp))
+           (body (cddr exp)))
+       `(define ,var (lambda ,args ,@body))))
+    (else exp)))
+
+; define->var : define-exp -> var
+(define (define->var exp)
+  (cond
+    ((define-lambda? exp)
+     (caadr exp))
+    (else 
+     (cadr exp))))
+
+; define->exp : define-exp -> exp
+(define (define->exp exp)
+  (cddr exp))
+
+(define (define-c? exp)
+  (tagged-list? 'define-c exp))
 
 ;; Create a proper copy of an improper list
 ;; EG: (1 2 . 3) ==> (1 2 3)

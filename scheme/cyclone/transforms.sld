@@ -48,9 +48,6 @@
     azip 
     assq-remove-key 
     assq-remove-keys 
-    const? 
-    ref? 
-    quote? 
     let? 
     let->bindings 
     let->exp 
@@ -67,24 +64,12 @@
     list->lambda-formals 
     list->pair 
     lambda->exp 
-    if->condition 
-    if->then 
-    if-else? 
-    if->else 
-    app? 
     app->fun 
     app->args 
     precompute-prim-app? 
     begin->exps 
-    define? 
     define-lambda? 
     define->lambda 
-    define->var 
-    define->exp 
-    define-c?
-    set!? 
-    set!->var 
-    set!->exp 
     closure? 
     closure->lam 
     closure->env 
@@ -261,24 +246,6 @@
 
 ;; Data type predicates and accessors.
 
-; const? : exp -> boolean
-(define (const? exp)
-  (or (integer? exp)
-      (real? exp)
-      (string? exp)
-      (vector? exp)
-      (bytevector? exp)
-      (char? exp)
-      (boolean? exp)))
-
-; ref? : exp -> boolean
-(define (ref? exp)
-  (symbol? exp))
-
-; quote? : exp -> boolean
-(define (quote? exp)
-  (tagged-list? 'quote exp))
-
 ; let? : exp -> boolean
 (define (let? exp)
   (tagged-list? 'let exp))
@@ -364,28 +331,6 @@
 (define (lambda->exp exp)
   (cddr exp)) ;; JAE - changed from caddr, so we can handle multiple expressions
 
-; if->condition : if-exp -> exp
-(define (if->condition exp)
-  (cadr exp))
-
-; if->then : if-exp -> exp
-(define (if->then exp)
-  (caddr exp))
-
-;; if-else? : if-exp -> bool
-;; Determines whether an if expression has an else clause
-(define (if-else? exp)
-  (and (tagged-list? 'if exp)
-       (> (length exp) 3)))
-
-; if->else : if-exp -> exp
-(define (if->else exp)
-  (cadddr exp))
-
-; app? : exp -> boolean
-(define (app? exp)
-  (pair? exp))
-
 ; app->fun : app-exp -> exp
 (define (app->fun exp)
   (car exp))
@@ -462,10 +407,6 @@
 (define (begin->exps exp)
   (cdr exp))
 
-; define : exp -> boolean
-(define (define? exp)
-  (tagged-list? 'define exp))
-
 (define (define-lambda? exp)
   (let ((var (cadr exp)))
     (or
@@ -485,33 +426,6 @@
            (body (cddr exp)))
        `(define ,var (lambda ,args ,@body))))
     (else exp)))
-
-; define->var : define-exp -> var
-(define (define->var exp)
-  (cond
-    ((define-lambda? exp)
-     (caadr exp))
-    (else 
-     (cadr exp))))
-
-; define->exp : define-exp -> exp
-(define (define->exp exp)
-  (cddr exp))
-
-(define (define-c? exp)
-  (tagged-list? 'define-c exp))
-
-; set! : exp -> boolean
-(define (set!? exp)
-  (tagged-list? 'set! exp))
-
-; set!->var : set!-exp -> var
-(define (set!->var exp)
-  (cadr exp))
-
-; set!->exp : set!-exp -> exp
-(define (set!->exp exp)
-  (caddr exp))
 
 ; closure? : exp -> boolean
 (define (closure? exp) 
