@@ -605,8 +605,8 @@
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
                        ;(env:define-variable! renamed val mac-env)
-;(Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
-;(Cyc-display "\n"  (current-output-port))
+(Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
+(Cyc-display "\n"  (current-output-port))
                        renamed)
                      ;identifier ;; TESTING!
                    )
@@ -640,11 +640,15 @@
 
 (define (Cyc-er-compare? use-env)
   (lambda (a b)
-    (let ((aval (env:lookup a use-env #f))
-          (bval (env:lookup b use-env #f)))
-      (if (and aval bval)
-          (eq? aval bval)
-          (eq? a b)))))
+    (let* ((aval (env:lookup a use-env #f))
+           (bval (env:lookup b use-env #f))
+           (result (if (and aval bval)
+                       (eq? aval bval)
+                       (eq? a b)))
+          )
+;(Cyc-write `(compare ,a ,b ,aval ,bval ,result) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
+      result)))
 
 ;; Name-mangling.
 
