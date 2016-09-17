@@ -28,6 +28,8 @@
     ;; A list of all macros defined by the program/library being compiled
     (define *macro:defined-macros* '())
 
+    (define *macro:renamed-variables* (env:extend-environment '() '() '()))
+
     (define (macro:add! name body)
       (set! *macro:defined-macros* 
         (cons (cons name body) *macro:defined-macros*))
@@ -85,8 +87,59 @@
 ;        (newline)
 ;        (display (list result))
 ;        (display "*/ ")
+          (macro:add-renamed-vars! use-env)
           result))
 
+    (define (macro:add-renamed-vars! env)
+      ;; TODO: change this to use a hash table
+      (set! *macro:renamed-variables*
+        (env:extend-environment
+          (env:all-variables env)
+          (env:all-values env)
+          *macro:renamed-variables*)))
+
+    #;(define (macro:cleanup expr)
+      (define (clean expr bv) ;; Bound variables
+         (cond 
+           ((const? expr)      expr)
+           ((prim? expr)       expr)
+           ((quote? expr)      expr)
+           ((define-c? expr)   expr)
+           ((ref? expr)        
+            ;; TODO: if symbol has been renamed and is not a bound variable,
+            ;;       undo the rename
+            expr)
+           ((if? expr)
+            `(if ,(clean (if->condition expr) bv)
+                 ,(clean (if->then expr) bv)
+                 ,(if (if-else? expr)
+                      (clean (if->else expr) bv)
+                      #f)))
+           ((lambda? expr)
+            `(lambda ,(lambda->formals expr)
+               ,@(map (lambda (e) 
+                        (clean e (cons (lambda-formals->list expr) 
+                                       bv)))
+                      (lambda->exp))))
+           ;; At this point defines cannot be in lambda form. 
+           ;; EG: (define (f x) ...)
+           ((define? expr)
+            (let ((bv* (cons (define->var expr) bv)))
+              `(define ,(define->var expr)
+                       ,@(map
+                          (lambda (e) (clean e bv*)) 
+                          (define->exp expr)))))
+           ;; For now, assume set is not introducing a new binding
+           ((set!? expr)
+            `(set! ,(clean (set!->var expr) bv)
+                   ,(clean (set!->exp expr) bv)))
+           ((app? expr) 
+            (map (lambda (e) (clean e bv)) 
+                 expr))
+           (else
+            (error "macro cleanup unexpected expression: " expr)))
+      (clean expr '())))
+      
     ; TODO: get macro name, transformer
     ; TODO: let-syntax forms
   ))
