@@ -115,7 +115,7 @@
             ;; if symbol has been renamed and is not a bound variable,
             ;; undo the rename
             (let ((val (env:lookup expr *macro:renamed-variables* #f)))
-              (if (and val (not (member val bv)))
+              (if (and val (not (member expr bv)))
                   (clean val bv)
                   expr)))
            ((if? expr)
