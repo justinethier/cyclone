@@ -32,6 +32,7 @@
     env:frame-values 
     env:add-binding-to-frame! 
     env:all-variables
+    env:all-values
     env:extend-environment 
     env:lookup
     env:lookup-variable-value 
@@ -315,6 +316,11 @@
     (env:frame-variables
       (env:first-frame env))))
 
+(define (env:all-values env)
+  (flatten 
+    (env:frame-values
+      (env:first-frame env))))
+
 (define (env:extend-environment vars vals base-env)
   (if (= (length vars) (length vals))
       (cons (env:make-frame vars vals) base-env)
@@ -517,12 +523,11 @@
      (lambda . lambda)
      (quote . quote)
      (set! . set!)
+(... . ...) ;; TODO: DEBUG ONLY! take it out though and syntax-rules is broken
      (begin . begin) ;; TODO: just a quick-fix, not a long-term solution
     )))
 
 (define (Cyc-er-compare? use-env)
-  ;; TODO: this is not good enough, need to determine if these symbols
-  ;; are the same identifier in their *environment of use*
   (lambda (a b)
     (let ((aval (env:lookup a use-env #f))
           (bval (env:lookup b use-env #f)))
