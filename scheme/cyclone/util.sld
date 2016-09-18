@@ -600,10 +600,14 @@
   ;; Keep looking up a symbol until the original non-renamed symbol is found
   (define (find-original-sym sym)
     (let ((val (env:lookup sym use-env #f)))
+;(Cyc-write `(find-original-sym ,sym ,val) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
       (if val
           (find-original-sym val) ;; Keep going
           sym))) ;; There was no rename, so sym is not renamed
   (lambda (a b)
+;(Cyc-write `(Cyc-er-compare? ,a ,b) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
     (let* ((asym (find-original-sym a))
            (bsym (find-original-sym b))
            (result (eq? asym bsym)))
