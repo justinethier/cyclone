@@ -1,3 +1,6 @@
+;(import (scheme base))
+;(cond
+;  (else #t))
 (import (scheme base) (scheme write))
 
 ;(define-syntax let*-values

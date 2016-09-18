@@ -539,48 +539,6 @@
 
 ;;; Explicit renaming macros
 
-;; ER macro rename function, based on code from Chibi scheme
-;  (lambda (sym) sym)) ; TODO: temporary placeholder, see below
-
-;TODO: I think we're ready to cut back over to this now?
-
-;(define (Cyc-er-rename mac-env)
-; Notes:
-;
-; need to figure out what to return from this function so that renaming
-; actually does what it is supposed to do (or a close approximation).
-; then need to figure out what needs to change in the rest of the code to
-; support that.
-; 
-; how renaming should work:
-;
-;  - ideally, add a closure from the macro-env for identifier
-;  - practically, if identifier is defined in mac-env, gensym but
-;    update mac-env so renamed variable points to original.
-;    if not defined, is it the same as a gensym? or nothing at all???
-;
-;in order for this to work:
-;
-; - compiler needs to maintain env consisting of at least macros,
-;   and pass this along. presumably this env would be used instead of
-;   *defined-macros*.
-; - interpreter can use a-env and global-env??????
-;   there are open questions about extending a-env, but without eval being
-;   able to define-syntax (yet), I think we can defer that until later.
-;
-;   can pass mac-env, useenv in to this guy (and compare as well), and possibly add renamed bindings to it.
-;
-; mac-env is 
-;  - global env for interpreted macros, at least for now until
-;    they can be recognized by eval
-;  - ?? for compiled macros
-;
-; use-env is:
-;  - current env for eval, can be passed in.
-;    is this really a-env though? or do we need to extend it when
-;    a new lambda scope is introduced?
-;  - need to keep track of it for compiled macro expansion
-;
 (define (Cyc-er-rename use-env mac-env)
   ((lambda (renames)
      (lambda (identifier)
@@ -605,8 +563,8 @@
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
                        ;(env:define-variable! renamed val mac-env)
-(Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
-(Cyc-display "\n"  (current-output-port))
+;(Cyc-write `(ER rename ,identifier to ,renamed) (current-output-port))
+;(Cyc-display "\n"  (current-output-port))
                        renamed)
                      ;identifier ;; TESTING!
                    )
@@ -634,19 +592,22 @@
      (lambda . lambda)
      (quote . quote)
      (set! . set!)
-(... . ...) ;; TODO: DEBUG ONLY! take it out though and syntax-rules is broken
+;(... . ...) ;; TODO: DEBUG ONLY! take it out though and syntax-rules is broken
      (begin . begin) ;; TODO: just a quick-fix, not a long-term solution
     )))
 
 (define (Cyc-er-compare? use-env)
+  ;; Keep looking up a symbol until the original non-renamed symbol is found
+  (define (find-original-sym sym)
+    (let ((val (env:lookup sym use-env #f)))
+      (if val
+          (find-original-sym val) ;; Keep going
+          sym))) ;; There was no rename, so sym is not renamed
   (lambda (a b)
-    (let* ((aval (env:lookup a use-env #f))
-           (bval (env:lookup b use-env #f))
-           (result (if (and aval bval)
-                       (eq? aval bval)
-                       (eq? a b)))
-          )
-;(Cyc-write `(compare ,a ,b ,aval ,bval ,result) (current-output-port))
+    (let* ((asym (find-original-sym a))
+           (bsym (find-original-sym b))
+           (result (eq? asym bsym)))
+;(Cyc-write `(compare ,a ,b ,asym ,bsym ,result) (current-output-port))
 ;(Cyc-display "\n"  (current-output-port))
       result)))
 
