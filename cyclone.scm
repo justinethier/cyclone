@@ -148,9 +148,9 @@
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
 ; TODO:
-      ;(set! input-program (macro:cleanup input-program))
-      ;(trace:info "---------------- after macro expansion cleanup:")
-      ;(trace:info input-program) ;pretty-print
+      (set! input-program (macro:cleanup input-program))
+      (trace:info "---------------- after macro expansion cleanup:")
+      (trace:info input-program) ;pretty-print
 
       ;; Separate global definitions from the rest of the top-level code
       (set! input-program 

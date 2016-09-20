@@ -596,12 +596,14 @@
      (begin . begin) ;; TODO: just a quick-fix, not a long-term solution
     )))
 
-(define (Cyc-er-compare? use-env)
+(define (Cyc-er-compare? use-env renamed-env)
   ;; Keep looking up a symbol until the original non-renamed symbol is found
   (define (find-original-sym sym)
     (let ((val (env:lookup sym use-env #f)))
 ;(Cyc-write `(find-original-sym ,sym ,val) (current-output-port))
 ;(Cyc-display "\n"  (current-output-port))
+      (if (not val)
+          (set! val (env:lookup sym renamed-env #f)))
       (if val
           (find-original-sym val) ;; Keep going
           sym))) ;; There was no rename, so sym is not renamed

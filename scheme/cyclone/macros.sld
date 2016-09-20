@@ -73,14 +73,14 @@
               ((Cyc-get-cvar (cadr macro))
                 exp
                 (Cyc-er-rename use-env mac-env)
-                (Cyc-er-compare? use-env)))
+                (Cyc-er-compare? use-env *macro:renamed-variables*)))
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
                   (Cyc-er-rename use-env mac-env)
-                  (Cyc-er-compare? use-env))
+                  (Cyc-er-compare? use-env *macro:renamed-variables*))
                 mac-env))))
 ;        (newline)
 ;        (display "/* ")
@@ -101,13 +101,13 @@
 
     (define (macro:cleanup expr)
       (define (clean expr bv) ;; Bound variables
-(newline)
-(display "/* macro:cleanup->clean, bv =")
-(write bv)
-(newline)
-(write expr)
-(newline)
-(display "*/ ")
+;(newline)
+;(display "/* macro:cleanup->clean, bv =")
+;(write bv)
+;(newline)
+;(write expr)
+;(newline)
+;(display "*/ ")
          (cond 
            ((const? expr)      expr)
            ((null? expr)       expr)
