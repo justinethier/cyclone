@@ -558,7 +558,7 @@
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
                       renamed))
-                   #;((eq? val 'not-defined)
+                   ((eq? val 'not-defined)
                      ;; Unrenamed variable identifier
                      (let ((renamed (gensym identifier)))
                        (env:define-variable! renamed identifier use-env)
