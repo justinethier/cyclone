@@ -8,7 +8,8 @@
 ;;;;
 (define-library (scheme cyclone util)
   (import (scheme base)
-          (scheme char))
+          (scheme char)
+          (srfi 69))
   (export
     ;; Code analysis
     tagged-list?
