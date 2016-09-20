@@ -129,7 +129,7 @@
                ,@(map (lambda (e) 
                         (clean e (cons (lambda-formals->list expr) 
                                        bv)))
-                      (lambda->exp))))
+                      (lambda->exp expr))))
            ;; At this point defines cannot be in lambda form. 
            ;; EG: (define (f x) ...)
            ((define? expr)
