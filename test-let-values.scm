@@ -1,3 +1,22 @@
+;; An alternate test case for SRFI 1 failing to compile:
+;(import (scheme base))
+;
+;(define-syntax :optional
+;  (syntax-rules ()
+;    ((:optional rest default-exp)
+;     (let ((maybe-arg rest))
+;       (cond ((null? maybe-arg) default-exp)
+;             ((null? (cdr maybe-arg)) (car maybe-arg))
+;             (else (error "too many optional arguments" maybe-arg)))))))
+;
+;(define (alist-delete! key alist . maybe-=)
+;  (let ((= (:optional maybe-= equal?)))
+;    (filter! (lambda (elt) (not (= key (car elt)))) alist)))
+;
+;(alist-delete! #f '())
+;;END
+
+
 ;(import (scheme base))
 ;(cond
 ;  (else #t))
