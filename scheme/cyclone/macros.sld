@@ -108,6 +108,7 @@
 (display "*/ ")
          (cond 
            ((const? expr)      expr)
+           ((null? expr)       expr)
            ;((prim? expr)       expr)
            ((quote? expr)      expr)
            ((define-c? expr)   expr)
