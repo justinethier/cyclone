@@ -102,7 +102,9 @@
     (define (macro:cleanup expr)
       (define (clean expr bv) ;; Bound variables
 (newline)
-(display "/* macro:cleanup->clean\n ")
+(display "/* macro:cleanup->clean, bv =")
+(write bv)
+(newline)
 (write expr)
 (newline)
 (display "*/ ")
@@ -128,8 +130,9 @@
            ((lambda? expr)
             `(lambda ,(lambda->formals expr)
                ,@(map (lambda (e) 
-                        (clean e (cons (lambda-formals->list expr) 
-                                       bv)))
+                        (clean e (append 
+                                   (lambda-formals->list expr) 
+                                   bv)))
                       (lambda->exp expr))))
            ;; At this point defines cannot be in lambda form. 
            ;; EG: (define (f x) ...)
