@@ -52,8 +52,7 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
-    (define *macro:renamed-variables* (env:extend-environment '() '() '()))
-    (define (macro:expand exp macro mac-env) ;;rename-tbl
+    (define (macro:expand exp macro mac-env rename-env)
       (let* ((use-env (env:extend-environment '() '() '()))
              (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro))))
@@ -72,14 +71,14 @@
               ((Cyc-get-cvar (cadr macro))
                 exp
                 (Cyc-er-rename use-env mac-env)
-                (Cyc-er-compare? use-env *macro:renamed-variables*)))
+                (Cyc-er-compare? use-env rename-env)))
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
                   (Cyc-er-rename use-env mac-env)
-                  (Cyc-er-compare? use-env *macro:renamed-variables*))
+                  (Cyc-er-compare? use-env rename-env))
                 mac-env))))
 ;        (newline)
 ;        (display "/* ")
@@ -87,7 +86,7 @@
 ;        (newline)
 ;        (display (list result))
 ;        (display "*/ ")
-          (macro:add-renamed-vars! use-env *macro:renamed-variables*)
+          (macro:add-renamed-vars! use-env rename-env)
           result))
 
     (define (macro:add-renamed-vars! env renamed-env)
@@ -98,7 +97,7 @@
           (env:all-variables env)
           (env:all-values env))))
 
-    (define (macro:cleanup expr)
+    (define (macro:cleanup expr rename-env)
       (define (clean expr bv) ;; Bound variables
 ;(newline)
 ;(display "/* macro:cleanup->clean, bv =")
@@ -116,7 +115,7 @@
            ((ref? expr)        
             ;; if symbol has been renamed and is not a bound variable,
             ;; undo the rename
-            (let ((val (env:lookup expr *macro:renamed-variables* #f)))
+            (let ((val (env:lookup expr rename-env #f)))
               (if (and val (not (member expr bv)))
                   (clean val bv)
                   expr)))

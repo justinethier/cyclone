@@ -37,6 +37,7 @@
       (define lib-exports '())
       (define lib-renamed-exports '())
       (define c-headers '())
+      (define rename-env (env:extend-environment '() '() '()))
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
@@ -133,10 +134,11 @@
       (set! input-program 
         (cond
           (program?
-            (expand-lambda-body input-program (macro:get-env)))
+            (expand-lambda-body input-program (macro:get-env) rename-env))
           (else
             (let ((expanded (expand `(begin ,@input-program) 
-                                    (macro:get-env))))
+                                    (macro:get-env)
+                                    rename-env)))
               (cond
                 ((and (pair? expanded)
                       (tagged-list? 'lambda (car expanded)))
@@ -148,13 +150,13 @@
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
 ; TODO:
-      (set! input-program (macro:cleanup input-program))
+      (set! input-program (macro:cleanup input-program rename-env))
       (trace:info "---------------- after macro expansion cleanup:")
       (trace:info input-program) ;pretty-print
 
       ;; Separate global definitions from the rest of the top-level code
       (set! input-program 
-          (isolate-globals input-program program? lib-name))
+          (isolate-globals input-program program? lib-name rename-env))
 
       ;; Optimize-out unused global variables
       ;; For now, do not do this if eval is used.

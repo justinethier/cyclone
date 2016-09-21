@@ -502,7 +502,7 @@
 
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
-(define (expand exp env)
+(define (expand exp env rename-env)
   (define (log e)
     (display  
       (list 'expand e 'env 
@@ -517,22 +517,22 @@
     ((ref? exp)        exp)
     ((quote? exp)      exp)
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
-                          ,@(expand-body '() (lambda->exp exp) env)
+                          ,@(expand-body '() (lambda->exp exp) env rename-env)
                           ;,@(map 
                           ;  ;; TODO: use extend env here?
-                          ;  (lambda (expr) (expand expr env))
+                          ;  (lambda (expr) (expand expr env rename-env))
                           ;  (lambda->exp exp))
                          ))
     ((define? exp)     (if (define-lambda? exp)
-                           (expand (define->lambda exp) env)
-                          `(define ,(expand (define->var exp) env)
-                                ,@(expand (define->exp exp) env))))
-    ((set!? exp)       `(set! ,(expand (set!->var exp) env)
-                              ,(expand (set!->exp exp) env)))
-    ((if? exp)         `(if ,(expand (if->condition exp) env)
-                            ,(expand (if->then exp) env)
+                           (expand (define->lambda exp) env rename-env)
+                          `(define ,(expand (define->var exp) env rename-env)
+                                ,@(expand (define->exp exp) env rename-env))))
+    ((set!? exp)       `(set! ,(expand (set!->var exp) env rename-env)
+                              ,(expand (set!->exp exp) env rename-env)))
+    ((if? exp)         `(if ,(expand (if->condition exp) env rename-env)
+                            ,(expand (if->then exp) env rename-env)
                             ,(if (if-else? exp)
-                                 (expand (if->else exp) env)
+                                 (expand (if->else exp) env rename-env)
                                  ;; Insert default value for missing else clause
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
@@ -546,8 +546,8 @@
        (cond
         ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
          (expand
-           `(define-syntax ,name ,(expand trans env))
-           env))
+           `(define-syntax ,name ,(expand trans env rename-env))
+           env rename-env))
         (else
          ;; TODO: for now, do not let a compiled macro be re-defined.
          ;; this is a hack for performance compiling (scheme base)
@@ -568,17 +568,17 @@
           ;; TODO: may run into issues with expanding now, before some
           ;; of the macros are defined. may need to make a special pass
           ;; to do loading or expansion of macro bodies
-          `(define ,name ,(expand body env)))))))
+          `(define ,name ,(expand body env rename-env)))))))
     ((app? exp)
      (cond
        ((symbol? (car exp))
         (let ((val (env:lookup (car exp) env #f)))
           (if (tagged-list? 'macro val)
             (expand ; Could expand into another macro
-              (macro:expand exp val env)
-              env)
+              (macro:expand exp val env rename-env)
+              env rename-env)
             (map
-              (lambda (expr) (expand expr env))
+              (lambda (expr) (expand expr env rename-env))
               exp))))
        (else
          ;; TODO: note that map does not guarantee that expressions are
@@ -586,17 +586,17 @@
          ;; in reverse order. Might be better to use a fold here and
          ;; elsewhere in (expand).
          (map 
-          (lambda (expr) (expand expr env))
+          (lambda (expr) (expand expr env rename-env))
           exp))))
     (else
       (error "unknown exp: " exp))))
 
 ;; Nicer interface to expand-body
-(define (expand-lambda-body exp env)
-  (expand-body '() exp env))
+(define (expand-lambda-body exp env rename-env)
+  (expand-body '() exp env rename-env))
 
 ;; Helper to expand a lambda body, so we can splice in any begin's
-(define (expand-body result exp env)
+(define (expand-body result exp env rename-env)
   (define (log e)
     (display (list 'expand-body e 'env 
               (env:frame-variables (env:first-frame env))) 
@@ -615,15 +615,16 @@
             (quote? this-exp)
             (define-c? this-exp))
 ;(log this-exp)
-        (expand-body (cons this-exp result) (cdr exp) env))
+        (expand-body (cons this-exp result) (cdr exp) env rename-env))
        ((define? this-exp)
 ;(log this-exp)
         (expand-body 
           (cons
-            (expand this-exp env)
+            (expand this-exp env rename-env)
             result)
           (cdr exp)
-          env))
+          env
+          rename-env))
        ((or (define-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
@@ -631,10 +632,11 @@
 ;(log (car this-exp))
         (expand-body 
           (cons
-            (expand this-exp env)
+            (expand this-exp env rename-env)
             result)
           (cdr exp)
-          env))
+          env
+          rename-env))
        ;; Splice in begin contents and keep expanding body
        ((begin? this-exp)
         (let* ((expr this-exp)
@@ -643,7 +645,8 @@
         (expand-body
          result
          (append begin-exprs (cdr exp))
-         env)))
+         env
+         rename-env)))
        ((app? this-exp)
         (cond
           ((symbol? (caar exp))
@@ -653,33 +656,36 @@
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
-              (let ((expanded (macro:expand this-exp val env)))
+              (let ((expanded (macro:expand this-exp val env rename-env)))
 ;(log `(DONE WITH macro:expand))
                 (expand-body
                   result
                   (cons 
                     expanded ;(macro:expand this-exp val env)
                     (cdr exp))
-                  env))
+                  env
+                  rename-env))
               ;; No macro, use main expand function to process
               (expand-body
                (cons 
                  (map
-                  (lambda (expr) (expand expr env))
+                  (lambda (expr) (expand expr env rename-env))
                   this-exp)
                  result)
                (cdr exp)
-               env))))
+               env
+               rename-env))))
           (else
 ;(log 'app)
            (expand-body
              (cons 
                (map
-                (lambda (expr) (expand expr env))
+                (lambda (expr) (expand expr env rename-env))
                 this-exp)
                result)
              (cdr exp)
-             env))))
+             env
+             rename-env))))
        (else
         (error "unknown exp: " this-exp))))))
 
@@ -691,7 +697,7 @@
 ; This function extracts out non-define statements, and adds them to 
 ; a "main" after the defines.
 ;
-(define (isolate-globals exp program? lib-name)
+(define (isolate-globals exp program? lib-name rename-env)
   (let loop ((top-lvl exp)
              (globals '())
              (exprs '()))
@@ -710,7 +716,8 @@
                ;; This is a library, keep inits in their own function
                `((define ,(lib:name->symbol lib-name)
                   (lambda () 0 ,@(reverse exprs))))))
-           (macro:get-env))))
+           (macro:get-env)
+           rename-env)))
       (else
        (cond
          ((define? (car top-lvl))
