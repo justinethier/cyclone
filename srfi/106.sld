@@ -25,39 +25,39 @@
       *shut-rd* *shut-wr* *shut-rdwr*
   )
   (begin
-    (define-syntax load-const
+    (define-syntax make-const
       (er-macro-transformer
         (lambda (expr rename compare)
-        ;; TODO: load const and function name from expr
-         `(define-c %shut-wr%
-            "(void *data, int argc, closure _, object k)"
-            "return_closcall1(data, k, obj_int2obj(SHUT_WR)); "))))
-    (load-const %shut-wr% "SHUT_WR")
-    ;; TODO: create a macro to streamline this!!
-    (define-c %shut-rd%
-      "(void *data, int argc, closure _, object k)"
-      "return_closcall1(data, k, obj_int2obj(SHUT_RD)); ")
+          (let* ((base-str (symbol->string (cadr expr)))
+                 (fsym (string->symbol (string-append "%" base-str "%")))
+                 (vsym (string->symbol (string-append "*" base-str "*")))
+                 (const-str (caddr expr)))
+           `(begin
+             (define ,vsym (,fsym))
+             (define-c ,fsym
+               "(void *data, int argc, closure _, object k)"
+               ,(string-append 
+                 "return_closcall1(data, k, obj_int2obj(" const-str ")); ")))))))
 
-    (define *shut-rd* (%shut-rd%))
+    (make-const af-unspec      "AF_UNSPEC"     )
+    (make-const af-inet        "AF_INET"       )
+    (make-const af-inet6       "AF_INET6"      )
+    (make-const sock-stream    "SOCK_STREAM"   )
+    (make-const sock-dgram     "SOCK_DGRAM"    )
+    (make-const ai-canonname   "AI_CANONNAME"  )
+    (make-const ai-numerichost "AI_NUMERICHOST")
+    (make-const ai-v4mapped    "AI_V4MAPPED"   )
+    (make-const ai-all         "AI_ALL"        )
+    (make-const ai-addrconfig  "AI_ADDRCONFIG" )
+    (make-const msg-peek       "MSG_PEEK"      )
+    (make-const msg-oob        "MSG_OOB"       )
+    (make-const msg-waitall    "MSG_WAITALL"   )
+    (make-const shut-rd        "SHUT_RD"       )
+    (make-const shut-wr        "SHUT_WR"       )
+    (make-const shut-rdwr      "SHUT_RDWR"     )
+
     (define *ipproto-ip* 0)
     (define *ipproto-tcp* 6)
     (define *ipproto-udp* 17)
-; really want to define-C these, but just to specify a constant and not a whole function
-; TODO:            (rename (AF_UNSPEC *af-unspec*)
-; TODO:                    (AF_INET   *af-inet*)
-; TODO:                    (AF_INET6  *af-inet6*))
-; TODO:            (rename (SOCK_STREAM *sock-stream*)
-; TODO:                    (SOCK_DGRAM  *sock-dgram*))
-; TODO:            (rename (AI_CANONNAME   *ai-canonname*)
-; TODO:                    (AI_NUMERICHOST *ai-numerichost*)
-; TODO:                    (AI_V4MAPPED    *ai-v4mapped*)
-; TODO:                    (AI_ALL         *ai-all*)
-; TODO:                    (AI_ADDRCONFIG  *ai-addrconfig*))
-; TODO:            (rename (MSG_PEEK     *msg-peek*)
-; TODO:                    (MSG_OOB      *msg-oob*)
-; TODO:                    (MSG_WAITALL  *msg-waitall*))
-; TODO:            (rename (SHUT_RD   *shut-rd*)
-; TODO:                    (SHUT_WR   *shut-wr*)
-; TODO:                    (SHUT_RDWR *shut-rdwr*)))
   )
 )
