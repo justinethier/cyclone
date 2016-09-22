@@ -11,7 +11,6 @@
           (scheme write) ;; Debug only
           (scheme eval)
           (scheme cyclone util)
-          (srfi 69)
   )
   (export
     define-syntax?
@@ -53,7 +52,8 @@
 
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
-    (define (macro:expand exp macro mac-env rename-tbl)
+    (define *macro:renamed-variables* (env:extend-environment '() '() '()))
+    (define (macro:expand exp macro mac-env) ;;rename-tbl
       (let* ((use-env (env:extend-environment '() '() '()))
              (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro))))
@@ -72,14 +72,14 @@
               ((Cyc-get-cvar (cadr macro))
                 exp
                 (Cyc-er-rename use-env mac-env)
-                (Cyc-er-compare? use-env rename-tbl)))
+                (Cyc-er-compare? use-env *macro:renamed-variables*)))
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
                   (Cyc-er-rename use-env mac-env)
-                  (Cyc-er-compare? use-env rename-tbl))
+                  (Cyc-er-compare? use-env *macro:renamed-variables*))
                 mac-env))))
 ;        (newline)
 ;        (display "/* ")
@@ -87,19 +87,18 @@
 ;        (newline)
 ;        (display (list result))
 ;        (display "*/ ")
-          (macro:add-renamed-vars! use-env rename-tbl)
+          (macro:add-renamed-vars! use-env *macro:renamed-variables*)
           result))
 
-    (define (macro:add-renamed-vars! env rename-tbl)
-      ;; TODO: change this to use a hash table
-      ;(set! *macro:renamed-variables*
-      ;  (env:extend-environment
-      ;    (env:all-variables env)
-      ;    (env:all-values env)
-      ;    *macro:renamed-variables*))
-    )
+    (define (macro:add-renamed-vars! env renamed-env)
+      (let ((frame (env:first-frame renamed-env)))
+        (for-each
+          (lambda (var val)
+            (env:add-binding-to-frame! var val frame))
+          (env:all-variables env)
+          (env:all-values env))))
 
-    (define (macro:cleanup expr rename-tbl)
+    (define (macro:cleanup expr)
       (define (clean expr bv) ;; Bound variables
 ;(newline)
 ;(display "/* macro:cleanup->clean, bv =")
@@ -117,7 +116,6 @@
            ((ref? expr)        
             ;; if symbol has been renamed and is not a bound variable,
             ;; undo the rename
-TODO: no good, change to use rename-tbl (a hashtable)
             (let ((val (env:lookup expr *macro:renamed-variables* #f)))
               (if (and val (not (member expr bv)))
                   (clean val bv)
