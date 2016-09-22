@@ -2,6 +2,8 @@
 (define-library (106) ;(srfi 106)
   (include-c-header "<sys/types.h>")
   (include-c-header "<sys/socket.h>")
+  (include-c-header "<netinet/in.h>")
+  (include-c-header "<arpa/inet.h>")
   (include-c-header "<netdb.h>")
   (import (scheme base))
   (export
@@ -25,6 +27,39 @@
       *shut-rd* *shut-wr* *shut-rdwr*
   )
   (begin
+  ;; see: http://gnosis.cx/publish/programming/sockets.html
+    (define-c %make-client-socket
+      "(void *data, int argc, closure _, object k, 
+        object node, object service, 
+        object family, object socktype, 
+        object flags, object protocol)"
+      ;; TODO: how to pack socket objects?
+      ;; can we put sock fd in a vector, along with an identifier?
+      " int sock;
+        struct sockaddr_in addr;
+        int af = obj_obj2int(family),
+            type = obj_obj2int(socktype),
+            proto = obj_obj2int(protocol);
+        // TODO: put trace statement here 
+        // TODO: type check args to this function
+
+        if ((sock = socket(af, type, proto)) < 0) {
+          Cyc_rt_raise_msg(data, \"Failed to create socket\");
+        }
+        memset(&addr 0, sizeof(addr));       /* Clear struct */
+        // TODO: flags?
+        addr = af;
+        addr = inet_addr(string_str(node));  /* IP address */
+        addr = htons(obj_obj2int(service));       /* server port */
+        /* Establish connection */
+        if (connect(sock,
+           (struct sockaddr *) &addr
+                               sizeof(addr)) < 0) {
+           Cyc_rt_raise_msg(data, \"Failed to connect with server\");
+        }
+        // TODO: pack socket, and pass that to k:
+        return_closcall1(data, k, obj_int2obj()); ")
+
     (define-syntax make-const
       (er-macro-transformer
         (lambda (expr rename compare)
