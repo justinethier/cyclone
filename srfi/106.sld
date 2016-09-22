@@ -27,6 +27,8 @@
       *shut-rd* *shut-wr* *shut-rdwr*
   )
   (begin
+    ;; TODO: identifier for socket in vector
+
   ;; see: http://gnosis.cx/publish/programming/sockets.html
     (define-c %make-client-socket
       "(void *data, int argc, closure _, object k, 
@@ -57,7 +59,7 @@
                                sizeof(addr)) < 0) {
            Cyc_rt_raise_msg(data, \"Failed to connect with server\");
         }
-        // TODO: pack socket, and pass that to k:
+        // TODO: pack socket, and pass that to k. check code in Cyc_make_vector
         return_closcall1(data, k, obj_int2obj()); ")
 
     (define-syntax make-const
