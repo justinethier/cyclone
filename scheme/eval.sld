@@ -98,6 +98,8 @@
 (define (assignment-variable exp) (cadr exp))
 (define (assignment-value exp) (caddr exp))
 
+(define (syntax? exp)
+  (tagged-list? 'define-syntax exp))
 (define (definition? exp)
   (tagged-list? 'define exp))
 (define (definition-variable exp)
@@ -146,6 +148,8 @@
 (define (procedure-environment p) (cadddr p))
 
 ;; Evaluated macros
+(define (make-macro expr)
+  (list macro-tag expr))
 (define macro-tag 'macro)
 (define (compound-macro? exp)
   (tagged-list? macro-tag exp))
@@ -353,6 +357,9 @@
         ((and (definition? exp)
               (not (null? (cdr exp))))
          (analyze-definition exp env))
+        ;((and (syntax? exp)
+        ;      (not (null? (cdr exp))))
+        ; (analyze-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -395,6 +402,24 @@
     (lambda (env)
       (env:define-variable! var (vproc env) env)
       'ok)))
+
+(define (analyze-syntax exp a-env)
+  (let ((var (cadr exp)))
+    (cond
+      ((tagged-list? 'er-macro-transformer (caddr exp))
+        (let ((sproc (analyze-syntax-lambda (cadr (caddr exp)) a-env)))
+          (lambda (env)
+            (env:define-variable! var sproc #;(sproc env) env)
+            'ok)))
+      (else
+        (error "macro syntax not supported yet")))))
+
+(define (analyze-syntax-lambda exp a-env)
+  (let ((vars (lambda-parameters exp))
+        (bproc (analyze-sequence (lambda-body exp) a-env)))
+    (write `(debug ,(lambda-body exp)))
+    ;(lambda (env) 
+      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
 
 (define (analyze-if exp a-env)
   (let ((pproc (analyze (if-predicate exp) a-env))
