@@ -1,4 +1,4 @@
-(import (scheme base) (scheme write) (106))
+(import (scheme base) (scheme write) (srfi 106))
 
 (define svr (make-server-socket "12345"))
 
