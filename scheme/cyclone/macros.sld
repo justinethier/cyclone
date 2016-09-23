@@ -109,8 +109,14 @@
          (cond 
            ((const? expr)      expr)
            ((null? expr)       expr)
-           ;((prim? expr)       expr)
-           ((quote? expr)      expr)
+           ((quote? expr)      
+            (let ((atom (cadr expr)))
+              ;; Clean up any renamed symbols that are quoted
+              ;; TODO: good enough for quoted pairs or do
+              ;;       we need to traverse those, too?
+              (if (ref? atom)
+                 `(quote ,(clean atom bv))
+                 expr)))
            ((define-c? expr)   expr)
            ((ref? expr)        
             ;; if symbol has been renamed and is not a bound variable,
