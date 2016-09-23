@@ -6,6 +6,7 @@
   (include-c-header "<arpa/inet.h>")
   (include-c-header "<netdb.h>")
   (include-c-header "<unistd.h>")
+  (include-c-header "<errno.h>")
   (import (scheme base) (scheme cxr))
   (export
       make-client-socket make-server-socket socket?
@@ -174,7 +175,7 @@
       (when (not (socket? sock))
         (error "Expected socket but received" sock))
 
-      (let ((sockfd (%socket-accept sock)))
+      (let ((sockfd (%socket-accept (socket->fd sock))))
         (if (= sockfd -1)
             (error "An error occurred accepting a socket connection")
             (cons *socket-object-type* sockfd))))
@@ -187,7 +188,12 @@
         addr_size = sizeof(their_addr);
 
         set_thread_blocked(data, k);
+        errno = 0;
         new_fd = accept(obj_obj2int(sockfd), (struct sockaddr *)&their_addr, &addr_size);
+        //if (new_fd < 0){
+        //  // TODO: not so good. maybe we should build a string and send that if an error occurs
+        //  fprintf(stderr, \"errno = %d\\n\", errno);
+        //}
         return_thread_runnable(data, obj_int2obj(new_fd)); ")
 
     (define (socket-send sock bv . opts)
