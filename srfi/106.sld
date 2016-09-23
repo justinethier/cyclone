@@ -1,7 +1,8 @@
 ;; Sockets library
-(define-library (srfi 106)
-; TODO: include necessary C headers
-; TODO: do we need to link to any libraries???
+(define-library (106) ;(srfi 106)
+  (include-c-header "<sys/types.h>")
+  (include-c-header "<sys/socket.h>")
+  (include-c-header "<netdb.h>")
   (import (scheme base))
   (export
       make-client-socket make-server-socket socket?
@@ -24,6 +25,20 @@
       *shut-rd* *shut-wr* *shut-rdwr*
   )
   (begin
+    (define-syntax load-const
+      (er-macro-transformer
+        (lambda (expr rename compare)
+        ;; TODO: load const and function name from expr
+         `(define-c %shut-wr%
+            "(void *data, int argc, closure _, object k)"
+            "return_closcall1(data, k, obj_int2obj(SHUT_WR)); "))))
+    (load-const %shut-wr% "SHUT_WR")
+    ;; TODO: create a macro to streamline this!!
+    (define-c %shut-rd%
+      "(void *data, int argc, closure _, object k)"
+      "return_closcall1(data, k, obj_int2obj(SHUT_RD)); ")
+
+    (define *shut-rd* (%shut-rd%))
     (define *ipproto-ip* 0)
     (define *ipproto-tcp* 6)
     (define *ipproto-udp* 17)
