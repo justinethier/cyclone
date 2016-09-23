@@ -116,7 +116,8 @@
             (set! socktype (cadr opts))
             (when (> (length opts) 2)
               (set! proto (caddr opts)))))
-        (%make-server-socket service family socktype proto)))
+        (let ((sock-fd (%make-server-socket service family socktype proto)))
+          (cons *socket-object-type* sock-fd))))
 
     (define-c %make-server-socket
       "(void *data, int argc, closure _, object k, 
@@ -163,22 +164,37 @@
         
         freeaddrinfo(servinfo); // all done with this structure
 
-        if (listen(sockfd, 20) < 0)
+        if (listen(sockfd, 20) < 0) {
             Cyc_rt_raise_msg(data, \"Unable to listen on socket\");
         }
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
-;; See: http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html#accept
-; TODO: (define (socket-accept sock))
-; struct sockaddr_storage their_addr;
-;    addr_size = sizeof their_addr;
-;    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
+    ;; See: http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html#accept
+    (define (socket-accept sock)
+      (when (not (socket? sock))
+        (error "Expected socket but received" sock))
+
+      (let ((sockfd (%socket-accept sock)))
+        (if (= sockfd -1)
+            (error "An error occurred accepting a socket connection")
+            (cons *socket-object-type* sockfd))))
+
+    (define-c %socket-accept
+      "(void *data, int argc, closure _, object k, object sockfd)"
+      " int new_fd;
+        struct sockaddr_storage their_addr;
+        socklen_t addr_size;
+        addr_size = sizeof(their_addr);
+
+        set_thread_blocked(data, k);
+        new_fd = accept(obj_obj2int(sockfd), (struct sockaddr *)&their_addr, &addr_size);
+        return_thread_runnable(data, obj_int2obj(new_fd)); ")
 
     (define (socket-send sock bv . opts)
       (let ((flags 0))
         (if (not (null? opts))
             (set! flags (car opts)))
-        (%socket-send sock bv flags)))
+        (%socket-send (socket->fd sock) bv flags)))
 
     (define-c %socket-send
       "(void *data, int argc, closure _, object k, object sockfd, object bvobj, object flags)"
@@ -192,7 +208,7 @@
       (let ((flags 0))
         (if (not (null? opts))
             (set! flags (car opts)))
-        (%socket-recv sock size flags)))
+        (%socket-recv (socket->fd sock) size flags)))
 
     (define-c %socket-recv
       "(void *data, int argc, closure _, object k, object sockfd, object size, object flags)"
