@@ -29,7 +29,7 @@
   )
   (begin
     (define *socket-object-type* '%socket-object-type%)
-
+    (define (socket->fd obj) (cdr obj))
     (define (socket? obj)
       (and (pair? obj) (eq? (car obj) *socket-object-type*)))
 
@@ -105,6 +105,32 @@
         
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
+
+    (define (socket-shutdown sock how)
+      (if (and (socket? sock) (integer? how))
+          (%socket-shutdown (socket->fd sock) how)))
+
+    (define-c %socket-shutdown
+      "(void *data, int argc, closure _, object k, object sockfd, object how)"
+      " shutdown(obj_obj2int(sockfd), obj_obj2int(how));
+        return_closcall1(data, k, boolean_t);")
+
+    (define (socket-close sock)
+      (if (socket? sock)
+          (%socket-close (socket->fd sock))))
+
+    (define-c %socket-close
+      "(void *data, int argc, closure _, object k, object sockfd)"
+      " close(obj_obj2int(sockfd));
+        return_closcall1(data, k, boolean_t);")
+
+;; TODO: socket-input-port
+;; TODO: socket-output-port
+
+    (define (call-with-socket socket proc)
+      (let ((result (proc socket)))
+        (socket-close socket)
+        result))
 
 ;    (define-syntax address-family
 ;      (er-macro-transformer
