@@ -106,14 +106,15 @@
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
-    (define (socket-merge-flags flags)
+    (define (socket-merge-flags . flags)
       (if (null? flags) 
           0
           (let ((result (car flags)))
             (for-each 
               (lambda (flag)
                 (set! result (num-or result flag)))
-              (cdr flags)))))
+              (cdr flags))
+            result)))
 
     (define-c num-or
       "(void *data, int argc, closure _, object k, object n1, object n2)"
