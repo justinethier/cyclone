@@ -6,7 +6,7 @@
   (include-c-header "<arpa/inet.h>")
   (include-c-header "<netdb.h>")
   (include-c-header "<unistd.h>")
-  (import (scheme base))
+  (import (scheme base) (scheme cxr))
   (export
       make-client-socket make-server-socket socket?
       socket-accept socket-send socket-recv
@@ -28,8 +28,27 @@
       *shut-rd* *shut-wr* *shut-rdwr*
   )
   (begin
-    ;; TODO: identifier for socket in vector
-    (define *socket-object-type* 'socket-object-type)
+    (define *socket-object-type* '%socket-object-type%)
+
+    (define (socket? obj)
+      (and (pair? obj) (eq? (car obj) *socket-object-type*)))
+
+    (define (make-client-socket node service . opts)
+      (let ((family *af-inet*)
+            (socktype *sock-stream*)
+            (flags (socket-merge-flags *ai-v4mapped* *ai-addrconfig*))
+            (proto *ipproto-ip*))
+        (when (not (null? opts))
+          (set! family (car opts))
+          (when (> (length opts) 1)
+            (set! socktype (cadr opts))
+            (when (> (length opts) 2)
+              (set! flags (caddr opts))
+              (when (> (length opts) 3)
+                (set! proto (cadddr opts))))))
+      (let ((sock-fd 
+             (%make-client-socket node service family socktype flags proto)))
+        (cons *socket-object-type* sock-fd))))
 
     ;; see: 
     ;; http://gnosis.cx/publish/programming/sockets.html
@@ -49,7 +68,6 @@
             af = obj_obj2int(family),
             type = obj_obj2int(socktype),
             proto = obj_obj2int(protocol);
-        make_pair(sockobj, quote_socket_91object_91type, NULL); 
 
         memset(&hints, 0, sizeof hints);
         hints.ai_flags = flags;
@@ -86,24 +104,13 @@
         }
         
         freeaddrinfo(servinfo); // all done with this structure
+        return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
-//        if ((sock = socket(af, type, proto)) < 0) {
-//          Cyc_rt_raise_msg(data, \"Failed to create socket\");
-//        }
-//        memset(&addr, 0, sizeof(addr));       /* Clear struct */
-//        // TODO: flags?
-//        addr.sin_family = af;
-//        addr.sin_addr.s_addr = inet_addr(string_str(node));  /* IP address */
-//        addr.sin_port = htons(obj_obj2int(service));       /* server port */
-//        /* Establish connection */
-//        if (connect(sock,
-//                    (struct sockaddr *) &addr,
-//                    sizeof(addr)) < 0) {
-//           Cyc_rt_raise_msg(data, \"Failed to connect with server\");
-//        }
+    (define (socket-merge-flags flags)
+    )
 
-        cdr(&sockobj) = obj_int2obj(sockfd);
-        return_closcall1(data, k, &sockobj); ")
+    ;(define (socket-purge-flags flags)
+    ;)
 
     (define-syntax make-const
       (er-macro-transformer
