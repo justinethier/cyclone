@@ -106,6 +106,14 @@
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
+    (define-syntax address-family
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (case (cadr expr)
+            ((inet) '*af-inet*)
+            ((inet6) '*af-inet6*)
+            (else '*af-unspec*)))))
+
     (define (socket-merge-flags . flags)
       (if (null? flags) 
           0
