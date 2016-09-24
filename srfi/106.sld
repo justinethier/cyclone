@@ -106,6 +106,67 @@
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
+    (define (make-server-socket service . opts)
+      (let ((family *af-inet*)
+            (socktype *sock-stream*)
+            (proto *ipproto-ip*))
+        (when (not (null? opts))
+          (set! family (car opts))
+          (when (> (length opts) 1)
+            (set! socktype (cadr opts))
+            (when (> (length opts) 2)
+              (set! proto (caddr opts)))))
+        (%make-server-socket service family socktype proto)))
+
+    (define-c %make-server-socket
+      "(void *data, int argc, closure _, object k, 
+        object aservice, object family, object socktype, object proto)"
+      "
+        int sockfd = 0;
+        struct addrinfo hints, *servinfo, *p;
+        int rv;
+        const char *service = string_str(aservice);
+        
+        memset(&hints, 0, sizeof hints);
+        hints.ai_family = obj_obj2int(family);
+        hints.ai_socktype = obj_obj2int(socktype);
+        hints.ai_protocol = obj_obj2int(proto);
+        hints.ai_flags = AI_PASSIVE; // use my IP address
+        
+        if ((rv = getaddrinfo(NULL, service, &hints, &servinfo)) != 0) {
+            char buffer[1024];
+            snprintf(buffer, 1023, \"getaddrinfo: %s\", gai_strerror(rv));
+            Cyc_rt_raise_msg(data, buffer);
+        }
+        
+        // loop through all the results and bind to the first we can
+        for(p = servinfo; p != NULL; p = p->ai_next) {
+            if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                    p->ai_protocol)) == -1) {
+                // perror(\"socket\");
+                continue;
+            }
+        
+            if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+                close(sockfd);
+                //perror(\"bind\");
+                continue;
+            }
+        
+            break; // if we get here, we must have connected successfully
+        }
+        
+        if (p == NULL) {
+            // looped off the end of the list with no successful bind
+            Cyc_rt_raise_msg(data, \"failed to bind socket\");
+        }
+        
+        freeaddrinfo(servinfo); // all done with this structure
+        return_closcall1(data, k, obj_int2obj(sockfd)); ")
+
+;; TODO: when do we call listen()? ??
+; TODO: (define (socket-accept sock))
+
     (define (socket-send sock bv . opts)
       (let ((flags 0))
         (if (not (null? opts))
