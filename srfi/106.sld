@@ -5,6 +5,7 @@
   (include-c-header "<netinet/in.h>")
   (include-c-header "<arpa/inet.h>")
   (include-c-header "<netdb.h>")
+  (include-c-header "<unistd.h>")
   (import (scheme base))
   (export
       make-client-socket make-server-socket socket?
@@ -28,39 +29,81 @@
   )
   (begin
     ;; TODO: identifier for socket in vector
+    (define *socket-object-type* 'socket-object-type)
 
-  ;; see: http://gnosis.cx/publish/programming/sockets.html
+    ;; see: 
+    ;; http://gnosis.cx/publish/programming/sockets.html
+    ;; http://beej.us/guide/bgnet/output/html/multipage/getaddrinfoman.html
     (define-c %make-client-socket
       "(void *data, int argc, closure _, object k, 
-        object node, object service, 
+        object anode, object aservice, 
         object family, object socktype, 
-        object flags, object protocol)"
-      ;; TODO: how to pack socket objects?
-      ;; can we put sock fd in a vector, along with an identifier?
-      " int sock;
-        struct sockaddr_in addr;
-        int af = obj_obj2int(family),
+        object aflags, object protocol)"
+      " int sockfd = 0;
+        //struct sockaddr_in addr;
+        struct addrinfo hints, *servinfo, *p;
+        const char *node = string_str(anode),
+                   *service = string_str(aservice);
+        int rv, 
+            flags = obj_obj2int(aflags),
+            af = obj_obj2int(family),
             type = obj_obj2int(socktype),
             proto = obj_obj2int(protocol);
-        // TODO: put trace statement here 
-        // TODO: type check args to this function
+        make_pair(sockobj, quote_socket_91object_91type, NULL); 
 
-        if ((sock = socket(af, type, proto)) < 0) {
-          Cyc_rt_raise_msg(data, \"Failed to create socket\");
+        memset(&hints, 0, sizeof hints);
+        hints.ai_flags = flags;
+        hints.ai_family = af;
+        hints.ai_socktype = type;
+        hints.ai_protocol = proto;
+
+        if ((rv = getaddrinfo(node, service, &hints, &servinfo)) != 0) {
+           char buffer[1024];
+           snprintf(buffer, 1023, \"getaddrinfo: %s\", gai_strerror(rv));
+           Cyc_rt_raise_msg(data, buffer);
         }
-        memset(&addr 0, sizeof(addr));       /* Clear struct */
-        // TODO: flags?
-        addr = af;
-        addr = inet_addr(string_str(node));  /* IP address */
-        addr = htons(obj_obj2int(service));       /* server port */
-        /* Establish connection */
-        if (connect(sock,
-           (struct sockaddr *) &addr
-                               sizeof(addr)) < 0) {
-           Cyc_rt_raise_msg(data, \"Failed to connect with server\");
+
+        // loop through all the results and connect to the first we can
+        for(p = servinfo; p != NULL; p = p->ai_next) {
+            if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                    p->ai_protocol)) == -1) {
+                //perror(\"socket\");
+                continue;
+            }
+        
+            if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+                //perror(\"socket\");
+                close(sockfd);
+                continue;
+            }
+        
+            break; // if we get here, we must have connected successfully
         }
-        // TODO: pack socket, and pass that to k. check code in Cyc_make_vector
-        return_closcall1(data, k, obj_int2obj()); ")
+        
+        if (p == NULL) {
+            // looped off the end of the list with no connection
+            Cyc_rt_raise_msg(data, \"failed to connect client socket\");
+        }
+        
+        freeaddrinfo(servinfo); // all done with this structure
+
+//        if ((sock = socket(af, type, proto)) < 0) {
+//          Cyc_rt_raise_msg(data, \"Failed to create socket\");
+//        }
+//        memset(&addr, 0, sizeof(addr));       /* Clear struct */
+//        // TODO: flags?
+//        addr.sin_family = af;
+//        addr.sin_addr.s_addr = inet_addr(string_str(node));  /* IP address */
+//        addr.sin_port = htons(obj_obj2int(service));       /* server port */
+//        /* Establish connection */
+//        if (connect(sock,
+//                    (struct sockaddr *) &addr,
+//                    sizeof(addr)) < 0) {
+//           Cyc_rt_raise_msg(data, \"Failed to connect with server\");
+//        }
+
+        cdr(&sockobj) = obj_int2obj(sockfd);
+        return_closcall1(data, k, &sockobj); ")
 
     (define-syntax make-const
       (er-macro-transformer
