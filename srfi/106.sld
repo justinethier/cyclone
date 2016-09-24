@@ -162,10 +162,17 @@
         }
         
         freeaddrinfo(servinfo); // all done with this structure
+
+        if (listen(sockfd, 20) < 0)
+            Cyc_rt_raise_msg(data, \"Unable to listen on socket\");
+        }
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
-;; TODO: when do we call listen()? ??
+;; See: http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html#accept
 ; TODO: (define (socket-accept sock))
+; struct sockaddr_storage their_addr;
+;    addr_size = sizeof their_addr;
+;    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 
     (define (socket-send sock bv . opts)
       (let ((flags 0))
