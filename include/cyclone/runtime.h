@@ -258,6 +258,8 @@ object Cyc_sum(void *data, object cont, int argc, object n, ...);
 object Cyc_sub(void *data, object cont, int argc, object n, ...);
 object Cyc_mul(void *data, object cont, int argc, object n, ...);
 object Cyc_div(void *data, object cont, int argc, object n, ...);
+object Cyc_bit_and(void *data, object n1, object n2); 
+object Cyc_bit_or(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
                           int default_no_args, int default_one_arg, object n,
