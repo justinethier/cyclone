@@ -106,6 +106,38 @@
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
+    (define (socket-send sock bv . opts)
+      (let ((flags 0))
+        (if (not (null? opts))
+            (set! flags (car opts)))
+        (%socket-send sock bv flags)))
+
+    (define-c %socket-send
+      "(void *data, int argc, closure _, object k, object sockfd, object bvobj, object flags)"
+      " // TODO: type checking 
+        int bytes_sent;
+        bytevector_type *bv =  (bytevector_type *)bvobj;
+        bytes_sent = send(obj_obj2int(sockfd), bv->data, bv->len, obj_obj2int(flags));
+        return_closcall1(data, k, obj_int2obj(bytes_sent));")
+
+    (define (socket-recv sock size . opts)
+      (let ((flags 0))
+        (if (not (null? opts))
+            (set! flags (car opts)))
+        (%socket-recv sock size flags)))
+
+    (define-c %socket-recv
+      "(void *data, int argc, closure _, object k, object sockfd, object size, object flags)"
+      " // TODO: type checking 
+        int len = obj_obj2int(size);
+        make_empty_bytevector(bv);
+        bv.data = alloca(sizeof(char) * len);
+
+        set_thread_blocked(data, k);
+        bv.len = recv(obj_obj2int(sockfd), bv.data, len, obj_obj2int(flags));
+        return_thread_runnable(data, &bv);
+      ")
+
     (define (socket-shutdown sock how)
       (if (and (socket? sock) (integer? how))
           (%socket-shutdown (socket->fd sock) how)))
