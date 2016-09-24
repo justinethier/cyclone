@@ -112,15 +112,27 @@
           (let ((result (car flags)))
             (for-each 
               (lambda (flag)
-                (set! result (num-or result flag)))
+                (set! result (bit-set result flag)))
               (cdr flags))
             result)))
 
-    (define-c num-or
+    (define (socket-purge-flags base-flag . flags)
+      (if (null? flags) 
+          base-flag
+          (begin
+            (for-each 
+              (lambda (flag)
+                (set! base-flag (bit-unset base-flag flag)))
+              flags)
+              base-flag)))
+
+    (define-c bit-set
       "(void *data, int argc, closure _, object k, object n1, object n2)"
-      " return_closcall1(data, k, Cyc_bit_or(data, n1, n2));")
-    ;(define (socket-purge-flags flags)
-    ;)
+      " return_closcall1(data, k, Cyc_bit_set(data, n1, n2));")
+
+    (define-c bit-unset
+      "(void *data, int argc, closure _, object k, object n1, object n2)"
+      " return_closcall1(data, k, Cyc_bit_unset(data, n1, n2));")
 
     (define-syntax make-const
       (er-macro-transformer
