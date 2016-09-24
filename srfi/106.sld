@@ -106,13 +106,55 @@
         freeaddrinfo(servinfo); // all done with this structure
         return_closcall1(data, k, obj_int2obj(sockfd)); ")
 
-    (define-syntax address-family
-      (er-macro-transformer
-        (lambda (expr rename compare)
-          (case (cadr expr)
-            ((inet) '*af-inet*)
-            ((inet6) '*af-inet6*)
-            (else '*af-unspec*)))))
+;    (define-syntax address-family
+;      (er-macro-transformer
+;        (lambda (expr rename compare)
+;          (case (cadr expr)
+;            ((inet)   '*af-inet*)
+;            ((inet6)  '*af-inet6*)
+;            (else     '*af-unspec*)))))
+
+;; TODO: not supported yet? define-syntax is not recognized by eval
+;    (define-syntax flags:sym->const
+;      (er-macro-transformer
+;        (lambda (expr rename compare)
+;          `(define-syntax ,(car expr)
+;             (er-macro-transformer
+;               (lambda (expr rename compare)
+;                 (case (cadr expr)
+;                  ,@(cdr expr))))))))
+;
+;    (flags:sym->const
+;      address-family
+;      ((inet)   '*af-inet*)
+;      ((inet6)  '*af-inet6*)
+;      (else     '*af-unspec*))
+;
+;address-info
+;((canoname)     '*ai-canonname*)
+;((numerichost)  '*ai-numerichost*)
+;((v4mapped)     '*ai-v4mapped*)
+;((all)          '*ai-all*)
+;((addrconfig)   '*ai-addrconfig*)
+;
+;socket-domain
+;((stream)   '*sock-stream*)
+;((datagram) '*sock-dgram*)
+;
+;ip-protocol
+;((ip)  '*ipproto-ip*)
+;((tcp) '*ipproto-tcp*)
+;((udp) '*ipproto-udp*)
+;
+;message-type
+;((none)     0)
+;((peek)     '*msg-peek*)
+;((oob)      '*msg-oob*)
+;((wait-all) '*msg-waitall*)
+;
+;shutdown-method
+;((read)  '*shut-rd*)
+;((write) '*shut-wr*)
 
     (define (socket-merge-flags . flags)
       (if (null? flags) 
