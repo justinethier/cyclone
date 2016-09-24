@@ -4500,15 +4500,15 @@ void vpbuffer_free(void **buf)
   free(buf);
 }
 
-object Cyc_bit_and(void *data, object n1, object n2) 
+object Cyc_bit_unset(void *data, object n1, object n2) 
 {
   Cyc_check_int(data, n1);
   Cyc_check_int(data, n2);
   return (obj_int2obj( 
-            obj_obj2int(n1) & obj_obj2int(n2)));
+            obj_obj2int(n1) & ~(obj_obj2int(n2))));
 }
 
-object Cyc_bit_or(void *data, object n1, object n2) 
+object Cyc_bit_set(void *data, object n1, object n2) 
 {
   Cyc_check_int(data, n1);
   Cyc_check_int(data, n2);
