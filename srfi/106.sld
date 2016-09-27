@@ -7,7 +7,7 @@
 ;;;; This module implements the basic socket interface from SRFI 106:
 ;;;; http://srfi.schemers.org/srfi-106/srfi-106.html
 ;;;;
-(define-library (106) ;(srfi 106)
+(define-library (srfi 106)
   (include-c-header "<sys/types.h>")
   (include-c-header "<sys/socket.h>")
   (include-c-header "<netinet/in.h>")
