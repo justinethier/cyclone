@@ -41,6 +41,7 @@ SMODULES = \
   srfi/18 \
   srfi/27 \
   srfi/69 \
+  srfi/106 \
   srfi/111 \
   srfi/117 \
   srfi/132 \
@@ -150,6 +151,7 @@ bootstrap: icyc
 	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/106.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/117.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
