@@ -357,9 +357,9 @@
         ((and (definition? exp)
               (not (null? (cdr exp))))
          (analyze-definition exp env))
-        ;((and (syntax? exp)
-        ;      (not (null? (cdr exp))))
-        ; (analyze-syntax exp env))
+        ((and (syntax? exp)
+              (not (null? (cdr exp))))
+         (analyze-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -407,19 +407,22 @@
   (let ((var (cadr exp)))
     (cond
       ((tagged-list? 'er-macro-transformer (caddr exp))
-        (let ((sproc (analyze-syntax-lambda (cadr (caddr exp)) a-env)))
+        (let ((sproc (make-macro (cadr (caddr exp))))) ;(analyze-syntax-lambda (cadr (caddr exp)) a-env)))
           (lambda (env)
-            (env:define-variable! var sproc #;(sproc env) env)
+            (env:define-variable! var sproc env)
             'ok)))
       (else
+        ;; TODO: need to support syntax-rules, and other methods of
+        ;; building a macro. maybe call into something like 
+        ;; analyze-syntax-lambda instead of erroring here
         (error "macro syntax not supported yet")))))
 
-(define (analyze-syntax-lambda exp a-env)
-  (let ((vars (lambda-parameters exp))
-        (bproc (analyze-sequence (lambda-body exp) a-env)))
-    (write `(debug ,(lambda-body exp)))
-    ;(lambda (env) 
-      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
+;(define (analyze-syntax-lambda exp a-env)
+;  (let ((vars (lambda-parameters exp))
+;        (bproc (analyze-sequence (lambda-body exp) a-env)))
+;    (write `(debug ,(lambda-body exp)))
+;    ;(lambda (env) 
+;      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
 
 (define (analyze-if exp a-env)
   (let ((pproc (analyze (if-predicate exp) a-env))
