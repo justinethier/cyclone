@@ -1,4 +1,12 @@
-;; Sockets library
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This module implements the basic socket interface from SRFI 106:
+;;;; http://srfi.schemers.org/srfi-106/srfi-106.html
+;;;;
 (define-library (106) ;(srfi 106)
   (include-c-header "<sys/types.h>")
   (include-c-header "<sys/socket.h>")
@@ -246,63 +254,67 @@
       " close(obj_obj2int(sockfd));
         return_closcall1(data, k, boolean_t);")
 
-;; TODO: socket-input-port
-;; TODO: socket-output-port
+;; TODO: implement both of these:
+    (define (socket-input-port sock)
+      (error "Not implemented yet"))
+    (define (socket-output-port sock)
+      (error "Not implemented yet"))
+;; END TODO
 
     (define (call-with-socket socket proc)
       (let ((result (proc socket)))
         (socket-close socket)
         result))
 
-;    (define-syntax address-family
-;      (er-macro-transformer
-;        (lambda (expr rename compare)
-;          (case (cadr expr)
-;            ((inet)   '*af-inet*)
-;            ((inet6)  '*af-inet6*)
-;            (else     '*af-unspec*)))))
+    (define-syntax flags:sym->const
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          `(define-syntax ,(cadr expr)
+             (er-macro-transformer
+               (lambda (expr rename compare)
+                 (case (cadr expr)
+                  ,@(cddr expr)
+                  (else
+                    (error 
+                      "Unexpected value" 
+                      (list (quote ,(cadr expr)) (cadr expr)))))))))))
 
-;; TODO: not supported yet? define-syntax is not recognized by eval
-;    (define-syntax flags:sym->const
-;      (er-macro-transformer
-;        (lambda (expr rename compare)
-;          `(define-syntax ,(car expr)
-;             (er-macro-transformer
-;               (lambda (expr rename compare)
-;                 (case (cadr expr)
-;                  ,@(cdr expr))))))))
-;
-;    (flags:sym->const
-;      address-family
-;      ((inet)   '*af-inet*)
-;      ((inet6)  '*af-inet6*)
-;      (else     '*af-unspec*))
-;
-;address-info
-;((canoname)     '*ai-canonname*)
-;((numerichost)  '*ai-numerichost*)
-;((v4mapped)     '*ai-v4mapped*)
-;((all)          '*ai-all*)
-;((addrconfig)   '*ai-addrconfig*)
-;
-;socket-domain
-;((stream)   '*sock-stream*)
-;((datagram) '*sock-dgram*)
-;
-;ip-protocol
-;((ip)  '*ipproto-ip*)
-;((tcp) '*ipproto-tcp*)
-;((udp) '*ipproto-udp*)
-;
-;message-type
-;((none)     0)
-;((peek)     '*msg-peek*)
-;((oob)      '*msg-oob*)
-;((wait-all) '*msg-waitall*)
-;
-;shutdown-method
-;((read)  '*shut-rd*)
-;((write) '*shut-wr*)
+    (flags:sym->const
+      address-family
+      ((inet)   '*af-inet*)
+      ((inet6)  '*af-inet6*)
+      ((unspec) '*af-unspec*))
+
+    (flags:sym->const
+      address-info
+      ((canoname)     '*ai-canonname*)
+      ((numerichost)  '*ai-numerichost*)
+      ((v4mapped)     '*ai-v4mapped*)
+      ((all)          '*ai-all*)
+      ((addrconfig)   '*ai-addrconfig*))
+
+    (flags:sym->const
+      socket-domain
+      ((stream)   '*sock-stream*)
+      ((datagram) '*sock-dgram*))
+      
+    (flags:sym->const
+      ip-protocol
+      ((ip)  '*ipproto-ip*)
+      ((tcp) '*ipproto-tcp*)
+      ((udp) '*ipproto-udp*))
+      
+    (flags:sym->const
+      message-type
+      ((none)     0)
+      ((peek)     '*msg-peek*)
+      ((oob)      '*msg-oob*)
+      ((wait-all) '*msg-waitall*))
+      
+    (flags:sym->const
+      shutdown-method
+      ((read)  '*shut-rd*)
+      ((write) '*shut-wr*))
 
     (define (socket-merge-flags . flags)
       (if (null? flags) 
