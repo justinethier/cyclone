@@ -4,15 +4,31 @@ The `(scheme write)` library provides procedures for writing
 Scheme objects.
 
 - [`display`](#display)
-- `write`
+- [`write`](#write)
+- [`write-simple`](#write-simple)
+- [`write-shared`](#write-shared)
 
 #display
 
-    (display)
-    (display port)
+    (display obj)
+    (display obj port)
+
+Write object to the given output port, or the current output if none is given. Strings and characters are output using only the characters that they represent, without any enclosing quotes, etc.
 
 #write
 
-    (write)
-    (write port)
+    (write obj)
+    (write obj port)
 
+Write object to the given output port, or the current output if none is given. Objects are written exactly as they are represented in code.
+
+
+#write-shared
+
+    (write-shared obj)
+    (write-shared obj port)
+
+#write-simple
+
+    (write-simple obj)
+    (write-simple obj port)
