@@ -254,12 +254,24 @@
       " close(obj_obj2int(sockfd));
         return_closcall1(data, k, boolean_t);")
 
-;; TODO: implement both of these:
+;; TODO: may not be good enough, socket may be closed if file is closed
     (define (socket-input-port sock)
-      (error "Not implemented yet"))
+      (%socket-input-port (socket->fd sock)))
+
+    (define-c %socket-input-port
+      "(void *data, int argc, closure _, object k, object sockfd)"
+      " FILE *fp = fdopen(obj_obj2int(sockfd), \"r\");
+        make_port(port, fp, 1);
+        return_closcall1(data, k, &port);")
+
     (define (socket-output-port sock)
-      (error "Not implemented yet"))
-;; END TODO
+      (%socket-output-port (socket->fd sock)))
+
+    (define-c %socket-output-port
+      "(void *data, int argc, closure _, object k, object sockfd)"
+      " FILE *fp = fdopen(obj_obj2int(sockfd), \"w\");
+        make_port(port, fp, 0);
+        return_closcall1(data, k, &port);")
 
     (define (call-with-socket socket proc)
       (let ((result (proc socket)))
