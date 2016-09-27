@@ -13,7 +13,7 @@ Section | Status | Comments
 3.4 Storage model | Yes | No immutable types at this time.
 3.5 Proper tail recursion | Yes |
 4.1 Primitive expression types | Partial | `include` and `include-ci` are not implemented, although `include` may be specified as part of a library definition.
-4.2 Derived expression types | Partial | 
+4.2 Derived expression types | Yes | 
 4.2.1 Conditionals | Yes | 
 4.2.2 Binding constructs | Yes |
 4.2.3 Sequencing | Yes | 
@@ -34,7 +34,7 @@ Section | Status | Comments
 6.1 Equivalence predicates | Yes |
 6.2 Numbers | Partial | Only integers and reals are supported at this time.
 6.3 Booleans | Yes | `#true` and `#false` are not recognized by parser.
-6.4 Pairs and lists | Yes | `member` functions are predicates, `member` and `assoc` do not accept `compare` argument.
+6.4 Pairs and lists | Yes |
 6.5 Symbols | Yes |
 6.6 Characters | Partial | No unicode support.
 6.7 Strings | Partial | No unicode support.
