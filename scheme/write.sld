@@ -10,7 +10,8 @@
   (export
     display
     write
-  )
+    write-shared
+    write-simple)
   (import (scheme base))
   (begin
     (define (display obj . port)
@@ -21,5 +22,7 @@
       (if (null? port)
           (Cyc-write obj (current-output-port))
           (Cyc-write obj (car port))))
+    (define write-shared write)
+    (define write-simple write)
   )
 )

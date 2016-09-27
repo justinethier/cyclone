@@ -3,7 +3,7 @@
 The `(scheme read)` library provides procedures for reading Scheme objects.
 
 - [`read`](#read)
-- `read-all`
+- [`read-all`](#read-all)
 
 #read
 
