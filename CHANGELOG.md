@@ -5,6 +5,10 @@ TODO: performance improvements
 TODO: SRFI 113, 128
 TODO: macro improvements (ref trans.) to support SRFI 128
 
+Features:
+
+- Limited support for `define-syntax` from `eval`.
+
 Bug Fixes
 
 - Improved macro hygiene support to properly rename temporary variables in the `let-values` macro.
