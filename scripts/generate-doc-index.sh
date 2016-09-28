@@ -1,3 +1,8 @@
 #!/bin/bash
-# Work in progress, doesn't do anything useful yet
-grep -r "^- \[" docs/api/scheme/*
+# Generate a sorted list of functions/variables from the API documentation.
+API=api-index.txt
+TMP=/tmp/api-index.txt
+cyclone scripts/generate-doc-index.scm
+grep -r "^- \[" docs/api/scheme/* | ./scripts/generate-doc-index | sort > $TMP
+grep -r "^- \[" docs/api/srfi/* | ./scripts/generate-doc-index >> $TMP
+sort $TMP > $API
