@@ -8,7 +8,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`force`](#force) 
 - [`delay-force`](#delay-force) 
 - [`make-promise`](#make-promise) 
-- [`promise?`](#promise?)
+- [`promise?`](#promise)
 
 #delay
 
@@ -32,7 +32,7 @@ Force the value of a promise.
 
 Return a promise which will return `obj` when forced. This function is similar to delay but does not delay its argument: it is a procedure rather than syntax. If `obj` is already a promise, it is returned.
 
-#promise?
+#promise
 
     (promise? obj)
 
