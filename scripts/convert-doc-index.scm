@@ -34,7 +34,7 @@
          (e-fnc (+ s-fnc (index-of (string->list (substring line (+ 0 s-fnc) (string-length line))) #\`)))
          (fnc (substring line s-fnc e-fnc)))
    (string-append 
-     "[`" fnc "`](" file "#" fnc ")")))
+     "- [`" fnc "`](" file "#" fnc ")")))
 
 ;(display (convert-line line))
 (define (loop)
