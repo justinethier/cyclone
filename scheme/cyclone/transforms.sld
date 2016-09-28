@@ -1075,6 +1075,10 @@
               (define-vars (find-defined-vars body))
               (defines-a-lookup (make-a-lookup define-vars))
              )
+         ;; This is a convenient place to check for duplicate lambda args
+         (if (not (equal? (delete-duplicates args) args))
+             (error "duplicate lambda parameter(s)" args))
+         ;; New lambda code
          `(lambda 
             ,(list->lambda-formals
                 (map (lambda (p) (cdr p)) a-lookup)  
