@@ -23,7 +23,8 @@
 ;; goal is:
 ;; [`load`](api/scheme/load.md#load)
 ;(define line "docs/api/scheme/base.md:- [`denominator`](#denominator)")
-(define line "docs/api/scheme/process-context.md:- [`get-environment-variables`](#get-environment-variables)")
+;(define line "docs/api/scheme/process-context.md:- [`get-environment-variables`](#get-environment-variables)")
+;(define line "docs/api/scheme/char.md:- [`string-ci>=?`](#string-ci-3)")
 
 (define (convert-line line)
   (let* ((lis (string->list line))
@@ -32,9 +33,13 @@
          (file (substring line s-file e-file))
          (s-fnc (+ 1 (index-of lis #\`)))
          (e-fnc (+ s-fnc (index-of (string->list (substring line (+ 0 s-fnc) (string-length line))) #\`)))
-         (fnc (substring line s-fnc e-fnc)))
+         (fnc (substring line s-fnc e-fnc))
+         (s-link (index-of lis #\#))
+         (e-link (string-length line))
+         (link (substring line s-link e-link))
+         )
    (string-append 
-     "- [`" fnc "`](" file "#" fnc ")")))
+     "- [`" fnc "`](" file "" link ")")))
 
 ;(display (convert-line line))
 (define (loop)
