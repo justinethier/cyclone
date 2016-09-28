@@ -10,8 +10,24 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`make-promise`](#make-promise) 
 - [`promise?`](#promise?)
 
-#delay 
+#delay
+
+    (delay {expression})                                lazy library syntax
+
 #force 
+
+    (force promise)
+
 #delay-force 
+
+    (delay-force {expression})                          lazy library syntax
+
 #make-promise
+
+    (make-promise obj)
+
 #promise?
+
+    (promise? obj)
+
+Returns `#t` if object is a promise, and `#f` otherwise.
