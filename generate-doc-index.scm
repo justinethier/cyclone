@@ -1,8 +1,15 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2016, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; A simple program to format links for the API index page.
+;;;;
 (import 
   (scheme base) 
   (scheme write)
-  (scheme cyclone util)
-  (srfi 1))
+  (scheme cyclone util))
 
 ;; TODO: move this somewhere useful
 (define (index-of lst x)
@@ -29,8 +36,11 @@
    (string-append 
      "[`" fnc "`](" file "#" fnc ")")))
 
-(display (convert-line line))
-;(define (loop)
-; (let ((line (read-line)))
-;  (if (not (eof? line))
-;      (display (convert-line line)))))
+;(display (convert-line line))
+(define (loop)
+ (let ((line (read-line)))
+  (when (not (eof-object? line))
+    (display (convert-line line))
+    (newline)
+    (loop))))
+(loop)
