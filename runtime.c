@@ -423,6 +423,7 @@ object Cyc_glo_eval_from_c = NULL;
 object Cyc_default_exception_handler(void *data, int argc, closure _,
                                      object err)
 {
+  int is_msg = 1;
   fprintf(stderr, "Error: ");
 
   if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag) {
@@ -431,8 +432,16 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
     // Error is list of form (type arg1 ... argn)
     err = cdr(err);             // skip type field
     for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
-      Cyc_display(car(err), stderr);
-      fprintf(stderr, " ");
+      if (is_msg && 
+          is_object_type(car(err)) && 
+          type_of(car(err)) == string_tag) {
+        is_msg = 0;
+        Cyc_display(car(err), stderr);
+        fprintf(stderr, ": ");
+      } else {
+        Cyc_write(car(err), stderr);
+        fprintf(stderr, " ");
+      }
     }
   }
 

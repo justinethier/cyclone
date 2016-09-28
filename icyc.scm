@@ -38,14 +38,18 @@
           (display "Error: ")
           (cond
             ((pair? obj)
+             (when (string? (car obj))
+               (display (car obj))
+               (display ": ")
+               (set! obj (cdr obj)))
              (for-each
                (lambda (o)
-                 (display o)
+                 (write o)
                  (display " "))
                obj))
             (else
               (display obj)))
-          (display "\n")
+          (newline)
           (k #t))
         (lambda ()
           (repl)))))
