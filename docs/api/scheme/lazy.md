@@ -12,19 +12,25 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 #delay
 
-    (delay {expression})                                lazy library syntax
+    (delay {expression})
+
+Return a promise object that can be asked in the future (via `force`) to evaluate `{expression}` and return the result.
 
 #force 
 
     (force promise)
 
+Force the value of a promise.
+
 #delay-force 
 
-    (delay-force {expression})                          lazy library syntax
+    (delay-force {expression})
 
 #make-promise
 
     (make-promise obj)
+
+Return a promise which will return `obj` when forced. This function is similar to delay but does not delay its argument: it is a procedure rather than syntax. If `obj` is already a promise, it is returned.
 
 #promise?
 
