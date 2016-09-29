@@ -219,6 +219,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #current-output-port
     (current-output-port)
 #define-record-type
+    (define-record-type {name}
+      {constructor} {pred} {field} ...)
 #denominator
     (denominator n)
 #do
