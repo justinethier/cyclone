@@ -1,7 +1,8 @@
 # Write Library
 
-The `(scheme write)` library provides procedures for writing
-Scheme objects.
+The `(scheme write)` library provides procedures for writing Scheme objects.
+
+For more information see the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf).
 
 - [`display`](#display)
 - [`write`](#write)
