@@ -10,10 +10,16 @@ The `(scheme time)` library provides access to time-related values.
 
     (current-jiffy)
 
+Get the number of jiffies since the program started. This function can return the same value if the program runs longer than approximately 72 minutes on a 32-bit platform.
+
 #current-second
 
     (current-second)
 
+Get the current number of seconds since the UNIX epoch. 
+
 #jiffies-per-second
 
     (jiffies-per-second)
+
+The number of jiffies per second.
