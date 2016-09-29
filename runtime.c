@@ -158,6 +158,28 @@ char **get_env_variables()
   return env_variables;
 }
 
+void pack_env_variables(void *data, object k)
+{
+  char **env = env_variables;
+  object tail;
+  object head = NULL;
+  tail = head;
+  for (; *env != NULL; env++) {
+    char *e = *env;
+    make_string_noalloc(stmp, e, strlen(e));
+    make_pair(tmp, boolean_t, &stmp);
+
+    make_pair(p, &tmp, NULL);
+    if (head == NULL) {
+        tail = head = &p;
+    } else {
+      cdr(tail) = &p;
+      tail = &p;
+    }
+  }
+  return_closcall1(data, k, &head);
+}
+
 void set_env_variables(char **vars)
 {
   env_variables = vars;

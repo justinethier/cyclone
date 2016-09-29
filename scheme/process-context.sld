@@ -12,7 +12,7 @@
     ;exit - not needed because already defined as a primitive, at least for now
     emergency-exit
     get-environment-variable
-    ; TODO: get-environment-variables
+    get-environment-variables
   )
   (begin
     (define emergency-exit exit)
@@ -47,5 +47,9 @@
           make_string(str, v);
           return_closcall1(data, k, &str);
         }
+      ")
+    (define-c get-environment-variables
+      "(void *data, int argc, closure _, object k)"
+      "pack_env_variables(data, k); 
       ")
   ))

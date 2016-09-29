@@ -47,6 +47,7 @@ extern long global_heap_size;
 extern const object Cyc_EOF;
 
 char **get_env_variables();
+void pack_env_variables(void *data, object k);
 void set_env_variables(char **vars);
 
 object cell_get(object cell);
