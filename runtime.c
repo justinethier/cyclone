@@ -152,6 +152,17 @@ static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
 
+char **env_variables = NULL;
+char **get_env_variables()
+{
+  return env_variables;
+}
+
+void set_env_variables(char **vars)
+{
+  env_variables = vars;
+}
+
 // Functions to support concurrency kit hashset
 // These are specifically for a table of symbols
 static void *hs_malloc(size_t r)

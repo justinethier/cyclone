@@ -46,6 +46,9 @@ extern long global_stack_size;
 extern long global_heap_size;
 extern const object Cyc_EOF;
 
+char **get_env_variables();
+void set_env_variables(char **vars);
+
 object cell_get(object cell);
 
 #define global_set(glo,value) Cyc_global_set(data, (object *)&glo, value)

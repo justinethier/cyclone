@@ -1,6 +1,8 @@
 
 # R<sup>7</sup>RS Libraries
 
+This section of the Cyclone Scheme API is based on the specification from [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). The R<sup>7</sup>RS document may be used to provide more detailed API information if the API provided here is not sufficient.
+
 - Cyclone runtime
 - [`scheme base`](api/scheme/base.md)
 - [`scheme case-lambda`](api/scheme/case-lambda.md)

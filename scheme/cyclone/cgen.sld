@@ -75,7 +75,7 @@
     (next (string->list str) '())))
 
 (define *c-main-function*
-"int main(int argc,char **argv)
+"int main(int argc, char **argv, char **envp)
 {gc_thread_data *thd;
  long stack_size = global_stack_size = STACK_SIZE;
  long heap_size = global_heap_size = HEAP_SIZE;
@@ -83,6 +83,7 @@
  mclosure0(entry_pt,&c_entry_pt); // First function to execute
  _cyc_argc = argc;
  _cyc_argv = argv;
+ set_env_variables(envp);
  gc_initialize();
  thd = malloc(sizeof(gc_thread_data));
  gc_thread_data_init(thd, 0, (char *) &stack_size, stack_size);
