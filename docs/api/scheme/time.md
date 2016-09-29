@@ -2,6 +2,8 @@
 
 The `(scheme time)` library provides access to time-related values.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`current-jiffy`](#current-jiffy)
 - [`current-second`](#current-second)
 - [`jiffies-per-second`](#jiffies-per-second)

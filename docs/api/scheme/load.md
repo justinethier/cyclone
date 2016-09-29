@@ -2,6 +2,8 @@
 
 The `(scheme load)` library exports procedures for loading Scheme expressions from files.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`load`](#load)
 
 #load

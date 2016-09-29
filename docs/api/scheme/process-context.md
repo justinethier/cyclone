@@ -2,6 +2,8 @@
 
 The `(scheme process-context)` library exports procedures for accessing with the program's calling context.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`command-line`](#command-line)
 - [`emergency-exit`](#emergency-exit)
 - [`get-environment-variable`](#get-environment-variable)

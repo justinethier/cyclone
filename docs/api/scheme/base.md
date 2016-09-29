@@ -2,6 +2,8 @@
 
 The `(scheme base)` library exports many of the procedures and syntax bindings that are traditionally associated with Scheme.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`cons-source`](#cons-source)
 - [`syntax-rules`](#syntax-rules)
 - [`letrec*`](#letrec*)

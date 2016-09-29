@@ -2,6 +2,8 @@
 
 The `(scheme read)` library provides procedures for reading Scheme objects.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`read`](#read)
 - [`read-all`](#read-all)
 

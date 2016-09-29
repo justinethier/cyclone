@@ -2,6 +2,8 @@
 
 The `(scheme inexact)` library exports procedures which are typically only useful with inexact values.
 
+For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
+
 - [`acos`](#acos)
 - [`asin`](#asin)
 - [`atan`](#atan)
