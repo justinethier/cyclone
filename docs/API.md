@@ -1,7 +1,7 @@
 
 # R<sup>7</sup>RS Libraries
 
-This section of the Cyclone Scheme API is based on the specification from [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). The R<sup>7</sup>RS document may be used to provide more detailed API information if the API provided here is not sufficient.
+This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf). The R<sup>7</sup>RS document may be used to provide detailed information in addition to the following API sections.
 
 - Cyclone runtime
 - [`scheme base`](api/scheme/base.md)
@@ -20,7 +20,7 @@ This section of the Cyclone Scheme API is based on the specification from [R<sup
 
 # SRFI Library Support
 
-Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries:
+Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Again, detailed information is available in the linked SRFI page as well as the provided Cyclone API.
 
 - [`srfi 1`](api/srfi/1.md) - [List Library](http://srfi.schemers.org/srfi-1/srfi-1.html)
 - [`srfi 2`](api/srfi/2.md) - [`and-let*`](http://srfi.schemers.org/srfi-2/srfi-2.html)
