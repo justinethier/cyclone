@@ -15,6 +15,7 @@ This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specific
 - [`scheme base`](api/scheme/base.md)
 - [`scheme case-lambda`](api/scheme/case-lambda.md)
 - [`scheme char`](api/scheme/char.md)
+- [`scheme complex`](api/scheme/complex.md)
 - [`scheme cxr`](api/scheme/cxr.md)
 - [`scheme eval`](api/scheme/eval.md)
 - [`scheme file`](api/scheme/file.md)
