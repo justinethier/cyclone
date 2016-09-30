@@ -20,6 +20,8 @@
     (when (> (string-length line) 1)
       (when (not (eq? last-alpha (string-ref line 0)))
         (set! last-alpha (string-ref line 0))
+        (newline)
+        (display "- - -")
         (newline))
       (display (substring line 1 (string-length line)))
     )
