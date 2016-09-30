@@ -4,7 +4,7 @@
 
 - [R<sup>7</sup>RS Libraries](#r7rs-libraries)
 - [SRFI Library Support](#srfi-library-support)
-- [Cyclone-specific](#cyclone-specific)
+- [Cyclone Internals](#cyclone-internals)
 - [Index](#index)
 
 # R<sup>7</sup>RS Libraries
@@ -42,9 +42,9 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 - [`srfi 132`](api/srfi/132.md) - [Sort Libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
 - [`srfi 133`](api/srfi/133.md) - [Vector Library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
 
-# Cyclone-specific
+# Cyclone Internals
 
-These libraries are used by the Cyclone compiler itself, and are subject to change:
+These libraries are used by the Cyclone compiler itself and could change in the future:
 
 - `scheme cyclone cgen`
 - `scheme cyclone common`
