@@ -30,7 +30,11 @@ bytevector-length
 bytevector-u8-ref
 bytevector-u8-set!
 bytevector?
+caar
+cadr
 car
+cdar
+cddr
 cdr
 cell
 cell-get
