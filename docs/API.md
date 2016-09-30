@@ -67,11 +67,13 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`assv`](api/scheme/base.md#assv)
 [`atan`](api/scheme/inexact.md#atan)
 
+- - -
 [`begin`](api/scheme/base.md#begin)
 [`boolean=?`](api/scheme/base.md#boolean)
 [`bytevector-copy`](api/scheme/base.md#bytevector-copy)
 [`bytevector-copy!`](api/scheme/base.md#bytevector-copy-1)
 
+- - -
 [`caaaar`](api/scheme/cxr.md#caaaar)
 [`caaadr`](api/scheme/cxr.md#caaadr)
 [`caaar`](api/scheme/cxr.md#caaar)
@@ -135,6 +137,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`current-output-port`](api/scheme/base.md#current-output-port)
 [`current-second`](api/scheme/time.md#current-second)
 
+- - -
 [`define-record-type`](api/scheme/base.md#define-record-type)
 [`delay`](api/scheme/lazy.md#delay) 
 [`delay-force`](api/scheme/lazy.md#delay-force) 
@@ -144,6 +147,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`do`](api/scheme/base.md#do)
 [`dynamic-wind`](api/scheme/base.md#dynamic-wind)
 
+- - -
 [`emergency-exit`](api/scheme/process-context.md#emergency-exit)
 [`eof-object`](api/scheme/base.md#eof-object)
 [`error`](api/scheme/base.md#error)
@@ -156,6 +160,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`exp`](api/scheme/inexact.md#exp)
 [`expt`](api/scheme/base.md#expt)
 
+- - -
 [`features`](api/scheme/base.md#features)
 [`finite?`](api/scheme/inexact.md#finite)
 [`floor`](api/scheme/base.md#floor)
@@ -169,6 +174,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`force`](api/scheme/lazy.md#force) 
 [`for-each`](api/scheme/base.md#for-each)
 
+- - -
 [`gcd`](api/scheme/base.md#gcd)
 [`get-environment-variable`](api/scheme/process-context.md#get-environment-variable)
 [`get-environment-variables`](api/scheme/process-context.md#get-environment-variables)
@@ -176,6 +182,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`get-output-string`](api/scheme/base.md#get-output-string)
 [`guard`](api/scheme/base.md#guard)
 
+- - -
 [`imag-part`](api/scheme/complex.md#imag-part)
 [`inexact`](api/scheme/base.md#inexact)
 [`inexact?`](api/scheme/base.md#inexact-1)
@@ -183,8 +190,10 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`input-port?`](api/scheme/base.md#input-port)
 [`input-port-open?`](api/scheme/base.md#input-port-open)
 
+- - -
 [`jiffies-per-second`](api/scheme/time.md#jiffies-per-second)
 
+- - -
 [`lcm`](api/scheme/base.md#lcm)
 [`let`](api/scheme/base.md#let)
 [`let*`](api/scheme/base.md#let-1)
@@ -201,6 +210,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`load`](api/scheme/load.md#load)
 [`log`](api/scheme/inexact.md#log)
 
+- - -
 [`magnitude`](api/scheme/complex.md#magnitude)
 [`make-constructor`](api/scheme/base.md#make-constructor)
 [`make-getter`](api/scheme/base.md#make-getter)
@@ -220,12 +230,14 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`min`](api/scheme/base.md#min)
 [`modulo`](api/scheme/base.md#modulo)
 
+- - -
 [`nan?`](api/scheme/inexact.md#nan)
 [`negative?`](api/scheme/base.md#negative)
 [`newline`](api/scheme/base.md#newline)
 [`not`](api/scheme/base.md#not)
 [`numerator`](api/scheme/base.md#numerator)
 
+- - -
 [`odd?`](api/scheme/base.md#odd)
 [`open-input-bytevector`](api/scheme/base.md#open-input-bytevector)
 [`open-input-string`](api/scheme/base.md#open-input-string)
@@ -235,13 +247,16 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`output-port?`](api/scheme/base.md#output-port)
 [`output-port-open?`](api/scheme/base.md#output-port-open)
 
+- - -
 [`parameterize`](api/scheme/base.md#parameterize)
 [`positive?`](api/scheme/base.md#positive)
 [`promise?`](api/scheme/lazy.md#promise)
 
+- - -
 [`quasiquote`](api/scheme/base.md#quasiquote)
 [`quotient`](api/scheme/base.md#quotient)
 
+- - -
 [`raise`](api/scheme/base.md#raise)
 [`raise-continuable`](api/scheme/base.md#raise-continuable)
 [`rational?`](api/scheme/base.md#rational)
@@ -256,6 +271,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`reverse`](api/scheme/base.md#reverse)
 [`round`](api/scheme/base.md#round)
 
+- - -
 [`setup-environment`](api/scheme/eval.md#setup-environment)
 [`sin`](api/scheme/inexact.md#sin)
 [`slot-set!`](api/scheme/base.md#slot-set)
@@ -286,6 +302,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`symbol=?`](api/scheme/base.md#symbol)
 [`syntax-error`](api/scheme/base.md#syntax-error)
 
+- - -
 [`tan`](api/scheme/inexact.md#tan)
 [`truncate`](api/scheme/base.md#truncate)
 [`truncate/`](api/scheme/base.md#truncate-1)
@@ -293,9 +310,11 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`truncate-remainder`](api/scheme/base.md#truncate-remainder)
 [`type-slot-offset`](api/scheme/base.md#type-slot-offset)
 
+- - -
 [`unless`](api/scheme/base.md#unless)
 [`utf8->string`](api/scheme/base.md#utf8-string)
 
+- - -
 [`values`](api/scheme/base.md#values)
 [`vector`](api/scheme/base.md#vector)
 [`vector-append`](api/scheme/base.md#vector-append)
@@ -307,6 +326,7 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`vector-map`](api/scheme/base.md#vector-map)
 [`vector->string`](api/scheme/base.md#vector-string)
 
+- - -
 [`when`](api/scheme/base.md#when)
 [`with-exception-handler`](api/scheme/base.md#with-exception-handler)
 [`with-input-from-file`](api/scheme/file.md#with-input-from-file)
@@ -317,4 +337,5 @@ These libraries are used by the Cyclone compiler itself, and are subject to chan
 [`write-simple`](api/scheme/write.md#write-simple)
 [`write-string`](api/scheme/base.md#write-string)
 
+- - -
 [`zero?`](api/scheme/base.md#zero)
