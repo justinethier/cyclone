@@ -3,18 +3,26 @@
 This section contains all of the primitives and other objects that are included in the Cyclone runtime. These objects are always available regardless of library imports.
 
 placeholder:
-- [`*`](#*)
+- [`*`](#)
+- [`+`](#-2)
+- [`-`](#-3)
+- [`/`](#-4)
+- [`<`](#-5)
+- [`<=`](#-6)
+- [`=`](#-7)
+- [`>`](#-8)
+- [`>=`](#-9)
 
 #*
+#+
+#-
+#/
+#<
+#<=
+#=
+#>
+#>=
 
-+
--
-/
-<
-<=
-=
->
->=
 apply
 boolean?
 bytevector
