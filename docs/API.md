@@ -3,7 +3,7 @@
 
 This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
 
-- Built-in primitives
+- [Primitives](api/primitives.md)
 - [`scheme base`](api/scheme/base.md)
 - [`scheme case-lambda`](api/scheme/case-lambda.md)
 - [`scheme char`](api/scheme/char.md)
