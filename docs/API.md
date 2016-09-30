@@ -4,7 +4,7 @@
 
 - [R<sup>7</sup>RS Libraries](#r7rs-libraries)
 - [SRFI Library Support](#srfi-library-support)
-- [Cyclone Internals](#cyclone-internals)
+- [Cyclone Compiler API](#cyclone-compiler-api)
 - [Index](#index)
 
 # R<sup>7</sup>RS Libraries
@@ -43,16 +43,21 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 - [`srfi 132`](api/srfi/132.md) - [Sort Libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
 - [`srfi 133`](api/srfi/133.md) - [Vector Library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
 
-# Cyclone Internals
+# Cyclone Compiler API
 
 These libraries are used by the Cyclone compiler itself and could change in the future:
 
-- `scheme cyclone cgen`
-- `scheme cyclone common`
-- `scheme cyclone libraries`
-- `scheme cyclone macros`
-- `scheme cyclone transforms`
-- `scheme cyclone util`
+- [`scheme cyclone ast`](api/scheme/cyclone/ast)
+- [`scheme cyclone cgen`](api/scheme/cyclone/cgen)
+- [`scheme cyclone common`](api/scheme/cyclone/common)
+- [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations)
+- [`scheme cyclone libraries`](api/scheme/cyclone/libraries)
+- [`scheme cyclone macros`](api/scheme/cyclone/macros)
+- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print)
+- [`scheme cyclone primitives`](api/scheme/cyclone/primitives)
+- [`scheme cyclone test`](api/scheme/cyclone/test)
+- [`scheme cyclone transforms`](api/scheme/cyclone/transforms)
+- [`scheme cyclone util`](api/scheme/cyclone/util)
 
 # Index
 
