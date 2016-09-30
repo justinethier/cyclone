@@ -2,7 +2,6 @@
 
 This section contains all of the primitives and other objects that are included in the Cyclone runtime. These objects are always available regardless of library imports.
 
-placeholder:
 - [`*`](#)
 - [`+`](#-1)
 - [`-`](#-)
