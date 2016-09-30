@@ -2,14 +2,14 @@
 
 The `(scheme cyclone ast)` library defines abstract syntax tree types used during compilation.
 
-- [`ast:make-lambda`](#ast:make-lambda)
-- [`ast:%make-lambda`](#ast:%make-lambda)
-- [`ast:lambda?`](#ast:lambda)
-- [`ast:lambda-id`](#ast:lambda-id)
-- [`ast:lambda-args`](#ast:lambda-args) 
-- [`ast:set-lambda-args!`](#ast:set-lambda-args)
-- [`ast:lambda-body`](#ast:lambda-body)
-- [`ast:set-lambda-body!`](#ast:set-lambda-body)
+- [`ast:make-lambda`](#astmake-lambda)
+- [`ast:%make-lambda`](#astmake-lambda-1)
+- [`ast:lambda?`](#astlambda)
+- [`ast:lambda-id`](#astlambda-id)
+- [`ast:lambda-args`](#astlambda-args) 
+- [`ast:set-lambda-args!`](#astset-lambda-args)
+- [`ast:lambda-body`](#astlambda-body)
+- [`ast:set-lambda-body!`](#astset-lambda-body)
 
 #ast:make-lambda
     (ast:make-lambda args body)
