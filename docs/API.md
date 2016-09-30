@@ -2,10 +2,10 @@
 
 # API Documentation
 
-- [#R<sup>7</sup>RS Libraries](#r7rs-libraries)
-- [#SRFI Library Support](#srfi-library-support)
-- [#Cyclone-specific](#cyclone-specific)
-- [#Index](#index)
+- [R<sup>7</sup>RS Libraries](#r7rs-libraries)
+- [SRFI Library Support](#srfi-library-support)
+- [Cyclone-specific](#cyclone-specific)
+- [Index](#index)
 
 # R<sup>7</sup>RS Libraries
 
