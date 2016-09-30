@@ -2,7 +2,7 @@
 
 The `(scheme cyclone cgen)` library compiles scheme code to a Cheney-on-the-MTA C runtime.
 
-- [`mta:code-gen`](#mta:code-gen)
+- [`mta:code-gen`](#mtacode-gen)
 - [`emit`](#emit)
 - [`emit*`](#emit-1)
 - [`emits`](#emits)
