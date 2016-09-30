@@ -1,3 +1,11 @@
+[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+
+# API Documentation
+
+- [#R<sup>7</sup>RS Libraries](#r7rs-libraries)
+- [#SRFI Library Support](#srfi-library-support)
+- [#Cyclone-specific](#cyclone-specific)
+- [#Index](#index)
 
 # R<sup>7</sup>RS Libraries
 
