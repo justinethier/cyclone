@@ -39,7 +39,8 @@
          (link (substring line s-link e-link))
          )
    (string-append 
-     "- [`" fnc "`](" file "" link ")")))
+     (string (string-ref fnc 0))
+     "[`" fnc "`](" file "" link ")")))
 
 ;(display (convert-line line))
 (define (loop)
