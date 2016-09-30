@@ -197,7 +197,7 @@
 ;    textual-port?
 ;
 ;    ;; syntax-rules
-;    parameterize
+    parameterize
 ;    define-values
 ;
 ; unclassified TODO's:

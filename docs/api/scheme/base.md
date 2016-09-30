@@ -58,7 +58,6 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`get-output-bytevector`](#get-output-bytevector)
 - [`get-output-string`](#get-output-string)
 - [`guard`](#guard)
-- [`guard-aux`](#guard-aux)
 - [`inexact`](#inexact)
 - [`inexact?`](#inexact-1)
 - [`input-port-open?`](#input-port-open)
@@ -102,6 +101,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`or`](#or)
 - [`output-port-open?`](#output-port-open)
 - [`output-port?`](#output-port)
+- [`parameterize`](#parameterize)
 - [`positive?`](#positive)
 - [`quasiquote`](#quasiquote)
 - [`quotient`](#quotient)
@@ -133,7 +133,6 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`string>?`](#string-5)
 - [`symbol=?`](#symbol)
 - [`syntax-error`](#syntax-error)
-- [`syntax-rules`](#syntax-rules)
 - [`truncate`](#truncate)
 - [`truncate-quotient`](#truncate-quotient)
 - [`truncate-remainder`](#truncate-remainder)
@@ -161,6 +160,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #abs
     (abs num)
 #and
+    (and {test1} ...)
 #any
     (any pred lst)
 #append
@@ -173,6 +173,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #assv
     (assv obj alist)
 #begin
+    (begin {expression or definition} ...)
 #boolean=?
     (boolean=? b1 b2 ...)
 #bytevector-copy
@@ -192,6 +193,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #call/cc
     (call/cc proc)
 #case
+    (case {key} {clause1} {clause2} ...)
 #ceiling
     (ceiling z)
 #char<=?
@@ -207,7 +209,9 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #complex?
     (complex? obj) 
 #cond
+    (cond {clause1} {clause2} ...)
 #cond-expand
+    (cond-expand {ce-clause2} {ce-clause2} ...)
 #current-error-port
     (current-error-port)
 #current-input-port
@@ -218,6 +222,10 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #denominator
     (denominator n)
 #do
+    (do (({variable1} {init1} {step1})
+         ...)
+    ({test} {expression} ...)
+    {command} ...)
 #dynamic-wind
     (dynamic-wind before thunk after)
 #eof-object
@@ -262,7 +270,9 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #get-output-string
     (get-output-string port)
 #guard
-#guard-aux
+    (guard ({variable}
+            {cond clause1} {cond clause2} ...)
+      {body})
 #inexact
     (inexact z)
 #inexact?
@@ -274,11 +284,17 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #lcm
     (lcm n1 ...)
 #let
+    (let {bindings} {body})
 #let*
+    (let* {bindings} {body})
 #let*-values
+    (let*-values {mv binding spec} {body})
 #let-values
+    (let-values {mv binding spec} {body})
 #letrec
+    (letrec {bindings} {body})
 #letrec*
+    (letrec* {bindings} {body})
 #list
     (list obj ...)
 #list-copy
@@ -343,13 +359,18 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #open-output-string
     (open-output-string)
 #or
+    (or {test1} ...)
 #output-port-open?
     (output-port-open? port)
 #output-port?
     (output-port? obj)
+#parameterize
+    (parameterize (({param1} {value1}) ...)
+      {body})
 #positive?
     (positive? n)
 #quasiquote
+    (quasiquote {qq template})
 #quotient
     (quotient x y)
 #raise
@@ -365,6 +386,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (read-string k)
     (read-string k port)
 #receive
+    (receive {formals} {expression} {body})
 #record?
     (record? obj)
 #remainder
@@ -420,7 +442,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #symbol=?
     (symbol=? symbol1 symbol2 symbol3 ...)
 #syntax-error
-#syntax-rules
+    (syntax-error {message} {args} ...)
 #truncate
     (truncate z)
 #truncate-quotient 
@@ -432,6 +454,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #type-slot-offset
     (type-slot-offset name sym)
 #unless
+    (unless {test} {expression1} {expression2} ...)
 #utf8->string
     (utf8->string bytevector)
     (utf8->string bytevector start)
@@ -467,6 +490,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 #vector-map
     (vector-map proc vector1 vector2 ...)
 #when
+    (when {test} {expression1} {expression2} ...)
 #with-exception-handler
     (with-exception-handler handler thunk)
 #write-char
@@ -477,28 +501,3 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (write-string string port)
 #zero?
     (zero? n)
-
-
-(define-syntax and
-(define-syntax begin 
-(define-syntax case
-(define-syntax cond
-(define-syntax cond-expand
-(define-syntax define-record-type
-(define-syntax do
-(define-syntax guard
-(define-syntax guard-aux
-(define-syntax let
-(define-syntax let*
-(define-syntax let*-values
-(define-syntax let-values
-(define-syntax letrec 
-(define-syntax letrec*
-(define-syntax or
-(define-syntax parameterize
-(define-syntax quasiquote
-(define-syntax receive
-(define-syntax syntax-error
-(define-syntax syntax-rules
-(define-syntax unless
-(define-syntax when
