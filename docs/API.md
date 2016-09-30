@@ -47,17 +47,17 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 These libraries are used by the Cyclone compiler itself and could change in the future:
 
-- [`scheme cyclone ast`](api/scheme/cyclone/ast)
-- [`scheme cyclone cgen`](api/scheme/cyclone/cgen)
-- [`scheme cyclone common`](api/scheme/cyclone/common)
-- [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations)
-- [`scheme cyclone libraries`](api/scheme/cyclone/libraries)
-- [`scheme cyclone macros`](api/scheme/cyclone/macros)
-- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print)
-- [`scheme cyclone primitives`](api/scheme/cyclone/primitives)
-- [`scheme cyclone test`](api/scheme/cyclone/test)
-- [`scheme cyclone transforms`](api/scheme/cyclone/transforms)
-- [`scheme cyclone util`](api/scheme/cyclone/util)
+- [`scheme cyclone ast`](api/scheme/cyclone/ast.md)
+- [`scheme cyclone cgen`](api/scheme/cyclone/cgen.md)
+- [`scheme cyclone common`](api/scheme/cyclone/common.md)
+- [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations.md)
+- [`scheme cyclone libraries`](api/scheme/cyclone/libraries.md)
+- [`scheme cyclone macros`](api/scheme/cyclone/macros.md)
+- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md)
+- [`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)
+- [`scheme cyclone test`](api/scheme/cyclone/test.md)
+- [`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)
+- [`scheme cyclone util`](api/scheme/cyclone/util.md)
 
 # Index
 
