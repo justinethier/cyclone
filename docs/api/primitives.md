@@ -163,7 +163,7 @@ Return the command line arguments to the program as a list of strings.
     (cons a b)
 Create a new pair with its car field set to `a` and its cdr field set to `b`.
 #delete-file
-    (delete-file filename)
+    (delete-file string)
 Delete a file with the given filename.
 #eof-object?
     (eof-object? obj)
@@ -185,8 +185,8 @@ Raises an exception by calling `raise` with the given message and objects.
     (exit obj)
 Exit the program.
 #file-exists?
-    (file-exists? filename)
-Determine if the given file exists.
+    (file-exists? string)
+Determine if the file with filename `string` exists.
 #integer->char
     (integer->char x)
 Return a character with the same value as the given integer.
