@@ -45,7 +45,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 # Cyclone Compiler API
 
-These libraries are used by the Cyclone compiler itself and could change in the future:
+These libraries are used by the Cyclone compiler. Some of these, such as `pretty-print` are stable and unlikely to change, whereas others could change as the compiler evolves.
 
 - [`scheme cyclone ast`](api/scheme/cyclone/ast.md)
 - [`scheme cyclone cgen`](api/scheme/cyclone/cgen.md)
@@ -61,6 +61,9 @@ These libraries are used by the Cyclone compiler itself and could change in the 
 
 # Index
 
+This section is an alphabetic listing of all the functions, objects, and macros provided by the previous libraries.
+
+- - -
 [`*Cyc-version-banner*`](api/scheme/cyclone/common.md#Cyc-version-banner)
 [`*af-inet*`](api/srfi/106.md#af-inet)
 [`*af-inet6*`](api/srfi/106.md#af-inet6)
