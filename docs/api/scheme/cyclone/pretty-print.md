@@ -1,7 +1,6 @@
 # Pretty Print Library
 
-The `(scheme cyclone pretty-print)` library provides a pretty-printer based on code from: 
-http://www.mathematik.uni-muenchen.de/~logik/download/minlog/src/pp-sexp.scm
+The `(scheme cyclone pretty-print)` library provides a pretty-printer for code formatting.
 
 - [`pretty-print`](#pretty-print)
 
