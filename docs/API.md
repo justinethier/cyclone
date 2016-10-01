@@ -223,7 +223,7 @@ These libraries are used by the Cyclone compiler itself and could change in the 
 [`char>=?`](api/scheme/base.md#char-3)
 [`char>?`](api/scheme/base.md#char-4)
 [`circular-list?`](api/srfi/1.md#circular-list)
-[`circular-list`](api/srfi/1.md#circular-list)
+[`circular-list`](api/srfi/1.md#circular-list-1)
 [`command-line`](api/scheme/process-context.md#command-line)
 [`complex?`](api/scheme/base.md#complex)
 [`concatenate!`](api/srfi/1.md#concatenate-1)
