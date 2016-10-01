@@ -81,24 +81,33 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../r7rs.pdf)
 
 #\*
     (* z1 ...)
+Return the product of the arguments.
 #+
     (+ z1 ...)
+Return the sum of the arguments.
 #-
     (- z)
     (- z1 z2 ...)
+With two or more arguments return their difference. With one argument return the additive inverse.
 #/
     (/ z)
     (/ z1 z2 ...)
+With two or more arguments return the quotient of the arguments. With one argument return the multiplicative inverse.
 #<
     (< x1 x2 ...)
+Return `#t` if the arguments are monotonically increasing, or `#f` otherwise.
 #<=
     (<= x1 x2 ...)
+Return `#t` if the arguments are monotonically non-decreasing, or `#f` otherwise.
 #=
     (= x1 x2 ...)
+Return `#t` if the arguments are equal, or `#f` otherwise.
 #>
     (> x1 x2 ...)
+Return `#t` if the arguments are monotonically decreasing, or `#f` otherwise.
 #>=
     (>= x1 x2 ...)
+Return `#t` if the arguments are monotonically non-increasing, or `#f` otherwise.
 #apply
     (apply proc arg1 ... args)
 The `apply` procedure calls `proc` with the elements of the list `(append (list arg1 ...) args)` as the actual arguments.
