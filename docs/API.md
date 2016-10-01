@@ -3,7 +3,7 @@
 # API Documentation
 
 - [R<sup>7</sup>RS Libraries](#r7rs-libraries)
-- [SRFI Library Support](#srfi-library-support)
+- [SRFI Libraries](#srfi-library-support)
 - [Cyclone Compiler API](#cyclone-compiler-api)
 - [Index](#index)
 
@@ -27,7 +27,7 @@ This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specific
 - [`scheme time`](api/scheme/time.md)
 - [`scheme write`](api/scheme/write.md)
 
-# SRFI Library Support
+# SRFI Libraries
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API:
 
