@@ -6,6 +6,7 @@ git checkout gh-pages
 cp -r /tmp/api/ docs/
 
 # find . | grep md
+cd docs/api
 for fn in `find . | grep md`; do
   echo "processing file: $fn"
   sed -i.old '1s;^;---\n;' $fn
