@@ -43,7 +43,7 @@ done
 # Do any one-off replacements
 cd ../..
 sed -i -- 's/primitives#)/primitives#section)/g' docs/API.md
-sed -i -- 's/primitives#)/primitives#section)/g' docs/primitives.md
+sed -i -- 's/primitives#)/primitives#section)/g' docs/api/primitives.md
 
 sed -i -- 's/#-heap/#heap/g' docs/API.md
 sed -i -- 's/#-heap/#heap/g' docs/api/srfi/18.md
