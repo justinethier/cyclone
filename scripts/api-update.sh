@@ -27,10 +27,6 @@ sed -i -- '1s;^;title: API\n;' docs/API.md
 sed -i -- '1s;^;layout: main\n;' docs/API.md
 sed -i -- '1s;^;---\n;' docs/API.md
 
-# On-off replacements
-sed -i -- 's/#-heap/#heap/g' docs/API.md
-sed -i -- 's/#-heap/#heap/g' docs/api/srfi/18.md
-
 # Add Jekyll header and do global replacements
 cd docs/api
 for fn in `find . | grep md`; do
@@ -43,4 +39,10 @@ for fn in `find . | grep md`; do
   # Replace ".md"
   sed -i -- 's/.md//g' $fn
 done
+
+# Do any one-off replacements
+sed -i -- 's/primitives#)/primitives#section)/g' docs/API.md
+
+sed -i -- 's/#-heap/#heap/g' docs/API.md
+sed -i -- 's/#-heap/#heap/g' docs/api/srfi/18.md
 
