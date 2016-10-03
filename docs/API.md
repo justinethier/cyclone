@@ -105,7 +105,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`+`](api/primitives#-1)
 
 - - -
-[`->heap`](api/srfi/18#-heap)
+[`->heap`](api/srfi/18#heap)
 [`-`](api/primitives#-)
 
 - - -
@@ -125,7 +125,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 - - -
 [`Cyc-er-compare?            `](api/scheme/cyclone/util#Cyc-er-compare)
 [`Cyc-er-rename              `](api/scheme/cyclone/util#Cyc-er-rename)
-[`Cyc-minor-gc`](api/srfi/18#Cyc-minor-gc)
+[`Cyc-minor-gc`](api/srfi/18#cyc-minor-gc)
 
 - - -
 [`abs`](api/scheme/base#abs)
@@ -264,9 +264,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`cddr                  `](api/primitives#cddr)
 [`cdr                   `](api/primitives#cdr)
 [`ceiling`](api/scheme/base#ceiling)
-[`cell                  `](api/primitives#cell)
 [`cell->value               `](api/scheme/cyclone/transforms#cell-value)
-[`cell-get              `](api/primitives#cell-get)
 [`cell-get->cell            `](api/scheme/cyclone/transforms#cell-get-cell)
 [`cell-get?                 `](api/scheme/cyclone/transforms#cell-get)
 [`cell?                     `](api/scheme/cyclone/transforms#cell)
@@ -789,7 +787,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`set-box!`](api/srfi/111#set-box)
 [`set-car!              `](api/primitives#set-car)
 [`set-cdr!              `](api/primitives#set-cdr)
-[`set-cell!             `](api/primitives#set-cell)
 [`set-cell!->cell           `](api/scheme/cyclone/transforms#set-cell-cell)
 [`set-cell!->value          `](api/scheme/cyclone/transforms#set-cell-value)
 [`set-cell!?                `](api/scheme/cyclone/transforms#set-cell)
