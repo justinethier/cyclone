@@ -9,7 +9,7 @@ This section contains all of the primitives and other objects that are included 
 
 For more information see the [R<sup>7</sup>RS Scheme Specification](../r7rs.pdf).
 
-- [`*`](#)
+- [`*`](#section)
 - [`+`](#-1)
 - [`-`](#-)
 - [`/`](#-2)
