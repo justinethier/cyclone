@@ -69,7 +69,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 
 - - -
 [`*Cyc-version-banner*`](api/scheme/cyclone/common#Cyc-version-banner)
-[`*`](api/primitives#)
+[`*`](api/primitives#section)
 [`*af-inet*`](api/srfi/106#af-inet)
 [`*af-inet6*`](api/srfi/106#af-inet6)
 [`*af-unspec*`](api/srfi/106#af-unspec)
