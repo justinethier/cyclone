@@ -84,82 +84,162 @@ The `(scheme cyclone transforms)` library performs Scheme-to-Scheme transformati
 - [`wrap-mutables             `](#wrap-mutables)
 
 # \*defined-macros\* 
+
 # \*do-code-gen\*
+
 # \*primitives\*
+
 # \*trace-level\*
+
 # alpha-convert 
+
 # analyze-mutable-variables 
+
 # app->args 
+
 # app->fun 
+
 # assq-remove-key 
+
 # assq-remove-keys 
+
 # ast:lambda-formals->list
+
 # ast:lambda-formals-type
+
 # azip 
+
 # basename
+
 # begin->exps 
+
 # built-in-syms
+
 # cell->value 
+
 # cell-get->cell 
+
 # cell-get? 
+
 # cell? 
+
 # clear-mutables
+
 # closure->env 
+
 # closure->fv 
+
 # closure->lam 
+
 # closure-convert 
+
 # closure? 
+
 # cps-convert 
+
 # cyc:error
+
 # define->lambda 
+
 # define-lambda? 
+
 # difference 
+
 # env-get->env
+
 # env-get->field 
+
 # env-get->id 
+
 # env-get? 
+
 # env-make->fields 
+
 # env-make->id 
+
 # env-make->values 
+
 # env-make? 
+
 # expand 
+
 # expand-lambda-body
+
 # filter-unused-variables 
+
 # free-vars 
+
 # get-macros
+
 # global-vars 
+
 # has-global? 
+
 # insert
+
 # is-mutable? 
+
 # isolate-globals 
+
 # lambda-num-args
+
 # let->args 
+
 # let->bindings 
+
 # let->bound-vars 
+
 # let->exp 
+
 # let=>lambda 
+
 # let? 
+
 # letrec->args 
+
 # letrec->bindings 
+
 # letrec->bound-vars 
+
 # letrec->exp 
+
 # letrec? 
+
 # list->lambda-formals 
+
 # list->pair 
+
 # list-index
+
 # mark-mutable
+
 # pos-in-list 
+
 # precompute-prim-app? 
+
 # reduce 
+
 # remove 
+
 # set-cell!->cell 
+
 # set-cell!->value 
+
 # set-cell!? 
+
 # symbol<? 
+
 # trace
+
 # trace:debug
+
 # trace:error
+
 # trace:info
+
 # trace:warn
+
 # union 
+
 # wrap-mutables 
+

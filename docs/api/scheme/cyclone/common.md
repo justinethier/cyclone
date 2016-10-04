@@ -10,14 +10,26 @@ The `(scheme cyclone common)` library contains definitions used by the compiler 
 - [`*c-file-header-comment*`](#c-file-header-comment)
 
 # \*Cyc-version-banner\*
+
 The version banner printed when `icyc` starts.
+
 # \*version\*
+
 The version number and name.
+
 # \*version-number\*
+
 The current version number.
+
 # \*version-name\*
+
 The current version name.
+
 # \*version-banner\*
+
 The version banner printed when `icyc` starts.
+
 # \*c-file-header-comment\*
+
 The header comment added to C files.
+

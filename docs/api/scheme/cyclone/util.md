@@ -65,63 +65,124 @@ The `(scheme cyclone util`) library contains various utility functions.
 - [`take                       `](#take)
 
 # Cyc-er-compare?
+
 # Cyc-er-rename
+
 # app?
+
 # begin?
+
 # const? 
+
 # define->exp 
+
 # define->var 
+
 # define-c?
+
 # define? 
+
 # delete
+
 # delete-duplicates
+
 # env:\_lookup-variable-value 
+
 # env:add-binding-to-frame! 
+
 # env:all-values
+
 # env:all-variables
+
 # env:define-variable! 
+
 # env:enclosing-environment
+
 # env:extend-environment 
+
 # env:first-frame
+
 # env:frame-values 
+
 # env:frame-variables
+
 # env:lookup
+
 # env:lookup-variable-value 
+
 # env:make-frame
+
 # env:set-variable-value! 
+
 # env:the-empty-environment
+
 # filter
+
 # flatten
+
 # formals->list
+
 # gensym
+
 # identifier->symbol
+
 # identifier=?
+
 # identifier?
+
 # if->condition 
+
 # if->else 
+
 # if->then 
+
 # if-else? 
+
 # if?
+
 # lambda->exp 
+
 # lambda->formals
+
 # lambda-formals->list
+
 # lambda-formals-type
+
 # lambda-varargs-var
+
 # lambda-varargs?
+
 # lambda?
+
 # length/obj
+
 # list-index2
+
 # list-insert-at!
+
 # list-prefix?
+
 # mangle
+
 # mangle-global
+
 # pack-lambda-arguments
+
 # pair->list 
+
 # quote? 
+
 # ref? 
+
 # set!->exp 
+
 # set!->var 
+
 # set!? 
+
 # string-replace-all
+
 # tagged-list?
+
 # take
+

@@ -30,28 +30,54 @@ The `(scheme cyclone test)` library contains a testing framework ported from `(c
 - [`current-test-comparator`](#current-test-comparator)
 
 # warning
+
 # test-group-inc!
+
 # print-exception
+
 # test
+
 # test-equal
+
 # test-error
+
 # test-assert
+
 # test-not
+
 # test-values
+
 # test-group
+
 # current-test-group
+
 # test-begin
+
 # test-end
+
 # test-syntax-error
+
 # test-propagate-info
+
 # test-vars
+
 # test-run
+
 # test-exit
+
 # current-test-verbosity
+
 # current-test-applier
+
 # current-test-handler
+
 # current-test-skipper
+
 # current-test-group-reporter
+
 # test-failure-count
+
 # current-test-epsilon
+
 # current-test-comparator
+
