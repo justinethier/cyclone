@@ -22,51 +22,51 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`sqrt`](#sqrt)
 - [`tan`](#tan)
 
-#acos
+# acos
 
     (acos z)
 
-#asin
+# asin
 
     (asin z)
 
-#atan
+# atan
 
     (atan z)
 
-#cos
+# cos
 
     (cos z)
 
-#exp
+# exp
 
     (exp z)
 
-#finite?
+# finite?
 
     (finite? z)
 
-#infinite?
+# infinite?
 
     (infinite? z)
 
-#log
+# log
 
     (log z)
 
-#nan?
+# nan?
 
     (nan? z)
 
-#sin
+# sin
 
     (sin z)
 
-#sqrt
+# sqrt
 
     (sqrt z)
 
-#tan
+# tan
 
     (tan z)
 

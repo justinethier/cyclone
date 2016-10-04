@@ -11,7 +11,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 - [`case-lambda`](#case-lambda)
 
-#case-lambda
+# case-lambda
 
     (case-lambda {clause} ...)
 

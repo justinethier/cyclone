@@ -39,51 +39,99 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`cdddar`](#cdddar)
 - [`cddddr`](#cddddr)
 
-#caaar
+# caaar
+
     (caaar list)
-#caadr
+
+# caadr
+
     (caadr list)
-#cadar
+
+# cadar
+
     (cadar list)
-#caddr
+
+# caddr
+
     (caddr list)
-#cdaar
+
+# cdaar
+
     (cdaar list)
-#cdadr
+
+# cdadr
+
     (cdadr list)
-#cddar
+
+# cddar
+
     (cddar list)
-#cdddr
+
+# cdddr
+
     (cdddr list)
-#caaaar
+
+# caaaar
+
     (caaaar list)
-#caaadr
+
+# caaadr
+
     (caaadr list)
-#caadar
+
+# caadar
+
     (caadar list)
-#caaddr
+
+# caaddr
+
     (caaddr list)
-#cadaar
+
+# cadaar
+
     (cadaar list)
-#cadadr
+
+# cadadr
+
     (cadadr list)
-#caddar
+
+# caddar
+
     (caddar list)
-#cadddr
+
+# cadddr
+
     (cadddr list)
-#cdaaar
+
+# cdaaar
+
     (cdaaar list)
-#cdaadr
+
+# cdaadr
+
     (cdaadr list)
-#cdadar
+
+# cdadar
+
     (cdadar list)
-#cdaddr
+
+# cdaddr
+
     (cdaddr list)
-#cddaar
+
+# cddaar
+
     (cddaar list)
-#cddadr
+
+# cddadr
+
     (cddadr list)
-#cdddar
+
+# cdddar
+
     (cdddar list)
-#cddddr
+
+# cddddr
+
     (cddddr list)
+

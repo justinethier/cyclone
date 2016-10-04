@@ -16,15 +16,27 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`make-rectangular`](#make-rectangular)
 - [`real-part`](#real-part)
 
-#angle
+# angle
+
     (angle z)
-#imag-part
+
+# imag-part
+
     (imag-part x)
-#magnitude
+
+# magnitude
+
     (magnitude z)
-#make-polar
+
+# make-polar
+
     (make-polar x y)
-#make-rectangular
+
+# make-rectangular
+
     (make-rectangular x y)
-#real-part
+
+# real-part
+
     (real-part x)
+

@@ -14,25 +14,25 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`get-environment-variable`](#get-environment-variable)
 - [`get-environment-variables`](#get-environment-variables)
 
-#command-line
+# command-line
 
     (command-line)
 
 Returns the command line passed to the program as a list of strings.
 
-#emergency-exit
+# emergency-exit
 
     (emergency-exit)
 
 Terminates the program immediately. This is an alias of `exit`. 
 
-#get-environment-variable
+# get-environment-variable
 
     (get-environment-variable name)
 
 Return the value of the given environment variable.
 
-#get-environment-variables
+# get-environment-variables
 
     (get-environment-variables)
 

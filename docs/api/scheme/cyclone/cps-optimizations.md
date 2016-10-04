@@ -43,38 +43,73 @@ The `(scheme cyclone optimizations)` library performs CPS analysis and optimizat
 - [`adbf:unused-params`](#adbfunused-params)
 - [`adbf:set-unused-params!`](#adbfset-unused-params)
 
-#optimize-cps 
-#analyze-cps
-#opt:contract
-#opt:inline-prims
-#adb:clear!
-#adb:get
-#adb:get/default
-#adb:set!
-#adb:get-db
-#simple-lambda?
-#one-instance-of-new-mutable-obj?
-#adb:make-var
-#%adb:make-var
-#adb:variable?
-#adbv:global?
-#adbv:set-global!
-#adbv:defined-by 
-#adbv:set-defined-by!
-#adbv:reassigned? 
-#adbv:set-reassigned!
-#adbv:assigned-value
-#adbv:set-assigned-value!
-#adbv:const? 
-#adbv:set-const!
-#adbv:const-value
-#adbv:set-const-value!
-#adbv:ref-by
-#adbv:set-ref-by!
-#adb:make-fnc
-#%adb:make-fnc
-#adb:function?
-#adbf:simple 
-#adbf:set-simple!
-#adbf:unused-params
-#adbf:set-unused-params!
+# optimize-cps 
+
+# analyze-cps
+
+# opt:contract
+
+# opt:inline-prims
+
+# adb:clear!
+
+# adb:get
+
+# adb:get/default
+
+# adb:set!
+
+# adb:get-db
+
+# simple-lambda?
+
+# one-instance-of-new-mutable-obj?
+
+# adb:make-var
+
+# %adb:make-var
+
+# adb:variable?
+
+# adbv:global?
+
+# adbv:set-global!
+
+# adbv:defined-by 
+
+# adbv:set-defined-by!
+
+# adbv:reassigned? 
+
+# adbv:set-reassigned!
+
+# adbv:assigned-value
+
+# adbv:set-assigned-value!
+
+# adbv:const? 
+
+# adbv:set-const!
+
+# adbv:const-value
+
+# adbv:set-const-value!
+
+# adbv:ref-by
+
+# adbv:set-ref-by!
+
+# adb:make-fnc
+
+# %adb:make-fnc
+
+# adb:function?
+
+# adbf:simple 
+
+# adbf:set-simple!
+
+# adbf:unused-params
+
+# adbf:set-unused-params!
+

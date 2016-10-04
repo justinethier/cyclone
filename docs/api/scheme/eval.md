@@ -13,7 +13,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`create-environment`](#create-environment)
 - [`setup-environment`] (#setup-environment)
 
-#eval
+# eval
 
     (eval expr . environment)
 
@@ -21,7 +21,7 @@ Evaluate `expr` in the specified environment and return the resulting value(s).
 
 A non-standard extension is provided to supply a default global environment if the `environment` argument is not specified.
 
-#create-environment
+# create-environment
 
     (create-environment vars values)
 
@@ -29,7 +29,7 @@ A non-standard function to create a new environment on top of the default one.
 
 `vars` is a list of identifiers in the new environment, and `values` is a list of each value assigned to each identifier.
 
-#setup-environment
+# setup-environment
 
 
     (setup-environment)
