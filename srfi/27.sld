@@ -93,11 +93,11 @@
     (define (random-source-pseudo-randomize! s i j)
       ;; Pretty bad quality, upgrade after switch to better gen
       (define n1
-        ((random-source-make-integers i) m))
+        i) ;((random-source-make-integers i) m))
       (define n2
-        ((random-source-make-integers j) m))
+        j) ;((random-source-make-integers j) m))
       (define n3
-        (abs (- n1 n2)))
+        (abs (+ n1 n2)))
       (random-source-state-set! s n3))
     
     (define (random-source-randomize! s)
