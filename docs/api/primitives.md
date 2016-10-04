@@ -84,13 +84,13 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../r7rs.pdf)
 - [`vector-set!           `](#vector-set)
 - [`vector?               `](#vector)
 
-#\*
+# \*
 
     (* z1 ...)
 
 Return the product of the arguments.
 
-#+
+# +
 
     (+ z1 ...)
 
