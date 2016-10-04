@@ -11,11 +11,11 @@ The `(scheme cyclone macro)` library contains code to deal with macros.
 - [`macro:get-env`](#macroget-env)
 - [`macro:get-defined-macros`](#macroget-defined-macros)
 
-#define-syntax?
-#macro:macro?
-#macro:expand
-#macro:add!
-#macro:cleanup
-#macro:load-env!
-#macro:get-env
-#macro:get-defined-macros
+# define-syntax?
+# macro:macro?
+# macro:expand
+# macro:add!
+# macro:cleanup
+# macro:load-env!
+# macro:get-env
+# macro:get-defined-macros

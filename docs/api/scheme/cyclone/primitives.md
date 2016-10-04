@@ -17,17 +17,17 @@ The `(scheme cyclone primitives)` library contains information about Cyclone's s
 - [`prim:arg-count?`](#primarg-count)
 - [`prim:allocates-object?)`](#primallocates-object)
 
-#prim?
-#\*primitives\*
-#\*primitives-num-args\*
-#prim-call?
-#prim->c-func
-#prim/data-arg?
-#prim/c-var-assign
-#prim/cvar?
-#prim:check-arg-count
-#prim:mutates?
-#prim:cont?
-#prim:cont/no-args?
-#prim:arg-count?
-#prim:allocates-object?)
+# prim?
+# \*primitives\*
+# \*primitives-num-args\*
+# prim-call?
+# prim->c-func
+# prim/data-arg?
+# prim/c-var-assign
+# prim/cvar?
+# prim:check-arg-count
+# prim:mutates?
+# prim:cont?
+# prim:cont/no-args?
+# prim:arg-count?
+# prim:allocates-object?)

@@ -28,29 +28,29 @@ The `(scheme cyclone libraries)` library implements r7rs libraries.
 - [`lib:idb:ids`](#libidb:ids)
 - [`lib:idb:id->import`](#libidb:id-import)
 
-#library?
+# library?
     (library? obj)
-#lib:list->import-set
-#lib:name
-#lib:name->string
-#lib:name->symbol
-#lib:result
-#lib:exports
-#lib:rename-exports
-#lib:imports
-#lib:body
-#lib:includes
-#lib:include-c-headers
-#lib:import->filename
-#lib:import->metalist
-#lib:import->path
-#lib:read-imports
-#lib:import->export-list
-#lib:resolve-imports
-#lib:resolve-meta
-#lib:get-all
-#lib:get-all-import-deps
-#lib:get-dep-list
-#lib:imports->idb
-#lib:idb:ids
-#lib:idb:id->import
+# lib:list->import-set
+# lib:name
+# lib:name->string
+# lib:name->symbol
+# lib:result
+# lib:exports
+# lib:rename-exports
+# lib:imports
+# lib:body
+# lib:includes
+# lib:include-c-headers
+# lib:import->filename
+# lib:import->metalist
+# lib:import->path
+# lib:read-imports
+# lib:import->export-list
+# lib:resolve-imports
+# lib:resolve-meta
+# lib:get-all
+# lib:get-all-import-deps
+# lib:get-dep-list
+# lib:imports->idb
+# lib:idb:ids
+# lib:idb:id->import
