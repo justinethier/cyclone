@@ -14,5 +14,7 @@ for fn in `find . | grep md`; do
   sed -i.old '1s;^;layout: main\n;' $fn
   sed -i.old '1s;^;---\n;' $fn
   rm -f $fn.old
+  # Replace ".md"
+  sed -i -- 's/.md//g' $fn
 done
 
