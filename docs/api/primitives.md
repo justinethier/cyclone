@@ -85,11 +85,17 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../r7rs.pdf)
 - [`vector?               `](#vector)
 
 #\*
+
     (* z1 ...)
+
 Return the product of the arguments.
+
 #+
+
     (+ z1 ...)
+
 Return the sum of the arguments.
+
 #-
     (- z)
     (- z1 z2 ...)
