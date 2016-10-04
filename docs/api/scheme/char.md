@@ -28,47 +28,90 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`string-upcase`](#string-upcase)
 
 #char-alphabetic?
+
     (char-alphabetic? c)
+
 #char-ci<=?
+
     (char-ci<=? c1 c2 . cs)
+
 #char-ci<? 
+
     (char-ci<? c1 c2 . cs)
+
 #char-ci=?
+
     (char-ci=? c1 c2 . cs)
+
 #char-ci>=? 
+
     (char-ci>=? c1 c2 . cs)
+
 #char-ci>?
+
     (char-ci>? c1 c2 . cs)
+
 #char-downcase
+
     (char-downcase c)
+
 #char-foldcase
+
     (char-foldcase c)
+
 #char-lower-case?
+
     (char-lower-case? c)
+
 #char-numeric?
+
     (char-numeric? c) 
+
 #char-upcase
+
     (char-upcase c)
+
 #char-upper-case?
+
     (char-upper-case? c)
+
 #char-whitespace?
+
     (char-whitespace? c)
+
 #digit-value
+
     (digit-value c)
+
 #string-ci<=? 
+
     (string-ci<=? s1 s2)
+
 #string-ci<?
+
     (string-ci<? s1 s2)
+
 #string-ci=? 
+
     (string-ci=? s1 s2)
+
 #string-ci>=?
+
     (string-ci>=? s1 s2)
+
 #string-ci>? 
+
     (string-ci>? s1 s2)
+
 #string-downcase
+
     (string-downcase str)
+
 #string-foldcase
+
     (string-foldcase str)
+
 #string-upcase
+
     (string-upcase str)
 
