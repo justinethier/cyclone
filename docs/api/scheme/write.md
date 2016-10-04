@@ -9,14 +9,14 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`write-simple`](#write-simple)
 - [`write-shared`](#write-shared)
 
-#display
+# display
 
     (display obj)
     (display obj port)
 
 Write object to the given output port, or the current output if none is given. Strings and characters are output using only the characters that they represent, without any enclosing quotes, etc.
 
-#write
+# write
 
     (write obj)
     (write obj port)
@@ -24,12 +24,12 @@ Write object to the given output port, or the current output if none is given. S
 Write object to the given output port, or the current output if none is given. Objects are written exactly as they are represented in code.
 
 
-#write-shared
+# write-shared
 
     (write-shared obj)
     (write-shared obj port)
 
-#write-simple
+# write-simple
 
     (write-simple obj)
     (write-simple obj port)

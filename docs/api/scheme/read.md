@@ -7,14 +7,14 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`read`](#read)
 - [`read-all`](#read-all)
 
-#read
+# read
 
     (read)
     (read port)
 
 Read a single Scheme object from the input port.
 
-#read-all
+# read-all
 
     (read-all)
     (read-all port)
