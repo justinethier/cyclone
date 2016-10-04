@@ -13,6 +13,11 @@ cp $TMP/API.md docs/
 
 echo "$(tail -n +2 docs/API.md)" > docs/API.md
 sed -i -- 's/.md//g' docs/API.md
+sed -i -- '1s;^;---\n\n;' docs/API.md
+sed -i -- '1s;^;title: API\n;' docs/API.md
+sed -i -- '1s;^;layout: main\n;' docs/API.md
+sed -i -- '1s;^;---\n;' docs/API.md
+
 # find . | grep md
 cd docs/api
 for fn in `find . | grep md`; do
