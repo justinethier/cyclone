@@ -6,12 +6,12 @@ title: API
 
 # API Documentation
 
-- [R<sup>7</sup>RS Libraries](#r7rs-libraries)
-- [SRFI Libraries](#srfi-library-support)
+- [Standard Libraries](#standard-libraries)
+- [SRFI Libraries](#srfi-libraries)
 - [Cyclone Compiler API](#cyclone-compiler-api)
 - [Index](#index)
 
-# R<sup>7</sup>RS Libraries
+# Standard Libraries
 
 This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
 
