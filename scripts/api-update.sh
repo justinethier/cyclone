@@ -5,8 +5,8 @@ TMP=/tmp/cyclone-docs
 rm -rf $TMP
 mkdir $TMP
 mkdir $TMP/api
-cp -r docs/api/ $TMP/api
-cp docs/API.md $TMP/
+cp -r docs/api/ $TMP
+cp docs/API.md $TMP
 git checkout gh-pages
 cp -r $TMP/api/ docs/
 cp $TMP/API.md docs/
