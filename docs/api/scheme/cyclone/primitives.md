@@ -12,7 +12,7 @@ The `(scheme cyclone primitives)` library contains information about Cyclone's s
 - [`*primitives-num-args*`](#primitives-num-args)
 - [`prim-call?`](#prim-call)
 - [`prim->c-func`](#prim-c-func)
-- [`prim/data-arg?`](#primdata-arg)
+- [`prim/data-arg?`](#prata-arg)
 - [`prim/c-var-assign`](#primc-var-assign)
 - [`prim/cvar?`](#primcvar)
 - [`prim:check-arg-count`](#primcheck-arg-count)
