@@ -1,10 +1,18 @@
 #!/bin/bash
 
-rm -rf /tmp/api
-cp -r docs/api/ /tmp/api
-git checkout gh-pages
-cp -r /tmp/api/ docs/
+TMP=/tmp/cyclone-docs
 
+rm -rf $TMP
+mkdir $TMP
+mkdir $TMP/api
+cp -r docs/api/ $TMP/api
+cp docs/API.md $TMP/
+git checkout gh-pages
+cp -r $TMP/api/ docs/
+cp $TMP/API.md docs/
+
+echo "$(tail -n +2 docs/API.md)" > docs/API.md
+sed -i -- 's/.md//g' docs/API.md
 # find . | grep md
 cd docs/api
 for fn in `find . | grep md`; do
