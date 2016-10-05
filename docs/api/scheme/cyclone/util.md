@@ -2,8 +2,8 @@
 
 The `(scheme cyclone util`) library contains various utility functions.
 
-- [`Cyc-er-compare?            `](#Cyc-er-compare)
-- [`Cyc-er-rename              `](#Cyc-er-rename)
+- [`Cyc-er-compare?            `](#cyc-er-compare)
+- [`Cyc-er-rename              `](#cyc-er-rename)
 - [`app?                       `](#app)
 - [`begin?                     `](#begin)
 - [`const?                     `](#const) 
