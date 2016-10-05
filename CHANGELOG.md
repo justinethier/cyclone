@@ -7,14 +7,14 @@ TODO: macro improvements (ref trans.) to support SRFI 128
 
 Features:
 
-- Limited support for `define-syntax` from `eval`.
+- Limited support for `define-syntax` from `eval` - explicit renaming macros can now be declared interactively.
 
 Bug Fixes
 
 - Improved macro hygiene support to properly rename temporary variables in the `let-values` macro.
-- Improve output of `error` by outputting objects as they are represented in memory by using `write`.
+- Improve output of `error` by using `write` to output objects as they are represented in memory.
 - Check for duplicate lambda parameters during compilation.
-- Fixed an error that was being raised when calling `(random-source-randomize! default-random-source)`.
+- Fixed an error that was being raised when calling `(random-source-randomize! default-random-source)` when using SRFI 27.
 - Raise an error if `list->string` encounters a list element that is not a character.
 
 # 0.2 - September 7, 2016
