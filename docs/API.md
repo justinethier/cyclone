@@ -102,25 +102,25 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`*version-number*`](api/scheme/cyclone/common#version-number)
 
 - - -
-[`+`](api/primitives#-1)
+[`+`](api/primitives#section-1)
 
 - - -
 [`->heap`](api/srfi/18#heap)
 [`-`](api/primitives#-)
 
 - - -
-[`/`](api/primitives#-2)
+[`/`](api/primitives#section-2)
 
 - - -
-[`<=`](api/primitives#-4)
-[`<`](api/primitives#-3)
+[`<=`](api/primitives#section-4)
+[`<`](api/primitives#section-3)
 
 - - -
-[`=`](api/primitives#-5)
+[`=`](api/primitives#section-5)
 
 - - -
-[`>=`](api/primitives#-7)
-[`>`](api/primitives#-6)
+[`>=`](api/primitives#section-7)
+[`>`](api/primitives#section-6)
 
 - - -
 [`Cyc-er-compare?            `](api/scheme/cyclone/util#Cyc-er-compare)
