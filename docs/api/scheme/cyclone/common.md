@@ -7,7 +7,7 @@ title: API
 
 The `(scheme cyclone common)` library contains definitions used by the compiler and interpreter.
 
-- [`*Cyc-version-banner*`](#Cyc-version-banner)
+- [`*Cyc-version-banner*`](#cyc-version-banner)
 - [`*version*`](#version)
 - [`*version-number*`](#version-number)
 - [`*version-name*`](#version-name)
