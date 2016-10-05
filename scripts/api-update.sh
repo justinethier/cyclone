@@ -43,7 +43,23 @@ done
 # Do any one-off replacements
 cd ../..
 sed -i -- 's/primitives#)/primitives#section)/g' docs/API.md
+sed -i -- 's/primitives#-1)/primitives#section-1)/g' docs/API.md
+sed -i -- 's/primitives#-2)/primitives#section-2)/g' docs/API.md
+sed -i -- 's/primitives#-3)/primitives#section-3)/g' docs/API.md
+sed -i -- 's/primitives#-4)/primitives#section-4)/g' docs/API.md
+sed -i -- 's/primitives#-5)/primitives#section-5)/g' docs/API.md
+sed -i -- 's/primitives#-6)/primitives#section-6)/g' docs/API.md
+sed -i -- 's/primitives#-7)/primitives#section-7)/g' docs/API.md
+sed -i -- 's/primitives#-8)/primitives#section-8)/g' docs/API.md
 sed -i -- 's/(#)/(#section)/g' docs/api/primitives.md
+sed -i -- 's/(#-1)/(#section-1)/g' docs/api/primitives.md
+sed -i -- 's/(#-2)/(#section-2)/g' docs/api/primitives.md
+sed -i -- 's/(#-3)/(#section-3)/g' docs/api/primitives.md
+sed -i -- 's/(#-4)/(#section-4)/g' docs/api/primitives.md
+sed -i -- 's/(#-5)/(#section-5)/g' docs/api/primitives.md
+sed -i -- 's/(#-6)/(#section-6)/g' docs/api/primitives.md
+sed -i -- 's/(#-7)/(#section-7)/g' docs/api/primitives.md
+sed -i -- 's/(#-8)/(#section-8)/g' docs/api/primitives.md
 
 sed -i -- 's/#-heap/#heap/g' docs/API.md
 sed -i -- 's/#-heap/#heap/g' docs/api/srfi/18.md
