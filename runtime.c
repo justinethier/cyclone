@@ -1491,6 +1491,9 @@ object Cyc_list2string(void *data, object cont, object lst)
   len = Cyc_length(data, lst);  // Inefficient, walks whole list
   buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
   while ((lst != NULL)) {
+    if (!obj_is_char(car(lst))) {
+      Cyc_rt_raise2(data, "Expected character but received", car(lst));
+    }
     buf[i++] = obj_obj2char(car(lst));
     lst = cdr(lst);
   }

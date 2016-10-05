@@ -14,7 +14,8 @@ Bug Fixes
 - Improved macro hygiene support to properly rename temporary variables in the `let-values` macro.
 - Improve output of `error` by outputting objects as they are represented in memory by using `write`.
 - Check for duplicate lambda parameters during compilation.
-- Fixd an error that was being raised when calling `(random-source-randomize! default-random-source)`.
+- Fixed an error that was being raised when calling `(random-source-randomize! default-random-source)`.
+- Raise an error if `list->string` encounters a list element that is not a character.
 
 # 0.2 - September 7, 2016
 
