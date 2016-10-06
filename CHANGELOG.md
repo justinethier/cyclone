@@ -7,7 +7,8 @@ TODO: macro improvements (ref trans.) to support SRFI 128
 
 Features:
 
-- Limited support for `define-syntax` from `eval` - explicit renaming macros can now be declared interactively.
+- Added limited support for calling `define-syntax` from `eval` - explicit renaming macros can now be declared interactively.
+- Added `get-environment-variables` from R7RS.
 
 Bug Fixes
 
