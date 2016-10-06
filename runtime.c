@@ -165,19 +165,39 @@ void pack_env_variables(void *data, object k)
   object head = NULL;
   tail = head;
   for (; *env != NULL; env++) {
-    char *e = *env;
-    make_string_noalloc(stmp, e, strlen(e));
-    make_pair(tmp, boolean_t, &stmp);
+    char *e = *env,
+         *eqpos = strchr(e, '=');
+    pair_type *p = alloca(sizeof(pair_type));
+    pair_type *tmp = alloca(sizeof(pair_type));
+    string_type *sval = alloca(sizeof(string_type));
+    string_type *svar = alloca(sizeof(string_type));
 
-    make_pair(p, &tmp, NULL);
+    svar->hdr.mark = gc_color_red; 
+    svar->hdr.grayed = 0;
+    svar->tag = string_tag; 
+    svar->len = eqpos - e;
+    svar->str = alloca(sizeof(char) * (svar->len));
+    strncpy(svar->str, e, svar->len);
+    (svar->str)[svar->len] = '\0';
+
+    if (eqpos) {
+      eqpos++;
+    }
+    sval->hdr.mark = gc_color_red; 
+    sval->hdr.grayed = 0;
+    sval->tag = string_tag; 
+    sval->len = strlen(eqpos);
+    sval->str = eqpos;
+    set_pair(tmp, svar, sval);
+    set_pair(p, tmp, NULL);
     if (head == NULL) {
-        tail = head = &p;
+        tail = head = p;
     } else {
-      cdr(tail) = &p;
-      tail = &p;
+      cdr(tail) = p;
+      tail = p;
     }
   }
-  return_closcall1(data, k, &head);
+  return_closcall1(data, k, head);
 }
 
 void set_env_variables(char **vars)
