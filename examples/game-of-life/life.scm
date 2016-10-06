@@ -11,13 +11,13 @@
 ;;;  > huski life.scm
 ;;;
 (import (scheme base)
-        (example life)
-        (example grid))
+;        (example life)
+        (example grid)
 ;; TODO:
-;        (only (example life) life)
+        (only (example life) life)
 ;        (rename (prefix (example grid) grid-)
 ;                (grid-make make-grid)))
-
+)
 ;; Initialize a grid with a glider.
 ;(define grid (make-grid 24 24))
 ;(grid-put! grid 1 1 #t)

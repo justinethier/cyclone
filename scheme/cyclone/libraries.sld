@@ -31,6 +31,7 @@
     lib:body
     lib:includes
     lib:include-c-headers
+    lib:import->library-name
     lib:import->filename
     lib:import->metalist
     lib:import->path
@@ -67,7 +68,7 @@
 
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
-  (apply string-append (map mangle name)))
+  (apply string-append (map mangle (lib:import->library-name name))))
 
 ;; Convert library name to a unique symbol
 (define (lib:name->symbol name)
@@ -194,16 +195,26 @@
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
 (define (lib:read-imports import)
-  (let* ((dir (lib:import->filename import))
+  (let* ((lib-name (lib:import->library-name import))
+         (dir (lib:import->filename lib-name))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (imports (lib:imports (car lib))))
     (close-input-port fp)
     imports))
 
+(define (lib:import->library-name import)
+  (cond
+    ((or (tagged-list? 'only import)
+         (tagged-list? 'except import))
+     (cadr import))
+    (else
+     import)))
+
 ;; Read export list for a given import
 (define (lib:import->export-list import)
-  (let* ((dir (string-append (lib:import->filename import)))
+  (let* ((lib-name (lib:import->library-name import))
+         (dir (string-append (lib:import->filename lib-name)))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
@@ -259,9 +270,10 @@
         #f)))
 
 (define (lib:import->metalist import)
-  (let ((file (lib:import->filename import ".meta"))
-        (fp #f)
-        (result '()))
+  (let* ((lib-name (lib:import->library-name import))
+         (file (lib:import->filename lib-name ".meta"))
+         (fp #f)
+         (result '()))
     (cond
       ((file-exists? file)
        (set! fp (open-input-file file))
