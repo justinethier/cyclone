@@ -274,11 +274,11 @@
 ;; TODO: how to handle if a var is renamed more than once? really just want one mapping from lib-var-name => renamed-var-name
 
   ;; TODO: if import-set is not library name, recursively process it, then deal with results here
-;  (unless (lib:import-set:library-name? import-set)
-;    (let ((result (lib:import-set/exports->imports
-;                    (lib:import-set->import-set import-set)
-;                    exports)))
-;      (set! exports result)))
+  (unless (lib:import-set:library-name? import-set)
+    (let ((result (lib:import-set/exports->imports
+                    (lib:import-set->import-set import-set)
+                    exports)))
+      (set! exports result)))
 
   (cond
     ((tagged-list? 'only import-set)
@@ -294,26 +294,53 @@
          ;; TODO: not good enough, need to handle renamed identifiers
          (not (member sym (cddr import-set))))
        exports))
-    ;;((tagged-list? 'prefix import-set)
-    ;; same as rename, but add given prefix to all exports
-
-    ;;((tagged-list? 'rename import-set)
-     ;; for each rename
-        ;; let's keep it simple and replace "ident" in exports with
-        ;; the mapping "(ident rename)". of course, that punts the
-        ;; job of dealing with the rename back to the caller, but
-        ;; I think that will be OK.
+    ((tagged-list? 'prefix import-set)
+     ;; same as rename, but add given prefix to all exports
+     (let* ((prefix (caddr import-set))
+            (prestr (symbol->string prefix)))
+       (map
+         (lambda (e)
+            (cons
+              ;; Renamed identifier with prefix
+              (string->symbol
+                (string-append
+                  prestr
+                  (symbol->string 
+                    (if (pair? e)
+                        (car e)
+                        e))))
+              ;; Original identifier
+              (if (pair? e)
+                  (cdr e)
+                  e)))
+         exports)))
+    ((tagged-list? 'rename import-set)
+     (let ((renames (cddr import-set)))
+       (map
+         (lambda (e)
+           (let ((rename (assoc 
+                           (if (pair? e) (car e) e) 
+                           renames)))
+            (if rename
+                (cons 
+                  (cadr rename) ;; Renamed identifier
+                  (if (pair? e) (cdr e) e) ;; Original identifier from library
+                )
+                e)))
+         exports)))
     (else
       exports)))
-;; TODO: test cases for above:
+;; Test cases for above:
 ;cyclone> (lib:import-set/exports->imports '(lib) '(a b c d e))
 ;(a b c d e)
 ;cyclone> (lib:import-set/exports->imports '(except (lib) a) '(a b c d e))
 ;(b c d e)
 ;cyclone> (lib:import-set/exports->imports '(rename (lib) (a a1) (d d1)) '(a b c d e))
-;((a a1) b c (d d1) e)
+;((a1 . a) b c (d1 . d) e)
+;cyclone> (lib:import-set/exports->imports '(rename (rename (lib) (a a1) (d d1)) (d1 d2)) '(a b c d e))
+;((a1 . a) b c (d2 . d) e)
 ;cyclone> (lib:import-set/exports->imports '(prefix (lib) my-) '(a b c d e))
-;(my-a my-b my-c my-d my-e)
+;((my-a . a) (my-b . b) (my-c . c) (my-d . d) (my-e . e))
 
 ;; Take a list of imports and resolve it to the imported vars
 ;(define (lib:resolve-imports imports)
