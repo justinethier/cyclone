@@ -1,6 +1,6 @@
 (define-library (example life)
   (export life)
-  (import (scheme base) ;TODO: (except (scheme base) set!)
+  (import (except (scheme base) set!)
           (scheme write)
           (example grid))
   (begin
