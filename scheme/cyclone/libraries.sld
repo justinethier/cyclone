@@ -285,11 +285,13 @@
      ;; Filter to symbols from "only" that appear in export list
      (filter
        (lambda (sym)
+         ;; TODO: not good enough, need to handle renamed identifiers
          (member sym exports))
        (cddr import-set)))
     ((tagged-list? 'except import-set)
      (filter
        (lambda (sym)
+         ;; TODO: not good enough, need to handle renamed identifiers
          (not (member sym (cddr import-set))))
        exports))
     ;;((tagged-list? 'prefix import-set)
@@ -303,6 +305,15 @@
         ;; I think that will be OK.
     (else
       exports)))
+;; TODO: test cases for above:
+;cyclone> (lib:import-set/exports->imports '(lib) '(a b c d e))
+;(a b c d e)
+;cyclone> (lib:import-set/exports->imports '(except (lib) a) '(a b c d e))
+;(b c d e)
+;cyclone> (lib:import-set/exports->imports '(rename (lib) (a a1) (d d1)) '(a b c d e))
+;((a a1) b c (d d1) e)
+;cyclone> (lib:import-set/exports->imports '(prefix (lib) my-) '(a b c d e))
+;(my-a my-b my-c my-d my-e)
 
 ;; Take a list of imports and resolve it to the imported vars
 ;(define (lib:resolve-imports imports)
