@@ -278,7 +278,7 @@
 ;    (let ((result (lib:import-set/exports->imports
 ;                    (lib:import-set->import-set import-set)
 ;                    exports)))
-;      ;; TODO: (set! ?? result)))
+;      (set! exports result)))
 
   (cond
     ((tagged-list? 'only import-set)
