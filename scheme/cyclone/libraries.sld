@@ -77,7 +77,8 @@
          (tagged-list? 'except import)
          (tagged-list? 'prefix import)
          (tagged-list? 'rename import))
-     (cadr import))
+     (lib:import->library-name 
+       (cadr import)))
     (else
      import)))
 
@@ -228,6 +229,8 @@
          (exports (lib:exports (car lib))))
     (close-input-port fp)
     (cond
+;; TODO: how to handle these recursively? IE: import set could be
+;; a rename that has a prefix that has a library name
       ((tagged-list? 'only import)
        ;; Filter to symbols from "only" that appear in export list
        (filter
@@ -239,6 +242,9 @@
          (lambda (sym)
            (not (member sym (cddr import))))
          exports))
+      ;; TODO: if prefix or rename, can resolve to original lib identifier.
+      ;; would need another function somewhere to compute the renames though.
+      ;; maybe compute both and return a list of both???
       (else 
        exports))))
 
