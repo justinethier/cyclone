@@ -222,7 +222,20 @@
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
     (close-input-port fp)
-    exports))
+    (cond
+      ((tagged-list? 'only import)
+       ;; Filter to symbols from "only" that appear in export list
+       (filter
+         (lambda (sym)
+           (member sym exports))
+         (cddr import)))
+      ((tagged-list? 'except import)
+       (filter
+         (lambda (sym)
+           (not (member sym (cddr import))))
+         exports))
+      (else 
+       exports))))
 
 ;; Take a list of imports and resolve it to the imported vars
 (define (lib:resolve-imports imports)
