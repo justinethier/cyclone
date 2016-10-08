@@ -47,7 +47,6 @@
     lib:idb:id->import
   )
   (begin
-  ;  (define read cyc-read)
 
 (define (library? ast)
   (tagged-list? 'define-library ast))
@@ -314,20 +313,22 @@
           (lambda (import-sets)
             (for-each 
               (lambda (i)
-                (let ((import-set (lib:list->import-set i)))
+                (let* ((import-set (lib:list->import-set i))
+                       (lib-name (lib:import->library-name import-set)))
                   (cond
                    ;; Prevent cycles by only processing new libraries
-                   ((not (assoc import-set libraries/deps))
+                   ((not (assoc lib-name libraries/deps))
                     ;; Find all dependencies of i (IE, libraries it imports)
-                    (let ((deps (lib:read-imports import-set))
-                          (lib-name (lib:import->library-name import-set))) 
-                     (set! libraries/deps (cons (cons lib-name deps) libraries/deps))
-                     (find-deps! deps)
+                    (let* ((deps (lib:read-imports import-set))
+                           (dep-libs (map lib:import->library-name deps)))
+                     (set! 
+                       libraries/deps 
+                       (cons (cons lib-name dep-libs) libraries/deps))
+                     (find-deps! dep-libs)
                    )))))
               import-sets))))
    (find-deps! imports)
-   ;`((deps ,libraries/deps) ; DEBUG
-   ;  (result ,(lib:get-dep-list libraries/deps)))
+   ;`((deps ,libraries/deps)) ; DEBUG
    (lib:get-dep-list libraries/deps)
    ))
 
