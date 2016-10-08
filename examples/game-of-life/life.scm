@@ -12,11 +12,11 @@
 ;;;
 (import (scheme base)
 ;        (example life)
-        (example grid)
+;        (example grid)
 ;; TODO:
         (only (example life) life)
-;        (rename (prefix (example grid) grid-)
-;                (grid-make make-grid)))
+        (rename (prefix (example grid) grid-)
+                (grid-make make-grid))
 )
 ;; Initialize a grid with a glider.
 ;(define grid (make-grid 24 24))

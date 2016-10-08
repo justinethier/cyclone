@@ -31,13 +31,16 @@
     lib:body
     lib:includes
     lib:include-c-headers
+    lib:import-set:library-name?
+    lib:import-set->import-set
     lib:import->library-name
     lib:import->filename
     lib:import->metalist
     lib:import->path
     lib:read-imports
     lib:import->export-list
-    lib:resolve-imports
+    lib:import-set/exports->imports
+    ;lib:resolve-imports
     lib:resolve-meta
     lib:get-all
     lib:get-all-import-deps
@@ -68,6 +71,19 @@
 (define (lib:name ast) 
   (lib:list->import-set (cadr ast)))
 
+;; Is import set just a library name?
+(define (lib:import-set:library-name? import-set)
+  (not
+    (or (tagged-list? 'only import-set)
+        (tagged-list? 'except import-set)
+        (tagged-list? 'prefix import-set)
+        (tagged-list? 'rename import-set))))
+
+;; lib:import-set->import-set -> list -> list
+;; Extract next import set from given input set
+(define (lib:import-set->import-set import-set)
+  (cadr import-set))
+
 ;; Convert an import-set to its corresponding library name.
 ;; These are not always the same thing, but each import-set
 ;; does reference a specific library.
@@ -81,7 +97,6 @@
        (cadr import)))
     (else
      import)))
-
 
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
@@ -228,6 +243,8 @@
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
     (close-input-port fp)
+;; TODO: don't even both with below and call this instead:
+;;(define (lib:import-set/exports->imports import-set exports)
     (cond
 ;; TODO: how to handle these recursively? IE: import set could be
 ;; a rename that has a prefix that has a library name
@@ -242,20 +259,59 @@
          (lambda (sym)
            (not (member sym (cddr import))))
          exports))
+
       ;; TODO: if prefix or rename, can resolve to original lib identifier.
       ;; would need another function somewhere to compute the renames though.
       ;; maybe compute both and return a list of both???
       (else 
        exports))))
 
+;; Take an import set and the corresponding list of exports. Process all of the
+;; import set directives (only, except, rename, prefix) and return a list of:
+;; - identifiers to import
+;; - renames: identifiers that will be imported using a different name
+(define (lib:import-set/exports->imports import-set exports)
+;; TODO: how to handle if a var is renamed more than once? really just want one mapping from lib-var-name => renamed-var-name
+
+  ;; TODO: if import-set is not library name, recursively process it, then deal with results here
+;  (unless (lib:import-set:library-name? import-set)
+;    (let ((result (lib:import-set/exports->imports
+;                    (lib:import-set->import-set import-set)
+;                    exports)))
+;      ;; TODO: (set! ?? result)))
+
+  (cond
+    ((tagged-list? 'only import-set)
+     ;; Filter to symbols from "only" that appear in export list
+     (filter
+       (lambda (sym)
+         (member sym exports))
+       (cddr import-set)))
+    ((tagged-list? 'except import-set)
+     (filter
+       (lambda (sym)
+         (not (member sym (cddr import-set))))
+       exports))
+    ;;((tagged-list? 'prefix import-set)
+    ;; same as rename, but add given prefix to all exports
+
+    ;;((tagged-list? 'rename import-set)
+     ;; for each rename
+        ;; let's keep it simple and replace "ident" in exports with
+        ;; the mapping "(ident rename)". of course, that punts the
+        ;; job of dealing with the rename back to the caller, but
+        ;; I think that will be OK.
+    (else
+      exports)))
+
 ;; Take a list of imports and resolve it to the imported vars
-(define (lib:resolve-imports imports)
- (apply
-   append
-   (map 
-     (lambda (import)
-       (lib:import->export-list import))
-     (map lib:list->import-set imports))))
+;(define (lib:resolve-imports imports)
+; (apply
+;   append
+;   (map 
+;     (lambda (import)
+;       (lib:import->export-list import))
+;     (map lib:list->import-set imports))))
 
 ;; Take a list of imports and create a "database" from them
 ;; consisting of maps between each exported identifier and the
