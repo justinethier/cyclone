@@ -68,6 +68,20 @@
 (define (lib:name ast) 
   (lib:list->import-set (cadr ast)))
 
+;; Convert an import-set to its corresponding library name.
+;; These are not always the same thing, but each import-set
+;; does reference a specific library.
+(define (lib:import->library-name import)
+  (cond
+    ((or (tagged-list? 'only import)
+         (tagged-list? 'except import)
+         (tagged-list? 'prefix import)
+         (tagged-list? 'rename import))
+     (cadr import))
+    (else
+     import)))
+
+
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
   (apply string-append (map mangle (lib:import->library-name name))))
@@ -204,14 +218,6 @@
          (imports (lib:imports (car lib))))
     (close-input-port fp)
     imports))
-
-(define (lib:import->library-name import)
-  (cond
-    ((or (tagged-list? 'only import)
-         (tagged-list? 'except import))
-     (cadr import))
-    (else
-     import)))
 
 ;; Read export list for a given import
 (define (lib:import->export-list import)
