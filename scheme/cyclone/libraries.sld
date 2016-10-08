@@ -53,11 +53,14 @@
   (tagged-list? 'define-library ast))
 
 ;; Convert a raw list to an import set. For example, a list might be
-;; (srfi 18) containing the number 18. An import set contains only symbols.
+;; (srfi 18) containing the number 18. An import set contains only symbols
+;; or sub-lists.
 (define (lib:list->import-set lis)
   (map
     (lambda (atom)
       (cond
+        ((pair? atom)
+         (lib:list->import-set atom))
         ((number? atom)
          (string->symbol (number->string atom)))
         (else atom)))
@@ -243,15 +246,15 @@
  (apply
    append
    (map 
-     (lambda (import)
-       (foldr
-         (lambda (id ids)
-          (cons
-            (cons id import)
-            ids))
-        '()
-         (lib:import->export-list import))
-     )
+     (lambda (import-set)
+       (let ((lib-name (lib:import->library-name import-set)))
+         (foldr
+           (lambda (id ids)
+            (cons
+              (cons id lib-name)
+              ids))
+          '()
+           (lib:import->export-list import-set))))
      (map lib:list->import-set imports))))
 
 ;; Convert from the import DB to a list of identifiers that are imported.
@@ -303,8 +306,9 @@
                    ;; Prevent cycles by only processing new libraries
                    ((not (assoc import-set libraries/deps))
                     ;; Find all dependencies of i (IE, libraries it imports)
-                    (let ((deps (lib:read-imports import-set))) 
-                     (set! libraries/deps (cons (cons import-set deps) libraries/deps))
+                    (let ((deps (lib:read-imports import-set))
+                          (lib-name (lib:import->library-name import-set))) 
+                     (set! libraries/deps (cons (cons lib-name deps) libraries/deps))
                      (find-deps! deps)
                    )))))
               import-sets))))
