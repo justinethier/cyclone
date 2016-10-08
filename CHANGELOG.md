@@ -9,6 +9,7 @@ Features:
 
 - Added limited support for calling `define-syntax` from `eval` - explicit renaming macros can now be declared interactively.
 - Added `get-environment-variables` from R7RS.
+- Improved library support to allow `only` and `except` import sets.
 
 Bug Fixes
 
