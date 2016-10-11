@@ -7,10 +7,9 @@ TODO: macro improvements (ref trans.) to support SRFI 128
 
 Features:
 
-- Added support for library import set forms: `only`, `except`, `prefix`, and `rename`.
+- Improved library support to recognize import set forms: `only`, `except`, `prefix`, and `rename`.
 - Added limited support for calling `define-syntax` from `eval` - explicit renaming macros can now be declared interactively.
 - Added `get-environment-variables` from R7RS.
-- Improved library support to allow `only` and `except` import sets.
 
 Bug Fixes
 
