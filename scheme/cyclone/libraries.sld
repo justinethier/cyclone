@@ -40,7 +40,6 @@
     lib:read-imports
     lib:import->export-list
     lib:import-set/exports->imports
-    ;lib:member:direct-or-car
     ;lib:resolve-imports
     lib:resolve-meta
     lib:get-all
@@ -244,56 +243,22 @@
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
     (close-input-port fp)
-;; TODO: don't even both with below and call this instead:
-;;(define (lib:import-set/exports->imports import-set exports)
-    (cond
-;; TODO: how to handle these recursively? IE: import set could be
-;; a rename that has a prefix that has a library name
-      ((tagged-list? 'only import)
-       ;; Filter to symbols from "only" that appear in export list
-       (filter
-         (lambda (sym)
-           (member sym exports))
-         (cddr import)))
-      ((tagged-list? 'except import)
-       (filter
-         (lambda (sym)
-           (not (member sym (cddr import))))
-         exports))
-
-      ;; TODO: if prefix or rename, can resolve to original lib identifier.
-      ;; would need another function somewhere to compute the renames though.
-      ;; maybe compute both and return a list of both???
-      (else 
-       exports))))
-
-;; Determine if given value is a member of the given list, either directly
-;; or as the car of a pair in the list
-#;(define (lib:member:direct-or-car val lis)
-  (call/cc
-    (lambda (return)
-      (for-each
-        (lambda (elem)
-          (if (or (equal? elem val)
-                  (and (pair? elem) (equal? (car elem) val)))
-              (return #t)))
-        lis)
-      (return #f))))
+    (lib:import-set/exports->imports import exports)))
 
 ;; Take an import set and the corresponding list of exports. Process all of the
-;; import set directives (only, except, rename, prefix) and return a list of:
-;; - identifiers to import
-;; - renames: identifiers that will be imported using a different name
+;; import set directives (only, except, rename, prefix) and return a list of identifiers to import based on the export list.
+;;
+;; Any identifiers renamed in the export list will be returned as a pair
+;; of the form (renamed-ident . original-ident)
+;; 
 (define (lib:import-set/exports->imports import-set exports)
-;; TODO: how to handle if a var is renamed more than once? really just want one mapping from lib-var-name => renamed-var-name
-
-  ;; TODO: if import-set is not library name, recursively process it, then deal with results here
+  ;; Handle import set that contains another import set
   (unless (lib:import-set:library-name? import-set)
     (let ((result (lib:import-set/exports->imports
                     (lib:import-set->import-set import-set)
                     exports)))
       (set! exports result)))
-
+  ;; Process the current import set
   (cond
     ((tagged-list? 'only import-set)
      ;; Filter to symbols from "only" that appear in export list
