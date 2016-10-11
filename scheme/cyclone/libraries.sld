@@ -54,8 +54,8 @@
     lib:idb:ids
     lib:idb:id->import
     lib:idb:lookup
-    lib:idb:entry:->library-name
-    lib:idb:entry:->library-id
+    lib:idb:entry->library-name
+    lib:idb:entry->library-id
   )
   (begin
 
@@ -396,9 +396,11 @@
         (lambda (entry)
           (cond
             ;; Normal identifier, no renaming
-            ((equal? identifier (car entry)) (return entry))
+            ((equal? identifier (car entry)) 
+             (return entry))
             ;; Identifier was renamed by an import set
-            ((equal? identifier (caar entry))
+            ((and (pair? (car entry))
+                  (equal? identifier (caar entry)))
              (return entry))
             ;; Keep going
             (else #f)))
@@ -406,14 +408,14 @@
       (return #f))))
 
 ;; Take an idb entry and find the library that imported it
-(define (lib:idb:entry:->library-name entry)
+(define (lib:idb:entry->library-name entry)
   (if entry
       (cdr entry)
       #f))
 
 ;; Take an idb entry and find the original identifier for it,
 ;; that is part of the library definition.
-(define (lib:idb:entry:->library-id entry)
+(define (lib:idb:entry->library-id entry)
   (if (pair? entry)
       (cond
         ;; ID was renamed by an import set
