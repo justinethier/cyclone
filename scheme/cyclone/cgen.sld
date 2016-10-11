@@ -1080,12 +1080,12 @@
                       program? 
                       lib-name 
                       lib-exports 
-                      imported-globals
+                      import-db
                       globals
                       c-headers
                       required-libs
                       src-file)
-  (set! *global-syms* (append globals (lib:idb:ids imported-globals)))
+  (set! *global-syms* (append globals (lib:idb:ids import-db)))
   (set! cgen:mangle-global
     (lambda (ident)
       (cond
@@ -1100,13 +1100,15 @@
            (string-append prefix suffix)))
         ;; Identifier exported by another library
         (else
-          (let ((import (lib:idb:id->import imported-globals ident)))
+          (let ((idb-entry (lib:idb:lookup import-db ident)))
             (cond
-              ((not import)
+              ((not idb-entry)
                (error `(Unable to find a library importing ,ident)))
               (else
-               (let ((suffix (import->string import))
-                     (prefix (mangle-global ident)))
+               (let ((suffix (import->string 
+                               (lib:idb:entry->library-name idb-entry)))
+                     (prefix (mangle-global 
+                               (lib:idb:entry->library-id idb-entry))))
                  (string-append prefix suffix)))))))))
 
   (let ((compiled-program-lst '())
@@ -1149,7 +1151,7 @@
           (emits "extern object ")
           (emits (cgen:mangle-global global))
           (emits ";\n"))
-        (lib:idb:ids imported-globals))
+        (lib:idb:ids import-db))
     (emit "#include \"cyclone/runtime.h\"")
 
     (if program?
