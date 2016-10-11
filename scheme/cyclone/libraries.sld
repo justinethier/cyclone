@@ -45,9 +45,17 @@
     lib:get-all
     lib:get-all-import-deps
     lib:get-dep-list
+    ;; Import Database "idb" oriented functions
+    ;;
+    ;; These functions perform operations for a "database" created from
+    ;; the data taken from a list of import sets: imported objects,
+    ;; renamed objects, and the libraries that contain them.
     lib:imports->idb
     lib:idb:ids
     lib:idb:id->import
+    lib:idb:lookup
+    lib:idb:entry:->library-name
+    lib:idb:entry:->library-id
   )
   (begin
 
@@ -366,16 +374,54 @@
 ;; EG: '((call/cc . (scheme base))) ==> '(call/cc)
 (define (lib:idb:ids db)
   (foldr 
-    (lambda (i is) (cons (car i) is))
+    (lambda (i is) 
+      (let ((id (if (pair? (car i)) (caar i) (car i))))
+        (cons id is)))
    '() 
     db))
 
+;; OBSOLETE
 ;; Map from identifier to the library that imported it
 (define (lib:idb:id->import db identifier)
   (let ((entry (assoc identifier db)))
     (if entry
         (cdr entry)
         #f)))
+
+;; Retrieve entry in the given idb database for the given identifier
+(define (lib:idb:lookup db identifier)
+  (call/cc 
+    (lambda (return)
+      (for-each
+        (lambda (entry)
+          (cond
+            ;; Normal identifier, no renaming
+            ((equal? identifier (car entry)) (return entry))
+            ;; Identifier was renamed by an import set
+            ((equal? identifier (caar entry))
+             (return entry))
+            ;; Keep going
+            (else #f)))
+        db)
+      (return #f))))
+
+;; Take an idb entry and find the library that imported it
+(define (lib:idb:entry:->library-name entry)
+  (if entry
+      (cdr entry)
+      #f))
+
+;; Take an idb entry and find the original identifier for it,
+;; that is part of the library definition.
+(define (lib:idb:entry:->library-id entry)
+  (if (pair? entry)
+      (cond
+        ;; ID was renamed by an import set
+        ((pair? (car entry))
+         (cdar entry))
+        (else
+          (car entry)))
+      #f))
 
 (define (lib:import->metalist import)
   (let* ((lib-name (lib:import->library-name import))
