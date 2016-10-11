@@ -40,6 +40,7 @@
     lib:read-imports
     lib:import->export-list
     lib:import-set/exports->imports
+    ;lib:member:direct-or-car
     ;lib:resolve-imports
     lib:resolve-meta
     lib:get-all
@@ -266,6 +267,19 @@
       (else 
        exports))))
 
+;; Determine if given value is a member of the given list, either directly
+;; or as the car of a pair in the list
+#;(define (lib:member:direct-or-car val lis)
+  (call/cc
+    (lambda (return)
+      (for-each
+        (lambda (elem)
+          (if (or (equal? elem val)
+                  (and (pair? elem) (equal? (car elem) val)))
+              (return #t)))
+        lis)
+      (return #f))))
+
 ;; Take an import set and the corresponding list of exports. Process all of the
 ;; import set directives (only, except, rename, prefix) and return a list of:
 ;; - identifiers to import
@@ -283,17 +297,21 @@
   (cond
     ((tagged-list? 'only import-set)
      ;; Filter to symbols from "only" that appear in export list
-     (filter
-       (lambda (sym)
-;; TODO: not good enough, need to handle renamed identifiers
-         (member sym exports))
-       (cddr import-set)))
+      (let ((only-syms (cddr import-set)))
+        (filter
+          (lambda (sym)
+            (member
+              (if (pair? sym) (car sym) sym)
+              only-syms))
+          exports)))
     ((tagged-list? 'except import-set)
-     (filter
-       (lambda (sym)
-;; TODO: not good enough, need to handle renamed identifiers
-         (not (member sym (cddr import-set))))
-       exports))
+     (let ((except-syms (cddr import-set)))
+       (filter
+         (lambda (sym)
+           (not (member 
+                  (if (pair? sym) (car sym) sym)
+                  except-syms)))
+         exports)))
     ((tagged-list? 'prefix import-set)
      ;; same as rename, but add given prefix to all exports
      (let* ((prefix (caddr import-set))
@@ -342,6 +360,9 @@
 ;cyclone> (lib:import-set/exports->imports '(prefix (lib) my-) '(a b c d e))
 ;((my-a . a) (my-b . b) (my-c . c) (my-d . d) (my-e . e))
 ;cyclone> (lib:import-set/exports->imports '(only (prefix (lib) my-) my-b) '(a b c d e))
+;
+; (lib:import-set/exports->imports '(except (rename (lib) (a a1) (d d1)) d1 e) '(a b c d e))
+;
 
 ;; Take a list of imports and resolve it to the imported vars
 ;(define (lib:resolve-imports imports)
