@@ -34,7 +34,7 @@ Section | Status | Comments
 5.3 Variable definitions | Partial | `define-values` is not implemented yet.
 5.4 Syntax definitions | Yes |
 5.5 Record-type definitions | Yes | 
-5.6 Libraries | Partial | The following import set forms are not supported yet: `only`, `except`, `rename`, `prefix`.
+5.6 Libraries | Yes |
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes |
 6.2 Numbers | Partial | Only integers and reals are supported at this time.
