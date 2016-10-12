@@ -5,7 +5,12 @@
 # Copyright (c) 2014-2016, Justin Ethier
 # All rights reserved.
 #
-# Copy API documentation to the Jekyll webpage (gh-pages)
+# Purpose
+# Use this script to copy API documentation changes to the Jekyll webpage (gh-pages).
+#
+# Usage
+# Run this script from the main directory of the repo:
+#     $ ./scripts/api-update.sh
 #
 
 TMP=/tmp/cyclone-docs
