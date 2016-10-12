@@ -56,11 +56,11 @@ sed -i -- 's/primitives#-5)/primitives#section-5)/g' docs/API.md
 sed -i -- 's/primitives#-6)/primitives#section-6)/g' docs/API.md
 sed -i -- 's/primitives#-7)/primitives#section-7)/g' docs/API.md
 sed -i -- 's/primitives#-8)/primitives#section-8)/g' docs/API.md
-sed -i -- 's/srfi\/128#)/(srfi\/128#section)/g' docs/API.md
-sed -i -- 's/srfi\/128#-1)/(srfi\/128#section-1)/g' docs/API.md
-sed -i -- 's/srfi\/128#-2)/(srfi\/128#section-2)/g' docs/API.md
-sed -i -- 's/srfi\/128#-3)/(srfi\/128#section-3)/g' docs/API.md
-sed -i -- 's/srfi\/128#-4)/(srfi\/128#section-4)/g' docs/API.md
+sed -i -- 's/srfi\/128#)/srfi\/128#section)/g' docs/API.md
+sed -i -- 's/srfi\/128#-1)/srfi\/128#section-1)/g' docs/API.md
+sed -i -- 's/srfi\/128#-2)/srfi\/128#section-2)/g' docs/API.md
+sed -i -- 's/srfi\/128#-3)/srfi\/128#section-3)/g' docs/API.md
+sed -i -- 's/srfi\/128#-4)/srfi\/128#section-4)/g' docs/API.md
 
 sed -i -- 's/(#)/(#section)/g' docs/api/primitives.md
 sed -i -- 's/(#-1)/(#section-1)/g' docs/api/primitives.md
