@@ -65,7 +65,11 @@ sed -i -- 's/(#-5)/(#section-5)/g' docs/api/primitives.md
 sed -i -- 's/(#-6)/(#section-6)/g' docs/api/primitives.md
 sed -i -- 's/(#-7)/(#section-7)/g' docs/api/primitives.md
 sed -i -- 's/(#-8)/(#section-8)/g' docs/api/primitives.md
-
+sed -i -- 's/(#)/(#section)/g' docs/api/srfi/128.md
+sed -i -- 's/(#-1)/(#section-1)/g' docs/api/srfi/128.md
+sed -i -- 's/(#-2)/(#section-2)/g' docs/api/srfi/128.md
+sed -i -- 's/(#-3)/(#section-3)/g' docs/api/srfi/128.md
+sed -i -- 's/(#-4)/(#section-4)/g' docs/api/srfi/128.md
 sed -i -- 's/#-heap/#heap/g' docs/API.md
 sed -i -- 's/#-heap/#heap/g' docs/api/srfi/18.md
 
