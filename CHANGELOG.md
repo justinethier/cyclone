@@ -10,7 +10,7 @@ Features:
 - Added support for SRFI 106: a basic socket interface.
 - Improved library support to recognize all of the import set forms: `only`, `except`, `prefix`, and `rename`.
 - Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`. 
-- Added `get-environment-variables` from R7RS.
+- Added the `get-environment-variables` function from R7RS.
 
 Bug Fixes
 
