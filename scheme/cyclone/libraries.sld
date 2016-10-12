@@ -52,7 +52,6 @@
     ;; renamed objects, and the libraries that contain them.
     lib:imports->idb
     lib:idb:ids
-    lib:idb:id->import
     lib:idb:lookup
     lib:idb:entry->library-name
     lib:idb:entry->library-id
@@ -379,14 +378,6 @@
         (cons id is)))
    '() 
     db))
-
-;; OBSOLETE
-;; Map from identifier to the library that imported it
-(define (lib:idb:id->import db identifier)
-  (let ((entry (assoc identifier db)))
-    (if entry
-        (cdr entry)
-        #f)))
 
 ;; Retrieve entry in the given idb database for the given identifier
 (define (lib:idb:lookup db identifier)

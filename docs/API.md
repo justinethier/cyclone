@@ -545,7 +545,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`lib:get-all`](api/scheme/cyclone/libraries.md#libget-all)
 [`lib:get-all-import-deps`](api/scheme/cyclone/libraries.md#libget-all-import-deps)
 [`lib:get-dep-list`](api/scheme/cyclone/libraries.md#libget-dep-list)
-[`lib:idb:id->import`](api/scheme/cyclone/libraries.md#libidb:id-import)
 [`lib:idb:ids`](api/scheme/cyclone/libraries.md#libidb:ids)
 [`lib:import->export-list`](api/scheme/cyclone/libraries.md#libimport-export-list)
 [`lib:import->filename`](api/scheme/cyclone/libraries.md#libimport-filename)
