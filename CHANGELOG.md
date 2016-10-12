@@ -7,7 +7,7 @@ TODO: macro improvements (ref trans.) to support SRFI 128
 
 Features:
 
-- Added support for SRFI 106: a basic socket interface.
+- Added support for SRFI 106: a basic socket interface, and SRFI 128: Comparators.
 - Improved library support to recognize all of the import set forms: `only`, `except`, `prefix`, and `rename`.
 - Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`. 
 - Added the `get-environment-variables` function from R7RS.

@@ -1,4 +1,4 @@
-(define-library (comparators)
+(define-library (srfi 128) ;comparators)
   (import (scheme base))
   (import (scheme case-lambda))
   (import (scheme char) (scheme complex) (scheme inexact))
@@ -16,6 +16,6 @@
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (export %salt%) ;; Temporary workaround since we cannot preserve referential transparency for this
-  (include "comparators-impl.scm")
-  (include "default.scm")
+  (include "comparators/comparators-impl.scm")
+  (include "comparators/default.scm")
 )

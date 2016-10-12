@@ -44,6 +44,7 @@ SMODULES = \
   srfi/106 \
   srfi/111 \
   srfi/117 \
+  srfi/128 \
   srfi/132 \
   srfi/133
 SLDFILES = $(addsuffix .sld, $(SMODULES))
@@ -154,6 +155,8 @@ bootstrap: icyc
 	cp srfi/106.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/117.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/128.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/128.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/list-queues/*.scm $(BOOTSTRAP_DIR)/srfi/list-queues
 	cp srfi/sorting/*.scm $(BOOTSTRAP_DIR)/srfi/sorting
