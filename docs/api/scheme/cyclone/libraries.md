@@ -31,7 +31,6 @@ The `(scheme cyclone libraries)` library implements r7rs libraries.
 - [`lib:get-dep-list`](#libget-dep-list)
 - [`lib:imports->idb`](#libimports-idb)
 - [`lib:idb:ids`](#libidb:ids)
-- [`lib:idb:id->import`](#libidb:id-import)
 
 # library?
 
@@ -82,6 +81,4 @@ The `(scheme cyclone libraries)` library implements r7rs libraries.
 # lib:imports->idb
 
 # lib:idb:ids
-
-# lib:idb:id->import
 
