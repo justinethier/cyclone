@@ -119,19 +119,19 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`/`](api/primitives#section-2)
 
 - - -
-[`<=?                           `](api/(srfi/128#section-3)
+[`<=?                           `](api/srfi/128#section-3)
 [`<=`](api/primitives#section-4)
-[`<?                            `](api/(srfi/128#section-1)
+[`<?                            `](api/srfi/128#section-1)
 [`<`](api/primitives#section-3)
 
 - - -
-[`=?                            `](api/(srfi/128#section)
+[`=?                            `](api/srfi/128#section)
 [`=`](api/primitives#section-5)
 
 - - -
-[`>=?                           `](api/(srfi/128#section-4)
+[`>=?                           `](api/srfi/128#section-4)
 [`>=`](api/primitives#section-7)
-[`>?                            `](api/(srfi/128#section-2)
+[`>?                            `](api/srfi/128#section-2)
 [`>`](api/primitives#section-6)
 
 - - -
