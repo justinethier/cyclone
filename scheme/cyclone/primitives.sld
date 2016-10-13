@@ -7,7 +7,9 @@
 ;;;; This module contains information about Cyclone's scheme primitives.
 ;;;;
 (define-library (scheme cyclone primitives)
-  (import (scheme base))
+  (import (scheme base)
+          ;(scheme write)
+  )
   (export
     prim?
     *primitives*
@@ -18,6 +20,7 @@
     prim/data-arg?
     prim/c-var-assign
     prim/cvar?
+    prim:inline-convert-prim-call
     prim:check-arg-count
     prim:mutates?
     prim:cont?
@@ -57,6 +60,7 @@
          Cyc-stdout
          Cyc-stdin
          Cyc-stderr
+         Cyc-fast-plus
          +
          -
          *
@@ -176,6 +180,7 @@
          (Cyc-stdout 0 0)
          (Cyc-stdin 0 0)
          (Cyc-stderr 0 0)
+         (Cyc-fast-plus 2 2)
          (- 1 #f)
          (/ 1 #f)
          (= 2 #f)
@@ -402,6 +407,7 @@
          ((eq? p 'Cyc-stdout)            "Cyc_stdout")
          ((eq? p 'Cyc-stdin)             "Cyc_stdin")
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
+         ((eq? p 'Cyc-fast-plus)         "Cyc_fast_sum")
          ((eq? p '+)                     "Cyc_sum")
          ((eq? p '-)                     "Cyc_sub")
          ((eq? p '*)                     "Cyc_mul")
@@ -523,6 +529,7 @@
     ;; Does the primitive require passing thread data as its first argument?
     (define (prim/data-arg? p)
       (member p '(
+        Cyc-fast-plus
         +
         -
         *
@@ -604,6 +611,7 @@
         ((eq? p 'Cyc-stderr) "port_type")
         ((eq? p 'open-input-file) "port_type")
         ((eq? p 'open-output-file) "port_type")
+        ((eq? p 'Cyc-fast-plus) "common_type")
         ((eq? p '+) "object")
         ((eq? p '-) "object")
         ((eq? p '*) "object")
@@ -658,6 +666,7 @@
                  make-vector list->vector
                  symbol->string number->string 
                  substring
+                 Cyc-fast-plus
                  + - * / apply 
                  = > < >= <=
                  command-line-arguments
@@ -710,4 +719,14 @@
     (define (prim:allocates-object? exp)
         (and  (prim? exp)
               (member exp '())))
+
+    (define (prim:inline-convert-prim-call prim-call)
+      ;(write `(prim:inline-convert-prim-call ,prim-call))
+      ;(newline)
+      (cond
+        ((and (equal? (car prim-call) '+)
+              (= (length prim-call) 3))
+          (cons 'Cyc-fast-plus (cdr prim-call)))
+        (else
+          prim-call)))
 ))

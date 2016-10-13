@@ -1022,8 +1022,6 @@
 
   ;; Perform actual alpha conversion
   (define (convert ast renamed)
-;(write `(DEBUG convert ,ast))
-;(write (newline))
     (cond
       ((const? ast) ast)
       ((quote? ast) ast)
@@ -1059,14 +1057,15 @@
             new-ast))))
       ((and (prim-call? ast)
             ;; Not a primitive if the identifier has been redefined
-            (not assoc (car ast) renamed))
+            (not (assoc (car ast) renamed)))
        (let ((converted
                (cons (car ast) 
                      (map (lambda (a) (convert a renamed))
                           (cdr ast)))))
          (if (precompute-prim-app? converted)
-           (eval converted) ;; OK, evaluate at compile time
-           converted)))
+           converted ; TODO:(eval converted) ;; OK, evaluate at compile time
+           converted))) ;; No, see if we can fast-convert it
+           ;(prim:inline-convert-prim-call converted)))) ;; No, see if we can fast-convert it
       ((lambda? ast)
        (let* ((args (lambda-formals->list ast))
               (ltype (lambda-formals-type ast))
