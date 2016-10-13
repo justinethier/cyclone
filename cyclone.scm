@@ -75,7 +75,7 @@
                                             (lib:import->path lib-name) 
                                             include)) 
                                input-program)))
-               includes))))
+               (reverse includes))))) ;; Append code in same order as the library's includes
         (else
           ;; Handle import, if present
           (cond
