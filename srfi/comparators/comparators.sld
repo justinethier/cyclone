@@ -15,6 +15,7 @@
   (export hash-bound hash-salt)
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
+  (export %salt%) ;; Temporary workaround since we cannot preserve referential transparency for this
   (include "comparators-impl.scm")
   (include "default.scm")
 )
