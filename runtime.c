@@ -2388,6 +2388,73 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   return NULL;
 }
 
+object Cyc_fast_mul(void *data, object ptr, object x, object y) {
+  // x is int (assume value types for integers)
+  if (obj_is_int(x)){
+    if (obj_is_int(y)){
+      int z = obj_obj2int(x) * obj_obj2int(y);
+      return obj_int2obj(z);
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_double(ptr, (double)(obj_obj2int(x)) * double_value(y));
+      return ptr;
+    }
+  }
+  // x is double
+  if (is_object_type(x) && type_of(x) == double_tag) {
+    if (obj_is_int(y)){
+      assign_double(ptr, (double)(obj_obj2int(y)) * double_value(x));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_double(ptr, double_value(x) * double_value(y));
+      return ptr;
+    }
+  }
+  // still here, raise an error 
+  make_string(s, "Bad argument type");
+  make_pair(c2, y, NULL);
+  make_pair(c1, x, &c2);
+  make_pair(c0, &s, &c1);
+  Cyc_rt_raise(data, &c0);
+  return NULL;
+}
+
+object Cyc_fast_div(void *data, object ptr, object x, object y) {
+  int z;
+  // x is int (assume value types for integers)
+  if (obj_is_int(x)){
+    if (obj_is_int(y)){
+      if (obj_obj2int(y) == 0) { goto divbyzero; }
+      z = obj_obj2int(x) / obj_obj2int(y);
+      return obj_int2obj(z);
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      if (double_value(y) == 0.0) { goto divbyzero; }
+      assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
+      return ptr;
+    }
+  }
+  // x is double
+  if (is_object_type(x) && type_of(x) == double_tag) {
+    if (obj_is_int(y)){
+      if (obj_obj2int(y) == 0.0) { goto divbyzero; }
+      assign_double(ptr, (double)(obj_obj2int(y)) / double_value(x));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      if (double_value(y) == 0.0) { goto divbyzero; }
+      assign_double(ptr, double_value(x) / double_value(y));
+      return ptr;
+    }
+  }
+  // still here, raise an error 
+  make_string(s, "Bad argument type");
+  make_pair(c2, y, NULL);
+  make_pair(c1, x, &c2);
+  make_pair(c0, &s, &c1);
+  Cyc_rt_raise(data, &c0);
+divbyzero:
+  Cyc_rt_raise_msg(data, "Divide by zero");
+  return NULL;
+}
+
 object Cyc_div_op(void *data, common_type * x, object y)
 {
   int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y));

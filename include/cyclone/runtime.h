@@ -269,6 +269,8 @@ object Cyc_mul(void *data, object cont, int argc, object n, ...);
 object Cyc_div(void *data, object cont, int argc, object n, ...);
 object Cyc_fast_sum(void *data, object ptr, object x, object y);
 object Cyc_fast_sub(void *data, object ptr, object x, object y);
+object Cyc_fast_mul(void *data, object ptr, object x, object y);
+object Cyc_fast_div(void *data, object ptr, object x, object y);
 object Cyc_bit_unset(void *data, object n1, object n2); 
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,
