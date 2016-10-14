@@ -2,8 +2,7 @@
 
 TODO: performance improvements
       need to improve both runtime speed and compiler optimizations
-TODO: SRFI 113, 128
-TODO: macro improvements (ref trans.) to support SRFI 128
+TODO: SRFI 113
 
 Features:
 
