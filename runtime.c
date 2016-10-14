@@ -2289,6 +2289,66 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     return_closcall1(data, cont, result); \
 }
 
+object Cyc_fast_sum(void *data, object cont, int argc, object x, object y) {
+  // x is int (assume value types for integers)
+  if (obj_is_int(x)){
+    if (obj_is_int(y)){
+      int z = obj_obj2int(x) + obj_obj2int(y);
+      _return_closcall1(data, cont, obj_int2obj(z));
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, (double)(obj_obj2int(x)) + double_value(y));
+      _return_closcall1(data, cont, &d);
+    }
+  }
+  // x is double
+  if (is_object_type(x) && type_of(x) == double_tag) {
+    if (obj_is_int(y)){
+      make_double(d, (double)(obj_obj2int(y)) + double_value(x));
+      _return_closcall1(data, cont, &d);
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, double_value(x) + double_value(y));
+      _return_closcall1(data, cont, &d);
+    }
+  }
+  // still here, raise an error 
+  make_string(s, "Bad argument type");
+  make_pair(c2, y, NULL);
+  make_pair(c1, x, &c2);
+  make_pair(c0, &s, &c1);
+  Cyc_rt_raise(data, &c0);
+  return NULL;
+}
+
+object Cyc_fast_sub(void *data, object cont, int argc, object x, object y) {
+  // x is int (assume value types for integers)
+  if (obj_is_int(x)){
+    if (obj_is_int(y)){
+      int z = obj_obj2int(x) - obj_obj2int(y);
+      _return_closcall1(data, cont, obj_int2obj(z));
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, (double)(obj_obj2int(x)) - double_value(y));
+      _return_closcall1(data, cont, &d);
+    }
+  }
+  // x is double
+  if (is_object_type(x) && type_of(x) == double_tag) {
+    if (obj_is_int(y)){
+      make_double(d, (double)(obj_obj2int(y)) - double_value(x));
+      _return_closcall1(data, cont, &d);
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, double_value(x) - double_value(y));
+      _return_closcall1(data, cont, &d);
+    }
+  }
+  // still here, raise an error 
+  make_string(s, "Bad argument type");
+  make_pair(c2, y, NULL);
+  make_pair(c1, x, &c2);
+  make_pair(c0, &s, &c1);
+  Cyc_rt_raise(data, &c0);
+  return NULL;
+}
+
 object Cyc_div_op(void *data, common_type * x, object y)
 {
   int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y));
