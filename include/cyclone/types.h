@@ -365,6 +365,12 @@ typedef struct {
   n.tag = double_tag; \
   n.value = v;
 
+#define assign_double(pobj,v) \
+  ((double_type *)pobj)->hdr.mark = gc_color_red; \
+  ((double_type *)pobj)->hdr.grayed = 0; \
+  ((double_type *)pobj)->tag = double_tag; \
+  double_value(pobj) = v;
+
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
 

@@ -1152,6 +1152,11 @@ declare_num_cmp(Cyc_num_lt, Cyc_num_lt_op, dispatch_num_lt, <);
 declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, dispatch_num_gte, >=);
 declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, dispatch_num_lte, <=);
 
+//TODO:
+//object Cyc_fast_num_eq(void *data, object cont, int argc, object x, object y) {
+//  return NULL;
+//}
+
 object Cyc_is_boolean(object o)
 {
   if ((o != NULL) &&
@@ -2289,25 +2294,36 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     return_closcall1(data, cont, result); \
 }
 
-object Cyc_fast_sum(void *data, object cont, int argc, object x, object y) {
+/*
+TODO: need compiler to allocate a common type on the stack, and pass
+a pointer to it as ptr. This would allow us to have a function that can
+be inlined.
+
+TODO: with above, will want compiler to replace suitable instances of +
+with something else to be compiled to this, such as Cyc:+.
+I think it is good enough to replace all calls to + with only 2 params.
+might be able to condense calls with more than 2 params down to multiple
+calls to Cyc:+, but lets do that afterwards
+*/
+object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   // x is int (assume value types for integers)
   if (obj_is_int(x)){
     if (obj_is_int(y)){
       int z = obj_obj2int(x) + obj_obj2int(y);
-      _return_closcall1(data, cont, obj_int2obj(z));
+      return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      make_double(d, (double)(obj_obj2int(x)) + double_value(y));
-      _return_closcall1(data, cont, &d);
+      assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
+      return ptr;
     }
   }
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
-      make_double(d, (double)(obj_obj2int(y)) + double_value(x));
-      _return_closcall1(data, cont, &d);
+      assign_double(ptr, (double)(obj_obj2int(y)) + double_value(x));
+      return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      make_double(d, double_value(x) + double_value(y));
-      _return_closcall1(data, cont, &d);
+      assign_double(ptr, double_value(x) + double_value(y));
+      return ptr;
     }
   }
   // still here, raise an error 
@@ -2319,7 +2335,7 @@ object Cyc_fast_sum(void *data, object cont, int argc, object x, object y) {
   return NULL;
 }
 
-object Cyc_fast_sub(void *data, object cont, int argc, object x, object y) {
+/*object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   // x is int (assume value types for integers)
   if (obj_is_int(x)){
     if (obj_is_int(y)){
@@ -2347,7 +2363,7 @@ object Cyc_fast_sub(void *data, object cont, int argc, object x, object y) {
   make_pair(c0, &s, &c1);
   Cyc_rt_raise(data, &c0);
   return NULL;
-}
+}*/
 
 object Cyc_div_op(void *data, common_type * x, object y)
 {
