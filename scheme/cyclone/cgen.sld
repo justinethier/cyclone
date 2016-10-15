@@ -539,6 +539,15 @@
                  ((prim/data-arg? p) "data")
                  (else "")))
          (tdata-comma (if (> (string-length tdata) 0) "," ""))
+         (tptr-type (prim/c-var-pointer p))
+         (tptr-comma (if tptr-type ",&" ""))
+         (tptr (cond
+                (tptr-type (mangle (gensym 'local)))
+                (else "")))
+         (tptr-decl
+          (cond 
+            (tptr-type (string-append tptr-type " " tptr "; "))
+            (else "")))
          (c-var-assign 
             (lambda (type)
               (let ((cv-name (mangle (gensym 'c))))
@@ -551,20 +560,26 @@
                        (closure-def closure-def)
                        (else ""))
 
-                      ;; Emit C variable
+                      ;; Emit C variables
+                      tptr-decl
                       type " " cv-name " = " c-func "("
 
                       ;; Emit closure as first arg, if necessary (apply only)
                       (cond
                        (closure-def
                         (string-append 
-                          tdata ","
-                          "&" closure-sym))
+                          tdata
+                          tptr-comma tptr
+                          ",&" closure-sym))
                        ((prim:cont? p) 
                         (string-append 
-                          tdata ","
+                          tdata 
+                          tptr-comma tptr
+                          ","
                           cont))
-                       (else tdata)))))))))
+                       (else 
+                        (string-append
+                          tdata tptr-comma tptr))))))))))
     (cond
      ((prim/c-var-assign p)
       (c-var-assign (prim/c-var-assign p)))
@@ -576,7 +591,7 @@
         ;; the logic
         ;;
         (let ((cv-name (mangle (gensym 'c))))
-           (c-code/vars 
+           (c-code/vars
             (if (prim:allocates-object? p)
                 cv-name ;; Already a pointer
                 (string-append "&" cv-name)) ;; Point to data
