@@ -2342,7 +2342,7 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
-      assign_double(ptr, (double)(obj_obj2int(y)) + double_value(x));
+      assign_double(ptr, double_value(x) + (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, double_value(x) + double_value(y));
@@ -2372,7 +2372,7 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
-      assign_double(ptr, (double)(obj_obj2int(y)) - double_value(x));
+      assign_double(ptr, double_value(x) - (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, double_value(x) - double_value(y));
@@ -2402,7 +2402,7 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
-      assign_double(ptr, (double)(obj_obj2int(y)) * double_value(x));
+      assign_double(ptr, double_value(x) * (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, double_value(x) * double_value(y));
