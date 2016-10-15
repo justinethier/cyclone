@@ -1098,7 +1098,7 @@ object Cyc_num_cmp_va_list(void *data, int argc,
   return boolean_t;
 }
 
-#define declare_num_cmp(FUNC, FUNC_OP, FUNC_APPLY, OP) \
+#define declare_num_cmp(FUNC, FUNC_OP, FUNC_FAST_OP, FUNC_APPLY, OP) \
 int FUNC_OP(void *data, object x, object y) { \
     int result = 0, \
         tx = (obj_is_int(x) ? -1 : type_of(x)), \
@@ -1144,18 +1144,52 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     result = Cyc_num_cmp_va_list(data, argc - 1, FUNC_OP, n, ap); \
     va_end(ap); \
     return_closcall1(data, cont, result); \
+} \
+object FUNC_FAST_OP(void *data, object x, object y) { \
+    int tx = (obj_is_int(x) ? -1 : type_of(x)), \
+        ty = (obj_is_int(y) ? -1 : type_of(y)); \
+    if (tx == -1 && ty == -1) { \
+      return ((obj_obj2int(x)) OP (obj_obj2int(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == -1 && ty == integer_tag) { \
+      return ((obj_obj2int(x)) OP (integer_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == -1 && ty == double_tag) { \
+      return ((obj_obj2int(x)) OP (double_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == integer_tag && ty == -1) { \
+      return ((integer_value(x)) OP (obj_obj2int(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == integer_tag && ty == integer_tag) { \
+      return ((integer_value(x)) OP (integer_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == integer_tag && ty == double_tag) { \
+      return ((integer_value(x)) OP (double_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == double_tag && ty == -1) { \
+      return ((double_value(x)) OP (obj_obj2int(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == double_tag && ty == integer_tag) { \
+      return ((double_value(x)) OP (integer_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else if (tx == double_tag && ty == double_tag) { \
+      return ((double_value(x)) OP (double_value(y))) \
+             ? boolean_t : boolean_f; \
+    } else { \
+        make_string(s, "Bad argument type"); \
+        make_pair(c2, y, NULL); \
+        make_pair(c1, x, &c2); \
+        make_pair(c0, &s, &c1); \
+        Cyc_rt_raise(data, &c0); \
+    } \
+    return NULL; \
 }
 
-declare_num_cmp(Cyc_num_eq, Cyc_num_eq_op, dispatch_num_eq, ==);
-declare_num_cmp(Cyc_num_gt, Cyc_num_gt_op, dispatch_num_gt, >);
-declare_num_cmp(Cyc_num_lt, Cyc_num_lt_op, dispatch_num_lt, <);
-declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, dispatch_num_gte, >=);
-declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, dispatch_num_lte, <=);
-
-//TODO:
-//object Cyc_fast_num_eq(void *data, object cont, int argc, object x, object y) {
-//  return NULL;
-//}
+declare_num_cmp(Cyc_num_eq,  Cyc_num_eq_op,  Cyc_num_fast_eq_op, dispatch_num_eq, ==);
+declare_num_cmp(Cyc_num_gt,  Cyc_num_gt_op,  Cyc_num_fast_gt_op, dispatch_num_gt, >);
+declare_num_cmp(Cyc_num_lt,  Cyc_num_lt_op,  Cyc_num_fast_lt_op, dispatch_num_lt, <);
+declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, Cyc_num_fast_gte_op, dispatch_num_gte, >=);
+declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, Cyc_num_fast_lte_op, dispatch_num_lte, <=);
 
 object Cyc_is_boolean(object o)
 {

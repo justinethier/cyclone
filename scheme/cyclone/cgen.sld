@@ -554,6 +554,7 @@
                 (c-code/vars 
                   (string-append 
                     (if (or (prim:cont? p) 
+                            (equal? (prim/c-var-assign p) "object")
                             (prim/c-var-pointer p)) ;; Assume returns object
                         "" 
                         "&")

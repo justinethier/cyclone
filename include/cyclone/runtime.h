@@ -166,6 +166,11 @@ int Cyc_num_gt_op(void *, object x, object y);
 int Cyc_num_lt_op(void *, object x, object y);
 int Cyc_num_gte_op(void *, object x, object y);
 int Cyc_num_lte_op(void *, object x, object y);
+object Cyc_num_fast_eq_op(void *data, object x, object y);
+object Cyc_num_fast_gt_op(void *data, object x, object y);
+object Cyc_num_fast_lt_op(void *data, object x, object y);
+object Cyc_num_fast_gte_op(void *data, object x, object y);
+object Cyc_num_fast_lte_op(void *data, object x, object y);
 object Cyc_num_cmp_va_list(void *data, int argc,
                            int (fn_op(void *, object, object)), object n,
                            va_list ns);

@@ -67,6 +67,11 @@
          -
          *
          /
+         Cyc-fast-eq
+         Cyc-fast-gt
+         Cyc-fast-lt
+         Cyc-fast-gte
+         Cyc-fast-lte
          =
          >
          <
@@ -184,6 +189,11 @@
          (Cyc-stderr 0 0)
          (Cyc-fast-plus 2 2)
          (Cyc-fast-sub 2 2)
+         (Cyc-fast-eq 2 2)
+         (Cyc-fast-gt 2 2)
+         (Cyc-fast-lt 2 2)
+         (Cyc-fast-gte 2 2)
+         (Cyc-fast-lte 2 2)
          (- 1 #f)
          (/ 1 #f)
          (= 2 #f)
@@ -416,6 +426,11 @@
          ((eq? p '-)                     "Cyc_sub")
          ((eq? p '*)                     "Cyc_mul")
          ((eq? p '/)                     "Cyc_div")
+         ((eq? p 'Cyc-fast-eq)           "Cyc_num_fast_eq_op")
+         ((eq? p 'Cyc-fast-gt)           "Cyc_num_fast_gt_op")
+         ((eq? p 'Cyc-fast-lt)           "Cyc_num_fast_lt_op")
+         ((eq? p 'Cyc-fast-gte)          "Cyc_num_fast_gte_op")
+         ((eq? p 'Cyc-fast-lte)          "Cyc_num_fast_lte_op")
          ((eq? p '=)                     "Cyc_num_eq")
          ((eq? p '>)                     "Cyc_num_gt")
          ((eq? p '<)                     "Cyc_num_lt")
@@ -539,6 +554,11 @@
         -
         *
         /
+        Cyc-fast-eq
+        Cyc-fast-gt
+        Cyc-fast-lt
+        Cyc-fast-gte
+        Cyc-fast-lte
         =
         >
         <
@@ -629,6 +649,11 @@
         ((eq? p '-) "object")
         ((eq? p '*) "object")
         ((eq? p '/) "object")
+        ((eq? p 'Cyc-fast-eq) "object")
+        ((eq? p 'Cyc-fast-gt) "object")
+        ((eq? p 'Cyc-fast-lt) "object")
+        ((eq? p 'Cyc-fast-gte) "object")
+        ((eq? p 'Cyc-fast-lte) "object")
         ((eq? p '=) "object")
         ((eq? p '>) "object")
         ((eq? p '<) "object")
@@ -681,6 +706,11 @@
                  substring
                  Cyc-fast-plus
                  Cyc-fast-sub
+                 Cyc-fast-eq
+                 Cyc-fast-gt
+                 Cyc-fast-lt
+                 Cyc-fast-gte
+                 Cyc-fast-lte
                  + - * / apply 
                  = > < >= <=
                  command-line-arguments
@@ -740,6 +770,16 @@
          (cons 'Cyc-fast-plus (cdr prim-call)))
         ((and (equal? (car prim-call) '-) (= (length prim-call) 3))
          (cons 'Cyc-fast-sub (cdr prim-call)))
+        ((and (equal? (car prim-call) '=) (= (length prim-call) 3))
+         (cons 'Cyc-fast-eq (cdr prim-call)))
+        ((and (equal? (car prim-call) '>) (= (length prim-call) 3))
+         (cons 'Cyc-fast-gt (cdr prim-call)))
+        ((and (equal? (car prim-call) '<) (= (length prim-call) 3))
+         (cons 'Cyc-fast-lt (cdr prim-call)))
+        ((and (equal? (car prim-call) '>=) (= (length prim-call) 3))
+         (cons 'Cyc-fast-gte (cdr prim-call)))
+        ((and (equal? (car prim-call) '<=) (= (length prim-call) 3))
+         (cons 'Cyc-fast-lte (cdr prim-call)))
         (else
          prim-call)))
 ))
