@@ -18,6 +18,7 @@
     prim-call?
     prim->c-func
     prim/data-arg?
+    prim/c-var-pointer
     prim/c-var-assign
     prim/cvar?
     prim:inline-convert-prim-call
@@ -602,6 +603,12 @@
         procedure?
         set-cell!)))
 
+    ;; Determine if primitive receives a pointer to a local C variable
+    (define (prim/c-var-pointer p)
+      (cond
+        ((eq? p 'Cyc-fast-plus) "common_type")
+        (else #f)))
+
     ;; Determine if primitive assigns (allocates) a C variable
     ;; EG: int v = prim();
     (define (prim/c-var-assign p)
@@ -611,7 +618,7 @@
         ((eq? p 'Cyc-stderr) "port_type")
         ((eq? p 'open-input-file) "port_type")
         ((eq? p 'open-output-file) "port_type")
-        ((eq? p 'Cyc-fast-plus) "common_type")
+        ((eq? p 'Cyc-fast-plus) "object")
         ((eq? p '+) "object")
         ((eq? p '-) "object")
         ((eq? p '*) "object")
