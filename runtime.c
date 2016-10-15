@@ -2436,7 +2436,7 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
       if (obj_obj2int(y) == 0.0) { goto divbyzero; }
-      assign_double(ptr, (double)(obj_obj2int(y)) / double_value(x));
+      assign_double(ptr, double_value(x) / (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       if (double_value(y) == 0.0) { goto divbyzero; }
