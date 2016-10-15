@@ -552,7 +552,12 @@
             (lambda (type)
               (let ((cv-name (mangle (gensym 'c))))
                 (c-code/vars 
-                  (string-append (if (prim:cont? p) "" "&") cv-name)
+                  (string-append 
+                    (if (or (prim:cont? p) 
+                            (prim/c-var-pointer p)) ;; Assume returns object
+                        "" 
+                        "&")
+                    cv-name)
                   (list
                     (string-append 
                       ;; Define closure if necessary (apply only)
