@@ -96,6 +96,7 @@
          eq?
          eqv?
          equal?
+         Cyc-fast-member
          ;assoc
          ;assq
          ;assv
@@ -222,6 +223,7 @@
          (eq? 2 2)
          (eqv? 2 2)
          (equal? 2 2)
+         (Cyc-fast-member 2 2)
          ;(assoc 2 2)
          ;(assq 2 2)
          ;(assv 2 2)
@@ -528,6 +530,7 @@
          ((eq? p 'eq?)           "Cyc_eq")
          ((eq? p 'eqv?)          "Cyc_eq")
          ((eq? p 'equal?)        "equalp")
+         ((eq? p 'Cyc-fast-member)  "memberp")
          ((eq? p 'boolean?)      "Cyc_is_boolean")
          ((eq? p 'char?)         "Cyc_is_char")
          ((eq? p 'null?)         "Cyc_is_null")
@@ -572,6 +575,7 @@
         <
         >=
         <=
+        Cyc-fast-member
         apply
         car
         cdr
