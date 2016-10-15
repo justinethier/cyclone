@@ -279,6 +279,10 @@ object Cyc_num_op_va_list(void *data, int argc,
                           va_list ns, common_type * buf);
 int equal(object, object);
 object equalp(object, object);
+object memberp(void *data, object x, list l);
+object memqp(void *data, object x, list l);
+list assq(void *data, object x, list l);
+list assoc(void *data, object x, list l);
 
 object Cyc_spawn_thread(object thunk);
 void Cyc_start_trampoline(gc_thread_data * thd);

@@ -1000,6 +1000,54 @@ object Cyc_write_char(void *data, object c, object port)
   return quote_void;
 }
 
+/* Fast versions of member and assoc */
+object memberp(void *data, object x, list l)
+{
+  Cyc_check_pair_or_null(data, l);
+  for (; l != NULL; l = cdr(l)) {
+    if (boolean_f != equalp(x, car(l)))
+      return boolean_t;
+  }
+  return boolean_f;
+}
+
+object memqp(void *data, object x, list l)
+{
+  Cyc_check_pair_or_null(data, l);
+  for (; l != NULL; l = cdr(l)) {
+    if ((x == car(l)))
+      return boolean_t;
+  }
+  return boolean_f;
+}
+
+list assq(void *data, object x, list l)
+{
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
+    return boolean_f;
+  for (; (l != NULL); l = cdr(l)) {
+    list la = car(l);
+    Cyc_check_pair(data, la);
+    if ((x == car(la)))
+      return la;
+  }
+  return boolean_f;
+}
+
+list assoc(void *data, object x, list l)
+{
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
+    return boolean_f;
+  for (; (l != NULL); l = cdr(l)) {
+    list la = car(l);
+    Cyc_check_pair(data, la);
+    if (boolean_f != equalp(x, car(la)))
+      return la;
+  }
+  return boolean_f;
+}
+/* END member and assoc */
+
 // Internal function, do not use this anywhere outside the runtime
 object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 {
