@@ -147,8 +147,7 @@
       (comment?
        (if (eq? c #\newline)
            (begin
-              (in-port:set-lnum! ptbl 
-                (+ 1 (in-port:get-lnum ptbl)))
+              (in-port:set-lnum! ptbl (+ 1 (in-port:get-lnum ptbl)))
               (in-port:set-cnum! ptbl 0)
               (parse fp '() toks all? #f parens ptbl))
            (parse fp '() toks all? #t parens ptbl)))
