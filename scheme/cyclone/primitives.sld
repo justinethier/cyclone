@@ -62,6 +62,7 @@
          Cyc-stdin
          Cyc-stderr
          Cyc-fast-plus
+         Cyc-fast-sub
          +
          -
          *
@@ -182,6 +183,7 @@
          (Cyc-stdin 0 0)
          (Cyc-stderr 0 0)
          (Cyc-fast-plus 2 2)
+         (Cyc-fast-sub 2 2)
          (- 1 #f)
          (/ 1 #f)
          (= 2 #f)
@@ -409,6 +411,7 @@
          ((eq? p 'Cyc-stdin)             "Cyc_stdin")
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
          ((eq? p 'Cyc-fast-plus)         "Cyc_fast_sum")
+         ((eq? p 'Cyc-fast-sub)          "Cyc_fast_sub")
          ((eq? p '+)                     "Cyc_sum")
          ((eq? p '-)                     "Cyc_sub")
          ((eq? p '*)                     "Cyc_mul")
@@ -531,6 +534,7 @@
     (define (prim/data-arg? p)
       (member p '(
         Cyc-fast-plus
+        Cyc-fast-sub
         +
         -
         *
@@ -607,6 +611,7 @@
     (define (prim/c-var-pointer p)
       (cond
         ((eq? p 'Cyc-fast-plus) "common_type")
+        ((eq? p 'Cyc-fast-sub) "common_type")
         (else #f)))
 
     ;; Determine if primitive assigns (allocates) a C variable
@@ -619,6 +624,7 @@
         ((eq? p 'open-input-file) "port_type")
         ((eq? p 'open-output-file) "port_type")
         ((eq? p 'Cyc-fast-plus) "object")
+        ((eq? p 'Cyc-fast-sub) "object")
         ((eq? p '+) "object")
         ((eq? p '-) "object")
         ((eq? p '*) "object")
@@ -674,6 +680,7 @@
                  symbol->string number->string 
                  substring
                  Cyc-fast-plus
+                 Cyc-fast-sub
                  + - * / apply 
                  = > < >= <=
                  command-line-arguments
@@ -728,12 +735,11 @@
               (member exp '())))
 
     (define (prim:inline-convert-prim-call prim-call)
-      ;(write `(prim:inline-convert-prim-call ,prim-call))
-      ;(newline)
       (cond
-        ((and (equal? (car prim-call) '+)
-              (= (length prim-call) 3))
-          (cons 'Cyc-fast-plus (cdr prim-call)))
+        ((and (equal? (car prim-call) '+) (= (length prim-call) 3))
+         (cons 'Cyc-fast-plus (cdr prim-call)))
+        ((and (equal? (car prim-call) '-) (= (length prim-call) 3))
+         (cons 'Cyc-fast-sub (cdr prim-call)))
         (else
-          prim-call)))
+         prim-call)))
 ))
