@@ -1,0 +1,78 @@
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:10:53 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing parsing under Cyclone
+Compiling...
+Running...
+Running parsing:2500
+Elapsed time: 188.596576 seconds (188.0) for parsing:2500
+
+real	3m8.529s
+user	3m8.320s
+sys	0m0.283s
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:14:26 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing read1 under Cyclone
+Compiling...
+Running...
+Running read1:2500
+Elapsed time: 61.306743 seconds (62.0) for read1:2500
+
+real	1m1.324s
+user	1m0.857s
+sys	0m0.450s
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:15:30 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing conform under Cyclone
+Compiling...
+Running...
+Running conform:500
+Elapsed time: 85.137925 seconds (85.0) for conform:500
+
+real	1m25.054s
+user	1m24.410s
+sys	0m0.733s
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:17:02 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing dynamic under Cyclone
+Compiling...
+Running...
+Running dynamic:500
+Elapsed time: 101.301634 seconds (101.0) for dynamic:500
+
+real	1m41.072s
+user	1m39.987s
+sys	0m1.317s
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:19:10 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing lattice under Cyclone
+Compiling...
+Running...
+Running lattice:44:10
+Elapsed time: 187.322588 seconds (187.0) for lattice:44:10
+
+real	3m7.127s
+user	3m5.597s
+sys	0m1.727s
+
+****************************
+Benchmarking Cyclone on Sat Oct 15 17:22:21 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing ack under Cyclone
+Compiling...
+Running...
+Running ack:3:12:2
+Elapsed time: 174.251467 seconds (174.0) for ack:3:12:2
+
+real	2m54.020s
+user	2m53.437s
+sys	0m0.813s
