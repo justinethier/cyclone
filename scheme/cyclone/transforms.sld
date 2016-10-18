@@ -1088,7 +1088,21 @@
                    (append a-lookup defines-a-lookup renamed))
                 (map (lambda (p) (cdr p)) defines-a-lookup)))))
       ((app? ast)
-       (map (lambda (a) (convert a renamed)) ast))
+       (cond
+        ;; Special case, convert these to primitives if possible
+        ((and (eq? (car ast) 'member)
+              (not (assoc (car ast) renamed))
+              (= (length ast) 3))
+         (cons 'Cyc-fast-member
+               (map (lambda (a) (convert a renamed)) (cdr ast))))
+        ((and (eq? (car ast) 'assoc)
+              (not (assoc (car ast) renamed))
+              (= (length ast) 3))
+         (cons 'Cyc-fast-assoc
+               (map (lambda (a) (convert a renamed)) (cdr ast))))
+        ;; Regular case, alpha convert everything
+        (else
+         (map (lambda (a) (convert a renamed)) ast))))
       (else
         (error "unhandled expression: " ast))))
 
