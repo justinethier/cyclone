@@ -10,11 +10,7 @@
   (import (scheme cyclone common))
   (export
     member
-    ;memv
-    ;memq
     assoc
-    ;assv
-    ;assq
     cons-source
     syntax-rules
     letrec*

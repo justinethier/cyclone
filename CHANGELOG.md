@@ -7,6 +7,7 @@ TODO: SRFI 113
 Features:
 
 - Improve performance by inlining numeric arithmetic and comparison operations.
+- Revert `assq`, `assv`, `memq`, and `memv` back to primitives for improved performance.
 - Added support for SRFI 106: a basic socket interface, and SRFI 128: Comparators.
 - Improved library support to recognize all of the import set forms: `only`, `except`, `prefix`, and `rename`.
 - Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`. 
