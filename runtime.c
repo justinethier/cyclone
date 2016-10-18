@@ -3410,6 +3410,30 @@ void _apply(void *data, object cont, object args)
   dispatch(data, obj_obj2int(argc), (function_type)dispatch_apply_va, cont, cont, args);
 }
 
+void _assq(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "assq  ", 2, args);
+  return_closcall1(data, cont, assq(data, car(args), cadr(args)));
+}
+
+void _assv(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "assv  ", 2, args);
+  return_closcall1(data, cont, assq(data, car(args), cadr(args)));
+}
+
+void _memq(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "memq", 2, args);
+  return_closcall1(data, cont, memqp(data, car(args), cadr(args)));
+}
+
+void _memv(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "memv", 2, args);
+  return_closcall1(data, cont, memqp(data, car(args), cadr(args)));
+}
+
 void _char_91_125integer(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "char->integer", 1, args);
@@ -4316,6 +4340,10 @@ static primitive_type eqv_127_primitive =
     { {0}, primitive_tag, "eqv?", &_eqv_127 };
 static primitive_type equal_127_primitive =
     { {0}, primitive_tag, "equal?", &_equal_127 };
+static primitive_type assq_primitive = { {0}, primitive_tag, "assq", &_assq };
+static primitive_type assv_primitive = { {0}, primitive_tag, "assv", &_assv };
+static primitive_type memq_primitive = { {0}, primitive_tag, "memq", &_memq };
+static primitive_type memv_primitive = { {0}, primitive_tag, "memv", &_memv };
 static primitive_type length_primitive =
     { {0}, primitive_tag, "length", &_length };
 static primitive_type bytevector_91length_primitive =
@@ -4539,6 +4567,10 @@ const object primitive_cell = &cell_primitive;
 const object primitive_eq_127 = &eq_127_primitive;
 const object primitive_eqv_127 = &eqv_127_primitive;
 const object primitive_equal_127 = &equal_127_primitive;
+const object primitive_assq = &assq_primitive;
+const object primitive_assv = &assv_primitive;
+const object primitive_memq = &memq_primitive;
+const object primitive_memv = &memv_primitive;
 const object primitive_length = &length_primitive;
 const object primitive_bytevector_91length = &bytevector_91length_primitive;
 const object primitive_vector_91length = &vector_91length_primitive;

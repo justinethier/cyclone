@@ -97,12 +97,11 @@
          eqv?
          equal?
          Cyc-fast-member
-         ;assoc
-         ;assq
-         ;assv
-         ;memq
-         ;memv
-         ;member
+         Cyc-fast-assoc
+         assv
+         assq
+         memq
+         memv
          length
          set-car!
          set-cdr!
@@ -224,12 +223,11 @@
          (eqv? 2 2)
          (equal? 2 2)
          (Cyc-fast-member 2 2)
-         ;(assoc 2 2)
-         ;(assq 2 2)
-         ;(assv 2 2)
-         ;(memq 2 2)
-         ;(memv 2 2)
-         ;(member 2 2)
+         (Cyc-fast-assoc 2 2)
+         (assq 2 2)
+         (assv 2 2)
+         (memq 2 2)
+         (memv 2 2)
          (length 1 1)
          (set-car! 2 2)
          (set-cdr! 2 2)
@@ -531,6 +529,11 @@
          ((eq? p 'eqv?)          "Cyc_eq")
          ((eq? p 'equal?)        "equalp")
          ((eq? p 'Cyc-fast-member)  "memberp")
+         ((eq? p 'Cyc-fast-assoc)   "assoc")
+         ((eq? p 'assq)          "assq")
+         ((eq? p 'assv)          "assq")
+         ((eq? p 'memq)          "memqp")
+         ((eq? p 'memv)          "memqp")
          ((eq? p 'boolean?)      "Cyc_is_boolean")
          ((eq? p 'char?)         "Cyc_is_char")
          ((eq? p 'null?)         "Cyc_is_null")
@@ -576,6 +579,7 @@
         >=
         <=
         Cyc-fast-member
+        Cyc-fast-assoc
         apply
         car
         cdr
@@ -627,11 +631,11 @@
         Cyc-installation-dir
         Cyc-compilation-environment
         command-line-arguments
-        ;assq
-        ;assv
+        assq
+        assv
         ;assoc
-        ;memq
-        ;memv
+        memq
+        memv
         ;member
         length
         set-car!

@@ -10,11 +10,11 @@
   (import (scheme cyclone common))
   (export
     member
-    memv
-    memq
+    ;memv
+    ;memq
     assoc
-    assv
-    assq
+    ;assv
+    ;assq
     cons-source
     syntax-rules
     letrec*
@@ -542,8 +542,8 @@
         (if (pair? compare)
             (member-helper obj lst (car compare))
             (member-helper obj lst equal?)))
-    (define (memq obj lst) (member-helper obj lst eq?))
-    (define (memv obj lst) (member-helper obj lst eqv?))
+    ;(define (memq obj lst) (member-helper obj lst eq?))
+    ;(define (memv obj lst) (member-helper obj lst eqv?))
     
     (define (assoc-helper obj lst cmp?)
      (cond 
@@ -557,8 +557,8 @@
         (if (pair? compare)
             (assoc-helper obj alist (car compare))
             (assoc-helper obj alist equal?)))
-    (define (assq obj alist) (assoc-helper obj alist eq?))
-    (define (assv obj alist) (assoc-helper obj alist eqv?))
+    ;(define (assq obj alist) (assoc-helper obj alist eq?))
+    ;(define (assv obj alist) (assoc-helper obj alist eqv?))
 
     (define (foldl func accum lst)
       (if (null? lst)
