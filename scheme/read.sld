@@ -36,12 +36,12 @@
 ;; TODO: unreg-port - delete fp entry from *in-port-table*
 ;; would want to do this when port is closed
 
-;(define (in-port:get-buf ptbl) (cadr ptbl))
-;(define (in-port:get-lnum ptbl) (caddr ptbl))
-;(define (in-port:get-cnum ptbl) (cadddr ptbl))
-(define in-port:get-buf cadr)
-(define in-port:get-lnum caddr)
-(define in-port:get-cnum cadddr)
+(define (in-port:get-buf ptbl) (cadr ptbl))
+(define (in-port:get-lnum ptbl) (caddr ptbl))
+(define (in-port:get-cnum ptbl) (cadddr ptbl))
+;(define in-port:get-buf cadr)
+;(define in-port:get-lnum caddr)
+;(define in-port:get-cnum cadddr)
 (define (in-port:set-buf! ptbl buf) (set-car! (cdr ptbl) buf))
 (define (in-port:set-lnum! ptbl lnum) (set-car! (cddr ptbl) lnum))
 (define (in-port:set-cnum! ptbl cnum) (set-car! (cdddr ptbl) cnum))
