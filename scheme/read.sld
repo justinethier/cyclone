@@ -36,16 +36,31 @@
 ;; TODO: unreg-port - delete fp entry from *in-port-table*
 ;; would want to do this when port is closed
 
+(define (in-port:get-buf ptbl) (cadr ptbl))
+(define (in-port:get-lnum ptbl) (caddr ptbl))
+(define (in-port:get-cnum ptbl) (cadddr ptbl))
+;(define in-port:get-buf cadr)
+;(define in-port:get-lnum caddr)
+;(define in-port:get-cnum cadddr)
+(define (in-port:set-buf! ptbl buf) (set-car! (cdr ptbl) buf))
+(define (in-port:set-lnum! ptbl lnum) (set-car! (cddr ptbl) lnum))
+(define (in-port:set-cnum! ptbl cnum) (set-car! (cdddr ptbl) cnum))
+;(define-syntax in-port:set-buf! 
+;  (er-macro-transformer
+;    (lambda (e r c)
+;      `(set-car! (cdr ,(cadr e)) ,(caddr e)))))
+;(define-syntax in-port:set-lnum!
+;  (er-macro-transformer
+;    (lambda (e r c)
+;      `(set-car! (cddr ,(cadr e)) ,(caddr e)))))
+;(define-syntax in-port:set-cnum!
+;  (er-macro-transformer
+;    (lambda (e r c)
+;      `(set-car! (cdddr ,(cadr e)) ,(caddr e)))))
 (define (in-port:read-buf! ptbl)
  (let ((result (cadr ptbl)))
    (in-port:set-buf! ptbl #f)
    result))
-(define (in-port:get-buf ptbl) (cadr ptbl))
-(define (in-port:set-buf! ptbl buf) (set-car! (cdr ptbl) buf))
-(define (in-port:get-lnum ptbl) (caddr ptbl))
-(define (in-port:set-lnum! ptbl lnum) (set-car! (cddr ptbl) lnum))
-(define (in-port:get-cnum ptbl) (cadddr ptbl))
-(define (in-port:set-cnum! ptbl cnum) (set-car! (cdddr ptbl) cnum))
 ;; END input port table
 
 ;; Helper functions
@@ -321,12 +336,12 @@
                (parse-number fp toks all? parens ptbl 
                  10 (lambda (num)
                       (exact
-                        (parse-atom num)))))
+                        (string->number (list->string num))))))
               ((eq? #\i next-c)
                (parse-number fp toks all? parens ptbl 
                  10 (lambda (num)
                       (inexact
-                        (parse-atom num)))))
+                        (string->number (list->string num))))))
               ((eq? #\b next-c)
                (parse-number fp toks all? parens ptbl 
                  2 (lambda (num) (string->number (list->string num) 2))))
@@ -515,11 +530,9 @@
 
 ;; parse-atom -> [chars] -> literal
 (define (parse-atom a)
-  (cond 
-    ((token-numeric? a)
-     (string->number (list->string a)))
-    (else
-     (string->symbol (list->string a)))))
+  (if (token-numeric? a)
+      (string->number (list->string a))
+      (string->symbol (list->string a))))
 
 ;;;;;
 ;; Read next character from port, using buffered char if available
