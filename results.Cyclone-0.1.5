@@ -76,3 +76,398 @@ Elapsed time: 169.592679 seconds (170.0) for ack:3:12:2
 real	2m49.347s
 user	2m48.770s
 sys	0m0.823s
+
+****************************
+Benchmarking Cyclone on Mon Oct 17 17:46:02 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing browse under Cyclone
+Compiling...
+Running...
+Running browse:2000
+Elapsed time: 32.46425 seconds (32.0) for browse:2000
+
+real	0m32.487s
+user	0m32.243s
+sys	0m0.227s
+
+Testing deriv under Cyclone
+Compiling...
+Running...
+Running deriv:10000000
+Elapsed time: 22.494093 seconds (23.0) for deriv:10000000
+
+real	0m22.503s
+user	0m22.473s
+sys	0m0.020s
+
+Testing destruc under Cyclone
+Compiling...
+Running...
+Running destruc:600:50:4000
+Elapsed time: 66.654691 seconds (67.0) for destruc:600:50:4000
+
+real	1m6.606s
+user	1m5.863s
+sys	0m0.797s
+
+Testing diviter under Cyclone
+Compiling...
+Running...
+Running diviter:1000:1000000
+Elapsed time: 9.949226 seconds (10.0) for diviter:1000:1000000
+
+real	0m9.944s
+user	0m9.863s
+sys	0m0.090s
+
+Testing divrec under Cyclone
+Compiling...
+Running...
+Running divrec:1000:1000000
+Elapsed time: 16.66855 seconds (16.0) for divrec:1000:1000000
+
+real	0m16.666s
+user	0m16.403s
+sys	0m0.267s
+
+Testing puzzle under Cyclone
+Compiling...
+Running...
+Running puzzle:1000
+Elapsed time: 79.060218 seconds (79.0) for puzzle:1000
+
+real	1m19.058s
+user	1m18.963s
+sys	0m0.100s
+
+Testing triangl under Cyclone
+Compiling...
+Running...
+Running triangl:22:1:50
+Elapsed time: 54.247966 seconds (55.0) for triangl:22:1:50
+
+real	0m54.261s
+user	0m54.217s
+sys	0m0.030s
+
+Testing tak under Cyclone
+Compiling...
+Running...
+Running tak:40:20:11:1
+Elapsed time: 53.14313 seconds (54.0) for tak:40:20:11:1
+
+real	0m53.150s
+user	0m53.123s
+sys	0m0.020s
+
+Testing takl under Cyclone
+Compiling...
+Running...
+Running takl:40:20:12:1
+Elapsed time: 33.25478 seconds (33.0) for takl:40:20:12:1
+
+real	0m33.291s
+user	0m33.213s
+sys	0m0.047s
+
+Testing ntakl under Cyclone
+Compiling...
+Running...
+Running ntakl:40:20:12:1
+Elapsed time: 33.109536 seconds (33.0) for ntakl:40:20:12:1
+
+real	0m33.103s
+user	0m33.080s
+sys	0m0.033s
+
+Testing cpstak under Cyclone
+Compiling...
+Running...
+Running cpstak:40:20:11:1
+Elapsed time: 68.903878 seconds (69.0) for cpstak:40:20:11:1
+
+real	1m8.918s
+user	1m8.823s
+sys	0m0.080s
+
+Testing ctak under Cyclone
+Compiling...
+Running...
+Running ctak:32:16:8:1
+Elapsed time: 5.539636 seconds (5.0) for ctak:32:16:8:1
+
+real	0m5.548s
+user	0m5.500s
+sys	0m0.043s
+
+Testing fib under Cyclone
+Compiling...
+Running...
+Running fib:40:5
+Elapsed time: 125.147218 seconds (125.0) for fib:40:5
+
+real	2m5.222s
+user	2m5.083s
+sys	0m0.083s
+
+Testing fibc under Cyclone
+Compiling...
+Running...
+Running fibc:30:10
+Elapsed time: 12.13306 seconds (12.0) for fibc:30:10
+
+real	0m12.136s
+user	0m12.117s
+sys	0m0.020s
+
+Testing fibfp under Cyclone
+Compiling...
+Running...
+Running fibfp:35.0:10
+Elapsed time: 24.984642 seconds (25.0) for fibfp:35.0:10
+
+real	0m25.003s
+user	0m24.963s
+sys	0m0.030s
+
+Testing sum under Cyclone
+Compiling...
+Running...
+Running sum:10000:200000
+Elapsed time: 169.653631 seconds (170.0) for sum:10000:200000
+
+real	2m49.698s
+user	2m49.620s
+sys	0m0.033s
+
+Testing sumfp under Cyclone
+Compiling...
+Running...
+Running sumfp:1000000.0:500
+Elapsed time: 44.667251 seconds (44.0) for sumfp:1000000.0:500
+
+real	0m44.681s
+user	0m44.647s
+sys	0m0.020s
+
+Testing fft under Cyclone
+Compiling...
+Running...
+Running fft:65536:100
+Elapsed time: 32.540796 seconds (32.0) for fft:65536:100
+
+real	0m32.492s
+user	0m32.250s
+sys	0m0.293s
+
+Testing mbrot under Cyclone
+Compiling...
+Running...
+Running mbrot:75:1000
+Elapsed time: 66.332244 seconds (66.0) for mbrot:75:1000
+
+real	1m6.404s
+user	1m6.310s
+sys	0m0.057s
+
+Testing mbrotZ under Cyclone
+Compiling...
+Running...
+Running mbrotZ:75:1000
+Error: Complex numbers are not supported at this time 
+Call history:
+/tmp/larcenous/mbrotZ.scm:hide
+scheme/base.sld:call-with-values
+scheme/base.sld:vector
+scheme/base.sld:values
+/tmp/larcenous/mbrotZ.scm:test
+/tmp/larcenous/mbrotZ.scm:mbrot
+scheme/complex.sld:make-rectangular
+scheme/base.sld:error
+scheme/base.sld:raise
+
+
+real	0m0.005s
+user	0m0.000s
+sys	0m0.000s
+
+Testing nucleic under Cyclone
+Compiling...
+Running...
+Running nucleic:50
+Elapsed time: 26.43198 seconds (27.0) for nucleic:50
+
+real	0m26.529s
+user	0m26.287s
+sys	0m0.167s
+
+Testing pnpoly under Cyclone
+Compiling...
+Running...
+Running pnpoly:1000000
+Elapsed time: 85.232466 seconds (85.0) for pnpoly:1000000
+
+real	1m25.225s
+user	1m25.150s
+sys	0m0.083s
+
+Testing ray under Cyclone
+Compiling...
+Running...
+Running ray:50
+Elapsed time: 25.983775 seconds (26.0) for ray:50
+
+real	0m26.006s
+user	0m25.930s
+sys	0m0.060s
+
+Testing simplex under Cyclone
+Compiling...
+Running...
+Running simplex:1000000
+Elapsed time: 79.207217 seconds (79.0) for simplex:1000000
+
+real	1m19.129s
+user	1m18.297s
+sys	0m0.910s
+
+Testing ack under Cyclone
+Compiling...
+Running...
+Running ack:3:12:2
+
+****************************
+Benchmarking Cyclone on Mon Oct 17 18:07:59 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing sboyer under Cyclone
+Compiling...
+Running...
+Running sboyer:5:1
+Elapsed time: 21.190696 seconds (21.0) for sboyer:5:1
+
+real	0m21.197s
+user	0m21.037s
+sys	0m0.163s
+
+****************************
+Benchmarking Cyclone on Mon Oct 17 18:08:37 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing nboyer under Cyclone
+Compiling...
+Running...
+Running nboyer:5:1
+Elapsed time: 28.791225 seconds (29.0) for nboyer:5:1
+
+real	0m28.828s
+user	0m28.473s
+sys	0m0.320s
+
+****************************
+Benchmarking Cyclone on Thu Oct 20 16:40:20 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing nboyer under Cyclone
+Compiling...
+Running...
+Running nboyer:5:1
+Elapsed time: 30.623026 seconds (31.0) for nboyer:5:1
+
+real	0m30.670s
+user	0m28.550s
+sys	0m2.077s
+
+Testing sboyer under Cyclone
+Compiling...
+Running...
+Running sboyer:5:1
+Elapsed time: 20.708636 seconds (21.0) for sboyer:5:1
+
+real	0m20.751s
+user	0m20.617s
+sys	0m0.093s
+
+Testing gcbench under Cyclone
+Compiling...
+Running...
+The garbage collector should touch about 128.0 megabytes of heap storage.
+The use of more or less memory will skew the results.
+Running gcbench:20:1
+Garbage Collector Test
+ Stretching memory with a binary tree of depth 20
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+GCBench: Main
+ Creating a long-lived binary tree of depth 18
+ Creating a long-lived array of 2097148.0 inexact reals
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+Creating 135300 trees of depth 4
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 33026 trees of depth 6
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 8208 trees of depth 8
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 2048 trees of depth 10
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 512 trees of depth 12
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 128 trees of depth 14
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 32 trees of depth 16
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 8 trees of depth 18
+GCBench: Top down construction
+GCBench: Bottom up construction
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+Elapsed time: 51.488102 seconds (51.0) for gcbench:20:1
+
+real	0m51.466s
+user	0m50.683s
+sys	0m0.810s
+
+Testing mperm under Cyclone
+Compiling...
+Running...
+Running perm20:10:2:1
+Elapsed time: 264.216181 seconds (264.0) for perm20:10:2:1
+
+real	4m31.372s
+user	4m28.043s
+sys	0m3.353s
+
+****************************
+Benchmarking Cyclone on Thu Oct 20 17:33:57 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+
+Testing matrix under Cyclone
+Compiling...
+Running...
+Running matrix:5:5:2500
+Elapsed time: 82.309042 seconds (82.0) for matrix:5:5:2500
+
+real	1m22.189s
+user	1m20.800s
+sys	0m1.510s
+
+Testing maze under Cyclone
+Compiling...
+Running...
+Running maze:20:7:10000
+Elapsed time: 37.74414 seconds (37.0) for maze:20:7:10000
+
+real	0m37.740s
+user	0m37.553s
+sys	0m0.197s
+
+Testing mazefun under Cyclone
+Compiling...
+Running...
+Running mazefun:11:11:10000
+Elapsed time: 59.260855 seconds (60.0) for mazefun:11:11:10000
+
+real	0m59.222s
+user	0m58.873s
+sys	0m0.390s
