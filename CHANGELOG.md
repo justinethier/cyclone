@@ -1,19 +1,21 @@
 # Next Release (tentatively 0.3.1) - Date TBD
 
-TODO: performance improvements
-      need to improve both runtime speed and compiler optimizations
+TODO: more performance improvements
 TODO: SRFI 113
 
-# Upcoming Release (tentatively 0.3) - Date TBD
+# 0.3 - Date TBD
 
 Features:
 
 - Improve performance by inlining numeric arithmetic and comparison operations.
 - Reverted `assq`, `assv`, `memq`, and `memv` back to primitives for improved performance. In addition the compiler was modified to allow for more efficient compilation of `assoc` and `member`.
-- Added support for SRFI 106: a basic socket interface, and SRFI 128: Comparators.
 - Improved library support to recognize all of the import set forms: `only`, `except`, `prefix`, and `rename`.
 - Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`. 
 - Added the `get-environment-variables` function from R7RS.
+- Added support for the following SRFI's:
+
+     - SRFI 106: A basic socket interface
+     - SRFI 128: Comparators
 
 Bug Fixes
 
