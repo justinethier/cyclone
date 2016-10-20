@@ -291,7 +291,7 @@ Full-Width Styles
   display: block;
   position: absolute;
   top:0;
-  right: 0px;
+  right: -30px;
   z-index: 10;
   padding: 10px 50px 10px 10px;
   color: #fff;
@@ -306,6 +306,7 @@ Full-Width Styles
   color: #000;
   font-weight: 700;
   margin: 0px;
+  padding-top: 10px;
   padding-left: 10px;
   padding-right: 10px;
   white-space: nowrap;
