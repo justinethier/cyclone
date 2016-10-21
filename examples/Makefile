@@ -4,6 +4,8 @@ TARGETS = \
   begin-splicing \
   fac \
   long-running-process \
+  networking/client \
+  networking/server \
   threading/cv-broadcast \
   threading/many-writers \
   threading/producer-consumer \
@@ -22,6 +24,10 @@ begin-splicing             : begin-splicing.scm
 fac                        : fac.scm
 	cyclone $^
 long-running-process       : long-running-process.scm
+	cyclone $^
+networking/client: networking/client.scm
+	cyclone $^
+networking/server: networking/server.scm
 	cyclone $^
 threading/cv-broadcast     : threading/cv-broadcast.scm
 	cyclone $^
