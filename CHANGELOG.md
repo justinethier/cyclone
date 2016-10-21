@@ -3,7 +3,7 @@
 TODO: more performance improvements
 TODO: SRFI 113
 
-# 0.3 - Date TBD
+# 0.3 - October 22, 2016
 
 Features:
 
