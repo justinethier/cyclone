@@ -456,3 +456,230 @@ Running...
 real	0m0.010s
 user	0m0.000s
 sys	0m0.003s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 14:53:20 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing equal under Cyclone
+Compiling...
+Running...
+Running equal:100:100:8:1000:2000:5000
+Elapsed time: 0.546295 seconds (0.0) for equal:100:100:8:1000:2000:5000
+
+real	0m0.551s
+user	0m0.513s
+sys	0m0.033s
+
+Testing bv2string under Cyclone
+Compiling...
+Running...
+Running bv2string:1000:1000:100
+Elapsed time: 18.463788 seconds (18.0) for bv2string:1000:1000:100
+
+real	0m18.465s
+user	0m18.447s
+sys	0m0.017s
+
+Testing gcbench under Cyclone
+Compiling...
+Running...
+The garbage collector should touch about 128.0 megabytes of heap storage.
+The use of more or less memory will skew the results.
+Running gcbench:20:1
+Garbage Collector Test
+ Stretching memory with a binary tree of depth 20
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+GCBench: Main
+ Creating a long-lived binary tree of depth 18
+ Creating a long-lived array of 2097148.0 inexact reals
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+Creating 135300 trees of depth 4
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 33026 trees of depth 6
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 8208 trees of depth 8
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 2048 trees of depth 10
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 512 trees of depth 12
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 128 trees of depth 14
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 32 trees of depth 16
+GCBench: Top down construction
+GCBench: Bottom up construction
+Creating 8 trees of depth 18
+GCBench: Top down construction
+GCBench: Bottom up construction
+ Total memory available= ???????? bytes  Free memory= ???????? bytes
+Elapsed time: 61.690944 seconds (62.0) for gcbench:20:1
+
+real	1m1.677s
+user	1m0.970s
+sys	0m0.727s
+
+Testing mperm under Cyclone
+Compiling...
+Running...
+Running perm20:10:2:1
+Elapsed time: 247.94873 seconds (248.0) for perm20:10:2:1
+
+real	4m16.026s
+user	4m14.320s
+sys	0m1.687s
+
+Testing conform under Cyclone
+Compiling...
+Running...
+Running conform:500
+Elapsed time: 53.6996 seconds (53.0) for conform:500
+
+real	0m53.686s
+user	0m53.397s
+sys	0m0.303s
+
+Testing dynamic under Cyclone
+Compiling...
+Running...
+Running dynamic:500
+Elapsed time: 68.568639 seconds (69.0) for dynamic:500
+
+real	1m8.579s
+user	1m8.153s
+sys	0m0.417s
+
+Testing earley under Cyclone
+Compiling...
+Running...
+Running earley:1
+Elapsed time: 600.922348 seconds (600.0) for earley:1
+
+real	10m0.839s
+user	9m58.483s
+sys	0m2.447s
+
+Testing graphs under Cyclone
+Compiling...
+Running...
+Running graphs:7:3
+Elapsed time: 102.022931 seconds (102.0) for graphs:7:3
+
+real	1m41.972s
+user	1m40.860s
+sys	0m1.163s
+
+Testing lattice under Cyclone
+Compiling...
+Running...
+Running lattice:44:10
+Elapsed time: 128.160431 seconds (128.0) for lattice:44:10
+
+real	2m8.160s
+user	2m7.823s
+sys	0m0.340s
+
+Testing matrix under Cyclone
+Compiling...
+Running...
+Running matrix:5:5:2500
+Elapsed time: 82.22192 seconds (82.0) for matrix:5:5:2500
+
+real	1m22.176s
+user	1m21.590s
+sys	0m0.633s
+
+Testing maze under Cyclone
+Compiling...
+Running...
+Running maze:20:7:10000
+Elapsed time: 41.1122 seconds (41.0) for maze:20:7:10000
+
+real	0m41.109s
+user	0m41.047s
+sys	0m0.070s
+
+Testing mazefun under Cyclone
+Compiling...
+Running...
+Running mazefun:11:11:10000
+Elapsed time: 67.293218 seconds (68.0) for mazefun:11:11:10000
+
+real	1m7.281s
+user	1m7.257s
+sys	0m0.037s
+
+Testing nqueens under Cyclone
+Compiling...
+Running...
+Running nqueens:13:10
+Elapsed time: 186.06596 seconds (186.0) for nqueens:13:10
+
+real	3m6.096s
+user	3m6.037s
+sys	0m0.030s
+
+Testing paraffins under Cyclone
+Compiling...
+Running...
+Running paraffins:23:10
+Elapsed time: 42.52144 seconds (43.0) for paraffins:23:10
+
+real	0m42.525s
+user	0m41.657s
+sys	0m0.867s
+
+Testing parsing under Cyclone
+Compiling...
+Running...
+Running parsing:2500
+Elapsed time: 78.389558 seconds (78.0) for parsing:2500
+
+real	1m18.383s
+user	1m18.337s
+sys	0m0.053s
+
+Testing peval under Cyclone
+Compiling...
+Running...
+Running peval:2000
+Elapsed time: 45.686942 seconds (46.0) for peval:2000
+
+real	0m45.680s
+user	0m45.543s
+sys	0m0.143s
+
+Testing primes under Cyclone
+Compiling...
+Running...
+Running primes:1000:10000
+Elapsed time: 24.276349 seconds (24.0) for primes:1000:10000
+
+real	0m24.269s
+user	0m24.130s
+sys	0m0.147s
+
+Testing quicksort under Cyclone
+Compiling...
+Running...
+Running quicksort:10000:2500
+Elapsed time: 96.833258 seconds (97.0) for quicksort:10000:2500
+
+real	1m36.840s
+user	1m36.660s
+sys	0m0.203s
+
+Testing scheme under Cyclone
+Compiling...
+Running...
+Running scheme:100000
+Elapsed time: 28.43945 seconds (28.0) for scheme:100000
+
+real	0m28.433s
+user	0m28.283s
+sys	0m0.157s
