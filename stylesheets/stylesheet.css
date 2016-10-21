@@ -303,7 +303,7 @@ Full-Width Styles
 }
 
 p.banner {
-  min-width: 300px;
+  /*min-width: 300px;*/
 }
 
 .banner {
