@@ -696,3 +696,16 @@ Elapsed time: 26.912887 seconds (27) for scheme:100000
 real	0m26.912s
 user	0m26.873s
 sys	0m0.040s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 14:29:47 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing dynamic under Cyclone
+Compiling...
+Running...
+Running dynamic:500
+Elapsed time: 65.142682 seconds (66) for dynamic:500
+
+real	1m5.253s
+user	1m4.673s
+sys	0m0.470s
