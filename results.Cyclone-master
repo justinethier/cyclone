@@ -1,78 +1,471 @@
 
 ****************************
-Benchmarking Cyclone on Sat Oct 15 17:10:53 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+Benchmarking Cyclone on Fri Oct 21 11:37:22 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
 
-Testing parsing under Cyclone
+Testing sboyer under Cyclone
 Compiling...
 Running...
-Running parsing:2500
-Elapsed time: 188.596576 seconds (188.0) for parsing:2500
+Running sboyer:5:1
+Elapsed time: 23.723715 seconds (24) for sboyer:5:1
 
-real	3m8.529s
-user	3m8.320s
-sys	0m0.283s
+real	0m23.746s
+user	0m23.580s
+sys	0m0.143s
 
-****************************
-Benchmarking Cyclone on Sat Oct 15 17:14:26 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
-
-Testing read1 under Cyclone
+Testing nboyer under Cyclone
 Compiling...
 Running...
-Running read1:2500
-Elapsed time: 61.306743 seconds (62.0) for read1:2500
+Running nboyer:5:1
+Elapsed time: 32.102711 seconds (32) for nboyer:5:1
 
-real	1m1.324s
-user	1m0.857s
-sys	0m0.450s
+real	0m32.100s
+user	0m31.710s
+sys	0m0.397s
 
-****************************
-Benchmarking Cyclone on Sat Oct 15 17:15:30 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
-
-Testing conform under Cyclone
+Testing maze under Cyclone
 Compiling...
 Running...
-Running conform:500
-Elapsed time: 85.137925 seconds (85.0) for conform:500
+Running maze:20:7:10000
+Elapsed time: 29.818574 seconds (30) for maze:20:7:10000
 
-real	1m25.054s
-user	1m24.410s
-sys	0m0.733s
-
-****************************
-Benchmarking Cyclone on Sat Oct 15 17:17:02 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
-
-Testing dynamic under Cyclone
-Compiling...
-Running...
-Running dynamic:500
-Elapsed time: 101.301634 seconds (101.0) for dynamic:500
-
-real	1m41.072s
-user	1m39.987s
-sys	0m1.317s
-
-****************************
-Benchmarking Cyclone on Sat Oct 15 17:19:10 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
-
-Testing lattice under Cyclone
-Compiling...
-Running...
-Running lattice:44:10
-Elapsed time: 187.322588 seconds (187.0) for lattice:44:10
-
-real	3m7.127s
-user	3m5.597s
-sys	0m1.727s
-
-****************************
-Benchmarking Cyclone on Sat Oct 15 17:22:21 EDT 2016 under Linux justin-pc 4.6.4-1-ARCH #1 SMP PREEMPT Mon Jul 11 19:12:32 CEST 2016 x86_64 GNU/Linux
+real	0m29.828s
+user	0m29.663s
+sys	0m0.157s
 
 Testing ack under Cyclone
 Compiling...
 Running...
 Running ack:3:12:2
-Elapsed time: 174.251467 seconds (174.0) for ack:3:12:2
+Elapsed time: 93.994821 seconds (94) for ack:3:12:2
 
-real	2m54.020s
-user	2m53.437s
-sys	0m0.813s
+real	1m33.873s
+user	1m33.573s
+sys	0m0.420s
+
+Testing tak under Cyclone
+Compiling...
+Running...
+Running tak:40:20:11:1
+Elapsed time: 32.001859 seconds (32) for tak:40:20:11:1
+
+real	0m32.007s
+user	0m31.963s
+sys	0m0.040s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 11:43:53 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing browse under Cyclone
+Compiling...
+Running...
+Running browse:2000
+Elapsed time: 37.419681 seconds (38) for browse:2000
+
+real	0m37.445s
+user	0m37.293s
+sys	0m0.137s
+
+Testing deriv under Cyclone
+Compiling...
+Running...
+Running deriv:10000000
+Elapsed time: 27.393798 seconds (27) for deriv:10000000
+
+real	0m27.409s
+user	0m27.367s
+sys	0m0.030s
+
+Testing destruc under Cyclone
+Compiling...
+Running...
+Running destruc:600:50:4000
+Elapsed time: 47.231566 seconds (48) for destruc:600:50:4000
+
+real	0m47.312s
+user	0m46.927s
+sys	0m0.307s
+
+Testing diviter under Cyclone
+Compiling...
+Running...
+Running diviter:1000:1000000
+Elapsed time: 11.425999 seconds (12) for diviter:1000:1000000
+
+real	0m11.446s
+user	0m11.387s
+sys	0m0.040s
+
+Testing divrec under Cyclone
+Compiling...
+Running...
+Running divrec:1000:1000000
+Elapsed time: 19.177673 seconds (19) for divrec:1000:1000000
+
+real	0m19.206s
+user	0m19.127s
+sys	0m0.053s
+
+Testing puzzle under Cyclone
+Compiling...
+Running...
+Running puzzle:1000
+Elapsed time: 42.494967 seconds (43) for puzzle:1000
+
+real	0m42.521s
+user	0m42.393s
+sys	0m0.103s
+
+Testing triangl under Cyclone
+Compiling...
+Running...
+Running triangl:22:1:50
+Elapsed time: 32.660418 seconds (32) for triangl:22:1:50
+
+real	0m32.712s
+user	0m32.647s
+sys	0m0.017s
+
+Testing tak under Cyclone
+Compiling...
+Running...
+Running tak:40:20:11:1
+Elapsed time: 31.946278 seconds (32) for tak:40:20:11:1
+
+real	0m31.957s
+user	0m31.923s
+sys	0m0.023s
+
+Testing takl under Cyclone
+Compiling...
+Running...
+Running takl:40:20:12:1
+Elapsed time: 35.064846 seconds (35) for takl:40:20:12:1
+
+real	0m35.097s
+user	0m35.047s
+sys	0m0.020s
+
+Testing ntakl under Cyclone
+Compiling...
+Running...
+Running ntakl:40:20:12:1
+Elapsed time: 34.144037 seconds (34) for ntakl:40:20:12:1
+
+real	0m34.190s
+user	0m34.127s
+sys	0m0.017s
+
+Testing cpstak under Cyclone
+Compiling...
+Running...
+Running cpstak:40:20:11:1
+Elapsed time: 49.310801 seconds (49) for cpstak:40:20:11:1
+
+real	0m49.363s
+user	0m49.263s
+sys	0m0.047s
+
+Testing ctak under Cyclone
+Compiling...
+Running...
+Running ctak:32:16:8:1
+Elapsed time: 4.276843 seconds (4) for ctak:32:16:8:1
+
+real	0m4.303s
+user	0m4.267s
+sys	0m0.013s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 12:42:23 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing fib under Cyclone
+Compiling...
+Running...
+Running fib:40:5
+Elapsed time: 51.845809 seconds (52) for fib:40:5
+
+real	0m51.854s
+user	0m51.833s
+sys	0m0.013s
+
+Testing fibc under Cyclone
+Compiling...
+Running...
+Running fibc:30:10
+Elapsed time: 8.131861 seconds (8) for fibc:30:10
+
+real	0m8.135s
+user	0m8.117s
+sys	0m0.017s
+
+Testing fibfp under Cyclone
+Compiling...
+Running...
+Running fibfp:35.0:10
+Elapsed time: 12.183236 seconds (12) for fibfp:35.0:10
+
+real	0m12.192s
+user	0m12.170s
+sys	0m0.013s
+
+Testing sum under Cyclone
+Compiling...
+Running...
+Running sum:10000:200000
+Elapsed time: 30.456965 seconds (31) for sum:10000:200000
+
+real	0m30.462s
+user	0m30.453s
+sys	0m0.003s
+
+Testing sumfp under Cyclone
+Compiling...
+Running...
+Running sumfp:1000000.0:500
+Elapsed time: 11.47446 seconds (12) for sumfp:1000000.0:500
+
+real	0m11.478s
+user	0m11.467s
+sys	0m0.007s
+
+Testing fft under Cyclone
+Compiling...
+Running...
+Running fft:65536:100
+Elapsed time: 22.13098 seconds (22) for fft:65536:100
+
+real	0m22.132s
+user	0m21.870s
+sys	0m0.277s
+
+Testing mbrot under Cyclone
+Compiling...
+Running...
+Running mbrot:75:1000
+Elapsed time: 18.126792 seconds (18) for mbrot:75:1000
+
+real	0m18.123s
+user	0m18.037s
+sys	0m0.090s
+
+Testing mbrotZ under Cyclone
+Compiling...
+Running...
+Running mbrotZ:75:1000
+Error: Complex numbers are not supported at this time: 
+Call history:
+/tmp/larcenous/mbrotZ.scm:hide
+scheme/base.sld:call-with-values
+scheme/base.sld:vector
+scheme/base.sld:values
+/tmp/larcenous/mbrotZ.scm:test
+/tmp/larcenous/mbrotZ.scm:mbrot
+scheme/complex.sld:make-rectangular
+scheme/base.sld:error
+scheme/base.sld:raise
+
+
+real	0m0.005s
+user	0m0.000s
+sys	0m0.000s
+
+Testing nucleic under Cyclone
+Compiling...
+Running...
+Running nucleic:50
+Elapsed time: 18.974292 seconds (19) for nucleic:50
+
+real	0m18.979s
+user	0m18.853s
+sys	0m0.123s
+
+Testing pnpoly under Cyclone
+Compiling...
+Running...
+Running pnpoly:1000000
+Elapsed time: 49.570693 seconds (50) for pnpoly:1000000
+
+real	0m49.570s
+user	0m49.527s
+sys	0m0.043s
+
+Testing ray under Cyclone
+Compiling...
+Running...
+Running ray:50
+Error: Unable to open file: "outputs/ray.output" 
+Call history:
+/tmp/larcenous/ray.scm:make-sphere
+scheme/base.sld:vector
+/tmp/larcenous/ray.scm:defsphere
+/tmp/larcenous/ray.scm:make-point
+scheme/base.sld:vector
+/tmp/larcenous/ray.scm:make-sphere
+scheme/base.sld:vector
+/tmp/larcenous/ray.scm:tracer
+scheme/file.sld:call-with-output-file
+
+
+real	0m0.005s
+user	0m0.003s
+sys	0m0.000s
+
+Testing simplex under Cyclone
+Compiling...
+Running...
+Running simplex:1000000
+Elapsed time: 55.802909 seconds (56) for simplex:1000000
+
+real	0m55.780s
+user	0m55.637s
+sys	0m0.167s
+
+Testing array1 under Cyclone
+Compiling...
+Running...
+Running array1:1000000:500
+./bench: line 289:  2142 Killed                  `dirname $1`/`basename $1 .scm` < "$2"
+
+real	0m7.052s
+user	0m5.977s
+sys	0m0.890s
+
+Testing string under Cyclone
+Compiling...
+Running...
+Running string:500000:25
+Elapsed time: 0.400879 seconds (1) for string:500000:25
+
+real	0m0.460s
+user	0m0.310s
+sys	0m0.097s
+
+Testing sum1 under Cyclone
+Compiling...
+Running...
+Running sum1:25
+Elapsed time: 16.015262 seconds (16) for sum1:25
+
+real	0m16.034s
+user	0m15.970s
+sys	0m0.047s
+
+Testing cat under Cyclone
+Compiling...
+Running...
+Running cat:50
+Error: Unable to open file: "outputs/cat.output" 
+Call history:
+scheme/base.sld:values
+/tmp/larcenous/cat.scm:hide
+scheme/base.sld:call-with-values
+scheme/base.sld:vector
+scheme/base.sld:values
+/tmp/larcenous/cat.scm:go
+scheme/file.sld:call-with-input-file
+scheme/base.sld:call-with-port
+scheme/file.sld:call-with-output-file
+
+
+real	0m0.023s
+user	0m0.000s
+sys	0m0.000s
+
+Testing tail under Cyclone
+Compiling...
+Running...
+Running tail:25
+Error: Unable to open file: "outputs/tail.output" 
+Call history:
+scheme/base.sld:values
+/tmp/larcenous/tail.scm:hide
+scheme/base.sld:call-with-values
+scheme/base.sld:vector
+scheme/base.sld:values
+/tmp/larcenous/tail.scm:go
+scheme/file.sld:call-with-input-file
+scheme/base.sld:call-with-port
+scheme/file.sld:call-with-output-file
+
+
+real	0m0.005s
+user	0m0.000s
+sys	0m0.000s
+
+Testing wc under Cyclone
+Compiling...
+Running...
+Running wc:inputs/bib:50
+Elapsed time: 102.68484 seconds (103) for wc:inputs/bib:50
+
+real	1m42.769s
+user	1m42.420s
+sys	0m0.270s
+
+Testing read1 under Cyclone
+Compiling...
+Running...
+Running read1:2500
+Elapsed time: 33.007797 seconds (33) for read1:2500
+
+real	0m33.054s
+user	0m32.820s
+sys	0m0.187s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 12:52:47 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing ray under Cyclone
+Compiling...
+Running...
+Running ray:50
+Elapsed time: 19.82752 seconds (20) for ray:50
+
+real	0m19.849s
+user	0m19.763s
+sys	0m0.063s
+
+Testing cat under Cyclone
+Compiling...
+Running...
+Running cat:50
+Elapsed time: 35.370847 seconds (35) for cat:50
+
+real	0m35.431s
+user	0m34.640s
+sys	0m0.730s
+
+Testing output under Cyclone
+cat: /home/justin/Documents/larceny/test/Benchmarking/R7RS/src/output.scm: No such file or directory
+Compiling...
+Error: Unbound variable(s): (main) 
+Call history:
+scheme/cyclone/transforms.sld:built-in-syms
+scheme/cyclone/transforms.sld:difference
+scheme/cyclone/transforms.sld:remove
+scheme/cyclone/transforms.sld:difference
+scheme/cyclone/transforms.sld:remove
+scheme/cyclone/transforms.sld:difference
+scheme/base.sld:list
+scheme/base.sld:error
+scheme/base.sld:raise
+
+Running...
+./bench: line 290: /home/justin/Documents/larceny/test/Benchmarking/R7RS/inputs/output.input: No such file or directory
+
+real	0m0.004s
+user	0m0.000s
+sys	0m0.000s
+
+****************************
+Benchmarking Cyclone on Fri Oct 21 13:26:50 UTC 2016 under Linux justin-arch64-vm 4.8.2-1-ARCH #1 SMP PREEMPT Mon Oct 17 08:11:46 CEST 2016 x86_64 GNU/Linux
+
+Testing array1 under Cyclone
+Compiling...
+Running...
+Running array1:1000000:500
+Elapsed time: 48.589992 seconds (48) for array1:1000000:500
+
+real	0m48.576s
+user	0m47.713s
+sys	0m0.877s
