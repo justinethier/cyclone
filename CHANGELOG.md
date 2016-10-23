@@ -3,6 +3,10 @@
 TODO: more performance improvements
 TODO: SRFI 113
 
+Bug Fixes
+
+- Modified SRFI 106 to be smarter about compiling `AI_V4MAPPED` and `AI_ALL`, which are not defined on OpenBSD.
+
 # 0.3 - October 22, 2016
 
 Features:

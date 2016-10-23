@@ -377,8 +377,27 @@
     (make-const sock-dgram     "SOCK_DGRAM"    )
     (make-const ai-canonname   "AI_CANONNAME"  )
     (make-const ai-numerichost "AI_NUMERICHOST")
-    (make-const ai-v4mapped    "AI_V4MAPPED"   )
-    (make-const ai-all         "AI_ALL"        )
+    ;; The next 2 are not defined on all platforms:
+    (define *ai-v4mapped* (ai-v4mapped))
+    (define-c ai-v4mapped
+      "(void *data, int argc, closure _, object k)"
+      " 
+#ifdef AI_V4MAPPED
+      return_closcall1(data, k, obj_int2obj(AI_V4MAPPED)); 
+#else
+      Cyc_rt_raise_msg(data, \"AI_V4MAPPED is not available on this platform\");
+#endif
+      ")
+    (define *ai-all* (ai-all))
+    (define-c ai-all
+      "(void *data, int argc, closure _, object k)"
+      " 
+#ifdef AI_ALL
+      return_closcall1(data, k, obj_int2obj(AI_ALL)); 
+#else
+      Cyc_rt_raise_msg(data, \"AI_ALL is not available on this platform\");
+#endif
+      ")
     (make-const ai-addrconfig  "AI_ADDRCONFIG" )
     (make-const msg-peek       "MSG_PEEK"      )
     (make-const msg-oob        "MSG_OOB"       )
