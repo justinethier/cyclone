@@ -20,6 +20,7 @@
   )
   (export
     library?
+    library-exists?
     lib:list->import-set
     lib:name
     lib:name->string
@@ -60,6 +61,13 @@
 
 (define (library? ast)
   (tagged-list? 'define-library ast))
+ 
+;; Determine if a library exists for the given import set
+(define (library-exists? import . ext)
+  (file-exists?
+    (lib:import->filename 
+      (lib:import->library-name import)
+      (if (null? ext) ".sld" (car ext)))))
 
 ;; Convert a raw list to an import set. For example, a list might be
 ;; (srfi 18) containing the number 18. An import set contains only symbols
