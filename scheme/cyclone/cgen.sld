@@ -9,6 +9,7 @@
 (define-library (scheme cyclone cgen)
   (import (scheme base)
           (scheme char)
+          (scheme inexact)
           (scheme write)
           (scheme cyclone primitives)
           (scheme cyclone transforms)
@@ -472,12 +473,19 @@
      (c-code (string-append "obj_int2obj(" 
                (number->string exp) ")")))
     ((real? exp)
-      (let ((cvar-name (mangle (gensym 'c))))
+      (let ((cvar-name (mangle (gensym 'c)))
+            (num2str (cond
+                       ;; The following two may not be very portable, 
+                       ;; may be better to use C99:
+                       ((nan? exp) "(0./0.)")
+                       ((infinite? exp) "(1./0.)")
+                       (else
+                         (number->string exp)))))
         (c-code/vars
             (string-append "&" cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
-                "make_double(" cvar-name ", " (number->string exp) ");")))))
+                "make_double(" cvar-name ", " num2str ");")))))
     ((boolean? exp) 
       (c-code (string-append
                 (if exp "boolean_t" "boolean_f"))))
