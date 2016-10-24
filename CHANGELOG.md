@@ -5,6 +5,7 @@ TODO: SRFI 113
 
 Bug Fixes
 
+- Only throw a divide by zero error for integer division. Floating point divide by zero is allowed and evaluates to `nan`.
 - Modified SRFI 106 to be smarter about compiling `AI_V4MAPPED` and `AI_ALL`, which are not defined on OpenBSD.
 
 # 0.3 - October 22, 2016

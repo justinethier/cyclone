@@ -2475,7 +2475,6 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       z = obj_obj2int(x) / obj_obj2int(y);
       return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      if (double_value(y) == 0.0) { goto divbyzero; }
       assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
       return ptr;
     }
@@ -2483,11 +2482,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
     if (obj_is_int(y)){
-      if (obj_obj2int(y) == 0.0) { goto divbyzero; }
       assign_double(ptr, double_value(x) / (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      if (double_value(y) == 0.0) { goto divbyzero; }
       assign_double(ptr, double_value(x) / double_value(y));
       return ptr;
     }
@@ -2506,13 +2503,10 @@ divbyzero:
 object Cyc_div_op(void *data, common_type * x, object y)
 {
   int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y));
-  if (1 &&
-      ((ty == -1 && (obj_obj2int(y) == 0)) ||
-       (ty == integer_tag && integer_value(y) == 0) ||
-       (ty == double_tag && double_value(y) == 0.0))) {
-    Cyc_rt_raise_msg(data, "Divide by zero");
-  }
   if (tx == integer_tag && ty == -1) {
+    if (obj_obj2int(y) == 0) {
+      Cyc_rt_raise_msg(data, "Divide by zero");
+    }
     x->double_t.tag = double_tag;
     x->double_t.value = ((double)x->integer_t.value) / (obj_obj2int(y));
   } else if (tx == double_tag && ty == -1) {
