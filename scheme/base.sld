@@ -316,6 +316,42 @@
       (er-macro-transformer
         ;; Based on the cond-expand macro from Chibi scheme
         (lambda (expr rename compare)
+;; TODO: port to this macro, so we can use below for library form
+;(define (library-exists? import . ext)
+;  (file-exists?
+;    (lib:import->filename 
+;      (lib:import->library-name import)
+;      (if (null? ext) ".sld" (car ext)))))
+;(define (lib:import->filename import . ext)
+;  (let* ((file-ext 
+;          (if (null? ext)
+;              ".sld"
+;              (car ext)))
+;         (filename*
+;          (string-append
+;            (apply
+;              string-append
+;              (map 
+;                (lambda (i) 
+;                  (string-append "/" (lib:atom->string i)))
+;                import))
+;            file-ext))
+;         (filename
+;           (substring filename* 1 (string-length filename*))))
+;    (if (or (tagged-list? 'scheme import)
+;            (tagged-list? 'srfi import))
+;      (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
+;      filename)))
+;(define (lib:import->library-name import)
+;  (cond
+;    ((or (tagged-list? 'only import)
+;         (tagged-list? 'except import)
+;         (tagged-list? 'prefix import)
+;         (tagged-list? 'rename import))
+;     (lib:import->library-name 
+;       (cadr import)))
+;    (else
+;     import)))
           (define (check x)
             (if (pair? x)
                 (case (car x)
