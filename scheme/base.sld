@@ -35,7 +35,7 @@
     floor-remainder
     even?
     exact-integer?
-    ;exact-integer-sqrt
+    exact-integer-sqrt
     exact?
     inexact?
     odd?
@@ -1044,15 +1044,18 @@
         (if (>= res 0) res (+ res b)))))
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
-;  ;; from mosh
-;  (define (exact-integer-sqrt k)
-;    (unless (and (exact? k)
-;                 (integer? k)
-;                 (not (negative? k)))
-;      (error "exact non-negative integer required" k))
-;    (let* ((s (exact (truncate (sqrt k))))
-;           (r (- k (* s s))))
-;      (values s r)))
+  ;; from mosh
+  (define (exact-integer-sqrt k)
+    (unless (and (exact? k)
+                 (integer? k)
+                 (not (negative? k)))
+      (error "exact non-negative integer required" k))
+    (let* ((s (exact (truncate (sqrt k))))
+           (r (- k (* s s))))
+      (values s r)))
+  (define-c sqrt
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_inexact_double_op(data, k, sqrt, z);")
   (define (exact-integer? num)
     (and (exact? num) (integer? num)))
   (define-c exact?

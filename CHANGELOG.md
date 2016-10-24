@@ -5,6 +5,7 @@ TODO: SRFI 113
 
 Features:
 
+- Thanks to ecraven, added `exact-integer-sqrt`.
 - Allow the reader to recognize `+inf.0`, `-inf.0`, `+nan.0`, and `-nan.0`.
 
 Bug Fixes
