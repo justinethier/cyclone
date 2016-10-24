@@ -317,48 +317,54 @@
         ;; Based on the cond-expand macro from Chibi scheme
         (lambda (expr rename compare)
 ;; TODO: port to this macro, so we can use below for library form
-;(define (library-exists? import . ext)
-;  (file-exists?
-;    (lib:import->filename 
-;      (lib:import->library-name import)
-;      (if (null? ext) ".sld" (car ext)))))
-;(define (lib:import->filename import . ext)
-;  (let* ((file-ext 
-;          (if (null? ext)
-;              ".sld"
-;              (car ext)))
-;         (filename*
-;          (string-append
-;            (apply
-;              string-append
-;              (map 
-;                (lambda (i) 
-;                  (string-append "/" (lib:atom->string i)))
-;                import))
-;            file-ext))
-;         (filename
-;           (substring filename* 1 (string-length filename*))))
-;    (if (or (tagged-list? 'scheme import)
-;            (tagged-list? 'srfi import))
-;      (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
-;      filename)))
-;(define (lib:import->library-name import)
-;  (cond
-;    ((or (tagged-list? 'only import)
-;         (tagged-list? 'except import)
-;         (tagged-list? 'prefix import)
-;         (tagged-list? 'rename import))
-;     (lib:import->library-name 
-;       (cadr import)))
-;    (else
-;     import)))
+(define (_library-exists? import . ext)
+  (file-exists?
+    (_lib:import->filename 
+      (_lib:import->library-name import)
+      (if (null? ext) ".sld" (car ext)))))
+(define (_lib:import->filename import . ext)
+  (let* ((file-ext 
+          (if (null? ext)
+              ".sld"
+              (car ext)))
+         (filename*
+          (string-append
+            (apply
+              string-append
+              (map 
+                (lambda (i) 
+                  (string-append 
+                    "/" 
+                    (cond
+                      ((symbol? i) (symbol->string i))
+                      ((number? i) (number->string i))
+                      (else (error "Unexpected type in import set")))))
+                import))
+            file-ext))
+         (filename
+           (substring filename* 1 (string-length filename*))))
+    (if (or (equal? 'scheme (car import))
+            (equal? 'srfi   (car import)))
+      (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
+      filename)))
+(define (_lib:import->library-name import)
+  (cond
+    ((and (pair? import)
+          (or (equal? 'only   (car import))
+              (equal? 'except (car import))
+              (equal? 'prefix (car import))
+              (equal? 'rename (car import))))
+     (_lib:import->library-name 
+       (cadr import)))
+    (else
+     import)))
           (define (check x)
             (if (pair? x)
                 (case (car x)
                   ((and) (every check (cdr x)))
                   ((or) (any check (cdr x)))
                   ((not) (not (check (cadr x))))
-                  ;((library) (eval `(find-module ',(cadr x)) (%meta-env)))
+                  ((library) (_library-exists? (cadr x))) ;(eval `(find-module ',(cadr x)) (%meta-env)))
                   (else (error "cond-expand: bad feature" x)))
                 (memq x (features))))
           (let expand ((ls (cdr expr)))
