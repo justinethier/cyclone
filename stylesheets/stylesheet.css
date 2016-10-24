@@ -302,6 +302,17 @@ Full-Width Styles
   border-bottom-right-radius: 2px;
 }
 
+.banner-forkme {
+  color: #fff;
+  background: url('../images/blacktocat.png') #000000 no-repeat 95% 50%;
+  font-weight: 700;
+  margin: 0px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
 p.banner {
   /*min-width: 300px;*/
 }
