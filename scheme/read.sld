@@ -532,7 +532,14 @@
 (define (parse-atom a)
   (if (token-numeric? a)
       (string->number (list->string a))
-      (string->symbol (list->string a))))
+      (let ((atom (string->symbol (list->string a))))
+        (if (or (eq? atom '+inf.0)
+                (eq? atom '-inf.0))
+            (expt 2 1000000)
+            (if (or (eq? atom '+nan.0)
+                    (eq? atom '-nan.0))
+                (/ 0.0 0.0)
+                atom)))))
 
 ;;;;;
 ;; Read next character from port, using buffered char if available

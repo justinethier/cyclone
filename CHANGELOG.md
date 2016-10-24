@@ -3,6 +3,10 @@
 TODO: more performance improvements
 TODO: SRFI 113
 
+Features:
+
+- Allow the reader to recognize `+inf.0`, `-inf.0`, `+nan.0`, and `-nan.0`.
+
 Bug Fixes
 
 - Only throw a divide by zero error for integer division. Floating point divide by zero is allowed and evaluates to `nan`.
