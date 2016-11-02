@@ -166,7 +166,10 @@
          Cyc-read-line
          Cyc-write-char
          Cyc-write
-         Cyc-display))
+         Cyc-display
+         Cyc-unsafe-car
+         Cyc-unsafe-cdr
+         ))
 
     ;; Keep track of how many args are required for each primitive.
     ;; For each primitive, define:
@@ -231,6 +234,8 @@
          (length 1 1)
          (set-car! 2 2)
          (set-cdr! 2 2)
+         (Cyc-unsafe-car 1 1)
+         (Cyc-unsafe-cdr 1 1)
          (car 1 1)
          (cdr 1 1)
          (caar    1 1)
@@ -461,6 +466,8 @@
          ((eq? p 'Cyc-display)           "Cyc_display_va")
          ((eq? p 'Cyc-write)             "Cyc_write_va")
          ((eq? p 'Cyc-write-char)        "Cyc_write_char")
+         ((eq? p 'Cyc-unsafe-car)        "car")
+         ((eq? p 'Cyc-unsafe-cdr)        "cdr")
          ((eq? p 'car)           "Cyc_car")
          ((eq? p 'cdr)           "Cyc_cdr")
          ((eq? p 'caar)          "Cyc_caar")
