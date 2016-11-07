@@ -470,6 +470,33 @@
                   ;; TODO: check for more than one arg??
                   (equal? (length (cdr exp))
                           (length (ast:lambda-formals->list (car exp))))
+                  (or
+                ;; This "and" is not for primitives, but rather checking 
+                ;; for constants to optimize out. This just happens to be 
+                ;; a convenient place since the optimization is the same.
+                (and
+                  ;; Check each parameter
+                  (every
+                    (lambda (param)
+                      (with-var param (lambda (var)
+                        (and 
+                          ;; At least for now, do not replace if referenced by multiple functions
+                          (<= (length (adbv:ref-by var)) 1)
+                          ;; Need to keep variable because it is mutated
+                          (not (adbv:reassigned? var))
+                    ))))
+                    (ast:lambda-formals->list (car exp)))
+                  ;; Args are all constants
+                  (every
+                    (lambda (arg)
+                      (and
+                        arg ;; #f is a special value for init, so do not optimize it for now
+                        (or (const? arg)
+                            (quote? arg))))
+                    (cdr exp))
+                )
+                ;; Check for primitive calls that can be optimized out
+                (and
                   ;; Double-check parameter can be optimized-out
                   (every
                     (lambda (param)
@@ -498,7 +525,7 @@
                   (inline-prim-call? 
                     (ast:lambda-body (car exp))
                     (prim-calls->arg-variables (cdr exp))
-                    (ast:lambda-formals->list (car exp)))
+                    (ast:lambda-formals->list (car exp)))))
              )
              (let ((args (cdr exp)))
                (for-each

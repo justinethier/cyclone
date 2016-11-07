@@ -8,6 +8,7 @@ Features:
 - Thanks to ecraven, added R7RS function `exact-integer-sqrt` to `(scheme base)`.
 - Allow the reader to recognize `+inf.0`, `-inf.0`, `+nan.0`, and `-nan.0`.
 - Allow `cond-expand` to test for whether a library exists using the form `(library {library name})`.
+- Reduce size of compiled code by inlining constant values. This reduced the code size of various cyclone libraries by approximately 33%.
 
 Bug Fixes
 
