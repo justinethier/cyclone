@@ -497,6 +497,38 @@
                 )
                 ;; Check for primitive calls that can be optimized out
                 (and
+                  #;(begin
+(trace:error `(DEBUG
+               ,exp
+                  ,(every
+                    (lambda (param)
+                      (with-var param (lambda (var)
+;(trace:error `(DEBUG ,param ,(adbv:ref-by var)))
+                        (and 
+                          ;; If param is never referenced, then prim is being
+                          ;; called for side effects, possibly on a global
+                          (not (null? (adbv:ref-by var)))
+                          ;; Need to keep variable because it is mutated
+                          (not (adbv:reassigned? var))
+                    ))))
+                    (ast:lambda-formals->list (car exp)))
+                  ;; Check all args are valid primitives that can be inlined
+                  ,(every
+                    (lambda (arg)
+                      (and (prim-call? arg)
+                           (not (prim:cont? (car arg)))))
+                    (cdr exp))
+                  ;; Disallow primitives that allocate a new obj,
+                  ;; because if the object is mutated all copies
+                  ;; must be modified. 
+                  ,(one-instance-of-new-mutable-obj?
+                    (cdr exp)
+                    (ast:lambda-formals->list (car exp)))
+                  ,(inline-prim-call? 
+                    (ast:lambda-body (car exp))
+                    (prim-calls->arg-variables (cdr exp))
+                    (ast:lambda-formals->list (car exp)))))
+                    #t)
                   ;; Double-check parameter can be optimized-out
                   (every
                     (lambda (param)
@@ -628,6 +660,7 @@
           ((member exp args)
            (set-car! arg-used #t))
           ((member exp ivars)
+           ;;(trace:error `(inline-ok? return #f ,exp ,ivars ,args))
            (return #f))
           (else 
            #t)))
@@ -649,7 +682,8 @@
          (inline-ok? (set!->var exp) ivars args arg-used return)
          (inline-ok? (set!->exp exp) ivars args arg-used return))
         ((if? exp)
-          (inline-ok? (if->condition exp) ivars args arg-used return)
+          (if (not (ref? (if->condition exp)))
+              (inline-ok? (if->condition exp) ivars args arg-used return))
           (inline-ok? (if->then exp) ivars args arg-used return)
           (inline-ok? (if->else exp) ivars args arg-used return))
         ((app? exp)
