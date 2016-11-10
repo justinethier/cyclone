@@ -644,8 +644,17 @@
     (define (inline-prim-call? exp ivars args)
       (call/cc
         (lambda (return)
+;; TODO:
+;; experimenting with switching inline-ok? with code using data from analysis DB
           ;(trace:error `(inline-ok? ,exp ,ivars ,args))
-          (inline-ok? exp ivars args (list #f) return)
+          ;(inline-ok? exp ivars args (list #f) return)
+          (for-each
+            (lambda (v)
+              (with-var v (lambda (var)
+                (if (not (adbv:inlinable var))
+                    (return #f)))))
+            ivars)
+;; End experimental code
           (return #t))))
 
     ;; Make sure inlining a primitive call will not cause out-of-order execution
