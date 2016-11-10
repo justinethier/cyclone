@@ -644,7 +644,7 @@
     (define (inline-prim-call? exp ivars args)
       (call/cc
         (lambda (return)
-          (trace:error `(inline-ok? ,exp ,ivars ,args))
+          ;(trace:error `(inline-ok? ,exp ,ivars ,args))
           (inline-ok? exp ivars args (list #f) return)
           (return #t))))
 
