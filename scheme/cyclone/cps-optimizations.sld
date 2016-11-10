@@ -767,7 +767,39 @@
             (lambda (e)
               (if (not (ref? e))
                   (analyze:find-inlinable-vars e args)))
-            (reverse (cdr exp))))
+            (cdr exp)))
+            ;(reverse (cdr exp))))
+          ((and (not (prim? (car exp)))
+                (ref? (car exp)))
+           (define ref-formals '())
+           (with-var (car exp) (lambda (var)
+             (let ((val (adbv:assigned-value var)))
+              (cond
+               ((ast:lambda? val)
+                (set! ref-formals (ast:lambda-formals->list val)))
+               ((and (pair? val) 
+                     (ast:lambda? (car val)) 
+                     (null? (cdr val)))
+                (set! ref-formals (ast:lambda-formals->list (car val))))
+           ))))
+;(trace:error `(DEBUG ref app ,(car exp) ,(cdr exp) ,ref-formals))
+           (cond
+            ((= (length ref-formals) (length (cdr exp)))
+             (analyze:find-inlinable-vars (car exp) args)
+             (for-each
+              (lambda (e a)
+                ;; Optimization:
+                ;; Ignore if an argument to a function is passed back 
+                ;; to another call to the function as the same parameter.
+                (if (not (equal? e a))
+                    (analyze:find-inlinable-vars e args)))
+              (cdr exp)
+              ref-formals))
+            (else
+             (for-each
+              (lambda (e)
+                (analyze:find-inlinable-vars e args))
+              exp))))
           (else
            (for-each
             (lambda (e)
