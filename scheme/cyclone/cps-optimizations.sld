@@ -752,7 +752,9 @@
          (let ((formals (ast:lambda-formals->list exp)))
            (for-each
             (lambda (e)
-              (analyze:find-inlinable-vars e formals))
+              ;; TODO: experimental change, append args to formals instead
+              ;; of just passing formals along
+              (analyze:find-inlinable-vars e (append formals args)))
             (ast:lambda-body exp))))
         ((const? exp) #t)
         ((quote? exp) #t)
