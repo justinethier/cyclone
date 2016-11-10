@@ -717,7 +717,7 @@
         (else
           (error `(Unexpected expression passed to inline prim check ,exp)))))
 
-    ;; Similar to above, but make a single pass across all the code to
+    ;; Similar to (inline-ok?) above, but this makes a single pass to
     ;; figure out which refs can be inlined and which ones are mutated or
     ;; otherwise used in such a way that they cannot be safely inlined.
     ;;
@@ -735,20 +735,13 @@
            (with-var exp (lambda (var)
              (adbv:set-inlinable! var #f)))))
         ((ast:lambda? exp)
-         ;; TODO: pass along immediate lambda args, and ignore if they
+         ;; Pass along immediate lambda args, and ignore if they
          ;; are used??? sort of makes sense because we want to inline
          ;; function arguments by replacing lambda args with the actual
-         ;; arguments. maybe we ignore lambda args within the lambda, but
-         ;; if they are used by another lambda (IE: closure) then flag
-         ;; them and do not allow an inline in that case (??).
+         ;; arguments.
          ;;
-         ;; not really flagging, we just pass args along always, and 
-         ;; do not append to prev args when a new lambda is handled.
-         ;;
-         ;(for-each
-         ; (lambda (e)
-         ;   (analyze:find-inlinable-vars e))
-         ; (ast:lambda-formals->list exp))
+         ;; This may still need some work to match what is going on 
+         ;; in inline-ok.
          (let ((formals (ast:lambda-formals->list exp)))
            (for-each
             (lambda (e)
