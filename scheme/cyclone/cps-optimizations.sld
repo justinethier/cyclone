@@ -754,7 +754,9 @@
             (lambda (e)
               ;; TODO: experimental change, append args to formals instead
               ;; of just passing formals along
-              (analyze:find-inlinable-vars e (append formals args)))
+              ;(analyze:find-inlinable-vars e (append formals args)))
+;; try this for now, do a full make then re-make and verify everything works
+              (analyze:find-inlinable-vars e formals))
             (ast:lambda-body exp))))
         ((const? exp) #t)
         ((quote? exp) #t)
