@@ -531,7 +531,11 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
   gc_heap *h_passed = h;
   gc_free_list *f1, *f2, *f3;
   pthread_mutex_lock(&heap_lock);
-  if (size <= h->last_alloc_size) {
+  // Start searching from the last heap page we had a successful
+  // allocation from, unless the current request is for a smaller
+  // block in which case there may be available memory closer to
+  // the start of the heap.
+  if (size >= h->last_alloc_size) {
     h = h->next_free;
   }
   for (; h; h = h->next) {      // All heaps
