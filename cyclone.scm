@@ -22,6 +22,8 @@
         (scheme cyclone macros)
         (scheme cyclone libraries))
 
+(define *optimization-level* 2) ;; Default level
+
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
@@ -228,10 +230,11 @@
       (trace:info "---------------- after CPS:")
       (trace:info input-program) ;pretty-print
 
-      (set! input-program
-        (optimize-cps input-program))
-      (trace:info "---------------- after cps optimizations:")
-      (trace:info input-program)
+      (when (> *optimization-level* 0)
+        (set! input-program
+          (optimize-cps input-program))
+        (trace:info "---------------- after cps optimizations:")
+        (trace:info input-program))
     
       (set! input-program
         (map
@@ -380,6 +383,11 @@
                                (equal? #\- (string-ref arg 0)))))
                    args))
        (compile? #t))
+  ;; Set optimization level(s)
+  (if (member "-O0" args)
+      (set! *optimization-level* 0))
+  ;; TODO: place more optimization reading here as necessary
+  ;; End optimizations
   (if (member "-t" args)
       (set! *trace-level* 4)) ;; Show all trace output
   (if (member "-d" args)
@@ -392,6 +400,8 @@
  -d              Only generate intermediate C files, do not compile them
  -h, --help      Display usage information
  -v              Display version information
+ -Ox             Optimization level, higher means more optimizations will
+                 be used. Set to 0 to disable optimizations.
  --autogen       Cyclone developer use only, create autogen.out file
 ")
      (newline))
