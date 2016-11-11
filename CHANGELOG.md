@@ -8,6 +8,7 @@ Features:
 - Allow the reader to recognize `+inf.0`, `-inf.0`, `+nan.0`, and `-nan.0`.
 - Allow `cond-expand` to test for whether a library exists using the form `(library {library name})`.
 - Reduce size of compiled code by inlining constant values. This reduced the code size of various cyclone libraries by approximately 33%. Added other inlining as well to slightly improve performance.
+- Added command line option `-O` to set the optimization level. For now there is `-O0` to disable optimizations and the default setting to enable them. Going forward there will be more fine-grained control.
 
 Bug Fixes
 
