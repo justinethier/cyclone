@@ -96,7 +96,8 @@
           ;; Follow references
           ((ref? value)
            (with-var! value (lambda (var)
-             (update-lambda-atv! (cons value syms) (adbv:assigned-value var)))))
+             (if (not (member value syms))
+                 (update-lambda-atv! (cons value syms) (adbv:assigned-value var))))))
           (else
             #f))
       )
