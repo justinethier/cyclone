@@ -223,6 +223,8 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->type = heap_type;
   h->size = size;
   h->newly_created = 1;
+  h->next_free = h;
+  h->last_alloc_size = 0;
   //h->free_size = size;
   cached_heap_total_sizes[heap_type] += size;
   cached_heap_free_sizes[heap_type] += size;
@@ -526,8 +528,12 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd)
 {
+  gc_heap *h_passed = h;
   gc_free_list *f1, *f2, *f3;
   pthread_mutex_lock(&heap_lock);
+  if (size <= h->last_alloc_size) {
+    h = h->next_free;
+  }
   for (; h; h = h->next) {      // All heaps
     // TODO: chunk size (ignoring for now)
 
@@ -550,6 +556,8 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
           cached_heap_free_sizes[heap_type] -=
               gc_allocated_bytes(obj, NULL, NULL);
         }
+        h_passed->next_free = h;
+        h_passed->last_alloc_size = size;
         pthread_mutex_unlock(&heap_lock);
         return f2;
       }
@@ -721,6 +729,8 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   // how much time is even spent sweeping
   //
   pthread_mutex_lock(&heap_lock);
+  h->next_free = h;
+  h->last_alloc_size = 0;
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nBefore sweep -------------------------\n");
