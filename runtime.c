@@ -1685,21 +1685,6 @@ str2int_errno str2int(int *out, char *s, int base)
     return STR2INT_SUCCESS;
 }
 
-int str2double(double *out, char *s) 
-{
-  *out = strtold(s, NULL);
-  // TODO: error checking, EG: HUGE_VALL
-  return 0;
-}
-
-int str2double_error(char *str, double result) {
-  //int i, len = strlen(str);
-  //for (i = 0; i < len; i++) {
-  //  if (!isspace(str[i]) && str[i] != '.' &&
-  //}
-  return 0;
-}
-
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
@@ -1714,17 +1699,15 @@ object Cyc_string2number_(void *data, object cont, object str)
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
     } else {
-      str2double(&n, s);
-      if (n > 0.0L || n < 0.0L || !str2double_error(s, n)) {
+      char *str_end;
+      n = strtold(s, &str_end);
+      if (s != str_end && *str_end == '\0') {
         make_double(result, n);
         _return_closcall1(data, cont, &result);
       } else {
         _return_closcall1(data, cont, boolean_f);
       }
     }
-  } else {
-    // TODO: not good enough because we do pointer comparisons to #f
-    //result.boolean_t = boolean_f;
   }
 
   Cyc_rt_raise2(data, "Expected string but received", str);
