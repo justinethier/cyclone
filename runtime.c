@@ -1006,7 +1006,7 @@ object memberp(void *data, object x, list l)
   Cyc_check_pair_or_null(data, l);
   for (; l != NULL; l = cdr(l)) {
     if (boolean_f != equalp(x, car(l)))
-      return boolean_t;
+      return l;
   }
   return boolean_f;
 }
@@ -1016,7 +1016,7 @@ object memqp(void *data, object x, list l)
   Cyc_check_pair_or_null(data, l);
   for (; l != NULL; l = cdr(l)) {
     if ((x == car(l)))
-      return boolean_t;
+      return l;
   }
   return boolean_f;
 }
