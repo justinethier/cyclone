@@ -1594,21 +1594,19 @@ object Cyc_list2string(void *data, object cont, object lst)
   object len;
 
   Cyc_check_pair_or_null(data, lst);
-
   len = Cyc_length(data, lst);  // Inefficient, walks whole list
-  buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
-  while ((lst != NULL)) {
-    if (!obj_is_char(car(lst))) {
-      Cyc_rt_raise2(data, "Expected character but received", car(lst));
-    }
-    buf[i++] = obj_obj2char(car(lst));
-    lst = cdr(lst);
-  }
-  buf[i] = '\0';
 
-  //{ make_string_noalloc(str, buf, i);
   {
-    make_string(str, buf);
+    make_string_noalloc(str, NULL, (obj_obj2int(len)));
+    str.str = buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
+    while ((lst != NULL)) {
+      if (!obj_is_char(car(lst))) {
+        Cyc_rt_raise2(data, "Expected character but received", car(lst));
+      }
+      buf[i++] = obj_obj2char(car(lst));
+      lst = cdr(lst);
+    }
+    buf[i] = '\0';
     _return_closcall1(data, cont, &str);
   }
 }
