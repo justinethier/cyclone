@@ -1694,6 +1694,14 @@ int str2double(double *out, char *s)
   return 0;
 }
 
+int str2double_error(char *str, double result) {
+  //int i, len = strlen(str);
+  //for (i = 0; i < len; i++) {
+  //  if (!isspace(str[i]) && str[i] != '.' &&
+  //}
+  return 0;
+}
+
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
@@ -1709,9 +1717,11 @@ object Cyc_string2number_(void *data, object cont, object str)
       _return_closcall1(data, cont, obj_int2obj(result));
     } else {
       str2double(&n, s);
-      {
+      if (n > 0.0L || n < 0.0L || !str2double_error(s, n)) {
         make_double(result, n);
         _return_closcall1(data, cont, &result);
+      } else {
+        _return_closcall1(data, cont, boolean_f);
       }
     }
   } else {
