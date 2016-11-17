@@ -1,0 +1,10 @@
+(DEBUG bind-in-order ((#((var-tag) result #t () () #(result #(expr result #f)) #f))))
+(INNER DEBUG (#((var-tag) result #t () () #(result #(expr result #f)) #f)) (#((var-tag) result #t () () #(result #(expr result #f)) #f)))
+
+
+  (define (bind-in-order order)
+(write `(DEBUG bind-in-order ,order))
+    (if (null? order)
+        (pt-body source body env use)
+        (let* ((vars-set (car order)) (vars (set->list vars-set)))
+(write `(INNER DEBUG ,vars-set ,vars))
