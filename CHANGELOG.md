@@ -17,6 +17,7 @@ Bug Fixes
 - Modified SRFI 106 to be smarter about compiling `AI_V4MAPPED` and `AI_ALL`, which are not defined on OpenBSD.
 - Fixed the `member` functions to always return the list when a value is found, instead of `#t`.
 - Fixed `string->number` to return `#f` if the string cannot be converted.
+- Fixed a bug where the optimizer would sometimes generate incorrect code when a mutating primitive (EG: `set-car!`) was passed an expression rather than an identifier as the variable argument.
 
 # 0.3 - October 22, 2016
 
