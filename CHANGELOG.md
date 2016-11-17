@@ -18,6 +18,7 @@ Bug Fixes
 - Fixed the `member` functions to always return the list when a value is found, instead of `#t`.
 - Fixed `string->number` to return `#f` if the string cannot be converted.
 - Fixed a bug where the optimizer would sometimes generate incorrect code when a mutating primitive (EG: `set-car!`) was passed an expression rather than an identifier as the variable argument.
+- Prevent the runtime from crashing when a non-numeric value type is passed to a numeric function.
 
 # 0.3 - October 22, 2016
 
