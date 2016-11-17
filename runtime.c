@@ -1719,7 +1719,7 @@ object Cyc_string2number_(void *data, object cont, object str)
     } else {
       char *str_end;
       n = strtold(s, &str_end);
-      if (s != str_end && *str_end == '\0') {
+      if (s != str_end && (*str_end == '\0' || isspace(*str_end))) {
         make_double(result, n);
         _return_closcall1(data, cont, &result);
       } else {
