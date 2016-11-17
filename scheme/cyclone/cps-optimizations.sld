@@ -232,7 +232,7 @@
               (with-var e (lambda (var)
                 (if (adbv:assigned-value var)
                     (set! e (adbv:assigned-value var))))))
-           (trace:error `(find-indirect-mutations ,e))
+           ;(trace:error `(find-indirect-mutations ,e))
            (find-indirect-mutations e))))
 
          ;; TODO: if ast-lambda (car),
