@@ -63,7 +63,7 @@
     (define-record-type <analysis-db-variable>
       (%adb:make-var global defined-by const const-value  ref-by
                      reassigned assigned-value app-fnc-count app-arg-count
-                     inlinable)
+                     inlinable mutated-indirectly)
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
@@ -81,6 +81,8 @@
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
       ;; Can a ref be safely inlined?
       (inlinable adbv:inlinable adbv:set-inlinable!)
+      ;; Is the variable mutated indirectly? (EG: set-car! of a cdr)
+      (mutated-indirectly adbv:mutated-indirectly? adbv:set-mutated-indirectly!)
     )
 
     (define (adbv-set-assigned-value-helper! sym var value)
@@ -109,7 +111,7 @@
     )
 
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f '() #f #f 0 0 #t))
+      (%adb:make-var '? '? #f #f '() #f #f 0 0 #t #f))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var)
@@ -221,6 +223,18 @@
                    (adbv:set-app-arg-count! var (+ 1 (adbv:app-arg-count var)))))))
           (app->args exp))
 
+         ;; Identify indirect mutations. That is, the result of a function call
+         ;; is what is mutated
+         (cond
+          ((and (prim:mutates? (car exp)))
+           (let ((e (cadr exp)))
+            (when (ref? e)
+              (with-var e (lambda (var)
+                (if (adbv:assigned-value var)
+                    (set! e (adbv:assigned-value var))))))
+           (trace:error `(find-indirect-mutations ,e))
+           (find-indirect-mutations e))))
+
          ;; TODO: if ast-lambda (car),
          ;; for each arg
          ;;  if arg is const-atomic
@@ -289,6 +303,36 @@
         ; Application:
         ((app? exp)
          (for-each (lambda (e) (analyze2 e)) exp))
+        (else #f)))
+
+    (define (find-indirect-mutations exp)
+      (cond
+        ; Core forms:
+        ;((ast:lambda? exp)
+        ; (let* ((id (ast:lambda-id exp))
+        ;        (fnc (adb:get id)))
+        ;   (adbf:set-simple! fnc (simple-lambda? exp))
+        ;   (for-each
+        ;     (lambda (expr)
+        ;       (analyze2 expr))
+        ;     (ast:lambda-body exp))))
+        ((const? exp) #f)
+        ((quote? exp) #f)
+        ((ref? exp)
+         (with-var! exp (lambda (var)
+           (adbv:set-mutated-indirectly! var #t))))
+        ;((define? exp)
+        ; ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
+        ;   (analyze2 (define->exp exp)))
+        ;((set!? exp)
+        ; ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
+        ;   (analyze2 (set!->exp exp)))
+        ((if? exp)       `(if ,(find-indirect-mutations (if->condition exp))
+                              ,(find-indirect-mutations (if->then exp))
+                              ,(find-indirect-mutations (if->else exp))))
+        ; Application:
+        ((app? exp)
+         (for-each find-indirect-mutations (cdr exp)))
         (else #f)))
 
     ;; TODO: make another pass for simple lambda's
