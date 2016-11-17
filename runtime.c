@@ -1194,8 +1194,21 @@ void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { 
     return_closcall1(data, cont, result); \
 } \
 object FUNC_FAST_OP(void *data, object x, object y) { \
-    int tx = (obj_is_int(x) ? -1 : type_of(x)), \
-        ty = (obj_is_int(y) ? -1 : type_of(y)); \
+    int tx, ty; \
+    if (obj_is_int(x)) { \
+      tx = -1; \
+    } else if (is_object_type(x)) { \
+      tx = type_of(x); \
+    } else { \
+      goto bad_arg_type_error; \
+    } \
+    if (obj_is_int(y)) { \
+      ty = -1; \
+    } else if (is_object_type(y)) { \
+      ty = type_of(y); \
+    } else { \
+      goto bad_arg_type_error; \
+    } \
     if (tx == -1 && ty == -1) { \
       return ((obj_obj2int(x)) OP (obj_obj2int(y))) \
              ? boolean_t : boolean_f; \
@@ -1224,13 +1237,18 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
       return ((double_value(x)) OP (double_value(y))) \
              ? boolean_t : boolean_f; \
     } else { \
+        goto bad_arg_type_error; \
+    } \
+    return NULL; \
+bad_arg_type_error: \
+    { \
         make_string(s, "Bad argument type"); \
         make_pair(c2, y, NULL); \
         make_pair(c1, x, &c2); \
         make_pair(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
+        return NULL; \
     } \
-    return NULL; \
 }
 
 declare_num_cmp(Cyc_num_eq,  Cyc_num_eq_op,  Cyc_num_fast_eq_op, dispatch_num_eq, ==);
@@ -2318,7 +2336,15 @@ object __halt(object obj)
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
-    int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y)); \
+    int tx, ty; \
+    tx = type_of(x); \
+    if (obj_is_int(y)) { \
+      ty = -1; \
+    } else if (is_object_type(y)) { \
+      ty = type_of(y); \
+    } else { \
+      goto bad_arg_type_error; \
+    } \
     if (DIV &&  \
         ((ty == -1 && (obj_obj2int(y) == 0)) || \
          (ty == integer_tag && integer_value(y) == 0) || \
@@ -2341,12 +2367,17 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else { \
+        goto bad_arg_type_error; \
+    } \
+    return x; \
+bad_arg_type_error: \
+    { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
         make_pair(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
+        return NULL; \
     } \
-    return x; \
 } \
 object FUNC(void *data, object cont, int argc, object n, ...) { \
     common_type buffer; \
@@ -2493,7 +2524,14 @@ divbyzero:
 
 object Cyc_div_op(void *data, common_type * x, object y)
 {
-  int tx = type_of(x), ty = (obj_is_int(y) ? -1 : type_of(y));
+  int tx = type_of(x), ty;
+  if (obj_is_int(y)) {
+    ty = -1;
+  } else if (is_object_type(y)) {
+    ty = type_of(y);
+  } else {
+    goto bad_arg_type_error;
+  }
   if (tx == integer_tag && ty == -1) {
     if (obj_obj2int(y) == 0) {
       Cyc_rt_raise_msg(data, "Divide by zero");
@@ -2516,12 +2554,17 @@ object Cyc_div_op(void *data, common_type * x, object y)
   } else if (tx == double_tag && ty == double_tag) {
     x->double_t.value = x->double_t.value / ((double_type *) y)->value;
   } else {
+    goto bad_arg_type_error;
+  }
+  return x;
+bad_arg_type_error:
+  {
     make_string(s, "Bad argument type");
     make_pair(c1, y, NULL);
     make_pair(c0, &s, &c1);
     Cyc_rt_raise(data, &c0);
+    return NULL;
   }
-  return x;
 }
 
 object Cyc_div(void *data, object cont, int argc, object n, ...)
@@ -2574,6 +2617,8 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->integer_t.hdr.grayed = 0;
     buf->integer_t.tag = integer_tag;
     buf->integer_t.value = obj_obj2int(n);
+  } else if (!is_object_type(n)) {
+    goto bad_arg_type_error;
   } else if (type_of(n) == integer_tag) {
     buf->integer_t.hdr.mark = gc_color_red;
     buf->integer_t.hdr.grayed = 0;
@@ -2585,10 +2630,7 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->double_t.tag = double_tag;
     buf->double_t.value = ((double_type *) n)->value;
   } else {
-    make_string(s, "Bad argument type");
-    make_pair(c1, n, NULL);
-    make_pair(c0, &s, &c1);
-    Cyc_rt_raise(data, &c0);
+    goto bad_arg_type_error;
   }
 
   if (argc == 1) {
@@ -2618,6 +2660,14 @@ object Cyc_num_op_va_list(void *data, int argc,
   }
 
   return buf;
+bad_arg_type_error:
+  {
+    make_string(s, "Bad argument type");
+    make_pair(c1, n, NULL);
+    make_pair(c0, &s, &c1);
+    Cyc_rt_raise(data, &c0);
+    return NULL;
+  }
 }
 
 /* I/O functions */
