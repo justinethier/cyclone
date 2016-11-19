@@ -38,7 +38,7 @@ Section | Status | Comments
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes |
 6.2 Numbers | Partial | Only integers and reals are supported at this time.
-6.3 Booleans | Yes | `#true` and `#false` are not recognized by parser.
+6.3 Booleans | Yes |
 6.4 Pairs and lists | Yes |
 6.5 Symbols | Yes |
 6.6 Characters | Partial | No unicode support.
