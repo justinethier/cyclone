@@ -5,6 +5,10 @@ Features:
 
 - Recognize escaped vertical line and hex scalar value characters when reading a string.
 
+Bug Fixes
+
+- Fixed a crash when running `cyclone` on 32-bit platforms.
+
 # 0.3.1 - November 20, 2016
 
 Features:
