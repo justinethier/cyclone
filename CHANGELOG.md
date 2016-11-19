@@ -1,6 +1,10 @@
 # Next Release - Date TBD
 TODO: SRFI 113
 
+Features:
+
+- Allow the reader to recognize `#true` and `#false`.
+
 # 0.3.2 - November 22, 2016
 
 Features:

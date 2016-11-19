@@ -344,12 +344,27 @@
               ;; Booleans
               ;; Do not use add-tok below, no need to quote a bool
               ((eq? #\t next-c) 
-;; TODO: read in rest of #true if it is there
+               ;; read in rest of #true if it is there
+               (when (eq? #\r (peek-char fp))
+                 (if (not (and (eq? #\r (read-char fp))
+                               (eq? #\u (read-char fp))
+                               (eq? #\e (read-char fp))))
+                     (parse-error "Invalid syntax for boolean true" 
+                       (in-port:get-lnum ptbl)
+                       (in-port:get-cnum ptbl))))
                (if all?
                    (parse fp '() (cons #t toks) all? #f parens ptbl)
                    #t))
               ((eq? #\f next-c) 
-;; TODO: read in rest of #false if it is there
+               ;; read in rest of #false if it is there
+               (when (eq? #\a (peek-char fp))
+                 (if (not (and (eq? #\a (read-char fp))
+                               (eq? #\l (read-char fp))
+                               (eq? #\s (read-char fp))
+                               (eq? #\e (read-char fp))))
+                     (parse-error "Invalid syntax for boolean false" 
+                       (in-port:get-lnum ptbl)
+                       (in-port:get-cnum ptbl))))
                (if all?
                    (parse fp '() (cons #f toks) all? #f parens ptbl)
                    #f))
