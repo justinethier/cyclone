@@ -1,6 +1,9 @@
 # Next Release - Date TBD
 
 TODO: SRFI 113
+Features:
+
+- Recognize escaped vertical line and hex scalar value characters when reading a string.
 
 # 0.3.1 - November 20, 2016
 

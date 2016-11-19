@@ -471,6 +471,25 @@
          (loop (cons (read-char fp) buf))))))
   (loop '()))
 
+(define (read-hex-scalar-value fp ptbl)
+  (define (done buf)
+    (cond 
+      ((= 0 (length buf))
+       (parse-error "missing character" 
+         (in-port:get-lnum ptbl)
+         (in-port:get-cnum ptbl)))
+      (else
+       (integer->char (string->number (list->string buf) 16)))))
+  (define (loop buf)
+    (let ((c (read-char fp)))
+      (cond
+        ((or (eof-object? c)
+             (eq? #\; c))
+         (done (reverse buf)))
+       (else
+         (loop (cons c buf))))))
+  (loop '()))
+
 (define (read-str fp buf ptbl)
   (let ((c (read-char fp)))
     (cond
@@ -505,6 +524,8 @@
       ((equal? #\n c) (cons #\newline buf))
       ((equal? #\r c) (cons #\return buf))
       ((equal? #\t c) (cons #\tab buf))
+      ((equal? #\x c)
+       (cons (read-hex-scalar-value fp ptbl) buf))
       (else
         (parse-error (string-append 
                        "invalid escape character [" 
