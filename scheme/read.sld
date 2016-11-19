@@ -497,6 +497,7 @@
       ((or (equal? #\" c)
            (equal? #\' c)
            (equal? #\? c)
+           (equal? #\| c)
            (equal? #\\ c))
        (cons c buf))
       ((equal? #\a c) (cons #\alarm buf))
