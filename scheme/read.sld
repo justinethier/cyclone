@@ -13,8 +13,24 @@
   (export
     read
     read-all
+    include
   )
   (begin
+
+(define-syntax include
+  (er-macro-transformer
+   (lambda (expr rename compare)
+     (apply
+      append
+      (cons
+        '(begin)
+         (map
+          (lambda (filename)
+            (call-with-port
+              (open-input-file filename)
+              (lambda (port)
+                (read-all port))))
+          (cdr expr)))))))
 
 (define read cyc-read)
 

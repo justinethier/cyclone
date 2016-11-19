@@ -7,6 +7,7 @@ Features:
 
 - Recognize escaped vertical line and hex scalar value characters when reading a string.
 - Added `current-thread` to SRFI 18.
+- Added the `include` macro.
 
 Bug Fixes
 
