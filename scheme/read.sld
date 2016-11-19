@@ -14,6 +14,7 @@
     read
     read-all
     include
+    include-ci
   )
   (begin
 
@@ -31,6 +32,11 @@
               (lambda (port)
                 (read-all port))))
           (cdr expr)))))))
+
+(define-syntax include-ci
+  (er-macro-transformer
+   (lambda (expr rename compare)
+    `(include ,@(cdr expr)))))
 
 (define read cyc-read)
 
