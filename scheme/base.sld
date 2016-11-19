@@ -171,6 +171,7 @@
     string->utf8
     denominator
     numerator
+    parameterize
 
 ;;;;
 ; Possibly missing functions:
@@ -194,7 +195,6 @@
 ;    textual-port?
 ;
 ;    ;; syntax-rules
-    parameterize
 ;    define-values
 ;
 ; unclassified TODO's:
