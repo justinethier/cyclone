@@ -1043,6 +1043,10 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
       for (i = 0; i < thd->gc_num_args; i++) {
         gc_mark_gray(thd, thd->gc_args[i]);
       }
+      // Mark thread object, if applicable. Very likely this is its only ref
+//      if (thd->scm_thread_obj) {
+//        gc_mark_gray(thd, thd->scm_thread_obj);
+//      }
       // Also, mark everything the collector moved to the heap
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
@@ -1532,7 +1536,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->mutations = 
       vpbuffer_realloc(thd->mutations, &(thd->mutation_buflen));
   thd->exception_handler_stack = NULL;
-//  thd->thread = NULL;
+  thd->scm_thread_obj = NULL;
   thd->thread_state = CYC_THREAD_STATE_NEW;
   //thd->mutator_num = mut_num;
   thd->jmp_start = malloc(sizeof(jmp_buf));

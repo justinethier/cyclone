@@ -78,10 +78,11 @@
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
       ;; t contains any closures on the "parent" thread's stack
-      (Cyc-minor-gc)
       (let* ((thunk (vector-ref t 1)) 
-             (mutator-id (Cyc-spawn-thread! thunk)))
-        (vector-set! t 2 mutator-id)))
+             (thread-params (cons t thunk)))
+        (Cyc-minor-gc)
+        (let ((mutator-id (Cyc-spawn-thread! thread-params)))
+          (vector-set! t 2 mutator-id))))
     (define (thread-yield!) (thread-sleep! 1))
     (define-c thread-terminate!
       "(void *data, int argc, closure _, object k)"

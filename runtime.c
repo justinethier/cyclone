@@ -4713,13 +4713,14 @@ const object primitive_call_95cc = &call_95cc_primitive;
 /**
  * Thread initialization function only called from within the runtime
  */
-void *Cyc_init_thread(object thunk)
+void *Cyc_init_thread(object thread_and_thunk)
 {
   long stack_start;
   gc_thread_data *thd;
   thd = malloc(sizeof(gc_thread_data));
   gc_thread_data_init(thd, 0, (char *)&stack_start, global_stack_size);
-  thd->gc_cont = thunk;
+  thd->scm_thread_obj = car(thread_and_thunk);
+  thd->gc_cont = cdr(thread_and_thunk);
   thd->gc_num_args = 1;
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
 //  thd->thread = pthread_self(); // TODO: ptr vs instance
@@ -4735,7 +4736,7 @@ void *Cyc_init_thread(object thunk)
 /**
  * Spawn a new thread to execute the given thunk
  */
-object Cyc_spawn_thread(object thunk)
+object Cyc_spawn_thread(object thread_and_thunk)
 {
 // TODO: if we want to return mutator number to the caller, we need
 // to reserve a number here. need to figure out how we are going to
@@ -4760,7 +4761,7 @@ to look at the lock-free structures provided by ck?
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread, NULL, Cyc_init_thread, thunk)) {
+  if (pthread_create(&thread, NULL, Cyc_init_thread, thread_and_thunk)) {
     fprintf(stderr, "Error creating a new thread\n");
     exit(1);
   }
