@@ -1,6 +1,8 @@
-# Next Release (tentatively 0.3.1) - Date TBD
+# Next Release - Date TBD
 
 TODO: SRFI 113
+
+# 0.3.1 - November 20, 2016
 
 Features:
 
