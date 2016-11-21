@@ -6,6 +6,7 @@ TODO: SRFI 113
 Features:
 
 - Recognize escaped vertical line and hex scalar value characters when reading a string.
+- Added `current-thread` to SRFI 18.
 
 Bug Fixes
 
