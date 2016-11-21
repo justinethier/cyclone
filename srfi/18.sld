@@ -18,7 +18,7 @@
     thread-sleep!
     thread-yield!
     thread-terminate!
-    ;; TODO: current-thread
+    current-thread
     ;; TODO: thread-join!
 
     mutex?
@@ -72,8 +72,19 @@
     (define (thread-specific t) (vector-ref t 4))
     (define (thread-specific-set! t obj) (vector-set! t 4 obj))
 
-    ; TODO:
-    ; current-thread - not sure how to look this up yet... may need a global list of running threads. Unfortunately need the vector here
+    (define (current-thread)
+      (let ((t (%current-thread)))
+        (if (null? t)
+            *primordial-thread*
+            t)))
+
+    (define *primordial-thread*
+      (vector 'cyc-thread-obj #f #f "main thread" #f))
+
+    (define-c %current-thread
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *td = (gc_thread_data *)data;
+        return_closcall1(data, k, td->scm_thread_obj); ")
 
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
@@ -83,6 +94,7 @@
         (Cyc-minor-gc)
         (let ((mutator-id (Cyc-spawn-thread! thread-params)))
           (vector-set! t 2 mutator-id))))
+
     (define (thread-yield!) (thread-sleep! 1))
     (define-c thread-terminate!
       "(void *data, int argc, closure _, object k)"

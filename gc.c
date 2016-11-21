@@ -1044,9 +1044,9 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
         gc_mark_gray(thd, thd->gc_args[i]);
       }
       // Mark thread object, if applicable. Very likely this is its only ref
-//      if (thd->scm_thread_obj) {
-//        gc_mark_gray(thd, thd->scm_thread_obj);
-//      }
+      if (thd->scm_thread_obj) {
+        gc_mark_gray(thd, thd->scm_thread_obj);
+      }
       // Also, mark everything the collector moved to the heap
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
