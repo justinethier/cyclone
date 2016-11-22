@@ -17,7 +17,7 @@ Section | Status | Comments
 3.3 External representations | Yes |
 3.4 Storage model | Yes | No immutable types at this time.
 3.5 Proper tail recursion | Yes |
-4.1 Primitive expression types | Partial | `include` and `include-ci` are not implemented, although `include` may be specified as part of a library definition.
+4.1 Primitive expression types | Yes |
 4.2 Derived expression types | Yes | 
 4.2.1 Conditionals | Yes | 
 4.2.2 Binding constructs | Yes |
