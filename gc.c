@@ -1417,8 +1417,11 @@ void gc_collector()
   //sweep : 
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-    gc_sweep(gc_get_heap()->heap[heap_type], heap_type, &freed_tmp);
-    freed += freed_tmp;
+    gc_heap *h = gc_get_heap()->heap[heap_type];
+    if (h) {
+      gc_sweep(h, heap_type, &freed_tmp);
+      freed += freed_tmp;
+    }
   }
 
   // TODO: this loop only includes smallest 2 heaps, is that sufficient??
