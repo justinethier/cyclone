@@ -5,6 +5,10 @@ Features:
 
 - Allow the reader to recognize `#true` and `#false`.
 
+Bug Fixes
+
+- Do not generate invalid C code when compiling `+` or `*` without any arguments.
+
 # 0.3.2 - November 22, 2016
 
 Features:
