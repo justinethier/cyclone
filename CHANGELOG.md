@@ -7,6 +7,7 @@ Features:
 
 Bug Fixes
 
+- Prevent C compilation error when compiling string with special characters in them such as `#\tab`, `#\alarm`, and `#\return`.
 - Do not generate invalid C code when compiling `+` or `*` without any arguments.
 
 # 0.3.2 - November 22, 2016
