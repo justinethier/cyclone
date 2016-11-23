@@ -1062,10 +1062,16 @@
                (cons (car ast) 
                      (map (lambda (a) (convert a renamed))
                           (cdr ast)))))
-         (if (precompute-prim-app? converted)
-           converted ; TODO:(eval converted) ;; OK, evaluate at compile time
+         (cond
+          ((and (equal? (car converted) '+) (= (length converted) 1))
+           0)
+          ((and (equal? (car converted) '*) (= (length converted) 1))
+           1)
+          ((precompute-prim-app? converted)
+           converted) ; TODO:(eval converted) ;; OK, evaluate at compile time
            ;converted))) ;; No, see if we can fast-convert it
-           (prim:inline-convert-prim-call converted)))) ;; No, see if we can fast-convert it
+          (else
+           (prim:inline-convert-prim-call converted))))) ;; No, see if we can fast-convert it
       ((lambda? ast)
        (let* ((args (lambda-formals->list ast))
               (ltype (lambda-formals-type ast))
