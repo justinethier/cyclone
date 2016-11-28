@@ -9,6 +9,7 @@ Bug Fixes
 
 - Prevent C compilation error when compiling string with special characters in them such as `#\tab`, `#\alarm`, and `#\return`.
 - Do not generate invalid C code when compiling `+` or `*` without any arguments.
+- Handle compilation of variable-argument anonymous lambda's. For example: `((lambda x x) 3 5)`.
 
 # 0.3.2 - November 22, 2016
 
