@@ -202,7 +202,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...);
 object Cyc_symbol2string(void *d, object cont, object sym);
 object Cyc_string2symbol(void *d, object str);
 object Cyc_list2string(void *d, object cont, object lst);
-object Cyc_list(void *data, int argc, object cont, object objs_raw, ...);
+object Cyc_list(void *data, int argc, object cont, ...);
 object Cyc_string2number_(void *d, object cont, object str);
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
 int binstr2int(const char *str);

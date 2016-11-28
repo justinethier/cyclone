@@ -1303,9 +1303,11 @@
                                             (list (cps-seq (cddr fn) ;(ast-subx fn)
                                                            cont-ast)))
                                            vals)))
-                            (if (equal? (lambda-formals-type fn) 'args:varargs)
-                                (cons 'Cyc-list code) ;; Manually build up list
-                                code)))))
+                            (cond
+                              ((equal? (lambda-formals-type fn) 'args:varargs)
+                               (cons 'Cyc-list code)) ;; Manually build up list
+                              (else
+                                code))))))
               (else
                  (cps-list ast ;(ast-subx ast)
                            (lambda (args)
