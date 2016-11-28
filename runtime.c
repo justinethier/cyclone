@@ -1629,6 +1629,13 @@ object Cyc_list2string(void *data, object cont, object lst)
   }
 }
 
+object Cyc_list(void *data, int argc, object cont, object objs_raw, ...) 
+{
+  load_varargs(objs, objs_raw, argc - 1);
+  //Cyc_st_add(data, "scheme/base.sld:list");
+  _return_closcall1(data, cont, objs);
+}
+
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
 {
   object base = NULL;
