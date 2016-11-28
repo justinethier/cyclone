@@ -1297,11 +1297,15 @@
                ;; Do conversion
                (cps-list (app->args ast)
                          (lambda (vals)
-                           (cons (ast:make-lambda
-                                   (lambda->formals fn)
-                                   (list (cps-seq (cddr fn) ;(ast-subx fn)
-                                                  cont-ast)))
-                                  vals))))
+                           (let ((code 
+                                    (cons (ast:make-lambda
+                                            (lambda->formals fn)
+                                            (list (cps-seq (cddr fn) ;(ast-subx fn)
+                                                           cont-ast)))
+                                           vals)))
+                            (if (equal? (lambda-formals-type fn) 'args:varargs)
+                                (cons 'Cyc-list code) ;; Manually build up list
+                                code)))))
               (else
                  (cps-list ast ;(ast-subx ast)
                            (lambda (args)
