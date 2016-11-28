@@ -61,6 +61,7 @@
          Cyc-stdout
          Cyc-stdin
          Cyc-stderr
+         Cyc-list
          Cyc-fast-plus
          Cyc-fast-sub
          Cyc-fast-mul
@@ -429,6 +430,7 @@
          ((eq? p 'Cyc-stdout)            "Cyc_stdout")
          ((eq? p 'Cyc-stdin)             "Cyc_stdin")
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
+         ((eq? p 'Cyc-list)              "Cyc_list")
          ((eq? p 'Cyc-fast-plus)         "Cyc_fast_sum")
          ((eq? p 'Cyc-fast-sub)          "Cyc_fast_sub")
          ((eq? p 'Cyc-fast-mul)          "Cyc_fast_mul")
@@ -567,6 +569,7 @@
     ;; Does the primitive require passing thread data as its first argument?
     (define (prim/data-arg? p)
       (member p '(
+        Cyc-list
         Cyc-fast-plus
         Cyc-fast-sub
         Cyc-fast-mul
@@ -753,6 +756,7 @@
            (member exp '(Cyc-read-line apply command-line-arguments number->string 
                          + - * /
                          = > < >= <=
+                         Cyc-list
                          read-char peek-char 
                          symbol->string list->string substring string-append string->number
                          make-bytevector
@@ -783,6 +787,7 @@
                            bytevector
                            bytevector-append
                            make-vector
+                           Cyc-list
                            = > < >= <=
                            + - * /))))
 
