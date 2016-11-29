@@ -43,6 +43,7 @@ SMODULES = \
   srfi/69 \
   srfi/106 \
   srfi/111 \
+  srfi/113 \
   srfi/117 \
   srfi/128 \
   srfi/132 \
@@ -154,11 +155,13 @@ bootstrap: icyc
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/106.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/113.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/117.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/128.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/128.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/list-queues/*.scm $(BOOTSTRAP_DIR)/srfi/list-queues
+	cp srfi/sets/*.scm $(BOOTSTRAP_DIR)/srfi/sets
 	cp srfi/sorting/*.scm $(BOOTSTRAP_DIR)/srfi/sorting
 	cp srfi/133.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
@@ -210,6 +213,7 @@ install:
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sets
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
@@ -223,6 +227,7 @@ install:
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.meta $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/list-queues/*.scm $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(INSTALL) -m0644 srfi/sets/*.scm $(DESTDIR)$(DATADIR)/srfi/sets
 	$(INSTALL) -m0644 srfi/sorting/*.scm $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
@@ -237,6 +242,8 @@ uninstall:
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/list-queues/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/sets/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sets
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/sorting/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/*.*
