@@ -3,7 +3,7 @@
   (scheme char)
   (scheme complex)
   (scheme cyclone test)
-  (sets)
+  (srfi 113)
   (srfi 128)
 )
 (include "comparators-shim.scm")

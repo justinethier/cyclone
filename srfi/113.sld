@@ -1,4 +1,4 @@
-(define-library (sets)
+(define-library (srfi 113)
   (import (scheme base))
   (import (scheme case-lambda))
   (import (scheme write))
@@ -41,5 +41,5 @@
           bag-increment! bag-decrement! bag->set set->bag set->bag!
           bag->alist alist->bag)
 
-  (include "sets-impl.scm")
+  (include "sets/sets-impl.scm")
 )
