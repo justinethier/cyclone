@@ -1,7 +1,8 @@
 # Next Release - Date TBD
-TODO: SRFI 113
 
 Features:
+
+TODO: SRFI 113 - added  under srfi/sets. need to fix up tests, rename/relocate to 113, and add to the makefile/build
 
 - Allow the reader to recognize `#true` and `#false`.
 
