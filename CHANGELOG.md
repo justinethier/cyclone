@@ -2,7 +2,7 @@
 
 Features:
 
-TODO: SRFI 113 - added  under srfi/sets. need to fix up tests, rename/relocate to 113, and add to the makefile/build
+TODO: SRFI 113 - added  under srfi/sets. need to fix up tests, rename/relocate to 113, and add to the makefile/build. also need a documentation page and refresh of API.md
 
 - Allow the reader to recognize `#true` and `#false`.
 
