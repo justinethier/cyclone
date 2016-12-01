@@ -167,6 +167,10 @@ p img {
   border: none;
 }
 
+a, code {
+  color: #007edf;
+}
+
 pre, code {
   width: 100%;
   color: #222;
