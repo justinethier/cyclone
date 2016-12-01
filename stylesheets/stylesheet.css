@@ -168,7 +168,7 @@ p img {
 }
 
 a, code {
-  color: #007edf important!;
+  color: #007edf !important;
 }
 
 pre, code {
