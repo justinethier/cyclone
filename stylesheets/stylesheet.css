@@ -167,8 +167,8 @@ p img {
   border: none;
 }
 
-a, code {
-  color: #007edf !important;
+a code {
+  color: #007edf;
 }
 
 pre, code {
