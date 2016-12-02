@@ -14,4 +14,5 @@ cyclone scripts/alphabetize.scm
 grep "^- \[" docs/api/* | ./scripts/convert-doc-index > $TMP
 grep -r "^- \[" docs/api/scheme/* | ./scripts/convert-doc-index >> $TMP
 grep -r "^- \[" docs/api/srfi/* | ./scripts/convert-doc-index >> $TMP
+grep -r "^\[" docs/api/srfi/* | ./scripts/convert-doc-index >> $TMP
 sort $TMP | ./scripts/alphabetize > $API
