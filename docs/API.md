@@ -40,6 +40,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 - [`srfi 69`](api/srfi/69.md) - [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
 - [`srfi 106`](api/srfi/106.md) - [Basic socket interface](http://srfi.schemers.org/srfi-106/srfi-106.html)
 - [`srfi 111`](api/srfi/111.md) - [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
+- [`srfi 113`](api/srfi/113.md) - [Sets and bags](http://srfi.schemers.org/srfi-113/srfi-113.html)
 - [`srfi 117`](api/srfi/117.md) - [Mutable queues](http://srfi.schemers.org/srfi-117/srfi-117.html)
 - [`srfi 128`](api/srfi/128.md) - [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
 - [`srfi 132`](api/srfi/132.md) - [Sort Libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
