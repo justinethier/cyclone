@@ -1031,15 +1031,18 @@
           (renamed 
             (cdr renamed))
           (else ast))))
-      ((define? ast)
+      ((and (define? ast)
+            (not (assoc 'define renamed)))
        ;; Only internal defines at this point, of form: (define ident value)
        `(set! ,@(map (lambda (a) (convert a renamed)) (cdr ast))))
-      ((set!? ast)
+      ((and (set!? ast)
+            (not (assoc 'set! renamed)))
          ;; Without define, we have no way of knowing if this was a
          ;; define or a set prior to this phase. But no big deal, since
          ;; the set will still work in either case, so no need to check
          `(set! ,@(map (lambda (a) (convert a renamed)) (cdr ast))))
-      ((if? ast)
+      ((and (if? ast)
+            (not (assoc 'if renamed)))
        ;; Add a failsafe here in case macro expansion added more
        ;; incomplete if expressions.
        ;; FUTURE: append the empty (unprinted) value instead of #f
@@ -1072,7 +1075,8 @@
            ;converted))) ;; No, see if we can fast-convert it
           (else
            (prim:inline-convert-prim-call converted))))) ;; No, see if we can fast-convert it
-      ((lambda? ast)
+      ((and (lambda? ast)
+            (not (assoc 'lambda renamed)))
        (let* ((args (lambda-formals->list ast))
               (ltype (lambda-formals-type ast))
               (a-lookup (map (lambda (a) (cons a (gensym a))) args))
