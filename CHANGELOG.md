@@ -2,8 +2,7 @@
 
 Features:
 
-TODO: SRFI 113 - added  under srfi/sets. need to fix up tests, . also need a documentation page and refresh of API.md
-
+- Added SRFI 113 - sets and bags.  
 - Allow the reader to recognize `#true` and `#false`.
 
 Bug Fixes
