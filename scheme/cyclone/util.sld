@@ -13,6 +13,7 @@
     ;; Code analysis
     tagged-list?
     if?
+    if-syntax?
     begin?
     lambda?
     pair->list 
@@ -89,6 +90,14 @@
 ; if? : exp -> boolean
 (define (if? exp)
   (tagged-list? 'if exp))
+
+(define (if-syntax? exp)
+  (and 
+    (if? exp)
+    (or 
+      (= (length exp) 3)
+      (= (length exp) 4))))
+       
 
 ; begin? : exp -> boolean
 (define (begin? exp) 
