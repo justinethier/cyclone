@@ -125,7 +125,7 @@
               (if (and val (not (member expr bv)))
                   (clean val bv)
                   expr)))
-           ((if? expr)
+           ((if-syntax? expr)
             `(if ,(clean (if->condition expr) bv)
                  ,(clean (if->then expr) bv)
                  ,(if (if-else? expr)
