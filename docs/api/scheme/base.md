@@ -163,6 +163,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # and
 
+*Syntax*
+
     (and {test1} ...)
 
 # any
@@ -231,7 +233,42 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # case
 
+*Syntax*
+
     (case {key} {clause1} {clause2} ...)
+
+Syntax: `{Key}` can be any expression. Each `{clause}` has the form
+
+    (({datum1} ...) {expression1} {expression2} ...),
+
+where each `{datum}` is an external representation of some object. It is an error if any of the `{datum}`'s are the same anywhere in the expression. Alternatively, a `{clause}` can be of the form
+
+    ((hdatum1} ...) => {expression})
+
+The last `{clause}` can be an "else clause," which has one of the forms
+
+    (else {expression1} {expression2} . . . )
+
+or
+
+    (else => {expression}).
+
+Semantics: A `case` expression is evaluated as follows.  `{Key}` is evaluated and its result is compared against each `{datum}`. If the result of evaluating `{key}` is the same to a `{datum}`, then the expressions in the corresponding `{clause}` are evaluated in order and the results of the last expression in the `{clause}` are returned as the results of the case expression.
+
+If the result of evaluating `{key}` is different from every `{datum}`, then if there is an else clause, its expressions are evaluated and the results of the last are the results of the case expression; otherwise the result of the case expression is unspecified.
+
+If the selected `{clause}` or else clause uses the `=>` alternate form, then the `{expression}` is evaluated. It is an error if its value is not a procedure accepting one argument. This procedure is then called on the value of the `{key}` and the values returned by this procedure are returned by the case expression.
+
+    (case (* 2 3)
+      ((2 3 5 7) ’prime)
+      ((1 4 6 8 9) ’composite)) => composite
+    (case (car ’(c d))
+      ((a) ’a)
+      ((b) ’b)) => unspecified
+    (case (car ’(c d))
+      ((a e i o u) ’vowel)
+      ((w y) ’semivowel)
+      (else => (lambda (x) x))) => c
 
 # ceiling
 
@@ -263,9 +300,58 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # cond
 
+*Syntax*
+
     (cond {clause1} {clause2} ...)
+    else
+    =>
+
+Syntax: hClausesi take one of two forms, either
+
+    ({test} {expression1} ...)
+
+where htesti is any expression, or
+
+    ({test} => {expression})
+
+The last hclausei can be an “else clause,” which has the
+form
+
+    (else {expression1} {expression2} ...)
+
+Semantics: A `cond` expression is evaluated by evaluating
+the `{test}` expressions of successive `{clause}`'s in order until
+one of them evaluates to a true value.
+When a `{test}` evaluates to a true value, the remaining
+ `{expression}`'s in its `{clause}` are evaluated in order, and the
+results of the last `{expression}` in the `{clause}` are returned
+as the results of the entire cond expression.
+
+If the selected `{clause}` contains only the `{test}` and no
+ `{expression}`'s, then the value of the `{test}` is returned as
+the result. If the selected `{clause}` uses the `=>` alternate
+form, then the `{expression}` is evaluated. It is an error if
+its value is not a procedure that accepts one argument.
+This procedure is then called on the value of the `{test}` and
+the values returned by this procedure are returned by the
+cond expression.
+
+If all `{test}`'s evaluate to `#f`, and there is no else clause,
+then the result of the conditional expression is unspecified;
+if there is an else clause, then its `{expression}`'s are evaluated
+  in order, and the values of the last one are returned.
+
+    (cond ((> 3 2) ’greater)
+          ((< 3 2) ’less)) => greater
+    (cond ((> 3 3) ’greater)
+          ((< 3 3) ’less)
+          (else ’equal)) => equal
+    (cond ((assv ’b ’((a 1) (b 2))) => cadr)
+          (else #f)) => 2
 
 # cond-expand
+
+*Syntax*
 
     (cond-expand {ce-clause2} {ce-clause2} ...)
 
@@ -283,6 +369,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # define-record-type
 
+*Syntax*
+
     (define-record-type {name}
 
       {constructor} {pred} {field} ...)
@@ -292,6 +380,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (denominator n)
 
 # do
+
+*Syntax*
 
     (do (({variable1} {init1} {step1})
 
@@ -388,6 +478,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (get-output-string port)
 
 # guard
+
+*Syntax*
 
     (guard ({variable}
 
@@ -665,6 +757,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
 # or
 
+*Syntax*
+
     (or {test1} ...)
 
 # output-port-open?
@@ -677,6 +771,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
 # parameterize
 
+*Syntax*
+
     (parameterize (({param1} {value1}) ...)
 
       {body})
@@ -686,6 +782,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
     (positive? n)
 
 # quasiquote
+
+*Syntax*
 
     (quasiquote {qq template})
 
@@ -718,6 +816,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
     (read-string k port)
 
 # receive
+
+*Syntax*
 
     (receive {formals} {expression} {body})
 
@@ -857,6 +957,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
 # unless
 
+*Syntax*
+
     (unless {test} {expression1} {expression2} ...)
 
 # utf8->string
@@ -928,6 +1030,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
     (vector-map proc vector1 vector2 ...)
 
 # when
+
+*Syntax*
 
     (when {test} {expression1} {expression2} ...)
 
