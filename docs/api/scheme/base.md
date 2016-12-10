@@ -167,6 +167,13 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (and {test1} ...)
 
+Semantics: The `{test}` expressions are evaluated from left to right, and if any expression evaluates to `#f`, then `#f` is returned. Any remaining expressions are not evaluated. If all the expressions evaluate to true values, the values of the last expression are returned. If there are no expressions, then `#t` is returned.
+
+    (and (= 2 2) (> 2 1)) => #t
+    (and (= 2 2) (< 2 1)) => #f
+    (and 1 2 ’c ’(f g)) => (f g)
+    (and) => #t
+
 # any
 
     (any pred lst)
@@ -194,6 +201,23 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 *Syntax*
 
     (begin {expression or definition} ...)
+
+This form of `begin` can appear as part of a `{body}`, or at the outermost level of a `{program}`, or at the REPL, or directly nested in a begin that is itself of this form.  It causes the contained expressions and definitions to be evaluated exactly as if the enclosing begin construct were not present.
+
+Rationale: This form is commonly used in the output of macros which need to generate multiple definitions and splice them into the context in which they are expanded.
+
+    (begin {expression1} {expression2} ...)
+
+This form of `begin` can be used as an ordinary expression.  The `{expression}`'s are evaluated sequentially from left to right, and the values of the last `{expression}` are returned.  This expression type is used to sequence side effects such as assignments or input and output.
+
+    (define x 0)
+
+    (and (= x 0)
+         (begin (set! x 5)
+                (+ x 1))) => 6
+
+    (begin (display "4 plus 1 equals ")
+           (display (+ 4 1))) => unspecified and prints 4 plus 1 equals 5
 
 # boolean=?
 
@@ -354,6 +378,26 @@ if there is an else clause, then its `{expression}`'s are evaluated
 *Syntax*
 
     (cond-expand {ce-clause2} {ce-clause2} ...)
+
+Syntax: The `cond-expand` expression type provides a way to statically expand different expressions depending on the implementation. A `{ce-clause}` takes the following form:
+
+    ({feature requirement} {expression} ...)
+
+The last clause can be an "else clause," which has the form
+
+    (else {expression} ...)
+
+A `{feature requirement}` takes one of the following forms:
+
+- `{feature identifier}`
+- `(library {library name})`
+- `(and {feature requirement} ...)`
+- `(or {feature requirement} ...)`
+- `(not {feature requirement})`
+
+Semantics: Each Scheme implementation maintains a list of feature identifiers which are present, as well as a list of libraries which can be imported. The value of a `{feature requirement}` is determined by replacing each `{feature identifier}` and `(library {library name})` on the implementation’s lists with `#t`, and all other feature identifiers and library names with `#f`, then evaluating the resulting expression as a Scheme boolean expression under the normal interpretation of `and`, `or`, and `not`.
+
+A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of successive `{ce-clause}`'s in order until one of them returns `#t`. When a true clause is found, the corresponding `{expression}`'s are expanded to a begin, and the remaining clauses are ignored. If none of the `{feature requirement}`'s evaluate to `#t`, then if there is an else clause, its `{expression}`'s are included. Otherwise, the behavior of the cond-expand is unspecified. Unlike cond, `cond-expand` does not depend on the value of any variables.
 
 # current-error-port
 
@@ -761,6 +805,14 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (or {test1} ...)
 
+Semantics: The `{test}` expressions are evaluated from left to right, and the value of the first expression that evaluates to a true value is returned. Any remaining expressions are not evaluated. If all expressions evaluate to `#f` or if there are no expressions, then `#f` is returned.
+
+    (or (= 2 2) (> 2 1)) => #t
+    (or (= 2 2) (< 2 1)) => #t
+    (or #f #f #f) => #f
+    (or (memq ’b ’(a b c))
+        (/ 3 0)) => (b c)
+
 # output-port-open?
 
     (output-port-open? port)
@@ -961,6 +1013,14 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (unless {test} {expression1} {expression2} ...)
 
+Syntax: The `{test}` is an expression.
+
+Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions are evaluated in order. The result of the when expression is unspecified.
+
+    (unless (= 1 1.0)
+      (display "1")
+      (display "2")) => unspecified and prints nothing
+
 # utf8->string
 
     (utf8->string bytevector)
@@ -1034,6 +1094,14 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 *Syntax*
 
     (when {test} {expression1} {expression2} ...)
+
+Syntax: The `{test}` is an expression.
+
+Semantics: The `test` is evaluated, and if it evaluates to a true value, the expressions are evaluated in order. The result of the when expression is unspecified.
+
+    (when (= 1 1.0)
+      (display "1")
+      (display "2")) => unspecified and prints 12
 
 # with-exception-handler
 
