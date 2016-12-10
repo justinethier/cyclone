@@ -330,15 +330,15 @@ If the selected `{clause}` or else clause uses the `=>` alternate form, then the
     else
     =>
 
-Syntax: hClausesi take one of two forms, either
+Syntax: `{Clauses}` take one of two forms, either
 
     ({test} {expression1} ...)
 
-where htesti is any expression, or
+where `{test}` is any expression, or
 
     ({test} => {expression})
 
-The last hclausei can be an “else clause,” which has the
+The last `{clause}` can be an "else clause," which has the
 form
 
     (else {expression1} {expression2} ...)
