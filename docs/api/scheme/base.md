@@ -189,6 +189,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # begin
 
+*Syntax*
+
     (begin {expression or definition} ...)
 
 # boolean=?
@@ -415,27 +417,125 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # let
 
+*Syntax*
+
     (let {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{init}`'s are evaluated in the current environment (in some unspecified order), the `{variable}`'s are bound to fresh locations holding the results, the `{body}` is evaluated in the extended environment, and the values of the last expression of `{body}` are returned. Each binding of a `{variable}` has `{body}` as its region.
+
+    (let ((x 2) (y 3))
+      (* x y)) => 6
+    
+    (let ((x 2) (y 3))
+      (let ((x 7)
+        (z (+ x y)))
+      (* z x))) => 35
 
 # let*
 
+*Syntax*
+
     (let* {bindings} {body})
 
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `let*` binding construct is similar to `let`, but the bindings are performed sequentially from left to right, and the region of a binding indicated by `({variable} {init})` is that part of the `let*` expression to the right of the binding. Thus the second binding is done in an environment in which the first binding is visible, and so on.
+
+The `{variable}`'s need not be distinct.
+
+    (let ((x 2) (y 3))
+        (let* ((x 7)
+               (z (+ x y)))
+          (* z x))) => 70
+
+
 # let*-values
+
+*Syntax*
 
     (let*-values {mv binding spec} {body})
 
 # let-values
 
+*Syntax*
+
     (let-values {mv binding spec} {body})
 
 # letrec
 
+*Syntax*
+
     (letrec {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{variable}`'s are bound to fresh locations holding unspecified values, the `{init}`'s are evaluated in the resulting environment (in some unspecified order), each `{variable}` is assigned to the result of the corresponding `{init}`, the `{body}` is evaluated in the resulting environment, and the values of the last expression in `{body}` are returned.
+
+Each binding of a `{variable}` has the entire letrec expression
+as its region, making it possible to define mutually
+recursive procedures.
+
+    (letrec ((even?
+              (lambda (n)
+                (if (zero? n)
+                    #t
+                    (odd? (- n 1)))))
+             (odd?
+              (lambda (n)
+                (if (zero? n)
+                    #f
+                    (even? (- n 1))))))
+      (even? 88))
+          => #t
+
+One restriction on `letrec` is very important: if it is not possible to evaluate each `{init}` without assigning or referring to the value of any `{variable}`, it is an error. The restriction is necessary because letrec is defined in terms of a procedure call where a lambda expression binds the `{variable}`'s to the values of the `{init}`'s. In the most common uses of letrec, all the `{init}`'s are lambda expressions and the restriction is satisfied automatically.
 
 # letrec*
 
+*Syntax*
+
     (letrec* {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{variable}`'s are bound to fresh locations, each `{variable}` is assigned in left-to-right order to the result of evaluating the corresponding `{init}`, the `{body}` is evaluated in the resulting environment, and the values of the last expression in `{body}` are returned. Despite the left-to-right evaluation and assignment order, each binding of a `{variable}` has the entire `letrec*` expression as its region, making it possible to define mutually recursive procedures.
+
+If it is not possible to evaluate each `{init}` without assigning or referring to the value of the corresponding `{variable}` or the `{variable}` of any of the bindings that follow it in `{bindings}`, it is an error. Another restriction is that it is an error to invoke the continuation of an `{init}` more than once.
+
+    (letrec* ((p
+                (lambda (x)
+                  (+ 1 (q (- x 1)))))
+              (q
+                (lambda (y)
+                  (if (zero? y)
+                      0
+                      (+ 1 (p (- y 1))))))
+              (x (p 5))
+              (y x))
+      y)
+        => 5
 
 # list
 
@@ -730,6 +830,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (symbol=? symbol1 symbol2 symbol3 ...)
 
 # syntax-error
+
+*Syntax*
 
     (syntax-error {message} {args} ...)
 
