@@ -1,3 +1,4 @@
+(import (scheme base) (scheme write) (scheme eval))
 ;; This is a temporary test file, move everything to a test suite and/or docs once it works!
 
 ;
@@ -85,7 +86,7 @@
 ;((lambda (tmp)
 ;  (write (eval 'tmp))) #f)
 (write (list 'after-eval 'x x 'y y '*z* *z*))
-x ;; oh shit, need to reference x/y otherwise they get optimized out!
+;x ;; oh shit, need to reference x/y otherwise they get optimized out!
 
 ;; case #2 - pass a local (IE, lambda var)
 ;; No, this is not allowed, see: http://stackoverflow.com/questions/3844196/how-can-i-use-external-variables-in-eval-in-scheme/3851284#3851284
