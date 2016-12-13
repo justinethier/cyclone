@@ -27,7 +27,8 @@
     prim:cont?
     prim:cont/no-args?
     prim:arg-count?
-    prim:allocates-object?)
+    prim:allocates-object?
+    prim:immutable-args/result?)
   (begin
     ; prim? : exp -> boolean
     (define (prim? exp)
@@ -797,6 +798,23 @@
     (define (prim:allocates-object? exp)
         (and  (prim? exp)
               (member exp '())))
+    
+    ;; Does the primitive only accept/return immutable objects?
+    ;; This is useful during optimization, because such primitives
+    ;; can always be inlined without concerns for side effects
+    (define (prim:immutable-args/result? sym)
+      (member sym 
+             '(= > < >= <=
+               + - * /
+               Cyc-fast-plus
+               Cyc-fast-sub
+               Cyc-fast-mul
+               Cyc-fast-div
+               Cyc-fast-eq
+               Cyc-fast-gt
+               Cyc-fast-lt
+               Cyc-fast-gte
+               Cyc-fast-lte)))
 
     (define (prim:inline-convert-prim-call prim-call)
       (cond
