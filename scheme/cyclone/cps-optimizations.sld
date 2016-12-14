@@ -602,10 +602,12 @@
                   (one-instance-of-new-mutable-obj?
                     (cdr exp)
                     (ast:lambda-formals->list (car exp)))
-                  (inline-prim-call? 
-                    (ast:lambda-body (car exp))
-                    (prim-calls->arg-variables (cdr exp))
-                    (ast:lambda-formals->list (car exp)))))
+                  (or
+                    (prim-calls-inlinable? (cdr exp))
+                    (inline-prim-call? 
+                      (ast:lambda-body (car exp))
+                      (prim-calls->arg-variables (cdr exp))
+                      (ast:lambda-formals->list (car exp))))))
              )
              (let ((args (cdr exp)))
                (for-each
@@ -655,6 +657,12 @@
           string-append string substring Cyc-installation-dir read-line
           Cyc-compilation-environment
           )))
+
+    (define (prim-calls-inlinable? prim-calls)
+      (every
+        (lambda (prim-call)
+          (prim:immutable-args/result? (car prim-call)))
+        prim-calls))
 
     ;; Check each pair of primitive call / corresponding lambda arg,
     ;; and verify that if the primitive call creates a new mutable
