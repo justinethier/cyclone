@@ -650,7 +650,7 @@
       (member 
         prim
         '(
-        ;apply ;; ??
+          apply ;; ??
           cons 
           make-vector 
           make-bytevector
@@ -668,10 +668,10 @@
           substring 
           Cyc-installation-dir 
           Cyc-compilation-environment
-       ;  Cyc-bytevector-copy
-       ;  Cyc-utf8->string
-       ;  Cyc-string->utf8
-       ;  list->vector
+          Cyc-bytevector-copy
+          Cyc-utf8->string
+          Cyc-string->utf8
+          list->vector
           )))
 
     (define (prim-calls-inlinable? prim-calls)
