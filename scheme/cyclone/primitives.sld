@@ -814,7 +814,58 @@
                Cyc-fast-gt
                Cyc-fast-lt
                Cyc-fast-gte
-               Cyc-fast-lte)))
+               Cyc-fast-lte
+;         Cyc-global-vars
+;         Cyc-get-cvar
+;         Cyc-cvar? ;; Cyclone-specific
+;         Cyc-opaque?
+;         Cyc-has-cycle?
+;         Cyc-stdout
+;         Cyc-stdin
+;         Cyc-stderr
+;         Cyc-list
+;         %halt
+;         exit
+;         cons
+;         cell-get
+;         cell
+;         Cyc-fast-member
+;         Cyc-fast-assoc
+;         assv
+;         assq
+;         memq
+;         memv
+;         length
+;         car
+;         cdr
+;         caar cadr cdar cddr
+;         caaar caadr cadar caddr cdaar cdadr cddar cdddr
+;         caaaar caaadr caadar caaddr cadaar cadadr
+;         caddar cadddr cdaaar cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr
+;         char->integer
+;         integer->char
+;         string->number
+;         string-append
+;         string-cmp
+;         list->string
+;         string->symbol
+;         symbol->string
+;         number->string
+;         boolean?
+;         char?
+;         eof-object?
+;         null?
+;         number?
+;         real?
+;         integer?
+;         pair?
+;         port?
+;         procedure?
+;         Cyc-macro?
+;         vector?
+;         string?
+;         symbol?
+    )))
 
     (define (prim:inline-convert-prim-call prim-call)
       (cond

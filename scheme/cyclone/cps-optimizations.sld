@@ -649,13 +649,29 @@
     (define (prim-creates-mutable-obj? prim)
       (member 
         prim
-        '(cons 
+        '(
+        ;apply ;; ??
+          cons 
           make-vector 
           make-bytevector
-          bytevector bytevector-append bytevector-copy
-          string->utf8 number->string symbol->string list->string utf8->string
-          string-append string substring Cyc-installation-dir read-line
+          bytevector 
+          bytevector-append 
+          bytevector-copy
+          string->utf8 
+          number->string 
+          symbol->string 
+          list->string 
+          utf8->string
+          read-line
+          string-append 
+          string 
+          substring 
+          Cyc-installation-dir 
           Cyc-compilation-environment
+       ;  Cyc-bytevector-copy
+       ;  Cyc-utf8->string
+       ;  Cyc-string->utf8
+       ;  list->vector
           )))
 
     (define (prim-calls-inlinable? prim-calls)
