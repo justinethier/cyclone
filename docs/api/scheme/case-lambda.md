@@ -23,7 +23,7 @@ It is an error for the arguments not to agree with the `{formals}` of any `{clau
     (define range
        (case-lambda
         ((e) (range 0 e))
-        ((b e) (do ((r ’() (cons e r))
+        ((b e) (do ((r '() (cons e r))
                     (e (- e 1) (- e 1)))
                    ((< e b) r)))))
 
