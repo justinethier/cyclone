@@ -171,7 +171,7 @@ Semantics: The `{test}` expressions are evaluated from left to right, and if any
 
     (and (= 2 2) (> 2 1)) => #t
     (and (= 2 2) (< 2 1)) => #f
-    (and 1 2 ’c ’(f g)) => (f g)
+    (and 1 2 '(f g)) => (f g)
     (and) => #t
 
 # any
@@ -284,14 +284,14 @@ If the result of evaluating `{key}` is different from every `{datum}`, then if t
 If the selected `{clause}` or else clause uses the `=>` alternate form, then the `{expression}` is evaluated. It is an error if its value is not a procedure accepting one argument. This procedure is then called on the value of the `{key}` and the values returned by this procedure are returned by the case expression.
 
     (case (* 2 3)
-      ((2 3 5 7) ’prime)
-      ((1 4 6 8 9) ’composite)) => composite
-    (case (car ’(c d))
-      ((a) ’a)
-      ((b) ’b)) => unspecified
-    (case (car ’(c d))
-      ((a e i o u) ’vowel)
-      ((w y) ’semivowel)
+      ((2 3 5 7) 'prime)
+      ((1 4 6 8 9) 'composite)) => composite
+    (case (car '(c d))
+      ((a) 'a)
+      ((b) 'b)) => unspecified
+    (case (car '(c d))
+      ((a e i o u) 'vowel)
+      ((w y) 'semivowel)
       (else => (lambda (x) x))) => c
 
 # ceiling
@@ -365,12 +365,12 @@ then the result of the conditional expression is unspecified;
 if there is an else clause, then its `{expression}`'s are evaluated
   in order, and the values of the last one are returned.
 
-    (cond ((> 3 2) ’greater)
-          ((< 3 2) ’less)) => greater
-    (cond ((> 3 3) ’greater)
-          ((< 3 3) ’less)
-          (else ’equal)) => equal
-    (cond ((assv ’b ’((a 1) (b 2))) => cadr)
+    (cond ((> 3 2) 'greater)
+          ((< 3 2) 'less)) => greater
+    (cond ((> 3 3) 'greater)
+          ((< 3 3) 'less)
+          (else 'equal)) => equal
+    (cond ((assv 'b '((a 1) (b 2))) => cadr)
           (else #f)) => 2
 
 # cond-expand
@@ -810,7 +810,7 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
     (or (= 2 2) (> 2 1)) => #t
     (or (= 2 2) (< 2 1)) => #t
     (or #f #f #f) => #f
-    (or (memq ’b ’(a b c))
+    (or (memq 'b '(a b c))
         (/ 3 0)) => (b c)
 
 # output-port-open?
