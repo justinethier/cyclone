@@ -168,7 +168,16 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # and
 
+*Syntax*
+
     (and {test1} ...)
+
+Semantics: The `{test}` expressions are evaluated from left to right, and if any expression evaluates to `#f`, then `#f` is returned. Any remaining expressions are not evaluated. If all the expressions evaluate to true values, the values of the last expression are returned. If there are no expressions, then `#t` is returned.
+
+    (and (= 2 2) (> 2 1)) => #t
+    (and (= 2 2) (< 2 1)) => #f
+    (and 1 2 '(f g)) => (f g)
+    (and) => #t
 
 # any
 
@@ -194,7 +203,26 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # begin
 
+*Syntax*
+
     (begin {expression or definition} ...)
+
+This form of `begin` can appear as part of a `{body}`, or at the outermost level of a `{program}`, or at the REPL, or directly nested in a begin that is itself of this form.  It causes the contained expressions and definitions to be evaluated exactly as if the enclosing begin construct were not present.
+
+Rationale: This form is commonly used in the output of macros which need to generate multiple definitions and splice them into the context in which they are expanded.
+
+    (begin {expression1} {expression2} ...)
+
+This form of `begin` can be used as an ordinary expression.  The `{expression}`'s are evaluated sequentially from left to right, and the values of the last `{expression}` are returned.  This expression type is used to sequence side effects such as assignments or input and output.
+
+    (define x 0)
+
+    (and (= x 0)
+         (begin (set! x 5)
+                (+ x 1))) => 6
+
+    (begin (display "4 plus 1 equals ")
+           (display (+ 4 1))) => unspecified and prints 4 plus 1 equals 5
 
 # boolean=?
 
@@ -234,7 +262,42 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # case
 
+*Syntax*
+
     (case {key} {clause1} {clause2} ...)
+
+Syntax: `{Key}` can be any expression. Each `{clause}` has the form
+
+    (({datum1} ...) {expression1} {expression2} ...),
+
+where each `{datum}` is an external representation of some object. It is an error if any of the `{datum}`'s are the same anywhere in the expression. Alternatively, a `{clause}` can be of the form
+
+    ((hdatum1} ...) => {expression})
+
+The last `{clause}` can be an "else clause," which has one of the forms
+
+    (else {expression1} {expression2} . . . )
+
+or
+
+    (else => {expression}).
+
+Semantics: A `case` expression is evaluated as follows.  `{Key}` is evaluated and its result is compared against each `{datum}`. If the result of evaluating `{key}` is the same to a `{datum}`, then the expressions in the corresponding `{clause}` are evaluated in order and the results of the last expression in the `{clause}` are returned as the results of the case expression.
+
+If the result of evaluating `{key}` is different from every `{datum}`, then if there is an else clause, its expressions are evaluated and the results of the last are the results of the case expression; otherwise the result of the case expression is unspecified.
+
+If the selected `{clause}` or else clause uses the `=>` alternate form, then the `{expression}` is evaluated. It is an error if its value is not a procedure accepting one argument. This procedure is then called on the value of the `{key}` and the values returned by this procedure are returned by the case expression.
+
+    (case (* 2 3)
+      ((2 3 5 7) 'prime)
+      ((1 4 6 8 9) 'composite)) => composite
+    (case (car '(c d))
+      ((a) 'a)
+      ((b) 'b)) => unspecified
+    (case (car '(c d))
+      ((a e i o u) 'vowel)
+      ((w y) 'semivowel)
+      (else => (lambda (x) x))) => c
 
 # ceiling
 
@@ -266,11 +329,80 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # cond
 
+*Syntax*
+
     (cond {clause1} {clause2} ...)
+    else
+    =>
+
+Syntax: `{Clauses}` take one of two forms, either
+
+    ({test} {expression1} ...)
+
+where `{test}` is any expression, or
+
+    ({test} => {expression})
+
+The last `{clause}` can be an "else clause," which has the
+form
+
+    (else {expression1} {expression2} ...)
+
+Semantics: A `cond` expression is evaluated by evaluating
+the `{test}` expressions of successive `{clause}`'s in order until
+one of them evaluates to a true value.
+When a `{test}` evaluates to a true value, the remaining
+ `{expression}`'s in its `{clause}` are evaluated in order, and the
+results of the last `{expression}` in the `{clause}` are returned
+as the results of the entire cond expression.
+
+If the selected `{clause}` contains only the `{test}` and no
+ `{expression}`'s, then the value of the `{test}` is returned as
+the result. If the selected `{clause}` uses the `=>` alternate
+form, then the `{expression}` is evaluated. It is an error if
+its value is not a procedure that accepts one argument.
+This procedure is then called on the value of the `{test}` and
+the values returned by this procedure are returned by the
+cond expression.
+
+If all `{test}`'s evaluate to `#f`, and there is no else clause,
+then the result of the conditional expression is unspecified;
+if there is an else clause, then its `{expression}`'s are evaluated
+  in order, and the values of the last one are returned.
+
+    (cond ((> 3 2) 'greater)
+          ((< 3 2) 'less)) => greater
+    (cond ((> 3 3) 'greater)
+          ((< 3 3) 'less)
+          (else 'equal)) => equal
+    (cond ((assv 'b '((a 1) (b 2))) => cadr)
+          (else #f)) => 2
 
 # cond-expand
 
+*Syntax*
+
     (cond-expand {ce-clause2} {ce-clause2} ...)
+
+Syntax: The `cond-expand` expression type provides a way to statically expand different expressions depending on the implementation. A `{ce-clause}` takes the following form:
+
+    ({feature requirement} {expression} ...)
+
+The last clause can be an "else clause," which has the form
+
+    (else {expression} ...)
+
+A `{feature requirement}` takes one of the following forms:
+
+- `{feature identifier}`
+- `(library {library name})`
+- `(and {feature requirement} ...)`
+- `(or {feature requirement} ...)`
+- `(not {feature requirement})`
+
+Semantics: Each Scheme implementation maintains a list of feature identifiers which are present, as well as a list of libraries which can be imported. The value of a `{feature requirement}` is determined by replacing each `{feature identifier}` and `(library {library name})` on the implementation’s lists with `#t`, and all other feature identifiers and library names with `#f`, then evaluating the resulting expression as a Scheme boolean expression under the normal interpretation of `and`, `or`, and `not`.
+
+A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of successive `{ce-clause}`'s in order until one of them returns `#t`. When a true clause is found, the corresponding `{expression}`'s are expanded to a begin, and the remaining clauses are ignored. If none of the `{feature requirement}`'s evaluate to `#t`, then if there is an else clause, its `{expression}`'s are included. Otherwise, the behavior of the cond-expand is unspecified. Unlike cond, `cond-expand` does not depend on the value of any variables.
 
 # current-error-port
 
@@ -286,6 +418,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # define-record-type
 
+*Syntax*
+
     (define-record-type {name}
 
       {constructor} {pred} {field} ...)
@@ -295,6 +429,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (denominator n)
 
 # do
+
+*Syntax*
 
     (do (({variable1} {init1} {step1})
 
@@ -392,6 +528,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # guard
 
+*Syntax*
+
     (guard ({variable}
 
             {cond clause1} {cond clause2} ...)
@@ -420,27 +558,125 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # let
 
+*Syntax*
+
     (let {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{init}`'s are evaluated in the current environment (in some unspecified order), the `{variable}`'s are bound to fresh locations holding the results, the `{body}` is evaluated in the extended environment, and the values of the last expression of `{body}` are returned. Each binding of a `{variable}` has `{body}` as its region.
+
+    (let ((x 2) (y 3))
+      (* x y)) => 6
+    
+    (let ((x 2) (y 3))
+      (let ((x 7)
+        (z (+ x y)))
+      (* z x))) => 35
 
 # let*
 
+*Syntax*
+
     (let* {bindings} {body})
 
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `let*` binding construct is similar to `let`, but the bindings are performed sequentially from left to right, and the region of a binding indicated by `({variable} {init})` is that part of the `let*` expression to the right of the binding. Thus the second binding is done in an environment in which the first binding is visible, and so on.
+
+The `{variable}`'s need not be distinct.
+
+    (let ((x 2) (y 3))
+        (let* ((x 7)
+               (z (+ x y)))
+          (* z x))) => 70
+
+
 # let*-values
+
+*Syntax*
 
     (let*-values {mv binding spec} {body})
 
 # let-values
 
+*Syntax*
+
     (let-values {mv binding spec} {body})
 
 # letrec
 
+*Syntax*
+
     (letrec {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{variable}`'s are bound to fresh locations holding unspecified values, the `{init}`'s are evaluated in the resulting environment (in some unspecified order), each `{variable}` is assigned to the result of the corresponding `{init}`, the `{body}` is evaluated in the resulting environment, and the values of the last expression in `{body}` are returned.
+
+Each binding of a `{variable}` has the entire letrec expression
+as its region, making it possible to define mutually
+recursive procedures.
+
+    (letrec ((even?
+              (lambda (n)
+                (if (zero? n)
+                    #t
+                    (odd? (- n 1)))))
+             (odd?
+              (lambda (n)
+                (if (zero? n)
+                    #f
+                    (even? (- n 1))))))
+      (even? 88))
+          => #t
+
+One restriction on `letrec` is very important: if it is not possible to evaluate each `{init}` without assigning or referring to the value of any `{variable}`, it is an error. The restriction is necessary because letrec is defined in terms of a procedure call where a lambda expression binds the `{variable}`'s to the values of the `{init}`'s. In the most common uses of letrec, all the `{init}`'s are lambda expressions and the restriction is satisfied automatically.
 
 # letrec*
 
+*Syntax*
+
     (letrec* {bindings} {body})
+
+`{bindings}` has the form:
+
+    (({variable1} {init1}) ...)
+
+where each `{init}` is an expression, and `{body}` is a sequence
+of zero or more definitions followed by a sequence of one or more expressions. It is an error for a `{variable}` to appear more than once in the list of variables being bound.
+
+Semantics: The `{variable}`'s are bound to fresh locations, each `{variable}` is assigned in left-to-right order to the result of evaluating the corresponding `{init}`, the `{body}` is evaluated in the resulting environment, and the values of the last expression in `{body}` are returned. Despite the left-to-right evaluation and assignment order, each binding of a `{variable}` has the entire `letrec*` expression as its region, making it possible to define mutually recursive procedures.
+
+If it is not possible to evaluate each `{init}` without assigning or referring to the value of the corresponding `{variable}` or the `{variable}` of any of the bindings that follow it in `{bindings}`, it is an error. Another restriction is that it is an error to invoke the continuation of an `{init}` more than once.
+
+    (letrec* ((p
+                (lambda (x)
+                  (+ 1 (q (- x 1)))))
+              (q
+                (lambda (y)
+                  (if (zero? y)
+                      0
+                      (+ 1 (p (- y 1))))))
+              (x (p 5))
+              (y x))
+      y)
+        => 5
 
 # list
 
@@ -570,7 +806,17 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # or
 
+*Syntax*
+
     (or {test1} ...)
+
+Semantics: The `{test}` expressions are evaluated from left to right, and the value of the first expression that evaluates to a true value is returned. Any remaining expressions are not evaluated. If all expressions evaluate to `#f` or if there are no expressions, then `#f` is returned.
+
+    (or (= 2 2) (> 2 1)) => #t
+    (or (= 2 2) (< 2 1)) => #t
+    (or #f #f #f) => #f
+    (or (memq 'b '(a b c))
+        (/ 3 0)) => (b c)
 
 # output-port-open?
 
@@ -582,6 +828,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # parameterize
 
+*Syntax*
+
     (parameterize (({param1} {value1}) ...)
 
       {body})
@@ -591,6 +839,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (positive? n)
 
 # quasiquote
+
+*Syntax*
 
     (quasiquote {qq template})
 
@@ -623,6 +873,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
     (read-string k port)
 
 # receive
+
+*Syntax*
 
     (receive {formals} {expression} {body})
 
@@ -736,6 +988,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # syntax-error
 
+*Syntax*
+
     (syntax-error {message} {args} ...)
 
 # truncate
@@ -760,7 +1014,17 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # unless
 
+*Syntax*
+
     (unless {test} {expression1} {expression2} ...)
+
+Syntax: The `{test}` is an expression.
+
+Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions are evaluated in order. The result of the when expression is unspecified.
+
+    (unless (= 1 1.0)
+      (display "1")
+      (display "2")) => unspecified and prints nothing
 
 # utf8->string
 
@@ -832,7 +1096,17 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
 # when
 
+*Syntax*
+
     (when {test} {expression1} {expression2} ...)
+
+Syntax: The `{test}` is an expression.
+
+Semantics: The `test` is evaluated, and if it evaluates to a true value, the expressions are evaluated in order. The result of the when expression is unspecified.
+
+    (when (= 1 1.0)
+      (display "1")
+      (display "2")) => unspecified and prints 12
 
 # with-exception-handler
 
