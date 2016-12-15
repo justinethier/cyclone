@@ -3,6 +3,7 @@
 Features:
 
 - Added SRFI 113 - sets and bags.  
+- Improve performance by more aggressively inlining primitives that work with immutable objects, such as the numeric arithmetic and comparison functions.
 - Allow the reader to recognize `#true` and `#false`.
 
 Bug Fixes
