@@ -1,16 +1,16 @@
-# Next Release - Date TBD
+# Next Release - Tentatively 0.3.3 - Date TBD
 
 Features:
 
 - Added SRFI 113 - sets and bags.  
-- Improve performance by more aggressively inlining primitives that work with immutable objects, such as the numeric arithmetic and comparison functions.
+- Improved performance by more aggressively inlining primitives that work with immutable objects, such as the numeric arithmetic and comparison functions.
 - Allow the reader to recognize `#true` and `#false`.
 
 Bug Fixes
 
-- Prevent C compilation error when compiling string with special characters in them such as `#\tab`, `#\alarm`, and `#\return`.
+- Prevent C compilation errors when compiling strings with special characters in them such as `#\tab`, `#\alarm`, and `#\return`.
 - Do not generate invalid C code when compiling `+` or `*` without any arguments.
-- Handle compilation of variable-argument anonymous lambda's. For example: `((lambda x x) 3 5)`.
+- Handle compilation of variable-argument anonymous lambdas. For example: `((lambda x x) 3 5)`.
 
 # 0.3.2 - November 22, 2016
 
