@@ -758,7 +758,7 @@ object Cyc_display(object x, FILE * port)
     fprintf(port, "<primitive %s>", prim_name(x));
     break;
   case cvar_tag:
-    Cyc_display(Cyc_get_cvar(x), port);
+    fprintf(port, "<cvar %p>", Cyc_get_cvar(x));
     break;
   case c_opaque_tag:
     fprintf(port, "<C opaque %p>", opaque_ptr(x));
