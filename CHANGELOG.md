@@ -1,4 +1,4 @@
-# Next Release - Tentatively 0.3.3 - Date TBD
+# 0.3.3 - December 19, 2016
 
 Features:
 
