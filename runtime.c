@@ -4768,7 +4768,7 @@ to look at the lock-free structures provided by ck?
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread, NULL, Cyc_init_thread, thread_and_thunk)) {
+  if (pthread_create(&thread, &attr, Cyc_init_thread, thread_and_thunk)) {
     fprintf(stderr, "Error creating a new thread\n");
     exit(1);
   }
