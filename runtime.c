@@ -4772,6 +4772,7 @@ to look at the lock-free structures provided by ck?
     fprintf(stderr, "Error creating a new thread\n");
     exit(1);
   }
+  pthread_attr_destroy(&attr);
   return boolean_t;
 }
 
