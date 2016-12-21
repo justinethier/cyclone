@@ -1,5 +1,8 @@
 # Next Release - TBD
 
+Bug Fixes
+
+- Display characters such as `#\space` correctly when output via `write`.
 
 # 0.3.3 - December 19, 2016
 

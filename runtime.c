@@ -899,7 +899,22 @@ static object _Cyc_write(object x, FILE * port)
     return quote_void;
   }
   if (obj_is_char(x)) {
-    fprintf(port, "#\\%c", obj_obj2char(x));
+    char c = obj_obj2char(x);
+    switch (c) {
+    case 0:   fprintf(port, "#\\null"); break;
+    case 7:   fprintf(port, "#\\alarm"); break;
+    case 8:   fprintf(port, "#\\backspace"); break;
+    case 9:   fprintf(port, "#\\tab"); break;
+    case 10:  fprintf(port, "#\\newline"); break;
+    case 13:  fprintf(port, "#\\return"); break;
+    case 27:  fprintf(port, "#\\escape"); break;
+    case 32:  fprintf(port, "#\\space"); break;
+    case 127: fprintf(port, "#\\delete"); break;
+    default:
+      fprintf(port, "#\\%c", obj_obj2char(x));
+      break;
+    }
+    //fprintf(port, "#\\%c", obj_obj2char(x));
     return quote_void;
   }
   if (obj_is_int(x)) {
