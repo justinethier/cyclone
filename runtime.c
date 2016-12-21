@@ -2414,7 +2414,13 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   // x is int (assume value types for integers)
   if (obj_is_int(x)){
     if (obj_is_int(y)){
-      int z = obj_obj2int(x) + obj_obj2int(y);
+      int xx = obj_obj2int(x),
+          yy = obj_obj2int(y),
+          z = xx + yy;
+      //if((((z ^ xx) & (z ^ yy)) >> 30) != 0) { // overflow
+      //  assign_double(ptr, (double)xx + (double)yy);
+      //  return ptr;
+      //}
       return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
