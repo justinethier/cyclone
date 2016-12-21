@@ -8,7 +8,7 @@
 ;;;;
 (define-library (scheme cyclone macros)
   (import (scheme base)
-          (scheme write) ;; Debug only
+          ;(scheme write) ;; Debug only
           (scheme eval)
           (scheme cyclone util)
   )
