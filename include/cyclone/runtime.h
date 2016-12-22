@@ -143,11 +143,11 @@ object dispatch_string_91append(void *data, int argc, object clo, object cont,
                                 object str1, ...);
 list malloc_make_pair(object, object);
 cvar_type *mcvar(object * var);
-object Cyc_display(object, FILE * port);
+object Cyc_display(void *data, object, FILE * port);
 void dispatch_display_va(void *data, int argc, object clo, object cont,
                          object x, ...);
-object Cyc_display_va(int argc, object x, ...);
-object Cyc_display_va_list(int argc, object x, va_list ap);
+object Cyc_display_va(void *data, int argc, object x, ...);
+object Cyc_display_va_list(void *data, int argc, object x, va_list ap);
 object Cyc_write_char(void *data, object c, object port);
 object Cyc_write(void *data, object, FILE * port);
 void dispatch_write_va(void *data, int argc, object clo, object cont,

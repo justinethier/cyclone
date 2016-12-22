@@ -420,7 +420,7 @@ void debug_dump_globals()
       printf("mark = %d ", mark(*c->pvar));
       if (mark(*c->pvar) == gc_color_red) {
         printf("obj = ");
-        Cyc_display(*c->pvar, stdout);
+        // TODO: no data param: Cyc_display(*c->pvar, stdout);
       }
       printf("\n");
     } else {
@@ -480,7 +480,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
   fprintf(stderr, "Error: ");
 
   if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag) {
-    Cyc_display(err, stderr);
+    Cyc_display(data, err, stderr);
   } else {
     // Error is list of form (type arg1 ... argn)
     err = cdr(err);             // skip type field
@@ -489,7 +489,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
           is_object_type(car(err)) && 
           type_of(car(err)) == string_tag) {
         is_msg = 0;
-        Cyc_display(car(err), stderr);
+        Cyc_display(data, car(err), stderr);
         fprintf(stderr, ": ");
       } else {
         Cyc_write(data, car(err), stderr);
@@ -686,43 +686,38 @@ void dispatch_display_va(void *data, int argc, object clo, object cont,
   object result;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_display_va_list(argc - 1, x, ap);
+  result = Cyc_display_va_list(data, argc - 1, x, ap);
   va_end(ap);
   return_closcall1(data, cont, result);
 }
 
-object Cyc_display_va(int argc, object x, ...)
+object Cyc_display_va(void *data, int argc, object x, ...)
 {
   object result;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_display_va_list(argc, x, ap);
+  result = Cyc_display_va_list(data, argc, x, ap);
   va_end(ap);
   return result;
 }
 
-object Cyc_display_va_list(int argc, object x, va_list ap)
+object Cyc_display_va_list(void *data, int argc, object x, va_list ap)
 {
-  FILE *fp = stdout;            // TODO: just a placeholder, should use current-output-port
+  FILE *fp = stdout; // TODO: just a placeholder, should use current-output-port
   if (argc > 1) {
     object tmp;
     tmp = va_arg(ap, object);
-    if (Cyc_is_port(tmp) == boolean_t) {
-      fp = ((port_type *) tmp)->fp;
-      if (fp == NULL) {
-        //Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
-        return quote_void;
-      }
-    } else {
-      // TODO: need a data arg, and should raise an error here instead
-      fprintf(stderr, "Bad argument: expected port\n");
-      exit(1);
+    Cyc_check_port(data, tmp);
+    fp = ((port_type *) tmp)->fp;
+    if (fp == NULL) {
+      Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+      return quote_void;
     }
   }
-  return Cyc_display(x, fp);
+  return Cyc_display(data, x, fp);
 }
 
-object Cyc_display(object x, FILE * port)
+object Cyc_display(void *data, object x, FILE * port)
 {
   object tmp = NULL;
   object has_cycle = boolean_f;
@@ -793,7 +788,7 @@ object Cyc_display(object x, FILE * port)
       if (i > 0) {
         fprintf(port, " ");
       }
-      Cyc_display(((vector) x)->elements[i], port);
+      Cyc_display(data, ((vector) x)->elements[i], port);
     }
     fprintf(port, ")");
     break;
@@ -810,7 +805,7 @@ object Cyc_display(object x, FILE * port)
   case pair_tag:
     has_cycle = Cyc_has_cycle(x);
     fprintf(port, "(");
-    Cyc_display(car(x), port);
+    Cyc_display(data, car(x), port);
 
     // Experimenting with displaying lambda defs in REPL
     // not good enough but this is a start. would probably need
@@ -818,7 +813,7 @@ object Cyc_display(object x, FILE * port)
     if (Cyc_is_symbol(car(x)) == boolean_t &&
         strncmp(((symbol) car(x))->desc, "procedure", 10) == 0) {
       fprintf(port, " ");
-      Cyc_display(cadr(x), port);
+      Cyc_display(data, cadr(x), port);
       fprintf(port, " ...)");   /* skip body and env for now */
       break;
     }
@@ -829,13 +824,13 @@ object Cyc_display(object x, FILE * port)
           break;                /* arbitrary number, for now */
       }
       fprintf(port, " ");
-      Cyc_display(car(tmp), port);
+      Cyc_display(data, car(tmp), port);
     }
     if (has_cycle == boolean_t) {
       fprintf(port, " ...");
     } else if (tmp) {
       fprintf(port, " . ");
-      Cyc_display(tmp, port);
+      Cyc_display(data, tmp, port);
     }
     fprintf(port, ")");
     break;
@@ -869,21 +864,16 @@ object Cyc_write_va(void *data, int argc, object x, ...)
 
 object Cyc_write_va_list(void *data, int argc, object x, va_list ap)
 {
-  FILE *fp = stdout;            // OK since this is the internal version of write
+  FILE *fp = stdout; // OK since this is the internal version of write
   // Longer-term maybe we get rid of varargs for this one
   if (argc > 1) {
     object tmp;
     tmp = va_arg(ap, object);
-    if (Cyc_is_port(tmp) == boolean_t) {
-      fp = ((port_type *) tmp)->fp;
-      if (fp == NULL) {
-        //Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
-        return quote_void;
-      }
-    } else {
-      // TODO: need a data arg, and should raise an error here instead
-      fprintf(stderr, "Bad argument: expected port\n");
-      exit(1);
+    Cyc_check_port(data, tmp);
+    fp = ((port_type *) tmp)->fp;
+    if (fp == NULL) {
+      Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+      return quote_void;
     }
   }
   return Cyc_write(data, x, fp);
@@ -918,7 +908,7 @@ static object _Cyc_write(void *data, object x, FILE * port)
     return quote_void;
   }
   if (obj_is_int(x)) {
-    Cyc_display(x, port);
+    Cyc_display(data, x, port);
     return quote_void;
   }
   switch (type_of(x)) {
@@ -989,7 +979,7 @@ static object _Cyc_write(void *data, object x, FILE * port)
     fprintf(port, ")");
     break;
   default:
-    Cyc_display(x, port);
+    Cyc_display(data, x, port);
   }
   return quote_void;
 }
@@ -3462,7 +3452,7 @@ void _apply(void *data, object cont, object args)
   object argc = Cyc_length(data, args);
 
   //fprintf(stdout, "_apply received args: ");
-  //Cyc_display(args, stdout);
+  //Cyc_display(data, args, stdout);
   //fprintf(stdout, "\n");
   dispatch(data, obj_obj2int(argc), (function_type)dispatch_apply_va, cont, cont, args);
 }
@@ -3849,7 +3839,7 @@ object apply(void *data, object cont, object func, object args)
   object count;
 
 //printf("DEBUG apply: ");
-//Cyc_display(args);
+//Cyc_display(data, args);
 //printf("\n");
   if (!is_object_type(func)) {
     Cyc_rt_raise2(data, "Call of non-procedure: ", func);
@@ -3868,9 +3858,9 @@ object apply(void *data, object cont, object func, object args)
   case closureN_tag:
     if (func == Cyc_glo_call_cc) {
 //      make_pair(c, cont, args);
-//Cyc_display(args, stderr);
+//Cyc_display(data, args, stderr);
 //        args = &c;
-//Cyc_display(&c, stderr);
+//Cyc_display(data, &c, stderr);
       count = Cyc_length(data, args);
       Cyc_check_num_args(data, "<procedure>", 1, args);
       dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont,
@@ -3892,7 +3882,7 @@ object apply(void *data, object cont, object func, object args)
       } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0) {
         make_pair(c, func, args);
         //printf("JAE DEBUG, sending to eval: ");
-        //Cyc_display(&c, stderr);
+        //Cyc_display(data, &c, stderr);
         ((closure) Cyc_glo_eval_from_c)->fn(data, 2, Cyc_glo_eval_from_c, cont,
                                             &c, NULL);
 
@@ -3939,7 +3929,7 @@ void Cyc_apply(void *data, int argc, closure cont, object prim, ...)
     args[i].pair_cdr = (i == (argc - 1)) ? NULL : &args[i + 1];
   }
   //printf("DEBUG applying primitive to ");
-  //Cyc_display((object)&args[0]);
+  //Cyc_display(data, (object)&args[0]);
   //printf("\n");
 
   va_end(ap);
