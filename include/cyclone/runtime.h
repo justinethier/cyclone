@@ -149,11 +149,11 @@ void dispatch_display_va(void *data, int argc, object clo, object cont,
 object Cyc_display_va(int argc, object x, ...);
 object Cyc_display_va_list(int argc, object x, va_list ap);
 object Cyc_write_char(void *data, object c, object port);
-object Cyc_write(object, FILE * port);
+object Cyc_write(void *data, object, FILE * port);
 void dispatch_write_va(void *data, int argc, object clo, object cont,
                        object x, ...);
-object Cyc_write_va(int argc, object x, ...);
-object Cyc_write_va_list(int argc, object x, va_list ap);
+object Cyc_write_va(void *data, int argc, object x, ...);
+object Cyc_write_va_list(void *data, int argc, object x, va_list ap);
 
 object Cyc_has_cycle(object lst);
 object Cyc_num_eq(void *, object cont, int argc, object n, ...);

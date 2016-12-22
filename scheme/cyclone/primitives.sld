@@ -607,6 +607,8 @@
         close-input-port
         close-output-port
         Cyc-flush-output-port
+        ; TODO: Cyc-display
+        Cyc-write
         file-exists?
         delete-file
         read-char

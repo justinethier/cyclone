@@ -492,7 +492,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
         Cyc_display(car(err), stderr);
         fprintf(stderr, ": ");
       } else {
-        Cyc_write(car(err), stderr);
+        Cyc_write(data, car(err), stderr);
         fprintf(stderr, " ");
       }
     }
@@ -852,22 +852,22 @@ void dispatch_write_va(void *data, int argc, object clo, object cont,
   object result;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_write_va_list(argc - 1, x, ap);
+  result = Cyc_write_va_list(data, argc - 1, x, ap);
   va_end(ap);
   return_closcall1(data, cont, result);
 }
 
-object Cyc_write_va(int argc, object x, ...)
+object Cyc_write_va(void *data, int argc, object x, ...)
 {
   object result;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_write_va_list(argc, x, ap);
+  result = Cyc_write_va_list(data, argc, x, ap);
   va_end(ap);
   return result;
 }
 
-object Cyc_write_va_list(int argc, object x, va_list ap)
+object Cyc_write_va_list(void *data, int argc, object x, va_list ap)
 {
   FILE *fp = stdout;            // OK since this is the internal version of write
   // Longer-term maybe we get rid of varargs for this one
@@ -886,10 +886,10 @@ object Cyc_write_va_list(int argc, object x, va_list ap)
       exit(1);
     }
   }
-  return Cyc_write(x, fp);
+  return Cyc_write(data, x, fp);
 }
 
-static object _Cyc_write(object x, FILE * port)
+static object _Cyc_write(void *data, object x, FILE * port)
 {
   object tmp = NULL;
   object has_cycle = boolean_f;
@@ -952,14 +952,14 @@ static object _Cyc_write(object x, FILE * port)
       if (i > 0) {
         fprintf(port, " ");
       }
-      _Cyc_write(((vector) x)->elements[i], port);
+      _Cyc_write(data, ((vector) x)->elements[i], port);
     }
     fprintf(port, ")");
     break;
   case pair_tag:
     has_cycle = Cyc_has_cycle(x);
     fprintf(port, "(");
-    _Cyc_write(car(x), port);
+    _Cyc_write(data, car(x), port);
 
     // Experimenting with displaying lambda defs in REPL
     // not good enough but this is a start. would probably need
@@ -967,7 +967,7 @@ static object _Cyc_write(object x, FILE * port)
     if (Cyc_is_symbol(car(x)) == boolean_t &&
         strncmp(((symbol) car(x))->desc, "procedure", 10) == 0) {
       fprintf(port, " ");
-      _Cyc_write(cadr(x), port);
+      _Cyc_write(data, cadr(x), port);
       fprintf(port, " ...)");   /* skip body and env for now */
       break;
     }
@@ -978,13 +978,13 @@ static object _Cyc_write(object x, FILE * port)
           break;                /* arbitrary number, for now */
       }
       fprintf(port, " ");
-      _Cyc_write(car(tmp), port);
+      _Cyc_write(data, car(tmp), port);
     }
     if (has_cycle == boolean_t) {
       fprintf(port, " ...");
     } else if (tmp) {
       fprintf(port, " . ");
-      _Cyc_write(tmp, port);
+      _Cyc_write(data, tmp, port);
     }
     fprintf(port, ")");
     break;
@@ -994,9 +994,9 @@ static object _Cyc_write(object x, FILE * port)
   return quote_void;
 }
 
-object Cyc_write(object x, FILE * port)
+object Cyc_write(void *data, object x, FILE * port)
 {
-  object y = _Cyc_write(x, port);
+  object y = _Cyc_write(data, x, port);
   //fprintf(port, "\n");
   return y;
 }
