@@ -1,4 +1,8 @@
-# Next Release - TBD
+# Next Release (Tentatively 0.3.4) - TBD
+
+Features
+
+- Improved error handling by `display` and `write`.
 
 Bug Fixes
 
