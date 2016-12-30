@@ -2,13 +2,11 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. This is a revision of the [original document](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago when the compiler was self hosting but before the new garbage collector was written. This document
+This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. This is a revision of the [original document](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. Basically this is an update that includes everything that has happened since then.
 
-Before we get started, I want to give a big **Thank You** to everyone that has contributed to the Scheme community. Cyclone is based on the latest revision of the Scheme language, developed by the large community, and wherever possible existing code from the community was reused or repurposed for this project instead of starting from scratch.
+Before we get started, I want to give a big **Thank You** to everyone that has contributed to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code from the community was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
-At the end of this document is a list of online resources that were the most helpful and influential. Without quality Scheme resources like these it would not have been possible to write Cyclone.
-
-In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to build Cyclone. In fact, the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes at this point. Maybe if there is greater interest from the community some of this can be ported back to that project.
+In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Maybe if there is greater interest from the community some of this work can be ported back to that project.
 
 ## Table of Contents
 
@@ -69,13 +67,53 @@ To overcome these difficulties a series of source-to-source transformations are 
 
 The 90-minute compiler ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
+## Macro Expansion
+
+Macro expansion is one of the first transformations. Any macros the compiler knows about are loaded as functions into a macro environment, and a single pass is made over the code. When the compiler finds a macro the code is expanded by calling the macro. The compiler then inspects the resulting code again in case the macro expanded into another macro.
+
+At the lowest level, [explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without requiring much more than `eval`. Many ER macros from [Chibi Scheme](https://github.com/ashinn/chibi-scheme) are used to implement the built-in macros in Cyclone.
+
+Cyclone also supports the high-level `syntax-rules` system from the Scheme reports. Syntax rules is implemented as a huge ER macro ported from Chibi Scheme.
+
+As a simple example the `let` macro below:
+
+    (let ((square (lambda (x) (* x x))))
+      (write (+ (square 10) 1)))
+
+is expanded to:
+
+    (((lambda (square) (write (+ (square 10) 1)))
+      (lambda (x) (* x x))))
+
 ### CPS Conversion
 
-TODO: what is CPS, why we need it (cheney on mta requires it)
+The conversion to continuation passing style (CPS) makes continuations explicit in the compiled code. This is a critical step to make the Scheme code simple enough that it can be represented by C. As we will see later, the runtime's garbage collector also requires code in CPS form.
+
+The basic idea is that each expression will produce a value that is consumed by the continuation of the expression. Continuations will be represented using functions. All of the code must be rewritten to accept a new continuation parameter `k` that will be called with the result of the expression. For example, considering the previous `let` example:
+
+    (((lambda (square) (write (+ (square 10) 1)))
+      (lambda (x) (* x x))))
+    
+the code in CPS form becomes:
+
+    ((lambda (r$4)
+       ((lambda (square$2)
+          (square$2
+            (lambda (r$6)
+              ((lambda (r$5) (write r$5))
+               (+ r$6 1)))
+            10))
+        r$4))
+     (lambda (k$7 x$1) (k$7 (* x$1 x$1))))
 
 ### CPS Optimizations
 
-TODO: CPS conversion generates too much code, need to optimize it to make the compiler practical
+CPS conversion generates too much code and is inefficient for functions such as primitives that can return a result directly instead of calling into a continuation. So we need to optimize it to make the compiler practical. For example, the previous CPS code can be simplified to:
+
+    ((lambda (k$7 x$1) (k$7 (* x$1 x$1)))
+      (lambda (r$6)
+        (write (+ r$6 1)))
+      10)
 
 types of optimizations - inlining is the key (explain with examples), what else?
 
@@ -184,12 +222,6 @@ Cyclone uses this technique to store characters. The nice thing about value type
 The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
 
 TODO: explain analysis phase, and how this is a nice speedup
-
-## Macros
-
-[Explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without requiring much more than `eval`. Many ER macros from [Chibi Scheme](https://github.com/ashinn/chibi-scheme) are used to implement the built-in macros in Cyclone.
-
-TODO: syntax-rules ER macro from Chibi is used to provide support for this macro system
 
 ## Scheme Standards
 
