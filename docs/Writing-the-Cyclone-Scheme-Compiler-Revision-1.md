@@ -96,23 +96,23 @@ The basic idea is that each expression will produce a value that is consumed by 
     
 the code in CPS form becomes:
 
-    ((lambda (r$4)
-       ((lambda (square$2)
-          (square$2
-            (lambda (r$6)
-              ((lambda (r$5) (write r$5))
-               (+ r$6 1)))
+    ((lambda (r)
+       ((lambda (square)
+          (square
+            (lambda (r)
+              ((lambda (r) (write r))
+               (+ r 1)))
             10))
-        r$4))
-     (lambda (k$7 x$1) (k$7 (* x$1 x$1))))
+        r))
+     (lambda (k x) (k (* x x))))
 
 ### CPS Optimizations
 
 CPS conversion generates too much code and is inefficient for functions such as primitives that can return a result directly instead of calling into a continuation. So we need to optimize it to make the compiler practical. For example, the previous CPS code can be simplified to:
 
-    ((lambda (k$7 x$1) (k$7 (* x$1 x$1)))
-      (lambda (r$6)
-        (write (+ r$6 1)))
+    ((lambda (k x) (k (* x x)))
+      (lambda (r)
+        (write (+ r 1)))
       10)
 
 types of optimizations - inlining is the key (explain with examples), what else?
@@ -128,7 +128,7 @@ Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.s
 
 The compiler's code generation phase takes a single pass over the transformed Scheme code and outputs C code to the current output port (usually a `.c` file).
 
-During this phase C code is sometimes returned for later use instead of being output directly. For example, when compiling a vector literal or a series of function arguments. In this case, the code is returned as a list of strings that separates variable declarations from C code in the "body" of the generated function.
+During this phase C code is sometimes saved for later use instead of being output directly. For example, when compiling a vector literal or a series of function arguments, the code is returned as a list of strings that separates variable declarations from C code in the "body" of the generated function.
 
 The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions and variables exported from the library become C globals in the generated code.
 
@@ -169,18 +169,15 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 ### Cyclone's Hybrid Collector 
 
-Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection because they are still referenced in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
+Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses another type of collector for the second generation.
 
-Cheney on the MTA, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
-
-Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
-
-Cyclone supports native threads by using a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
+Cyclone supports native threads by using a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. Each thread contains its own stack that is collected using Cheney on the MTA during minor GC. Each object that survives a minor collection is copied from the stack to a newly-allocated slot on the heap. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 More details are available in a separate [Garbage Collector](Garbage-collector.md) document.
 
 ### Native Thread Support
 
+Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied a single time during minor GC. In order for an object to be shared among threads the application must guarantee that the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible to initiate a minor GC for the calling thread to guarantee an object will henceforth not be relocated.
 
 ### Data Structures
 
