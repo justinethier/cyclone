@@ -208,19 +208,21 @@ More details are available in a separate [Garbage Collector](Garbage-collector.m
 
 ### Heap Data Structures
 
-TODO: code from Chibi scheme
+Cyclone allocates heap data one page at a time. Each page is several megabytes in size and can store multiple Scheme objects. Cyclone will start with a small initial page size (say 2 MB) and gradually allocate larger pages using the Fibonnaci Sequence until reaching a maximum size (say 16 MB).
+
+Each page contains a linked list of free objects that is used to find the next available slot for an allocation. An entry on the free list will be split if it is larger than necessary for an allocation; the remaining space will remain in the free list for the next allocation.
+
+Cyclone allocates smaller objects in fixed size heaps to minimize allocation time and prevent heap fragmentation.
+
+The heap data structures and associated algorithms are based on code from Chibi scheme.
+
 TODO: not really related to this paper, but can allocation speedup for Cyclone be ported back to Chibi? Should look into that
 
 ## C Runtime
 
 The C runtime supports compiled Scheme programs by providing a set of primitive functions called into by the compiled code and functions for various supporting features such as call history, exception handling, and garbage collection.
 
-yes, find that paper from Dybvig about writing Chez scheme, about how they made the runtime nice and fast. same applies here as well
-
-here it is:
-https://www.cs.indiana.edu/~dyb/pubs/hocs.pdf
-
-The "money" quote is:
+An interesting observation from R. Kent Dybvig that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
 
 > My focus was instead on low-level details, like choosing efficient representations and generating good instruction sequences, and the compiler did include a peephole optimizer. High-level optimization is important, and we did plenty of that later, but low-level details often have more leverage in the sense that they typically affect a broader class of programs, if not all programs.
 
@@ -236,9 +238,13 @@ Cyclone attempts to support multithreading in an efficient way that minimizes th
 
 Most Scheme data types are represented as allocated "objects" that contain a tag to identify the object type. For example:
 
+TODO: update this, maybe whole section
+
     typedef struct {tag_type tag; double value;} double_type;
 
 ### Value Types
+
+TODO: revise this whole section:
 
 On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. On many machines, addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
