@@ -2,7 +2,7 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This document covers some of the background on how Cyclone was written, including aspects of the compiler and runtime system. This is a revision of the [original document](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. Basically this is an update that includes everything that has happened since then.
+This is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. This version includes everything that has happened since then, and attempts to provide a constructive background on how Cyclone was written.
 
 Before we get started, I want to give a big **Thank You** to everyone that has contributed to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code from the community was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
@@ -67,7 +67,35 @@ To overcome these difficulties a series of source-to-source transformations are 
 
 The 90-minute compiler ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
-## Macro Expansion
+### The Basic Pattern - Make Many Small Passes
+
+Most of the transformations follow a similar pattern. A single function is used to recursively examine all of the code's AST, examining each piece of code a single time. This is efficient as long as code is only visited a single time.
+
+This is a simple example, although instead of doing a straightforward transformation it calls `mark-mutable` to track mutations for a later phase:
+
+    (define (analyze-mutable-variables exp)
+      (cond 
+        ((const? exp)    (void))
+        ((prim? exp)     (void))
+        ((ref? exp)      (void))
+        ((quote? exp)    (void))
+        ((lambda? exp)   
+         (map analyze-mutable-variables (lambda->exp exp))
+         (void))
+        ((set!? exp)     
+         (mark-mutable (set!->var exp))
+         (analyze-mutable-variables (set!->exp exp)))
+        ((if? exp)       
+         (analyze-mutable-variables (if->condition exp))
+         (analyze-mutable-variables (if->then exp))
+         (analyze-mutable-variables (if->else exp)))
+        ((app? exp)
+         (map analyze-mutable-variables exp)
+         (void))
+        (else
+         (error "unknown expression type: " exp))))
+
+### Macro Expansion
 
 Macro expansion is one of the first transformations. Any macros the compiler knows about are loaded as functions into a macro environment, and a single pass is made over the code. When the compiler finds a macro the code is expanded by calling the macro. The compiler then inspects the resulting code again in case the macro expanded into another macro.
 
@@ -115,14 +143,13 @@ CPS conversion generates too much code and is inefficient for functions such as 
         (write (+ r 1)))
       10)
 
-types of optimizations - inlining is the key (explain with examples), what else?
+One of the most effective optimizations is inlining of primitives. That is, some runtime functions can be called directly, so an enclosing `lambda` is not needed to evaluate them. This can greatly reduce the amount of generated code.
 
-ideas from chicken - analysis pass, analysis DB
+There is also a contraction phase that eliminates other unnecessary `lambda`'s. There are a few other miscellaneous optimizations such as constant folding, which evaluates certain primitives at compile time if the parameters are constants.
 
- A custom AST is used to represent some object during CPS optimizations though
+To more efficiently identify optimizations an analysis pass is made over the code to build up a "database" of various attributes that determine which optimizations can be performed. The DB is a hash table of records with an entry for each variable and function. This idea was borrowed from CHICKEN.
 
-TODO:
-Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could be applied to Cyclone.
+In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number.
 
 ## C Code Generation
 
@@ -174,6 +201,9 @@ Baker's technique uses a copying collector for both the minor and major generati
 Cyclone supports native threads by using a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. Each thread contains its own stack that is collected using Cheney on the MTA during minor GC. Each object that survives a minor collection is copied from the stack to a newly-allocated slot on the heap. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 More details are available in a separate [Garbage Collector](Garbage-collector.md) document.
+
+TODO:
+<img src="images/cyclone-contribs.png">
 
 ### Native Thread Support
 
@@ -230,6 +260,8 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 - implement more libraries (industria??)
 - way to support eggs or other libraries? is that even worth the effort?
 - benchmark
+
+Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could be applied to Cyclone.
 
 ## Conclusion
 
