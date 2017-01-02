@@ -212,7 +212,8 @@ TODO: code from Chibi scheme
 TODO: not really related to this paper, but can allocation speedup for Cyclone be ported back to Chibi? Should look into that
 
 ## C Runtime
-TODO: anything else to say about the C runtime???
+
+The C runtime supports compiled Scheme programs by providing a set of primitive functions called into by the compiled code and functions for various supporting features such as call history, exception handling, and garbage collection.
 
 yes, find that paper from Dybvig about writing Chez scheme, about how they made the runtime nice and fast. same applies here as well
 
@@ -295,13 +296,15 @@ Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://git
 
 ## References
 
-- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
-- [CHICKEN Scheme](http://www.call-cc.org/)
-- [CHICKEN Scheme - Internals](https://wiki.call-cc.org/Internals)
-- [Chibi Scheme](https://github.com/ashinn/chibi-scheme)
-- [Compiling Scheme to C with closure conversion](http://matt.might.net/articles/compiling-scheme-to-c/), by Matt Might
-- [Lisp in Small Pieces](http://pagesperso-systeme.lip6.fr/Christian.Queinnec/WWW/LiSP.html), by Christian Queinnec
-- [R<sup>5</sup>RS Scheme Specification](http://www.schemers.org/Documents/Standards/R5RS/HTML/)
-- [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki)
-- [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html), by Harold Abelson and Gerald Jay Sussman
-- [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf), by Marc Feeley
+1. [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+2. [CHICKEN Scheme](http://www.call-cc.org/)
+3. [CHICKEN Scheme - Internals](https://wiki.call-cc.org/Internals)
+4. [Chibi Scheme](https://github.com/ashinn/chibi-scheme)
+5. [Compiling Scheme to C with closure conversion](http://matt.might.net/articles/compiling-scheme-to-c/), by Matt Might
+6. [Lisp in Small Pieces](http://pagesperso-systeme.lip6.fr/Christian.Queinnec/WWW/LiSP.html), by Christian Queinnec
+7. [R<sup>5</sup>RS Scheme Specification](http://www.schemers.org/Documents/Standards/R5RS/HTML/)
+8. [R<sup>7</sup>RS Scheme Specification](http://trac.sacrideo.us/wg/wiki)
+9. [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html), by Harold Abelson and Gerald Jay Sussman
+10. [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf), by Marc Feeley
+11. [The Development of Chez Scheme](https://www.cs.indiana.edu/~dyb/pubs/hocs.pdf), by R. Kent Dybvig
+
