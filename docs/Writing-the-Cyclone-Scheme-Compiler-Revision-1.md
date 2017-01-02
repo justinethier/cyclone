@@ -2,9 +2,9 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. This version includes everything that has happened since then, and attempts to provide a constructive background on how Cyclone was written.
+This is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. This version includes everything that has happened since then and attempts to provide a constructive background on how Cyclone was written.
 
-Before we get started, I want to give a big **Thank You** to everyone that has contributed to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code from the community was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
+Before we get started, I want to say **Thank You** to everyone that has contributed to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code from the community was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
 In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Maybe if there is greater interest from the community some of this work can be ported back to that project.
 
@@ -67,41 +67,39 @@ To overcome these difficulties a series of source-to-source transformations are 
 
 The 90-minute compiler ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
-### The Basic Pattern - Make Many Small Passes
+### Many Small Passes
 
-Most of the transformations follow a similar pattern. A single function is used to recursively examine all of the code's AST, examining each piece of code a single time. This is efficient as long as code is only visited a single time.
+Most of the transformations follow a similar pattern. A single function is used to recursively examine all of the code's AST, examining each piece of code within an expression. This is efficient as long as each sub-expression is only visited a single time.
 
-This is a simple example, although instead of doing a straightforward transformation it calls `mark-mutable` to track mutations for a later phase:
+This is a short example that searches for free variables. The point is not to show exactly what is going on here, but rather to present the pattern used by each of the transformations:
 
-    (define (analyze-mutable-variables exp)
-      (cond 
-        ((const? exp)    (void))
-        ((prim? exp)     (void))
-        ((ref? exp)      (void))
-        ((quote? exp)    (void))
+    (define (search exp)
+      (cond
+        ((const? exp)    '())
+        ((prim? exp)     '())    
+        ((quote? exp)    '())    
+        ((ref? exp)      (if bound-only? '() (list exp)))
         ((lambda? exp)   
-         (map analyze-mutable-variables (lambda->exp exp))
-         (void))
-        ((set!? exp)     
-         (mark-mutable (set!->var exp))
-         (analyze-mutable-variables (set!->exp exp)))
-        ((if? exp)       
-         (analyze-mutable-variables (if->condition exp))
-         (analyze-mutable-variables (if->then exp))
-         (analyze-mutable-variables (if->else exp)))
-        ((app? exp)
-         (map analyze-mutable-variables exp)
-         (void))
-        (else
-         (error "unknown expression type: " exp))))
+          (difference (reduce union (map search (lambda->exp exp)) '())
+                      (lambda-formals->list exp)))
+        ((if-syntax? exp)  (union (search (if->condition exp))
+                                (union (search (if->then exp))
+                                       (search (if->else exp)))))
+        ((define? exp)     (union (list (define->var exp))
+                                (search (define->exp exp))))
+        ((define-c? exp) (list (define->var exp)))
+        ((set!? exp)     (union (list (set!->var exp)) 
+                                (search (set!->exp exp))))
+        ((app? exp)       (reduce union (map search exp) '()))
+        (else             (error "unknown expression: " exp))))
 
 ### Macro Expansion
 
 Macro expansion is one of the first transformations. Any macros the compiler knows about are loaded as functions into a macro environment, and a single pass is made over the code. When the compiler finds a macro the code is expanded by calling the macro. The compiler then inspects the resulting code again in case the macro expanded into another macro.
 
-At the lowest level, [explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system without requiring much more than `eval`. Many ER macros from [Chibi Scheme](https://github.com/ashinn/chibi-scheme) are used to implement the built-in macros in Cyclone.
+At the lowest level, Cyclone's [explicit renaming](http://wiki.call-cc.org/explicit-renaming-macros) (ER) macros provide a simple, low-level macro system that does not require much more than `eval`. Many ER macros from [Chibi Scheme](https://github.com/ashinn/chibi-scheme) are used to implement the built-in macros in Cyclone.
 
-Cyclone also supports the high-level `syntax-rules` system from the Scheme reports. Syntax rules is implemented as a huge ER macro ported from Chibi Scheme.
+Cyclone also supports the high-level `syntax-rules` system from the Scheme reports. Syntax rules is implemented as [a huge ER macro](https://github.com/justinethier/cyclone/blob/v0.3.3/scheme/base.sld#L1242) ported from Chibi Scheme.
 
 As a simple example the `let` macro below:
 
@@ -145,11 +143,11 @@ CPS conversion generates too much code and is inefficient for functions such as 
 
 One of the most effective optimizations is inlining of primitives. That is, some runtime functions can be called directly, so an enclosing `lambda` is not needed to evaluate them. This can greatly reduce the amount of generated code.
 
-There is also a contraction phase that eliminates other unnecessary `lambda`'s. There are a few other miscellaneous optimizations such as constant folding, which evaluates certain primitives at compile time if the parameters are constants.
+A contraction phase is also used to eliminate other unnecessary `lambda`'s. There are a few other miscellaneous optimizations such as constant folding, which evaluates certain primitives at compile time if the parameters are constants.
 
-To more efficiently identify optimizations an analysis pass is made over the code to build up a "database" of various attributes that determine which optimizations can be performed. The DB is a hash table of records with an entry for each variable and function. This idea was borrowed from CHICKEN.
+To more efficiently identify optimizations Cyclone first makes a code pass to build up an hash table-based analysis database (DB) of various attributes. This is the same strategy employed by CHICKEN, although we record different attributes. The DB contains a table of records with an entry for each variable (indexed by symbol) and each function (indexed by unique ID).
 
-In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number.
+In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number. After optimizations are complete, the lambdas are converted back into regular S-expressions.
 
 ## C Code Generation
 
@@ -198,18 +196,17 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses another type of collector for the second generation.
 
-Cyclone supports native threads by using a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. Each thread contains its own stack that is collected using Cheney on the MTA during minor GC. Each object that survives a minor collection is copied from the stack to a newly-allocated slot on the heap. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
+To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for enhancements down the road.
+
+TODO: <img src="images/cyclone-contribs.png">
+
+Under Cyclone's runtime each thread contains its own stack that is used for private thread allocations. Thread stacks are managed independently using Cheney on the MTA. Each object that survives one of these minor collections is copied from the stack to a newly-allocated slot on the heap. 
+
+Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
 More details are available in a separate [Garbage Collector](Garbage-collector.md) document.
 
-TODO:
-<img src="images/cyclone-contribs.png">
-
-### Native Thread Support
-
-Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied a single time during minor GC. In order for an object to be shared among threads the application must guarantee that the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible to initiate a minor GC for the calling thread to guarantee an object will henceforth not be relocated.
-
-### Data Structures
+### Heap Data Structures
 
 TODO: code from Chibi scheme
 TODO: not really related to this paper, but can allocation speedup for Cyclone be ported back to Chibi? Should look into that
@@ -225,6 +222,12 @@ https://www.cs.indiana.edu/~dyb/pubs/hocs.pdf
 The "money" quote is:
 
 > My focus was instead on low-level details, like choosing efficient representations and generating good instruction sequences, and the compiler did include a peephole optimizer. High-level optimization is important, and we did plenty of that later, but low-level details often have more leverage in the sense that they typically affect a broader class of programs, if not all programs.
+
+## Native Thread Support
+
+A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
+
+Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
 
 ## Data Types
 
@@ -294,6 +297,7 @@ Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://git
 
 - [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
 - [CHICKEN Scheme](http://www.call-cc.org/)
+- [CHICKEN Scheme - Internals](https://wiki.call-cc.org/Internals)
 - [Chibi Scheme](https://github.com/ashinn/chibi-scheme)
 - [Compiling Scheme to C with closure conversion](http://matt.might.net/articles/compiling-scheme-to-c/), by Matt Might
 - [Lisp in Small Pieces](http://pagesperso-systeme.lip6.fr/Christian.Queinnec/WWW/LiSP.html), by Christian Queinnec
