@@ -12,16 +12,28 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 
 ## Table of Contents
 
-TODO: sync all of this up with the sections (subsections?) below
-
 - [Overview](#overview)
+- [Reader](#reader)
 - [Source-to-Source Transformations](#source-to-source-transformations)
-- [C Code Generation](#c-code-generation)
+  - [Basic Pattern of Many Small Passes](#basic-pattern-of-many-small-passes)
+  - [Macro Expansion](#macro-expansion)
+  - [CPS Conversion](#cps-conversion)
+  - [CPS Optimizations](#cps-optimizations)
+  - [Closure Conversion](#closure-conversion)
+- [C Back-End](c-back-end)
+  - [Code Generation](#code-generation)
+  - [Compilation](#compilation)
 - [Garbage Collector](#garbage-collector)
+  - [Background: Cheney on the MTA](#background-cheney-on-the-mta)
+  - [Cyclone's Hybrid Collector](#cyclones-hybrid-collector)
+  - [Heap Data Structures](#heap-data-structures)
 - [C Runtime](#c-runtime)
-- [Data Types](#data-types)
+  - [Data Types](#data-types)
+  - [Thread Data Parameter](#thread-data-parameter)
+  - [Call History](#call-history)
+  - [Exception Handling](#exception-handling)
+- [Native Thread Support](#native-thread-support)
 - [Interpreter](#interpreter)
-- [Macros](#macros)
 - [Scheme Standards](#scheme-standards)
 - [Future](#future)
 - [Conclusion](#conclusion)
@@ -77,7 +89,7 @@ To overcome these difficulties a series of source-to-source transformations are 
 
 The 90-minute compiler ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
-### Many Small Passes
+### Basic Pattern of Many Small Passes
 
 Most of the transformations follow a similar pattern. A single function is used to recursively examine all of the code's AST, examining each piece of code within an expression. This is efficient as long as each sub-expression is only visited a single time.
 
@@ -159,7 +171,7 @@ To more efficiently identify optimizations Cyclone first makes a code pass to bu
 
 In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number. After optimizations are complete, the lambdas are converted back into regular S-expressions.
 
-## Closure Conversion
+### Closure Conversion
 
 TODO: briefly explain concept, flat closures (EG: vector)
 
