@@ -13,14 +13,13 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 ## Table of Contents
 
 - [Overview](#overview)
-- [Reader](#reader)
 - [Source-to-Source Transformations](#source-to-source-transformations)
   - [Basic Pattern of Many Small Passes](#basic-pattern-of-many-small-passes)
   - [Macro Expansion](#macro-expansion)
   - [CPS Conversion](#cps-conversion)
   - [CPS Optimizations](#cps-optimizations)
   - [Closure Conversion](#closure-conversion)
-- [C Back-End](c-back-end)
+- [C Back-End](#c-back-end)
   - [Code Generation](#code-generation)
   - [Compilation](#compilation)
 - [Garbage Collector](#garbage-collector)
@@ -33,6 +32,7 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
   - [Call History](#call-history)
   - [Exception Handling](#exception-handling)
 - [Native Thread Support](#native-thread-support)
+- [Reader](#reader)
 - [Interpreter](#interpreter)
 - [Scheme Standards](#scheme-standards)
 - [Future](#future)
@@ -48,12 +48,6 @@ Cyclone has a similar architecture to other modern compilers:
 First, an input file containing Scheme code is received on the command line and loaded into an abstract syntax tree (AST) by Cyclone's parser. From there a series of source-to-source transformations are performed on the AST to expand macros, perform optimizations, and make the code easier to compile to C. These intermediate representations (IR) can be printed out in a readable format to aid debugging. The final AST is then output as a `.c` file and the C compiler is invoked to create the final executable or object file.
 
 The code is represented internally as an AST of regular Scheme objects.  Since Scheme represents both code and data using [S-expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not (in general) have to use custom abstract data types to store the code as would be the case with many other languages.
-
-## Reader
-
-Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either discarded - if it is whitespace, part of a comment, etc - or added to the current token. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
-
-The full implementation is written in Scheme and located in the `(scheme read)` library.
 
 ## Source-to-Source Transformations
 
@@ -91,9 +85,9 @@ The 90-minute compiler ultimately compiles the code down to a single function an
 
 ### Basic Pattern of Many Small Passes
 
-Most of the transformations follow a similar pattern. A single function is used to recursively examine all of the code's AST, examining each piece of code within an expression. This is efficient as long as each sub-expression is only visited a single time.
+To make Cyclone easier to maintain a separate pass is made for each transformation. This allows Cyclone's code to be as simple as possible and minimizes dependencies so there is less chance of changes to one transformation breaking the code for another.
 
-This is a short example that searches for free variables. The point is not to show exactly what is going on here, but rather to present the pattern used by each of the transformations:
+Most of the transformations follow a similar pattern of recursively examining an expression. This is efficient as long as each sub-expression is only visited a single time. Here is a short example that searches for free variables. The point is not to show exactly what is going on here, but rather to present the pattern used by each of the transformations:
 
     (define (search exp)
       (cond
@@ -246,7 +240,7 @@ Anyway, more details are available in a separate [Garbage Collector](Garbage-Col
 
 ### Heap Data Structures
 
-Cyclone allocates heap data one page at a time. Each page is several megabytes in size and can store multiple Scheme objects. Cyclone will start with a small initial page size (say 2 MB) and gradually allocate larger pages using the Fibonnaci Sequence until reaching a maximum size (say 16 MB).
+Cyclone allocates heap data one page at a time. Each page is several megabytes in size and can store multiple Scheme objects. Cyclone will start with a small initial page size and gradually allocate larger pages using the Fibonnaci Sequence until reaching a maximum size.
 
 Each page contains a linked list of free objects that is used to find the next available slot for an allocation. An entry on the free list will be split if it is larger than necessary for an allocation; the remaining space will remain in the free list for the next allocation.
 
@@ -316,6 +310,12 @@ A family of `Cyc_rt_raise` functions is provided to allow an exception to be rai
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
 
 Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
+
+## Reader
+
+Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either added to the current token or discarded if it is whitespace, part of a comment, etc. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
+
+The full implementation is written in Scheme and located in the `(scheme read)` library.
 
 ## Interpreter
 
