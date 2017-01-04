@@ -301,9 +301,13 @@ Each thread has its own instance of the thread data structure and its own stack 
 
 ### Call History
 
+TODO: this is kind of a mess, need to rewrite this paragraph:
+
 Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer consists of an array of pointers-to-strings and the compiler generates calls to `Cyc_st_add` to perform runtime updates. This function needs to be fast as this function is called all the time! So it does the bare minimum and adds a call by updating the pointer at the current buffer index and incrementing that index.
 
 ### Exception Handling
+
+TODO: revise this paragraph?
 
 A family of `Cyc_rt_raise` functions is provided to allow an exception to be raised for the current thread. These functions gather the required arguments and use `apply` to call the thread's current exception handler. The handler is part of the thread data parameter, so any functions that raise an exception must receive that parameter.
 
