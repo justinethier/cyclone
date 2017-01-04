@@ -178,7 +178,7 @@ Free variables passed to a nested function must be captured in a closure so they
 
 Cyclone uses flat closures - objects that contain a single function reference and a vector of free variables. This is a more efficient representation than an environment as only a single vector lookup is required to read any of the free variables.
 
-Mutated variables must be added to a pair (called a "cell") by a separate compilation pass executed prior to closure conversion.
+Mutated variables are not directly supported by flat closures and must be added to a pair (called a "cell") by a separate compilation pass prior to closure conversion.
 
 Cyclone's closure conversion is based on code from Marc Feeley's 90 minute Scheme->C compiler and Matt Might's Scheme->C compiler.
 
