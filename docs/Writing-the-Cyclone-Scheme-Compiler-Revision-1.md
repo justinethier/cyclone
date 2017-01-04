@@ -1,3 +1,5 @@
+[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+
 # Writing the Cyclone Scheme Compiler (Revision 1)
 
 ###### by [Justin Ethier](https://github.com/justinethier)
