@@ -37,6 +37,12 @@ First, an input file containing Scheme code is received on the command line and 
 
 The code is represented internally as an AST of regular Scheme objects.  Since Scheme represents both code and data using [S-expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not (in general) have to use custom abstract data types to store the code as would be the case with many other languages.
 
+## Reader
+
+Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either discarded - if it is whitespace, part of a comment, etc - or added to the current token. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
+
+The full implementation is written in Scheme and located in the `(scheme read)` library.
+
 ## Source-to-Source Transformations
 
 ### Overview
@@ -153,13 +159,27 @@ To more efficiently identify optimizations Cyclone first makes a code pass to bu
 
 In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number. After optimizations are complete, the lambdas are converted back into regular S-expressions.
 
-## C Code Generation
+## Closure Conversion
+
+TODO: briefly explain concept, flat closures (EG: vector)
+
+TODO: need to wrap any mutable variables in cells before closure conversion can happen!
+
+TODO: short example??
+
+## C Back-End
+
+### Code Generation
 
 The compiler's code generation phase takes a single pass over the transformed Scheme code and outputs C code to the current output port (usually a `.c` file).
 
 During this phase C code is sometimes saved for later use instead of being output directly. For example, when compiling a vector literal or a series of function arguments, the code is returned as a list of strings that separates variable declarations from C code in the "body" of the generated function.
 
 The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions and variables exported from the library become C globals in the generated code.
+
+### Compilation
+
+The C compiler is invoked to generate machine code for the Scheme module, and to also create an executable if a Scheme program is being compiled.
 
 ## Garbage Collector
 
@@ -284,12 +304,6 @@ A family of `Cyc_rt_raise` functions is provided to allow an exception to be rai
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
 
 Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
-
-## Reader
-
-Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either discarded - if it is whitespace, part of a comment, etc - or added to the current token. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
-
-The full implementation is written in Scheme and located in the `(scheme read)` library.
 
 ## Interpreter
 
