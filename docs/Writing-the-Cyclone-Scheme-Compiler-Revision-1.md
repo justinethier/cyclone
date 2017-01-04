@@ -206,7 +206,7 @@ It took a long time to research and plan out all of this before it could be impl
 
 <img src="images/cyclone-contribs.png">
 
-Anyway, more details are available in a separate [Garbage Collector](Garbage-collector.md) document.
+Anyway, more details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
 ### Heap Data Structures
 
