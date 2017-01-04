@@ -109,6 +109,8 @@ Most of the transformations follow a similar pattern of recursively examining an
         ((app? exp)       (reduce union (map search exp) '()))
         (else             (error "unknown expression: " exp))))
 
+TODO: mention nanopass, which seems to be a better approach but is R6RS so not really an option for this project :(
+
 ### Macro Expansion
 
 Macro expansion is one of the first transformations. Any macros the compiler knows about are loaded as functions into a macro environment, and a single pass is made over the code. When the compiler finds a macro the code is expanded by calling the macro. The compiler then inspects the resulting code again in case the macro expanded into another macro.
