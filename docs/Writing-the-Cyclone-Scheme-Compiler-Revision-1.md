@@ -263,16 +263,18 @@ The interpreter itself is straightforward but there is nice speed up to be had b
 
 ## Scheme Standards
 
-Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular [R<sup>5</sup>RS spec](http://www.schemers.org/Documents/Standards/R5RS/HTML/). Library (C module) support is the most important but there are also exceptions, system interfaces, and a more consistent API.
+Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular [R<sup>5</sup>RS spec](http://www.schemers.org/Documents/Standards/R5RS/HTML/). Library support is the most important new feature but there are also exceptions, system interfaces, and a more consistent API.
 
 ## Future
 
-- Implement more of r7rs-large, have started on data structures
-- implement more libraries (industria??)
-- way to support eggs or other libraries? is that even worth the effort?
-- benchmark
+Some items to consider in the future are:
 
-Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could be applied to Cyclone.
+- Implement more of r7rs-large, have started on data structures
+- Implement more libraries (TODO: industria for r7rs??)
+- Way to support eggs or other existing libraries? Is that possible or even worth the effort?
+- Additional optimizations
+
+  Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could still be applied to Cyclone.
 
 ## Conclusion
 
