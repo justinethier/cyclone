@@ -206,7 +206,7 @@ Under Cyclone's runtime each thread contains its own stack that is used for priv
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-It took a long time to research and plan out all of this before it could be implemented. There is a nice lull in Github contributions during that time:
+It took a long time to research and plan out all of this before it could be implemented. There was a noticeable lull in Github contributions during that time:
 
 <img src="images/cyclone-contribs.png">
 
