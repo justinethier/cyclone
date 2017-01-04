@@ -6,11 +6,9 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This write-up is an attempt to provide a constructive background on the various components of Cyclone and how they were written. It is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. So much time has passed that I thought it would be worthwhile to provide a brain dump of sort for everything that has happened in the last year and half.
+This write-up is an attempt to provide a constructive background on the various components of Cyclone and how they were written. It is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. So much time has passed that I thought it would be worthwhile to provide a brain dump of sorts for everything that has happened in the last year and half.
 
 Before we get started, I want to say **Thank You** to all of the contributors to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
-
-In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Maybe if there is an interest from the community some of this work can be ported back to that project.
 
 ## Table of Contents
 
@@ -27,6 +25,7 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 - [Garbage Collector](#garbage-collector)
   - [Background: Cheney on the MTA](#background-cheney-on-the-mta)
   - [Cyclone's Hybrid Collector](#cyclones-hybrid-collector)
+  - [Developing the New Collector](#developing-the-new-collector)
   - [Heap Data Structures](#heap-data-structures)
 - [C Runtime](#c-runtime)
   - [Data Types](#data-types)
@@ -89,7 +88,7 @@ The 90-minute compiler ultimately compiles the code down to a single function an
 
 To make Cyclone easier to maintain a separate pass is made for each transformation. This allows Cyclone's code to be as simple as possible and minimizes dependencies so there is less chance of changes to one transformation breaking the code for another.
 
-Most of the transformations follow a similar pattern of recursively examining an expression. This is efficient as long as each sub-expression is only visited a single time. Here is a short example that searches for free variables. The point is not to show exactly what is going on here, but rather to present the pattern used by each of the transformations:
+Most of the transformations follow a similar pattern of recursively examining an expression, which is efficient as long as each sub-expression is only visited a single time. Here is a short example that demonstrates the code structure:
 
     (define (search exp)
       (cond
@@ -111,7 +110,7 @@ Most of the transformations follow a similar pattern of recursively examining an
         ((app? exp)       (reduce union (map search exp) '()))
         (else             (error "unknown expression: " exp))))
 
-TODO: mention nanopass, which seems to be a better approach but is R6RS so not really an option for this project :(
+The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write this type of code. Unfortunately Nanopass is written in R<sup>6</sup>RS and could not be used for this project.
 
 ### Macro Expansion
 
@@ -230,17 +229,29 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses another type of collector for the second generation.
 
-To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for enhancements down the road.
+To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for further enhancements down the road.
 
 Under Cyclone's runtime each thread contains its own stack that is used for private thread allocations. Thread stacks are managed independently using Cheney on the MTA. Each object that survives one of these minor collections is copied from the stack to a newly-allocated slot on the heap. 
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-It took a long time to research and plan out all of this before it could be implemented. There was a noticeable lull in Github contributions during that time:
+More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
+
+### Developing the New Collector
+
+It took a long time to research and plan out the new GC before it could be implemented. There was a noticeable lull in Github contributions during that time:
 
 <img src="images/cyclone-contribs.png">
 
-Anyway, more details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
+The actual development consisted of several distinct phases:
+
+- Phase 0 - Started with a runtime using a basic Cheney-style copying collector.
+- Phase 1 - Added new definitions via `gc.h` and made sure everything compiles.
+- Phase 2 - Changed how strings are allocated to clean up the code and be compatible with the new GC algorithm. This was mainly just an exercise in cleaning up cruft in the old Cyclone implementation.
+- Phase 3 - Changed from using a Cheney-style copying collector to a naive mark-and-sweep algorithm. The new algorithm was based on code from Chibi Scheme, so it was already debugged and a solid foundation for future work.
+- Phase 4 - Integrated a new tracing GC algorithm but do not activate it yet. Added a new thread data argument to all of the necessary runtime functions.
+- Phase 5 - Required the pthreads library, and stood Cyclone back up using the new GC algorithm for the first time.
+- Phase 6 - Added SRFI 18 to support multiple application threads.
 
 ### Heap Data Structures
 
@@ -293,9 +304,9 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 
 - Thread state
 - Stack boundaries
-- Jump buffer
+- Cheney on the MTA jump buffer
 - List of mutated objects detected by the minor GC write barrier
-- Major GC parameters - mark buffer, last read/write, etc (see next sections)
+- Parameters for major GC
 - Call history buffer
 - Exception handler stack
 
@@ -303,9 +314,7 @@ Each thread has its own instance of the thread data structure and its own stack 
 
 ### Call History
 
-TODO: this is kind of a mess, need to rewrite this paragraph:
-
-Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer consists of an array of pointers-to-strings and the compiler generates calls to `Cyc_st_add` to perform runtime updates. This function needs to be fast as this function is called all the time! So it does the bare minimum and adds a call by updating the pointer at the current buffer index and incrementing that index.
+Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer itself consists of an array of pointers-to-strings. Cyclone generates calls to runtime function `Cyc_st_add` as part of the compiled code to populate the buffer. This function must be fast as it is called all the time! So it does the bare minimum: update the pointer at the current buffer index and increment the index.
 
 ### Exception Handling
 
@@ -341,12 +350,16 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 Some items to consider in the future are:
 
+TODO: gambit GC (parallel with multiple collector threads)
+
 - Implement more of r7rs-large, have started on data structures
 - Implement more libraries (TODO: industria for r7rs??)
 - Way to support eggs or other existing libraries? Is that possible or even worth the effort?
 - Additional optimizations
 
   Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could still be applied to Cyclone.
+
+In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Perhaps if there is interest from the community some of this work can be ported back to that project.
 
 ## Conclusion
 
