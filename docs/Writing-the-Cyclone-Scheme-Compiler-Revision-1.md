@@ -40,6 +40,10 @@ Before we get started, I want to say **Thank You** to all of the contributors to
 - [Conclusion](#conclusion)
 - [References](#references)
 
+TODO: Terms section
+
+free variables - variables that are referenced within the body of a function but that are not bound within the function
+
 ## Overview
 
 Cyclone has a similar architecture to other modern compilers:
@@ -170,11 +174,13 @@ In order to support the analysis DB a custom AST is used to represent functions 
 
 ### Closure Conversion
 
-TODO: briefly explain concept, flat closures (EG: vector)
+Free variables passed to a nested function must be captured in a closure so they can be referenced at runtime. The closure conversion transformation modifies lambda definitions as necessary to create new closures and replaces free variable references with lookups from the current closure.
 
-TODO: need to wrap any mutable variables in cells before closure conversion can happen!
+Cyclone uses flat closures - objects that contain a single function reference and a vector of free variables. This is a more efficient representation than an environment as only a single vector lookup is required to read any of the free variables.
 
-TODO: short example??
+Mutated variables must be added to a pair (called a "cell") by a separate compilation pass executed prior to closure conversion.
+
+Cyclone's closure conversion is based on code from Marc Feeley's 90 minute Scheme->C compiler and Matt Might's Scheme->C compiler.
 
 ## C Back-End
 
@@ -318,8 +324,6 @@ Each thread maintains a circular buffer of call history that is used to provide 
 
 ### Exception Handling
 
-TODO: revise this paragraph?
-
 A family of `Cyc_rt_raise` functions is provided to allow an exception to be raised for the current thread. These functions gather the required arguments and use `apply` to call the thread's current exception handler. The handler is part of the thread data parameter, so any functions that raise an exception must receive that parameter.
 
 ## Native Thread Support
@@ -348,14 +352,13 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 ## Future
 
-Some items to consider in the future are:
+Some goals for the future are:
 
-TODO: gambit GC (parallel with multiple collector threads)
-
-- Implement more of r7rs-large, have started on data structures
-- Implement more libraries (TODO: industria for r7rs??)
-- Way to support eggs or other existing libraries? Is that possible or even worth the effort?
-- Additional optimizations
+- Implement more of r7rs-large; work has already started on the data structures side.
+- Implement more libraries (for example, by porting some of [industria](https://github.com/weinholt/industria) to r7rs).
+- Is there a way to support CHICKEN eggs or other existing libraries? Is that possible or even worth the effort?
+- Improve the garbage collector. Possibly by allowing more than one collector thread (Per gambit's parallel GC).
+- Perform additional optimizations, EG:
 
   Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could still be applied to Cyclone.
 
