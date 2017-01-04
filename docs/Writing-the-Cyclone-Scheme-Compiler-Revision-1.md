@@ -218,7 +218,7 @@ Cyclone allocates heap data one page at a time. Each page is several megabytes i
 
 Each page contains a linked list of free objects that is used to find the next available slot for an allocation. An entry on the free list will be split if it is larger than necessary for an allocation; the remaining space will remain in the free list for the next allocation.
 
-Cyclone allocates smaller objects in fixed size heaps to minimize allocation time and prevent heap fragmentation.
+Cyclone allocates smaller objects in fixed size heaps to minimize allocation time and prevent heap fragmentation. The runtime also remembers the last page of the heap that was able to allocate memory, greatly reducing allocation time on larger heaps.
 
 The heap data structures and associated algorithms are based on code from Chibi scheme.
 
