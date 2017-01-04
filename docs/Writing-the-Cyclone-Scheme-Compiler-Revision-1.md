@@ -12,6 +12,8 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 
 ## Table of Contents
 
+TODO: sync all of this up with the sections (subsections?) below
+
 - [Overview](#overview)
 - [Source-to-Source Transformations](#source-to-source-transformations)
 - [C Code Generation](#c-code-generation)
