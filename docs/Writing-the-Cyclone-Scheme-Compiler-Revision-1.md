@@ -4,7 +4,7 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. So much time has passed that I thought it would be worthwhile to provide a brain dump of sort for everything that has happened in the last year and half. Again, this write-up is an attempt to provide a constructive background on the various components of Cyclone and how they were written.
+This write-up is an attempt to provide a constructive background on the various components of Cyclone and how they were written. It is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. So much time has passed that I thought it would be worthwhile to provide a brain dump of sort for everything that has happened in the last year and half.
 
 Before we get started, I want to say **Thank You** to all of the contributors to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
@@ -226,21 +226,17 @@ TODO: not really related to this paper, but can allocation speedup for Cyclone b
 
 ## C Runtime
 
+### Overview
+
 The C runtime provides supporting features to compiled Scheme programs including a set of primitive functions, call history, exception handling, and garbage collection.
 
 An interesting observation from R. Kent Dybvig that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
 
 > My focus was instead on low-level details, like choosing efficient representations and generating good instruction sequences, and the compiler did include a peephole optimizer. High-level optimization is important, and we did plenty of that later, but low-level details often have more leverage in the sense that they typically affect a broader class of programs, if not all programs.
 
-## Native Thread Support
+### Data Types
 
-A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
-
-Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
-
-## Data Types
-
-### Objects
+#### Objects
 
 Most Scheme data types are represented as heap/stack allocated objects that contain a tag to identify the object type. For example:
 
@@ -253,7 +249,7 @@ Most Scheme data types are represented as heap/stack allocated objects that cont
 
 The `gc_header_type` field contains marking information for the garbage collector.
 
-### Value Types
+#### Value Types
 
 On the other hand, some data types can be represented using 30 bits or less and can be stored as value types. Cyclone uses this technique to store characters and integers. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
 
@@ -261,11 +257,47 @@ Value types are stored using a technique from Lisp in Small Pieces. On many mach
 
 > The reason why most pointers are aligned to at least 4 bytes is that most pointers are pointers to objects or basic types that themselves are aligned to at least 4 bytes. Things that have 4 byte alignment include (for most systems): int, float, bool (yes, really), any pointer type, and any basic type their size or larger.
 
+### Thread Data Parameter
+
+At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The continuation and arguments are used by the application code to call into its next function with a result. Thread data is a structure that contains all of the necessary information to perform collections, including:
+
+- Thread state
+- Stack boundaries
+- Jump buffer
+- List of mutated objects detected by the minor GC write barrier
+- Major GC parameters - mark buffer, last read/write, etc (see next sections)
+- Call history buffer
+- Exception handler stack
+
+Each thread has its own instance of the thread data structure and its own stack (assigned by the C runtime/compiler).
+
+### Call History
+
+Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer consists of an array of pointers-to-strings and the compiler generates calls to `Cyc_st_add` to perform runtime updates. This function needs to be fast as this function is called all the time! So it does the bare minimum and adds a call by updating the pointer at the current buffer index and incrementing that index.
+
+### Exception Handling
+
+A family of `Cyc_rt_raise` functions is provided to allow an exception to be raised for the current thread. These functions gather the required arguments and use `apply` to call the thread's current exception handler. The handler is part of the thread data parameter, so any functions that raise an exception must receive that parameter.
+
+## Native Thread Support
+
+A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
+
+Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
+
+## Reader
+
+Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either discarded - if it is whitespace, part of a comment, etc - or added to the current token. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
+
+The full implementation is written in Scheme and located in the `(scheme read)` library.
+
 ## Interpreter
 
-The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
+The `eval` function is written in Scheme, using code from the [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) as a starting point.
 
 The interpreter itself is straightforward but there is nice speed up to be had by separating syntactic analysis from execution. It would be interesting see what kind of performance improvements could be obtained by compiling to VM bytecodes or even using a JIT compiler.
+
+The interpreter's full implementation is available in the `(scheme eval)` library, and the `icyc` executable is provided for convenient access to a REPL.
 
 ## Scheme Standards
 
