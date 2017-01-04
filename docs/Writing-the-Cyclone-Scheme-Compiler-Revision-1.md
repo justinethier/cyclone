@@ -220,7 +220,7 @@ TODO: not really related to this paper, but can allocation speedup for Cyclone b
 
 ## C Runtime
 
-The C runtime supports compiled Scheme programs by providing a set of primitive functions called into by the compiled code and functions for various supporting features such as call history, exception handling, and garbage collection.
+The C runtime provides supporting features to compiled Scheme programs including a set of primitive functions, call history, exception handling, and garbage collection.
 
 An interesting observation from R. Kent Dybvig that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
 
@@ -236,29 +236,30 @@ Cyclone attempts to support multithreading in an efficient way that minimizes th
 
 ### Objects
 
-Most Scheme data types are represented as allocated "objects" that contain a tag to identify the object type. For example:
+Most Scheme data types are represented as heap/stack allocated objects that contain a tag to identify the object type. For example:
 
-TODO: update this, maybe whole section
+    typedef struct {
+      gc_header_type hdr;
+      tag_type tag;
+      object pair_car;
+      object pair_cdr;
+    } pair_type;
 
-    typedef struct {tag_type tag; double value;} double_type;
+The `gc_header_type` field contains marking information for the garbage collector.
 
 ### Value Types
 
-TODO: revise this whole section:
+On the other hand, some data types can be represented using 30 bits or less and can be stored as value types. Cyclone uses this technique to store characters and integers. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
 
-On the other hand, some data types can be represented using 30 bits or less and can be stored as value types using a technique from Lisp in Small Pieces. On many machines, addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
+Value types are stored using a technique from Lisp in Small Pieces. On many machines addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
 > The reason why most pointers are aligned to at least 4 bytes is that most pointers are pointers to objects or basic types that themselves are aligned to at least 4 bytes. Things that have 4 byte alignment include (for most systems): int, float, bool (yes, really), any pointer type, and any basic type their size or larger.
-
-Due to the tag field, all Cyclone objects will have (at least) 4-byte alignment.
-
-Cyclone uses this technique to store characters. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
 
 ## Interpreter
 
 The [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) was used as a starting point for `eval`.
 
-TODO: explain analysis phase, and how this is a nice speedup
+The interpreter itself is straightforward but there is nice speed up to be had by separating syntactic analysis from execution. It would be interesting see what kind of performance improvements could be obtained by compiling to VM bytecodes or even using a JIT compiler.
 
 ## Scheme Standards
 
