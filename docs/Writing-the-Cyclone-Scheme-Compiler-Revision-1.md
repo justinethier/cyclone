@@ -198,13 +198,15 @@ Baker's technique uses a copying collector for both the minor and major generati
 
 To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for enhancements down the road.
 
-TODO: <img src="images/cyclone-contribs.png">
-
 Under Cyclone's runtime each thread contains its own stack that is used for private thread allocations. Thread stacks are managed independently using Cheney on the MTA. Each object that survives one of these minor collections is copied from the stack to a newly-allocated slot on the heap. 
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-More details are available in a separate [Garbage Collector](Garbage-collector.md) document.
+It took a long time to research and plan out all of this before it could be implemented. There is a nice lull in Github contributions during that time:
+
+<img src="images/cyclone-contribs.png">
+
+Anyway, more details are available in a separate [Garbage Collector](Garbage-collector.md) document.
 
 ### Heap Data Structures
 
