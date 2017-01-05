@@ -228,7 +228,7 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses another type of collector for the second generation.
 
-To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for enhancements down the road.
+To that end, Cyclone supports uses a tri-color tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. The DLG algorithm was selected in part because many state-of-the-art collectors are built on top of DLG such as Chicken, Clover, and Schism. So this may allow for further enhancements down the road.
 
 Under Cyclone's runtime each thread contains its own stack that is used for private thread allocations. Thread stacks are managed independently using Cheney on the MTA. Each object that survives one of these minor collections is copied from the stack to a newly-allocated slot on the heap. 
 
@@ -238,17 +238,17 @@ It took a long time to research and plan out all of this before it could be impl
 
 <img src="images/cyclone-contribs.png">
 
-TODO: create a development section with 7 phases of compiler dev
-Phase 1 (gc-dev) - Add gc.h, make sure it compiles.
-Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and be compatible with a new GC algorithm.
-Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
-Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
-Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
-Phase 6 (gc-dev6) - Multiple mutators (application threads)
-Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
+The actual development consisted of several distinct phases:
 
+- Phase - Started with a runtime using a basic Cheney-style copying collector.
+- Phase 1 - Added new definitions via `gc.h` and make sure everything compiles.
+- Phase 2 - Changed how strings are allocated to clean up the code and be compatible with the new GC algorithm. This was mainly just an exercise in cleaning up cruft in the old Cyclone implementation.
+- Phase 3 - Changed from using a Cheney-style copying collector to a naive mark&sweep algorithm. The new algorithm was based on code from Chibi Scheme, so it was already debugged and a solid foundation for future work.
+- Phase 4 - Integrated a new tracing GC algorithm but do not activate it yet. Added a new thread data argument to all of the necessary runtime functions.
+- Phase 5 - Required the pthreads library, and stood Cyclone back up using new GC algorithm.
+- Phase 6 - Added SRFI 18 to support multiple application threads.
 
-Anyway, more details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
+More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
 ### Heap Data Structures
 
