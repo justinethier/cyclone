@@ -109,7 +109,7 @@ Most of the transformations follow a similar pattern of recursively examining an
         ((app? exp)       (reduce union (map search exp) '()))
         (else             (error "unknown expression: " exp))))
 
-TODO: mention nanopass, which seems to be a better approach but is R6RS so not really an option for this project :(
+The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write this type of code. Unfortunately Nanopass is written in R<sup>6</sup>RS and could not be used for this project.
 
 ### Macro Expansion
 
