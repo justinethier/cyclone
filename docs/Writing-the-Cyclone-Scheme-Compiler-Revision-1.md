@@ -25,6 +25,7 @@ In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme)
 - [Garbage Collector](#garbage-collector)
   - [Background: Cheney on the MTA](#background-cheney-on-the-mta)
   - [Cyclone's Hybrid Collector](#cyclones-hybrid-collector)
+  - [Developing the New Collector](#developing-the-new-collector)
   - [Heap Data Structures](#heap-data-structures)
 - [C Runtime](#c-runtime)
   - [Data Types](#data-types)
@@ -234,7 +235,11 @@ Under Cyclone's runtime each thread contains its own stack that is used for priv
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-It took a long time to research and plan out all of this before it could be implemented. There was a noticeable lull in Github contributions during that time:
+More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
+
+### Developing the New Collector
+
+It took a long time to research and plan out the new GC before it could be implemented. There was a noticeable lull in Github contributions during that time:
 
 <img src="images/cyclone-contribs.png">
 
@@ -247,8 +252,6 @@ The actual development consisted of several distinct phases:
 - Phase 4 - Integrated a new tracing GC algorithm but do not activate it yet. Added a new thread data argument to all of the necessary runtime functions.
 - Phase 5 - Required the pthreads library, and stood Cyclone back up using new GC algorithm.
 - Phase 6 - Added SRFI 18 to support multiple application threads.
-
-More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
 ### Heap Data Structures
 
