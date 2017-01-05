@@ -8,8 +8,6 @@ This write-up is an attempt to provide a constructive background on the various 
 
 Before we get started, I want to say **Thank You** to all of the contributors to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
-In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Maybe if there is an interest from the community some of this work can be ported back to that project.
-
 ## Table of Contents
 
 - [Overview](#overview)
@@ -358,6 +356,8 @@ TODO: gambit GC (parallel with multiple collector threads)
 - Additional optimizations
 
   Andrew Appel used a similar runtime for [Standard ML of New Jersey](http://www.smlnj.org/) which is referenced by Baker's paper. Appel's book [Compiling with Continuations](http://www.amazon.com/Compiling-Continuations-Andrew-W-Appel/dp/052103311X) includes a section on how to implement compiler optimizations - many of which could still be applied to Cyclone.
+
+In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Perhaps if there is interest from the community some of this work can be ported back to that project.
 
 ## Conclusion
 
