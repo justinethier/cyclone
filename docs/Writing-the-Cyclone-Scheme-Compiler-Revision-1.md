@@ -236,7 +236,10 @@ Heap objects are not relocated, making it easier for the runtime to support nati
 
 It took a long time to research and plan out all of this before it could be implemented. There was a noticeable lull in Github contributions during that time:
 
+TODO: get rid of top graph
 <img src="images/cyclone-contribs.png">
+
+TODO: create a development section with 7 phases of compiler dev
 
 Anyway, more details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
@@ -338,6 +341,8 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 ## Future
 
 Some items to consider in the future are:
+
+TODO: gambit GC (parallel with multiple collector threads)
 
 - Implement more of r7rs-large, have started on data structures
 - Implement more libraries (TODO: industria for r7rs??)
