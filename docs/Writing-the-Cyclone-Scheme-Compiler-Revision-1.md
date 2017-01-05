@@ -245,7 +245,7 @@ It took a long time to research and plan out the new GC before it could be imple
 
 The actual development consisted of several distinct phases:
 
-- Phase - Started with a runtime using a basic Cheney-style copying collector.
+- Phase 0 - Started with a runtime using a basic Cheney-style copying collector.
 - Phase 1 - Added new definitions via `gc.h` and make sure everything compiles.
 - Phase 2 - Changed how strings are allocated to clean up the code and be compatible with the new GC algorithm. This was mainly just an exercise in cleaning up cruft in the old Cyclone implementation.
 - Phase 3 - Changed from using a Cheney-style copying collector to a naive mark&sweep algorithm. The new algorithm was based on code from Chibi Scheme, so it was already debugged and a solid foundation for future work.
