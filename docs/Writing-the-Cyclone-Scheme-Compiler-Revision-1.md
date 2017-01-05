@@ -236,10 +236,17 @@ Heap objects are not relocated, making it easier for the runtime to support nati
 
 It took a long time to research and plan out all of this before it could be implemented. There was a noticeable lull in Github contributions during that time:
 
-TODO: get rid of top graph
 <img src="images/cyclone-contribs.png">
 
 TODO: create a development section with 7 phases of compiler dev
+Phase 1 (gc-dev) - Add gc.h, make sure it compiles.
+Phase 2 (gc-dev2) - Change how strings are allocated, to clean up the code and be compatible with a new GC algorithm.
+Phase 3 (gc-dev3) - Change from using a Cheney-style copying collector to a naive mark&sweep algorithm.
+Phase 4 (gc-dev4) - Integrating new tracing GC algorithm, added new thread data argument to runtime.
+Phase 5 (gc-dev5) - Require pthreads library, stand cyclone back up using new GC algorithm.
+Phase 6 (gc-dev6) - Multiple mutators (application threads)
+Phase 7 (TBD) - Sharing of variables between threads (ideally without limitation, but that might not be realistic)
+
 
 Anyway, more details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
