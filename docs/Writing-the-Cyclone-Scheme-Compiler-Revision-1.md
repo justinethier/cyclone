@@ -87,7 +87,7 @@ The 90-minute compiler ultimately compiles the code down to a single function an
 
 To make Cyclone easier to maintain a separate pass is made for each transformation. This allows Cyclone's code to be as simple as possible and minimizes dependencies so there is less chance of changes to one transformation breaking the code for another.
 
-Most of the transformations follow a similar pattern of recursively examining an expression. This is efficient as long as each sub-expression is only visited a single time. Here is a short example that searches for free variables. The point is not to show exactly what is going on here, but rather to present the pattern used by each of the transformations:
+Most of the transformations follow a similar pattern of recursively examining an expression, which is efficient as long as each sub-expression is only visited a single time. Here is a short example that demonstrates the code structure:
 
     (define (search exp)
       (cond
