@@ -301,9 +301,9 @@ At runtime Cyclone passes the current continuation, number of arguments, and a t
 
 - Thread state
 - Stack boundaries
-- Jump buffer
+- Cheney on the MTA jump buffer
 - List of mutated objects detected by the minor GC write barrier
-- Major GC parameters - mark buffer, last read/write, etc (see next sections)
+- Parameters for major GC
 - Call history buffer
 - Exception handler stack
 
