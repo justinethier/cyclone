@@ -116,7 +116,7 @@ Most of the transformations follow a similar pattern of recursively examining an
         ((app? exp)       (reduce union (map search exp) '()))
         (else             (error "unknown expression: " exp))))
 
-The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write a compiler using this type of pattern. Unfortunately Nanopass itself is written in R<sup>6</sup>RS and could not be used for this project.
+The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write a compiler that makes many small passes over the code. Unfortunately Nanopass itself is written in R<sup>6</sup>RS and could not be used for this project.
 
 ### Macro Expansion
 
