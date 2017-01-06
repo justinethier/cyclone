@@ -38,17 +38,12 @@ Before we get started, I want to say **Thank You** to all of the contributors to
 - [Scheme Standards](#scheme-standards)
 - [Future](#future)
 - [Conclusion](#conclusion)
+- [Terms](#terms)
 - [References](#references)
-
-TODO: Terms section
-
-free variables - variables that are referenced within the body of a function but that are not bound within the function
 
 ## Overview
 
 Cyclone has a similar architecture to other modern compilers:
-
-TODO: this is hard to read. let's revisit original diagram and make that less wide so the exported PNG is not as wide either
 
 <img src="images/compiler.png" alt="flowchart of cyclone compiler">
 
@@ -287,7 +282,7 @@ An interesting observation from R. Kent Dybvig that I have tried to keep in mind
 
 #### Objects
 
-Most Scheme data types are represented as heap/stack allocated objects that contain a tag to identify the object type. For example:
+Most Scheme data types are represented as objects that are allocated in heap/stack memory. Each type of object has a corresponding C structure that defines its fields:
 
     typedef struct {
       gc_header_type hdr;
@@ -296,17 +291,28 @@ Most Scheme data types are represented as heap/stack allocated objects that cont
       object pair_cdr;
     } pair_type;
 
-The `gc_header_type` field contains marking information for the garbage collector.
+All objects have:
+
+- A `gc_header_type` field that contains marking information for the garbage collector.
+- A tag to identify the object type.
+- One or more additional fields that contain the actual object data.
 
 #### Value Types
 
-On the other hand, some data types can be represented using 30 bits or less and can be stored as value types. Cyclone uses this technique to store characters and integers. The nice thing about value types is they do not have to be garbage collected because no extra data is allocated for them. 
+On the other hand, some data types can be represented using 30 bits or less and can be stored as value types. The great thing about value types is they do not have to be garbage collected because no extra data is allocated for them. This makes them super efficient for commonly-used data types.
 
-Value types are stored using a technique from Lisp in Small Pieces. On many machines addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
+Value types are stored using a common technique that is described in Lisp in Small Pieces (among other places). On many machines addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
 > The reason why most pointers are aligned to at least 4 bytes is that most pointers are pointers to objects or basic types that themselves are aligned to at least 4 bytes. Things that have 4 byte alignment include (for most systems): int, float, bool (yes, really), any pointer type, and any basic type their size or larger.
 
-TODO: explain how chars and ints are tagged then, and how to box/unbox them
+In Cyclone the two least significant bits are used to indicate the following data types:
+
+Binary Bit Pattern | Data Type
+00 | Pointer (an object type)
+01 | Integer
+10 | Character
+
+Booleans are potentially another good candidate for values types. But for the time being they are represented in the runtime using pointers to the constants `boolean_t` and `boolean_f`.
 
 ### Thread Data Parameter
 
@@ -393,6 +399,12 @@ Thanks for reading!
 
 Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap).
 
+## Terms
+
+- Abstract Syntax Tree (AST) - A tree representation of the syntactic structor of source code written in a programming language. Sometimes S-expressions can be used as an AST and sometimes a representation that retains more information is required.
+- Free Variables - Variables that are referenced within the body of a function but that are not bound within the function.
+- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
+- REPL - Read Eval Print Loop; basically a command prompt for interactively evaluating code.
 
 ## References
 
