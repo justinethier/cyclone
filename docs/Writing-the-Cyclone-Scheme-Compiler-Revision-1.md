@@ -308,6 +308,7 @@ Value types are stored using a common technique that is described in Lisp in Sma
 In Cyclone the two least significant bits are used to indicate the following data types:
 
 Binary Bit Pattern | Data Type
+------------------ | ---------
 00 | Pointer (an object type)
 01 | Integer
 10 | Character
