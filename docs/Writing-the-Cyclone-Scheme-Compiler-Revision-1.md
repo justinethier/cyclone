@@ -306,6 +306,8 @@ Value types are stored using a technique from Lisp in Small Pieces. On many mach
 
 > The reason why most pointers are aligned to at least 4 bytes is that most pointers are pointers to objects or basic types that themselves are aligned to at least 4 bytes. Things that have 4 byte alignment include (for most systems): int, float, bool (yes, really), any pointer type, and any basic type their size or larger.
 
+TODO: explain how chars and ints are tagged then, and how to box/unbox them
+
 ### Thread Data Parameter
 
 At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The continuation and arguments are used by the application code to call into its next function with a result. Thread data is a structure that contains all of the necessary information to perform collections, including:
@@ -332,7 +334,7 @@ A family of `Cyc_rt_raise` functions is provided to allow an exception to be rai
 
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
 
-Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. This can be done by using synchronization primitives (such as a mutex) to coordinate access. It is also possible for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
+Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. One solution is for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
 
 ## Reader
 
@@ -356,9 +358,8 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 Some goals for the future are:
 
-- Implement more of r7rs-large; work has already started on the data structures side.
+- Implement more of R<sup>7</sup>RS-large; work has already started on the data structures side.
 - Implement more libraries (for example, by porting some of [industria](https://github.com/weinholt/industria) to r7rs).
-- Is there a way to support CHICKEN eggs or other existing libraries? Is that possible or even worth the effort?
 - Improve the garbage collector. Possibly by allowing more than one collector thread (Per gambit's parallel GC).
 - Perform additional optimizations, EG:
 
