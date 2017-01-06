@@ -14,7 +14,7 @@ Before we get started, I want to say **Thank You** to all of the contributors to
 
 - [Overview](#overview)
 - [Source-to-Source Transformations](#source-to-source-transformations)
-  - [Basic Pattern of Many Small Passes](#basic-pattern-of-many-small-passes)
+  - [Just Make Many Small Passes](#just-make-many-small-passes)
   - [Macro Expansion](#macro-expansion)
   - [CPS Conversion](#cps-conversion)
   - [CPS Optimizations](#cps-optimizations)
@@ -88,11 +88,11 @@ To overcome these difficulties a series of source-to-source transformations are 
 
 The 90-minute compiler ultimately compiles the code down to a single function and uses jumps to support continuations. This is a bit too limiting for a production compiler, so that part was not used.
 
-### Basic Pattern of Many Small Passes
+### Just Make Many Small Passes
 
 To make Cyclone easier to maintain a separate pass is made for each transformation. This allows Cyclone's code to be as simple as possible and minimizes dependencies so there is less chance of changes to one transformation breaking the code for another.
 
-Most of the transformations follow a similar pattern of recursively examining an expression, which is efficient as long as each sub-expression is only visited a single time. Here is a short example that demonstrates the code structure:
+Most of the transformations follow a similar pattern of recursively examining an expression. Here is a short example that demonstrates the code structure:
 
     (define (search exp)
       (cond
@@ -114,7 +114,7 @@ Most of the transformations follow a similar pattern of recursively examining an
         ((app? exp)       (reduce union (map search exp) '()))
         (else             (error "unknown expression: " exp))))
 
-The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write this type of code. Unfortunately Nanopass is written in R<sup>6</sup>RS and could not be used for this project.
+The [Nanopass Framework](https://github.com/nanopass/nanopass-framework-scheme) was created to make it easier to write a compiler using this type of pattern. Unfortunately Nanopass itself is written in R<sup>6</sup>RS and could not be used for this project.
 
 ### Macro Expansion
 
