@@ -165,15 +165,15 @@ One of the most effective optimizations is inlining of primitives. That is, some
 
 A contraction phase is also used to eliminate other unnecessary `lambda`'s. There are a few other miscellaneous optimizations such as constant folding, which evaluates certain primitives at compile time if the parameters are constants.
 
-To more efficiently identify optimizations Cyclone first makes a code pass to build up an hash table-based analysis database (DB) of various attributes. This is the same strategy employed by CHICKEN, although we record different attributes. The DB contains a table of records with an entry for each variable (indexed by symbol) and each function (indexed by unique ID).
+To more efficiently identify optimizations Cyclone first makes a code pass to build up an hash table-based analysis database (DB) of various attributes. This is the same strategy employed by CHICKEN, although each compiler records different attributes. The DB contains a table of records with an entry for each variable (indexed by symbol) and each function (indexed by unique ID).
 
 In order to support the analysis DB a custom AST is used to represent functions during this phase, so that each one can be tagged with a unique identification number. After optimizations are complete, the lambdas are converted back into regular S-expressions.
 
 ### Closure Conversion
 
-Free variables passed to a nested function must be captured in a closure so they can be referenced at runtime. The closure conversion transformation modifies lambda definitions as necessary to create new closures and replaces free variable references with lookups from the current closure.
+Free variables passed to a nested function must be captured in a closure so they can be referenced at runtime. The closure conversion transformation modifies lambda definitions as necessary to create new closures. It also replaces free variable references with lookups from the current closure.
 
-Cyclone uses flat closures - objects that contain a single function reference and a vector of free variables. This is a more efficient representation than an environment as only a single vector lookup is required to read any of the free variables.
+Cyclone uses flat closures: objects that contain a single function reference and a vector of free variables. This is a more efficient representation than an environment as only a single vector lookup is required to read any of the free variables.
 
 Mutated variables are not directly supported by flat closures and must be added to a pair (called a "cell") by a separate compilation pass prior to closure conversion.
 
