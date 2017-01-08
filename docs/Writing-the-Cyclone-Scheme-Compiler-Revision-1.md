@@ -275,7 +275,7 @@ TODO: not really related to this paper, but can allocation speedup for Cyclone b
 
 The C runtime provides supporting features to compiled Scheme programs including a set of primitive functions, call history, exception handling, and garbage collection.
 
-An interesting observation from R. Kent Dybvig [11](#references) that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
+An interesting observation from R. Kent Dybvig [[11]](#references) that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
 
 > My focus was instead on low-level details, like choosing efficient representations and generating good instruction sequences, and the compiler did include a peephole optimizer. High-level optimization is important, and we did plenty of that later, but low-level details often have more leverage in the sense that they typically affect a broader class of programs, if not all programs.
 
