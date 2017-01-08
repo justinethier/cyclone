@@ -338,6 +338,8 @@ Each thread maintains a circular buffer of call history that is used to provide 
 
 A family of `Cyc_rt_raise` functions is provided to allow an exception to be raised for the current thread. These functions gather the required arguments and use `apply` to call the thread's current exception handler. The handler is part of the thread data parameter, so any functions that raise an exception must receive that parameter.
 
+A Scheme API for exception handling is provided as part of R<sup>7</sup>RS.
+
 ## Native Thread Support
 
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
@@ -364,23 +366,23 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 ## Benchmarks
 
-[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) based on the ones from the Larceny project. These are the typical benchmarks that many implementations have used over the years, but the remarkable thing about this suite is all of the major implementations are supported, allowing an apples-to-apples comparison of all the major Schemes.
+[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) based on a R<sup>7</sup>RS suite from the Larceny project. These are the typical benchmarks that many implementations have used over the years, but the remarkable thing here is all of the major implementations are supported, allowing a rare apples-to-apples comparison among all the widely-used Schemes.
 
-Over the past year Cyclone has matured to the point where most of the 56 benchmarks will run:
+Over the past year Cyclone has matured to the point where almost all of the 56 benchmarks will run:
 
 <img src="images/benchmark-tests-finished.png">
 
 The remaining ones are:
 
-- `mbrotZ` fails because Cyclone does not support complex numbers.
+- `mbrotZ` fails because Cyclone does not support complex numbers yet.
 - `pi` does not work because Cyclone does not support bignums yet.
-- `compiler` passes but returns the wrong result. This is going to be fun to track down since the program is (relatively) huge and takes so long to compile...
+- `compiler` passes but returns the wrong result. This will be fun to track down since the program is huge and takes a long time to compile...
 
-Regarding performance, from Feeley's presentation:
+Regarding performance, from Feeley's presentation [[10]](#references):
 
 > Performance is not so bad with NO optimizations (about 6 times slower than Gambit-C with full optimization)
 
-But Cyclone has some optimizations now, doesn't it? The following is a chart of total runtime (in minutes) for the benchmarks that each Scheme passes successfully. Cyclone performs well against all of the interpreters but still has a long ways to go to match top-tier compilers. Then again, most of these compilers have been around for a decade or longer:
+But Cyclone has some optimizations now, doesn't it? The following is a chart of total runtime in minutes for the benchmarks that each Scheme passes successfully. Cyclone performs well against all of the interpreters but still has a long ways to go to match top-tier compilers. Then again, most of these compilers have been around for a decade or longer:
 
 <img src="images/benchmark-total-runtimes.png">
 
