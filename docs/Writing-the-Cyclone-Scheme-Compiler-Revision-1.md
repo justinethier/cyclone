@@ -275,7 +275,7 @@ TODO: not really related to this paper, but can allocation speedup for Cyclone b
 
 The C runtime provides supporting features to compiled Scheme programs including a set of primitive functions, call history, exception handling, and garbage collection.
 
-An interesting observation from R. Kent Dybvig that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
+An interesting observation from R. Kent Dybvig [11](#references) that I have tried to keep in mind is that performance optimizations in the runtime can be just as (if not more) important that higher level CPS optimizations:
 
 > My focus was instead on low-level details, like choosing efficient representations and generating good instruction sequences, and the compiler did include a peephole optimizer. High-level optimization is important, and we did plenty of that later, but low-level details often have more leverage in the sense that they typically affect a broader class of programs, if not all programs.
 
@@ -283,7 +283,7 @@ An interesting observation from R. Kent Dybvig that I have tried to keep in mind
 
 #### Objects
 
-Most Scheme data types are represented as objects that are allocated in heap/stack memory. Each type of object has a corresponding C structure that defines its fields:
+Most Scheme data types are represented as objects that are allocated in heap/stack memory. Each type of object has a corresponding C structure that defines its fields, such as the following one for pairs:
 
     typedef struct {
       gc_header_type hdr;
@@ -296,11 +296,11 @@ All objects have:
 
 - A `gc_header_type` field that contains marking information for the garbage collector.
 - A tag to identify the object type.
-- One or more additional fields that contain the actual object data.
+- One or more additional fields containing the actual object data.
 
 #### Value Types
 
-On the other hand, some data types can be represented using 30 bits or less and can be stored as value types. The great thing about value types is they do not have to be garbage collected because no extra data is allocated for them. This makes them super efficient for commonly-used data types.
+On the other hand, some data types can be represented using 30 bits or less and are stored as value types. The great thing about value types is they do not have to be garbage collected because no extra data is allocated for them. This makes them super efficient for commonly-used data types.
 
 Value types are stored using a common technique that is described in Lisp in Small Pieces (among other places). On many machines addresses are multiples of four, leaving the two least significant bits free. [A brief explanation](http://stackoverflow.com/q/9272526/101258):
 
