@@ -332,7 +332,7 @@ Each thread has its own instance of the thread data structure and its own stack 
 
 ### Call History
 
-Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer itself consists of an array of pointers-to-strings. Cyclone generates calls to runtime function `Cyc_st_add` as part of the compiled code to populate the buffer. This function must be fast as it is called all the time! So it does the bare minimum: update the pointer at the current buffer index and increment the index.
+Each thread maintains a circular buffer of call history that is used to provide debug information in the event of an error. The buffer itself consists of an array of pointers-to-strings. The compiler emits calls to runtime function `Cyc_st_add` that will populate the buffer when the program is running. `Cyc_st_add` must be fast as it is called all the time! So it does the bare minimum - update the pointer at the current buffer index and increment the index.
 
 ### Exception Handling
 
