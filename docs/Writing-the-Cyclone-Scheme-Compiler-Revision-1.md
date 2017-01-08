@@ -364,17 +364,17 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 ## Benchmarks
 
-[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) based on the ones from the Larceny project. These are the typical benchmarks that many implementations have used over the years, but the remarkable thing about this suite is all of the major implementations are supported. This allows an apples-to-apples comparison of all of the major implementations.
+[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) based on the ones from the Larceny project. These are the typical benchmarks that many implementations have used over the years, but the remarkable thing about this suite is all of the major implementations are supported, allowing an apples-to-apples comparison of all the major Schemes.
 
-Over the past year Cyclone has matured to the point where almost all of the 56 benchmarks will run:
+Over the past year Cyclone has matured to the point where most of the 56 benchmarks will run:
 
 <img src="images/benchmark-tests-finished.png">
 
 The remaining ones are:
 
-- `compiler` passes but returns the wrong result. This is going to be fun to track down since the program takes so long to compile...
 - `mbrotZ` fails because Cyclone does not support complex numbers.
 - `pi` does not work because Cyclone does not support bignums yet.
+- `compiler` passes but returns the wrong result. This is going to be fun to track down since the program is (relatively) huge and takes so long to compile...
 
 Regarding performance, from Feeley's presentation:
 
