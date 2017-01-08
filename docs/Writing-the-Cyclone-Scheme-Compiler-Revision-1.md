@@ -384,17 +384,9 @@ From Feeley's presentation:
 
 Compared to a similar compiler (CHICKEN), Cyclone's performance is worse but also "not so bad":
 
-     $ time cyclone -d transforms.sld
-    
-    real    0m6.802s
-    user    0m4.444s
-    sys     0m1.512s
+<img src="images/benchmark-tests-finished.png">
 
-    $ time csc -t transforms.scm
-    
-    real    0m1.084s
-    user    0m0.512s
-    sys     0m0.380s
+<img src="images/benchmark-total-runtimes.png">
 
 Thanks for reading!
 
