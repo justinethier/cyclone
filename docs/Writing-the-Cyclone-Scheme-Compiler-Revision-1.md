@@ -36,6 +36,7 @@ Before we get started, I want to say **Thank You** to all of the contributors to
 - [Reader](#reader)
 - [Interpreter](#interpreter)
 - [Scheme Standards](#scheme-standards)
+- [Benchmarks](#benchmarks)
 - [Future](#future)
 - [Conclusion](#conclusion)
 - [Terms](#terms)
@@ -361,6 +362,28 @@ The interpreter's full implementation is available in the `(scheme eval)` librar
 
 Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/justinethier/cyclone/raw/master/docs/r7rs.pdf). This spec is relatively new and provides incremental improvements from the popular [R<sup>5</sup>RS spec](http://www.schemers.org/Documents/Standards/R5RS/HTML/). Library support is the most important new feature but there are also exceptions, system interfaces, and a more consistent API.
 
+## Benchmarks
+
+[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html). These are the typical Scheme benchmarks that many implementations use but the remarkable thing about this suite is all of the major implementations are supported. This allows an apples-to-apples comparison of all of the major implementations.
+
+Over the past year Cyclone has matured to the point where almost all of the 56 benchmarks will run:
+
+<img src="images/benchmark-tests-finished.png">
+
+The remaining ones are:
+
+- `compiler` passes but returns the wrong result. This is going to be fun to track down since the program takes so long to compile...
+- `mbrotZ` fails because Cyclone does not support complex numbers.
+- `pi` does not work because Cyclone does not support bignums yet.
+
+Regarding performance, from Feeley's presentation:
+
+> Performance is not so bad with NO optimizations (about 6 times slower than Gambit-C with full optimization)
+
+But Cyclone has some optimizations now, doesn't it? The following is a chart of total runtime (in minutes) for the benchmarks that each Scheme passes successfully. Cyclone performs well against all of the interpreters but still has a long ways to go to match top-tier compilers. Then again, most of these compilers have been around for a decade or longer:
+
+<img src="images/benchmark-total-runtimes.png">
+
 ## Future
 
 Some goals for the future are:
@@ -375,18 +398,6 @@ Some goals for the future are:
 In addition, developing [Husk Scheme](http://justinethier.github.io/husk-scheme) helped me gather much of the knowledge that would later be used to create Cyclone. In fact the primary motivation in building Cyclone was to go a step further and understand how to build a full, free-standing Scheme system. At this point Cyclone has eclipsed the speed and functionality of Husk and it is not clear if Husk will receive much more than bug fixes going forward. Perhaps if there is interest from the community some of this work can be ported back to that project.
 
 ## Conclusion
-
-TODO: this section is completely out of date, a better reference would be benchmark results from r7rs-benchmarks
-
-From Feeley's presentation:
-
-> Performance is not so bad with NO optimizations (about 6 times slower than Gambit-C with full optimization)
-
-Compared to a similar compiler (CHICKEN), Cyclone's performance is worse but also "not so bad":
-
-<img src="images/benchmark-tests-finished.png">
-
-<img src="images/benchmark-total-runtimes.png">
 
 Thanks for reading!
 
