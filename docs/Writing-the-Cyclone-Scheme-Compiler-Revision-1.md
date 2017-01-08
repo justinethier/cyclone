@@ -364,7 +364,7 @@ Cyclone targets the [R<sup>7</sup>RS-small specification](https://github.com/jus
 
 ## Benchmarks
 
-[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html). These are the typical Scheme benchmarks that many implementations use but the remarkable thing about this suite is all of the major implementations are supported. This allows an apples-to-apples comparison of all of the major implementations.
+[ecraven](https://github.com/ecraven) has put together an excellent set of [Scheme benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) based on the ones from the Larceny project. These are the typical benchmarks that many implementations have used over the years, but the remarkable thing about this suite is all of the major implementations are supported. This allows an apples-to-apples comparison of all of the major implementations.
 
 Over the past year Cyclone has matured to the point where almost all of the 56 benchmarks will run:
 
