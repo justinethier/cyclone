@@ -267,8 +267,6 @@ Cyclone allocates smaller objects in fixed size heaps to minimize allocation tim
 
 The heap data structures and associated algorithms are based on code from Chibi scheme.
 
-TODO: not really related to this paper, but can allocation speedup for Cyclone be ported back to Chibi? Should look into that
-
 ## C Runtime
 
 ### Overview
