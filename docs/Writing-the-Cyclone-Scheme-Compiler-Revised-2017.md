@@ -244,7 +244,7 @@ Heap objects are not relocated, making it easier for the runtime to support nati
 
 ### Major Garbage Collection Algorithm
 
-During a major GC the collector thread transitions through the following states.
+Each object is marked with a specific color (white, gray, or black) that determines how it will be handled during a major collection. Major GC transitions through the following states: 
 
 #### Clear
 The collector thread swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1. At this point no heap objects are marked, as demonstrated below:
