@@ -392,7 +392,7 @@ The interpreter's full implementation is available in the `(scheme eval)` librar
 
 ### Compiler Internals
 
-Most of the Cyclone compiler is implemented in Scheme as [a series of libraries](API.md#cyclone-libraries).
+Most of the Cyclone compiler is implemented in Scheme as [a series of libraries](API.md#api-documentation).
 
 ## Scheme Standards
 
