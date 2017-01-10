@@ -25,6 +25,7 @@ Before we get started, I want to say **Thank You** to all of the contributors to
 - [Garbage Collector](#garbage-collector)
   - [Background: Cheney on the MTA](#background-cheney-on-the-mta)
   - [Cyclone's Hybrid Collector](#cyclones-hybrid-collector)
+  - [Major Garbage Collection Algorithm](#major-garbage-collection-algorithm)
   - [Developing the New Collector](#developing-the-new-collector)
   - [Heap Data Structures](#heap-data-structures)
 - [C Runtime](#c-runtime)
@@ -239,7 +240,33 @@ Under Cyclone's runtime each thread contains its own stack that is used for priv
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-More details are available in a separate [Garbage Collector](Garbage-Collector.md) document. For a casual reader the most interesting part may be the [Collection Cycle](Garbage-Collector.md#collection-cycle) section, which explains what happens on the collector thread and application (mutator) threads during a major GC.
+### Major Garbage Collection Algorithm
+
+During a major GC the collector thread transitions through the following states.
+
+#### Clear
+The collector thread swaps the values of the clear color (white) and the mark color (black). This is more efficient than modifying the color on each object in the heap. The collector then transitions to sync 1. At this point no heap objects are marked, as demonstrated below:
+
+<img src="images/gc-graph-clear.png" alt="Initial object graph">
+
+#### Mark
+The collector thread transitions to sync 2 and then async. At this point it marks the global variables and waits for the application threads to also transition to async. When an application thread transitions it will mark its roots and use black as the allocation color to prevent any new objects from being collected during this cycle:
+
+<img src="images/gc-graph-mark.png" alt="Initial object graph">
+
+#### Trace
+The collector thread finds all live objects using a breadth-first search and marks them black:
+
+<img src="images/gc-graph-trace.png" alt="Initial object graph">
+
+#### Sweep
+The collector thread scans the heap and frees memory used by all white objects:
+
+<img src="images/gc-graph-sweep.png" alt="Initial object graph">
+
+If the heap is still low on memory at this point the heap will be increased in size. Also, to ensure a complete collection, data for any terminated threads is not freed until now.
+
+More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
 
 ### Developing the New Collector
 
