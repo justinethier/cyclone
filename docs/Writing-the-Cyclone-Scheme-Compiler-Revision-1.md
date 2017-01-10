@@ -380,7 +380,7 @@ Regarding performance, from Feeley's presentation [[10]](#references):
 
 > Performance is not so bad with NO optimizations (about 6 times slower than Gambit-C with full optimization)
 
-But Cyclone has some optimizations now, doesn't it? The following is a chart of total runtime in minutes for the benchmarks that each Scheme passes successfully. Cyclone performs well against all of the interpreters but still has a long ways to go to match top-tier compilers. Then again, most of these compilers have been around for a decade or longer:
+But Cyclone has some optimizations now, doesn't it? The following is a chart of total runtime in minutes for the benchmarks that each Scheme passes successfully. This metric is problematic because not all of the Schemes can run all of the benchmarks but it gives a general idea of how well they compare to each other. Cyclone performs well against all of the interpreters but still has a long ways to go to match top-tier compilers. Then again, most of these compilers have been around for a decade or longer:
 
 <img src="images/benchmark-total-runtimes.png">
 
