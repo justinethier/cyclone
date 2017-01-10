@@ -369,8 +369,6 @@ A Scheme API for exception handling is provided as part of R<sup>7</sup>RS.
 
 ## Scheme Libraries
 
-TODO: explain compiler is mostly implemented as libraries? maybe a new sub-section?
-
 ### Native Thread Support
 
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
@@ -390,6 +388,10 @@ The `eval` function is written in Scheme, using code from the [Metacircular Eval
 The interpreter itself is straightforward but there is nice speed up to be had by separating syntactic analysis from execution. It would be interesting see what kind of performance improvements could be obtained by compiling to VM bytecodes or even using a JIT compiler.
 
 The interpreter's full implementation is available in the `(scheme eval)` library, and the `icyc` executable is provided for convenient access to a REPL.
+
+### Compiler Internals
+
+Most of the Cyclone compiler is implemented in Scheme as [a series of libraries](API.md#cyclone-libraries).
 
 ## Scheme Standards
 
