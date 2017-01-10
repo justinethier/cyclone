@@ -32,9 +32,10 @@ Before we get started, I want to say **Thank You** to all of the contributors to
   - [Thread Data Parameter](#thread-data-parameter)
   - [Call History](#call-history)
   - [Exception Handling](#exception-handling)
-- [Native Thread Support](#native-thread-support)
-- [Reader](#reader)
-- [Interpreter](#interpreter)
+- [Scheme Libraries](#scheme-libraries)
+  - [Native Thread Support](#native-thread-support)
+  - [Reader](#reader)
+  - [Interpreter](#interpreter)
 - [Scheme Standards](#scheme-standards)
 - [Benchmarks](#benchmarks)
 - [Future](#future)
@@ -368,19 +369,23 @@ A family of `Cyc_rt_raise` functions is provided to allow an exception to be rai
 
 A Scheme API for exception handling is provided as part of R<sup>7</sup>RS.
 
-## Native Thread Support
+## Scheme Libraries
+
+TODO: explain compiler is mostly implemented as libraries? maybe a new sub-section?
+
+### Native Thread Support
 
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
 
 Cyclone attempts to support multithreading in an efficient way that minimizes the amount of synchronization among threads. But objects are still copied during minor GC. In order for an object to be shared among threads the application must guarantee the object is no longer on the stack. One solution is for application code to initiate a minor GC before an object is shared with other threads, to guarantee the object will henceforth not be relocated.
 
-## Reader
+### Reader
 
 Cyclone uses a combined lexer / parser to read S-expressions. Input is processed one character at a time and either added to the current token or discarded if it is whitespace, part of a comment, etc. Once a terminating character is read the token is inspected and converted to an appropriate Scheme object. For example, a series of numbers may be converted into an integer.
 
 The full implementation is written in Scheme and located in the `(scheme read)` library.
 
-## Interpreter
+### Interpreter
 
 The `eval` function is written in Scheme, using code from the [Metacircular Evaluator](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html#%_sec_4.1) from [SICP](https://mitpress.mit.edu/sicp/full-text/book/book.html) as a starting point.
 
