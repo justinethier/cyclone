@@ -168,7 +168,7 @@ The collector swaps the values of the clear color (white) and the mark color (bl
 <img src="images/gc-graph-clear.png" alt="Initial object graph">
 
 ### Mark
-The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async. When a mutator transitions it will gray its roots and use black as the allocation color to prevent any new objects from being collected during this cycle:
+The collector transitions to sync 2 and then async. At this point it marks the global variables and waits for the mutators to also transition to async. When a mutator transitions it will mark its roots and use black as the allocation color to prevent any new objects from being collected during this cycle:
 
 <img src="images/gc-graph-mark.png" alt="Initial object graph">
 
