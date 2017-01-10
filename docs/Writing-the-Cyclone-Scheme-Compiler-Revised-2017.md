@@ -53,9 +53,9 @@ First, an input file containing Scheme code is received on the command line and 
 
 The code is represented internally as an AST of regular Scheme objects.  Since Scheme represents both code and data using [S-expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not (in general) have to use custom abstract data types to store the code as would be the case with many other languages.
 
-TODO: move reader section up here??
+Programs are linked with the necessary Scheme libraries and the Cyclone runtime library to create an executable:
 
-TODO: have another diagram that illustrates the compiled file contains a mix of generated C code, and runtime (with primitives, gc, helper functions, environments, etc)??
+<img src="images/runtime.png" alt="Diagram of files linked into a compiled executable">
 
 ## Source-to-Source Transformations
 
