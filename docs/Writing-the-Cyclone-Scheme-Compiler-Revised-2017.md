@@ -19,9 +19,8 @@ Before we get started, I want to say **Thank You** to all of the contributors to
   - [CPS Conversion](#cps-conversion)
   - [CPS Optimizations](#cps-optimizations)
   - [Closure Conversion](#closure-conversion)
-- [C Back-End](#c-back-end)
-  - [Code Generation](#code-generation)
-  - [Compilation](#compilation)
+  - [C Code Generation](#c-code-generation)
+  - [Native Compilation](#native-compilation)
 - [Garbage Collector](#garbage-collector)
   - [Background: Cheney on the MTA](#background-cheney-on-the-mta)
   - [Cyclone's Hybrid Collector](#cyclones-hybrid-collector)
@@ -181,9 +180,7 @@ Mutated variables are not directly supported by flat closures and must be added 
 
 Cyclone's closure conversion is based on code from Marc Feeley's 90 minute Scheme->C compiler and Matt Might's Scheme->C compiler.
 
-## C Back-End
-
-### Code Generation
+### C Code Generation
 
 The compiler's code generation phase takes a single pass over the transformed Scheme code and outputs C code to the current output port (usually a `.c` file).
 
@@ -191,7 +188,7 @@ During this phase C code is sometimes saved for later use instead of being outpu
 
 The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions and variables exported from the library become C globals in the generated code.
 
-### Compilation
+### Native Compilation
 
 The C compiler is invoked to generate machine code for the Scheme module, and to also create an executable if a Scheme program is being compiled.
 
