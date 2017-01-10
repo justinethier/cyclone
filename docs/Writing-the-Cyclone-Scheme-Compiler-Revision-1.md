@@ -239,7 +239,7 @@ Under Cyclone's runtime each thread contains its own stack that is used for priv
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
-More details are available in a separate [Garbage Collector](Garbage-Collector.md) document.
+More details are available in a separate [Garbage Collector](Garbage-Collector.md) document. For a casual reader the most interesting part may be the [Collection Cycle](Garbage-Collector.md#collection-cycle) section, which explains what happens on the collector thread and application (mutator) threads during a major GC.
 
 ### Developing the New Collector
 
