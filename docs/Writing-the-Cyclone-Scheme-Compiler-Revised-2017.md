@@ -36,6 +36,7 @@ Before we get started, I want to say **Thank You** to all of the contributors to
   - [Native Thread Support](#native-thread-support)
   - [Reader](#reader)
   - [Interpreter](#interpreter)
+  - [Compiler Internals](#compiler-internals)
 - [Scheme Standards](#scheme-standards)
 - [Benchmarks](#benchmarks)
 - [Future](#future)
