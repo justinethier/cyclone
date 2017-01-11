@@ -259,7 +259,11 @@ The collector thread swaps the values of the clear color (white) and the mark co
 <img src="images/gc-graph-clear.png" alt="Initial object graph">
 
 #### Mark
-The collector thread transitions to sync 2 and then async. At this point it marks the global variables and waits for the application threads to also transition to async. When an application thread transitions it will mark its roots and use black as the allocation color to prevent any new objects from being collected during this cycle:
+The collector thread transitions to sync 2 and then async. At this point it marks the global variables and waits for the application threads to also transition to async. When an application thread transitions it will:
+
+- Mark its roots black.
+- Gray any child objects of the roots. The collector thread traces these gray objects during the next phase.
+- Use black as the allocation color to prevent any new objects from being collected during this cycle.
 
 <img src="images/gc-graph-mark.png" alt="Initial object graph">
 
