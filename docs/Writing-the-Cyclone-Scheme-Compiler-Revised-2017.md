@@ -243,6 +243,12 @@ Under Cyclone's runtime each thread contains its own stack that is used for priv
 
 Heap objects are not relocated, making it easier for the runtime to support native threads. In addition major GC uses a collector thread that executes asynchronously so application threads can continue to run concurrently even during collections.
 
+In summary:
+
+- All objects on the stack are collected using Cheney on the MTA, and the ones that survive are placed on the heap.
+- Heap objects are collected during Major GC using the DLG algorithm.
+- Heap collection runs on a separate thread in parallel with application threads.
+
 ### Major Garbage Collection Algorithm
 
 Each object is marked with a specific color (white, gray, or black) that determines how it will be handled during a major collection. Major GC transitions through the following states: 
