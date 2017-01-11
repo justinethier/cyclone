@@ -380,6 +380,8 @@ A Scheme API for exception handling is provided as part of R<sup>7</sup>RS.
 
 ## Scheme Libraries
 
+This section describes a few notable parts of [Cyclone's Scheme API](API.md).
+
 ### Native Thread Support
 
 A multithreading API is provided based on [SRFI 18](http://justinethier.github.io/cyclone/docs/api/srfi/18). Most of the work to support multithreading is accomplished by the runtime and garbage collector.
