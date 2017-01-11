@@ -52,8 +52,6 @@ Cyclone has a similar architecture to other modern compilers:
 
 First, an input file containing Scheme code is received on the command line and loaded into an abstract syntax tree (AST) by Cyclone's parser. From there a series of source-to-source transformations are performed on the AST to expand macros, perform optimizations, and make the code easier to compile to C. These intermediate representations (IR) can be printed out in a readable format to aid debugging. The final AST is then output as a `.c` file and the C compiler is invoked to create the final executable or object file.
 
-The code is represented internally as an AST of regular Scheme objects.  Since Scheme represents both code and data using [S-expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not (in general) have to use custom abstract data types to store the code as would be the case with many other languages.
-
 Programs are linked with the necessary Scheme libraries and the Cyclone runtime library to create an executable:
 
 <img src="images/runtime.png" alt="Diagram of files linked into a compiled executable">
@@ -95,6 +93,8 @@ The 90-minute compiler ultimately compiles the code down to a single function an
 ### Just Make Many Small Passes
 
 To make Cyclone easier to maintain a separate pass is made for each transformation. This allows Cyclone's code to be as simple as possible and minimizes dependencies so there is less chance of changes to one transformation breaking the code for another.
+
+Internally Cyclone represents the code being compiled as an AST of regular Scheme objects.  Since Scheme represents both code and data using [S-expressions](https://en.wikipedia.org/wiki/S-expression), our compiler does not (in general) have to use custom abstract data types to store the code as would be the case with many other languages.
 
 Most of the transformations follow a similar pattern of recursively examining an expression. Here is a short example that demonstrates the code structure:
 
