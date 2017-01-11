@@ -1183,18 +1183,6 @@ void gc_collector_trace()
   }
 }
 
-// "Color" objects gray by adding them to the mark stack for further processing.
-//
-// Note that stack objects are always colored red during creation, so
-// they should never be added to the mark stack. Which would be bad because it
-// could lead to stack corruption.
-//
-// Attempt to speed this up by forcing an inline
-//
-#define gc_collector_mark_gray(parent, gobj) \
-  if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
-    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
-  }
 //static void gc_collector_mark_gray(object parent, object obj)
 //{
 //  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
@@ -1206,10 +1194,7 @@ void gc_collector_trace()
 //  }
 //}
 
-// TODO: seriously consider changing the mark() macro to color(),
-// and sync up the header variable. that would make all of this code
-// bit clearer...
-
+/*
 void gc_mark_black(object obj)
 {
   // TODO: is sync required to get colors? probably not on the collector
@@ -1267,6 +1252,7 @@ void gc_mark_black(object obj)
 #endif
   }
 }
+*/
 
 void gc_empty_collector_stack()
 {
@@ -1412,6 +1398,8 @@ void gc_collector()
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - after post_handshake async\n");
 #endif
+
+TODO: call into shim in runtime, that will call back into gc_mark_globals in this module, but with global objs as parameters. this should allow us to explicitly inline all instances of gc_mark_black since they would now be in this module. and of course, none of the changes on this branch  matter if they don't actually speed anything up, so need to measure that once it compiles!
   gc_mark_globals();
   gc_wait_handshake();
 #if GC_DEBUG_TRACE
