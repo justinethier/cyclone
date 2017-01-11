@@ -47,13 +47,13 @@ Documentation
 
 - The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
 
+- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler-Revised-2017.md) provides high-level details on how the compiler was written and how it works.
+
 - There is a [Development Guide](docs/Development.md) with instructions for common tasks when hacking on the compiler itself.
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
 - This [Benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other R<sup>7</sup>RS and R<sup>6</sup>RS Schemes using a common set of benchmarks.
-
-- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler.md) provides high-level details on how the compiler was written and how it works.
 
 - Finally, if you need another resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
