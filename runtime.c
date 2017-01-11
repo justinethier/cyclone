@@ -3995,30 +3995,9 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   exit(1);
 }
 
-// Mark globals as part of the tracing collector
-// This is called by the collector thread
-void gc_mark_globals()
+void gc_request_mark_globals()
 {
-#if GC_DEBUG_TRACE
-  //fprintf(stderr, "(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
-  fprintf(stderr, "Cyc_global_variables %p\n", Cyc_global_variables);
-#endif
-  // Mark global variables
-  gc_mark_black(Cyc_global_variables);  // Internal global used by the runtime
-  // Marking it ensures all glos are marked
-  {
-    list l = global_table;
-    for (; l != NULL; l = cdr(l)) {
-      cvar_type *c = (cvar_type *) car(l);
-      object glo = *(c->pvar);
-      if (glo != NULL) {
-#if GC_DEBUG_VERBOSE
-        fprintf(stderr, "global pvar %p\n", glo);
-#endif
-        gc_mark_black(glo);     // Mark actual object the global points to
-      }
-    }
-  }
+  gc_mark_globals(Cyc_global_variables, global_table);
 }
 
 char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,

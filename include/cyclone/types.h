@@ -670,7 +670,8 @@ size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);
 //void gc_mark(gc_heap *h, object obj);
-void gc_mark_globals(void);
+void gc_request_mark_globals(void);
+void gc_mark_globals(object globals, object global_table);
 size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
 void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
@@ -708,61 +709,5 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
 void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
 
-// "Color" objects gray by adding them to the mark stack for further processing.
-//
-// Note that stack objects are always colored red during creation, so
-// they should never be added to the mark stack. Which would be bad because it
-// could lead to stack corruption.
-//
-// Attempt to speed this up by forcing an inline
-//
-#define gc_collector_mark_gray(parent, gobj) \
-  if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
-    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
-  }
-
-#define gc_mark_black(obj) \
-{ \
-  int markColor = ck_pr_load_int(&gc_color_mark); \
-  if (is_object_type(obj) && mark(obj) != markColor) { \
-    switch (type_of(obj)) { \
-    case pair_tag:{ \
-        gc_collector_mark_gray(obj, car(obj)); \
-        gc_collector_mark_gray(obj, cdr(obj)); \
-        break; \
-      } \
-    case closure1_tag: \
-      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
-      break; \
-    case closureN_tag:{ \
-        int i, n = ((closureN) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case vector_tag:{ \
-        int i, n = ((vector) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case cvar_tag:{ \
-        cvar_type *c = (cvar_type *) obj; \
-        object pvar = *(c->pvar); \
-        if (pvar) { \
-          gc_collector_mark_gray(obj, pvar); \
-        } \
-        break; \
-      } \
-    default: \
-      break; \
-    } \
-    if (mark(obj) != gc_color_red) { \
-      mark(obj) = markColor; \
-    } \
-  } \
-}
 
 #endif                          /* CYCLONE_TYPES_H */

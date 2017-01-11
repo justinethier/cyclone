@@ -1138,51 +1138,18 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
   }
 }
 
-void gc_collector_trace()
-{
-  ck_array_iterator_t iterator;
-  gc_thread_data *m;
-  int clean = 0;
-  while (!clean) {
-    clean = 1;
-
-    CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
-// TODO: ideally, want to use a lock-free data structure to prevent
-// having to use a mutex here. see corresponding code in gc_mark_gray
-      pthread_mutex_lock(&(m->lock));
-      while (m->last_read < m->last_write) {
-        clean = 0;
-#if GC_DEBUG_VERBOSE
-        fprintf(stderr,
-                "gc_mark_black mark buffer %p, last_read = %d last_write = %d\n",
-                (m->mark_buffer)[m->last_read], m->last_read, m->last_write);
-#endif
-        gc_mark_black((m->mark_buffer)[m->last_read]);
-        gc_empty_collector_stack();
-        (m->last_read)++;       // Inc here to prevent off-by-one error
-      }
-      pthread_mutex_unlock(&(m->lock));
-
-      // Try checking the condition once more after giving the
-      // mutator a chance to respond, to prevent exiting early.
-      // This is experimental, not sure if it is necessary
-      if (clean) {
-        pthread_mutex_lock(&(m->lock));
-        if (m->last_read < m->last_write) {
-#if GC_SAFETY_CHECKS
-          fprintf(stderr,
-                  "gc_collector_trace - might have exited trace early\n");
-#endif
-          clean = 0;
-        } else if (m->pending_writes) {
-          clean = 0;
-        }
-        pthread_mutex_unlock(&(m->lock));
-      }
-    }
+// "Color" objects gray by adding them to the mark stack for further processing.
+//
+// Note that stack objects are always colored red during creation, so
+// they should never be added to the mark stack. Which would be bad because it
+// could lead to stack corruption.
+//
+// Attempt to speed this up by forcing an inline
+//
+#define gc_collector_mark_gray(parent, gobj) \
+  if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
+    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
   }
-}
-
 //static void gc_collector_mark_gray(object parent, object obj)
 //{
 //  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
@@ -1193,6 +1160,50 @@ void gc_collector_trace()
 //#endif
 //  }
 //}
+
+#define gc_mark_black(obj) \
+{ \
+  int markColor = ck_pr_load_int(&gc_color_mark); \
+  if (is_object_type(obj) && mark(obj) != markColor) { \
+    switch (type_of(obj)) { \
+    case pair_tag:{ \
+        gc_collector_mark_gray(obj, car(obj)); \
+        gc_collector_mark_gray(obj, cdr(obj)); \
+        break; \
+      } \
+    case closure1_tag: \
+      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
+      break; \
+    case closureN_tag:{ \
+        int i, n = ((closureN) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case vector_tag:{ \
+        int i, n = ((vector) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case cvar_tag:{ \
+        cvar_type *c = (cvar_type *) obj; \
+        object pvar = *(c->pvar); \
+        if (pvar) { \
+          gc_collector_mark_gray(obj, pvar); \
+        } \
+        break; \
+      } \
+    default: \
+      break; \
+    } \
+    if (mark(obj) != gc_color_red) { \
+      mark(obj) = markColor; \
+    } \
+  } \
+}
 
 /*
 void gc_mark_black(object obj)
@@ -1254,8 +1265,55 @@ void gc_mark_black(object obj)
 }
 */
 
+
+void gc_collector_trace()
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  int clean = 0;
+  while (!clean) {
+    clean = 1;
+
+    CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
+// TODO: ideally, want to use a lock-free data structure to prevent
+// having to use a mutex here. see corresponding code in gc_mark_gray
+      pthread_mutex_lock(&(m->lock));
+      while (m->last_read < m->last_write) {
+        clean = 0;
+#if GC_DEBUG_VERBOSE
+        fprintf(stderr,
+                "gc_mark_black mark buffer %p, last_read = %d last_write = %d\n",
+                (m->mark_buffer)[m->last_read], m->last_read, m->last_write);
+#endif
+        gc_mark_black((m->mark_buffer)[m->last_read]);
+        gc_empty_collector_stack();
+        (m->last_read)++;       // Inc here to prevent off-by-one error
+      }
+      pthread_mutex_unlock(&(m->lock));
+
+      // Try checking the condition once more after giving the
+      // mutator a chance to respond, to prevent exiting early.
+      // This is experimental, not sure if it is necessary
+      if (clean) {
+        pthread_mutex_lock(&(m->lock));
+        if (m->last_read < m->last_write) {
+#if GC_SAFETY_CHECKS
+          fprintf(stderr,
+                  "gc_collector_trace - might have exited trace early\n");
+#endif
+          clean = 0;
+        } else if (m->pending_writes) {
+          clean = 0;
+        }
+        pthread_mutex_unlock(&(m->lock));
+      }
+    }
+  }
+}
+
 void gc_empty_collector_stack()
 {
+  object obj;
   // Mark stack is only used by the collector thread, so no sync needed
   while (mark_stack_i > 0) {    // not empty
     mark_stack_i--;
@@ -1263,7 +1321,8 @@ void gc_empty_collector_stack()
 //    fprintf(stderr, "gc_mark_black mark stack %p \n",
 //      mark_stack[mark_stack_i]);
 //#endif
-    gc_mark_black(mark_stack[mark_stack_i]);
+    obj = mark_stack[mark_stack_i];
+    gc_mark_black(obj);
   }
 }
 
@@ -1398,9 +1457,7 @@ void gc_collector()
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - after post_handshake async\n");
 #endif
-
-TODO: call into shim in runtime, that will call back into gc_mark_globals in this module, but with global objs as parameters. this should allow us to explicitly inline all instances of gc_mark_black since they would now be in this module. and of course, none of the changes on this branch  matter if they don't actually speed anything up, so need to measure that once it compiles!
-  gc_mark_globals();
+  gc_request_mark_globals();
   gc_wait_handshake();
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - after wait_handshake async\n");
@@ -1498,6 +1555,33 @@ void gc_start_collector()
     exit(1);
   }
 }
+
+// Mark globals as part of the tracing collector
+// This is called by the collector thread
+void gc_mark_globals(object globals, object global_table)
+{
+#if GC_DEBUG_TRACE
+  //fprintf(stderr, "(gc_mark_globals heap: %p size: %d)\n", h, (unsigned int)gc_heap_total_size(h));
+  fprintf(stderr, "Cyc_global_variables %p\n", globals);
+#endif
+  // Mark global variables
+  gc_mark_black(globals);  // Internal global used by the runtime
+  // Marking it ensures all glos are marked
+  {
+    list l = global_table;
+    for (; l != NULL; l = cdr(l)) {
+      cvar_type *c = (cvar_type *) car(l);
+      object glo = *(c->pvar);
+      if (glo != NULL) {
+#if GC_DEBUG_VERBOSE
+        fprintf(stderr, "global pvar %p\n", glo);
+#endif
+        gc_mark_black(glo);     // Mark actual object the global points to
+      }
+    }
+  }
+}
+
 
 /////////////////////////////////////////////
 // END tri-color marking section
