@@ -1183,21 +1183,28 @@ void gc_collector_trace()
   }
 }
 
-static void gc_collector_mark_gray(object parent, object obj)
-{
-  // "Color" objects gray by adding them to the mark stack for further processing.
-  //
-  // Note that stack objects are always colored red during creation, so
-  // they should never be added to the mark stack. Which would be bad because it
-  // could lead to stack corruption.
-  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
-    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
-#if GC_DEBUG_VERBOSE
-    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
-            type_of(parent), obj);
-#endif
+// "Color" objects gray by adding them to the mark stack for further processing.
+//
+// Note that stack objects are always colored red during creation, so
+// they should never be added to the mark stack. Which would be bad because it
+// could lead to stack corruption.
+//
+// Attempt to speed this up by forcing an inline
+//
+#define gc_collector_mark_gray(parent, gobj) \
+  if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
+    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
   }
-}
+//static void gc_collector_mark_gray(object parent, object obj)
+//{
+//  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
+//    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
+//#if GC_DEBUG_VERBOSE
+//    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
+//            type_of(parent), obj);
+//#endif
+//  }
+//}
 
 // TODO: seriously consider changing the mark() macro to color(),
 // and sync up the header variable. that would make all of this code
