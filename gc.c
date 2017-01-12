@@ -266,7 +266,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
     return page;
   }
 #if GC_DEBUG_TRACE
-  fprintf(stderr, "DEBUG freeing heap page at addr: %p\n", page);
+  fprintf(stderr, "DEBUG freeing heap type %d page at addr: %p\n", page->type, page);
 #endif
 
   prev_page->next = page->next;
@@ -853,7 +853,9 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     // so forth. A better solution might be to keep empty heap pages
     // off to the side and only free them if there is enough free space
     // remaining without them.
-    if (gc_is_heap_empty(h) && !h->newly_created){
+    //
+    // Experimenting with only freeing huge heaps
+    if (h->type == HEAP_HUGE && gc_is_heap_empty(h) && !h->newly_created){
         unsigned int h_size = h->size;
         h = gc_heap_free(h, prev_h);
         cached_heap_free_sizes[heap_type] -= h_size;

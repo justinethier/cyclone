@@ -34,7 +34,7 @@
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
 #define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)     // Grow first page by adding this amount to it
 #define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     // Size of the first page
-#define HEAP_SIZE (32 * 1024 * 1024)    // Normal size of a page
+#define HEAP_SIZE (377 * 1024 * 1024)    // Normal size of a page
 
 /////////////////////////////
 // Major GC tuning parameters
