@@ -1150,6 +1150,7 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
   if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
   }
+
 //static void gc_collector_mark_gray(object parent, object obj)
 //{
 //  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
@@ -1161,6 +1162,8 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
 //  }
 //}
 
+// See full version below for debugging purposes.
+// Also sync any changes to this macro with the function version
 #define gc_mark_black(obj) \
 { \
   int markColor = ck_pr_load_int(&gc_color_mark); \
