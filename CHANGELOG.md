@@ -2,6 +2,7 @@
 
 Features
 
+- Enhanced performance for programs with a high allocation rate.
 - Improved error handling by `display` and `write`.
 
 Bug Fixes
