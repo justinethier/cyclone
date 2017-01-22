@@ -19,7 +19,7 @@
     thread-yield!
     thread-terminate!
     current-thread
-    ;; TODO: thread-join!
+    thread-join!
 
     mutex?
     make-mutex 
@@ -86,21 +86,40 @@
       " gc_thread_data *td = (gc_thread_data *)data;
         return_closcall1(data, k, td->scm_thread_obj); ")
 
+    (define-c %get-thread-data
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *td = (gc_thread_data *)data;
+        make_c_opaque(co, td);
+        return_closcall1(data, k, &co); ")
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
       ;; t contains any closures on the "parent" thread's stack
       (let* ((thunk (vector-ref t 1)) 
-             (thread-params (cons t thunk)))
+             (thread-params (cons t (lambda ()
+                                      (vector-set! t 2 (%get-thread-data))
+                                      (thunk)))))
         (Cyc-minor-gc)
-        (let ((mutator-id (Cyc-spawn-thread! thread-params)))
-          (vector-set! t 2 mutator-id))))
+        (Cyc-spawn-thread! thread-params)
+        ))
 
     (define (thread-yield!) (thread-sleep! 1))
     (define-c thread-terminate!
       "(void *data, int argc, closure _, object k)"
       " Cyc_end_thread(data); ")
-    ;; TODO: thread-join!
-    ;; TODO: possible to do this using mutator ID to get the pthread_t ??
+
+;; TODO: not good enough, need to return value from thread
+;; TODO: also not good enough because threads are started detached right now, which makes them unjoinable. need to reconcile that with the SRFI 18 requirement to have a join API
+    (define-c %thread-join!
+      "(void *data, int argc, closure _, object k, object thread_data_opaque)"
+      " gc_thread_data *td = (gc_thread_data *)(opaque_ptr(thread_data_opaque));
+        set_thread_blocked(data, k);
+        pthread_join(td->thread_id, NULL);
+        return_thread_runnable(data, boolean_t);")
+    (define (thread-join! t)
+      (if (and (thread? t) (Cyc-opaque? (vector-ref t 2)))
+        (%thread-join! (vector-ref t 2))
+        #f))
 
     (define-c thread-sleep!
       "(void *data, int argc, closure _, object k, object timeout)"

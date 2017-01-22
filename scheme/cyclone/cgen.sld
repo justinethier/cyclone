@@ -99,6 +99,7 @@
  thd->gc_cont = &entry_pt;
  thd->gc_args[0] = &clos_halt;
  thd->gc_num_args = 1;
+ thd->thread_id = pthread_self();
  gc_add_mutator(thd);
  Cyc_heap_init(heap_size);
  thd->thread_state = CYC_THREAD_STATE_RUNNABLE;

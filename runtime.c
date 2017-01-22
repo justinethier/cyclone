@@ -4167,6 +4167,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
 
   // Transport exception stack
   gc_move2heap(((gc_thread_data *) data)->exception_handler_stack);
+  gc_move2heap(((gc_thread_data *) data)->scm_thread_obj);
 
   // Transport mutations
   {
@@ -4720,9 +4721,7 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->gc_cont = cdr(thread_and_thunk);
   thd->gc_num_args = 1;
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
-//  thd->thread = pthread_self(); // TODO: ptr vs instance
-//  returns instance so would need to malloc here
-//  would also need to update termination code to free that memory
+  thd->thread_id = pthread_self();
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
