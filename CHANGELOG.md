@@ -7,6 +7,7 @@ Features
 
 Bug Fixes
 
+- Thanks to Koz Ross, `equal?` has been updated to check bytevectors for deep equality. 
 - Display characters such as `#\space` correctly when output via `write`.
 - Thanks for Seth Alves, removed unnecessary include of `ck_string.h` which is not provided in older versions of `libck`.
 

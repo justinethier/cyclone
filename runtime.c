@@ -588,6 +588,19 @@ int equal(object x, object y)
       return 1;
     }
     return 0;
+  case bytevector_tag:
+    if (is_object_type(y) &&
+        type_of(y) == bytevector_tag &&
+        ((bytevector) x)->len == ((bytevector) y)->len) {
+      int i;
+      for (i = 0; i < ((bytevector) x)->len; i++) {
+        if (((bytevector)x)->data[i] != ((bytevector)y)->data[i]) {
+          return 0;
+        }
+      }
+      return 1;
+    }
+    return 0;
   default:
     return x == y;
   }
