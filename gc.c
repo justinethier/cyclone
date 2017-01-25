@@ -1648,11 +1648,29 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
   }
+  thd->heap = calloc(1, sizeof(gc_heap_root));
+  thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
+  thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0);
+  thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0);
+  thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0);
+  if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
+    thd->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, 0, 0);
+  }
+  thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
+  thd->cached_heap_free_sizes = calloc(5, sizeof(uint64_t));
+  thd->cached_heap_total_sizes = calloc(5, sizeof(uint64_t));
 }
 
 void gc_thread_data_free(gc_thread_data * thd)
 {
   if (thd) {
+//
+// !!
+// TODO: (not necessarily here, but somewhere need to roll heap pages into
+// another thread data. need to include cached heap sizes/total, too.
+// then free cached heap vars here.
+// !!
+//
     if (pthread_mutex_destroy(&thd->lock) != 0) {
       // TODO: can only destroy the lock if it is unlocked. need to make sure we
       // can guarantee that is the case prior to making this call

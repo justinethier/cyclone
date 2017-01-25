@@ -140,7 +140,6 @@ if (type_is_pair_prim(clo)) { \
 /*END closcall section */
 
 /* Global variables. */
-static gc_heap_root *Cyc_heap;
 object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
@@ -261,17 +260,6 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 
 void gc_init_heap(long heap_size)
 {
-  size_t initial_heap_size = INITIAL_HEAP_SIZE;
-  Cyc_heap = calloc(1, sizeof(gc_heap_root));
-  Cyc_heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
-  Cyc_heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, initial_heap_size, 0, 0);
-  Cyc_heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, initial_heap_size, 0, 0);
-  Cyc_heap->heap[HEAP_64] = gc_heap_create(HEAP_64, initial_heap_size, 0, 0);
-  if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
-    Cyc_heap->heap[HEAP_96] = gc_heap_create(HEAP_96, initial_heap_size, 0, 0);
-  }
-  Cyc_heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
-
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,

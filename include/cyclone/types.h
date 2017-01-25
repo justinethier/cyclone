@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdint.h>
 
 // Maximum number of args that GC will accept
 #define NUM_GC_ARGS 128
@@ -141,6 +142,9 @@ struct gc_thread_data_t {
   int mark_buffer_len;
   pthread_mutex_t lock;
   pthread_t thread_id;
+  gc_heap_root *heap;
+  uint64_t *cached_heap_free_sizes;
+  uint64_t *cached_heap_total_sizes;
   // Data needed for call history
   char **stack_traces;
   int stack_trace_idx;
