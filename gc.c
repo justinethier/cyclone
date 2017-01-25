@@ -1154,71 +1154,26 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
 // they should never be added to the mark stack. Which would be bad because it
 // could lead to stack corruption.
 //
+#if GC_DEBUG_VERBOSE
+static void gc_collector_mark_gray(object parent, object obj)
+{
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
+    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
+    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
+            type_of(parent), obj);
+  }
+}
+#else
+//
 // Attempt to speed this up by forcing an inline
 //
 #define gc_collector_mark_gray(parent, gobj) \
   if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
   }
+#endif
 
-//static void gc_collector_mark_gray(object parent, object obj)
-//{
-//  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
-//    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
-//#if GC_DEBUG_VERBOSE
-//    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
-//            type_of(parent), obj);
-//#endif
-//  }
-//}
-
-// See full version below for debugging purposes.
-// Also sync any changes to this macro with the function version
-#define gc_mark_black(obj) \
-{ \
-  int markColor = ck_pr_load_int(&gc_color_mark); \
-  if (is_object_type(obj) && mark(obj) != markColor) { \
-    switch (type_of(obj)) { \
-    case pair_tag:{ \
-        gc_collector_mark_gray(obj, car(obj)); \
-        gc_collector_mark_gray(obj, cdr(obj)); \
-        break; \
-      } \
-    case closure1_tag: \
-      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
-      break; \
-    case closureN_tag:{ \
-        int i, n = ((closureN) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case vector_tag:{ \
-        int i, n = ((vector) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case cvar_tag:{ \
-        cvar_type *c = (cvar_type *) obj; \
-        object pvar = *(c->pvar); \
-        if (pvar) { \
-          gc_collector_mark_gray(obj, pvar); \
-        } \
-        break; \
-      } \
-    default: \
-      break; \
-    } \
-    if (mark(obj) != gc_color_red) { \
-      mark(obj) = markColor; \
-    } \
-  } \
-}
-
-/*
+#if GC_DEBUG_VERBOSE
 void gc_mark_black(object obj)
 {
   // TODO: is sync required to get colors? probably not on the collector
@@ -1267,16 +1222,60 @@ void gc_mark_black(object obj)
       // Only blacken objects on the heap
       mark(obj) = markColor;
     }
-#if GC_DEBUG_VERBOSE
     if (mark(obj) != gc_color_red) {
       fprintf(stderr, "marked %p %d\n", obj, markColor);
     } else {
       fprintf(stderr, "not marking stack obj %p %d\n", obj, markColor);
     }
-#endif
   }
 }
-*/
+#else
+// See full version above for debugging purposes.
+// Also sync any changes to this macro with the function version
+#define gc_mark_black(obj) \
+{ \
+  int markColor = ck_pr_load_int(&gc_color_mark); \
+  if (is_object_type(obj) && mark(obj) != markColor) { \
+    switch (type_of(obj)) { \
+    case pair_tag:{ \
+        gc_collector_mark_gray(obj, car(obj)); \
+        gc_collector_mark_gray(obj, cdr(obj)); \
+        break; \
+      } \
+    case closure1_tag: \
+      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
+      break; \
+    case closureN_tag:{ \
+        int i, n = ((closureN) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case vector_tag:{ \
+        int i, n = ((vector) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case cvar_tag:{ \
+        cvar_type *c = (cvar_type *) obj; \
+        object pvar = *(c->pvar); \
+        if (pvar) { \
+          gc_collector_mark_gray(obj, pvar); \
+        } \
+        break; \
+      } \
+    default: \
+      break; \
+    } \
+    if (mark(obj) != gc_color_red) { \
+      mark(obj) = markColor; \
+    } \
+  } \
+}
+#endif
 
 
 void gc_collector_trace()

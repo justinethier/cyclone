@@ -63,7 +63,7 @@
 /* Additional runtime checking of the GC system.
    This is here because these checks should not be
    necessary if GC is working correctly. */
-#define GC_SAFETY_CHECKS 1
+#define GC_SAFETY_CHECKS 0
 
 // General constants
 #define NANOSECONDS_PER_MILLISECOND 1000000
