@@ -1,6 +1,6 @@
 ;;; PARAFFINS -- Compute how many paraffins exist with N carbon atoms.
 
-(import (scheme base) (scheme read) (scheme write) (scheme time))
+(import (scheme base) (scheme read) (scheme write) (scheme time) (srfi 18))
 
 ;;; This benchmark uses the following R6RS procedures.
 
@@ -186,7 +186,17 @@
     (run-r7rs-benchmark
      (string-append name ":" s1 ":" s2)
      count
-     (lambda () (nb (hide count input1)))
+     (lambda () 
+       #;(thread-start!
+         (make-thread
+           (lambda ()
+             (nb (hide count input1)))))
+       (thread-start!
+         (make-thread
+           (lambda ()
+             (nb (hide count input1)))))
+       (nb (hide count input1))
+     )
      (lambda (result) (= result output)))))
 
 ;;; The following code is appended to all benchmarks.

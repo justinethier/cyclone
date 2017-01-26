@@ -1,6 +1,6 @@
 ;;; CTAK -- A version of the TAK procedure that uses continuations.
 
-(import (scheme base) (scheme read) (scheme write) (scheme time))
+(import (scheme base) (scheme read) (scheme write) (scheme time) (srfi 18))
 
 (define (ctak x y z)
   (call-with-current-continuation
@@ -35,7 +35,26 @@
      (string-append name ":" s1 ":" s2 ":" s3 ":" s4)
      count
      (lambda ()
-       (ctak (hide count input1) (hide count input2) (hide count input3)))
+       (thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       (thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       (thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       (thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       (ctak (hide count input1) (hide count input2) (hide count input3))
+
+       ;; TODO: thread-join
+     )
      (lambda (result) (equal? result output)))))
 
 ;;; The following code is appended to all benchmarks.
