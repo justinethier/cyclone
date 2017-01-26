@@ -1684,11 +1684,11 @@ void gc_thread_data_free(gc_thread_data * thd)
 {
   if (thd) {
 //
-// !!
-// TODO: (not necessarily here, but somewhere need to roll heap pages into
-// another thread data. need to include cached heap sizes/total, too.
-// then free cached heap vars here.
-// !!
+ !!
+ TODO: (not necessarily here, but somewhere need to roll heap pages into
+ another thread data. need to include cached heap sizes/total, too.
+ then free cached heap vars here.
+ !!
 //
     if (pthread_mutex_destroy(&thd->lock) != 0) {
       // TODO: can only destroy the lock if it is unlocked. need to make sure we
