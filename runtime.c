@@ -2063,12 +2063,27 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
   Cyc_check_num(data, len);
   length = unbox_number(len);
 
-  bv = alloca(sizeof(bytevector_type));
-  ((bytevector) bv)->hdr.mark = gc_color_red;
-  ((bytevector) bv)->hdr.grayed = 0;
-  ((bytevector) bv)->tag = bytevector_tag;
-  ((bytevector) bv)->len = length;
-  ((bytevector) bv)->data = alloca(sizeof(char) * length);
+  if (length >= MAX_STACK_OBJ) {
+    int heap_grown;
+    bv = gc_alloc(Cyc_heap, 
+                  sizeof(bytevector_type) + length,
+                  boolean_f, // OK to populate manually over here
+                  (gc_thread_data *)data, 
+                  &heap_grown);
+    ((bytevector) bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    ((bytevector) bv)->hdr.grayed = 0;
+    ((bytevector) bv)->tag = bytevector_tag;
+    ((bytevector) bv)->len = length;
+    ((bytevector) bv)->data = (char *)(((char *)bv) + sizeof(bytevector_type));
+  } else {
+    bv = alloca(sizeof(bytevector_type));
+    ((bytevector) bv)->hdr.mark = gc_color_red;
+    ((bytevector) bv)->hdr.grayed = 0;
+    ((bytevector) bv)->tag = bytevector_tag;
+    ((bytevector) bv)->len = length;
+    ((bytevector) bv)->data = alloca(sizeof(char) * length);
+  }
+
   if (argc > 1) {
     Cyc_check_num(data, fill);
     fill_val = unbox_number(fill);
