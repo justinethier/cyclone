@@ -146,10 +146,6 @@ void gc_initialize()
   mark_stack = vpbuffer_realloc(mark_stack, &(mark_stack_len));
 
   // Here is as good a place as any to do this...
-  if (pthread_mutex_init(&(heap_lock), NULL) != 0) {
-    fprintf(stderr, "Unable to initialize heap_lock mutex\n");
-    exit(1);
-  }
   if (pthread_mutex_init(&(mutators_lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize mutators_lock mutex\n");
     exit(1);
