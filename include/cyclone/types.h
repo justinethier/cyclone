@@ -103,56 +103,6 @@ enum object_tag {
 // Define the size of object tags
 typedef unsigned char tag_type;
 
-/* Threading */
-typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
-  CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
-  CYC_THREAD_STATE_TERMINATED
-} cyc_thread_state_type;
-
-/* Thread data structures */
-typedef struct gc_thread_data_t gc_thread_data;
-struct gc_thread_data_t {
-  // Thread object, if applicable
-  object scm_thread_obj;
-  cyc_thread_state_type thread_state;
-  // Data needed to initiate stack-based minor GC
-  char *stack_start;
-  char *stack_limit;
-  // Minor GC write barrier
-  void **mutations;
-  int mutation_buflen;
-  int mutation_count;
-  // List of objects moved to heap during minor GC
-  void **moveBuf;
-  int moveBufLen;
-  // Need the following to perform longjmp's
-  //int mutator_num;
-  jmp_buf *jmp_start;
-  // After longjmp, pick up execution using continuation/arguments
-  object gc_cont;
-  object *gc_args;
-  short gc_num_args;
-  // Data needed for heap GC
-  int gc_alloc_color;
-  int gc_status;
-  int last_write;
-  int last_read;
-  int pending_writes;
-  void **mark_buffer;
-  int mark_buffer_len;
-  pthread_mutex_t lock;
-  pthread_t thread_id;
-  gc_heap_root *heap;
-  uint64_t *cached_heap_free_sizes;
-  uint64_t *cached_heap_total_sizes;
-  // Data needed for call history
-  char **stack_traces;
-  int stack_trace_idx;
-  char *stack_prev_frame;
-  // Exception handler stack
-  object exception_handler_stack;
-};
-
 /* GC data structures */
 
 /**
@@ -232,6 +182,56 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 // the collector swaps their values as an optimization.
 #define gc_color_red  0         // Memory not to be GC'd, such as on the stack
 #define gc_color_blue 2         // Unallocated memory
+
+/* Threading */
+typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
+  CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
+  CYC_THREAD_STATE_TERMINATED
+} cyc_thread_state_type;
+
+/* Thread data structures */
+typedef struct gc_thread_data_t gc_thread_data;
+struct gc_thread_data_t {
+  // Thread object, if applicable
+  object scm_thread_obj;
+  cyc_thread_state_type thread_state;
+  // Data needed to initiate stack-based minor GC
+  char *stack_start;
+  char *stack_limit;
+  // Minor GC write barrier
+  void **mutations;
+  int mutation_buflen;
+  int mutation_count;
+  // List of objects moved to heap during minor GC
+  void **moveBuf;
+  int moveBufLen;
+  // Need the following to perform longjmp's
+  //int mutator_num;
+  jmp_buf *jmp_start;
+  // After longjmp, pick up execution using continuation/arguments
+  object gc_cont;
+  object *gc_args;
+  short gc_num_args;
+  // Data needed for heap GC
+  int gc_alloc_color;
+  int gc_status;
+  int last_write;
+  int last_read;
+  int pending_writes;
+  void **mark_buffer;
+  int mark_buffer_len;
+  pthread_mutex_t lock;
+  pthread_t thread_id;
+  gc_heap_root *heap;
+  uint64_t *cached_heap_free_sizes;
+  uint64_t *cached_heap_total_sizes;
+  // Data needed for call history
+  char **stack_traces;
+  int stack_trace_idx;
+  char *stack_prev_frame;
+  // Exception handler stack
+  object exception_handler_stack;
+};
 
 // Determine if stack has overflowed
 #if STACK_GROWTH_IS_DOWNWARD
@@ -707,7 +707,6 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
 //  body \
 //  return_thread_runnable((data), (result));
 */
-gc_heap_root *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
 /* Mutation table to support minor GC write barrier */

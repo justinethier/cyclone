@@ -55,12 +55,14 @@ static void **mark_stack = NULL;
 static int mark_stack_len = 0;
 static int mark_stack_i = 0;
 
-// Lock to protect the heap from concurrent modifications
-static pthread_mutex_t heap_lock;
-
-// Cached heap statistics
-static uint64_t cached_heap_free_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
-static uint64_t cached_heap_total_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
+// OBSOLETE:
+//// Lock to protect the heap from concurrent modifications
+//static pthread_mutex_t heap_lock;
+//
+//// Cached heap statistics
+//static uint64_t cached_heap_free_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
+//static uint64_t cached_heap_total_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
+//// END OBSOLETE
 
 // Data for each individual mutator thread
 ck_array_t Cyc_mutators, old_mutators;
@@ -720,6 +722,70 @@ size_t gc_heap_total_size(gc_heap * h)
 //  pthread_mutex_unlock(&heap_lock);
 //  return total_size;
 //}
+
+// A convenient front-end to the actual gc_sweep function.
+void gc_collector_sweep()
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  gc_heap *h;
+  int heap_type;
+  size_t freed_tmp = 0, freed = 0;
+#if GC_DEBUG_TRACE
+  size_t total_size;
+  size_t total_free;
+  time_t gc_collector_start = time(NULL);
+#endif
+
+  CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
+    for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+      h = m->heap->heap[heap_type];
+      if (h) {
+        gc_sweep(h, heap_type, &freed_tmp);
+        freed += freed_tmp;
+      }
+    }
+
+    // TODO: this loop only includes smallest 2 heaps, is that sufficient??
+    for (heap_type = 0; heap_type < 2; heap_type++) {
+      while ( ck_pr_load_64(&(m->cached_heap_free_sizes[heap_type])) <
+             (ck_pr_load_64(&(m->cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
+#if GC_DEBUG_TRACE
+        fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
+                100.0 * GC_FREE_THRESHOLD, heap_type);
+#endif
+        if (heap_type == HEAP_SM) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0);
+        } else if (heap_type == HEAP_64) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0);
+        } else if (heap_type == HEAP_REST) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0);
+        }
+      }
+    }
+#if GC_DEBUG_TRACE
+    total_size = ck_pr_load_64(&(m->cached_heap_total_sizes[HEAP_SM])) +
+                 ck_pr_load_64(&(m->cached_heap_total_sizes[HEAP_64])) + 
+#if INTPTR_MAX == INT64_MAX
+                 ck_pr_load_64(&(m->cached_heap_total_sizes[HEAP_96])) + 
+#endif
+                 ck_pr_load_64(&(m->cached_heap_total_sizes[HEAP_REST]));
+    total_free = ck_pr_load_64(&(m->cached_heap_free_sizes[HEAP_SM])) +
+                 ck_pr_load_64(&(m->cached_heap_free_sizes[HEAP_64])) + 
+#if INTPTR_MAX == INT64_MAX
+                 ck_pr_load_64(&(m->cached_heap_free_sizes[HEAP_96])) + 
+#endif
+                 ck_pr_load_64(&(m->cached_heap_free_sizes[HEAP_REST]));
+    fprintf(stderr,
+            "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
+            total_size, total_free, freed,
+            (time(NULL) - gc_collector_start));
+#endif
+  }
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "all thread heap sweeps done\n");
+#endif
+}
 
 size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
 {
@@ -1432,12 +1498,8 @@ void debug_dump_globals();
 // Main collector function
 void gc_collector()
 {
-  int old_clear, old_mark, heap_type;
-  size_t freed_tmp = 0, freed = 0;
+  int old_clear, old_mark;
 #if GC_DEBUG_TRACE
-  size_t total_size;
-  size_t total_free;
-  time_t gc_collector_start = time(NULL);
   print_allocated_obj_counts();
   print_current_time();
   fprintf(stderr, " - Starting gc_collector\n");
@@ -1483,50 +1545,8 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
+  gc_collector_sweep();
 
-  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-    gc_heap *h = gc_get_heap()->heap[heap_type];
-    if (h) {
-      gc_sweep(h, heap_type, &freed_tmp);
-      freed += freed_tmp;
-    }
-  }
-
-  // TODO: this loop only includes smallest 2 heaps, is that sufficient??
-  for (heap_type = 0; heap_type < 2; heap_type++) {
-    while ( ck_pr_load_64(&(cached_heap_free_sizes[heap_type])) <
-           (ck_pr_load_64(&(cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
-#if GC_DEBUG_TRACE
-      fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
-              100.0 * GC_FREE_THRESHOLD, heap_type);
-#endif
-      if (heap_type == HEAP_SM) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      } else if (heap_type == HEAP_64) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      } else if (heap_type == HEAP_REST) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      }
-    }
-  }
-#if GC_DEBUG_TRACE
-  total_size = ck_pr_load_64(&(cached_heap_total_sizes[HEAP_SM])) +
-               ck_pr_load_64(&(cached_heap_total_sizes[HEAP_64])) + 
-#if INTPTR_MAX == INT64_MAX
-               ck_pr_load_64(&(cached_heap_total_sizes[HEAP_96])) + 
-#endif
-               ck_pr_load_64(&(cached_heap_total_sizes[HEAP_REST]));
-  total_free = ck_pr_load_64(&(cached_heap_free_sizes[HEAP_SM])) +
-               ck_pr_load_64(&(cached_heap_free_sizes[HEAP_64])) + 
-#if INTPTR_MAX == INT64_MAX
-               ck_pr_load_64(&(cached_heap_free_sizes[HEAP_96])) + 
-#endif
-               ck_pr_load_64(&(cached_heap_free_sizes[HEAP_REST]));
-  fprintf(stderr,
-          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
-          total_size, total_free, freed,
-          (time(NULL) - gc_collector_start));
-#endif
 #if GC_DEBUG_TRACE
   fprintf(stderr, "cleaning up any old thread data\n");
 #endif
@@ -1654,7 +1674,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0);
   thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0);
   if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
-    thd->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, 0, 0);
+    thd->heap->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, 0, 0);
   }
   thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
   thd->cached_heap_free_sizes = calloc(5, sizeof(uint64_t));
