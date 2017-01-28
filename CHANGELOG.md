@@ -2,6 +2,7 @@
 
 Features
 
+- Koz Ross added an implementation of SRFI 60.
 - Enhanced performance for programs with a high allocation rate.
 - Improved error handling by `display` and `write`.
 
