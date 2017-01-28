@@ -55,14 +55,11 @@ static void **mark_stack = NULL;
 static int mark_stack_len = 0;
 static int mark_stack_i = 0;
 
-// OBSOLETE:
-//// Lock to protect the heap from concurrent modifications
-//static pthread_mutex_t heap_lock;
-//
-//// Cached heap statistics
-//static uint64_t cached_heap_free_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
-//static uint64_t cached_heap_total_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
-//// END OBSOLETE
+// Data for the "main" thread which is guaranteed to always be there.
+// Per SRFI 18:
+//    All threads are terminated when the primordial
+//    thread terminates (normally or not).
+static gc_thread_data *primordial_thread = NULL;
 
 // Data for each individual mutator thread
 ck_array_t Cyc_mutators, old_mutators;
@@ -162,6 +159,11 @@ void gc_add_mutator(gc_thread_data * thd)
   }
   ck_array_commit(&Cyc_mutators);
   pthread_mutex_unlock(&mutators_lock);
+
+  // Main thread is always the first one added
+  if (primordial_thread == NULL) {
+      primordial_thread = thd;
+  }
 }
 
 // Remove selected mutator from the mutator list.
@@ -479,7 +481,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
 {
   size_t /*cur_size,*/ new_size;
   gc_heap *h_last = h, *h_new;
-  pthread_mutex_lock(&(thd->lock)); //heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   // Compute size of new heap page
   if (heap_type == HEAP_HUGE) {
     new_size = gc_heap_align(size) + 128;
@@ -522,7 +524,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
   // Done with computing new page size
   h_new = gc_heap_create(heap_type, new_size, h_last->max_size, chunk_size, thd);
   h_last->next = h_new;
-  pthread_mutex_unlock(&(thd->lock)); //heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - grew heap\n");
 #endif
@@ -534,7 +536,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
 {
   gc_heap *h_passed = h;
   gc_free_list *f1, *f2, *f3;
-  pthread_mutex_lock(&(thd->lock)); //heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   // Start searching from the last heap page we had a successful
   // allocation from, unless the current request is for a smaller
   // block in which case there may be available memory closer to
@@ -566,12 +568,12 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
         }
         h_passed->next_free = h;
         h_passed->last_alloc_size = size;
-        pthread_mutex_unlock(&(thd->lock)); //heap_lock);
+        pthread_mutex_unlock(&(thd->heap_lock));
         return f2;
       }
     }
   }
-  pthread_mutex_unlock(&(thd->lock)); //heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
   return NULL;
 }
 
@@ -617,9 +619,9 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     if (!result) {
       fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
       fprintf(stderr, "Heap type %d diagnostics:\n", heap_type);
-      pthread_mutex_lock(&(thd->lock)); //heap_lock);
+      pthread_mutex_lock(&(thd->heap_lock));
       gc_print_stats(h);
-      pthread_mutex_unlock(&(thd->lock)); //heap_lock); // why not
+      pthread_mutex_unlock(&(thd->heap_lock)); // why not
       exit(1);                  // could throw error, but OOM is a major issue, so...
     }
   }
@@ -798,13 +800,9 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
 
   //
   // Lock the heap to prevent issues with allocations during sweep
-  // It sucks to have to use a coarse-grained lock like this, but let's
-  // be safe and prevent threading issues right now. Once the new GC
-  // works we can go back and try to speed things up (if possible)
-  // by using more fine-grained locking. Can also profile to see
-  // how much time is even spent sweeping
+  // This coarse-grained lock actually performed better than a fine-grained one.
   //
-  pthread_mutex_lock(&(thd->lock)); //heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   h->next_free = h;
   h->last_alloc_size = 0;
 
@@ -945,7 +943,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
   gc_print_stats(orig_heap_ptr);
 #endif
 
-  pthread_mutex_unlock(&(thd->lock)); //heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
   if (sum_freed_ptr)
     *sum_freed_ptr = sum_freed;
   return max_freed;
@@ -1663,6 +1661,10 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->mark_buffer_len = 128;
   thd->mark_buffer =
       vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
+  if (pthread_mutex_init(&(thd->heap_lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize thread mutex\n");
+    exit(1);
+  }
   if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
@@ -1683,13 +1685,6 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
 void gc_thread_data_free(gc_thread_data * thd)
 {
   if (thd) {
-//
-// !!
-// TODO: (not necessarily here, but somewhere need to roll heap pages into
-// another thread data. need to include cached heap sizes/total, too.
-// then free cached heap vars here.
-// !!
-//
     if (pthread_mutex_destroy(&thd->lock) != 0) {
       // TODO: can only destroy the lock if it is unlocked. need to make sure we
       // can guarantee that is the case prior to making this call
@@ -1697,6 +1692,23 @@ void gc_thread_data_free(gc_thread_data * thd)
       fprintf(stderr, "Thread mutex is locked, unable to free\n");
       exit(1);
     }
+    if (pthread_mutex_destroy(&thd->heap_lock) != 0) {
+      fprintf(stderr, "Thread heap mutex is locked, unable to free\n");
+      exit(1);
+    }
+    // Merge heaps for the terminating thread into the main thread's heap.
+    // Eventually any data that is unused will be freed, but we need to
+    // keep the heap pages for now because they could still contain live 
+    // objects.
+    // Lock the primordial thread (hopefully will not cause any deadlocks)
+    // but don't bother locking thd since it is already done by now.
+    pthread_mutex_lock(&(primordial_thread->heap_lock));
+    gc_merge_all_heaps(primordial_thread, thd);
+    pthread_mutex_unlock(&(primordial_thread->heap_lock));
+    if (thd->cached_heap_free_sizes)
+      free(thd->cached_heap_free_sizes);
+    if (thd->cached_heap_total_sizes);
+      free(thd->cached_heap_total_sizes);
     if (thd->jmp_start)
       free(thd->jmp_start);
     if (thd->gc_args)
@@ -1723,18 +1735,27 @@ void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc)
   last->next = hsrc;
 }
 
-void gc_heap_merge_all(gc_heap_root *dest, gc_heap_root *src)
+/**
+ * Merge all thread heaps into another.
+ * Assumes appropriate locks are already held.
+ */
+void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
 {
   gc_heap *hdest, *hsrc;
   int heap_type;
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-    hdest = dest->heap[heap_type];
-    hsrc = src->heap[heap_type];
+    hdest = dest->heap->heap[heap_type];
+    hsrc = src->heap->heap[heap_type];
     if (hdest && hsrc) {
       gc_heap_merge(hdest, hsrc);
+      ck_pr_add_64(&(dest->cached_heap_total_sizes[heap_type]), 
+           ck_pr_load_64(&(src->cached_heap_total_sizes[heap_type])));
+      ck_pr_add_64(&(dest->cached_heap_free_sizes[heap_type]), 
+           ck_pr_load_64(&(src->cached_heap_free_sizes[heap_type])));
     }
   }
+  fprintf(stderr, "Finished merging old heap data\n");
 }
 
 /**

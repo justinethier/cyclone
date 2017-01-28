@@ -35,7 +35,15 @@
      (string-append name ":" s1 ":" s2 ":" s3 ":" s4)
      count
      (lambda ()
-       (thread-start!
+       #;(thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       #;(thread-start!
+         (make-thread
+           (lambda ()
+             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       #;(thread-start!
          (make-thread
            (lambda ()
              (ctak (hide count input1) (hide count input2) (hide count input3)))))
@@ -43,14 +51,7 @@
          (make-thread
            (lambda ()
              (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       (thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       (thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
+       (thread-sleep! 10000)
        (ctak (hide count input1) (hide count input2) (hide count input3))
 
        ;; TODO: thread-join
