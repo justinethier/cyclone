@@ -1709,7 +1709,7 @@ void gc_thread_data_free(gc_thread_data * thd)
     pthread_mutex_unlock(&(primordial_thread->heap_lock));
     if (thd->cached_heap_free_sizes)
       free(thd->cached_heap_free_sizes);
-    if (thd->cached_heap_total_sizes);
+    if (thd->cached_heap_total_sizes)
       free(thd->cached_heap_total_sizes);
     if (thd->jmp_start)
       free(thd->jmp_start);
