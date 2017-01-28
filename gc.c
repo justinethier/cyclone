@@ -1755,7 +1755,9 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
            ck_pr_load_64(&(src->cached_heap_free_sizes[heap_type])));
     }
   }
+#ifdef GC_DEBUG_TRACE
   fprintf(stderr, "Finished merging old heap data\n");
+#endif
 }
 
 /**
