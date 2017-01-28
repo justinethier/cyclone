@@ -22,10 +22,10 @@
   "(void* data, int argc, closure _, object k, object x, object y)"
   "Cyc_check_int(data, x);
   Cyc_check_int(data, y);
-  int result = unbox_number(x) & unbox_number(y);
+  int result = ((int)unbox_number(x)) & ((int)unbox_number(y));
   return_closcall1(data, k, obj_int2obj(result));")
 
-(define (logand (x . rest))
+(define (logand x . rest)
   (if (null? rest)
     x
     (logand (raw-logand x (car rest)) (cdr rest))))
@@ -36,10 +36,10 @@
   "(void* data, int argc, closure _, object k, object x, object y)"
   "Cyc_check_int(data, x);
   Cyc_check_int(data, y);
-  int result = unbox_number(x) | unbox_number(y);
+  int result = ((int)unbox_number(x)) | ((int)unbox_number(y));
   return_closcall1(data, k, obj_int2obj(result));")
 
-(define (logior (x . rest))
+(define (logior x . rest)
   (if (null? rest)
     x
     (logior (raw-logior x (car rest)) (cdr rest))))
@@ -50,10 +50,10 @@
   "(void* data, int argc, closure _, object k, object x, object y)"
   "Cyc_check_int(data, x);
   Cyc_check_int(data, y);
-  int result = unbox_number(x) ^ unbox_number(y);
+  int result = ((int)unbox_number(x)) ^ ((int)unbox_number(y));
   return_closcall1(data, k, obj_int2obj(result));")
 
-(define (logxor (x . rest))
+(define (logxor x . rest)
   (if (null? rest)
     x
     (logxor (raw-logxor x (car rest)) (cdr rest))))
@@ -61,7 +61,7 @@
 (define-c lognot
   "(void* data, int argc, closure _, object k, object x)"
   "Cyc_check_int(data, x);
-  int result = ~(unbox_number(x));
+  int result = ~(((int)unbox_number(x)));
   return_closcall1(data, k, obj_int2obj(result));")
 
 (define bitwise-not lognot)
@@ -73,7 +73,7 @@
   Cyc_check_int(data, n0);
   Cyc_check_int(data, n1);
   int m = unbox_number(mask);
-  int result = (m & unbox_number(n0)) | ((~m) & unbox_number(n1));
+  int result = (m & ((int)unbox_number(n0))) | ((~m) & ((int)unbox_number(n1)));
   return_closcall1(data, k, obj_int2obj(result));")
 
 (define bitwise-merge bitwise-if)
@@ -83,7 +83,7 @@
 
 (define (logcount n)
   (define lookup #u8(0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4))
-  (define (logcount-rec (n tot))
+  (define (logcount-rec n tot)
     (if (zero? n)
       tot
       (logcount-rec (quotient n 16) 
