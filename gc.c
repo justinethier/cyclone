@@ -1684,11 +1684,11 @@ void gc_thread_data_free(gc_thread_data * thd)
 {
   if (thd) {
 //
- !!
- TODO: (not necessarily here, but somewhere need to roll heap pages into
- another thread data. need to include cached heap sizes/total, too.
- then free cached heap vars here.
- !!
+// !!
+// TODO: (not necessarily here, but somewhere need to roll heap pages into
+// another thread data. need to include cached heap sizes/total, too.
+// then free cached heap vars here.
+// !!
 //
     if (pthread_mutex_destroy(&thd->lock) != 0) {
       // TODO: can only destroy the lock if it is unlocked. need to make sure we
@@ -1711,6 +1711,29 @@ void gc_thread_data_free(gc_thread_data * thd)
       free(thd->mutations);
     }
     free(thd);
+  }
+}
+
+/**
+ * Merge one heap into another. Assumes appropriate locks are already held.
+ */
+void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc)
+{
+  gc_heap *last = gc_heap_last(hdest);
+  last->next = hsrc;
+}
+
+void gc_heap_merge_all(gc_heap_root *dest, gc_heap_root *src)
+{
+  gc_heap *hdest, *hsrc;
+  int heap_type;
+
+  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+    hdest = dest->heap[heap_type];
+    hsrc = src->heap[heap_type];
+    if (hdest && hsrc) {
+      gc_heap_merge(hdest, hsrc);
+    }
   }
 }
 

@@ -662,6 +662,8 @@ void gc_remove_mutator(gc_thread_data * thd);
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
                         size_t chunk_size, gc_thread_data *thd);
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
+void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
+void gc_heap_merge_all(gc_heap_root *dest, gc_heap_root *src);
 void gc_print_stats(gc_heap * h);
 int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
