@@ -266,7 +266,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
 {
   // At least for now, do not free first page
   if (prev_page == NULL || page == NULL) {
-    return page;
+    return NULL;
   }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG freeing heap type %d page at addr: %p\n", page->type, page);
@@ -928,10 +928,12 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
     if (gc_is_heap_empty(h) && 
           (h->type == HEAP_HUGE || !(h->ttl--))) {
         unsigned int h_size = h->size;
-        h = gc_heap_free(h, prev_h);
-        ck_pr_sub_64(&(thd->cached_heap_free_sizes[heap_type] ), h_size);
-        ck_pr_sub_64(&(thd->cached_heap_total_sizes[heap_type]), h_size);
-
+        gc_heap *new_h = gc_heap_free(h, prev_h);
+        if (new_h) { // Ensure free succeeded
+          h = new_h;
+          ck_pr_sub_64(&(thd->cached_heap_free_sizes[heap_type] ), h_size);
+          ck_pr_sub_64(&(thd->cached_heap_total_sizes[heap_type]), h_size);
+        }
     }
     sum_freed += heap_freed;
     heap_freed = 0;
