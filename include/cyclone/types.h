@@ -224,8 +224,8 @@ struct gc_thread_data_t {
   pthread_mutex_t heap_lock;
   pthread_t thread_id;
   gc_heap_root *heap;
-  uint64_t *cached_heap_free_sizes;
-  uint64_t *cached_heap_total_sizes;
+  uintptr_t *cached_heap_free_sizes;
+  uintptr_t *cached_heap_total_sizes;
   // Data needed for call history
   char **stack_traces;
   int stack_trace_idx;
