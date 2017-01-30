@@ -347,8 +347,8 @@ static object quote_##name = NULL;
 
 /* Define numeric types */
 
-// Integer object type is still included for now, but ints
-// should be stored using value types instead.
+// Integer object type is deprecated, integers should be stored using value types instead.
+// This is only still here because it is used internally by the runtime.
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
