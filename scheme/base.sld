@@ -1046,9 +1046,6 @@
     " Cyc_check_num(data, num);
       if (obj_is_int(num)) {
         return_closcall1(data, k, obj_int2obj( abs( obj_obj2int(num))));
-      } else if (type_of(num) == integer_tag) {
-        object obj = obj_int2obj(abs(((integer_type *)num)->value));
-        return_closcall1(data, k, obj);
       } else {
         make_double(d, fabs(((double_type *)num)->value));
         return_closcall1(data, k, &d);
@@ -1061,15 +1058,11 @@
       Cyc_check_num(data, num2);
       if (obj_is_int(num1)) {
         i = obj_obj2int(num1);
-      } else if (type_of(num1) == integer_tag) { 
-        i = ((integer_type *)num1)->value; 
       } else /* Must be double: if (type_of(num1) == double_tag)*/ { 
         i = ((double_type *)num1)->value; 
       }
       if (obj_is_int(num2)) {
         j = obj_obj2int(num2);
-      } else if (type_of(num2) == integer_tag) { 
-        j = ((integer_type *)num2)->value; 
       } else /* Must be double: if (type_of(num2) == double_tag)*/ { 
         j = ((double_type *)num2)->value; 
       }
