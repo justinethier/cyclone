@@ -1771,6 +1771,8 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
  */
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 {
+  thd->gc_cont = cont;
+  thd->gc_num_args = 0;         // Will be set later, after collection
   if (!ck_pr_cas_int((int *)&(thd->thread_state),
                      CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_BLOCKED)) {
     fprintf(stderr,
@@ -1778,8 +1780,6 @@ void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
             thd->thread_state);
     exit(1);
   }
-  thd->gc_cont = cont;
-  thd->gc_num_args = 0;         // Will be set later, after collection
 }
 
 void Cyc_apply_from_buf(void *data, int argc, object prim, object * buf);
