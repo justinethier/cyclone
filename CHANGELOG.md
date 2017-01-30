@@ -3,8 +3,9 @@
 Features
 
 - Koz Ross added an implementation of SRFI 60.
-- Enhanced performance for programs with a high allocation rate.
+- Updated the garbage collector to enhance performance for programs with a high allocation rate, and to scale better to multiple concurrent threads.
 - Improved error handling by `display` and `write`.
+- Removed the `make_int` C macro which was deprecated and could cause problems when used in FFI functions.
 
 Bug Fixes
 
