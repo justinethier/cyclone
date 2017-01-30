@@ -55,12 +55,11 @@ static void **mark_stack = NULL;
 static int mark_stack_len = 0;
 static int mark_stack_i = 0;
 
-// Lock to protect the heap from concurrent modifications
-static pthread_mutex_t heap_lock;
-
-// Cached heap statistics
-static int cached_heap_free_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
-static int cached_heap_total_sizes[7] = { 0, 0, 0, 0, 0, 0, 0 };
+// Data for the "main" thread which is guaranteed to always be there.
+// Per SRFI 18:
+//    All threads are terminated when the primordial
+//    thread terminates (normally or not).
+static gc_thread_data *primordial_thread = NULL;
 
 // Data for each individual mutator thread
 ck_array_t Cyc_mutators, old_mutators;
@@ -144,10 +143,6 @@ void gc_initialize()
   mark_stack = vpbuffer_realloc(mark_stack, &(mark_stack_len));
 
   // Here is as good a place as any to do this...
-  if (pthread_mutex_init(&(heap_lock), NULL) != 0) {
-    fprintf(stderr, "Unable to initialize heap_lock mutex\n");
-    exit(1);
-  }
   if (pthread_mutex_init(&(mutators_lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize mutators_lock mutex\n");
     exit(1);
@@ -164,6 +159,11 @@ void gc_add_mutator(gc_thread_data * thd)
   }
   ck_array_commit(&Cyc_mutators);
   pthread_mutex_unlock(&mutators_lock);
+
+  // Main thread is always the first one added
+  if (primordial_thread == NULL) {
+      primordial_thread = thd;
+  }
 }
 
 // Remove selected mutator from the mutator list.
@@ -211,8 +211,11 @@ void gc_free_old_thread_data()
   pthread_mutex_unlock(&mutators_lock);
 }
 
+/**
+ * Create a new heap page. The caller must hold the necessary locks.
+ */
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
-                        size_t chunk_size)
+                        size_t chunk_size, gc_thread_data *thd)
 {
   gc_free_list *free, *next;
   gc_heap *h;
@@ -222,12 +225,12 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
     return NULL;
   h->type = heap_type;
   h->size = size;
-  h->newly_created = 1;
+  h->ttl = 10;
   h->next_free = h;
   h->last_alloc_size = 0;
   //h->free_size = size;
-  cached_heap_total_sizes[heap_type] += size;
-  cached_heap_free_sizes[heap_type] += size;
+  ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), size);
+  ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
   h->chunk_size = chunk_size;
   h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
@@ -263,7 +266,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
 {
   // At least for now, do not free first page
   if (prev_page == NULL || page == NULL) {
-    return page;
+    return NULL;
   }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG freeing heap type %d page at addr: %p\n", page->type, page);
@@ -474,11 +477,11 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   return (char *)obj;
 }
 
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd)
 {
   size_t /*cur_size,*/ new_size;
   gc_heap *h_last = h, *h_new;
-  pthread_mutex_lock(&heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   // Compute size of new heap page
   if (heap_type == HEAP_HUGE) {
     new_size = gc_heap_align(size) + 128;
@@ -493,6 +496,9 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
       if (new_size < HEAP_SIZE) {
         new_size = prev_size + h_last->size;
         prev_size = h_last->size;
+        if (new_size > HEAP_SIZE) {
+            new_size = HEAP_SIZE;
+        }
       } else {
         new_size = HEAP_SIZE;
       }
@@ -516,9 +522,9 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size)
   // allocate larger pages if size will not fit on the page
   //new_size = gc_heap_align(((cur_size > size) ? cur_size : size));
   // Done with computing new page size
-  h_new = gc_heap_create(heap_type, new_size, h_last->max_size, chunk_size);
+  h_new = gc_heap_create(heap_type, new_size, h_last->max_size, chunk_size, thd);
   h_last->next = h_new;
-  pthread_mutex_unlock(&heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - grew heap\n");
 #endif
@@ -530,7 +536,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
 {
   gc_heap *h_passed = h;
   gc_free_list *f1, *f2, *f3;
-  pthread_mutex_lock(&heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   // Start searching from the last heap page we had a successful
   // allocation from, unless the current request is for a smaller
   // block in which case there may be available memory closer to
@@ -557,17 +563,17 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
           // Copy object into heap now to avoid any uninitialized memory issues
           gc_copy_obj(f2, obj, thd);
           //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
-          cached_heap_free_sizes[heap_type] -=
-              gc_allocated_bytes(obj, NULL, NULL);
+          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]),
+                       gc_allocated_bytes(obj, NULL, NULL));
         }
         h_passed->next_free = h;
         h_passed->last_alloc_size = size;
-        pthread_mutex_unlock(&heap_lock);
+        pthread_mutex_unlock(&(thd->heap_lock));
         return f2;
       }
     }
   }
-  pthread_mutex_unlock(&heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
   return NULL;
 }
 
@@ -607,11 +613,15 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     // A vanilla mark&sweep collector would collect now, but unfortunately
     // we can't do that because we have to go through multiple stages, some
     // of which are asynchronous. So... no choice but to grow the heap.
-    gc_grow_heap(h, heap_type, size, 0);
+    gc_grow_heap(h, heap_type, size, 0, thd);
     *heap_grown = 1;
     result = gc_try_alloc(h, heap_type, size, obj, thd);
     if (!result) {
       fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
+      fprintf(stderr, "Heap type %d diagnostics:\n", heap_type);
+      pthread_mutex_lock(&(thd->heap_lock));
+      gc_print_stats(h);
+      pthread_mutex_unlock(&(thd->heap_lock)); // why not
       exit(1);                  // could throw error, but OOM is a major issue, so...
     }
   }
@@ -690,18 +700,18 @@ gc_heap *gc_heap_last(gc_heap * h)
   return h;
 }
 
-size_t gc_heap_total_size(gc_heap * h)
-{
-  size_t total_size = 0;
-  pthread_mutex_lock(&heap_lock);
-  while (h) {
-    total_size += h->size;
-    h = h->next;
-  }
-  pthread_mutex_unlock(&heap_lock);
-  return total_size;
-}
-
+//size_t gc_heap_total_size(gc_heap * h)
+//{
+//  size_t total_size = 0;
+//  pthread_mutex_lock(&heap_lock);
+//  while (h) {
+//    total_size += h->size;
+//    h = h->next;
+//  }
+//  pthread_mutex_unlock(&heap_lock);
+//  return total_size;
+//}
+//
 //size_t gc_heap_total_free_size(gc_heap *h)
 //{
 //  size_t total_size = 0;
@@ -714,7 +724,71 @@ size_t gc_heap_total_size(gc_heap * h)
 //  return total_size;
 //}
 
-size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
+// A convenient front-end to the actual gc_sweep function.
+void gc_collector_sweep()
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  gc_heap *h;
+  int heap_type;
+  size_t freed_tmp = 0, freed = 0;
+#if GC_DEBUG_TRACE
+  size_t total_size;
+  size_t total_free;
+  time_t gc_collector_start = time(NULL);
+#endif
+
+  CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
+    for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+      h = m->heap->heap[heap_type];
+      if (h) {
+        gc_sweep(h, heap_type, &freed_tmp, m);
+        freed += freed_tmp;
+      }
+    }
+
+    // TODO: this loop only includes smallest 2 heaps, is that sufficient??
+    for (heap_type = 0; heap_type < 2; heap_type++) {
+      while ( ck_pr_load_ptr(&(m->cached_heap_free_sizes[heap_type])) <
+             (ck_pr_load_ptr(&(m->cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
+#if GC_DEBUG_TRACE
+        fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
+                100.0 * GC_FREE_THRESHOLD, heap_type);
+#endif
+        if (heap_type == HEAP_SM) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
+        } else if (heap_type == HEAP_64) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
+        } else if (heap_type == HEAP_REST) {
+          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
+        }
+      }
+    }
+#if GC_DEBUG_TRACE
+    total_size = ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_SM])) +
+                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_64])) + 
+#if INTPTR_MAX == INT64_MAX
+                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_96])) + 
+#endif
+                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_REST]));
+    total_free = ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_SM])) +
+                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_64])) + 
+#if INTPTR_MAX == INT64_MAX
+                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_96])) + 
+#endif
+                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_REST]));
+    fprintf(stderr,
+            "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
+            total_size, total_free, freed,
+            (time(NULL) - gc_collector_start));
+#endif
+  }
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "all thread heap sweeps done\n");
+#endif
+}
+
+size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd)
 {
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
   object p, end;
@@ -726,13 +800,9 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
 
   //
   // Lock the heap to prevent issues with allocations during sweep
-  // It sucks to have to use a coarse-grained lock like this, but let's
-  // be safe and prevent threading issues right now. Once the new GC
-  // works we can go back and try to speed things up (if possible)
-  // by using more fine-grained locking. Can also profile to see
-  // how much time is even spent sweeping
+  // This coarse-grained lock actually performed better than a fine-grained one.
   //
-  pthread_mutex_lock(&heap_lock);
+  pthread_mutex_lock(&(thd->heap_lock));
   h->next_free = h;
   h->last_alloc_size = 0;
 
@@ -840,7 +910,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
       }
     }
     //h->free_size += heap_freed;
-    cached_heap_free_sizes[heap_type] += heap_freed;
+    ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), heap_freed);
     // Free the heap page if possible.
     //
     // With huge heaps, this becomes more important. one of the huge
@@ -855,13 +925,16 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
     // remaining without them.
     //
     // Experimenting with only freeing huge heaps
-    if (h->type == HEAP_HUGE && gc_is_heap_empty(h) && !h->newly_created){
+    if (gc_is_heap_empty(h) && 
+          (h->type == HEAP_HUGE || !(h->ttl--))) {
         unsigned int h_size = h->size;
-        h = gc_heap_free(h, prev_h);
-        cached_heap_free_sizes[heap_type] -= h_size;
-        cached_heap_total_sizes[heap_type] -= h_size;
+        gc_heap *new_h = gc_heap_free(h, prev_h);
+        if (new_h) { // Ensure free succeeded
+          h = new_h;
+          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type] ), h_size);
+          ck_pr_sub_ptr(&(thd->cached_heap_total_sizes[heap_type]), h_size);
+        }
     }
-    h->newly_created = 0;
     sum_freed += heap_freed;
     heap_freed = 0;
   }
@@ -872,7 +945,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr)
   gc_print_stats(orig_heap_ptr);
 #endif
 
-  pthread_mutex_unlock(&heap_lock);
+  pthread_mutex_unlock(&(thd->heap_lock));
   if (sum_freed_ptr)
     *sum_freed_ptr = sum_freed;
   return max_freed;
@@ -1073,16 +1146,16 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
   // Threshold is intentially low because we have to go through an
   // entire handshake/trace/sweep cycle, ideally without growing heap.
   if (ck_pr_load_int(&gc_stage) == STAGE_RESTING &&
-      ((cached_heap_free_sizes[HEAP_SM] <
-        cached_heap_total_sizes[HEAP_SM] * GC_COLLECTION_THRESHOLD) ||
-       (cached_heap_free_sizes[HEAP_64] <
-        cached_heap_total_sizes[HEAP_64] * GC_COLLECTION_THRESHOLD) ||
+      ((ck_pr_load_ptr(&(thd->cached_heap_free_sizes[HEAP_SM])) <
+        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_SM])) * GC_COLLECTION_THRESHOLD) ||
+       (ck_pr_load_ptr(&(thd->cached_heap_free_sizes[HEAP_64])) <
+        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_64])) * GC_COLLECTION_THRESHOLD) ||
 #if INTPTR_MAX == INT64_MAX
-       (cached_heap_free_sizes[HEAP_96] <
-        cached_heap_total_sizes[HEAP_96] * GC_COLLECTION_THRESHOLD) ||
+       (ck_pr_load_ptr(&(thd->cached_heap_free_sizes[HEAP_96])) <
+        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_96])) * GC_COLLECTION_THRESHOLD) ||
 #endif
-       (cached_heap_free_sizes[HEAP_REST] <
-        cached_heap_total_sizes[HEAP_REST] * GC_COLLECTION_THRESHOLD))) {
+       (ck_pr_load_ptr(&(thd->cached_heap_free_sizes[HEAP_REST])) <
+        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_REST])) * GC_COLLECTION_THRESHOLD))) {
 #if GC_DEBUG_TRACE
     fprintf(stderr,
             "Less than %f%% of the heap is free, initiating collector\n",
@@ -1146,71 +1219,26 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
 // they should never be added to the mark stack. Which would be bad because it
 // could lead to stack corruption.
 //
+#if GC_DEBUG_VERBOSE
+static void gc_collector_mark_gray(object parent, object obj)
+{
+  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
+    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
+    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
+            type_of(parent), obj);
+  }
+}
+#else
+//
 // Attempt to speed this up by forcing an inline
 //
 #define gc_collector_mark_gray(parent, gobj) \
   if (is_object_type(gobj) && mark(gobj) == gc_color_clear) { \
     mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, gobj); \
   }
+#endif
 
-//static void gc_collector_mark_gray(object parent, object obj)
-//{
-//  if (is_object_type(obj) && mark(obj) == gc_color_clear) {
-//    mark_stack = vpbuffer_add(mark_stack, &mark_stack_len, mark_stack_i++, obj);
-//#if GC_DEBUG_VERBOSE
-//    fprintf(stderr, "mark gray parent = %p (%d) obj = %p\n", parent,
-//            type_of(parent), obj);
-//#endif
-//  }
-//}
-
-// See full version below for debugging purposes.
-// Also sync any changes to this macro with the function version
-#define gc_mark_black(obj) \
-{ \
-  int markColor = ck_pr_load_int(&gc_color_mark); \
-  if (is_object_type(obj) && mark(obj) != markColor) { \
-    switch (type_of(obj)) { \
-    case pair_tag:{ \
-        gc_collector_mark_gray(obj, car(obj)); \
-        gc_collector_mark_gray(obj, cdr(obj)); \
-        break; \
-      } \
-    case closure1_tag: \
-      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
-      break; \
-    case closureN_tag:{ \
-        int i, n = ((closureN) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case vector_tag:{ \
-        int i, n = ((vector) obj)->num_elements; \
-        for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
-        } \
-        break; \
-      } \
-    case cvar_tag:{ \
-        cvar_type *c = (cvar_type *) obj; \
-        object pvar = *(c->pvar); \
-        if (pvar) { \
-          gc_collector_mark_gray(obj, pvar); \
-        } \
-        break; \
-      } \
-    default: \
-      break; \
-    } \
-    if (mark(obj) != gc_color_red) { \
-      mark(obj) = markColor; \
-    } \
-  } \
-}
-
-/*
+#if GC_DEBUG_VERBOSE
 void gc_mark_black(object obj)
 {
   // TODO: is sync required to get colors? probably not on the collector
@@ -1259,16 +1287,60 @@ void gc_mark_black(object obj)
       // Only blacken objects on the heap
       mark(obj) = markColor;
     }
-#if GC_DEBUG_VERBOSE
     if (mark(obj) != gc_color_red) {
       fprintf(stderr, "marked %p %d\n", obj, markColor);
     } else {
       fprintf(stderr, "not marking stack obj %p %d\n", obj, markColor);
     }
-#endif
   }
 }
-*/
+#else
+// See full version above for debugging purposes.
+// Also sync any changes to this macro with the function version
+#define gc_mark_black(obj) \
+{ \
+  int markColor = ck_pr_load_int(&gc_color_mark); \
+  if (is_object_type(obj) && mark(obj) != markColor) { \
+    switch (type_of(obj)) { \
+    case pair_tag:{ \
+        gc_collector_mark_gray(obj, car(obj)); \
+        gc_collector_mark_gray(obj, cdr(obj)); \
+        break; \
+      } \
+    case closure1_tag: \
+      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
+      break; \
+    case closureN_tag:{ \
+        int i, n = ((closureN) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case vector_tag:{ \
+        int i, n = ((vector) obj)->num_elements; \
+        for (i = 0; i < n; i++) { \
+          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
+        } \
+        break; \
+      } \
+    case cvar_tag:{ \
+        cvar_type *c = (cvar_type *) obj; \
+        object pvar = *(c->pvar); \
+        if (pvar) { \
+          gc_collector_mark_gray(obj, pvar); \
+        } \
+        break; \
+      } \
+    default: \
+      break; \
+    } \
+    if (mark(obj) != gc_color_red) { \
+      mark(obj) = markColor; \
+    } \
+  } \
+}
+#endif
 
 
 void gc_collector_trace()
@@ -1425,12 +1497,8 @@ void debug_dump_globals();
 // Main collector function
 void gc_collector()
 {
-  int old_clear, old_mark, heap_type;
-  size_t freed_tmp = 0, freed = 0;
+  int old_clear, old_mark;
 #if GC_DEBUG_TRACE
-  size_t total_size;
-  size_t total_free;
-  time_t gc_collector_start = time(NULL);
   print_allocated_obj_counts();
   print_current_time();
   fprintf(stderr, " - Starting gc_collector\n");
@@ -1476,50 +1544,8 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_TRACING, STAGE_SWEEPING);
   //
   //sweep : 
+  gc_collector_sweep();
 
-  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-    gc_heap *h = gc_get_heap()->heap[heap_type];
-    if (h) {
-      gc_sweep(h, heap_type, &freed_tmp);
-      freed += freed_tmp;
-    }
-  }
-
-  // TODO: this loop only includes smallest 2 heaps, is that sufficient??
-  for (heap_type = 0; heap_type < 2; heap_type++) {
-    while (cached_heap_free_sizes[heap_type] <
-           (cached_heap_total_sizes[heap_type] * GC_FREE_THRESHOLD)) {
-#if GC_DEBUG_TRACE
-      fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
-              100.0 * GC_FREE_THRESHOLD, heap_type);
-#endif
-      if (heap_type == HEAP_SM) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      } else if (heap_type == HEAP_64) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      } else if (heap_type == HEAP_REST) {
-        gc_grow_heap(gc_get_heap()->heap[heap_type], heap_type, 0, 0);
-      }
-    }
-  }
-#if GC_DEBUG_TRACE
-  total_size = cached_heap_total_sizes[HEAP_SM] +
-               cached_heap_total_sizes[HEAP_64] + 
-#if INTPTR_MAX == INT64_MAX
-               cached_heap_total_sizes[HEAP_96] + 
-#endif
-               cached_heap_total_sizes[HEAP_REST];
-  total_free = cached_heap_free_sizes[HEAP_SM] +
-               cached_heap_free_sizes[HEAP_64] + 
-#if INTPTR_MAX == INT64_MAX
-               cached_heap_free_sizes[HEAP_96] + 
-#endif
-               cached_heap_free_sizes[HEAP_REST];
-  fprintf(stderr,
-          "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
-          total_size, total_free, freed,
-          (time(NULL) - gc_collector_start));
-#endif
 #if GC_DEBUG_TRACE
   fprintf(stderr, "cleaning up any old thread data\n");
 #endif
@@ -1637,10 +1663,25 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->mark_buffer_len = 128;
   thd->mark_buffer =
       vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
+  if (pthread_mutex_init(&(thd->heap_lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize thread mutex\n");
+    exit(1);
+  }
   if (pthread_mutex_init(&(thd->lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
   }
+  thd->cached_heap_free_sizes = calloc(5, sizeof(uintptr_t));
+  thd->cached_heap_total_sizes = calloc(5, sizeof(uintptr_t));
+  thd->heap = calloc(1, sizeof(gc_heap_root));
+  thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
+  thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0, thd);
+  thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0, thd);
+  thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0, thd);
+  if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
+    thd->heap->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, 0, 0, thd);
+  }
+  thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0, thd);
 }
 
 void gc_thread_data_free(gc_thread_data * thd)
@@ -1653,6 +1694,23 @@ void gc_thread_data_free(gc_thread_data * thd)
       fprintf(stderr, "Thread mutex is locked, unable to free\n");
       exit(1);
     }
+    if (pthread_mutex_destroy(&thd->heap_lock) != 0) {
+      fprintf(stderr, "Thread heap mutex is locked, unable to free\n");
+      exit(1);
+    }
+    // Merge heaps for the terminating thread into the main thread's heap.
+    // Eventually any data that is unused will be freed, but we need to
+    // keep the heap pages for now because they could still contain live 
+    // objects.
+    // Lock the primordial thread (hopefully will not cause any deadlocks)
+    // but don't bother locking thd since it is already done by now.
+    pthread_mutex_lock(&(primordial_thread->heap_lock));
+    gc_merge_all_heaps(primordial_thread, thd);
+    pthread_mutex_unlock(&(primordial_thread->heap_lock));
+    if (thd->cached_heap_free_sizes)
+      free(thd->cached_heap_free_sizes);
+    if (thd->cached_heap_total_sizes)
+      free(thd->cached_heap_total_sizes);
     if (thd->jmp_start)
       free(thd->jmp_start);
     if (thd->gc_args)
@@ -1671,6 +1729,40 @@ void gc_thread_data_free(gc_thread_data * thd)
 }
 
 /**
+ * Merge one heap into another. Assumes appropriate locks are already held.
+ */
+void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc)
+{
+  gc_heap *last = gc_heap_last(hdest);
+  last->next = hsrc;
+}
+
+/**
+ * Merge all thread heaps into another.
+ * Assumes appropriate locks are already held.
+ */
+void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
+{
+  gc_heap *hdest, *hsrc;
+  int heap_type;
+
+  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+    hdest = dest->heap->heap[heap_type];
+    hsrc = src->heap->heap[heap_type];
+    if (hdest && hsrc) {
+      gc_heap_merge(hdest, hsrc);
+      ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]), 
+           ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
+      ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]), 
+           ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
+    }
+  }
+#ifdef GC_DEBUG_TRACE
+  fprintf(stderr, "Finished merging old heap data\n");
+#endif
+}
+
+/**
  * Called explicitly from a mutator thread to let the collector know
  * it (may) block for an unknown period of time.
  *
@@ -1679,6 +1771,8 @@ void gc_thread_data_free(gc_thread_data * thd)
  */
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 {
+  thd->gc_cont = cont;
+  thd->gc_num_args = 0;         // Will be set later, after collection
   if (!ck_pr_cas_int((int *)&(thd->thread_state),
                      CYC_THREAD_STATE_RUNNABLE, CYC_THREAD_STATE_BLOCKED)) {
     fprintf(stderr,
@@ -1686,8 +1780,6 @@ void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
             thd->thread_state);
     exit(1);
   }
-  thd->gc_cont = cont;
-  thd->gc_num_args = 0;         // Will be set later, after collection
 }
 
 void Cyc_apply_from_buf(void *data, int argc, object prim, object * buf);

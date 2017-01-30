@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdint.h>
 
 // Maximum number of args that GC will accept
 #define NUM_GC_ARGS 128
@@ -34,7 +35,7 @@
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
 #define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)     // Grow first page by adding this amount to it
 #define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     // Size of the first page
-#define HEAP_SIZE (377 * 1024 * 1024)    // Normal size of a page
+#define HEAP_SIZE (32 * 1024 * 1024)    // Normal size of a page
 
 /////////////////////////////
 // Major GC tuning parameters
@@ -63,7 +64,7 @@
 /* Additional runtime checking of the GC system.
    This is here because these checks should not be
    necessary if GC is working correctly. */
-#define GC_SAFETY_CHECKS 1
+#define GC_SAFETY_CHECKS 0
 
 // General constants
 #define NANOSECONDS_PER_MILLISECOND 1000000
@@ -101,53 +102,6 @@ enum object_tag {
 
 // Define the size of object tags
 typedef unsigned char tag_type;
-
-/* Threading */
-typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
-  CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
-  CYC_THREAD_STATE_TERMINATED
-} cyc_thread_state_type;
-
-/* Thread data structures */
-typedef struct gc_thread_data_t gc_thread_data;
-struct gc_thread_data_t {
-  // Thread object, if applicable
-  object scm_thread_obj;
-  cyc_thread_state_type thread_state;
-  // Data needed to initiate stack-based minor GC
-  char *stack_start;
-  char *stack_limit;
-  // Minor GC write barrier
-  void **mutations;
-  int mutation_buflen;
-  int mutation_count;
-  // List of objects moved to heap during minor GC
-  void **moveBuf;
-  int moveBufLen;
-  // Need the following to perform longjmp's
-  //int mutator_num;
-  jmp_buf *jmp_start;
-  // After longjmp, pick up execution using continuation/arguments
-  object gc_cont;
-  object *gc_args;
-  short gc_num_args;
-  // Data needed for heap GC
-  int gc_alloc_color;
-  int gc_status;
-  int last_write;
-  int last_read;
-  int pending_writes;
-  void **mark_buffer;
-  int mark_buffer_len;
-  pthread_mutex_t lock;
-  pthread_t thread_id;
-  // Data needed for call history
-  char **stack_traces;
-  int stack_trace_idx;
-  char *stack_prev_frame;
-  // Exception handler stack
-  object exception_handler_stack;
-};
 
 /* GC data structures */
 
@@ -191,7 +145,7 @@ struct gc_heap_t {
   unsigned int size;
   unsigned int chunk_size;      // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
-  unsigned int newly_created;
+  unsigned int ttl; // Keep empty page alive this many times before freeing
   //
   gc_heap *next_free;
   unsigned int last_alloc_size;
@@ -228,6 +182,57 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 // the collector swaps their values as an optimization.
 #define gc_color_red  0         // Memory not to be GC'd, such as on the stack
 #define gc_color_blue 2         // Unallocated memory
+
+/* Threading */
+typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
+  CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
+  CYC_THREAD_STATE_TERMINATED
+} cyc_thread_state_type;
+
+/* Thread data structures */
+typedef struct gc_thread_data_t gc_thread_data;
+struct gc_thread_data_t {
+  // Thread object, if applicable
+  object scm_thread_obj;
+  cyc_thread_state_type thread_state;
+  // Data needed to initiate stack-based minor GC
+  char *stack_start;
+  char *stack_limit;
+  // Minor GC write barrier
+  void **mutations;
+  int mutation_buflen;
+  int mutation_count;
+  // List of objects moved to heap during minor GC
+  void **moveBuf;
+  int moveBufLen;
+  // Need the following to perform longjmp's
+  //int mutator_num;
+  jmp_buf *jmp_start;
+  // After longjmp, pick up execution using continuation/arguments
+  object gc_cont;
+  object *gc_args;
+  short gc_num_args;
+  // Data needed for heap GC
+  int gc_alloc_color;
+  int gc_status;
+  int last_write;
+  int last_read;
+  int pending_writes;
+  void **mark_buffer;
+  int mark_buffer_len;
+  pthread_mutex_t lock;
+  pthread_mutex_t heap_lock;
+  pthread_t thread_id;
+  gc_heap_root *heap;
+  uintptr_t *cached_heap_free_sizes;
+  uintptr_t *cached_heap_total_sizes;
+  // Data needed for call history
+  char **stack_traces;
+  int stack_trace_idx;
+  char *stack_prev_frame;
+  // Exception handler stack
+  object exception_handler_stack;
+};
 
 // Determine if stack has overflowed
 #if STACK_GROWTH_IS_DOWNWARD
@@ -350,12 +355,6 @@ typedef struct {
   int value;
   int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
 } integer_type;
-#define make_int(n,v) \
-  integer_type n; \
-  n.hdr.mark = gc_color_red; \
-  n.hdr.grayed = 0; \
-  n.tag = integer_tag; \
-  n.value = v;
 
 typedef struct {
   gc_header_type hdr;
@@ -656,10 +655,12 @@ void gc_initialize();
 void gc_add_mutator(gc_thread_data * thd);
 void gc_remove_mutator(gc_thread_data * thd);
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
-                        size_t chunk_size);
+                        size_t chunk_size, gc_thread_data *thd);
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
+void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
+void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
 void gc_print_stats(gc_heap * h);
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size);
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
@@ -673,7 +674,7 @@ size_t gc_heap_total_size(gc_heap * h);
 //void gc_mark(gc_heap *h, object obj);
 void gc_request_mark_globals(void);
 void gc_mark_globals(object globals, object global_table);
-size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr);
+size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
 void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
@@ -703,7 +704,6 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
 //  body \
 //  return_thread_runnable((data), (result));
 */
-gc_heap_root *gc_get_heap();
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
 /* Mutation table to support minor GC write barrier */

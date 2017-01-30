@@ -140,7 +140,6 @@ if (type_is_pair_prim(clo)) { \
 /*END closcall section */
 
 /* Global variables. */
-static gc_heap_root *Cyc_heap;
 object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
@@ -261,17 +260,6 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 
 void gc_init_heap(long heap_size)
 {
-  size_t initial_heap_size = INITIAL_HEAP_SIZE;
-  Cyc_heap = calloc(1, sizeof(gc_heap_root));
-  Cyc_heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
-  Cyc_heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, initial_heap_size, 0, 0);
-  Cyc_heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, initial_heap_size, 0, 0);
-  Cyc_heap->heap[HEAP_64] = gc_heap_create(HEAP_64, initial_heap_size, 0, 0);
-  if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
-    Cyc_heap->heap[HEAP_96] = gc_heap_create(HEAP_96, initial_heap_size, 0, 0);
-  }
-  Cyc_heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0);
-
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
@@ -283,11 +271,6 @@ void gc_init_heap(long heap_size)
     fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
     exit(1);
   }
-}
-
-gc_heap_root *gc_get_heap()
-{
-  return Cyc_heap;
 }
 
 object cell_get(object cell)
@@ -1071,7 +1054,7 @@ object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 {
   object p = NULL;
   int heap_grown;
-  p = gc_alloc(Cyc_heap, 
+  p = gc_alloc(((gc_thread_data *)data)->heap, 
                sizeof(port_type),
                (char *)stack_p,
                (gc_thread_data *)data, 
@@ -1385,8 +1368,8 @@ object Cyc_is_procedure(void *data, object o)
         tag == closure1_tag || tag == closureN_tag || tag == primitive_tag) {
       return boolean_t;
     } else if (tag == pair_tag) {
-      integer_type l = Cyc_length_as_object(data, o);
-      if (l.value > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
+      int i = obj_obj2int(Cyc_length(data, o));
+      if (i > 0 && Cyc_is_symbol(car(o)) == boolean_t) {
         if (strncmp(((symbol) car(o))->desc, "primitive", 10) == 0 ||
             strncmp(((symbol) car(o))->desc, "procedure", 10) == 0) {
           return boolean_t;
@@ -1496,19 +1479,6 @@ object Cyc_vector_ref(void *data, object v, object k)
   }
 
   return ((vector) v)->elements[idx];
-}
-
-integer_type Cyc_length_as_object(void *data, object l)
-{
-  make_int(len, 0);
-  while ((l != NULL)) {
-    if (is_value_type(l) || ((list) l)->tag != pair_tag) {
-      Cyc_rt_raise2(data, "length - invalid parameter, expected list", l);
-    }
-    l = cdr(l);
-    len.value++;
-  }
-  return len;
 }
 
 object Cyc_vector_length(void *data, object v)
@@ -2019,7 +1989,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     // TODO: mark this thread as potentially blocking before doing
     //       the allocation????
     int heap_grown;
-    v = gc_alloc(Cyc_heap, 
+    v = gc_alloc(((gc_thread_data *)data)->heap, 
                  sizeof(vector_type) + element_vec_size,
                  boolean_f, // OK to populate manually over here
                  (gc_thread_data *)data, 
@@ -2065,7 +2035,7 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 
   if (length >= MAX_STACK_OBJ) {
     int heap_grown;
-    bv = gc_alloc(Cyc_heap, 
+    bv = gc_alloc(((gc_thread_data *)data)->heap,
                   sizeof(bytevector_type) + length,
                   boolean_f, // OK to populate manually over here
                   (gc_thread_data *)data, 
@@ -3267,30 +3237,30 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args)
 
 void __87(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_sum, cont, cont, args);
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_sum, cont, cont, args);
 }
 
 void __91(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "-", 1, args);
   {
-    integer_type argc = Cyc_length_as_object(data, args);
-    dispatch(data, argc.value, (function_type) dispatch_sub, cont, cont, args);
+    int argc = obj_obj2int(Cyc_length(data, args));
+    dispatch(data, argc, (function_type) dispatch_sub, cont, cont, args);
 }}
 
 void __85(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_mul, cont, cont, args);
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_mul, cont, cont, args);
 }
 
 void __95(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "/", 1, args);
   {
-    integer_type argc = Cyc_length_as_object(data, args);
-    dispatch(data, argc.value, (function_type) dispatch_div, cont, cont, args);
+    int argc = obj_obj2int(Cyc_length(data, args));
+    dispatch(data, argc, (function_type) dispatch_div, cont, cont, args);
 }}
 
 void _Cyc_91cvar_127(void *data, object cont, object args)
@@ -3449,33 +3419,33 @@ void _cell(void *data, object cont, object args)
 
 void __123(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_num_eq, cont, cont, args);
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_num_eq, cont, cont, args);
 }
 
 void __125(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_num_gt, cont, cont, args);
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_num_gt, cont, cont, args);
 }
 
 void __121(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_num_lt, cont, cont, args);
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_num_lt, cont, cont, args);
 }
 
 void __125_123(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_num_gte, cont, cont,
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_num_gte, cont, cont,
            args);
 }
 
 void __121_123(void *data, object cont, object args)
 {
-  integer_type argc = Cyc_length_as_object(data, args);
-  dispatch(data, argc.value, (function_type) dispatch_num_lte, cont, cont,
+  int argc = obj_obj2int(Cyc_length(data, args));
+  dispatch(data, argc, (function_type) dispatch_num_lte, cont, cont,
            args);
 }
 
@@ -3598,9 +3568,6 @@ void _cyc_system(void *data, object cont, object args)
     return_closcall1(data, cont, obj);
 }}
 
-//void _error(void *data, object cont, object args) {
-//    integer_type argc = Cyc_length_as_object(args);
-//    dispatch_va(data, argc.value, dispatch_error, cont, cont, args); }
 void _Cyc_91current_91exception_91handler(void *data, object cont, object args)
 {
   object handler = Cyc_current_exception_handler(data);
@@ -4054,30 +4021,31 @@ char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
 
 char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
 {
+  gc_heap_root *heap = thd->heap;
   if (!is_object_type(obj))
     return obj;
   switch (type_of(obj)) {
   case pair_tag:{
-      list hp = gc_alloc(Cyc_heap, sizeof(pair_type), obj, thd, heap_grown);
+      list hp = gc_alloc(heap, sizeof(pair_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case macro_tag:{
       macro_type *hp =
-          gc_alloc(Cyc_heap, sizeof(macro_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(macro_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case closure0_tag:{
       closure0_type *hp =
-          gc_alloc(Cyc_heap, sizeof(closure0_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(closure0_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case closure1_tag:{
       closure1_type *hp =
-          gc_alloc(Cyc_heap, sizeof(closure1_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(closure1_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case closureN_tag:{
-      closureN_type *hp = gc_alloc(Cyc_heap,
+      closureN_type *hp = gc_alloc(heap,
                                    sizeof(closureN_type) +
                                    sizeof(object) *
                                    (((closureN) obj)->num_elements),
@@ -4085,7 +4053,7 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case vector_tag:{
-      vector_type *hp = gc_alloc(Cyc_heap,
+      vector_type *hp = gc_alloc(heap,
                                  sizeof(vector_type) +
                                  sizeof(object) *
                                  (((vector) obj)->num_elements),
@@ -4093,41 +4061,41 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case bytevector_tag:{
-      bytevector_type *hp = gc_alloc(Cyc_heap,
+      bytevector_type *hp = gc_alloc(heap,
                                      sizeof(bytevector_type) +
                                      sizeof(char) * (((bytevector) obj)->len),
                                      obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case string_tag:{
-      string_type *hp = gc_alloc(Cyc_heap,
+      string_type *hp = gc_alloc(heap,
                                  sizeof(string_type) + ((string_len(obj) + 1)),
                                  obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case integer_tag:{
       integer_type *hp =
-          gc_alloc(Cyc_heap, sizeof(integer_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(integer_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case double_tag:{
       double_type *hp =
-          gc_alloc(Cyc_heap, sizeof(double_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(double_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case port_tag:{
       port_type *hp =
-          gc_alloc(Cyc_heap, sizeof(port_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case cvar_tag:{
       cvar_type *hp =
-          gc_alloc(Cyc_heap, sizeof(cvar_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(cvar_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case c_opaque_tag:{
       c_opaque_type *hp =
-          gc_alloc(Cyc_heap, sizeof(c_opaque_type), obj, thd, heap_grown);
+          gc_alloc(heap, sizeof(c_opaque_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case forward_tag:
@@ -4847,7 +4815,7 @@ object copy2heap(void *data, object obj)
     return obj;
   }
 
-  return gc_alloc(Cyc_heap, gc_allocated_bytes(obj, NULL, NULL), obj, data,
+  return gc_alloc(((gc_thread_data *)data)->heap, gc_allocated_bytes(obj, NULL, NULL), obj, data,
                   &on_stack);
 }
 

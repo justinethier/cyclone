@@ -179,7 +179,6 @@ object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
 object Cyc_set_cdr(void *, object l, object val);
 object Cyc_length(void *d, object l);
-integer_type Cyc_length_as_object(void *d, object l);
 object Cyc_vector_length(void *data, object v);
 object Cyc_vector_ref(void *d, object v, object k);
 object Cyc_vector_set(void *d, object v, object k, object obj);
