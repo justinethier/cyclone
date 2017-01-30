@@ -355,12 +355,6 @@ typedef struct {
   int value;
   int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
 } integer_type;
-#define make_int(n,v) \
-  integer_type n; \
-  n.hdr.mark = gc_color_red; \
-  n.hdr.grayed = 0; \
-  n.tag = integer_tag; \
-  n.value = v;
 
 typedef struct {
   gc_header_type hdr;
