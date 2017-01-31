@@ -73,7 +73,7 @@
   (test 0 (integer-length 0))
   (test 4 (integer-length #b1111)))
 
-(define fsb-results #u8(-1, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4))
+(define fsb-results #u8(-1 0 1 0 2 0 1 0 3 0 1 0 2 0 1 0 4))
 
 (test-group
   "log2-binary-factors"
