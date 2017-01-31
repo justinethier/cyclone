@@ -297,7 +297,7 @@
       (read-all port))))
 
 ;; Compile and emit:
-(define (run-compiler args cc?)
+(define (run-compiler args cc? append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
@@ -373,7 +373,25 @@
             (else
               (display comp-lib-cmd)
               (newline))))))))
-          
+
+;; Collect values for the given command line arguments and option.
+;; Will return a list of values for the option.
+;; For example:
+;;  ("-a" "1" "2") ==> ("1")
+;;  ("-a" "1" -a "2") ==> ("1" "2")
+(define (collect-opt-values args opt)
+  (cdr
+    (foldl
+      (lambda (arg accum)
+        (cond
+          ((equal? arg opt)
+           (cons opt (cdr accum)))
+          ((car accum) ;; we are at an opt value
+           (cons #f (cons arg (cdr accum))))
+          (else
+           (cons #f (cdr accum)))))
+      (list #f)
+      args)))
 
 ;; Handle command line arguments
 (let* ((args (command-line-arguments)) ;; TODO: port (command-line-arguments) to husk??
@@ -382,7 +400,9 @@
                      (not (and (> (string-length arg) 1)
                                (equal? #\- (string-ref arg 0)))))
                    args))
-       (compile? #t))
+       (compile? #t)
+       (append-dirs (collect-opt-values args "-A"))
+       (prepend-dirs (collect-opt-values args "-I")))
   ;; Set optimization level(s)
   (if (member "-O0" args)
       (set! *optimization-level* 0))
@@ -419,5 +439,5 @@
      (display "cyclone: no input file")
      (newline))
     (else
-      (run-compiler non-opts compile?))))
+      (run-compiler non-opts compile? append-dirs prepend-dirs))))
 
