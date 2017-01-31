@@ -27,7 +27,7 @@
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
-(define (c-compile-and-emit input-program lib-deps src-file)
+(define (c-compile-and-emit input-program lib-deps src-file append-dirs prepend-dirs)
   (call/cc 
     (lambda (return)
       (define globals '())
@@ -105,10 +105,10 @@
       ;; As of now, that will have to be dealt with later.
       (trace:info "imports:")
       (trace:info imports)
-      (set! imported-vars (lib:imports->idb imports))
+      (set! imported-vars (lib:imports->idb imports append-dirs prepend-dirs))
       (trace:info "resolved imports:")
       (trace:info imported-vars)
-      (let ((meta (lib:resolve-meta imports)))
+      (let ((meta (lib:resolve-meta imports append-dirs prepend-dirs)))
         (set! *defined-macros* (append meta *defined-macros*))
         (trace:info "resolved macros:")
         (trace:info meta))
@@ -314,7 +314,7 @@
              (with-output-to-file 
                src-file
                (lambda ()
-                 (c-compile-and-emit program lib-deps in-file)))))
+                 (c-compile-and-emit program lib-deps in-file append-dirs prepend-dirs)))))
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file

@@ -275,9 +275,9 @@
     imports))
 
 ;; Read export list for a given import
-(define (lib:import->export-list import)
+(define (lib:import->export-list import append-dirs prepend-dirs)
   (let* ((lib-name (lib:import->library-name import))
-         (dir (string-append (lib:import->filename lib-name)))
+         (dir (string-append (lib:import->filename lib-name ".sld" append-dirs prepend-dirs)))
          (fp (open-input-file dir))
          (lib (read-all fp))
          (exports (lib:exports (car lib))))
@@ -386,7 +386,7 @@
 ;;
 ;; TODO: convert this to use a hashtable. Initially a-lists
 ;; will be used to prove out the concept, but this is inefficient
-(define (lib:imports->idb imports)
+(define (lib:imports->idb imports append-dirs prepend-dirs)
  (apply
    append
    (map 
@@ -398,7 +398,7 @@
               (cons id lib-name)
               ids))
           '()
-           (lib:import->export-list import-set))))
+           (lib:import->export-list import-set append-dirs prepend-dirs))))
      (map lib:list->import-set imports))))
 
 ;; Convert from the import DB to a list of identifiers that are imported.
@@ -448,9 +448,9 @@
           (car entry)))
       #f))
 
-(define (lib:import->metalist import)
+(define (lib:import->metalist import append-dirs prepend-dirs)
   (let* ((lib-name (lib:import->library-name import))
-         (file (lib:import->filename lib-name ".meta"))
+         (file (lib:import->filename lib-name ".meta" append-dirs prepend-dirs))
          (fp #f)
          (result '()))
     (cond
@@ -460,12 +460,12 @@
        (close-input-port fp)))
     result))
 
-(define (lib:resolve-meta imports)
+(define (lib:resolve-meta imports append-dirs prepend-dirs)
  (apply
    append
    (map 
      (lambda (import)
-       (lib:import->metalist import))
+       (lib:import->metalist import append-dirs prepend-dirs))
      imports)))
 
 ;; Given an import set, get all dependant import names that are required
