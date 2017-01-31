@@ -229,8 +229,8 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->next_free = h;
   h->last_alloc_size = 0;
   //h->free_size = size;
-  ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), (void *)size);
-  ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), (void *)size);
+  ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), size);
+  ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
   h->chunk_size = chunk_size;
   h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
@@ -564,7 +564,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
           gc_copy_obj(f2, obj, thd);
           //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
           ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]),
-                       (void *)gc_allocated_bytes(obj, NULL, NULL));
+                       gc_allocated_bytes(obj, NULL, NULL));
         }
         h_passed->next_free = h;
         h_passed->last_alloc_size = size;
@@ -910,7 +910,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
       }
     }
     //h->free_size += heap_freed;
-    ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), (void *)heap_freed);
+    ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), heap_freed);
     // Free the heap page if possible.
     //
     // With huge heaps, this becomes more important. one of the huge
@@ -931,8 +931,8 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
         gc_heap *new_h = gc_heap_free(h, prev_h);
         if (new_h) { // Ensure free succeeded
           h = new_h;
-          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type] ), (void *)h_size);
-          ck_pr_sub_ptr(&(thd->cached_heap_total_sizes[heap_type]), (void *)h_size);
+          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type] ), h_size);
+          ck_pr_sub_ptr(&(thd->cached_heap_total_sizes[heap_type]), h_size);
         }
     }
     sum_freed += heap_freed;
@@ -1752,9 +1752,9 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
     if (hdest && hsrc) {
       gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]), 
-           (void *)ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
+           ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]), 
-           (void *)ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
+           ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
     }
   }
 #ifdef GC_DEBUG_TRACE
