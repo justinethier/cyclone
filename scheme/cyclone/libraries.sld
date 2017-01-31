@@ -187,12 +187,23 @@
      (error "Unexpected type in import set"))))
 
 ;; Resolve library filename given an import. 
-;; Assumes ".sld" file extension if one is not specified.
-(define (lib:import->filename import . ext)
+;; Options:
+;; - Extension, assumes ".sld" file extension if one is not specified.
+;; - Append path, list of strings
+;; - Prepend path, list of strings
+(define (lib:import->filename import . opts)
   (let* ((file-ext 
-          (if (null? ext)
+          (if (null? opts)
               ".sld"
-              (car ext)))
+              (car opts)))
+         (append-dirs
+          (if (or (null? opts) (null? (cdr opts)))
+              '()
+              (cadr opts)))
+         (prepend-dirs
+          (if (or (null? opts) (null? (cdr opts)) (null? (cddr opts)))
+              '()
+              (caddr opts)))
          (filename*
           (string-append
             (apply
@@ -203,11 +214,24 @@
                 import))
             file-ext))
          (filename
-           (substring filename* 1 (string-length filename*))))
-    (if (or (tagged-list? 'scheme import)
-            (tagged-list? 'srfi import))
-      (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
-      filename)))
+           (substring filename* 1 (string-length filename*)))
+         (dir (if (or (tagged-list? 'scheme import)
+                      (tagged-list? 'srfi import))
+                  (Cyc-installation-dir 'sld)
+                  "")))
+    (call/cc
+      (lambda (return)
+        (for-each
+          (lambda (path)
+            (let ((f (string-append path "/" filename)))
+              (if (file-exists? f) 
+                  (return f))))
+          (append prepend-dirs (list dir) append-dirs))
+        ;; Not found, just return base name
+        (if (> (string-length dir) 0)
+            (string-append dir "/" filename)
+            filename)))
+  ))
 
 ;; Get path to directory that contains the library
 (define (lib:import->path import)
