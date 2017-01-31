@@ -325,7 +325,7 @@
                     string-append
                     (map
                       (lambda (i)
-                        (string-append " " (lib:import->filename i ".o") " "))
+                        (string-append " " (lib:import->filename i ".o" append-dirs prepend-dirs) " "))
                       lib-deps)))
                  (comp-prog-cmd 
                    (string-replace-all 
@@ -395,11 +395,15 @@
 
 ;; Handle command line arguments
 (let* ((args (command-line-arguments)) ;; TODO: port (command-line-arguments) to husk??
-       (non-opts (filter
-                   (lambda (arg) 
-                     (not (and (> (string-length arg) 1)
-                               (equal? #\- (string-ref arg 0)))))
-                   args))
+       (non-opts 
+        (if (null? args)
+            '()
+            (list (car (reverse args)))))
+                ; (filter
+                ;   (lambda (arg) 
+                ;     (not (and (> (string-length arg) 1)
+                ;               (equal? #\- (string-ref arg 0)))))
+                ;   args))
        (compile? #t)
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
