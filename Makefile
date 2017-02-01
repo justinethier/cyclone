@@ -5,7 +5,7 @@
 include Makefile.config
 
 CYCLONE = cyclone
-TESTSCM = unit-tests
+TESTSCM = unit-tests srfi-60-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 BOOTSTRAP_DIR = ../cyclone-bootstrap
 
