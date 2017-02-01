@@ -4,8 +4,8 @@
 
 include Makefile.config
 
-CYCLONE = cyclone
-TESTSCM = unit-tests
+CYCLONE = ../cyclone-bootstrap/cyclone -A . -A ../cyclone-bootstrap
+TESTSCM = unit-tests srfi-60-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 BOOTSTRAP_DIR = ../cyclone-bootstrap
 
@@ -175,7 +175,7 @@ examples:
 
 .PHONY: test
 test: $(TESTFILES) $(CYCLONE) $(COBJECTS)
-	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone -A . tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
+	$(foreach f,$(TESTSCM), echo tests/$(f) ; $(CYCLONE) tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
 .PHONY: tags
 tags:
