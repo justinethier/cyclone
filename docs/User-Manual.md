@@ -97,8 +97,11 @@ Cyclone will not automatically generate libraries when compiling a program. Each
 
 Option | Notes
 ------ | -----
-`-t`            | Show intermediate trace output in generated C files
+`-A directory`  | Append directory to the list of directories that are searched in order to locate imported libraries.
+`-I directory`  | Prepend directory to the list of directories that are searched in order to locate imported libraries.
+`-Ox`           | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
 `-d`            | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
+`-t`            | Show intermediate trace output in generated C files
 `-h, --help`    | Display usage information
 `-v`            | Display version information
 
