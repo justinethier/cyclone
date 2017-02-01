@@ -421,13 +421,16 @@
     ((or (member "-h" args)
          (member "--help" args))
      (display "
- -t              Show intermediate trace output in generated C files
- -d              Only generate intermediate C files, do not compile them
- -h, --help      Display usage information
- -v              Display version information
+ -A directory    Append directory to the list of directories that are searched 
+                 in order to locate imported libraries.
+ -I directory    Prepend directory to the list of directories that are searched 
+                 in order to locate imported libraries.
  -Ox             Optimization level, higher means more optimizations will
                  be used. Set to 0 to disable optimizations.
- --autogen       Cyclone developer use only, create autogen.out file
+ -d              Only generate intermediate C files, do not compile them
+ -t              Show intermediate trace output in generated C files
+ -h, --help      Display usage information
+ -v              Display version information
 ")
      (newline))
     ((member "-v" args)
