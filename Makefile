@@ -174,8 +174,8 @@ examples:
 	cd examples ; make
 
 .PHONY: test
-test: $(TESTFILES) $(CYCLONE)
-	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
+test: $(TESTFILES) $(CYCLONE) $(COBJECTS)
+	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone -A . tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
 .PHONY: tags
 tags:
