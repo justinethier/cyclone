@@ -3,6 +3,16 @@
 Features
 
 - Koz Ross added an implementation of SRFI 60.
+- Added the `-A` and `-I` compiler options from SRFI 138 to `cyclone`:
+
+  > `-A directory` 
+  >
+  > Append directory to the list of directories that are searched in order to locate imported libraries.
+  >
+  > `-I directory`
+  >
+  > Prepend directory to the list of directories that are searched in order to locate imported libraries.
+
 - Updated the garbage collector to enhance performance for programs with a high allocation rate, and to scale better to multiple concurrent threads.
 - Improved error handling by `display` and `write`.
 - Removed the `make_int` C macro which was deprecated and could cause problems when used in FFI functions.
