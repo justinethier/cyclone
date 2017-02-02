@@ -27,7 +27,8 @@
 ;; Code emission.
   
 ; c-compile-and-emit : (string -> A) exp -> void
-(define (c-compile-and-emit input-program lib-deps src-file append-dirs prepend-dirs)
+(define (c-compile-and-emit input-program program:imports/code 
+                            lib-deps src-file append-dirs prepend-dirs)
   (call/cc 
     (lambda (return)
       (define globals '())
@@ -81,7 +82,7 @@
                (reverse includes))))) ;; Append code in same order as the library's includes
         (else
           ;; Handle imports, if present
-          (let ((reduction (import-reduction input-program)))
+          (let ((reduction program:imports/code))
             (set! imports (car reduction))
             (set! input-program (cdr reduction)))
 
@@ -330,13 +331,11 @@
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
-TODO: for a program need to get the import list here, not later on.
-then pass that import list futher as well as using it here in the 
-call to lib:get-all-import-deps:
+         (program:imports/code (if program? (import-reduction in-prog) '()))
          (lib-deps 
-           (if (and program? 
-                   (tagged-list? 'import (car in-prog)))
-             (lib:get-all-import-deps (cdar in-prog) append-dirs prepend-dirs)
+           (if (and program?
+                    (not (null? (car program:imports/code))))
+             (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)
             '()))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
@@ -346,7 +345,8 @@ call to lib:get-all-import-deps:
              (with-output-to-file 
                src-file
                (lambda ()
-                 (c-compile-and-emit program lib-deps in-file append-dirs prepend-dirs)))))
+                 (c-compile-and-emit program program:imports/code 
+                                     lib-deps in-file append-dirs prepend-dirs)))))
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file
