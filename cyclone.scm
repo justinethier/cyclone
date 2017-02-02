@@ -73,9 +73,10 @@
              (for-each
                (lambda (include)
                  (set! input-program 
-                       (append (read-file (string-append 
-                                            (lib:import->path lib-name) 
-                                            include)) 
+                       (append (read-file ;(string-append 
+                                            (lib:import->path lib-name append-dirs prepend-dirs include) 
+                                            ;include)
+                       ) 
                                input-program)))
                (reverse includes))))) ;; Append code in same order as the library's includes
         (else

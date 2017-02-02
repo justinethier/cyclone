@@ -234,7 +234,7 @@
   ))
 
 ;; Get path to directory that contains the library
-(define (lib:import->path import)
+(define (lib:import->path import append-dirs prepend-dirs include)
   (let* ((import-path (reverse (cdr (reverse import))))
          (path
            (apply
@@ -242,10 +242,30 @@
              (map 
                (lambda (i) 
                  (string-append (lib:atom->string i) "/"))
-               import-path))))
-    (if (tagged-list? 'scheme import)
-      (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
-      path)))
+               import-path)))
+         (filename
+          (string-append path "" include))
+         (dir (if (or (tagged-list? 'scheme import)
+                      ;(tagged-list? 'srfi import)
+                  )
+                  (Cyc-installation-dir 'sld)
+                  "")))
+    (call/cc
+      (lambda (return)
+        (for-each
+          (lambda (path)
+            (let ((f (string-append path "/" filename)))
+              (if (file-exists? f) 
+                  (return f))))
+          (append prepend-dirs (list dir) append-dirs))
+        ;; Not found, just return base name
+        (if (> (string-length dir) 0)
+            (string-append dir "/" filename)
+            filename)))
+    ;(if (tagged-list? 'scheme import)
+    ;  (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
+    ;  path)
+  ))
 
 ;; Given a program's import set, resolve each import to its .o file, then
 ;; process each import recursively to get the .o files that each one of those
