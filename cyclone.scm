@@ -288,6 +288,14 @@
 ;; - imports
 ;; - remaining program
 (define (import-reduction expr)
+  ;; TODO: consolidate this with other macro loading code
+  (define rename-env (env:extend-environment '() '() '()))
+  (let ((macros (filter 
+                  (lambda (v) 
+                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
+                  (Cyc-global-vars))))
+    (macro:load-env! macros (create-environment '() '())))
+  ;;
   (let ((results
           (foldl
             (lambda (ex accum)
@@ -298,14 +306,12 @@
                   (else
                     (cons (car accum) (cons e (cdr accum))))))
               (cond
-               ;; TODO: this part does not work yet, would need to load
-               ;; the base macro environment first
-               ;((tagged-list? 'cond-expand ex)
-               ; (let ((ex* (expand ex (macro:get-env) '())))
-               ;   (trace:info `(DEBUG ,ex* ,ex))
-               ;   (if (tagged-list? 'import ex*)
-               ;       (process ex*)
-               ;       (process ex))))
+               ((tagged-list? 'cond-expand ex)
+                (let ((ex* (expand ex (macro:get-env) rename-env)))
+                  ;(trace:info `(DEBUG ,ex* ,ex))
+                  (if (tagged-list? 'import ex*)
+                      (process ex*)
+                      (process ex))))
                (else
                 (process ex))))
             (cons '() '())
