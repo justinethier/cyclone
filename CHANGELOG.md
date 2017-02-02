@@ -3,6 +3,7 @@
 Features
 
 - Koz Ross added an implementation of SRFI 60.
+- Allow a program to have more than one `import` declaration. A program can now also use `cond-expand` to selectively expand `import` declarations.
 - Added the `-A` and `-I` compiler options from SRFI 138 to `cyclone`:
 
   > `-A directory` 
