@@ -28,7 +28,7 @@
 (define (logand x . rest)
   (if (null? rest)
     x
-    (logand (raw-logand x (car rest)) (cdr rest))))
+    (apply logand (raw-logand x (car rest)) (cdr rest))))
 
 (define bitwise-and logand)
 
@@ -42,7 +42,7 @@
 (define (logior x . rest)
   (if (null? rest)
     x
-    (logior (raw-logior x (car rest)) (cdr rest))))
+    (apply logior (raw-logior x (car rest)) (cdr rest))))
 
 (define bitwise-ior logior)
 
@@ -56,12 +56,14 @@
 (define (logxor x . rest)
   (if (null? rest)
     x
-    (logxor (raw-logxor x (car rest)) (cdr rest))))
+    (apply logxor (raw-logxor x (car rest)) (cdr rest))))
+
+(define bitwise-xor logxor)
 
 (define-c lognot
   "(void* data, int argc, closure _, object k, object x)"
   "Cyc_check_int(data, x);
-  int result = ~(((int)unbox_number(x)));
+  int result = ~((int)unbox_number(x));
   return_closcall1(data, k, obj_int2obj(result));")
 
 (define bitwise-not lognot)
@@ -81,6 +83,8 @@
 (define (logtest n1 n2)
   (not (zero? (logand n1 n2))))
 
+(define any-bits-set? logtest)
+
 (define (logcount n)
   (define lookup #u8(0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4))
   (define (logcount-rec n tot)
@@ -96,7 +100,7 @@
 (define bit-count logcount)
 
 (define (integer-length x)
-  (exact (ceiling (log x 2))))
+  (exact (ceiling (log (+ x 1) 2))))
 
 (define (log2-binary-factors n)
   (- (integer-length (logand n (- n))) 1))
@@ -104,7 +108,7 @@
 (define first-set-bit log2-binary-factors)
 
 (define (logbit? index n)
-  (logtest (expt 2 index) n))
+  (logtest (exact (expt 2 index)) n))
 
 (define bit-set? logbit?)
 
@@ -122,14 +126,8 @@
               (ash from start)
               to))
 
-(define-c ash
-  "(void* data, int argc, closure _, object k, object n, object count)"
-  "Cyc_check_int(data, n);
-  Cyc_check_int(data, count);
-  int x = unbox_number(n);
-  int y = unbox_number(count);
-  int result = (y < 0) ? (x >> y) : (x << y);
-  return_closcall1(data, k, obj_int2obj(result));")
+(define (ash x y)
+  (exact (floor (* x (expt 2 y)))))
 
 (define arithmetic-shift ash)
 
@@ -146,15 +144,15 @@
 
 (define (bit-reverse k n)
   (do ((m (if (negative? n) (lognot n) n) (ash m -1))
-       (k (- k 1) (- k 1))
+       (k (+ -1 k) (+ -1 k))
        (rvs 0 (logior (ash rvs 1) (logand 1 m))))
       ((negative? k) (if (negative? n) (lognot rvs) rvs))))
 
 (define (reverse-bit-field n start end)
   (define width (- end start))
   (let ((mask (lognot (ash -1 width))))
-    (define zn (logand mask (arithmetic-shift n (- start))))
-    (logior (arithmetic-shift (bit-reverse width zn) start)
+    (define zn (logand mask (ash n (- start))))
+    (logior (ash (bit-reverse width zn) start)
             (logand (lognot (ash mask start)) n))))
 
 (define (integer->list k . len)

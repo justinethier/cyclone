@@ -5,7 +5,7 @@
 include Makefile.config
 
 CYCLONE = cyclone
-TESTSCM = unit-tests
+TESTSCM = unit-tests srfi-60-tests
 TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
 BOOTSTRAP_DIR = ../cyclone-bootstrap
 
@@ -174,8 +174,8 @@ examples:
 	cd examples ; make
 
 .PHONY: test
-test: $(TESTFILES) $(CYCLONE) $(COBJECTS)
-	$(foreach f,$(TESTSCM), echo tests/$(f) ; ./cyclone -A . tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
+test: $(TESTFILES) $(COBJECTS)
+	$(foreach f,$(TESTSCM), echo tests/$(f) ; $(CYCLONE) -I . tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
 
 .PHONY: tags
 tags:
@@ -191,7 +191,7 @@ indent:
 .PHONY: clean
 clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
-	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c tests/$(f).c;)
+	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c $(f).o tests/$(f).c tests/$(f).o;)
 	cd examples ; make clean
 
 install-includes:
