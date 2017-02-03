@@ -80,13 +80,11 @@
                                input-program)))
                (reverse includes))))) ;; Append code in same order as the library's includes
         (else
-          ;; Handle import, if present
-          (cond
-            ((tagged-list? 'import (car input-program))
-             (set! imports (cdar input-program))
-             (set! input-program (cdr input-program))
-             ;(error (list 'imports (cdar input-program)))
-            ))
+          ;; Handle imports, if present
+          (let ((reduction (import-reduction input-program)))
+            (set! imports (car reduction))
+            (set! input-program (cdr reduction)))
+
           ;; Handle any C headers
           (let ((headers (lib:include-c-headers `(dummy dummy ,@input-program))))
             (cond
@@ -284,6 +282,36 @@
                     lib-deps
                     src-file) 
       (return '())))) ;; No codes to return
+
+;; Read top-level imports from a program and return a cons of:
+;; - imports
+;; - remaining program
+(define (import-reduction expr)
+  (let ((results
+          (foldl
+            (lambda (ex accum)
+              (define (process e)
+                (cond
+                  ((tagged-list? 'import e)
+                   (cons (cons (cdr e) (car accum)) (cdr accum)))
+                  (else
+                    (cons (car accum) (cons e (cdr accum))))))
+              (cond
+               ;; TODO: this part does not work yet, would need to load
+               ;; the base macro environment first
+               ;((tagged-list? 'cond-expand ex)
+               ; (let ((ex* (expand ex (macro:get-env) '())))
+               ;   (trace:info `(DEBUG ,ex* ,ex))
+               ;   (if (tagged-list? 'import ex*)
+               ;       (process ex*)
+               ;       (process ex))))
+               (else
+                (process ex))))
+            (cons '() '())
+            expr)))
+    (cons
+      (apply append (reverse (car results)))
+      (reverse (cdr results)))))
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
 (define (get-data-path)
