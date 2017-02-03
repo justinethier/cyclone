@@ -330,6 +330,9 @@
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
          (program? (not (library? (car in-prog))))
+TODO: for a program need to get the import list here, not later on.
+then pass that import list futher as well as using it here in the 
+call to lib:get-all-import-deps:
          (lib-deps 
            (if (and program? 
                    (tagged-list? 'import (car in-prog)))
