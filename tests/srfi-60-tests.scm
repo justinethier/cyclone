@@ -44,19 +44,15 @@
 
 (test-group
   "lognot"
-  (test "-10000001" (dec->bin (lognot #b10000000)))
-  (test "-10000001" (dec->bin (bitwise-not #b10000000)))
-  (test "-1" (dec->bin (lognot #b0)))
-  (test "-1" (dec->bin (bitwise-not #b0))))
+  (test "11111111111111111111111101111111" (dec->bin (lognot #b10000000)))
+  (test "11111111111111111111111101111111" (dec->bin (bitwise-not #b10000000)))
+  (test "11111111111111111111111111111111" (dec->bin (lognot #b0)))
+  (test "11111111111111111111111111111111" (dec->bin (bitwise-not #b0))))
 
 (test-group
   "logtest"
-  (do
-    ((i 1 (when (= i j) (+ 1 i)))
-     (j 0) (if (= i j) 0 (+ 1 j)))
-    ((= i 1024))
-    (test (not (zero? (logand i j))) (logtest i j))
-    (test (not (zero? (logand i j))) (any-bits-set? i j))))
+  (test-not (logtest #b0100 #b1011))
+  (test-assert (logtest #b0100 #b0111)))
 
 (test-group
   "logcount"
@@ -73,17 +69,16 @@
   (test 0 (integer-length 0))
   (test 4 (integer-length #b1111)))
 
-(define fsb-results #u8(-1 0 1 0 2 0 1 0 3 0 1 0 2 0 1 0 4))
-
 (test-group
   "log2-binary-factors"
   (do
-    ((i 0 (+ i 1)))
+    ((i 0 (+ i 1))
+     (fsb-results #(-1 0 1 0 2 0 1 0 3 0 1 0 2 0 1 0 4)))
     ((= i 17))
-    (let ((res (bytevector-u8-ref fsb-results i)))
+    (let ((res (vector-ref fsb-results i)))
       (test res (log2-binary-factors i))
       (test res (first-set-bit i))
-      (test res (log2-binary (- i)))
+      (test res (log2-binary-factors (- i)))
       (test res (first-set-bit (- i))))))
 
 (test-group 
@@ -91,7 +86,7 @@
   (test-assert (logbit? 0 #b1101))
   (test-assert (bit-set? 0 #b1101))
   (test-not (logbit? 1 #b1101))
-  (test-not (bit-set? 0 #b1101))
+  (test-not (bit-set? 1 #b1101))
   (test-assert (logbit? 2 #b1101))
   (test-assert (bit-set? 2 #b1101))
   (test-assert (logbit? 3 #b1101))
@@ -138,4 +133,6 @@
 
 (test-group
   "reverse-bit-field"
-  (test "e5" (number->string (reverse-bit-field #xa7 0 8) 16)))
+  (test "E5" (number->string (reverse-bit-field #xa7 0 8) 16)))
+
+(test-end)
