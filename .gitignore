@@ -1,3 +1,6 @@
+# Annoying stray test file
+test.txt
+
 # Object files
 *.o
 *.ko
