@@ -288,14 +288,15 @@
 ;; - imports
 ;; - remaining program
 (define (import-reduction expr)
-  ;; TODO: consolidate this with other macro loading code
-  (define rename-env (env:extend-environment '() '() '()))
-  (let ((macros (filter 
-                  (lambda (v) 
-                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
-                  (Cyc-global-vars))))
-    (macro:load-env! macros (create-environment '() '())))
-  ;;
+;  ;; TODO: consolidate this with other macro loading code
+;  (define rename-env (env:extend-environment '() '() '()))
+;  (let ((macros (filter 
+;                  (lambda (v) 
+;                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
+;                  (Cyc-global-vars))))
+;    (macro:load-env! macros (create-environment '() '())))
+;  ;;
+  (define expander (base-expander))
   (let ((results
           (foldl
             (lambda (ex accum)
@@ -307,7 +308,7 @@
                     (cons (car accum) (cons e (cdr accum))))))
               (cond
                ((tagged-list? 'cond-expand ex)
-                (let ((ex* (expand ex (macro:get-env) rename-env)))
+                (let ((ex* (expander ex))) ;(expand ex (macro:get-env) rename-env)))
                   ;(trace:info `(DEBUG ,ex* ,ex))
                   (if (tagged-list? 'import ex*)
                       (process ex*)
@@ -319,6 +320,19 @@
     (cons
       (apply append (reverse (car results)))
       (reverse (cdr results)))))
+
+;; Return a function to expand any built-in macros
+;; NOTE: since this uses a global macro env, it will be overridden later on when
+;; macros are loaded from dependent libraries.
+(define (base-expander)
+  (let ((rename-env (env:extend-environment '() '() '()))
+        (macros (filter 
+                  (lambda (v) 
+                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
+                  (Cyc-global-vars))))
+    (macro:load-env! macros (create-environment '() '()))
+    (lambda (ex) 
+      (expand ex (macro:get-env) rename-env))))
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
 (define (get-data-path)
