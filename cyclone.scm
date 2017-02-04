@@ -340,11 +340,16 @@
 ;; Compile and emit:
 (define (run-compiler args cc? append-dirs prepend-dirs)
   (let* ((in-file (car args))
-         (in-prog (read-file in-file))
-         ;; TODO: expand in-prog, if a library, using lib:cond-expand.
-         ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (expander (base-expander))
-         (program? (not (library? (car in-prog))))
+         (in-prog-raw (read-file in-file))
+         (program? (not (library? (car in-prog-raw))))
+         (in-prog
+          (if program? 
+              in-prog-raw
+              ;; Account for any cond-expand declarations in the library
+              (list (lib:cond-expand (car in-prog-raw) expander))))
+   ;; TODO: expand in-prog, if a library, using lib:cond-expand. (OK, this works now)
+   ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (program:imports/code (if program? (import-reduction in-prog expander) '()))
          (lib-deps 
            (if (and program?

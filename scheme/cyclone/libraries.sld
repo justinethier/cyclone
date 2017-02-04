@@ -188,7 +188,7 @@
 (define (lib:cond-expand expr expander)
   (let ((name (cadr expr))
         (decls (lib:cond-expand-decls (cddr expr) expander)))
-    `(define-library ,name ,decls)))
+    `(define-library ,name ,@decls)))
 
 (define (lib:cond-expand-decls decls expander)
   (reverse
@@ -196,7 +196,8 @@
       (lambda (d acc) 
         (cond
           ((tagged-list? 'cond-expand d)
-           (lib:cond-expand-decls (expander d)))
+           (cons (expander d) acc))
+           ;(lib:cond-expand-decls (expander d)))
           (else
             (cons d acc)) ))
       '() 
