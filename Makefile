@@ -11,12 +11,15 @@ CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
 # Directories
+SCHEME_DIR = scheme
 EXAMPLE_DIR = examples
 HEADER_DIR = include/cyclone
 TEST_DIR = tests
 
 # Source files
-SLDFILES = $(wildcard scheme/*.sld) $(wildcard srfi/*.sld)
+SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
+					 $(wildcard srfi/*.sld) \
+					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm $(TEST_DIR)/srfi-60-tests.scm
