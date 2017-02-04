@@ -7,25 +7,24 @@ include Makefile.config
 
 CYCLONE = cyclone
 CCOMP = $(CC) $(CFLAGS)
-SLDFILES = scheme/*.sld srfi/*.sld
+SLDFILES = $(wildcard scheme/*.sld) $(wildcard srfi/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADER_DIR = include/cyclone
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 
 all : cyclone icyc
 
-$(COBJECTS) : $(SLDFILES)
+$(COBJECTS) : %.o: %.sld
 	$(CYCLONE) $<
 
 cyclone : cyclone.scm $(COBJECTS) libcyclone.a
-	$(CYCLONE) $<
+	$(CYCLONE) cyclone.scm
 
 icyc : icyc.scm $(COBJECTS) libcyclone.a
 	$(CYCLONE) $<
 
 dispatch.c : generate-c.scm
-# TODO: could call from icyc, eg: icyc generate-c.scm
-	$(CYCLONE) generate-c.scm
+	cyclone $<
 	./generate-c
 
 libcyclone.so.1 : runtime.c include/cyclone/runtime.h
@@ -68,5 +67,3 @@ libcyclone.a : runtime.o gc.o dispatch.o mstreams.o
 .PHONY: clean
 clean:
 	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
-	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c $(f).o tests/$(f).c tests/$(f).o;)
-	cd examples ; make clean
