@@ -11,6 +11,7 @@ CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
 # Directories
+BOOTSTRAP_DIR = ../cyclone-bootstrap
 SCHEME_DIR = scheme
 EXAMPLE_DIR = examples
 HEADER_DIR = include/cyclone
@@ -219,6 +220,7 @@ bootstrap : icyc libs
 	cp srfi/9.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/28.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/60.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/69.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/106.c $(BOOTSTRAP_DIR)/srfi
