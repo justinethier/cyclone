@@ -23,7 +23,7 @@ Bug Fixes
 - Thanks to Koz Ross, `equal?` has been updated to check bytevectors for deep equality. 
 - Prevent crashes when allocating large bytevectors.
 - Display characters such as `#\space` correctly when output via `write`.
-- Thanks for Seth Alves, removed unnecessary include of `ck_string.h` which is not provided in older versions of `libck`.
+- Thanks to Seth Alves, removed unnecessary include of `ck_string.h` which is not provided in older versions of `libck`.
 
 # 0.3.3 - December 19, 2016
 
