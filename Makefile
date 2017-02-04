@@ -19,12 +19,8 @@ TEST_DIR = tests
 SLDFILES = $(wildcard scheme/*.sld) $(wildcard srfi/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
-EXAMPLE_SRC = $(wildcard $(EXAMPLE_DIR)/*.scm) \
-							$(wildcard $(EXAMPLE_DIR)/networking/*.scm) \
-							$(wildcard $(EXAMPLE_THREADING_DIR)/*.scm)
-EXAMPLES = $(patsubst %.scm,%,$(EXAMPLE_SRC))
 TEST_SRC = $(TEST_DIR)/unit-tests.scm $(TEST_DIR)/srfi-60-tests.scm
-TESTS = $(patsubsts %.scm,%,$(TEST_SRC))
+TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
 
@@ -36,7 +32,7 @@ example :
 	cd $(EXAMPLE_DIR) ; make
 
 clean :
-	rm -rf a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	rm -rf test.txt a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; make clean
 
 install : libs install-libs install-includes install-bin
