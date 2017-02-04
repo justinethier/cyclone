@@ -11,9 +11,8 @@ CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
 # Directories
-HEADER_DIR = include/cyclone
 EXAMPLE_DIR = examples
-EXAMPLE_THREADING_DIR = $(EXAMPLE_DIR)/threading
+HEADER_DIR = include/cyclone
 TEST_DIR = tests
 
 # Source files
@@ -33,14 +32,12 @@ all : cyclone icyc libs
 
 test : libs $(TESTS)
 
-example : $(EXAMPLES) game-of-life hello-library/hello
+example :
+	cd $(EXAMPLE_DIR) ; make
 
 clean :
 	rm -rf a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
-	rm -rf $(EXAMPLE_DIR)/*.o $(EXAMPLE_DIR)/*.c $(EXAMPLE_DIR)/*.meta $(EXAMPLES)
-	rm -rf $(EXAMPLE_THREADING_DIR)/*.o $(EXAMPLE_THREADING_DIR)/*.c $(EXAMPLE_THREADING_DIR)/*.meta
-	cd $(EXAMPLE_DIR)/game-of-life ; make clean
-	cd $(EXAMPLE_DIR)/hello-library ; make clean
+	cd $(EXAMPLE_DIR) ; make clean
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
