@@ -30,6 +30,8 @@
     lib:rename-exports
     lib:imports
     lib:body
+    lib:cond-expand
+    lib:cond-expand-decls
     lib:includes
     lib:include-c-headers
     lib:import-set:library-name?
@@ -176,6 +178,29 @@
       (cddr ast))))
 
 ;; TODO: include-ci, cond-expand
+
+;TODO: maybe just want a function that will take a define-library expression and expand any top-level cond-expand expressions.
+;then just return all of that. the front-end can then call this function once to pre-process the library code before any further compilation.
+;
+;obviously also need to expand cond-expand in cases where the code reads sld files to track down library dependencies
+
+;; Take given define-library expression and cond-expand all declarations
+(define (lib:cond-expand expr expander)
+  (let ((name (cadr expr))
+        (decls (lib:cond-expand-decls (cddr expr) expander)))
+    `(define-library ,name ,decls)))
+
+(define (lib:cond-expand-decls decls expander)
+  (reverse
+    (foldl 
+      (lambda (d acc) 
+        (cond
+          ((tagged-list? 'cond-expand d)
+           (lib:cond-expand-decls (expander d)))
+          (else
+            (cons d acc)) ))
+      '() 
+     decls)))
 
 (define (lib:atom->string atom)
   (cond
