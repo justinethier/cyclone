@@ -37,6 +37,7 @@ example :
 clean :
 	rm -rf test.txt a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; make clean
+	rm -rf tests/*.o tests/*.c
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
