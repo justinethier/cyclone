@@ -102,7 +102,7 @@ debug :
 
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean bootstrap tags indent debug 
+.PHONY: clean bootstrap tags indent debug test
 
 $(TESTS) : %: %.scm
 	$(CYCLONE) -I . $<

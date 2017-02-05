@@ -287,16 +287,7 @@
 ;; Read top-level imports from a program and return a cons of:
 ;; - imports
 ;; - remaining program
-(define (import-reduction expr)
-;  ;; TODO: consolidate this with other macro loading code
-;  (define rename-env (env:extend-environment '() '() '()))
-;  (let ((macros (filter 
-;                  (lambda (v) 
-;                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
-;                  (Cyc-global-vars))))
-;    (macro:load-env! macros (create-environment '() '())))
-;  ;;
-  (define expander (base-expander))
+(define (import-reduction expr expander)
   (let ((results
           (foldl
             (lambda (ex accum)
@@ -350,8 +341,11 @@
 (define (run-compiler args cc? append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (in-prog (read-file in-file))
+         ;; TODO: expand in-prog, if a library, using lib:cond-expand.
+         ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
+         (expander (base-expander))
          (program? (not (library? (car in-prog))))
-         (program:imports/code (if program? (import-reduction in-prog) '()))
+         (program:imports/code (if program? (import-reduction in-prog expander) '()))
          (lib-deps 
            (if (and program?
                     (not (null? (car program:imports/code))))
