@@ -1,113 +1,177 @@
 # Cyclone Scheme
 # Copyright (c) 2014, Justin Ethier
+# Copyright (c) 2017, Koz Ross
 # All rights reserved.
 
 include Makefile.config
 
+# Commands
 CYCLONE = cyclone
-TESTSCM = unit-tests srfi-60-tests
-TESTFILES = $(addprefix tests/, $(addsuffix .scm, $(TESTSCM)))
-BOOTSTRAP_DIR = ../cyclone-bootstrap
+CCOMP = $(CC) $(CFLAGS)
+INDENT_CMD = indent -linux -l80 -i2 -nut
 
-SMODULES = \
-  scheme/base \
-  scheme/case-lambda \
-  scheme/char \
-  scheme/complex \
-  scheme/cxr \
-  scheme/eval \
-  scheme/file \
-  scheme/lazy \
-  scheme/load \
-  scheme/inexact \
-  scheme/process-context \
-  scheme/read \
-  scheme/time \
-  scheme/write \
-  scheme/cyclone/ast \
-  scheme/cyclone/cps-optimizations \
-  scheme/cyclone/cgen \
-  scheme/cyclone/common \
-  scheme/cyclone/libraries \
-  scheme/cyclone/macros \
-  scheme/cyclone/pretty-print \
-  scheme/cyclone/primitives \
-  scheme/cyclone/transforms \
-  scheme/cyclone/util \
-  scheme/cyclone/test \
-  srfi/1 \
-  srfi/2 \
-  srfi/9 \
-  srfi/18 \
-  srfi/27 \
-  srfi/60 \
-  srfi/69 \
-  srfi/106 \
-  srfi/111 \
-  srfi/113 \
-  srfi/117 \
-  srfi/128 \
-  srfi/132 \
-  srfi/133
-SLDFILES = $(addsuffix .sld, $(SMODULES))
-COBJECTS=$(SLDFILES:.sld=.o)
+# Directories
+SCHEME_DIR = scheme
+EXAMPLE_DIR = examples
+HEADER_DIR = include/cyclone
+TEST_DIR = tests
 
-all: cyclone icyc
+# Source files
+SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
+					 $(wildcard srfi/*.sld) \
+					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld)
+COBJECTS = $(SLDFILES:.sld=.o)
+HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
+TEST_SRC = $(TEST_DIR)/unit-tests.scm $(TEST_DIR)/srfi-60-tests.scm
+TESTS = $(basename $(TEST_SRC))
 
-%.o: %.sld
+# Primary rules (of interest to an end user)
+
+all : cyclone icyc libs
+
+test : libs $(TESTS)
+
+example :
+	cd $(EXAMPLE_DIR) ; make
+
+clean :
+	rm -rf test.txt a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	cd $(EXAMPLE_DIR) ; make clean
+	rm -rf tests/*.o tests/*.c
+
+install : libs install-libs install-includes install-bin
+	$(MKDIR) $(DESTDIR)$(DATADIR)
+	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sets
+	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
+	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/*.meta $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/list-queues/*.scm $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(INSTALL) -m0644 srfi/sets/*.scm $(DESTDIR)$(DATADIR)/srfi/sets
+	$(INSTALL) -m0644 srfi/sorting/*.scm $(DESTDIR)$(DATADIR)/srfi/sorting
+
+uninstall :
+	$(RM) $(DESTDIR)$(BINDIR)/cyclone
+	$(RM) $(DESTDIR)$(BINDIR)/icyc
+	$(RM) $(DESTDIR)$(LIBDIR)/libcyclone.a
+	$(RM) $(DESTDIR)$(INCDIR)/*.*
+	$(RMDIR) $(DESTDIR)$(INCDIR)
+	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/list-queues/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/sets/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sets
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/sorting/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
+	$(RM) $(DESTDIR)$(DATADIR)/srfi/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi
+	$(RM) $(DESTDIR)$(DATADIR)/scheme/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
+	$(RMDIR) $(DESTDIR)$(DATADIR)
+
+# Dev rules (of interest to people hacking on Cyclone's core)
+
+tags :
+	ctags -R *
+
+indent : gc.c runtime.c mstreams.c $(HEADER_DIR)/*.h
+	$(INDENT_CMD) gc.c
+	$(INDENT_CMD) runtime.c
+	$(INDENT_CMD) mstreams.c
+	$(INDENT_CMD) $(HEADER_DIR)/*.h
+
+# This is a test directive used to test changes to a SLD file
+# EG: make sld SLDPATH=scheme/cyclone SLD=macros
+sld :
+	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+
+debug :
+	sudo ls; cyclone scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo make install-includes && sudo make install-libs && ./cyclone generate-c.scm
+
+# Helper rules (of interest to people hacking on this makefile)
+
+.PHONY: clean bootstrap tags indent debug 
+
+$(TESTS) : %: %.scm
+	$(CYCLONE) -I . $<
+	./$@
+	rm -rf $@
+
+$(EXAMPLES) : %: %.scm
 	$(CYCLONE) $<
 
-cyclone: $(COBJECTS) libcyclone.a cyclone.scm
+game-of-life :
+	cd $(EXAMPLE_DIR)/game-of-life ; make
+
+hello-library/hello : 
+	cd $(EXAMPLE_DIR)/hello-library ; make
+
+libs : $(COBJECTS)
+
+$(COBJECTS) : %.o: %.sld
+	$(CYCLONE) $<
+
+cyclone : cyclone.scm libcyclone.a
 	$(CYCLONE) cyclone.scm
 
-icyc: $(COBJECTS) libcyclone.a icyc.scm
-	$(CYCLONE) icyc.scm
+icyc : icyc.scm libcyclone.a
+	$(CYCLONE) $<
 
-dispatch.c: generate-c.scm
-# TODO: could call from icyc, eg: icyc generate-c.scm
-	$(CYCLONE) generate-c.scm
+dispatch.c : generate-c.scm
+	cyclone $<
 	./generate-c
 
-libcyclone.so.1: runtime.c include/cyclone/runtime.h
-	gcc $(CFLAGS) -c -fPIC runtime.c -o runtime.o
-	gcc -shared -Wl,-soname,libcyclone.so.1 -o libcyclone.so.1.0.1 runtime.o
+libcyclone.a : $(CFILES) $(HEADERS)
 
-libcyclone.a: runtime.c include/cyclone/runtime.h include/cyclone/types.h gc.c dispatch.c mstreams.c
-#	echo $(CC_PROG)
-#	echo $(CC_EXEC)
-#	echo $(CC_LIB)
-	$(CC) $(CFLAGS) -c dispatch.c -o dispatch.o
-	$(CC) $(CFLAGS) -std=gnu99 -c gc.c -o gc.o
-	$(CC) $(CFLAGS) -c \
-                  -DCYC_HAVE_OPEN_MEMSTREAM=$(CYC_PLATFORM_HAS_MEMSTREAM) \
-                  -DCYC_HAVE_FMEMOPEN=$(CYC_PLATFORM_HAS_FMEMOPEN) \
-                  mstreams.c -o mstreams.o
-	$(CC) $(CFLAGS) -c \
-                  -DCYC_INSTALL_DIR=\"$(PREFIX)\" \
-                  -DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
-                  -DCYC_INSTALL_INC=\"$(INCDIR)\" \
-                  -DCYC_INSTALL_SLD=\"$(DATADIR)\" \
-                  -DCYC_CC_PROG=\"$(CC_PROG)\" \
-                  -DCYC_CC_EXEC=\"$(CC_EXEC)\" \
-                  -DCYC_CC_LIB=\"$(CC_LIB)\" \
-                  runtime.c -o runtime.o
-	$(AR) rcs libcyclone.a runtime.o gc.o dispatch.o mstreams.o
+dispatch.o : dispatch.c $(HEADERS)
+	$(CCOMP) -c $< -o $@
+
+gc.o : gc.c $(HEADERS)
+	$(CCOMP) -std=gnu99 -c $< -o $@
+
+mstreams.o : mstreams.c $(HEADERS)
+	$(CCOMP) -c \
+					-DCYC_HAVE_OPEN_MEMSTREAM=$(CYC_PLATFORM_HAS_MEMSTREAM) \
+					-DCYC_HAVE_FMEMOPEN=$(CYC_PLATFORM_HAS_FMEMOPEN) \
+					$< -o $@
+
+runtime.o : runtime.c $(HEADERS)
+	$(CCOMP) -c \
+					-DCYC_INSTALL_DIR=\"$(PREFIX)\" \
+					-DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
+					-DCYC_INSTALL_INC=\"$(INCDIR)\" \
+					-DCYC_INSTALL_SLD=\"$(DATADIR)\" \
+					-DCYC_CC_PROG=\"$(CC_PROG)\" \
+					-DCYC_CC_EXEC=\"$(CC_EXEC)\" \
+					-DCYC_CC_LIB=\"$(CC_LIB)\" \
+					$< -o $@
+
+libcyclone.a : runtime.o gc.o dispatch.o mstreams.o 
+	$(AR) rcs $@ $^ 
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library
 #gcc -static main.c -L. -lmean -o statically_linked
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
-.PHONY: bootstrap
-bootstrap: icyc
-#	rm -rf $(BOOTSTRAP_DIR)
+bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/srfi
-	mkdir -p $(BOOTSTRAP_DIR)/include/cyclone
-	cp include/cyclone/types.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp include/cyclone/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp include/cyclone/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp include/cyclone/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
+	mkdir -p $(BOOTSTRAP_DIR)/$(HEADER_DIR)
+	cp $(HEADER_DIR)/types.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp $(HEADER_DIR)/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp $(HEADER_DIR)/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp $(HEADER_DIR)/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
@@ -169,102 +233,15 @@ bootstrap: icyc
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
-.PHONY: examples
-examples:
-	cd examples ; make
-
-.PHONY: test
-test: $(TESTFILES) $(COBJECTS)
-	$(foreach f,$(TESTSCM), echo tests/$(f) ; $(CYCLONE) -I . tests/$(f).scm && tests/$(f) && rm -rf tests/$(f);)
-
-.PHONY: tags
-tags:
-	ctags -R *
-
-.PHONY: indent
-indent:
-	indent -linux -l80 -i2 -nut gc.c
-	indent -linux -l80 -i2 -nut runtime.c
-	indent -linux -l80 -i2 -nut mstreams.c
-	indent -linux -l80 -i2 -nut include/cyclone/*.h
-
-.PHONY: clean
-clean:
-	rm -rf a.out *.o *.so *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
-	$(foreach f,$(TESTSCM), rm -rf $(f) $(f).c $(f).o tests/$(f).c tests/$(f).o;)
-	cd examples ; make clean
-
-install-includes:
+install-includes : $(HEADER_DIR)/*.h 
 	$(MKDIR) $(DESTDIR)$(INCDIR)
-	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
+	$(INSTALL) -m0644 $(HEADER_DIR)/*.h $(DESTDIR)$(INCDIR)/
 
-install-libs:
+install-libs : libcyclone.a
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
 
-install-bin:
+install-bin : cyclone icyc
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
-
-install:
-	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(MKDIR) $(DESTDIR)$(LIBDIR)
-	$(MKDIR) $(DESTDIR)$(INCDIR)
-	$(MKDIR) $(DESTDIR)$(DATADIR)
-	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
-	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
-	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sets
-	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
-	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
-	$(INSTALL) -m0644 include/cyclone/*.h $(DESTDIR)$(INCDIR)/
-	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
-	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
-	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
-	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
-	$(INSTALL) -m0644 srfi/*.meta $(DESTDIR)$(DATADIR)/srfi
-	$(INSTALL) -m0644 srfi/list-queues/*.scm $(DESTDIR)$(DATADIR)/srfi/list-queues
-	$(INSTALL) -m0644 srfi/sets/*.scm $(DESTDIR)$(DATADIR)/srfi/sets
-	$(INSTALL) -m0644 srfi/sorting/*.scm $(DESTDIR)$(DATADIR)/srfi/sorting
-	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
-	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
-
-uninstall:
-	$(RM) $(DESTDIR)$(BINDIR)/cyclone
-	$(RM) $(DESTDIR)$(BINDIR)/icyc
-	$(RM) $(DESTDIR)$(LIBDIR)/libcyclone.a
-	$(RM) $(DESTDIR)$(INCDIR)/*.*
-	$(RMDIR) $(DESTDIR)$(INCDIR)
-	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(RM) $(DESTDIR)$(DATADIR)/srfi/list-queues/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
-	$(RM) $(DESTDIR)$(DATADIR)/srfi/sets/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sets
-	$(RM) $(DESTDIR)$(DATADIR)/srfi/sorting/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
-	$(RM) $(DESTDIR)$(DATADIR)/srfi/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi
-	$(RM) $(DESTDIR)$(DATADIR)/scheme/*.*
-	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme
-	$(RMDIR) $(DESTDIR)$(DATADIR)
-
-
-# This is a test directive used to test changes to a SLD file
-# EG: make sld SLDPATH=scheme/cyclone SLD=macros
-sld:
-	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
-
-.PHONY: debug
-debug:
-	sudo ls; cyclone scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo make install-includes && sudo make install-libs && ./cyclone generate-c.scm
-###	cyclone scheme/cyclone/macros.sld && sudo cp scheme/cyclone/macros.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/macros.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/macros.o /usr/local/share/cyclone/scheme/cyclone/ && \
-###	cyclone scheme/cyclone/util.sld && sudo cp scheme/cyclone/util.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/util.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/util.o /usr/local/share/cyclone/scheme/cyclone/ && \
-###	cyclone scheme/cyclone/transforms.sld && sudo cp scheme/cyclone/transforms.c /usr/local/share/cyclone/scheme/cyclone/  && sudo cp scheme/cyclone/transforms.sld /usr/local/share/cyclone/scheme/cyclone/ && sudo cp scheme/cyclone/transforms.o /usr/local/share/cyclone/scheme/cyclone/ && \
-###	cyclone -t cyclone.scm && cyclone -t icyc.scm && sudo make install-bin
-
