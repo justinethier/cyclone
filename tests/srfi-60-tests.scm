@@ -135,4 +135,4 @@
   "reverse-bit-field"
   (test "E5" (number->string (reverse-bit-field #xa7 0 8) 16)))
 
-(test-end)
+(test-exit)
