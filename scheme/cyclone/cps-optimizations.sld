@@ -603,7 +603,11 @@
                     (cdr exp)
                     (ast:lambda-formals->list (car exp)))
                   (or
-                    (prim-calls-inlinable? (cdr exp))
+                    ; Issue #172 - Cannot assume that just because a primitive 
+                    ; deals with immutable objects that it is safe to inline.
+                    ; A (set!) could still mutate variables the primitive is
+                    ; using, causing invalid behavior.
+                    ;(prim-calls-inlinable? (cdr exp))
                     (inline-prim-call? 
                       (ast:lambda-body (car exp))
                       (prim-calls->arg-variables (cdr exp))
