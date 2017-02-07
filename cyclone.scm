@@ -338,7 +338,7 @@
       (read-all port))))
 
 ;; Compile and emit:
-(define (run-compiler args cc? append-dirs prepend-dirs)
+(define (run-compiler args cc? cc-prog cc-exec cc-lib append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -359,6 +359,11 @@
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
+         (get-comp-env 
+           (lambda (sym str)
+             (if (> (string-length str) 0)
+                 str
+                 (Cyc-compilation-environment sym)))) 
          (create-c-file 
            (lambda (program) 
              (with-output-to-file 
@@ -381,14 +386,16 @@
                  (comp-prog-cmd 
                    (string-replace-all 
                      (string-replace-all 
-                       (Cyc-compilation-environment 'cc-prog) 
+                       ;(Cyc-compilation-environment 'cc-prog) 
+                       (get-comp-env 'cc-prog cc-prog)
                        "~src-file~" src-file)
                      "~exec-file~" exec-file))
                  (comp-objs-cmd 
                    (string-replace-all
                      (string-replace-all
                        (string-replace-all
-                         (Cyc-compilation-environment 'cc-exec)
+                         ;(Cyc-compilation-environment 'cc-exec)
+                         (get-comp-env 'cc-exec cc-exec)
                          "~exec-file~" exec-file)
                        "~obj-files~" objs-str)
                      "~exec-file~" exec-file)))
@@ -415,7 +422,8 @@
         (let ((comp-lib-cmd
                 (string-replace-all 
                   (string-replace-all 
-                    (Cyc-compilation-environment 'cc-lib)
+                    ;(Cyc-compilation-environment 'cc-lib)
+                    (get-comp-env 'cc-lib cc-lib)
                     "~src-file~" src-file)
                   "~exec-file~" exec-file)))
           (cond
@@ -456,6 +464,9 @@
                 ;               (equal? #\- (string-ref arg 0)))))
                 ;   args))
        (compile? #t)
+       (cc-prog (apply string-append (collect-opt-values args "-CP")))
+       (cc-exec (apply string-append (collect-opt-values args "-CE")))
+       (cc-lib  (apply string-append (collect-opt-values args "-CL")))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
   ;; Set optimization level(s)
@@ -475,6 +486,13 @@
                  in order to locate imported libraries.
  -I directory    Prepend directory to the list of directories that are searched 
                  in order to locate imported libraries.
+ -CP directory   Specify a custom command line for the C compiler to compile
+                 a program module. See Makefile.config for an example of how
+                 to construct such a command line.
+ -CE directory   Specify a custom command line for the C compiler to compile
+                 an executable.
+ -CL directory   Specify a custom command line for the C compiler to compile
+                 a library module.
  -Ox             Optimization level, higher means more optimizations will
                  be used. Set to 0 to disable optimizations.
  -d              Only generate intermediate C files, do not compile them
@@ -497,5 +515,5 @@
      (display "cyclone: no input file")
      (newline))
     (else
-      (run-compiler non-opts compile? append-dirs prepend-dirs))))
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib append-dirs prepend-dirs))))
 

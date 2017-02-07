@@ -14,6 +14,20 @@ Features
   >
   > Prepend directory to the list of directories that are searched in order to locate imported libraries.
 
+- Added the `-CP`, `-CE`, and `-CL` compiler options to allow passing arbitrary flags to the C compiler:
+
+ > `-CP directory`
+ >
+ > Specify a custom command line for the C compiler to compile a program module. See Makefile.config for an example of how to construct such a command line.
+ >
+ > `-CE directory`
+ >
+ > Specify a custom command line for the C compiler to compile an executable.
+ >
+ > `-CL directory`
+ >
+ > Specify a custom command line for the C compiler to compile a library module.
+
 - Updated the garbage collector to enhance performance for programs with a high allocation rate, and to scale better to multiple concurrent threads.
 - Improved error handling by `display` and `write`.
 - Removed the `make_int` C macro which was deprecated and could cause problems when used in FFI functions.
