@@ -16,15 +16,15 @@ Features
 
 - Added the `-CP`, `-CE`, and `-CL` compiler options to allow passing arbitrary flags to the C compiler:
 
- > `-CP directory`
+ > `-CP cc-commands`
  >
  > Specify a custom command line for the C compiler to compile a program module. See Makefile.config for an example of how to construct such a command line.
  >
- > `-CE directory`
+ > `-CE cc-commands`
  >
  > Specify a custom command line for the C compiler to compile an executable.
  >
- > `-CL directory`
+ > `-CL cc-commands`
  >
  > Specify a custom command line for the C compiler to compile a library module.
 

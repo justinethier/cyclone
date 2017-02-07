@@ -486,12 +486,12 @@
                  in order to locate imported libraries.
  -I directory    Prepend directory to the list of directories that are searched 
                  in order to locate imported libraries.
- -CP directory   Specify a custom command line for the C compiler to compile
+ -CP cc-commands Specify a custom command line for the C compiler to compile
                  a program module. See Makefile.config for an example of how
                  to construct such a command line.
- -CE directory   Specify a custom command line for the C compiler to compile
+ -CE cc-commands Specify a custom command line for the C compiler to compile
                  an executable.
- -CL directory   Specify a custom command line for the C compiler to compile
+ -CL cc-commands Specify a custom command line for the C compiler to compile
                  a library module.
  -Ox             Optimization level, higher means more optimizations will
                  be used. Set to 0 to disable optimizations.
