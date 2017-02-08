@@ -417,6 +417,16 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       hp->value = ((integer_type *) obj)->value;
       return (char *)hp;
     }
+  case bignum_tag:{
+      bignum_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = bignum_tag;
+      ((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
+      ((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
+      ((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
+      ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
+      return (char *)hp;
+    }
   case double_tag:{
       double_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
@@ -674,6 +684,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
   }
   if (t == integer_tag)
     return gc_heap_align(sizeof(integer_type));
+  if (t == bignum_tag)
+    return gc_heap_align(sizeof(bignum_type));
   if (t == double_tag)
     return gc_heap_align(sizeof(double_type));
   if (t == port_tag)
@@ -869,6 +881,13 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
             fprintf(stderr, "Error destroying condition variable\n");
             exit(1);
           }
+        } else if (type_of(p) == bignum_tag) {
+          // TODO: this is no good if we abandon bignum's on the stack
+          // in that case the finalizer is never called
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "mp_clear from sweep\n");
+#endif
+          mp_clear(&(((bignum_type *)p)->bn));
         }
         // free p
         heap_freed += size;

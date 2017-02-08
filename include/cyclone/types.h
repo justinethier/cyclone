@@ -18,6 +18,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <stdint.h>
+#include "tommath.h"
 
 // Maximum number of args that GC will accept
 #define NUM_GC_ARGS 128
@@ -87,14 +88,15 @@ enum object_tag {
       , eof_tag                 // 9
       , forward_tag             // 10
       , integer_tag             // 11
-      , macro_tag               // 12
-      , mutex_tag               // 13
-      , pair_tag                // 14
-      , port_tag                // 15 
-      , primitive_tag           // 16
-      , string_tag              // 17
-      , symbol_tag              // 18
-      , vector_tag              // 19
+      , bignum_tag              // 12
+      , macro_tag               // 13
+      , mutex_tag               // 14
+      , pair_tag                // 15
+      , port_tag                // 16 
+      , primitive_tag           // 17
+      , string_tag              // 18
+      , symbol_tag              // 19
+      , vector_tag              // 20
 };
 
 #define type_is_pair_prim(clo) \
@@ -355,6 +357,20 @@ typedef struct {
   int value;
   int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
 } integer_type;
+
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  mp_int bn;
+} bignum_type;
+
+#define make_empty_bignum(n) \
+  bignum_type n; \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = bignum_tag; \
+  mp_init(&n);
+/* TODO: check return value of mp_init */
 
 typedef struct {
   gc_header_type hdr;

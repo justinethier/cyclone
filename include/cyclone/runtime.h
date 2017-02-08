@@ -246,6 +246,7 @@ object Cyc_is_null(object o);
 object Cyc_is_number(object o);
 object Cyc_is_real(object o);
 object Cyc_is_integer(object o);
+object Cyc_is_bignum(object o);
 object Cyc_is_vector(object o);
 object Cyc_is_bytevector(object o);
 object Cyc_is_port(object o);
