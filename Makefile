@@ -25,7 +25,8 @@ COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
-					 $(TEST_DIR)/srfi-60-tests.scm
+					 $(TEST_DIR)/srfi-60-tests.scm \
+					 $(TEST_DIR)/srfi-121-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
@@ -227,6 +228,7 @@ bootstrap : icyc libs
 	cp srfi/111.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/113.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/117.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/121.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/128.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/128.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
