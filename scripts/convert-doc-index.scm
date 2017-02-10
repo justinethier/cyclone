@@ -46,7 +46,14 @@
 (define (loop)
  (let ((line (read-line)))
   (when (not (eof-object? line))
-    (display (convert-line line))
-    (newline)
+    (call/cc
+      (lambda (k)
+        (with-exception-handler
+          (lambda (obj)
+            (display `(Error processing line ,line details ,obj))
+            (k #t))
+          (lambda ()
+            (display (convert-line line))
+            (newline)))))
     (loop))))
 (loop)
