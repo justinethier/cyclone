@@ -108,11 +108,19 @@
 
 (define bit-count logcount)
 
-(define (integer-length x)
-  (exact (ceiling (log (+ x 1) 2))))
+(define-c integer-length
+  "(void* data, int argc, closure _, object k, object x)"
+  "Cyc_check_int(data, x);
+  int input = (int)unbox_number(x);
+  int res = 0;
+  while (input) {
+        res++;
+        input >>= 1;
+  };
+  return_closcall1(data, k, obj_int2obj(res));")
 
 (define (log2-binary-factors n)
-  (- (integer-length (logand n (- n))) 1))
+  (- (integer-length (raw-logand n (- n))) 1))
 
 (define first-set-bit log2-binary-factors)
 
