@@ -1708,6 +1708,18 @@ str2int_errno str2int(int *out, char *s, int base)
     return STR2INT_SUCCESS;
 }
 
+int str_is_bignum(str2int_errno errnum, char *c)
+{
+  if (errnum == STR2INT_INCONVERTIBLE) return 0; // Unexpected chars for int
+
+  for (;*c; c++) {
+    if (!isdigit(*c) && *c != '-') {
+      return 0;
+    }
+  }
+  return 1;
+}
+
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
@@ -1721,6 +1733,13 @@ object Cyc_string2number_(void *data, object cont, object str)
     rv = str2int(&result, s, 10);
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
+    } else if (str_is_bignum(rv, s)) {
+      make_empty_bignum(bn);
+      
+      // TODO: check return value
+      mp_read_radix(&(bignum_value(&bn)), s, 10);
+
+      _return_closcall1(data, cont, &bn);
     } else {
       char *str_end;
       n = strtold(s, &str_end);

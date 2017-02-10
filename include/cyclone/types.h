@@ -369,7 +369,7 @@ typedef struct {
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
   n.tag = bignum_tag; \
-  mp_init(&n);
+  mp_init(&(n.bn));
 /* TODO: check return value of mp_init */
 
 typedef struct {
@@ -392,6 +392,7 @@ typedef struct {
 
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
+#define bignum_value(x) (((bignum_type *) x)->bn)
 
 /* Define string type */
 typedef struct {
