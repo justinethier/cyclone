@@ -135,8 +135,22 @@
               (ash from start)
               to))
 
-(define (ash x y)
-  (exact (floor (* x (expt 2 y)))))
+(define-c ash
+  "(void* data, int argc, closure _, object k, object x, object y)"
+  "Cyc_check_int(data, x);
+  Cyc_check_int(data,y);
+  int bf = (int)unbox_number(x);
+  int shift = (int)unbox_number(y);
+  if (shift > 0) {
+        for (int i = 0; i < shift; i++) {
+                 bf *= 2;
+        }
+  } else {
+        for (int i = 0; i < abs(shift); i++) {
+                bf /= 2; 
+        }
+  }
+  return_closcall1(data, k, obj_int2obj(bf))")
 
 (define arithmetic-shift ash)
 
