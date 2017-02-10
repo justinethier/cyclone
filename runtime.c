@@ -831,6 +831,19 @@ object Cyc_display(void *data, object x, FILE * port)
     }
     fprintf(port, ")");
     break;
+  case bignum_tag: {
+    int bufsz; 
+    char *buf;
+
+    // TODO: check return value
+    mp_radix_size(&bignum_value(x), 10, &bufsz);
+
+    buf = alloca(bufsz);
+    // TODO: check return value
+    mp_toradix_n(&bignum_value(x), buf, 10, bufsz);
+    fprintf(port, "%s", buf);
+    break;
+  }
   default:
     fprintf(port, "Cyc_display: bad tag x=%d\n", ((closure) x)->tag);
     exit(1);
