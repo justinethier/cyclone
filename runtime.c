@@ -1169,6 +1169,35 @@ typedef enum {
   , CYC_BN_GTE = 2
 } bn_cmp_type;
 
+/**
+ * Convert from a bignum to a double 
+ * Code is from: https://github.com/libtom/libtommath/issues/3
+ */
+#define PRECISION 53
+double mp_get_double(mp_int *a)
+{
+    static const int NEED_DIGITS = (PRECISION + 2 * DIGIT_BIT - 2) / DIGIT_BIT;
+    static const double DIGIT_MULTI = (mp_digit)1 << DIGIT_BIT;
+
+    int i, limit;
+    double d = 0.0;
+
+    mp_clamp(a);
+    i = USED(a);
+    limit = i <= NEED_DIGITS ? 0 : i - NEED_DIGITS;
+
+    while (i-- > limit) {
+        d += DIGIT(a, i);
+        d *= DIGIT_MULTI;
+    }
+
+    if(SIGN(a) == MP_NEG)
+        d *= -1.0;
+
+    d *= pow(2.0, i * DIGIT_BIT);
+    return d;
+}
+
 int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int ty)
 {
   mp_int tmp;
@@ -1238,11 +1267,13 @@ int FUNC_OP(void *data, object x, object y) { \
     } else if (tx == bignum_tag && ty == -1) { \
       result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == bignum_tag && ty == double_tag) { \
+      result = mp_get_double(&bignum_value(x)) OP (double_value(y)); \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
       result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == -1 && ty == bignum_tag) { \
       result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == double_tag && ty == bignum_tag) { \
+      result = (double_value(x)) OP mp_get_double(&bignum_value(x)); \
     } else { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
