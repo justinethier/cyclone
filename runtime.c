@@ -1161,6 +1161,38 @@ object Cyc_num_cmp_va_list(void *data, int argc,
   return boolean_t;
 }
 
+typedef enum {
+    CYC_BN_LTE = -2
+  , CYC_BN_LT = MP_LT
+  , CYC_BN_EQ = MP_EQ
+  , CYC_BN_GT = MP_GT
+  , CYC_BN_GTE = 2
+} bn_cmp_type;
+
+int Cyc_bignum_cmp(void *data, bn_tmp_type type, object x, int tx, object y, int ty)
+{
+  int cmp;
+
+  if (tx == bignum_tag && ty == bignum_tag) {
+    cmp = mp_cmp(&bignum_value(x), &bignum_value(y));
+    // if cmp == type, return true
+    // otherwise need to check GTE / LTE
+  }
+    /* TODO:
+    } else if (tx == bignum_tag && ty == -1) { \
+    } else if (tx == bignum_tag && ty == double_tag) { \
+    } else if (tx == bignum_tag && ty == bignum_tag) { \
+    } else if (tx == -1 && ty == bignum_tag) { \
+    } else if (tx == double_tag && ty == bignum_tag) { \
+    */
+  {
+    make_string(s, "Bad argument type");
+    make_pair(c1, y, NULL);
+    make_pair(c0, &s, &c1);
+    Cyc_rt_raise(data, &c0);
+  }
+}
+
 #define declare_num_cmp(FUNC, FUNC_OP, FUNC_FAST_OP, FUNC_APPLY, OP) \
 int FUNC_OP(void *data, object x, object y) { \
     int result = 0, \
@@ -1184,6 +1216,11 @@ int FUNC_OP(void *data, object x, object y) { \
       result = (double_value(x)) OP (integer_value(y)); \
     } else if (tx == double_tag && ty == double_tag) { \
       result = (double_value(x)) OP (double_value(y)); \
+    } else if (tx == bignum_tag && ty == -1) { \
+    } else if (tx == bignum_tag && ty == double_tag) { \
+    } else if (tx == bignum_tag && ty == bignum_tag) { \
+    } else if (tx == -1 && ty == bignum_tag) { \
+    } else if (tx == double_tag && ty == bignum_tag) { \
     } else { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
