@@ -1171,6 +1171,7 @@ typedef enum {
 
 int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int ty)
 {
+  mp_int tmp;
   int cmp;
 
   if (tx == bignum_tag && ty == bignum_tag) {
@@ -1178,11 +1179,28 @@ int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int
     return (cmp == type) ||
            ((type == CYC_BN_GTE && cmp > MP_LT) ||
             (type == CYC_BN_LTE && cmp < MP_GT));
+  } else if (tx == bignum_tag && ty == -1) { \
+    // TODO: could consolidate with below
+    // TODO: probably possible to use sign and if different can avoid bignum alloc
+    mp_init(&tmp);
+    mp_set_int(&tmp, obj_obj2int(y));
+    cmp = mp_cmp(&bignum_value(x), &tmp);
+    mp_clear(&tmp);
+    return (cmp == type) ||
+           ((type == CYC_BN_GTE && cmp > MP_LT) ||
+            (type == CYC_BN_LTE && cmp < MP_GT));
+  } else if (tx == -1 && ty == bignum_tag) { \
+    mp_init(&tmp);
+    mp_set_int(&tmp, obj_obj2int(x));
+    cmp = mp_cmp(&tmp, &bignum_value(y));
+    mp_clear(&tmp);
+    return (cmp == type) ||
+           ((type == CYC_BN_GTE && cmp > MP_LT) ||
+            (type == CYC_BN_LTE && cmp < MP_GT));
   }
+
     /* TODO:
-    } else if (tx == bignum_tag && ty == -1) { \
     } else if (tx == bignum_tag && ty == double_tag) { \
-    } else if (tx == -1 && ty == bignum_tag) { \
     } else if (tx == double_tag && ty == bignum_tag) { \
     */
   {
@@ -1218,10 +1236,12 @@ int FUNC_OP(void *data, object x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
       result = (double_value(x)) OP (double_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
+      result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == bignum_tag && ty == double_tag) { \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
       result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == -1 && ty == bignum_tag) { \
+      result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
     } else if (tx == double_tag && ty == bignum_tag) { \
     } else { \
         make_string(s, "Bad argument type"); \
