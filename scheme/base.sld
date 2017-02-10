@@ -119,6 +119,7 @@
     error
     raise
     raise-continuable
+    with-handler
     with-exception-handler
     Cyc-add-exception-handler
     Cyc-remove-exception-handler
@@ -976,6 +977,20 @@
     (define (raise-continuable obj)
       ((Cyc-current-exception-handler) 
         (cons 'continuable (if (pair? obj) obj (list obj)))))
+    ;; A simpler exception handler based on the one from Bigloo:
+    ;; https://www-sop.inria.fr/indes/fp/Bigloo/doc/bigloo-17.html#g20889
+    ;(define (with-handler handler body)
+    (define-syntax with-handler
+      (er-macro-transformer
+        (lambda (exp rename compare)
+          `(call/cc
+             (lambda (k)
+               (with-exception-handler
+                 (lambda (obj)
+                   (,(cadr exp) obj)
+                   (k #t))
+                 (lambda ()
+                   ,@(cddr exp))))))))
     (define (with-exception-handler handler thunk)
       (let ((result #f)
             (my-handler 
