@@ -10,8 +10,8 @@
 ;;;; doesn't have them yet. This will need to be modified accordingly once 
 ;;;; this support is provided.
 (define-library (srfi 60)
-  (import (scheme base)
-          (scheme inexact))
+  (import 
+    (scheme base))
   (export
     any-bits-set? arithmetic-shift ash
     bit-count bit-field bit-set? bitwise-and bitwise-if bitwise-ior 

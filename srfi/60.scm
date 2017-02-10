@@ -125,7 +125,7 @@
 (define first-set-bit log2-binary-factors)
 
 (define (logbit? index n)
-  (logtest (exact (expt 2 index)) n))
+  (logtest (ash 1 index) n))
 
 (define bit-set? logbit?)
 
