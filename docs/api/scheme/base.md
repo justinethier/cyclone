@@ -152,6 +152,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`vector-map`](#vector-map)
 - [`when`](#when)
 - [`with-exception-handler`](#with-exception-handler)
+- [`with-handler`](#with-handler)
 - [`write-char`](#write-char)
 - [`write-string`](#write-string)
 - [`zero?`](#zero)
@@ -1106,6 +1107,10 @@ Semantics: The `test` is evaluated, and if it evaluates to a true value, the exp
 # with-exception-handler
 
     (with-exception-handler handler thunk)
+
+# with-handler
+
+    (with-handler handler body)
 
 # write-char
 

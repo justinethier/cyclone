@@ -987,8 +987,7 @@
              (lambda (k)
                (with-exception-handler
                  (lambda (obj)
-                   (,(cadr exp) obj)
-                   (k #t))
+                   (k (,(cadr exp) obj)))
                  (lambda ()
                    ,@(cddr exp))))))))
     (define (with-exception-handler handler thunk)

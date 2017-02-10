@@ -36,6 +36,7 @@ Features
 - Updated the garbage collector to enhance performance for programs with a high allocation rate, and to scale better to multiple concurrent threads.
 - Improved error handling by `display` and `write`.
 - Removed the `make_int` C macro which was deprecated and could cause problems when used in FFI functions.
+- Added a `with-handler` exception handler form based on the syntax from Bigloo.
 
 Bug Fixes
 
