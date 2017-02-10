@@ -1,4 +1,6 @@
-# Next Release (Tentatively 0.3.4) - TBD
+# Next Release (Tentatively 0.3.5) - TBD
+
+# 0.3.4 - February 10, 2017
 
 Features
 
