@@ -6,7 +6,7 @@
 include Makefile.config
 
 # Commands
-CYCLONE = cyclone
+CYCLONE = cyclone -A .
 CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
@@ -26,7 +26,8 @@ HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
-					 $(TEST_DIR)/srfi-121-tests.scm
+					 $(TEST_DIR)/srfi-121-tests.scm \
+					 $(TEST_DIR)/array-list-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
@@ -214,6 +215,10 @@ bootstrap : icyc libs
 	cp scheme/cyclone/test.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/test.meta $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/test.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/array-list.c $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/array-list.meta $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/array-list.sld $(BOOTSTRAP_DIR)/scheme/cyclone #just in case
+	cp scheme/cyclone/array-list.scm $(BOOTSTRAP_DIR)/scheme/cyclone #just in case
 	cp srfi/1.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.meta $(BOOTSTRAP_DIR)/srfi

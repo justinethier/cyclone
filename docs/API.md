@@ -53,6 +53,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 These libraries are provided by Cyclone with a stable API that is unlikely to change.
 
+- [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md)
 - [`scheme cyclone test`](api/scheme/cyclone/test.md)
 
@@ -201,6 +202,13 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`append`](api/scheme/base.md#append)
 [`apply                 `](api/primitives.md#apply)
 [`arithmetic-shift`](api/srfi/60.md#ash)
+[`array-list`](api/scheme/cyclone/array-list.md#array-list)
+[`array-list?`](api/scheme/cyclone/array-list.md#array-list1)
+[`array-list-delete!`](api/scheme/cyclone/array-list.md#array-list-delete)
+[`array-list-empty?`](api/scheme/cyclone/array-list.md#array-list-empty)
+[`array-list-length`](api/scheme/cyclone/array-list.md#array-list-length)
+[`array-list-ref`](api/scheme/cyclone/array-list.md#array-list-ref)
+[`array-list-set!`](api/scheme/cyclone/array-list.md#array-list-set)
 [`ash`](api/srfi/60.md#ash)
 [`asin`](api/scheme/inexact.md#asin)
 [`assoc`](api/scheme/base.md#assoc)
@@ -789,6 +797,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`macro:load-env!`](api/scheme/cyclone/macros.md#macroload-env)
 [`macro:macro?`](api/scheme/cyclone/macros.md#macromacro)
 [`magnitude`](api/scheme/complex.md#magnitude)
+[`make-array-list`](api/scheme/cyclone/array-list.md#make-array-list)
 [`make-bytevector       `](api/primitives.md#make-bytevector)
 [`make-client-socket`](api/srfi/106.md#make-client-socket)
 [`make-comparator               `](api/srfi/128.md#make-comparator)
