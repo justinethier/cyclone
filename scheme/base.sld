@@ -1078,6 +1078,9 @@
         (if (>= res 0) res (+ res b)))))
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
+  (define-c bignum?
+    "(void *data, int argc, closure _, object k, object obj)"
+    " return_closcall1(data, k, Cyc_is_bignum(obj)); ")
   ;; from mosh
   (define (exact-integer-sqrt k)
     (unless (and (exact? k)
