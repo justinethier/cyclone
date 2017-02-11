@@ -1098,7 +1098,8 @@
   (define-c exact?
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
-      if (obj_is_int(num) || type_of(num) == integer_tag)
+      if (obj_is_int(num) || type_of(num) == integer_tag 
+                          || type_of(num) == bignum_tag)
         return_closcall1(data, k, boolean_t);
       return_closcall1(data, k, boolean_f); ")
   (define (inexact? num) (not (exact? num)))
