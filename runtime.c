@@ -2445,7 +2445,26 @@ object __halt(object obj)
   return NULL;
 }
 
-#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, NO_ARG, ONE_ARG, DIV) \
+static int Cyc_checked_add(int x, int y, int *result)
+{
+  *result = x + y;
+  return ((((*result ^ x) & (*result ^ y)) >> 30) != 0);
+}
+
+static int Cyc_checked_sub(int x, int y, int *result)
+{
+  *result = x - y;
+  return ((((*result ^ x) & ~(*result ^ y)) >> 30) != 0);
+}
+
+// TODO: overflow checking
+static int Cyc_checked_mul(int x, int y, int *result)
+{
+  *result = x * y;
+  return 0;
+}
+
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
     int tx, ty; \
     tx = type_of(x); \
@@ -2463,7 +2482,13 @@ object FUNC_OP(void *data, common_type *x, object y) { \
       Cyc_rt_raise_msg(data, "Divide by zero"); \
     } \
     if (tx == integer_tag && ty == -1) { \
-        x->integer_t.value = (x->integer_t.value) OP (obj_obj2int(y)); \
+        int result; \
+        if (INT_OP(x->integer_t.value, obj_obj2int(y), &result) == 0) { \
+          x->integer_t.value = result; \
+        } else { \
+          fprintf(stderr, "integer overflow or underflow detected\n"); \
+          exit(1); \
+        } \
     } else if (tx == double_tag && ty == -1) { \
         x->double_t.value = x->double_t.value OP (obj_obj2int(y)); \
     } else if (tx == integer_tag && ty == integer_tag) { \
@@ -2515,12 +2540,15 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
     if (obj_is_int(y)){
       int xx = obj_obj2int(x),
           yy = obj_obj2int(y),
-          z = xx + yy;
-      //if((((z ^ xx) & (z ^ yy)) >> 30) != 0) { // overflow
-      //  assign_double(ptr, (double)xx + (double)yy);
-      //  return ptr;
-      //}
-      return obj_int2obj(z);
+          z;
+
+      if (Cyc_checked_add(xx, yy, &z) == 0) {
+        return obj_int2obj(z);
+      } else {
+        // TODO: no, use bignum instead
+        assign_double(ptr, (double)xx + (double)yy);
+        return ptr;
+      }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
       return ptr;
@@ -2549,8 +2577,18 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   // x is int (assume value types for integers)
   if (obj_is_int(x)){
     if (obj_is_int(y)){
-      int z = obj_obj2int(x) - obj_obj2int(y);
-      return obj_int2obj(z);
+      int xx = obj_obj2int(x),
+          yy = obj_obj2int(y),
+          z;
+      if (Cyc_checked_sub(xx, yy, &z) == 0) {
+        return obj_int2obj(z);
+      } else {
+        // TODO: no, use bignum instead
+        assign_double(ptr, (double)xx - (double)yy);
+        return ptr;
+      }
+//      int z = obj_obj2int(x) - obj_obj2int(y);
+//      return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) - double_value(y));
       return ptr;
@@ -2707,10 +2745,9 @@ void dispatch_div(void *data, int argc, object clo, object cont, object n, ...)
   return_closcall1(data, cont, result);
 }
 
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, 0, 0, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, -1, 0, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, 1, 1, 0);
-//declare_num_op(Cyc_div, Cyc_div_op2, dispatch_div, /, -1, 1, 1);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, 0, 0, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, -1, 0, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, 1, 1, 0);
 
 object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),

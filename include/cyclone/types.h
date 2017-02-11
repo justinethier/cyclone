@@ -660,6 +660,7 @@ typedef union {
   primitive_type primitive_t;
   integer_type integer_t;
   double_type double_t;
+  bignum_type bignum_t;
 } common_type;
 
 /* Utility functions */
