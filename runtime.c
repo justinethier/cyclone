@@ -2533,6 +2533,11 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->double_t.value = x->integer_t.value OP ((double_type *)y)->value; \
     } else if (tx == double_tag && ty == double_tag) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
+    } else if (tx == integer_tag && ty == bignum_tag) { \
+    } else if (tx == integer_tag && ty == double_tag) { \
+    } else if (tx == bignum_tag && ty == -1) { \
+    } else if (tx == bignum_tag && ty == double_tag) { \
+    } else if (tx == bignum_tag && ty == bignum_tag) { \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -2583,6 +2588,7 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
       return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
     }
   }
   // x is double
@@ -2593,6 +2599,18 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, double_value(x) + double_value(y));
       return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+    }
+  }
+  // x is bignum
+  if (is_object_type(x) && type_of(x) == bignum_tag) {
+    if (obj_is_int(y)){
+      //assign_double(ptr, double_value(x) + (double)(obj_obj2int(y)));
+      //return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      //assign_double(ptr, double_value(x) + double_value(y));
+      //return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
     }
   }
   // still here, raise an error 
@@ -2739,6 +2757,11 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.value = x->integer_t.value / ((double_type *) y)->value;
   } else if (tx == double_tag && ty == double_tag) {
     x->double_t.value = x->double_t.value / ((double_type *) y)->value;
+  } else if (tx == integer_tag && ty == bignum_tag) { \
+  } else if (tx == integer_tag && ty == double_tag) { \
+  } else if (tx == bignum_tag && ty == -1) { \
+  } else if (tx == bignum_tag && ty == double_tag) { \
+  } else if (tx == bignum_tag && ty == bignum_tag) { \
   } else {
     goto bad_arg_type_error;
   }
