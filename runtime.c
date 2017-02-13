@@ -1227,11 +1227,6 @@ int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int
            ((type == CYC_BN_GTE && cmp > MP_LT) ||
             (type == CYC_BN_LTE && cmp < MP_GT));
   }
-
-    /* TODO:
-    } else if (tx == bignum_tag && ty == double_tag) { \
-    } else if (tx == double_tag && ty == bignum_tag) { \
-    */
   {
     make_string(s, "Bad argument type");
     make_pair(c1, y, NULL);
@@ -2497,6 +2492,7 @@ static int Cyc_checked_mul(int x, int y, int *result)
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
+    mp_int bn_tmp; \
     int tx, ty; \
     tx = type_of(x); \
     if (obj_is_int(y)) { \
@@ -2534,9 +2530,19 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else if (tx == integer_tag && ty == bignum_tag) { \
-    } else if (tx == integer_tag && ty == double_tag) { \
+    } else if (tx == double_tag && ty == bignum_tag) { \
+        x->double_t.value = x->double_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
+        mp_int tmp2; \
+        mp_init(&tmp2); \
+        mp_set_int(&tmp2, obj_obj2int(y)); \
+        mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
+        mp_add(&bn_tmp, &tmp2, &(x->bignum_t.bn)); \
     } else if (tx == bignum_tag && ty == double_tag) { \
+        x->double_t.hdr.mark = gc_color_red; \
+        x->double_t.hdr.grayed = 0; \
+        x->double_t.tag = double_tag; \
+        x->double_t.value = mp_get_double(&(x->bignum_t.bn)) OP ((double_type *)y)->value; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
     } else { \
         goto bad_arg_type_error; \

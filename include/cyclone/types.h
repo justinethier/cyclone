@@ -372,6 +372,13 @@ typedef struct {
   mp_init(&(n.bn));
 /* TODO: check return value of mp_init */
 
+#define init_empty_bignum(n) \
+  n.hdr.mark = gc_color_red; \
+  n.hdr.grayed = 0; \
+  n.tag = bignum_tag; \
+  mp_init(&(n.bn));
+/* TODO: check return value of mp_init */
+
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
