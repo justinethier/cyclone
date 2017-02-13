@@ -2490,7 +2490,7 @@ static int Cyc_checked_mul(int x, int y, int *result)
   return 0;
 }
 
-#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, NO_ARG, ONE_ARG, DIV) \
+#define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, BN_OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
     mp_int bn_tmp; \
     int tx, ty; \
@@ -2533,17 +2533,21 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == double_tag && ty == bignum_tag) { \
         x->double_t.value = x->double_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
+        int tmpy = obj_obj2int(y); \
         mp_int tmp2; \
         mp_init(&tmp2); \
-        mp_set_int(&tmp2, obj_obj2int(y)); \
+        mp_set_int(&tmp2, tmpy); \
+        if (y < 0) { tmp2.sign = MP_NEG; } \
         mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
-        mp_add(&bn_tmp, &tmp2, &(x->bignum_t.bn)); \
+        BN_OP(&bn_tmp, &tmp2, &(x->bignum_t.bn)); \
     } else if (tx == bignum_tag && ty == double_tag) { \
         x->double_t.hdr.mark = gc_color_red; \
         x->double_t.hdr.grayed = 0; \
         x->double_t.tag = double_tag; \
         x->double_t.value = mp_get_double(&(x->bignum_t.bn)) OP ((double_type *)y)->value; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
+        mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
+        BN_OP(&bn_tmp, &bignum_value(y), &(x->bignum_t.bn)); \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -2805,9 +2809,9 @@ void dispatch_div(void *data, int argc, object clo, object cont, object n, ...)
   return_closcall1(data, cont, result);
 }
 
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, 0, 0, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, -1, 0, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, 1, 1, 0);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, mp_add, 0, 0, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, mp_sub, -1, 0, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, mp_mul, 1, 1, 0);
 
 object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
@@ -2843,6 +2847,11 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->double_t.hdr.grayed = 0;
     buf->double_t.tag = double_tag;
     buf->double_t.value = ((double_type *) n)->value;
+  } else if (type_of(n) == bignum_tag) {
+    buf->bignum_t.hdr.mark = gc_color_red;
+    buf->bignum_t.hdr.grayed = 0;
+    buf->bignum_t.tag = bignum_tag;
+    buf->bignum_t.bn = ((bignum_type *) n)->bn;
   } else {
     goto bad_arg_type_error;
   }
