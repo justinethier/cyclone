@@ -1344,6 +1344,16 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
       return ((double_value(x)) OP (double_value(y))) \
              ? boolean_t : boolean_f; \
+    } else if (tx == bignum_tag && ty == -1) { \
+      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+    } else if (tx == bignum_tag && ty == double_tag) { \
+      return mp_get_double(&bignum_value(x)) OP (double_value(y)) ? boolean_t : boolean_f; \
+    } else if (tx == bignum_tag && ty == bignum_tag) { \
+      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+    } else if (tx == -1         && ty == bignum_tag) { \
+      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+    } else if (tx == double_tag && ty == bignum_tag) { \
+      return (double_value(x)) OP mp_get_double(&bignum_value(x)) ? boolean_t : boolean_f; \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -2750,6 +2760,7 @@ divbyzero:
 
 object Cyc_div_op(void *data, common_type * x, object y)
 {
+  mp_int bn_tmp, bn_tmp2;
   int tx = type_of(x), ty;
   if (obj_is_int(y)) {
     ty = -1;
@@ -2779,11 +2790,29 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.value = x->integer_t.value / ((double_type *) y)->value;
   } else if (tx == double_tag && ty == double_tag) {
     x->double_t.value = x->double_t.value / ((double_type *) y)->value;
-  } else if (tx == integer_tag && ty == bignum_tag) { \
-  } else if (tx == integer_tag && ty == double_tag) { \
-  } else if (tx == bignum_tag && ty == -1) { \
-  } else if (tx == bignum_tag && ty == double_tag) { \
-  } else if (tx == bignum_tag && ty == bignum_tag) { \
+  } else if (tx == integer_tag && ty == bignum_tag) {
+    mp_init(&bn_tmp2);
+    Cyc_int2bignum(x->integer_t.value, &bn_tmp2);
+    x->bignum_t.hdr.mark = gc_color_red;
+    x->bignum_t.hdr.grayed = 0;
+    x->bignum_t.tag = bignum_tag;
+    mp_init(&(x->bignum_t.bn));
+    mp_div(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn), NULL);
+  } else if (tx == double_tag && ty == bignum_tag) {
+     x->double_t.value = x->double_t.value / mp_get_double(&bignum_value(y));
+  } else if (tx == bignum_tag && ty == -1) {
+    mp_init(&bn_tmp2);
+    Cyc_int2bignum(obj_obj2int(y), &bn_tmp2);
+    mp_init_copy(&bn_tmp,  &(x->bignum_t.bn));
+    mp_div(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn), NULL);
+  } else if (tx == bignum_tag && ty == double_tag) {
+    x->double_t.hdr.mark = gc_color_red;
+    x->double_t.hdr.grayed = 0;
+    x->double_t.tag = double_tag;
+    x->double_t.value = mp_get_double(&(x->bignum_t.bn)) / ((double_type *)y)->value;
+  } else if (tx == bignum_tag && ty == bignum_tag) {
+    mp_init_copy(&bn_tmp,  &(x->bignum_t.bn));
+    mp_div(&bn_tmp, &bignum_value(y), &(x->bignum_t.bn), NULL);
   } else {
     goto bad_arg_type_error;
   }
