@@ -2536,8 +2536,8 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         int tmpy = obj_obj2int(y); \
         mp_int tmp2; \
         mp_init(&tmp2); \
-        mp_set_int(&tmp2, tmpy); \
-        if (y < 0) { tmp2.sign = MP_NEG; } \
+        mp_set_int(&tmp2, abs(tmpy)); \
+        if (tmpy < 0) { mp_neg(&tmp2, &tmp2); } \
         mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
         BN_OP(&bn_tmp, &tmp2, &(x->bignum_t.bn)); \
     } else if (tx == bignum_tag && ty == double_tag) { \
