@@ -1198,6 +1198,14 @@ double mp_get_double(mp_int *a)
     return d;
 }
 
+static void Cyc_int2bignum(int n, mp_int *bn)
+{
+  mp_set_int(bn, abs(n));
+  if (n < 0) { 
+    mp_neg(bn, bn);
+  }
+}
+
 int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int ty)
 {
   mp_int tmp;
@@ -1212,7 +1220,7 @@ int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int
     // TODO: could consolidate with below
     // TODO: probably possible to use sign and if different can avoid bignum alloc
     mp_init(&tmp);
-    mp_set_int(&tmp, obj_obj2int(y));
+    Cyc_int2bignum(obj_obj2int(y), &tmp);
     cmp = mp_cmp(&bignum_value(x), &tmp);
     mp_clear(&tmp);
     return (cmp == type) ||
@@ -1220,7 +1228,7 @@ int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int
             (type == CYC_BN_LTE && cmp < MP_GT));
   } else if (tx == -1 && ty == bignum_tag) { \
     mp_init(&tmp);
-    mp_set_int(&tmp, obj_obj2int(x));
+    Cyc_int2bignum(obj_obj2int(x), &tmp);
     cmp = mp_cmp(&tmp, &bignum_value(y));
     mp_clear(&tmp);
     return (cmp == type) ||
@@ -2492,7 +2500,7 @@ static int Cyc_checked_mul(int x, int y, int *result)
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, BN_OP, NO_ARG, ONE_ARG, DIV) \
 object FUNC_OP(void *data, common_type *x, object y) { \
-    mp_int bn_tmp; \
+    mp_int bn_tmp, bn_tmp2; \
     int tx, ty; \
     tx = type_of(x); \
     if (obj_is_int(y)) { \
@@ -2530,16 +2538,20 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else if (tx == integer_tag && ty == bignum_tag) { \
+        mp_init(&bn_tmp2); \
+        Cyc_int2bignum(x->integer_t.value, &bn_tmp2); \
+        x->bignum_t.hdr.mark = gc_color_red; \
+        x->bignum_t.hdr.grayed = 0; \
+        x->bignum_t.tag = bignum_tag; \
+        mp_init(&(x->bignum_t.bn)); \
+        BN_OP(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn)); \
     } else if (tx == double_tag && ty == bignum_tag) { \
         x->double_t.value = x->double_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
-        int tmpy = obj_obj2int(y); \
-        mp_int tmp2; \
-        mp_init(&tmp2); \
-        mp_set_int(&tmp2, abs(tmpy)); \
-        if (tmpy < 0) { mp_neg(&tmp2, &tmp2); } \
+        mp_init(&bn_tmp2); \
+        Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
         mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
-        BN_OP(&bn_tmp, &tmp2, &(x->bignum_t.bn)); \
+        BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn)); \
     } else if (tx == bignum_tag && ty == double_tag) { \
         x->double_t.hdr.mark = gc_color_red; \
         x->double_t.hdr.grayed = 0; \
