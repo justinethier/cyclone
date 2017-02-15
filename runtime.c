@@ -1198,6 +1198,32 @@ double mp_get_double(mp_int *a)
     return d;
 }
 
+// TODO: convert bignum back to fixnum if possible
+object Cyc_bignum_normalize(void *data, object n)
+{
+  mp_int bn;
+  object result;
+  int i;
+  if (!is_object_type(n) || type_of(n) != bignum_tag) {
+    return n;
+  }
+
+  mp_init(&bn);
+  mp_set_int(&bn, CYC_FIXNUM_MAX);
+  if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
+    result = n;
+  } else {
+    i = mp_get_int(&bignum_value(n));
+    if (SIGN(&bignum_value(n)) == MP_NEG) {
+      i = -i;
+    }
+    result = obj_int2obj(i);
+  }
+
+  mp_clear(&bn);
+  return result;
+}
+
 static void Cyc_int2bignum(int n, mp_int *bn)
 {
   mp_set_int(bn, abs(n));
@@ -3089,38 +3115,60 @@ bad_arg_type_error:
   }
 }
 
-object Cyc_expt(void *data, object cont, object z1, object z2)
+void Cyc_expt(void *data, object cont, object x, object y)
 {
-  // TODO: if either is double, promote result to double
-  // if both int, do mp_expt_d and normalize back to fixnum if necessary
-//  c = a **b
-//  int mp_expt_d(mp_int *a, mp_digit b, mp_int *c);
-  make_double(d, 0.0);
-  Cyc_check_num(data, z1);
-  Cyc_check_num(data, z2);
-  d.value = pow( unbox_number(z1), unbox_number(z2) );
-  return_closcall1(data, cont, &d);
-}
-
-// TODO: convert bignum back to fixnum if possible
-object Cyc_bignum_normalize(void *data, object n)
-{
-  mp_int bn;
-  object result;
-  if (!is_object_type(n) || type_of(n) != bignum_tag) {
-    return n;
+//  // TODO: if either is double, promote result to double
+//  // if both int, do mp_expt_d and normalize back to fixnum if necessary
+////  c = a **b
+////  int mp_expt_d(mp_int *a, mp_digit b, mp_int *c);
+//  make_double(d, 0.0);
+//  Cyc_check_num(data, z1);
+//  Cyc_check_num(data, z2);
+//  d.value = pow( unbox_number(z1), unbox_number(z2) );
+//  return_closcall1(data, cont, &d);
+  if (obj_is_int(x)){
+    if (obj_is_int(y)){
+      make_empty_bignum(bn);
+      Cyc_int2bignum(obj_obj2int(x), &(bn.bn));
+      mp_expt_d(&bignum_value(&bn), obj_obj2int(y), &bignum_value(&bn));
+      return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, 0.0);
+      d.value = pow((double)obj_obj2int(x), double_value(y));
+      return_closcall1(data, cont, &d);
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      // TODO:
+    }
   }
-
-  mp_init(&bn);
-  mp_set_int(&bn, CYC_FIXNUM_MAX);
-  if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
-    result = n;
-  } else {
-    result = return obj_obj2int( TODO: get signed bignum int value
+  if (is_object_type(x) && type_of(x) == double_tag) {
+    make_double(d, 0.0);
+    if (obj_is_int(y)){
+      d.value = (double)obj_obj2int(y);
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      d.value = double_value(y);
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      d.value = mp_get_double(&bignum_value(y));
+    }
+    d.value = pow(double_value(x), d.value);
+    return_closcall1(data, cont, &d);
   }
-
-  mp_clear(&bn);
-  return result;
+  if (is_object_type(x) && type_of(x) == bignum_tag) {
+    if (obj_is_int(y)){
+      // TODO:
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      make_double(d, 0.0);
+      d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
+      return_closcall1(data, cont, &d);
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      // TODO:
+    }
+  }
+  // still here, raise an error 
+  make_string(s, "Bad argument type");
+  make_pair(c2, y, NULL);
+  make_pair(c1, x, &c2);
+  make_pair(c0, &s, &c1);
+  Cyc_rt_raise(data, &c0);
 }
 
 /* I/O functions */
