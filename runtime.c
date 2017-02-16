@@ -2930,7 +2930,9 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->bignum_t.hdr.mark = gc_color_red;
     buf->bignum_t.hdr.grayed = 0;
     buf->bignum_t.tag = bignum_tag;
-    buf->bignum_t.bn = ((bignum_type *) n)->bn;
+    // TODO: allocate a new one here?
+    //buf->bignum_t.bn = ((bignum_type *) n)->bn;
+    mp_init_copy(&bignum_value(n), &(buf->bignum_t.bn));
   } else {
     goto bad_arg_type_error;
   }
@@ -2946,9 +2948,14 @@ object Cyc_num_op_va_list(void *data, int argc,
     if (type_of(&tmp) == integer_tag) {
       buf->integer_t.tag = integer_tag;
       buf->integer_t.value = integer_value(&tmp);
-    } else {
+    } else if (type_of(&tmp) == double_tag){
       buf->double_t.tag = double_tag;
       buf->double_t.value = double_value(&tmp);
+    } else {
+      buf->bignum_t.tag = bignum_tag;
+      //buf->bignum_t.bn = bignum_value(&tmp);
+      // TODO: free previous mp_init above?? or free tmp bn?
+      mp_init_copy(&(buf->bignum_t.bn), &(bignum_value(&tmp)));
     }
   } else {
     for (i = 1; i < argc; i++) {
