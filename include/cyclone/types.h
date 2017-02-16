@@ -270,6 +270,9 @@ struct gc_thread_data_t {
 #define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
+#define CYC_FIXNUM_MAX 1073741823
+#define CYC_FIXNUM_MIN -1073741824
+
 /* Function type */
 
 typedef void (*function_type) ();

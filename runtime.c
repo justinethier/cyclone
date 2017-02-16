@@ -1814,9 +1814,9 @@ str2int_errno str2int(int *out, char *s, int base)
     errno = 0;
     long l = strtol(s, &end, base);
     /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
-    if (l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
+    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX))
         return STR2INT_OVERFLOW;
-    if (l < INT_MIN || (errno == ERANGE && l == LONG_MIN))
+    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN))
         return STR2INT_UNDERFLOW;
     if (*end != '\0')
         return STR2INT_INCONVERTIBLE;
@@ -3087,6 +3087,25 @@ bad_arg_type_error:
     Cyc_rt_raise(data, &c0);
     return NULL;
   }
+}
+
+object Cyc_expt(void *data, object cont, object z1, object z2)
+{
+  // TODO: if either is double, promote result to double
+  // if both int, do mp_expt_d and normalize back to fixnum if necessary
+//  c = a **b
+//  int mp_expt_d(mp_int *a, mp_digit b, mp_int *c);
+  make_double(d, 0.0);
+  Cyc_check_num(data, z1);
+  Cyc_check_num(data, z2);
+  d.value = pow( unbox_number(z1), unbox_number(z2) );
+  return_closcall1(data, cont, &d);
+}
+
+// TODO: convert bignum back to fixnum if possible
+object Cyc_bignum_normalize(void *data, object n)
+{
+  return n;
 }
 
 /* I/O functions */
