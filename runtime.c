@@ -3105,7 +3105,20 @@ object Cyc_expt(void *data, object cont, object z1, object z2)
 // TODO: convert bignum back to fixnum if possible
 object Cyc_bignum_normalize(void *data, object n)
 {
-  return n;
+  mp_int bn;
+  if (!is_object_type(n) || type_of(n) != bignum_tag) {
+    return n;
+  }
+
+  mp_init(&bn);
+  mp_set_int(&bn, CYC_FIXNUM_MAX);
+  if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
+    mp_clear(&bn);
+    return n;
+  } else {
+    mp_clear(&bn);
+    return obj_obj2int( TODO: get signed bignum int value
+  }
 }
 
 /* I/O functions */
