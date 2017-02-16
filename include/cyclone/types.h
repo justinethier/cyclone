@@ -410,6 +410,14 @@ typedef struct {
 #define double_value(x) (((double_type *) x)->value)
 #define bignum_value(x) (((bignum_type *) x)->bn)
 
+typedef enum {
+    CYC_BN_LTE = -2
+  , CYC_BN_LT = MP_LT
+  , CYC_BN_EQ = MP_EQ
+  , CYC_BN_GT = MP_GT
+  , CYC_BN_GTE = 2
+} bn_cmp_type;
+
 /* Define string type */
 typedef struct {
   gc_header_type hdr;
@@ -684,6 +692,7 @@ void **vpbuffer_realloc(void **buf, int *len);
 void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
 double mp_get_double(mp_int *a);
+int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 
 /* GC prototypes */
 void gc_initialize();

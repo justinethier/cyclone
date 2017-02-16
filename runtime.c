@@ -544,7 +544,10 @@ int equal(object x, object y)
   if (obj_is_int(x))
     return (obj_is_int(y) && x == y) ||
         (is_object_type(y) &&
-         type_of(y) == integer_tag && integer_value(y) == obj_obj2int(x));
+         (
+          (type_of(y) == integer_tag && integer_value(y) == obj_obj2int(x)) ||
+          (type_of(y) == bignum_tag && Cyc_bignum_cmp(MP_EQ, x, -1, y, bignum_tag))
+         ));
   switch (type_of(x)) {
   case string_tag:
     return (is_object_type(y) &&
@@ -580,10 +583,21 @@ int equal(object x, object y)
       return 1;
     }
     return 0;
-  case bignum_tag:
-    return (is_object_type(y) &&
-            type_of(y) == bignum_tag &&
-            MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
+  case bignum_tag: {
+    int ty = -1;
+    if (is_value_type(y)) {
+      if (!obj_is_int(y)) {
+        return 0;
+      }
+    } else {
+      ty = type_of(y);
+    }
+    
+    return Cyc_bignum_cmp(MP_EQ, x, bignum_tag, y, ty);
+  //  return (is_object_type(y) &&
+  //          type_of(y) == bignum_tag &&
+  //          MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
+  }
   case integer_tag:
     return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
         (is_object_type(y) &&
@@ -1165,14 +1179,6 @@ object Cyc_num_cmp_va_list(void *data, int argc,
   return boolean_t;
 }
 
-typedef enum {
-    CYC_BN_LTE = -2
-  , CYC_BN_LT = MP_LT
-  , CYC_BN_EQ = MP_EQ
-  , CYC_BN_GT = MP_GT
-  , CYC_BN_GTE = 2
-} bn_cmp_type;
-
 /**
  * Convert from a bignum to a double 
  * Code is from: https://github.com/libtom/libtommath/issues/3
@@ -1236,7 +1242,7 @@ static void Cyc_int2bignum(int n, mp_int *bn)
   }
 }
 
-int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int ty)
+int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
 {
   mp_int tmp;
   int cmp;
@@ -1266,10 +1272,10 @@ int Cyc_bignum_cmp(void *data, bn_cmp_type type, object x, int tx, object y, int
             (type == CYC_BN_LTE && cmp < MP_GT));
   }
   {
-    make_string(s, "Bad argument type");
-    make_pair(c1, y, NULL);
-    make_pair(c0, &s, &c1);
-    Cyc_rt_raise(data, &c0);
+    //make_string(s, "Bad argument type");
+    //make_pair(c1, y, NULL);
+    //make_pair(c0, &s, &c1);
+    //Cyc_rt_raise(data, &c0);
     return 0;
   }
 }
@@ -1298,13 +1304,13 @@ int FUNC_OP(void *data, object x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
       result = (double_value(x)) OP (double_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
-      result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
+      result = Cyc_bignum_cmp(BN_CMP, x, tx, y, ty); \
     } else if (tx == bignum_tag && ty == double_tag) { \
       result = mp_get_double(&bignum_value(x)) OP (double_value(y)); \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
-      result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
+      result = Cyc_bignum_cmp(BN_CMP, x, tx, y, ty); \
     } else if (tx == -1 && ty == bignum_tag) { \
-      result = Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty); \
+      result = Cyc_bignum_cmp(BN_CMP, x, tx, y, ty); \
     } else if (tx == double_tag && ty == bignum_tag) { \
       result = (double_value(x)) OP mp_get_double(&bignum_value(x)); \
     } else { \
@@ -1375,13 +1381,13 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
       return ((double_value(x)) OP (double_value(y))) \
              ? boolean_t : boolean_f; \
     } else if (tx == bignum_tag && ty == -1) { \
-      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+      return Cyc_bignum_cmp(BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
     } else if (tx == bignum_tag && ty == double_tag) { \
       return mp_get_double(&bignum_value(x)) OP (double_value(y)) ? boolean_t : boolean_f; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
-      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+      return Cyc_bignum_cmp(BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
     } else if (tx == -1         && ty == bignum_tag) { \
-      return Cyc_bignum_cmp(data, BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
+      return Cyc_bignum_cmp(BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
     } else if (tx == double_tag && ty == bignum_tag) { \
       return (double_value(x)) OP mp_get_double(&bignum_value(x)) ? boolean_t : boolean_f; \
     } else { \
