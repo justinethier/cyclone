@@ -3106,6 +3106,7 @@ object Cyc_expt(void *data, object cont, object z1, object z2)
 object Cyc_bignum_normalize(void *data, object n)
 {
   mp_int bn;
+  object result;
   if (!is_object_type(n) || type_of(n) != bignum_tag) {
     return n;
   }
@@ -3113,12 +3114,13 @@ object Cyc_bignum_normalize(void *data, object n)
   mp_init(&bn);
   mp_set_int(&bn, CYC_FIXNUM_MAX);
   if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
-    mp_clear(&bn);
-    return n;
+    result = n;
   } else {
-    mp_clear(&bn);
-    return obj_obj2int( TODO: get signed bignum int value
+    result = return obj_obj2int( TODO: get signed bignum int value
   }
+
+  mp_clear(&bn);
+  return result;
 }
 
 /* I/O functions */
