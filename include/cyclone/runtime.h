@@ -100,6 +100,8 @@ object Cyc_global_set(void *thd, object * glo, object value);
     d.value = OP(obj_obj2int(z)); \
   } else if (type_of(z) == integer_tag) { \
     d.value = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    d.value = OP(mp_get_double(&bignum_value(z))); \
   } else { \
     d.value = OP(((double_type *)z)->value); \
   } \
@@ -112,6 +114,8 @@ object Cyc_global_set(void *thd, object * glo, object value);
     i = obj_obj2int(z); \
   } else if (type_of(z) == integer_tag) { \
     i = (int)OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    return_closcall1(data, cont, z); \
   } else { \
     i = (int)OP(((double_type *)z)->value); \
   } \

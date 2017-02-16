@@ -680,6 +680,7 @@ typedef union {
 void **vpbuffer_realloc(void **buf, int *len);
 void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
+double mp_get_double(mp_int *a);
 
 /* GC prototypes */
 void gc_initialize();
