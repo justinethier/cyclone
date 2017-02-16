@@ -2489,6 +2489,8 @@ object __halt(object obj)
   return NULL;
 }
 
+// Signed arithmetic overflow checks, based on code from CHICKEN:
+
 static int Cyc_checked_add(int x, int y, int *result)
 {
   *result = x + y;
@@ -2501,11 +2503,11 @@ static int Cyc_checked_sub(int x, int y, int *result)
   return ((((*result ^ x) & ~(*result ^ y)) >> 30) != 0);
 }
 
-// TODO: overflow checking
+// Code from http://stackoverflow.com/q/1815367/101258
 static int Cyc_checked_mul(int x, int y, int *result)
 {
   *result = x * y;
-  return 0;
+  return (*result != 0 && (*result)/x != y);
 }
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, BN_OP, NO_ARG, ONE_ARG, DIV) \
