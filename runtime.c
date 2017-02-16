@@ -1721,6 +1721,14 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
       snprintf(buffer, 1024, "%d", ((integer_type *) n)->value);
     } else if (type_of(n) == double_tag) {
       double2buffer(buffer, 1024, ((double_type *) n)->value);
+    } else if (type_of(n) == bignum_tag) {
+      int sz;
+      mp_radix_size(&bignum_value(n), 10, &sz);
+      if (sz > 1024) {
+        // TODO: just temporary, need to handle this better
+        Cyc_rt_raise(data, "number->string - bignum is too large to print");
+      }
+      mp_toradix(&bignum_value(n), buffer, 10);
     } else {
       Cyc_rt_raise2(data, "number->string - Unexpected object", n);
     }
