@@ -20,3 +20,30 @@
     (+ x 1)
     ))
 (newline)
+(write
+  (list 
+    x 
+    (- 1.0 x ) 
+    (- x x) 
+    (- x 1.0) 
+    (- x 1)
+    ))
+(newline)
+(write
+  (list 
+    x 
+    (* 1.0 x ) 
+    (* x x) 
+    (* x 1.0) 
+    (* x 1)
+    ))
+(newline)
+(write
+  (list 
+    x 
+    (/ 1.0 x ) 
+    (/ x x) 
+    (/ x 1.0) 
+    (/ x 1)
+    ))
+(newline)
