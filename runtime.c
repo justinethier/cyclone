@@ -2932,7 +2932,7 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->bignum_t.tag = bignum_tag;
     // TODO: allocate a new one here?
     //buf->bignum_t.bn = ((bignum_type *) n)->bn;
-    mp_init_copy(&bignum_value(n), &(buf->bignum_t.bn));
+    mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n));
   } else {
     goto bad_arg_type_error;
   }
