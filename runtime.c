@@ -2531,8 +2531,17 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         if (INT_OP(x->integer_t.value, obj_obj2int(y), &result) == 0) { \
           x->integer_t.value = result; \
         } else { \
-          fprintf(stderr, "integer overflow or underflow detected\n"); \
-          exit(1); \
+          mp_init(&bn_tmp); \
+          mp_init(&bn_tmp2); \
+          Cyc_int2bignum(x->integer_t.value, &bn_tmp); \
+          Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
+          x->bignum_t.hdr.mark = gc_color_red; \
+          x->bignum_t.hdr.grayed = 0; \
+          x->bignum_t.tag = bignum_tag; \
+          mp_init(&(x->bignum_t.bn)); \
+          BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn)); \
+          mp_clear(&bn_tmp); \
+          mp_clear(&bn_tmp2); \
         } \
     } else if (tx == double_tag && ty == -1) { \
         x->double_t.value = x->double_t.value OP (obj_obj2int(y)); \
@@ -2555,6 +2564,7 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->bignum_t.tag = bignum_tag; \
         mp_init(&(x->bignum_t.bn)); \
         BN_OP(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn)); \
+        mp_clear(&bn_tmp2); \
     } else if (tx == double_tag && ty == bignum_tag) { \
         x->double_t.value = x->double_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
@@ -2562,6 +2572,7 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
         mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
         BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn)); \
+        mp_clear(&bn_tmp2); \
     } else if (tx == bignum_tag && ty == double_tag) { \
         x->double_t.hdr.mark = gc_color_red; \
         x->double_t.hdr.grayed = 0; \
@@ -2613,14 +2624,31 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       if (Cyc_checked_add(xx, yy, &z) == 0) {
         return obj_int2obj(z);
       } else {
-        // TODO: no, use bignum instead
-        assign_double(ptr, (double)xx + (double)yy);
+        //// TODO: no, use bignum instead
+        //assign_double(ptr, (double)xx + (double)yy);
+        //return ptr;
+        mp_int tmp, tmp2;
+        mp_init(&tmp);
+        mp_init(&tmp2);
+        Cyc_int2bignum(xx, &tmp);
+        Cyc_int2bignum(yy, &tmp2);
+        assign_empty_bignum(ptr)
+        mp_add(&tmp, &tmp2, &bignum_value(ptr));
+        mp_clear(&tmp);
+        mp_clear(&tmp2);
         return ptr;
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+        mp_int tmp;
+        mp_init(&tmp);
+        Cyc_int2bignum(obj_obj2int(x), &tmp);
+        assign_empty_bignum(ptr)
+        mp_add(&tmp, &bignum_value(y), &bignum_value(ptr));
+        mp_clear(&tmp);
+        return ptr;
     }
   }
   // x is double
@@ -2632,17 +2660,27 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       assign_double(ptr, double_value(x) + double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_double(ptr, double_value(x) + mp_get_double(&bignum_value(y)));
+      return ptr;
     }
   }
   // x is bignum
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
-      //assign_double(ptr, double_value(x) + (double)(obj_obj2int(y)));
-      //return ptr;
+      mp_int tmp;
+      mp_init(&tmp);
+      Cyc_int2bignum(obj_obj2int(y), &tmp);
+      assign_empty_bignum(ptr)
+      mp_add(&bignum_value(x), &tmp, &bignum_value(ptr));
+      mp_clear(&tmp);
+      return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      //assign_double(ptr, double_value(x) + double_value(y));
-      //return ptr;
+      assign_double(ptr, mp_get_double(&bignum_value(x)) + double_value(y));
+      return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_empty_bignum(ptr)
+      mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(ptr));
+      return ptr;
     }
   }
   // still here, raise an error 

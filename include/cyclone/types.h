@@ -378,6 +378,12 @@ typedef struct {
   n.tag = bignum_tag; \
   mp_init(&(n.bn));
 /* TODO: check return value of mp_init */
+#define assign_empty_bignum(pobj) \
+  ((bignum_type *)pobj)->hdr.mark = gc_color_red; \
+  ((bignum_type *)pobj)->hdr.grayed = 0; \
+  ((bignum_type *)pobj)->tag = bignum_tag; \
+  mp_init(&(((bignum_type *)pobj)->bn));
+/* TODO: check return value of mp_init */
 
 typedef struct {
   gc_header_type hdr;

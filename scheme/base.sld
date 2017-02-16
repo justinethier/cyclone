@@ -41,6 +41,7 @@
     odd?
     complex?
     rational?
+    bignum?
     gcd
     lcm
     quotient
