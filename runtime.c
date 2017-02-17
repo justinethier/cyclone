@@ -1898,12 +1898,11 @@ object Cyc_string2number_(void *data, object cont, object str)
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
     } else if (str_is_bignum(rv, s)) {
-      make_empty_bignum(bn);
-      
-      // TODO: check return value
-      mp_read_radix(&(bignum_value(&bn)), s, 10);
-
-      _return_closcall1(data, cont, &bn);
+      alloc_bignum(data, bn);
+      if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), s, 10)) {
+        Cyc_rt_raise2(data, "Error converting string to bignum", str);
+      }
+      _return_closcall1(data, cont, bn);
     } else {
       char *str_end;
       n = strtold(s, &str_end);
@@ -3153,10 +3152,10 @@ void Cyc_expt(void *data, object cont, object x, object y)
       if (obj_obj2int(y) < 0) {
         Cyc_expt_double(data, cont, (double)obj_obj2int(x), (double)obj_obj2int(y));
       } else {
-        make_empty_bignum(bn);
-        Cyc_int2bignum(obj_obj2int(x), &(bn.bn));
-        mp_expt_d(&bignum_value(&bn), obj_obj2int(y), &bignum_value(&bn));
-        return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+        alloc_bignum(data, bn);
+        Cyc_int2bignum(obj_obj2int(x), &(bn->bn));
+        mp_expt_d(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn));
+        return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       Cyc_expt_double(data, cont, (double)obj_obj2int(x), double_value(y));
@@ -3181,9 +3180,9 @@ void Cyc_expt(void *data, object cont, object x, object y)
       if (obj_obj2int(y) < 0) {
         Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), (double)obj_obj2int(y));
       } else {
-        make_empty_bignum(bn);
-        mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(&bn));
-        return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+        alloc_bignum(data, bn);
+        mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(bn));
+        return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), double_value(y));

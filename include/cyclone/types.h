@@ -370,15 +370,6 @@ typedef struct {
 #define alloc_bignum(data, p) \
   bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
 
-// TODO: the following macro is obsolete
-#define make_empty_bignum(n) \
-  bignum_type n; \
-  n.hdr.mark = gc_color_red; \
-  n.hdr.grayed = 0; \
-  n.tag = bignum_tag; \
-  mp_init(&(n.bn));
-/* TODO: check return value of mp_init */
-
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
