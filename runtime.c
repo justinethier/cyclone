@@ -1208,7 +1208,7 @@ double mp_get_double(mp_int *a)
     return d;
 }
 
-// TODO: convert bignum back to fixnum if possible
+// Convert a bignum back to fixnum if possible
 object Cyc_bignum_normalize(void *data, object n)
 {
   mp_int bn;
@@ -1229,7 +1229,6 @@ object Cyc_bignum_normalize(void *data, object n)
     }
     result = obj_int2obj(i);
   }
-
   mp_clear(&bn);
   return result;
 }
@@ -1271,13 +1270,7 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
            ((type == CYC_BN_GTE && cmp > MP_LT) ||
             (type == CYC_BN_LTE && cmp < MP_GT));
   }
-  {
-    //make_string(s, "Bad argument type");
-    //make_pair(c1, y, NULL);
-    //make_pair(c0, &s, &c1);
-    //Cyc_rt_raise(data, &c0);
-    return 0;
-  }
+  return 0;
 }
 
 #define declare_num_cmp(FUNC, FUNC_OP, FUNC_FAST_OP, FUNC_APPLY, OP, BN_CMP) \
@@ -2621,17 +2614,17 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == bignum_tag && ty == -1) { \
         mp_init(&bn_tmp2); \
         Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
-        mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
-        BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn)); \
+        BN_OP(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn)); \
         mp_clear(&bn_tmp2); \
     } else if (tx == bignum_tag && ty == double_tag) { \
+        double d = mp_get_double(&(x->bignum_t.bn)); \
+        mp_clear(&(x->bignum_t.bn)); \
         x->double_t.hdr.mark = gc_color_red; \
         x->double_t.hdr.grayed = 0; \
         x->double_t.tag = double_tag; \
-        x->double_t.value = mp_get_double(&(x->bignum_t.bn)) OP ((double_type *)y)->value; \
+        x->double_t.value = d OP ((double_type *)y)->value; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
-        mp_init_copy(&bn_tmp,  &(x->bignum_t.bn)); \
-        BN_OP(&bn_tmp, &bignum_value(y), &(x->bignum_t.bn)); \
+        BN_OP(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn)); \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -2957,7 +2950,7 @@ divbyzero:
 
 object Cyc_div_op(void *data, common_type * x, object y)
 {
-  mp_int bn_tmp, bn_tmp2;
+  mp_int bn_tmp2;
   int tx = type_of(x), ty;
   if (obj_is_int(y)) {
     ty = -1;
@@ -2996,21 +2989,23 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->bignum_t.tag = bignum_tag;
     mp_init(&(x->bignum_t.bn));
     mp_div(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn), NULL);
+    mp_clear(&bn_tmp2);
   } else if (tx == double_tag && ty == bignum_tag) {
      x->double_t.value = x->double_t.value / mp_get_double(&bignum_value(y));
   } else if (tx == bignum_tag && ty == -1) {
     mp_init(&bn_tmp2);
     Cyc_int2bignum(obj_obj2int(y), &bn_tmp2);
-    mp_init_copy(&bn_tmp,  &(x->bignum_t.bn));
-    mp_div(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn), NULL);
+    mp_div(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn), NULL);
+    mp_clear(&bn_tmp2);
   } else if (tx == bignum_tag && ty == double_tag) {
+    double d = mp_get_double(&(x->bignum_t.bn));
+    mp_clear(&(x->bignum_t.bn));
     x->double_t.hdr.mark = gc_color_red;
     x->double_t.hdr.grayed = 0;
     x->double_t.tag = double_tag;
-    x->double_t.value = mp_get_double(&(x->bignum_t.bn)) / ((double_type *)y)->value;
+    x->double_t.value = d / ((double_type *)y)->value;
   } else if (tx == bignum_tag && ty == bignum_tag) {
-    mp_init_copy(&bn_tmp,  &(x->bignum_t.bn));
-    mp_div(&bn_tmp, &bignum_value(y), &(x->bignum_t.bn), NULL);
+    mp_div(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL);
   } else {
     goto bad_arg_type_error;
   }
@@ -3090,8 +3085,6 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->bignum_t.hdr.mark = gc_color_red;
     buf->bignum_t.hdr.grayed = 0;
     buf->bignum_t.tag = bignum_tag;
-    // TODO: allocate a new one here?
-    //buf->bignum_t.bn = ((bignum_type *) n)->bn;
     mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n));
   } else {
     goto bad_arg_type_error;
@@ -3113,9 +3106,10 @@ object Cyc_num_op_va_list(void *data, int argc,
       buf->double_t.value = double_value(&tmp);
     } else {
       buf->bignum_t.tag = bignum_tag;
-      //buf->bignum_t.bn = bignum_value(&tmp);
-      // TODO: free previous mp_init above?? or free tmp bn?
-      mp_init_copy(&(buf->bignum_t.bn), &(bignum_value(&tmp)));
+      buf->bignum_t.bn.used = tmp.bignum_t.bn.used;
+      buf->bignum_t.bn.alloc = tmp.bignum_t.bn.alloc;
+      buf->bignum_t.bn.sign = tmp.bignum_t.bn.sign;
+      buf->bignum_t.bn.dp = tmp.bignum_t.bn.dp;
     }
   } else {
     for (i = 1; i < argc; i++) {
@@ -3126,6 +3120,8 @@ object Cyc_num_op_va_list(void *data, int argc,
   // Convert to immediate int
   if (type_of(buf) == integer_tag) {
     return obj_int2obj(buf->integer_t.value);
+  } else if (type_of(buf) == bignum_tag) {
+    buf = gc_alloc_from_bignum(data, &(buf->bignum_t));
   }
 
   return buf;

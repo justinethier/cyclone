@@ -606,6 +606,12 @@ void *gc_alloc_bignum(gc_thread_data *data)
   return bn;
 }
 
+void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src)
+{
+  int heap_grown;
+  return gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum_type), (char *)(src), (gc_thread_data *)data, &heap_grown);
+}
+
 void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown)
 {

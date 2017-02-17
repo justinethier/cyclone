@@ -693,6 +693,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
 void *gc_alloc_bignum(gc_thread_data *data);
+void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 size_t gc_heap_total_size(gc_heap * h);
