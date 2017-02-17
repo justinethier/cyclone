@@ -1305,7 +1305,7 @@ int FUNC_OP(void *data, object x, object y) { \
     } else if (tx == -1 && ty == bignum_tag) { \
       result = Cyc_bignum_cmp(BN_CMP, x, tx, y, ty); \
     } else if (tx == double_tag && ty == bignum_tag) { \
-      result = (double_value(x)) OP mp_get_double(&bignum_value(x)); \
+      result = (double_value(x)) OP mp_get_double(&bignum_value(y)); \
     } else { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
