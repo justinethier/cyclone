@@ -2962,7 +2962,6 @@ object Cyc_div_op(void *data, common_type * x, object y)
   if (tx == integer_tag && ty == -1) {
     if (obj_obj2int(y) == 0) {
       Cyc_rt_raise_msg(data, "Divide by zero");
-      // TODO: check for bignum div by zero
     }
     x->double_t.tag = double_tag;
     x->double_t.value = ((double)x->integer_t.value) / (obj_obj2int(y));
