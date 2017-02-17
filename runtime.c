@@ -546,19 +546,14 @@ int equal(object x, object y)
         (is_object_type(y) &&
          type_of(y) == integer_tag && integer_value(y) == obj_obj2int(x));
   switch (type_of(x)) {
-  case integer_tag:
-    return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
-        (is_object_type(y) &&
-         type_of(y) == integer_tag &&
-         ((integer_type *) x)->value == ((integer_type *) y)->value);
-  case double_tag:
-    return (is_object_type(y) &&
-            type_of(y) == double_tag &&
-            ((double_type *) x)->value == ((double_type *) y)->value);
   case string_tag:
     return (is_object_type(y) &&
             type_of(y) == string_tag &&
             strcmp(((string_type *) x)->str, ((string_type *) y)->str) == 0);
+  case double_tag:
+    return (is_object_type(y) &&
+            type_of(y) == double_tag &&
+            ((double_type *) x)->value == ((double_type *) y)->value);
   case vector_tag:
     if (is_object_type(y) &&
         type_of(y) == vector_tag &&
@@ -585,6 +580,15 @@ int equal(object x, object y)
       return 1;
     }
     return 0;
+  case bignum_tag:
+    return (is_object_type(y) &&
+            type_of(y) == bignum_tag &&
+            MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
+  case integer_tag:
+    return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
+        (is_object_type(y) &&
+         type_of(y) == integer_tag &&
+         ((integer_type *) x)->value == ((integer_type *) y)->value);
   default:
     return x == y;
   }
@@ -3156,7 +3160,9 @@ void Cyc_expt(void *data, object cont, object x, object y)
   }
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
-      // TODO:
+      make_empty_bignum(bn);
+      mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(&bn));
+      return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       make_double(d, 0.0);
       d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
