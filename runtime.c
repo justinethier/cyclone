@@ -1233,7 +1233,7 @@ object Cyc_bignum_normalize(void *data, object n)
   return result;
 }
 
-static void Cyc_int2bignum(int n, mp_int *bn)
+void Cyc_int2bignum(int n, mp_int *bn)
 {
   mp_set_int(bn, abs(n));
   if (n < 0) { 
