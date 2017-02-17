@@ -1163,11 +1163,7 @@
   (define (square z) (* z z))
   (define-c expt
     "(void *data, int argc, closure _, object k, object z1, object z2)"
-    " make_double(d, 0.0);
-      Cyc_check_num(data, z1);
-      Cyc_check_num(data, z2);
-      d.value = pow( unbox_number(z1), unbox_number(z2) );
-      return_closcall1(data, k, &d); ")
+    " Cyc_expt(data, k, z1, z2); ")
   (define-c eof-object
     "(void *data, int argc, closure _, object k)"
     " return_closcall1(data, k, Cyc_EOF); ")

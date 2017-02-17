@@ -178,6 +178,7 @@ object Cyc_num_fast_lte_op(void *data, object x, object y);
 object Cyc_num_cmp_va_list(void *data, int argc,
                            int (fn_op(void *, object, object)), object n,
                            va_list ns);
+void Cyc_expt(void *data, object cont, object x, object y);
 object Cyc_eq(object x, object y);
 object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
