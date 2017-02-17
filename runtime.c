@@ -2533,7 +2533,9 @@ static int Cyc_checked_sub(int x, int y, int *result)
 static int Cyc_checked_mul(int x, int y, int *result)
 {
   *result = x * y;
-  return (*result != 0 && (*result)/x != y);
+  return (*result != 0 && (*result)/x != y) || // Overflow
+         (*result > CYC_FIXNUM_MAX) ||
+         (*result < CYC_FIXNUM_MIN);
 }
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, BN_OP, NO_ARG, ONE_ARG, DIV) \
