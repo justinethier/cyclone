@@ -3139,27 +3139,26 @@ bad_arg_type_error:
   }
 }
 
+void Cyc_expt_double(void *data, object cont, double x, double y)
+{
+  make_double(d, pow(x, y));
+  return_closcall1(data, cont, &d);
+}
+
 void Cyc_expt(void *data, object cont, object x, object y)
 {
-//  // TODO: if either is double, promote result to double
-//  // if both int, do mp_expt_d and normalize back to fixnum if necessary
-////  c = a **b
-////  int mp_expt_d(mp_int *a, mp_digit b, mp_int *c);
-//  make_double(d, 0.0);
-//  Cyc_check_num(data, z1);
-//  Cyc_check_num(data, z2);
-//  d.value = pow( unbox_number(z1), unbox_number(z2) );
-//  return_closcall1(data, cont, &d);
   if (obj_is_int(x)){
     if (obj_is_int(y)){
-      make_empty_bignum(bn);
-      Cyc_int2bignum(obj_obj2int(x), &(bn.bn));
-      mp_expt_d(&bignum_value(&bn), obj_obj2int(y), &bignum_value(&bn));
-      return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+      if (obj_obj2int(y) < 0) {
+        Cyc_expt_double(data, cont, (double)obj_obj2int(x), (double)obj_obj2int(y));
+      } else {
+        make_empty_bignum(bn);
+        Cyc_int2bignum(obj_obj2int(x), &(bn.bn));
+        mp_expt_d(&bignum_value(&bn), obj_obj2int(y), &bignum_value(&bn));
+        return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+      }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      make_double(d, 0.0);
-      d.value = pow((double)obj_obj2int(x), double_value(y));
-      return_closcall1(data, cont, &d);
+      Cyc_expt_double(data, cont, (double)obj_obj2int(x), double_value(y));
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       // TODO:
     }
@@ -3178,13 +3177,18 @@ void Cyc_expt(void *data, object cont, object x, object y)
   }
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
-      make_empty_bignum(bn);
-      mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(&bn));
-      return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+      if (obj_obj2int(y) < 0) {
+        Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), (double)obj_obj2int(y));
+      } else {
+        make_empty_bignum(bn);
+        mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(&bn));
+        return_closcall1(data, cont, Cyc_bignum_normalize(data, &bn));
+      }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      make_double(d, 0.0);
-      d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
-      return_closcall1(data, cont, &d);
+      Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), double_value(y));
+      //make_double(d, 0.0);
+      //d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
+      //return_closcall1(data, cont, &d);
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       // TODO:
     }
