@@ -2681,11 +2681,11 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
         mp_init(&bny);
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
-        assign_empty_bignum(ptr)
-        mp_add(&bnx, &bny, &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_add(&bnx, &bny, &bignum_value(bn));
         mp_clear(&bnx);
         mp_clear(&bny);
-        return ptr;
+        return bn;
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
@@ -2694,10 +2694,10 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
         mp_int bnx;
         mp_init(&bnx);
         Cyc_int2bignum(obj_obj2int(x), &bnx);
-        assign_empty_bignum(ptr)
-        mp_add(&bnx, &bignum_value(y), &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_add(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
-        return ptr;
+        return bn;
     }
   }
   // x is double
@@ -2719,17 +2719,17 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       mp_int bny;
       mp_init(&bny);
       Cyc_int2bignum(obj_obj2int(y), &bny);
-      assign_empty_bignum(ptr)
-      mp_add(&bignum_value(x), &bny, &bignum_value(ptr));
+      alloc_bignum(data, bn);
+      mp_add(&bignum_value(x), &bny, &bignum_value(bn));
       mp_clear(&bny);
-      return ptr;
+      return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, mp_get_double(&bignum_value(x)) + double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_empty_bignum(ptr)
-      mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(ptr));
-      return ptr;
+      alloc_bignum(data, bn);
+      mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      return bn;
     }
   }
   // still here, raise an error 
@@ -2756,10 +2756,11 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
         mp_init(&bny);
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
-        assign_empty_bignum(ptr)
-        mp_sub(&bnx, &bny, &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_sub(&bnx, &bny, &bignum_value(bn));
         mp_clear(&bnx);
         mp_clear(&bny);
+        return bn;
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) - double_value(y));
@@ -2768,10 +2769,10 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
         mp_int bnx;
         mp_init(&bnx);
         Cyc_int2bignum(obj_obj2int(x), &bnx);
-        assign_empty_bignum(ptr)
-        mp_sub(&bnx, &bignum_value(y), &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_sub(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
-        return ptr;
+        return bn;
     }
   }
   // x is double
@@ -2793,17 +2794,17 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       mp_int bny;
       mp_init(&bny);
       Cyc_int2bignum(obj_obj2int(y), &bny);
-      assign_empty_bignum(ptr)
-      mp_sub(&bignum_value(x), &bny, &bignum_value(ptr));
+      alloc_bignum(data, bn);
+      mp_sub(&bignum_value(x), &bny, &bignum_value(bn));
       mp_clear(&bny);
-      return ptr;
+      return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, mp_get_double(&bignum_value(x)) - double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_empty_bignum(ptr)
-      mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(ptr));
-      return ptr;
+      alloc_bignum(data, bn);
+      mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      return bn;
     }
   }
   // still here, raise an error 
@@ -2830,11 +2831,11 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
         mp_init(&bny);
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
-        assign_empty_bignum(ptr)
-        mp_mul(&bnx, &bny, &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_mul(&bnx, &bny, &bignum_value(bn));
         mp_clear(&bnx);
         mp_clear(&bny);
-        return ptr;
+        return bn;
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) * double_value(y));
@@ -2843,10 +2844,10 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
         mp_int bnx;
         mp_init(&bnx);
         Cyc_int2bignum(obj_obj2int(x), &bnx);
-        assign_empty_bignum(ptr)
-        mp_mul(&bnx, &bignum_value(y), &bignum_value(ptr));
+        alloc_bignum(data, bn);
+        mp_mul(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
-        return ptr;
+        return bn;
     }
   }
   // x is double
@@ -2868,17 +2869,17 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       mp_int bny;
       mp_init(&bny);
       Cyc_int2bignum(obj_obj2int(y), &bny);
-      assign_empty_bignum(ptr)
-      mp_mul(&bignum_value(x), &bny, &bignum_value(ptr));
+      alloc_bignum(data, bn);
+      mp_mul(&bignum_value(x), &bny, &bignum_value(bn));
       mp_clear(&bny);
-      return ptr;
+      return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, mp_get_double(&bignum_value(x)) * double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_empty_bignum(ptr)
-      mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(ptr));
-      return ptr;
+      alloc_bignum(data, bn);
+      mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      return bn;
     }
   }
   // still here, raise an error 
@@ -2906,10 +2907,10 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
         mp_int bnx;
         mp_init(&bnx);
         Cyc_int2bignum(obj_obj2int(x), &bnx);
-        assign_empty_bignum(ptr)
-        mp_div(&bnx, &bignum_value(y), &bignum_value(ptr), NULL);
+        alloc_bignum(data, bn);
+        mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL);
         mp_clear(&bnx);
-        return ptr;
+        return bn;
     }
   }
   // x is double
@@ -2931,17 +2932,17 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       mp_int bny;
       mp_init(&bny);
       Cyc_int2bignum(obj_obj2int(y), &bny);
-      assign_empty_bignum(ptr)
-      mp_div(&bignum_value(x), &bny, &bignum_value(ptr), NULL);
+      alloc_bignum(data, bn);
+      mp_div(&bignum_value(x), &bny, &bignum_value(bn), NULL);
       mp_clear(&bny);
-      return ptr;
+      return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, mp_get_double(&bignum_value(x)) / double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_empty_bignum(ptr)
-      mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(ptr), NULL);
-      return ptr;
+      alloc_bignum(data, bn);
+      mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(bn), NULL);
+      return bn;
     }
   }
   // still here, raise an error 
