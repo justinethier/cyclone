@@ -1691,7 +1691,7 @@ char *int_to_binary(char *b, int x)
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
 {
   object base = NULL;
-  int base_num = 10, val;
+  int base_num = 10, val, sz;
   char buffer[1024];
   va_list ap;
   va_start(ap, n);
@@ -1705,38 +1705,42 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
     base_num = unbox_number(base);
   }
 
-  if (base_num == 2) {
-    val = obj_is_int(n) ?
-        obj_obj2int(n) :
-        type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
-    int_to_binary(buffer, val);
-  } else if (base_num == 8) {
-    val = obj_is_int(n) ?
-        obj_obj2int(n) :
-        type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
-    snprintf(buffer, 1024, "%o", val);
-  } else if (base_num == 16) {
-    val = obj_is_int(n) ?
-        obj_obj2int(n) :
-        type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
-    snprintf(buffer, 1024, "%X", val);
+  if (is_object_type(n) && type_of(n) == bignum_tag) {
+    if (base_num > 64 || base_num < 2) {
+      Cyc_rt_raise2(data, "number->string - invalid radix for bignum", base);
+    }
+    mp_radix_size(&bignum_value(n), base_num, &sz);
+    if (sz > 1024) {
+      // TODO: just temporary, need to handle this better
+      Cyc_rt_raise2(data, "number->string - bignum is too large to convert", n);
+    }
+    mp_toradix(&bignum_value(n), buffer, base_num);
   } else {
-    if (obj_is_int(n)) {
-      snprintf(buffer, 1024, "%ld", obj_obj2int(n));
-    } else if (type_of(n) == integer_tag) {
-      snprintf(buffer, 1024, "%d", ((integer_type *) n)->value);
-    } else if (type_of(n) == double_tag) {
-      double2buffer(buffer, 1024, ((double_type *) n)->value);
-    } else if (type_of(n) == bignum_tag) {
-      int sz;
-      mp_radix_size(&bignum_value(n), 10, &sz);
-      if (sz > 1024) {
-        // TODO: just temporary, need to handle this better
-        Cyc_rt_raise(data, "number->string - bignum is too large to print");
-      }
-      mp_toradix(&bignum_value(n), buffer, 10);
+    if (base_num == 2) {
+      val = obj_is_int(n) ?
+          obj_obj2int(n) :
+          type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
+      int_to_binary(buffer, val);
+    } else if (base_num == 8) {
+      val = obj_is_int(n) ?
+          obj_obj2int(n) :
+          type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
+      snprintf(buffer, 1024, "%o", val);
+    } else if (base_num == 16) {
+      val = obj_is_int(n) ?
+          obj_obj2int(n) :
+          type_of(n) == integer_tag ? integer_value(n) : ((int)double_value(n));
+      snprintf(buffer, 1024, "%X", val);
     } else {
-      Cyc_rt_raise2(data, "number->string - Unexpected object", n);
+      if (obj_is_int(n)) {
+        snprintf(buffer, 1024, "%ld", obj_obj2int(n));
+      } else if (type_of(n) == integer_tag) {
+        snprintf(buffer, 1024, "%d", ((integer_type *) n)->value);
+      } else if (type_of(n) == double_tag) {
+        double2buffer(buffer, 1024, ((double_type *) n)->value);
+      } else {
+        Cyc_rt_raise2(data, "number->string - Unexpected object", n);
+      }
     }
   }
   make_string(str, buffer);
