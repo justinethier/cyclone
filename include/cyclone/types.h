@@ -367,6 +367,9 @@ typedef struct {
   mp_int bn;
 } bignum_type;
 
+#define alloc_bignum(data, p) \
+  bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
+
 #define make_empty_bignum(n) \
   bignum_type n; \
   n.hdr.mark = gc_color_red; \
@@ -375,12 +378,6 @@ typedef struct {
   mp_init(&(n.bn));
 /* TODO: check return value of mp_init */
 
-#define init_empty_bignum(n) \
-  n.hdr.mark = gc_color_red; \
-  n.hdr.grayed = 0; \
-  n.tag = bignum_tag; \
-  mp_init(&(n.bn));
-/* TODO: check return value of mp_init */
 #define assign_empty_bignum(pobj) \
   ((bignum_type *)pobj)->hdr.mark = gc_color_red; \
   ((bignum_type *)pobj)->hdr.grayed = 0; \
@@ -710,6 +707,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
+void *gc_alloc_bignum(gc_thread_data *data);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 size_t gc_heap_total_size(gc_heap * h);

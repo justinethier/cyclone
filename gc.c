@@ -587,6 +587,25 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
   return NULL;
 }
 
+// A convenience function for allocating bignums
+void *gc_alloc_bignum(gc_thread_data *data)
+{
+  int heap_grown, result;
+  bignum_type *bn;
+  bignum_type tmp;
+  tmp.hdr.mark = gc_color_red;
+  tmp.hdr.grayed = 0;
+  tmp.tag = bignum_tag;
+  bn = gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+
+  if ((result = mp_init(&bignum_value(bn))) != MP_OKAY) {
+     fprintf(stderr, "Error initializing number %s",
+                     mp_error_to_string(result));
+     exit(1);
+  }
+  return bn;
+}
+
 void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown)
 {
