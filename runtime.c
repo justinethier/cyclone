@@ -1799,14 +1799,22 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
   if (base) {
     base_num = unbox_number(base);
     Cyc_check_str(data, str);
+    result = -1;
     if (base_num == 2) {
       result = (int)strtol(string_str(str), NULL, 2);
-      _return_closcall1(data, cont, obj_int2obj(result));
     } else if (base_num == 8) {
       result = (int)strtol(string_str(str), NULL, 8);
-      _return_closcall1(data, cont, obj_int2obj(result));
     } else if (base_num == 16) {
       result = (int)strtol(string_str(str), NULL, 16);
+    }
+
+    if (result <= 0 || result > CYC_FIXNUM_MAX) {
+      alloc_bignum(data, bn);
+      if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
+        Cyc_rt_raise2(data, "Error converting string to bignum", str);
+      }
+      _return_closcall1(data, cont, bn);
+    } else {
       _return_closcall1(data, cont, obj_int2obj(result));
     }
   }
@@ -2883,7 +2891,6 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   if (obj_is_int(x)){
     if (obj_is_int(y)){
       if (obj_obj2int(y) == 0) { goto divbyzero; }
-      // TODO: check for over/under flow????
       z = obj_obj2int(x) / obj_obj2int(y);
       return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3149,7 +3156,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       Cyc_expt_double(data, cont, (double)obj_obj2int(x), double_value(y));
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      // TODO:
+      // Not handled at this time
     }
   }
   if (is_object_type(x) && type_of(x) == double_tag) {
@@ -3179,7 +3186,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
       //d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
       //return_closcall1(data, cont, &d);
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      // TODO:
+      // Not handled at this time
     }
   }
   // still here, raise an error 
