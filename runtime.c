@@ -1244,33 +1244,27 @@ void Cyc_int2bignum(int n, mp_int *bn)
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
 {
   mp_int tmp;
-  int cmp;
+  int cmp = 0;
 
   if (tx == bignum_tag && ty == bignum_tag) {
     cmp = mp_cmp(&bignum_value(x), &bignum_value(y));
-    return (cmp == type) ||
-           ((type == CYC_BN_GTE && cmp > MP_LT) ||
-            (type == CYC_BN_LTE && cmp < MP_GT));
   } else if (tx == bignum_tag && ty == -1) { \
-    // TODO: could consolidate with below
-    // TODO: probably possible to use sign and if different can avoid bignum alloc
     mp_init(&tmp);
     Cyc_int2bignum(obj_obj2int(y), &tmp);
     cmp = mp_cmp(&bignum_value(x), &tmp);
     mp_clear(&tmp);
-    return (cmp == type) ||
-           ((type == CYC_BN_GTE && cmp > MP_LT) ||
-            (type == CYC_BN_LTE && cmp < MP_GT));
   } else if (tx == -1 && ty == bignum_tag) { \
     mp_init(&tmp);
     Cyc_int2bignum(obj_obj2int(x), &tmp);
     cmp = mp_cmp(&tmp, &bignum_value(y));
     mp_clear(&tmp);
-    return (cmp == type) ||
-           ((type == CYC_BN_GTE && cmp > MP_LT) ||
-            (type == CYC_BN_LTE && cmp < MP_GT));
+  } else {
+    return 0;
   }
-  return 0;
+
+  return (cmp == type) ||
+         ((type == CYC_BN_GTE && cmp > MP_LT) ||
+          (type == CYC_BN_LTE && cmp < MP_GT));
 }
 
 #define declare_num_cmp(FUNC, FUNC_OP, FUNC_FAST_OP, FUNC_APPLY, OP, BN_CMP) \
