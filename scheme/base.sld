@@ -1070,13 +1070,22 @@
   (define-c bignum?
     "(void *data, int argc, closure _, object k, object obj)"
     " return_closcall1(data, k, Cyc_is_bignum(obj)); ")
+  (define-c bignum-sqrt
+    "(void *data, int argc, closure _, object k, object obj)"
+    " alloc_bignum(data, bn);
+      if (MP_OKAY != mp_sqrt(&(bignum_value(obj)), &bignum_value(bn))) {
+        Cyc_rt_raise2(data, \"Error computing sqrt\", obj);
+      }
+      return_closcall1(data, k, bn); ")
   ;; from mosh
   (define (exact-integer-sqrt k)
     (unless (and (exact? k)
                  (integer? k)
                  (not (negative? k)))
       (error "exact non-negative integer required" k))
-    (let* ((s (exact (truncate (sqrt k))))
+    (let* ((s (if (bignum? k)
+                  (bignum-sqrt k)
+                  (exact (truncate (sqrt k)))))
            (r (- k (* s s))))
       (values s r)))
   (define-c sqrt
