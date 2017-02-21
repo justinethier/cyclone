@@ -1,6 +1,6 @@
 ---
 layout: main
-title: User Manual
+title: API
 ---
 
 # User Manual
@@ -47,6 +47,10 @@ The following packages are required:
         wget http://concurrencykit.org/releases/ck-0.5.0.tar.gz
         tar xfz ck-0.5.0.tar.gz ; cd ck-0.5.0 ; ./configure && make all && sudo make install
         sudo ldconfig
+
+- [LibTomMath](https://github.com/libtom/libtommath)
+
+    Again, the best way to install `libtommath` is via your system's package manager.
     
 # Installation
 
@@ -134,7 +138,7 @@ A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance) lists differenc
 
 # Multithreaded Programming
 
-The [`srfi 18`](api/srfi/18.md) library may be imported to provide support for multithreaded programs. See the [SRFI 18 specification](http://srfi.schemers.org/srfi-18/srfi-18.html) for more background information.
+The [`srfi 18`](api/srfi/18) library may be imported to provide support for multithreaded programs. See the [SRFI 18 specification](http://srfi.schemers.org/srfi-18/srfi-18.html) for more background information.
 
 Due to how Cyclone's garbage collector is implemented, objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. There are two ways to meet this guarantee:
 
@@ -161,7 +165,7 @@ The `define-c` special form can be used to define a function containing user-def
      (define-c Cyc-add-exception-handler
        "(void *data, int argc, closure _, object k, object h)"
        " gc_thread_data *thd = (gc_thread_data *)data;
-         make_cons(c, h, thd->exception_handler_stack);
+         make_pair(c, h, thd->exception_handler_stack);
          thd->exception_handler_stack = &c;
          return_closcall1(data, k, &c); ")
 
