@@ -593,7 +593,7 @@
       (string->number (list->string a))
       (if (or (equal? a '(#\+ #\i #\n #\f #\. #\0))
               (equal? a '(#\- #\i #\n #\f #\. #\0)))
-          (expt 2 1000000)
+          (expt 2.0 1000000)
           (if (or (equal? a '(#\+ #\n #\a #\n #\. #\0))
                   (equal? a '(#\- #\n #\a #\n #\. #\0)))
               (/ 0.0 0.0)
