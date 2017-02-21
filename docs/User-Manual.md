@@ -96,15 +96,18 @@ Cyclone will not automatically generate libraries when compiling a program. Each
 
 `cyclone` has the following command line options:
 
-Option | Notes
------- | -----
-`-A directory`  | Append directory to the list of directories that are searched in order to locate imported libraries.
-`-I directory`  | Prepend directory to the list of directories that are searched in order to locate imported libraries.
-`-Ox`           | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
-`-d`            | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
-`-t`            | Show intermediate trace output in generated C files
-`-h, --help`    | Display usage information
-`-v`            | Display version information
+Option             | Notes
+------------------ | -----
+`-A directory`     | Append directory to the list of directories that are searched in order to locate imported libraries.
+`-I directory`     | Prepend directory to the list of directories that are searched in order to locate imported libraries.
+`-CP cc-commands`  | Specify a custom command line for the C compiler to compile a program module. See `Makefile.config` for an example of how to construct such a command line.
+`-CE cc-commands`  | Specify a custom command line for the C compiler to compile an executable.
+`-CL cc-commands`  | Specify a custom command line for the C compiler to compile a library module.
+`-Ox`              | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
+`-d`               | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
+`-t`               | Show intermediate trace output in generated C files
+`-h, --help`       | Display usage information
+`-v`               | Display version information
 
 ## Generated Files
 
