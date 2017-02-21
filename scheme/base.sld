@@ -1058,23 +1058,7 @@
   ;; Apparently C % is actually the remainder, not modulus
   (define-c remainder
     "(void *data, int argc, closure _, object k, object num1, object num2)"
-    " int i, j;
-      Cyc_check_num(data, num1);
-      Cyc_check_num(data, num2);
-      if (obj_is_int(num1)) {
-        i = obj_obj2int(num1);
-      } else /* Must be double: if (type_of(num1) == double_tag)*/ { 
-        i = ((double_type *)num1)->value; 
-      }
-      if (obj_is_int(num2)) {
-        j = obj_obj2int(num2);
-      } else /* Must be double: if (type_of(num2) == double_tag)*/ { 
-        j = ((double_type *)num2)->value; 
-      }
-      {
-        object result = obj_int2obj(i % j);
-        return_closcall1(data, k, result); 
-      }")
+    " Cyc_remainder(data, k, num1, num2); ")
   ;; From chibi scheme. Cannot use C % operator
   (define (modulo a b)
     (let ((res (remainder a b)))
