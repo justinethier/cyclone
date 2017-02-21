@@ -27,6 +27,7 @@
       " Cyc_check_num(data, z);
         if (obj_is_int(z) || 
             type_of(z) == integer_tag ||
+            type_of(z) == bignum_tag ||
             !isnan(((double_type *)z)->value)) 
         {
           return_closcall1(data, k, boolean_f);
@@ -37,21 +38,14 @@
       " Cyc_check_num(data, z);
         if (obj_is_int(z) || 
             type_of(z) == integer_tag ||
+            type_of(z) == bignum_tag ||
             !isinf(((double_type *)z)->value)) 
         {
           return_closcall1(data, k, boolean_f);
         }
         return_closcall1(data, k, boolean_t);")
-    (define-c finite?
-      "(void *data, int argc, closure _, object k, object z)"
-      " Cyc_check_num(data, z);
-        if (obj_is_int(z) || 
-            type_of(z) == integer_tag ||
-            !isfinite(((double_type *)z)->value)) 
-        {
-          return_closcall1(data, k, boolean_f);
-        }
-        return_closcall1(data, k, boolean_t);")
+    (define (finite? z)
+      (if (infinite? z) #f #t))
     (define-c acos
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, acos, z);")

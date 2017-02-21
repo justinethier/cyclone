@@ -100,6 +100,8 @@ object Cyc_global_set(void *thd, object * glo, object value);
     d.value = OP(obj_obj2int(z)); \
   } else if (type_of(z) == integer_tag) { \
     d.value = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    d.value = OP(mp_get_double(&bignum_value(z))); \
   } else { \
     d.value = OP(((double_type *)z)->value); \
   } \
@@ -112,6 +114,8 @@ object Cyc_global_set(void *thd, object * glo, object value);
     i = obj_obj2int(z); \
   } else if (type_of(z) == integer_tag) { \
     i = (int)OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    return_closcall1(data, cont, z); \
   } else { \
     i = (int)OP(((double_type *)z)->value); \
   } \
@@ -174,6 +178,8 @@ object Cyc_num_fast_lte_op(void *data, object x, object y);
 object Cyc_num_cmp_va_list(void *data, int argc,
                            int (fn_op(void *, object, object)), object n,
                            va_list ns);
+void Cyc_expt(void *data, object cont, object x, object y);
+void Cyc_remainder(void *data, object cont, object num1, object num2);
 object Cyc_eq(object x, object y);
 object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
@@ -246,6 +252,7 @@ object Cyc_is_null(object o);
 object Cyc_is_number(object o);
 object Cyc_is_real(object o);
 object Cyc_is_integer(object o);
+object Cyc_is_bignum(object o);
 object Cyc_is_vector(object o);
 object Cyc_is_bytevector(object o);
 object Cyc_is_port(object o);

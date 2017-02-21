@@ -18,6 +18,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <stdint.h>
+#include "tommath.h"
 
 // Maximum number of args that GC will accept
 #define NUM_GC_ARGS 128
@@ -87,14 +88,15 @@ enum object_tag {
       , eof_tag                 // 9
       , forward_tag             // 10
       , integer_tag             // 11
-      , macro_tag               // 12
-      , mutex_tag               // 13
-      , pair_tag                // 14
-      , port_tag                // 15 
-      , primitive_tag           // 16
-      , string_tag              // 17
-      , symbol_tag              // 18
-      , vector_tag              // 19
+      , bignum_tag              // 12
+      , macro_tag               // 13
+      , mutex_tag               // 14
+      , pair_tag                // 15
+      , port_tag                // 16 
+      , primitive_tag           // 17
+      , string_tag              // 18
+      , symbol_tag              // 19
+      , vector_tag              // 20
 };
 
 #define type_is_pair_prim(clo) \
@@ -268,6 +270,9 @@ struct gc_thread_data_t {
 #define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
+#define CYC_FIXNUM_MAX 1073741823
+#define CYC_FIXNUM_MIN -1073741824
+
 /* Function type */
 
 typedef void (*function_type) ();
@@ -359,6 +364,15 @@ typedef struct {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
+  mp_int bn;
+} bignum_type;
+
+#define alloc_bignum(data, p) \
+  bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
+
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
   double value;
 } double_type;
 #define make_double(n,v) \
@@ -376,6 +390,15 @@ typedef struct {
 
 #define integer_value(x) (((integer_type *) x)->value)
 #define double_value(x) (((double_type *) x)->value)
+#define bignum_value(x) (((bignum_type *) x)->bn)
+
+typedef enum {
+    CYC_BN_LTE = -2
+  , CYC_BN_LT = MP_LT
+  , CYC_BN_EQ = MP_EQ
+  , CYC_BN_GT = MP_GT
+  , CYC_BN_GTE = 2
+} bn_cmp_type;
 
 /* Define string type */
 typedef struct {
@@ -643,12 +666,18 @@ typedef union {
   primitive_type primitive_t;
   integer_type integer_t;
   double_type double_t;
+  bignum_type bignum_t;
 } common_type;
 
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
 void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
+
+/* Bignum utility functions */
+double mp_get_double(mp_int *a);
+int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
+void Cyc_int2bignum(int n, mp_int *bn);
 
 /* GC prototypes */
 void gc_initialize();
@@ -666,6 +695,8 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
+void *gc_alloc_bignum(gc_thread_data *data);
+void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 size_t gc_heap_total_size(gc_heap * h);

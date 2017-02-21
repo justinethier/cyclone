@@ -472,6 +472,19 @@
      (c-compile-vector exp))
     ((bytevector? exp)
      (c-compile-bytevector exp))
+    ((bignum? exp)
+      (let ((cvar-name (mangle (gensym 'c)))
+            (num2str (cond
+                       (else
+                         (number->string exp)))))
+        (c-code/vars
+            (string-append "" cvar-name) ; Code is just the variable name
+            (list     ; Allocate pointer on the C stack
+              (string-append 
+                "alloc_bignum(data, " cvar-name "); "
+                ;; TODO: need error checking, this is just a first cut:
+                "mp_read_radix(&bignum_value(" cvar-name "), \"" num2str "\", 10);"))))
+    )
     ((integer? exp) 
 ;     (let ((cvar-name (mangle (gensym 'c))))
 ;        (c-code/vars

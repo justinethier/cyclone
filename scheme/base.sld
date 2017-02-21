@@ -41,6 +41,7 @@
     odd?
     complex?
     rational?
+    bignum?
     gcd
     lcm
     quotient
@@ -1060,6 +1061,10 @@
     " Cyc_check_num(data, num);
       if (obj_is_int(num)) {
         return_closcall1(data, k, obj_int2obj( abs( obj_obj2int(num))));
+      } else if (is_object_type(num) && type_of(num) == bignum_tag){
+        alloc_bignum(data, bn);
+        mp_abs(&bignum_value(num), &bignum_value(bn));
+        return_closcall1(data, k, bn);
       } else {
         make_double(d, fabs(((double_type *)num)->value));
         return_closcall1(data, k, &d);
@@ -1067,23 +1072,7 @@
   ;; Apparently C % is actually the remainder, not modulus
   (define-c remainder
     "(void *data, int argc, closure _, object k, object num1, object num2)"
-    " int i, j;
-      Cyc_check_num(data, num1);
-      Cyc_check_num(data, num2);
-      if (obj_is_int(num1)) {
-        i = obj_obj2int(num1);
-      } else /* Must be double: if (type_of(num1) == double_tag)*/ { 
-        i = ((double_type *)num1)->value; 
-      }
-      if (obj_is_int(num2)) {
-        j = obj_obj2int(num2);
-      } else /* Must be double: if (type_of(num2) == double_tag)*/ { 
-        j = ((double_type *)num2)->value; 
-      }
-      {
-        object result = obj_int2obj(i % j);
-        return_closcall1(data, k, result); 
-      }")
+    " Cyc_remainder(data, k, num1, num2); ")
   ;; From chibi scheme. Cannot use C % operator
   (define (modulo a b)
     (let ((res (remainder a b)))
@@ -1092,13 +1081,25 @@
         (if (>= res 0) res (+ res b)))))
   (define (odd? num)   (= (modulo num 2) 1))
   (define (even? num)  (= (modulo num 2) 0))
+  (define-c bignum?
+    "(void *data, int argc, closure _, object k, object obj)"
+    " return_closcall1(data, k, Cyc_is_bignum(obj)); ")
+  (define-c bignum-sqrt
+    "(void *data, int argc, closure _, object k, object obj)"
+    " alloc_bignum(data, bn);
+      if (MP_OKAY != mp_sqrt(&(bignum_value(obj)), &bignum_value(bn))) {
+        Cyc_rt_raise2(data, \"Error computing sqrt\", obj);
+      }
+      return_closcall1(data, k, bn); ")
   ;; from mosh
   (define (exact-integer-sqrt k)
     (unless (and (exact? k)
                  (integer? k)
                  (not (negative? k)))
       (error "exact non-negative integer required" k))
-    (let* ((s (exact (truncate (sqrt k))))
+    (let* ((s (if (bignum? k)
+                  (bignum-sqrt k)
+                  (exact (truncate (sqrt k)))))
            (r (- k (* s s))))
       (values s r)))
   (define-c sqrt
@@ -1109,7 +1110,8 @@
   (define-c exact?
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
-      if (obj_is_int(num) || type_of(num) == integer_tag)
+      if (obj_is_int(num) || type_of(num) == integer_tag 
+                          || type_of(num) == bignum_tag)
         return_closcall1(data, k, boolean_t);
       return_closcall1(data, k, boolean_f); ")
   (define (inexact? num) (not (exact? num)))
@@ -1172,11 +1174,7 @@
   (define (square z) (* z z))
   (define-c expt
     "(void *data, int argc, closure _, object k, object z1, object z2)"
-    " make_double(d, 0.0);
-      Cyc_check_num(data, z1);
-      Cyc_check_num(data, z2);
-      d.value = pow( unbox_number(z1), unbox_number(z2) );
-      return_closcall1(data, k, &d); ")
+    " Cyc_expt(data, k, z1, z2); ")
   (define-c eof-object
     "(void *data, int argc, closure _, object k)"
     " return_closcall1(data, k, Cyc_EOF); ")
