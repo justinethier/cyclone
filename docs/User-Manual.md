@@ -44,6 +44,8 @@ The following packages are required:
         wget http://concurrencykit.org/releases/ck-0.5.0.tar.gz
         tar xfz ck-0.5.0.tar.gz ; cd ck-0.5.0 ; ./configure && make all && sudo make install
         sudo ldconfig
+
+- [LibTomMath](https://github.com/libtom/libtommath) - Again, this library should be available via package manager, and that is the recommended installation method.
     
 # Installation
 
