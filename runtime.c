@@ -3196,6 +3196,68 @@ void Cyc_expt(void *data, object cont, object x, object y)
   Cyc_rt_raise(data, &c0);
 }
 
+void Cyc_bignum_remainder(void *data, object cont, object num1, object num2, object rem)
+{
+  mp_div(&bignum_value(num1), &bignum_value(num2), NULL, &bignum_value(rem));
+  return_closcall1(data, cont, Cyc_bignum_normalize(data, rem));
+}
+
+void Cyc_remainder(void *data, object cont, object num1, object num2)
+{
+  int i = 0, j = 0;
+  object result;
+  Cyc_check_num(data, num1);
+  Cyc_check_num(data, num2);
+  if (obj_is_int(num1)) {
+    if (obj_is_int(num2)){
+      i = obj_obj2int(num1);
+      j = obj_obj2int(num2);
+    }
+    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
+      alloc_bignum(data, bn);
+      Cyc_int2bignum(obj_obj2int(num1), &(bn->bn));
+      Cyc_bignum_remainder(data, cont, bn, num2, bn);
+    }
+    else {
+      i = obj_obj2int(num1);
+      j = ((double_type *)num2)->value; 
+    }
+  } else if (is_object_type(num1) && type_of(num1) == bignum_tag) {
+    if (obj_is_int(num2)){
+      alloc_bignum(data, bn);
+      Cyc_int2bignum(obj_obj2int(num2), &(bn->bn));
+      Cyc_bignum_remainder(data, cont, num1, bn, bn);
+    }
+    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
+      alloc_bignum(data, rem);
+      Cyc_bignum_remainder(data, cont, num1, num2, rem);
+    }
+    else {
+      j = ((double_type *)num2)->value; 
+      alloc_bignum(data, bn);
+      Cyc_int2bignum(obj_obj2int(j), &(bn->bn));
+      Cyc_bignum_remainder(data, cont, num1, bn, bn);
+    }
+  } else { // num1 is double...
+    if (obj_is_int(num2)){
+      i = ((double_type *)num1)->value; 
+      j = obj_obj2int(num2);
+    }
+    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
+      i = ((double_type *)num1)->value; 
+      alloc_bignum(data, bn);
+      Cyc_int2bignum(obj_obj2int(i), &(bn->bn));
+      Cyc_bignum_remainder(data, cont, bn, num2, bn);
+    }
+    else {
+      i = ((double_type *)num1)->value; 
+      j = ((double_type *)num2)->value; 
+    }
+  }
+  result = obj_int2obj(i % j);
+  return_closcall1(data, cont, result); 
+}
+
 /* I/O functions */
 
 port_type Cyc_stdout()
