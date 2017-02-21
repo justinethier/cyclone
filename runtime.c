@@ -2891,6 +2891,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   if (obj_is_int(x)){
     if (obj_is_int(y)){
       if (obj_obj2int(y) == 0) { goto divbyzero; }
+      // Overflow can occur if y = 0 || (x = 0x80000000 && y = -1)
+      // We already check for 0 above and the value of x above is a
+      // bignum, so no futher checks are required.
       z = obj_obj2int(x) / obj_obj2int(y);
       return obj_int2obj(z);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
