@@ -70,11 +70,20 @@
 // General constants
 #define NANOSECONDS_PER_MILLISECOND 1000000
 
-// Generic object type
+#define CYC_FIXNUM_MAX 1073741823
+#define CYC_FIXNUM_MIN -1073741824
+
+/**
+ * Generic object type
+ * \ingroup objects
+ */
 typedef void *object;
 
-// Define a tag for each possible type of object.
-// Remember to update tag_names in runtime.c when adding new tags
+/**
+ * Define a tag for each possible type of object.
+ * Remember to update tag_names in runtime.c when adding new tags
+ *\ingroup objects
+ */
 enum object_tag {
   boolean_tag = 0               // 0
       , bytevector_tag          // 1
@@ -102,7 +111,10 @@ enum object_tag {
 #define type_is_pair_prim(clo) \
   (type_of(clo) >= pair_tag)
 
-// Define the size of object tags
+/**
+ * Defines the size of object tags
+ * \ingroup objects
+ */
 typedef unsigned char tag_type;
 
 /* GC data structures */
@@ -246,6 +258,11 @@ struct gc_thread_data_t {
 #define type_of(obj) (((pair_type *) obj)->tag)
 #define forward(obj) (((pair_type *) obj)->pair_car)
 
+/**
+ * \defgroup immediates Value Types
+ */
+/**@{*/
+
 /** Define value types. 
  *  Depending on the underlying architecture, compiler, etc these types
  *  have extra least significant bits that can be used to mark them as
@@ -270,8 +287,12 @@ struct gc_thread_data_t {
 #define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
 #define is_object_type(x) (x && !is_value_type(x))
 
-#define CYC_FIXNUM_MAX 1073741823
-#define CYC_FIXNUM_MIN -1073741824
+/**@}*/
+
+/**
+ * \defgroup objects Object Types
+ */
+/**@{*/
 
 /* Function type */
 
@@ -492,8 +513,9 @@ typedef bytevector_type *bytevector;
   v.len = 0; \
   v.data = NULL;
 
-/* Pair (cons) type */
-
+/**
+ * Pair (cons) type 
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -668,6 +690,8 @@ typedef union {
   double_type double_t;
   bignum_type bignum_t;
 } common_type;
+
+/**@}*/
 
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
