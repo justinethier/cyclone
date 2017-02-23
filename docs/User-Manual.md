@@ -40,17 +40,22 @@ The following packages are required:
 
 - make
 - gcc
+- [LibTomMath](https://github.com/libtom/libtommath)
 - [Concurrency Kit](http://concurrencykit.org/)
 
-    The best way to install libck is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.5.0` below with the latest version available from their website:
+  NOTE: The best way to install `libck` is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.5.2` below with the latest version available from their website:
     
-        wget http://concurrencykit.org/releases/ck-0.5.0.tar.gz
-        tar xfz ck-0.5.0.tar.gz ; cd ck-0.5.0 ; ./configure && make all && sudo make install
+        wget http://concurrencykit.org/releases/ck-0.5.2.tar.gz
+        tar xfz ck-0.5.2.tar.gz ; cd ck-0.5.2 ; ./configure PREFIX=/usr && make all && sudo make install
         sudo ldconfig
 
-- [LibTomMath](https://github.com/libtom/libtommath)
+On a Debian variant such as Ubuntu the necessary packages may be installed via the command:
 
-    Again, the best way to install `libtommath` is via your system's package manager.
+    sudo apt-get install libtommath-dev libck-dev make gcc
+
+The following command can be used to install dependencies on Fedora, though `libck` will also need to be built from source:
+
+    sudo yum install libtommath-devel gcc make
     
 # Installation
 
