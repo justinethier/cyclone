@@ -6,7 +6,7 @@
 
 ###### by [Justin Ethier](https://github.com/justinethier)
 
-This write-up provides a high level background on the various components of Cyclone and how they were written. It is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. So much time has passed that I thought it would be worthwhile to provide a brain dump of sorts for everything that has happened in the last year and half.
+This write-up provides a high level background on the various components of Cyclone and how they were written. It is a revision of the [original write-up](Writing-the-Cyclone-Scheme-Compiler.md), written over a year ago in August 2015, when the compiler was self hosting but before the new garbage collector was written. Quite a bit of time has passed since then, so I thought it would be worthwhile to provide a brain dump of sorts for everything that has happened in the last year and half.
 
 Before we get started, I want to say **Thank You** to all of the contributors to the Scheme community. Cyclone is based on the community's latest revision of the Scheme language and wherever possible existing code was reused or repurposed for this project, instead of starting from scratch. At the end of this document is a list of helpful online resources. Without high quality Scheme resources like these the Cyclone project would not have been possible.
 
