@@ -562,6 +562,7 @@ int equal(object x, object y)
         type_of(y) == vector_tag &&
         ((vector) x)->num_elements == ((vector) y)->num_elements) {
       int i;
+      if (x == y) return 1;
       for (i = 0; i < ((vector) x)->num_elements; i++) {
         if (equalp(((vector) x)->elements[i], ((vector) y)->elements[i]) ==
             boolean_f)
@@ -641,12 +642,27 @@ object Cyc_set_cvar(object var, object value)
   return var;
 }
 
+object Cyc_has_vector_cycle(object vec)
+{
+  int i;
+  // TODO: this is not generic enough
+  for (i = 0; i < ((vector)vec)->num_elements; i++) {
+    if (((vector)vec)->elements[i] == vec) {
+      return boolean_t;
+    }
+  }
+  return boolean_f;
+}
+
 object Cyc_has_cycle(object lst)
 {
   object slow_lst, fast_lst;
-  if ((lst == NULL) || is_value_type(lst) ||
-      (is_object_type(lst) && type_of(lst) != pair_tag)) {
-    return (boolean_f);
+  if ((lst == NULL) || is_value_type(lst)) {
+    return boolean_f;
+  } else if (is_object_type(lst) && type_of(lst) == vector_tag) {
+    return Cyc_has_vector_cycle(lst);
+  } else if (is_object_type(lst) && type_of(lst) != pair_tag) {
+    return boolean_f;
   }
   slow_lst = lst;
   fast_lst = cdr(lst);
@@ -798,12 +814,17 @@ object Cyc_display(void *data, object x, FILE * port)
     fprintf(port, "%s", ((string_type *) x)->str);
     break;
   case vector_tag:
+    has_cycle = Cyc_has_cycle(x);
     fprintf(port, "#(");
-    for (i = 0; i < ((vector) x)->num_elements; i++) {
-      if (i > 0) {
-        fprintf(port, " ");
+    if (has_cycle == boolean_t) {
+      fprintf(port, "...");
+    } else {
+      for (i = 0; i < ((vector) x)->num_elements; i++) {
+        if (i > 0) {
+          fprintf(port, " ");
+        }
+        Cyc_display(data, ((vector) x)->elements[i], port);
       }
-      Cyc_display(data, ((vector) x)->elements[i], port);
     }
     fprintf(port, ")");
     break;
@@ -963,14 +984,18 @@ static object _Cyc_write(void *data, object x, FILE * port)
     fputc('"', port);
     break;
   }
-  // TODO: what about a list? contents should be displayed per (write)
   case vector_tag:
+    has_cycle = Cyc_has_cycle(x);
     fprintf(port, "#(");
-    for (i = 0; i < ((vector) x)->num_elements; i++) {
-      if (i > 0) {
-        fprintf(port, " ");
+    if (has_cycle == boolean_t) {
+      fprintf(port, "...");
+    } else {
+      for (i = 0; i < ((vector) x)->num_elements; i++) {
+        if (i > 0) {
+          fprintf(port, " ");
+        }
+        _Cyc_write(data, ((vector) x)->elements[i], port);
       }
-      _Cyc_write(data, ((vector) x)->elements[i], port);
     }
     fprintf(port, ")");
     break;
