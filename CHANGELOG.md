@@ -1,9 +1,11 @@
-# Next Release (Tentatively 0.4) - TBD
+# Changelog
+
+## Next Release (Tentatively 0.4) - TBD
 
 - Added a new bignum type to support exact integers of practically unlimited size.
 - As part of the bignum changes, modified the code for exact integer arithmetic to detect overflow.
 
-# 0.3.4 - February 10, 2017
+## 0.3.4 - February 10, 2017
 
 Features
 
@@ -50,7 +52,7 @@ Bug Fixes
 - Display characters such as `#\space` correctly when output via `write`.
 - Thanks to Seth Alves, removed unnecessary include of `ck_string.h` which is not provided in older versions of `libck`.
 
-# 0.3.3 - December 19, 2016
+## 0.3.3 - December 19, 2016
 
 Features:
 
@@ -64,7 +66,7 @@ Bug Fixes
 - Do not generate invalid C code when compiling `+` or `*` without any arguments.
 - Handle compilation of variable-argument anonymous lambdas. For example: `((lambda x x) 3 5)`.
 
-# 0.3.2 - November 22, 2016
+## 0.3.2 - November 22, 2016
 
 Features:
 
@@ -76,7 +78,7 @@ Bug Fixes
 
 - Fixed a crash when running `cyclone` on 32-bit platforms.
 
-# 0.3.1 - November 20, 2016
+## 0.3.1 - November 20, 2016
 
 Features:
 
@@ -96,7 +98,7 @@ Bug Fixes
 - Fixed a bug where the optimizer would sometimes generate incorrect code when a mutating primitive (EG: `set-car!`) was passed an expression rather than an identifier as the variable argument.
 - Prevent the runtime from crashing when a non-numeric value type is passed to a numeric function.
 
-# 0.3 - October 22, 2016
+## 0.3 - October 22, 2016
 
 Features:
 
@@ -118,7 +120,7 @@ Bug Fixes
 - Fixed an error that was being raised when calling `(random-source-randomize! default-random-source)` when using SRFI 27.
 - Raise an error if `list->string` encounters a list element that is not a character.
 
-# 0.2 - September 7, 2016
+## 0.2 - September 7, 2016
 
 Features:
 
