@@ -4591,7 +4591,7 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   exit(1);
 }
 
-void gc_request_mark_globals()
+void gc_request_mark_globals(void)
 {
   gc_mark_globals(Cyc_global_variables, global_table);
 }
