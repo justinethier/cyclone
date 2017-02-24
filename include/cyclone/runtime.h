@@ -160,6 +160,7 @@ list assoc(void *data, object x, list l);
 
 /**
  * \defgroup prim_ctrl Control flow
+ * @brief Primitives that control the flow of program execution
  */
 
 /**@{*/
@@ -178,6 +179,7 @@ void do_dispatch(void *data, int argc, function_type func, object clo,
 
 /**
  * \defgroup prim_str Strings
+ * @brief String functions
  */
 /**@{*/
 object Cyc_string_cmp(void *data, object str1, object str2);
@@ -197,6 +199,7 @@ object Cyc_string_set(void *data, object str, object k, object chr);
 
 /**
  * \defgroup prim_char Characters
+ * @brief Character functions
  */
 /**@{*/
 object Cyc_char2integer(object chr);
@@ -204,6 +207,7 @@ object Cyc_char2integer(object chr);
 
 /**
  * \defgroup prim_sym Symbols
+ * @brief Symbol functions
  */
 /**@{*/
 object Cyc_symbol2string(void *d, object cont, object sym);
@@ -211,23 +215,8 @@ object Cyc_string2symbol(void *d, object str);
 /**@}*/
 
 /**
- * \defgroup prim_symtbl Symbol table
- *
- * @brief The symbol table, a thread-safe container for all symbols.
- *
- * This table contains a pointer to each symbol used by the current
- * program.
- */
-/**@{*/
-object add_symbol(symbol_type * psym);
-object add_symbol_by_name(const char *name);
-object find_symbol_by_name(const char *name);
-object find_or_add_symbol(const char *name);
-char *_strdup(const char *s);
-/**@}*/
-
-/**
  * \defgroup prim_cvar C vars
+ * @brief Primitives for the C-variable integration type
  */
 /**@{*/
 extern object Cyc_global_variables;
@@ -239,6 +228,7 @@ object Cyc_set_cvar(object var, object value);
 
 /**
  * \defgroup prim_io I/O
+ * @brief Input/Output functions
  */
 /**@{*/
 object Cyc_display(void *data, object, FILE * port);
@@ -274,6 +264,7 @@ object Cyc_io_read_line(void *data, object cont, object port);
 
 /**
  * \defgroup prim_num Numbers
+ * @brief Number functions
  */
 /**@{*/
 
@@ -385,6 +376,7 @@ object Cyc_is_opaque(object o);
 
 /**
  * \defgroup prim_vec Vectors
+ * @brief Vector functions
  */
 /**@{*/
 object Cyc_vector_length(void *data, object v);
@@ -395,6 +387,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 
 /**
  * \defgroup prim_bv Bytevectors
+ * @brief Bytevector functions
  */
 /**@{*/
 object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...);
@@ -414,6 +407,7 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
 
 /**
  * \defgroup prim_sys System interface
+ * @brief Functions for interacting with the system
  */
 /**@{*/
 int _cyc_argc;
@@ -430,6 +424,10 @@ object Cyc_io_file_exists(void *data, object filename);
 
 /**
  * \defgroup prim_thd Threads
+ * @brief Thread-oriented functions
+ *
+ * Most of these are internal and should not be called from 
+ * an FFI function.
  */
 /**@{*/
 object Cyc_spawn_thread(object thunk);
@@ -441,7 +439,7 @@ object Cyc_thread_sleep(void *data, object timeout);
 
 /**
  * \defgroup prim_gc Garbage collection
- * @brief Functions to manually trigger GC
+ * @brief Functions to manually trigger a GC
  */
 /**@{*/
 object Cyc_trigger_minor_gc(void *data, object cont);
@@ -456,16 +454,6 @@ object copy2heap(void *data, object obj);
 /**@{*/
 void Cyc_st_add(void *data, char *frame);
 void Cyc_st_print(void *data, FILE * out);
-/**@}*/
-
-/**
- * \defgroup prim_glo Global table
- *
- * @brief A table of global variables.
- */
-/**@{*/
-extern list global_table;
-void add_global(object * glo);
 /**@}*/
 
 /**
@@ -635,6 +623,32 @@ void Cyc_rt_raise2(void *data, const char *msg, object err);
 void Cyc_rt_raise_msg(void *data, const char *err);
 /**@}*/
 
+/**@}*/
+
+/**
+ * \defgroup prim_symtbl Symbol table
+ *
+ * @brief The symbol table, a thread-safe container for all symbols.
+ *
+ * This table contains a pointer to each symbol used by the current
+ * program.
+ */
+/**@{*/
+object add_symbol(symbol_type * psym);
+object add_symbol_by_name(const char *name);
+object find_symbol_by_name(const char *name);
+object find_or_add_symbol(const char *name);
+char *_strdup(const char *s);
+/**@}*/
+
+/**
+ * \defgroup prim_glo Global table
+ *
+ * @brief A table of global variables.
+ */
+/**@{*/
+extern list global_table;
+void add_global(object * glo);
 /**@}*/
 
 #endif                          /* CYCLONE_RUNTIME_H */
