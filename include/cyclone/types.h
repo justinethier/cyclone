@@ -82,7 +82,7 @@ typedef unsigned char tag_type;
 /**
  * \defgroup gc Garbage Collector
  *
- * All of the code related to the garbage collector.
+ * @brief All of the code related to the garbage collector.
  *
  * When using the FFI there is normally no need to call 
  * into this code unless something is specifically mentioned
@@ -362,7 +362,15 @@ void clear_mutations(void *data);
 /**@}*/
 
 /**
- * \defgroup immediates Data Types - Immediate Objects
+ * \defgroup datatypes Data Types
+ * @brief All of the Scheme data types provided by Cyclone.
+ */
+/**@{*/
+
+/**
+ * \defgroup immediates Immediate Objects
+ *  
+ *  @brief Objects that do not require memory allocation.
  *
  *  Immediate objects (also known as value types) are stored directly within
  *  the bits that would otherwise be a pointer to an object type. Since
@@ -433,7 +441,8 @@ void clear_mutations(void *data);
 /**@}*/
 
 /**
- * \defgroup objects Data Types - Objects
+ * \defgroup objects Objects
+ * @brief Definitions and code for memory-allocated objects.
  *
  * Most Scheme data types are defined as object types.
  *
@@ -954,6 +963,7 @@ typedef union {
   bignum_type bignum_t;
 } common_type;
 
+/**@}*/
 /**@}*/
 
 /* Utility functions */
