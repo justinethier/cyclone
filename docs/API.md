@@ -6,6 +6,7 @@
 - [SRFI Libraries](#srfi-libraries)
 - [Cyclone Libraries](#cyclone-libraries)
 - [Cyclone Compiler API](#cyclone-compiler-api)
+- [C API](#c-api)
 - [Index](#index)
 
 # Standard Libraries
@@ -70,6 +71,10 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 - [`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)
 - [`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)
 - [`scheme cyclone util`](api/scheme/cyclone/util.md)
+
+# C API
+
+[This documentation](http://justinethier.github.io/cyclone/c-api/) covers the C API provided by Cyclone Scheme. It is intended both to help understand how the Cyclone runtime works as well as to provide a useful reference manual when working with the Cyclone FFI.
 
 # Index
 
