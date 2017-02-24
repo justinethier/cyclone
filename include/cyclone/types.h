@@ -1,4 +1,4 @@
-/** 
+/* 
  * Cyclone Scheme
  * Copyright (c) 2014, Justin Ethier
  * All rights reserved.
@@ -19,67 +19,6 @@
 #include <pthread.h>
 #include <stdint.h>
 #include "tommath.h"
-
-/**
- * Maximum number of args that GC will accept 
- */
-#define NUM_GC_ARGS 128
-
-/** 
- * Which way does the CPU grow its stack? 
- */
-#define STACK_GROWTH_IS_DOWNWARD 1
-
-/** 
- * Size of the stack buffer, in bytes.
- * This is used as the first generation of the GC.
- */
-#define STACK_SIZE 500000
-
-/** 
- * Do not allocate objects larger than this on the stack.
- */
-#define MAX_STACK_OBJ (STACK_SIZE * 2)
-
-// Parameters for size of a "page" on the heap (the second generation GC), in bytes.
-#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)     // Grow first page by adding this amount to it
-#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     // Size of the first page
-#define HEAP_SIZE (32 * 1024 * 1024)    // Normal size of a page
-
-/////////////////////////////
-// Major GC tuning parameters
-
-// Start GC cycle if % heap space free below this percentage
-#define GC_COLLECTION_THRESHOLD 0.05
-
-// After major GC, grow the heap so at least this percentage is free
-#define GC_FREE_THRESHOLD 0.40
-// END GC tuning
-/////////////////////////////
-
-// Number of functions to save for printing call history
-#define MAX_STACK_TRACES 10
-
-// Show diagnostic information for the GC when program terminates
-#define DEBUG_SHOW_DIAG 0
-
-// Show diagnostic information before/after sweeping
-#define GC_DEBUG_SHOW_SWEEP_DIAG 0
-
-// GC debugging flags
-#define GC_DEBUG_TRACE 0
-#define GC_DEBUG_VERBOSE 0
-
-/* Additional runtime checking of the GC system.
-   This is here because these checks should not be
-   necessary if GC is working correctly. */
-#define GC_SAFETY_CHECKS 0
-
-// General constants
-#define NANOSECONDS_PER_MILLISECOND 1000000
-
-#define CYC_FIXNUM_MAX 1073741823
-#define CYC_FIXNUM_MIN -1073741824
 
 /**
  * Generic object type
@@ -125,6 +64,102 @@ enum object_tag {
  * \ingroup objects
  */
 typedef unsigned char tag_type;
+
+/**
+ * Access an object's tag.
+ * \ingroup objects
+ */
+#define type_of(obj) (((pair_type *) obj)->tag)
+
+/**
+ * Access an object's forwarding pointer.
+ * Note this is only applicable when objects are relocated
+ * during minor GC.
+ * \ingroup objects
+ */
+#define forward(obj) (((pair_type *) obj)->pair_car)
+
+/**
+ * \defgroup gc Garbage Collector
+ *
+ * All of the code related to the garbage collector.
+ *
+ * When using the FFI there is normally no need to call 
+ * into this code unless something is specifically mentioned
+ * in the User Manual.
+ */
+/**@{*/
+
+/**
+ * Maximum number of args that GC will accept 
+ */
+#define NUM_GC_ARGS 128
+
+/** 
+ * Which way does the CPU grow its stack? 
+ */
+#define STACK_GROWTH_IS_DOWNWARD 1
+
+/** 
+ * Size of the stack buffer, in bytes.
+ * This is used as the first generation of the GC.
+ */
+#define STACK_SIZE 500000
+
+/** 
+ * Do not allocate objects larger than this on the stack.
+ */
+#define MAX_STACK_OBJ (STACK_SIZE * 2)
+
+////////////////////////////////
+// Parameters for size of a "page" on the heap (the second generation GC), in bytes.
+
+/** Grow first page by adding this amount to it */
+#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)    
+
+/** Size of the first page */
+#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     
+
+/** Normal size of a heap page */
+#define HEAP_SIZE (32 * 1024 * 1024)    
+
+// End heap page size parameters
+////////////////////////////////
+
+/////////////////////////////
+// Major GC tuning parameters
+
+/** Start GC cycle if % heap space free below this percentage */
+#define GC_COLLECTION_THRESHOLD 0.05
+
+/** After major GC, grow the heap so at least this percentage is free */
+#define GC_FREE_THRESHOLD 0.40
+// END GC tuning
+/////////////////////////////
+
+/** Number of functions to save for printing call history */
+#define MAX_STACK_TRACES 10
+
+/** Show diagnostic information for the GC when program terminates */
+#define DEBUG_SHOW_DIAG 0
+
+/** Show diagnostic information before/after sweeping */
+#define GC_DEBUG_SHOW_SWEEP_DIAG 0
+
+/** GC debugging flag */
+#define GC_DEBUG_TRACE 0
+
+/** GC debugging flag */
+#define GC_DEBUG_VERBOSE 0
+
+/** Additional runtime checking of the GC system.
+ *  This is here because these checks should not be
+ *  necessary if GC is working correctly. 
+ */
+#define GC_SAFETY_CHECKS 0
+
+/** Generic constant used for GC sleep/wake */
+#define NANOSECONDS_PER_MILLISECOND 1000000
 
 /* GC data structures */
 
@@ -264,13 +299,72 @@ struct gc_thread_data_t {
 #define stack_overflow(x,y) ((x) > (y))
 #endif
 
-#define type_of(obj) (((pair_type *) obj)->tag)
-#define forward(obj) (((pair_type *) obj)->pair_car)
+/* GC prototypes */
+void gc_initialize(void);
+void gc_add_mutator(gc_thread_data * thd);
+void gc_remove_mutator(gc_thread_data * thd);
+gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
+                        size_t chunk_size, gc_thread_data *thd);
+gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
+void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
+void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
+void gc_print_stats(gc_heap * h);
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
+char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
+void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
+                   gc_thread_data * thd);
+void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
+               int *heap_grown);
+void *gc_alloc_bignum(gc_thread_data *data);
+size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
+gc_heap *gc_heap_last(gc_heap * h);
+size_t gc_heap_total_size(gc_heap * h);
+//size_t gc_heap_total_free_size(gc_heap *h);
+//size_t gc_collect(gc_heap *h, size_t *sum_freed);
+//void gc_mark(gc_heap *h, object obj);
+void gc_request_mark_globals(void);
+void gc_mark_globals(object globals, object global_table);
+size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
+void gc_thr_grow_move_buffer(gc_thread_data * d);
+void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
+void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
+                         long stack_size);
+void gc_thread_data_free(gc_thread_data * thd);
+// Prototypes for mutator/collector:
+int gc_is_stack_obj(gc_thread_data * thd, object obj);
+void gc_mut_update(gc_thread_data * thd, object old_obj, object value);
+void gc_mut_cooperate(gc_thread_data * thd, int buf_len);
+void gc_mark_gray(gc_thread_data * thd, object obj);
+void gc_mark_gray2(gc_thread_data * thd, object obj);
+void gc_collector_trace();
+void gc_empty_collector_stack();
+void gc_handshake(gc_status_type s);
+void gc_post_handshake(gc_status_type s);
+void gc_wait_handshake();
+void gc_start_collector();
+void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
+void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
+#define set_thread_blocked(d, c) \
+  gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
+#define return_thread_runnable(d, r) \
+  gc_mutator_thread_runnable(((gc_thread_data *)d), (r))
+/*
+//#define do_with_blocked_thread(data, cont, result, body) \
+//  set_thread_blocked((data), (cont)); \
+//  body \
+//  return_thread_runnable((data), (result));
+*/
+/* Mutation table to support minor GC write barrier */
+void add_mutation(void *data, object var, int index, object value);
+void clear_mutations(void *data);
+
+// END GC section
+/**@}*/
 
 /**
- * \defgroup immediates Value Types
+ * \defgroup immediates Data Types - Immediate Objects
  *
- *  Value types (also known as immediates) are stored directly within
+ *  Immediate objects (also known as value types) are stored directly within
  *  the bits that would otherwise be a pointer to an object type. Since
  *  all of the data is contained in those bits, a value type is never
  *  allocated on the heap and never needs to be garbage collected,
@@ -289,6 +383,12 @@ struct gc_thread_data_t {
  *  - 0x10 - char
  */
 /**@{*/
+
+/** Maximum allowed value of a fixnum */
+#define CYC_FIXNUM_MAX 1073741823
+
+/** Minimum allowed value of a fixnum */
+#define CYC_FIXNUM_MIN -1073741824
 
 /**
  * Determine if an object is an integer.
@@ -333,7 +433,7 @@ struct gc_thread_data_t {
 /**@}*/
 
 /**
- * \defgroup objects Object Types
+ * \defgroup objects Data Types - Objects
  *
  * Most Scheme data types are defined as object types.
  *
@@ -866,67 +966,9 @@ double mp_get_double(mp_int *a);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_int2bignum(int n, mp_int *bn);
 
-/* GC prototypes */
-void gc_initialize();
-void gc_add_mutator(gc_thread_data * thd);
-void gc_remove_mutator(gc_thread_data * thd);
-gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
-                        size_t chunk_size, gc_thread_data *thd);
-gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
-void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
-void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
-void gc_print_stats(gc_heap * h);
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
-char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
-void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
-                   gc_thread_data * thd);
-void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
-               int *heap_grown);
-void *gc_alloc_bignum(gc_thread_data *data);
+/* Remaining GC prototypes that require objects to be defined */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
-size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
-gc_heap *gc_heap_last(gc_heap * h);
-size_t gc_heap_total_size(gc_heap * h);
-//size_t gc_heap_total_free_size(gc_heap *h);
-//size_t gc_collect(gc_heap *h, size_t *sum_freed);
-//void gc_mark(gc_heap *h, object obj);
-void gc_request_mark_globals(void);
-void gc_mark_globals(object globals, object global_table);
-size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
-void gc_thr_grow_move_buffer(gc_thread_data * d);
-void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
-void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
-                         long stack_size);
-void gc_thread_data_free(gc_thread_data * thd);
-// Prototypes for mutator/collector:
-int gc_is_stack_obj(gc_thread_data * thd, object obj);
-void gc_mut_update(gc_thread_data * thd, object old_obj, object value);
-void gc_mut_cooperate(gc_thread_data * thd, int buf_len);
-void gc_mark_gray(gc_thread_data * thd, object obj);
-void gc_mark_gray2(gc_thread_data * thd, object obj);
-void gc_collector_trace();
-void gc_empty_collector_stack();
-void gc_handshake(gc_status_type s);
-void gc_post_handshake(gc_status_type s);
-void gc_wait_handshake();
-void gc_start_collector();
-void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
-void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
-#define set_thread_blocked(d, c) \
-  gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
-#define return_thread_runnable(d, r) \
-  gc_mutator_thread_runnable(((gc_thread_data *)d), (r))
-/*
-//#define do_with_blocked_thread(data, cont, result, body) \
-//  set_thread_blocked((data), (cont)); \
-//  body \
-//  return_thread_runnable((data), (result));
-*/
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
-/* Mutation table to support minor GC write barrier */
-void add_mutation(void *data, object var, int index, object value);
-void clear_mutations(void *data);
-
 
 #endif                          /* CYCLONE_TYPES_H */
