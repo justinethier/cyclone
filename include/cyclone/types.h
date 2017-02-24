@@ -515,7 +515,7 @@ typedef void (*function_type) ();
 typedef void (*function_type_va) (int, object, object, object, ...);
 
 /**
- * Defines the C-variable integration type 
+ * @brief C-variable integration type - wrapper around a Cyclone object pointer
  */
 typedef struct {
   gc_header_type hdr;
@@ -536,7 +536,8 @@ typedef cvar_type *cvar;
   n.pvar = v;
 
 /**
- * C Opaque type - a wrapper around a pointer of any type.
+ * @brief C Opaque type - a wrapper around a pointer of any type.
+ *
  * Note this requires application code to free any memory
  * before an object is collected by GC.  
  */
@@ -560,7 +561,7 @@ typedef c_opaque_type *c_opaque;
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
 
 /**
- * Define mutex type
+ * @brief The mutex thread synchronization type
  *
  * Mutexes are always allocated directly on the heap.
  */
@@ -572,7 +573,7 @@ typedef struct {
 typedef mutex_type *mutex;
 
 /**
- * Define condition variable type i
+ * @brief The condition variable thread synchronization type
  *
  * Condition variables are always allocated directly on the heap.
  */
@@ -584,7 +585,7 @@ typedef struct {
 typedef cond_var_type *cond_var;
 
 /** 
- * Define boolean type. 
+ * @brief The boolean type: True or False
  *
  * Booleans always refer to one of the objects `boolean_t` or `boolean_f` 
  * which are created by the runtime.
@@ -599,9 +600,7 @@ typedef boolean_type *boolean;
 #define boolean_desc(x) (((boolean_type *) x)->desc)
 
 /**
- * Define symbol type. 
- * 
- * Symbols are similar to strings, but only one instance of each
+ * @brief Symbols are similar to strings, but only one instance of each
  * unique symbol is created, so comparisons are O(1).
  *
  * A thread-safe symbol table is used at runtime to store all of
@@ -622,6 +621,8 @@ static object quote_##name = NULL;
 /* Define numeric types */
 
 /**
+ * @brief Deprecated - boxed integers
+ *
  * The integer object type is deprecated, integers should be stored using value types instead.
  * This is only still here because it is used internally by the runtime.
  */
@@ -633,7 +634,8 @@ typedef struct {
 } integer_type;
 
 /**
- * Bignums are exact integers of unlimited precision.
+ * @brief Exact integer of unlimited precision.
+ *
  * The backing store is the `mp_int` data type from LibTomMath.
  * 
  * Note memory for `mp_int` is allocated via `malloc`, so bignums must
@@ -650,7 +652,7 @@ typedef struct {
   bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
 
 /**
- * Double-precision floating point type, also known as a flonum.
+ * @brief Double-precision floating point type, also known as a flonum.
  */
 typedef struct {
   gc_header_type hdr;
@@ -694,7 +696,9 @@ typedef enum {
   , CYC_BN_GTE = 2
 } bn_cmp_type;
 
-/** Define the string type */
+/** 
+ * @brief The string type 
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -747,7 +751,9 @@ typedef struct {
 // TODO: a simple wrapper around FILE may not be good enough long-term
 // TODO: how exactly mode will be used. need to know r/w, bin/txt
 
-/** The port object type */
+/**
+ * @brief The port object type 
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -768,7 +774,9 @@ typedef struct {
   p.mem_buf = NULL; \
   p.mem_buf_len = 0;
 
-/** Vector type */
+/**
+ * @brief Vector type 
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -787,7 +795,7 @@ typedef vector_type *vector;
   v.elements = NULL;
 
 /**
- * Bytevector type 
+ * @brief Bytevector type 
  *
  * Bytevectors are similar to regular vectors, but instead of containing
  * objects, each bytevector member is a 8-bit integer.
@@ -810,7 +818,7 @@ typedef bytevector_type *bytevector;
   v.data = NULL;
 
 /**
- * The pair (cons) type.
+ * @brief The pair (cons) type.
  *
  * Contrary to popular belief, Scheme does not actually have a list type.
  *
@@ -915,7 +923,7 @@ typedef pair_type *pair;
 
 /* Closure types */
 
-/** Closure for macro */
+/** @brief Closure for a macro */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -923,14 +931,14 @@ typedef struct {
   int num_args;
 } macro_type;
 
-/** A closed-over function with no variables */
+/** @brief A closed-over function with no variables */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
   int num_args;
 } closure0_type;
-/** A closed-over function with one variable */
+/** @brief A closed-over function with one variable */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -938,7 +946,7 @@ typedef struct {
   int num_args;
   object element;
 } closure1_type;
-/** A closed-over function with zero or more closed-over variables */
+/** @brief A closed-over function with zero or more closed-over variables */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -980,8 +988,7 @@ typedef closure0_type *macro;
   c.element = a;
 
 /** 
- * The primitive type 
- * Primitives are functions built into the runtime.
+ * @brief A function built into the runtime.
  */
 typedef struct {
   gc_header_type hdr;
@@ -999,7 +1006,7 @@ static const object primitive_##name = &name##_primitive
 #define prim_name(x) (((primitive_type *) x)->desc)
 
 /**
- * A union of all the constant-size objects.
+ * @brief A union of all the constant-size objects.
  *
  * This type is used internally to (for example) pass a pointer
  * to an inline function that might need to use it for an allocation.
