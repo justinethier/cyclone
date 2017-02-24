@@ -20,17 +20,25 @@
 #include <stdint.h>
 #include "tommath.h"
 
-// Maximum number of args that GC will accept
+/**
+ * Maximum number of args that GC will accept 
+ */
 #define NUM_GC_ARGS 128
 
-// Which way does the CPU grow its stack?
+/** 
+ * Which way does the CPU grow its stack? 
+ */
 #define STACK_GROWTH_IS_DOWNWARD 1
 
-// Size of the stack buffer, in bytes.
-// This is used as the first generation of the GC.
+/** 
+ * Size of the stack buffer, in bytes.
+ * This is used as the first generation of the GC.
+ */
 #define STACK_SIZE 500000
 
-// Do not allocate objects larger than this on the stack.
+/** 
+ * Do not allocate objects larger than this on the stack.
+ */
 #define MAX_STACK_OBJ (STACK_SIZE * 2)
 
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
