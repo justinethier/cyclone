@@ -42,7 +42,7 @@ example :
 clean :
 	rm -rf test.txt a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; make clean
-	rm -rf tests/*.o tests/*.c
+	rm -rf html tests/*.o tests/*.c
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
@@ -103,9 +103,12 @@ sld :
 debug :
 	sudo ls; cyclone scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo make install-includes && sudo make install-libs && ./cyclone generate-c.scm
 
+doc :
+	doxygen Doxyfile
+
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean bootstrap tags indent debug test
+.PHONY: clean bootstrap tags indent debug test doc
 
 $(TESTS) : %: %.scm
 	$(CYCLONE) -I . $<
