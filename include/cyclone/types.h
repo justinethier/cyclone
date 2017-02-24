@@ -858,6 +858,12 @@ typedef pair_type *pair;
  */
 #define make_cell(n,a) make_pair(n,a,NULL);
 
+/**
+ * \defgroup objects_unsafe_cxr Unsafe pair access macros
+ * @brief Macros for fast - but unsafe - pair access
+ *
+ */
+/**@{*/
 /** Unsafely access a pair's `car` */
 #define car(x)    (((pair_type *) x)->pair_car)
 /** Unsafely access a pair's `cdr` */
@@ -890,8 +896,14 @@ typedef pair_type *pair;
 #define cddadr(x) (cdr(cdr(car(cdr(x)))))
 #define cdddar(x) (cdr(cdr(cdr(car(x)))))
 #define cddddr(x) (cdr(cdr(cdr(cdr(x)))))
+/**@}*/
 
-// Safe versions of the above:
+/**
+ * \defgroup objects_safe_cxr Safe pair access macros
+ * @brief Macros for safe pair access
+ *
+ */
+/**@{*/
 #define Cyc_caar(d, x) (Cyc_car(d, Cyc_car(d, x)))
 #define Cyc_cadr(d, x) (Cyc_car(d, Cyc_cdr(d, x)))
 #define Cyc_cdar(d, x) (Cyc_cdr(d, Cyc_car(d, x)))
@@ -920,6 +932,7 @@ typedef pair_type *pair;
 #define Cyc_cddadr(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, Cyc_cdr(d, x)))))
 #define Cyc_cdddar(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_car(d, x)))))
 #define Cyc_cddddr(d, x) (Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, Cyc_cdr(d, x)))))
+/**@}*/
 
 /* Closure types */
 
