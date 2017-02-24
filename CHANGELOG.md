@@ -4,6 +4,7 @@
 
 - Added a new bignum type to support exact integers of practically unlimited size.
 - As part of the bignum changes, modified the code for exact integer arithmetic to detect overflow.
+- Added documentation for the [C API](http://justinethier.github.io/cyclone/c-api/modules.html).
 
 ## 0.3.4 - February 10, 2017
 
