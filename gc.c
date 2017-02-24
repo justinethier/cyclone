@@ -126,8 +126,8 @@ void print_current_time()
 /////////////
 // Functions
 
-// Perform one-time initialization before mutators can be executed
-void gc_initialize()
+/** Perform one-time initialization before mutators can be executed */
+void gc_initialize(void)
 {
   if (ck_array_init(&Cyc_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0) {
     fprintf(stderr, "Unable to initialize mutator array\n");
