@@ -32,18 +32,18 @@ extern const object quote_void;
 extern const object Cyc_EOF;
 
 /**
- * \ingroup gc
+ * \ingroup gc_minor
  */
 void GC(void *, closure, object *, int);
 
 /**
- * \ingroup gc
+ * \ingroup gc_major
  */
 void gc_init_heap(long heap_size);
 
 /**
  * \defgroup prim Primitives
- * @brief
+ * @brief Built-in Scheme functions provided by the runtime library
  *
  */
 /**@{*/

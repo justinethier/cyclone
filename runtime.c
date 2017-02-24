@@ -4738,7 +4738,10 @@ object Cyc_trigger_minor_gc(void *data, object cont)
   return NULL;
 }
 
-// Do a minor GC
+/**
+ * Do a minor GC
+ * \ingroup gc_minor
+ */
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args)
 {

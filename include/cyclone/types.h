@@ -72,17 +72,9 @@ typedef unsigned char tag_type;
 #define type_of(obj) (((pair_type *) obj)->tag)
 
 /**
- * Access an object's forwarding pointer.
- * Note this is only applicable when objects are relocated
- * during minor GC.
- * \ingroup objects
- */
-#define forward(obj) (((pair_type *) obj)->pair_car)
-
-/**
- * \defgroup gc Garbage collector
+ * \defgroup gc Garbage collection
  *
- * @brief All of the code related to the garbage collector.
+ * @brief The Cyclone runtime's garbage collector (GC)
  *
  * When using the FFI there is normally no need to call 
  * into this code unless something is specifically mentioned
@@ -91,25 +83,11 @@ typedef unsigned char tag_type;
 /**@{*/
 
 /**
- * Maximum number of args that GC will accept 
+ * \defgroup gc_major Major GC
+ * @brief Major GC is responsible for removing unused objects from
+ * the heap.
  */
-#define NUM_GC_ARGS 128
-
-/** 
- * Which way does the CPU grow its stack? 
- */
-#define STACK_GROWTH_IS_DOWNWARD 1
-
-/** 
- * Size of the stack buffer, in bytes.
- * This is used as the first generation of the GC.
- */
-#define STACK_SIZE 500000
-
-/** 
- * Do not allocate objects larger than this on the stack.
- */
-#define MAX_STACK_OBJ (STACK_SIZE * 2)
+/**@{*/
 
 ////////////////////////////////
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
@@ -189,14 +167,21 @@ typedef enum {
   , HEAP_HUGE    // Huge objects, 1 per page
 } gc_heap_type;
 
+/** The number of `gc_heap_type`'s */
 #define NUM_HEAP_TYPES (HEAP_HUGE + 1)
 
+/** 
+ * Linked list of free memory chunks on a heap page
+ */
 typedef struct gc_free_list_t gc_free_list;
 struct gc_free_list_t {
   unsigned int size;
   gc_free_list *next;
 };
 
+/**
+ * Data for a heap page
+ */
 typedef struct gc_heap_t gc_heap;
 struct gc_heap_t {
   gc_heap_type type;
@@ -213,23 +198,34 @@ struct gc_heap_t {
   char *data;
 };
 
+/**
+ * A heap root is the heap's first page
+ */
 typedef struct gc_heap_root_t gc_heap_root;
 struct gc_heap_root_t {
   gc_heap **heap;
 };
 
+/**
+ * Header added to each object for GC purposes
+ */
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
   unsigned char mark;           // mark bits (only need 2)
   unsigned char grayed;         // stack object to be grayed when moved to heap
 };
+
+/** Get an object's `mark` value */
 #define mark(x) (((list) x)->hdr.mark)
+
+/** Get an object's `grayed` value */
 #define grayed(x) (((list) x)->hdr.grayed)
 
-/* Enums for tri-color marking */
+/** Enums for tri-color marking */
 typedef enum { STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2
 } gc_status_type;
 
+/** Stages of the Major GC's collector thread */
 typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
       //, STAGE_REF_PROCESSING 
   , STAGE_SWEEPING, STAGE_RESTING
@@ -238,16 +234,24 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 // Constant colors are defined here.
 // The mark/clear colors are defined in the gc module because
 // the collector swaps their values as an optimization.
-#define gc_color_red  0         // Memory not to be GC'd, such as on the stack
-#define gc_color_blue 2         // Unallocated memory
 
-/* Threading */
+/** Memory not to be collected by major GC, such as on the stack */
+#define gc_color_red  0         
+
+/** Unallocated memory */
+#define gc_color_blue 2         
+
+/** Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
   CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
   CYC_THREAD_STATE_TERMINATED
 } cyc_thread_state_type;
 
-/* Thread data structures */
+/**
+ * Thread data structures 
+ * @brief Each thread is given an instance of this struct to 
+ *        maintain its state
+ */
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
   // Thread object, if applicable
@@ -291,13 +295,6 @@ struct gc_thread_data_t {
   // Exception handler stack
   object exception_handler_stack;
 };
-
-// Determine if stack has overflowed
-#if STACK_GROWTH_IS_DOWNWARD
-#define stack_overflow(x,y) ((x) < (y))
-#else
-#define stack_overflow(x,y) ((x) > (y))
-#endif
 
 /* GC prototypes */
 void gc_initialize(void);
@@ -354,9 +351,63 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
 //  body \
 //  return_thread_runnable((data), (result));
 */
-/* Mutation table to support minor GC write barrier */
+
+/**@}*/
+
+/**
+ * \defgroup gc_minor Minor GC
+ * @brief Minor GC is called periodically to copy live objects off of a thread stack
+ *
+ */
+/**@{*/
+
+/**
+ * Maximum number of args that GC will accept 
+ */
+#define NUM_GC_ARGS 128
+
+/** 
+ * Which way does the CPU grow its stack? 
+ */
+#define STACK_GROWTH_IS_DOWNWARD 1
+
+/** 
+ * Size of the stack buffer, in bytes.
+ * This is used as the first generation of the GC.
+ */
+#define STACK_SIZE 500000
+
+/** 
+ * Do not allocate objects larger than this on the stack.
+ */
+#define MAX_STACK_OBJ (STACK_SIZE * 2)
+
+/** Determine if stack has overflowed */
+#if STACK_GROWTH_IS_DOWNWARD
+#define stack_overflow(x,y) ((x) < (y))
+#else
+#define stack_overflow(x,y) ((x) > (y))
+#endif
+
+/**
+ * Access an object's forwarding pointer.
+ * Note this is only applicable when objects are relocated
+ * during minor GC.
+ * \ingroup objects
+ */
+#define forward(obj) (((pair_type *) obj)->pair_car)
+
+
+/**
+ * \defgroup gc_minor_mut Mutation table
+ * @brief Mutation table to support the minor GC write barrier
+ */
+/**@{*/
 void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
+/**@}*/
+
+/**@}*/
 
 // END GC section
 /**@}*/
@@ -978,6 +1029,11 @@ void Cyc_int2bignum(int n, mp_int *bn);
 
 /* Remaining GC prototypes that require objects to be defined */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
+
+/**
+ * Do a minor GC
+ * \ingroup gc_minor
+ */
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
 
