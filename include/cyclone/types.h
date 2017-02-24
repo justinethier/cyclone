@@ -277,7 +277,7 @@ struct gc_thread_data_t {
  *  The possible types are:
  *
  *  - 0x00 - pointer (an object type)
- *  - 0x01 - integer
+ *  - 0x01 - integer (also known as fixnum)
  *  - 0x10 - char
  */
 /**@{*/
@@ -326,21 +326,40 @@ struct gc_thread_data_t {
 
 /**
  * \defgroup objects Object Types
+ *
+ * Most Scheme data types are defined as object types.
+ *
+ * Each object type contains a header for garbage collection and a
+ * tag that identifies the type of object, as well as any object-specific
+ * fields.
+ *
+ * Most object types are allocated on the nursery (the C stack) and 
+ * relocated to the garbage-collected heap during minor GC. It is only
+ * safe for an object on the nursery to be used by the thread that
+ * created it, as that object could be relocated at any time.
  */
 /**@{*/
 
-/* Function type */
-
+/** Function type */
 typedef void (*function_type) ();
+
+/** Variable-argument function type */
 typedef void (*function_type_va) (int, object, object, object, ...);
 
-/* Define C-variable integration type */
+/**
+ * Defines the C-variable integration type 
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  object *pvar;                 /* GC assumes this is a Cyclone object! */
+  /** Variable pointer. Note GC assumes this is a Cyclone object! */
+  object *pvar;
 } cvar_type;
 typedef cvar_type *cvar;
+
+/**
+ * Create a new cvar in the nursery
+ */
 #define make_cvar(n,v) \
   cvar_type n; \
   n.hdr.mark = gc_color_red; \
@@ -348,15 +367,20 @@ typedef cvar_type *cvar;
   n.tag = cvar_tag; \
   n.pvar = v;
 
-/* C Opaque type - a wrapper around a pointer of any type.
-   Note this requires application code to free any memory
-   before an object is collected by GC.  */
+/**
+ * C Opaque type - a wrapper around a pointer of any type.
+ * Note this requires application code to free any memory
+ * before an object is collected by GC.  
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  void *ptr;                    /* Can be anything, GC will not collect it */
+  /** This pointer can be anything, GC will not collect it */
+  void *ptr;
 } c_opaque_type;
 typedef c_opaque_type *c_opaque;
+
+/** Create a new opaque in the nursery */
 #define make_c_opaque(var, p) \
   c_opaque_type var; \
   var.hdr.mark = gc_color_red; \
@@ -364,9 +388,14 @@ typedef c_opaque_type *c_opaque;
   var.tag = c_opaque_tag; \
   var.ptr = p;
 
+/** Access the Opaque's pointer */
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
 
-/* Define mutex type */
+/**
+ * Define mutex type
+ *
+ * Mutexes are always allocated directly on the heap.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -374,7 +403,11 @@ typedef struct {
 } mutex_type;
 typedef mutex_type *mutex;
 
-/* Define condition variable type */
+/**
+ * Define condition variable type i
+ *
+ * Condition variables are always allocated directly on the heap.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -382,7 +415,12 @@ typedef struct {
 } cond_var_type;
 typedef cond_var_type *cond_var;
 
-/* Define boolean type. */
+/** 
+ * Define boolean type. 
+ *
+ * Booleans always refer to one of the objects `boolean_t` or `boolean_f` 
+ * which are created by the runtime.
+ */
 typedef struct {
   gc_header_type hdr;
   const tag_type tag;
@@ -392,8 +430,15 @@ typedef boolean_type *boolean;
 
 #define boolean_desc(x) (((boolean_type *) x)->desc)
 
-/* Define symbol type. */
-
+/**
+ * Define symbol type. 
+ * 
+ * Symbols are similar to strings, but only one instance of each
+ * unique symbol is created, so comparisons are O(1).
+ *
+ * A thread-safe symbol table is used at runtime to store all of
+ * the program's symbols.
+ */
 typedef struct {
   gc_header_type hdr;
   const tag_type tag;
@@ -408,8 +453,10 @@ static object quote_##name = NULL;
 
 /* Define numeric types */
 
-// Integer object type is deprecated, integers should be stored using value types instead.
-// This is only still here because it is used internally by the runtime.
+/**
+ * The integer object type is deprecated, integers should be stored using value types instead.
+ * This is only still here because it is used internally by the runtime.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -417,20 +464,33 @@ typedef struct {
   int padding;                  // Prevent mem corruption if sizeof(int) < sizeof(ptr)
 } integer_type;
 
+/**
+ * Bignums are exact integers of unlimited precision.
+ * The backing store is the `mp_int` data type from LibTomMath.
+ * 
+ * Note memory for `mp_int` is allocated via `malloc`, so bignums must
+ * always be allocated on Cyclone's heap.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   mp_int bn;
 } bignum_type;
 
+/** Allocate a new bignum on the heap */
 #define alloc_bignum(data, p) \
   bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
 
+/**
+ * Double-precision floating point type, also known as a flonum.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   double value;
 } double_type;
+
+/** Create a new double in the nursery */
 #define make_double(n,v) \
   double_type n; \
   n.hdr.mark = gc_color_red; \
@@ -438,16 +498,26 @@ typedef struct {
   n.tag = double_tag; \
   n.value = v;
 
+/** Assign given double value to the given double object pointer */
 #define assign_double(pobj,v) \
   ((double_type *)pobj)->hdr.mark = gc_color_red; \
   ((double_type *)pobj)->hdr.grayed = 0; \
   ((double_type *)pobj)->tag = double_tag; \
   double_value(pobj) = v;
 
+/** Access the integer_type integer value directly */
 #define integer_value(x) (((integer_type *) x)->value)
+
+/** Access the double directly */
 #define double_value(x) (((double_type *) x)->value)
+
+/** Access a bignum's `mp_int` directly */
 #define bignum_value(x) (((bignum_type *) x)->bn)
 
+/**
+ * This enumeration complements the comparison types from LibTomMath,
+ * and provides constants for each of the comparison operators.
+ */
 typedef enum {
     CYC_BN_LTE = -2
   , CYC_BN_LT = MP_LT
@@ -456,13 +526,15 @@ typedef enum {
   , CYC_BN_GTE = 2
 } bn_cmp_type;
 
-/* Define string type */
+/** Define the string type */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   int len;
   char *str;
 } string_type;
+
+/** Create a new string in the nursery */
 #define make_string(cs, s) string_type cs; \
 { int len = strlen(s); \
   cs.hdr.mark = gc_color_red; \
@@ -471,6 +543,11 @@ typedef struct {
   cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
+
+/** 
+ * Create a new string with the given length 
+ * (so it does not need to be computed) 
+ */
 #define make_string_with_len(cs, s, length) string_type cs;  \
 { int len = length; \
   cs.hdr.mark = gc_color_red; \
@@ -479,12 +556,20 @@ typedef struct {
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
+
+/**
+ * Create a string object using the given C string and length.
+ * No allocation is done for the given C string.
+ */
 #define make_string_noalloc(cs, s, length) string_type cs; \
 { cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = length; \
   cs.str = s; }
 
+/** Get the length of a string */
 #define string_len(x) (((string_type *) x)->len)
+
+/** Get a string object's C string */
 #define string_str(x) (((string_type *) x)->str)
 
 /* I/O types */
@@ -493,6 +578,8 @@ typedef struct {
 //       consider http://stackoverflow.com/questions/6206893/how-to-implement-char-ready-in-c
 // TODO: a simple wrapper around FILE may not be good enough long-term
 // TODO: how exactly mode will be used. need to know r/w, bin/txt
+
+/** The port object type */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -502,6 +589,7 @@ typedef struct {
   size_t mem_buf_len;
 } port_type;
 
+/** Create a new port object in the nursery */
 #define make_port(p,f,m) \
   port_type p; \
   p.hdr.mark = gc_color_red; \
@@ -512,8 +600,7 @@ typedef struct {
   p.mem_buf = NULL; \
   p.mem_buf_len = 0;
 
-/* Vector type */
-
+/** Vector type */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -522,6 +609,7 @@ typedef struct {
 } vector_type;
 typedef vector_type *vector;
 
+/** Create a new vector in the nursery */
 #define make_empty_vector(v) \
   vector_type v; \
   v.hdr.mark = gc_color_red; \
@@ -530,8 +618,12 @@ typedef vector_type *vector;
   v.num_elements = 0; \
   v.elements = NULL;
 
-/* Bytevector type */
-
+/**
+ * Bytevector type 
+ *
+ * Bytevectors are similar to regular vectors, but instead of containing
+ * objects, each bytevector member is a 8-bit integer.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -540,6 +632,7 @@ typedef struct {
 } bytevector_type;
 typedef bytevector_type *bytevector;
 
+/** Create a new bytevector in the nursery */
 #define make_empty_bytevector(v) \
   bytevector_type v; \
   v.hdr.mark = gc_color_red; \
@@ -549,7 +642,14 @@ typedef bytevector_type *bytevector;
   v.data = NULL;
 
 /**
- * Pair (cons) type 
+ * The pair (cons) type.
+ *
+ * Contrary to popular belief, Scheme does not actually have a list type.
+ *
+ * Instead there is a pair object composed two objects, the `car` and `cdr`.
+ * A list can be created by storing values in the `car` and a pointer to
+ * the rest of the list in `cdr`. A `NULL` in the `cdr` indicates the end
+ * of a list.
  */
 typedef struct {
   gc_header_type hdr;
@@ -560,6 +660,7 @@ typedef struct {
 typedef pair_type *list;
 typedef pair_type *pair;
 
+/** Create a new pair in the nursery */
 #define make_pair(n,a,d) \
   pair_type n; \
   n.hdr.mark = gc_color_red; \
@@ -575,9 +676,15 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+/**
+ * Create a pair with a single value. 
+ * This is useful to create an object that can be modified.
+ */
 #define make_cell(n,a) make_pair(n,a,NULL);
 
+/** Unsafely access a pair's `car` */
 #define car(x)    (((pair_type *) x)->pair_car)
+/** Unsafely access a pair's `cdr` */
 #define cdr(x)    (((pair_type *) x)->pair_cdr)
 #define caar(x)   (car(car(x)))
 #define cadr(x)   (car(cdr(x)))
@@ -640,18 +747,22 @@ typedef pair_type *pair;
 
 /* Closure types */
 
+/** Closure for macro */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
   int num_args;
 } macro_type;
+
+/** A closed-over function with no variables */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
   int num_args;
 } closure0_type;
+/** A closed-over function with one variable */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -659,6 +770,7 @@ typedef struct {
   int num_args;
   object element;
 } closure1_type;
+/** A closed-over function with zero or more closed-over variables */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -699,7 +811,10 @@ typedef closure0_type *macro;
   c.num_args = -1; \
   c.element = a;
 
-/* Primitive types */
+/** 
+ * The primitive type 
+ * Primitives are functions built into the runtime.
+ */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
@@ -715,7 +830,12 @@ static const object primitive_##name = &name##_primitive
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
 #define prim_name(x) (((primitive_type *) x)->desc)
 
-/* All constant-size objects */
+/**
+ * A union of all the constant-size objects.
+ *
+ * This type is used internally to (for example) pass a pointer
+ * to an inline function that might need to use it for an allocation.
+ */
 typedef union {
   boolean_type boolean_t;
   pair_type pair_t;
