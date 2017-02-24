@@ -873,7 +873,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = include/cyclone/ck_ht_hash.h include/cyclone/runtime-main.h .git docs examples scheme scripts srfi tests *.md
+EXCLUDE                = include/cyclone/ck_ht_hash.h include/cyclone/runtime-main.h .git docs examples scheme scripts srfi tests *.md cyclone.c generate-c.c icyc.c
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
