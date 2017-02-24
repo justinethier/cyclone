@@ -10,6 +10,7 @@ title: API
 - [SRFI Libraries](#srfi-libraries)
 - [Cyclone Libraries](#cyclone-libraries)
 - [Cyclone Compiler API](#cyclone-compiler-api)
+- [C API](#c-api)
 - [Index](#index)
 
 # Standard Libraries
@@ -57,6 +58,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 These libraries are provided by Cyclone with a stable API that is unlikely to change.
 
+- [`scheme cyclone array-list`](api/scheme/cyclone/array-list)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print)
 - [`scheme cyclone test`](api/scheme/cyclone/test)
 
@@ -73,6 +75,10 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 - [`scheme cyclone primitives`](api/scheme/cyclone/primitives)
 - [`scheme cyclone transforms`](api/scheme/cyclone/transforms)
 - [`scheme cyclone util`](api/scheme/cyclone/util)
+
+# C API
+
+[This documentation](http://justinethier.github.io/cyclone/c-api/modules.html) covers the C API provided by Cyclone Scheme. It is intended both to help understand how the Cyclone runtime works as well as to provide a useful reference manual when working with the Cyclone FFI.
 
 # Index
 
@@ -205,6 +211,13 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`append`](api/scheme/base#append)
 [`apply                 `](api/primitives#apply)
 [`arithmetic-shift`](api/srfi/60#ash)
+[`array-list`](api/scheme/cyclone/array-list#array-list)
+[`array-list?`](api/scheme/cyclone/array-list#array-list1)
+[`array-list-delete!`](api/scheme/cyclone/array-list#array-list-delete)
+[`array-list-empty?`](api/scheme/cyclone/array-list#array-list-empty)
+[`array-list-length`](api/scheme/cyclone/array-list#array-list-length)
+[`array-list-ref`](api/scheme/cyclone/array-list#array-list-ref)
+[`array-list-set!`](api/scheme/cyclone/array-list#array-list-set)
 [`ash`](api/srfi/60#ash)
 [`asin`](api/scheme/inexact#asin)
 [`assoc`](api/scheme/base#assoc)
@@ -793,6 +806,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`macro:load-env!`](api/scheme/cyclone/macros#macroload-env)
 [`macro:macro?`](api/scheme/cyclone/macros#macromacro)
 [`magnitude`](api/scheme/complex#magnitude)
+[`make-array-list`](api/scheme/cyclone/array-list#make-array-list)
 [`make-bytevector       `](api/primitives#make-bytevector)
 [`make-client-socket`](api/srfi/106#make-client-socket)
 [`make-comparator               `](api/srfi/128#make-comparator)
