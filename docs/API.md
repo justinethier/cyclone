@@ -74,7 +74,7 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 
 # C API
 
-[This documentation](http://justinethier.github.io/cyclone/c-api/) covers the C API provided by Cyclone Scheme. It is intended both to help understand how the Cyclone runtime works as well as to provide a useful reference manual when working with the Cyclone FFI.
+[This documentation](http://justinethier.github.io/cyclone/c-api/modules.html) covers the C API provided by Cyclone Scheme. It is intended both to help understand how the Cyclone runtime works as well as to provide a useful reference manual when working with the Cyclone FFI.
 
 # Index
 
