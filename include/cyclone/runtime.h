@@ -9,7 +9,51 @@
 #ifndef CYCLONE_RUNTIME_H
 #define CYCLONE_RUNTIME_H
 
-/* Error checking definitions */
+
+/**
+ * The boolean True value.
+ * \ingroup objects
+ */
+extern const object boolean_t;
+/**
+ * The boolean False value.
+ * \ingroup objects
+ */
+extern const object boolean_f;
+/**
+ * The void value.
+ * \ingroup objects
+ */
+extern const object quote_void;
+/**
+ * The EOF value.
+ * \ingroup objects
+ */
+extern const object Cyc_EOF;
+
+/**
+ * \ingroup gc
+ */
+void GC(void *, closure, object *, int);
+
+/**
+ * \ingroup gc
+ */
+void gc_init_heap(long heap_size);
+
+/**
+ * \defgroup prim Primitives
+ * @brief
+ *
+ */
+/**@{*/
+
+/**
+ * \defgroup prim_err Error checking
+ * @brief Runtime error checks including object type validation, bounds, and number of function arguments
+ *
+ */
+/**@{*/
 #define Cyc_check_num_args(data, fnc_name, num_args, args) { \
   object l = Cyc_length(data, args); \
   if (num_args > obj_obj2int(l)) { \
@@ -40,11 +84,11 @@
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
+/**@}*/
 /* END error checking */
 
 extern long global_stack_size;
 extern long global_heap_size;
-extern const object Cyc_EOF;
 
 char **get_env_variables();
 void pack_env_variables(void *data, object k);
@@ -92,6 +136,146 @@ object Cyc_global_set(void *thd, object * glo, object value);
       va_end(va); \
     } \
   }
+/* Prototypes for primitive functions. */
+
+/**
+ * \defgroup prim_pairs Pairs and lists
+ */
+/**@{*/
+object Cyc_car(void *data, object lis);
+object Cyc_cdr(void *data, object lis);
+list malloc_make_pair(object, object);
+object Cyc_set_cell(void *, object l, object val);
+object Cyc_set_car(void *, object l, object val);
+object Cyc_set_cdr(void *, object l, object val);
+object Cyc_length(void *d, object l);
+object Cyc_list2vector(void *data, object cont, object l);
+object Cyc_list2string(void *d, object cont, object lst);
+object Cyc_list(void *data, int argc, object cont, ...);
+object memberp(void *data, object x, list l);
+object memqp(void *data, object x, list l);
+list assq(void *data, object x, list l);
+list assoc(void *data, object x, list l);
+/**@}*/
+
+/**
+ * \defgroup prim_ctrl Control flow
+ */
+
+/**@{*/
+object apply(void *data, object cont, object func, object args);
+void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
+void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
+object apply_va(void *data, object cont, int argc, object func, ...);
+void dispatch(void *data, int argc, function_type func, object clo, object cont,
+              object args);
+void dispatch_va(void *data, int argc, function_type_va func, object clo,
+                 object cont, object args);
+void do_dispatch(void *data, int argc, function_type func, object clo,
+                 object * buffer);
+
+/**@}*/
+
+/**
+ * \defgroup prim_str Strings
+ */
+/**@{*/
+object Cyc_string_cmp(void *data, object str1, object str2);
+object dispatch_string_91append(void *data, int argc, object clo, object cont,
+                                object str1, ...);
+object Cyc_string2number_(void *d, object cont, object str);
+object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
+int binstr2int(const char *str);
+int octstr2int(const char *str);
+object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
+object Cyc_string_length(void *data, object str);
+object Cyc_substring(void *data, object cont, object str, object start,
+                     object end);
+object Cyc_string_ref(void *data, object str, object k);
+object Cyc_string_set(void *data, object str, object k, object chr);
+/**@}*/
+
+/**
+ * \defgroup prim_char Characters
+ */
+/**@{*/
+object Cyc_char2integer(object chr);
+/**@}*/
+
+/**
+ * \defgroup prim_sym Symbols
+ */
+/**@{*/
+object Cyc_symbol2string(void *d, object cont, object sym);
+object Cyc_string2symbol(void *d, object str);
+/**@}*/
+
+/**
+ * \defgroup prim_symtbl Symbol table
+ *
+ * @brief The symbol table, a thread-safe container for all symbols.
+ *
+ * This table contains a pointer to each symbol used by the current
+ * program.
+ */
+/**@{*/
+object add_symbol(symbol_type * psym);
+object add_symbol_by_name(const char *name);
+object find_symbol_by_name(const char *name);
+object find_or_add_symbol(const char *name);
+char *_strdup(const char *s);
+/**@}*/
+
+/**
+ * \defgroup prim_cvar C vars
+ */
+/**@{*/
+extern object Cyc_global_variables;
+cvar_type *mcvar(object * var);
+object Cyc_get_global_variables();
+object Cyc_get_cvar(object var);
+object Cyc_set_cvar(object var, object value);
+/**@}*/
+
+/**
+ * \defgroup prim_io I/O
+ */
+/**@{*/
+object Cyc_display(void *data, object, FILE * port);
+void dispatch_display_va(void *data, int argc, object clo, object cont,
+                         object x, ...);
+object Cyc_display_va(void *data, int argc, object x, ...);
+object Cyc_display_va_list(void *data, int argc, object x, va_list ap);
+object Cyc_write_char(void *data, object c, object port);
+object Cyc_write(void *data, object, FILE * port);
+void dispatch_write_va(void *data, int argc, object clo, object cont,
+                       object x, ...);
+object Cyc_write_va(void *data, int argc, object x, ...);
+object Cyc_write_va_list(void *data, int argc, object x, va_list ap);
+port_type Cyc_stdout(void);
+port_type Cyc_stdin(void);
+port_type Cyc_stderr(void);
+port_type Cyc_io_open_input_file(void *data, object str);
+port_type Cyc_io_open_output_file(void *data, object str);
+port_type *Cyc_io_open_output_string(void *data);
+port_type *Cyc_io_open_input_string(void *data, object str);
+port_type *Cyc_io_open_input_bytevector(void *data, object bv);
+void Cyc_io_get_output_string(void *data, object cont, object port);
+void Cyc_io_get_output_bytevector(void *data, object cont, object port);
+object Cyc_io_close_port(void *data, object port);
+object Cyc_io_close_input_port(void *data, object port);
+object Cyc_io_close_output_port(void *data, object port);
+object Cyc_io_flush_output_port(void *data, object port);
+object Cyc_io_read_char(void *data, object cont, object port);
+object Cyc_io_peek_char(void *data, object cont, object port);
+object Cyc_io_read_line(void *data, object cont, object port);
+/**@}*/
+
+
+/**
+ * \defgroup prim_num Numbers
+ */
+/**@{*/
 
 #define return_inexact_double_op(data, cont, OP, z) \
   make_double(d, 0.0); \
@@ -127,39 +311,6 @@ object Cyc_global_set(void *thd, object * glo, object value);
                        ((integer_type *)n)->value : \
                        ((double_type *)n)->value)))
 
-/* Prototypes for primitive functions. */
-
-extern object Cyc_global_variables;
-int _cyc_argc;
-char **_cyc_argv;
-void gc_init_heap(long heap_size);
-object Cyc_car(void *data, object lis);
-object Cyc_cdr(void *data, object lis);
-object Cyc_get_global_variables();
-object Cyc_get_cvar(object var);
-object Cyc_set_cvar(object var, object value);
-object apply(void *data, object cont, object func, object args);
-void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
-void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
-object apply_va(void *data, object cont, int argc, object func, ...);
-object Cyc_string_cmp(void *data, object str1, object str2);
-object dispatch_string_91append(void *data, int argc, object clo, object cont,
-                                object str1, ...);
-list malloc_make_pair(object, object);
-cvar_type *mcvar(object * var);
-object Cyc_display(void *data, object, FILE * port);
-void dispatch_display_va(void *data, int argc, object clo, object cont,
-                         object x, ...);
-object Cyc_display_va(void *data, int argc, object x, ...);
-object Cyc_display_va_list(void *data, int argc, object x, va_list ap);
-object Cyc_write_char(void *data, object c, object port);
-object Cyc_write(void *data, object, FILE * port);
-void dispatch_write_va(void *data, int argc, object clo, object cont,
-                       object x, ...);
-object Cyc_write_va(void *data, int argc, object x, ...);
-object Cyc_write_va_list(void *data, int argc, object x, va_list ap);
-
-object Cyc_has_cycle(object lst);
 object Cyc_num_eq(void *, object cont, int argc, object n, ...);
 object Cyc_num_gt(void *, object cont, int argc, object n, ...);
 object Cyc_num_lt(void *, object cont, int argc, object n, ...);
@@ -180,72 +331,36 @@ object Cyc_num_cmp_va_list(void *data, int argc,
                            va_list ns);
 void Cyc_expt(void *data, object cont, object x, object y);
 void Cyc_remainder(void *data, object cont, object num1, object num2);
-object Cyc_eq(object x, object y);
-object Cyc_set_cell(void *, object l, object val);
-object Cyc_set_car(void *, object l, object val);
-object Cyc_set_cdr(void *, object l, object val);
-object Cyc_length(void *d, object l);
-object Cyc_vector_length(void *data, object v);
-object Cyc_vector_ref(void *d, object v, object k);
-object Cyc_vector_set(void *d, object v, object k, object obj);
-object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
-object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...);
-object Cyc_bytevector(void *data, object cont, int argc, object bval, ...);
-object Cyc_bytevector_length(void *data, object bv);
-object Cyc_bytevector_append(void *data, object cont, int _argc, object bv,
-                             ...);
-object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
-                           object end);
-object Cyc_bytevector_u8_ref(void *data, object bv, object k);
-object Cyc_bytevector_u8_set(void *data, object bv, object k, object b);
-object Cyc_utf82string(void *data, object cont, object bv, object start,
-                       object end);
-object Cyc_string2utf8(void *data, object cont, object str, object start,
-                       object end);
-object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...);
-object Cyc_symbol2string(void *d, object cont, object sym);
-object Cyc_string2symbol(void *d, object str);
-object Cyc_list2string(void *d, object cont, object lst);
-object Cyc_list(void *data, int argc, object cont, ...);
-object Cyc_string2number_(void *d, object cont, object str);
-object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
-int binstr2int(const char *str);
-int octstr2int(const char *str);
-object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
-object Cyc_string_length(void *data, object str);
-object Cyc_substring(void *data, object cont, object str, object start,
-                     object end);
-object Cyc_string_ref(void *data, object str, object k);
-object Cyc_string_set(void *data, object str, object k, object chr);
-object Cyc_installation_dir(void *data, object cont, object type);
-object Cyc_compilation_environment(void *data, object cont, object var);
-object Cyc_command_line_arguments(void *data, object cont);
-object Cyc_system(object cmd);
-object Cyc_char2integer(object chr);
 object Cyc_integer2char(void *data, object n);
-void Cyc_halt(object obj);
-object __halt(object obj);
-port_type Cyc_stdout(void);
-port_type Cyc_stdin(void);
-port_type Cyc_stderr(void);
-port_type Cyc_io_open_input_file(void *data, object str);
-port_type Cyc_io_open_output_file(void *data, object str);
-port_type *Cyc_io_open_output_string(void *data);
-port_type *Cyc_io_open_input_string(void *data, object str);
-port_type *Cyc_io_open_input_bytevector(void *data, object bv);
-void Cyc_io_get_output_string(void *data, object cont, object port);
-void Cyc_io_get_output_bytevector(void *data, object cont, object port);
-object Cyc_io_close_port(void *data, object port);
-object Cyc_io_close_input_port(void *data, object port);
-object Cyc_io_close_output_port(void *data, object port);
-object Cyc_io_flush_output_port(void *data, object port);
-object Cyc_io_delete_file(void *data, object filename);
-object Cyc_io_file_exists(void *data, object filename);
-object Cyc_io_read_char(void *data, object cont, object port);
-object Cyc_io_peek_char(void *data, object cont, object port);
-object Cyc_io_read_line(void *data, object cont, object port);
-
+object Cyc_sum_op(void *data, common_type * x, object y);
+object Cyc_sub_op(void *data, common_type * x, object y);
+object Cyc_mul_op(void *data, common_type * x, object y);
+object Cyc_div_op(void *data, common_type * x, object y);
+object Cyc_sum(void *data, object cont, int argc, object n, ...);
+object Cyc_sub(void *data, object cont, int argc, object n, ...);
+object Cyc_mul(void *data, object cont, int argc, object n, ...);
+object Cyc_div(void *data, object cont, int argc, object n, ...);
+object Cyc_fast_sum(void *data, object ptr, object x, object y);
+object Cyc_fast_sub(void *data, object ptr, object x, object y);
+object Cyc_fast_mul(void *data, object ptr, object x, object y);
+object Cyc_fast_div(void *data, object ptr, object x, object y);
+object Cyc_bit_unset(void *data, object n1, object n2); 
+object Cyc_bit_set(void *data, object n1, object n2);
+object Cyc_num_op_va_list(void *data, int argc,
+                          object(fn_op(void *, common_type *, object)),
+                          int default_no_args, int default_one_arg, object n,
+                          va_list ns, common_type * buf);
+double MRG32k3a (double seed);
+/**@}*/
+/**
+ * \defgroup prim_eq Equality and type predicates
+ */
+/**@{*/
+object Cyc_eq(object x, object y);
+int equal(object, object);
+object equalp(object, object);
+object Cyc_has_cycle(object lst);
 object Cyc_is_boolean(object o);
 object Cyc_is_pair(object o);
 object Cyc_is_null(object o);
@@ -266,64 +381,101 @@ object Cyc_is_macro(object o);
 object Cyc_is_eof_object(object o);
 object Cyc_is_cvar(object o);
 object Cyc_is_opaque(object o);
-object Cyc_sum_op(void *data, common_type * x, object y);
-object Cyc_sub_op(void *data, common_type * x, object y);
-object Cyc_mul_op(void *data, common_type * x, object y);
-object Cyc_div_op(void *data, common_type * x, object y);
-object Cyc_sum(void *data, object cont, int argc, object n, ...);
-object Cyc_sub(void *data, object cont, int argc, object n, ...);
-object Cyc_mul(void *data, object cont, int argc, object n, ...);
-object Cyc_div(void *data, object cont, int argc, object n, ...);
-object Cyc_fast_sum(void *data, object ptr, object x, object y);
-object Cyc_fast_sub(void *data, object ptr, object x, object y);
-object Cyc_fast_mul(void *data, object ptr, object x, object y);
-object Cyc_fast_div(void *data, object ptr, object x, object y);
-object Cyc_bit_unset(void *data, object n1, object n2); 
-object Cyc_bit_set(void *data, object n1, object n2);
-object Cyc_num_op_va_list(void *data, int argc,
-                          object(fn_op(void *, common_type *, object)),
-                          int default_no_args, int default_one_arg, object n,
-                          va_list ns, common_type * buf);
-int equal(object, object);
-object equalp(object, object);
-object memberp(void *data, object x, list l);
-object memqp(void *data, object x, list l);
-list assq(void *data, object x, list l);
-list assoc(void *data, object x, list l);
+/**@}*/
 
+/**
+ * \defgroup prim_vec Vectors
+ */
+/**@{*/
+object Cyc_vector_length(void *data, object v);
+object Cyc_vector_ref(void *d, object v, object k);
+object Cyc_vector_set(void *d, object v, object k, object obj);
+object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
+/**@}*/
+
+/**
+ * \defgroup prim_bv Bytevectors
+ */
+/**@{*/
+object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...);
+object Cyc_bytevector(void *data, object cont, int argc, object bval, ...);
+object Cyc_bytevector_length(void *data, object bv);
+object Cyc_bytevector_append(void *data, object cont, int _argc, object bv,
+                             ...);
+object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
+                           object end);
+object Cyc_bytevector_u8_ref(void *data, object bv, object k);
+object Cyc_bytevector_u8_set(void *data, object bv, object k, object b);
+object Cyc_utf82string(void *data, object cont, object bv, object start,
+                       object end);
+object Cyc_string2utf8(void *data, object cont, object str, object start,
+                       object end);
+/**@}*/
+
+/**
+ * \defgroup prim_sys System interface
+ */
+/**@{*/
+int _cyc_argc;
+char **_cyc_argv;
+object Cyc_installation_dir(void *data, object cont, object type);
+object Cyc_compilation_environment(void *data, object cont, object var);
+object Cyc_command_line_arguments(void *data, object cont);
+object Cyc_system(object cmd);
+void Cyc_halt(object obj);
+object __halt(object obj);
+object Cyc_io_delete_file(void *data, object filename);
+object Cyc_io_file_exists(void *data, object filename);
+/**@}*/
+
+/**
+ * \defgroup prim_thd Threads
+ */
+/**@{*/
 object Cyc_spawn_thread(object thunk);
 void Cyc_start_trampoline(gc_thread_data * thd);
 void Cyc_end_thread(gc_thread_data * thd);
 void Cyc_exit_thread(gc_thread_data * thd);
 object Cyc_thread_sleep(void *data, object timeout);
-void GC(void *, closure, object *, int);
+/**@}*/
+
+/**
+ * \defgroup prim_gc Garbage collection
+ * @brief Functions to manually trigger GC
+ */
+/**@{*/
 object Cyc_trigger_minor_gc(void *data, object cont);
 object copy2heap(void *data, object obj);
+/**@}*/
 
+/**
+ * \defgroup prim_ch Call history
+ *
+ * @brief Functions for maintaining call history.
+ */
+/**@{*/
 void Cyc_st_add(void *data, char *frame);
 void Cyc_st_print(void *data, FILE * out);
+/**@}*/
 
-char *_strdup(const char *s);
-object add_symbol(symbol_type * psym);
-object add_symbol_by_name(const char *name);
-object find_symbol_by_name(const char *name);
-object find_or_add_symbol(const char *name);
-
+/**
+ * \defgroup prim_glo Global table
+ *
+ * @brief A table of global variables.
+ */
+/**@{*/
 extern list global_table;
 void add_global(object * glo);
+/**@}*/
 
-void dispatch(void *data, int argc, function_type func, object clo, object cont,
-              object args);
-void dispatch_va(void *data, int argc, function_type_va func, object clo,
-                 object cont, object args);
-void do_dispatch(void *data, int argc, function_type func, object clo,
-                 object * buffer);
-
-extern const object boolean_t;
-extern const object boolean_f;
-extern const object quote_void;
-
-/* This section is auto-generated via --autogen */
+/**
+ * \defgroup prim_obj Primitive objects
+ *
+ * @brief Objects added to the global environment at runtime as references to the corresponding primitives.
+ *
+ * This code was originally auto-generated via `--autogen`
+ */
+/**@{*/
 extern const object primitive_Cyc_91global_91vars;
 extern const object primitive_Cyc_91get_91cvar;
 extern const object primitive_Cyc_91set_91cvar_67;
@@ -454,6 +606,7 @@ extern const object primitive_Cyc_91write;
 extern const object primitive_Cyc_91display;
 extern const object primitive_call_95cc;
 /* -------------------------------------------- */
+/**@}*/
 
 /** Globals that are needed by the runtime 
  *  What's going on here is the globals are defined by a module, but
@@ -469,13 +622,19 @@ extern object Cyc_glo_call_cc;
 #define __glo_eval_91from_91c_scheme_eval Cyc_glo_eval_from_c
 #define __glo_call_95cc_scheme_base Cyc_glo_call_cc
 
-/* Exception handling */
-object Cyc_default_exception_handler(void *data, int argc, closure _,
-                                     object err);
+/**
+ * \defgroup prim_ex Exception handling 
+ * @brief Raise and handle Scheme exceptions
+ */
+/**@{*/
+object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
+
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);
 void Cyc_rt_raise2(void *data, const char *msg, object err);
 void Cyc_rt_raise_msg(void *data, const char *err);
+/**@}*/
 
-double MRG32k3a (double seed);
+/**@}*/
+
 #endif                          /* CYCLONE_RUNTIME_H */

@@ -80,7 +80,7 @@ typedef unsigned char tag_type;
 #define forward(obj) (((pair_type *) obj)->pair_car)
 
 /**
- * \defgroup gc Garbage Collector
+ * \defgroup gc Garbage collector
  *
  * @brief All of the code related to the garbage collector.
  *
@@ -362,13 +362,13 @@ void clear_mutations(void *data);
 /**@}*/
 
 /**
- * \defgroup datatypes Data Types
+ * \defgroup datatypes Data types
  * @brief All of the Scheme data types provided by Cyclone.
  */
 /**@{*/
 
 /**
- * \defgroup immediates Immediate Objects
+ * \defgroup immediates Immediate objects
  *  
  *  @brief Objects that do not require memory allocation.
  *
