@@ -80,7 +80,8 @@
 typedef void *object;
 
 /**
- * Define a tag for each possible type of object.
+ * Define a unique tag for each possible type of object.
+ *
  * Remember to update tag_names in runtime.c when adding new tags
  *\ingroup objects
  */
@@ -260,31 +261,65 @@ struct gc_thread_data_t {
 
 /**
  * \defgroup immediates Value Types
- */
-/**@{*/
-
-/** Define value types. 
+ *
+ *  Value types (also known as immediates) are stored directly within
+ *  the bits that would otherwise be a pointer to an object type. Since
+ *  all of the data is contained in those bits, a value type is never
+ *  allocated on the heap and never needs to be garbage collected,
+ *  making them very efficient.
+ *
  *  Depending on the underlying architecture, compiler, etc these types
  *  have extra least significant bits that can be used to mark them as
  *  values instead of objects (IE, pointer to a tagged object).
  *  On many machines, addresses are multiples of four, leaving the two
  *  least significant bits free - from lisp in small pieces.
  *
- *  Types:
- *  0x00 - pointer (an object type)
- *  0x01 - integer (in progress)
- *  0x10 - char
+ *  The possible types are:
+ *
+ *  - 0x00 - pointer (an object type)
+ *  - 0x01 - integer
+ *  - 0x10 - char
  */
+/**@{*/
 
+/**
+ * Determine if an object is an integer.
+ */
 #define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
+
+/**
+ * Convert from an object to an integer.
+ */
 #define obj_obj2int(x) ((long)(x)>>1)
+
+/**
+ * Convert from an integer to an object.
+ */
 #define obj_int2obj(c) ((void *)((((long)c)<<1) | 1))
 
+/**
+ * Determine if the object is a char.
+ */
 #define obj_is_char(x)  (((unsigned long)(x) & (unsigned long)3) == 2)
+
+/**
+ * Convert from an object to a char.
+ */
 #define obj_obj2char(x) (char)((long)(x)>>2)
+
+/**
+ * Convert from a char to an object.
+ */
 #define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
 
+/**
+ * Is the given object a value type?
+ */
 #define is_value_type(x) ((unsigned long)(x) & (unsigned long)3)
+
+/**
+ * Is the given object an object (non-immediate) type?
+ */
 #define is_object_type(x) (x && !is_value_type(x))
 
 /**@}*/
