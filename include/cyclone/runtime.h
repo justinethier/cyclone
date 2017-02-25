@@ -140,6 +140,7 @@ object Cyc_global_set(void *thd, object * glo, object value);
 
 /**
  * \defgroup prim_pairs Pairs and lists
+ * @brief Functions for working with pairs and lists
  */
 /**@{*/
 object Cyc_car(void *data, object lis);
