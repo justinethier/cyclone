@@ -61,7 +61,7 @@ static int mark_stack_i = 0;
 //    thread terminates (normally or not).
 static gc_thread_data *primordial_thread = NULL;
 
-// Data for each individual mutator thread
+/** Data for each individual mutator thread */
 ck_array_t Cyc_mutators, old_mutators;
 static pthread_mutex_t mutators_lock;
 
@@ -126,7 +126,9 @@ void print_current_time()
 /////////////
 // Functions
 
-/** Perform one-time initialization before mutators can be executed */
+/** 
+ * @brief Perform one-time initialization before mutators can be executed 
+ */
 void gc_initialize(void)
 {
   if (ck_array_init(&Cyc_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0) {
@@ -149,7 +151,10 @@ void gc_initialize(void)
   }
 }
 
-// Add data for a new mutator
+/**
+ * @brief  Add data for a new mutator
+ * @param  thd  Thread data for the mutator
+ */
 void gc_add_mutator(gc_thread_data * thd)
 {
   pthread_mutex_lock(&mutators_lock);
@@ -166,10 +171,13 @@ void gc_add_mutator(gc_thread_data * thd)
   }
 }
 
-// Remove selected mutator from the mutator list.
-// This is done for terminated threads. Note data is queued to be
-// freed, to prevent accidentally freeing it while the collector
-// thread is potentially accessing it.
+/**
+ * @brief Remove selected mutator from the mutator list.
+ * This is done for terminated threads. Note data is queued to be
+ * freed, to prevent accidentally freeing it while the collector
+ * thread is potentially accessing it.
+ * @param   thd   Thread data for the mutator
+ */
 void gc_remove_mutator(gc_thread_data * thd)
 {
   pthread_mutex_lock(&mutators_lock);
@@ -187,6 +195,9 @@ void gc_remove_mutator(gc_thread_data * thd)
   pthread_mutex_unlock(&mutators_lock);
 }
 
+/**
+ * @brief Free thread data for all terminated mutators
+ */
 void gc_free_old_thread_data()
 {
   ck_array_iterator_t iterator;
@@ -212,7 +223,15 @@ void gc_free_old_thread_data()
 }
 
 /**
- * Create a new heap page. The caller must hold the necessary locks.
+ * @brief Create a new heap page. 
+ *        The caller must hold the necessary locks.
+ * @param  heap_type  Define the size of objects that will be allocated on this heap 
+ * @param  size       Requested size (unpadded) of the heap
+ * @param  max_size   Define the heap page max size parameter
+ * @param  chunk_size Define the heap chunk size parameter
+ * @param  thd        Calling mutator's thread data object
+ * @return Pointer to the newly allocated heap page, or NULL
+ *         if the allocation failed.
  */
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
                         size_t chunk_size, gc_thread_data *thd)
@@ -257,7 +276,6 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
 
 /**
  * @brief   Free a page of the heap
- * @usage
  * @param   page        Page to free
  * @param   prev_page   Previous page in the heap
  * @return  Previous page if successful, NULL otherwise
@@ -277,6 +295,12 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
   return prev_page;
 }
 
+/**
+ * @brief Determine if a heap page is empty
+ * @param h Heap to inspect. The caller should acquire the necessary lock
+ *            on this heap.
+ * @return A truthy value if the heap is empty, 0 otherwise.
+ */
 int gc_is_heap_empty(gc_heap *h) 
 {
   gc_free_list *f;
