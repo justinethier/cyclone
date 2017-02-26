@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['bignum_2dtest_2ec',['bignum-test.c',['../bignum-test_8c.html',1,'']]],
   ['bignum_5ft',['bignum_t',['../unioncommon__type_ab8530b00033b4a73718b6be56743f271.html#ab8530b00033b4a73718b6be56743f271',1,'common_type']]],
   ['bignum_5ftag',['bignum_tag',['../group__objects_ga3eff9ebd9f241e211e00b991e2ac60fc.html#gga3eff9ebd9f241e211e00b991e2ac60fcae867e50c8a42ecb3593673f9b5f68eda',1,'types.h']]],
   ['bignum_5ftype',['bignum_type',['../structbignum__type.html',1,'']]],

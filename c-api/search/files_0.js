@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['bignum_2dtest_2ec',['bignum-test.c',['../bignum-test_8c.html',1,'']]]
+  ['c_2dapi_2emd',['C-API.md',['../C-API_8md.html',1,'']]],
+  ['changelog_2emd',['CHANGELOG.md',['../CHANGELOG_8md.html',1,'']]]
 ];

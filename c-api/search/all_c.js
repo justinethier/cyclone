@@ -8,7 +8,6 @@ var searchData=
   ['macro',['macro',['../group__objects_ga46231cbc8e3cbc00623f1181fdc56eee.html#ga46231cbc8e3cbc00623f1181fdc56eee',1,'types.h']]],
   ['macro_5ftag',['macro_tag',['../group__objects_ga3eff9ebd9f241e211e00b991e2ac60fc.html#gga3eff9ebd9f241e211e00b991e2ac60fca72e4427c7dc45f6cd222f2c81b3df35a',1,'types.h']]],
   ['macro_5ftype',['macro_type',['../structmacro__type.html',1,'']]],
-  ['main',['main',['../bignum-test_8c_a647f21a28344e1d9c643f4115516d7c9.html#a647f21a28344e1d9c643f4115516d7c9',1,'main(int argc, char **argv, char **envp):&#160;bignum-test.c'],['../test_8c_a647f21a28344e1d9c643f4115516d7c9.html#a647f21a28344e1d9c643f4115516d7c9',1,'main(int argc, char **argv, char **envp):&#160;test.c'],['../tmp_8c_acdef7a1fd863a6d3770c1268cb06add3.html#acdef7a1fd863a6d3770c1268cb06add3',1,'main():&#160;tmp.c']]],
   ['make_5fc_5fopaque',['make_c_opaque',['../group__objects_ga751c3b9362007d827f8fa6668415e1bf.html#ga751c3b9362007d827f8fa6668415e1bf',1,'types.h']]],
   ['make_5fcell',['make_cell',['../group__objects_gaf69ff213c1057ebc0886f9557b7c00cd.html#gaf69ff213c1057ebc0886f9557b7c00cd',1,'types.h']]],
   ['make_5fcvar',['make_cvar',['../group__objects_ga5c491b6ee0e16480c390f3516964569e.html#ga5c491b6ee0e16480c390f3516964569e',1,'types.h']]],

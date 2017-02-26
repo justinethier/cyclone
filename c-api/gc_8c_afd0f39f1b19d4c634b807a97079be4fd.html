@@ -20,6 +20,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Cyclone Scheme
    &#160;<span id="projectnumber">0.4</span>
@@ -142,6 +143,15 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Determine if a heap page is empty. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Heap to inspect. The caller should acquire the necessary lock on this heap. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A truthy value if the heap is empty, 0 otherwise. </dd></dl>
 
 </div>
 </div>
