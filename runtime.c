@@ -4776,6 +4776,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
 
   // Transport exception stack
   gc_move2heap(((gc_thread_data *) data)->exception_handler_stack);
+  gc_move2heap(((gc_thread_data *) data)->param_objs);
   gc_move2heap(((gc_thread_data *) data)->scm_thread_obj);
 
   // Transport mutations

@@ -949,6 +949,7 @@
            ((param value) ...)
            body))))
     (define (make-parameter init . o)
+      ;; TODO: need to store/set value in the thread data parameter (param_objs), to make it thread-specific 
       (let* ((converter
                (if (pair? o) (car o) (lambda (x) x)))
              (value (converter init)))
