@@ -314,8 +314,9 @@ int gc_is_heap_empty(gc_heap *h)
 }
 
 /**
- * Print heap usage information.
- * Before calling this function the current thread must have the heap lock
+ * @brief Print heap usage information. Before calling this function the 
+ *        current thread must have the heap lock
+ * @param h Heap to analyze.
  */
 void gc_print_stats(gc_heap * h)
 {
@@ -345,11 +346,18 @@ void gc_print_stats(gc_heap * h)
   }
 }
 
-// Copy given object into given heap object
+/**
+ * @brief Copy given object into given heap object
+ * @param dest  Pointer to destination heap memory slot
+ * @param obj   Object to copy
+ * @param thd   Thread data object for the applicable mutator
+ * @return The appropriate pointer to use for `obj`
+ *
+ * NOTE: There is no additional type checking because this function is
+ * called from `gc_move` which already does that.
+ */
 char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
 {
-  // NOTE: no additional type checking because this is called from gc_move
-  // which already does that
   #if GC_DEBUG_TRACE
   allocated_obj_counts[type_of(obj)]++;
   #endif
@@ -511,6 +519,22 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   return (char *)obj;
 }
 
+/**
+ * @brief Grow a heap by allocating a new page.
+ * @param h          Heap to be expanded
+ * @param heap_type  Define the size of objects that will be allocated on this heap 
+ * @param size       Not applicable, can set to 0
+ * @param chunk_size Heap chunk size, or 0 if not applicable
+ * @param thd        Thread data for the mutator using this heap
+ * @return A true value if the heap was grown, or 0 otherwise
+ *
+ * Heaps are increased in size by adding a newly-allocated page at the
+ * end of the heap's linked list.
+ *
+ * Page size is determined by starting at the minimum page size and
+ * increasing size using the Fibonnaci Sequence until reaching the
+ * max size.
+ */
 int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd)
 {
   size_t /*cur_size,*/ new_size;
@@ -565,6 +589,18 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
   return (h_new != NULL);
 }
 
+/**
+ * @brief Attempt to allocate a new heap slot for the given object
+ * @param h          Heap to allocate from
+ * @param heap_type  Define the size of objects that will be allocated on this heap 
+ * @param size       Size of the requested object, in bytes
+ * @param obj        Object containing data that will be copied to the heap
+ * @param thd        Thread data for the mutator using this heap
+ * @return Pointer to the newly-allocated object, or `NULL` if allocation failed
+ *
+ * This function will fail if there is no space on the heap for the 
+ * requested object.
+ */
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd)
 {
@@ -611,7 +647,11 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
   return NULL;
 }
 
-// A convenience function for allocating bignums
+/**
+ * @brief A convenience function for allocating bignums
+ * @param data  The mutator's thread data object
+ * @return Pointer to a heap object for the bignum
+ */
 void *gc_alloc_bignum(gc_thread_data *data)
 {
   int heap_grown, result;
@@ -630,12 +670,31 @@ void *gc_alloc_bignum(gc_thread_data *data)
   return bn;
 }
 
+/**
+ * @brief A helper function to create a heap-allocated copy of a bignum
+ * @param data  The mutator's thread data object
+ * @param src   The bignum instance to copy to the heap
+ * @return Pointer to the heap object
+ */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src)
 {
   int heap_grown;
   return gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum_type), (char *)(src), (gc_thread_data *)data, &heap_grown);
 }
 
+/**
+ * @brief Allocate memory on the heap for an object
+ * @param hrt   The root of the heap to allocate from
+ * @param size  Size of the object to allocate
+ * @param obj   Object containing data to copy to the heap
+ * @param thd   The requesting mutator's thread data object
+ * @param heap_grown  Pointer to an "out" parameter that will be set to
+ *                    `1` if the heap is grown in size.
+ * @return Pointer to the heap object
+ *
+ * This function will attempt to grow the heap if it is full, and will
+ * terminate the program if the OS is out of memory.
+ */
 void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown)
 {
@@ -695,6 +754,13 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   return result;
 }
 
+/**
+ * @brief Get the number of bytes that will be allocated for `obj`.
+ * @param obj Object to inspect
+ * @param q   Previous free list pointer, set to `NULL` if not applicable
+ * @param r   Next free list pointer, set to `NULL` if not applicable
+ * @return Number of bytes, including any needed for alignment
+ */
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
 {
   tag_type t;
@@ -754,6 +820,14 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
   return 0;
 }
 
+/**
+ * @brief Get the heap's last page
+ * @param h Heap to inspect
+ * @return Pointer to the heap's last page
+ *
+ * This function does not do any locking, it is the responsibility of
+ * the caller to hold the appropriate locks prior to calling.
+ */
 gc_heap *gc_heap_last(gc_heap * h)
 {
   while (h->next)
@@ -785,7 +859,9 @@ gc_heap *gc_heap_last(gc_heap * h)
 //  return total_size;
 //}
 
-// A convenient front-end to the actual gc_sweep function.
+/**
+ * @brief A convenient front-end to the actual gc_sweep function.
+ */
 void gc_collector_sweep()
 {
   ck_array_iterator_t iterator;
