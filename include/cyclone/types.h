@@ -315,7 +315,7 @@ void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
 void *gc_alloc_bignum(gc_thread_data *data);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
-size_t gc_heap_total_size(gc_heap * h);
+//size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);
 //void gc_mark(gc_heap *h, object obj);

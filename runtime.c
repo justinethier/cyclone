@@ -259,6 +259,10 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 
 // End supporting functions
 
+/**
+ * @brief Perform one-time heap initializations for the program
+ * @param heap_size Unused
+ */
 void gc_init_heap(long heap_size)
 {
   if (!ck_hs_init(&symbol_table,
