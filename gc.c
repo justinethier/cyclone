@@ -925,6 +925,19 @@ void gc_collector_sweep()
 #endif
 }
 
+/**
+ * @brief Sweep portion of the GC algorithm
+ * @param h           Heap to sweep
+ * @param heap_type   Type of heap, based on object sizes allocated on it
+ * @param sum_freed_ptr Out parameter tracking the sum of freed data, in bytes.
+ *                      This parameter is ignored if NULL is passed.
+ * @param thd           Thread data object for the mutator using this heap
+ * @return Return the size of the largest object freed, in bytes
+ *
+ * This portion of the major GC algorithm is responsible for returning unused
+ * memory slots to the heap. It is only called by the collector thread after
+ * the heap has been traced to identify live objects.
+ */
 size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd)
 {
   size_t freed, max_freed = 0, heap_freed = 0, sum_freed = 0, size;
@@ -1095,6 +1108,10 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
   return max_freed;
 }
 
+/**
+ * @brief Increase the size of the mutator's move buffer
+ * @param d Mutator's thread data object
+ */
 void gc_thr_grow_move_buffer(gc_thread_data * d)
 {
   if (!d)
@@ -1113,6 +1130,12 @@ void gc_thr_grow_move_buffer(gc_thread_data * d)
 #endif
 }
 
+/**
+ * @brief Add an object to the move buffer
+ * @param d Mutator data object containing the buffer
+ * @param alloci  Pointer to the next open slot in the buffer
+ * @param obj     Object to add
+ */
 void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
 {
   if (*alloci == d->moveBufLen) {
@@ -1131,7 +1154,8 @@ void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
 // GC functions called by the Mutator threads
 
 /**
- * Clear thread data read/write fields
+ * @brief Clear thread data read/write fields
+ * @param thd Mutator's thread data object
  */
 void gc_zero_read_write_counts(gc_thread_data * thd)
 {
@@ -1154,7 +1178,9 @@ void gc_zero_read_write_counts(gc_thread_data * thd)
 }
 
 /**
- * Move pending writes to last_write
+ * @brief Move pending writes to 'last_write'
+ * @param thd Mutator's thread data object
+ * @param locked  Does the caller hold the mutator lock?
  */
 void gc_sum_pending_writes(gc_thread_data * thd, int locked)
 {
@@ -1169,7 +1195,10 @@ void gc_sum_pending_writes(gc_thread_data * thd, int locked)
 }
 
 /**
- * Determine if object lives on the thread's stack
+ * @brief Determine if object lives on the thread's stack
+ * @param thd Mutator's thread data
+ * @param obj Object to inspect
+ * @return True if `obj` is on the mutator's stack, false otherwise
  */
 int gc_is_stack_obj(gc_thread_data * thd, object obj)
 {
@@ -1180,7 +1209,7 @@ int gc_is_stack_obj(gc_thread_data * thd, object obj)
 }
 
 /**
- * Helper function for gc_mut_update
+ * @brief Helper function for `gc_mut_update`
  */
 static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj)
 {
@@ -1196,7 +1225,11 @@ static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj)
 }
 
 /**
- * Write barrier for updates to heap-allocated objects
+ * @brief Write barrier for updates to heap-allocated objects
+ * @param thd     Mutator's thread data
+ * @param old_obj Old object value prior to the mutation
+ * @param value   New object value
+ *
  * The key for this barrier is to identify stack objects that contain
  * heap references, so they can be marked to avoid collection.
 */
@@ -1228,6 +1261,14 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
   }
 }
 
+/**
+ * @brief Called by a mutator to cooperate with the collector thread
+ * @param thd Mutator's thread data
+ * @param buf_len Number of objects moved to the heap by the mutator during minor GC
+ *
+ * This function must be called periodically by each mutator to coordinate
+ * with the collector. In our implementation it is called after minor GC.
+ */
 void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 {
   int i, status_c, status_m;
@@ -1314,7 +1355,10 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 // Collector functions
 
 /**
- * Mark the given object gray if it is on the heap.
+ * @brief Mark the given object gray if it is on the heap.
+ * @param thd Mutator's thread data
+ * @param obj Object to gray
+ *
  * Note marking is done implicitly by placing it in a buffer,
  * to avoid repeated re-scanning.
  *
@@ -1339,7 +1383,10 @@ void gc_mark_gray(gc_thread_data * thd, object obj)
 }
 
 /**
- * Add a pending write to the mark buffer.
+ * @brief Add a pending write to the mark buffer.
+ * @param thd Mutator's thread data
+ * @param obj Object to gray
+ *
  * These are pended because they are written in a batch during minor GC.
  * To prevent race conditions we wait until all of the writes are made before
  * updating last write.
@@ -1357,12 +1404,15 @@ void gc_mark_gray2(gc_thread_data * thd, object obj)
   }
 }
 
-// "Color" objects gray by adding them to the mark stack for further processing.
-//
-// Note that stack objects are always colored red during creation, so
-// they should never be added to the mark stack. Which would be bad because it
-// could lead to stack corruption.
-//
+/**
+ * @brief "Color" objects gray by adding them to the mark stack for further processing.
+ * @param parent Parent of object, used for debugging only
+ * @param obj Object to mark
+ *
+ * Note that stack objects are always colored red during creation, so
+ * they should never be added to the mark stack. Which would be bad because it
+ * could lead to stack corruption.
+ */
 #if GC_DEBUG_VERBOSE
 static void gc_collector_mark_gray(object parent, object obj)
 {
@@ -1486,7 +1536,12 @@ void gc_mark_black(object obj)
 }
 #endif
 
-
+/**
+ * @brief The collector's tracing algorithm
+ *
+ * This function ensures all live objects are marked prior to transitioning
+ * to the collector's sweep phase.
+ */
 void gc_collector_trace()
 {
   ck_array_iterator_t iterator;
@@ -1532,6 +1587,11 @@ void gc_collector_trace()
   }
 }
 
+/**
+ * @brief Empty the collector's mark stack
+ *
+ * Objects on the stack are removed one at a time and marked
+ */
 void gc_empty_collector_stack()
 {
   object obj;
@@ -1547,12 +1607,21 @@ void gc_empty_collector_stack()
   }
 }
 
+/**
+ * @brief Called by the collector thread to perform a handshake with 
+ *        all of the mutators
+ * @param s Transition to this GC status
+ */
 void gc_handshake(gc_status_type s)
 {
   gc_post_handshake(s);
   gc_wait_handshake();
 }
 
+/**
+ * @brief Change GC status to the given type
+ * @param s Transition to this GC status
+ */
 void gc_post_handshake(gc_status_type s)
 {
   int status = ck_pr_load_int(&gc_status_col);
@@ -1560,6 +1629,14 @@ void gc_post_handshake(gc_status_type s)
   }
 }
 
+/**
+ * @brief Wait for all mutators to handshake
+ *
+ * This function is always called by the collector. If a mutator
+ * is blocked and cannot handshake, the collector will cooperate
+ * on its behalf, including invoking a minor GC of the mutator's
+ * stack, so major GC can proceed.
+ */
 void gc_wait_handshake()
 {
   ck_array_iterator_t iterator;
@@ -1638,7 +1715,9 @@ void gc_wait_handshake()
 
 void debug_dump_globals();
 
-// Main collector function
+/**
+ * @brief Main collector function
+ */
 void gc_collector()
 {
   int old_clear, old_mark;
@@ -1722,6 +1801,9 @@ void *collector_main(void *arg)
 
 static pthread_t collector_thread;
 
+/**
+ * @brief Spawn the collector thread
+ */
 void gc_start_collector()
 {
   if (pthread_create
@@ -1731,8 +1813,13 @@ void gc_start_collector()
   }
 }
 
-// Mark globals as part of the tracing collector
-// This is called by the collector thread
+/**
+ * @brief Mark globals as part of the tracing collector
+ * @param globals
+ * @param global_table
+ *
+ * This is called by the collector thread
+ */
 void gc_mark_globals(object globals, object global_table)
 {
 #if GC_DEBUG_TRACE
@@ -1762,9 +1849,16 @@ void gc_mark_globals(object globals, object global_table)
 // END tri-color marking section
 /////////////////////////////////////////////
 
-// Initialize runtime data structures for a thread.
-// Must be called on the target thread itself during startup,
-// to verify stack limits are setup correctly.
+/**
+ * @brief Initialize runtime data structures for a thread.
+ * @param thd Mutator's thread data
+ * @param mut_num     Unused
+ * @param stack_base  Bottom of the mutator's stack
+ * @param stack_size  Max allowed size of mutator's stack before triggering minor GC
+ *
+ * Must be called on the target thread itself during startup,
+ * to verify stack limits are setup correctly.
+ */
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
                          long stack_size)
 {
@@ -1828,6 +1922,10 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0, thd);
 }
 
+/**
+ * @brief Free all data for the given mutator
+ * @param thd Mutator's thread data object containing data to free
+ */
 void gc_thread_data_free(gc_thread_data * thd)
 {
   if (thd) {
@@ -1873,7 +1971,11 @@ void gc_thread_data_free(gc_thread_data * thd)
 }
 
 /**
- * Merge one heap into another. Assumes appropriate locks are already held.
+ * @brief Merge one heap into another. 
+ * @param hdest Heap that will receive new pages
+ * @param hsrc  Heap that is being merged to the end of `hdest`
+ *
+ * This function assumes appropriate locks are already held.
  */
 void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc)
 {
@@ -1882,7 +1984,10 @@ void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc)
 }
 
 /**
- * Merge all thread heaps into another.
+ * @brief Merge all thread heaps into another.
+ * @param dest Heap receiving new pages
+ * @param src  Heap containing pages to be appended
+ *
  * Assumes appropriate locks are already held.
  */
 void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
@@ -1907,11 +2012,10 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
 }
 
 /**
- * Called explicitly from a mutator thread to let the collector know
- * it (may) block for an unknown period of time.
- *
- * The current continuation is required so that we can trace over it 
- * in case the collector has to cooperate for the mutator.
+ * @brief Called explicitly from a mutator thread to let the collector know
+ *        it (may) block for an unknown period of time.
+ * @param thd Mutator's thread data
+ * @param cont The mutator's current continuation. This is required so that we can trace over this object in case the collector has to cooperate for the mutator.
  */
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 {
@@ -1929,10 +2033,14 @@ void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 void Cyc_apply_from_buf(void *data, int argc, object prim, object * buf);
 
 /**
- * Called explicitly from a mutator thread to let the collector know
- * that it has finished blocking. In addition, if the collector 
- * cooperated on behalf of the mutator while it was blocking, the mutator
- * will move any remaining stack objects to the heap and longjmp.
+ * @brief Called explicitly from a mutator thread to let the collector know
+ * that it has finished blocking. 
+ * @param thd Mutator's thread data
+ * @param result  Data returned by the blocking function
+ *
+ * In addition, if the collector cooperated on behalf of the mutator while 
+ * it was blocking, the mutator will move any remaining stack objects to 
+ * the heap and longjmp.
  */
 void gc_mutator_thread_runnable(gc_thread_data * thd, object result)
 {
