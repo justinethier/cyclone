@@ -176,6 +176,18 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Initialize runtime data structures for a thread. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">mut_num</td><td>Unused </td></tr>
+    <tr><td class="paramname">stack_base</td><td>Bottom of the mutator's stack </td></tr>
+    <tr><td class="paramname">stack_size</td><td>Max allowed size of mutator's stack before triggering minor GC</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Must be called on the target thread itself during startup, to verify stack limits are setup correctly. </p>
+
 </div>
 </div>
     </td>

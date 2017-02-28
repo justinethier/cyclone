@@ -169,7 +169,17 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Write barrier for updates to heap-allocated objects The key for this barrier is to identify stack objects that contain heap references, so they can be marked to avoid collection. </p>
+
+<p>Write barrier for updates to heap-allocated objects. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">old_obj</td><td>Old object value prior to the mutation </td></tr>
+    <tr><td class="paramname">value</td><td>New object value</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>The key for this barrier is to identify stack objects that contain heap references, so they can be marked to avoid collection. </p>
 
 </div>
 </div>

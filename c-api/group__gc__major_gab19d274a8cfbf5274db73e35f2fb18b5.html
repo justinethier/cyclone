@@ -176,6 +176,19 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Sweep portion of the GC algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Heap to sweep </td></tr>
+    <tr><td class="paramname">heap_type</td><td>Type of heap, based on object sizes allocated on it </td></tr>
+    <tr><td class="paramname">sum_freed_ptr</td><td>Out parameter tracking the sum of freed data, in bytes. This parameter is ignored if NULL is passed. </td></tr>
+    <tr><td class="paramname">thd</td><td>Thread data object for the mutator using this heap </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return the size of the largest object freed, in bytes</dd></dl>
+<p>This portion of the major GC algorithm is responsible for returning unused memory slots to the heap. It is only called by the collector thread after the heap has been traced to identify live objects. </p>
+
 </div>
 </div>
     </td>

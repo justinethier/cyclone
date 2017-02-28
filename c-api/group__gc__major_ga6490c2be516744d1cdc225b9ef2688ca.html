@@ -163,7 +163,16 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Determine if object lives on the thread's stack </p>
+
+<p>Determine if object lives on the thread's stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">obj</td><td>Object to inspect </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if <code>obj</code> is on the mutator's stack, false otherwise </dd></dl>
 
 </div>
 </div>

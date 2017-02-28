@@ -154,6 +154,16 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Get the heap's last page. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Heap to inspect </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the heap's last page</dd></dl>
+<p>This function does not do any locking, it is the responsibility of the caller to hold the appropriate locks prior to calling. </p>
+
 </div>
 </div>
     </td>

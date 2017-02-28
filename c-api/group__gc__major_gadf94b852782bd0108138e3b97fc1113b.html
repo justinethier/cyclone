@@ -163,8 +163,15 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Called explicitly from a mutator thread to let the collector know it (may) block for an unknown period of time.</p>
-<p>The current continuation is required so that we can trace over it in case the collector has to cooperate for the mutator. </p>
+
+<p>Called explicitly from a mutator thread to let the collector know it (may) block for an unknown period of time. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">cont</td><td>The mutator's current continuation. This is required so that we can trace over this object in case the collector has to cooperate for the mutator. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

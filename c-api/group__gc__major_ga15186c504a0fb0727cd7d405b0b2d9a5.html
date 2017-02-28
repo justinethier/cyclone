@@ -148,7 +148,7 @@ $(function() {
           <td class="memname">char* gc_copy_obj </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="group__objects_ga71301352e6ef9a0fcf7b0a8bae72c535.html#ga71301352e6ef9a0fcf7b0a8bae72c535">object</a>&#160;</td>
-          <td class="paramname"><em>hp</em>, </td>
+          <td class="paramname"><em>dest</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -169,6 +169,18 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Copy given object into given heap object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dest</td><td>Pointer to destination heap memory slot </td></tr>
+    <tr><td class="paramname">obj</td><td>Object to copy </td></tr>
+    <tr><td class="paramname">thd</td><td>Thread data object for the applicable mutator </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The appropriate pointer to use for <code>obj</code></dd></dl>
+<p>NOTE: There is no additional type checking because this function is called from <code>gc_move</code> which already does that. </p>
 
 </div>
 </div>

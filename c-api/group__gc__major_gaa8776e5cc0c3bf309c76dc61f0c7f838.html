@@ -163,7 +163,16 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Mark the given object gray if it is on the heap. Note marking is done implicitly by placing it in a buffer, to avoid repeated re-scanning.</p>
+
+<p>Mark the given object gray if it is on the heap. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">obj</td><td>Object to gray</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Note marking is done implicitly by placing it in a buffer, to avoid repeated re-scanning.</p>
 <p>This function must be executed once the thread lock has been acquired. </p>
 
 </div>

@@ -163,7 +163,16 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Merge one heap into another. Assumes appropriate locks are already held. </p>
+
+<p>Merge one heap into another. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">hdest</td><td>Heap that will receive new pages </td></tr>
+    <tr><td class="paramname">hsrc</td><td>Heap that is being merged to the end of <code>hdest</code></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This function assumes appropriate locks are already held. </p>
 
 </div>
 </div>

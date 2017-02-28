@@ -157,6 +157,16 @@ $(function() {
 <div class="ttc" id="group__immediates_ga57936aa324ea2422e81e7f3315caf8cc_html_ga57936aa324ea2422e81e7f3315caf8cc"><div class="ttname"><a href="group__immediates_ga57936aa324ea2422e81e7f3315caf8cc.html#ga57936aa324ea2422e81e7f3315caf8cc">is_object_type</a></div><div class="ttdeci">#define is_object_type(x)</div><div class="ttdef"><b>Definition:</b> types.h:490</div></div>
 <div class="ttc" id="types_8h_a75a7c8dc50900925e39415036f17dae9_html_a75a7c8dc50900925e39415036f17dae9"><div class="ttname"><a href="types_8h_a75a7c8dc50900925e39415036f17dae9.html#a75a7c8dc50900925e39415036f17dae9">vpbuffer_add</a></div><div class="ttdeci">void ** vpbuffer_add(void **buf, int *len, int i, void *obj)</div><div class="ttdef"><b>Definition:</b> runtime.c:5438</div></div>
 </div><!-- fragment -->
+<p>"Color" objects gray by adding them to the mark stack for further processing. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parent</td><td>Parent of object, used for debugging only </td></tr>
+    <tr><td class="paramname">obj</td><td>Object to mark</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Note that stack objects are always colored red during creation, so they should never be added to the mark stack. Which would be bad because it could lead to stack corruption. </p>
+
 </div>
 </div>
     </td>

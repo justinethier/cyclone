@@ -182,6 +182,20 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Attempt to allocate a new heap slot for the given object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Heap to allocate from </td></tr>
+    <tr><td class="paramname">heap_type</td><td>Define the size of objects that will be allocated on this heap </td></tr>
+    <tr><td class="paramname">size</td><td>Size of the requested object, in bytes </td></tr>
+    <tr><td class="paramname">obj</td><td>Object containing data that will be copied to the heap </td></tr>
+    <tr><td class="paramname">thd</td><td>Thread data for the mutator using this heap </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the newly-allocated object, or <code>NULL</code> if allocation failed</dd></dl>
+<p>This function will fail if there is no space on the heap for the requested object. </p>
+
 </div>
 </div>
     </td>

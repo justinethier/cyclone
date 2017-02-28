@@ -163,7 +163,16 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Called explicitly from a mutator thread to let the collector know that it has finished blocking. In addition, if the collector cooperated on behalf of the mutator while it was blocking, the mutator will move any remaining stack objects to the heap and longjmp. </p>
+
+<p>Called explicitly from a mutator thread to let the collector know that it has finished blocking. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">thd</td><td>Mutator's thread data </td></tr>
+    <tr><td class="paramname">result</td><td>Data returned by the blocking function</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>In addition, if the collector cooperated on behalf of the mutator while it was blocking, the mutator will move any remaining stack objects to the heap and longjmp. </p>
 
 </div>
 </div>

@@ -182,6 +182,21 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Grow a heap by allocating a new page. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">h</td><td>Heap to be expanded </td></tr>
+    <tr><td class="paramname">heap_type</td><td>Define the size of objects that will be allocated on this heap </td></tr>
+    <tr><td class="paramname">size</td><td>Not applicable, can set to 0 </td></tr>
+    <tr><td class="paramname">chunk_size</td><td>Heap chunk size, or 0 if not applicable </td></tr>
+    <tr><td class="paramname">thd</td><td>Thread data for the mutator using this heap </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A true value if the heap was grown, or 0 otherwise</dd></dl>
+<p>Heaps are increased in size by adding a newly-allocated page at the end of the heap's linked list.</p>
+<p>Page size is determined by starting at the minimum page size and increasing size using the Fibonnaci Sequence until reaching the max size. </p>
+
 </div>
 </div>
     </td>

@@ -153,6 +153,9 @@ $(function() {
       </table>
 </div><div class="memdoc">
 
+<p>Wait for all mutators to handshake. </p>
+<p>This function is always called by the collector. If a mutator is blocked and cannot handshake, the collector will cooperate on its behalf, including invoking a minor GC of the mutator's stack, so major GC can proceed. </p>
+
 </div>
 </div>
     </td>

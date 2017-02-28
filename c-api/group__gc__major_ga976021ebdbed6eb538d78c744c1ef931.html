@@ -148,7 +148,7 @@ $(function() {
           <td class="memname">void* gc_alloc </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="group__gc__major_ga61dd942ed84e904a5c297fdc57fd4d7a.html#ga61dd942ed84e904a5c297fdc57fd4d7a">gc_heap_root</a> *&#160;</td>
-          <td class="paramname"><em>h</em>, </td>
+          <td class="paramname"><em>hrt</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -181,6 +181,20 @@ $(function() {
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Allocate memory on the heap for an object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">hrt</td><td>The root of the heap to allocate from </td></tr>
+    <tr><td class="paramname">size</td><td>Size of the object to allocate </td></tr>
+    <tr><td class="paramname">obj</td><td>Object containing data to copy to the heap </td></tr>
+    <tr><td class="paramname">thd</td><td>The requesting mutator's thread data object </td></tr>
+    <tr><td class="paramname">heap_grown</td><td>Pointer to an "out" parameter that will be set to <code>1</code> if the heap is grown in size. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the heap object</dd></dl>
+<p>This function will attempt to grow the heap if it is full, and will terminate the program if the OS is out of memory. </p>
 
 </div>
 </div>
