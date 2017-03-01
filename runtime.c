@@ -1465,6 +1465,13 @@ object Cyc_is_real(object o)
   return Cyc_is_number(o);
 }
 
+object Cyc_is_fixnum(object o)
+{
+  if (obj_is_int(o))
+    return boolean_t;
+  return boolean_f;
+}
+
 object Cyc_is_integer(object o)
 {
   if ((o != NULL) && (obj_is_int(o) ||
