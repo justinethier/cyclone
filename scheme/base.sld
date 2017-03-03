@@ -107,6 +107,7 @@
     string->vector
     string-map
     string-for-each
+    get-param-objs ;; TODO: only for debugging!!
     make-parameter
     current-output-port
     current-input-port
@@ -948,6 +949,17 @@
            ()
            ((param value) ...)
            body))))
+    (define-c get-param-objs
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        return_closcall1(data, k, thd->param_objs); ")
+    (define-c set-param-obj!
+      "(void *data, int argc, closure _, object k, object obj)"
+      " make_pair(p, obj, NULL);
+        gc_thread_data *thd = (gc_thread_data *)data;
+        cdr(&p) = thd->param_objs;
+        thd->param_objs = (object)(&p);
+        return_closcall1(data, k, thd->param_objs); ")
     (define *parameter-id* 0)
     (define (make-parameter init . o)
       ;; TODO: need to store/set value in the thread data parameter (param_objs), to make it thread-specific 
@@ -959,18 +971,24 @@
         (set! key *parameter-id*)
         (set! *parameter-id* (+ *parameter-id* 1))
         ;;
+        (set-param-obj! (cons key value))
 
         (lambda args
           (cond
             ((null? args)
-             value)
+             (cdr (assoc key (get-param-objs))))
+             ;value)
             ((eq? (car args) '<param-set!>)
-             (set! value (cadr args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (cadr args))))
+             ;(set! value (cadr args)))
             ((eq? (car args) '<param-convert>)
              converter)
            (else
              ;(error "bad parameter syntax" args)
-             (set! value (converter (car args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (converter (car args))))
+             ;(set! value (converter (car args)))
            )))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
