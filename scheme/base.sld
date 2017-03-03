@@ -948,12 +948,18 @@
            ()
            ((param value) ...)
            body))))
+    (define *parameter-id* 0)
     (define (make-parameter init . o)
       ;; TODO: need to store/set value in the thread data parameter (param_objs), to make it thread-specific 
-      ;; TODO: what will the key be? how do we look up the thread's value for this parameter object????
       (let* ((converter
                (if (pair? o) (car o) (lambda (x) x)))
-             (value (converter init)))
+             (value (converter init))
+             (key #f))
+        ;; TODO: this is not thread safe!
+        (set! key *parameter-id*)
+        (set! *parameter-id* (+ *parameter-id* 1))
+        ;;
+
         (lambda args
           (cond
             ((null? args)
