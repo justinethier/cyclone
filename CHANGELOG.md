@@ -1,6 +1,6 @@
 # Changelog
 
-## Next Release (Tentatively 0.4) - TBD
+## 0.4 - March 9, 2017
 
 - Added a new bignum type to support exact integers of practically unlimited size.
 - As part of the bignum changes, modified the code for exact integer arithmetic to detect overflow.
