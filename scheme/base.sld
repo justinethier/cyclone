@@ -962,7 +962,6 @@
         return_closcall1(data, k, thd->param_objs); ")
     (define *parameter-id* 0)
     (define (make-parameter init . o)
-      ;; TODO: need to store/set value in the thread data parameter (param_objs), to make it thread-specific 
       (let* ((converter
                (if (pair? o) (car o) (lambda (x) x)))
              (value (converter init))
