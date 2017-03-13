@@ -5326,6 +5326,21 @@ const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
 
+void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
+{
+  int heap_grown;
+  pair_type *p;
+  pair_type tmp;
+  tmp.hdr.mark = gc_color_red;
+  tmp.hdr.grayed = 0;
+  tmp.tag = pair_tag;
+  tmp.pair_car = head;
+  tmp.pair_cdr = tail;
+  p = gc_alloc(((gc_thread_data *)data)->heap, sizeof(pair_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+
+  return p;
+}
+
 /**
  * Thread initialization function only called from within the runtime
  */
@@ -5341,18 +5356,34 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
   thd->thread_id = pthread_self();
 
- TODO: want to get thread params from calling thread, and probably
- allocate a new set of cells instead of just assigning this thread's
- params to the parent's params.
+// TODO: want to get thread params from calling thread, and probably
+// allocate a new set of cells instead of just assigning this thread's
+// params to the parent's params.
  
   vector_type *t = (vector_type *)thd->scm_thread_obj;
   object op = Cyc_vector_ref(thd, t, obj_int2obj(2));
   c_opaque_type *o = (c_opaque_type *)op;
-//  thd->param_objs = ??
-  object obj = ((gc_thread_data *)o->ptr)->param_objs;
-  while (obj) {
-
+  object par = ((gc_thread_data *)o->ptr)->param_objs;
+  object child = NULL;
+  thd->param_objs = NULL;
+  while (par) {
+    if (thd->param_objs == NULL) {
+      thd->param_objs = gc_alloc_pair(thd, NULL, NULL);
+      child = thd->param_objs;
+    } else {
+      pair_type *p = gc_alloc_pair(thd, NULL, NULL);
+      cdr(child) = p;
+      child = p;
+    }
+    car(child) = gc_alloc_pair(thd, car(car(par)), cdr(car(par)));
+    par = cdr(par);
   }
+//  fprintf(stdout, "old: ");
+//  Cyc_display(thd, ((gc_thread_data *)o->ptr)->param_objs, stdout);
+//  fprintf(stdout, "\n");
+//  fprintf(stdout, "new: ");
+//  Cyc_display(thd, thd->param_objs, stdout);
+//  fprintf(stdout, "\n");
 // END TODO
 
   gc_add_mutator(thd);
