@@ -5341,14 +5341,18 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
   thd->thread_id = pthread_self();
 
-// TODO: want to get thread params from calling thread, and probably
-// allocate a new set of cells instead of just assigning this thread's
-// params to the parent's params.
-
+ TODO: want to get thread params from calling thread, and probably
+ allocate a new set of cells instead of just assigning this thread's
+ params to the parent's params.
+ 
   vector_type *t = (vector_type *)thd->scm_thread_obj;
   object op = Cyc_vector_ref(thd, t, obj_int2obj(2));
   c_opaque_type *o = (c_opaque_type *)op;
 //  thd->param_objs = ??
+  object obj = ((gc_thread_data *)o->ptr)->param_objs;
+  while (obj) {
+
+  }
 // END TODO
 
   gc_add_mutator(thd);
