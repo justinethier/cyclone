@@ -957,6 +957,7 @@
       "(void *data, int argc, closure _, object k, object obj)"
       " make_pair(p, obj, NULL);
         gc_thread_data *thd = (gc_thread_data *)data;
+        //Cyc_global_set(thd, thd->param_objs, &p); // TODO: needed?? seems to be segfauling, though
         cdr(&p) = thd->param_objs;
         thd->param_objs = (object)(&p);
         return_closcall1(data, k, thd->param_objs); ")
