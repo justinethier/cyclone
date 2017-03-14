@@ -5346,6 +5346,9 @@ void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
  */
 void *Cyc_init_thread(object thread_and_thunk)
 {
+  vector_type *t;
+  c_opaque_type *o;
+  object op, parent, child;
   long stack_start;
   gc_thread_data *thd;
   thd = malloc(sizeof(gc_thread_data));
@@ -5356,17 +5359,14 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
   thd->thread_id = pthread_self();
 
-// TODO: want to get thread params from calling thread, and probably
-// allocate a new set of cells instead of just assigning this thread's
-// params to the parent's params.
- 
-  vector_type *t = (vector_type *)thd->scm_thread_obj;
-  object op = Cyc_vector_ref(thd, t, obj_int2obj(2));
-  c_opaque_type *o = (c_opaque_type *)op;
-  object par = ((gc_thread_data *)o->ptr)->param_objs;
-  object child = NULL;
+  // Copy thread params from the calling thread
+  t = (vector_type *)thd->scm_thread_obj;
+  op = Cyc_vector_ref(thd, t, obj_int2obj(2)); // Field set in thread-start!
+  o = (c_opaque_type *)op;
+  parent = ((gc_thread_data *)o->ptr)->param_objs; // Unbox parent thread's data
+  child = NULL;
   thd->param_objs = NULL;
-  while (par) {
+  while (parent) {
     if (thd->param_objs == NULL) {
       thd->param_objs = gc_alloc_pair(thd, NULL, NULL);
       child = thd->param_objs;
@@ -5375,16 +5375,10 @@ void *Cyc_init_thread(object thread_and_thunk)
       cdr(child) = p;
       child = p;
     }
-    car(child) = gc_alloc_pair(thd, car(car(par)), cdr(car(par)));
-    par = cdr(par);
+    car(child) = gc_alloc_pair(thd, car(car(parent)), cdr(car(parent)));
+    parent = cdr(parent);
   }
-//  fprintf(stdout, "old: ");
-//  Cyc_display(thd, ((gc_thread_data *)o->ptr)->param_objs, stdout);
-//  fprintf(stdout, "\n");
-//  fprintf(stdout, "new: ");
-//  Cyc_display(thd, thd->param_objs, stdout);
-//  fprintf(stdout, "\n");
-// END TODO
+  // Done initializing parameter objects
 
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,

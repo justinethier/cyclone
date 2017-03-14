@@ -12,7 +12,7 @@
 (thread-start!
   (make-thread
     (lambda ()
-      (thread-sleep! 2000)
+      (thread-sleep! 1200)
       (display "started thread, this should be written to console")
       (newline)
       (display "thread done")
