@@ -957,9 +957,9 @@
       "(void *data, int argc, closure _, object k, object obj)"
       " make_pair(p, obj, NULL);
         gc_thread_data *thd = (gc_thread_data *)data;
-        //Cyc_global_set(thd, thd->param_objs, &p); // TODO: needed?? seems to be segfauling, though
         cdr(&p) = thd->param_objs;
-        thd->param_objs = (object)(&p);
+        global_set((thd->param_objs), &p);
+        //thd->param_objs = (object)(&p);
         return_closcall1(data, k, thd->param_objs); ")
     (define *parameter-id* 0)
     (define (make-parameter init . o)
@@ -976,19 +976,19 @@
         (lambda args
           (cond
             ((null? args)
-             (cdr (assoc key (get-param-objs))))
-             ;value)
+             ;(cdr (assoc key (get-param-objs))))
+             value)
             ((eq? (car args) '<param-set!>)
-             (let ((cell (assoc key (get-param-objs))))
-              (set-cdr! cell (cadr args))))
-             ;(set! value (cadr args)))
+             ;(let ((cell (assoc key (get-param-objs))))
+             ; (set-cdr! cell (cadr args))))
+             (set! value (cadr args)))
             ((eq? (car args) '<param-convert>)
              converter)
            (else
              ;(error "bad parameter syntax" args)
-             (let ((cell (assoc key (get-param-objs))))
-              (set-cdr! cell (converter (car args))))
-             ;(set! value (converter (car args)))
+             ;(let ((cell (assoc key (get-param-objs))))
+             ; (set-cdr! cell (converter (car args))))
+             (set! value (converter (car args)))
            )))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
