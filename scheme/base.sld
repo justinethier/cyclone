@@ -952,15 +952,20 @@
     (define-c get-param-objs
       "(void *data, int argc, closure _, object k)"
       " gc_thread_data *thd = (gc_thread_data *)data;
+        //Cyc_st_add(data, \"scheme/base.sld:get-param-objs\");
         return_closcall1(data, k, thd->param_objs); ")
     (define-c set-param-obj!
       "(void *data, int argc, closure _, object k, object obj)"
-      " make_pair(p, obj, NULL);
+      " make_pair(p, obj, ((gc_thread_data *)data)->param_objs);
         gc_thread_data *thd = (gc_thread_data *)data;
-        cdr(&p) = thd->param_objs;
+        //Cyc_st_add(data, \"scheme/base.sld:set-param-objs!\");
+        //fprintf(stderr, \"scheme/base.sld:set-param-objs!\\n\");
         global_set((thd->param_objs), &p);
         //thd->param_objs = (object)(&p);
-        return_closcall1(data, k, thd->param_objs); ")
+        // obj is on the stack, need to add it to write barrier
+        // to ensure it is transported to the heap
+        //add_mutation(data, &p, -1, obj);
+        return_closcall1(data, k, boolean_t); ")
     (define *parameter-id* 0)
     (define (make-parameter init . o)
       (let* ((converter
@@ -976,19 +981,25 @@
         (lambda args
           (cond
             ((null? args)
+             ;; DEBUG
+             (let ((pobj (get-param-objs)))
+              (if (not (pair? (car pobj)))
+                  (Cyc-display `(get-param-objs not a list: ,(get-param-objs))))
+              (cdr (assoc key pobj))))
+             ;; END DEBUG
              ;(cdr (assoc key (get-param-objs))))
-             value)
+             ;value)
             ((eq? (car args) '<param-set!>)
-             ;(let ((cell (assoc key (get-param-objs))))
-             ; (set-cdr! cell (cadr args))))
-             (set! value (cadr args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (cadr args))))
+             ;(set! value (cadr args)))
             ((eq? (car args) '<param-convert>)
              converter)
            (else
              ;(error "bad parameter syntax" args)
-             ;(let ((cell (assoc key (get-param-objs))))
-             ; (set-cdr! cell (converter (car args))))
-             (set! value (converter (car args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (converter (car args))))
+             ;(set! value (converter (car args)))
            )))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
