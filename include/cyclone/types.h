@@ -295,7 +295,7 @@ struct gc_thread_data_t {
   // Exception handler stack
   object exception_handler_stack;
   // Parameter object data
-  object *param_objs;
+  object param_objs;
 };
 
 /* GC prototypes */
