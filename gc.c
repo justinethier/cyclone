@@ -1696,6 +1696,15 @@ void gc_wait_handshake()
             //for (i = 0; i < m->gc_num_args; i++) {
             //  gc_mark_gray(m, m->gc_args[i]);
             //}
+            if (m->scm_thread_obj) {
+              gc_mark_gray(m, m->scm_thread_obj);
+            }
+            if (m->exception_handler_stack) {
+              gc_mark_gray(m, m->exception_handler_stack);
+            }
+            if (m->param_objs) {
+              gc_mark_gray(m, m->param_objs);
+            }
             // Also, mark everything the collector moved to the heap
             for (i = 0; i < buf_len; i++) {
               gc_mark_gray(m, m->moveBuf[i]);
