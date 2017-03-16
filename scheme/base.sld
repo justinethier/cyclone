@@ -988,8 +988,8 @@
             ((null? args)
              ;; DEBUG
              (let ((pobj (get-param-objs)))
-              (if (not (pair? (car pobj)))
-                  (Cyc-display `(get-param-objs not a list: ,(get-param-objs))))
+              ;(if (not (pair? (car pobj)))
+              ;    (Cyc-display `(get-param-objs not a list: ,(get-param-objs))))
               (cdr (assoc key pobj))))
              ;; END DEBUG
              ;(cdr (assoc key (get-param-objs))))
