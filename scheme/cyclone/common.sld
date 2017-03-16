@@ -15,7 +15,7 @@
     *version-banner*
     *c-file-header-comment*)
   (begin
-(define *version-number* "0.4")
+(define *version-number* "0.4.1")
 (define *version-name* "")
 (define *version* (string-append *version-number* " " *version-name* ""))
 
