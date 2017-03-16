@@ -1465,6 +1465,13 @@ object Cyc_is_real(object o)
   return Cyc_is_number(o);
 }
 
+object Cyc_is_fixnum(object o)
+{
+  if (obj_is_int(o))
+    return boolean_t;
+  return boolean_f;
+}
+
 object Cyc_is_integer(object o)
 {
   if ((o != NULL) && (obj_is_int(o) ||
@@ -1833,6 +1840,8 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       result = (int)strtol(string_str(str), NULL, 2);
     } else if (base_num == 8) {
       result = (int)strtol(string_str(str), NULL, 8);
+    } else if (base_num == 10) {
+      Cyc_string2number_(data, cont, str); // Default processing
     } else if (base_num == 16) {
       result = (int)strtol(string_str(str), NULL, 16);
     }
@@ -1842,7 +1851,7 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
         Cyc_rt_raise2(data, "Error converting string to bignum", str);
       }
-      _return_closcall1(data, cont, bn);
+      _return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
     } else {
       _return_closcall1(data, cont, obj_int2obj(result));
     }
@@ -4776,6 +4785,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
 
   // Transport exception stack
   gc_move2heap(((gc_thread_data *) data)->exception_handler_stack);
+  gc_move2heap(((gc_thread_data *) data)->param_objs);
   gc_move2heap(((gc_thread_data *) data)->scm_thread_obj);
 
   // Transport mutations
@@ -5318,11 +5328,29 @@ const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
 
+void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
+{
+  int heap_grown;
+  pair_type *p;
+  pair_type tmp;
+  tmp.hdr.mark = gc_color_red;
+  tmp.hdr.grayed = 0;
+  tmp.tag = pair_tag;
+  tmp.pair_car = head;
+  tmp.pair_cdr = tail;
+  p = gc_alloc(((gc_thread_data *)data)->heap, sizeof(pair_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+
+  return p;
+}
+
 /**
  * Thread initialization function only called from within the runtime
  */
 void *Cyc_init_thread(object thread_and_thunk)
 {
+  vector_type *t;
+  c_opaque_type *o;
+  object op, parent, child;
   long stack_start;
   gc_thread_data *thd;
   thd = malloc(sizeof(gc_thread_data));
@@ -5332,6 +5360,28 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->gc_num_args = 1;
   thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
   thd->thread_id = pthread_self();
+
+  // Copy thread params from the calling thread
+  t = (vector_type *)thd->scm_thread_obj;
+  op = Cyc_vector_ref(thd, t, obj_int2obj(2)); // Field set in thread-start!
+  o = (c_opaque_type *)op;
+  parent = ((gc_thread_data *)o->ptr)->param_objs; // Unbox parent thread's data
+  child = NULL;
+  thd->param_objs = NULL;
+  while (parent) {
+    if (thd->param_objs == NULL) {
+      thd->param_objs = gc_alloc_pair(thd, NULL, NULL);
+      child = thd->param_objs;
+    } else {
+      pair_type *p = gc_alloc_pair(thd, NULL, NULL);
+      cdr(child) = p;
+      child = p;
+    }
+    car(child) = gc_alloc_pair(thd, car(car(parent)), cdr(car(parent)));
+    parent = cdr(parent);
+  }
+  // Done initializing parameter objects
+
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);

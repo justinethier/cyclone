@@ -99,6 +99,8 @@
              (thread-params (cons t (lambda ()
                                       (vector-set! t 2 (%get-thread-data))
                                       (thunk)))))
+        (vector-set! t 2 (%get-thread-data)) ;; Temporarily make parent thread
+                                             ;; data available for child init
         (Cyc-minor-gc)
         (Cyc-spawn-thread! thread-params)
         ))

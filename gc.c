@@ -1307,6 +1307,12 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
       if (thd->scm_thread_obj) {
         gc_mark_gray(thd, thd->scm_thread_obj);
       }
+      if (thd->exception_handler_stack) {
+        gc_mark_gray(thd, thd->exception_handler_stack);
+      }
+      if (thd->param_objs) {
+        gc_mark_gray(thd, thd->param_objs);
+      }
       // Also, mark everything the collector moved to the heap
       for (i = 0; i < buf_len; i++) {
         gc_mark_gray(thd, thd->moveBuf[i]);
@@ -1690,6 +1696,15 @@ void gc_wait_handshake()
             //for (i = 0; i < m->gc_num_args; i++) {
             //  gc_mark_gray(m, m->gc_args[i]);
             //}
+            if (m->scm_thread_obj) {
+              gc_mark_gray(m, m->scm_thread_obj);
+            }
+            if (m->exception_handler_stack) {
+              gc_mark_gray(m, m->exception_handler_stack);
+            }
+            if (m->param_objs) {
+              gc_mark_gray(m, m->param_objs);
+            }
             // Also, mark everything the collector moved to the heap
             for (i = 0; i < buf_len; i++) {
               gc_mark_gray(m, m->moveBuf[i]);
@@ -1883,6 +1898,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->mutation_count = 0;
   thd->mutations = 
       vpbuffer_realloc(thd->mutations, &(thd->mutation_buflen));
+  thd->param_objs = NULL;
   thd->exception_handler_stack = NULL;
   thd->scm_thread_obj = NULL;
   thd->thread_state = CYC_THREAD_STATE_NEW;

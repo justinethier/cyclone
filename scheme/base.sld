@@ -107,6 +107,7 @@
     string->vector
     string-map
     string-for-each
+    ;get-param-objs ;; TODO: only for debugging!!
     make-parameter
     current-output-port
     current-input-port
@@ -948,21 +949,62 @@
            ()
            ((param value) ...)
            body))))
+    (define-c get-param-objs
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        //Cyc_st_add(data, \"scheme/base.sld:get-param-objs\");
+        return_closcall1(data, k, thd->param_objs); ")
+    (define-c set-param-obj!
+      "(void *data, int argc, closure _, object k, object obj)"
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        make_pair(c, obj, thd->param_objs);
+        thd->param_objs = &c;
+        return_closcall1(data, k, &c); ")
+      ;"(void *data, int argc, closure _, object k, object obj)"
+      ;" make_pair(p, obj, ((gc_thread_data *)data)->param_objs);
+      ;  gc_thread_data *thd = (gc_thread_data *)data;
+      ;  //Cyc_st_add(data, \"scheme/base.sld:set-param-objs!\");
+      ;  //fprintf(stderr, \"scheme/base.sld:set-param-objs!\\n\");
+      ;  global_set((thd->param_objs), &p);
+      ;  //thd->param_objs = (object)(&p);
+      ;  // obj is on the stack, need to add it to write barrier
+      ;  // to ensure it is transported to the heap
+      ;  //add_mutation(data, &p, -1, obj);
+      ;  return_closcall1(data, k, boolean_t); ")
+    (define *parameter-id* 0)
     (define (make-parameter init . o)
       (let* ((converter
                (if (pair? o) (car o) (lambda (x) x)))
-             (value (converter init)))
+             (value (converter init))
+             (key #f))
+        ;; TODO: this is not thread safe!
+        (set! key *parameter-id*)
+        (set! *parameter-id* (+ *parameter-id* 1))
+        ;;
+        (set-param-obj! (cons key value))
+
         (lambda args
           (cond
             ((null? args)
-             value)
+             ;; DEBUG
+             (let ((pobj (get-param-objs)))
+              ;(if (not (pair? (car pobj)))
+              ;    (Cyc-display `(get-param-objs not a list: ,(get-param-objs))))
+              (cdr (assoc key pobj))))
+             ;; END DEBUG
+             ;(cdr (assoc key (get-param-objs))))
+             ;value)
             ((eq? (car args) '<param-set!>)
-             (set! value (cadr args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (cadr args))))
+             ;(set! value (cadr args)))
             ((eq? (car args) '<param-convert>)
              converter)
            (else
              ;(error "bad parameter syntax" args)
-             (set! value (converter (car args)))
+             (let ((cell (assoc key (get-param-objs))))
+              (set-cdr! cell (converter (car args))))
+             ;(set! value (converter (car args)))
            )))))
     (define current-output-port
       (make-parameter (Cyc-stdout)))
