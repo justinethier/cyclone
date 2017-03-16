@@ -956,16 +956,21 @@
         return_closcall1(data, k, thd->param_objs); ")
     (define-c set-param-obj!
       "(void *data, int argc, closure _, object k, object obj)"
-      " make_pair(p, obj, ((gc_thread_data *)data)->param_objs);
-        gc_thread_data *thd = (gc_thread_data *)data;
-        //Cyc_st_add(data, \"scheme/base.sld:set-param-objs!\");
-        //fprintf(stderr, \"scheme/base.sld:set-param-objs!\\n\");
-        global_set((thd->param_objs), &p);
-        //thd->param_objs = (object)(&p);
-        // obj is on the stack, need to add it to write barrier
-        // to ensure it is transported to the heap
-        //add_mutation(data, &p, -1, obj);
-        return_closcall1(data, k, boolean_t); ")
+      " gc_thread_data *thd = (gc_thread_data *)data;
+        make_pair(c, obj, thd->param_objs);
+        thd->param_objs = &c;
+        return_closcall1(data, k, &c); ")
+      ;"(void *data, int argc, closure _, object k, object obj)"
+      ;" make_pair(p, obj, ((gc_thread_data *)data)->param_objs);
+      ;  gc_thread_data *thd = (gc_thread_data *)data;
+      ;  //Cyc_st_add(data, \"scheme/base.sld:set-param-objs!\");
+      ;  //fprintf(stderr, \"scheme/base.sld:set-param-objs!\\n\");
+      ;  global_set((thd->param_objs), &p);
+      ;  //thd->param_objs = (object)(&p);
+      ;  // obj is on the stack, need to add it to write barrier
+      ;  // to ensure it is transported to the heap
+      ;  //add_mutation(data, &p, -1, obj);
+      ;  return_closcall1(data, k, boolean_t); ")
     (define *parameter-id* 0)
     (define (make-parameter init . o)
       (let* ((converter
