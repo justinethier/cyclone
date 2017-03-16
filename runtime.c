@@ -1840,6 +1840,8 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       result = (int)strtol(string_str(str), NULL, 2);
     } else if (base_num == 8) {
       result = (int)strtol(string_str(str), NULL, 8);
+    } else if (base_num == 10) {
+      Cyc_string2number_(data, cont, str); // Default processing
     } else if (base_num == 16) {
       result = (int)strtol(string_str(str), NULL, 16);
     }
@@ -1849,7 +1851,7 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
         Cyc_rt_raise2(data, "Error converting string to bignum", str);
       }
-      _return_closcall1(data, cont, bn);
+      _return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
     } else {
       _return_closcall1(data, cont, obj_int2obj(result));
     }
