@@ -5,6 +5,7 @@
 Features
 
 - Store parameter objects in such a way that changes to a parameter object do not affect other threads that use the same parameter object.
+- Allow Cyclone to find `(cyclone)` prefixed libraries installed in Cyclone's system folder.
 
 The specific requirement from R<sup>7</sup>RS is:
 
