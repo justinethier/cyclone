@@ -346,7 +346,8 @@
                    (filename
                      (substring filename* 1 (string-length filename*))))
               (if (or (equal? 'scheme (car import))
-                      (equal? 'srfi   (car import)))
+                      (equal? 'srfi   (car import))
+                      (equal? 'cyclone (car import)))
                 (string-append (Cyc-installation-dir 'sld) "/" filename) ;; Built-in library
                 filename)))
           (define (_lib:import->library-name import)

@@ -242,7 +242,8 @@
          (filename
            (substring filename* 1 (string-length filename*)))
          (dir (if (or (tagged-list? 'scheme import)
-                      (tagged-list? 'srfi import))
+                      (tagged-list? 'srfi import)
+                      (tagged-list? 'cyclone import))
                   (Cyc-installation-dir 'sld)
                   "")))
     (call/cc
@@ -273,6 +274,7 @@
           (string-append path "" include))
          (dir (if (or (tagged-list? 'scheme import)
                       ;(tagged-list? 'srfi import)
+                      (tagged-list? 'cyclone import)
                   )
                   (Cyc-installation-dir 'sld)
                   "")))
