@@ -39,6 +39,7 @@
       (define lib-name '())
       (define lib-exports '())
       (define lib-renamed-exports '())
+      (define lib-pass-thru-exports '())
       (define c-headers '())
       (define rename-env (env:extend-environment '() '() '()))
 
@@ -57,6 +58,7 @@
              (cons
                (lib:name->symbol lib-name)
                (lib:exports (car input-program))))
+           (set! lib-pass-thru-exports lib-exports)
            (set! lib-renamed-exports 
              (lib:rename-exports (car input-program)))
            (set! imports (lib:imports (car input-program)))
@@ -99,10 +101,6 @@
         ))
 
       ;; Process library imports
-      ;; TODO: this may not be good enough, may need to tag library
-      ;; imports uniquely to reduce issues when the same variable
-      ;; is used by multiple libraries, and to allow renaming of imports.
-      ;; As of now, that will have to be dealt with later.
       (trace:info "imports:")
       (trace:info imports)
       (set! imported-vars (lib:imports->idb imports append-dirs prepend-dirs))
@@ -147,6 +145,8 @@
                  (lambda->exp (car expanded)))
                 ((tagged-list? 'define expanded)
                  (list expanded))
+                ((boolean? expanded)
+                 (list expanded))
                 (else
                   (error `(Unhandled expansion ,expanded))))))))
       (trace:info "---------------- after macro expansion:")
@@ -169,13 +169,29 @@
 
       (trace:info "---------------- after processing globals")
       (trace:info input-program) ;pretty-print
+
+      ;; Identify global variables
+      (set! module-globals (global-vars input-program))
+      (set! globals (append (lib:idb:ids imported-vars) module-globals))
+
+      ;; Trim down the export list to any exports that are just "pass throughs"
+      ;; from imported libraries. That is, they are not actually defined in
+      ;; the library being compiled
+      (set! lib-pass-thru-exports
+        (filter
+          (lambda (e)
+            (and
+              (not (member e module-globals)) ;; Defined by this lib? Not a PT
+              (assoc e imported-vars)) ;; PT must be imported
+          )
+          lib-pass-thru-exports))
+      (trace:info "pass thru exports:")
+      (trace:info lib-pass-thru-exports)
     
       ; Note alpha-conversion is overloaded to convert internal defines to 
       ; set!'s below, since all remaining phases operate on set!, not define.
       ;
       ; TODO: consider moving some of this alpha-conv logic below back into trans?
-      (set! module-globals (global-vars input-program))
-      (set! globals (append (lib:idb:ids imported-vars) module-globals))
       (set! input-program 
         (map
           (lambda (expr)
