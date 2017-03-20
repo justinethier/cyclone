@@ -25,7 +25,8 @@
     (scheme base)
     (scheme case-lambda))
   (export
-    array-list array-list? 
+    ;array-list 
+    array-list? 
     array-list-delete!
     array-list-empty? 
     array-list-insert!

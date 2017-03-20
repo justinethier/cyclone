@@ -1127,10 +1127,25 @@
          "" 
          (lib:list->import-set import)))
 
+;; Identifier exported by another library
+(define (mangle-exported-ident import-db ident error?)
+  (let ((idb-entry (lib:idb:lookup import-db ident)))
+    (cond
+      ((not idb-entry)
+       (if error?
+           (error `(Unable to find a library importing ,ident))
+           #f))
+      (else
+       (let ((suffix (import->string 
+                       (lib:idb:entry->library-name idb-entry)))
+             (prefix (mangle-global 
+                       (lib:idb:entry->library-id idb-entry))))
+         (string-append prefix suffix))))))
+
 (define (mta:code-gen input-program 
                       program? 
                       lib-name 
-                      lib-exports 
+                      lib-pass-thru-exports
                       import-db
                       globals
                       c-headers
@@ -1145,7 +1160,8 @@
               (member ident globals))
          (mangle-global ident))
         ;; Identifier exported by the library being compiled
-        ((member ident globals)
+        ((or (member ident globals)
+             (member ident lib-pass-thru-exports))
          (let ((suffix (import->string lib-name))
                (prefix (mangle-global ident)))
            (string-append prefix suffix)))
@@ -1196,6 +1212,21 @@
           (emits (cgen:mangle-global (car global)))
           (emits " = NULL;\n"))
         *globals*)
+    ;; "Pass-through"'s - exports from this module
+    ;; that are actually defined by another.
+    (for-each
+        (lambda (global)
+          (emits "object ")
+          (emits (cgen:mangle-global global))
+          (emits " = NULL;\n")
+
+          (let ((extern (mangle-exported-ident import-db global #f)))
+            (cond
+              (extern
+                (emits "extern object ")
+                (emits extern)
+                (emits ";\n")))))
+        lib-pass-thru-exports)
     ;; Globals defined by another module
     (for-each
         (lambda (global)
@@ -1320,6 +1351,15 @@
              (set! pairs (cons pair-sym pairs))
           ))
           *globals*)
+        (for-each
+          (lambda (g)
+            (let ((idb-entry (lib:idb:lookup import-db g)))
+              (if idb-entry
+                  (emits* 
+                    (cgen:mangle-global g) " = " 
+                    (mangle-exported-ident import-db g #f)
+                    ";\n"))))
+          lib-pass-thru-exports)
         (let loop ((code '())
                    (ps pairs)
                    (cs (map (lambda (_) (mangle (gensym 'c))) pairs)))

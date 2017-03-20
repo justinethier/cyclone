@@ -90,7 +90,6 @@
     cell-get->cell 
     expand 
     expand-lambda-body
-    let=>lambda 
     isolate-globals 
     has-global? 
     global-vars 

@@ -14,7 +14,8 @@
           (scheme time))
   (export random-integer random-real default-random-source
           next-mrg32k3a ;; TODO: only here for testing
-          make-random-source random-source?
+          make-random-source 
+          ; random-source?
           random-source-state-ref random-source-state-set!
           random-source-randomize! random-source-pseudo-randomize!
           random-source-make-integers random-source-make-reals)

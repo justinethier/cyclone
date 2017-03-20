@@ -180,10 +180,17 @@
       (set! lib-pass-thru-exports
         (filter
           (lambda (e)
-            (and
-              (not (member e module-globals)) ;; Defined by this lib? Not a PT
-              (assoc e imported-vars)) ;; PT must be imported
-          )
+            (let ((module-global? (member e module-globals))
+                  (imported-var? (assoc e imported-vars)))
+              (cond
+                ((eq? e 'call/cc) #f) ;; Special case
+                ((and (not module-global?)
+                      (not imported-var?))
+                 (error "Identifier is exported but not defined" e))
+                (else
+                  ;; Pass throughs are not defined in this module,
+                  ;; but by definition must be defined in an imported lib
+                  (and (not module-global?) imported-var?)))))
           lib-pass-thru-exports))
       (trace:info "pass thru exports:")
       (trace:info lib-pass-thru-exports)
@@ -292,7 +299,7 @@
       (mta:code-gen input-program 
                     program? 
                     lib-name 
-                    lib-exports 
+                    lib-pass-thru-exports
                     imported-vars
                     module-globals
                     c-headers
