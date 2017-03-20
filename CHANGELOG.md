@@ -5,13 +5,13 @@
 Features
 
 - Store parameter objects in such a way that changes to a parameter object do not affect other threads that use the same parameter object.
-- Allow Cyclone to find `(cyclone)` prefixed libraries installed in Cyclone's system folder.
 
 The specific requirement from R<sup>7</sup>RS is:
 
 > `parameterize` must not change the associated values of any parameters in any thread other than the current thread and threads created inside the `parameterize` body.
 
 - Normalize the result of `string->number` such that bignums are only returned if the result truly is a bignum.
+- Allow Cyclone to find `(cyclone)` prefixed libraries installed in Cyclone's system folder.
 
 Bug Fixes
 
