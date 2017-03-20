@@ -1185,6 +1185,23 @@
                  (difference fv (built-in-syms)))
                (list))))))
 
+TODO: upgrade applicable function calls to inlinable primitives
+first case is char=? => Cyc-fast-char-eq (and rest of the family)
+(define (inline-applicable-funcs expr)
+  (define (conv ast)
+    (cond
+      ((define? ast)
+       `(define ,@(map (lambda (a) (conv a)) (cdr ast))))
+      ((set!? ast)
+       `(set! ,@(map (lambda (a) (conv a)) (cdr ast))))
+      ((if? ast)
+        TODO
+      ((lambda? ast)
+      ((app? ast)
+      (else
+        ast)))
+  (conv expr))
+
 ;;
 ;; Helpers to syntax check primitive calls
 ;;
