@@ -205,6 +205,11 @@ object Cyc_string_set(void *data, object str, object k, object chr);
  */
 /**@{*/
 object Cyc_char2integer(object chr);
+object Cyc_char_eq_op(void *data, object a, object b);
+object Cyc_char_gt_op(void *data, object a, object b);
+object Cyc_char_lt_op(void *data, object a, object b);
+object Cyc_char_gte_op(void *data, object a, object b);
+object Cyc_char_lte_op(void *data, object a, object b);
 /**@}*/
 
 /**

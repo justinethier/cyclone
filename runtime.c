@@ -2541,6 +2541,19 @@ object Cyc_system(object cmd)
   return obj_int2obj(system(((string_type *) cmd)->str));
 }
 
+#define declare_char_comp(FUNC, OP) \
+object FUNC(void *data, object a, object b) \
+{ \
+  if (obj_obj2char(a) OP obj_obj2char(b)) \
+    return boolean_t; \
+  return boolean_f; \
+}
+declare_char_comp(Cyc_char_eq_op,  ==);
+declare_char_comp(Cyc_char_gt_op,  > );
+declare_char_comp(Cyc_char_lt_op,  < );
+declare_char_comp(Cyc_char_gte_op, >=);
+declare_char_comp(Cyc_char_lte_op, <=);
+
 object Cyc_char2integer(object chr)
 {
   return obj_int2obj(obj_obj2char(chr));

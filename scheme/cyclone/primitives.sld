@@ -76,6 +76,11 @@
          Cyc-fast-lt
          Cyc-fast-gte
          Cyc-fast-lte
+         Cyc-fast-char-eq
+         Cyc-fast-char-gt
+         Cyc-fast-char-lt
+         Cyc-fast-char-gte
+         Cyc-fast-char-lte
          =
          >
          <
@@ -203,6 +208,11 @@
          (Cyc-fast-lt 2 2)
          (Cyc-fast-gte 2 2)
          (Cyc-fast-lte 2 2)
+         (Cyc-fast-char-eq 2 2)
+         (Cyc-fast-char-gt 2 2)
+         (Cyc-fast-char-lt 2 2)
+         (Cyc-fast-char-gte 2 2)
+         (Cyc-fast-char-lte 2 2)
          (- 1 #f)
          (/ 1 #f)
          (= 2 #f)
@@ -445,6 +455,11 @@
          ((eq? p 'Cyc-fast-lt)           "Cyc_num_fast_lt_op")
          ((eq? p 'Cyc-fast-gte)          "Cyc_num_fast_gte_op")
          ((eq? p 'Cyc-fast-lte)          "Cyc_num_fast_lte_op")
+         ((eq? p 'Cyc-fast-char-eq)      "Cyc_char_eq_op")
+         ((eq? p 'Cyc-fast-char-gt)      "Cyc_char_gt_op")
+         ((eq? p 'Cyc-fast-char-lt)      "Cyc_char_lt_op")
+         ((eq? p 'Cyc-fast-char-gte)     "Cyc_char_gte_op")
+         ((eq? p 'Cyc-fast-char-lte)     "Cyc_char_lte_op")
          ((eq? p '=)                     "Cyc_num_eq")
          ((eq? p '>)                     "Cyc_num_gt")
          ((eq? p '<)                     "Cyc_num_lt")
@@ -584,6 +599,11 @@
         Cyc-fast-lt
         Cyc-fast-gte
         Cyc-fast-lte
+        Cyc-fast-char-eq
+        Cyc-fast-char-gt
+        Cyc-fast-char-lt
+        Cyc-fast-char-gte
+        Cyc-fast-char-lte
         =
         >
         <
@@ -687,6 +707,11 @@
         ((eq? p 'Cyc-fast-lt) "object")
         ((eq? p 'Cyc-fast-gte) "object")
         ((eq? p 'Cyc-fast-lte) "object")
+        ((eq? p 'Cyc-fast-char-eq) "object")
+        ((eq? p 'Cyc-fast-char-gt) "object")
+        ((eq? p 'Cyc-fast-char-lt) "object")
+        ((eq? p 'Cyc-fast-char-gte) "object")
+        ((eq? p 'Cyc-fast-char-lte) "object")
         ((eq? p '=) "object")
         ((eq? p '>) "object")
         ((eq? p '<) "object")
@@ -746,6 +771,11 @@
                  Cyc-fast-lt
                  Cyc-fast-gte
                  Cyc-fast-lte
+                 Cyc-fast-char-eq
+                 Cyc-fast-char-gt
+                 Cyc-fast-char-lt
+                 Cyc-fast-char-gte
+                 Cyc-fast-char-lte
                  + - * / apply 
                  = > < >= <=
                  command-line-arguments
@@ -802,8 +832,7 @@
               (member exp '())))
     
     ;; Does the primitive only accept/return immutable objects?
-    ;; This is useful during optimization, because such primitives
-    ;; can always be inlined without concerns for side effects
+    ;; This is useful during optimization
     (define (prim:immutable-args/result? sym)
       (member sym 
              '(= > < >= <=
@@ -817,6 +846,11 @@
                Cyc-fast-lt
                Cyc-fast-gte
                Cyc-fast-lte
+               Cyc-fast-char-eq
+               Cyc-fast-char-gt
+               Cyc-fast-char-lt
+               Cyc-fast-char-gte
+               Cyc-fast-char-lte
 ;              %halt
 ;              exit
                char->integer
