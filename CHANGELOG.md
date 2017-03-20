@@ -12,7 +12,7 @@ Features
 
 - Normalize the result of `string->number` such that bignums are only returned if the result truly is a bignum.
 - Allow Cyclone to find `(cyclone)` prefixed libraries installed in Cyclone's system folder.
-- Allow a library to export identifiers that it does not define directly, but rather that are defined by libraries imported by the library being compiled.
+- Allow a library to export identifiers that are exported by another library. Previously a library could only export identifiers that it defined directly.
 - Raise an error if an unknown identifier is found in a library's `export` list.
 
 Bug Fixes
