@@ -1188,17 +1188,39 @@
 
 ;; Upgrade applicable function calls to inlinable primitives
 ;;
-;; Assumptions:
-;; - This executes after alpha conversion, so there are no define
-;;   expressions or if's without an else clause
+;; This must execute after alpha conversion so that any locals
+;; are renamed and if expressions always have an else clause.
 ;;
-;first case is char=? => Cyc-fast-char-eq (and rest of the family)
 (define (prim-convert expr)
+  ;; Map from a given function call to a primitive call, if possible
+  ;; Inputs:
+  ;; - Function symbol
+  ;; - Number of arguments to the function
+  (define (func->prim/exact-args func-sym num-args)
+    (define mappings
+      '(
+         (char=?  2 Cyc-fast-char-eq )
+         (char>?  2 Cyc-fast-char-gt )
+         (char<?  2 Cyc-fast-char-lt )
+         (char>=? 2 Cyc-fast-char-gte)
+         (char<=? 2 Cyc-fast-char-lte)
+       ))
+    (let ((m (assoc func-sym mappings)))
+      ;(trace:error `(func->prim/exact-args ,func-sym ,num-args ,m))
+      (cond
+        ((and m (= (cadr m) num-args)) (caddr m)) ;; Upgrade to a primitive
+        (else func-sym)))) ;; Remain a function
   (define (conv ast)
     (cond
       ((const? ast) ast)
       ((quote? ast) ast)
       ((ref? ast)   ast)
+      ((define? ast)
+       `(define
+          ,(cadr ast) ;; Preserve var/args
+          ,@(map conv (define->exp ast))))
+      ((set!? ast)
+       `(set! ,@(map (lambda (a) (conv a)) (cdr ast))))
       ((set!? ast)
        `(set! ,@(map (lambda (a) (conv a)) (cdr ast))))
       ((if? ast)
@@ -1215,11 +1237,9 @@
             ,@(map conv body))))
       ((app? ast)
        (cond
-        ((and 
-           (eq? (car ast) 'char=?)
-           (= (length ast) 3) 
-         )
-         `(Cyc-fast-char-eq ,@(cdr ast)))
+        ((ref? (car ast))
+         `( ,(func->prim/exact-args (car ast) (- (length ast) 1))
+            ,@(cdr ast)))
         (else
          (map conv ast))))
       (else
