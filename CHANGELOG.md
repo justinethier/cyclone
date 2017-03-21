@@ -15,6 +15,7 @@ Features
 - Allow a library to export identifiers that are exported by another library. Previously a library could only export identifiers that it defined directly.
 - Raise an error if an unknown identifier is found in a library's `export` list.
 - Aric Belsito removed a hardcoded call to `cyclone` from the Makefile when building `generate-c`. Thanks!
+- Allow `cyclone` to inline character comparison functions (`char=?`, etc) when only two arguments are present, for a significant speed improvement.
 
 Bug Fixes
 
