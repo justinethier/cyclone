@@ -1414,11 +1414,20 @@
       (else
         ;; Do not use closcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->element;")
-        ;(emit "((cont)->fn)(1, cont, cont);")
         (emit* 
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
             ")->fn)(data, 1, cont, cont);")
+        ;; TODO: can GC to ensure objects are moved when exporting exports.
+        ;; Ideally want to create an inner function and only do this for libraries
+        ;; that we know are exporting exports. Otherwise it just wastes time on 
+        ;; startup
+        ;(emit*
+        ;  "object buf[1]; buf[0] = cont;"
+        ;  "GC(data, "
+        ;      (cgen:mangle-global (lib:name->symbol lib-name)) 
+        ;      ", buf, 1);")
+
       ))
 
     (emit "}")
