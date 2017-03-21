@@ -206,6 +206,15 @@
           input-program))
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
+
+      ;; Convert some function calls to primitives, if possible
+      (set! input-program 
+        (map
+          (lambda (expr)
+            (prim-convert expr))
+          input-program))
+      (trace:info "---------------- after func->primitive conversion:")
+      (trace:info input-program) ;pretty-print
     
       (let ((cps (map 
                    (lambda (expr)
