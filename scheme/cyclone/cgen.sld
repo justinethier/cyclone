@@ -1293,7 +1293,7 @@
           required-libs)
         (emit "static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,cont; { "))
       (else
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
         ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
@@ -1418,16 +1418,17 @@
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
             ")->fn)(data, 1, cont, cont);")
-        ;; TODO: can GC to ensure objects are moved when exporting exports.
-        ;; Ideally want to create an inner function and only do this for libraries
-        ;; that we know are exporting exports. Otherwise it just wastes time on 
-        ;; startup
-        ;(emit*
-        ;  "object buf[1]; buf[0] = cont;"
-        ;  "GC(data, "
-        ;      (cgen:mangle-global (lib:name->symbol lib-name)) 
-        ;      ", buf, 1);")
 
+        (emit* "}")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
+        (if (null? lib-pass-thru-exports)
+            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
+            ; GC to ensure objects are moved when exporting exports.
+            ; Otherwise there will be broken hearts :(
+            (emit*
+              "  mclosure1(clo, c_" (lib:name->string lib-name) "_entry_pt_first_lambda, ((closure1_type *)cont)->element);\n"
+              "  object buf[1]; buf[0] = cont;\n"
+              "  GC(data, (closure)&clo, buf, 1);\n"))
       ))
 
     (emit "}")
