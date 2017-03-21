@@ -136,7 +136,7 @@ icyc : icyc.scm libcyclone.a
 	$(CYCLONE) $<
 
 dispatch.c : generate-c.scm
-	cyclone $<
+	$(CYCLONE) $<
 	./generate-c
 
 libcyclone.a : $(CFILES) $(HEADERS)
