@@ -592,6 +592,12 @@
     (map car deps)))
 
 
+TODO: this is not good enough because need to load new symbols into
+the global environment for eval. I don't think it is good enough
+to just reset env because then any vars, changes, etc are lost.
+also, what library should all of this go into? could move these 2 
+into (scheme eval) but can that module import libraries? or will that
+cause build errors? lot of little details to decide here
 (define (lib:dyn-load import)
   (let ((lib-name (lib:list->import-set import)))
     (c:dyn-load 
