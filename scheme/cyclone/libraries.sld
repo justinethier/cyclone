@@ -597,7 +597,7 @@
     (c:dyn-load 
       (lib:import->filename lib-name ".so")
       (string-append
-        "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))))
+        "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))))
 
 (define-c c:dyn-load
   "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
