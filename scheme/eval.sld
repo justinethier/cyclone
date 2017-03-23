@@ -375,6 +375,9 @@
               (not (null? (cdr exp))))
          (analyze-lambda exp env))
 
+        ((tagged-list? 'import exp)
+         (analyze-import exp env))
+
         ;; experimenting with passing these back to eval
         ((compound-procedure? exp)
          (lambda (env) exp)) ;; TODO: good enough? update env?
@@ -431,6 +434,13 @@
 ;    (write `(debug ,(lambda-body exp)))
 ;    ;(lambda (env) 
 ;      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
+
+(define (analyze-import exp env)
+  (lambda (env)
+    ;; TODO: allow %import to take env
+    (write `(%import ,(cdr exp)))
+    (apply %import (cdr exp))
+    'ok))
 
 (define (analyze-if exp a-env)
   (let ((pproc (analyze (if-predicate exp) a-env))
