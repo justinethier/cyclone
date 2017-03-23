@@ -22,7 +22,7 @@
     create-environment ; non-standard
     setup-environment ; non-standard
     ;; Dynamic import
-    lib:dyn-load ;; TODO: eventually this becomes "import"?
+    %import
   )
   (begin
 
@@ -587,14 +587,25 @@
 ;(loop)
   
 
+;; TODO: right now this is a hack, just get all the imports sets and call their entry point
+;; function to initialize them. longer-term will need to only load the specific identifiers
+;; called out in the import sets
+;;
+;; TODO: get any dependencies and load them, too
+(define (%import . import-sets)
+  (let ((lib-names (lib:get-all-import-deps import-sets '() '())))
+    (for-each
+      (lambda (lib-name)
+        (c:dyn-load 
+          (lib:import->filename lib-name ".so")
+          (string-append
+            "c_" (lib:name->string lib-name) "_entry_pt_first_lambda")))
+      lib-names)
+    (set! *global-environment* (setup-environment *initial-environment*))
+    #t))
 
-;TODO: this is not good enough because need to load new symbols into
-;the global environment for eval. I don't think it is good enough
-;to just reset env because then any vars, changes, etc are lost.
-;also, what library should all of this go into? could move these 2 
-;into (scheme eval) but can that module import libraries? or will that
-;cause build errors? lot of little details to decide here
-(define (lib:dyn-load import)
+;; TODO: this function is just a proof of concept
+#;(define (lib:dyn-load import)
   (let ((lib-name (lib:list->import-set import)))
     (c:dyn-load 
       (lib:import->filename lib-name ".so")
