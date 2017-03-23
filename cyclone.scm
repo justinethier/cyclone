@@ -454,15 +454,16 @@
         (let ((comp-lib-cmd
                 (string-replace-all 
                   (string-replace-all 
-                    ;(Cyc-compilation-environment 'cc-lib)
                     (get-comp-env 'cc-lib cc-lib)
                     "~src-file~" src-file)
                   "~exec-file~" exec-file)))
           (cond
             (cc?
-              (system comp-lib-cmd))
+              (system comp-lib-cmd)
+            )
             (else
               (display comp-lib-cmd)
+              (newline)
               (newline))))))))
 
 ;; Collect values for the given command line arguments and option.

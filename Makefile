@@ -7,7 +7,7 @@ include Makefile.config
 
 # Commands
 CYCLONE = cyclone -A .
-CCOMP = $(CC) $(CFLAGS)
+CCOMP = $(CC) $(LIB_CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
 # Directories
@@ -162,6 +162,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_CC_PROG=\"$(CC_PROG)\" \
 					-DCYC_CC_EXEC=\"$(CC_EXEC)\" \
 					-DCYC_CC_LIB=\"$(CC_LIB)\" \
+					-DCYC_CC_SO=\"$(CC_SO)\" \
 					$< -o $@
 
 libcyclone.a : runtime.o gc.o dispatch.o mstreams.o 

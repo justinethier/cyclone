@@ -2156,6 +2156,11 @@ object Cyc_compilation_environment(void *data, object cont, object var)
       snprintf(buf, sizeof(buf), "%s", CYC_CC_LIB);
       make_string(str, buf);
       _return_closcall1(data, cont, &str);
+    } else if (strncmp(((symbol) var)->desc, "cc-so", 6) == 0) {
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s", CYC_CC_SO);
+      make_string(str, buf);
+      _return_closcall1(data, cont, &str);
     }
   }
   Cyc_rt_raise2(data, 
