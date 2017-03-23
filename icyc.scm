@@ -29,7 +29,7 @@
     (display *Cyc-version-banner*))
   (else #f))
 
-(define *icyc-env* (setup-environment))
+;(define *icyc-env* (setup-environment))
 (define (repl:next-line)
   (call/cc
     (lambda (k)
@@ -57,7 +57,7 @@
 
 (define (repl)
   (display "cyclone> ")
-  (let ((c (eval (read) *icyc-env*)))
+  (let ((c (eval (read) #;*icyc-env*)))
     (cond
       ((not (eof-object? c))
        (write c)
@@ -68,11 +68,11 @@
         (exit 0)))))
 
 ;; Use a special version of load to pull defs into the repl's env
-(define (load2 f)
-  (load f *icyc-env*))
-(env:define-variable! 'load load2 *icyc-env*)
+;(define (load2 f)
+;  (load f *icyc-env*))
+;(env:define-variable! 'load load2 *icyc-env*)
 
 (let ((args (command-line-arguments)))
   (if (= (length args) 1)
-      (load (car args) *icyc-env*))
+      (load (car args) #;*icyc-env*))
   (repl:next-line))

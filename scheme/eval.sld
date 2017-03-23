@@ -10,7 +10,7 @@
 (define-library (scheme eval)
   (import 
     (scheme cyclone util)
-    ;(scheme cyclone libraries) ;; for handling import sets
+    (scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
     (scheme write) ;; Only used for debugging
@@ -21,6 +21,8 @@
     eval-from-c ; non-standard
     create-environment ; non-standard
     setup-environment ; non-standard
+    ;; Dynamic import
+    lib:dyn-load ;; TODO: eventually this becomes "import"?
   )
   (begin
 
@@ -322,11 +324,11 @@
 ;; (define (primitive-procedure? proc)
 ;;   (equal? proc 'cons))
 
-(define (setup-environment)
+(define (setup-environment . env)
   (let ((initial-env
-         (env:extend-environment (primitive-procedure-names)
-                             (primitive-procedure-objects)
-                             env:the-empty-environment)))
+         (if (not (null? env))
+             (car env)
+             (create-initial-environment))))
     (cond-expand
       (cyclone
         ;; Also include compiled variables
@@ -335,7 +337,13 @@
           (map (lambda (v) (cdr v)) (Cyc-global-vars))
           initial-env))
       (else initial-env))))
-(define *global-environment* (setup-environment))
+
+(define (create-initial-environment)
+  (env:extend-environment (primitive-procedure-names)
+                          (primitive-procedure-objects)
+                          env:the-empty-environment))
+(define *initial-environment* (create-initial-environment))
+(define *global-environment* (setup-environment (create-initial-environment)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This step separates syntactic analysis from execution.
@@ -578,4 +586,27 @@
 ;  (loop))
 ;(loop)
   
+
+
+;TODO: this is not good enough because need to load new symbols into
+;the global environment for eval. I don't think it is good enough
+;to just reset env because then any vars, changes, etc are lost.
+;also, what library should all of this go into? could move these 2 
+;into (scheme eval) but can that module import libraries? or will that
+;cause build errors? lot of little details to decide here
+(define (lib:dyn-load import)
+  (let ((lib-name (lib:list->import-set import)))
+    (c:dyn-load 
+      (lib:import->filename lib-name ".so")
+      (string-append
+        "c_" (lib:name->string lib-name) "_entry_pt_first_lambda")))
+  ;; Reload env with new compiled bindings
+  ;; NOTE: will undo any changes to these bindings!!!
+  (set! *global-environment* (setup-environment *initial-environment*))
+  #t)
+
+(define-c c:dyn-load
+  "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
+  " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
+
   ))

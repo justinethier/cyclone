@@ -58,8 +58,6 @@
     lib:idb:lookup
     lib:idb:entry->library-name
     lib:idb:entry->library-id
-    ;; Dynamic import
-    lib:dyn-load
   )
   (begin
 
@@ -590,24 +588,5 @@
   (let* ((resolved (dep-resolve (node->edges '(#f)) (make-cell) (make-cell)))
          (deps (reverse (cdr (get-cell resolved))))) ;; cdr to get rid of master list
     (map car deps)))
-
-
-TODO: this is not good enough because need to load new symbols into
-the global environment for eval. I don't think it is good enough
-to just reset env because then any vars, changes, etc are lost.
-also, what library should all of this go into? could move these 2 
-into (scheme eval) but can that module import libraries? or will that
-cause build errors? lot of little details to decide here
-(define (lib:dyn-load import)
-  (let ((lib-name (lib:list->import-set import)))
-    (c:dyn-load 
-      (lib:import->filename lib-name ".so")
-      (string-append
-        "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))))
-
-(define-c c:dyn-load
-  "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
-  " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
-
 
 ))
