@@ -58,6 +58,8 @@
     lib:idb:lookup
     lib:idb:entry->library-name
     lib:idb:entry->library-id
+    ;; Dynamic import
+    lib:dyn-load
   )
   (begin
 
@@ -588,5 +590,18 @@
   (let* ((resolved (dep-resolve (node->edges '(#f)) (make-cell) (make-cell)))
          (deps (reverse (cdr (get-cell resolved))))) ;; cdr to get rid of master list
     (map car deps)))
+
+
+(define (lib:dyn-load import)
+  (let ((lib-name (lib:list->import-set import)))
+    (c:dyn-load 
+      (lib:import->filename lib-name ".so")
+      (string-append
+        "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))))
+
+(define-c c:dyn-load
+  "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
+  " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
+
 
 ))
