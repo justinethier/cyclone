@@ -602,8 +602,21 @@
 ;; called out in the import sets
 ;;
 ;; TODO: get any dependencies and load them, too
+;; TODO: for some of that (prefix, maybe other stuff), can we do the renaming in the env??
 (define (%import . import-sets)
   (let ((lib-names (lib:get-all-import-deps import-sets '() '())))
+
+    ;; TODO:
+    ;; Instead of blindly loading everything, should only load the libraries that are
+    ;; actually needed. may want to create a new table in the runtime that keeps track of
+    ;; loaded libraries. maybe have one of the libck data structures be used for it. could
+    ;; then have supporting functions:
+    ;; - add_lib - auto-generated call placed in each lib's entry point
+    ;; - check_lib - called here to look up each library to see if it is already loaded
+    ;; one issue - what if a library has changed and really should be reloaded?
+    ;; also, is there any value to loading a library that is not compiled? I guess we can
+    ;; sort of do that now via (load).
+
     (for-each
       (lambda (lib-name)
         (c:dyn-load 
@@ -614,18 +627,7 @@
     (set! *global-environment* (setup-environment *initial-environment*))
     #t))
 
-;; TODO: this function is just a proof of concept
-#;(define (lib:dyn-load import)
-  (let ((lib-name (lib:list->import-set import)))
-    (c:dyn-load 
-      (lib:import->filename lib-name ".so")
-      (string-append
-        "c_" (lib:name->string lib-name) "_entry_pt_first_lambda")))
-  ;; Reload env with new compiled bindings
-  ;; NOTE: will undo any changes to these bindings!!!
-  (set! *global-environment* (setup-environment *initial-environment*))
-  #t)
-
+;; Wrapper around the actual shared object import function
 (define-c c:dyn-load
   "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
   " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
