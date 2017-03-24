@@ -40,7 +40,7 @@ example :
 	cd $(EXAMPLE_DIR) ; make
 
 clean :
-	rm -rf test.txt a.out *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o scheme/cyclone/*.o scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; make clean
 	rm -rf html tests/*.o tests/*.c
 
@@ -53,12 +53,15 @@ install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sorting
 	$(INSTALL) -m0644 scheme/*.sld $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/*.o $(DESTDIR)$(DATADIR)/scheme
+	$(INSTALL) -m0644 scheme/*.so $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
+	$(INSTALL) -m0644 srfi/*.so $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.meta $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/list-queues/*.scm $(DESTDIR)$(DATADIR)/srfi/list-queues
 	$(INSTALL) -m0644 srfi/sets/*.scm $(DESTDIR)$(DATADIR)/srfi/sets
