@@ -355,7 +355,7 @@ Binary Bit Pattern | Data Type
 01 | Integer
 10 | Character
 
-Booleans are potentially another good candidate for values types. But for the time being they are represented in the runtime using pointers to the constants `boolean_t` and `boolean_f`.
+Booleans are potentially another good candidate for value types. But for the time being they are represented in the runtime using pointers to the constants `boolean_t` and `boolean_f`.
 
 ### Thread Data Parameter
 
