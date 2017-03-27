@@ -4,6 +4,7 @@
 
 Features
 
+- Cyclone now has support in the interpreter for loading libraries via `import`. This is probably the most important change in this release and allows `icyc` to be used to its full potential.
 - Store parameter objects in such a way that changes to a parameter object do not affect other threads that use the same parameter object.
 
     The specific requirement from R<sup>7</sup>RS is:
