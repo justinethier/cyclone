@@ -23,6 +23,7 @@
     setup-environment ; non-standard
     ;; Dynamic import
     %import
+    c:lib-loaded? ;; TODO: debug only!
   )
   (begin
 
@@ -606,13 +607,15 @@
   (let ((lib-names (lib:get-all-import-deps import-sets '() '())))
     (for-each
       (lambda (lib-name)
-        (let ((loaded? (c:lib-loaded? (lib:name->unique-string lib-name))))
-          (if loaded?
+        (let* ((us (lib:name->unique-string lib-name))
+               (loaded? (c:lib-loaded? us)))
+;; TODO: some kind of bug here, seems libraries are never registered as loaded
+          (if (not loaded?)
             (c:import-shared-obj
               (lib:import->filename lib-name ".so")
               (string-append
                 "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))
-            ;(write `(,lib-name is already loaded skipping))
+            (begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))
            )))
       lib-names)
     (set! *global-environment* (setup-environment *initial-environment*))
