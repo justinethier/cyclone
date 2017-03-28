@@ -7,7 +7,7 @@ include Makefile.config
 
 # Commands
 CYCLONE = cyclone -A .
-CCOMP = $(CC) $(LIB_CFLAGS)
+CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
 # Directories
