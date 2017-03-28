@@ -23,7 +23,6 @@
     setup-environment ; non-standard
     ;; Dynamic import
     %import
-    c:lib-loaded? ;; TODO: debug only!
   )
   (begin
 
