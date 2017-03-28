@@ -148,6 +148,7 @@ char **_cyc_argv = NULL;
 static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custom type
 
 const object Cyc_EOF = &__EOF;
+static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
@@ -265,6 +266,13 @@ static bool set_insert(ck_hs_t * hs, const void *value)
  */
 void gc_init_heap(long heap_size)
 {
+  if (!ck_hs_init(&lib_table,
+                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
+                  hs_hash, hs_compare,
+                  &my_allocator, 32, 43423)) {
+    fprintf(stderr, "Unable to initialize library table\n");
+    exit(1);
+  }
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
@@ -385,6 +393,30 @@ object find_or_add_symbol(const char *name)
 }
 
 /* END symbol table */
+
+/* Library table */
+object is_library_loaded(const char *name)
+{
+  symbol_type tmp = { {0}, symbol_tag, name};
+  object result = set_get(&symbol_table, &tmp);
+  if (result)
+    return boolean_t;
+  return boolean_f;
+}
+
+object register_library(const char *name)
+{
+  symbol_type sym = { {0}, symbol_tag, _strdup(name)};
+  symbol_type *psym = malloc(sizeof(symbol_type));
+  memcpy(psym, &sym, sizeof(symbol_type));
+  // Reuse mutex since lib inserts will be rare
+  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
+  set_insert(&lib_table, psym);
+  pthread_mutex_unlock(&symbol_table_lock);
+  return psym;
+}
+/* END Library table */
+
 
 /* Global table */
 list global_table = NULL;

@@ -437,8 +437,8 @@
 
 (define (analyze-import exp env)
   (lambda (env)
-    ;; TODO: allow %import to take env
-    (write `(%import ,(cdr exp)))
+    ;; FUTURE: allow %import to take env?
+    ;(write `(%import ,(cdr exp)))
     (apply %import (cdr exp))
     'ok))
 

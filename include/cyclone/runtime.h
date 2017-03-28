@@ -650,6 +650,16 @@ char *_strdup(const char *s);
 /**@}*/
 
 /**
+ * \defgroup prim_glo Library table
+ *
+ * @brief A table of scheme libraries that are loaded.
+ */
+/**@{*/
+object is_library_loaded(const char *name);
+object register_library(const char *name);
+/**@}*/
+
+/**
  * \defgroup prim_glo Global table
  *
  * @brief A table of global variables.

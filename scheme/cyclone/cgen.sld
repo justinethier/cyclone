@@ -1421,6 +1421,9 @@
 
         (emit* "}")
         (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
+        (emit* "  register_library(\""
+               (lib:name->unique-string lib-name)
+               "\");")
         (if (null? lib-pass-thru-exports)
             (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
             ; GC to ensure objects are moved when exporting exports.

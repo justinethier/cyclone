@@ -25,6 +25,7 @@
     lib:name
     lib:name->string
     lib:name->symbol
+    lib:name->unique-string
     lib:result
     lib:exports
     lib:rename-exports
@@ -118,6 +119,16 @@
 ;; Convert name (as list of symbols) to a mangled string
 (define (lib:name->string name)
   (apply string-append (map mangle (lib:import->library-name name))))
+
+;; Convert name (as list of symbols) to a mangled string guaranteed to be unique
+(define (lib:name->unique-string name)
+  (foldl
+    (lambda (s acc)
+      (if (> (string-length acc) 0)
+          (string-append acc "_" s)
+          s))
+    ""
+    (map mangle (lib:import->library-name name))))
 
 ;; Convert library name to a unique symbol
 (define (lib:name->symbol name)
