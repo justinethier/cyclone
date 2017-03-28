@@ -601,35 +601,31 @@
 ;; function to initialize them. longer-term will need to only load the specific identifiers
 ;; called out in the import sets
 ;;
-;; TODO: get any dependencies and load them, too
-;; TODO: for some of that (prefix, maybe other stuff), can we do the renaming in the env??
+;; TODO: for some imports (prefix, maybe other stuff), can we do the renaming in the env??
 (define (%import . import-sets)
   (let ((lib-names (lib:get-all-import-deps import-sets '() '())))
-
-    ;; TODO:
-    ;; Instead of blindly loading everything, should only load the libraries that are
-    ;; actually needed. may want to create a new table in the runtime that keeps track of
-    ;; loaded libraries. maybe have one of the libck data structures be used for it. could
-    ;; then have supporting functions:
-    ;; - add_lib - auto-generated call placed in each lib's entry point
-    ;; - check_lib - called here to look up each library to see if it is already loaded
-    ;; one issue - what if a library has changed and really should be reloaded?
-    ;; also, is there any value to loading a library that is not compiled? I guess we can
-    ;; sort of do that now via (load).
-
     (for-each
       (lambda (lib-name)
-        (c:dyn-load 
-          (lib:import->filename lib-name ".so")
-          (string-append
-            "c_" (lib:name->string lib-name) "_entry_pt_first_lambda")))
+        (let ((loaded? (c:lib-loaded? (lib:name->unique-string lib-name))))
+          (if loaded?
+            (c:import-shared-obj
+              (lib:import->filename lib-name ".so")
+              (string-append
+                "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))
+            ;(write `(,lib-name is already loaded skipping))
+           )))
       lib-names)
     (set! *global-environment* (setup-environment *initial-environment*))
     #t))
 
 ;; Wrapper around the actual shared object import function
-(define-c c:dyn-load
+(define-c c:import-shared-obj
   "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
   " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
+
+(define-c c:lib-loaded?
+  "(void *data, int argc, closure _, object k, object name)"
+  " Cyc_check_str(data, name);
+    return_closcall1(data, k, is_library_loaded(string_str(name))); ")
 
   ))
