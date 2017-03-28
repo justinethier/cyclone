@@ -398,7 +398,7 @@ object find_or_add_symbol(const char *name)
 object is_library_loaded(const char *name)
 {
   symbol_type tmp = { {0}, symbol_tag, name};
-  object result = set_get(&symbol_table, &tmp);
+  object result = set_get(&lib_table, &tmp);
   if (result)
     return boolean_t;
   return boolean_f;
