@@ -413,7 +413,7 @@ object register_library(const char *name)
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
   set_insert(&lib_table, psym);
   pthread_mutex_unlock(&symbol_table_lock);
-  return psym;
+  return boolean_t;
 }
 /* END Library table */
 
