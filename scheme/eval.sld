@@ -604,18 +604,22 @@
 ;;
 ;; TODO: for some imports (prefix, maybe other stuff), can we do the renaming in the env??
 (define (%import . import-sets)
-  (let ((lib-names (lib:get-all-import-deps import-sets '() '())))
+  (let (;; Libraries explicitly listed in the import expression
+        (explicit-lib-names 
+          (map lib:import->library-name (lib:list->import-set import-sets)))
+        ;; All dependent libraries
+        (lib-names (lib:get-all-import-deps import-sets '() '())))
     (for-each
       (lambda (lib-name)
         (let* ((us (lib:name->unique-string lib-name))
                (loaded? (c:lib-loaded? us)))
-;; TODO: some kind of bug here, seems libraries are never registered as loaded
-          (if (not loaded?)
+          (if (or (not loaded?) 
+                  (member lib-name explicit-lib-names))
             (c:import-shared-obj
               (lib:import->filename lib-name ".so")
               (string-append
                 "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))
-            (begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))
+            ;(begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))
            )))
       lib-names)
     (set! *global-environment* (setup-environment *initial-environment*))
