@@ -349,6 +349,9 @@ object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
                           int default_no_args, int default_one_arg, object n,
                           va_list ns, common_type * buf);
+void Cyc_int2bignum(int n, mp_int *bn);
+object Cyc_bignum_normalize(void *data, object n);
+int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 double MRG32k3a (double seed);
 /**@}*/
 /**
