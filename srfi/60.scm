@@ -29,15 +29,22 @@
 ;;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;;;; 
  
-(define-c raw-logand
-  "(void* data, int argc, closure _, object k, object x, object y)"
+(define-syntax binop
+  (er-macro-transformer
+    (lambda (expr rename compare)
+      (let* ((fnc (cadr expr))
+             (args
+              "(void* data, int argc, closure _, object k, object x, object y)")
+             (int-code (caddr expr))
+             (bn-op-code (cadddr expr))
+             (body
+              (string-append
   "Cyc_check_int(data, x);
    Cyc_check_int(data, y);
 
-   if (obj_is_int(x) && obj_is_int(y)) {
-       int result = ((int)unbox_number(x)) & ((int)unbox_number(y));
-       return_closcall1(data, k, obj_int2obj(result));
-   } else {
+   if (obj_is_int(x) && obj_is_int(y)) {"
+   int-code
+   "} else {
      int result;
      alloc_bignum(data, bn);
      mp_int *xx, *yy;
@@ -59,7 +66,9 @@
        yy = &bignum_value(y);
      }
 
-     result = mp_and(xx, yy, &(bignum_value(bn)));
+     "
+     bn-op-code
+     "
      if (MP_OKAY != result) {
       char buffer[128];
       snprintf(buffer, 127, \"Bignum error: %s\", mp_error_to_string(result));
@@ -67,7 +76,26 @@
      }
      return_closcall1(data, k, Cyc_bignum_normalize(data, bn));
    }
-  ")
+  ")))
+        `(define-c ,fnc ,args ,body)))))
+
+(begin 
+  (binop 
+    raw-logand
+    " int result = ((int)unbox_number(x)) & ((int)unbox_number(y));
+      return_closcall1(data, k, obj_int2obj(result)); "
+    " result = mp_and(xx, yy, &(bignum_value(bn))); ")
+  (binop 
+    raw-logior
+    " int result = ((int)unbox_number(x)) | ((int)unbox_number(y));
+      return_closcall1(data, k, obj_int2obj(result)); "
+    " result = mp_or(xx, yy, &(bignum_value(bn))); ")
+  (binop 
+    raw-logxor
+    " int result = ((int)unbox_number(x)) ^ ((int)unbox_number(y));
+      return_closcall1(data, k, obj_int2obj(result)); "
+    " result = mp_xor(xx, yy, &(bignum_value(bn))); ")
+   )
 
 (define (logand x . rest)
   (if (null? rest)
@@ -76,26 +104,12 @@
 
 (define bitwise-and logand)
 
-(define-c raw-logior
-  "(void* data, int argc, closure _, object k, object x, object y)"
-  "Cyc_check_fixnum(data, x); // TODO: bignum support
-   Cyc_check_fixnum(data, y);
-   int result = ((int)unbox_number(x)) | ((int)unbox_number(y));
-   return_closcall1(data, k, obj_int2obj(result));")
-
 (define (logior x . rest)
   (if (null? rest)
     x
     (apply logior (raw-logior x (car rest)) (cdr rest))))
 
 (define bitwise-ior logior)
-
-(define-c raw-logxor
-  "(void* data, int argc, closure _, object k, object x, object y)"
-  "Cyc_check_int(data, x);
-  Cyc_check_int(data, y);
-  int result = ((int)unbox_number(x)) ^ ((int)unbox_number(y));
-  return_closcall1(data, k, obj_int2obj(result));")
 
 (define (logxor x . rest)
   (if (null? rest)
@@ -107,8 +121,13 @@
 (define-c lognot
   "(void* data, int argc, closure _, object k, object x)"
   "Cyc_check_int(data, x);
-  int result = ~((int)unbox_number(x));
-  return_closcall1(data, k, obj_int2obj(result));")
+   if (Cyc_is_bignum(x) == boolean_t) {
+      // uh oh, libtommath doesn't provide this!
+      Cyc_rt_raise_msg(data, \"bignum negation not supported yet\");
+   } else {
+    int result = ~((int)unbox_number(x));
+    return_closcall1(data, k, obj_int2obj(result));
+   }")
 
 (define bitwise-not lognot)
 
