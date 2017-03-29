@@ -5633,7 +5633,7 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   function_type entry_pt;
   Cyc_check_str(data, filename);
   Cyc_check_str(data, entry_pt_fnc);
-  handle = dlopen(string_str(filename), RTLD_LAZY);
+  handle = dlopen(string_str(filename), RTLD_GLOBAL | RTLD_LAZY);
   if (handle == NULL) {
     //make_string(s, dlerror());
     fprintf(stderr, "%s\n", dlerror());
