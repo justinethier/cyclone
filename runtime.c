@@ -5629,23 +5629,24 @@ double MRG32k3a (double seed)
 /** Dynamic loading */
 void Cyc_import_shared_object(void *data, object cont, object filename, object entry_pt_fnc)
 {
+  char buffer[256];
   void *handle;
   function_type entry_pt;
   Cyc_check_str(data, filename);
   Cyc_check_str(data, entry_pt_fnc);
   handle = dlopen(string_str(filename), RTLD_GLOBAL | RTLD_LAZY);
   if (handle == NULL) {
-    //make_string(s, dlerror());
-    fprintf(stderr, "%s\n", dlerror());
-    Cyc_rt_raise2(data, "Unable to import library", filename);
+    snprintf(buffer, 256, "%s", dlerror());
+    make_string(s, buffer);
+    Cyc_rt_raise2(data, "Unable to import library", &s);
   }
   dlerror();    /* Clear any existing error */
 
   entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
   if (entry_pt == NULL) {
-    //make_string(s, dlerror());
-    fprintf(stderr, "%s\n", dlerror());
-    Cyc_rt_raise2(data, "Unable to load symbol", entry_pt_fnc);
+    snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
+    make_string(s, buffer);
+    Cyc_rt_raise2(data, "Unable to load symbol", &s);
   }
   mclosure1(clo, entry_pt, cont);
   entry_pt(data, 0, &clo, &clo);
