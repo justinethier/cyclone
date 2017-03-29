@@ -256,7 +256,7 @@
                       (tagged-list? 'srfi import)
                       (tagged-list? 'cyclone import))
                   (Cyc-installation-dir 'sld)
-                  "")))
+                  "./")))
     (call/cc
       (lambda (return)
         (for-each
