@@ -1,38 +1,73 @@
-#|
- | Copyright (c) 1991, 1993, 2001, 2003, 2005 Aubrey Jaffer
- | Copyright (c) 2017, Koz Ross 
- |
- | All rights reserved.
- |
- | Redistribution and use in source and binary forms, with or without
- | modification, are permitted provided that the following conditions are met:
- |     * Redistributions of source code must retain the above copyright
- |       notice, this list of conditions and the following disclaimer.
- |     * Redistributions in binary form must reproduce the above copyright
- |       notice, this list of conditions and the following disclaimer in the
- |       documentation and/or other materials provided with the distribution.
- |     * Neither the name of Cyclone nor the
- |       names of its contributors may be used to endorse or promote products
- |       derived from this software without specific prior written permission.
- |
- | THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- | ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- | WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- | DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- | DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- | (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- | LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- | ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- | (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- | SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- |#
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;; 
+;;;; Copyright (c) 1991, 1993, 2001, 2003, 2005 Aubrey Jaffer
+;;;; Copyright (c) 2017, Koz Ross, Justin Ethier 
+;;;; 
+;;;; All rights reserved.
+;;;; 
+;;;; Redistribution and use in source and binary forms, with or without
+;;;; modification, are permitted provided that the following conditions are met:
+;;;;     * Redistributions of source code must retain the above copyright
+;;;;       notice, this list of conditions and the following disclaimer.
+;;;;     * Redistributions in binary form must reproduce the above copyright
+;;;;       notice, this list of conditions and the following disclaimer in the
+;;;;       documentation and/or other materials provided with the distribution.
+;;;;     * Neither the name of Cyclone nor the
+;;;;       names of its contributors may be used to endorse or promote products
+;;;;       derived from this software without specific prior written permission.
+;;;; 
+;;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+;;;; ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+;;;; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+;;;; DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+;;;; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+;;;; (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+;;;; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+;;;; ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;;;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;;; 
  
 (define-c raw-logand
   "(void* data, int argc, closure _, object k, object x, object y)"
   "Cyc_check_int(data, x);
-  Cyc_check_int(data, y);
-  int result = ((int)unbox_number(x)) & ((int)unbox_number(y));
-  return_closcall1(data, k, obj_int2obj(result));")
+   Cyc_check_int(data, y);
+
+   if (obj_is_int(x) && obj_is_int(y)) {
+       int result = ((int)unbox_number(x)) & ((int)unbox_number(y));
+       return_closcall1(data, k, obj_int2obj(result));
+   } else {
+     int result;
+     alloc_bignum(data, bn);
+     mp_int *xx, *yy;
+     mp_int tmpx, tmpy;
+
+     if (obj_is_int(x)) {
+       mp_init(&tmpx);
+       Cyc_int2bignum(obj_obj2int(x), &tmpx);
+       xx = &tmpx;
+     } else {
+       xx = &bignum_value(x);
+     }
+
+     if (obj_is_int(y)) {
+       mp_init(&tmpy);
+       Cyc_int2bignum(obj_obj2int(y), &tmpy);
+       yy = &tmpy;
+     } else {
+       yy = &bignum_value(y);
+     }
+
+     result = mp_and(xx, yy, &(bignum_value(bn)));
+     if (MP_OKAY != result) {
+      char buffer[128];
+      snprintf(buffer, 127, \"Bignum error: %s\", mp_error_to_string(result));
+      Cyc_rt_raise_msg(data, buffer);
+     }
+     return_closcall1(data, k, Cyc_bignum_normalize(data, bn));
+   }
+  ")
 
 (define (logand x . rest)
   (if (null? rest)
@@ -43,10 +78,10 @@
 
 (define-c raw-logior
   "(void* data, int argc, closure _, object k, object x, object y)"
-  "Cyc_check_int(data, x);
-  Cyc_check_int(data, y);
-  int result = ((int)unbox_number(x)) | ((int)unbox_number(y));
-  return_closcall1(data, k, obj_int2obj(result));")
+  "Cyc_check_fixnum(data, x); // TODO: bignum support
+   Cyc_check_fixnum(data, y);
+   int result = ((int)unbox_number(x)) | ((int)unbox_number(y));
+   return_closcall1(data, k, obj_int2obj(result));")
 
 (define (logior x . rest)
   (if (null? rest)
