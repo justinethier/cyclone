@@ -111,13 +111,19 @@
 (define-c integer-length
   "(void* data, int argc, closure _, object k, object x)"
   "Cyc_check_int(data, x);
-  int input = (int)unbox_number(x);
-  int res = 0;
-  while (input) {
-        res++;
-        input >>= 1;
-  };
-  return_closcall1(data, k, obj_int2obj(res));")
+   if (Cyc_is_bignum(x) == boolean_t) {
+     int res;
+     mp_radix_size(&bignum_value(x), 2, &res);
+     return_closcall1(data, k, obj_int2obj((res - 1)));
+   } else {
+     int input = (int)unbox_number(x);
+     int res = 0;
+     while (input) {
+           res++;
+           input >>= 1;
+     };
+     return_closcall1(data, k, obj_int2obj(res));
+   }")
 
 (define (log2-binary-factors n)
   (- (integer-length (raw-logand n (- n))) 1))
