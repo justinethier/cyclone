@@ -226,6 +226,28 @@
 //   }
    return_closcall1(data, k, obj_int2obj(bf))")
 
+;; (define-c ash
+;;   "(void* data, int argc, closure _, object k, object x, object y)"
+;;   "Cyc_check_int(data, x);
+;;    Cyc_check_fixnum(data,y);
+;;    int shift;
+;;    //int result;
+;;    alloc_bignum(data, bn);
+;; 
+;;    if (obj_is_int(x)) {
+;;      Cyc_int2bignum(obj_obj2int(x), &bignum_value(bn));
+;;    } else {
+;;      mp_copy(&bignum_value(x), &bignum_value(bn));
+;;    }
+;; 
+;;    shift = (int)unbox_number(y);
+;;    if (shift > 0) {
+;;      mp_lshd(&bignum_value(bn), shift);
+;;    } else {
+;;      mp_rshd(&bignum_value(bn), abs(shift));
+;;    }
+;;    return_closcall1(data, k, Cyc_bignum_normalize(data, bn));")
+
 (define arithmetic-shift ash)
 
 (define (rotate-bit-field n count start end)
