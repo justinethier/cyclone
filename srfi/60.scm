@@ -134,12 +134,12 @@
 (define-c bitwise-if
   "(void* data, int argc, closure _, object k, 
           object mask, object n0, object n1)"
-  "Cyc_check_int(data, mask);
-  Cyc_check_int(data, n0);
-  Cyc_check_int(data, n1);
-  int m = unbox_number(mask);
-  int result = (m & ((int)unbox_number(n0))) | ((~m) & ((int)unbox_number(n1)));
-  return_closcall1(data, k, obj_int2obj(result));")
+  "Cyc_check_fixnum(data, mask); // TODO: bignum support
+   Cyc_check_fixnum(data, n0);
+   Cyc_check_fixnum(data, n1);
+   int m = unbox_number(mask);
+   int result = (m & ((int)unbox_number(n0))) | ((~m) & ((int)unbox_number(n1)));
+   return_closcall1(data, k, obj_int2obj(result));")
 
 (define bitwise-merge bitwise-if)
 
@@ -206,20 +206,25 @@
 (define-c ash
   "(void* data, int argc, closure _, object k, object x, object y)"
   "Cyc_check_int(data, x);
-  Cyc_check_int(data,y);
-  int bf = (int)unbox_number(x);
-  int shift = (int)unbox_number(y);
-  int i;
-  if (shift > 0) {
-        for (i = 0; i < shift; i++) {
-                 bf *= 2;
-        }
-  } else {
-        for (i = 0; i < abs(shift); i++) {
-                bf /= 2; 
-        }
-  }
-  return_closcall1(data, k, obj_int2obj(bf))")
+   Cyc_check_int(data,y);
+   int bf = (int)unbox_number(x);
+   int shift = (int)unbox_number(y);
+   //int i;
+   if (shift > 0) {
+     bf <<= shift;
+   } else {
+     bf >>= abs(shift);
+   }
+//   if (shift > 0) {
+//         for (i = 0; i < shift; i++) {
+//                  bf *= 2;
+//         }
+//   } else {
+//         for (i = 0; i < abs(shift); i++) {
+//                 bf /= 2; 
+//         }
+//   }
+   return_closcall1(data, k, obj_int2obj(bf))")
 
 (define arithmetic-shift ash)
 
