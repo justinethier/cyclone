@@ -203,50 +203,57 @@
               (ash from start)
               to))
 
-(define-c ash
-  "(void* data, int argc, closure _, object k, object x, object y)"
-  "Cyc_check_int(data, x);
-   Cyc_check_int(data,y);
-   int bf = (int)unbox_number(x);
-   int shift = (int)unbox_number(y);
-   //int i;
-   if (shift > 0) {
-     bf <<= shift;
-   } else {
-     bf >>= abs(shift);
-   }
-//   if (shift > 0) {
-//         for (i = 0; i < shift; i++) {
-//                  bf *= 2;
-//         }
-//   } else {
-//         for (i = 0; i < abs(shift); i++) {
-//                 bf /= 2; 
-//         }
-//   }
-   return_closcall1(data, k, obj_int2obj(bf))")
+;(define-c ash
+;  "(void* data, int argc, closure _, object k, object x, object y)"
+;  "Cyc_check_int(data, x);
+;   Cyc_check_int(data,y);
+;   int bf = (int)unbox_number(x);
+;   int shift = (int)unbox_number(y);
+;   //int i;
+;   if (shift > 0) {
+;     bf <<= shift;
+;   } else {
+;     bf >>= abs(shift);
+;   }
+;//   if (shift > 0) {
+;//         for (i = 0; i < shift; i++) {
+;//                  bf *= 2;
+;//         }
+;//   } else {
+;//         for (i = 0; i < abs(shift); i++) {
+;//                 bf /= 2; 
+;//         }
+;//   }
+;   return_closcall1(data, k, obj_int2obj(bf))")
 
-;; (define-c ash
-;;   "(void* data, int argc, closure _, object k, object x, object y)"
-;;   "Cyc_check_int(data, x);
-;;    Cyc_check_fixnum(data,y);
-;;    int shift;
-;;    //int result;
-;;    alloc_bignum(data, bn);
-;; 
-;;    if (obj_is_int(x)) {
-;;      Cyc_int2bignum(obj_obj2int(x), &bignum_value(bn));
-;;    } else {
-;;      mp_copy(&bignum_value(x), &bignum_value(bn));
-;;    }
-;; 
-;;    shift = (int)unbox_number(y);
-;;    if (shift > 0) {
-;;      mp_lshd(&bignum_value(bn), shift);
-;;    } else {
-;;      mp_rshd(&bignum_value(bn), abs(shift));
-;;    }
-;;    return_closcall1(data, k, Cyc_bignum_normalize(data, bn));")
+ (define-c ash
+   "(void* data, int argc, closure _, object k, object x, object y)"
+   "Cyc_check_int(data, x);
+    Cyc_check_fixnum(data,y);
+    int shift, i;
+    //int result;
+    alloc_bignum(data, bn);
+ 
+    if (Cyc_is_bignum(x) == boolean_t){
+      mp_copy(&bignum_value(x), &bignum_value(bn));
+    } else {
+      Cyc_int2bignum((int)unbox_number(x), &bignum_value(bn));
+    }
+ 
+// Inefficient but always works without overflow
+// Should be able to do pure fixnum math in some cases, though
+    shift = (int)unbox_number(y);
+    if (shift > 0) {
+      for (i = 0; i < shift; i++) {
+         mp_mul_2(&bignum_value(bn), &bignum_value(bn));
+      }
+    } else {
+      for (i = 0; i < abs(shift); i++) {
+         mp_div_2(&bignum_value(bn), &bignum_value(bn));
+      }
+    }
+
+    return_closcall1(data, k, Cyc_bignum_normalize(data, bn));")
 
 (define arithmetic-shift ash)
 
