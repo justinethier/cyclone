@@ -4,8 +4,6 @@
 
 Features
 
-IN PROGRESS - bignum support for SRFI 60
-
 - Cyclone now has support in the interpreter for loading libraries via `import`. This is probably the most important change in this release and allows `icyc` to be used to its full potential.
 - Store parameter objects in such a way that changes to a parameter object do not affect other threads that use the same parameter object.
 
@@ -13,6 +11,7 @@ IN PROGRESS - bignum support for SRFI 60
 
     > `parameterize` must not change the associated values of any parameters in any thread other than the current thread and threads created inside the `parameterize` body.
 
+- Added bignum support to SRFI 60 - integers as bits.
 - Normalize the result of `string->number` such that bignums are only returned if the result truly is a bignum.
 - Allow Cyclone to find `(cyclone)` prefixed libraries installed in Cyclone's system folder.
 - Allow a library to export identifiers that are exported by another library. Previously a library could only export identifiers that it defined directly.
