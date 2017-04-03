@@ -72,9 +72,11 @@
 ; TODO: experimenting with how an inline definition might look.
 ;       need something that can both work within the same module and
 ;       also when imported into another module.
-;      inline:
-;      "(void *data, object ptr, object z)"
-;      " return_inexact_double_op(data, k, log, z);"
+      ;; Inline arguments:
+      "(void *data, object ptr, object z)"
+      ;; must always return an object
+      ;; Inline body:
+      " unboxed_inexact_double_op(data, ptr, log, z);"
       )
     (define-c sin
       "(void *data, int argc, closure _, object k, object z)"

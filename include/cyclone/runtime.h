@@ -275,6 +275,21 @@ object Cyc_io_read_line(void *data, object cont, object port);
  */
 /**@{*/
 
+#define unboxed_inexact_double_op(data, ptr, OP, z) \
+  double unboxed; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    unboxed = OP(obj_obj2int(z)); \
+  } else if (type_of(z) == integer_tag) { \
+    unboxed = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    unboxed = OP(mp_get_double(&bignum_value(z))); \
+  } else { \
+    unboxed = OP(((double_type *)z)->value); \
+  } \
+  assign_double(ptr, unboxed); \
+  return ptr;
+
 #define return_inexact_double_op(data, cont, OP, z) \
   make_double(d, 0.0); \
   Cyc_check_num(data, z); \
