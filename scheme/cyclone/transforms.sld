@@ -790,7 +790,9 @@
       (lambda (e)
         (if (or (define? e)
                 (define-c? e))
-            (set! globals (cons (define->var e) globals))))
+            (set! globals (cons (define->var e) globals)))
+        (if (define-c-inline? e)
+            (set! globals (cons (define-c->inline-var e) globals))))
       exp)
     globals))
 
