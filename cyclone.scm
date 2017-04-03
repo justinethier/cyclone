@@ -370,7 +370,7 @@
       (read-all port))))
 
 ;; Compile and emit:
-(define (run-compiler args cc? cc-prog cc-exec cc-lib append-dirs prepend-dirs)
+(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -454,15 +454,25 @@
         (let ((comp-lib-cmd
                 (string-replace-all 
                   (string-replace-all 
-                    ;(Cyc-compilation-environment 'cc-lib)
                     (get-comp-env 'cc-lib cc-lib)
                     "~src-file~" src-file)
-                  "~exec-file~" exec-file)))
+                  "~exec-file~" exec-file))
+              (comp-so-cmd
+                (string-replace-all 
+                  (string-replace-all 
+                    (get-comp-env 'cc-so cc-so)
+                    "~src-file~" src-file)
+                  "~exec-file~" exec-file))
+              )
           (cond
             (cc?
-              (system comp-lib-cmd))
+              (system comp-lib-cmd)
+              (system comp-so-cmd)
+            )
             (else
               (display comp-lib-cmd)
+              (newline)
+              (display comp-so-cmd)
               (newline))))))))
 
 ;; Collect values for the given command line arguments and option.
@@ -499,6 +509,7 @@
        (cc-prog (apply string-append (collect-opt-values args "-CP")))
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
+       (cc-so   (apply string-append (collect-opt-values args "-CS")))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
   ;; Set optimization level(s)
@@ -525,6 +536,8 @@
                  an executable.
  -CL cc-commands Specify a custom command line for the C compiler to compile
                  a library module.
+ -CS cc-commands Specify a custom command line for the C compiler to compile
+                 a shared object module.
  -Ox             Optimization level, higher means more optimizations will
                  be used. Set to 0 to disable optimizations.
  -d              Only generate intermediate C files, do not compile them
@@ -547,5 +560,5 @@
      (display "cyclone: no input file")
      (newline))
     (else
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib append-dirs prepend-dirs))))
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so append-dirs prepend-dirs))))
 

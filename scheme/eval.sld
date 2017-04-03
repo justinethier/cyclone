@@ -10,7 +10,7 @@
 (define-library (scheme eval)
   (import 
     (scheme cyclone util)
-    ;(scheme cyclone libraries) ;; for handling import sets
+    (scheme cyclone libraries) ;; for handling import sets
     (scheme base)
     (scheme file)
     (scheme write) ;; Only used for debugging
@@ -21,6 +21,8 @@
     eval-from-c ; non-standard
     create-environment ; non-standard
     setup-environment ; non-standard
+    ;; Dynamic import
+    %import
   )
   (begin
 
@@ -322,11 +324,11 @@
 ;; (define (primitive-procedure? proc)
 ;;   (equal? proc 'cons))
 
-(define (setup-environment)
+(define (setup-environment . env)
   (let ((initial-env
-         (env:extend-environment (primitive-procedure-names)
-                             (primitive-procedure-objects)
-                             env:the-empty-environment)))
+         (if (not (null? env))
+             (car env)
+             (create-initial-environment))))
     (cond-expand
       (cyclone
         ;; Also include compiled variables
@@ -335,7 +337,13 @@
           (map (lambda (v) (cdr v)) (Cyc-global-vars))
           initial-env))
       (else initial-env))))
-(define *global-environment* (setup-environment))
+
+(define (create-initial-environment)
+  (env:extend-environment (primitive-procedure-names)
+                          (primitive-procedure-objects)
+                          env:the-empty-environment))
+(define *initial-environment* (create-initial-environment))
+(define *global-environment* (setup-environment (create-initial-environment)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This step separates syntactic analysis from execution.
@@ -366,6 +374,9 @@
         ((and (lambda? exp) 
               (not (null? (cdr exp))))
          (analyze-lambda exp env))
+
+        ((tagged-list? 'import exp)
+         (analyze-import exp env))
 
         ;; experimenting with passing these back to eval
         ((compound-procedure? exp)
@@ -423,6 +434,13 @@
 ;    (write `(debug ,(lambda-body exp)))
 ;    ;(lambda (env) 
 ;      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
+
+(define (analyze-import exp env)
+  (lambda (env)
+    ;; FUTURE: allow %import to take env?
+    ;(write `(%import ,(cdr exp)))
+    (apply %import (cdr exp))
+    'ok))
 
 (define (analyze-if exp a-env)
   (let ((pproc (analyze (if-predicate exp) a-env))
@@ -578,4 +596,42 @@
 ;  (loop))
 ;(loop)
   
+
+;; TODO: right now this is a hack, just get all the imports sets and call their entry point
+;; function to initialize them. longer-term will need to only load the specific identifiers
+;; called out in the import sets
+;;
+;; TODO: for some imports (prefix, maybe other stuff), can we do the renaming in the env??
+(define (%import . import-sets)
+  (let (;; Libraries explicitly listed in the import expression
+        (explicit-lib-names 
+          (map lib:import->library-name (lib:list->import-set import-sets)))
+        ;; All dependent libraries
+        (lib-names (lib:get-all-import-deps import-sets '() '())))
+    (for-each
+      (lambda (lib-name)
+        (let* ((us (lib:name->unique-string lib-name))
+               (loaded? (c:lib-loaded? us)))
+          (if (or (not loaded?) 
+                  (member lib-name explicit-lib-names))
+            (c:import-shared-obj
+              (lib:import->filename lib-name ".so")
+              (string-append
+                "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))
+            ;(begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))
+           )))
+      lib-names)
+    (set! *global-environment* (setup-environment *initial-environment*))
+    #t))
+
+;; Wrapper around the actual shared object import function
+(define-c c:import-shared-obj
+  "(void *data, int argc, closure _, object k, object fn, object entry_fnc)"
+  " Cyc_import_shared_object(data, k, fn, entry_fnc); ")
+
+(define-c c:lib-loaded?
+  "(void *data, int argc, closure _, object k, object name)"
+  " Cyc_check_str(data, name);
+    return_closcall1(data, k, is_library_loaded(string_str(name))); ")
+
   ))

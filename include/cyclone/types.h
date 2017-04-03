@@ -18,6 +18,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <dlfcn.h>
 #include "tommath.h"
 
 /**
@@ -1059,4 +1060,5 @@ void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
 
+void Cyc_import_shared_object(void *data, object cont, object filename, object entry_pt_fnc);
 #endif                          /* CYCLONE_TYPES_H */

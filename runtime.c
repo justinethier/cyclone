@@ -148,6 +148,7 @@ char **_cyc_argv = NULL;
 static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custom type
 
 const object Cyc_EOF = &__EOF;
+static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
@@ -265,6 +266,13 @@ static bool set_insert(ck_hs_t * hs, const void *value)
  */
 void gc_init_heap(long heap_size)
 {
+  if (!ck_hs_init(&lib_table,
+                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
+                  hs_hash, hs_compare,
+                  &my_allocator, 32, 43423)) {
+    fprintf(stderr, "Unable to initialize library table\n");
+    exit(1);
+  }
   if (!ck_hs_init(&symbol_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
@@ -385,6 +393,30 @@ object find_or_add_symbol(const char *name)
 }
 
 /* END symbol table */
+
+/* Library table */
+object is_library_loaded(const char *name)
+{
+  symbol_type tmp = { {0}, symbol_tag, name};
+  object result = set_get(&lib_table, &tmp);
+  if (result)
+    return boolean_t;
+  return boolean_f;
+}
+
+object register_library(const char *name)
+{
+  symbol_type sym = { {0}, symbol_tag, _strdup(name)};
+  symbol_type *psym = malloc(sizeof(symbol_type));
+  memcpy(psym, &sym, sizeof(symbol_type));
+  // Reuse mutex since lib inserts will be rare
+  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
+  set_insert(&lib_table, psym);
+  pthread_mutex_unlock(&symbol_table_lock);
+  return boolean_t;
+}
+/* END Library table */
+
 
 /* Global table */
 list global_table = NULL;
@@ -2154,6 +2186,11 @@ object Cyc_compilation_environment(void *data, object cont, object var)
     } else if (strncmp(((symbol) var)->desc, "cc-lib", 7) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_LIB);
+      make_string(str, buf);
+      _return_closcall1(data, cont, &str);
+    } else if (strncmp(((symbol) var)->desc, "cc-so", 6) == 0) {
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s", CYC_CC_SO);
       make_string(str, buf);
       _return_closcall1(data, cont, &str);
     }
@@ -5587,3 +5624,31 @@ double MRG32k3a (double seed)
       return ((p1 - p2) * norm);
 }
 /* END RNG */
+
+
+/** Dynamic loading */
+void Cyc_import_shared_object(void *data, object cont, object filename, object entry_pt_fnc)
+{
+  char buffer[256];
+  void *handle;
+  function_type entry_pt;
+  Cyc_check_str(data, filename);
+  Cyc_check_str(data, entry_pt_fnc);
+  handle = dlopen(string_str(filename), RTLD_GLOBAL | RTLD_LAZY);
+  if (handle == NULL) {
+    snprintf(buffer, 256, "%s", dlerror());
+    make_string(s, buffer);
+    Cyc_rt_raise2(data, "Unable to import library", &s);
+  }
+  dlerror();    /* Clear any existing error */
+
+  entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
+  if (entry_pt == NULL) {
+    snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
+    make_string(s, buffer);
+    Cyc_rt_raise2(data, "Unable to load symbol", &s);
+  }
+  mclosure1(clo, entry_pt, cont);
+  entry_pt(data, 0, &clo, &clo);
+}
+

@@ -68,7 +68,16 @@
             (/ (c-log z1) (c-log z2*)))))
     (define-c c-log
       "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, log, z);")
+      " return_inexact_double_op(data, k, log, z);"
+; TODO: experimenting with how an inline definition might look.
+;       need something that can both work within the same module and
+;       also when imported into another module.
+      ;; Inline arguments:
+      "(void *data, object ptr, object z)"
+      ;; must always return an object
+      ;; Inline body:
+      " unboxed_inexact_double_op(data, ptr, log, z);"
+      )
     (define-c sin
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, sin, z);")

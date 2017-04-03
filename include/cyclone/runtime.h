@@ -275,6 +275,21 @@ object Cyc_io_read_line(void *data, object cont, object port);
  */
 /**@{*/
 
+#define unboxed_inexact_double_op(data, ptr, OP, z) \
+  double unboxed; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    unboxed = OP(obj_obj2int(z)); \
+  } else if (type_of(z) == integer_tag) { \
+    unboxed = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    unboxed = OP(mp_get_double(&bignum_value(z))); \
+  } else { \
+    unboxed = OP(((double_type *)z)->value); \
+  } \
+  assign_double(ptr, unboxed); \
+  return ptr;
+
 #define return_inexact_double_op(data, cont, OP, z) \
   make_double(d, 0.0); \
   Cyc_check_num(data, z); \
@@ -349,6 +364,9 @@ object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
                           int default_no_args, int default_one_arg, object n,
                           va_list ns, common_type * buf);
+void Cyc_int2bignum(int n, mp_int *bn);
+object Cyc_bignum_normalize(void *data, object n);
+int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 double MRG32k3a (double seed);
 /**@}*/
 /**
@@ -647,6 +665,16 @@ object add_symbol_by_name(const char *name);
 object find_symbol_by_name(const char *name);
 object find_or_add_symbol(const char *name);
 char *_strdup(const char *s);
+/**@}*/
+
+/**
+ * \defgroup prim_glo Library table
+ *
+ * @brief A table of scheme libraries that are loaded.
+ */
+/**@{*/
+object is_library_loaded(const char *name);
+object register_library(const char *name);
 /**@}*/
 
 /**
