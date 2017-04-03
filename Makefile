@@ -20,14 +20,16 @@ TEST_DIR = tests
 # Source files
 SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
 					 $(wildcard srfi/*.sld) \
-					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld)
+					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld) \
+					 $(wildcard $(SCHEME_DIR)/cyclone/iset/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
-					 $(TEST_DIR)/array-list-tests.scm
+					 $(TEST_DIR)/array-list-tests.scm \
+					 $(TEST_DIR)/iset-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
