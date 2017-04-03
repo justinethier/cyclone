@@ -27,7 +27,8 @@ TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
-					 $(TEST_DIR)/array-list-tests.scm
+					 $(TEST_DIR)/array-list-tests.scm \
+					 $(TEST_DIR)/iset-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
