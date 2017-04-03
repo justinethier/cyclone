@@ -68,6 +68,9 @@
     ;; Code generation
     mangle
     mangle-global
+    ;; Inlines (TBD, this may move)
+    define-c-inline?
+    define-c->inline-var
     ;; Scheme library functions
     gensym
     delete
@@ -197,6 +200,16 @@
 
 (define (define-c? exp)
   (tagged-list? 'define-c exp))
+
+(define (define-c-inline? exp)
+  (and (define-c? exp) (= (length exp) 6)))
+
+(define (define-c->inline-var exp)
+  (let ((var (define->var exp)))
+    (string->symbol
+      (string-append
+        (symbol->string var)
+        "__inline__"))))
 
 ;; Create a proper copy of an improper list
 ;; EG: (1 2 . 3) ==> (1 2 3)
