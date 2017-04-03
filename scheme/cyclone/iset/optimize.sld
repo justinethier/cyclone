@@ -1,0 +1,10 @@
+(define-library (scheme cyclone iset optimize)
+  (export
+   iset-balance iset-balance! iset-optimize iset-optimize! iset->code)
+  (import (scheme base)
+          (scheme cyclone iset base)
+          (scheme cyclone iset iterators)
+          (scheme cyclone iset constructors)
+          (srfi 9)
+          (srfi 60))
+  (include "optimize.scm"))
