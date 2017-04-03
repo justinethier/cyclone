@@ -823,10 +823,13 @@
       (st:add-function! trace var)))
    (c-code/vars "" (list ""))))
 
-;; TODO: not tested, does not work yet:
-(define (c-compile-raw-global-lambda exp append-preamble cont trace)
-   (let* ((lambda-data
-            `(precompiled-lambda
+(define (c-compile-raw-global-lambda exp append-preamble cont trace . inline?)
+   (let* ((precompiled-sym
+            (if (equal? inline? '(#t))
+                'precompiled-inline-lambda
+                'precompiled-lambda))
+          (lambda-data
+            `(,precompiled-sym
               ,(caddr exp) ;; Args
               ,(cadddr exp) ;; Body
           ))
@@ -842,6 +845,21 @@
           (num-args
             (- total-num-args 4))
           )
+     ;; Is the function also defined inline?
+     ;(trace:error `(JAE define-c ,exp))
+     (cond
+      ((> (length exp) 4)
+       ;(trace:error `(JAE define-c inline detected))
+       (let ((fnc-sym 
+               (define-c->inline-var exp)))
+          ;(trace:error `(JAE define-c inline detected ,fnc-sym))
+         (c-compile-raw-global-lambda 
+           `(define-c ,fnc-sym ,@(cddddr exp))
+           append-preamble 
+           cont 
+           trace
+           #t)))) ;; Inline this one
+     ;; Add this define-c
      (add-global 
        (define->var exp)
        #t ;(lambda? body) 
@@ -1256,6 +1274,12 @@
            (number->string (car l))
            (cadadr l)
            " ;"))
+        ((equal? 'precompiled-inline-lambda (caadr l))
+         (emit*
+           "static object __lambda_" 
+           (number->string (car l))
+           (cadadr l)
+           " ;"))
         (else
          (emit*
            "static void __lambda_" 
@@ -1273,6 +1297,15 @@
        ((equal? 'precompiled-lambda (caadr l))
          (emit*
            "static void __lambda_" 
+           (number->string (car l))
+           (cadadr l)
+           " {"
+           (car (cddadr l))
+           " }"
+         ))
+       ((equal? 'precompiled-inline-lambda (caadr l))
+         (emit*
+           "static object __lambda_" 
            (number->string (car l))
            (cadadr l)
            " {"
