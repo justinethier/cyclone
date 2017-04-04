@@ -174,6 +174,14 @@
       (set! module-globals (global-vars input-program))
       (set! globals (append (lib:idb:ids imported-vars) module-globals))
 
+      ;; Register inlinable Scheme functions
+      (for-each
+        (lambda (e)
+          (if (define-c-inline? e)
+            (prim:add-udf! (define->var e) (define-c->inline-var e))))
+            ;(write `(DEBUG add inline ,(define->var e) ,(define-c->inline-var e)))))
+        input-program)
+
       ;; Trim down the export list to any exports that are just "pass throughs"
       ;; from imported libraries. That is, they are not actually defined in
       ;; the library being compiled
