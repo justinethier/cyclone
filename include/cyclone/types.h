@@ -517,6 +517,9 @@ typedef void (*function_type) ();
 /** Variable-argument function type */
 typedef void (*function_type_va) (int, object, object, object, ...);
 
+/** Non-CPS function type */
+typedef object (*inline_function_type) ();
+
 /**
  * @brief C-variable integration type - wrapper around a Cyclone object pointer
  */
