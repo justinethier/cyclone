@@ -32,6 +32,7 @@
     ;; User defined function primitives
     ;*udf-prims*
     ;*udf-cps->inline*
+    prim:udf?
     prim:add-udf!
     prim:func->prim
   )
@@ -42,6 +43,8 @@
       (set! *udf-cps->inline*
         (cons (cons cps-sym inline-sym) *udf-cps->inline*))
       (set! *udf-prims* (cons inline-sym *udf-prims*)))
+    (define (prim:udf? exp)
+      (member exp *udf-prims*))
 
     ; prim? : exp -> boolean
     (define (prim? exp)
