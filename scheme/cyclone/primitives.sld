@@ -907,6 +907,11 @@
          (cons 'Cyc-fast-gte (cdr prim-call)))
         ((and (equal? (car prim-call) '<=) (= (length prim-call) 3))
          (cons 'Cyc-fast-lte (cdr prim-call)))
+        ;; TODO: exploring this idea, although we only get here for prim-calls, implying that
+        ;; either the inlinable function's CPS version must be marked as a prim, or this
+        ;; conversion logic must be put somewhere else
+        ;;((assoc (car prim-call) *udf-cps->inline*)
+        ;; (cons (cdr (assoc (car prim-call) *udf-cps->inline*)) (cdr prim-call)))
         (else
          prim-call)))
 ))
