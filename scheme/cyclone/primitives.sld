@@ -912,6 +912,11 @@
          prim-call)))
 
   ;; Map from a Scheme function to a primitive, if possible.
+  ;;
+  ;; Inputs:
+  ;; - Function symbol
+  ;; - Number of arguments to the function
+  ;;
   ;; Note the only reason to do this is to change from a CPS-style
   ;; function to one that can be inlined with no CPS, which yields
   ;; a significant speed improvement.
