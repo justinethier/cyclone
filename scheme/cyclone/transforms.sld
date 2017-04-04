@@ -1223,7 +1223,7 @@
        (cond
         ((ref? (car ast))
          `( ,(prim:func->prim (car ast) (- (length ast) 1))
-            ,@(cdr ast)))
+            ,@(map conv (cdr ast))))
         (else
          (map conv ast))))
       (else
