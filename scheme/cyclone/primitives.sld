@@ -45,7 +45,8 @@
 
     ; prim? : exp -> boolean
     (define (prim? exp)
-      (member exp *primitives*))
+      (or (member exp *primitives*)
+          (member exp *udf-prims*)))
     
     ;; Does primitive mutate any of its arguments?
     (define (prim:mutates? exp)
@@ -597,6 +598,7 @@
 
     ;; Does the primitive require passing thread data as its first argument?
     (define (prim/data-arg? p)
+     (or
       (member p '(
         Cyc-list
         Cyc-fast-plus
@@ -687,7 +689,8 @@
         set-car!
         set-cdr!
         procedure?
-        set-cell!)))
+        set-cell!))
+       (member p *udf-prims*)))
 
     ;; Determine if primitive receives a pointer to a local C variable
     (define (prim/c-var-pointer p)
@@ -696,6 +699,7 @@
         ((eq? p 'Cyc-fast-sub) "common_type")
         ((eq? p 'Cyc-fast-mul) "common_type")
         ((eq? p 'Cyc-fast-div) "common_type")
+        ((member p *udf-prims*) "common_type")
         (else #f)))
 
     ;; Determine if primitive assigns (allocates) a C variable
@@ -751,12 +755,14 @@
         ((eq? p 'list->vector) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
+        ((member p *udf-prims*) "object")
         (else #f)))
 
     ;; Determine if primitive creates a C variable
     (define (prim/cvar? exp)
         (and (prim? exp)
-             (member exp '(
+             (or
+               (member exp '(
                  Cyc-stdout
                  Cyc-stdin
                  Cyc-stderr
@@ -794,7 +800,8 @@
                  command-line-arguments
                  Cyc-read-line
                  read-char peek-char
-                 cons cell))))
+                 cons cell))
+               (member exp *udf-prims*))))
 
     ;; Pass continuation as the function's first parameter?
     (define (prim:cont? exp)
