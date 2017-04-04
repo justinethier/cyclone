@@ -28,8 +28,20 @@
     prim:cont/no-args?
     prim:arg-count?
     prim:allocates-object?
-    prim:immutable-args/result?)
+    prim:immutable-args/result?
+    ;; User defined function primitives
+    ;*udf-prims*
+    ;*udf-cps->inline*
+    prim:add-udf!
+  )
   (begin
+    (define *udf-prims* '())
+    (define *udf-cps->inline* '())
+    (define (prim:add-udf! cps-sym inline-sym)
+      (set! *udf-cps->inline*
+        (cons (cons cps-sym inline-sym) *udf-cps->inline*))
+      (set! *udf-prims* (cons inline-sym *udf-prims*)))
+
     ; prim? : exp -> boolean
     (define (prim? exp)
       (member exp *primitives*))
