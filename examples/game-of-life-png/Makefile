@@ -17,7 +17,7 @@ $(SCM_PROGRAM): $(SCM_FILE) $(COBJECTS) write-png.o
 	cyclone -d $<
 # For now, modify -d output manually to compile-in necessary objects/libs for PNG
 	gcc life.c -g -c -o life.o
-	gcc life.o  /usr/local/share/cyclone/scheme/base.o  example/grid.o  /usr/local/share/cyclone/scheme/write.o  example/life.o write-png.o -pthread -lcyclone -lck -lm -lpng -g -o life
+	gcc life.o  /usr/local/share/cyclone/scheme/base.o  example/grid.o  /usr/local/share/cyclone/scheme/write.o  example/life.o write-png.o -pthread -lcyclone -lck -lm -ltommath -ldl -lpng -g -o life
 
 #write-png: write-png.o
 #	gcc -o write-png write-png.o -lpng
