@@ -33,6 +33,7 @@
     ;*udf-prims*
     ;*udf-cps->inline*
     prim:add-udf!
+    prim:func->prim
   )
   (begin
     (define *udf-prims* '())
@@ -907,11 +908,32 @@
          (cons 'Cyc-fast-gte (cdr prim-call)))
         ((and (equal? (car prim-call) '<=) (= (length prim-call) 3))
          (cons 'Cyc-fast-lte (cdr prim-call)))
-        ;; TODO: exploring this idea, although we only get here for prim-calls, implying that
-        ;; either the inlinable function's CPS version must be marked as a prim, or this
-        ;; conversion logic must be put somewhere else
-        ;;((assoc (car prim-call) *udf-cps->inline*)
-        ;; (cons (cdr (assoc (car prim-call) *udf-cps->inline*)) (cdr prim-call)))
         (else
          prim-call)))
+
+  ;; Map from a Scheme function to a primitive, if possible.
+  ;; Note the only reason to do this is to change from a CPS-style
+  ;; function to one that can be inlined with no CPS, which yields
+  ;; a significant speed improvement.
+  (define (prim:func->prim func-sym num-args)
+    (define mappings
+      '(
+         (char=?  2 Cyc-fast-char-eq )
+         (char>?  2 Cyc-fast-char-gt )
+         (char<?  2 Cyc-fast-char-lt )
+         (char>=? 2 Cyc-fast-char-gte)
+         (char<=? 2 Cyc-fast-char-lte)
+       ))
+    (let ((m (assoc func-sym mappings))
+          (udf (assoc func-sym *udf-cps->inline*)) 
+         )
+      (cond
+        ;; Upgrade to a primitive using hardcoded mappings
+        ((and m (= (cadr m) num-args)) 
+         (caddr m)) 
+        ;; Upgrade to a (non-CPS) Scheme function
+        (udf ;; for now do not check args
+         (cdr udf))
+        ;; No match; keep original function
+        (else func-sym)))) 
 ))
