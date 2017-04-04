@@ -17,6 +17,7 @@
         (scheme cyclone common)
         (scheme cyclone util)
         (scheme cyclone cgen)
+        (scheme cyclone primitives)
         (scheme cyclone transforms)
         (scheme cyclone cps-optimizations)
         (scheme cyclone macros)
