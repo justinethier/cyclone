@@ -547,7 +547,14 @@
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont)
-  (let* ((c-func (prim->c-func p))
+  (let* ((c-func 
+           (if (prim:udf? p)
+               (string-append
+                 "((inline_function_type)
+                   ((closure)"
+                    (cgen:mangle-global p)
+                 ")->fn)")
+               (prim->c-func p)))
          ;; Following closure defs are only used for prim:cont? to
          ;; create a new closure for the continuation, if needed.
          ;;
