@@ -1071,7 +1071,9 @@
     " return_exact_double_op(data, k, ceil, z); ")
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, (int), z); ")
+    " return_exact_double_op(data, k, (int), z); "
+    "(void *data, object ptr, object z)"
+    " unboxed_inexact_double_op(data, ptr, (int), z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, round, z); ")
