@@ -70,7 +70,7 @@
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, log, z);"
       "(void *data, object ptr, object z)"
-      " unboxed_inexact_double_op(data, ptr, log, z);"
+      " return_inexact_double_op_no_cps(data, ptr, log, z);"
       )
     (define-c sin
       "(void *data, int argc, closure _, object k, object z)"

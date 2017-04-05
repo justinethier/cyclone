@@ -275,7 +275,7 @@ object Cyc_io_read_line(void *data, object cont, object port);
  */
 /**@{*/
 
-#define unboxed_inexact_double_op(data, ptr, OP, z) \
+#define return_inexact_double_op_no_cps(data, ptr, OP, z) \
   double unboxed; \
   Cyc_check_num(data, z); \
   if (obj_is_int(z)) { \
@@ -317,6 +317,20 @@ object Cyc_io_read_line(void *data, object cont, object port);
     i = (int)OP(((double_type *)z)->value); \
   } \
   return_closcall1(data, cont, obj_int2obj(i))
+
+#define return_exact_double_op_no_cps(data, ptr, OP, z) \
+  int i = 0; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    i = obj_obj2int(z); \
+  } else if (type_of(z) == integer_tag) { \
+    i = (int)OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    return z; \
+  } else { \
+    i = (int)OP(((double_type *)z)->value); \
+  } \
+  return obj_int2obj(i);
 
 #define unbox_number(n) \
   ((obj_is_int(n) ? obj_obj2int(n) : \
