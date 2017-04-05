@@ -1069,6 +1069,7 @@
   (define-c ceiling
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, ceil, z); ")
+;TODO: working on define-c:inline macro to make it less verbose to do this
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, (int), z); "
