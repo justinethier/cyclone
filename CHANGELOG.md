@@ -1,6 +1,6 @@
 # Changelog
 
-## TBD (Tenatively 0.5)
+## 0.5 - TBD (April ??)
 
 Features
 
