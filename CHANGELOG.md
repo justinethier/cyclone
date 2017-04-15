@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1 - TBD
+
+- Prevent potential memory corruption when working with large vectors that cannot be allocated on the stack.
+
 ## 0.5 - April 14, 2017
 
 Features

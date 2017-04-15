@@ -2236,6 +2236,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   int i, ulen;
   size_t element_vec_size;
   va_list ap;
+  make_pair(tmp_pair, NULL, NULL);
   va_start(ap, len);
   if (argc > 1) {
     fill = va_arg(ap, object);
@@ -2261,6 +2262,10 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     ((vector) v)->tag = vector_tag;
     ((vector) v)->num_elements = ulen;
     ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
+    // Use write barrier to ensure fill is moved to heap if it is on the stack
+    // Otherwise if next minor GC misses fill it could be catastrophic
+    car(&tmp_pair) = fill;
+    add_mutation(data, &tmp_pair, -1, fill);
   } else {
     v = alloca(sizeof(vector_type));
     ((vector) v)->hdr.mark = gc_color_red;
