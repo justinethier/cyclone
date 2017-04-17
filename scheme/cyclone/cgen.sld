@@ -1333,9 +1333,8 @@
     (cond
       ((not program?)
         (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure cont, object value){ ")
-        (emit* "make_pair(head, NULL, NULL);")
         (let ((pairs '())
-              (head-pair "NULL"))
+              (head-pair #f))
           (for-each
             (lambda (g)
               (let ((cvar-sym (mangle (gensym 'cvar)))
@@ -1346,13 +1345,33 @@
                (emits*
                    "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string g)
                    "\"), &" cvar-sym ");\n")
-               (set! pairs (cons pair-sym pairs))
-               (set! head-pair pair-sym)
-            ))
+               (set! pairs (cons pair-sym pairs))))
             *global-inlines*)
-          ;; TODO: need to link the pairs
-          (emit* "car(&head) = &" head-pair ";")
-          (emit* "(((closure)cont)->fn)(data, 1, cont, &head);")
+            ;; Link the pairs
+            (let loop ((code '())
+                       (ps pairs)
+                       (cs (map (lambda (_) (mangle (gensym 'c))) pairs)))
+                (cond
+                  ((null? ps) 
+                   (for-each
+                     (lambda (str)
+                       (emits str))
+                     code))
+                  ((null? (cdr ps))
+                   (if (not head-pair)
+                       (set! head-pair (car cs)))
+                   (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", NULL);\n") code)
+                         (cdr ps)
+                         (cdr cs)))
+                  (else
+                   (if (not head-pair)
+                       (set! head-pair (car cs)))
+                   (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
+                         (cdr ps) 
+                         (cdr cs)))))
+          (if head-pair
+              (emit* "(((closure)cont)->fn)(data, 1, cont, &" head-pair ");")
+              (emit* "(((closure)cont)->fn)(data, 1, cont, NULL);"))
           (emit* " } "))
       ))
 
