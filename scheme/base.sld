@@ -1073,10 +1073,8 @@
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, (int), z); "
-    ;; TODO: this inline form is not stable yet, will crash the gcbench benchmark
-    ;"(void *data, object ptr, object z)"
-    ;" return_exact_double_op_no_cps(data, ptr, (int), z);"
-    )
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, (int), z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, round, z); ")
