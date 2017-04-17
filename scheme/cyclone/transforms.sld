@@ -105,6 +105,7 @@
     pos-in-list 
     closure-convert 
     prim-convert
+    inlinable-top-level-function?
   )
   (begin
 
@@ -1230,6 +1231,30 @@
         ast)))
   (conv expr))
 
+;; Determine if the given top-level function can be freed from CPS, due
+;; to it only containing calls to code that itself can be inlined.
+(define (inlinable-top-level-function? expr)
+;; TODO:   (define (scan expr)
+;; TODO:     (cond
+;; TODO:       ((string? expr) #f)
+;; TODO:       ((bytevectors? expr) #f)
+;; TODO:       ((const? expr) #t) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
+;; TODO:       ((ref? expr) #t)
+;; TODO:       ;; if - ok by itself, check clauses
+;; TODO:       ;; prim-app - OK only if prim does not require CPS.
+;; TODO:       ;;            still need to check all its args
+;; TODO:       ;; app - same as prim, only OK if function does not require CPS.
+;; TODO:       ;;       probably safe to return #t if calling self, since if no
+;; TODO:       ;;       CPS it will be rejected anyway
+;; TODO:       ;; define, set - reject
+;; TODO:       ;; lambda of all forms - reject
+;; TODO:       (else #f)))
+  (cond
+    ((and (define? expr)
+          (lambda? (car (define->exp expr)))
+          (equal? 'args:fixed (lambda-formals-type (car (define->exp expr)))))
+     #t) ;; TODO: no, scan lambda body
+    (else #f)))
 ;;
 ;; Helpers to syntax check primitive calls
 ;;
