@@ -69,13 +69,14 @@
     (define-c c-log
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, log, z);"
-      ;; TODO: this inline form is not stable yet
-      ;"(void *data, object ptr, object z)"
-      ;" return_inexact_double_op_no_cps(data, ptr, log, z);"
+      "(void *data, object ptr, object z)"
+      " return_inexact_double_op_no_cps(data, ptr, log, z);"
       )
     (define-c sin
       "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, sin, z);")
+      " return_inexact_double_op(data, k, sin, z);"
+      "(void *data, object ptr, object z)"
+      " return_inexact_double_op_no_cps(data, ptr, sin, z);")
     (define-c sqrt
       "(void *data, int argc, closure _, object k, object z)"
       " return_inexact_double_op(data, k, sqrt, z);")
