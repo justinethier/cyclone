@@ -1332,7 +1332,7 @@
     ; Emit inlinable function list
     (cond
       ((not program?)
-        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure cont, object value){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure _, object cont){ ")
         (let ((pairs '())
               (head-pair #f))
           (for-each
@@ -1430,6 +1430,22 @@
     ;; TODO: only need to do this if 'eval' was also compiled
     (let ((pairs '())
           (head-pair #f))
+
+;; TODO: want some way of being able to get the list in scheme code
+;; TODO:        ;; Attempt to expose inlinable lambdas function
+;; TODO:        (let ((cvar-sym (mangle (gensym 'cvar)))
+;; TODO:              (pair-sym (mangle (gensym 'pair)))
+;; TODO:              (fnc (string-append
+;; TODO:                     "c_" (lib:name->string lib-name) "_inlinable_lambdas")))
+;; TODO:         (emits* 
+;; TODO:             "  make_cvar(" cvar-sym 
+;; TODO:             ", (object *)&" fnc ");")
+;; TODO:         (emits*
+;; TODO:             "make_pair(" pair-sym ", find_or_add_symbol(\"" fnc
+;; TODO:             "\"), &" cvar-sym ");\n")
+;; TODO:         (set! pairs (cons pair-sym pairs)))
+;; TODO:        ;; END
+
         (for-each
           (lambda (g)
             (let ((cvar-sym (mangle (gensym 'cvar)))
