@@ -1431,20 +1431,23 @@
     (let ((pairs '())
           (head-pair #f))
 
-;; TODO: want some way of being able to get the list in scheme code
-;; TODO:        ;; Attempt to expose inlinable lambdas function
-;; TODO:        (let ((cvar-sym (mangle (gensym 'cvar)))
-;; TODO:              (pair-sym (mangle (gensym 'pair)))
-;; TODO:              (fnc (string-append
-;; TODO:                     "c_" (lib:name->string lib-name) "_inlinable_lambdas")))
-;; TODO:         (emits* 
-;; TODO:             "  make_cvar(" cvar-sym 
-;; TODO:             ", (object *)&" fnc ");")
-;; TODO:         (emits*
-;; TODO:             "make_pair(" pair-sym ", find_or_add_symbol(\"" fnc
-;; TODO:             "\"), &" cvar-sym ");\n")
-;; TODO:         (set! pairs (cons pair-sym pairs)))
-;; TODO:        ;; END
+        ;; Expose list of inlinable lambda functions
+        (when (not program?)
+          (let ( ;(cvar-sym (mangle (gensym 'cvar)))
+                (pair-sym (mangle (gensym 'pair)))
+                (clo-sym (mangle (gensym 'clo)))
+                (fnc (string-append
+                       "c_" (lib:name->string lib-name) "_inlinable_lambdas")))
+           (emits* 
+               "  mclosure0(" clo-sym ", " fnc "); "
+              ; "  make_cvar(" cvar-sym 
+              ; ", (object *)&" fnc ");"
+               )
+           (emits*
+               "make_pair(" pair-sym ", find_or_add_symbol(\"" fnc
+               "\"), &" clo-sym ");\n")
+           (set! pairs (cons pair-sym pairs))))
+        ;; END
 
         (for-each
           (lambda (g)
