@@ -305,7 +305,13 @@
 ;; trace - trace information. presently a pair containing:
 ;;         * source file
 ;;         * function name (or NULL if none)
-(define (c-compile-exp exp append-preamble cont trace)
+;; cps? - Determine whether to compile using continuation passing style.
+;;        Normally this is always enabled, but sometimes a function has a
+;;        version that can be inlined (as an optimization), so this will 
+;;        be set to false to change the type of compilation.
+;;        NOTE: this field is not passed everywhere because a lot of forms
+;;              require CPS, so this flag is not applicable to them.
+(define (c-compile-exp exp append-preamble cont trace cps?)
   (cond
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
@@ -314,7 +320,7 @@
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
     ((quote? exp)       (c-compile-quote exp))
-    ((if? exp)          (c-compile-if exp append-preamble cont trace))
+    ((if? exp)          (c-compile-if exp append-preamble cont trace cps?))
 
     ; IR (2):
     ((tagged-list? '%closure exp)
@@ -331,7 +337,7 @@
        append-preamble cont trace))
     
     ; Application:      
-    ((app? exp)         (c-compile-app exp append-preamble cont trace))
+    ((app? exp)         (c-compile-app exp append-preamble cont trace cps?))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
 (define (c-compile-quote qexp)
@@ -676,7 +682,7 @@
     num-args)))
 
 ;; c-compile-app : app-exp (string -> void) -> string
-(define (c-compile-app exp append-preamble cont trace)
+(define (c-compile-app exp append-preamble cont trace cps?)
   ;(trace:debug `(c-compile-app: ,exp))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
@@ -793,7 +799,7 @@
          (error `(Unsupported function application ,exp)))))))
 
 ; c-compile-if : if-exp -> string
-(define (c-compile-if exp append-preamble cont trace)
+(define (c-compile-if exp append-preamble cont trace cps?)
   (let* ((compile (lambda (exp)
                     (c-compile-exp exp append-preamble cont trace)))
          (test (compile (if->condition exp)))
@@ -858,7 +864,7 @@
 ;;         (c-compile-exp 
 ;;          body append-preamble cont
 ;;          (st:add-function! trace var)
-;;          #t ;; inline --> requires passing new param everywhere, though
+;;          #f ;; inline, so disable CPS on this pass
 ;;         )
 ;        ))
 
