@@ -224,13 +224,6 @@
           input-program))
       (trace:info "---------------- after func->primitive conversion:")
       (trace:info input-program) ;pretty-print
-
-      (trace:info "---------------- results of inlinable-top-level-function analysis: ")
-      (for-each
-        (lambda (e)
-          (if (inlinable-top-level-function? e)
-              (trace:info (define->var e))))
-        input-program)
     
       (let ((cps (map 
                    (lambda (expr)
