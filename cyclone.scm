@@ -216,6 +216,20 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
+      ;; Identify native Scheme functions that can be inlined
+;      (define inlinable-scheme-fncs '())
+;      (for-each
+;        (lambda (e)
+;          (when (inlinable-top-level-function? e)
+;            (set! inlinable-scheme-fncs
+;              (cons (define->var e) inlinable-scheme-fncs))
+;            ;; TESTING, will not work yet
+;            (prim:add-udf! (define->var e) (define-c->inline-var e))
+;        ))
+;        input-program)
+;      (trace:info "---------------- results of inlinable-top-level-function analysis: ")
+;      (trace:info inlinable-scheme-fncs)
+
       ;; Convert some function calls to primitives, if possible
       (set! input-program 
         (map
@@ -224,13 +238,6 @@
           input-program))
       (trace:info "---------------- after func->primitive conversion:")
       (trace:info input-program) ;pretty-print
-
-      (trace:info "---------------- results of inlinable-top-level-function analysis: ")
-      (for-each
-        (lambda (e)
-          (if (inlinable-top-level-function? e)
-              (trace:info (define->var e))))
-        input-program)
     
       (let ((cps (map 
                    (lambda (expr)
