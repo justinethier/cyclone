@@ -833,6 +833,17 @@
      (c-compile-exp 
       body append-preamble cont
       (st:add-function! trace var)))
+
+   ;; Add inline global definition also, if applicable
+;   (if (and (lambda? body)
+;            (prim:udf? exp)
+;       (add-global 
+;         (define-c->inline-var exp)
+;         (lambda? body) 
+;         (c-compile-exp 
+;          body append-preamble cont
+;          (st:add-function! trace var)))
+
    (c-code/vars "" (list ""))))
 
 (define (c-compile-raw-global-lambda exp append-preamble cont trace . inline?)
@@ -903,7 +914,7 @@
 ;; once given a C name, produce a C function
 ;; definition with that name.
 
-;; These procedures are stored up an eventually 
+;; These procedures are stored up and eventually 
 ;; emitted.
 
 ; type lambda-id = natural
@@ -922,8 +933,8 @@
     id))
 
 ; get-lambda : lambda-id -> (symbol -> string)
-(define (get-lambda id)
-  (cdr (assv id lambdas)))
+;(define (get-lambda id)
+;  (cdr (assv id lambdas)))
 
 (define (lambda->env exp)
     (let ((formals (lambda-formals->list exp)))
