@@ -224,7 +224,10 @@
             (set! inlinable-scheme-fncs
               (cons (define->var e) inlinable-scheme-fncs))
             ;; TESTING, will not work yet
-            ;(prim:add-udf! (define->var e) (define-c->inline-var e))
+            (set! module-globals
+              (cons (define-c->inline-var e) module-globals))
+            (prim:add-udf! (define->var e) (define-c->inline-var e))
+            ;; END
         ))
         input-program)
       (trace:info "---------------- results of inlinable-top-level-function analysis: ")
@@ -326,6 +329,9 @@
     
       (trace:info "---------------- C headers: ")
       (trace:info c-headers)
+
+      (trace:info "---------------- module globals: ")
+      (trace:info module-globals)
 
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 
