@@ -765,17 +765,27 @@
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace cps?))
                 (this-cont (c:body cfun))
                 (cargs (c-compile-args (cdr args) append-preamble "  " this-cont trace cps?)))
-           (set-c-call-arity! (c:num-args cargs))
-           (c-code 
-             (string-append
-               (c:allocs->str (c:allocs cfun) "\n")
-               (c:allocs->str (c:allocs cargs) "\n")
-               "return_closcall" (number->string (c:num-args cargs))
-               "(data,"
-               this-cont
-               (if (> (c:num-args cargs) 0) "," "")
-               (c:body cargs)
-               ");"))))
+           (cond
+             ((not cps?)
+              (c-code 
+                (string-append
+                  (c:allocs->str (c:allocs cfun) "\n")
+                  (c:allocs->str (c:allocs cargs) "\n")
+                  "return_copy(ptr,"
+                  (c:body cargs)
+                  ");")))
+             (else
+              (set-c-call-arity! (c:num-args cargs))
+              (c-code 
+                (string-append
+                  (c:allocs->str (c:allocs cfun) "\n")
+                  (c:allocs->str (c:allocs cargs) "\n")
+                  "return_closcall" (number->string (c:num-args cargs))
+                  "(data,"
+                  this-cont
+                  (if (> (c:num-args cargs) 0) "," "")
+                  (c:body cargs)
+                  ");"))))))
 
         ((tagged-list? '%closure fun)
          (let* ((cfun (c-compile-closure 
@@ -784,17 +794,27 @@
                 (cargs (c-compile-args
                          args append-preamble "  " this-cont trace cps?))
                 (num-cargs (c:num-args cargs)))
-           (set-c-call-arity! num-cargs)
-           (c-code
-             (string-append
-                (c:allocs->str (c:allocs cfun) "\n")
-                (c:allocs->str (c:allocs cargs) "\n")
-                "return_closcall" (number->string num-cargs)
-                "(data,"
-                this-cont
-                (if (> num-cargs 0) "," "")
-                (c:body cargs)
-                ");"))))
+           (cond
+             ((not cps?)
+              (c-code
+                (string-append
+                   (c:allocs->str (c:allocs cfun) "\n")
+                   (c:allocs->str (c:allocs cargs) "\n")
+                   "return_copy(ptr,"
+                   (c:body cargs)
+                   ");")))
+             (else ;; CPS, IE normal behavior
+               (set-c-call-arity! num-cargs)
+               (c-code
+                 (string-append
+                    (c:allocs->str (c:allocs cfun) "\n")
+                    (c:allocs->str (c:allocs cargs) "\n")
+                    "return_closcall" (number->string num-cargs)
+                    "(data,"
+                    this-cont
+                    (if (> num-cargs 0) "," "")
+                    (c:body cargs)
+                    ");"))))))
 
         (else
          (error `(Unsupported function application ,exp)))))))
@@ -1162,7 +1182,7 @@
                         append-preamble
                         (mangle env-closure)
                         trace 
-                        #t)))
+                        cps?)))
      (cons 
       (lambda (name)
         (string-append "static " return-type " " name 
