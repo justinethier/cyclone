@@ -1040,6 +1040,34 @@ typedef union {
   bignum_type bignum_t;
 } common_type;
 
+#define return_copy(ptr, obj) \
+{ \
+  tag_type t; \
+  if (is_value_type(obj)) \
+    return obj; \
+  t = type_of(obj); \
+  if (t == boolean_tag ||  /* Pre-allocated */ \
+      t == symbol_tag ||   /* Allocated in their own area */ \
+      t == bignum_tag) {  /* Always heap allocated */ \
+    return obj; \
+  } else if (t == pair_tag) { \
+    ((common_type *)ptr)->pair_t.hdr.mark = gc_color_red; \
+    ((common_type *)ptr)->pair_t.hdr.grayed = 0; \
+    ((common_type *)ptr)->pair_t.tag = pair_tag; \
+    ((common_type *)ptr)->pair_t.pair_car = car(obj); \
+    ((common_type *)ptr)->pair_t.pair_cdr = cdr(obj); \
+    return ptr; \
+  } else if (t == double_tag) { \
+    ((common_type *)ptr)->double_t.hdr.mark = gc_color_red; \
+    ((common_type *)ptr)->double_t.hdr.grayed = 0; \
+    ((common_type *)ptr)->double_t.tag = double_tag; \
+    ((common_type *)ptr)->double_t.value = double_value(obj); \
+    return ptr; \
+  } else { \
+    return obj; \
+  } \
+}
+
 /**@}*/
 /**@}*/
 
