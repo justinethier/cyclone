@@ -1234,7 +1234,6 @@
 ;; Determine if the given top-level function can be freed from CPS, due
 ;; to it only containing calls to code that itself can be inlined.
 (define (inlinable-top-level-function? expr)
-   (define this-fnc-sym (define->var expr))
    (define (scan expr fail)
      (cond
        ((string? expr) (fail))
