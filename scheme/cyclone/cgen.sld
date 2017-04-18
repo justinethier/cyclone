@@ -814,6 +814,15 @@
 (define (add-global-inline var-sym)
   (set! *global-inlines* (cons var-sym *global-inlines*)))
 
+;; Add a global inlinable function that is written in Scheme.
+;; This is more challenging than define-c forms since the 
+;; code must be compiled again to work without CPS.
+(define *global-inline-scms* '())
+(define (add-global-inline-scm-lambda var-sym code)
+  (add-global-inline var-sym)
+  (set! *global-inline-scms* 
+        (cons (list var-sym code) *global-inline-scms*)))
+
 ;; Global compilation
 (define *globals* '())
 (define *global-syms* '())
@@ -835,14 +844,23 @@
       (st:add-function! trace var)))
 
    ;; Add inline global definition also, if applicable
+;   (trace:error `(JAE DEBUG ,var 
+;           ,(lambda? body) 
+;           ,(define-c->inline-var exp)
+;           ,(prim:udf? (define-c->inline-var exp))
+;           ))
 ;   (if (and (lambda? body)
-;            (prim:udf? exp)
+;            (prim:udf? (define-c->inline-var exp)))
 ;       (add-global 
 ;         (define-c->inline-var exp)
-;         (lambda? body) 
-;         (c-compile-exp 
-;          body append-preamble cont
-;          (st:add-function! trace var)))
+;         #t ;; always a lambda
+;   (c-code/vars "TODO" (list "TODO")) ;; Temporary testing!
+;;         (c-compile-exp 
+;;          body append-preamble cont
+;;          (st:add-function! trace var)
+;;          #t ;; inline --> requires passing new param everywhere, though
+;;         )
+;        ))
 
    (c-code/vars "" (list ""))))
 
