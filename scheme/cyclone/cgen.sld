@@ -864,9 +864,9 @@
 
    (c-code/vars "" (list ""))))
 
-(define (c-compile-raw-global-lambda exp append-preamble cont trace . inline?)
+(define (c-compile-raw-global-lambda exp append-preamble cont trace . cps?)
    (let* ((precompiled-sym
-            (if (equal? inline? '(#t))
+            (if (equal? cps? '(#f))
                 'precompiled-inline-lambda
                 'precompiled-lambda))
           (lambda-data
@@ -900,7 +900,7 @@
            append-preamble 
            cont 
            trace
-           #t)))) ;; Inline this one
+           #f)))) ;; Inline this one; CPS will not be used
      ;; Add this define-c
      (add-global 
        (define->var exp)
