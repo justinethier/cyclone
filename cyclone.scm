@@ -218,18 +218,20 @@
 
       ;; Identify native Scheme functions that can be inlined
       (define inlinable-scheme-fncs '())
-      (for-each
-        (lambda (e)
-          (when (inlinable-top-level-function? e)
-            (set! inlinable-scheme-fncs
-              (cons (define->var e) inlinable-scheme-fncs))
-            ;; TESTING, will not work yet
-            (set! module-globals
-              (cons (define-c->inline-var e) module-globals))
-            (prim:add-udf! (define->var e) (define-c->inline-var e))
-            ;; END
-        ))
-        input-program)
+      (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
+        (for-each
+          (lambda (e)
+            (when (and (not (equal? (define->var e) lib-init-fnc))
+                       (inlinable-top-level-function? e))
+              (set! inlinable-scheme-fncs
+                (cons (define->var e) inlinable-scheme-fncs))
+              ;; TESTING, will not work yet
+              (set! module-globals
+                (cons (define-c->inline-var e) module-globals))
+              (prim:add-udf! (define->var e) (define-c->inline-var e))
+              ;; END
+          ))
+          input-program))
       (trace:info "---------------- results of inlinable-top-level-function analysis: ")
       (trace:info inlinable-scheme-fncs)
 
