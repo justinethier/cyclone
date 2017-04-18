@@ -1234,26 +1234,52 @@
 ;; Determine if the given top-level function can be freed from CPS, due
 ;; to it only containing calls to code that itself can be inlined.
 (define (inlinable-top-level-function? expr)
-;; TODO:   (define (scan expr)
-;; TODO:     (cond
-;; TODO:       ((string? expr) #f)
-;; TODO:       ((bytevectors? expr) #f)
-;; TODO:       ((const? expr) #t) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
-;; TODO:       ((ref? expr) #t)
-;; TODO:       ;; if - ok by itself, check clauses
-;; TODO:       ;; prim-app - OK only if prim does not require CPS.
-;; TODO:       ;;            still need to check all its args
-;; TODO:       ;; app - same as prim, only OK if function does not require CPS.
-;; TODO:       ;;       probably safe to return #t if calling self, since if no
-;; TODO:       ;;       CPS it will be rejected anyway
-;; TODO:       ;; define, set - reject
-;; TODO:       ;; lambda of all forms - reject
-;; TODO:       (else #f)))
+   (define (scan expr fail)
+     (cond
+       ((string? expr) (fail))
+       ((bytevector? expr) (fail))
+       ((const? expr) #t) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
+       ((ref? expr) #t)
+       ((if? expr)
+        (scan (if->condition expr) fail)
+        (scan (if->then expr) fail)
+        (scan (if->else expr) fail))
+       ((app? expr)
+        (let ((fnc (car expr)))
+              ;(inline-fnc (prim:func->prim (car expr) (- (length expr) 1))))
+          ;; If function needs CPS, fail right away
+          (if (or (not (prim? fnc)) ;; Eventually need to handle user functions, too
+                  (prim:cont? fnc) ;; Needs CPS
+                  ;(equal? fnc inline-fnc) ;; No inline version
+              )
+              (fail))
+          ;; Otherwise, check for valid args
+          (for-each
+            (lambda (e)
+              (scan e fail))
+            (cdr expr))))
+       ;; prim-app - OK only if prim does not require CPS.
+       ;;            still need to check all its args
+       ;; app - same as prim, only OK if function does not require CPS.
+       ;;       probably safe to return #t if calling self, since if no
+       ;;       CPS it will be rejected anyway
+       ;;  NOTE: would not be able to detect all functions in this module immediately.
+       ;;  would probably have to find some, then run this function successively to find others.
+       ;;
+       ;; define, set - reject
+       ;; lambda of all forms - reject
+       (else (fail))))
   (cond
     ((and (define? expr)
           (lambda? (car (define->exp expr)))
           (equal? 'args:fixed (lambda-formals-type (car (define->exp expr)))))
-     #t) ;; TODO: no, scan lambda body
+     (call/cc
+      (lambda (k)
+        (scan
+          (car (lambda->exp
+                 (car (define->exp expr))))
+          (lambda () (k #f))) ;; Fail with #f
+        (k #t)))) ;; Scanned fine, return #t
     (else #f)))
 ;;
 ;; Helpers to syntax check primitive calls
