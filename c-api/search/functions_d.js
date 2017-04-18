@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['vpbuffer_5fadd',['vpbuffer_add',['../types_8h_a75a7c8dc50900925e39415036f17dae9.html#a75a7c8dc50900925e39415036f17dae9',1,'vpbuffer_add(void **buf, int *len, int i, void *obj):&#160;runtime.c'],['../runtime_8c_a75a7c8dc50900925e39415036f17dae9.html#a75a7c8dc50900925e39415036f17dae9',1,'vpbuffer_add(void **buf, int *len, int i, void *obj):&#160;runtime.c']]],
-  ['vpbuffer_5ffree',['vpbuffer_free',['../types_8h_a24aed87e9e46908d0a5ad680e82b7ff4.html#a24aed87e9e46908d0a5ad680e82b7ff4',1,'vpbuffer_free(void **buf):&#160;runtime.c'],['../runtime_8c_a24aed87e9e46908d0a5ad680e82b7ff4.html#a24aed87e9e46908d0a5ad680e82b7ff4',1,'vpbuffer_free(void **buf):&#160;runtime.c']]],
-  ['vpbuffer_5frealloc',['vpbuffer_realloc',['../types_8h_ac2343bb5210a1e0caf42a915dcef7c91.html#ac2343bb5210a1e0caf42a915dcef7c91',1,'vpbuffer_realloc(void **buf, int *len):&#160;runtime.c'],['../runtime_8c_ac2343bb5210a1e0caf42a915dcef7c91.html#ac2343bb5210a1e0caf42a915dcef7c91',1,'vpbuffer_realloc(void **buf, int *len):&#160;runtime.c']]]
+  ['set_5fenv_5fvariables',['set_env_variables',['../group__prim_gad4a90351f4237dd82fdda26dcb8066bd.html#gad4a90351f4237dd82fdda26dcb8066bd',1,'set_env_variables(char **vars):&#160;runtime.c'],['../group__prim_gad4a90351f4237dd82fdda26dcb8066bd.html#gad4a90351f4237dd82fdda26dcb8066bd',1,'set_env_variables(char **vars):&#160;runtime.c']]],
+  ['str2int',['str2int',['../runtime_8c_ace663d9eab14cdc57554c7de25b666ba.html#ace663d9eab14cdc57554c7de25b666ba',1,'runtime.c']]],
+  ['str_5fis_5fbignum',['str_is_bignum',['../runtime_8c_a0aa8c0e9944b42d7ab31424dee4ebfad.html#a0aa8c0e9944b42d7ab31424dee4ebfad',1,'runtime.c']]]
 ];

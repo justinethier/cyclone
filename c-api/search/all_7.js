@@ -8,6 +8,7 @@ var searchData=
   ['gc_5falloc_5fbignum',['gc_alloc_bignum',['../group__gc__major_gaec0fd25a5b345b9ad50842b08bed4027.html#gaec0fd25a5b345b9ad50842b08bed4027',1,'gc_alloc_bignum(gc_thread_data *data):&#160;gc.c'],['../group__gc__major_gaec0fd25a5b345b9ad50842b08bed4027.html#gaec0fd25a5b345b9ad50842b08bed4027',1,'gc_alloc_bignum(gc_thread_data *data):&#160;gc.c']]],
   ['gc_5falloc_5fcolor',['gc_alloc_color',['../structgc__thread__data__t_a00833ff092d944d2f054a6efcfa8df97.html#a00833ff092d944d2f054a6efcfa8df97',1,'gc_thread_data_t']]],
   ['gc_5falloc_5ffrom_5fbignum',['gc_alloc_from_bignum',['../gc_8c_a9f542dda06a1a342304c570baf6347a0.html#a9f542dda06a1a342304c570baf6347a0',1,'gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src):&#160;gc.c'],['../types_8h_a9f542dda06a1a342304c570baf6347a0.html#a9f542dda06a1a342304c570baf6347a0',1,'gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src):&#160;gc.c']]],
+  ['gc_5falloc_5fpair',['gc_alloc_pair',['../runtime_8c_a31873b93b0f42e473078b4b667396fab.html#a31873b93b0f42e473078b4b667396fab',1,'runtime.c']]],
   ['gc_5fallocated_5fbytes',['gc_allocated_bytes',['../group__gc__major_ga2f62288e6f57fe9fbff4bae5bd782e44.html#ga2f62288e6f57fe9fbff4bae5bd782e44',1,'gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r):&#160;gc.c'],['../group__gc__major_ga2f62288e6f57fe9fbff4bae5bd782e44.html#ga2f62288e6f57fe9fbff4bae5bd782e44',1,'gc_allocated_bytes(object obj, gc_free_list *q, gc_free_list *r):&#160;gc.c']]],
   ['gc_5fargs',['gc_args',['../structgc__thread__data__t_a157d435dd6793a2ad61a123b39240baa.html#a157d435dd6793a2ad61a123b39240baa',1,'gc_thread_data_t']]],
   ['gc_5fcollection_5fthreshold',['GC_COLLECTION_THRESHOLD',['../group__gc__major_ga11081c291bf7b8ca714d6ba09e0912d7.html#ga11081c291bf7b8ca714d6ba09e0912d7',1,'types.h']]],
@@ -91,6 +92,5 @@ var searchData=
   ['global_5ftable',['global_table',['../group__prim__glo_gac52bad1e086d5f0dc519027ea19f32c4.html#gac52bad1e086d5f0dc519027ea19f32c4',1,'global_table():&#160;runtime.c'],['../group__prim__glo_gac52bad1e086d5f0dc519027ea19f32c4.html#gac52bad1e086d5f0dc519027ea19f32c4',1,'global_table():&#160;runtime.c']]],
   ['grayed',['grayed',['../structgc__header__type__t_a05168ba505698eb154858ce0c8e917e6.html#a05168ba505698eb154858ce0c8e917e6',1,'gc_header_type_t::grayed()'],['../group__gc__major_gaf98d32e8f592dc38f4cd01c153e91a2d.html#gaf98d32e8f592dc38f4cd01c153e91a2d',1,'grayed():&#160;types.h']]],
   ['grow_5fheap_5fby_5fsize',['GROW_HEAP_BY_SIZE',['../group__gc__major_ga91caaa8e3c877e2780b365e593bbfef9.html#ga91caaa8e3c877e2780b365e593bbfef9',1,'types.h']]],
-  ['garbage_20collection',['Garbage collection',['../group__prim__gc.html',1,'']]],
-  ['global_20table',['Global table',['../group__prim__glo.html',1,'']]]
+  ['garbage_20collection',['Garbage collection',['../group__prim__gc.html',1,'']]]
 ];

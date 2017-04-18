@@ -64,7 +64,32 @@ $(function() {
 <div class="title">Changelog </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h2>Next Release (Tentatively 0.4) - TBD</h2>
+<div class="textblock"><h2>0.5.1 - TBD</h2>
+<ul>
+<li>Prevent potential memory corruption when working with large vectors that cannot be allocated on the stack.</li>
+</ul>
+<h2>0.5 - April 14, 2017</h2>
+<p>Features</p>
+<ul>
+<li>Cyclone now has support in the interpreter for loading libraries via <code>import</code>. This is probably the most important change in this release and allows <code>icyc</code> to be used to its full potential.</li>
+<li><p class="startli">Store parameter objects in such a way that changes to a parameter object do not affect other threads that use the same parameter object.</p>
+<p class="startli">The specific requirement from R<sup>7</sup>RS is:</p>
+<p class="startli">&gt; <code>parameterize</code> must not change the associated values of any parameters in any thread other than the current thread and threads created inside the <code>parameterize</code> body.</p>
+</li>
+<li>Added bignum support to SRFI 60 - integers as bits.</li>
+<li>Normalize the result of <code>string-&gt;number</code> such that bignums are only returned if the result truly is a bignum.</li>
+<li>Allow Cyclone to find <code>(cyclone)</code> prefixed libraries installed in Cyclone's system folder.</li>
+<li>Allow a library to export identifiers that are exported by another library. Previously a library could only export identifiers that it defined directly.</li>
+<li>Raise an error if an unknown identifier is found in a library's <code>export</code> list.</li>
+<li>Aric Belsito removed a hardcoded call to <code>cyclone</code> from the Makefile when building <code>generate-c</code>. Thanks!</li>
+<li>Allow <code>cyclone</code> to inline character comparison functions (<code>char=?</code>, etc) when only two arguments are present, for a significant speed improvement.</li>
+</ul>
+<p>Bug Fixes</p>
+<ul>
+<li>Prevent exception handlers from being accidentally collected when the collector cooperates on behalf of a mutator.</li>
+<li>Fixed a regression where <code>string-&gt;number</code> returns <code>0</code> on bad input instead of <code>#f</code>.</li>
+</ul>
+<h2>0.4 - March 9, 2017</h2>
 <ul>
 <li>Added a new bignum type to support exact integers of practically unlimited size.</li>
 <li>As part of the bignum changes, modified the code for exact integer arithmetic to detect overflow.</li>

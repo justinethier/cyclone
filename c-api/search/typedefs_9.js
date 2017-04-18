@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tag_5ftype',['tag_type',['../group__objects_gaf08305e847b96d1bbe60be47d08e9589.html#gaf08305e847b96d1bbe60be47d08e9589',1,'types.h']]]
+  ['symbol',['symbol',['../group__objects_ga6e2275016b341ac6b813eefbced33d77.html#ga6e2275016b341ac6b813eefbced33d77',1,'types.h']]]
 ];
