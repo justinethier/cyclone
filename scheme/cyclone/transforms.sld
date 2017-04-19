@@ -1272,11 +1272,17 @@
           (equal? 'args:fixed (lambda-formals-type (car (define->exp expr)))))
      (call/cc
       (lambda (k)
-        (scan
-          (car (lambda->exp
-                 (car (define->exp expr))))
-          (lambda () (k #f))) ;; Fail with #f
-        (k #t)))) ;; Scanned fine, return #t
+        (let* ((define-body (car (define->exp expr)))
+               (lambda-body (lambda->exp define-body)))
+          (cond
+            ((> (length lambda-body) 1)
+             (k #f)) ;; Fail with more than one expression in lambda body,
+                     ;; because CPS is required to compile that.
+            (else
+              (scan
+                (car lambda-body)
+                (lambda () (k #f))) ;; Fail with #f
+              (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
 ;;
 ;; Helpers to syntax check primitive calls
