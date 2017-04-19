@@ -734,7 +734,9 @@
                     (if (prim/c-var-assign fun)
                       ;; Add a comma if there were any args to the func added by comp-prim
                       (if (or (str-ending? (car (c:allocs c-fun)) "(") 
-                              (prim:cont/no-args? fun))
+                              (prim:cont/no-args? fun)
+                              (and (prim:udf? fun)
+                                   (zero? num-args)))
                         "" 
                         ",")
                       ",")
