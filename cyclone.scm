@@ -221,7 +221,8 @@
       (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
         (for-each
           (lambda (e)
-            (when (and (not (equal? (define->var e) lib-init-fnc))
+            (when (and (define? e)
+                       (not (equal? (define->var e) lib-init-fnc))
                        (inlinable-top-level-function? e))
               (set! inlinable-scheme-fncs
                 (cons (define->var e) inlinable-scheme-fncs))
