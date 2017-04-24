@@ -878,8 +878,10 @@
 ;           ,(define-c->inline-var exp)
 ;           ,(prim:udf? (define-c->inline-var exp))
 ;           ))
-   (if (and (lambda? body)
-            (prim:udf? (define-c->inline-var exp)))
+   (when (and (lambda? body)
+              (prim:udf? (define-c->inline-var exp)))
+       (add-global-inline 
+         (define-c->inline-var exp))
        (add-global 
          (define-c->inline-var exp)
          #t ;; always a lambda
