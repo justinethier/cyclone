@@ -1046,18 +1046,7 @@ typedef union {
   if (!is_object_type(obj)) \
     return obj; \
   t = type_of(obj); \
-  if (t == boolean_tag ||  /* Pre-allocated */ \
-      t == symbol_tag ||   /* Allocated in their own area */ \
-      t == bignum_tag) {  /* Always heap allocated */ \
-    return obj; \
-  } else if (0 && t == pair_tag) { \
-    ((common_type *)ptr)->pair_t.hdr.mark = gc_color_red; \
-    ((common_type *)ptr)->pair_t.hdr.grayed = 0; \
-    ((common_type *)ptr)->pair_t.tag = pair_tag; \
-    ((common_type *)ptr)->pair_t.pair_car = car(obj); \
-    ((common_type *)ptr)->pair_t.pair_cdr = cdr(obj); \
-    return ptr; \
-  } else if (t == double_tag) { \
+  if (t == double_tag) { \
     ((common_type *)ptr)->double_t.hdr.mark = gc_color_red; \
     ((common_type *)ptr)->double_t.hdr.grayed = 0; \
     ((common_type *)ptr)->double_t.tag = double_tag; \
