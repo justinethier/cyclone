@@ -216,6 +216,27 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
+;;; EXPERIMENTAL CODE
+;;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
+;;; TODO: probably not good enough since inlines are not in export list
+;(for-each
+;  (lambda (psyms)
+;    (let ((var (car psyms)) (inline (cdr psyms)))
+;      (prim:add-udf! var inline)))
+;  (eval '(c_schemebase_inlinable_lambdas)))
+;  ;(assoc 'quotient (c_schemebase_inlinable_lambdas))
+;  ;    (set! globals (append (lib:idb:ids imported-vars) module-globals))
+;
+;  ;; total hack to update export list
+;  (set! imported-vars 
+;    (append
+;      imported-vars
+;      (map
+;        (lambda (psyms)
+;          (list (cdr psyms) 'scheme 'base))
+;        (eval '(c_schemebase_inlinable_lambdas)))))
+;;; END
+
       ;; Convert some function calls to primitives, if possible
       (set! input-program 
         (map
@@ -225,7 +246,7 @@
       (trace:info "---------------- after func->primitive conversion:")
       (trace:info input-program) ;pretty-print
 
-      ;; Identify native Scheme functions that can be inlined
+      ;; Identify native Scheme functions (from module being compiled) that can be inlined
       (define inlinable-scheme-fncs '())
       (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
         (for-each
