@@ -840,17 +840,17 @@
 
 ;; Global inlinable functions
 (define *global-inlines* '())
-(define (add-global-inline var-sym)
-  (set! *global-inlines* (cons var-sym *global-inlines*)))
+(define (add-global-inline orig-sym inline-sym)
+  (set! *global-inlines* (cons (cons orig-sym inline-sym) *global-inlines*)))
 
 ;; Add a global inlinable function that is written in Scheme.
 ;; This is more challenging than define-c forms since the 
 ;; code must be compiled again to work without CPS.
-(define *global-inline-scms* '())
-(define (add-global-inline-scm-lambda var-sym code)
-  (add-global-inline var-sym)
-  (set! *global-inline-scms* 
-        (cons (list var-sym code) *global-inline-scms*)))
+;(define *global-inline-scms* '())
+;(define (add-global-inline-scm-lambda var-sym code)
+;  (add-global-inline var-sym )
+;  (set! *global-inline-scms* 
+;        (cons (list var-sym code) *global-inline-scms*)))
 
 ;; Global compilation
 (define *globals* '())
@@ -881,6 +881,7 @@
    (when (and (lambda? body)
               (prim:udf? (define-c->inline-var exp)))
        (add-global-inline 
+         var
          (define-c->inline-var exp))
        (add-global 
          (define-c->inline-var exp)
@@ -924,7 +925,7 @@
        (let ((fnc-sym 
                (define-c->inline-var exp)))
           ;(trace:error `(JAE define-c inline detected ,fnc-sym))
-         (add-global-inline fnc-sym)
+         (add-global-inline (define->var exp) fnc-sym)
          (c-compile-raw-global-lambda 
            `(define-c ,fnc-sym ,@(cddddr exp))
            append-preamble 
@@ -1418,14 +1419,10 @@
               (head-pair #f))
           (for-each
             (lambda (g)
-              (let ((cvar-sym (mangle (gensym 'cvar)))
-                    (pair-sym (mangle (gensym 'pair))))
-               (emits* 
-                   "  make_cvar(" cvar-sym 
-                   ", (object *)&" (cgen:mangle-global g) ");")
+              (let ((pair-sym (mangle (gensym 'pair))))
                (emits*
-                   "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string g)
-                   "\"), &" cvar-sym ");\n")
+                   "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
+                   "\"), find_or_add_symbol(\"" (symbol->string (cdr g)) "\"));\n")
                (set! pairs (cons pair-sym pairs))))
             *global-inlines*)
             ;; Link the pairs
