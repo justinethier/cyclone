@@ -217,6 +217,12 @@
       (trace:info input-program) ;pretty-print
 
 ;;; EXPERIMENTAL CODE
+;;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
+;;;       behind an exception handler (in case the compiler does not have that module loaded).
+;;;
+;;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
+;;;       and if not loaded, eval/import it and try again.
+;;;
 ;;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
 ;;; TODO: probably not good enough since inlines are not in export list
 ;(for-each
