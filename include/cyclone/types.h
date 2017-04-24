@@ -1050,7 +1050,7 @@ typedef union {
       t == symbol_tag ||   /* Allocated in their own area */ \
       t == bignum_tag) {  /* Always heap allocated */ \
     return obj; \
-  } else if (t == pair_tag) { \
+  } else if (0 && t == pair_tag) { \
     ((common_type *)ptr)->pair_t.hdr.mark = gc_color_red; \
     ((common_type *)ptr)->pair_t.hdr.grayed = 0; \
     ((common_type *)ptr)->pair_t.tag = pair_tag; \
