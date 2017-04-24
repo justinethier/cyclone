@@ -1234,6 +1234,34 @@
 ;; Determine if the given top-level function can be freed from CPS, due
 ;; to it only containing calls to code that itself can be inlined.
 (define (inlinable-top-level-function? expr)
+    ;; TODO: consolidate with same function in cps-optimizations module
+    (define (prim-creates-mutable-obj? prim)
+      (member 
+        prim
+        '(
+          apply ;; ??
+          cons 
+          make-vector 
+          make-bytevector
+          bytevector 
+          bytevector-append 
+          bytevector-copy
+          string->utf8 
+          number->string 
+          symbol->string 
+          list->string 
+          utf8->string
+          read-line
+          string-append 
+          string 
+          substring 
+          Cyc-installation-dir 
+          Cyc-compilation-environment
+          Cyc-bytevector-copy
+          Cyc-utf8->string
+          Cyc-string->utf8
+          list->vector
+          )))
    (define (scan expr fail)
      (cond
        ((string? expr) (fail))
@@ -1252,6 +1280,8 @@
                   (prim:mutates? fnc) ;; This is too conservative, but basically
                                       ;; there are restrictions about optimizing
                                       ;; args to a mutator, so reject them for now
+                  (prim-creates-mutable-obj? fnc) ;; Again, probably more conservative
+                                                  ;; than necessary
               )
               (fail))
           ;; Otherwise, check for valid args
