@@ -1043,7 +1043,7 @@ typedef union {
 #define return_copy(ptr, obj) \
 { \
   tag_type t; \
-  if (is_value_type(obj)) \
+  if (!is_object_type(obj)) \
     return obj; \
   t = type_of(obj); \
   if (t == boolean_tag ||  /* Pre-allocated */ \
