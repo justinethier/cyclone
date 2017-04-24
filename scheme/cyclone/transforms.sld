@@ -1249,6 +1249,9 @@
           ;; If function needs CPS, fail right away
           (if (or (not (prim? fnc)) ;; Eventually need to handle user functions, too
                   (prim:cont? fnc) ;; Needs CPS
+                  (prim:mutates? fnc) ;; This is too conservative, but basically
+                                      ;; there are restrictions about optimizing
+                                      ;; args to a mutator, so reject them for now
               )
               (fail))
           ;; Otherwise, check for valid args
