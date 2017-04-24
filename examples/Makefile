@@ -48,3 +48,5 @@ clean:
 	cd threading ; rm -rf *.o *.c *.meta
 	cd game-of-life ; make clean
 	cd hello-library ; make clean
+	cd networking ; rm -rf client.c server.c
+
