@@ -216,15 +216,30 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
-;;; EXPERIMENTAL CODE
-;;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
-;;;       behind an exception handler (in case the compiler does not have that module loaded).
-;;;
-;;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
-;;;       and if not loaded, eval/import it and try again.
-;;;
-;;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
-;;; TODO: probably not good enough since inlines are not in export list
+;; EXPERIMENTAL CODE
+;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
+;;       behind an exception handler (in case the compiler does not have that module loaded).
+;;
+;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
+;;       and if not loaded, eval/import it and try again.
+;;
+;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
+;; TODO: probably not good enough since inlines are not in export list
+
+;(for-each
+;  (lambda (import)
+;    (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
+;           (inlinable-lambdas-fnc 
+;            (string->symbol
+;              (string-append "c_" lib-name-str "_inlinable_lambdas"))))
+;TODO: no, only import if not previously loaded. may need a new export for this
+;    #t ;(eval `(import ,import))
+;    (%import import)
+;    ;(define vars/inlines (eval `( ,inlinable-lambdas-fnc )))
+;    ;(trace:info `(DEBUG ,import ,vars/inlines))
+;  ))
+;  imports)
+
 ;(for-each
 ;  (lambda (psyms)
 ;    (let ((var (car psyms)) (inline (cdr psyms)))
@@ -241,7 +256,7 @@
 ;        (lambda (psyms)
 ;          (list (cdr psyms) 'scheme 'base))
 ;        (eval '(c_schemebase_inlinable_lambdas)))))
-;;; END
+;; END
 
       ;; Convert some function calls to primitives, if possible
       (set! input-program 
