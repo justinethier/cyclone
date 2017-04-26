@@ -228,34 +228,37 @@
 
 (for-each
   (lambda (import)
-    (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
-           (inlinable-lambdas-fnc 
-            (string->symbol
-              (string-append "c_" lib-name-str "_inlinable_lambdas"))))
-    (cond
-      ((imported? import)
-       (let ((lib-name (lib:list->import-set import))
-             (vars/inlines (eval `( ,inlinable-lambdas-fnc ))))
-         (trace:info `(DEBUG ,import ,vars/inlines))
-         ;; Register inlines as user-defined primitives
-         (for-each
-           (lambda (v/i)
-             (let ((var (car v/i)) (inline (cdr v/i)))
-               (prim:add-udf! var inline)))
-           vars/inlines)
-         ;; Keep track of inline version of functions along with other imports
-         (set! imported-vars 
-           (append
-             imported-vars
-             (map
-               (lambda (v/i)
-                 (cons (cdr v/i) lib-name))
-               vars/inlines)))))
-      (else
-        ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
-        ;;(%import import)
-        #f))
-  ))
+    (with-handler
+      (lambda (err)
+        #f)
+      (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
+             (inlinable-lambdas-fnc 
+              (string->symbol
+                (string-append "c_" lib-name-str "_inlinable_lambdas"))))
+      (cond
+        ((imported? import)
+         (let ((lib-name (lib:list->import-set import))
+               (vars/inlines (eval `( ,inlinable-lambdas-fnc ))))
+           (trace:info `(DEBUG ,import ,vars/inlines))
+           ;; Register inlines as user-defined primitives
+           (for-each
+             (lambda (v/i)
+               (let ((var (car v/i)) (inline (cdr v/i)))
+                 (prim:add-udf! var inline)))
+             vars/inlines)
+           ;; Keep track of inline version of functions along with other imports
+           (set! imported-vars 
+             (append
+               imported-vars
+               (map
+                 (lambda (v/i)
+                   (cons (cdr v/i) lib-name))
+                 vars/inlines)))))
+        (else
+          ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
+          ;;(%import import)
+          ;; if this work is done, would need to consolidate inline reg code above
+          #f)))))
   imports)
 
 ;(for-each
