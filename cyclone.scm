@@ -226,19 +226,37 @@
 ;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
 ;; TODO: probably not good enough since inlines are not in export list
 
-;(for-each
-;  (lambda (import)
-;    (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
-;           (inlinable-lambdas-fnc 
-;            (string->symbol
-;              (string-append "c_" lib-name-str "_inlinable_lambdas"))))
-;TODO: no, only import if not previously loaded. may need a new export for this
-;    #t ;(eval `(import ,import))
-;    (%import import)
-;    ;(define vars/inlines (eval `( ,inlinable-lambdas-fnc )))
-;    ;(trace:info `(DEBUG ,import ,vars/inlines))
-;  ))
-;  imports)
+(for-each
+  (lambda (import)
+    (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
+           (inlinable-lambdas-fnc 
+            (string->symbol
+              (string-append "c_" lib-name-str "_inlinable_lambdas"))))
+    (cond
+      ((imported? import)
+       (let ((lib-name (lib:list->import-set import))
+             (vars/inlines (eval `( ,inlinable-lambdas-fnc ))))
+         (trace:info `(DEBUG ,import ,vars/inlines))
+         ;; Register inlines as user-defined primitives
+         (for-each
+           (lambda (v/i)
+             (let ((var (car v/i)) (inline (cdr v/i)))
+               (prim:add-udf! var inline)))
+           vars/inlines)
+         ;; Keep track of inline version of functions along with other imports
+         (set! imported-vars 
+           (append
+             imported-vars
+             (map
+               (lambda (v/i)
+                 (cons (cdr v/i) lib-name))
+               vars/inlines)))))
+      (else
+        ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
+        ;;(%import import)
+        #f))
+  ))
+  imports)
 
 ;(for-each
 ;  (lambda (psyms)
