@@ -239,6 +239,8 @@
         ((imported? import)
          (let ((lib-name (lib:list->import-set import))
                (vars/inlines
+TODO: if this filtering out too many (or all) the candidates??
+need to test this (filter) out more
                  (filter
                   (lambda (v/i)
                     ;; Try to avoid name conflicts
