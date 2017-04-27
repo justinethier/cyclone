@@ -238,7 +238,12 @@
       (cond
         ((imported? import)
          (let ((lib-name (lib:list->import-set import))
-               (vars/inlines (eval `( ,inlinable-lambdas-fnc ))))
+               (vars/inlines
+                 (filter
+                  (lambda (v/i)
+                    ;; Try to avoid name conflicts
+                    (not (member (car v/i) globals)))
+                  (eval `( ,inlinable-lambdas-fnc )))))
            (trace:info `(DEBUG ,import ,vars/inlines))
            ;; Register inlines as user-defined primitives
            (for-each
