@@ -1261,7 +1261,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
 (define identifier? symbol?)
-(define (identifier->symbol obj) obj)
+;(define (identifier->symbol obj) obj)
 (define (find-tail pred ls)
   (and (pair? ls) (if (pred (car ls)) ls (find-tail pred (cdr ls)))))
 
@@ -1363,7 +1363,8 @@
                                          (next-symbol
                                           (string-append
                                            (symbol->string
-                                            (identifier->symbol (car x)))
+                                            (car x))
+                                            ;(identifier->symbol (car x)))
                                            "-ls")))
                                        new-vars))
                          (once
