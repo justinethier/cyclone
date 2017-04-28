@@ -314,26 +314,31 @@
       (trace:info input-program) ;pretty-print
 
       ;; Identify native Scheme functions (from module being compiled) that can be inlined
-;; TODO: this will never work 100%. I suggest Scheme code needs to be able to make functions as inline, and the code below will run those functions through the inlinable-top-level-lambda? check below.
+      ;;
+      ;; NOTE: There is a chicken-and-egg problem here that prevents this from 
+      ;; automatically working 100%. Basically we need to know whether the inline logic will
+      ;; work for a given candidate. The problem is, the only way to do that is to run the
+      ;; code through CPS and by then we would have to go back and repeat many phases if a
+      ;; candidate fails the inline tests. At least for now, an alternative is to require 
+      ;; user code to specify (via inline) what functions the compiler should try inlining.
+      ;; There is a small chance one of those inlines can pass these tests and still fail
+      ;; the subsequent inline checks though, which causes an error in the C compiler.
       (define inlinable-scheme-fncs '())
       (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
         (for-each
           (lambda (e)
             (when (and (define? e)
-                       #f ;; TODO: replace with lookup check from user-specified inline list
+                       (member (define->var e) inlines) ;; Primary check, did use request inline
                        (not (equal? (define->var e) lib-init-fnc))
-                       (inlinable-top-level-lambda? e))
+                       (inlinable-top-level-lambda? e)) ;; Failsafe, reject if basic checks fail
               (set! inlinable-scheme-fncs
                 (cons (define->var e) inlinable-scheme-fncs))
-              ;; TESTING, will not work yet
               (set! module-globals
                 (cons (define-c->inline-var e) module-globals))
-              (prim:add-udf! (define->var e) (define-c->inline-var e))
-              ;; END
-          ))
-          input-program))
-      (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
-      (trace:info inlinable-scheme-fncs)
+              (prim:add-udf! (define->var e) (define-c->inline-var e))))
+          input-program)
+        (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
+        (trace:info inlinable-scheme-fncs))
     
       (let ((cps (map 
                    (lambda (expr)
