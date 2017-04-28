@@ -105,7 +105,6 @@
     pos-in-list 
     closure-convert 
     prim-convert
-    inlinable-top-level-function?
   )
   (begin
 
@@ -1231,92 +1230,6 @@
         ast)))
   (conv expr))
 
-;; Determine if the given top-level function can be freed from CPS, due
-;; to it only containing calls to code that itself can be inlined.
-(define (inlinable-top-level-function? expr)
-    ;; TODO: consolidate with same function in cps-optimizations module
-    (define (prim-creates-mutable-obj? prim)
-      (member 
-        prim
-        '(
-          apply ;; ??
-          cons 
-          make-vector 
-          make-bytevector
-          bytevector 
-          bytevector-append 
-          bytevector-copy
-          string->utf8 
-          number->string 
-          symbol->string 
-          list->string 
-          utf8->string
-          read-line
-          string-append 
-          string 
-          substring 
-          Cyc-installation-dir 
-          Cyc-compilation-environment
-          Cyc-bytevector-copy
-          Cyc-utf8->string
-          Cyc-string->utf8
-          list->vector
-          )))
-   (define (scan expr fail)
-     (cond
-       ((string? expr) (fail))
-       ((bytevector? expr) (fail))
-       ((const? expr) #t) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
-       ((ref? expr) #t)
-       ((if? expr)
-        (scan (if->condition expr) fail)
-        (scan (if->then expr) fail)
-        (scan (if->else expr) fail))
-       ((app? expr)
-        (let ((fnc (car expr)))
-          ;; If function needs CPS, fail right away
-          (if (or (not (prim? fnc)) ;; Eventually need to handle user functions, too
-                  (prim:cont? fnc) ;; Needs CPS
-                  (prim:mutates? fnc) ;; This is too conservative, but basically
-                                      ;; there are restrictions about optimizing
-                                      ;; args to a mutator, so reject them for now
-                  (prim-creates-mutable-obj? fnc) ;; Again, probably more conservative
-                                                  ;; than necessary
-              )
-              (fail))
-          ;; Otherwise, check for valid args
-          (for-each
-            (lambda (e)
-              (scan e fail))
-            (cdr expr))))
-       ;; prim-app - OK only if prim does not require CPS.
-       ;;            still need to check all its args
-       ;; app - same as prim, only OK if function does not require CPS.
-       ;;       probably safe to return #t if calling self, since if no
-       ;;       CPS it will be rejected anyway
-       ;;  NOTE: would not be able to detect all functions in this module immediately.
-       ;;  would probably have to find some, then run this function successively to find others.
-       ;;
-       ;; Reject everything else - define, set, lambda
-       (else (fail))))
-  (cond
-    ((and (define? expr)
-          (lambda? (car (define->exp expr)))
-          (equal? 'args:fixed (lambda-formals-type (car (define->exp expr)))))
-     (call/cc
-      (lambda (k)
-        (let* ((define-body (car (define->exp expr)))
-               (lambda-body (lambda->exp define-body)))
-          (cond
-            ((> (length lambda-body) 1)
-             (k #f)) ;; Fail with more than one expression in lambda body,
-                     ;; because CPS is required to compile that.
-            (else
-              (scan
-                (car lambda-body)
-                (lambda () (k #f))) ;; Fail with #f
-              (k #t))))))) ;; Scanned fine, return #t
-    (else #f)))
 ;;
 ;; Helpers to syntax check primitive calls
 ;;
