@@ -233,18 +233,26 @@
      (call/cc
       (lambda (k)
         (let* ((define-body (car (define->exp expr)))
-               (lambda-body (lambda->exp define-body)))
+               (lambda-body (lambda->exp define-body))
+               (fv (filter 
+                     (lambda (v)
+                       (not (prim? v)))
+                     (free-vars expr)))
+              )
+;(trace:error `(JAE DEBUG ,(define->var expr) ,fv))
           (cond
             ((> (length lambda-body) 1)
              (k #f)) ;; Fail with more than one expression in lambda body,
                      ;; because CPS is required to compile that.
+            ((> (length fv) 1) ;; Reject any free variables to attempt to prevent
+             (k #f))           ;; cases where there is a variable that may be
+                               ;; mutated outside the scope of this function.
             (else
               (scan
                 (car lambda-body)
                 (lambda () (k #f))) ;; Fail with #f
               (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
-
 
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
