@@ -225,6 +225,8 @@
 ;;
 ;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
 ;; TODO: probably not good enough since inlines are not in export list
+;;
+;; TODO: later on, in cgen, only add inlinables that correspond to exported functions
 
 (for-each
   (lambda (import)
@@ -239,14 +241,14 @@
         ((imported? import)
          (let ((lib-name (lib:list->import-set import))
                (vars/inlines
-TODO: if this filtering out too many (or all) the candidates??
-need to test this (filter) out more
                  (filter
                   (lambda (v/i)
-                    ;; Try to avoid name conflicts
-                    (not (member (car v/i) globals)))
+                    ;; Try to avoid name conflicts by not loading inlines
+                    ;; that conflict with identifiers in this module.
+                    ;; More of a band-aid than a true solution, though.
+                    (not (member (car v/i) module-globals)))
                   (eval `( ,inlinable-lambdas-fnc )))))
-           (trace:info `(DEBUG ,import ,vars/inlines))
+           (trace:info `(DEBUG ,import ,vars/inlines ,module-globals))
            ;; Register inlines as user-defined primitives
            (for-each
              (lambda (v/i)
