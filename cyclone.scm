@@ -304,7 +304,7 @@
           (lambda (e)
             (when (and (define? e)
                        (not (equal? (define->var e) lib-init-fnc))
-                       (inlinable-top-level-function? e))
+                       (inlinable-top-level-lambda? e))
               (set! inlinable-scheme-fncs
                 (cons (define->var e) inlinable-scheme-fncs))
               ;; TESTING, will not work yet
@@ -314,7 +314,7 @@
               ;; END
           ))
           input-program))
-      (trace:info "---------------- results of inlinable-top-level-function analysis: ")
+      (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
       (trace:info inlinable-scheme-fncs)
     
       (let ((cps (map 
