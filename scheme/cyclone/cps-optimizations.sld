@@ -959,6 +959,17 @@
                   (analyze:find-inlinable-vars e args)))
             (cdr exp)))
             ;(reverse (cdr exp))))
+;; If primitive mutates its args, ignore if ivar is not mutated (??)
+;((and (prim? (car exp))
+;      (prim:mutates? (car exp))
+;      (> (length exp) 1))
+; (analyze:find-inlinable-vars (cadr exp) args)
+; ;; First param is always mutated
+; (for-each
+;  (lambda (e)
+;    (if (not (ref? e))
+;        (analyze:find-inlinable-vars e args)))
+;  (cddr exp)))
           ((and (not (prim? (car exp)))
                 (ref? (car exp)))
            (define ref-formals '())
