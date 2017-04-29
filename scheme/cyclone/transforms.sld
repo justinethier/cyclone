@@ -106,6 +106,27 @@
     closure-convert 
     prim-convert
   )
+  (inline
+    cell-get->cell
+    cell->value
+    set-cell!->value
+    set-cell!->cell
+    env-get->env
+    env-get->field
+    env-get->id
+    env-make->id
+    closure->fv
+    closure->env
+    closure->lam
+    begin->exps
+    app->args
+    app->fun
+    letrec->exp
+    letrec->bindings
+    let->exp
+    let->bindings
+    void
+  )
   (begin
 
 ;; Container for built-in macros

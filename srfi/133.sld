@@ -1,6 +1,11 @@
 (define-library (srfi 133) ;vectors)
   (import (scheme base))
   (import (scheme cxr))
+  (inline
+    unspecified-value
+    between?
+    nonneg-int?
+  )
   ;; Constructors 
   (export vector-unfold vector-unfold-right vector-reverse-copy 
           vector-concatenate vector-append-subvectors)

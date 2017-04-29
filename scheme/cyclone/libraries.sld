@@ -61,6 +61,10 @@
     lib:idb:entry->library-name
     lib:idb:entry->library-id
   )
+  (inline
+    lib:idb:entry->library-name
+    lib:import-set->import-set
+  )
   (begin
 
 (define (library? ast)

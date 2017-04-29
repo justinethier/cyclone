@@ -25,6 +25,24 @@
     %import
     imported?
   )
+  (inline
+    primitive-implementation
+    procedure-environment
+    procedure-body
+    procedure-parameters
+    operands
+    operator
+    application?
+    if-alternative
+    if-consequent
+    if-predicate
+    lambda-body
+    lambda-parameters
+    definition-variable
+    assignment-value
+    assignment-variable
+    variable?
+  )
   (begin
 
 ;; From r7rs:

@@ -36,6 +36,8 @@
       *msg-peek* *msg-oob* *msg-waitall*
       *shut-rd* *shut-wr* *shut-rdwr*
   )
+  (inline
+    socket->fd)
   (begin
     (define *socket-object-type* '%socket-object-type%)
     (define (socket->fd obj) (cdr obj))

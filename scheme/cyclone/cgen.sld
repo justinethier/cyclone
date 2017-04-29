@@ -28,6 +28,13 @@
     emit-newline
     string-join
   )
+  (inline
+    global-not-lambda?
+    global-lambda?
+    c:num-args
+    c:allocs
+    st:->var
+  )
   (begin
 
 (define (emit line)

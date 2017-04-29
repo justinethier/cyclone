@@ -207,6 +207,22 @@
 ;    letrec-syntax
 ;;;;
   )
+  (inline
+    square
+    quotient
+    numerator
+    denominator
+    truncate
+    negative?
+    positive?
+    zero?
+    not
+    string>=?
+    string>?
+    string<=?
+    string<?
+    string=?
+  )
   (begin
     ;; Features implemented by this Scheme
     (define (features) 

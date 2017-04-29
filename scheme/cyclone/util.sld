@@ -83,6 +83,23 @@
     string-replace-all
     take
     filter)
+  (inline
+    env:frame-values
+    env:frame-variables
+    env:first-frame
+    env:enclosing-environment
+    lambda->exp
+    lambda->formals
+    define->exp
+    set!->exp
+    set!->var
+    ref?
+    app?
+    if->else
+    if->then
+    if->condition
+    tagged-list?
+  )
   (begin
 
 (define (tagged-list? tag exp)
