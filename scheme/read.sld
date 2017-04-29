@@ -16,6 +16,11 @@
     include
     include-ci
   )
+  (inline
+    in-port:get-cnum
+    in-port:get-lnum
+    in-port:get-buf
+  )
   (begin
 
 (define-syntax include
