@@ -826,6 +826,7 @@
               (if (not (adbv:inlinable var))
                   (set! fast-inline #f)))))
           ivars)
+;(trace:error `(DEBUG inline-prim-call ,exp ,ivars ,args ,cannot-inline ,fast-inline))
       (cond
         (cannot-inline #f)
         (else
@@ -914,6 +915,7 @@
            ;; If the code gets this far, assume we came from a place
            ;; that does not allow the var to be inlined. We need to
            ;; explicitly white-list variables that can be inlined.
+; (trace:error `(DEBUG not inlinable ,exp ,args))
            (with-var exp (lambda (var)
              (adbv:set-inlinable! var #f)))))
         ((ast:lambda? exp)
