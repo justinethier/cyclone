@@ -255,7 +255,8 @@
                 (string-append "c_" lib-name-str "_inlinable_lambdas"))))
       (cond
         ((imported? import)
-         (let ((lib-name (lib:list->import-set import))
+         (let ((lib-name (lib:import->library-name 
+                           (lib:list->import-set import)))
                (vars/inlines
                  (filter
                   (lambda (v/i)
