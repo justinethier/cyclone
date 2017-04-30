@@ -190,13 +190,15 @@
       (cddr ast))))
 
 (define (lib:inlines ast)
-  (map
-    (lambda (inc-lst)
-      (cadr inc-lst))
-    (filter
-      (lambda (code)
-        (tagged-list? 'inline code))
-      (cddr ast))))
+  (apply 
+    append
+    (map
+      (lambda (inc-lst)
+        (cdr inc-lst))
+      (filter
+        (lambda (code)
+          (tagged-list? 'inline code))
+        (cddr ast)))))
 
 ;; TODO: include-ci, cond-expand
 
