@@ -36,6 +36,7 @@
       (define module-globals '()) ;; Globals defined by this module
       (define program? #t) ;; Are we building a program or a library?
       (define imports '())
+      (define inlines '())
       (define imported-vars '())
       (define lib-name '())
       (define lib-exports '())
@@ -55,6 +56,7 @@
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
            (set! c-headers (lib:include-c-headers (car input-program)))
+           (set! inlines (lib:inlines (car input-program)))
            (set! lib-exports
              (cons
                (lib:name->symbol lib-name)
@@ -89,6 +91,17 @@
             (set! imports (car reduction))
             (set! input-program (cdr reduction)))
 
+          ;;  Handle inline list, if present`
+          (let ((lis (lib:inlines `(dummy dummy ,@input-program))))
+            (cond
+              ((not (null? lis))
+               (set! inlines lis)
+               (set! input-program 
+                     (filter 
+                       (lambda (expr)
+                         (not (tagged-list? 'inline expr)))
+                       input-program)))))
+
           ;; Handle any C headers
           (let ((headers (lib:include-c-headers `(dummy dummy ,@input-program))))
             (cond
@@ -100,6 +113,9 @@
                          (not (tagged-list? 'include-c-header expr)))
                        input-program)))))
         ))
+
+      (trace:info "inline candidates:")
+      (trace:info inlines)
 
       ;; Process library imports
       (trace:info "imports:")
@@ -298,11 +314,13 @@
       (trace:info input-program) ;pretty-print
 
       ;; Identify native Scheme functions (from module being compiled) that can be inlined
+;; TODO: this will never work 100%. I suggest Scheme code needs to be able to make functions as inline, and the code below will run those functions through the inlinable-top-level-lambda? check below.
       (define inlinable-scheme-fncs '())
       (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
         (for-each
           (lambda (e)
             (when (and (define? e)
+                       #f ;; TODO: replace with lookup check from user-specified inline list
                        (not (equal? (define->var e) lib-init-fnc))
                        (inlinable-top-level-lambda? e))
               (set! inlinable-scheme-fncs
