@@ -1,4 +1,5 @@
-;;; ARRAY1 -- One of the Kernighan and Van Wyk benchmarks.
+;;; A temporary test file, can inlining be done more efficiently here?
+;; if this inline can be done, try with full-up array1
 
 (import (scheme base) (scheme read) (scheme write) (scheme time))
 
