@@ -19,6 +19,7 @@
       inlinable-top-level-lambda?
       optimize-cps 
       analyze-cps
+      ;analyze-lambda-side-effects
       opt:contract
       opt:inline-prims
       adb:clear!
@@ -63,12 +64,17 @@
     (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
-      (%adb:make-var global defined-by const const-value  ref-by
-                     reassigned assigned-value app-fnc-count app-arg-count
-                     inlinable mutated-indirectly)
+      (%adb:make-var 
+        global defined-by 
+        defines-lambda-id
+        const const-value  ref-by
+        reassigned assigned-value 
+        app-fnc-count app-arg-count
+        inlinable mutated-indirectly)
       adb:variable?
       (global adbv:global? adbv:set-global!)
       (defined-by adbv:defined-by adbv:set-defined-by!)
+      (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
@@ -113,7 +119,7 @@
     )
 
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f '() #f #f 0 0 #t #f))
+      (%adb:make-var '? '? #f #f #f '() #f #f 0 0 #t #f))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var side-effects)
@@ -256,10 +262,70 @@
               (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
 
+    (define (analyze-find-lambdas exp lid)
+      (cond
+        ((ast:lambda? exp)
+         (let* ((id (ast:lambda-id exp))
+                (fnc (adb:get/default id (adb:make-fnc))))
+           (adb:set! id fnc)
+           (for-each
+             (lambda (expr)
+               (analyze-find-lambdas expr id))
+             (ast:lambda-body exp))))
+        ((const? exp) #f)
+        ((quote? exp) #f)
+        ((ref? exp) #f)
+        ((define? exp)
+         (let ((val (define->exp exp)))
+           (if (ast:lambda? (car val))
+               (with-var! (define->var exp) (lambda (var)
+                 (adbv:set-defines-lambda-id! 
+                   var (ast:lambda-id (car val)))))))
+         (analyze-find-lambdas (define->exp exp) lid))
+        ((set!? exp)
+         (analyze-find-lambdas (set!->exp exp) lid))
+        ((if? exp)
+         (analyze-find-lambdas (if->condition exp) lid)
+         (analyze-find-lambdas (if->then exp) lid)
+         (analyze-find-lambdas (if->else exp) lid))
+        ((app? exp)
+         (for-each
+           (lambda (e)
+             (analyze-find-lambdas e lid))
+           exp))
+        (else
+          #f)))
+
     ;; Mark each lambda that has side effects.
     ;; For nested lambdas, if a child has side effects also mark the parent
-    ;(define (analyze-lambda-side-effects exp lid)
-
+    #;(define (analyze-lambda-side-effects exp lid)
+      (cond
+        ((ast:lambda? exp)
+         (let* ((id (ast:lambda-id exp))
+                (fnc (adb:get/default id (adb:make-fnc))))
+           (adb:set! id fnc)
+           (for-each
+             (lambda (expr)
+               (analyze-lambda-side-effects expr id))
+             (ast:lambda-body exp))))
+        ((const? exp) #f)
+        ((quote? exp) #f)
+        ((ref? exp) #f)
+        ((define? exp)
+         (analyze-lambda-side-effects (define->exp exp) lid))
+        ((set!? exp)
+         (analyze-lambda-side-effects (set!->exp exp) lid))
+        ((if? exp)
+         (analyze-lambda-side-effects (if->condition exp) lid)
+         (analyze-lambda-side-effects (if->then exp) lid)
+         (analyze-lambda-side-effects (if->else exp) lid))
+        ((app? exp)
+         (for-each
+           (lambda (e)
+             (analyze-lambda-side-effects e lid))
+           exp))
+        (else
+          #f)))
 
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
@@ -1018,6 +1084,7 @@
           (error `(Unexpected expression passed to find inlinable vars ,exp)))))
 
     (define (analyze-cps exp)
+      (analyze-find-lambdas exp -1)
       (analyze exp -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
