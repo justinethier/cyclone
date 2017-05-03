@@ -298,7 +298,7 @@
 
     ;; Mark each lambda that has side effects.
     ;; For nested lambdas, if a child has side effects also mark the parent
-    #;(define (analyze-lambda-side-effects exp lid)
+    (define (analyze-lambda-side-effects exp lid)
       (cond
         ((ast:lambda? exp)
          (let* ((id (ast:lambda-id exp))
@@ -307,23 +307,48 @@
            (for-each
              (lambda (expr)
                (analyze-lambda-side-effects expr id))
-             (ast:lambda-body exp))))
+             (ast:lambda-body exp))
+           ;; If id has side effects, mark parent lid, too
+           (if (and (> lid -1)
+                    (adbf:side-effects fnc))
+               (with-fnc! lid (lambda (f)
+                 (adbf:set-side-effects! f #t))))))
         ((const? exp) #f)
         ((quote? exp) #f)
         ((ref? exp) #f)
         ((define? exp)
          (analyze-lambda-side-effects (define->exp exp) lid))
         ((set!? exp)
+         (with-fnc! lid (lambda (fnc)
+           (adbf:set-side-effects! fnc #t)))
          (analyze-lambda-side-effects (set!->exp exp) lid))
         ((if? exp)
          (analyze-lambda-side-effects (if->condition exp) lid)
          (analyze-lambda-side-effects (if->then exp) lid)
          (analyze-lambda-side-effects (if->else exp) lid))
         ((app? exp)
+         (let ((pure-ref #t))
+           ;; Check if ref is pure. Note this may give wrong results
+           ;; if ref's lambda has not been scanned yet. One solution is
+           ;; to make 2 top-level passes of analyze-lambda-side-effects.
+           (if (ref? (car exp))
+               (with-var (car exp) (lambda (var)
+                 (if (adbv:defines-lambda-id var)
+                     (with-fnc! (adbv:defines-lambda-id var) (lambda (fnc)
+                       (if (adbf:side-effects fnc)
+                           (set! pure-ref #f))))))))
+
+         ;; This lambda has side effects if it calls a mutating prim or
+         ;; a function not explicitly marked as having no side effects.
+         (if (or (prim:mutates? (car exp))
+                 (and (ref? (car exp))
+                      (not pure-ref)))
+             (with-fnc! lid (lambda (fnc)
+               (adbf:set-side-effects! fnc #t))))
          (for-each
            (lambda (e)
              (analyze-lambda-side-effects e lid))
-           exp))
+           exp)))
         (else
           #f)))
 
@@ -1085,6 +1110,8 @@
 
     (define (analyze-cps exp)
       (analyze-find-lambdas exp -1)
+      (analyze-lambda-side-effects exp -1)
+      (analyze-lambda-side-effects exp -1) ;; 2nd pass guarantees lambda purity
       (analyze exp -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
