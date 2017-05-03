@@ -52,6 +52,7 @@
       adb:function?
       adbf:simple adbf:set-simple!
       adbf:unused-params adbf:set-unused-params!
+      adbf:side-effects adbf:set-side-effects!
   )
   (begin
     (define *adb* (make-hash-table))
@@ -115,15 +116,16 @@
       (%adb:make-var '? '? #f #f '() #f #f 0 0 #t #f))
 
     (define-record-type <analysis-db-function>
-      (%adb:make-fnc simple unused-params assigned-to-var)
+      (%adb:make-fnc simple unused-params assigned-to-var side-effects)
       adb:function?
       (simple adbf:simple adbf:set-simple!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
       (assigned-to-var adbf:assigned-to-var adbf:set-assigned-to-var!)
+      (side-effects adbf:side-effects adbf:set-side-effects!)
       ;; TODO: top-level-define ?
     )
     (define (adb:make-fnc)
-      (%adb:make-fnc '? '? '()))
+      (%adb:make-fnc '? '? '() #f))
 
     ;; A constant value that cannot be mutated
     ;; A variable only ever assigned to one of these could have all
@@ -253,6 +255,11 @@
                 (lambda () (k #f))) ;; Fail with #f
               (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
+
+    ;; Mark each lambda that has side effects.
+    ;; For nested lambdas, if a child has side effects also mark the parent
+    ;(define (analyze-lambda-side-effects exp lid)
+
 
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
