@@ -1070,7 +1070,17 @@
             (cddr exp)))
           ((and (not (prim? (car exp)))
                 (ref? (car exp)))
+           (define pure-fnc #f)
            (define ref-formals '())
+           ;; Does ref refer to a pure function (no side effects)?
+           (let ((var (adb:get/default (car exp) #f)))
+            (if var
+                (let ((lid (adbv:defines-lambda-id var)))
+                  (if lid
+                      (with-fnc! lid (lambda (fnc)
+                        (if (not (adbf:side-effects fnc))
+                            (set! pure-fnc #t))))))))
+           ;;
            (with-var (car exp) (lambda (var)
              (let ((val (adbv:assigned-value var)))
               (cond
@@ -1083,6 +1093,15 @@
            ))))
 ;(trace:error `(DEBUG ref app ,(car exp) ,(cdr exp) ,ref-formals))
            (cond
+            (pure-fnc
+              (for-each
+                (lambda (e)
+                  ;; Skip refs since fnc is pure and cannot change them
+                  (if (not (ref? e))
+                      (analyze:find-inlinable-vars e args)))
+                exp))
+            ;; TODO: how do you know if it is the same function, or just
+            ;; another function with the same formals?
             ((= (length ref-formals) (length (cdr exp)))
              (analyze:find-inlinable-vars (car exp) args)
              (for-each
