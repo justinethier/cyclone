@@ -598,7 +598,8 @@
                (ast:%make-lambda
                  (ast:lambda-id exp)
                  (ast:lambda-args exp)
-                 (opt:contract (ast:lambda-body exp))))))
+                 (opt:contract (ast:lambda-body exp))
+                 (ast:lambda-has-cont exp)))))
         ((const? exp) exp)
         ((ref? exp) 
          (let ((var (adb:get/default exp #f)))
@@ -652,7 +653,8 @@
                  (ast:%make-lambda
                    (ast:lambda-id fnc)
                    (reverse new-params)
-                   (ast:lambda-body fnc))
+                   (ast:lambda-body fnc) 
+                   (ast:lambda-has-cont fnc))
                  (map 
                    opt:contract
                      (reverse new-args)))))
@@ -683,7 +685,8 @@
            (ast:%make-lambda
             (ast:lambda-id exp)
             (ast:lambda-args exp)
-            (map (lambda (b) (opt:inline-prims b refs)) (ast:lambda-body exp))))
+            (map (lambda (b) (opt:inline-prims b refs)) (ast:lambda-body exp))
+            (ast:lambda-has-cont exp)))
           ((const? exp) exp)
           ((quote? exp) exp)
           ((define? exp)

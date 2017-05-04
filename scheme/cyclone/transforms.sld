@@ -1300,7 +1300,8 @@
                  (let ((k (gensym 'k)))
                     (list (ast:make-lambda
                            (list k)
-                           (list (xform k)))
+                           (list (xform k))
+                           #t)
                           cont-ast)))))
 
           ((prim-call? ast)
@@ -1327,7 +1328,8 @@
                          (if (equal? ltype 'args:varargs)
                              'args:fixed-with-varargs ;; OK? promote due to k
                              ltype))
-                      (list (cps-seq (cddr ast) k))))))
+                      (list (cps-seq (cddr ast) k)) 
+                      #t))))
 
           ((app? ast)
            ;; Syntax check the function
