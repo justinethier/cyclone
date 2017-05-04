@@ -1075,11 +1075,18 @@
            ;; Does ref refer to a pure function (no side effects)?
            (let ((var (adb:get/default (car exp) #f)))
             (if var
-                (let ((lid (adbv:defines-lambda-id var)))
-                  (if lid
-                      (with-fnc! lid (lambda (fnc)
-                        (if (not (adbf:side-effects fnc))
-                            (set! pure-fnc #t))))))))
+                (let ((lid (adbv:defines-lambda-id var))
+                      (assigned-val (adbv:assigned-value var)))
+                  (cond
+                   (lid
+                    (with-fnc! lid (lambda (fnc)
+                      (if (not (adbf:side-effects fnc))
+                          (set! pure-fnc #t)))))
+                   ((ast:lambda? assigned-val)
+                    (with-fnc! (ast:lambda-id assigned-val) (lambda (fnc)
+                      (if (not (adbf:side-effects fnc))
+                          (set! pure-fnc #t)))))
+                   ))))
            ;;
            (with-var (car exp) (lambda (var)
              (let ((val (adbv:assigned-value var)))
