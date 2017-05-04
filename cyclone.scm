@@ -390,8 +390,15 @@
       (when (> *optimization-level* 0)
         (set! input-program
           (optimize-cps input-program))
-        (trace:info "---------------- after cps optimizations:")
-        (trace:info input-program))
+        (trace:info "---------------- after cps optimizations (1):")
+        (trace:info input-program)
+
+        (set! input-program
+          (optimize-cps input-program))
+        (trace:info "---------------- after cps optimizations (2):")
+        (trace:info input-program)
+        
+      )
     
       (set! input-program
         (map
