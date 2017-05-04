@@ -208,6 +208,7 @@
 ;;;;
   )
   (inline
+    exact-integer?
     square
     quotient
     numerator
@@ -1155,7 +1156,13 @@
       if (obj_is_int(num) || type_of(num) == integer_tag 
                           || type_of(num) == bignum_tag)
         return_closcall1(data, k, boolean_t);
-      return_closcall1(data, k, boolean_f); ")
+      return_closcall1(data, k, boolean_f); "
+    "(void *data, object ptr, object num)"
+    " Cyc_check_num(data, num);
+      if (obj_is_int(num) || type_of(num) == integer_tag 
+                          || type_of(num) == bignum_tag)
+        return boolean_t;
+      return boolean_f;")
   (define (inexact? num) (not (exact? num)))
   (define complex? number?) 
   (define rational? number?)
