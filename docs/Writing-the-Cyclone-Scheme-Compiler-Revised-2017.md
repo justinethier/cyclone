@@ -60,7 +60,7 @@ Programs are linked with the necessary Scheme libraries and the Cyclone runtime 
 
 ### Overview
 
-My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (also [video 1](https://www.youtube.com/watch?v=HIr9eO1kB8g), [video 2](https://www.youtube.com/watch?v=TxOM9Y5YrCs), and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc)). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
+My primary inspiration for Cyclone was Marc Feeley's [The 90 minute Scheme to C compiler](http://churchturing.org/y/90-min-scc.pdf) (also [video](https://youtu.be/Bp89aBm9tGU) and [code](https://github.com/justinethier/nugget/tree/master/90-min-scc)). Over the course of 90 minutes, Feeley demonstrates how to compile Scheme to C code using source-to-source transformations, including closure and continuation-passing-style (CPS) conversions. 
 
 As outlined in the presentation, some of the difficulties in compiling to C are:
 
