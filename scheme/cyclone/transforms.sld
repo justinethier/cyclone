@@ -185,17 +185,6 @@
 
 (cond-expand
   (cyclone
-    ; member : symbol sorted-set[symbol] -> boolean
-    (define (member sym S)
-      (if (not (pair? S))
-          #f
-          (if (eq? sym (car S))
-              #t
-              (member sym (cdr S))))))
-  (else #f))
-
-(cond-expand
-  (cyclone
     ; void : -> void
     (define (void) (if #f #t)))
   (else #f))
