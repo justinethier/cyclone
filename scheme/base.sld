@@ -1082,11 +1082,14 @@
 
   (define-c floor
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, floor, z); ")
+    " return_exact_double_op(data, k, floor, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, floor, z);")
   (define-c ceiling
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, ceil, z); ")
-  ;TODO: working on define-c:inline macro to make it less verbose to do this
+    " return_exact_double_op(data, k, ceil, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, ceil, z);")
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, (int), z); "
@@ -1094,11 +1097,15 @@
     " return_exact_double_op_no_cps(data, ptr, (int), z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, round, z); ")
+    " return_exact_double_op(data, k, round, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, round, z);")
   (define exact truncate)
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, (double), z); ")
+    " return_inexact_double_op(data, k, (double), z); "
+    "(void *data, object ptr, object z)"
+    " return_inexact_double_op_no_cps(data, ptr, (double), z);")
   (define-c abs
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
@@ -1147,7 +1154,9 @@
       (values s r)))
   (define-c sqrt
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, sqrt, z);")
+    " return_inexact_double_op(data, k, sqrt, z);"
+    "(void *data, object ptr, object z)"
+    " return_inexact_double_op_no_cps(data, ptr, sqrt, z);")
   (define (exact-integer? num)
     (and (exact? num) (integer? num)))
   (define-c exact?
@@ -1226,7 +1235,9 @@
     " Cyc_expt(data, k, z1, z2); ")
   (define-c eof-object
     "(void *data, int argc, closure _, object k)"
-    " return_closcall1(data, k, Cyc_EOF); ")
+    " return_closcall1(data, k, Cyc_EOF); "
+    "(void *data, object ptr)"
+    " return Cyc_EOF;")
   (define-c input-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
