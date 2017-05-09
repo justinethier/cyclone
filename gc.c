@@ -250,6 +250,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   //h->free_size = size;
   ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), size);
   ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
+  // heap_num_allocations already initialized to 0, nothing else needed here
   h->chunk_size = chunk_size;
   h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
@@ -635,6 +636,8 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
           //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
           ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]),
                        gc_allocated_bytes(obj, NULL, NULL));
+        } else {
+          ck_pr_add_ptr(&(thd->heap_num_allocations[heap_type]), 1);
         }
         h_passed->next_free = h;
         h_passed->last_alloc_size = size;
@@ -901,6 +904,8 @@ void gc_collector_sweep()
         }
       }
     }
+    // Clear allocation counts to delay next GC trigger
+    ck_pr_store_ptr(&(m->heap_num_allocations[HEAP_HUGE]), 0); 
 #if GC_DEBUG_TRACE
     total_size = ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_SM])) +
                  ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_64])) + 
@@ -1346,7 +1351,10 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
         ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_96])) * GC_COLLECTION_THRESHOLD) ||
 #endif
        (ck_pr_load_ptr(&(thd->cached_heap_free_sizes[HEAP_REST])) <
-        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_REST])) * GC_COLLECTION_THRESHOLD))) {
+        ck_pr_load_ptr(&(thd->cached_heap_total_sizes[HEAP_REST])) * GC_COLLECTION_THRESHOLD) ||
+       // Experimenting with separate huge heap threshold
+       (ck_pr_load_ptr(&(thd->heap_num_allocations[HEAP_HUGE])) > 100)
+        )) {
 #if GC_DEBUG_TRACE
     fprintf(stderr,
             "Less than %f%% of the heap is free, initiating collector\n",
@@ -1927,6 +1935,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   }
   thd->cached_heap_free_sizes = calloc(5, sizeof(uintptr_t));
   thd->cached_heap_total_sizes = calloc(5, sizeof(uintptr_t));
+  thd->heap_num_allocations = calloc(5, sizeof(uintptr_t));
   thd->heap = calloc(1, sizeof(gc_heap_root));
   thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
   thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0, thd);
@@ -1969,6 +1978,8 @@ void gc_thread_data_free(gc_thread_data * thd)
       free(thd->cached_heap_free_sizes);
     if (thd->cached_heap_total_sizes)
       free(thd->cached_heap_total_sizes);
+    if (thd->heap_num_allocations)
+      free(thd->heap_num_allocations);
     if (thd->jmp_start)
       free(thd->jmp_start);
     if (thd->gc_args)
@@ -2020,6 +2031,8 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
            ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]), 
            ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
+      ck_pr_add_ptr(&(dest->heap_num_allocations[heap_type]), 
+           ck_pr_load_ptr(&(src->heap_num_allocations[heap_type])));
     }
   }
 #ifdef GC_DEBUG_TRACE
