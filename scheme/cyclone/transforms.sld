@@ -987,7 +987,35 @@
                           ,(wrap-mutables (if->else exp) globals)))
     
     ; Application:
-    ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
+    ((app? exp)
+     (let ((result (map (lambda (e) (wrap-mutables e globals)) exp)))
+       ;; This code can eliminate a lambda definition. But typically
+       ;; the code that would have such a definition has a recursive
+       ;; inner loop, so there is not much savings to eliminating the
+       ;; single outer lambda:
+       ;;
+       ;;(cond
+       ;; ((and (lambda? (car result))
+       ;;       (equal? (cdr result) '(#f))
+       ;;       (app? (car (lambda->exp (car result))))
+       ;;       (lambda? (car (car (lambda->exp (car result))))))
+       ;;  (let* ((inner-lambda (car (car (lambda->exp (car result)))))
+       ;;         (inner-formals (lambda-formals->list inner-lambda))
+       ;;         (inner-args (cdr (car (lambda->exp (car result)))))
+       ;;         (outer-formals (lambda-formals->list (car result)))
+       ;;         (opt? (and (pair? outer-formals)
+       ;;                    (is-mutable? (car outer-formals))
+       ;;                    (equal? outer-formals inner-formals)
+       ;;                    (equal? inner-args `((cell ,(car inner-formals))))
+       ;;                    )))
+       ;;    (trace:error `(DEBUG ,opt? ,outer-formals ,inner-formals ,inner-args))
+       ;;    ;result
+       ;;    (if opt?
+       ;;        `(,inner-lambda (cell #f))
+       ;;        result)
+       ;; ))
+       ;; (else result))))
+       result))
     (else            (error "unknown expression type: " exp))))
 
 ;; Alpha conversion
