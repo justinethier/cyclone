@@ -593,7 +593,7 @@
          ((eq? p 'symbol?)       "Cyc_is_symbol")
          ((eq? p 'cons)          "make_pair")
          ((eq? p 'cell)          "make_cell")
-         ((eq? p 'cell-get)      "cell_get")
+         ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
          ((eq? p 'set-global!)   "global_set")
          (else
