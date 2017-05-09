@@ -2,6 +2,14 @@
 
 ## 0.5.1 - TBD
 
+Features
+
+- Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is typically more efficient and will be used by compiled code whenever possible.
+
+- Improved the compiler's CPS optimization phase to eliminate certain unnecessary function calls. This leads to a performance increase of about 5% when running ecraven's R7RS benchmark suite.
+
+Bug Fixes
+
 - Prevent potential memory corruption when working with large vectors that cannot be allocated on the stack.
 
 ## 0.5 - April 14, 2017

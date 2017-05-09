@@ -105,7 +105,27 @@
     pos-in-list 
     closure-convert 
     prim-convert
-    inlinable-top-level-function?
+  )
+  (inline
+    cell-get->cell
+    cell->value
+    set-cell!->value
+    set-cell!->cell
+    env-get->env
+    env-get->field
+    env-get->id
+    env-make->id
+    closure->fv
+    closure->env
+    closure->lam
+    begin->exps
+    app->args
+    app->fun
+    letrec->exp
+    letrec->bindings
+    let->exp
+    let->bindings
+    void
   )
   (begin
 
@@ -162,17 +182,6 @@
 
 
 ;; Utilities.
-
-(cond-expand
-  (cyclone
-    ; member : symbol sorted-set[symbol] -> boolean
-    (define (member sym S)
-      (if (not (pair? S))
-          #f
-          (if (eq? sym (car S))
-              #t
-              (member sym (cdr S))))))
-  (else #f))
 
 (cond-expand
   (cyclone
@@ -1231,54 +1240,6 @@
         ast)))
   (conv expr))
 
-;; Determine if the given top-level function can be freed from CPS, due
-;; to it only containing calls to code that itself can be inlined.
-(define (inlinable-top-level-function? expr)
-   (define this-fnc-sym (define->var expr))
-   (define (scan expr fail)
-     (cond
-       ((string? expr) (fail))
-       ((bytevector? expr) (fail))
-       ((const? expr) #t) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
-       ((ref? expr) #t)
-       ((if? expr)
-        (scan (if->condition expr) fail)
-        (scan (if->then expr) fail)
-        (scan (if->else expr) fail))
-       ((app? expr)
-        (let ((fnc (car expr)))
-          ;; If function needs CPS, fail right away
-          (if (or (not (prim? fnc)) ;; Eventually need to handle user functions, too
-                  (prim:cont? fnc) ;; Needs CPS
-              )
-              (fail))
-          ;; Otherwise, check for valid args
-          (for-each
-            (lambda (e)
-              (scan e fail))
-            (cdr expr))))
-       ;; prim-app - OK only if prim does not require CPS.
-       ;;            still need to check all its args
-       ;; app - same as prim, only OK if function does not require CPS.
-       ;;       probably safe to return #t if calling self, since if no
-       ;;       CPS it will be rejected anyway
-       ;;  NOTE: would not be able to detect all functions in this module immediately.
-       ;;  would probably have to find some, then run this function successively to find others.
-       ;;
-       ;; Reject everything else - define, set, lambda
-       (else (fail))))
-  (cond
-    ((and (define? expr)
-          (lambda? (car (define->exp expr)))
-          (equal? 'args:fixed (lambda-formals-type (car (define->exp expr)))))
-     (call/cc
-      (lambda (k)
-        (scan
-          (car (lambda->exp
-                 (car (define->exp expr))))
-          (lambda () (k #f))) ;; Fail with #f
-        (k #t)))) ;; Scanned fine, return #t
-    (else #f)))
 ;;
 ;; Helpers to syntax check primitive calls
 ;;
@@ -1328,7 +1289,8 @@
                  (let ((k (gensym 'k)))
                     (list (ast:make-lambda
                            (list k)
-                           (list (xform k)))
+                           (list (xform k))
+                           #t)
                           cont-ast)))))
 
           ((prim-call? ast)
@@ -1355,7 +1317,8 @@
                          (if (equal? ltype 'args:varargs)
                              'args:fixed-with-varargs ;; OK? promote due to k
                              ltype))
-                      (list (cps-seq (cddr ast) k))))))
+                      (list (cps-seq (cddr ast) k)) 
+                      #t))))
 
           ((app? ast)
            ;; Syntax check the function

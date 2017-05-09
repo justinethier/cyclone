@@ -207,6 +207,23 @@
 ;    letrec-syntax
 ;;;;
   )
+  (inline
+    exact-integer?
+    square
+    quotient
+    numerator
+    denominator
+    truncate
+    negative?
+    positive?
+    zero?
+    not
+    string>=?
+    string>?
+    string<=?
+    string<?
+    string=?
+  )
   (begin
     ;; Features implemented by this Scheme
     (define (features) 
@@ -1065,11 +1082,14 @@
 
   (define-c floor
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, floor, z); ")
+    " return_exact_double_op(data, k, floor, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, floor, z);")
   (define-c ceiling
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, ceil, z); ")
-  ;TODO: working on define-c:inline macro to make it less verbose to do this
+    " return_exact_double_op(data, k, ceil, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, ceil, z);")
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
     " return_exact_double_op(data, k, (int), z); "
@@ -1077,11 +1097,15 @@
     " return_exact_double_op_no_cps(data, ptr, (int), z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, round, z); ")
+    " return_exact_double_op(data, k, round, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_double_op_no_cps(data, ptr, round, z);")
   (define exact truncate)
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, (double), z); ")
+    " return_inexact_double_op(data, k, (double), z); "
+    "(void *data, object ptr, object z)"
+    " return_inexact_double_op_no_cps(data, ptr, (double), z);")
   (define-c abs
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
@@ -1130,7 +1154,9 @@
       (values s r)))
   (define-c sqrt
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, sqrt, z);")
+    " return_inexact_double_op(data, k, sqrt, z);"
+    "(void *data, object ptr, object z)"
+    " return_inexact_double_op_no_cps(data, ptr, sqrt, z);")
   (define (exact-integer? num)
     (and (exact? num) (integer? num)))
   (define-c exact?
@@ -1139,7 +1165,13 @@
       if (obj_is_int(num) || type_of(num) == integer_tag 
                           || type_of(num) == bignum_tag)
         return_closcall1(data, k, boolean_t);
-      return_closcall1(data, k, boolean_f); ")
+      return_closcall1(data, k, boolean_f); "
+    "(void *data, object ptr, object num)"
+    " Cyc_check_num(data, num);
+      if (obj_is_int(num) || type_of(num) == integer_tag 
+                          || type_of(num) == bignum_tag)
+        return boolean_t;
+      return boolean_f;")
   (define (inexact? num) (not (exact? num)))
   (define complex? number?) 
   (define rational? number?)
@@ -1203,7 +1235,9 @@
     " Cyc_expt(data, k, z1, z2); ")
   (define-c eof-object
     "(void *data, int argc, closure _, object k)"
-    " return_closcall1(data, k, Cyc_EOF); ")
+    " return_closcall1(data, k, Cyc_EOF); "
+    "(void *data, object ptr)"
+    " return Cyc_EOF;")
   (define-c input-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
@@ -1261,7 +1295,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; syntax-rules
 (define identifier? symbol?)
-(define (identifier->symbol obj) obj)
+;(define (identifier->symbol obj) obj)
 (define (find-tail pred ls)
   (and (pair? ls) (if (pred (car ls)) ls (find-tail pred (cdr ls)))))
 
@@ -1363,7 +1397,8 @@
                                          (next-symbol
                                           (string-append
                                            (symbol->string
-                                            (identifier->symbol (car x)))
+                                            (car x))
+                                            ;(identifier->symbol (car x)))
                                            "-ls")))
                                        new-vars))
                          (once

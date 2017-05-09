@@ -2,6 +2,8 @@
   (import (scheme base))
   (import (scheme case-lambda))
   (import (scheme char) (scheme complex) (scheme inexact))
+  (inline
+    boolean<?)
   (export comparator? comparator-ordered? comparator-hashable?)
   (export make-comparator
           make-pair-comparator make-list-comparator make-vector-comparator

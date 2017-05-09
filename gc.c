@@ -775,16 +775,19 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
   t = type_of(obj);
   if (t == pair_tag)
     return gc_heap_align(sizeof(pair_type));
-  if (t == macro_tag)
-    return gc_heap_align(sizeof(macro_type));
-  if (t == closure0_tag)
-    return gc_heap_align(sizeof(closure0_type));
-  if (t == closure1_tag)
-    return gc_heap_align(sizeof(closure1_type));
   if (t == closureN_tag) {
     return gc_heap_align(sizeof(closureN_type) +
                          sizeof(object) * 
                          ((closureN_type *) obj)->num_elements);
+  }
+  if (t == double_tag)
+    return gc_heap_align(sizeof(double_type));
+  if (t == closure0_tag)
+    return gc_heap_align(sizeof(closure0_type));
+  if (t == closure1_tag)
+    return gc_heap_align(sizeof(closure1_type));
+  if (t == string_tag) {
+    return gc_heap_align(sizeof(string_type) + string_len(obj) + 1);
   }
   if (t == vector_tag) {
     return gc_heap_align(sizeof(vector_type) +
@@ -794,15 +797,10 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(bytevector_type) +
                          sizeof(char) * ((bytevector) obj)->len);
   }
-  if (t == string_tag) {
-    return gc_heap_align(sizeof(string_type) + string_len(obj) + 1);
-  }
-  if (t == integer_tag)
-    return gc_heap_align(sizeof(integer_type));
+  if (t == macro_tag)
+    return gc_heap_align(sizeof(macro_type));
   if (t == bignum_tag)
     return gc_heap_align(sizeof(bignum_type));
-  if (t == double_tag)
-    return gc_heap_align(sizeof(double_type));
   if (t == port_tag)
     return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag)
@@ -813,6 +811,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(mutex_type));
   if (t == cond_var_tag)
     return gc_heap_align(sizeof(cond_var_type));
+  if (t == integer_tag)
+    return gc_heap_align(sizeof(integer_type));
 
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %d\n", obj,
           t);

@@ -22,6 +22,8 @@
     macro:get-env
     macro:get-defined-macros
   )
+  (inline
+    macro:macro?)
   (begin
     ;; top-level macro environment
     (define *macro:env* '())

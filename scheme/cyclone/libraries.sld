@@ -35,6 +35,7 @@
     lib:cond-expand-decls
     lib:includes
     lib:include-c-headers
+    lib:inlines
     lib:import-set:library-name?
     lib:import-set->import-set
     lib:import->library-name
@@ -59,6 +60,10 @@
     lib:idb:lookup
     lib:idb:entry->library-name
     lib:idb:entry->library-id
+  )
+  (inline
+    lib:idb:entry->library-name
+    lib:import-set->import-set
   )
   (begin
 
@@ -187,6 +192,17 @@
       (lambda (code)
         (tagged-list? 'include-c-header code))
       (cddr ast))))
+
+(define (lib:inlines ast)
+  (apply 
+    append
+    (map
+      (lambda (inc-lst)
+        (cdr inc-lst))
+      (filter
+        (lambda (code)
+          (tagged-list? 'inline code))
+        (cddr ast)))))
 
 ;; TODO: include-ci, cond-expand
 

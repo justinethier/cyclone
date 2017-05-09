@@ -23,6 +23,25 @@
     setup-environment ; non-standard
     ;; Dynamic import
     %import
+    imported?
+  )
+  (inline
+    primitive-implementation
+    procedure-environment
+    procedure-body
+    procedure-parameters
+    operands
+    operator
+    application?
+    if-alternative
+    if-consequent
+    if-predicate
+    lambda-body
+    lambda-parameters
+    definition-variable
+    assignment-value
+    assignment-variable
+    variable?
   )
   (begin
 
@@ -623,6 +642,10 @@
       lib-names)
     (set! *global-environment* (setup-environment *initial-environment*))
     #t))
+
+;; Is the given library loaded?
+(define (imported? lis)
+  (c:lib-loaded? (lib:name->unique-string (lib:list->import-set lis))))
 
 ;; Wrapper around the actual shared object import function
 (define-c c:import-shared-obj

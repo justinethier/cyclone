@@ -7,6 +7,7 @@
 ;;;; This module contains the inexact library from r7rs.
 ;;;;
 (define-library (scheme inexact)
+  (import (scheme base))
   (export 
     acos 
     asin
@@ -22,6 +23,19 @@
     tan
   )
   (begin
+    (define-syntax define-inexact-op
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (let* ((fnc (cadr expr))
+                 (op (caddr expr)))
+           `(define-c ,fnc
+              "(void *data, int argc, closure _, object k, object z)"
+              ,(string-append
+                " return_inexact_double_op(data, k, " op ", z);")
+              "(void *data, object ptr, object z)"
+              ,(string-append
+                " return_inexact_double_op_no_cps(data, ptr, " op ", z);"))))))
+
     (define-c nan?
       "(void *data, int argc, closure _, object k, object z)"
       " Cyc_check_num(data, z);
@@ -46,41 +60,18 @@
         return_closcall1(data, k, boolean_t);")
     (define (finite? z)
       (if (infinite? z) #f #t))
-    (define-c acos
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, acos, z);")
-    (define-c asin
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, asin, z);")
-    (define-c atan
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, atan, z);")
-    (define-c cos
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, cos, z);")
-    (define-c exp
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, exp, z);")
     (define (log z1 . z2)
       (if (null? z2)
           (c-log z1)
           (let ((z2* (car z2)))
             (/ (c-log z1) (c-log z2*)))))
-    (define-c c-log
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, log, z);"
-      "(void *data, object ptr, object z)"
-      " return_inexact_double_op_no_cps(data, ptr, log, z);"
-      )
-    (define-c sin
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, sin, z);"
-      "(void *data, object ptr, object z)"
-      " return_inexact_double_op_no_cps(data, ptr, sin, z);")
-    (define-c sqrt
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, sqrt, z);")
-    (define-c tan
-      "(void *data, int argc, closure _, object k, object z)"
-      " return_inexact_double_op(data, k, tan, z);")
+    (define-inexact-op c-log "log")
+    (define-inexact-op exp "exp")
+    (define-inexact-op sqrt "sqrt")
+    (define-inexact-op sin "sin")
+    (define-inexact-op cos "cos")
+    (define-inexact-op tan "tan")
+    (define-inexact-op asin "asin")
+    (define-inexact-op acos "acos")
+    (define-inexact-op atan "atan")
 ))

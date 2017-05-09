@@ -36,6 +36,7 @@
       (define module-globals '()) ;; Globals defined by this module
       (define program? #t) ;; Are we building a program or a library?
       (define imports '())
+      (define inlines '())
       (define imported-vars '())
       (define lib-name '())
       (define lib-exports '())
@@ -55,6 +56,7 @@
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
            (set! c-headers (lib:include-c-headers (car input-program)))
+           (set! inlines (lib:inlines (car input-program)))
            (set! lib-exports
              (cons
                (lib:name->symbol lib-name)
@@ -89,6 +91,17 @@
             (set! imports (car reduction))
             (set! input-program (cdr reduction)))
 
+          ;;  Handle inline list, if present`
+          (let ((lis (lib:inlines `(dummy dummy ,@input-program))))
+            (cond
+              ((not (null? lis))
+               (set! inlines lis)
+               (set! input-program 
+                     (filter 
+                       (lambda (expr)
+                         (not (tagged-list? 'inline expr)))
+                       input-program)))))
+
           ;; Handle any C headers
           (let ((headers (lib:include-c-headers `(dummy dummy ,@input-program))))
             (cond
@@ -100,6 +113,9 @@
                          (not (tagged-list? 'include-c-header expr)))
                        input-program)))))
         ))
+
+      (trace:info "inline candidates:")
+      (trace:info inlines)
 
       ;; Process library imports
       (trace:info "imports:")
@@ -216,6 +232,79 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
+;; EXPERIMENTAL CODE
+;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
+;;       behind an exception handler (in case the compiler does not have that module loaded).
+;;
+;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
+;;       and if not loaded, eval/import it and try again.
+;;
+;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
+;; TODO: probably not good enough since inlines are not in export list
+;;
+;; TODO: later on, in cgen, only add inlinables that correspond to exported functions
+
+(for-each
+  (lambda (import)
+    (with-handler
+      (lambda (err)
+        #f)
+      (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
+             (inlinable-lambdas-fnc 
+              (string->symbol
+                (string-append "c_" lib-name-str "_inlinable_lambdas"))))
+      (cond
+        ((imported? import)
+         (let ((lib-name (lib:import->library-name 
+                           (lib:list->import-set import)))
+               (vars/inlines
+                 (filter
+                  (lambda (v/i)
+                    ;; Try to avoid name conflicts by not loading inlines
+                    ;; that conflict with identifiers in this module.
+                    ;; More of a band-aid than a true solution, though.
+                    (not (member (car v/i) module-globals)))
+                  (eval `( ,inlinable-lambdas-fnc )))))
+           (trace:info `(DEBUG ,import ,vars/inlines ,module-globals))
+           ;; Register inlines as user-defined primitives
+           (for-each
+             (lambda (v/i)
+               (let ((var (car v/i)) (inline (cdr v/i)))
+                 (prim:add-udf! var inline)))
+             vars/inlines)
+           ;; Keep track of inline version of functions along with other imports
+           (set! imported-vars 
+             (append
+               imported-vars
+               (map
+                 (lambda (v/i)
+                   (cons (cdr v/i) lib-name))
+                 vars/inlines)))))
+        (else
+          ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
+          ;;(%import import)
+          ;; if this work is done, would need to consolidate inline reg code above
+          #f)))))
+  imports)
+
+;(for-each
+;  (lambda (psyms)
+;    (let ((var (car psyms)) (inline (cdr psyms)))
+;      (prim:add-udf! var inline)))
+;  (eval '(c_schemebase_inlinable_lambdas)))
+;  ;(assoc 'quotient (c_schemebase_inlinable_lambdas))
+;  ;    (set! globals (append (lib:idb:ids imported-vars) module-globals))
+;
+;  ;; total hack to update export list
+;  (set! imported-vars 
+;    (append
+;      imported-vars
+;      (map
+;        (lambda (psyms)
+;          (list (cdr psyms) 'scheme 'base))
+;        (eval '(c_schemebase_inlinable_lambdas)))))
+;; END
+
       ;; Convert some function calls to primitives, if possible
       (set! input-program 
         (map
@@ -224,6 +313,33 @@
           input-program))
       (trace:info "---------------- after func->primitive conversion:")
       (trace:info input-program) ;pretty-print
+
+      ;; Identify native Scheme functions (from module being compiled) that can be inlined
+      ;;
+      ;; NOTE: There is a chicken-and-egg problem here that prevents this from 
+      ;; automatically working 100%. Basically we need to know whether the inline logic will
+      ;; work for a given candidate. The problem is, the only way to do that is to run the
+      ;; code through CPS and by then we would have to go back and repeat many phases if a
+      ;; candidate fails the inline tests. At least for now, an alternative is to require 
+      ;; user code to specify (via inline) what functions the compiler should try inlining.
+      ;; There is a small chance one of those inlines can pass these tests and still fail
+      ;; the subsequent inline checks though, which causes an error in the C compiler.
+      (define inlinable-scheme-fncs '())
+      (let ((lib-init-fnc (lib:name->symbol lib-name))) ;; safe to ignore for programs
+        (for-each
+          (lambda (e)
+            (when (and (define? e)
+                       (member (define->var e) inlines) ;; Primary check, did use request inline
+                       (not (equal? (define->var e) lib-init-fnc))
+                       (inlinable-top-level-lambda? e)) ;; Failsafe, reject if basic checks fail
+              (set! inlinable-scheme-fncs
+                (cons (define->var e) inlinable-scheme-fncs))
+              (set! module-globals
+                (cons (define-c->inline-var e) module-globals))
+              (prim:add-udf! (define->var e) (define-c->inline-var e))))
+          input-program)
+        (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
+        (trace:info inlinable-scheme-fncs))
     
       (let ((cps (map 
                    (lambda (expr)
@@ -274,8 +390,15 @@
       (when (> *optimization-level* 0)
         (set! input-program
           (optimize-cps input-program))
-        (trace:info "---------------- after cps optimizations:")
-        (trace:info input-program))
+        (trace:info "---------------- after cps optimizations (1):")
+        (trace:info input-program)
+
+        (set! input-program
+          (optimize-cps input-program))
+        (trace:info "---------------- after cps optimizations (2):")
+        (trace:info input-program)
+        
+      )
     
       (set! input-program
         (map
@@ -312,6 +435,9 @@
     
       (trace:info "---------------- C headers: ")
       (trace:info c-headers)
+
+      (trace:info "---------------- module globals: ")
+      (trace:info module-globals)
 
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 

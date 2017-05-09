@@ -15,6 +15,9 @@
     make-rectangular 
     real-part
   )
+  (inline
+    real-part
+    imag-part)
   (import (scheme base))
   (begin
     (define (real-part x) x)

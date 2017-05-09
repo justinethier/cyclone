@@ -42,6 +42,15 @@
     lset-union  lset-intersection  lset-difference  lset-xor  lset-diff+intersection
     lset-union! lset-intersection! lset-difference! lset-xor! lset-diff+intersection!
   )
+  (inline
+    tenth
+    ninth
+    eighth
+    seventh
+    sixth
+    fifth
+    not-pair?
+  )
   (include "1.scm")
   (begin)
 )

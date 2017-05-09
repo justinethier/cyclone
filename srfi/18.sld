@@ -49,6 +49,10 @@
     ->heap
     Cyc-minor-gc
   )
+  (inline
+    thread-specific
+    thread-name
+  )
   (begin
     ;; Threading
     (define (thread? obj) 

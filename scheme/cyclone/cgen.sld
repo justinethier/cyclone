@@ -28,6 +28,13 @@
     emit-newline
     string-join
   )
+  (inline
+    global-not-lambda?
+    global-lambda?
+    c:num-args
+    c:allocs
+    st:->var
+  )
   (begin
 
 (define (emit line)
@@ -286,7 +293,7 @@
   (let* ((preamble "")
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n"))))
-         (body (c-compile-exp exp append-preamble "cont" (list src-file))))
+         (body (c-compile-exp exp append-preamble "cont" (list src-file) #t)))
     ;(write `(DEBUG ,body))
     (string-append 
      preamble 
@@ -305,7 +312,13 @@
 ;; trace - trace information. presently a pair containing:
 ;;         * source file
 ;;         * function name (or NULL if none)
-(define (c-compile-exp exp append-preamble cont trace)
+;; cps? - Determine whether to compile using continuation passing style.
+;;        Normally this is always enabled, but sometimes a function has a
+;;        version that can be inlined (as an optimization), so this will 
+;;        be set to false to change the type of compilation.
+;;        NOTE: this field is not passed everywhere because a lot of forms
+;;              require CPS, so this flag is not applicable to them.
+(define (c-compile-exp exp append-preamble cont trace cps?)
   (cond
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
@@ -314,11 +327,11 @@
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
     ((quote? exp)       (c-compile-quote exp))
-    ((if? exp)          (c-compile-if exp append-preamble cont trace))
+    ((if? exp)          (c-compile-if exp append-preamble cont trace cps?))
 
     ; IR (2):
     ((tagged-list? '%closure exp)
-     (c-compile-closure exp append-preamble cont trace))
+     (c-compile-closure exp append-preamble cont trace cps?))
     ; Global definition
     ((define? exp)
      (c-compile-global exp append-preamble cont trace))
@@ -328,10 +341,10 @@
     ((tagged-list? 'lambda exp)
      (c-compile-exp
       `(%closure ,exp)
-       append-preamble cont trace))
+       append-preamble cont trace cps?))
     
     ; Application:      
-    ((app? exp)         (c-compile-app exp append-preamble cont trace))
+    ((app? exp)         (c-compile-app exp append-preamble cont trace cps?))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
 (define (c-compile-quote qexp)
@@ -654,7 +667,7 @@
       (mangle exp))))
 
 ; c-compile-args : list[exp] (string -> void) -> string
-(define (c-compile-args args append-preamble prefix cont trace)
+(define (c-compile-args args append-preamble prefix cont trace cps?)
   (letrec ((num-args 0)
          (_c-compile-args 
           (lambda (args append-preamble prefix cont)
@@ -667,7 +680,7 @@
               (c:append/prefix
                 prefix 
                 (c-compile-exp (car args) 
-                  append-preamble cont trace)
+                  append-preamble cont trace cps?)
                 (_c-compile-args (cdr args) 
                   append-preamble ", " cont)))))))
   (c:tuple/args
@@ -676,14 +689,14 @@
     num-args)))
 
 ;; c-compile-app : app-exp (string -> void) -> string
-(define (c-compile-app exp append-preamble cont trace)
+(define (c-compile-app exp append-preamble cont trace cps?)
   ;(trace:debug `(c-compile-app: ,exp))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
         ((lambda? fun)
-         (let* ((lid (allocate-lambda (c-compile-lambda fun trace))) ;; TODO: pass in free vars? may be needed to track closures
+         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
                                                                ;; properly, wait until this comes up in an example
                 (this-cont (string-append "__lambda_" (number->string lid)))
                 (cgen 
@@ -692,7 +705,8 @@
                      append-preamble 
                      ""
                      this-cont
-                     trace))
+                     trace
+                     cps?))
                 (num-cargs (c:num-args cgen)))
            (set-c-call-arity! num-cargs)
            (c-code
@@ -707,7 +721,7 @@
          (let* ((c-fun 
                  (c-compile-prim fun cont))
                 (c-args
-                 (c-compile-args args append-preamble "" "" trace))
+                 (c-compile-args args append-preamble "" "" trace cps?))
                 (num-args (length args))
                 (num-args-str
                   (string-append 
@@ -727,7 +741,9 @@
                     (if (prim/c-var-assign fun)
                       ;; Add a comma if there were any args to the func added by comp-prim
                       (if (or (str-ending? (car (c:allocs c-fun)) "(") 
-                              (prim:cont/no-args? fun))
+                              (prim:cont/no-args? fun)
+                              (and (prim:udf? fun)
+                                   (zero? num-args)))
                         "" 
                         ",")
                       ",")
@@ -755,47 +771,67 @@
 
         ;; TODO: may not be good enough, closure app could be from an element
         ((tagged-list? '%closure-ref fun)
-         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace))
+         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace cps?))
                 (this-cont (c:body cfun))
-                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont trace)))
-           (set-c-call-arity! (c:num-args cargs))
-           (c-code 
-             (string-append
-               (c:allocs->str (c:allocs cfun) "\n")
-               (c:allocs->str (c:allocs cargs) "\n")
-               "return_closcall" (number->string (c:num-args cargs))
-               "(data,"
-               this-cont
-               (if (> (c:num-args cargs) 0) "," "")
-               (c:body cargs)
-               ");"))))
+                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont trace cps?)))
+           (cond
+             ((not cps?)
+              (c-code 
+                (string-append
+                  (c:allocs->str (c:allocs cfun) "\n")
+                  (c:allocs->str (c:allocs cargs) "\n")
+                  "return_copy(ptr,"
+                  (c:body cargs)
+                  ");")))
+             (else
+              (set-c-call-arity! (c:num-args cargs))
+              (c-code 
+                (string-append
+                  (c:allocs->str (c:allocs cfun) "\n")
+                  (c:allocs->str (c:allocs cargs) "\n")
+                  "return_closcall" (number->string (c:num-args cargs))
+                  "(data,"
+                  this-cont
+                  (if (> (c:num-args cargs) 0) "," "")
+                  (c:body cargs)
+                  ");"))))))
 
         ((tagged-list? '%closure fun)
          (let* ((cfun (c-compile-closure 
-                        fun append-preamble cont trace))
+                        fun append-preamble cont trace cps?))
                 (this-cont (string-append "(closure)" (c:body cfun)))
                 (cargs (c-compile-args
-                         args append-preamble "  " this-cont trace))
+                         args append-preamble "  " this-cont trace cps?))
                 (num-cargs (c:num-args cargs)))
-           (set-c-call-arity! num-cargs)
-           (c-code
-             (string-append
-                (c:allocs->str (c:allocs cfun) "\n")
-                (c:allocs->str (c:allocs cargs) "\n")
-                "return_closcall" (number->string num-cargs)
-                "(data,"
-                this-cont
-                (if (> num-cargs 0) "," "")
-                (c:body cargs)
-                ");"))))
+           (cond
+             ((not cps?)
+              (c-code
+                (string-append
+                   (c:allocs->str (c:allocs cfun) "\n")
+                   (c:allocs->str (c:allocs cargs) "\n")
+                   "return_copy(ptr,"
+                   (c:body cargs)
+                   ");")))
+             (else ;; CPS, IE normal behavior
+               (set-c-call-arity! num-cargs)
+               (c-code
+                 (string-append
+                    (c:allocs->str (c:allocs cfun) "\n")
+                    (c:allocs->str (c:allocs cargs) "\n")
+                    "return_closcall" (number->string num-cargs)
+                    "(data,"
+                    this-cont
+                    (if (> num-cargs 0) "," "")
+                    (c:body cargs)
+                    ");"))))))
 
         (else
          (error `(Unsupported function application ,exp)))))))
 
 ; c-compile-if : if-exp -> string
-(define (c-compile-if exp append-preamble cont trace)
+(define (c-compile-if exp append-preamble cont trace cps?)
   (let* ((compile (lambda (exp)
-                    (c-compile-exp exp append-preamble cont trace)))
+                    (c-compile-exp exp append-preamble cont trace cps?)))
          (test (compile (if->condition exp)))
          (then (compile (if->then exp)))
          (els (compile (if->else exp))))
@@ -811,8 +847,17 @@
 
 ;; Global inlinable functions
 (define *global-inlines* '())
-(define (add-global-inline var-sym)
-  (set! *global-inlines* (cons var-sym *global-inlines*)))
+(define (add-global-inline orig-sym inline-sym)
+  (set! *global-inlines* (cons (cons orig-sym inline-sym) *global-inlines*)))
+
+;; Add a global inlinable function that is written in Scheme.
+;; This is more challenging than define-c forms since the 
+;; code must be compiled again to work without CPS.
+;(define *global-inline-scms* '())
+;(define (add-global-inline-scm-lambda var-sym code)
+;  (add-global-inline var-sym )
+;  (set! *global-inline-scms* 
+;        (cons (list var-sym code) *global-inline-scms*)))
 
 ;; Global compilation
 (define *globals* '())
@@ -832,12 +877,34 @@
      (lambda? body) 
      (c-compile-exp 
       body append-preamble cont
-      (st:add-function! trace var)))
+      (st:add-function! trace var) #t))
+
+   ;; Add inline global definition also, if applicable
+;   (trace:error `(JAE DEBUG ,var 
+;           ,(lambda? body) 
+;           ,(define-c->inline-var exp)
+;           ,(prim:udf? (define-c->inline-var exp))
+;           ))
+   (when (and (lambda? body)
+              (prim:udf? (define-c->inline-var exp)))
+       (add-global-inline 
+         var
+         (define-c->inline-var exp))
+       (add-global 
+         (define-c->inline-var exp)
+         #t ;; always a lambda
+         (c-compile-exp 
+          body append-preamble cont
+          (st:add-function! trace var)
+          #f ;; inline, so disable CPS on this pass
+         )
+        ))
+
    (c-code/vars "" (list ""))))
 
-(define (c-compile-raw-global-lambda exp append-preamble cont trace . inline?)
+(define (c-compile-raw-global-lambda exp append-preamble cont trace . cps?)
    (let* ((precompiled-sym
-            (if (equal? inline? '(#t))
+            (if (equal? cps? '(#f))
                 'precompiled-inline-lambda
                 'precompiled-lambda))
           (lambda-data
@@ -865,13 +932,13 @@
        (let ((fnc-sym 
                (define-c->inline-var exp)))
           ;(trace:error `(JAE define-c inline detected ,fnc-sym))
-         (add-global-inline fnc-sym)
+         (add-global-inline (define->var exp) fnc-sym)
          (c-compile-raw-global-lambda 
            `(define-c ,fnc-sym ,@(cddddr exp))
            append-preamble 
            cont 
            trace
-           #t)))) ;; Inline this one
+           #f)))) ;; Inline this one; CPS will not be used
      ;; Add this define-c
      (add-global 
        (define->var exp)
@@ -903,7 +970,7 @@
 ;; once given a C name, produce a C function
 ;; definition with that name.
 
-;; These procedures are stored up an eventually 
+;; These procedures are stored up and eventually 
 ;; emitted.
 
 ; type lambda-id = natural
@@ -913,17 +980,20 @@
 
 ; lambdas : alist[lambda-id,string -> string]
 (define lambdas '())
+(define inline-lambdas '())
 
 ; allocate-lambda : (string -> string) -> lambda-id
-(define (allocate-lambda lam)
+(define (allocate-lambda lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
     (set! lambdas (cons (list id lam) lambdas))
+    (if (equal? cps? '(#f))
+        (set! inline-lambdas (cons id inline-lambdas)))
     id))
 
 ; get-lambda : lambda-id -> (symbol -> string)
-(define (get-lambda id)
-  (cdr (assv id lambdas)))
+;(define (get-lambda id)
+;  (cdr (assv id lambdas)))
 
 (define (lambda->env exp)
     (let ((formals (lambda-formals->list exp)))
@@ -993,7 +1063,7 @@
 ;;    the closure. The closure conversion phase tags each access
 ;;    to one with the corresponding index so `lambda` can use them.
 ;;
-(define (c-compile-closure exp append-preamble cont trace)
+(define (c-compile-closure exp append-preamble cont trace cps?)
   (let* ((lam (closure->lam exp))
          (free-vars
            (map
@@ -1006,7 +1076,7 @@
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
-         (lid (allocate-lambda (c-compile-lambda lam trace)))
+         (lid (allocate-lambda (c-compile-lambda lam trace cps?) cps?))
          (macro? (assoc (st:->var trace) (get-macros)))
          (call/cc? (and (equal? (car trace) "scheme/base.sld")
                         (equal? (st:->var trace) 'call/cc)))
@@ -1084,18 +1154,28 @@
         ""))))))
 
 ; c-compile-lambda : lamda-exp (string -> void) -> (string -> string)
-(define (c-compile-lambda exp trace)
+(define (c-compile-lambda exp trace cps?)
   (let* ((preamble "")
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n")))))
     (let* ((formals (c-compile-formals 
-                      (lambda->formals exp)
+                      (if (not cps?)
+                          ;; Ignore continuation (k) arg for non-CPS funcs
+                          (cdr (lambda->formals exp))
+                          (lambda->formals exp))
                       (lambda-formals-type exp)))
            (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
                           (mangle (if (pair? (lambda->formals exp))
                                       (car (lambda->formals exp))
                                       (lambda->formals exp)))
                           ""))
+           (return-type
+            (if cps? "void" "object"))
+           (arg-argc (if cps? "int argc, " ""))
+           (arg-closure
+            (if cps?
+                "closure _"
+                "object ptr"))
            (has-closure? 
              (and
                (> (string-length tmp-ident) 3)
@@ -1105,19 +1185,20 @@
                 (if has-closure? 
                     "" 
                     (if (equal? "" formals) 
-                        "closure _"    ;; TODO: seems wrong, will GC be too aggressive 
-                        "closure _,")) ;; due to missing refs, with ignored closure?
+                        arg-closure
+                        (string-append arg-closure ",")))
                 formals))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
                         (car (lambda->exp exp)) ;; car ==> assume single expr in lambda body after CPS
                         append-preamble
                         (mangle env-closure)
-                        trace)))
+                        trace 
+                        cps?)))
      (cons 
       (lambda (name)
-        (string-append "static void " name 
-                       "(void *data, int argc, " 
+        (string-append "static " return-type " " name 
+                       "(void *data, " arg-argc
                         formals*
                        ") {\n"
                        preamble
@@ -1293,6 +1374,12 @@
            (number->string (car l))
            (cadadr l)
            " ;"))
+        ((member (car l) inline-lambdas)
+         (emit*
+           "static object __lambda_" 
+           (number->string (car l)) "(void *data, "
+           (cdadr l)
+           ") ;"))
         (else
          (emit*
            "static void __lambda_" 
@@ -1325,6 +1412,8 @@
            (car (cddadr l))
            " }"
          ))
+       ((member (car l) inline-lambdas)
+        (emit ((caadr l) (string-append "__lambda_" (number->string (car l))))))
        (else
          (emit ((caadr l) (string-append "__lambda_" (number->string (car l))))))))
      lambdas)
@@ -1337,14 +1426,10 @@
               (head-pair #f))
           (for-each
             (lambda (g)
-              (let ((cvar-sym (mangle (gensym 'cvar)))
-                    (pair-sym (mangle (gensym 'pair))))
-               (emits* 
-                   "  make_cvar(" cvar-sym 
-                   ", (object *)&" (cgen:mangle-global g) ");")
+              (let ((pair-sym (mangle (gensym 'pair))))
                (emits*
-                   "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string g)
-                   "\"), &" cvar-sym ");\n")
+                   "make_pair(" pair-sym ", find_or_add_symbol(\"" (symbol->string (car g))
+                   "\"), find_or_add_symbol(\"" (symbol->string (cdr g)) "\"));\n")
                (set! pairs (cons pair-sym pairs))))
             *global-inlines*)
             ;; Link the pairs

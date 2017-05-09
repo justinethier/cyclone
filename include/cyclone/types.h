@@ -1040,6 +1040,23 @@ typedef union {
   bignum_type bignum_t;
 } common_type;
 
+#define return_copy(ptr, obj) \
+{ \
+  tag_type t; \
+  if (!is_object_type(obj)) \
+    return obj; \
+  t = type_of(obj); \
+  if (t == double_tag) { \
+    ((common_type *)ptr)->double_t.hdr.mark = gc_color_red; \
+    ((common_type *)ptr)->double_t.hdr.grayed = 0; \
+    ((common_type *)ptr)->double_t.tag = double_tag; \
+    ((common_type *)ptr)->double_t.value = double_value(obj); \
+    return ptr; \
+  } else { \
+    return obj; \
+  } \
+}
+
 /**@}*/
 /**@}*/
 
