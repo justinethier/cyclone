@@ -2,11 +2,17 @@
 
 ## 0.5.1 - TBD
 
+Performance improvements were the primary focus of this release. With the changes below, Cyclone is able to run the benchmarks in [ecraven's R7RS suite](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) over 12% faster than in the previous release.
+
 Features
 
-- Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is typically more efficient and will be used by compiled code whenever possible.
+- Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is more efficient and will be used by compiled code whenever possible.
 
-- Improved the compiler's CPS optimization phase to eliminate certain unnecessary function calls. This leads to a performance increase of about 5% when running ecraven's R7RS benchmark suite.
+- Improved the compiler's CPS optimization phase to eliminate more unnecessary function calls. 
+
+- Modified the GC to allow a given number of "huge" allocations to trigger GC. Previously GC was only triggered when smaller heap regions were below a certain percentage of free memory.
+
+- Compiled code now directly accesses boxed mutable variables instead of using a wrapper function.
 
 Bug Fixes
 
