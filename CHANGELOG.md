@@ -2,7 +2,7 @@
 
 ## 0.5.1 - TBD
 
-Performance improvements were the primary focus of this release. With the changes below, Cyclone is able to run the benchmarks in [ecraven's R7RS suite](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) over 12% faster than in the previous release.
+The main focus of this release is performance improvements. Cyclone is now able to run the benchmarks in [ecraven's R7RS suite](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) over 12% faster than in the previous release.
 
 Features
 
