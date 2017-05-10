@@ -232,78 +232,63 @@
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
-;; EXPERIMENTAL CODE
-;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
-;;       behind an exception handler (in case the compiler does not have that module loaded).
-;;
-;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
-;;       and if not loaded, eval/import it and try again.
-;;
-;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
-;; TODO: probably not good enough since inlines are not in export list
-;;
-;; TODO: later on, in cgen, only add inlinables that correspond to exported functions
-
-(for-each
-  (lambda (import)
-    (with-handler
-      (lambda (err)
-        #f)
-      (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
-             (inlinable-lambdas-fnc 
-              (string->symbol
-                (string-append "c_" lib-name-str "_inlinable_lambdas"))))
-      (cond
-        ((imported? import)
-         (let ((lib-name (lib:import->library-name 
-                           (lib:list->import-set import)))
-               (vars/inlines
-                 (filter
-                  (lambda (v/i)
-                    ;; Try to avoid name conflicts by not loading inlines
-                    ;; that conflict with identifiers in this module.
-                    ;; More of a band-aid than a true solution, though.
-                    (not (member (car v/i) module-globals)))
-                  (eval `( ,inlinable-lambdas-fnc )))))
-           (trace:info `(DEBUG ,import ,vars/inlines ,module-globals))
-           ;; Register inlines as user-defined primitives
-           (for-each
-             (lambda (v/i)
-               (let ((var (car v/i)) (inline (cdr v/i)))
-                 (prim:add-udf! var inline)))
-             vars/inlines)
-           ;; Keep track of inline version of functions along with other imports
-           (set! imported-vars 
-             (append
-               imported-vars
-               (map
-                 (lambda (v/i)
-                   (cons (cdr v/i) lib-name))
-                 vars/inlines)))))
-        (else
-          ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
-          ;;(%import import)
-          ;; if this work is done, would need to consolidate inline reg code above
-          #f)))))
-  imports)
-
-;(for-each
-;  (lambda (psyms)
-;    (let ((var (car psyms)) (inline (cdr psyms)))
-;      (prim:add-udf! var inline)))
-;  (eval '(c_schemebase_inlinable_lambdas)))
-;  ;(assoc 'quotient (c_schemebase_inlinable_lambdas))
-;  ;    (set! globals (append (lib:idb:ids imported-vars) module-globals))
-;
-;  ;; total hack to update export list
-;  (set! imported-vars 
-;    (append
-;      imported-vars
-;      (map
-;        (lambda (psyms)
-;          (list (cdr psyms) 'scheme 'base))
-;        (eval '(c_schemebase_inlinable_lambdas)))))
-;; END
+      ;; EXPERIMENTAL CODE - Load functions in other modules that are
+      ;; able to be inlined (in this context, from CPS).
+      ;;
+      ;; TODO: extend this initially by, for each import, invoking that module's inlinable_lambdas function
+      ;;       behind an exception handler (in case the compiler does not have that module loaded).
+      ;;
+      ;;       Longer term, need to test if module is loaded (maybe do that in combo with exception handler above)
+      ;;       and if not loaded, eval/import it and try again.
+      ;;
+      ;; assumes (scheme base) is available to compiler AND at runtime in the compiled module/program
+      ;; TODO: probably not good enough since inlines are not in export list
+      ;;
+      ;; TODO: later on, in cgen, only add inlinables that correspond to exported functions
+      
+      (for-each
+        (lambda (import)
+          (with-handler
+            (lambda (err)
+              #f)
+            (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
+                   (inlinable-lambdas-fnc 
+                    (string->symbol
+                      (string-append "c_" lib-name-str "_inlinable_lambdas"))))
+            (cond
+              ((imported? import)
+               (let ((lib-name (lib:import->library-name 
+                                 (lib:list->import-set import)))
+                     (vars/inlines
+                       (filter
+                        (lambda (v/i)
+                          ;; Try to avoid name conflicts by not loading inlines
+                          ;; that conflict with identifiers in this module.
+                          ;; More of a band-aid than a true solution, though.
+                          (not (member (car v/i) module-globals)))
+                        (eval `( ,inlinable-lambdas-fnc )))))
+                 ;(trace:info `(DEBUG ,import ,vars/inlines ,module-globals))
+                 ;; Register inlines as user-defined primitives
+                 (for-each
+                   (lambda (v/i)
+                     (let ((var (car v/i)) (inline (cdr v/i)))
+                       (prim:add-udf! var inline)))
+                   vars/inlines)
+                 ;; Keep track of inline version of functions along with other imports
+                 (set! imported-vars 
+                   (append
+                     imported-vars
+                     (map
+                       (lambda (v/i)
+                         (cons (cdr v/i) lib-name))
+                       vars/inlines)))))
+              (else
+                ;; TODO: try loading if not loaded (but need ex handler in case anything bad happens) #t ;(eval `(import ,import))
+                ;;(%import import)
+                ;; if this work is done, would need to consolidate inline reg code above
+                #f)))))
+        imports)
+      ;; END
 
       ;; Convert some function calls to primitives, if possible
       (set! input-program 
