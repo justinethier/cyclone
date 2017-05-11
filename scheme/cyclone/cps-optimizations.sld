@@ -1167,7 +1167,8 @@
       (let* ((args (cdr exp))
              (var (adb:get (car exp)))
              ;; Function definition, or #f if none
-             (fnc (adbv:assigned-value var))
+             (fnc* (adbv:assigned-value var))
+             (fnc (if (pair? fnc*) (car fnc*) fnc*))
              (formals (if (ast:lambda? fnc) (ast:lambda-args fnc) '()))
              ;; First formal, or #f if none
              (maybe-cont (if (and (list? formals) (pair? formals))
