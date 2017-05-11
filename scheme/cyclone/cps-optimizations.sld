@@ -631,6 +631,12 @@
                  ,(opt:contract (if->else exp))))))
         ; Application:
         ((app? exp)
+         ;; Hack to test this idea
+         ;; TODO: was testing this with the fibc program
+         ;(if (beta-expand? exp)
+         ;    (set! exp (beta-expand exp)))
+         ;; END
+
          (let* ((fnc (opt:contract (car exp))))
            (cond
             ((and (ast:lambda? fnc)
@@ -1148,6 +1154,44 @@
             ;(reverse exp))))) ;; Ensure args are examined before function
         (else
           (error `(Unexpected expression passed to find inlinable vars ,exp)))))
+
+    (define (beta-expand? exp)
+      (cond
+        ((and (app? exp)
+              (ref? (car exp)))
+         (with-var (car exp) (lambda (var)
+           (= 1 (adbv:app-fnc-count var))))) ;; TODO: too simplistic
+         (else #f)))
+
+    (define (beta-expand exp)
+      (let* ((args (cdr exp))
+             (var (adb:get (car exp)))
+             ;; Function definition, or #f if none
+             (fnc (adbv:assigned-value var))
+             (formals (if (ast:lambda? fnc) (ast:lambda-args fnc) '()))
+             ;; First formal, or #f if none
+             (maybe-cont (if (and (list? formals) (pair? formals))
+                             (car formals)
+                             #f))
+             ;; function's continuation symbol, or #f if none
+             (cont (if maybe-cont
+                       (with-var maybe-cont (lambda (var)
+                         (if (adbv:cont? var) maybe-cont #f)))
+                       #f))
+            )
+(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
+        (cond
+         ;; TODO: first arg to the lambda could be a cont, in which
+         ;; case it needs to be removed from formals list and body
+         ((and (ast:lambda? fnc)
+               (or ;(= (length args) (length formals))
+                   (and (= (length args) (- (length formals) 1))
+                        cont)))
+          ;;todo: set up a map, and replace each formal with its corresponding arg
+          (trace:error `(JAE DEBUG beta expand ,exp))
+          exp
+         )
+         (else exp)))) ;; beta expansion failed
 
     (define (analyze-cps exp)
       (analyze-find-lambdas exp -1)
