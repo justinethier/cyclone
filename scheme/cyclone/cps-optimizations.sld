@@ -633,6 +633,8 @@
         ((app? exp)
          ;; Hack to test this idea
          ;; TODO: was testing this with the fibc program
+         ;; TODO: real solution is to have a separate beta expansion phase after opt:contract.
+         ;;       will need to pass over all the code and expand here in the (app?) clause
          ;(if (beta-expand? exp)
          ;    (set! exp (beta-expand exp)))
          ;; END
@@ -1160,8 +1162,36 @@
         ((and (app? exp)
               (ref? (car exp)))
          (with-var (car exp) (lambda (var)
-           (= 1 (adbv:app-fnc-count var))))) ;; TODO: too simplistic
-         (else #f)))
+           ;(= 1 (adbv:app-fnc-count var)) ;; TODO: too simplistic
+           ;; TODO: following causes problems on unit-test.scm.
+           ;;  Needs to be debugged more...
+           (let* ((fnc* (adbv:assigned-value var))
+                  (fnc (if (and (pair? fnc*)
+                                (ast:lambda? (car fnc*)))
+                           (car fnc*)
+                           fnc*)))
+             (and (ast:lambda? fnc)
+                  (not (fnc-depth>? (ast:lambda-body fnc) 4))))
+           )))
+        (else #f)))
+
+    (define (fnc-depth>? exp depth)
+      (call/cc
+        (lambda (return)
+          (define (scan exp depth)
+            (if (zero? depth) (return #t))
+            (cond
+              ((ast:lambda? exp)
+               (scan (ast:lambda-body exp) (- depth 1)))
+              ((quote? exp) #f)
+              ((app? exp)
+               (for-each 
+                (lambda (e)
+                  (scan e (- depth 1)))
+                exp))
+              (else #f)))
+          (scan exp depth)
+          (return #f))))
 
     (define (beta-expand exp)
       (let* ((args (cdr exp))
@@ -1211,6 +1241,8 @@
             (ast:lambda-has-cont exp)))
          ((ref? exp)
           (replace exp))
+         ((quote? exp)
+          exp)
          ((app? exp)
           (map scan exp))
          (else exp)))
