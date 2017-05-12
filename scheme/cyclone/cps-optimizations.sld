@@ -1167,7 +1167,11 @@
       (let* ((args (cdr exp))
              (var (adb:get (car exp)))
              ;; Function definition, or #f if none
-             (fnc (adbv:assigned-value var))
+             (fnc* (adbv:assigned-value var))
+             (fnc (if (and (pair? fnc*)
+                           (ast:lambda? (car fnc*)))
+                      (car fnc*)
+                      fnc*))
              (formals (if (ast:lambda? fnc) (ast:lambda-args fnc) '()))
              ;; First formal, or #f if none
              (maybe-cont (if (and (list? formals) (pair? formals))
@@ -1181,17 +1185,36 @@
             )
 (trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
         (cond
-         ;; TODO: first arg to the lambda could be a cont, in which
-         ;; case it needs to be removed from formals list and body
+         ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
-               (or ;(= (length args) (length formals))
-                   (and (= (length args) (- (length formals) 1))
-                        cont)))
-          ;;todo: set up a map, and replace each formal with its corresponding arg
-          (trace:error `(JAE DEBUG beta expand ,exp))
-          exp
+               (= (length args) (length formals)))
+          ;(trace:error `(JAE DEBUG beta expand ,exp))
+          (beta-expansion exp fnc) ; exp
          )
          (else exp)))) ;; beta expansion failed
+
+    ;; Replace function call with body of fnc
+    (define (beta-expansion exp fnc)
+      ;; Mapping from a formal => actual arg
+      (define formals/actuals 
+        (map cons (ast:lambda-args fnc) (cdr exp)))
+      (define (replace ref)
+        (let ((r (assoc ref formals/actuals)))
+            (if r (cdr r) ref)))
+      (define (scan exp)
+        (cond
+         ((ast:lambda? exp)
+          (ast:%make-lambda
+            (ast:lambda-id exp)
+            (ast:lambda-args exp)
+            (scan (ast:lambda-body exp))
+            (ast:lambda-has-cont exp)))
+         ((ref? exp)
+          (replace exp))
+         ((app? exp)
+          (map scan exp))
+         (else exp)))
+      (scan (car (ast:lambda-body fnc))))
 
     (define (analyze-cps exp)
       (analyze-find-lambdas exp -1)
