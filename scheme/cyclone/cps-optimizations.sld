@@ -22,6 +22,7 @@
       ;analyze-lambda-side-effects
       opt:contract
       opt:inline-prims
+      opt:beta-expand
       adb:clear!
       adb:get
       adb:get/default
@@ -631,12 +632,9 @@
                  ,(opt:contract (if->else exp))))))
         ; Application:
         ((app? exp)
-         ;; Hack to test this idea
-         ;; TODO: was testing this with the fibc program
-         ;; TODO: real solution is to have a separate beta expansion phase after opt:contract.
-         ;;       will need to pass over all the code and expand here in the (app?) clause
-         (if (beta-expand? exp)
-             (set! exp (beta-expand exp)))
+         ;; Beta expansion of functions only called once, from CWC
+         (if (beta-expand/called-once? exp)
+             (set! exp (beta-expand-app exp)))
          ;; END
 
          (let* ((fnc (opt:contract (car exp))))
@@ -1157,20 +1155,25 @@
         (else
           (error `(Unexpected expression passed to find inlinable vars ,exp)))))
 
+    (define (beta-expand/called-once? exp)
+      (beta-expand/opts? exp #t))
+
     (define (beta-expand? exp)
+      (beta-expand/opts? exp #f))
+
+    (define (beta-expand/opts? exp called-once?)
       (cond
         ((and (app? exp)
               (ref? (car exp)))
          (with-var (car exp) (lambda (var)
-           ;(= 1 (adbv:app-fnc-count var)) ;; TODO: too simplistic
-           ;; TODO: following causes problems on unit-test.scm.
-           ;;  Needs to be debugged more...
            (let* ((fnc* (adbv:assigned-value var))
                   (fnc (if (and (pair? fnc*)
                                 (ast:lambda? (car fnc*)))
                            (car fnc*)
                            fnc*)))
              (and (ast:lambda? fnc)
+                  (or (not called-once?)
+                      (= 1 (adbv:app-fnc-count var)))
                   (not (adbv:reassigned? var))
                   (not (fnc-depth>? (ast:lambda-body fnc) 4))))
            )))
@@ -1194,25 +1197,26 @@
           (scan exp depth)
           (return #f))))
 
-    (define (beta-expand exp)
+    ;; Check app and beta expand if possible, else just return given code
+    (define (beta-expand-app exp)
       (let* ((args (cdr exp))
-             (var (adb:get (car exp)))
+             (var (adb:get/default (car exp) #f))
              ;; Function definition, or #f if none
-             (fnc* (adbv:assigned-value var))
+             (fnc* (if var (adbv:assigned-value var) #f))
              (fnc (if (and (pair? fnc*)
                            (ast:lambda? (car fnc*)))
                       (car fnc*)
                       fnc*))
              (formals (if (ast:lambda? fnc) (ast:lambda-args fnc) '()))
-             ;; First formal, or #f if none
-             (maybe-cont (if (and (list? formals) (pair? formals))
-                             (car formals)
-                             #f))
-             ;; function's continuation symbol, or #f if none
-             (cont (if maybe-cont
-                       (with-var maybe-cont (lambda (var)
-                         (if (adbv:cont? var) maybe-cont #f)))
-                       #f))
+             ;;; First formal, or #f if none
+             ;(maybe-cont (if (and (list? formals) (pair? formals))
+             ;                (car formals)
+             ;                #f))
+             ;;; function's continuation symbol, or #f if none
+             ;(cont (if maybe-cont
+             ;          (with-var maybe-cont (lambda (var)
+             ;            (if (adbv:cont? var) maybe-cont #f)))
+             ;          #f))
             )
 ;(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
         (cond
@@ -1223,12 +1227,12 @@
                (list? formals)
                (= (length args) (length formals)))
           ;(trace:error `(JAE DEBUG beta expand ,exp))
-          (beta-expansion exp fnc) ; exp
+          (beta-expansion-app exp fnc) ; exp
          )
          (else exp)))) ;; beta expansion failed
 
     ;; Replace function call with body of fnc
-    (define (beta-expansion exp fnc)
+    (define (beta-expansion-app exp fnc)
       ;; Mapping from a formal => actual arg
       (define formals/actuals 
         (map cons (ast:lambda-args fnc) (cdr exp)))
@@ -1252,6 +1256,36 @@
          (else exp)))
       (scan (car (ast:lambda-body fnc))))
 
+    ;; Full beta expansion phase, make a pass over all of the program's AST
+    (define (opt:beta-expand exp)
+;(write `(DEBUG opt:beta-expand ,exp)) (newline)
+      (cond
+       ((ast:lambda? exp)
+        (ast:%make-lambda
+          (ast:lambda-id exp)
+          (ast:lambda-args exp)
+          (opt:beta-expand (ast:lambda-body exp))
+          (ast:lambda-has-cont exp)))
+       ((quote? exp) exp)
+       ((const? exp) exp)
+       ((ref? exp) exp)
+       ((define? exp)
+        `(define ,(define->var exp)
+                 ,@(opt:beta-expand (define->exp exp))))
+       ((set!? exp)
+        `(set! ,(set!->var exp)
+               ,(opt:beta-expand (set!->exp exp))))
+       ((if? exp)       
+        `(if ,(opt:beta-expand (if->condition exp))
+             ,(opt:beta-expand (if->then exp))
+             ,(opt:beta-expand (if->else exp))))
+       ((app? exp)
+        (let ((code (if (beta-expand? exp)
+                        (beta-expand-app exp)
+                        exp)))
+          (map opt:beta-expand code)))
+       (else exp)))
+
     (define (analyze-cps exp)
       (analyze-find-lambdas exp -1)
       (analyze-lambda-side-effects exp -1)
@@ -1259,33 +1293,6 @@
       (analyze exp -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
-;; For now, beta expansion finds so few candidates it is not worth optimizing
-;;      ;; TODO:
-;;      ;; Find candidates for beta expansion
-;;      (for-each
-;;        (lambda (db-entry)
-;;;(trace:error `(check for lambda candidate
-;;          (cond
-;;            ((number? (car db-entry))
-;;             ;; TODO: this is just exploratory code, can be more efficient
-;;             (let ((id (car db-entry))
-;;                   (fnc (cdr db-entry))
-;;                   (app-count 0)
-;;                   (app-arg-count 0)
-;;                   (reassigned-count 0))
-;;              (for-each
-;;                (lambda (sym)
-;;                  (with-var! sym (lambda (var)
-;;                    (set! app-count (+ app-count (adbv:app-fnc-count var)))
-;;                    (set! app-arg-count (+ app-arg-count (adbv:app-arg-count var)))
-;;                    (set! reassigned-count (+ reassigned-count (if (adbv:reassigned? var) 1 0)))
-;;                  ))
-;;                )
-;;                (adbf:assigned-to-var fnc))
-;;(trace:error `(candidate ,id ,app-count ,app-arg-count ,reassigned-count))
-;;             ))))
-;;        (hash-table->alist *adb*))
-;;      ;; END TODO
     )
 
     ;; NOTES:
@@ -1301,20 +1308,14 @@
     ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
     ;; END notes
 
-    ;(define (optimize-cps ast)
-    ;  (define (loop ast n)
-    ;    (if (= n 0)
-    ;        (do-optimize-cps ast)
-    ;        (loop (do-optimize-cps ast) (- n 1))))
-    ;   (loop ast 2))
-
     (define (optimize-cps ast)
       (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
-      (opt:inline-prims 
-        (opt:contract ast))
+      (opt:beta-expand
+        (opt:inline-prims 
+          (opt:contract ast)))
     )
 
 ))
