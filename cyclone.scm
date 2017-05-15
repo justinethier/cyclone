@@ -383,6 +383,10 @@
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info input-program)
         
+        (set! input-program
+          (optimize-cps input-program))
+        (trace:info "---------------- after cps optimizations (3):")
+        (trace:info input-program)
       )
     
       (set! input-program
