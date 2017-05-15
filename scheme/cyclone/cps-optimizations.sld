@@ -635,8 +635,8 @@
          ;; TODO: was testing this with the fibc program
          ;; TODO: real solution is to have a separate beta expansion phase after opt:contract.
          ;;       will need to pass over all the code and expand here in the (app?) clause
-         ;(if (beta-expand? exp)
-         ;    (set! exp (beta-expand exp)))
+         (if (beta-expand? exp)
+             (set! exp (beta-expand exp)))
          ;; END
 
          (let* ((fnc (opt:contract (car exp))))
@@ -1171,6 +1171,7 @@
                            (car fnc*)
                            fnc*)))
              (and (ast:lambda? fnc)
+                  (not (adbv:reassigned? var))
                   (not (fnc-depth>? (ast:lambda-body fnc) 4))))
            )))
         (else #f)))
@@ -1213,10 +1214,12 @@
                          (if (adbv:cont? var) maybe-cont #f)))
                        #f))
             )
-(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
+;(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
         (cond
          ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
+               (not (adbv:reassigned? var)) ;; Failsafe
+               (not (adbv:cont? var)) ;; TEST, don't delete a continuation
                (list? formals)
                (= (length args) (length formals)))
           ;(trace:error `(JAE DEBUG beta expand ,exp))
