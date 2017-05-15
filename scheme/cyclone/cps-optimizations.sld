@@ -1217,6 +1217,7 @@
         (cond
          ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
+               (list? formals)
                (= (length args) (length formals)))
           ;(trace:error `(JAE DEBUG beta expand ,exp))
           (beta-expansion exp fnc) ; exp
