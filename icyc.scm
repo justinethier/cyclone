@@ -24,10 +24,6 @@
         ;(srfi 2)
         ;(srfi 133)
         (srfi 69))
-(cond-expand
-  (cyclone
-    (display *Cyc-version-banner*))
-  (else #f))
 
 ;(define *icyc-env* (setup-environment))
 (define (repl:next-line)
@@ -67,12 +63,80 @@
         (display "\n")
         (exit 0)))))
 
+;; Collect values for the given command line arguments and option.
+;; Will return a list of values for the option.
+;; For example:
+;;  ("-a" "1" "2") ==> ("1")
+;;  ("-a" "1" -a "2") ==> ("1" "2")
+(define (collect-opt-values args opt)
+  (cdr
+    (foldl
+      (lambda (arg accum)
+        (cond
+          ((equal? arg opt)
+           (cons opt (cdr accum)))
+          ((car accum) ;; we are at an opt value
+           (cons #f (cons arg (cdr accum))))
+          (else
+           (cons #f (cdr accum)))))
+      (list #f)
+      args)))
+
 ;; Use a special version of load to pull defs into the repl's env
 ;(define (load2 f)
 ;  (load f *icyc-env*))
 ;(env:define-variable! 'load load2 *icyc-env*)
 
-(let ((args (command-line-arguments)))
-  (if (= (length args) 1)
-      (load (car args) #;*icyc-env*))
-  (repl:next-line))
+(define (usage)
+  (display "
+Usage: icyc [OPTIONS] [FILENAME]
+Starts the interactive interpreter for Cyclone Scheme.
+
+Options:
+
+ -p sexp         Evaluate the given S-expression and exit
+ -s              Run as a script, without the normal icyc banner
+ -h, --help      Display usage information
+ -v              Display version information
+ -vn             Display version number
+")
+  (newline))
+
+(let ((args (command-line-arguments))
+      (run-as-script #f))
+  ;; Process arguments used by main REPL
+  (if (member "-s" args)
+      (set! run-as-script #t))
+
+  ;; Process remaining arguments that, if present, will cause icyc to
+  ;; do something other than start the REPL. If no such arguments are
+  ;; found, just run icyc.
+  (cond
+    ((member "-p" args)
+     (let ((sexp-strs (collect-opt-values args "-p")))
+       (cond
+         ((null? sexp-strs)
+          (usage))
+         (else
+          (let* ((sexp-str (apply string-append sexp-strs))
+                 (in-port (open-input-string sexp-str))
+                 (sexp (read in-port)))
+            (display
+              (eval sexp))
+            (newline)
+            (close-port in-port))))))
+    ((or (member "-h" args)
+         (member "--help" args))
+     (usage))
+    ((member "-v" args)
+     (display *version-banner*))
+    ((member "-vn" args)
+     (display (Cyc-version)))
+    (else
+     (if (not run-as-script) 
+         (display *Cyc-version-banner*))
+     (if (and (>= (length args) 1)
+              (not (member (car (reverse args)) '("-s"))))
+         (load (car (reverse args)) #;*icyc-env*))
+     (repl:next-line))))
+
