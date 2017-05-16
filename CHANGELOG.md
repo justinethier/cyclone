@@ -14,6 +14,8 @@ Features
 
 - Compiled code now directly accesses boxed mutable variables instead of using a wrapper function.
 
+- Added command line options to `icyc` for evaluating an S-expression from the command line and for running as a script without the Cyclone banner text.
+
 Bug Fixes
 
 - Prevent potential memory corruption when working with large vectors that cannot be allocated on the stack.
