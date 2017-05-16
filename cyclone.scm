@@ -649,6 +649,11 @@
     ((or (member "-h" args)
          (member "--help" args))
      (display "
+Usage: cyclone [OPTIONS] FILENAME
+Run the Cyclone Scheme compiler.
+
+Options:
+
  -A directory    Append directory to the list of directories that are searched 
                  in order to locate imported libraries.
  -I directory    Prepend directory to the list of directories that are searched 
@@ -668,6 +673,7 @@
  -t              Show intermediate trace output in generated C files
  -h, --help      Display usage information
  -v              Display version information
+ -vn             Display version number
 ")
      (newline))
     ((member "-v" args)
@@ -677,6 +683,8 @@
      (newline))
     ((member "-v" args)
      (display *version-banner*))
+    ((member "-vn" args)
+     (display (Cyc-version)))
     ((member "--autogen" args)
      (autogen "autogen.out"))
     ((or (< (length args) 1)
