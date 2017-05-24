@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Released Cyclone Scheme 0.5.1
-excerpt: The main focus of `0.5.1` is performance but this is also the first release to provide installation instructions for both Windows and Mac.
+excerpt: The main focus of `0.5.1` is performance but this is also the first release to provide installation instructions for Linux, Mac, and Windows.
 ---
 
 Features
