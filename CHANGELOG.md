@@ -2,11 +2,11 @@
 
 ## 0.5.1 - TBD
 
-The main focus of this release is performance but this is also the first release to provide installation instructions for both Windows and Mac.
+The main focus of `0.5.1` is performance but this is also the first release to provide installation instructions for both Windows and Mac.
 
 Features
 
-- Added build instructions for Windows (MSYS) and Mac - Thanks @ckkashyap!!
+- Thanks to Kashyap for adding build instructions for Windows (MSYS) and Mac!
 
 - Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is more efficient and will be used by compiled code whenever possible.
 
