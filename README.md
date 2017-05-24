@@ -7,7 +7,7 @@ Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Sch
 Getting Started
 ---------------
 
-1. To install Cyclone on your machine for the first time use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. 
+1. To install Cyclone on your machine for the first time use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, and Windows (via MSYS).
 
 2. After installing you can run the `cyclone` command to compile a single Scheme file:
 

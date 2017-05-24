@@ -2,9 +2,11 @@
 
 ## 0.5.1 - TBD
 
-The main focus of this release is performance. Cyclone is now able to run the benchmarks in [ecraven's R7RS suite](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) over 12% faster than in the previous release.
+The main focus of this release is performance but this is also the first release to provide installation instructions for both Windows and Mac.
 
 Features
+
+- Added build instructions for Windows (MSYS) and Mac - Thanks @ckkashyap!!
 
 - Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is more efficient and will be used by compiled code whenever possible.
 
