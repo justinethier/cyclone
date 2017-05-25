@@ -843,17 +843,28 @@
                   (= 1 (length (ast:lambda-formals->list (car exp))))
                   (= 1 (length (ast:lambda-formals->list (cadr exp))))
                   (if? (car (ast:lambda-body (car exp))))
+                  ;; Simplification, for now only allow then/else that call a cont
+                  ;; immediately, to prevent having to scan/rewrite those expressions
+                  (let ((if-exp (car (ast:lambda-body (car exp))))
+                        (kont (car (ast:lambda-formals->list (car exp)))))
+                    (and 
+                      (app? (if->then if-exp))
+                      (app? (if->else if-exp))
+                      (equal? kont (car (if->then if-exp)))
+                      (equal? kont (car (if->else if-exp)))))
+                  ;;
                   (not
                     (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
                       (adbf:side-effects fnc))))
                   )
-;(trace:error `(DEBUG2 ,(car (ast:lambda-body (car exp)))))
+(trace:error `(DEBUG2 ,exp))
              (let* ((new-exp (car (ast:lambda-body (cadr exp))))
-                    (new-if (car (ast:lambda-body (car exp))))
-; TODO: No, just replace K with values
-                    ;(new-if `(if ,(if->condition old-if)
-                    ;             ,(cadr (if->then old-if))
-                    ;             ,(cadr (if->else old-if))))
+                    (old-if (car (ast:lambda-body (car exp))))
+; TODO: what about nested if's? may need another pass above to make sure
+;; the if is simple enough to inline
+                    (new-if `(Cyc-if ,(if->condition old-if)
+                                     ,(cadr (if->then old-if))
+                                     ,(cadr (if->else old-if))))
                     (old-k (car (ast:lambda-formals->list (car exp))))
                     (old-arg (car (ast:lambda-formals->list (cadr exp))))
                     )
@@ -867,17 +878,19 @@
                                ,new-if
                                new-exp:
                                ,new-exp
-                               )))
+                               ))
 
+               (hash-table-set! refs old-k 'values) ;; TODO: only a temporary solution, requires (scheme base) which is not guaranteed to be imported
+               (hash-table-set! refs old-arg new-if)
              ;; TODO: behavior would be:
              ;; - simplify calling lambda's if to remove cont
              ;; - replace arg to other lambda with simplified expression
              ;; - replace exp with body of other lambda, 
              ;; - and call opt:inline-prims on it
-
+               (opt:inline-prims new-exp refs)
              ;; Same behavior for now, just seeing if this is possible first
-             (map (lambda (e) (opt:inline-prims e refs)) exp))
-             ;;
+             ;(map (lambda (e) (opt:inline-prims e refs)) exp)
+            )) ;;
             (else
               (map (lambda (e) (opt:inline-prims e refs)) exp))))
           (else 

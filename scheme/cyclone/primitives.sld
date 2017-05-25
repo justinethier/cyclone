@@ -80,6 +80,7 @@
          Cyc-stdin
          Cyc-stderr
          Cyc-list
+         Cyc-if
          Cyc-fast-plus
          Cyc-fast-sub
          Cyc-fast-mul
@@ -216,6 +217,7 @@
          (Cyc-stdout 0 0)
          (Cyc-stdin 0 0)
          (Cyc-stderr 0 0)
+         (Cyc-if 3 3)
          (Cyc-fast-plus 2 2)
          (Cyc-fast-sub 2 2)
          (Cyc-fast-mul 2 2)
@@ -459,6 +461,7 @@
          ((eq? p 'Cyc-stdin)             "Cyc_stdin")
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
          ((eq? p 'Cyc-list)              "Cyc_list")
+         ((eq? p 'Cyc-if)                "Cyc_if")
          ((eq? p 'Cyc-fast-plus)         "Cyc_fast_sum")
          ((eq? p 'Cyc-fast-sub)          "Cyc_fast_sub")
          ((eq? p 'Cyc-fast-mul)          "Cyc_fast_mul")
