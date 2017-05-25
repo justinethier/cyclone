@@ -164,6 +164,10 @@
       (let ((var (adb:get/default sym (adb:make-var))))
         (fnc var)))
 
+    (define (with-fnc id callback)
+      (let ((fnc (adb:get/default id (adb:make-fnc))))
+        (callback fnc)))
+
     (define (with-fnc! id callback)
       (let ((fnc (adb:get/default id (adb:make-fnc))))
         (callback fnc)
@@ -831,6 +835,30 @@
                   (set! args (cdr args)))
                 (ast:lambda-formals->list (car exp))))
              (opt:inline-prims (car (ast:lambda-body (car exp))) refs))
+            ;; Issue #201 - Attempt to identify case where an if can be inlined
+            ((and (= (length exp) 2)
+                  (ast:lambda? (car exp))
+                  (ast:lambda? (cadr exp))
+                  (ast:lambda-has-cont (car exp))
+                  (= 1 (length (ast:lambda-formals->list (car exp))))
+                  (= 1 (length (ast:lambda-formals->list (cadr exp))))
+                  (if? (car (ast:lambda-body (car exp))))
+                  (not
+                    (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
+                      (adbf:side-effects fnc))))
+                  )
+             ;(let ((if-fnc (adb:get/default (ast:lambda-body (car exp))
+             (trace:error `(DEBUG if inline candidate ,exp))
+
+             ;; TODO: behavior would be:
+             ;; - simplify calling lambda's if to remove cont
+             ;; - replace arg to other lambda with simplified expression
+             ;; - replace exp with body of other lambda, 
+             ;; - and call opt:inline-prims on it
+
+             ;; Same behavior for now, just seeing if this is possible first
+             (map (lambda (e) (opt:inline-prims e refs)) exp))
+             ;;
             (else
               (map (lambda (e) (opt:inline-prims e refs)) exp))))
           (else 
