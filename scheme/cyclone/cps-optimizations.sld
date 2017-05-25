@@ -857,18 +857,20 @@
                     (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
                       (adbf:side-effects fnc))))
                   )
-(trace:error `(DEBUG2 ,exp))
+;(trace:error `(DEBUG2 ,exp))
              (let* ((new-exp (car (ast:lambda-body (cadr exp))))
                     (old-if (car (ast:lambda-body (car exp))))
 ; TODO: what about nested if's? may need another pass above to make sure
 ;; the if is simple enough to inline
+TODO: can logic from inlinable-top-level-lambda? be repurposed to
+scan old-if to make sure everything is inlinable???
                     (new-if `(Cyc-if ,(if->condition old-if)
                                      ,(cadr (if->then old-if))
                                      ,(cadr (if->else old-if))))
                     (old-k (car (ast:lambda-formals->list (car exp))))
                     (old-arg (car (ast:lambda-formals->list (cadr exp))))
                     )
-               (trace:error `(DEBUG if inline candidate 
+               #;(trace:error `(DEBUG if inline candidate 
                                ,exp
                                old-k:
                                ,old-k
