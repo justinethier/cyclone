@@ -847,8 +847,27 @@
                     (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
                       (adbf:side-effects fnc))))
                   )
-             ;(let ((if-fnc (adb:get/default (ast:lambda-body (car exp))
-             (trace:error `(DEBUG if inline candidate ,exp))
+;(trace:error `(DEBUG2 ,(car (ast:lambda-body (car exp)))))
+             (let* ((new-exp (car (ast:lambda-body (cadr exp))))
+                    (new-if (car (ast:lambda-body (car exp))))
+; TODO: No, just replace K with values
+                    ;(new-if `(if ,(if->condition old-if)
+                    ;             ,(cadr (if->then old-if))
+                    ;             ,(cadr (if->else old-if))))
+                    (old-k (car (ast:lambda-formals->list (car exp))))
+                    (old-arg (car (ast:lambda-formals->list (cadr exp))))
+                    )
+               (trace:error `(DEBUG if inline candidate 
+                               ,exp
+                               old-k:
+                               ,old-k
+                               old-arg:
+                               ,old-arg
+                               new-if:
+                               ,new-if
+                               new-exp:
+                               ,new-exp
+                               )))
 
              ;; TODO: behavior would be:
              ;; - simplify calling lambda's if to remove cont
