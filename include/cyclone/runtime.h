@@ -369,7 +369,7 @@ object Cyc_sub(void *data, object cont, int argc, object n, ...);
 object Cyc_mul(void *data, object cont, int argc, object n, ...);
 object Cyc_div(void *data, object cont, int argc, object n, ...);
 // Future idea, there may be uses for this in addition to if statements:
-#define Cyc_if(c,t,e) ((boolean_f != c) ? t : e)
+#define Cyc_if(c,t,e) ((boolean_f != c) ? (t) : (e))
 object Cyc_fast_sum(void *data, object ptr, object x, object y);
 object Cyc_fast_sub(void *data, object ptr, object x, object y);
 object Cyc_fast_mul(void *data, object ptr, object x, object y);
