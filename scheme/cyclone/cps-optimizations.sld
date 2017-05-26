@@ -46,6 +46,8 @@
       adbv:set-const!
       adbv:const-value
       adbv:set-const-value!
+      adbv:ref-count
+      adbv:set-ref-count!
       adbv:ref-by
       adbv:set-ref-by!
       ;; Analyze functions
@@ -68,7 +70,8 @@
       (%adb:make-var 
         global defined-by 
         defines-lambda-id
-        const const-value  ref-by
+        const const-value  
+        ref-count ref-by
         reassigned assigned-value 
         app-fnc-count app-arg-count
         inlinable mutated-indirectly
@@ -79,6 +82,7 @@
       (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
+      (ref-count adbv:ref-count adbv:set-ref-count!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
       ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
@@ -122,7 +126,7 @@
     )
 
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f #f '() #f #f 0 0 #t #f #f))
+      (%adb:make-var '? '? #f #f #f 0 '() #f #f 0 0 #t #f #f))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var side-effects)
@@ -407,12 +411,14 @@
         ((quote? exp) #f)
         ((ref? exp)
          (let ((var (adb:get/default exp (adb:make-var))))
+          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
          ))
         ((define? exp)
          ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
          (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
+           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv-set-assigned-value-helper! (define->var exp) var (define->exp exp))
            (adbv:set-const! var #f)
@@ -424,6 +430,7 @@
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
            (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
+           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
@@ -510,6 +517,7 @@
 ;; TODO:
 ;        ((ref? exp)
 ;         (let ((var (adb:get/default exp (adb:make-var))))
+;          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
 ;          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
 ;         ))
         ((define? exp)
