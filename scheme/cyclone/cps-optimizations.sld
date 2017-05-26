@@ -850,7 +850,8 @@
                 (ast:lambda-formals->list (car exp))))
              (opt:inline-prims (car (ast:lambda-body (car exp))) refs))
             ;; Issue #201 - Attempt to identify case where an if can be inlined
-            ((and (= (length exp) 2)
+            ((and #f ;; TODO: Disabling for now, see issue for more info
+                  (= (length exp) 2)
                   (ast:lambda? (car exp))
                   (ast:lambda? (cadr exp))
                   (ast:lambda-has-cont (car exp))
