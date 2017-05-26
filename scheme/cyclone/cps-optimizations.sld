@@ -857,6 +857,7 @@
                   (= 1 (length (ast:lambda-formals->list (car exp))))
                   (= 1 (length (ast:lambda-formals->list (cadr exp))))
                   (if? (car (ast:lambda-body (car exp))))
+;; TODO: think we can get rid of this simplification now
                   ;; Simplification, for now only allow then/else that call a cont
                   ;; immediately, to prevent having to scan/rewrite those expressions
                   (let ((if-exp (car (ast:lambda-body (car exp))))
