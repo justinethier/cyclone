@@ -176,34 +176,6 @@
 ;; Determine if the given top-level function can be freed from CPS, due
 ;; to it only containing calls to code that itself can be inlined.
 (define (inlinable-top-level-lambda? expr)
-    ;; TODO: consolidate with same function in cps-optimizations module
-    (define (prim-creates-mutable-obj? prim)
-      (member 
-        prim
-        '(
-          apply ;; ??
-          cons 
-          make-vector 
-          make-bytevector
-          bytevector 
-          bytevector-append 
-          bytevector-copy
-          string->utf8 
-          number->string 
-          symbol->string 
-          list->string 
-          utf8->string
-          read-line
-          string-append 
-          string 
-          substring 
-          Cyc-installation-dir 
-          Cyc-compilation-environment
-          Cyc-bytevector-copy
-          Cyc-utf8->string
-          Cyc-string->utf8
-          list->vector
-          )))
    (define (scan expr fail)
      (cond
        ((string? expr) (fail))
@@ -268,6 +240,48 @@
                 (lambda () (k #f))) ;; Fail with #f
               (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
+
+    ;; Scan given if expression to determine if an inline is safe.
+    ;; Returns #f if not, the new if expression otherwise.
+    (define (inline-if:scan-and-replace expr kont)
+      (define (scan expr fail)
+;(trace:error `(inline-if:scan-and-replace:scan ,expr))
+           (cond
+             ((ast:lambda? expr) (fail))
+             ((string? expr) (fail))
+             ((bytevector? expr) (fail))
+             ((const? expr) expr) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
+             ((ref? expr) expr)
+             ((if? expr)
+              `(Cyc-if ,(scan (if->condition expr) fail)
+                       ,(scan (if->then expr) fail)
+                       ,(scan (if->else expr) fail)))
+             ((app? expr)
+              (let ((fnc (car expr)))
+                ;; If function needs CPS, fail right away
+                (cond
+                 ((equal? (car expr) kont)
+                  ;; Get rid of the continuation
+                  (scan (cadr expr) fail))
+                 ((or (not (prim? fnc))
+                        (prim:cont? fnc)
+                        (prim:mutates? fnc)
+                        (prim-creates-mutable-obj? fnc)
+                    )
+                    (fail))
+                 (else
+                   ;; Otherwise, check for valid args
+                   (cons
+                     (car expr)
+                     (map
+                       (lambda (e)
+                         (scan e fail))
+                       (cdr expr)))))))
+             ;; Reject everything else - define, set, lambda
+             (else (fail))))
+      (call/cc
+        (lambda (return)
+          (scan expr (lambda () (return #f))))))
 
     (define (analyze-find-lambdas exp lid)
       (cond
@@ -850,8 +864,9 @@
                     (and 
                       (app? (if->then if-exp))
                       (app? (if->else if-exp))
-                      (equal? kont (car (if->then if-exp)))
-                      (equal? kont (car (if->else if-exp)))))
+                      ;(equal? kont (car (if->then if-exp)))
+                      ;(equal? kont (car (if->else if-exp)))
+                      ))
                   ;;
                   (not
                     (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
@@ -860,15 +875,18 @@
 ;(trace:error `(DEBUG2 ,exp))
              (let* ((new-exp (car (ast:lambda-body (cadr exp))))
                     (old-if (car (ast:lambda-body (car exp))))
-; TODO: what about nested if's? may need another pass above to make sure
-;; the if is simple enough to inline
-TODO: can logic from inlinable-top-level-lambda? be repurposed to
-scan old-if to make sure everything is inlinable???
-                    (new-if `(Cyc-if ,(if->condition old-if)
-                                     ,(cadr (if->then old-if))
-                                     ,(cadr (if->else old-if))))
                     (old-k (car (ast:lambda-formals->list (car exp))))
                     (old-arg (car (ast:lambda-formals->list (cadr exp))))
+; TODO: what about nested if's? may need another pass above to make sure
+;; the if is simple enough to inline
+;TODO: can logic from inlinable-top-level-lambda? be repurposed to
+;scan old-if to make sure everything is inlinable???
+                    (new-if 
+                      (inline-if:scan-and-replace
+                        `(Cyc-if ,(if->condition old-if)
+                                 ,(if->then old-if)
+                                 ,(if->else old-if))
+                        old-k))
                     )
                #;(trace:error `(DEBUG if inline candidate 
                                ,exp
@@ -882,16 +900,13 @@ scan old-if to make sure everything is inlinable???
                                ,new-exp
                                ))
 
-               (hash-table-set! refs old-k 'values) ;; TODO: only a temporary solution, requires (scheme base) which is not guaranteed to be imported
-               (hash-table-set! refs old-arg new-if)
-             ;; TODO: behavior would be:
-             ;; - simplify calling lambda's if to remove cont
-             ;; - replace arg to other lambda with simplified expression
-             ;; - replace exp with body of other lambda, 
-             ;; - and call opt:inline-prims on it
-               (opt:inline-prims new-exp refs)
-             ;; Same behavior for now, just seeing if this is possible first
-             ;(map (lambda (e) (opt:inline-prims e refs)) exp)
+               (cond
+                (new-if
+                  (hash-table-set! refs old-arg new-if)
+                  (opt:inline-prims new-exp refs))
+                (else
+                  ;; Could not inline
+                  (map (lambda (e) (opt:inline-prims e refs)) exp)))
             )) ;;
             (else
               (map (lambda (e) (opt:inline-prims e refs)) exp))))
