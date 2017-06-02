@@ -764,7 +764,8 @@
                     (apply f cars)
                     (recur cdrs)))))
           ;; Fast path.
-          (if (eq? 1 (length lis1))
+          ;(if (eq? 1 (length lis1))
+          (if (null? (cdr lis1)) ;; O(1) instead of O(n) for length
             (f (car lis1))
             (begin (f (car lis1))
                    (for-each f (cdr lis1)))))))
