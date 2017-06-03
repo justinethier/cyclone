@@ -14,14 +14,16 @@ Initial speed test for `tail` - Cyclone does very poorly compared to other Schem
     user    0m31.783s
     sys     0m0.513s
 
-One of the easiest things to do is run a profiler on the code. This lets us see if there is something in the runtime or compiled code that is dominating the runtime, and possibly slowing things down. This isn't a catch-all - for example, it can't show us if a compiler optimization is needed. But it helps paint a picture of what is going on.
+One of the easiest things to do is run a profiler on the code to figure out what is going on. This lets us see if there is something in the runtime or compiled code that is dominating the runtime, and possibly slowing things down. This isn't a catch-all - for example, it can't show us if a compiler optimization is needed. But it helps paint a picture of what is going on.
+
+A compiled Cyclone program is just a regular C program so we can use the standard GNU tools for profiling and debugging.
 
 To get started we change `Makefile.config` in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
 
     CFLAGS       ?= -g -pg -fPIC -rdynamic -Wall -Iinclude -L.
     COMP_CFLAGS  ?= -g -pg -fPIC -rdynamic -Wall -I$(PREFIX)/include -L$(PREFIX)/lib
 
-Then Cyclone is rebuilt:
+Then Cyclone must be rebuilt:
 
     [justin@justin-pc cyclone-bootstrap]$ sudo make clean ; ./install.sh
 
@@ -69,7 +71,7 @@ Let's examine the start of `report.txt` to see the functions that are taking up 
     
 Well that's interesting, `tail` is spending all of its time computing `Cyc_length`.
 
-A compiled Cyclone program is just a regular C program so we can use `gdb` to debug it and figure out how `Cyc_length` is being called. 
+Again, Cyclone compiles programs to C, so we can use `gdb` to debug them and figure out how `Cyc_length` is being called. 
 
 First we need to know what inputs to use:
 
