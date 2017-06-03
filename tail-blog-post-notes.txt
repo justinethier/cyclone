@@ -168,6 +168,20 @@ Anyway the solution is to check directly for null, instead of scanning the whole
       (f (car lis1))
       (begin (f (car lis1))
 
-After rebuilding with this fix we can re-run the tail benchmark. Remember the older code took over 32 seconds to finish:
+After rebuilding with this fix we can re-run the tail benchmark:
 
+    [justin@justin-pc r7rs-benchmarks]$ ./bench cyclone tail
+    
+    Testing tail under Cyclone
+    Including postlude /home/justin/Documents/r7rs-benchmarks/src/Cyclone-postlude.scm
+    Compiling...
+    Running...
+    Running tail:25
+    Elapsed time: 0.72314 seconds (1) for tail:25
+    +!CSVLINE!+cyclone-0.5.1,tail:25,0.72314
+    
+    real    0m0.729s
+    user    0m0.540s
+    sys     0m0.187s 
 
+Whoa! Remember the older code took over 32 seconds to finish, and now its less than a second. Not bad.
