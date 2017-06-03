@@ -116,12 +116,12 @@ To run gdb:
 
 After continuing a few times, the code breaks here:
 
-#0  Cyc_length (data=0x7cd4e0, l=0x7ffffffbc660) at runtime.c:1713
-#1  0x00000000004af96b in __lambda_368 (data=0x7cd4e0, argc=3, _=0x7ffff6635340, k_734906=0x7ffff63331c0, f_731928=0x7ffffffb2dd0, lis1_731927=0x7ffffffbc660,
-    lists_731926_raw=0x7ca420 <Cyc_void_symbol>) at scheme/base.c:22680
-#2  0x00000000004afde1 in __lambda_367 (data=0x7cd4e0, argc=1, self_736727=0x7ffffff9d4c0, r_734921=0x7ca420 <Cyc_void_symbol>) at scheme/base.c:22703
-#3  0x00000000004b7aa7 in __lambda_299 (data=0x7cd4e0, argc=3, _=0x7ffff66350e0, k_735061=0x7ffffff9d4c0, char_731994=0x2a, port_731993_raw=0x7ffff6333200) at scheme/base.c:23706
-#4  0x000000000055cf5e in do_dispatch (data=0x7cd4e0, argc=3, func=0x4b7523 <__lambda_299>, clo=0x7ffff66350e0, b=0x7ffffff9ccf0) at dispatch.c:6
+    #0  Cyc_length (data=0x7cd4e0, l=0x7ffffffbc660) at runtime.c:1713
+    #1  0x00000000004af96b in __lambda_368 (data=0x7cd4e0, argc=3, _=0x7ffff6635340, k_734906=0x7ffff63331c0, f_731928=0x7ffffffb2dd0, lis1_731927=0x7ffffffbc660,
+        lists_731926_raw=0x7ca420 <Cyc_void_symbol>) at scheme/base.c:22680
+    #2  0x00000000004afde1 in __lambda_367 (data=0x7cd4e0, argc=1, self_736727=0x7ffffff9d4c0, r_734921=0x7ca420 <Cyc_void_symbol>) at scheme/base.c:22703
+    #3  0x00000000004b7aa7 in __lambda_299 (data=0x7cd4e0, argc=3, _=0x7ffff66350e0, k_735061=0x7ffffff9d4c0, char_731994=0x2a, port_731993_raw=0x7ffff6333200) at scheme/base.c:23706
+    #4  0x000000000055cf5e in do_dispatch (data=0x7cd4e0, argc=3, func=0x4b7523 <__lambda_299>, clo=0x7ffff66350e0, b=0x7ffffff9ccf0) at dispatch.c:6
 
 Opening the source code for `scheme/base.c` you can see the code breaks in the `for-each` function:
 
