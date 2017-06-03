@@ -14,8 +14,9 @@ Initial speed test for `tail` - Cyclone does very poorly compared to other Schem
     user    0m31.783s
     sys     0m0.513s
 
+One of the easiest things to do is run a profiler on the code. This lets us see if there is something in the runtime or compiled code that is dominating the runtime, and possibly slowing things down. This isn't a catch-all - for example, it can't show us if a compiler optimization is needed. But it helps paint a picture of what is going on.
 
-Change `Makefile.config` in cyclone-bootstrap to do profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
+To get started we change `Makefile.config` in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
 
     CFLAGS       ?= -g -pg -fPIC -rdynamic -Wall -Iinclude -L.
     COMP_CFLAGS  ?= -g -pg -fPIC -rdynamic -Wall -I$(PREFIX)/include -L$(PREFIX)/lib
@@ -24,23 +25,24 @@ Then Cyclone is rebuilt:
 
     [justin@justin-pc cyclone-bootstrap]$ sudo make clean ; ./install.sh
 
-Once this is done a `gmon.out` file will be generated each time Cyclone or a compiled Cyclone program is executed.
+Once this is done a `gmon.out` file will be generated each time Cyclone or a compiled Cyclone program is executed. This can be used to create a detailed analysis of what the program was doing at runtime.
 
-
-Set up for running the `tail` benchmark directly:
+Now we perform set up for running the `tail` benchmark directly:
 
     [justin@justin-pc r7rs-benchmarks]$ cd /tmp/larcenous/Cyclone/
     [justin@justin-pc Cyclone]$ cp -r ~/Documents/r7rs-benchmarks/inputs/ .
     [justin@justin-pc Cyclone]$ mkdir outputs
 
-Recompile `tail.scm` to get a version with profiling, and then run it to generate a `gmon.out` file:
+And recompile `tail.scm` to get a version with profiling. We then run it to generate a `gmon.out` file:
 
     [justin@justin-pc Cyclone]$ cyclone  tail.scm
     [justin@justin-pc Cyclone]$ ./tail < inputs/tail.input
 
-[justin@justin-pc Cyclone]$ ls
-gmon.out  inputs  outputs  tail  tail.c  tail.o  tail.scm
-[justin@justin-pc Cyclone]$ gprof ./tail gmon.out > report.txt
+Then we run `gprof` to create a report:
+
+    [justin@justin-pc Cyclone]$ ls
+    gmon.out  inputs  outputs  tail  tail.c  tail.o  tail.scm
+    [justin@justin-pc Cyclone]$ gprof ./tail gmon.out > report.txt
 
 Let's examine the start of `report.txt` to see the functions that are taking up the most of the program's runtime: 
 
@@ -67,8 +69,9 @@ Let's examine the start of `report.txt` to see the functions that are taking up 
     
 Well that's interesting, `tail` is spending all of its time computing `Cyc_length`.
 
+A compiled Cyclone program is just a regular C program so we can use `gdb` to debug it and figure out how `Cyc_length` is being called. 
 
-Run gdb:
+First we need to know what inputs to use:
 
     [justin@justin-pc Cyclone]$ cat inputs/tail.input
     25
@@ -76,7 +79,7 @@ Run gdb:
     "outputs/tail.output"
     ignored
 
-A compiled Cyclone program is just a regular C program so we can use `gdb` to debug it:
+To run gdb:
 
     [justin@justin-pc Cyclone]$ gdb ./tail
     GNU gdb (GDB) 7.12.1
@@ -120,7 +123,7 @@ After continuing a few times, the code breaks here:
 #3  0x00000000004b7aa7 in __lambda_299 (data=0x7cd4e0, argc=3, _=0x7ffff66350e0, k_735061=0x7ffffff9d4c0, char_731994=0x2a, port_731993_raw=0x7ffff6333200) at scheme/base.c:23706
 #4  0x000000000055cf5e in do_dispatch (data=0x7cd4e0, argc=3, func=0x4b7523 <__lambda_299>, clo=0x7ffff66350e0, b=0x7ffffff9ccf0) at dispatch.c:6
 
-Opening the source code for `scheme/base.c` you can see this is in the `for-each` function:
+Opening the source code for `scheme/base.c` you can see the code breaks in the `for-each` function:
 
     static void __lambda_368(void *data, int argc, closure _,object k_734906, object f_731928, object lis1_731927, object lists_731926_raw, ...) {
     load_varargs(lists_731926, lists_731926_raw, argc - 3);
@@ -155,14 +158,11 @@ The code can be simplified to make it more obvious what is going on:
 
 Basically on every iteration of `for-each` the code is calling `length` to see if `f` can be called directly. Well, that's not good - the main `for-each` loop itself has a time complexity of O(N). The runtime depends directly on the length of `lis1`. But each time `length` is called it must examine the entire contents of `lis1`, which is another O(N) operation. Combined with the outer loop this raises the overall time complexity to O(N^2) - which can really add up for large values of N.
 
+This reminds me of [an old article from Joel Spolsky](http://global.joelonsoftware.com/English/Articles/Interviewing.html) that talks about the same issue with respect to strings:
 
-This reminds me of an old article from Joel Spolsky that talks about the same issue with respect to strings:
-http://global.joelonsoftware.com/English/Articles/Interviewing.html
+> Is their function fast? Look at how many times they call strlen. I've seen O(n^2) algorithms for strrev when it should be O(n), because they are calling strlen again and again in a loop.
 
-Is their function fast? Look at how many times they call strlen. I've seen O(n^2) algorithms for strrev when it should be O(n), because they are calling strlen again and again in a loop.
-
-
-Anyway the solution is to check directly for null, instead of scanning the whole string:
+The solution is to check directly for null, instead of scanning the whole string:
 
     (if (null? (cdr lis1))
       (f (car lis1))
@@ -184,4 +184,4 @@ After rebuilding with this fix we can re-run the tail benchmark:
     user    0m0.540s
     sys     0m0.187s 
 
-Whoa! Remember the older code took over 32 seconds to finish, and now its less than a second. Not bad.
+Whoa! Remember the older code took over 32 seconds to finish? Now it finishes in less than a second. Not bad.
