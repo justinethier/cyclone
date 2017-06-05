@@ -1,4 +1,4 @@
-Initial speed test for `tail` - Cyclone does very poorly compared to other Schemes:
+While going through a new run of the [R7RS benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html), I noticed Cyclone performed significantly worse than other schemes on the tail benchmark. Certainly when testing locally the results are less than impressive:
 
     [justin@justin-pc r7rs-benchmarks]$ ./bench cyclone tail
     
@@ -14,7 +14,7 @@ Initial speed test for `tail` - Cyclone does very poorly compared to other Schem
     user    0m31.783s
     sys     0m0.513s
 
-One of the easiest things to do is run a profiler on the code to figure out what is going on. This lets us see if there is something in the runtime or compiled code that is dominating the runtime, and possibly slowing things down. This isn't a catch-all - for example, it can't show us if a compiler optimization is needed. But it helps paint a picture of what is going on.
+One of the easiest things to do is run a profiler on the code to figure out what is going on. This lets us see if there is something in the runtime or compiled code that is dominating the execution time, and possibly slowing things down. This isn't a catch-all - for example, it can't show us if a compiler optimization is needed. But it helps paint a picture of what is going on.
 
 A compiled Cyclone program is just a regular C program so we can use the standard GNU tools for profiling and debugging.
 
@@ -27,7 +27,7 @@ Then Cyclone must be rebuilt:
 
     [justin@justin-pc cyclone-bootstrap]$ sudo make clean ; ./install.sh
 
-Once this is done a `gmon.out` file will be generated each time Cyclone or a compiled Cyclone program is executed. This can be used to create a detailed analysis of what the program was doing at runtime.
+Once this is done a `gmon.out` file will be generated each time Cyclone or a compiled Cyclone program is executed. This can be used to create a detailed analysis of what the program is doing at runtime.
 
 Now we perform set up for running the `tail` benchmark directly:
 
@@ -158,7 +158,7 @@ The code can be simplified to make it more obvious what is going on:
             (begin (f (car lis1))
                    (for-each f (cdr lis1))))))
 
-Basically on every iteration of `for-each` the code is calling `length` to see if `f` can be called directly. Well, that's not good - the main `for-each` loop itself has a time complexity of O(N). The runtime depends directly on the length of `lis1`. But each time `length` is called it must examine the entire contents of `lis1`, which is another O(N) operation. Combined with the outer loop this raises the overall time complexity to O(N^2) - which can really add up for large values of N.
+Basically on every iteration of `for-each` the code is calling `length` to see if `f` can be called directly. Well, that's not good - the main `for-each` loop itself has a [time complexity of `O(n)`](https://en.wikipedia.org/wiki/Big_O_notation). The runtime depends directly on the length of `lis1`. But each time `length` is called it must examine the entire contents of `lis1`, which is another `O(n)` operation. Combined with the outer loop this raises the overall time complexity to `O(n^2)` - which can really add up for large values of `n`.
 
 This reminds me of [an old article from Joel Spolsky](http://global.joelonsoftware.com/English/Articles/Interviewing.html) that talks about the same issue with respect to strings:
 
