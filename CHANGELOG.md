@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.2 - TBD
+## 0.5.2 - June 5, 2017
 
 Bug Fixes
 
