@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2 - TBD
+
+Bug Fixes
+
+- Fixed a bug in `for-each` that was causing `length` to be executed during each iteration.
+
 ## 0.5.1 - May 24, 2017
 
 The main focus of `0.5.1` is performance but this is also the first release to provide installation instructions for both Windows and Mac.
