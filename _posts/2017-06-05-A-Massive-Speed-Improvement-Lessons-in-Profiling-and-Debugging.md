@@ -1,6 +1,6 @@
 ---
 layout: post
-title: A Massive Speed Improvement: Lessons in Profiling and Debugging
+title: A Massive Speed Improvement - Lessons in Profiling and Debugging
 excerpt: While going through a new run of the R7RS benchmarks from Larceny, I noticed Cyclone performed significantly worse than other schemes on the tail benchmark.
 ---
 
