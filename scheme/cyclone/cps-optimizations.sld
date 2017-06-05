@@ -46,6 +46,8 @@
       adbv:set-const!
       adbv:const-value
       adbv:set-const-value!
+      adbv:ref-count
+      adbv:set-ref-count!
       adbv:ref-by
       adbv:set-ref-by!
       ;; Analyze functions
@@ -68,7 +70,8 @@
       (%adb:make-var 
         global defined-by 
         defines-lambda-id
-        const const-value  ref-by
+        const const-value  
+        ref-count ref-by
         reassigned assigned-value 
         app-fnc-count app-arg-count
         inlinable mutated-indirectly
@@ -79,6 +82,7 @@
       (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
+      (ref-count adbv:ref-count adbv:set-ref-count!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
       ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
@@ -122,7 +126,7 @@
     )
 
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f #f '() #f #f 0 0 #t #f #f))
+      (%adb:make-var '? '? #f #f #f 0 '() #f #f 0 0 #t #f #f))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var side-effects)
@@ -164,6 +168,10 @@
       (let ((var (adb:get/default sym (adb:make-var))))
         (fnc var)))
 
+    (define (with-fnc id callback)
+      (let ((fnc (adb:get/default id (adb:make-fnc))))
+        (callback fnc)))
+
     (define (with-fnc! id callback)
       (let ((fnc (adb:get/default id (adb:make-fnc))))
         (callback fnc)
@@ -172,34 +180,6 @@
 ;; Determine if the given top-level function can be freed from CPS, due
 ;; to it only containing calls to code that itself can be inlined.
 (define (inlinable-top-level-lambda? expr)
-    ;; TODO: consolidate with same function in cps-optimizations module
-    (define (prim-creates-mutable-obj? prim)
-      (member 
-        prim
-        '(
-          apply ;; ??
-          cons 
-          make-vector 
-          make-bytevector
-          bytevector 
-          bytevector-append 
-          bytevector-copy
-          string->utf8 
-          number->string 
-          symbol->string 
-          list->string 
-          utf8->string
-          read-line
-          string-append 
-          string 
-          substring 
-          Cyc-installation-dir 
-          Cyc-compilation-environment
-          Cyc-bytevector-copy
-          Cyc-utf8->string
-          Cyc-string->utf8
-          list->vector
-          )))
    (define (scan expr fail)
      (cond
        ((string? expr) (fail))
@@ -264,6 +244,48 @@
                 (lambda () (k #f))) ;; Fail with #f
               (k #t))))))) ;; Scanned fine, return #t
     (else #f)))
+
+    ;; Scan given if expression to determine if an inline is safe.
+    ;; Returns #f if not, the new if expression otherwise.
+    (define (inline-if:scan-and-replace expr kont)
+      (define (scan expr fail)
+;(trace:error `(inline-if:scan-and-replace:scan ,expr))
+           (cond
+             ((ast:lambda? expr) (fail))
+             ((string? expr) (fail))
+             ((bytevector? expr) (fail))
+             ((const? expr) expr) ;; Good enough? what about large vectors or anything requiring alloca (strings, bytevectors, what else?)
+             ((ref? expr) expr)
+             ((if? expr)
+              `(Cyc-if ,(scan (if->condition expr) fail)
+                       ,(scan (if->then expr) fail)
+                       ,(scan (if->else expr) fail)))
+             ((app? expr)
+              (let ((fnc (car expr)))
+                ;; If function needs CPS, fail right away
+                (cond
+                 ((equal? (car expr) kont)
+                  ;; Get rid of the continuation
+                  (scan (cadr expr) fail))
+                 ((or (not (prim? fnc))
+                        (prim:cont? fnc)
+                        (prim:mutates? fnc)
+                        (prim-creates-mutable-obj? fnc)
+                    )
+                    (fail))
+                 (else
+                   ;; Otherwise, check for valid args
+                   (cons
+                     (car expr)
+                     (map
+                       (lambda (e)
+                         (scan e fail))
+                       (cdr expr)))))))
+             ;; Reject everything else - define, set, lambda
+             (else (fail))))
+      (call/cc
+        (lambda (return)
+          (scan expr (lambda () (return #f))))))
 
     (define (analyze-find-lambdas exp lid)
       (cond
@@ -389,12 +411,14 @@
         ((quote? exp) #f)
         ((ref? exp)
          (let ((var (adb:get/default exp (adb:make-var))))
+          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
          ))
         ((define? exp)
          ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
          (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
+           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv-set-assigned-value-helper! (define->var exp) var (define->exp exp))
            (adbv:set-const! var #f)
@@ -406,6 +430,7 @@
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
            (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
+           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
@@ -492,6 +517,7 @@
 ;; TODO:
 ;        ((ref? exp)
 ;         (let ((var (adb:get/default exp (adb:make-var))))
+;          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
 ;          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
 ;         ))
         ((define? exp)
@@ -831,6 +857,67 @@
                   (set! args (cdr args)))
                 (ast:lambda-formals->list (car exp))))
              (opt:inline-prims (car (ast:lambda-body (car exp))) refs))
+            ;; Issue #201 - Attempt to identify case where an if can be inlined
+            ((and #f ;; TODO: Disabling for now, see issue for more info
+                  (= (length exp) 2)
+                  (ast:lambda? (car exp))
+                  (ast:lambda? (cadr exp))
+                  (ast:lambda-has-cont (car exp))
+                  (= 1 (length (ast:lambda-formals->list (car exp))))
+                  (= 1 (length (ast:lambda-formals->list (cadr exp))))
+                  (if? (car (ast:lambda-body (car exp))))
+;; TODO: think we can get rid of this simplification now
+                  ;; Simplification, for now only allow then/else that call a cont
+                  ;; immediately, to prevent having to scan/rewrite those expressions
+                  (let ((if-exp (car (ast:lambda-body (car exp))))
+                        (kont (car (ast:lambda-formals->list (car exp)))))
+                    (and 
+                      (app? (if->then if-exp))
+                      (app? (if->else if-exp))
+                      ;(equal? kont (car (if->then if-exp)))
+                      ;(equal? kont (car (if->else if-exp)))
+                      ))
+                  ;;
+                  (not
+                    (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
+                      (adbf:side-effects fnc))))
+                  )
+;(trace:error `(DEBUG2 ,exp))
+             (let* ((new-exp (car (ast:lambda-body (cadr exp))))
+                    (old-if (car (ast:lambda-body (car exp))))
+                    (old-k (car (ast:lambda-formals->list (car exp))))
+                    (old-arg (car (ast:lambda-formals->list (cadr exp))))
+; TODO: what about nested if's? may need another pass above to make sure
+;; the if is simple enough to inline
+;TODO: can logic from inlinable-top-level-lambda? be repurposed to
+;scan old-if to make sure everything is inlinable???
+                    (new-if 
+                      (inline-if:scan-and-replace
+                        `(Cyc-if ,(if->condition old-if)
+                                 ,(if->then old-if)
+                                 ,(if->else old-if))
+                        old-k))
+                    )
+               #;(trace:error `(DEBUG if inline candidate 
+                               ,exp
+                               old-k:
+                               ,old-k
+                               old-arg:
+                               ,old-arg
+                               new-if:
+                               ,new-if
+                               new-exp:
+                               ,new-exp
+                               ))
+
+               (cond
+                (new-if
+                  (hash-table-set! refs old-arg new-if)
+                  (opt:inline-prims new-exp refs))
+                (else
+                  ;; Could not inline
+                  (map (lambda (e) (opt:inline-prims e refs)) exp)))
+            )) ;;
             (else
               (map (lambda (e) (opt:inline-prims e refs)) exp))))
           (else 
