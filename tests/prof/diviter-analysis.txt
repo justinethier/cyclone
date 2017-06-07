@@ -1,0 +1,2682 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 24.73      3.47     3.47 1499840774     0.00     0.00  Cyc_is_pair
+ 24.31      6.88     3.41  1160759     0.00     0.00  __lambda_7
+ 11.44      8.49     1.61 999896698     0.00     0.00  Cyc_cdr
+  5.63      9.28     0.79   163416     0.00     0.00  gc_minor
+  5.27     10.02     0.74 499941228     0.00     0.00  Cyc_car
+  4.21     10.61     0.59 42706093     0.00     0.00  gc_try_alloc
+  4.06     11.18     0.57                             Cyc_is_boolean
+  3.85     11.72     0.54 500943656     0.00     0.00  Cyc_is_null
+  2.42     12.06     0.34      220     0.00     0.00  gc_sweep
+  2.35     12.39     0.33 42706240     0.00     0.00  ck_pr_sub_ptr
+  1.92     12.66     0.27   999905     0.00     0.00  __lambda_8
+  1.85     12.92     0.26 42706050     0.00     0.00  gc_alloc
+  1.18     13.08     0.17      135     0.00     0.00  equal
+  1.07     13.23     0.15 42868325     0.00     0.00  gc_move
+  1.00     13.37     0.14 85051565     0.00     0.00  gc_allocated_bytes
+  0.93     13.50     0.13 42705960     0.00     0.00  gc_copy_obj
+  0.86     13.62     0.12 42705909     0.00     0.00  gc_fixup_moved_obj
+  0.57     13.70     0.08 42705956     0.00     0.00  gc_thr_add_to_move_buffer
+  0.29     13.74     0.04   999888     0.00     0.00  __lambda_9
+  0.21     13.77     0.03   999903     0.00     0.00  Cyc_fast_sum
+  0.21     13.80     0.03   999900     0.00     0.00  __lambda_58
+  0.21     13.83     0.03       17     0.00     0.00  gc_request_mark_globals
+  0.21     13.86     0.03                             gc_alloc_from_bignum
+  0.21     13.89     0.03                             gc_print_stats
+  0.14     13.91     0.02   999928     0.00     0.00  add_mutation
+  0.14     13.93     0.02   999902     0.00     0.00  __lambda_10
+  0.14     13.95     0.02                             ck_pr_add_8
+  0.07     13.96     0.01  2738856     0.00     0.00  ck_pr_md_load_int
+  0.07     13.97     0.01  1265035     0.00     0.00  ck_pr_md_load_ptr
+  0.07     13.98     0.01  1080349     0.00     0.00  vpbuffer_add
+  0.07     13.99     0.01   999907     0.00     0.00  Cyc_checked_add
+  0.07     14.00     0.01   999900     0.00     0.00  __lambda_12
+  0.07     14.01     0.01   999898     0.00     0.00  __lambda_11
+  0.07     14.02     0.01        6     0.00     0.00  gc_thr_grow_move_buffer
+  0.04     14.03     0.01   999911     0.00     0.00  __lambda_31
+  0.04     14.03     0.01        1     0.01     0.01  __lambda_32
+  0.00     14.03     0.00  1000033     0.00     0.00  Cyc_st_add
+  0.00     14.03     0.00   999944     0.00     0.00  gc_mut_update
+  0.00     14.03     0.00   999889     0.00     0.00  __lambda_6
+  0.00     14.03     0.00   999873     0.00     0.00  Cyc_num_fast_lt_op
+  0.00     14.03     0.00   999873     0.00     0.00  Cyc_set_cell
+  0.00     14.03     0.00   163450     0.00     0.00  do_dispatch
+  0.00     14.03     0.00   163447     0.00     0.00  gc_mut_cooperate
+  0.00     14.03     0.00   163445     0.00     0.00  clear_mutations
+  0.00     14.03     0.00   163445     0.00     0.00  gc_sum_pending_writes
+  0.00     14.03     0.00   163417     0.00     0.00  GC
+  0.00     14.03     0.00    17618     0.00     0.00  gc_mark_gray
+  0.00     14.03     0.00    14362     0.00     0.00  gc_empty_collector_stack
+  0.00     14.03     0.00    10504     0.00     0.00  mark_stack_or_heap_obj
+  0.00     14.03     0.00    10496     0.00     0.00  gc_is_stack_obj
+  0.00     14.03     0.00     4642     0.00     0.00  gc_mark_gray2
+  0.00     14.03     0.00     1003     0.00     0.00  Cyc_fast_sub
+  0.00     14.03     0.00     1001     0.00     0.00  Cyc_num_fast_eq_op
+  0.00     14.03     0.00     1000     0.00     0.00  Cyc_checked_sub
+  0.00     14.03     0.00      860     0.00     0.00  MurmurHash64A
+  0.00     14.03     0.00      860     0.00     0.00  hs_hash
+  0.00     14.03     0.00      464     0.00     0.00  set_insert
+  0.00     14.03     0.00      458     0.00     0.00  add_symbol
+  0.00     14.03     0.00      437     0.00     0.00  ck_pr_cas_int
+  0.00     14.03     0.00      396     0.00     0.00  find_or_add_symbol
+  0.00     14.03     0.00      396     0.00     0.00  find_symbol_by_name
+  0.00     14.03     0.00      396     0.00     0.00  set_get
+  0.00     14.03     0.00      373     0.00     0.00  ck_pr_add_ptr
+  0.00     14.03     0.00      360     0.00     0.00  _strdup
+  0.00     14.03     0.00      354     0.00     0.00  add_symbol_by_name
+  0.00     14.03     0.00      345     0.00     0.00  gc_is_heap_empty
+  0.00     14.03     0.00      286     0.00     0.00  add_global
+  0.00     14.03     0.00      286     0.00     0.00  malloc_make_pair
+  0.00     14.03     0.00      286     0.00     0.00  mcvar
+  0.00     14.03     0.00      214     0.00     0.00  ck_pr_barrier
+  0.00     14.03     0.00      194     0.00     0.00  ck_pr_fence_load
+  0.00     14.03     0.00      145     0.00     0.00  Cyc_eq
+  0.00     14.03     0.00      133     0.00     0.00  equalp
+  0.00     14.03     0.00       50     0.00     0.00  gc_heap_free
+  0.00     14.03     0.00       50     0.00     0.00  gc_wait_handshake
+  0.00     14.03     0.00       46     0.00     0.00  gc_zero_read_write_counts
+  0.00     14.03     0.00       45     0.00     0.01  gc_collector_sweep
+  0.00     14.03     0.00       45     0.00     0.00  gc_free_old_thread_data
+  0.00     14.03     0.00       44     0.00     0.00  ck_pr_md_store_int
+  0.00     14.03     0.00       41     0.00     0.00  gc_post_handshake
+  0.00     14.03     0.00       39     0.00     0.00  gc_handshake
+  0.00     14.03     0.00       36     0.00     0.00  Cyc_is_port
+  0.00     14.03     0.00       34     0.00     0.00  Cyc_set_car
+  0.00     14.03     0.00       27     0.00     0.00  Cyc_global_set
+  0.00     14.03     0.00       27     0.00     0.00  Cyc_length
+  0.00     14.03     0.00       25     0.00     0.00  assoc
+  0.00     14.03     0.00       24     0.00     0.00  __lambda_22
+  0.00     14.03     0.00       24     0.00     0.00  __lambda_23
+  0.00     14.03     0.00       24     0.00     0.00  gc_collector_trace
+  0.00     14.03     0.00       22     0.00     0.00  __lambda_658
+  0.00     14.03     0.00       22     0.00     0.00  __lambda_662
+  0.00     14.03     0.00       22     0.00     0.00  __lambda_666
+  0.00     14.03     0.00       20     0.00     0.00  Cyc_is_string
+  0.00     14.03     0.00       19     0.00     0.00  Cyc_is_eof_object
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_223
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_224
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_225
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_226
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_227
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_228
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_45
+  0.00     14.03     0.00       19     0.00     0.00  __lambda_46
+  0.00     14.03     0.00       19     0.00     0.00  apply
+  0.00     14.03     0.00       17     0.00     0.00  Cyc_io_read_char
+  0.00     14.03     0.00       17     0.00     0.00  __lambda_274
+  0.00     14.03     0.00       17     0.00     0.00  gc_mutator_thread_blocked
+  0.00     14.03     0.00       17     0.00     0.00  gc_mutator_thread_runnable
+  0.00     14.03     0.00       17     0.00     0.00  memberp
+  0.00     14.03     0.00       15     0.00     0.00  Cyc_apply
+  0.00     14.03     0.00       15     0.00     0.00  gc_mark_globals
+  0.00     14.03     0.00       14     0.00     0.00  Cyc_display
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_214
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_215
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_216
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_217
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_218
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_219
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_220
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_221
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_222
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_273
+  0.00     14.03     0.00       14     0.00     0.00  __lambda_34
+  0.00     14.03     0.00       14     0.00     0.00  _cons
+  0.00     14.03     0.00       13     0.00     0.00  gc_heap_create
+  0.00     14.03     0.00       12     0.00     0.00  Cyc_display_va
+  0.00     14.03     0.00       12     0.00     0.00  Cyc_display_va_list
+  0.00     14.03     0.00       12     0.00     0.00  __lambda_0
+  0.00     14.03     0.00       12     0.00     0.00  __lambda_1
+  0.00     14.03     0.00       12     0.00     0.04  gc_collector
+  0.00     14.03     0.00        8     0.00     0.00  Cyc_is_number
+  0.00     14.03     0.00        8     0.00     0.00  gc_grow_heap
+  0.00     14.03     0.00        8     0.00     0.00  vpbuffer_realloc
+  0.00     14.03     0.00        6     0.00     0.00  register_library
+  0.00     14.03     0.00        5     0.00     0.00  Cyc_string_append
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_18
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_19
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_20
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_21
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_44
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_54
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_55
+  0.00     14.03     0.00        5     0.00     0.00  __lambda_56
+  0.00     14.03     0.00        4     0.00     0.00  apply_va
+  0.00     14.03     0.00        4     0.00     0.00  dispatch
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_check_obj
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_fast_div
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_is_vector
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_list2string
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_string2number2_
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_string2number_
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_vector_ref
+  0.00     14.03     0.00        3     0.00     0.00  Cyc_write_char
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_10
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_11
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_292
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_293
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_294
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_298
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_299
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_30
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_300
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_300
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_301
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_31
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_33
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_344
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_345
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_346
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_347
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_374
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_42
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_43
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_659
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_660
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_661
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_667
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_668
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_669
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_670
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_671
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_672
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_673
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_674
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_675
+  0.00     14.03     0.00        3     0.00     0.00  __lambda_9
+  0.00     14.03     0.00        3     0.00     0.00  str2int
+  0.00     14.03     0.00        2     0.00     0.00  Cyc_io_flush_output_port
+  0.00     14.03     0.00        2     0.00     0.00  Cyc_number2string2
+  0.00     14.03     0.00        2     0.00     0.00  Cyc_write
+  0.00     14.03     0.00        2     0.00     0.00  Cyc_write_va
+  0.00     14.03     0.00        2     0.00     0.00  Cyc_write_va_list
+  0.00     14.03     0.00        2     0.00     0.00  _Cyc_write
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_0
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_1
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_2
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_24
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_25
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_26
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_295
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_3
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_321
+  0.00     14.03     0.00        2     0.00     0.00  __lambda_722
+  0.00     14.03     0.00        2     0.00     0.00  double2buffer
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_fast_mul
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_heap_init
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_list2vector
+  0.00     14.03     0.00        1     0.00    12.94  Cyc_start_trampoline
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_stderr
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_stdin
+  0.00     14.03     0.00        1     0.00     0.00  Cyc_stdout
+  0.00     14.03     0.00        1     0.00     0.00  __75halt
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_0
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_0
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1280
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1281
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1282
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1283
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1284
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1285
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1286
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1287
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1288
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1289
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1290
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1291
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1292
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1293
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1294
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1295
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1296
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_1297
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_13
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_14
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_15
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_16
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_17
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_18
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_19
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_2
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_2
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_2
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_20
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_21
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_22
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_23
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_233
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_234
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_235
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_236
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_237
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_238
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_239
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_24
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_25
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_26
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_27
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_28
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_29
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_3
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_3
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_3
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_30
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_33
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_34
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_35
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_356
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_357
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_36
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_37
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_375
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_38
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_39
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_39
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_4
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_4
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_4
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_4
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_40
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_41
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_42
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_43
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_44
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_45
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_46
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_47
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_48
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_49
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_5
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_5
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_5
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_5
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_50
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_51
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_57
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_59
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_6
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_6
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_60
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_61
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_62
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_63
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_64
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_65
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_66
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_67
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_68
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_69
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_7
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_70
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_71
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_72
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_720
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_73
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_74
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_75
+  0.00     14.03     0.00        1     0.00     0.00  __lambda_8
+  0.00     14.03     0.00        1     0.00     0.00  c_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_scheme_char_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_scheme_char_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_schemebase_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_schemebase_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_schemecyclonecommon_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_schemecyclonecommon_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_schemeread_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_schemeread_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_schemetime_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_schemetime_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  c_schemewrite_entry_pt
+  0.00     14.03     0.00        1     0.00     0.00  c_schemewrite_entry_pt_first_lambda
+  0.00     14.03     0.00        1     0.00     0.00  gc_add_mutator
+  0.00     14.03     0.00        1     0.00     0.00  gc_init_heap
+  0.00     14.03     0.00        1     0.00     0.00  gc_initialize
+  0.00     14.03     0.00        1     0.00     0.00  gc_start_collector
+  0.00     14.03     0.00        1     0.00     0.00  gc_thread_data_init
+  0.00     14.03     0.00        1     0.00     0.00  set_env_variables
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2016 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.07% of 14.03 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     92.2    0.00   12.94                 main [1]
+                0.00   12.94       1/1           Cyc_start_trampoline [3]
+                0.00    0.00       1/1           gc_thread_data_init [55]
+                0.00    0.00       1/1           gc_initialize [213]
+                0.00    0.00       1/1           set_env_variables [215]
+                0.00    0.00       1/1           gc_add_mutator [211]
+                0.00    0.00       1/1           Cyc_heap_init [193]
+-----------------------------------------------
+[2]     92.2    3.80    9.14  163446+9160802 <cycle 1 as a whole> [2]
+                3.41    8.86 1160759+499784062     __lambda_7 <cycle 1> [4]
+                0.27    0.04  999905             __lambda_8 <cycle 1> [20]
+                0.00    0.07      22             __lambda_662 <cycle 1> [29]
+                0.00    0.07      14             __lambda_34 <cycle 1> [30]
+                0.01    0.04  999911             __lambda_31 <cycle 1> [31]
+                0.04    0.00  999888             __lambda_9 <cycle 1> [33]
+                0.03    0.00  999900             __lambda_58 <cycle 1> [36]
+                0.01    0.02  999898             __lambda_11 <cycle 1> [39]
+                0.02    0.00  999902             __lambda_10 <cycle 1> [42]
+                0.00    0.02  999889             __lambda_6 <cycle 1> [43]
+                0.00    0.01       3             __lambda_33 <cycle 1> [44]
+                0.01    0.00  999900             __lambda_12 <cycle 1> [49]
+                0.00    0.01       3             __lambda_11 <cycle 1> [52]
+                0.01    0.00       1             __lambda_32 <cycle 1> [54]
+                0.00    0.00       1             __lambda_236 <cycle 1> [56]
+                0.00    0.00       1             __lambda_13 <cycle 1> [57]
+                0.00    0.00      24             __lambda_22 <cycle 1> [66]
+                0.00    0.00      19             __lambda_227 <cycle 1> [68]
+                0.00    0.00      19             __lambda_228 <cycle 1> [70]
+                0.00    0.00      24             __lambda_23 <cycle 1> [71]
+                0.00    0.00       5             __lambda_56 <cycle 1> [72]
+                0.00    0.00       5             __lambda_20 <cycle 1> [75]
+                0.00    0.00       5             __lambda_18 <cycle 1> [74]
+                0.00    0.00      19             __lambda_46 <cycle 1> [77]
+                0.00    0.00       3             __lambda_670 <cycle 1> [78]
+                0.00    0.00       3             __lambda_671 <cycle 1> [79]
+                0.00    0.00      17             __lambda_274 <cycle 1> [80]
+                0.00    0.00      19             __lambda_223 <cycle 1> [81]
+                0.00    0.00      14             __lambda_273 <cycle 1> [82]
+                0.00    0.00       5             __lambda_21 <cycle 1> [83]
+                0.00    0.00       1             __lambda_2 <cycle 1> [84]
+                0.00    0.00       1             __lambda_59 <cycle 1> [85]
+                0.00    0.00       1             __lambda_8 <cycle 1> [87]
+                0.00    0.00       1             __lambda_71 <cycle 1> [86]
+                0.00    0.00      22             __lambda_666 <cycle 1> [88]
+                0.00    0.00       3             __lambda_669 <cycle 1> [89]
+                0.00    0.00       5             __lambda_19 <cycle 1> [90]
+                0.00    0.00       2             __lambda_26 <cycle 1> [91]
+                0.00    0.00      12             __lambda_1 <cycle 1> [92]
+                0.00    0.00       3             __lambda_293 <cycle 1> [93]
+                0.00    0.00       3             __lambda_42 <cycle 1> [94]
+                0.00    0.00       2             __lambda_295 <cycle 1> [95]
+                0.00    0.00       4             apply_va <cycle 1> [96]
+                0.00    0.00       1             __lambda_5 <cycle 1> [118]
+                0.00    0.00       1             __lambda_3 <cycle 1> [113]
+                0.00    0.00       1             __lambda_2 <cycle 1> [112]
+                0.00    0.00       1             __lambda_0 <cycle 1> [97]
+                0.00    0.00       1             __lambda_1297 <cycle 1> [111]
+                0.00    0.00       1             __lambda_1295 <cycle 1> [110]
+                0.00    0.00       1             __lambda_1293 <cycle 1> [109]
+                0.00    0.00       1             __lambda_1291 <cycle 1> [108]
+                0.00    0.00       1             __lambda_1290 <cycle 1> [107]
+                0.00    0.00       1             __lambda_1289 <cycle 1> [106]
+                0.00    0.00       1             __lambda_1288 <cycle 1> [105]
+                0.00    0.00       1             __lambda_1287 <cycle 1> [104]
+                0.00    0.00       1             __lambda_1286 <cycle 1> [103]
+                0.00    0.00       1             __lambda_1285 <cycle 1> [102]
+                0.00    0.00       1             __lambda_1284 <cycle 1> [101]
+                0.00    0.00       1             __lambda_1283 <cycle 1> [100]
+                0.00    0.00       1             __lambda_1282 <cycle 1> [99]
+                0.00    0.00       1             __lambda_1280 <cycle 1> [98]
+                0.00    0.00       1             __lambda_5 <cycle 1> [119]
+                0.00    0.00       1             __lambda_4 <cycle 1> [117]
+                0.00    0.00       1             __lambda_39 <cycle 1> [116]
+                0.00    0.00       1             __lambda_357 <cycle 1> [115]
+                0.00    0.00       1             __lambda_356 <cycle 1> [114]
+                0.00    0.00       1             __lambda_6 <cycle 1> [120]
+                0.00    0.00       3             __lambda_661 <cycle 1> [122]
+                0.00    0.00       3             Cyc_list2string <cycle 1> [121]
+                0.00    0.00       1             __lambda_233 <cycle 1> [123]
+                0.00    0.00       5             __lambda_44 <cycle 1> [124]
+                0.00    0.00       1             __lambda_237 <cycle 1> [125]
+                0.00    0.00       3             __lambda_344 <cycle 1> [127]
+                0.00    0.00       3             __lambda_299 <cycle 1> [126]
+                0.00    0.00       1             Cyc_list2vector <cycle 1> [128]
+                0.00    0.00       2             __lambda_3 <cycle 1> [129]
+                0.00    0.00  163450             do_dispatch <cycle 1> [132]
+                0.00    0.00       1+1000        __lambda_1 <cycle 1> [907]
+                0.00    0.00      22             __lambda_658 <cycle 1> [856]
+                0.00    0.00      19             __lambda_226 <cycle 1> [859]
+                0.00    0.00      19             __lambda_45 <cycle 1> [860]
+                0.00    0.00      19             __lambda_225 <cycle 1> [858]
+                0.00    0.00      19             __lambda_224 <cycle 1> [857]
+                0.00    0.00      19             apply <cycle 1> [163]
+                0.00    0.00      17             Cyc_io_read_char <cycle 1> [164]
+                0.00    0.00      17             gc_mutator_thread_runnable <cycle 1> [166]
+                0.00    0.00      15             Cyc_apply <cycle 1> [167]
+                0.00    0.00      14             __lambda_222 <cycle 1> [869]
+                0.00    0.00      14             __lambda_221 <cycle 1> [868]
+                0.00    0.00      14             __lambda_220 <cycle 1> [867]
+                0.00    0.00      14             __lambda_219 <cycle 1> [866]
+                0.00    0.00      14             __lambda_218 <cycle 1> [865]
+                0.00    0.00      14             __lambda_217 <cycle 1> [864]
+                0.00    0.00      14             __lambda_216 <cycle 1> [863]
+                0.00    0.00      14             __lambda_215 <cycle 1> [862]
+                0.00    0.00      14             __lambda_214 <cycle 1> [861]
+                0.00    0.00      14             _cons <cycle 1> [870]
+                0.00    0.00      12             __lambda_0 <cycle 1> [871]
+                0.00    0.00       5             Cyc_string_append <cycle 1> [176]
+                0.00    0.00       5             __lambda_55 <cycle 1> [873]
+                0.00    0.00       5             __lambda_54 <cycle 1> [872]
+                0.00    0.00       4             dispatch <cycle 1> [177]
+                0.00    0.00       3             __lambda_675 <cycle 1> [895]
+                0.00    0.00       3             __lambda_674 <cycle 1> [894]
+                0.00    0.00       3             __lambda_660 <cycle 1> [889]
+                0.00    0.00       3             __lambda_673 <cycle 1> [893]
+                0.00    0.00       3             __lambda_672 <cycle 1> [892]
+                0.00    0.00       3             __lambda_668 <cycle 1> [891]
+                0.00    0.00       3             __lambda_659 <cycle 1> [888]
+                0.00    0.00       3             __lambda_667 <cycle 1> [890]
+                0.00    0.00       3             __lambda_347 <cycle 1> [885]
+                0.00    0.00       3             __lambda_346 <cycle 1> [884]
+                0.00    0.00       3             __lambda_10 <cycle 1> [874]
+                0.00    0.00       3             __lambda_9 <cycle 1> [896]
+                0.00    0.00       3             __lambda_345 <cycle 1> [883]
+                0.00    0.00       3             __lambda_43 <cycle 1> [887]
+                0.00    0.00       3             __lambda_31 <cycle 1> [882]
+                0.00    0.00       3             __lambda_374 <cycle 1> [886]
+                0.00    0.00       3             __lambda_30 <cycle 1> [878]
+                0.00    0.00       3             __lambda_301 <cycle 1> [881]
+                0.00    0.00       3             __lambda_292 <cycle 1> [875]
+                0.00    0.00       3             __lambda_300 <cycle 1> [880]
+                0.00    0.00       3             __lambda_294 <cycle 1> [876]
+                0.00    0.00       3             Cyc_string2number2_ <cycle 1> [181]
+                0.00    0.00       3             Cyc_string2number_ <cycle 1> [182]
+                0.00    0.00       3             __lambda_300 <cycle 1> [879]
+                0.00    0.00       3             __lambda_298 <cycle 1> [877]
+                0.00    0.00       2             __lambda_321 <cycle 1> [903]
+                0.00    0.00       2             __lambda_25 <cycle 1> [902]
+                0.00    0.00       2             __lambda_24 <cycle 1> [901]
+                0.00    0.00       2             __lambda_1 <cycle 1> [899]
+                0.00    0.00       2             __lambda_0 <cycle 1> [898]
+                0.00    0.00       2             Cyc_number2string2 <cycle 1> [187]
+                0.00    0.00       2             __lambda_2 <cycle 1> [900]
+                0.00    0.00       1             __lambda_75 <cycle 1> [980]
+                0.00    0.00       1             __lambda_4 <cycle 1> [947]
+                0.00    0.00       1             __lambda_74 <cycle 1> [979]
+                0.00    0.00       1             __lambda_4 <cycle 1> [946]
+                0.00    0.00       1             __lambda_1 <cycle 1> [908]
+                0.00    0.00       1             c_schemebase_entry_pt <cycle 1> [201]
+                0.00    0.00       1             c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+                0.00    0.00       1             __lambda_1296 <cycle 1> [912]
+                0.00    0.00       1             __lambda_1294 <cycle 1> [911]
+                0.00    0.00       1             __lambda_1292 <cycle 1> [910]
+                0.00    0.00       1             __lambda_1281 <cycle 1> [909]
+                0.00    0.00       1             c_schemetime_entry_pt <cycle 1> [207]
+                0.00    0.00       1             c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+                0.00    0.00       1             __lambda_3 <cycle 1> [935]
+                0.00    0.00       1             c_schemewrite_entry_pt <cycle 1> [209]
+                0.00    0.00       1             c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+                0.00    0.00       1             c_scheme_char_entry_pt <cycle 1> [199]
+                0.00    0.00       1             c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+                0.00    0.00       1             c_schemeread_entry_pt <cycle 1> [205]
+                0.00    0.00       1             c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+                0.00    0.00       1             c_entry_pt_first_lambda <cycle 1> [198]
+                0.00    0.00       1             __lambda_22 <cycle 1> [922]
+                0.00    0.00       1             __lambda_28 <cycle 1> [932]
+                0.00    0.00       1             __lambda_26 <cycle 1> [930]
+                0.00    0.00       1             __lambda_16 <cycle 1> [915]
+                0.00    0.00       1             __lambda_5 <cycle 1> [958]
+                0.00    0.00       1             __lambda_4 <cycle 1> [945]
+                0.00    0.00       1             __lambda_3 <cycle 1> [934]
+                0.00    0.00       1             __lambda_0 <cycle 1> [906]
+                0.00    0.00       1             __lambda_15 <cycle 1> [914]
+                0.00    0.00       1             __lambda_57 <cycle 1> [962]
+                0.00    0.00       1             __lambda_61 <cycle 1> [965]
+                0.00    0.00       1             __lambda_60 <cycle 1> [964]
+                0.00    0.00       1             __lambda_30 <cycle 1> [936]
+                0.00    0.00       1             __lambda_51 <cycle 1> [961]
+                0.00    0.00       1             __lambda_62 <cycle 1> [966]
+                0.00    0.00       1             __lambda_50 <cycle 1> [960]
+                0.00    0.00       1             __lambda_70 <cycle 1> [975]
+                0.00    0.00       1             __lambda_49 <cycle 1> [957]
+                0.00    0.00       1             c_entry_pt <cycle 1> [197]
+                0.00    0.00       1             c_schemecyclonecommon_entry_pt <cycle 1> [203]
+                0.00    0.00       1             c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+                0.00    0.00       1             __lambda_6 <cycle 1> [963]
+                0.00    0.00       1             __lambda_21 <cycle 1> [921]
+                0.00    0.00       1             __lambda_20 <cycle 1> [920]
+                0.00    0.00       1             __lambda_19 <cycle 1> [918]
+                0.00    0.00       1             __lambda_18 <cycle 1> [917]
+                0.00    0.00       1             __lambda_17 <cycle 1> [916]
+                0.00    0.00       1             __lambda_29 <cycle 1> [933]
+                0.00    0.00       1             __lambda_239 <cycle 1> [927]
+                0.00    0.00       1             __lambda_27 <cycle 1> [931]
+                0.00    0.00       1             __lambda_375 <cycle 1> [942]
+                0.00    0.00       1             __lambda_25 <cycle 1> [929]
+                0.00    0.00       1             __lambda_23 <cycle 1> [923]
+                0.00    0.00       1             __lambda_24 <cycle 1> [928]
+                0.00    0.00       1             __lambda_235 <cycle 1> [925]
+                0.00    0.00       1             __lambda_234 <cycle 1> [924]
+                0.00    0.00       1             __lambda_238 <cycle 1> [926]
+                0.00    0.00       1             __lambda_65 <cycle 1> [969]
+                0.00    0.00       1             __lambda_64 <cycle 1> [968]
+                0.00    0.00       1             __lambda_2 <cycle 1> [919]
+                0.00    0.00       1             __lambda_63 <cycle 1> [967]
+                0.00    0.00       1             __lambda_47 <cycle 1> [955]
+                0.00    0.00       1             __lambda_45 <cycle 1> [953]
+                0.00    0.00       1             __lambda_68 <cycle 1> [972]
+                0.00    0.00       1             __lambda_67 <cycle 1> [971]
+                0.00    0.00       1             __lambda_48 <cycle 1> [956]
+                0.00    0.00       1             __lambda_46 <cycle 1> [954]
+                0.00    0.00       1             __lambda_44 <cycle 1> [952]
+                0.00    0.00       1             __lambda_43 <cycle 1> [951]
+                0.00    0.00       1             __lambda_41 <cycle 1> [949]
+                0.00    0.00       1             __lambda_39 <cycle 1> [944]
+                0.00    0.00       1             __lambda_38 <cycle 1> [943]
+                0.00    0.00       1             __lambda_37 <cycle 1> [941]
+                0.00    0.00       1             __lambda_36 <cycle 1> [940]
+                0.00    0.00       1             __lambda_35 <cycle 1> [939]
+                0.00    0.00       1             __lambda_66 <cycle 1> [970]
+                0.00    0.00       1             __lambda_42 <cycle 1> [950]
+                0.00    0.00       1             __lambda_34 <cycle 1> [938]
+                0.00    0.00       1             __lambda_33 <cycle 1> [937]
+                0.00    0.00       1             __lambda_7 <cycle 1> [974]
+                0.00    0.00       1             __lambda_5 <cycle 1> [959]
+                0.00    0.00       1             __lambda_14 <cycle 1> [913]
+                0.00    0.00       1             __lambda_73 <cycle 1> [978]
+                0.00    0.00       1             __lambda_72 <cycle 1> [976]
+                0.00    0.00       1             __lambda_69 <cycle 1> [973]
+                0.00    0.00       1             __lambda_40 <cycle 1> [948]
+-----------------------------------------------
+                0.00   12.94       1/1           main [1]
+[3]     92.2    0.00   12.94       1         Cyc_start_trampoline [3]
+                3.80    9.14  163446/163446      do_dispatch <cycle 1> [132]
+-----------------------------------------------
+                             499784062             __lambda_7 <cycle 1> [4]
+                              162156             do_dispatch <cycle 1> [132]
+                              998603             __lambda_6 <cycle 1> [43]
+[4]     87.4    3.41    8.86 1160759+499784062 __lambda_7 <cycle 1> [4]
+                1.61    2.31 999896485/999896698     Cyc_cdr [5]
+                0.00    2.50  160843/163417      GC [7]
+                0.74    1.16 499941160/499941228     Cyc_car [9]
+                0.54    0.00 500943588/500943656     Cyc_is_null [14]
+                              999911             __lambda_31 <cycle 1> [31]
+                             499784062             __lambda_7 <cycle 1> [4]
+-----------------------------------------------
+                0.00    0.00       1/999896698     __lambda_237 <cycle 1> [125]
+                0.00    0.00       1/999896698     __lambda_233 <cycle 1> [123]
+                0.00    0.00       2/999896698     __lambda_26 <cycle 1> [91]
+                0.00    0.00       5/999896698     __lambda_19 <cycle 1> [90]
+                0.00    0.00      10/999896698     __lambda_223 <cycle 1> [81]
+                0.00    0.00      10/999896698     __lambda_21 <cycle 1> [83]
+                0.00    0.00      14/999896698     __lambda_273 <cycle 1> [82]
+                0.00    0.00      19/999896698     __lambda_46 <cycle 1> [77]
+                0.00    0.00      22/999896698     __lambda_662 <cycle 1> [29]
+                0.00    0.00      57/999896698     __lambda_228 <cycle 1> [70]
+                0.00    0.00      72/999896698     __lambda_23 <cycle 1> [71]
+                1.61    2.31 999896485/999896698     __lambda_7 <cycle 1> [4]
+[5]     27.9    1.61    2.31 999896698         Cyc_cdr [5]
+                2.31    0.00 999894311/1499840774     Cyc_is_pair [6]
+-----------------------------------------------
+                0.00    0.00       1/1499840774     __lambda_236 <cycle 1> [56]
+                0.00    0.00       1/1499840774     Cyc_list2vector <cycle 1> [128]
+                0.00    0.00       3/1499840774     __lambda_661 <cycle 1> [122]
+                0.00    0.00       3/1499840774     Cyc_list2string <cycle 1> [121]
+                0.00    0.00       4/1499840774     apply_va <cycle 1> [96]
+                0.00    0.00      17/1499840774     memberp [27]
+                0.00    0.00      34/1499840774     Cyc_set_car [65]
+                0.00    0.00      65/1499840774     assoc [28]
+                0.00    0.00     135/1499840774     equalp [22]
+                1.16    0.00 499946200/1499840774     Cyc_car [9]
+                2.31    0.00 999894311/1499840774     Cyc_cdr [5]
+[6]     24.7    3.47    0.00 1499840774         Cyc_is_pair [6]
+-----------------------------------------------
+                0.00    0.00       1/163417      __lambda_58 <cycle 1> [36]
+                0.00    0.00       1/163417      __lambda_8 <cycle 1> [20]
+                0.00    0.02    1286/163417      __lambda_11 <cycle 1> [39]
+                0.00    0.02    1286/163417      __lambda_6 <cycle 1> [43]
+                0.00    2.50  160843/163417      __lambda_7 <cycle 1> [4]
+[7]     18.1    0.00    2.54  163417         GC [7]
+                0.79    1.74  163416/163416      gc_minor [8]
+                0.00    0.01  163447/163447      gc_mut_cooperate [45]
+-----------------------------------------------
+                0.79    1.74  163416/163416      GC [7]
+[8]     18.0    0.79    1.74  163416         gc_minor [8]
+                0.15    1.59 42868325/42868325     gc_move [10]
+                0.00    0.00  163445/163445      clear_mutations [133]
+-----------------------------------------------
+                0.00    0.00       1/499941228     __lambda_236 <cycle 1> [56]
+                0.00    0.00       2/499941228     __lambda_295 <cycle 1> [95]
+                0.00    0.00       2/499941228     __lambda_26 <cycle 1> [91]
+                0.00    0.00       3/499941228     __lambda_293 <cycle 1> [93]
+                0.00    0.00       3/499941228     __lambda_42 <cycle 1> [94]
+                0.00    0.00       5/499941228     __lambda_223 <cycle 1> [81]
+                0.00    0.00      14/499941228     __lambda_274 <cycle 1> [80]
+                0.00    0.00      19/499941228     __lambda_228 <cycle 1> [70]
+                0.00    0.00      19/499941228     __lambda_46 <cycle 1> [77]
+                0.74    1.16 499941160/499941228     __lambda_7 <cycle 1> [4]
+[9]     13.5    0.74    1.16 499941228         Cyc_car [9]
+                1.16    0.00 499946200/1499840774     Cyc_is_pair [6]
+-----------------------------------------------
+                0.15    1.59 42868325/42868325     gc_minor [8]
+[10]    12.4    0.15    1.59 42868325         gc_move [10]
+                0.26    1.12 42706050/42706050     gc_alloc [11]
+                0.12    0.09 42705909/42705909     gc_fixup_moved_obj [21]
+-----------------------------------------------
+                0.26    1.12 42706050/42706050     gc_move [10]
+[11]     9.8    0.26    1.12 42706050         gc_alloc [11]
+                0.59    0.53 42706093/42706093     gc_try_alloc [12]
+                0.00    0.00       8/8           gc_grow_heap [173]
+-----------------------------------------------
+                0.59    0.53 42706093/42706093     gc_alloc [11]
+[12]     8.0    0.59    0.53 42706093         gc_try_alloc [12]
+                0.33    0.00 42706228/42706240     ck_pr_sub_ptr [19]
+                0.13    0.00 42705960/42705960     gc_copy_obj [25]
+                0.07    0.00 42706136/85051565     gc_allocated_bytes [24]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]     4.1    0.57    0.00                 Cyc_is_boolean [13]
+-----------------------------------------------
+                0.00    0.00       2/500943656     __lambda_295 <cycle 1> [95]
+                0.00    0.00       2/500943656     __lambda_233 <cycle 1> [123]
+                0.00    0.00       2/500943656     __lambda_3 <cycle 1> [129]
+                0.00    0.00       3/500943656     __lambda_299 <cycle 1> [126]
+                0.00    0.00       3/500943656     __lambda_344 <cycle 1> [127]
+                0.00    0.00       5/500943656     __lambda_44 <cycle 1> [124]
+                0.00    0.00      12/500943656     __lambda_1 <cycle 1> [92]
+                0.00    0.00      17/500943656     __lambda_274 <cycle 1> [80]
+                0.00    0.00      22/500943656     __lambda_666 <cycle 1> [88]
+                0.54    0.00 500943588/500943656     __lambda_7 <cycle 1> [4]
+[14]     3.8    0.54    0.00 500943656         Cyc_is_null [14]
+-----------------------------------------------
+                                                 <spontaneous>
+[15]     3.1    0.00    0.44                 collector_main [15]
+                0.00    0.44      12/12          gc_collector [16]
+                0.00    0.00     441/2738856     ck_pr_md_load_int [46]
+-----------------------------------------------
+                0.00    0.44      12/12          collector_main [15]
+[16]     3.1    0.00    0.44      12         gc_collector [16]
+                0.00    0.41      45/45          gc_collector_sweep [17]
+                0.03    0.00      17/17          gc_request_mark_globals [35]
+                0.00    0.00      24/24          gc_collector_trace [58]
+                0.00    0.00      39/39          gc_handshake [67]
+                0.00    0.00      20/50          gc_wait_handshake [64]
+                0.00    0.00      45/45          gc_free_old_thread_data [69]
+                0.00    0.00      31/2738856     ck_pr_md_load_int [46]
+                0.00    0.00      13/41          gc_post_handshake [76]
+                0.00    0.00     159/437         ck_pr_cas_int [143]
+-----------------------------------------------
+                0.00    0.41      45/45          gc_collector [16]
+[17]     2.9    0.00    0.41      45         gc_collector_sweep [17]
+                0.34    0.07     220/220         gc_sweep [18]
+                0.00    0.00     224/1265035     ck_pr_md_load_ptr [50]
+                0.00    0.00      45/194         ck_pr_fence_load [154]
+                0.00    0.00      44/44          ck_pr_md_store_int [158]
+-----------------------------------------------
+                0.34    0.07     220/220         gc_collector_sweep [17]
+[18]     2.9    0.34    0.07     220         gc_sweep [18]
+                0.07    0.00 42345429/85051565     gc_allocated_bytes [24]
+                0.00    0.00      12/42706240     ck_pr_sub_ptr [19]
+                0.00    0.00     347/373         ck_pr_add_ptr [147]
+                0.00    0.00     345/345         gc_is_heap_empty [149]
+                0.00    0.00      50/50          gc_heap_free [156]
+-----------------------------------------------
+                0.00    0.00      12/42706240     gc_sweep [18]
+                0.33    0.00 42706228/42706240     gc_try_alloc [12]
+[19]     2.4    0.33    0.00 42706240         ck_pr_sub_ptr [19]
+-----------------------------------------------
+                              999905             __lambda_9 <cycle 1> [33]
+[20]     2.2    0.27    0.04  999905         __lambda_8 <cycle 1> [20]
+                0.00    0.04  999866/999873      Cyc_set_cell [34]
+                0.00    0.00       1/163417      GC [7]
+                              999888             __lambda_6 <cycle 1> [43]
+-----------------------------------------------
+                0.12    0.09 42705909/42705909     gc_move [10]
+[21]     1.5    0.12    0.09 42705909         gc_fixup_moved_obj [21]
+                0.08    0.01 42705956/42705956     gc_thr_add_to_move_buffer [26]
+                0.00    0.00    4642/4642        gc_mark_gray2 [61]
+-----------------------------------------------
+                                   1             equalp [22]
+                0.00    0.00       1/133         __lambda_13 <cycle 1> [57]
+                0.00    0.00       1/133         __lambda_236 <cycle 1> [56]
+                0.00    0.08      65/133         assoc [28]
+                0.00    0.08      66/133         memberp [27]
+[22]     1.2    0.00    0.17     133+1       equalp [22]
+                0.17    0.00     135/135         equal [23]
+                0.00    0.00     135/1499840774     Cyc_is_pair [6]
+                                   1             equalp [22]
+-----------------------------------------------
+                0.17    0.00     135/135         equalp [22]
+[23]     1.2    0.17    0.00     135         equal [23]
+-----------------------------------------------
+                0.07    0.00 42345429/85051565     gc_sweep [18]
+                0.07    0.00 42706136/85051565     gc_try_alloc [12]
+[24]     1.0    0.14    0.00 85051565         gc_allocated_bytes [24]
+-----------------------------------------------
+                0.13    0.00 42705960/42705960     gc_try_alloc [12]
+[25]     0.9    0.13    0.00 42705960         gc_copy_obj [25]
+-----------------------------------------------
+                0.08    0.01 42705956/42705956     gc_fixup_moved_obj [21]
+[26]     0.6    0.08    0.01 42705956         gc_thr_add_to_move_buffer [26]
+                0.01    0.00       5/6           gc_thr_grow_move_buffer [51]
+-----------------------------------------------
+                0.00    0.01       3/17          __lambda_33 <cycle 1> [44]
+                0.00    0.07      14/17          __lambda_34 <cycle 1> [30]
+[27]     0.6    0.00    0.08      17         memberp [27]
+                0.00    0.08      66/133         equalp [22]
+                0.00    0.00      17/1499840774     Cyc_is_pair [6]
+-----------------------------------------------
+                0.00    0.01       3/25          __lambda_11 <cycle 1> [52]
+                0.00    0.07      22/25          __lambda_662 <cycle 1> [29]
+[28]     0.6    0.00    0.08      25         assoc [28]
+                0.00    0.08      65/133         equalp [22]
+                0.00    0.00      65/1499840774     Cyc_is_pair [6]
+-----------------------------------------------
+                                  22             __lambda_658 <cycle 1> [856]
+[29]     0.5    0.00    0.07      22         __lambda_662 <cycle 1> [29]
+                0.00    0.07      22/25          assoc [28]
+                0.00    0.00      22/999896698     Cyc_cdr [5]
+                                  12             __lambda_0 <cycle 1> [871]
+                                   3             __lambda_298 <cycle 1> [877]
+                                   3             __lambda_346 <cycle 1> [884]
+                                   2             __lambda_2 <cycle 1> [900]
+                                   1             __lambda_33 <cycle 1> [937]
+                                   1             __lambda_65 <cycle 1> [969]
+-----------------------------------------------
+                                  14             __lambda_223 <cycle 1> [81]
+[30]     0.5    0.00    0.07      14         __lambda_34 <cycle 1> [30]
+                0.00    0.07      14/17          memberp [27]
+                0.00    0.00      14/1000033     Cyc_st_add [130]
+                                  14             __lambda_222 <cycle 1> [869]
+-----------------------------------------------
+                              999911             __lambda_7 <cycle 1> [4]
+[31]     0.3    0.01    0.04  999911         __lambda_31 <cycle 1> [31]
+                0.03    0.01  999876/999903      Cyc_fast_sum [32]
+                              999899             __lambda_58 <cycle 1> [36]
+-----------------------------------------------
+                0.00    0.00       3/999903      __lambda_670 <cycle 1> [78]
+                0.00    0.00       5/999903      __lambda_56 <cycle 1> [72]
+                0.00    0.00      19/999903      __lambda_227 <cycle 1> [68]
+                0.03    0.01  999876/999903      __lambda_31 <cycle 1> [31]
+[32]     0.3    0.03    0.01  999903         Cyc_fast_sum [32]
+                0.01    0.00  999907/999907      Cyc_checked_add [48]
+-----------------------------------------------
+                              999888             __lambda_10 <cycle 1> [42]
+[33]     0.3    0.04    0.00  999888         __lambda_9 <cycle 1> [33]
+                              999905             __lambda_8 <cycle 1> [20]
+-----------------------------------------------
+                0.00    0.00       1/999873      __lambda_71 <cycle 1> [86]
+                0.00    0.00       1/999873      __lambda_59 <cycle 1> [85]
+                0.00    0.00       1/999873      __lambda_2 <cycle 1> [84]
+                0.00    0.00       1/999873      __lambda_8 <cycle 1> [87]
+                0.00    0.00       3/999873      __lambda_671 <cycle 1> [79]
+                0.00    0.04  999866/999873      __lambda_8 <cycle 1> [20]
+[34]     0.3    0.00    0.04  999873         Cyc_set_cell [34]
+                0.02    0.01  999894/999928      add_mutation [40]
+                0.00    0.01  999883/999944      gc_mut_update [53]
+-----------------------------------------------
+                0.03    0.00      17/17          gc_collector [16]
+[35]     0.2    0.03    0.00      17         gc_request_mark_globals [35]
+                0.00    0.00      15/15          gc_mark_globals [63]
+-----------------------------------------------
+                                   1             __lambda_30 <cycle 1> [936]
+                              999899             __lambda_31 <cycle 1> [31]
+[36]     0.2    0.03    0.00  999900         __lambda_58 <cycle 1> [36]
+                0.00    0.00       1/163417      GC [7]
+                0.00    0.00  999872/999873      Cyc_num_fast_lt_op [131]
+                              999899             __lambda_12 <cycle 1> [49]
+                                   1             __lambda_13 <cycle 1> [57]
+-----------------------------------------------
+                                                 <spontaneous>
+[37]     0.2    0.03    0.00                 gc_alloc_from_bignum [37]
+-----------------------------------------------
+                                                 <spontaneous>
+[38]     0.2    0.03    0.00                 gc_print_stats [38]
+-----------------------------------------------
+                              999898             __lambda_12 <cycle 1> [49]
+[39]     0.2    0.01    0.02  999898         __lambda_11 <cycle 1> [39]
+                0.00    0.02    1286/163417      GC [7]
+                0.00    0.00  999879/1000033     Cyc_st_add [130]
+                              998616             __lambda_10 <cycle 1> [42]
+-----------------------------------------------
+                0.00    0.00      34/999928      Cyc_set_car [65]
+                0.02    0.01  999894/999928      Cyc_set_cell [34]
+[40]     0.2    0.02    0.01  999928         add_mutation [40]
+                0.01    0.00  999895/1080349     vpbuffer_add [47]
+-----------------------------------------------
+                                                 <spontaneous>
+[41]     0.1    0.02    0.00                 ck_pr_add_8 [41]
+-----------------------------------------------
+                                1286             do_dispatch <cycle 1> [132]
+                              998616             __lambda_11 <cycle 1> [39]
+[42]     0.1    0.02    0.00  999902         __lambda_10 <cycle 1> [42]
+                              999888             __lambda_9 <cycle 1> [33]
+-----------------------------------------------
+                                   1             do_dispatch <cycle 1> [132]
+                              999888             __lambda_8 <cycle 1> [20]
+[43]     0.1    0.00    0.02  999889         __lambda_6 <cycle 1> [43]
+                0.00    0.02    1286/163417      GC [7]
+                              998603             __lambda_7 <cycle 1> [4]
+-----------------------------------------------
+                                   3             __lambda_293 <cycle 1> [93]
+[44]     0.1    0.00    0.01       3         __lambda_33 <cycle 1> [44]
+                0.00    0.01       3/17          memberp [27]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_292 <cycle 1> [875]
+-----------------------------------------------
+                0.00    0.01  163447/163447      GC [7]
+[45]     0.1    0.00    0.01  163447         gc_mut_cooperate [45]
+                0.01    0.00 1264656/1265035     ck_pr_md_load_ptr [50]
+                0.00    0.00  648454/2738856     ck_pr_md_load_int [46]
+                0.00    0.00   11768/17618       gc_mark_gray [60]
+                0.00    0.00  163445/163445      gc_sum_pending_writes [134]
+                0.00    0.00     187/437         ck_pr_cas_int [143]
+                0.00    0.00      46/46          gc_zero_read_write_counts [157]
+-----------------------------------------------
+                0.00    0.00       2/2738856     gc_thread_data_init [55]
+                0.00    0.00      31/2738856     gc_collector [16]
+                0.00    0.00      43/2738856     gc_post_handshake [76]
+                0.00    0.00     267/2738856     gc_wait_handshake [64]
+                0.00    0.00     441/2738856     collector_main [15]
+                0.00    0.00    5399/2738856     gc_mark_globals [63]
+                0.00    0.00   14475/2738856     gc_collector_trace [58]
+                0.00    0.00   69789/2738856     gc_empty_collector_stack [59]
+                0.00    0.00  648454/2738856     gc_mut_cooperate [45]
+                0.01    0.00 1999955/2738856     gc_mut_update [53]
+[46]     0.1    0.01    0.00 2738856         ck_pr_md_load_int [46]
+-----------------------------------------------
+                0.00    0.00     177/1080349     gc_mark_globals [63]
+                0.00    0.00    1335/1080349     gc_collector_trace [58]
+                0.00    0.00    4447/1080349     gc_mark_gray2 [61]
+                0.00    0.00   11557/1080349     gc_mark_gray [60]
+                0.00    0.00   62938/1080349     gc_empty_collector_stack [59]
+                0.01    0.00  999895/1080349     add_mutation [40]
+[47]     0.1    0.01    0.00 1080349         vpbuffer_add [47]
+                0.00    0.00       5/8           vpbuffer_realloc [174]
+-----------------------------------------------
+                0.01    0.00  999907/999907      Cyc_fast_sum [32]
+[48]     0.1    0.01    0.00  999907         Cyc_checked_add [48]
+-----------------------------------------------
+                                   1             do_dispatch <cycle 1> [132]
+                              999899             __lambda_58 <cycle 1> [36]
+[49]     0.1    0.01    0.00  999900         __lambda_12 <cycle 1> [49]
+                              999898             __lambda_11 <cycle 1> [39]
+-----------------------------------------------
+                0.00    0.00      45/1265035     gc_free_old_thread_data [69]
+                0.00    0.00      49/1265035     gc_wait_handshake [64]
+                0.00    0.00      61/1265035     gc_collector_trace [58]
+                0.00    0.00     224/1265035     gc_collector_sweep [17]
+                0.01    0.00 1264656/1265035     gc_mut_cooperate [45]
+[50]     0.1    0.01    0.00 1265035         ck_pr_md_load_ptr [50]
+-----------------------------------------------
+                0.00    0.00       1/6           gc_thread_data_init [55]
+                0.01    0.00       5/6           gc_thr_add_to_move_buffer [26]
+[51]     0.1    0.01    0.00       6         gc_thr_grow_move_buffer [51]
+-----------------------------------------------
+                                   3             __lambda_346 <cycle 1> [884]
+[52]     0.1    0.00    0.01       3         __lambda_11 <cycle 1> [52]
+                0.00    0.01       3/25          assoc [28]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_10 <cycle 1> [874]
+-----------------------------------------------
+                0.00    0.00      27/999944      Cyc_global_set [73]
+                0.00    0.00      34/999944      Cyc_set_car [65]
+                0.00    0.01  999883/999944      Cyc_set_cell [34]
+[53]     0.1    0.00    0.01  999944         gc_mut_update [53]
+                0.01    0.00 1999955/2738856     ck_pr_md_load_int [46]
+                0.00    0.00   10504/10504       mark_stack_or_heap_obj [62]
+-----------------------------------------------
+                                   1             __lambda_295 <cycle 1> [95]
+[54]     0.0    0.01    0.00       1         __lambda_32 <cycle 1> [54]
+                                   1             Cyc_apply <cycle 1> [167]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[55]     0.0    0.00    0.00       1         gc_thread_data_init [55]
+                0.00    0.00       1/6           gc_thr_grow_move_buffer [51]
+                0.00    0.00       2/2738856     ck_pr_md_load_int [46]
+                0.00    0.00       5/13          gc_heap_create [169]
+                0.00    0.00       2/8           vpbuffer_realloc [174]
+-----------------------------------------------
+                                   1             __lambda_238 <cycle 1> [926]
+[56]     0.0    0.00    0.00       1         __lambda_236 <cycle 1> [56]
+                0.00    0.00       1/133         equalp [22]
+                0.00    0.00       1/499941228     Cyc_car [9]
+                0.00    0.00       1/1499840774     Cyc_is_pair [6]
+                                   1             __lambda_237 <cycle 1> [125]
+-----------------------------------------------
+                                   1             __lambda_58 <cycle 1> [36]
+[57]     0.0    0.00    0.00       1         __lambda_13 <cycle 1> [57]
+                0.00    0.00       1/133         equalp [22]
+                0.00    0.00       1/27          Cyc_length [160]
+                                   1             __lambda_57 <cycle 1> [962]
+-----------------------------------------------
+                0.00    0.00      24/24          gc_collector [16]
+[58]     0.0    0.00    0.00      24         gc_collector_trace [58]
+                0.00    0.00   14362/14362       gc_empty_collector_stack [59]
+                0.00    0.00   14475/2738856     ck_pr_md_load_int [46]
+                0.00    0.00    1335/1080349     vpbuffer_add [47]
+                0.00    0.00      61/1265035     ck_pr_md_load_ptr [50]
+                0.00    0.00      56/194         ck_pr_fence_load [154]
+-----------------------------------------------
+                0.00    0.00   14362/14362       gc_collector_trace [58]
+[59]     0.0    0.00    0.00   14362         gc_empty_collector_stack [59]
+                0.00    0.00   62938/1080349     vpbuffer_add [47]
+                0.00    0.00   69789/2738856     ck_pr_md_load_int [46]
+-----------------------------------------------
+                0.00    0.00    5850/17618       mark_stack_or_heap_obj [62]
+                0.00    0.00   11768/17618       gc_mut_cooperate [45]
+[60]     0.0    0.00    0.00   17618         gc_mark_gray [60]
+                0.00    0.00   11557/1080349     vpbuffer_add [47]
+-----------------------------------------------
+                0.00    0.00    4642/4642        gc_fixup_moved_obj [21]
+[61]     0.0    0.00    0.00    4642         gc_mark_gray2 [61]
+                0.00    0.00    4447/1080349     vpbuffer_add [47]
+-----------------------------------------------
+                0.00    0.00   10504/10504       gc_mut_update [53]
+[62]     0.0    0.00    0.00   10504         mark_stack_or_heap_obj [62]
+                0.00    0.00    5850/17618       gc_mark_gray [60]
+                0.00    0.00   10496/10496       gc_is_stack_obj [135]
+-----------------------------------------------
+                0.00    0.00      15/15          gc_request_mark_globals [35]
+[63]     0.0    0.00    0.00      15         gc_mark_globals [63]
+                0.00    0.00    5399/2738856     ck_pr_md_load_int [46]
+                0.00    0.00     177/1080349     vpbuffer_add [47]
+-----------------------------------------------
+                0.00    0.00      20/50          gc_collector [16]
+                0.00    0.00      30/50          gc_handshake [67]
+[64]     0.0    0.00    0.00      50         gc_wait_handshake [64]
+                0.00    0.00     267/2738856     ck_pr_md_load_int [46]
+                0.00    0.00      49/1265035     ck_pr_md_load_ptr [50]
+                0.00    0.00      48/194         ck_pr_fence_load [154]
+-----------------------------------------------
+                0.00    0.00       5/34          __lambda_20 <cycle 1> [75]
+                0.00    0.00       5/34          __lambda_18 <cycle 1> [74]
+                0.00    0.00      24/34          __lambda_22 <cycle 1> [66]
+[65]     0.0    0.00    0.00      34         Cyc_set_car [65]
+                0.00    0.00      34/999928      add_mutation [40]
+                0.00    0.00      34/999944      gc_mut_update [53]
+                0.00    0.00      34/1499840774     Cyc_is_pair [6]
+-----------------------------------------------
+                                  24             __lambda_23 <cycle 1> [71]
+[66]     0.0    0.00    0.00      24         __lambda_22 <cycle 1> [66]
+                0.00    0.00      24/34          Cyc_set_car [65]
+                                  19             __lambda_226 <cycle 1> [859]
+                                   5             __lambda_54 <cycle 1> [872]
+-----------------------------------------------
+                0.00    0.00      39/39          gc_collector [16]
+[67]     0.0    0.00    0.00      39         gc_handshake [67]
+                0.00    0.00      30/50          gc_wait_handshake [64]
+                0.00    0.00      28/41          gc_post_handshake [76]
+-----------------------------------------------
+                                  19             __lambda_228 <cycle 1> [70]
+[68]     0.0    0.00    0.00      19         __lambda_227 <cycle 1> [68]
+                0.00    0.00      19/999903      Cyc_fast_sum [32]
+                                  19             __lambda_23 <cycle 1> [71]
+-----------------------------------------------
+                0.00    0.00      45/45          gc_collector [16]
+[69]     0.0    0.00    0.00      45         gc_free_old_thread_data [69]
+                0.00    0.00      45/1265035     ck_pr_md_load_ptr [50]
+                0.00    0.00      45/194         ck_pr_fence_load [154]
+-----------------------------------------------
+                                   2             __lambda_44 <cycle 1> [124]
+                                   3             __lambda_345 <cycle 1> [883]
+                                  14             __lambda_214 <cycle 1> [861]
+[70]     0.0    0.00    0.00      19         __lambda_228 <cycle 1> [70]
+                0.00    0.00      57/999896698     Cyc_cdr [5]
+                0.00    0.00      19/499941228     Cyc_car [9]
+                0.00    0.00      19/1000033     Cyc_st_add [130]
+                                  19             __lambda_227 <cycle 1> [68]
+-----------------------------------------------
+                                   5             __lambda_55 <cycle 1> [873]
+                                  19             __lambda_227 <cycle 1> [68]
+[71]     0.0    0.00    0.00      24         __lambda_23 <cycle 1> [71]
+                0.00    0.00      72/999896698     Cyc_cdr [5]
+                0.00    0.00      24/1000033     Cyc_st_add [130]
+                                  24             __lambda_22 <cycle 1> [66]
+-----------------------------------------------
+                                   5             __lambda_223 <cycle 1> [81]
+[72]     0.0    0.00    0.00       5         __lambda_56 <cycle 1> [72]
+                0.00    0.00       5/999903      Cyc_fast_sum [32]
+                                   5             __lambda_21 <cycle 1> [83]
+-----------------------------------------------
+                0.00    0.00       1/27          __lambda_5 <cycle 1> [118]
+                0.00    0.00       1/27          __lambda_3 <cycle 1> [113]
+                0.00    0.00       1/27          __lambda_2 <cycle 1> [112]
+                0.00    0.00       1/27          __lambda_0 <cycle 1> [97]
+                0.00    0.00       1/27          __lambda_1297 <cycle 1> [111]
+                0.00    0.00       1/27          __lambda_1295 <cycle 1> [110]
+                0.00    0.00       1/27          __lambda_1293 <cycle 1> [109]
+                0.00    0.00       1/27          __lambda_1291 <cycle 1> [108]
+                0.00    0.00       1/27          __lambda_1290 <cycle 1> [107]
+                0.00    0.00       1/27          __lambda_1289 <cycle 1> [106]
+                0.00    0.00       1/27          __lambda_1288 <cycle 1> [105]
+                0.00    0.00       1/27          __lambda_1287 <cycle 1> [104]
+                0.00    0.00       1/27          __lambda_1286 <cycle 1> [103]
+                0.00    0.00       1/27          __lambda_1285 <cycle 1> [102]
+                0.00    0.00       1/27          __lambda_1284 <cycle 1> [101]
+                0.00    0.00       1/27          __lambda_1283 <cycle 1> [100]
+                0.00    0.00       1/27          __lambda_1282 <cycle 1> [99]
+                0.00    0.00       1/27          __lambda_1280 <cycle 1> [98]
+                0.00    0.00       1/27          __lambda_5 <cycle 1> [119]
+                0.00    0.00       1/27          __lambda_4 <cycle 1> [117]
+                0.00    0.00       1/27          __lambda_39 <cycle 1> [116]
+                0.00    0.00       1/27          __lambda_357 <cycle 1> [115]
+                0.00    0.00       1/27          __lambda_356 <cycle 1> [114]
+                0.00    0.00       1/27          __lambda_6 <cycle 1> [120]
+                0.00    0.00       3/27          __lambda_669 <cycle 1> [89]
+[73]     0.0    0.00    0.00      27         Cyc_global_set [73]
+                0.00    0.00      27/999944      gc_mut_update [53]
+-----------------------------------------------
+                                   5             __lambda_19 <cycle 1> [90]
+[74]     0.0    0.00    0.00       5         __lambda_18 <cycle 1> [74]
+                0.00    0.00       5/34          Cyc_set_car [65]
+                                   3             __lambda_43 <cycle 1> [887]
+                                   2             __lambda_24 <cycle 1> [901]
+-----------------------------------------------
+                                   5             __lambda_21 <cycle 1> [83]
+[75]     0.0    0.00    0.00       5         __lambda_20 <cycle 1> [75]
+                0.00    0.00       5/34          Cyc_set_car [65]
+                                   5             __lambda_55 <cycle 1> [873]
+-----------------------------------------------
+                0.00    0.00      13/41          gc_collector [16]
+                0.00    0.00      28/41          gc_handshake [67]
+[76]     0.0    0.00    0.00      41         gc_post_handshake [76]
+                0.00    0.00      43/2738856     ck_pr_md_load_int [46]
+                0.00    0.00      57/437         ck_pr_cas_int [143]
+-----------------------------------------------
+                                  19             __lambda_226 <cycle 1> [859]
+[77]     0.0    0.00    0.00      19         __lambda_46 <cycle 1> [77]
+                0.00    0.00      19/999896698     Cyc_cdr [5]
+                0.00    0.00      19/499941228     Cyc_car [9]
+                                  19             __lambda_45 <cycle 1> [860]
+-----------------------------------------------
+                                   3             __lambda_671 <cycle 1> [79]
+[78]     0.0    0.00    0.00       3         __lambda_670 <cycle 1> [78]
+                0.00    0.00       3/999903      Cyc_fast_sum [32]
+                                   3             __lambda_669 <cycle 1> [89]
+-----------------------------------------------
+                                   3             __lambda_672 <cycle 1> [892]
+[79]     0.0    0.00    0.00       3         __lambda_671 <cycle 1> [79]
+                0.00    0.00       3/999873      Cyc_set_cell [34]
+                                   3             __lambda_670 <cycle 1> [78]
+-----------------------------------------------
+                                   3             __lambda_374 <cycle 1> [886]
+                                  14             __lambda_273 <cycle 1> [82]
+[80]     0.0    0.00    0.00      17         __lambda_274 <cycle 1> [80]
+                0.00    0.00      14/499941228     Cyc_car [9]
+                0.00    0.00      17/500943656     Cyc_is_null [14]
+                0.00    0.00      17/1000033     Cyc_st_add [130]
+                                  14             Cyc_apply <cycle 1> [167]
+                                   3             __lambda_30 <cycle 1> [878]
+-----------------------------------------------
+                                  19             __lambda_224 <cycle 1> [857]
+[81]     0.0    0.00    0.00      19         __lambda_223 <cycle 1> [81]
+                0.00    0.00      10/999896698     Cyc_cdr [5]
+                0.00    0.00       5/499941228     Cyc_car [9]
+                                  14             __lambda_34 <cycle 1> [30]
+                                   5             __lambda_56 <cycle 1> [72]
+-----------------------------------------------
+                                  14             _cons <cycle 1> [870]
+[82]     0.0    0.00    0.00      14         __lambda_273 <cycle 1> [82]
+                0.00    0.00      14/999896698     Cyc_cdr [5]
+                                  14             __lambda_274 <cycle 1> [80]
+-----------------------------------------------
+                                   5             __lambda_56 <cycle 1> [72]
+[83]     0.0    0.00    0.00       5         __lambda_21 <cycle 1> [83]
+                0.00    0.00      10/999896698     Cyc_cdr [5]
+                0.00    0.00       5/1000033     Cyc_st_add [130]
+                                   5             __lambda_20 <cycle 1> [75]
+-----------------------------------------------
+                                   1             __lambda_3 <cycle 1> [934]
+[84]     0.0    0.00    0.00       1         __lambda_2 <cycle 1> [84]
+                0.00    0.00       1/999873      Cyc_set_cell [34]
+                                   1             __lambda_0 <cycle 1> [906]
+-----------------------------------------------
+                                   1             __lambda_60 <cycle 1> [964]
+[85]     0.0    0.00    0.00       1         __lambda_59 <cycle 1> [85]
+                0.00    0.00       1/999873      Cyc_set_cell [34]
+                                   1             __lambda_30 <cycle 1> [936]
+-----------------------------------------------
+                                   1             __lambda_72 <cycle 1> [976]
+[86]     0.0    0.00    0.00       1         __lambda_71 <cycle 1> [86]
+                0.00    0.00       1/999873      Cyc_set_cell [34]
+                                   1             __lambda_69 <cycle 1> [973]
+-----------------------------------------------
+                                   1             __lambda_321 <cycle 1> [903]
+[87]     0.0    0.00    0.00       1         __lambda_8 <cycle 1> [87]
+                0.00    0.00       1/999873      Cyc_set_cell [34]
+                                   1             __lambda_7 <cycle 1> [974]
+-----------------------------------------------
+                                   1             __lambda_66 <cycle 1> [970]
+                                   1             __lambda_34 <cycle 1> [938]
+                                   2             __lambda_3 <cycle 1> [129]
+                                   3             __lambda_299 <cycle 1> [126]
+                                   3             __lambda_344 <cycle 1> [127]
+                                  12             __lambda_1 <cycle 1> [92]
+[88]     0.0    0.00    0.00      22         __lambda_666 <cycle 1> [88]
+                0.00    0.00      22/500943656     Cyc_is_null [14]
+                                  22             __lambda_658 <cycle 1> [856]
+-----------------------------------------------
+                                   3             __lambda_670 <cycle 1> [78]
+[89]     0.0    0.00    0.00       3         __lambda_669 <cycle 1> [89]
+                0.00    0.00       3/27          Cyc_global_set [73]
+                                   3             __lambda_668 <cycle 1> [891]
+-----------------------------------------------
+                                   2             __lambda_25 <cycle 1> [902]
+                                   3             __lambda_44 <cycle 1> [124]
+[90]     0.0    0.00    0.00       5         __lambda_19 <cycle 1> [90]
+                0.00    0.00       5/999896698     Cyc_cdr [5]
+                0.00    0.00       5/1000033     Cyc_st_add [130]
+                                   5             __lambda_18 <cycle 1> [74]
+-----------------------------------------------
+                                   2             __lambda_45 <cycle 1> [860]
+[91]     0.0    0.00    0.00       2         __lambda_26 <cycle 1> [91]
+                0.00    0.00       2/999896698     Cyc_cdr [5]
+                0.00    0.00       2/499941228     Cyc_car [9]
+                0.00    0.00       2/1000033     Cyc_st_add [130]
+                                   2             __lambda_25 <cycle 1> [902]
+-----------------------------------------------
+                                   1             __lambda_69 <cycle 1> [973]
+                                   1             __lambda_68 <cycle 1> [972]
+                                   1             __lambda_49 <cycle 1> [957]
+                                   1             __lambda_47 <cycle 1> [955]
+                                   1             __lambda_45 <cycle 1> [953]
+                                   1             __lambda_44 <cycle 1> [952]
+                                   1             __lambda_42 <cycle 1> [950]
+                                   1             __lambda_40 <cycle 1> [948]
+                                   1             __lambda_39 <cycle 1> [944]
+                                   1             __lambda_38 <cycle 1> [943]
+                                   1             __lambda_37 <cycle 1> [941]
+                                   1             __lambda_36 <cycle 1> [940]
+[92]     0.0    0.00    0.00      12         __lambda_1 <cycle 1> [92]
+                0.00    0.00      12/500943656     Cyc_is_null [14]
+                0.00    0.00      12/1000033     Cyc_st_add [130]
+                                  12             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                                   3             __lambda_301 <cycle 1> [881]
+[93]     0.0    0.00    0.00       3         __lambda_293 <cycle 1> [93]
+                0.00    0.00       3/499941228     Cyc_car [9]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_33 <cycle 1> [44]
+-----------------------------------------------
+                                   3             Cyc_string2number_ <cycle 1> [182]
+[94]     0.0    0.00    0.00       3         __lambda_42 <cycle 1> [94]
+                0.00    0.00       3/499941228     Cyc_car [9]
+                                   1             __lambda_19 <cycle 1> [918]
+                                   1             __lambda_20 <cycle 1> [920]
+                                   1             __lambda_21 <cycle 1> [921]
+-----------------------------------------------
+                                   1             __lambda_65 <cycle 1> [969]
+                                   1             __lambda_33 <cycle 1> [937]
+[95]     0.0    0.00    0.00       2         __lambda_295 <cycle 1> [95]
+                0.00    0.00       2/499941228     Cyc_car [9]
+                0.00    0.00       2/500943656     Cyc_is_null [14]
+                0.00    0.00       2/1000033     Cyc_st_add [130]
+                0.00    0.00       2/2           Cyc_io_flush_output_port [186]
+                                   1             __lambda_32 <cycle 1> [54]
+                                   1             __lambda_64 <cycle 1> [968]
+-----------------------------------------------
+                                   1             __lambda_237 <cycle 1> [125]
+                                   3             __lambda_300 <cycle 1> [879]
+[96]     0.0    0.00    0.00       4         apply_va <cycle 1> [96]
+                0.00    0.00       4/1499840774     Cyc_is_pair [6]
+                                   4             apply <cycle 1> [163]
+-----------------------------------------------
+                                   1             Cyc_string_append <cycle 1> [176]
+[97]     0.0    0.00    0.00       1         __lambda_0 <cycle 1> [97]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             c_schemebase_entry_pt <cycle 1> [201]
+-----------------------------------------------
+                                   1             __lambda_321 <cycle 1> [903]
+[98]     0.0    0.00    0.00       1         __lambda_1280 <cycle 1> [98]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             c_schemetime_entry_pt <cycle 1> [207]
+-----------------------------------------------
+                                   1             __lambda_1283 <cycle 1> [100]
+[99]     0.0    0.00    0.00       1         __lambda_1282 <cycle 1> [99]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1281 <cycle 1> [909]
+-----------------------------------------------
+                                   1             __lambda_1284 <cycle 1> [101]
+[100]    0.0    0.00    0.00       1         __lambda_1283 <cycle 1> [100]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1282 <cycle 1> [99]
+-----------------------------------------------
+                                   1             __lambda_1285 <cycle 1> [102]
+[101]    0.0    0.00    0.00       1         __lambda_1284 <cycle 1> [101]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1283 <cycle 1> [100]
+-----------------------------------------------
+                                   1             __lambda_1286 <cycle 1> [103]
+[102]    0.0    0.00    0.00       1         __lambda_1285 <cycle 1> [102]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1284 <cycle 1> [101]
+-----------------------------------------------
+                                   1             __lambda_1287 <cycle 1> [104]
+[103]    0.0    0.00    0.00       1         __lambda_1286 <cycle 1> [103]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1285 <cycle 1> [102]
+-----------------------------------------------
+                                   1             __lambda_1288 <cycle 1> [105]
+[104]    0.0    0.00    0.00       1         __lambda_1287 <cycle 1> [104]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1286 <cycle 1> [103]
+-----------------------------------------------
+                                   1             __lambda_1289 <cycle 1> [106]
+[105]    0.0    0.00    0.00       1         __lambda_1288 <cycle 1> [105]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1287 <cycle 1> [104]
+-----------------------------------------------
+                                   1             __lambda_1290 <cycle 1> [107]
+[106]    0.0    0.00    0.00       1         __lambda_1289 <cycle 1> [106]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1288 <cycle 1> [105]
+-----------------------------------------------
+                                   1             __lambda_1291 <cycle 1> [108]
+[107]    0.0    0.00    0.00       1         __lambda_1290 <cycle 1> [107]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1289 <cycle 1> [106]
+-----------------------------------------------
+                                   1             __lambda_667 <cycle 1> [890]
+[108]    0.0    0.00    0.00       1         __lambda_1291 <cycle 1> [108]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1290 <cycle 1> [107]
+-----------------------------------------------
+                                   1             __lambda_667 <cycle 1> [890]
+[109]    0.0    0.00    0.00       1         __lambda_1293 <cycle 1> [109]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1292 <cycle 1> [910]
+-----------------------------------------------
+                                   1             __lambda_667 <cycle 1> [890]
+[110]    0.0    0.00    0.00       1         __lambda_1295 <cycle 1> [110]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1294 <cycle 1> [911]
+-----------------------------------------------
+                                   1             c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+[111]    0.0    0.00    0.00       1         __lambda_1297 <cycle 1> [111]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_1296 <cycle 1> [912]
+-----------------------------------------------
+                                   1             __lambda_3 <cycle 1> [113]
+[112]    0.0    0.00    0.00       1         __lambda_2 <cycle 1> [112]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_1 <cycle 1> [908]
+-----------------------------------------------
+                                   1             Cyc_string_append <cycle 1> [176]
+[113]    0.0    0.00    0.00       1         __lambda_3 <cycle 1> [113]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_2 <cycle 1> [112]
+-----------------------------------------------
+                                   1             __lambda_357 <cycle 1> [115]
+[114]    0.0    0.00    0.00       1         __lambda_356 <cycle 1> [114]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             c_entry_pt_first_lambda <cycle 1> [198]
+-----------------------------------------------
+                                   1             c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+[115]    0.0    0.00    0.00       1         __lambda_357 <cycle 1> [115]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_356 <cycle 1> [114]
+-----------------------------------------------
+                                   1             c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+[116]    0.0    0.00    0.00       1         __lambda_39 <cycle 1> [116]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             c_schemeread_entry_pt <cycle 1> [205]
+-----------------------------------------------
+                                   1             __lambda_5 <cycle 1> [119]
+[117]    0.0    0.00    0.00       1         __lambda_4 <cycle 1> [117]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             c_scheme_char_entry_pt <cycle 1> [199]
+-----------------------------------------------
+                                   1             Cyc_string_append <cycle 1> [176]
+[118]    0.0    0.00    0.00       1         __lambda_5 <cycle 1> [118]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_4 <cycle 1> [946]
+-----------------------------------------------
+                                   1             c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+[119]    0.0    0.00    0.00       1         __lambda_5 <cycle 1> [119]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_4 <cycle 1> [117]
+-----------------------------------------------
+                                   1             __lambda_7 <cycle 1> [974]
+[120]    0.0    0.00    0.00       1         __lambda_6 <cycle 1> [120]
+                0.00    0.00       1/27          Cyc_global_set [73]
+                                   1             __lambda_5 <cycle 1> [959]
+-----------------------------------------------
+                                   3             __lambda_300 <cycle 1> [880]
+[121]    0.0    0.00    0.00       3         Cyc_list2string <cycle 1> [121]
+                0.00    0.00       3/1499840774     Cyc_is_pair [6]
+                0.00    0.00       3/27          Cyc_length [160]
+                                   3             __lambda_294 <cycle 1> [876]
+-----------------------------------------------
+                                   3             __lambda_675 <cycle 1> [895]
+[122]    0.0    0.00    0.00       3         __lambda_661 <cycle 1> [122]
+                0.00    0.00       3/1499840774     Cyc_is_pair [6]
+                                   3             __lambda_674 <cycle 1> [894]
+-----------------------------------------------
+                                   1             __lambda_235 <cycle 1> [925]
+[123]    0.0    0.00    0.00       1         __lambda_233 <cycle 1> [123]
+                0.00    0.00       1/999896698     Cyc_cdr [5]
+                0.00    0.00       2/500943656     Cyc_is_null [14]
+                                   1             __lambda_234 <cycle 1> [924]
+-----------------------------------------------
+                                   5             __lambda_54 <cycle 1> [872]
+[124]    0.0    0.00    0.00       5         __lambda_44 <cycle 1> [124]
+                0.00    0.00       5/500943656     Cyc_is_null [14]
+                0.00    0.00       5/1000033     Cyc_st_add [130]
+                                   3             __lambda_19 <cycle 1> [90]
+                                   2             __lambda_228 <cycle 1> [70]
+-----------------------------------------------
+                                   1             __lambda_236 <cycle 1> [56]
+[125]    0.0    0.00    0.00       1         __lambda_237 <cycle 1> [125]
+                0.00    0.00       1/999896698     Cyc_cdr [5]
+                                   1             apply_va <cycle 1> [96]
+-----------------------------------------------
+                                   3             do_dispatch <cycle 1> [132]
+[126]    0.0    0.00    0.00       3         __lambda_299 <cycle 1> [126]
+                0.00    0.00       3/500943656     Cyc_is_null [14]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                                   3             __lambda_347 <cycle 1> [885]
+[127]    0.0    0.00    0.00       3         __lambda_344 <cycle 1> [127]
+                0.00    0.00       3/500943656     Cyc_is_null [14]
+                                   3             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                                   1             __lambda_375 <cycle 1> [942]
+[128]    0.0    0.00    0.00       1         Cyc_list2vector <cycle 1> [128]
+                0.00    0.00       1/1499840774     Cyc_is_pair [6]
+                0.00    0.00       1/27          Cyc_length [160]
+                                   1             __lambda_25 <cycle 1> [929]
+-----------------------------------------------
+                                   1             __lambda_48 <cycle 1> [956]
+                                   1             __lambda_46 <cycle 1> [954]
+[129]    0.0    0.00    0.00       2         __lambda_3 <cycle 1> [129]
+                0.00    0.00       2/500943656     Cyc_is_null [14]
+                0.00    0.00       2/1000033     Cyc_st_add [130]
+                                   2             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                0.00    0.00       1/1000033     __lambda_75 <cycle 1> [980]
+                0.00    0.00       1/1000033     __lambda_73 <cycle 1> [978]
+                0.00    0.00       1/1000033     __lambda_29 <cycle 1> [933]
+                0.00    0.00       1/1000033     __lambda_22 <cycle 1> [922]
+                0.00    0.00       1/1000033     __lambda_5 <cycle 1> [958]
+                0.00    0.00       1/1000033     __lambda_6 <cycle 1> [963]
+                0.00    0.00       1/1000033     __lambda_1297 <cycle 1> [111]
+                0.00    0.00       1/1000033     __lambda_375 <cycle 1> [942]
+                0.00    0.00       1/1000033     __lambda_239 <cycle 1> [927]
+                0.00    0.00       1/1000033     __lambda_235 <cycle 1> [925]
+                0.00    0.00       1/1000033     __lambda_4 <cycle 1> [947]
+                0.00    0.00       1/1000033     __lambda_3 <cycle 1> [935]
+                0.00    0.00       1/1000033     __lambda_5 <cycle 1> [119]
+                0.00    0.00       1/1000033     __lambda_39 <cycle 1> [116]
+                0.00    0.00       1/1000033     __lambda_357 <cycle 1> [115]
+                0.00    0.00       2/1000033     __lambda_321 <cycle 1> [903]
+                0.00    0.00       2/1000033     __lambda_295 <cycle 1> [95]
+                0.00    0.00       2/1000033     __lambda_3 <cycle 1> [129]
+                0.00    0.00       2/1000033     __lambda_26 <cycle 1> [91]
+                0.00    0.00       3/1000033     __lambda_675 <cycle 1> [895]
+                0.00    0.00       3/1000033     __lambda_374 <cycle 1> [886]
+                0.00    0.00       3/1000033     __lambda_300 <cycle 1> [879]
+                0.00    0.00       3/1000033     __lambda_299 <cycle 1> [126]
+                0.00    0.00       3/1000033     __lambda_33 <cycle 1> [44]
+                0.00    0.00       3/1000033     __lambda_347 <cycle 1> [885]
+                0.00    0.00       3/1000033     __lambda_301 <cycle 1> [881]
+                0.00    0.00       3/1000033     __lambda_293 <cycle 1> [93]
+                0.00    0.00       3/1000033     __lambda_31 <cycle 1> [882]
+                0.00    0.00       3/1000033     __lambda_11 <cycle 1> [52]
+                0.00    0.00       5/1000033     __lambda_44 <cycle 1> [124]
+                0.00    0.00       5/1000033     __lambda_21 <cycle 1> [83]
+                0.00    0.00       5/1000033     __lambda_19 <cycle 1> [90]
+                0.00    0.00      12/1000033     __lambda_1 <cycle 1> [92]
+                0.00    0.00      14/1000033     __lambda_34 <cycle 1> [30]
+                0.00    0.00      17/1000033     __lambda_274 <cycle 1> [80]
+                0.00    0.00      19/1000033     __lambda_228 <cycle 1> [70]
+                0.00    0.00      24/1000033     __lambda_23 <cycle 1> [71]
+                0.00    0.00  999879/1000033     __lambda_11 <cycle 1> [39]
+[130]    0.0    0.00    0.00 1000033         Cyc_st_add [130]
+-----------------------------------------------
+                0.00    0.00       1/999873      __lambda_23 <cycle 1> [923]
+                0.00    0.00  999872/999873      __lambda_58 <cycle 1> [36]
+[131]    0.0    0.00    0.00  999873         Cyc_num_fast_lt_op [131]
+-----------------------------------------------
+                                   4             dispatch <cycle 1> [177]
+                3.80    9.14  163446/163446      Cyc_start_trampoline [3]
+[132]    0.0    0.00    0.00  163450         do_dispatch <cycle 1> [132]
+                              162156             __lambda_7 <cycle 1> [4]
+                                1286             __lambda_10 <cycle 1> [42]
+                                   3             __lambda_299 <cycle 1> [126]
+                                   1             __lambda_6 <cycle 1> [43]
+                                   1             __lambda_12 <cycle 1> [49]
+                                   1             c_entry_pt <cycle 1> [197]
+                                   1             __lambda_28 <cycle 1> [932]
+-----------------------------------------------
+                0.00    0.00  163445/163445      gc_minor [8]
+[133]    0.0    0.00    0.00  163445         clear_mutations [133]
+-----------------------------------------------
+                0.00    0.00  163445/163445      gc_mut_cooperate [45]
+[134]    0.0    0.00    0.00  163445         gc_sum_pending_writes [134]
+-----------------------------------------------
+                0.00    0.00   10496/10496       mark_stack_or_heap_obj [62]
+[135]    0.0    0.00    0.00   10496         gc_is_stack_obj [135]
+-----------------------------------------------
+                0.00    0.00       1/1003        __lambda_50 <cycle 1> [960]
+                0.00    0.00       1/1003        __lambda_48 <cycle 1> [956]
+                0.00    0.00       1/1003        __lambda_36 <cycle 1> [940]
+                0.00    0.00    1000/1003        __lambda_1 <cycle 1> [907]
+[136]    0.0    0.00    0.00    1003         Cyc_fast_sub [136]
+                0.00    0.00    1000/1000        Cyc_checked_sub [138]
+-----------------------------------------------
+                0.00    0.00    1001/1001        __lambda_1 <cycle 1> [907]
+[137]    0.0    0.00    0.00    1001         Cyc_num_fast_eq_op [137]
+-----------------------------------------------
+                0.00    0.00    1000/1000        Cyc_fast_sub [136]
+[138]    0.0    0.00    0.00    1000         Cyc_checked_sub [138]
+-----------------------------------------------
+                0.00    0.00     860/860         hs_hash [140]
+[139]    0.0    0.00    0.00     860         MurmurHash64A [139]
+-----------------------------------------------
+                0.00    0.00     396/860         set_get [146]
+                0.00    0.00     464/860         set_insert [141]
+[140]    0.0    0.00    0.00     860         hs_hash [140]
+                0.00    0.00     860/860         MurmurHash64A [139]
+-----------------------------------------------
+                0.00    0.00       6/464         register_library [175]
+                0.00    0.00     458/464         add_symbol [142]
+[141]    0.0    0.00    0.00     464         set_insert [141]
+                0.00    0.00     464/860         hs_hash [140]
+-----------------------------------------------
+                0.00    0.00       6/458         c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+                0.00    0.00      98/458         c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+                0.00    0.00     354/458         add_symbol_by_name [148]
+[142]    0.0    0.00    0.00     458         add_symbol [142]
+                0.00    0.00     458/464         set_insert [141]
+-----------------------------------------------
+                0.00    0.00      17/437         gc_mutator_thread_blocked [165]
+                0.00    0.00      17/437         gc_mutator_thread_runnable <cycle 1> [166]
+                0.00    0.00      57/437         gc_post_handshake [76]
+                0.00    0.00     159/437         gc_collector [16]
+                0.00    0.00     187/437         gc_mut_cooperate [45]
+[143]    0.0    0.00    0.00     437         ck_pr_cas_int [143]
+-----------------------------------------------
+                0.00    0.00       5/396         c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+                0.00    0.00       6/396         c_entry_pt <cycle 1> [197]
+                0.00    0.00       6/396         c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+                0.00    0.00       8/396         c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+                0.00    0.00      24/396         c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+                0.00    0.00      48/396         c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+                0.00    0.00     299/396         c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+[144]    0.0    0.00    0.00     396         find_or_add_symbol [144]
+                0.00    0.00     396/396         find_symbol_by_name [145]
+                0.00    0.00     354/354         add_symbol_by_name [148]
+-----------------------------------------------
+                0.00    0.00     396/396         find_or_add_symbol [144]
+[145]    0.0    0.00    0.00     396         find_symbol_by_name [145]
+                0.00    0.00     396/396         set_get [146]
+-----------------------------------------------
+                0.00    0.00     396/396         find_symbol_by_name [145]
+[146]    0.0    0.00    0.00     396         set_get [146]
+                0.00    0.00     396/860         hs_hash [140]
+-----------------------------------------------
+                0.00    0.00      26/373         gc_heap_create [169]
+                0.00    0.00     347/373         gc_sweep [18]
+[147]    0.0    0.00    0.00     373         ck_pr_add_ptr [147]
+-----------------------------------------------
+                0.00    0.00     354/354         find_or_add_symbol [144]
+[148]    0.0    0.00    0.00     354         add_symbol_by_name [148]
+                0.00    0.00     354/360         _strdup [855]
+                0.00    0.00     354/458         add_symbol [142]
+-----------------------------------------------
+                0.00    0.00     345/345         gc_sweep [18]
+[149]    0.0    0.00    0.00     345         gc_is_heap_empty [149]
+-----------------------------------------------
+                0.00    0.00       4/286         c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+                0.00    0.00       5/286         c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+                0.00    0.00       6/286         c_entry_pt <cycle 1> [197]
+                0.00    0.00       7/286         c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+                0.00    0.00      23/286         c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+                0.00    0.00      41/286         c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+                0.00    0.00     200/286         c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+[150]    0.0    0.00    0.00     286         add_global [150]
+                0.00    0.00     286/286         mcvar [152]
+                0.00    0.00     286/286         malloc_make_pair [151]
+-----------------------------------------------
+                0.00    0.00     286/286         add_global [150]
+[151]    0.0    0.00    0.00     286         malloc_make_pair [151]
+-----------------------------------------------
+                0.00    0.00     286/286         add_global [150]
+[152]    0.0    0.00    0.00     286         mcvar [152]
+-----------------------------------------------
+                0.00    0.00     214/214         ck_pr_fence_load [154]
+[153]    0.0    0.00    0.00     214         ck_pr_barrier [153]
+-----------------------------------------------
+                0.00    0.00      45/194         gc_free_old_thread_data [69]
+                0.00    0.00      45/194         gc_collector_sweep [17]
+                0.00    0.00      48/194         gc_wait_handshake [64]
+                0.00    0.00      56/194         gc_collector_trace [58]
+[154]    0.0    0.00    0.00     194         ck_pr_fence_load [154]
+                0.00    0.00     214/214         ck_pr_barrier [153]
+-----------------------------------------------
+                0.00    0.00      14/145         __lambda_222 <cycle 1> [869]
+                0.00    0.00      14/145         __lambda_221 <cycle 1> [868]
+                0.00    0.00      14/145         __lambda_220 <cycle 1> [867]
+                0.00    0.00      14/145         __lambda_219 <cycle 1> [866]
+                0.00    0.00      14/145         __lambda_218 <cycle 1> [865]
+                0.00    0.00      14/145         __lambda_217 <cycle 1> [864]
+                0.00    0.00      14/145         __lambda_216 <cycle 1> [863]
+                0.00    0.00      14/145         __lambda_215 <cycle 1> [862]
+                0.00    0.00      14/145         __lambda_214 <cycle 1> [861]
+                0.00    0.00      19/145         __lambda_224 <cycle 1> [857]
+[155]    0.0    0.00    0.00     145         Cyc_eq [155]
+-----------------------------------------------
+                0.00    0.00      50/50          gc_sweep [18]
+[156]    0.0    0.00    0.00      50         gc_heap_free [156]
+-----------------------------------------------
+                0.00    0.00      46/46          gc_mut_cooperate [45]
+[157]    0.0    0.00    0.00      46         gc_zero_read_write_counts [157]
+-----------------------------------------------
+                0.00    0.00      44/44          gc_collector_sweep [17]
+[158]    0.0    0.00    0.00      44         ck_pr_md_store_int [158]
+-----------------------------------------------
+                0.00    0.00       2/36          Cyc_write_va_list [190]
+                0.00    0.00       2/36          Cyc_io_flush_output_port [186]
+                0.00    0.00       3/36          Cyc_write_char [184]
+                0.00    0.00      12/36          Cyc_display_va_list [171]
+                0.00    0.00      17/36          Cyc_io_read_char <cycle 1> [164]
+[159]    0.0    0.00    0.00      36         Cyc_is_port [159]
+-----------------------------------------------
+                0.00    0.00       1/27          __lambda_13 <cycle 1> [57]
+                0.00    0.00       1/27          Cyc_list2vector <cycle 1> [128]
+                0.00    0.00       3/27          Cyc_list2string <cycle 1> [121]
+                0.00    0.00       8/27          apply <cycle 1> [163]
+                0.00    0.00      14/27          _cons <cycle 1> [870]
+[160]    0.0    0.00    0.00      27         Cyc_length [160]
+-----------------------------------------------
+                0.00    0.00       3/20          Cyc_string2number_ <cycle 1> [182]
+                0.00    0.00      17/20          Cyc_string_append <cycle 1> [176]
+[161]    0.0    0.00    0.00      20         Cyc_is_string [161]
+-----------------------------------------------
+                0.00    0.00      19/19          __lambda_225 <cycle 1> [858]
+[162]    0.0    0.00    0.00      19         Cyc_is_eof_object [162]
+-----------------------------------------------
+                                   4             apply_va <cycle 1> [96]
+                                  15             Cyc_apply <cycle 1> [167]
+[163]    0.0    0.00    0.00      19         apply <cycle 1> [163]
+                0.00    0.00       8/27          Cyc_length [160]
+                0.00    0.00       1/1           __75halt [905]
+                                  14             _cons <cycle 1> [870]
+                                   4             dispatch <cycle 1> [177]
+-----------------------------------------------
+                                  17             __lambda_45 <cycle 1> [860]
+[164]    0.0    0.00    0.00      17         Cyc_io_read_char <cycle 1> [164]
+                0.00    0.00      17/36          Cyc_is_port [159]
+                0.00    0.00      17/17          gc_mutator_thread_blocked [165]
+                                  17             gc_mutator_thread_runnable <cycle 1> [166]
+-----------------------------------------------
+                0.00    0.00      17/17          Cyc_io_read_char <cycle 1> [164]
+[165]    0.0    0.00    0.00      17         gc_mutator_thread_blocked [165]
+                0.00    0.00      17/437         ck_pr_cas_int [143]
+-----------------------------------------------
+                                  17             Cyc_io_read_char <cycle 1> [164]
+[166]    0.0    0.00    0.00      17         gc_mutator_thread_runnable <cycle 1> [166]
+                0.00    0.00      17/437         ck_pr_cas_int [143]
+                                  17             __lambda_225 <cycle 1> [858]
+-----------------------------------------------
+                                   1             __lambda_32 <cycle 1> [54]
+                                  14             __lambda_274 <cycle 1> [80]
+[167]    0.0    0.00    0.00      15         Cyc_apply <cycle 1> [167]
+                                  15             apply <cycle 1> [163]
+-----------------------------------------------
+                0.00    0.00       2/14          _Cyc_write [897]
+                0.00    0.00      12/14          Cyc_display_va_list [171]
+[168]    0.0    0.00    0.00      14         Cyc_display [168]
+                0.00    0.00       2/2           double2buffer [191]
+-----------------------------------------------
+                0.00    0.00       5/13          gc_thread_data_init [55]
+                0.00    0.00       8/13          gc_grow_heap [173]
+[169]    0.0    0.00    0.00      13         gc_heap_create [169]
+                0.00    0.00      26/373         ck_pr_add_ptr [147]
+-----------------------------------------------
+                0.00    0.00      12/12          __lambda_0 <cycle 1> [871]
+[170]    0.0    0.00    0.00      12         Cyc_display_va [170]
+                0.00    0.00      12/12          Cyc_display_va_list [171]
+-----------------------------------------------
+                0.00    0.00      12/12          Cyc_display_va [170]
+[171]    0.0    0.00    0.00      12         Cyc_display_va_list [171]
+                0.00    0.00      12/36          Cyc_is_port [159]
+                0.00    0.00      12/14          Cyc_display [168]
+-----------------------------------------------
+                0.00    0.00       1/8           __lambda_720 [977]
+                0.00    0.00       2/8           __lambda_722 [904]
+                0.00    0.00       2/8           Cyc_number2string2 <cycle 1> [187]
+                0.00    0.00       3/8           Cyc_vector_ref [183]
+[172]    0.0    0.00    0.00       8         Cyc_is_number [172]
+-----------------------------------------------
+                0.00    0.00       8/8           gc_alloc [11]
+[173]    0.0    0.00    0.00       8         gc_grow_heap [173]
+                0.00    0.00       8/13          gc_heap_create [169]
+-----------------------------------------------
+                0.00    0.00       1/8           gc_initialize [213]
+                0.00    0.00       2/8           gc_thread_data_init [55]
+                0.00    0.00       5/8           vpbuffer_add [47]
+[174]    0.0    0.00    0.00       8         vpbuffer_realloc [174]
+-----------------------------------------------
+                0.00    0.00       1/6           c_schemecyclonecommon_entry_pt <cycle 1> [203]
+                0.00    0.00       1/6           c_schemebase_entry_pt <cycle 1> [201]
+                0.00    0.00       1/6           c_schemetime_entry_pt <cycle 1> [207]
+                0.00    0.00       1/6           c_schemewrite_entry_pt <cycle 1> [209]
+                0.00    0.00       1/6           c_scheme_char_entry_pt <cycle 1> [199]
+                0.00    0.00       1/6           c_schemeread_entry_pt <cycle 1> [205]
+[175]    0.0    0.00    0.00       6         register_library [175]
+                0.00    0.00       6/360         _strdup [855]
+                0.00    0.00       6/464         set_insert [141]
+-----------------------------------------------
+                                   1             __lambda_74 <cycle 1> [979]
+                                   1             __lambda_15 <cycle 1> [914]
+                                   1             __lambda_6 <cycle 1> [963]
+                                   1             __lambda_4 <cycle 1> [946]
+                                   1             __lambda_1 <cycle 1> [908]
+[176]    0.0    0.00    0.00       5         Cyc_string_append <cycle 1> [176]
+                0.00    0.00      17/20          Cyc_is_string [161]
+                                   1             __lambda_40 <cycle 1> [948]
+                                   1             __lambda_14 <cycle 1> [913]
+                                   1             __lambda_0 <cycle 1> [97]
+                                   1             __lambda_3 <cycle 1> [113]
+                                   1             __lambda_5 <cycle 1> [118]
+-----------------------------------------------
+                                   4             apply <cycle 1> [163]
+[177]    0.0    0.00    0.00       4         dispatch <cycle 1> [177]
+                                   4             do_dispatch <cycle 1> [132]
+-----------------------------------------------
+                0.00    0.00       3/3           Cyc_string2number_ <cycle 1> [182]
+[178]    0.0    0.00    0.00       3         Cyc_check_obj [178]
+-----------------------------------------------
+                0.00    0.00       1/3           __lambda_70 <cycle 1> [975]
+                0.00    0.00       1/3           __lambda_48 <cycle 1> [956]
+                0.00    0.00       1/3           __lambda_36 <cycle 1> [940]
+[179]    0.0    0.00    0.00       3         Cyc_fast_div [179]
+-----------------------------------------------
+                0.00    0.00       3/3           Cyc_vector_ref [183]
+[180]    0.0    0.00    0.00       3         Cyc_is_vector [180]
+-----------------------------------------------
+                                   3             __lambda_294 <cycle 1> [876]
+[181]    0.0    0.00    0.00       3         Cyc_string2number2_ <cycle 1> [181]
+                                   3             Cyc_string2number_ <cycle 1> [182]
+-----------------------------------------------
+                                   3             Cyc_string2number2_ <cycle 1> [181]
+[182]    0.0    0.00    0.00       3         Cyc_string2number_ <cycle 1> [182]
+                0.00    0.00       3/20          Cyc_is_string [161]
+                0.00    0.00       3/3           Cyc_check_obj [178]
+                0.00    0.00       3/3           str2int [185]
+                                   3             __lambda_42 <cycle 1> [94]
+-----------------------------------------------
+                0.00    0.00       3/3           __lambda_28 <cycle 1> [932]
+[183]    0.0    0.00    0.00       3         Cyc_vector_ref [183]
+                0.00    0.00       3/3           Cyc_is_vector [180]
+                0.00    0.00       3/8           Cyc_is_number [172]
+-----------------------------------------------
+                0.00    0.00       3/3           __lambda_298 <cycle 1> [877]
+[184]    0.0    0.00    0.00       3         Cyc_write_char [184]
+                0.00    0.00       3/36          Cyc_is_port [159]
+-----------------------------------------------
+                0.00    0.00       3/3           Cyc_string2number_ <cycle 1> [182]
+[185]    0.0    0.00    0.00       3         str2int [185]
+-----------------------------------------------
+                0.00    0.00       2/2           __lambda_295 <cycle 1> [95]
+[186]    0.0    0.00    0.00       2         Cyc_io_flush_output_port [186]
+                0.00    0.00       2/36          Cyc_is_port [159]
+-----------------------------------------------
+                                   1             __lambda_19 <cycle 1> [918]
+                                   1             __lambda_18 <cycle 1> [917]
+[187]    0.0    0.00    0.00       2         Cyc_number2string2 <cycle 1> [187]
+                0.00    0.00       2/8           Cyc_is_number [172]
+                                   1             __lambda_17 <cycle 1> [916]
+                                   1             __lambda_18 <cycle 1> [917]
+-----------------------------------------------
+                0.00    0.00       2/2           Cyc_write_va_list [190]
+[188]    0.0    0.00    0.00       2         Cyc_write [188]
+                0.00    0.00       2/2           _Cyc_write [897]
+-----------------------------------------------
+                0.00    0.00       2/2           __lambda_2 <cycle 1> [900]
+[189]    0.0    0.00    0.00       2         Cyc_write_va [189]
+                0.00    0.00       2/2           Cyc_write_va_list [190]
+-----------------------------------------------
+                0.00    0.00       2/2           Cyc_write_va [189]
+[190]    0.0    0.00    0.00       2         Cyc_write_va_list [190]
+                0.00    0.00       2/36          Cyc_is_port [159]
+                0.00    0.00       2/2           Cyc_write [188]
+-----------------------------------------------
+                0.00    0.00       2/2           Cyc_display [168]
+[191]    0.0    0.00    0.00       2         double2buffer [191]
+-----------------------------------------------
+                0.00    0.00       1/1           __lambda_70 <cycle 1> [975]
+[192]    0.0    0.00    0.00       1         Cyc_fast_mul [192]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[193]    0.0    0.00    0.00       1         Cyc_heap_init [193]
+                0.00    0.00       1/1           gc_start_collector [214]
+                0.00    0.00       1/1           gc_init_heap [212]
+-----------------------------------------------
+                0.00    0.00       1/1           __lambda_1292 <cycle 1> [910]
+[194]    0.0    0.00    0.00       1         Cyc_stderr [194]
+-----------------------------------------------
+                0.00    0.00       1/1           __lambda_1294 <cycle 1> [911]
+[195]    0.0    0.00    0.00       1         Cyc_stdin [195]
+-----------------------------------------------
+                0.00    0.00       1/1           __lambda_1296 <cycle 1> [912]
+[196]    0.0    0.00    0.00       1         Cyc_stdout [196]
+-----------------------------------------------
+                                   1             do_dispatch <cycle 1> [132]
+[197]    0.0    0.00    0.00       1         c_entry_pt <cycle 1> [197]
+                0.00    0.00       6/286         add_global [150]
+                0.00    0.00       6/396         find_or_add_symbol [144]
+                                   1             c_schemecyclonecommon_entry_pt <cycle 1> [203]
+-----------------------------------------------
+                                   1             __lambda_356 <cycle 1> [114]
+[198]    0.0    0.00    0.00       1         c_entry_pt_first_lambda <cycle 1> [198]
+                                   1             __lambda_22 <cycle 1> [922]
+-----------------------------------------------
+                                   1             __lambda_4 <cycle 1> [117]
+[199]    0.0    0.00    0.00       1         c_scheme_char_entry_pt <cycle 1> [199]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+-----------------------------------------------
+                                   1             c_scheme_char_entry_pt <cycle 1> [199]
+[200]    0.0    0.00    0.00       1         c_scheme_char_entry_pt_first_lambda <cycle 1> [200]
+                0.00    0.00      24/396         find_or_add_symbol [144]
+                0.00    0.00      23/286         add_global [150]
+                                   1             __lambda_39 <cycle 1> [116]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [97]
+[201]    0.0    0.00    0.00       1         c_schemebase_entry_pt <cycle 1> [201]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+-----------------------------------------------
+                                   1             c_schemebase_entry_pt <cycle 1> [201]
+[202]    0.0    0.00    0.00       1         c_schemebase_entry_pt_first_lambda <cycle 1> [202]
+                0.00    0.00     299/396         find_or_add_symbol [144]
+                0.00    0.00     200/286         add_global [150]
+                0.00    0.00      98/458         add_symbol [142]
+                                   1             __lambda_1297 <cycle 1> [111]
+-----------------------------------------------
+                                   1             c_entry_pt <cycle 1> [197]
+[203]    0.0    0.00    0.00       1         c_schemecyclonecommon_entry_pt <cycle 1> [203]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+-----------------------------------------------
+                                   1             c_schemecyclonecommon_entry_pt <cycle 1> [203]
+[204]    0.0    0.00    0.00       1         c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+                0.00    0.00       8/396         find_or_add_symbol [144]
+                0.00    0.00       7/286         add_global [150]
+                                   1             __lambda_6 <cycle 1> [963]
+-----------------------------------------------
+                                   1             __lambda_39 <cycle 1> [116]
+[205]    0.0    0.00    0.00       1         c_schemeread_entry_pt <cycle 1> [205]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+-----------------------------------------------
+                                   1             c_schemeread_entry_pt <cycle 1> [205]
+[206]    0.0    0.00    0.00       1         c_schemeread_entry_pt_first_lambda <cycle 1> [206]
+                0.00    0.00      48/396         find_or_add_symbol [144]
+                0.00    0.00      41/286         add_global [150]
+                0.00    0.00       6/458         add_symbol [142]
+                                   1             __lambda_357 <cycle 1> [115]
+-----------------------------------------------
+                                   1             __lambda_1280 <cycle 1> [98]
+[207]    0.0    0.00    0.00       1         c_schemetime_entry_pt <cycle 1> [207]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+-----------------------------------------------
+                                   1             c_schemetime_entry_pt <cycle 1> [207]
+[208]    0.0    0.00    0.00       1         c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+                0.00    0.00       5/396         find_or_add_symbol [144]
+                0.00    0.00       4/286         add_global [150]
+                                   1             __lambda_3 <cycle 1> [935]
+-----------------------------------------------
+                                   1             __lambda_3 <cycle 1> [935]
+[209]    0.0    0.00    0.00       1         c_schemewrite_entry_pt <cycle 1> [209]
+                0.00    0.00       1/6           register_library [175]
+                                   1             c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+-----------------------------------------------
+                                   1             c_schemewrite_entry_pt <cycle 1> [209]
+[210]    0.0    0.00    0.00       1         c_schemewrite_entry_pt_first_lambda <cycle 1> [210]
+                0.00    0.00       6/396         find_or_add_symbol [144]
+                0.00    0.00       5/286         add_global [150]
+                                   1             __lambda_5 <cycle 1> [119]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[211]    0.0    0.00    0.00       1         gc_add_mutator [211]
+-----------------------------------------------
+                0.00    0.00       1/1           Cyc_heap_init [193]
+[212]    0.0    0.00    0.00       1         gc_init_heap [212]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[213]    0.0    0.00    0.00       1         gc_initialize [213]
+                0.00    0.00       1/8           vpbuffer_realloc [174]
+-----------------------------------------------
+                0.00    0.00       1/1           Cyc_heap_init [193]
+[214]    0.0    0.00    0.00       1         gc_start_collector [214]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[215]    0.0    0.00    0.00       1         set_env_variables [215]
+-----------------------------------------------
+                0.00    0.00       6/360         register_library [175]
+                0.00    0.00     354/360         add_symbol_by_name [148]
+[855]    0.0    0.00    0.00     360         _strdup [855]
+-----------------------------------------------
+                                  22             __lambda_666 <cycle 1> [88]
+[856]    0.0    0.00    0.00      22         __lambda_658 <cycle 1> [856]
+                                  22             __lambda_662 <cycle 1> [29]
+-----------------------------------------------
+                                  19             __lambda_225 <cycle 1> [858]
+[857]    0.0    0.00    0.00      19         __lambda_224 <cycle 1> [857]
+                0.00    0.00      19/145         Cyc_eq [155]
+                                  19             __lambda_223 <cycle 1> [81]
+-----------------------------------------------
+                                   2             __lambda_24 <cycle 1> [901]
+                                  17             gc_mutator_thread_runnable <cycle 1> [166]
+[858]    0.0    0.00    0.00      19         __lambda_225 <cycle 1> [858]
+                0.00    0.00      19/19          Cyc_is_eof_object [162]
+                                  19             __lambda_224 <cycle 1> [857]
+-----------------------------------------------
+                                  19             __lambda_22 <cycle 1> [66]
+[859]    0.0    0.00    0.00      19         __lambda_226 <cycle 1> [859]
+                                  19             __lambda_46 <cycle 1> [77]
+-----------------------------------------------
+                                  19             __lambda_46 <cycle 1> [77]
+[860]    0.0    0.00    0.00      19         __lambda_45 <cycle 1> [860]
+                                  17             Cyc_io_read_char <cycle 1> [164]
+                                   2             __lambda_26 <cycle 1> [91]
+-----------------------------------------------
+                                  14             __lambda_215 <cycle 1> [862]
+[861]    0.0    0.00    0.00      14         __lambda_214 <cycle 1> [861]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_228 <cycle 1> [70]
+-----------------------------------------------
+                                  14             __lambda_216 <cycle 1> [863]
+[862]    0.0    0.00    0.00      14         __lambda_215 <cycle 1> [862]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_214 <cycle 1> [861]
+-----------------------------------------------
+                                  14             __lambda_217 <cycle 1> [864]
+[863]    0.0    0.00    0.00      14         __lambda_216 <cycle 1> [863]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_215 <cycle 1> [862]
+-----------------------------------------------
+                                  14             __lambda_218 <cycle 1> [865]
+[864]    0.0    0.00    0.00      14         __lambda_217 <cycle 1> [864]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_216 <cycle 1> [863]
+-----------------------------------------------
+                                  14             __lambda_219 <cycle 1> [866]
+[865]    0.0    0.00    0.00      14         __lambda_218 <cycle 1> [865]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_217 <cycle 1> [864]
+-----------------------------------------------
+                                  14             __lambda_220 <cycle 1> [867]
+[866]    0.0    0.00    0.00      14         __lambda_219 <cycle 1> [866]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_218 <cycle 1> [865]
+-----------------------------------------------
+                                  14             __lambda_221 <cycle 1> [868]
+[867]    0.0    0.00    0.00      14         __lambda_220 <cycle 1> [867]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_219 <cycle 1> [866]
+-----------------------------------------------
+                                  14             __lambda_222 <cycle 1> [869]
+[868]    0.0    0.00    0.00      14         __lambda_221 <cycle 1> [868]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_220 <cycle 1> [867]
+-----------------------------------------------
+                                  14             __lambda_34 <cycle 1> [30]
+[869]    0.0    0.00    0.00      14         __lambda_222 <cycle 1> [869]
+                0.00    0.00      14/145         Cyc_eq [155]
+                                  14             __lambda_221 <cycle 1> [868]
+-----------------------------------------------
+                                  14             apply <cycle 1> [163]
+[870]    0.0    0.00    0.00      14         _cons <cycle 1> [870]
+                0.00    0.00      14/27          Cyc_length [160]
+                                  14             __lambda_273 <cycle 1> [82]
+-----------------------------------------------
+                                  12             __lambda_662 <cycle 1> [29]
+[871]    0.0    0.00    0.00      12         __lambda_0 <cycle 1> [871]
+                0.00    0.00      12/12          Cyc_display_va [170]
+                                   1             __lambda_35 <cycle 1> [939]
+                                   1             __lambda_36 <cycle 1> [940]
+                                   1             __lambda_37 <cycle 1> [941]
+                                   1             __lambda_38 <cycle 1> [943]
+                                   1             __lambda_39 <cycle 1> [944]
+                                   1             __lambda_41 <cycle 1> [949]
+                                   1             __lambda_43 <cycle 1> [951]
+                                   1             __lambda_44 <cycle 1> [952]
+                                   1             __lambda_46 <cycle 1> [954]
+                                   1             __lambda_48 <cycle 1> [956]
+                                   1             __lambda_67 <cycle 1> [971]
+                                   1             __lambda_68 <cycle 1> [972]
+-----------------------------------------------
+                                   5             __lambda_22 <cycle 1> [66]
+[872]    0.0    0.00    0.00       5         __lambda_54 <cycle 1> [872]
+                                   5             __lambda_44 <cycle 1> [124]
+-----------------------------------------------
+                                   5             __lambda_20 <cycle 1> [75]
+[873]    0.0    0.00    0.00       5         __lambda_55 <cycle 1> [873]
+                                   5             __lambda_23 <cycle 1> [71]
+-----------------------------------------------
+                                   3             __lambda_11 <cycle 1> [52]
+[874]    0.0    0.00    0.00       3         __lambda_10 <cycle 1> [874]
+                                   3             __lambda_9 <cycle 1> [896]
+-----------------------------------------------
+                                   3             __lambda_33 <cycle 1> [44]
+[875]    0.0    0.00    0.00       3         __lambda_292 <cycle 1> [875]
+                                   3             __lambda_300 <cycle 1> [880]
+-----------------------------------------------
+                                   3             Cyc_list2string <cycle 1> [121]
+[876]    0.0    0.00    0.00       3         __lambda_294 <cycle 1> [876]
+                                   3             Cyc_string2number2_ <cycle 1> [181]
+-----------------------------------------------
+                                   3             __lambda_662 <cycle 1> [29]
+[877]    0.0    0.00    0.00       3         __lambda_298 <cycle 1> [877]
+                0.00    0.00       3/3           Cyc_write_char [184]
+                                   1             __lambda_34 <cycle 1> [938]
+                                   1             __lambda_42 <cycle 1> [950]
+                                   1             __lambda_66 <cycle 1> [970]
+-----------------------------------------------
+                                   3             __lambda_274 <cycle 1> [80]
+[878]    0.0    0.00    0.00       3         __lambda_30 <cycle 1> [878]
+                                   3             __lambda_301 <cycle 1> [881]
+-----------------------------------------------
+                                   1             __lambda_67 <cycle 1> [971]
+                                   1             __lambda_43 <cycle 1> [951]
+                                   1             __lambda_35 <cycle 1> [939]
+[879]    0.0    0.00    0.00       3         __lambda_300 <cycle 1> [879]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             apply_va <cycle 1> [96]
+-----------------------------------------------
+                                   3             __lambda_292 <cycle 1> [875]
+[880]    0.0    0.00    0.00       3         __lambda_300 <cycle 1> [880]
+                                   3             Cyc_list2string <cycle 1> [121]
+-----------------------------------------------
+                                   3             __lambda_30 <cycle 1> [878]
+[881]    0.0    0.00    0.00       3         __lambda_301 <cycle 1> [881]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_293 <cycle 1> [93]
+-----------------------------------------------
+                                   3             __lambda_43 <cycle 1> [887]
+[882]    0.0    0.00    0.00       3         __lambda_31 <cycle 1> [882]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_374 <cycle 1> [886]
+-----------------------------------------------
+                                   1             __lambda_5 <cycle 1> [959]
+                                   2             __lambda_9 <cycle 1> [896]
+[883]    0.0    0.00    0.00       3         __lambda_345 <cycle 1> [883]
+                                   3             __lambda_228 <cycle 1> [70]
+-----------------------------------------------
+                                   3             __lambda_662 <cycle 1> [29]
+[884]    0.0    0.00    0.00       3         __lambda_346 <cycle 1> [884]
+                                   3             __lambda_11 <cycle 1> [52]
+-----------------------------------------------
+                                   1             __lambda_22 <cycle 1> [922]
+                                   1             __lambda_21 <cycle 1> [921]
+                                   1             __lambda_20 <cycle 1> [920]
+[885]    0.0    0.00    0.00       3         __lambda_347 <cycle 1> [885]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_344 <cycle 1> [127]
+-----------------------------------------------
+                                   3             __lambda_31 <cycle 1> [882]
+[886]    0.0    0.00    0.00       3         __lambda_374 <cycle 1> [886]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_274 <cycle 1> [80]
+-----------------------------------------------
+                                   3             __lambda_18 <cycle 1> [74]
+[887]    0.0    0.00    0.00       3         __lambda_43 <cycle 1> [887]
+                                   3             __lambda_31 <cycle 1> [882]
+-----------------------------------------------
+                                   3             __lambda_668 <cycle 1> [891]
+[888]    0.0    0.00    0.00       3         __lambda_659 <cycle 1> [888]
+                                   3             __lambda_667 <cycle 1> [890]
+-----------------------------------------------
+                                   3             __lambda_674 <cycle 1> [894]
+[889]    0.0    0.00    0.00       3         __lambda_660 <cycle 1> [889]
+                                   3             __lambda_673 <cycle 1> [893]
+-----------------------------------------------
+                                   3             __lambda_659 <cycle 1> [888]
+[890]    0.0    0.00    0.00       3         __lambda_667 <cycle 1> [890]
+                                   1             __lambda_1291 <cycle 1> [108]
+                                   1             __lambda_1293 <cycle 1> [109]
+                                   1             __lambda_1295 <cycle 1> [110]
+-----------------------------------------------
+                                   3             __lambda_669 <cycle 1> [89]
+[891]    0.0    0.00    0.00       3         __lambda_668 <cycle 1> [891]
+                                   3             __lambda_659 <cycle 1> [888]
+-----------------------------------------------
+                                   3             __lambda_673 <cycle 1> [893]
+[892]    0.0    0.00    0.00       3         __lambda_672 <cycle 1> [892]
+                                   3             __lambda_671 <cycle 1> [79]
+-----------------------------------------------
+                                   3             __lambda_660 <cycle 1> [889]
+[893]    0.0    0.00    0.00       3         __lambda_673 <cycle 1> [893]
+                                   3             __lambda_672 <cycle 1> [892]
+-----------------------------------------------
+                                   3             __lambda_661 <cycle 1> [122]
+[894]    0.0    0.00    0.00       3         __lambda_674 <cycle 1> [894]
+                                   3             __lambda_660 <cycle 1> [889]
+-----------------------------------------------
+                                   1             __lambda_1296 <cycle 1> [912]
+                                   1             __lambda_1294 <cycle 1> [911]
+                                   1             __lambda_1292 <cycle 1> [910]
+[895]    0.0    0.00    0.00       3         __lambda_675 <cycle 1> [895]
+                0.00    0.00       3/1000033     Cyc_st_add [130]
+                                   3             __lambda_661 <cycle 1> [122]
+-----------------------------------------------
+                                   3             __lambda_10 <cycle 1> [874]
+[896]    0.0    0.00    0.00       3         __lambda_9 <cycle 1> [896]
+                                   2             __lambda_345 <cycle 1> [883]
+                                   1             __lambda_321 <cycle 1> [903]
+-----------------------------------------------
+                0.00    0.00       2/2           Cyc_write [188]
+[897]    0.0    0.00    0.00       2         _Cyc_write [897]
+                0.00    0.00       2/14          Cyc_display [168]
+-----------------------------------------------
+                                   1             __lambda_63 <cycle 1> [967]
+                                   1             __lambda_51 <cycle 1> [961]
+[898]    0.0    0.00    0.00       2         __lambda_0 <cycle 1> [898]
+                                   1             __lambda_50 <cycle 1> [960]
+                                   1             __lambda_62 <cycle 1> [966]
+-----------------------------------------------
+                                   1             __lambda_62 <cycle 1> [966]
+                                   1             __lambda_57 <cycle 1> [962]
+[899]    0.0    0.00    0.00       2         __lambda_1 <cycle 1> [899]
+                                   1             __lambda_51 <cycle 1> [961]
+                                   1             __lambda_61 <cycle 1> [965]
+-----------------------------------------------
+                                   2             __lambda_662 <cycle 1> [29]
+[900]    0.0    0.00    0.00       2         __lambda_2 <cycle 1> [900]
+                0.00    0.00       2/2           Cyc_write_va [189]
+                                   1             __lambda_45 <cycle 1> [953]
+                                   1             __lambda_47 <cycle 1> [955]
+-----------------------------------------------
+                                   2             __lambda_18 <cycle 1> [74]
+[901]    0.0    0.00    0.00       2         __lambda_24 <cycle 1> [901]
+                                   2             __lambda_225 <cycle 1> [858]
+-----------------------------------------------
+                                   2             __lambda_26 <cycle 1> [91]
+[902]    0.0    0.00    0.00       2         __lambda_25 <cycle 1> [902]
+                                   2             __lambda_19 <cycle 1> [90]
+-----------------------------------------------
+                                   1             __lambda_1281 <cycle 1> [909]
+                                   1             __lambda_9 <cycle 1> [896]
+[903]    0.0    0.00    0.00       2         __lambda_321 <cycle 1> [903]
+                0.00    0.00       2/1000033     Cyc_st_add [130]
+                                   1             __lambda_8 <cycle 1> [87]
+                                   1             __lambda_1280 <cycle 1> [98]
+-----------------------------------------------
+                0.00    0.00       1/2           __lambda_48 <cycle 1> [956]
+                0.00    0.00       1/2           __lambda_36 <cycle 1> [940]
+[904]    0.0    0.00    0.00       2         __lambda_722 [904]
+                0.00    0.00       2/8           Cyc_is_number [172]
+-----------------------------------------------
+                0.00    0.00       1/1           apply <cycle 1> [163]
+[905]    0.0    0.00    0.00       1         __75halt [905]
+-----------------------------------------------
+                                   1             __lambda_2 <cycle 1> [84]
+[906]    0.0    0.00    0.00       1         __lambda_0 <cycle 1> [906]
+                                   1             __lambda_1 <cycle 1> [907]
+-----------------------------------------------
+                                1000             __lambda_1 <cycle 1> [907]
+                                   1             __lambda_0 <cycle 1> [906]
+[907]    0.0    0.00    0.00       1+1000    __lambda_1 <cycle 1> [907]
+                0.00    0.00    1001/1001        Cyc_num_fast_eq_op [137]
+                0.00    0.00    1000/1003        Cyc_fast_sub [136]
+                                   1             __lambda_15 <cycle 1> [914]
+                                1000             __lambda_1 <cycle 1> [907]
+-----------------------------------------------
+                                   1             __lambda_2 <cycle 1> [112]
+[908]    0.0    0.00    0.00       1         __lambda_1 <cycle 1> [908]
+                                   1             Cyc_string_append <cycle 1> [176]
+-----------------------------------------------
+                                   1             __lambda_1282 <cycle 1> [99]
+[909]    0.0    0.00    0.00       1         __lambda_1281 <cycle 1> [909]
+                                   1             __lambda_321 <cycle 1> [903]
+-----------------------------------------------
+                                   1             __lambda_1293 <cycle 1> [109]
+[910]    0.0    0.00    0.00       1         __lambda_1292 <cycle 1> [910]
+                0.00    0.00       1/1           Cyc_stderr [194]
+                                   1             __lambda_675 <cycle 1> [895]
+-----------------------------------------------
+                                   1             __lambda_1295 <cycle 1> [110]
+[911]    0.0    0.00    0.00       1         __lambda_1294 <cycle 1> [911]
+                0.00    0.00       1/1           Cyc_stdin [195]
+                                   1             __lambda_675 <cycle 1> [895]
+-----------------------------------------------
+                                   1             __lambda_1297 <cycle 1> [111]
+[912]    0.0    0.00    0.00       1         __lambda_1296 <cycle 1> [912]
+                0.00    0.00       1/1           Cyc_stdout [196]
+                                   1             __lambda_675 <cycle 1> [895]
+-----------------------------------------------
+                                   1             Cyc_string_append <cycle 1> [176]
+[913]    0.0    0.00    0.00       1         __lambda_14 <cycle 1> [913]
+                                   1             __lambda_73 <cycle 1> [978]
+-----------------------------------------------
+                                   1             __lambda_1 <cycle 1> [907]
+[914]    0.0    0.00    0.00       1         __lambda_15 <cycle 1> [914]
+                                   1             Cyc_string_append <cycle 1> [176]
+-----------------------------------------------
+                                   1             __lambda_26 <cycle 1> [930]
+[915]    0.0    0.00    0.00       1         __lambda_16 <cycle 1> [915]
+                                   1             __lambda_5 <cycle 1> [958]
+-----------------------------------------------
+                                   1             Cyc_number2string2 <cycle 1> [187]
+[916]    0.0    0.00    0.00       1         __lambda_17 <cycle 1> [916]
+                                   1             __lambda_29 <cycle 1> [933]
+-----------------------------------------------
+                                   1             Cyc_number2string2 <cycle 1> [187]
+[917]    0.0    0.00    0.00       1         __lambda_18 <cycle 1> [917]
+                                   1             Cyc_number2string2 <cycle 1> [187]
+-----------------------------------------------
+                                   1             __lambda_42 <cycle 1> [94]
+[918]    0.0    0.00    0.00       1         __lambda_19 <cycle 1> [918]
+                                   1             Cyc_number2string2 <cycle 1> [187]
+-----------------------------------------------
+                                   1             __lambda_64 <cycle 1> [968]
+[919]    0.0    0.00    0.00       1         __lambda_2 <cycle 1> [919]
+                                   1             __lambda_63 <cycle 1> [967]
+-----------------------------------------------
+                                   1             __lambda_42 <cycle 1> [94]
+[920]    0.0    0.00    0.00       1         __lambda_20 <cycle 1> [920]
+                                   1             __lambda_347 <cycle 1> [885]
+-----------------------------------------------
+                                   1             __lambda_42 <cycle 1> [94]
+[921]    0.0    0.00    0.00       1         __lambda_21 <cycle 1> [921]
+                                   1             __lambda_347 <cycle 1> [885]
+-----------------------------------------------
+                                   1             c_entry_pt_first_lambda <cycle 1> [198]
+[922]    0.0    0.00    0.00       1         __lambda_22 <cycle 1> [922]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_347 <cycle 1> [885]
+-----------------------------------------------
+                                   1             __lambda_25 <cycle 1> [929]
+[923]    0.0    0.00    0.00       1         __lambda_23 <cycle 1> [923]
+                0.00    0.00       1/999873      Cyc_num_fast_lt_op [131]
+                                   1             __lambda_24 <cycle 1> [928]
+-----------------------------------------------
+                                   1             __lambda_233 <cycle 1> [123]
+[924]    0.0    0.00    0.00       1         __lambda_234 <cycle 1> [924]
+                                   1             __lambda_238 <cycle 1> [926]
+-----------------------------------------------
+                                   1             __lambda_24 <cycle 1> [928]
+[925]    0.0    0.00    0.00       1         __lambda_235 <cycle 1> [925]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_233 <cycle 1> [123]
+-----------------------------------------------
+                                   1             __lambda_234 <cycle 1> [924]
+[926]    0.0    0.00    0.00       1         __lambda_238 <cycle 1> [926]
+                                   1             __lambda_236 <cycle 1> [56]
+-----------------------------------------------
+                                   1             __lambda_29 <cycle 1> [933]
+[927]    0.0    0.00    0.00       1         __lambda_239 <cycle 1> [927]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_27 <cycle 1> [931]
+-----------------------------------------------
+                                   1             __lambda_23 <cycle 1> [923]
+[928]    0.0    0.00    0.00       1         __lambda_24 <cycle 1> [928]
+                                   1             __lambda_235 <cycle 1> [925]
+-----------------------------------------------
+                                   1             Cyc_list2vector <cycle 1> [128]
+[929]    0.0    0.00    0.00       1         __lambda_25 <cycle 1> [929]
+                                   1             __lambda_23 <cycle 1> [923]
+-----------------------------------------------
+                                   1             __lambda_28 <cycle 1> [932]
+[930]    0.0    0.00    0.00       1         __lambda_26 <cycle 1> [930]
+                                   1             __lambda_16 <cycle 1> [915]
+-----------------------------------------------
+                                   1             __lambda_239 <cycle 1> [927]
+[931]    0.0    0.00    0.00       1         __lambda_27 <cycle 1> [931]
+                                   1             __lambda_375 <cycle 1> [942]
+-----------------------------------------------
+                                   1             do_dispatch <cycle 1> [132]
+[932]    0.0    0.00    0.00       1         __lambda_28 <cycle 1> [932]
+                0.00    0.00       3/3           Cyc_vector_ref [183]
+                                   1             __lambda_26 <cycle 1> [930]
+-----------------------------------------------
+                                   1             __lambda_17 <cycle 1> [916]
+[933]    0.0    0.00    0.00       1         __lambda_29 <cycle 1> [933]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_239 <cycle 1> [927]
+-----------------------------------------------
+                                   1             __lambda_4 <cycle 1> [945]
+[934]    0.0    0.00    0.00       1         __lambda_3 <cycle 1> [934]
+                                   1             __lambda_2 <cycle 1> [84]
+-----------------------------------------------
+                                   1             c_schemetime_entry_pt_first_lambda <cycle 1> [208]
+[935]    0.0    0.00    0.00       1         __lambda_3 <cycle 1> [935]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             c_schemewrite_entry_pt <cycle 1> [209]
+-----------------------------------------------
+                                   1             __lambda_59 <cycle 1> [85]
+[936]    0.0    0.00    0.00       1         __lambda_30 <cycle 1> [936]
+                                   1             __lambda_58 <cycle 1> [36]
+-----------------------------------------------
+                                   1             __lambda_662 <cycle 1> [29]
+[937]    0.0    0.00    0.00       1         __lambda_33 <cycle 1> [937]
+                                   1             __lambda_295 <cycle 1> [95]
+-----------------------------------------------
+                                   1             __lambda_298 <cycle 1> [877]
+[938]    0.0    0.00    0.00       1         __lambda_34 <cycle 1> [938]
+                                   1             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[939]    0.0    0.00    0.00       1         __lambda_35 <cycle 1> [939]
+                                   1             __lambda_300 <cycle 1> [879]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[940]    0.0    0.00    0.00       1         __lambda_36 <cycle 1> [940]
+                0.00    0.00       1/1003        Cyc_fast_sub [136]
+                0.00    0.00       1/3           Cyc_fast_div [179]
+                0.00    0.00       1/2           __lambda_722 [904]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[941]    0.0    0.00    0.00       1         __lambda_37 <cycle 1> [941]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_27 <cycle 1> [931]
+[942]    0.0    0.00    0.00       1         __lambda_375 <cycle 1> [942]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             Cyc_list2vector <cycle 1> [128]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[943]    0.0    0.00    0.00       1         __lambda_38 <cycle 1> [943]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[944]    0.0    0.00    0.00       1         __lambda_39 <cycle 1> [944]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_5 <cycle 1> [958]
+[945]    0.0    0.00    0.00       1         __lambda_4 <cycle 1> [945]
+                                   1             __lambda_3 <cycle 1> [934]
+-----------------------------------------------
+                                   1             __lambda_5 <cycle 1> [118]
+[946]    0.0    0.00    0.00       1         __lambda_4 <cycle 1> [946]
+                                   1             Cyc_string_append <cycle 1> [176]
+-----------------------------------------------
+                                   1             __lambda_75 <cycle 1> [980]
+[947]    0.0    0.00    0.00       1         __lambda_4 <cycle 1> [947]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_74 <cycle 1> [979]
+-----------------------------------------------
+                                   1             Cyc_string_append <cycle 1> [176]
+[948]    0.0    0.00    0.00       1         __lambda_40 <cycle 1> [948]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[949]    0.0    0.00    0.00       1         __lambda_41 <cycle 1> [949]
+                                   1             __lambda_75 <cycle 1> [980]
+-----------------------------------------------
+                                   1             __lambda_298 <cycle 1> [877]
+[950]    0.0    0.00    0.00       1         __lambda_42 <cycle 1> [950]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[951]    0.0    0.00    0.00       1         __lambda_43 <cycle 1> [951]
+                                   1             __lambda_300 <cycle 1> [879]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[952]    0.0    0.00    0.00       1         __lambda_44 <cycle 1> [952]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_2 <cycle 1> [900]
+[953]    0.0    0.00    0.00       1         __lambda_45 <cycle 1> [953]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[954]    0.0    0.00    0.00       1         __lambda_46 <cycle 1> [954]
+                                   1             __lambda_3 <cycle 1> [129]
+-----------------------------------------------
+                                   1             __lambda_2 <cycle 1> [900]
+[955]    0.0    0.00    0.00       1         __lambda_47 <cycle 1> [955]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[956]    0.0    0.00    0.00       1         __lambda_48 <cycle 1> [956]
+                0.00    0.00       1/1003        Cyc_fast_sub [136]
+                0.00    0.00       1/3           Cyc_fast_div [179]
+                0.00    0.00       1/2           __lambda_722 [904]
+                                   1             __lambda_3 <cycle 1> [129]
+-----------------------------------------------
+                                   1             __lambda_70 <cycle 1> [975]
+[957]    0.0    0.00    0.00       1         __lambda_49 <cycle 1> [957]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_16 <cycle 1> [915]
+[958]    0.0    0.00    0.00       1         __lambda_5 <cycle 1> [958]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_4 <cycle 1> [945]
+-----------------------------------------------
+                                   1             __lambda_6 <cycle 1> [120]
+[959]    0.0    0.00    0.00       1         __lambda_5 <cycle 1> [959]
+                                   1             __lambda_345 <cycle 1> [883]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [898]
+[960]    0.0    0.00    0.00       1         __lambda_50 <cycle 1> [960]
+                0.00    0.00       1/1003        Cyc_fast_sub [136]
+                                   1             __lambda_70 <cycle 1> [975]
+-----------------------------------------------
+                                   1             __lambda_1 <cycle 1> [899]
+[961]    0.0    0.00    0.00       1         __lambda_51 <cycle 1> [961]
+                                   1             __lambda_0 <cycle 1> [898]
+-----------------------------------------------
+                                   1             __lambda_13 <cycle 1> [57]
+[962]    0.0    0.00    0.00       1         __lambda_57 <cycle 1> [962]
+                                   1             __lambda_1 <cycle 1> [899]
+-----------------------------------------------
+                                   1             c_schemecyclonecommon_entry_pt_first_lambda <cycle 1> [204]
+[963]    0.0    0.00    0.00       1         __lambda_6 <cycle 1> [963]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             Cyc_string_append <cycle 1> [176]
+-----------------------------------------------
+                                   1             __lambda_61 <cycle 1> [965]
+[964]    0.0    0.00    0.00       1         __lambda_60 <cycle 1> [964]
+                                   1             __lambda_59 <cycle 1> [85]
+-----------------------------------------------
+                                   1             __lambda_1 <cycle 1> [899]
+[965]    0.0    0.00    0.00       1         __lambda_61 <cycle 1> [965]
+                                   1             __lambda_60 <cycle 1> [964]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [898]
+[966]    0.0    0.00    0.00       1         __lambda_62 <cycle 1> [966]
+                                   1             __lambda_1 <cycle 1> [899]
+-----------------------------------------------
+                                   1             __lambda_2 <cycle 1> [919]
+[967]    0.0    0.00    0.00       1         __lambda_63 <cycle 1> [967]
+                                   1             __lambda_0 <cycle 1> [898]
+-----------------------------------------------
+                                   1             __lambda_295 <cycle 1> [95]
+[968]    0.0    0.00    0.00       1         __lambda_64 <cycle 1> [968]
+                                   1             __lambda_2 <cycle 1> [919]
+-----------------------------------------------
+                                   1             __lambda_662 <cycle 1> [29]
+[969]    0.0    0.00    0.00       1         __lambda_65 <cycle 1> [969]
+                                   1             __lambda_295 <cycle 1> [95]
+-----------------------------------------------
+                                   1             __lambda_298 <cycle 1> [877]
+[970]    0.0    0.00    0.00       1         __lambda_66 <cycle 1> [970]
+                                   1             __lambda_666 <cycle 1> [88]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[971]    0.0    0.00    0.00       1         __lambda_67 <cycle 1> [971]
+                                   1             __lambda_300 <cycle 1> [879]
+-----------------------------------------------
+                                   1             __lambda_0 <cycle 1> [871]
+[972]    0.0    0.00    0.00       1         __lambda_68 <cycle 1> [972]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_71 <cycle 1> [86]
+[973]    0.0    0.00    0.00       1         __lambda_69 <cycle 1> [973]
+                                   1             __lambda_1 <cycle 1> [92]
+-----------------------------------------------
+                                   1             __lambda_8 <cycle 1> [87]
+[974]    0.0    0.00    0.00       1         __lambda_7 <cycle 1> [974]
+                                   1             __lambda_6 <cycle 1> [120]
+-----------------------------------------------
+                                   1             __lambda_50 <cycle 1> [960]
+[975]    0.0    0.00    0.00       1         __lambda_70 <cycle 1> [975]
+                0.00    0.00       1/1           Cyc_fast_mul [192]
+                0.00    0.00       1/1           __lambda_720 [977]
+                0.00    0.00       1/3           Cyc_fast_div [179]
+                                   1             __lambda_49 <cycle 1> [957]
+-----------------------------------------------
+                                   1             __lambda_73 <cycle 1> [978]
+[976]    0.0    0.00    0.00       1         __lambda_72 <cycle 1> [976]
+                                   1             __lambda_71 <cycle 1> [86]
+-----------------------------------------------
+                0.00    0.00       1/1           __lambda_70 <cycle 1> [975]
+[977]    0.0    0.00    0.00       1         __lambda_720 [977]
+                0.00    0.00       1/8           Cyc_is_number [172]
+-----------------------------------------------
+                                   1             __lambda_14 <cycle 1> [913]
+[978]    0.0    0.00    0.00       1         __lambda_73 <cycle 1> [978]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_72 <cycle 1> [976]
+-----------------------------------------------
+                                   1             __lambda_4 <cycle 1> [947]
+[979]    0.0    0.00    0.00       1         __lambda_74 <cycle 1> [979]
+                                   1             Cyc_string_append <cycle 1> [176]
+-----------------------------------------------
+                                   1             __lambda_41 <cycle 1> [949]
+[980]    0.0    0.00    0.00       1         __lambda_75 <cycle 1> [980]
+                0.00    0.00       1/1000033     Cyc_st_add [130]
+                                   1             __lambda_4 <cycle 1> [947]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2016 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+ [167] Cyc_apply             [859] __lambda_226 (read.c) [892] __lambda_672 (base.c)
+   [9] Cyc_car                [68] __lambda_227 (read.c) [893] __lambda_673 (base.c)
+   [5] Cyc_cdr                [70] __lambda_228 (read.c) [894] __lambda_674 (base.c)
+ [178] Cyc_check_obj         [923] __lambda_23 (diviter.c) [895] __lambda_675 (base.c)
+  [48] Cyc_checked_add (runtime.c) [71] __lambda_23 (read.c) [972] __lambda_68 (diviter.c)
+ [138] Cyc_checked_sub (runtime.c) [123] __lambda_233 (base.c) [973] __lambda_69 (diviter.c)
+ [168] Cyc_display           [924] __lambda_234 (base.c)   [4] __lambda_7 (diviter.c)
+ [170] Cyc_display_va        [925] __lambda_235 (base.c) [974] __lambda_7 (read.c)
+ [171] Cyc_display_va_list    [56] __lambda_236 (base.c) [975] __lambda_70 (diviter.c)
+ [155] Cyc_eq                [125] __lambda_237 (base.c)  [86] __lambda_71 (diviter.c)
+ [179] Cyc_fast_div          [926] __lambda_238 (base.c) [976] __lambda_72 (diviter.c)
+ [192] Cyc_fast_mul          [927] __lambda_239 (base.c) [977] __lambda_720 (base.c)
+ [136] Cyc_fast_sub          [928] __lambda_24 (diviter.c) [904] __lambda_722 (base.c)
+  [32] Cyc_fast_sum          [901] __lambda_24 (read.c)  [978] __lambda_73 (diviter.c)
+  [73] Cyc_global_set        [929] __lambda_25 (diviter.c) [979] __lambda_74 (diviter.c)
+ [193] Cyc_heap_init (runtime-main.h) [902] __lambda_25 (read.c) [980] __lambda_75 (diviter.c)
+ [186] Cyc_io_flush_output_port [930] __lambda_26 (diviter.c) [20] __lambda_8 (diviter.c)
+ [164] Cyc_io_read_char       [91] __lambda_26 (read.c)   [87] __lambda_8 (read.c)
+  [13] Cyc_is_boolean        [931] __lambda_27 (diviter.c) [33] __lambda_9 (diviter.c)
+ [162] Cyc_is_eof_object      [82] __lambda_273 (base.c) [896] __lambda_9 (read.c)
+  [14] Cyc_is_null            [80] __lambda_274 (base.c) [870] _cons
+ [172] Cyc_is_number         [932] __lambda_28 (diviter.c) [855] _strdup
+   [6] Cyc_is_pair           [933] __lambda_29 (diviter.c) [150] add_global
+ [159] Cyc_is_port           [875] __lambda_292 (read.c)  [40] add_mutation
+ [161] Cyc_is_string          [93] __lambda_293 (read.c) [142] add_symbol
+ [180] Cyc_is_vector         [876] __lambda_294 (read.c) [148] add_symbol_by_name
+ [160] Cyc_length             [95] __lambda_295 (base.c) [163] apply
+ [121] Cyc_list2string       [877] __lambda_298 (base.c)  [96] apply_va
+ [128] Cyc_list2vector       [126] __lambda_299 (base.c)  [28] assoc
+ [137] Cyc_num_fast_eq_op    [934] __lambda_3 (diviter.c) [197] c_entry_pt (diviter.c)
+ [131] Cyc_num_fast_lt_op    [113] __lambda_3 (common.c) [198] c_entry_pt_first_lambda (diviter.c)
+ [187] Cyc_number2string2    [935] __lambda_3 (time.c)   [199] c_scheme_char_entry_pt
+  [65] Cyc_set_car           [129] __lambda_3 (write.c)  [200] c_scheme_char_entry_pt_first_lambda
+  [34] Cyc_set_cell          [936] __lambda_30 (diviter.c) [201] c_schemebase_entry_pt
+ [130] Cyc_st_add            [878] __lambda_30 (read.c)  [202] c_schemebase_entry_pt_first_lambda
+   [3] Cyc_start_trampoline  [879] __lambda_300 (base.c) [203] c_schemecyclonecommon_entry_pt
+ [194] Cyc_stderr            [880] __lambda_300 (read.c) [204] c_schemecyclonecommon_entry_pt_first_lambda
+ [195] Cyc_stdin             [881] __lambda_301 (read.c) [205] c_schemeread_entry_pt
+ [196] Cyc_stdout             [31] __lambda_31 (diviter.c) [206] c_schemeread_entry_pt_first_lambda
+ [181] Cyc_string2number2_   [882] __lambda_31 (read.c)  [207] c_schemetime_entry_pt
+ [182] Cyc_string2number_     [54] __lambda_32 (diviter.c) [208] c_schemetime_entry_pt_first_lambda
+ [176] Cyc_string_append     [903] __lambda_321 (base.c) [209] c_schemewrite_entry_pt
+ [183] Cyc_vector_ref        [937] __lambda_33 (diviter.c) [210] c_schemewrite_entry_pt_first_lambda
+ [188] Cyc_write              [44] __lambda_33 (char.c)   [41] ck_pr_add_8 (ck_pr.h)
+ [184] Cyc_write_char        [938] __lambda_34 (diviter.c) [147] ck_pr_add_ptr (ck_pr.h)
+ [189] Cyc_write_va           [30] __lambda_34 (char.c)  [153] ck_pr_barrier (ck_pr.h)
+ [190] Cyc_write_va_list     [127] __lambda_344 (read.c) [143] ck_pr_cas_int (ck_pr.h)
+   [7] GC                    [883] __lambda_345 (read.c) [154] ck_pr_fence_load (ck_pr.h)
+ [139] MurmurHash64A (ck_ht_hash.h) [884] __lambda_346 (read.c) [46] ck_pr_md_load_int (ck_pr.h)
+ [897] _Cyc_write (runtime.c) [885] __lambda_347 (read.c) [50] ck_pr_md_load_ptr (ck_pr.h)
+ [905] __75halt              [939] __lambda_35 (diviter.c) [158] ck_pr_md_store_int (ck_pr.h)
+ [906] __lambda_0 (diviter.c) [114] __lambda_356 (read.c) [19] ck_pr_sub_ptr (ck_pr.h)
+  [97] __lambda_0 (common.c) [115] __lambda_357 (read.c) [133] clear_mutations
+ [898] __lambda_0 (time.c)   [940] __lambda_36 (diviter.c) [177] dispatch
+ [871] __lambda_0 (write.c)  [941] __lambda_37 (diviter.c) [132] do_dispatch
+ [907] __lambda_1 (diviter.c) [886] __lambda_374 (base.c) [191] double2buffer
+ [908] __lambda_1 (common.c) [942] __lambda_375 (base.c)  [23] equal
+ [899] __lambda_1 (time.c)   [943] __lambda_38 (diviter.c) [22] equalp
+  [92] __lambda_1 (write.c)  [944] __lambda_39 (diviter.c) [144] find_or_add_symbol
+  [42] __lambda_10 (diviter.c) [116] __lambda_39 (char.c) [145] find_symbol_by_name
+ [874] __lambda_10 (read.c)  [945] __lambda_4 (diviter.c) [211] gc_add_mutator
+  [39] __lambda_11 (diviter.c) [946] __lambda_4 (common.c) [11] gc_alloc
+  [52] __lambda_11 (read.c)  [947] __lambda_4 (base.c)    [37] gc_alloc_from_bignum
+  [49] __lambda_12 (diviter.c) [117] __lambda_4 (write.c) [24] gc_allocated_bytes
+  [98] __lambda_1280 (base.c) [948] __lambda_40 (diviter.c) [16] gc_collector
+ [909] __lambda_1281 (base.c) [949] __lambda_41 (diviter.c) [17] gc_collector_sweep
+  [99] __lambda_1282 (base.c) [950] __lambda_42 (diviter.c) [58] gc_collector_trace
+ [100] __lambda_1283 (base.c) [94] __lambda_42 (read.c)   [25] gc_copy_obj
+ [101] __lambda_1284 (base.c) [951] __lambda_43 (diviter.c) [59] gc_empty_collector_stack
+ [102] __lambda_1285 (base.c) [887] __lambda_43 (read.c)  [21] gc_fixup_moved_obj
+ [103] __lambda_1286 (base.c) [952] __lambda_44 (diviter.c) [69] gc_free_old_thread_data
+ [104] __lambda_1287 (base.c) [124] __lambda_44 (read.c) [173] gc_grow_heap
+ [105] __lambda_1288 (base.c) [953] __lambda_45 (diviter.c) [67] gc_handshake
+ [106] __lambda_1289 (base.c) [860] __lambda_45 (read.c) [169] gc_heap_create
+ [107] __lambda_1290 (base.c) [954] __lambda_46 (diviter.c) [156] gc_heap_free
+ [108] __lambda_1291 (base.c) [77] __lambda_46 (read.c)  [212] gc_init_heap
+ [910] __lambda_1292 (base.c) [955] __lambda_47 (diviter.c) [213] gc_initialize
+ [109] __lambda_1293 (base.c) [956] __lambda_48 (diviter.c) [149] gc_is_heap_empty
+ [911] __lambda_1294 (base.c) [957] __lambda_49 (diviter.c) [135] gc_is_stack_obj
+ [110] __lambda_1295 (base.c) [958] __lambda_5 (diviter.c) [63] gc_mark_globals
+ [912] __lambda_1296 (base.c) [118] __lambda_5 (common.c) [60] gc_mark_gray
+ [111] __lambda_1297 (base.c) [119] __lambda_5 (write.c)  [61] gc_mark_gray2
+  [57] __lambda_13 (diviter.c) [959] __lambda_5 (read.c)   [8] gc_minor
+ [913] __lambda_14 (diviter.c) [960] __lambda_50 (diviter.c) [10] gc_move
+ [914] __lambda_15 (diviter.c) [961] __lambda_51 (diviter.c) [45] gc_mut_cooperate
+ [915] __lambda_16 (diviter.c) [872] __lambda_54 (read.c) [53] gc_mut_update
+ [916] __lambda_17 (diviter.c) [873] __lambda_55 (read.c) [165] gc_mutator_thread_blocked
+ [917] __lambda_18 (diviter.c) [72] __lambda_56 (read.c) [166] gc_mutator_thread_runnable
+  [74] __lambda_18 (read.c)  [962] __lambda_57 (diviter.c) [76] gc_post_handshake
+ [918] __lambda_19 (diviter.c) [36] __lambda_58 (diviter.c) [38] gc_print_stats
+  [90] __lambda_19 (read.c)   [85] __lambda_59 (diviter.c) [35] gc_request_mark_globals
+  [84] __lambda_2 (diviter.c) [43] __lambda_6 (diviter.c) [214] gc_start_collector
+ [112] __lambda_2 (common.c) [963] __lambda_6 (common.c) [134] gc_sum_pending_writes
+ [919] __lambda_2 (time.c)   [120] __lambda_6 (read.c)    [18] gc_sweep
+ [900] __lambda_2 (write.c)  [964] __lambda_60 (diviter.c) [26] gc_thr_add_to_move_buffer
+ [920] __lambda_20 (diviter.c) [965] __lambda_61 (diviter.c) [51] gc_thr_grow_move_buffer
+  [75] __lambda_20 (read.c)  [966] __lambda_62 (diviter.c) [55] gc_thread_data_init
+ [921] __lambda_21 (diviter.c) [967] __lambda_63 (diviter.c) [12] gc_try_alloc
+  [83] __lambda_21 (read.c)  [968] __lambda_64 (diviter.c) [64] gc_wait_handshake
+ [861] __lambda_214 (read.c) [969] __lambda_65 (diviter.c) [157] gc_zero_read_write_counts
+ [862] __lambda_215 (read.c) [856] __lambda_658 (base.c) [140] hs_hash (runtime.c)
+ [863] __lambda_216 (read.c) [888] __lambda_659 (base.c) [151] malloc_make_pair
+ [864] __lambda_217 (read.c) [970] __lambda_66 (diviter.c) [62] mark_stack_or_heap_obj (gc.c)
+ [865] __lambda_218 (read.c) [889] __lambda_660 (base.c) [152] mcvar
+ [866] __lambda_219 (read.c) [122] __lambda_661 (base.c)  [27] memberp
+ [922] __lambda_22 (diviter.c) [29] __lambda_662 (base.c) [175] register_library
+  [66] __lambda_22 (read.c)   [88] __lambda_666 (base.c) [215] set_env_variables
+ [867] __lambda_220 (read.c) [890] __lambda_667 (base.c) [146] set_get (runtime.c)
+ [868] __lambda_221 (read.c) [891] __lambda_668 (base.c) [141] set_insert (runtime.c)
+ [869] __lambda_222 (read.c)  [89] __lambda_669 (base.c) [185] str2int
+  [81] __lambda_223 (read.c) [971] __lambda_67 (diviter.c) [47] vpbuffer_add
+ [857] __lambda_224 (read.c)  [78] __lambda_670 (base.c) [174] vpbuffer_realloc
+ [858] __lambda_225 (read.c)  [79] __lambda_671 (base.c)   [2] <cycle 1>
