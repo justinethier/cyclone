@@ -1470,7 +1470,7 @@ object Cyc_is_boolean(object o)
 
 object Cyc_is_pair(object o)
 {
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == pair_tag)
+  if (is_object_type(o) && ((list) o)->tag == pair_tag)
     return boolean_t;
   return boolean_f;
 }
