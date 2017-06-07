@@ -640,7 +640,7 @@
     (cond
       ((eq? #\| c) 
        (let ((str (if (null? tok) 
-                      "||"
+                      ""
                       (list->string 
                         (reverse tok)))))
         (string->symbol str)))
