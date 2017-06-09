@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3 - TBD
+
+Features
+
+- Decrease minor GC time by only tracing globals when one of them has changed.
+
 ## 0.5.2 - June 5, 2017
 
 Bug Fixes
