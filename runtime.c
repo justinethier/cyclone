@@ -4857,10 +4857,6 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
       if (is_value_type(o)) {
         // Can happen if a vector element was already
         // moved and we found an index. Just ignore it
-        //if (obj_is_char(o)) {
-        //  o = (object)(((uintptr_t) o) - 2);
-        //  gc_move2heap(o);
-        //}
       } else if (type_of(o) == pair_tag) {
         gc_move2heap(car(o));
         gc_move2heap(cdr(o));
