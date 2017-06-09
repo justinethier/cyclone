@@ -1905,6 +1905,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->mutation_count = 0;
   thd->mutations = 
       vpbuffer_realloc(thd->mutations, &(thd->mutation_buflen));
+  thd->globals_changed = 1;
   thd->param_objs = NULL;
   thd->exception_handler_stack = NULL;
   thd->scm_thread_obj = NULL;

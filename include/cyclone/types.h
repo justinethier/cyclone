@@ -265,6 +265,8 @@ struct gc_thread_data_t {
   void **mutations;
   int mutation_buflen;
   int mutation_count;
+  // Is minor collection of globals necessary?
+  unsigned char globals_changed;
   // List of objects moved to heap during minor GC
   void **moveBuf;
   int moveBufLen;

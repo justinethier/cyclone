@@ -701,6 +701,7 @@ object register_library(const char *name);
 /**@{*/
 extern list global_table;
 void add_global(object * glo);
+void Cyc_set_globals_changed(gc_thread_data *thd);
 /**@}*/
 
 #endif                          /* CYCLONE_RUNTIME_H */

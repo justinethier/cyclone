@@ -1474,6 +1474,9 @@
         ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
+    ;; Set global-changed indicator
+    (emit "Cyc_set_globals_changed((gc_thread_data *)data);")
+
     ;; Initialize symbols
     (for-each
         (lambda (sym)

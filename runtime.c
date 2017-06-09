@@ -20,22 +20,12 @@
 
 //int JAE_DEBUG = 0;
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int globals_changed = 1; // TODO: not good enough, needs to live in thread data!
 
 object Cyc_global_set(void *thd, object * glo, object value)
 {
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   *(glo) = value;
-
-  globals_changed = 1;
-  //gc_thread_data *d = (gc_thread_data *) thd;
-  //if (is_object_type(value)) {
-  //  d->mutations = vpbuffer_add(d->mutations, 
-  //                                &(d->mutation_buflen), 
-  //                                d->mutation_count, 
-  //                                ((object) (((uintptr_t)(*glo)) + 2)));
-  //  d->mutation_count++;
-  //}
+  ((gc_thread_data *) thd)->globals_changed = 1;
   return value;
 }
 
@@ -438,7 +428,6 @@ void add_global(object * glo)
   // a contiguous block of memory for this... for now
   // this is more expedient
   global_table = malloc_make_pair(mcvar(glo), global_table);
-  globals_changed = 1;
 }
 
 void debug_dump_globals()
@@ -459,6 +448,11 @@ void debug_dump_globals()
       printf(" is NULL\n");
     }
   }
+}
+
+void Cyc_set_globals_changed(gc_thread_data *thd) 
+{
+  thd->globals_changed = 1;
 }
 
 /* END Global table */
@@ -4887,18 +4881,18 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
   }
   clear_mutations(data);        // Reset for next time
 
-if (globals_changed) {
-    globals_changed = 0;
-  // Transport globals
-  gc_move2heap(Cyc_global_variables);   // Internal global used by the runtime
-  {
-    list l = global_table;
-    for (; l != NULL; l = cdr(l)) {
-      cvar_type *c = (cvar_type *) car(l);
-      gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+  if (((gc_thread_data *) data)->globals_changed) {
+      ((gc_thread_data *) data)->globals_changed = 0;
+    // Transport globals
+    gc_move2heap(Cyc_global_variables);   // Internal global used by the runtime
+    {
+      list l = global_table;
+      for (; l != NULL; l = cdr(l)) {
+        cvar_type *c = (cvar_type *) car(l);
+        gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+      }
     }
   }
-}
 
   // Check allocated objects, moving additional objects as needed
   while (scani < alloci) {
