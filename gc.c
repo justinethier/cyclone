@@ -363,39 +363,6 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   #endif
 
   switch (type_of(obj)) {
-  case pair_tag:{
-      list hp = dest;
-      hp->hdr.mark = thd->gc_alloc_color;
-      type_of(hp) = pair_tag;
-      car(hp) = car(obj);
-      cdr(hp) = cdr(obj);
-      return (char *)hp;
-    }
-  case macro_tag:{
-      macro_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = macro_tag;
-      hp->fn = ((macro) obj)->fn;
-      hp->num_args = ((macro) obj)->num_args;
-      return (char *)hp;
-    }
-  case closure0_tag:{
-      closure0_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure0_tag;
-      hp->fn = ((closure0) obj)->fn;
-      hp->num_args = ((closure0) obj)->num_args;
-      return (char *)hp;
-    }
-  case closure1_tag:{
-      closure1_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure1_tag;
-      hp->fn = ((closure1) obj)->fn;
-      hp->num_args = ((closure1) obj)->num_args;
-      hp->element = ((closure1) obj)->element;
-      return (char *)hp;
-    }
   case closureN_tag:{
       int i;
       closureN_type *hp = dest;
@@ -408,6 +375,40 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       for (i = 0; i < hp->num_elements; i++) {
         hp->elements[i] = ((closureN) obj)->elements[i];
       }
+      return (char *)hp;
+    }
+  case closure0_tag:{
+      closure0_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure0_tag;
+      hp->fn = ((closure0) obj)->fn;
+      hp->num_args = ((closure0) obj)->num_args;
+      return (char *)hp;
+    }
+  case pair_tag:{
+      list hp = dest;
+      hp->hdr.mark = thd->gc_alloc_color;
+      type_of(hp) = pair_tag;
+      car(hp) = car(obj);
+      cdr(hp) = cdr(obj);
+      return (char *)hp;
+    }
+  case string_tag:{
+      char *s;
+      string_type *hp = dest;
+      s = ((char *)hp) + sizeof(string_type);
+      memcpy(s, string_str(obj), string_len(obj) + 1);
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = string_tag;
+      string_len(hp) = string_len(obj);
+      string_str(hp) = s;
+      return (char *)hp;
+    }
+  case double_tag:{
+      double_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = double_tag;
+      hp->value = ((double_type *) obj)->value;
       return (char *)hp;
     }
   case vector_tag:{
@@ -431,22 +432,14 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       memcpy(hp->data, ((bytevector) obj)->data, hp->len);
       return (char *)hp;
     }
-  case string_tag:{
-      char *s;
-      string_type *hp = dest;
-      s = ((char *)hp) + sizeof(string_type);
-      memcpy(s, string_str(obj), string_len(obj) + 1);
+  case port_tag:{
+      port_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = string_tag;
-      string_len(hp) = string_len(obj);
-      string_str(hp) = s;
-      return (char *)hp;
-    }
-  case integer_tag:{
-      integer_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = integer_tag;
-      hp->value = ((integer_type *) obj)->value;
+      type_of(hp) = port_tag;
+      hp->fp = ((port_type *) obj)->fp;
+      hp->mode = ((port_type *) obj)->mode;
+      hp->mem_buf = ((port_type *)obj)->mem_buf;
+      hp->mem_buf_len = ((port_type *)obj)->mem_buf_len;
       return (char *)hp;
     }
   case bignum_tag:{
@@ -459,35 +452,11 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
       return (char *)hp;
     }
-  case double_tag:{
-      double_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = double_tag;
-      hp->value = ((double_type *) obj)->value;
-      return (char *)hp;
-    }
-  case port_tag:{
-      port_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = port_tag;
-      hp->fp = ((port_type *) obj)->fp;
-      hp->mode = ((port_type *) obj)->mode;
-      hp->mem_buf = ((port_type *)obj)->mem_buf;
-      hp->mem_buf_len = ((port_type *)obj)->mem_buf_len;
-      return (char *)hp;
-    }
   case cvar_tag:{
       cvar_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = cvar_tag;
       hp->pvar = ((cvar_type *) obj)->pvar;
-      return (char *)hp;
-    }
-  case c_opaque_tag:{
-      c_opaque_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = c_opaque_tag;
-      hp->ptr = ((c_opaque_type *) obj)->ptr;
       return (char *)hp;
     }
   case mutex_tag:{
@@ -504,6 +473,30 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       // NOTE: don't copy cond_var itself, caller will do that (this is a special case)
       return (char *)hp;
     }
+  case macro_tag:{
+      macro_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = macro_tag;
+      hp->fn = ((macro) obj)->fn;
+      hp->num_args = ((macro) obj)->num_args;
+      return (char *)hp;
+    }
+  case closure1_tag:{
+      closure1_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = closure1_tag;
+      hp->fn = ((closure1) obj)->fn;
+      hp->num_args = ((closure1) obj)->num_args;
+      hp->element = ((closure1) obj)->element;
+      return (char *)hp;
+    }
+  case c_opaque_tag:{
+      c_opaque_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = c_opaque_tag;
+      hp->ptr = ((c_opaque_type *) obj)->ptr;
+      return (char *)hp;
+    }
   case forward_tag:
     return (char *)forward(obj);
   case eof_tag:
@@ -511,6 +504,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case boolean_tag:
   case symbol_tag:
     break;
+  case integer_tag:{
+      integer_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = integer_tag;
+      hp->value = ((integer_type *) obj)->value;
+      return (char *)hp;
+    }
   default:
     fprintf(stderr, "gc_copy_obj: bad tag obj=%p obj.tag=%d\n", (object) obj,
             type_of(obj));

@@ -4700,13 +4700,12 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
   if (!is_object_type(obj))
     return obj;
   switch (type_of(obj)) {
-  case pair_tag:{
-      list hp = gc_alloc(heap, sizeof(pair_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
-  case macro_tag:{
-      macro_type *hp =
-          gc_alloc(heap, sizeof(macro_type), obj, thd, heap_grown);
+  case closureN_tag:{
+      closureN_type *hp = gc_alloc(heap,
+                                   sizeof(closureN_type) +
+                                   sizeof(object) *
+                                   (((closureN) obj)->num_elements),
+                                   obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case closure0_tag:{
@@ -4714,17 +4713,19 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
           gc_alloc(heap, sizeof(closure0_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
-  case closure1_tag:{
-      closure1_type *hp =
-          gc_alloc(heap, sizeof(closure1_type), obj, thd, heap_grown);
+  case pair_tag:{
+      list hp = gc_alloc(heap, sizeof(pair_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
-  case closureN_tag:{
-      closureN_type *hp = gc_alloc(heap,
-                                   sizeof(closureN_type) +
-                                   sizeof(object) *
-                                   (((closureN) obj)->num_elements),
-                                   obj, thd, heap_grown);
+  case string_tag:{
+      string_type *hp = gc_alloc(heap,
+                                 sizeof(string_type) + ((string_len(obj) + 1)),
+                                 obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+  case double_tag:{
+      double_type *hp =
+          gc_alloc(heap, sizeof(double_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case vector_tag:{
@@ -4742,15 +4743,9 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
                                      obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
-  case string_tag:{
-      string_type *hp = gc_alloc(heap,
-                                 sizeof(string_type) + ((string_len(obj) + 1)),
-                                 obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
-  case integer_tag:{
-      integer_type *hp =
-          gc_alloc(heap, sizeof(integer_type), obj, thd, heap_grown);
+  case port_tag:{
+      port_type *hp =
+          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case bignum_tag:{
@@ -4758,19 +4753,19 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
           gc_alloc(heap, sizeof(bignum_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
   }
-  case double_tag:{
-      double_type *hp =
-          gc_alloc(heap, sizeof(double_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
-  case port_tag:{
-      port_type *hp =
-          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
   case cvar_tag:{
       cvar_type *hp =
           gc_alloc(heap, sizeof(cvar_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+  case macro_tag:{
+      macro_type *hp =
+          gc_alloc(heap, sizeof(macro_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
+  case closure1_tag:{
+      closure1_type *hp =
+          gc_alloc(heap, sizeof(closure1_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case c_opaque_tag:{
@@ -4788,6 +4783,11 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
     break;
   case symbol_tag:
     break;                      // JAE TODO: raise an error here? Should not be possible in real code, though (IE, without GC DEBUG flag)
+  case integer_tag:{
+      integer_type *hp =
+          gc_alloc(heap, sizeof(integer_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
   default:
     fprintf(stderr, "gc_move: bad tag obj=%p obj.tag=%d\n", (object) obj,
             type_of(obj));
