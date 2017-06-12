@@ -633,8 +633,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
           // Copy object into heap now to avoid any uninitialized memory issues
           gc_copy_obj(f2, obj, thd);
           //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
-          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]),
-                       gc_allocated_bytes(obj, NULL, NULL));
+          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
         } else {
           ck_pr_add_int(&(thd->heap_num_huge_allocations), 1);
         }
