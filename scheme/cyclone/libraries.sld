@@ -16,6 +16,7 @@
 (define-library (scheme cyclone libraries)
   (import (scheme base)
           (scheme read)
+          (scheme process-context)
           (scheme cyclone util)
   )
   (export
@@ -42,6 +43,7 @@
     lib:import->filename
     lib:import->metalist
     lib:import->path
+    lib:check-system-path
     lib:read-imports
     lib:import->export-list
     lib:import-set/exports->imports
@@ -321,6 +323,21 @@
     ;  (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
     ;  path)
   ))
+
+;; string :: string
+;;
+;; Check the system path to see if the given library is present.
+;; If so return the full path, otherwise give up and return filename.
+;;
+(define (lib:check-system-path filename)
+  (let* ((env-dir (get-environment-variable "CYCLONE_LIBRARY_PATH"))
+         (dir (if env-dir 
+                  env-dir 
+                  (Cyc-installation-dir 'sld)))
+         (path (string-append dir "/" filename)))
+    (if (file-exists? path)
+        path
+        filename)))
 
 ;; Given a program's import set, resolve each import to its .o file, then
 ;; process each import recursively to get the .o files that each one of those
