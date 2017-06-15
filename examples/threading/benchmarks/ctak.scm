@@ -41,7 +41,7 @@
   (let* ((j/s (jiffies-per-second))
          (t0 (current-second))
          (j0 (current-jiffy)))
-(async-exec-multi! 3 (lambda () 
+(async-exec-multi! 1 (lambda () 
     (run-r7rs-benchmark
      (string-append name ":" s1 ":" s2 ":" s3 ":" s4)
      count
@@ -95,7 +95,7 @@
 
 (define (wait-for-all-async)
   (let loop ((done #f))
-    (thread-sleep! 100)
+    (thread-sleep! 0)
     (mutex-lock! m)
     (if (= *running-threads* 0) (set! done #t))
     (mutex-unlock! m)
