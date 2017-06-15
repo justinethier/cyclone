@@ -4,6 +4,8 @@
 
 Features
 
+- On Arthur Maciel's suggestion, modified Cyclone to always check its system folder for a library if an import is not found. In conjunction with this, the `CYCLONE_LIBRARY_PATH` environment variable may be set to force Cyclone to look in a specific place other than the system folder for libraries.
+
 - Decrease minor GC time by only tracing globals when one of them has changed.
 
 ## 0.5.2 - June 5, 2017
