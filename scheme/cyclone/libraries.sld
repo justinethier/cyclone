@@ -284,9 +284,10 @@
                   (return f))))
           (append prepend-dirs (list dir) append-dirs))
         ;; Not found, just return base name
-        (if (> (string-length dir) 0)
-            (string-append dir "/" filename)
-            filename)))
+        (lib:check-system-path
+          (if (> (string-length dir) 0)
+              (string-append dir "/" filename)
+              filename))))
   ))
 
 ;; Get path to directory that contains the library
@@ -316,9 +317,10 @@
                   (return f))))
           (append prepend-dirs (list dir) append-dirs))
         ;; Not found, just return base name
-        (if (> (string-length dir) 0)
-            (string-append dir "/" filename)
-            filename)))
+        (lib:check-system-path
+          (if (> (string-length dir) 0)
+              (string-append dir "/" filename)
+              filename))))
     ;(if (tagged-list? 'scheme import)
     ;  (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
     ;  path)
