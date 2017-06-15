@@ -31,33 +31,76 @@
          (s2 (number->string input2))
          (s1 (number->string input1))
          (name "ctak"))
+  ;; Rounds to thousandths.
+  (define (rounded x)
+    (/ (round (* 1000 x)) 1000))
+  (display "Running ")
+  (display (string-append name ":" s1 ":" s2 ":" s3 ":" s4))
+  (newline)
+  (flush-output-port (current-output-port))
+  (let* ((j/s (jiffies-per-second))
+         (t0 (current-second))
+         (j0 (current-jiffy)))
+(async-exec-multi! 3 (lambda () 
     (run-r7rs-benchmark
      (string-append name ":" s1 ":" s2 ":" s3 ":" s4)
      count
      (lambda ()
-       #;(thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       #;(thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       #;(thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       (thread-start!
-         (make-thread
-           (lambda ()
-             (ctak (hide count input1) (hide count input2) (hide count input3)))))
-       (thread-sleep! 10000)
        (ctak (hide count input1) (hide count input2) (hide count input3))
-
-       ;; TODO: thread-join
      )
-     (lambda (result) (equal? result output)))))
+     (lambda (result) (equal? result output)))
+))
+(wait-for-all-async) ;; TODO: thread-join
 
+             (let* ((j1 (current-jiffy))
+                    (t1 (current-second))
+                    (jifs (- j1 j0))
+                    (secs (inexact (/ jifs j/s)))
+                    (secs2 (rounded (- t1 t0))))
+               (display "Elapsed time: ")
+               (write secs)
+               (display " seconds (")
+               (write secs2)
+               (display ") for ")
+               (display name)
+               (newline)
+               (display "+!CSVLINE!+")
+               (display (this-scheme-implementation-name))
+               (display ",")
+               (display name)
+               (display ",")
+               (display secs)
+               (newline)
+               (flush-output-port (current-output-port)))
+
+    )))
+
+(define *running-threads* 0)
+(define m (make-mutex))
+
+(define (async-exec-multi! n thunk)
+  (do ((i 0 (+ i 1)))
+      ((>= i n)) 
+    (async-exec! thunk)))
+
+(define (async-exec! thunk)
+  (set! *running-threads* (+ *running-threads* 1)) ;; On main thread, so no lock
+  (thread-start!
+    (make-thread
+      (lambda ()
+        (thunk)
+        (mutex-lock! m)
+        (set! *running-threads* (- *running-threads* 1))
+        (mutex-unlock! m)))))
+
+(define (wait-for-all-async)
+  (let loop ((done #f))
+    (thread-sleep! 100)
+    (mutex-lock! m)
+    (if (= *running-threads* 0) (set! done #t))
+    (mutex-unlock! m)
+    (if (not done) (loop #f))))
+  
 ;;; The following code is appended to all benchmarks.
 
 ;;; Given an integer and an object, returns the object
@@ -81,49 +124,19 @@
 
 (define (run-r7rs-benchmark name count thunk ok?)
 
-  ;; Rounds to thousandths.
-  (define (rounded x)
-    (/ (round (* 1000 x)) 1000))
 
-  (display "Running ")
-  (display name)
-  (newline)
-  (flush-output-port (current-output-port))
-  (let* ((j/s (jiffies-per-second))
-         (t0 (current-second))
-         (j0 (current-jiffy)))
     (let loop ((i 0)
                (result #f))
       (cond ((< i count)
              (loop (+ i 1) (thunk)))
             ((ok? result)
-             (let* ((j1 (current-jiffy))
-                    (t1 (current-second))
-                    (jifs (- j1 j0))
-                    (secs (inexact (/ jifs j/s)))
-                    (secs2 (rounded (- t1 t0))))
-               (display "Elapsed time: ")
-               (write secs)
-               (display " seconds (")
-               (write secs2)
-               (display ") for ")
-               (display name)
-               (newline)
-               (display "+!CSVLINE!+")
-               (display (this-scheme-implementation-name))
-               (display ",")
-               (display name)
-               (display ",")
-               (display secs)
-               (newline)
-               (flush-output-port (current-output-port)))
              result)
             (else
              (display "ERROR: returned incorrect result: ")
              (write result)
              (newline)
              (flush-output-port (current-output-port))
-             result)))))
+             (exit 1)))))
 (define (this-scheme-implementation-name)
   (string-append "cyclone-" (Cyc-version)))
 (main)
