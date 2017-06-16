@@ -2056,7 +2056,7 @@ void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src)
   }
   ck_pr_add_int(&(dest->heap_num_huge_allocations), 
        ck_pr_load_int(&(src->heap_num_huge_allocations)));
-#ifdef GC_DEBUG_TRACE
+#if GC_DEBUG_TRACE
   fprintf(stderr, "Finished merging old heap data\n");
 #endif
 }
