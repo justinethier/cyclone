@@ -8,6 +8,8 @@ Features
 
 - Decrease minor GC time by only tracing globals when one of them has changed.
 
+- Added the `thread-join!` function to `(srfi 18)`.
+
 ## 0.5.2 - June 5, 2017
 
 Bug Fixes
