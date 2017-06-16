@@ -17,7 +17,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(import (scheme base) (scheme read) (scheme write) (scheme time) (srfi 18))
+(import (scheme base) (scheme read) (scheme write) (scheme time) (srfi 18) (scheme process-context))
 
 ;; Crude test rig, just for benchmarking.
 
@@ -116,10 +116,10 @@
   )
 
 (define (main)
-  (let* ((count (read))
-         (input1 (read))
-         (input2 (read))
-         (output (read))
+  (let* ((count  100 #;(read))
+         (input1 1000 #;(read))
+         (input2 1000 #;(read))
+         (output 0 #;(read))
          (s3 (number->string count))
          (s2 (number->string input2))
          (s1 (number->string input1))
@@ -142,7 +142,7 @@
   (let* ((j/s (jiffies-per-second))
          (t0 (current-second))
          (j0 (current-jiffy)))
-(async-exec-multi! 2 (lambda () 
+(async-exec-multi! 3 (lambda () 
     (run-r7rs-benchmark
      (string-append name ":" s1 ":" s2 ":" s3 )
      count
@@ -188,7 +188,10 @@
   (let ((t (make-thread
              (lambda ()
                (mutex-lock! m)
-               (set! *running-threads* (cons (current-thread) *running-threads*))
+               (let ((t (cons (current-thread) *running-threads*)))
+                (cond-expand
+                  (cyclone (Cyc-minor-gc))) ;; Move t to heap
+                (set! *running-threads* t))
                (mutex-unlock! m)
                (thunk))))) 
     (thread-start! t)))
