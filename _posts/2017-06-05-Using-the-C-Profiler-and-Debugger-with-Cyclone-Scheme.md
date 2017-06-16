@@ -24,7 +24,7 @@ One of the easiest things to do is run a profiler on the code to figure out what
 
 A compiled Cyclone program is just a regular C program so we can use the standard GNU tools for profiling and debugging.
 
-To get started we change [`Makefile.config`](https://github.com/justinethier/cyclone-bootstrap/blob/master/Makefile.config) in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
+To get started we change [`Makefile.config`](https://github.com/justinethier/cyclone-bootstrap/blob/master/Makefile.config#L8) in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
 
     CFLAGS       ?= -g -pg -fPIC -rdynamic -Wall -Iinclude -L.
     COMP_CFLAGS  ?= -g -pg -fPIC -rdynamic -Wall -I$(PREFIX)/include -L$(PREFIX)/lib
