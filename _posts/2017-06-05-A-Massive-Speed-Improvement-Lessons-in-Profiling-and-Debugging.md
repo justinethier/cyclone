@@ -1,10 +1,10 @@
 ---
 layout: post
-title: A Massive Speed Improvement - Lessons in Profiling and Debugging
+title: Using the C Profiler and Debugger with Cyclone Scheme
 excerpt: While going through a new run of the R7RS benchmarks from Larceny, I noticed Cyclone performed significantly worse than other schemes on the tail benchmark.
 ---
 
-While going through a new run of the [R7RS benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html), I noticed Cyclone performed significantly worse than other schemes on the tail benchmark. Certainly when testing locally the results are less than impressive:
+While going through a new run of the [R7RS benchmarks from Larceny](http://www.larcenists.org/benchmarksGenuineR7Linux.html), I noticed Cyclone performed significantly worse than other schemes on the tail benchmark. Certainly when testing locally the results are disappointing:
 
     [justin@justin-pc r7rs-benchmarks]$ ./bench cyclone tail
     
@@ -192,4 +192,4 @@ After rebuilding with this fix we can re-run the tail benchmark:
     user    0m0.540s
     sys     0m0.187s 
 
-Whoa! Remember the older code took over 32 seconds to finish? Now it finishes in less than a second. Not bad.
+Whoa! Remember how the older code took over 32 seconds to finish? Now it finishes in less than a second. Not bad.
