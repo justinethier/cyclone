@@ -24,7 +24,7 @@ One of the easiest things to do is run a profiler on the code to figure out what
 
 A compiled Cyclone program is just a regular C program so we can use the standard GNU tools for profiling and debugging.
 
-To get started we change `Makefile.config` in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
+To get started we change [`Makefile.config`](https://github.com/justinethier/cyclone-bootstrap/blob/master/Makefile.config) in cyclone-bootstrap to enable profiling. The `-O2` option in the lines below are replaced with `-g -pg`:
 
     CFLAGS       ?= -g -pg -fPIC -rdynamic -Wall -Iinclude -L.
     COMP_CFLAGS  ?= -g -pg -fPIC -rdynamic -Wall -I$(PREFIX)/include -L$(PREFIX)/lib
@@ -131,14 +131,14 @@ After continuing a few times, the code breaks here:
     #3  0x00000000004b7aa7 in __lambda_299 (data=0x7cd4e0, argc=3, _=0x7ffff66350e0, k_735061=0x7ffffff9d4c0, char_731994=0x2a, port_731993_raw=0x7ffff6333200) at scheme/base.c:23706
     #4  0x000000000055cf5e in do_dispatch (data=0x7cd4e0, argc=3, func=0x4b7523 <__lambda_299>, clo=0x7ffff66350e0, b=0x7ffffff9ccf0) at dispatch.c:6
 
-Opening the source code for `scheme/base.c` you can see the code breaks in the `for-each` function:
+Opening the source code for [`scheme/base.c`](https://github.com/justinethier/cyclone-bootstrap/blob/v0.5/scheme/base.c) you can see the code breaks in the `for-each` function:
 
     static void __lambda_368(void *data, int argc, closure _,object k_734906, object f_731928, object lis1_731927, object lists_731926_raw, ...) {
     load_varargs(lists_731926, lists_731926_raw, argc - 3);
     Cyc_st_add(data, "scheme/base.sld:for-each");
     if( (boolean_f != Cyc_is_null(lis1_731927)) ){
 
-And in `scheme/base.sld` you can see where `length` is being called:
+And in [`scheme/base.sld`](https://github.com/justinethier/cyclone-bootstrap/blob/v0.5/scheme/base.sld) you can see where `length` is being called:
 
     (define (for-each f lis1 . lists)
       (if (not (null? lis1))
@@ -164,7 +164,7 @@ The code can be simplified to make it more obvious what is going on:
             (begin (f (car lis1))
                    (for-each f (cdr lis1))))))
 
-Basically on every iteration of `for-each` the code is calling `length` to see if `f` can be called directly. Well, that's not good - the main `for-each` loop itself has a [time complexity of `O(n)`](https://en.wikipedia.org/wiki/Big_O_notation). The runtime depends directly on the length of `lis1`. But each time `length` is called it must examine the entire contents of `lis1`, which is another `O(n)` operation. Combined with the outer loop this raises the overall time complexity to `O(n^2)` - which can really add up for large values of `n`.
+Basically on every iteration of `for-each` the code is calling `length` to see if `f` can be called directly. Well, that's not good - the main `for-each` loop itself has a [time complexity of `O(n)`](https://en.wikipedia.org/wiki/Big_O_notation). That is, its execution time depends directly on the length of `lis1`. But each time `length` is called it must examine the entire contents of `lis1`, which is another `O(n)` operation. Combined with the outer loop this raises the overall time complexity to `O(n^2)` - which can really add up for large values of `n`.
 
 This reminds me of [an old article from Joel Spolsky](http://global.joelonsoftware.com/English/Articles/Interviewing.html) that talks about the same issue with respect to strings:
 
