@@ -52,7 +52,7 @@ Then we run `gprof` to create a report:
     gmon.out  inputs  outputs  tail  tail.c  tail.o  tail.scm
     [justin@justin-pc Cyclone]$ gprof ./tail gmon.out > report.txt
 
-Let's examine the start of `report.txt` to see the functions that are taking up the most of the program's runtime: 
+Let's examine the start of `report.txt` to see the functions that account for most of the program's runtime: 
 
     Flat profile:
     
@@ -192,4 +192,4 @@ After rebuilding with this fix we can re-run the tail benchmark:
     user    0m0.540s
     sys     0m0.187s 
 
-Whoa! Remember how the older code took over 32 seconds to finish? Now it finishes in less than a second. Not bad.
+Whoa! Remember how the older code took over 32 seconds to finish? Now it finishes in less than a second. [Not bad](http://ecraven.github.io/r7rs-benchmarks/benchmark.html).
