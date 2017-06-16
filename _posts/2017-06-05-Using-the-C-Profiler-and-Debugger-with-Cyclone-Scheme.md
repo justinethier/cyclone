@@ -138,7 +138,7 @@ Opening the source code for [`scheme/base.c`](https://github.com/justinethier/cy
     Cyc_st_add(data, "scheme/base.sld:for-each");
     if( (boolean_f != Cyc_is_null(lis1_731927)) ){
 
-And in [`scheme/base.sld`](https://github.com/justinethier/cyclone-bootstrap/blob/v0.5/scheme/base.sld) you can see where `length` is being called:
+And in [`scheme/base.sld`](https://github.com/justinethier/cyclone-bootstrap/blob/v0.5/scheme/base.sld#L740) you can see where `length` is being called:
 
     (define (for-each f lis1 . lists)
       (if (not (null? lis1))
