@@ -195,6 +195,18 @@ void gc_remove_mutator(gc_thread_data * thd)
   pthread_mutex_unlock(&mutators_lock);
 }
 
+int gc_is_mutator_active(gc_thread_data *thd)
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
+    if (m == thd) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /**
  * @brief Free thread data for all terminated mutators
  */
