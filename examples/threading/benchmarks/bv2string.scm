@@ -142,7 +142,7 @@
   (let* ((j/s (jiffies-per-second))
          (t0 (current-second))
          (j0 (current-jiffy)))
-(async-exec-multi! 1 (lambda () 
+(async-exec-multi! 2 (lambda () 
     (run-r7rs-benchmark
      (string-append name ":" s1 ":" s2 ":" s3 )
      count
@@ -244,5 +244,5 @@
              (flush-output-port (current-output-port))
              (exit 1)))))
 (define (this-scheme-implementation-name)
-  (string-append "cyclone-" (Cyc-version)))
+  (string-append "cyclone-" #;(Cyc-version)))
 (main)
