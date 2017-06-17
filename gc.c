@@ -1832,6 +1832,19 @@ void *collector_main(void *arg)
   return NULL;
 }
 
+/**
+ * @brief A high-resolution sleep function.
+ *
+ * @param  ms  Sleep time in milliseconds
+ */
+void gc_sleep_ms(int ms)
+{
+  struct timespec tim;
+  tim.tv_sec = 0;
+  tim.tv_nsec = ms * NANOSECONDS_PER_MILLISECOND;
+  nanosleep(&tim, NULL);
+}
+
 static pthread_t collector_thread;
 
 /**

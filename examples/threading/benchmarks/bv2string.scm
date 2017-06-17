@@ -176,7 +176,7 @@
                (flush-output-port (current-output-port)))
 
     )))
-(define *running-threads* 0)
+(define *running-threads* '())
 (define m (make-mutex))
 
 (define (async-exec-multi! n thunk)
@@ -185,22 +185,27 @@
     (async-exec! thunk)))
 
 (define (async-exec! thunk)
-  (set! *running-threads* (+ *running-threads* 1)) ;; On main thread, so no lock
-  (thread-start!
-    (make-thread
-      (lambda ()
-        (thunk)
-        (mutex-lock! m)
-        (set! *running-threads* (- *running-threads* 1))
-        (mutex-unlock! m)))))
+  (let ((t (make-thread
+             (lambda ()
+               (mutex-lock! m)
+               (set! *running-threads* (cons (current-thread) *running-threads*))
+               (mutex-unlock! m)
+               (thunk))))) 
+    (thread-start! t)))
 
 (define (wait-for-all-async)
-  (let loop ((done #f))
-    (thread-sleep! 0)
+  (thread-sleep! 1) ;; TODO: not good enough, figure out a better solution
+  (let loop ()
+    (define t #f)
     (mutex-lock! m)
-    (if (= *running-threads* 0) (set! done #t))
+    (when (not (null? *running-threads*))
+      (set! t (car *running-threads*))
+      (set! *running-threads* (cdr *running-threads*)))
     (mutex-unlock! m)
-    (if (not done) (loop #f))))
+
+    (when t
+      (thread-join! t)
+      (loop))))
   
 ;;; The following code is appended to all benchmarks.
 

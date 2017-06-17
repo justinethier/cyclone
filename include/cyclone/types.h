@@ -307,6 +307,7 @@ void gc_initialize(void);
 void gc_add_mutator(gc_thread_data * thd);
 void gc_remove_mutator(gc_thread_data * thd);
 int gc_is_mutator_active(gc_thread_data *thd);
+void gc_sleep_ms(int ms);
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
                         size_t chunk_size, gc_thread_data *thd);
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);

@@ -120,7 +120,13 @@
       "(void *data, int argc, closure _, object k, object thread_data_opaque)"
       " gc_thread_data *td = (gc_thread_data *)(opaque_ptr(thread_data_opaque));
         set_thread_blocked(data, k);
-        pthread_join(td->thread_id, NULL);
+        /* Cannot join to detached thread! pthread_join(td->thread_id, NULL);*/
+        while (1) {
+          if (!gc_is_mutator_active(td)){
+            break;
+          }
+          gc_sleep_ms(250);
+        }
         return_thread_runnable(data, boolean_t);")
     (define (thread-join! t)
       (if (and (thread? t) (Cyc-opaque? (vector-ref t 2)))
