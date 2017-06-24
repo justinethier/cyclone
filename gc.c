@@ -995,7 +995,7 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
 #endif
         continue;
       }
-      size = gc_heap_align(gc_allocated_bytes(p, q, r));
+      size = gc_allocated_bytes(p, q, r);
 
 #if GC_SAFETY_CHECKS
       if (!is_object_type(p)) {
