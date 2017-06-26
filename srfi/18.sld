@@ -114,8 +114,9 @@
       "(void *data, int argc, closure _, object k)"
       " Cyc_end_thread(data); ")
 
-;; TODO: not good enough, need to return value from thread
-;; TODO: also not good enough because threads are started detached right now, which makes them unjoinable. need to reconcile that with the SRFI 18 requirement to have a join API
+    ;; TODO: not good enough, need to return value from thread
+    ;; TODO: perhaps not an ideal solution using a loop/polling below, but good
+    ;;       enough with detached threads and our other constraints.
     (define-c %thread-join!
       "(void *data, int argc, closure _, object k, object thread_data_opaque)"
       " gc_thread_data *td = (gc_thread_data *)(opaque_ptr(thread_data_opaque));
