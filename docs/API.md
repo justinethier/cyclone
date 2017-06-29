@@ -1122,6 +1122,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`test-vars`](api/scheme/cyclone/test#test-vars)
 [`test`](api/scheme/cyclone/test#test)
 [`third`](api/srfi/1#third)
+[`thread-join!`](api/srfi/18#thread-join)
 [`thread-name`](api/srfi/18#thread-name)
 [`thread-sleep!`](api/srfi/18#thread-sleep)
 [`thread-specific-set!`](api/srfi/18#thread-specific-set)
