@@ -94,6 +94,10 @@ Starts the interactive interpreter for Cyclone Scheme.
 
 Options:
 
+ -A directory    Append directory to the list of directories that are searched 
+                 in order to locate imported libraries.
+ -I directory    Prepend directory to the list of directories that are searched 
+                 in order to locate imported libraries.
  -p sexp         Evaluate the given S-expression and exit
  -s              Run as a script, without the normal icyc banner
  -h, --help      Display usage information
