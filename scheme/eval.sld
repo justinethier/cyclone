@@ -24,6 +24,7 @@
     ;; Dynamic import
     %import
     imported?
+    %set-import-dirs!
   )
   (inline
     primitive-implementation
@@ -615,6 +616,11 @@
 ;  (loop))
 ;(loop)
   
+(define *append-dirs* '())
+(define *prepend-dirs* '())
+(define (%set-import-dirs! append-dirs prepend-dirs)
+  (set! *append-dirs* append-dirs)
+  (set! *prepend-dirs* prepend-dirs))
 
 ;; TODO: right now this is a hack, just get all the imports sets and call their entry point
 ;; function to initialize them. longer-term will need to only load the specific identifiers
@@ -626,7 +632,7 @@
         (explicit-lib-names 
           (map lib:import->library-name (lib:list->import-set import-sets)))
         ;; All dependent libraries
-        (lib-names (lib:get-all-import-deps import-sets '() '())))
+        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs*)))
     (for-each
       (lambda (lib-name)
         (let* ((us (lib:name->unique-string lib-name))
@@ -634,7 +640,7 @@
           (if (or (not loaded?) 
                   (member lib-name explicit-lib-names))
             (c:import-shared-obj
-              (lib:import->filename lib-name ".so")
+              (lib:import->filename lib-name ".so" *append-dirs* *prepend-dirs*)
               (string-append
                 "c_" (lib:name->string lib-name) "_entry_pt_first_lambda"))
             ;(begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))

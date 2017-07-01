@@ -102,11 +102,18 @@ Options:
 ")
   (newline))
 
-(let ((args (command-line-arguments))
-      (run-as-script #f))
+(let* ((args (command-line-arguments))
+       (append-dirs (collect-opt-values args "-A"))
+       (prepend-dirs (collect-opt-values args "-I"))
+       (run-as-script #f))
   ;; Process arguments used by main REPL
   (if (member "-s" args)
       (set! run-as-script #t))
+
+  ;; Add additional places to look for imports, if necessary
+  (if (or (not (null? append-dirs))
+          (not (null? prepend-dirs)))
+      (%set-import-dirs! append-dirs prepend-dirs))
 
   ;; Process remaining arguments that, if present, will cause icyc to
   ;; do something other than start the REPL. If no such arguments are
