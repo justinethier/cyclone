@@ -2,6 +2,10 @@
 
 ## 0.5.4 - TBD
 
+Features
+
+- Allow the `-A` and `-I` options to `icyc`, for specifying additional library import directories.
+
 ## 0.5.3 - June 29, 2017
 
 Features
