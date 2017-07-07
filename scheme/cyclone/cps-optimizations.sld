@@ -1468,33 +1468,47 @@
     ((app? exp)
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
-       (if (lambda? fn)
-           (let* ((body  (lambda->exp fn))
-                  (new-free-vars 
-                    (difference
-                      (difference (free-vars body) (lambda-formals->list fn))
-                      globals))
-                  (new-free-vars? (> (length new-free-vars) 0)))
-               (if new-free-vars?
-                 ; Free vars, create a closure for them
-                 (let* ((new-self-var (gensym 'self)))
-                   `((%closure 
-                        (lambda
-                          ,(list->lambda-formals
-                             (cons new-self-var (lambda-formals->list fn))
-                             (lambda-formals-type fn))
-                          ,(convert (car body) new-self-var new-free-vars))
-                        ,@(map (lambda (v) (cc v))
-                               new-free-vars))
-                     ,@args))
-                 ; No free vars, just create simple lambda
-                 `((lambda ,(lambda->formals fn)
-                           ,@(map cc body))
-                   ,@args)))
+       (cond
+         ((lambda? fn)
+          (cond
+            ;; If the lambda argument is not used, flag so the C code is 
+            ;; all generated within the same function
+            ((and (eq? (lambda-formals-type fn) 'args:fixed)
+                  (with-var 
+                    (car (lambda-formals->list fn))
+                    (lambda (var)
+                      (zero? (adbv:ref-count var)))))
+             `(Cyc-seq
+               ,@args
+               ,@(map cc (lambda->exp fn))))
+            (else
+              (let* ((body  (lambda->exp fn))
+                     (new-free-vars 
+                       (difference
+                         (difference (free-vars body) (lambda-formals->list fn))
+                         globals))
+                     (new-free-vars? (> (length new-free-vars) 0)))
+                  (if new-free-vars?
+                    ; Free vars, create a closure for them
+                    (let* ((new-self-var (gensym 'self)))
+                      `((%closure 
+                           (lambda
+                             ,(list->lambda-formals
+                                (cons new-self-var (lambda-formals->list fn))
+                                (lambda-formals-type fn))
+                             ,(convert (car body) new-self-var new-free-vars))
+                           ,@(map (lambda (v) (cc v))
+                                  new-free-vars))
+                        ,@args))
+                    ; No free vars, just create simple lambda
+                    `((lambda ,(lambda->formals fn)
+                              ,@(map cc body))
+                      ,@args))))))
+         (else
            (let ((f (cc fn)))
             `((%closure-ref ,f 0)
               ,f
-              ,@args)))))
+              ,@args))))))
     (else                
       (error "unhandled exp: " exp))))
   (cc exp))
