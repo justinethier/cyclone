@@ -16,6 +16,8 @@
           (scheme cyclone transforms)
           (srfi 69))
   (export
+      closure-convert 
+      pos-in-list 
       inlinable-top-level-lambda?
       optimize-cps 
       analyze-cps
@@ -1404,5 +1406,100 @@
         (opt:inline-prims 
           (opt:contract ast)))
     )
+
+;; Closure-conversion.
+;;
+;; Closure conversion eliminates all of the free variables from every
+;; lambda term.
+;;
+;; The code below is based on a fusion of a port of the 90-min-scc code by 
+;; Marc Feeley and the closure conversion code in Matt Might's scheme->c 
+;; compiler.
+
+(define (pos-in-list x lst)
+  (let loop ((lst lst) (i 0))
+    (cond ((not (pair? lst)) #f)
+          ((eq? (car lst) x) i)
+          (else 
+            (loop (cdr lst) (+ i 1))))))
+
+(define (closure-convert exp globals)
+ (define (convert exp self-var free-var-lst)
+  (define (cc exp)
+   (cond
+    ((const? exp)        exp)
+    ((quote? exp)        exp)
+    ((ref? exp)
+      (let ((i (pos-in-list exp free-var-lst)))
+        (if i
+            `(%closure-ref
+              ,self-var
+              ,(+ i 1))
+            exp)))
+    ((or
+        (tagged-list? '%closure-ref exp)
+        (tagged-list? '%closure exp)
+        (prim-call? exp))
+        `(,(car exp)
+          ,@(map cc (cdr exp)))) ;; TODO: need to splice?
+    ((set!? exp)  `(set! ,(set!->var exp)
+                         ,(cc (set!->exp exp))))
+    ((lambda? exp)
+     (let* ((new-self-var (gensym 'self))
+            (body  (lambda->exp exp))
+            (new-free-vars 
+              (difference 
+                (difference (free-vars body) (lambda-formals->list exp))
+                globals)))
+       `(%closure
+          (lambda
+            ,(list->lambda-formals
+               (cons new-self-var (lambda-formals->list exp))
+               (lambda-formals-type exp))
+            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
+          ,@(map (lambda (v) ;; TODO: splice here?
+                    (cc v))
+            new-free-vars))))
+    ((if? exp)  `(if ,@(map cc (cdr exp))))
+    ((cell? exp)       `(cell ,(cc (cell->value exp))))
+    ((cell-get? exp)   `(cell-get ,(cc (cell-get->cell exp))))
+    ((set-cell!? exp)  `(set-cell! ,(cc (set-cell!->cell exp))
+                                   ,(cc (set-cell!->value exp))))
+    ((app? exp)
+     (let ((fn (car exp))
+           (args (map cc (cdr exp))))
+       (if (lambda? fn)
+           (let* ((body  (lambda->exp fn))
+                  (new-free-vars 
+                    (difference
+                      (difference (free-vars body) (lambda-formals->list fn))
+                      globals))
+                  (new-free-vars? (> (length new-free-vars) 0)))
+               (if new-free-vars?
+                 ; Free vars, create a closure for them
+                 (let* ((new-self-var (gensym 'self)))
+                   `((%closure 
+                        (lambda
+                          ,(list->lambda-formals
+                             (cons new-self-var (lambda-formals->list fn))
+                             (lambda-formals-type fn))
+                          ,(convert (car body) new-self-var new-free-vars))
+                        ,@(map (lambda (v) (cc v))
+                               new-free-vars))
+                     ,@args))
+                 ; No free vars, just create simple lambda
+                 `((lambda ,(lambda->formals fn)
+                           ,@(map cc body))
+                   ,@args)))
+           (let ((f (cc fn)))
+            `((%closure-ref ,f 0)
+              ,f
+              ,@args)))))
+    (else                
+      (error "unhandled exp: " exp))))
+  (cc exp))
+
+ `(lambda ()
+    ,(convert exp #f '())))
 
 ))
