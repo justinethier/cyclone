@@ -825,6 +825,15 @@
                     (c:body cargs)
                     ");"))))))
 
+        ((equal? 'Cyc-seq fun)
+         (let ((exps (foldr
+                       (lambda (expr acc)
+                         (c:append 
+                           acc
+                           (c-compile-exp expr append-preamble cont trace cps?)))
+                       (c-code "")
+                       args)))
+          exps))
         (else
          (error `(Unsupported function application ,exp)))))))
 
