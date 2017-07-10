@@ -1477,7 +1477,14 @@
                   (with-var 
                     (car (lambda-formals->list fn))
                     (lambda (var)
-                      (zero? (adbv:ref-count var)))))
+                      (zero? (adbv:ref-count var))))
+                  ;; Non-CPS args
+                  (every
+                    (lambda (x)
+                      (or (not (pair? x)) ;; Should never happen
+                          (and (prim-call? x)
+                               (not (prim:cont? (car x))))))
+                    args))
              `(Cyc-seq
                ,@args
                ,@(map cc (lambda->exp fn))))
