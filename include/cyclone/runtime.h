@@ -394,7 +394,8 @@ int equal(object, object);
 object equalp(object, object);
 object Cyc_has_cycle(object lst);
 object Cyc_is_boolean(object o);
-object Cyc_is_pair(object o);
+//object Cyc_is_pair(object o);
+#define Cyc_is_pair(o) ((is_object_type(o) && ((list) o)->tag == pair_tag) ? boolean_t : boolean_f)
 object Cyc_is_null(object o);
 object Cyc_is_number(object o);
 object Cyc_is_real(object o);
