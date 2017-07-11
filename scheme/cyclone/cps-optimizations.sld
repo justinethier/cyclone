@@ -847,6 +847,24 @@
                     ; A (set!) could still mutate variables the primitive is
                     ; using, causing invalid behavior.
                     ;(prim-calls-inlinable? (cdr exp))
+
+                    ;; Testing - every arg only used once
+                    ;(and
+                    ;  (every
+                    ;    (lambda (param)
+                    ;      (with-var param (lambda (var)
+                    ;        (equal? 1 (adbv:ref-count var)))))
+                    ;    (ast:lambda-formals->list (car exp)))
+                    ;  ;; Do not inline if prim mutates, to avoid cases where
+                    ;  ;; a var may be modified out-of-order. May be possible
+                    ;  ;; to be more intelligent about this in the future.
+                    ;  (every
+                    ;   (lambda (arg)
+                    ;     (and (prim-call? arg)
+                    ;          (not (equal? 'cell (car arg)))
+                    ;          (not (prim:mutates? (car arg)))))
+                    ;   (cdr exp)))
+
                     (inline-prim-call? 
                       (ast:lambda-body (car exp))
                       (prim-calls->arg-variables (cdr exp))
