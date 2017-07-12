@@ -907,6 +907,8 @@
          (cons 'Cyc-fast-plus (cdr prim-call)))
         ((and (equal? (car prim-call) '-) (= (length prim-call) 3))
          (cons 'Cyc-fast-sub (cdr prim-call)))
+        ((and (equal? (car prim-call) '-) (= (length prim-call) 2))
+         `(Cyc-fast-sub 0 ,@(cdr prim-call)))
         ((and (equal? (car prim-call) '*) (= (length prim-call) 3))
          (cons 'Cyc-fast-mul (cdr prim-call)))
         ((and (equal? (car prim-call) '/) (= (length prim-call) 3))
