@@ -828,11 +828,17 @@
         ((equal? 'Cyc-seq fun)
          (let ((exps (foldr
                        (lambda (expr acc)
-                         ;(c:append 
-                         (let ((cp1 (c-compile-exp expr append-preamble cont trace cps?))
+                         ;; Join expressions; based on c:append 
+                         (let ((cp1 (if (ref? expr)
+                                        ; Ignore lone ref to avoid C warning
+                                        (c-code/vars "" '())
+                                        (c-compile-exp expr append-preamble cont trace cps?)))
                                (cp2 acc))
                            (c-code/vars 
-                             (string-append (c:body cp1) ";" (c:body cp2))
+                             (let ((cp1-body (c:body cp1)))
+                               (if (zero? (string-length cp1-body))
+                                   (c:body cp2) ;; Ignore cp1 if necessary
+                                   (string-append cp1-body ";" (c:body cp2))))
                              (append (c:allocs cp1) (c:allocs cp2)))))
                        (c-code "")
                        args)))
