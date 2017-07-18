@@ -1885,10 +1885,21 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
     }
 
     if (result <= 0 || result > CYC_FIXNUM_MAX) {
+      mp_int tmp;
       alloc_bignum(data, bn);
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
         Cyc_rt_raise2(data, "Error converting string to bignum", str);
       }
+
+      // If result is mp_zero and str does not contain a 0, then fail
+//      mp_init(&tmp);
+//      mp_zero(&tmp);
+//      if (MP_EQ == mp_cmp(&(bignum_value(bn)), &tmp) &&
+//          // TODO: str does not contain '0'
+//         ) {
+//        _return_closcall1(data, cont, boolean_f);
+//      }
+
       _return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
     } else {
       _return_closcall1(data, cont, obj_int2obj(result));
