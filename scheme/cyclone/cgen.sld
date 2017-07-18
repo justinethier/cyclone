@@ -21,7 +21,7 @@
     autogen
     autogen:defprimitives 
     autogen:primitive-procedures 
-    c-compile-program
+    ;c-compile-program
     emit
     emit*
     emits
