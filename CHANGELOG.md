@@ -6,6 +6,10 @@ Features
 
 - Allow the `-A` and `-I` options to `icyc`, for specifying additional library import directories.
 
+Bug Fixes
+
+- Updated `string->number` to return `#f` for all bases when the conversion fails. Previously bases other than ten would return `0` instead.
+
 ## 0.5.3 - June 29, 2017
 
 Features
