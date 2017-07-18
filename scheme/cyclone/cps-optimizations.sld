@@ -1441,7 +1441,13 @@
           (else 
             (loop (cdr lst) (+ i 1))))))
 
-(define (closure-convert exp globals)
+(define (closure-convert exp globals . opts)
+ (let ((optimization-level 2))
+   (if (pair? opts)
+       (set! optimization-level (car opts)))
+   (_closure-convert exp globals optimization-level)))
+
+(define (_closure-convert exp globals optimization-level)
  (define (convert exp self-var free-var-lst)
   (define (cc exp)
    (cond
@@ -1491,7 +1497,9 @@
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
             ;; all generated within the same function
-            ((and (eq? (lambda-formals-type fn) 'args:fixed)
+            ((and (> optimization-level 0)
+                  (eq? (lambda-formals-type fn) 'args:fixed)
+                  (pair? (lambda-formals->list fn))
                   (with-var 
                     (car (lambda-formals->list fn))
                     (lambda (var)

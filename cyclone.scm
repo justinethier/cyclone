@@ -406,12 +406,12 @@
              ((define? expr)
               ;; Global
               `(define ,(define->var expr)
-                 ,@(caddr (closure-convert (define->exp expr) globals))))
+                 ,@(caddr (closure-convert (define->exp expr) globals *optimization-level*))))
              ((define-c? expr)
               expr)
              (else
               (caddr ;; Strip off superfluous lambda
-                (closure-convert expr globals)))))
+                (closure-convert expr globals *optimization-level*)))))
           input-program))
     ;    (caddr ;; Strip off superfluous lambda
     ;      (closure-convert input-program)))
