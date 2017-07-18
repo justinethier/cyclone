@@ -1892,13 +1892,12 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       }
 
       // If result is mp_zero and str does not contain a 0, then fail
-//      mp_init(&tmp);
-//      mp_zero(&tmp);
-//      if (MP_EQ == mp_cmp(&(bignum_value(bn)), &tmp) &&
-//          // TODO: str does not contain '0'
-//         ) {
-//        _return_closcall1(data, cont, boolean_f);
-//      }
+      mp_init(&tmp);
+      mp_zero(&tmp);
+      if (MP_EQ == mp_cmp(&(bignum_value(bn)), &tmp) &&
+          NULL == strchr(string_str(str), '0')) {
+          _return_closcall1(data, cont, boolean_f);
+      }
 
       _return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
     } else {
