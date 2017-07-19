@@ -349,6 +349,7 @@
   (and 
     (pair? ast)
     (prim? (car ast))
+    (not (prim:udf? (car ast)))
     ;; Does not make sense to precompute these
     (not (member (car ast)
                 '(Cyc-global-vars
