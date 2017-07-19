@@ -1314,7 +1314,7 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
       debug_print = 1;
 #endif
       // Mark thread "roots":
-      // Begin my marking current continuation, which may have already
+      // Begin by marking current continuation, which may have already
       // been on the heap prior to latest minor GC
       pthread_mutex_lock(&(thd->lock));
       gc_mark_gray(thd, thd->gc_cont);
