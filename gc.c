@@ -1230,8 +1230,7 @@ static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj, int locked)
 {
   if (!is_object_type(obj) || type_of(obj) == boolean_tag) {
     return;
-  }
-  else if (gc_is_stack_obj(thd, obj)) {
+  } else if (gc_is_stack_obj(thd, obj)) {
     // Set object to be marked after moved to heap by next GC.
     // This avoids having to recursively examine the stack now, 
     // which we have to do anyway during minor GC.
