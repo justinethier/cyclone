@@ -1226,16 +1226,21 @@ int gc_is_stack_obj(gc_thread_data * thd, object obj)
 /**
  * @brief Helper function for `gc_mut_update`
  */
-static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj)
+static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj, int locked)
 {
-  if (gc_is_stack_obj(thd, obj)) {
+  if (!is_object_type(obj) || type_of(obj) == boolean_tag) {
+    return;
+  }
+  else if (gc_is_stack_obj(thd, obj)) {
     // Set object to be marked after moved to heap by next GC.
     // This avoids having to recursively examine the stack now, 
     // which we have to do anyway during minor GC.
     grayed(obj) = 1;
   } else {
     // Value is on the heap, mark gray right now
+    if (!locked) { pthread_mutex_lock(&(thd->lock)); }
     gc_mark_gray(thd, obj);
+    if (!locked) { pthread_mutex_unlock(&(thd->lock)); }
   }
 }
 
@@ -1254,16 +1259,14 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
       stage = ck_pr_load_int(&gc_stage);
   if (ck_pr_load_int(&(thd->gc_status)) != STATUS_ASYNC) {
     pthread_mutex_lock(&(thd->lock));
-    mark_stack_or_heap_obj(thd, old_obj);
-    mark_stack_or_heap_obj(thd, value);
+    mark_stack_or_heap_obj(thd, old_obj, 1);
+    mark_stack_or_heap_obj(thd, value, 1);
     pthread_mutex_unlock(&(thd->lock));
   } else if (stage == STAGE_TRACING) {
 //fprintf(stderr, "DEBUG - GC async tracing marking heap obj %p ", old_obj);
 //Cyc_display(old_obj, stderr);
 //fprintf(stderr, "\n");
-    pthread_mutex_lock(&(thd->lock));
-    mark_stack_or_heap_obj(thd, old_obj);
-    pthread_mutex_unlock(&(thd->lock));
+    mark_stack_or_heap_obj(thd, old_obj, 0);
 #if GC_DEBUG_VERBOSE
     if (is_object_type(old_obj) && mark(old_obj) == gc_color_clear) {
       fprintf(stderr,
