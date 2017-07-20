@@ -194,6 +194,8 @@ struct gc_heap_t {
   gc_heap *next_free;
   unsigned int last_alloc_size;
   //unsigned int free_size;
+  gc_heap **next_frees;
+  //
   gc_free_list *free_list;
   gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
   char *data;

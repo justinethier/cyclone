@@ -38,6 +38,12 @@
 //#define gc_word_align(n) gc_align((n), 2)
 #define gc_heap_align(n) gc_align(n, 5)
 
+#if INTPTR_MAX == INT64_MAX
+  #define REST_HEAP_MIN_SIZE 128
+#else
+  #define REST_HEAP_MIN_SIZE 96
+#endif
+
 ////////////////////
 // Global variables
 
@@ -267,6 +273,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->size = size;
   h->ttl = 10;
   h->next_free = h;
+  h->next_frees = NULL:
   h->last_alloc_size = 0;
   //h->free_size = size;
   ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), size);
@@ -293,6 +300,21 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
           ((char *)free) + free->size, next, ((char *)next) + next->size);
 #endif
   return h;
+}
+
+/**
+ * @brief   Helper for initializing the "REST" heap for medium-sized objects
+ * @param   h     Root of the heap
+ */
+void gc_heap_create_rest(gc_heap *h) {
+  int i;
+  h->next_frees = malloc(sizeof(gc_heap *) * 3);
+  for (i = 0; i < 3; i++){
+    // TODO: just create heaps here instead?
+    // TODO: don't forget to set chunk_size on them
+    h->next_frees[i] = h;
+  }
+  // TODO: not here, but  need a new gc_grow_heap (and strategy) for REST heap!!
 }
 
 /**
@@ -665,6 +687,58 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
         }
         h_passed->next_free = h;
         h_passed->last_alloc_size = size;
+        pthread_mutex_unlock(&(thd->heap_lock));
+        return f2;
+      }
+    }
+  }
+  pthread_mutex_unlock(&(thd->heap_lock));
+  return NULL;
+}
+
+// TODO: testing a new allocation strategy for the "REST" heap
+void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj,
+                   gc_thread_data * thd)
+{
+  int free_list_i = -1;
+  gc_heap *h_passed = h;
+  gc_free_list *f1, *f2, *f3;
+  pthread_mutex_lock(&(thd->heap_lock));
+  // Start searching from the last heap page we had a successful
+  // allocation from, unless the current request is for a smaller
+  // block in which case there may be available memory closer to
+  // the start of the heap.
+  if (chunk_size) {
+    free_list_i = (size - REST_HEAP_MIN_SIZE) / 32;
+    h = h->next_frees[free_list_i];
+  }
+  for (; h && h->chunk_size == size; h = h->next) {      // All heaps
+    // TODO: chunk size (ignoring for now)
+
+    for (f1 = h->free_list, f2 = f1->next; f2; f1 = f2, f2 = f2->next) {        // all free in this heap
+      if (f2->size >= size) {   // Big enough for request
+        // TODO: take whole chunk or divide up f2 (using f3)?
+        if (f2->size >= (size + gc_heap_align(1) /* min obj size */ )) {
+          f3 = (gc_free_list *) (((char *)f2) + size);
+          f3->size = f2->size - size;
+          f3->next = f2->next;
+          f1->next = f3;
+        } else {                /* Take the whole chunk */
+          f1->next = f2->next;
+        }
+
+          // Copy object into heap now to avoid any uninitialized memory issues
+          #if GC_DEBUG_TRACE
+          if (size < (32 * NUM_ALLOC_SIZES)) {
+            allocated_size_counts[(size / 32) - 1]++;
+          }
+          #endif
+          gc_copy_obj(f2, obj, thd);
+          //h->free_size -= gc_allocated_bytes(obj, NULL, NULL);
+          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
+        if (free_list_i >= 0) {
+          h_passed->next_frees[free_list_i] = h;
+        }
         pthread_mutex_unlock(&(thd->heap_lock));
         return f2;
       }
