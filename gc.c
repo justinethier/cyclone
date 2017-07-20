@@ -306,15 +306,21 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
  * @brief   Helper for initializing the "REST" heap for medium-sized objects
  * @param   h     Root of the heap
  */
-void gc_heap_create_rest(gc_heap *h) {
+void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd) {
   int i;
+  gc_heap *h_last = h;
+  size_t chunk_size = REST_HEAP_MIN_SIZE;
   h->next_frees = malloc(sizeof(gc_heap *) * 3);
   for (i = 0; i < 3; i++){
     // TODO: just create heaps here instead?
     // TODO: don't forget to set chunk_size on them
-    h->next_frees[i] = h;
+    h->next_frees[i] = gc_heap_create(h->heap_type, h->size, h->max_size, chunk_size, thd);
+    h_last = h_last->next = h->next_frees[i];
+    chunk_size += 32;
   }
   // TODO: not here, but  need a new gc_grow_heap (and strategy) for REST heap!!
+  should be able to re-use gc_grow_heap but only account for sizes from pages with the
+  same chunk_size. need to make sure the new page is added at the very end too, of course
 }
 
 /**
