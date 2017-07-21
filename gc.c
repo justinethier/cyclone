@@ -320,6 +320,15 @@ void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd) {
   }
 }
 
+gc_heap *gc_find_heap_with_chunk_size(gc_heap *h, size_t chunk_size) 
+{
+  while (h) {
+    if (h->chunk_size == chunk_size) return h;
+    h = h->next;
+  }
+  return NULL;
+}
+
 /**
  * @brief   Free a page of the heap
  * @param   page        Page to free
@@ -739,7 +748,7 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
 }
 
 // TODO: testing a new allocation strategy for the "REST" heap
-void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj,
+void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, char *obj,
                    gc_thread_data * thd)
 {
   int free_list_i = -1;
@@ -750,12 +759,14 @@ void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj,
   // allocation from, unless the current request is for a smaller
   // block in which case there may be available memory closer to
   // the start of the heap.
-  if (size < (REST_HEAP_MIN_SIZE + 32 * 3)) {
+  if (chunk_size) {
     free_list_i = (size - REST_HEAP_MIN_SIZE) / 32;
     h = h->next_frees[free_list_i];
   }
-  for (; h && h->chunk_size == size; h = h->next) {      // All heaps
-    // TODO: chunk size (ignoring for now)
+  for (; h ; h = h->next) {      // All heaps
+    if (h->chunk_size != chunk_size) {
+      continue;
+    }
 
     for (f1 = h->free_list, f2 = f1->next; f2; f1 = f2, f2 = f2->next) {        // all free in this heap
       if (f2->size >= size) {   // Big enough for request
@@ -904,16 +915,21 @@ void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data *
 {
   void *result = NULL;
   gc_heap *h = NULL;
+  size_t chunk_size = 0;
   h = hrt->heap[HEAP_REST];
 #if GC_DEBUG_TRACE
   allocated_heap_counts[HEAP_REST]++;
 #endif
 
-  result = gc_try_alloc_rest(h, HEAP_REST, size, obj, thd);
+  if (size < (REST_HEAP_MIN_SIZE + 32 * 3)) {
+    chunk_size = size;
+  }
+
+  result = gc_try_alloc_rest(h, HEAP_REST, size, chunk_size, obj, thd);
   if (!result) {
-    gc_grow_heap_rest(h, HEAP_REST, size, 0, thd);
+    gc_grow_heap_rest(h, HEAP_REST, size, chunk_size, thd);
     *heap_grown = 1;
-    result = gc_try_alloc_rest(h, HEAP_REST, size, obj, thd);
+    result = gc_try_alloc_rest(h, HEAP_REST, size, chunk_size, obj, thd);
     if (!result) {
       fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
       fprintf(stderr, "Heap type %d diagnostics:\n", HEAP_REST);
@@ -1133,6 +1149,15 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
   pthread_mutex_lock(&(thd->heap_lock));
   h->next_free = h;
   h->last_alloc_size = 0;
+
+  if (heap_type == HEAP_REST) {
+    int i;
+    size_t chunk_size = REST_HEAP_MIN_SIZE;
+    for (i = 0; i < 3; i++) {
+      h->next_frees[i] = gc_find_heap_with_chunk_size(h, chunk_size);
+      chunk_size += 32;
+    }
+  }
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nBefore sweep -------------------------\n");
