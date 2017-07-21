@@ -325,6 +325,12 @@ void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
 void *gc_alloc_bignum(gc_thread_data *data);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
+
+void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd);
+int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
+void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd);
+void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd, int *heap_grown);
+
 //size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
 //size_t gc_collect(gc_heap *h, size_t *sum_freed);

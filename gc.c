@@ -273,7 +273,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->size = size;
   h->ttl = 10;
   h->next_free = h;
-  h->next_frees = NULL:
+  h->next_frees = NULL;
   h->last_alloc_size = 0;
   //h->free_size = size;
   ck_pr_add_ptr(&(thd->cached_heap_total_sizes[heap_type]), size);
@@ -314,13 +314,10 @@ void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd) {
   for (i = 0; i < 3; i++){
     // TODO: just create heaps here instead?
     // TODO: don't forget to set chunk_size on them
-    h->next_frees[i] = gc_heap_create(h->heap_type, h->size, h->max_size, chunk_size, thd);
+    h->next_frees[i] = gc_heap_create(HEAP_REST, h->size, h->max_size, chunk_size, thd);
     h_last = h_last->next = h->next_frees[i];
     chunk_size += 32;
   }
-  // TODO: not here, but  need a new gc_grow_heap (and strategy) for REST heap!!
-  should be able to re-use gc_grow_heap but only account for sizes from pages with the
-  same chunk_size. need to make sure the new page is added at the very end too, of course
 }
 
 /**
@@ -638,6 +635,45 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
   return (h_new != NULL);
 }
 
+int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd)
+{
+  size_t new_size = 0;
+  gc_heap *h_last = h, *h_new;
+  size_t prev_size = GROW_HEAP_BY_SIZE;
+  pthread_mutex_lock(&(thd->heap_lock));
+  // Compute size of new heap page
+  // Grow heap gradually using fibonnaci sequence.
+  while (h_last->next) {
+    if (h_last->chunk_size == chunk_size) {
+      if (new_size < HEAP_SIZE) {
+        new_size = prev_size + h_last->size;
+        prev_size = h_last->size;
+        if (new_size > HEAP_SIZE) {
+            new_size = HEAP_SIZE;
+        }
+      } else {
+        new_size = HEAP_SIZE;
+      }
+    }
+    h_last = h_last->next;
+  }
+  if (new_size == 0) {
+    new_size = prev_size + h_last->size;
+  }
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "Growing heap %d new page size = %zu\n", heap_type,
+          new_size);
+#endif
+  // Done with computing new page size
+  h_new = gc_heap_create(heap_type, new_size, h_last->max_size, chunk_size, thd);
+  h_last->next = h_new;
+  pthread_mutex_unlock(&(thd->heap_lock));
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "DEBUG - grew heap\n");
+#endif
+  return (h_new != NULL);
+}
+
 /**
  * @brief Attempt to allocate a new heap slot for the given object
  * @param h          Heap to allocate from
@@ -714,7 +750,7 @@ void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj,
   // allocation from, unless the current request is for a smaller
   // block in which case there may be available memory closer to
   // the start of the heap.
-  if (chunk_size) {
+  if (size < (REST_HEAP_MIN_SIZE + 32 * 3)) {
     free_list_i = (size - REST_HEAP_MIN_SIZE) / 32;
     h = h->next_frees[free_list_i];
   }
@@ -827,6 +863,8 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     heap_type = HEAP_HUGE;
   } else {
     heap_type = HEAP_REST;
+    // Special case, at least for now
+    return gc_alloc_rest(hrt, size, obj, thd, heap_grown);
   }
   h = hrt->heap[heap_type];
 #if GC_DEBUG_TRACE
@@ -857,6 +895,37 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   //if (is_value_type(result)) {
   //  printf("Invalid allocated address - is a value type %p\n", result);
   //}
+#endif
+  return result;
+}
+
+void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
+               int *heap_grown)
+{
+  void *result = NULL;
+  gc_heap *h = NULL;
+  h = hrt->heap[HEAP_REST];
+#if GC_DEBUG_TRACE
+  allocated_heap_counts[HEAP_REST]++;
+#endif
+
+  result = gc_try_alloc_rest(h, HEAP_REST, size, obj, thd);
+  if (!result) {
+    gc_grow_heap_rest(h, HEAP_REST, size, 0, thd);
+    *heap_grown = 1;
+    result = gc_try_alloc_rest(h, HEAP_REST, size, obj, thd);
+    if (!result) {
+      fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
+      fprintf(stderr, "Heap type %d diagnostics:\n", HEAP_REST);
+      pthread_mutex_lock(&(thd->heap_lock));
+      gc_print_stats(h);
+      pthread_mutex_unlock(&(thd->heap_lock)); // why not
+      exit(1);                  // could throw error, but OOM is a major issue, so...
+    }
+  }
+#if GC_DEBUG_VERBOSE
+  fprintf(stderr, "alloc %p size = %zu, obj=%p, tag=%d, mark=%d\n", result,
+          size, obj, type_of(obj), mark(((object) result)));
 #endif
   return result;
 }
@@ -2058,6 +2127,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->heap = calloc(1, sizeof(gc_heap_root));
   thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
   thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0, thd);
+  gc_heap_create_rest(thd->heap->heap[HEAP_REST], thd); // REST-specific init
   thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0, thd);
   thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0, thd);
   if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
