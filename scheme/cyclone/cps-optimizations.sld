@@ -62,6 +62,19 @@
       adbf:side-effects adbf:set-side-effects!
   )
   (begin
+    (define 
+      *contract-env* 
+      (let ((env (create-environment '() '())))
+        (eval '(define Cyc-fast-plus +) env)
+        (eval '(define Cyc-fast-sub -) env)
+        (eval '(define Cyc-fast-mul *) env)
+        (eval '(define Cyc-fast-div /) env)
+        (eval '(define Cyc-fast-eq =) env)
+        (eval '(define Cyc-fast-gt >) env)
+        (eval '(define Cyc-fast-lt <) env)
+        (eval '(define Cyc-fast-gte >=) env)
+        (eval '(define Cyc-fast-lte <=) env)
+        env))
     (define *adb* (make-hash-table))
     (define (adb:get-db) *adb*)
     (define (adb:clear!)
@@ -709,8 +722,7 @@
                         (precompute-prim-app? result))
                    (with-handler
                       (lambda (err) result)
-                      ;; TODO: not good enough does not handler Cyc-fast-plus and friends
-                      (eval result))
+                      (eval result *contract-env*))
                    result))
              ))))
         (else 
