@@ -10,6 +10,7 @@
 ;(define-library (cps-optimizations) ;; For debugging via local unit tests
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
+          (scheme eval)
           (scheme cyclone util)
           (scheme cyclone ast)
           (scheme cyclone primitives)
@@ -700,9 +701,18 @@
                    opt:contract
                      (reverse new-args)))))
             (else
-             (cons 
-               fnc
-               (map (lambda (e) (opt:contract e)) (cdr exp)))))))
+             (let ((result
+                     (cons 
+                       fnc
+                       (map (lambda (e) (opt:contract e)) (cdr exp)))))
+               (if (and (prim-call? exp)
+                        (precompute-prim-app? result))
+                   (with-handler
+                      (lambda (err) result)
+                      ;; TODO: not good enough does not handler Cyc-fast-plus and friends
+                      (eval result))
+                   result))
+             ))))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
 
