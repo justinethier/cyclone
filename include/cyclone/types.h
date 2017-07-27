@@ -1002,13 +1002,8 @@ typedef closure0_type *macro;
   c.fn = f; \
   c.num_args = -1;
 
-#define mclosure0(c,f) \
-  closure0_type c; \
-  c.hdr.mark = gc_color_red; \
-  c.hdr.grayed = 0; \
-  c.tag = closure0_tag; \
-  c.fn = f; \
-  c.num_args = -1;
+#define mclosure0(c, f) \
+ static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .num_args = -1 }; /* TODO: need a new macro that initializes num_args */
 
 #define mclosure1(c,f,a) \
   closure1_type c; \
