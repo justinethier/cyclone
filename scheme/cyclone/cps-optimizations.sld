@@ -718,9 +718,10 @@
                      (cons 
                        fnc
                        (map (lambda (e) (opt:contract e)) (cdr exp)))))
+               ;; Perform constant folding if possible
                (if (and (prim-call? exp)
                         (precompute-prim-app? result))
-                   (with-handler
+                   (with-handler ;; Safety check, keep going if eval fails
                       (lambda (err) result)
                       (eval result *contract-env*))
                    result))
