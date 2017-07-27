@@ -875,7 +875,7 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   } else {
     heap_type = HEAP_REST;
     // Special case, at least for now
-    return gc_alloc_rest(hrt, size, obj, thd, heap_grown);
+    //return gc_alloc_rest(hrt, size, obj, thd, heap_grown);
   }
   h = hrt->heap[heap_type];
 #if GC_DEBUG_TRACE
@@ -1077,7 +1077,7 @@ void gc_collector_sweep()
     }
 
     // TODO: this loop only includes smallest 2 heaps, is that sufficient??
-    for (heap_type = 0; heap_type < 2; heap_type++) {
+    for (heap_type = 0; heap_type < 4; heap_type++) {
       while ( ck_pr_load_ptr(&(m->cached_heap_free_sizes[heap_type])) <
              (ck_pr_load_ptr(&(m->cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
 #if GC_DEBUG_TRACE
@@ -1150,14 +1150,14 @@ size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_da
   h->next_free = h;
   h->last_alloc_size = 0;
 
-  if (heap_type == HEAP_REST) {
-    int i;
-    size_t chunk_size = REST_HEAP_MIN_SIZE;
-    for (i = 0; i < 3; i++) {
-      h->next_frees[i] = gc_find_heap_with_chunk_size(h, chunk_size);
-      chunk_size += 32;
-    }
-  }
+  //if (heap_type == HEAP_REST) {
+  //  int i;
+  //  size_t chunk_size = REST_HEAP_MIN_SIZE;
+  //  for (i = 0; i < 3; i++) {
+  //    h->next_frees[i] = gc_find_heap_with_chunk_size(h, chunk_size);
+  //    chunk_size += 32;
+  //  }
+  //}
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nBefore sweep -------------------------\n");
@@ -2152,7 +2152,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->heap = calloc(1, sizeof(gc_heap_root));
   thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
   thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0, thd);
-  gc_heap_create_rest(thd->heap->heap[HEAP_REST], thd); // REST-specific init
+  //gc_heap_create_rest(thd->heap->heap[HEAP_REST], thd); // REST-specific init
   thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0, thd);
   thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0, thd);
   if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
