@@ -5,6 +5,7 @@
 Features
 
 - Allow the `-A` and `-I` options to `icyc`, for specifying additional library import directories.
+- Perform constant folding as part of the CPS optimization phase.
 
 Bug Fixes
 
