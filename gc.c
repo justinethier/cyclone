@@ -1077,7 +1077,7 @@ void gc_collector_sweep()
     }
 
     // TODO: this loop only includes smallest 2 heaps, is that sufficient??
-    for (heap_type = 0; heap_type < 4; heap_type++) {
+    for (heap_type = 0; heap_type < 2; heap_type++) {
       while ( ck_pr_load_ptr(&(m->cached_heap_free_sizes[heap_type])) <
              (ck_pr_load_ptr(&(m->cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
 #if GC_DEBUG_TRACE
