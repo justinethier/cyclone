@@ -4718,11 +4718,6 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
                                    obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
-  case closure0_tag:{
-      closure0_type *hp =
-          gc_alloc(heap, sizeof(closure0_type), obj, thd, heap_grown);
-      return gc_fixup_moved_obj(thd, alloci, obj, hp);
-    }
   case pair_tag:{
       list hp = gc_alloc(heap, sizeof(pair_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
@@ -4783,6 +4778,8 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
           gc_alloc(heap, sizeof(c_opaque_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
+  case closure0_tag:
+    break;
   case forward_tag:
     return (char *)forward(obj);
   case eof_tag:
@@ -4927,7 +4924,6 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         break;
       }
       // No child objects to move
-    case closure0_tag:
     case macro_tag:
     case bytevector_tag:
     case string_tag:
@@ -4943,6 +4939,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
     case primitive_tag:
     case symbol_tag:
     case boolean_tag:
+    case closure0_tag:
     default:
       fprintf(stderr,
               "GC: unexpected object type %d for object %p\n", type_of(obj),

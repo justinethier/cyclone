@@ -432,14 +432,6 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       }
       return (char *)hp;
     }
-  case closure0_tag:{
-      closure0_type *hp = dest;
-      mark(hp) = thd->gc_alloc_color;
-      type_of(hp) = closure0_tag;
-      hp->fn = ((closure0) obj)->fn;
-      hp->num_args = ((closure0) obj)->num_args;
-      return (char *)hp;
-    }
   case pair_tag:{
       list hp = dest;
       hp->hdr.mark = thd->gc_alloc_color;
@@ -558,6 +550,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case primitive_tag:
   case boolean_tag:
   case symbol_tag:
+  case closure0_tag:
     break;
   case integer_tag:{
       integer_type *hp = dest;
@@ -974,8 +967,6 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
   }
   if (t == double_tag)
     return gc_heap_align(sizeof(double_type));
-  if (t == closure0_tag)
-    return gc_heap_align(sizeof(closure0_type));
   if (t == closure1_tag)
     return gc_heap_align(sizeof(closure1_type));
   if (t == string_tag) {
