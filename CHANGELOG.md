@@ -4,9 +4,9 @@
 
 Features
 
-- Allow the `-A` and `-I` options to `icyc`, for specifying additional library import directories.
+- Allow the `-A` and `-I` options to `icyc` for specifying additional library import directories.
 - Perform constant folding as part of the CPS optimization phase.
-- Avoid heap allocations by statically allocating closures that do not contain any free variables.
+- Statically allocate closures that do not contain any free variables, to avoid unnecessary heap allocations.
 
 Bug Fixes
 
