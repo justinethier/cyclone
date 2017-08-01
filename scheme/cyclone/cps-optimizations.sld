@@ -62,7 +62,7 @@
       adbf:side-effects adbf:set-side-effects!
   )
   (begin
-    #;(define 
+    (define 
       *contract-env* 
       (let ((env (create-environment '() '())))
         (eval '(define Cyc-fast-plus +) env)
@@ -719,13 +719,12 @@
                        fnc
                        (map (lambda (e) (opt:contract e)) (cdr exp)))))
                ;; Perform constant folding if possible
-               ;;(if (and (prim-call? exp)
-               ;;         (precompute-prim-app? result))
-               ;;    (with-handler ;; Safety check, keep going if eval fails
-               ;;       (lambda (err) result)
-               ;;       (eval result *contract-env*))
-               ;;    result))
-               result)
+               (if (and (prim-call? exp)
+                        (precompute-prim-app? result))
+                   (with-handler ;; Safety check, keep going if eval fails
+                      (lambda (err) result)
+                      (eval result *contract-env*))
+                   result))
              ))))
         (else 
           (error "CPS optimize [1] - Unknown expression" exp))))
