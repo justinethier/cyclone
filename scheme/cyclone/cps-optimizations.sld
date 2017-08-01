@@ -1521,7 +1521,8 @@
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
             ;; all generated within the same function
-            ((and (> optimization-level 0)
+            ((and #f
+                  (> optimization-level 0)
                   (eq? (lambda-formals-type fn) 'args:fixed)
                   (pair? (lambda-formals->list fn))
                   (with-var 
