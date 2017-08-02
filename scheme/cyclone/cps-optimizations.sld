@@ -1533,6 +1533,7 @@
                     (lambda (x)
                       (or (not (pair? x)) ;; Should never happen
                           (and (prim-call? x)
+                               ;; TODO: necessary for gcbench stability??? (not (prim:mutates? (car x)))
                                (not (prim:cont? (car x))))))
                     args))
              `(Cyc-seq
