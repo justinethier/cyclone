@@ -14,11 +14,10 @@
     fx-greatest
     fx-least
     fixnum?
-    ;fxzero? fxpositive? fxnegative? fxodd? fxeven?
-    ;fx= fx< fx> fx<= fx>=
+    fxzero? fxpositive? fxnegative? ;fxodd? fxeven?
+    fx=? fx<? fx>? fx<=? fx>=?
     ;fxmax fxmin
-    fx+
-    ;fx- fx*
+    fx+ fx- fx*
     ;fxabs fxsquare fxsqrt fxexpt
     ;fx+/carry
     ;fx-/carry
@@ -58,6 +57,10 @@
     fx-least
     fixnum?
     fx+
+    fx-
+    fx*
+    fx=?  fx<? fx>? fx<=? fx>=?
+    fxzero? fxpositive? fxnegative? ;fxodd? fxeven?
   )
   (begin
     (define (fx-width) 31)
@@ -67,12 +70,50 @@
       "(void *data, int argc, closure _, object k, object obj)"
       " return_closcall1(data, k, 
           obj_is_int(obj) ? boolean_t : boolean_f); ")
-    (define-c fx+
-      "(void *data, int argc, closure _, object k, object i, object j)"
+    (define-syntax bin-num-op
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (let* ((fnc (cadr expr))
+                 (args
+                  "(void* data, int argc, closure _, object k, object i, object j)")
+                 (op-str (caddr expr))
+                 (body
+                   (string-append
+                    " Cyc_check_fixnum(data, i);
+                      Cyc_check_fixnum(data, j);
+                      object result = obj_int2obj(obj_obj2int(i) " op-str " obj_obj2int(j));
+                      return_closcall1(data, k, result); ")))
+            `(define-c ,fnc ,args ,body)))))
+    (define-syntax cmp-op
+      (er-macro-transformer
+        (lambda (expr rename compare)
+          (let* ((fnc (cadr expr))
+                 (args
+                  "(void* data, int argc, closure _, object k, object i, object j)")
+                 (op-str (caddr expr))
+                 (body
+                   (string-append
+                    " Cyc_check_fixnum(data, i);
+                      Cyc_check_fixnum(data, j);
+                      object result = (obj_obj2int(i) " op-str " obj_obj2int(j)) ? boolean_t : boolean_f;
+                      return_closcall1(data, k, result); ")))
+            `(define-c ,fnc ,args ,body)))))
+    (begin
+      (bin-num-op fx+ "+")
+      (bin-num-op fx- "-")
+      (bin-num-op fx* "*")
+      (cmp-op fx=? "==")
+      (cmp-op fx<?  "<")
+      (cmp-op fx>? ">")
+      (cmp-op fx<=? "<=")
+      (cmp-op fx>=? ">=")
+    )
+    (define-c fxzero?
+      "(void* data, int argc, closure _, object k, object i)"
       " Cyc_check_fixnum(data, i);
-        Cyc_check_fixnum(data, j);
-        object result = obj_int2obj(obj_obj2int(i) + obj_obj2int(j));
-        return_closcall1(data, k, result); ")
-    ;; TODO: consider using macros to autogenerate some of these functions, similar to SRFI 60
+        return_closcall1(data, k, obj_obj2int(i) == 0 ? boolean_t : boolean_f); ")
+    (define (fxpositive? i) (fx>? i 0))
+    (define (fxnegative? i) (fx<? i 0))
+    ; fxodd? fxeven?
   ))
 
