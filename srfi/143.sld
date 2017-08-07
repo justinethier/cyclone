@@ -73,5 +73,6 @@
         Cyc_check_fixnum(data, j);
         object result = obj_int2obj(obj_obj2int(i) + obj_obj2int(j));
         return_closcall1(data, k, result); ")
+    ;; TODO: consider using macros to autogenerate some of these functions, similar to SRFI 60
   ))
 
