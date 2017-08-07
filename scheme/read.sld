@@ -698,7 +698,7 @@
 ;;;;;
   
 ;; Main lexer/parser
-(define cyc-read ;; TODO: should be (read), but that is breaking on csi 4.8.0.5
+(define cyc-read
   (lambda args
     (let ((fp (if (null? args)
                   (current-input-port)
@@ -716,10 +716,6 @@
           (reverse result)
           (loop fp (cons obj result)))))
     (loop fp '())))
-
-;; TODO: for some reason this causes trouble in chicken 4.8. WTF??
-;; read -> port -> object
-;(define read cyc-read)
 
 ;    ;; Test code
 ;    ;(let ((fp (open-input-file "tests/begin.scm")))
