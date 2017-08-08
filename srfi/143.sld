@@ -4,8 +4,7 @@
 ;;;; Copyright (c) 2014-2016, Justin Ethier
 ;;;; All rights reserved.
 ;;;;
-;;;; This module is (currently) a stub of SRFI 143.
-;;;; Note the SRFI is still in DRAFT status.
+;;;; SRFI 143: Fixnums
 ;;;;
 (define-library (srfi 143)
   (import (scheme base)
