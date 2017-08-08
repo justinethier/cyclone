@@ -27,7 +27,8 @@
     fxnot fxand fxior fxxor 
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
-;  fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+;  fxbit-count fxlength 
+    fxif ;fxbit-set? fxcopy-bit
 ;  fxfirst-set-bit fxbit-field
 ;  fxbit-field-rotate fxbit-field-reverse
   )
@@ -45,6 +46,7 @@
     fxnot fxand fxior fxxor 
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
+    fxif
   )
   (begin
     (define (fx-width) 31)
@@ -127,5 +129,7 @@
           (fxarithmetic-shift-right i (fxneg count))))
     (bin-num-op fxarithmetic-shift-left "<<")
     (bin-num-op fxarithmetic-shift-right ">>")
+    (define (fxif mask i j)
+      (fxior (fxand (fxnot mask) i) (fxand mask j)))
   ))
 
