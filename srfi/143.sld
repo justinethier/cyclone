@@ -60,14 +60,17 @@
       (er-macro-transformer
         (lambda (expr rename compare)
           (let* ((fnc (cadr expr))
-                 (args
-                  "(void* data, int argc, closure _, object k, object i, object j)")
                  (op-str (caddr expr))
+                 (zero-check? (and (> (length expr) 3) (cadddr expr)))
+                 (args "(void* data, int argc, closure _, object k, object i, object j)")
                  (body
                    (string-append
                     " Cyc_check_fixnum(data, i);
-                      Cyc_check_fixnum(data, j);
-                      object result = obj_int2obj(obj_obj2int(i) " op-str " obj_obj2int(j));
+                      Cyc_check_fixnum(data, j); "
+                      (if zero-check?
+                          " if (obj_obj2int(j) == 0) { Cyc_rt_raise_msg(data, \"Divide by zero\");}"
+                          "")
+                    " object result = obj_int2obj(obj_obj2int(i) " op-str " obj_obj2int(j));
                       return_closcall1(data, k, result); ")))
             `(define-c ,fnc ,args ,body)))))
     (define-syntax cmp-op
@@ -88,11 +91,8 @@
       (bin-num-op fx+ "+")
       (bin-num-op fx- "-")
       (bin-num-op fx* "*")
-
-      ;; TODO: need a 0 check for these next 2. maybe need another macro for that
-      (bin-num-op fxquotient "/")
-      (bin-num-op fxremainder "%")
-
+      (bin-num-op fxquotient "/" #t)
+      (bin-num-op fxremainder "%" #t)
       (cmp-op fx=? "==")
       (cmp-op fx<?  "<")
       (cmp-op fx>? ">")
