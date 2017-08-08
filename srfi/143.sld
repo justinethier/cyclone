@@ -28,7 +28,7 @@
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
 ;  fxbit-count fxlength 
-    fxif ;fxbit-set? fxcopy-bit
+    fxif fxbit-set? ;fxcopy-bit
 ;  fxfirst-set-bit fxbit-field
 ;  fxbit-field-rotate fxbit-field-reverse
   )
@@ -46,7 +46,7 @@
     fxnot fxand fxior fxxor 
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
-    fxif
+    fxif fxbit-set?
   )
   (begin
     (define (fx-width) 31)
@@ -134,5 +134,11 @@
     (bin-num-op fxarithmetic-shift-right ">>")
     (define (fxif mask i j)
       (fxior (fxand (fxnot mask) i) (fxand mask j)))
+    (define-c fxbit-set?
+       "(void* data, int argc, closure _, object k, object index, object i)"
+       " Cyc_check_fixnum(data, index);
+         Cyc_check_fixnum(data, i);
+         int result = ((obj_obj2int(i)) & (1 << (obj_obj2int(index))));
+         return_closcall1(data, k, result ? boolean_t : boolean_f); ")
   ))
 
