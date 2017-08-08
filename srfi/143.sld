@@ -25,7 +25,7 @@
 ;  fx+/carry fx-/carry fx*/carry
 
     fxnot fxand fxior fxxor 
-    ;fxarithmetic-shift 
+    fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
 ;  fxbit-count fxlength fxif fxbit-set? fxcopy-bit
 ;  fxfirst-set-bit fxbit-field
@@ -43,7 +43,7 @@
     fxsquare
     fxabs 
     fxnot fxand fxior fxxor 
-    ;fxarithmetic-shift 
+    fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
   )
   (begin
@@ -121,7 +121,10 @@
     (bin-num-op fxand "&")
     (bin-num-op fxior "|")
     (bin-num-op fxxor "^")
-    ;fxarithmetic-shift
+    (define (fxarithmetic-shift i count)
+      (if (fxpositive? count)
+          (fxarithmetic-shift-left i count)
+          (fxarithmetic-shift-right i (fxneg count))))
     (bin-num-op fxarithmetic-shift-left "<<")
     (bin-num-op fxarithmetic-shift-right ">>")
   ))
