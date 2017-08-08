@@ -10,57 +10,36 @@
 (define-library (srfi 143)
   (import (scheme base))
   (export
-    fx-width
-    fx-greatest
-    fx-least
+    fx-width fx-greatest fx-least
     fixnum?
-    fxzero? fxpositive? fxnegative? ;fxodd? fxeven?
     fx=? fx<? fx>? fx<=? fx>=?
-    ;fxmax fxmin
+    fxzero? fxpositive? fxnegative? fxodd? fxeven?
+    fxmax fxmin
     fx+ fx- fx*
-    ;fxabs fxsquare fxsqrt fxexpt
-    ;fx+/carry
-    ;fx-/carry
-    ;fx*+/carry
-    ;fxfloor/ fxfloor-quotient fxfloor-remainder
-    ;fxceiling/ fxceiling-quotient fxceiling-remainder
-    ;fxtruncate/ fxtruncate-quotient fxtruncate-remainder
-    ;fxround/ fxround-quotient fxround-remainder
-    ;fxeuclidean/ fxeuclidean-quotient fxeuclidean-remainder
-    ;fxbalanced/ fxbalanced-quotient fxbalanced-remainder
-    ;fxnot
-    ;fxand   fxior   fxxor   fxeqv
-    ;fxnand  fxnor 
-    ;fxandc1 fxandc2 fxorc1  fxorc2 
-    ;farithmetic-shift fxbit-count fxinteger-length
+    fxneg
+    fxquotient fxremainder
+    fxabs 
+    fxsquare 
+    fxsqrt 
 
-    ;fxif 
-    ;fxbit-set? fxcopy-bit fxbit-swap
-    ;fxany-bit-set? fxevery-bit-set?
-    ;fxfirst-set-bit
-
-    ;fxbit-field fxbit-field-any? fxbit-field-every?
-    ;fxbit-field-clear fxbit-field-set
-    ;fxbit-field-replace  fbit-field-replace-same
-    ;fxbit-field-rotate fxbit-field-reverse
-    ;fxbit-field-append
-
-    ;fixnum->list list->fixnum
-    ;fixnum->vector vector->fixnum
-    ;fxbits
-    ;fxfold fxfor-each fxunfold
-    ;fxlogical-shift
+;  fx+/carry fx-/carry fx*/carry
+;  fxnot fxand fxior fxxor fxarithmetic-shift
+;  fxarithmetic-shift-left fxarithmetic-shift-right
+;  fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+;  fxfirst-set-bit fxbit-field
+;  fxbit-field-rotate fxbit-field-reverse
   )
   (inline
     fx-width
     fx-greatest
     fx-least
     fixnum?
-    fx+
-    fx-
-    fx*
     fx=?  fx<? fx>? fx<=? fx>=?
-    fxzero? fxpositive? fxnegative? ;fxodd? fxeven?
+    fxzero? fxpositive? fxnegative? fxodd? fxeven?
+    fx+ fx- fx*
+    fxneg fxquotient fxremainder
+    fxsquare
+    fxabs 
   )
   (begin
     (define (fx-width) 31)
@@ -102,6 +81,8 @@
       (bin-num-op fx+ "+")
       (bin-num-op fx- "-")
       (bin-num-op fx* "*")
+      (bin-num-op fxquotient "/")
+      (bin-num-op fxremainder "%")
       (cmp-op fx=? "==")
       (cmp-op fx<?  "<")
       (cmp-op fx>? ">")
@@ -114,6 +95,18 @@
         return_closcall1(data, k, obj_obj2int(i) == 0 ? boolean_t : boolean_f); ")
     (define (fxpositive? i) (fx>? i 0))
     (define (fxnegative? i) (fx<? i 0))
-    ; fxodd? fxeven?
+    (define-c fxodd?
+      "(void* data, int argc, closure _, object k, object i)"
+      " Cyc_check_fixnum(data, i);
+        return_closcall1(data, k, obj_obj2int(i) % 2 ? boolean_t : boolean_f); ")
+    (define (fxeven? i) 
+      (if (fxodd? i) #f #t))
+    (define (fxmax first . rest) (foldl (lambda (old new) (if (fx>? old new) old new)) first rest))
+    (define (fxmin first . rest) (foldl (lambda (old new) (if (fx<? old new) old new)) first rest))
+    (define fxsqrt exact-integer-sqrt)
+    (define (fxsquare i) (fx* i i))
+    (define (fxneg i) (fx- 0 i))
+    (define (fxabs i)
+      (if (fxnegative? i) (fxneg i) i))
   ))
 
