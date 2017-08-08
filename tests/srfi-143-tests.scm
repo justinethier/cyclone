@@ -4,6 +4,9 @@
   (test #t (fixnum? 32767))
   (test #f (fixnum? 1.1))
 
+  (test #t (fx=? 1 1))
+  (test #f (fx=? 1 2))
+  (test #f (fx=? 2 3))
 ;  (test #t (fx=? 1 1 1))
 ;  (test #f (fx=? 1 2 2))
 ;  (test #f (fx=? 1 1 2))
