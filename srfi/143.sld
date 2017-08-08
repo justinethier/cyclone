@@ -88,8 +88,11 @@
       (bin-num-op fx+ "+")
       (bin-num-op fx- "-")
       (bin-num-op fx* "*")
+
+      ;; TODO: need a 0 check for these next 2. maybe need another macro for that
       (bin-num-op fxquotient "/")
       (bin-num-op fxremainder "%")
+
       (cmp-op fx=? "==")
       (cmp-op fx<?  "<")
       (cmp-op fx>? ">")
