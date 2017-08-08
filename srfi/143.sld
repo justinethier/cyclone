@@ -21,10 +21,11 @@
     fxabs 
     fxsquare 
     fxsqrt 
-
+; TODO: 
 ;  fx+/carry fx-/carry fx*/carry
-;  fxnot fxand fxior fxxor fxarithmetic-shift
-;  fxarithmetic-shift-left fxarithmetic-shift-right
+
+    fxnot fxand fxior fxxor 
+; fxarithmetic-shift   fxarithmetic-shift-left fxarithmetic-shift-right
 ;  fxbit-count fxlength fxif fxbit-set? fxcopy-bit
 ;  fxfirst-set-bit fxbit-field
 ;  fxbit-field-rotate fxbit-field-reverse
@@ -40,6 +41,7 @@
     fxneg fxquotient fxremainder
     fxsquare
     fxabs 
+    fxnot fxand fxior fxxor 
   )
   (begin
     (define (fx-width) 31)
@@ -108,5 +110,13 @@
     (define (fxneg i) (fx- 0 i))
     (define (fxabs i)
       (if (fxnegative? i) (fxneg i) i))
+    (define-c fxnot
+       "(void* data, int argc, closure _, object k, object i)"
+       " Cyc_check_fixnum(data, i);
+         object result = obj_int2obj(~(int)(obj_obj2int(i)));
+         return_closcall1(data, k, result); ")
+    (bin-num-op fxand "&")
+    (bin-num-op fxior "|")
+    (bin-num-op fxxor "^")
   ))
 
