@@ -71,7 +71,7 @@
     (test 35 (* root rem)))
 )
 
-#;(test-group "fixnum/bitwise"
+(test-group "fixnum/bitwise"
   (test "test-1" -1 (fxnot 0))
   (test "test-2" 0 (fxand #b0 #b1))
   (test "test-115" 6 (fxand 14 6))

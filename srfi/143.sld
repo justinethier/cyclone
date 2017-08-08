@@ -8,7 +8,8 @@
 ;;;; Note the SRFI is still in DRAFT status.
 ;;;;
 (define-library (srfi 143)
-  (import (scheme base))
+  (import (scheme base)
+          (scheme inexact))
   (export
     fx-width fx-greatest fx-least
     fixnum?
@@ -27,9 +28,10 @@
     fxnot fxand fxior fxxor 
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
-;  fxbit-count fxlength 
+    fxbit-count 
+    fxlength 
     fxif fxbit-set? fxcopy-bit
-    ;fxfirst-set-bit 
+    fxfirst-set-bit 
     fxbit-field
     fxbit-field-rotate fxbit-field-reverse
   )
@@ -47,8 +49,9 @@
     fxnot fxand fxior fxxor 
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
+    fxbit-count 
     fxif fxbit-set? fxcopy-bit
-    ;fxfirst-set-bit 
+    fxfirst-set-bit 
     fxbit-field
     mask
   )
@@ -136,8 +139,28 @@
           (fxarithmetic-shift-right i (fxneg count))))
     (bin-num-op fxarithmetic-shift-left "<<")
     (bin-num-op fxarithmetic-shift-right ">>")
-    (define (fxif mask i j)
-      (fxior (fxand (fxnot mask) i) (fxand mask j)))
+
+    (define-c fxbit-count
+       "(void* data, int argc, closure _, object k, object i)"
+       " Cyc_check_fixnum(data, i);
+         unsigned int count = 0;
+         int n = obj_obj2int(i);
+         while (n) {
+           n &= (n - 1);
+           count++;
+         }
+         return_closcall1(data, k, obj_int2obj(count));")
+
+    (define (fxlength  i)
+      (ceiling (/ (log (if (fxnegative? i)
+                           (fxneg i)
+                           (fx+ 1 i)))
+                  (log 2))))
+
+    (define (fxif mask n0 n1)
+      (fxior (fxand mask n0)
+             (fxand (fxnot mask) n1)))
+
     (define-c fxbit-set?
        "(void* data, int argc, closure _, object k, object index, object i)"
        " Cyc_check_fixnum(data, index);
@@ -153,7 +176,10 @@
     ;; Helper function
     (define (mask start end) (fxnot (fxarithmetic-shift-left -1 (- end start))))
 
-    ;(define (fxfirst-set-bit i) (- (fxbit-count (fxxor i (- i 1))) 1))
+    (define (fxfirst-set-bit i) 
+      (if (fxzero? i)
+          -1
+          (- (fxbit-count (fxxor i (- i 1))) 1)))
     
     (define (fxbit-field n start end)
       (fxand (mask start end) (fxarithmetic-shift n (- start))))
