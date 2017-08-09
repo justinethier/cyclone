@@ -778,6 +778,7 @@ typedef struct {
   tag_type tag;
   FILE *fp;
   int mode;
+  unsigned char flags;
   char *mem_buf;
   size_t mem_buf_len;
 } port_type;
@@ -790,6 +791,18 @@ typedef struct {
   p.tag = port_tag; \
   p.fp = f; \
   p.mode = m; \
+  p.flags = 0; \
+  p.mem_buf = NULL; \
+  p.mem_buf_len = 0;
+
+#define make_file_backed_port(p,f,m) \
+  port_type p; \
+  p.hdr.mark = gc_color_red; \
+  p.hdr.grayed = 0; \
+  p.tag = port_tag; \
+  p.fp = f; \
+  p.mode = m; \
+  p.flags = 1; \
   p.mem_buf = NULL; \
   p.mem_buf_len = 0;
 
