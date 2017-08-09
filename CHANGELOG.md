@@ -1,5 +1,15 @@
 # Changelog
 
+## Next Release - TBD
+
+Features
+
+- Added SRFI 143 - Fixnums.
+
+Bug Fixes
+
+- Prevent `remainder` from crashing the runtime due to divide by zero.
+
 ## 0.5.4 - August 3, 2017
 
 Features

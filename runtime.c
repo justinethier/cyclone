@@ -3367,6 +3367,7 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       j = ((double_type *)num2)->value; 
     }
   }
+  if (j == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
   result = obj_int2obj(i % j);
   return_closcall1(data, cont, result); 
 }
