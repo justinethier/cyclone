@@ -672,6 +672,15 @@
       (parse fp '() '() #f #f 0 (reg-port fp)))))
 
 
+(define-c reading-from-file?
+  "(void *data, int argc, closure _, object k, object port)"
+  " object result = boolean_f;
+    Cyc_check_port(data, port);
+    if (((port_type *)port)->flags == 1) {
+      result = boolean_t;
+    }
+    return_closcall1(data, k, result);")
+
 ;    ;; Test code
 ;    ;(let ((fp (open-input-file "tests/begin.scm")))
 ;    ;(let ((fp (open-input-file "tests/strings.scm")))
