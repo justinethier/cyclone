@@ -3397,7 +3397,7 @@ port_type Cyc_io_open_input_file(void *data, object str)
   const char *fname;
   Cyc_check_str(data, str);
   fname = ((string_type *) str)->str;
-  make_port(p, NULL, 1);
+  make_file_backed_port(p, NULL, 1);
   p.fp = fopen(fname, "r");
   if (p.fp == NULL) {
     Cyc_rt_raise2(data, "Unable to open file", str);
@@ -5672,5 +5672,12 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   }
   mclosure1(clo, entry_pt, cont);
   entry_pt(data, 0, &clo, &clo);
+}
+
+/** Read */
+void Cyc_read(void *data, object cont, object port)
+{
+  //Cyc_check_port(data, port);
+  port_type *p = (port_type *)port;
 }
 
