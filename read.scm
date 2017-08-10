@@ -694,3 +694,20 @@
 ;(repl)
 
 (write 'TODO)
+
+;; Notes on writing a fast parser:
+- Interface to the user is (read). This needs to be fast
+- Could read input a line at a time, but then need to buffer in the port_type object
+- Thinking fread would be most efficient
+- Port would need an array, size (could be known instead of storing), and current index
+- Need a way to indicate EOF
+- One drawback - will not integrate nicely with other I/O on same port (read-char, read-line, etc) until those functions are updated to work with buffered I/O
+
+- Shouldn't chars for comments be immediately read? Not sure why existing code attempts to pass state
+- Not sure if we need the (all?) var. Can't we just loop and quit when closing paren is seen?
+
+- could main parsing code be written in C? this could save a lot of time
+  maybe have a scheme layer to handle nested parens (anything else?) and call C to
+  get the next token
+
+
