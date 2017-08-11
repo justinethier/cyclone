@@ -5768,7 +5768,11 @@ void Cyc_io_read_token(void *data, object cont, object port)
       // - if a read is needed
       // - if token length exceeds mem_buf length
       // will need to figure something out, maybe copy out to another malloc'd buffer
-      // in those cases
+      // in those cases. I think that might be the best strategy, to malloc then realloc.
+      // in this case we need the following:
+      // - token buffer
+      // - start index (for tokens in mem_buf)
+      // - end index (for tokens in token buf, 0 if token buf is empty)
       _read_error(data, p, "Unhandled input sequence");
     }
 
