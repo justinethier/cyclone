@@ -5677,7 +5677,31 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
 /** Read */
 void Cyc_read(void *data, object cont, object port)
 {
-  //Cyc_check_port(data, port);
+  Cyc_check_port(data, port);
   //port_type *p = (port_type *)port;
+  /* needs to work with this data structure:
+  I suppose if buf len is 0, try reading more...
+#define make_file_backed_port(p,f,m) 
+  port_type p; 
+  p.hdr.mark = gc_color_red; 
+  p.hdr.grayed = 0; 
+  p.tag = port_tag; 
+  p.fp = f; 
+  p.mode = m; 
+  p.flags = 1; 
+  p.line_num = 0; 
+  p.col_num = 0; 
+  p.mem_buf = malloc(CYC_IO_BUF_LEN); 
+  p.mem_buf_len = 0;
+  */
+
+  // Read data if buffer is full/empty
+  // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
+     // Process input one char at a time
+     // If comment found, eat up comment chars
+     // Want to use buffer instead of copying chars each time, but
+     //     need a solution when another read is required, since that would
+     //     overwrite buffer
+     // Raise an exception if any errors are found
 }
 
