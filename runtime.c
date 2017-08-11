@@ -5684,7 +5684,7 @@ int read_from_port(port_type *p)
   rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
   p->mem_buf_len = rv;
   p->buf_idx = 0;
-  return (rv == 0);
+  return rv;
 }
 
 void _read_line_comment(port_type *p)
