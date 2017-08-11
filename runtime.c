@@ -5755,7 +5755,20 @@ void Cyc_io_read_token(void *data, object cont, object port)
       p->line_num++;
     } else if (isspace(c)) {
       _read_whitespace(p);
+    } else if (c == '(' || c == ')' || c == '\'' || c == ',') {
+      // TODO: if buffer is not empty, return that instead, otherwise return this:
+      return_closcall1(data, cont, obj_char2obj(c));
+
+    // TODO: " (string)
+    // TODO: #
+    // TODO: | (literal identifier)
     } else {
+      // TODO: no, need to read chars into a new buffer. can be part of mem_buf with a 
+      // starting idx, except:
+      // - if a read is needed
+      // - if token length exceeds mem_buf length
+      // will need to figure something out, maybe copy out to another malloc'd buffer
+      // in those cases
       _read_error(data, p, "Unhandled input sequence");
     }
 
