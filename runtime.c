@@ -5678,6 +5678,6 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
 void Cyc_read(void *data, object cont, object port)
 {
   //Cyc_check_port(data, port);
-  port_type *p = (port_type *)port;
+  //port_type *p = (port_type *)port;
 }
 

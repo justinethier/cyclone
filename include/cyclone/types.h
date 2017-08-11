@@ -779,8 +779,8 @@ typedef struct {
   FILE *fp;
   int mode;
   unsigned char flags;
-  // TODO: int line_num;
-  // TODO: int char_num;
+  unsigned int line_num;
+  unsigned int col_num;
   char *mem_buf;
   size_t mem_buf_len;
 } port_type;
@@ -796,6 +796,8 @@ typedef struct {
   p.fp = f; \
   p.mode = m; \
   p.flags = 0; \
+  p.line_num = 0; \
+  p.col_num = 0; \
   p.mem_buf = NULL; \
   p.mem_buf_len = 0;
 
@@ -807,6 +809,8 @@ typedef struct {
   p.fp = f; \
   p.mode = m; \
   p.flags = 1; \
+  p.line_num = 0; \
+  p.col_num = 0; \
   p.mem_buf = malloc(IO_BUF_LEN); \
   p.mem_buf_len = 0;
 
