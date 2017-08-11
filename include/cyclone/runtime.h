@@ -266,6 +266,7 @@ object Cyc_io_flush_output_port(void *data, object port);
 object Cyc_io_read_char(void *data, object cont, object port);
 object Cyc_io_peek_char(void *data, object cont, object port);
 object Cyc_io_read_line(void *data, object cont, object port);
+void Cyc_io_read_token(void *data, object cont, object port);
 /**@}*/
 
 

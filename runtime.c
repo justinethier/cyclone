@@ -5706,7 +5706,22 @@ void _read_line_comment(port_type *p)
 void _read_multiline_comment(port_type *p) {}
 void _read_whitespace(port_type *p) {}
 
-void Cyc_read(void *data, object cont, object port)
+void _read_error(void *data, port_type *p, const char *msg) 
+{
+/* TODO: need equivalent of this:
+(define (parse-error msg lnum cnum)
+  (error
+    (string-append
+      "Error (line "
+      (number->string lnum)
+      ", char "
+      (number->string cnum)
+      "): "
+      msg)))
+*/
+}
+
+void Cyc_read_token(void *data, object cont, object port)
 {
   Cyc_check_port(data, port);
   port_type *p = (port_type *)port;
@@ -5743,7 +5758,14 @@ void Cyc_read(void *data, object cont, object port)
     if (c == ';') {
       _read_line_comment(p);
       // TODO: but then what, want to go back
+    } else if (c == '\n') {
+      p->line_num++;
+    } else if (isspace(c)) {
+      _read_whitespace(p);
+    } else {
+      _read_error(data, p, "Unhandled input sequence");
     }
+
     // Want to use buffer instead of copying chars each time, but
     //     need a solution when another read is required, since that would
     //     overwrite buffer
