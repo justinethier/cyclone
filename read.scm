@@ -697,7 +697,8 @@
   "(void *data, int argc, closure _, object k, object port)"
   " Cyc_io_read_token(data, k, port);")
 
-(read-token (open-input-file "generate-c.scm"))
+(write
+  (read-token (open-input-file "generate-c.scm")))
 
 ;; Notes on writing a fast parser:
 ; - Interface to the user is (read). This needs to be fast
