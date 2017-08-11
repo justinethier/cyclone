@@ -5675,10 +5675,42 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
 }
 
 /** Read */
+int read_from_port(port_type *p)
+{
+  size_t rv;
+  FILE *fp = p->fp;
+  char *buf = p->mem_buf;
+
+  rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
+  p->mem_buf_len = rv;
+  p->buf_idx = 0;
+  return (rv == 0);
+}
+
+void _read_line_comment(port_type *p)
+{
+  while(1) {
+    // Read more data into buffer, if needed
+    if (p->buf_idx == p->mem_buf_len) {
+      if (!read_from_port(p)){
+        break; // Return if buf is empty
+      }
+    }
+    if (p->mem_buf[p->buf_idx++] == '\n') {
+      p->line_num++; // TODO: do we care about col_num above?
+      break;
+    }
+  }
+}
+
+void _read_multiline_comment(port_type *p) {}
+void _read_whitespace(port_type *p) {}
+
 void Cyc_read(void *data, object cont, object port)
 {
   Cyc_check_port(data, port);
-  //port_type *p = (port_type *)port;
+  port_type *p = (port_type *)port;
+  char c;
   /* needs to work with this data structure:
   I suppose if buf len is 0, try reading more...
 #define make_file_backed_port(p,f,m) 
@@ -5695,13 +5727,27 @@ void Cyc_read(void *data, object cont, object port)
   p.mem_buf_len = 0;
   */
 
-  // Read data if buffer is full/empty
   // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
-     // Process input one char at a time
-     // If comment found, eat up comment chars
-     // Want to use buffer instead of copying chars each time, but
-     //     need a solution when another read is required, since that would
-     //     overwrite buffer
-     // Raise an exception if any errors are found
+  while (1) {
+    // Read data if buffer is full/empty
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+      int rv = read_from_port(p);
+      if (!rv) {
+        return_closcall1(data, cont, Cyc_EOF);
+      }
+    }
+
+    // Process input one char at a time
+    c = p->mem_buf[p->buf_idx++];
+    // If comment found, eat up comment chars
+    if (c == ';') {
+      _read_line_comment(p);
+      // TODO: but then what, want to go back
+    }
+    // Want to use buffer instead of copying chars each time, but
+    //     need a solution when another read is required, since that would
+    //     overwrite buffer
+    // Raise an exception if any errors are found
+  }
 }
 
