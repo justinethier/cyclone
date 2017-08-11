@@ -785,7 +785,7 @@ typedef struct {
   size_t mem_buf_len;
 } port_type;
 
-#define IO_BUF_LEN 1024
+#define CYC_IO_BUF_LEN 1024
 
 /** Create a new port object in the nursery */
 #define make_port(p,f,m) \
@@ -811,7 +811,7 @@ typedef struct {
   p.flags = 1; \
   p.line_num = 0; \
   p.col_num = 0; \
-  p.mem_buf = malloc(IO_BUF_LEN); \
+  p.mem_buf = malloc(CYC_IO_BUF_LEN); \
   p.mem_buf_len = 0;
 
 /**
