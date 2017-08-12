@@ -698,7 +698,7 @@
   " Cyc_io_read_token(data, k, port);")
 
 (write
-  (read-token (open-input-file "generate-c.scm")))
+  (read-token (open-input-file "test.scm")))
 
 ;; Notes on writing a fast parser:
 ; - Interface to the user is (read). This needs to be fast

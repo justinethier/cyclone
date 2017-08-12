@@ -824,8 +824,8 @@ typedef struct {
   p.buf_idx = 0; \
   p.tok_start = 0; \
   p.tok_end = 0; \
-  p.tok_buf = NULL; \
-  p.tok_buf_len = 0; \
+  p.tok_buf = malloc(CYC_IO_BUF_LEN); \
+  p.tok_buf_len = CYC_IO_BUF_LEN; \
   p.mem_buf = malloc(CYC_IO_BUF_LEN); \
   p.mem_buf_len = 0;
 
