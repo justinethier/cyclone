@@ -3442,6 +3442,11 @@ object Cyc_io_close_port(void *data, object port)
       ((port_type *)port)->mem_buf = NULL;
       ((port_type *)port)->mem_buf_len = 0;
     }
+    if (((port_type *)port)->tok_buf != NULL){
+      free( ((port_type *)port)->tok_buf );
+      ((port_type *)port)->tok_buf = NULL;
+      ((port_type *)port)->tok_buf_len = 0;
+    }
   }
   return port;
 }
@@ -5759,9 +5764,10 @@ void Cyc_io_read_token(void *data, object cont, object port)
       // TODO: if buffer is not empty, return that instead, otherwise return this:
       return_closcall1(data, cont, obj_char2obj(c));
 
-    // TODO: " (string)
-    // TODO: #
-    // TODO: | (literal identifier)
+    } else if (c == '"') {
+      Cyc_rt_raise_msg(data, "TODO: parsing for strings");
+    } else if (c == '#') {
+      Cyc_rt_raise_msg(data, "TODO: parsing for #");
     } else {
       // TODO: no, need to read chars into a new buffer. can be part of mem_buf with a 
       // starting idx, except:

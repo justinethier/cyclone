@@ -782,6 +782,10 @@ typedef struct {
   unsigned int line_num;
   unsigned int col_num;
   unsigned int buf_idx;
+  unsigned int tok_start; // Start of token in mem_buf (end is unknown yet)
+  unsigned int tok_end; // End of token in tok_buf (start is tok_buf[0])
+  char *tok_buf; // Alternative buffer for tokens
+  size_t tok_buf_len; 
   char *mem_buf;
   size_t mem_buf_len;
 } port_type;
@@ -800,6 +804,10 @@ typedef struct {
   p.line_num = 0; \
   p.col_num = 0; \
   p.buf_idx = 0; \
+  p.tok_start = 0; \
+  p.tok_end = 0; \
+  p.tok_buf = NULL; \
+  p.tok_buf_len = 0; \
   p.mem_buf = NULL; \
   p.mem_buf_len = 0;
 
@@ -814,6 +822,10 @@ typedef struct {
   p.line_num = 0; \
   p.col_num = 0; \
   p.buf_idx = 0; \
+  p.tok_start = 0; \
+  p.tok_end = 0; \
+  p.tok_buf = NULL; \
+  p.tok_buf_len = 0; \
   p.mem_buf = malloc(CYC_IO_BUF_LEN); \
   p.mem_buf_len = 0;
 

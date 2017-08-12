@@ -489,6 +489,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       hp->line_num = ((port_type *) obj)->line_num;
       hp->col_num = ((port_type *) obj)->col_num;
       hp->buf_idx = ((port_type *) obj)->buf_idx;
+      hp->tok_start = ((port_type *) obj)->tok_start;
+      hp->tok_end = ((port_type *) obj)->tok_end;
+      hp->tok_buf = ((port_type *) obj)->tok_buf;
+      hp->tok_buf_len = ((port_type *) obj)->tok_buf_len;
       hp->mem_buf = ((port_type *)obj)->mem_buf;
       hp->mem_buf_len = ((port_type *)obj)->mem_buf_len;
       return (char *)hp;
