@@ -5721,9 +5721,13 @@ void _read_error(void *data, port_type *p, const char *msg)
 
 void _read_return_atom(void *data, object cont, port_type *p) 
 {
-  // TODO: process tok_buf
+  // Back up a char, since we always get here after reaching a terminal char
+  // indicating we have the full atom
+  p->buf_idx--;
+  p->col_num--;
+
   p->tok_buf[p->tok_end + 1] = '\0'; // TODO: what if buffer is full?
-  p->tok_end = 0;
+  p->tok_end = 0; // Reset for next atom
   printf("TODO: return atom from %s\n", p->tok_buf);
   return_closcall1(data, cont, boolean_f);
 }
@@ -5733,21 +5737,6 @@ void Cyc_io_read_token(void *data, object cont, object port)
   Cyc_check_port(data, port);
   port_type *p = (port_type *)port;
   char c;
-  /* needs to work with this data structure:
-  I suppose if buf len is 0, try reading more...
-#define make_file_backed_port(p,f,m) 
-  port_type p; 
-  p.hdr.mark = gc_color_red; 
-  p.hdr.grayed = 0; 
-  p.tag = port_tag; 
-  p.fp = f; 
-  p.mode = m; 
-  p.flags = 1; 
-  p.line_num = 0; 
-  p.col_num = 0; 
-  p.mem_buf = malloc(CYC_IO_BUF_LEN); 
-  p.mem_buf_len = 0;
-  */
 
   // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
   while (1) {
@@ -5761,35 +5750,36 @@ void Cyc_io_read_token(void *data, object cont, object port)
 
     // Process input one char at a time
     c = p->mem_buf[p->buf_idx++];
+    p->col_num++;
+
     // If comment found, eat up comment chars
     if (c == ';') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_line_comment(p);
       // TODO: but then what, want to go back
     } else if (c == '\n') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
       p->line_num++;
+      p->col_num = 0;
     } else if (isspace(c)) {
+      if (p->tok_end) _read_return_atom(data, cont, p);
       _read_whitespace(p);
-    } else if (c == '(' || c == ')' || c == '\'' || c == ',') {
-      // TODO: if buffer is not empty, return that instead, otherwise return this:
+    } else if (c == '(' || c == ')' || c == '\'' || c == '`' || c == ',') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
       return_closcall1(data, cont, obj_char2obj(c));
 
     } else if (c == '"') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
       Cyc_rt_raise_msg(data, "TODO: parsing for strings");
-    } else if (c == '#') {
+    } else if (c == '#' && !p->tok_end) {
       Cyc_rt_raise_msg(data, "TODO: parsing for #");
     } else {
-      // TODO: no, need to read chars into a new buffer. can be part of mem_buf with a 
-      // starting idx, except:
-      // - if a read is needed
-      // - if token length exceeds mem_buf length
-      // will need to figure something out, maybe copy out to another malloc'd buffer
-      // in those cases. I think that might be the best strategy, to malloc then realloc.
-      // in this case we need the following:
-      // - token buffer
-      // - start index (for tokens in mem_buf)
-      // - end index (for tokens in token buf, 0 if token buf is empty)
-      //_read_error(data, p, "Unhandled input sequence");
+      // No special meaning, add char to current token (an atom)
+
+      // TODO: need to realloc if tok_end == (tok_buf_len - 1) 
+      // this accounts for the \0 that needs to be appended when parsing the atom
+      // FUTURE: more efficient to try and use mem_buf directly??
+      //         complicates things with more edge cases though
       p->tok_buf[p->tok_end++] = c;
     }
 
