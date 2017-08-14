@@ -743,9 +743,26 @@
             (reverse lis))
            (else
             (loop (cons t lis) (parse2 fp))))))
-      ((eq? token #())
-       ;; TODO: vector parsing, similar to list
-       'TODO)
+      ((vector? token)
+       (let loop ((lis '())
+                  (t (parse2 fp)))
+         (cond
+           ((eof-object? t)
+            (error "missing closing parenthesis"))
+           ((eq? t #\))
+            (list->vector (reverse lis)))
+           (else
+            (loop (cons t lis) (parse2 fp))))))
+      ;;((bytevector? token)
+      ;; (let loop ((lis '())
+      ;;            (t (parse2 fp)))
+      ;;   (cond
+      ;;     ((eof-object? t)
+      ;;      (error "missing closing parenthesis"))
+      ;;     ((eq? t #\))
+      ;;      (list->vector (reverse lis)))
+      ;;     (else
+      ;;      (loop (cons t lis) (parse2 fp))))))
       ((eq? token #\')
        (list 'quote (parse2 fp)))
       ((eq? token #\`)
