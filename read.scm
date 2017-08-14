@@ -742,12 +742,14 @@
            ((eq? t #\))
             (reverse lis))
            (else
-            (loop (cons t lis) (parse2 fp)))))
-      )
-      ;; Close parent, stop current read loop
-      ;; Quote
-      ;; , - could be unquote or unquote-splicing
-      ;; # - get next char(s)
+            (loop (cons t lis) (parse2 fp))))))
+      ((eq? token #\')
+       (list 'quote (parse2 fp)))
+      ((eq? token #\`)
+       (list 'quasiquote (parse2 fp)))
+      ;; TODO: , - tricky, could be unquote or unquote-splicing
+      ;;((eq? t #\`)
+      ;; (list 'quasiquote (parse2 fp)))
       ;; Other special cases?
       (else
         token))))
