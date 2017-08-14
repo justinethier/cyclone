@@ -5743,6 +5743,8 @@ void _read_error(void *data, port_type *p, const char *msg)
 
 void _read_return_atom(void *data, object cont, port_type *p) 
 {
+  object sym;
+
   // Back up a char, since we always get here after reaching a terminal char
   // indicating we have the full atom
   p->buf_idx--;
@@ -5750,8 +5752,42 @@ void _read_return_atom(void *data, object cont, port_type *p)
 
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
-  printf("TODO: return atom from %s\n", p->tok_buf);
-  return_closcall1(data, cont, boolean_f);
+  // printf("TODO: return atom from %s\n", p->tok_buf);
+
+/*
+ TODO: not good enough, could be a number.
+ logic from existing read is:
+
+(define (sign? c)
+  (or
+    (equal? c #\+)
+    (equal? c #\-)))
+
+;; token-numeric? -> [chars] -> boolean
+(define (token-numeric? a)
+    (or (char-numeric? (car a))
+        (and (> (length a) 1)
+             (eq? #\. (car a))
+             (char-numeric? (cadr a)))
+        (and (> (length a) 1)
+             (or (char-numeric? (cadr a))
+                 (eq? #\. (cadr a)))
+             (sign? (car a)))))
+
+;; parse-atom -> [chars] -> literal
+(define (parse-atom a)
+  (if (token-numeric? a)
+      (string->number (list->string a))
+      (if (or (equal? a '(#\+ #\i #\n #\f #\. #\0))
+              (equal? a '(#\- #\i #\n #\f #\. #\0)))
+          (expt 2.0 1000000)
+          (if (or (equal? a '(#\+ #\n #\a #\n #\. #\0))
+                  (equal? a '(#\- #\n #\a #\n #\. #\0)))
+              (/ 0.0 0.0)
+              (string->symbol (list->string a))))))
+*/
+  sym = find_or_add_symbol(p->tok_buf);
+  return_closcall1(data, cont, sym);
 }
 
 void Cyc_io_read_token(void *data, object cont, object port)
