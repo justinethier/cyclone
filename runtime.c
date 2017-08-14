@@ -5702,14 +5702,35 @@ void _read_line_comment(port_type *p)
       }
     }
     if (p->mem_buf[p->buf_idx++] == '\n') {
-      p->line_num++; // TODO: do we care about col_num above?
+      p->line_num++; // Ignore col_num since we are just skipping over chars
+      p->col_num = 0;
       break;
     }
   }
 }
 
 void _read_multiline_comment(port_type *p) {}
-void _read_whitespace(port_type *p) {}
+void _read_whitespace(port_type *p) 
+{
+  while(1) {
+    // Read more data into buffer, if needed
+    if (p->buf_idx == p->mem_buf_len) {
+      if (!read_from_port(p)){
+        break; // Return if buf is empty
+      }
+    }
+    p->buf_idx++;
+    if (p->mem_buf[p->buf_idx] == '\n') {
+      p->line_num++; // Ignore col_num since we are just skipping over chars
+      p->col_num = 0;
+      break;
+    } else if (isspace(p->mem_buf[p->buf_idx])) {
+      p->col_num++;
+    } else {
+      break; // Terminate on non-whitespace char
+    }
+  }
+}
 
 void _read_error(void *data, port_type *p, const char *msg) 
 {
