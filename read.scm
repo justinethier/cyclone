@@ -737,7 +737,8 @@
        (let loop ((lis '())
                   (t (parse2 fp)))
          (cond
-           ;; TODO: EOF
+           ((eof-object? t)
+            (error "missing closing parenthesis"))
            ((eq? t #\))
             (reverse lis))
            (else

@@ -5692,6 +5692,14 @@ int read_from_port(port_type *p)
   return rv;
 }
 
+void _read_error(void *data, port_type *p, const char *msg) 
+{
+  char buf[1024];
+  snprintf(buf, 1023, "Error (line %d, column %d): %s", 
+           p->line_num, p->col_num, msg);
+  Cyc_rt_raise_msg(data, buf);
+}
+
 void _read_line_comment(port_type *p)
 {
   while(1) {
@@ -5733,33 +5741,88 @@ void _read_whitespace(port_type *p)
   }
 }
 
-void _read_error(void *data, port_type *p, const char *msg) 
+static void _read_add_to_tok_buf(port_type *p, char c)
 {
-  char buf[1024];
-  snprintf(buf, 1023, "Error (line %d, column %d): %s", 
-           p->line_num, p->col_num, msg);
-  Cyc_rt_raise_msg(data, buf);
+  // FUTURE: more efficient to try and use mem_buf directly??
+  //         complicates things with more edge cases though
+  if ((p->tok_end + 1) == p->tok_buf_len) { // +1 for trailing \0 later on
+    p->tok_buf_len *= 2;
+    p->tok_buf = realloc(p->tok_buf, p->tok_buf_len);
+    if (!p->tok_buf) {
+      fprintf(stderr, "Unable to grow token buffer!\n");
+      exit(1);
+    }
+  }
+  p->tok_buf[p->tok_end++] = c;
+}
+
+void _read_string(void *data, object cont, port_type *p) 
+{
+  char c;
+  int escaped = 0;
+  while(1) {
+    // Read more data into buffer, if needed
+    if (p->buf_idx == p->mem_buf_len) {
+      if (!read_from_port(p)){
+        _read_error(data, p, "Missing closing double-quote");
+      }
+    }
+    c = p->mem_buf[p->buf_idx++];
+    p->col_num++;
+
+    if (escaped) {
+      escaped = 0;
+      switch (c) {
+      case '"':
+      case '\'':
+      case '?':
+      case '|':
+      case '\\':
+        _read_add_to_tok_buf(p, c);
+        break;
+      case 'a':
+        _read_add_to_tok_buf(p, '\a');
+        break;
+      case 'b':
+        _read_add_to_tok_buf(p, '\b');
+        break;
+      case 'n':
+        _read_add_to_tok_buf(p, '\n');
+        break;
+      case 'r':
+        _read_add_to_tok_buf(p, '\r');
+        break;
+      case 't':
+        _read_add_to_tok_buf(p, '\t');
+        break;
+      case 'x':
+        // TODO: read hex scalar value
+        break;
+      default:
+        _read_error(data, p, "invalid escape character in string"); // TODO: char
+        break;
+      }
+    } else if (c == '"') {
+      p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
+      p->tok_end = 0; // Reset for next atom
+      {
+        make_string(str, p->tok_buf);
+        return_closcall1(data, cont, &str);
+      }
+    } else if (c == '\\') {
+      escaped = 1;
+    } else if (c == '\n') {
+      p->line_num++;
+      p->col_num = 0;
+      _read_add_to_tok_buf(p, c);
+    } else {
+      _read_add_to_tok_buf(p, c);
+    }
+  }
 }
 
 int _read_is_numeric(const char *tok)
 {
-  /* Equivalent to:
-  (define (sign? c)
-    (or
-      (equal? c #\+)
-      (equal? c #\-)))
-
-  ;; token-numeric? -> [chars] -> boolean
-  (define (token-numeric? a)
-      (or (char-numeric? (car a))
-          (and (> (length a) 1)
-               (eq? #\. (car a))
-               (char-numeric? (cadr a)))
-          (and (> (length a) 1)
-               (or (char-numeric? (cadr a))
-                   (eq? #\. (cadr a)))
-               (sign? (car a)))))
-  */
   int len = strlen(tok);
   return (len &&
           ((isdigit(tok[0])) ||
@@ -5778,23 +5841,6 @@ void _read_return_atom(void *data, object cont, port_type *p)
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
 
-/*
- TODO: not good enough, could be a number.
- logic from existing read is:
-
-
-;; parse-atom -> [chars] -> literal
-(define (parse-atom a)
-  (if (token-numeric? a)
-      (string->number (list->string a))
-      (if (or (equal? a '(#\+ #\i #\n #\f #\. #\0))
-              (equal? a '(#\- #\i #\n #\f #\. #\0)))
-          (expt 2.0 1000000)
-          (if (or (equal? a '(#\+ #\n #\a #\n #\. #\0))
-                  (equal? a '(#\- #\n #\a #\n #\. #\0)))
-              (/ 0.0 0.0)
-              (string->symbol (list->string a))))))
-*/
   if (_read_is_numeric(p->tok_buf)) {
     make_string(str, p->tok_buf);
     Cyc_string2number_(data, cont, &str);
@@ -5850,17 +5896,12 @@ void Cyc_io_read_token(void *data, object cont, object port)
 
     } else if (c == '"') {
       if (p->tok_end) _read_return_atom(data, cont, p);
-      Cyc_rt_raise_msg(data, "TODO: parsing for strings");
+      _read_string(data, cont, p);
     } else if (c == '#' && !p->tok_end) {
       Cyc_rt_raise_msg(data, "TODO: parsing for #");
     } else {
       // No special meaning, add char to current token (an atom)
-
-      // TODO: need to realloc if tok_end == (tok_buf_len - 1) 
-      // this accounts for the \0 that needs to be appended when parsing the atom
-      // FUTURE: more efficient to try and use mem_buf directly??
-      //         complicates things with more edge cases though
-      p->tok_buf[p->tok_end++] = c;
+      _read_add_to_tok_buf(p, c);
     }
 
   }
