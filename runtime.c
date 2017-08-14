@@ -5796,28 +5796,29 @@ void _read_string(void *data, object cont, port_type *p)
         _read_add_to_tok_buf(p, '\t');
         break;
       case 'x': {
-        char buf[128];
+        char buf[32];
         int i = 0;
-        while (i < 127){
+        while (i < 31){
           if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
             int rv = read_from_port(p); 
             if (!rv) { 
               break;
             }
           }
-          if (p->mem_buf[p->buf_idx] == ';') break;
+          if (p->mem_buf[p->buf_idx] == ';'){
+            p->buf_idx++;
+            break;
+          }
           buf[i] = p->mem_buf[p->buf_idx];
           p->buf_idx++;
           p->col_num++;
           i++;
         }
         buf[i] = '\0';
-        // TODO: convert hex and return_closcall1(data, cont, 
         {
-          make_string(str, buf);
-       // TODO: (integer->char (string->number (list->string buf) 16)))))
-       //   Cyc_string2number2_(data, cont, 2, buf, obj_int2obj(16)); 
-       return_closcall1(data, cont, boolean_f); // TODO: just a placeholder!
+          int result = (int)strtol(buf, NULL, 16);
+          //return_closcall1(data, cont, obj_char2obj(result));
+          p->tok_buf[p->tok_end++] = (char)result;
         }
         break;
       }
