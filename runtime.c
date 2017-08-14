@@ -5946,15 +5946,31 @@ void Cyc_io_read_token(void *data, object cont, object port)
       p->col_num++;
       // TODO: block comment
       if (c == 't') {
+        if ((p->mem_buf_len - p->buf_idx) >= 3 &&
+            p->mem_buf[p->buf_idx + 0] == 'r' &&
+            p->mem_buf[p->buf_idx + 1] == 'u' &&
+            p->mem_buf[p->buf_idx + 2] == 'e') {
+          p->buf_idx += 3;
+          p->col_num += 3;
+        }
         return_closcall1(data, cont, boolean_t);
-      // TODO: #true
       } else if (c == 'f') {
+        if ((p->mem_buf_len - p->buf_idx) >= 4 &&
+            p->mem_buf[p->buf_idx + 0] == 'a' &&
+            p->mem_buf[p->buf_idx + 1] == 'l' &&
+            p->mem_buf[p->buf_idx + 2] == 's' &&
+            p->mem_buf[p->buf_idx + 3] == 'e') {
+          p->buf_idx += 4;
+          p->col_num += 4;
+        }
         return_closcall1(data, cont, boolean_f);
-      }
-      // TODO: #false
       // TODO: numbers
       // TODO: bytevector
       // TODO: vector
+      } else if (c == '(') {
+        make_empty_vector(vec);
+        return_closcall1(data, cont, &vec);
+      }
       // TODO: character
       // TODO: datum comment
       _read_error(data, p, "Unhandled input sequence");

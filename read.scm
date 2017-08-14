@@ -743,6 +743,9 @@
             (reverse lis))
            (else
             (loop (cons t lis) (parse2 fp))))))
+      ((eq? token #())
+       ;; TODO: vector parsing, similar to list
+       'TODO)
       ((eq? token #\')
        (list 'quote (parse2 fp)))
       ((eq? token #\`)
