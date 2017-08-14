@@ -5741,6 +5741,32 @@ void _read_error(void *data, port_type *p, const char *msg)
   Cyc_rt_raise_msg(data, buf);
 }
 
+int _read_is_numeric(const char *tok)
+{
+  /* Equivalent to:
+  (define (sign? c)
+    (or
+      (equal? c #\+)
+      (equal? c #\-)))
+
+  ;; token-numeric? -> [chars] -> boolean
+  (define (token-numeric? a)
+      (or (char-numeric? (car a))
+          (and (> (length a) 1)
+               (eq? #\. (car a))
+               (char-numeric? (cadr a)))
+          (and (> (length a) 1)
+               (or (char-numeric? (cadr a))
+                   (eq? #\. (cadr a)))
+               (sign? (car a)))))
+  */
+  int len = strlen(tok);
+  return (len &&
+          ((isdigit(tok[0])) ||
+           ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
+           ((len > 1) && (tok[1] == '.' || isdigit(tok[1])) && (tok[0] == '-' || tok[0] == '+'))));
+}
+
 void _read_return_atom(void *data, object cont, port_type *p) 
 {
   object sym;
@@ -5749,30 +5775,13 @@ void _read_return_atom(void *data, object cont, port_type *p)
   // indicating we have the full atom
   p->buf_idx--;
   p->col_num--;
-
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
-  // printf("TODO: return atom from %s\n", p->tok_buf);
 
 /*
  TODO: not good enough, could be a number.
  logic from existing read is:
 
-(define (sign? c)
-  (or
-    (equal? c #\+)
-    (equal? c #\-)))
-
-;; token-numeric? -> [chars] -> boolean
-(define (token-numeric? a)
-    (or (char-numeric? (car a))
-        (and (> (length a) 1)
-             (eq? #\. (car a))
-             (char-numeric? (cadr a)))
-        (and (> (length a) 1)
-             (or (char-numeric? (cadr a))
-                 (eq? #\. (cadr a)))
-             (sign? (car a)))))
 
 ;; parse-atom -> [chars] -> literal
 (define (parse-atom a)
@@ -5786,8 +5795,21 @@ void _read_return_atom(void *data, object cont, port_type *p)
               (/ 0.0 0.0)
               (string->symbol (list->string a))))))
 */
-  sym = find_or_add_symbol(p->tok_buf);
-  return_closcall1(data, cont, sym);
+  if (_read_is_numeric(p->tok_buf)) {
+    make_string(str, p->tok_buf);
+    Cyc_string2number_(data, cont, &str);
+  } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
+             strncmp("-inf.0", p->tok_buf, 6) == 0) {
+    make_double(d, 2.0);
+    Cyc_expt(data, cont, &d, obj_int2obj(1000000));
+  } else if (strncmp("+nan.0", p->tok_buf, 6) == 0 ||
+             strncmp("-nan.0", p->tok_buf, 6) == 0) {
+    make_double(d, 0.0 / 0.0);
+    return_closcall1(data, cont, &d);
+  } else {
+    sym = find_or_add_symbol(p->tok_buf);
+    return_closcall1(data, cont, sym);
+  }
 }
 
 void Cyc_io_read_token(void *data, object cont, object port)
