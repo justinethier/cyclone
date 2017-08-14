@@ -5941,7 +5941,23 @@ void Cyc_io_read_token(void *data, object cont, object port)
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_string(data, cont, p);
     } else if (c == '#' && !p->tok_end) {
-      Cyc_rt_raise_msg(data, "TODO: parsing for #");
+      _read_next_char(data, cont, p); // Fill buffer
+      c = p->mem_buf[p->buf_idx++];
+      p->col_num++;
+      // TODO: block comment
+      if (c == 't') {
+        return_closcall1(data, cont, boolean_t);
+      // TODO: #true
+      } else if (c == 'f') {
+        return_closcall1(data, cont, boolean_f);
+      }
+      // TODO: #false
+      // TODO: numbers
+      // TODO: bytevector
+      // TODO: vector
+      // TODO: character
+      // TODO: datum comment
+      _read_error(data, p, "Unhandled input sequence");
     } else {
       // No special meaning, add char to current token (an atom)
       _read_add_to_tok_buf(p, c);
