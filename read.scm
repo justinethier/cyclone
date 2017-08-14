@@ -747,9 +747,10 @@
        (list 'quote (parse2 fp)))
       ((eq? token #\`)
        (list 'quasiquote (parse2 fp)))
-      ;; TODO: , - tricky, could be unquote or unquote-splicing
-      ;;((eq? t #\`)
-      ;; (list 'quasiquote (parse2 fp)))
+      ((eq? token #\,)
+       (list 'unquote (parse2 fp)))
+      ((eq? token (string->symbol ",@"))
+       (list 'unquote-splicing (parse2 fp)))
       ;; Other special cases?
       (else
         token))))

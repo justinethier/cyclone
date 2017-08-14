@@ -5858,6 +5858,14 @@ void _read_return_atom(void *data, object cont, port_type *p)
   }
 }
 
+#define _read_next_char(data, cont, p) \
+ if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { \
+   int rv = read_from_port(p); \
+   if (!rv) { \
+     return_closcall1(data, cont, Cyc_EOF); \
+   } \
+ } 
+
 void Cyc_io_read_token(void *data, object cont, object port)
 {
   Cyc_check_port(data, port);
@@ -5890,10 +5898,21 @@ void Cyc_io_read_token(void *data, object cont, object port)
     } else if (isspace(c)) {
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_whitespace(p);
-    } else if (c == '(' || c == ')' || c == '\'' || c == '`' || c == ',') {
+    } else if (c == '(' || c == ')' || c == '\'' || c == '`') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       return_closcall1(data, cont, obj_char2obj(c));
+    } else if (c == ',') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
 
+      _read_next_char(data, cont, p); // Do another buffer read if needed
+      if (p->mem_buf[p->buf_idx] == '@') {
+        object unquote_splicing = find_or_add_symbol(",@");
+        p->buf_idx++;
+        p->col_num++;
+        return_closcall1(data, cont, unquote_splicing);
+      } else {
+        return_closcall1(data, cont, obj_char2obj(c));
+      }
     } else if (c == '"') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_string(data, cont, p);
