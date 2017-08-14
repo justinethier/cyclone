@@ -5719,12 +5719,13 @@ void _read_whitespace(port_type *p)
         break; // Return if buf is empty
       }
     }
-    p->buf_idx++;
     if (p->mem_buf[p->buf_idx] == '\n') {
+      p->buf_idx++;
       p->line_num++; // Ignore col_num since we are just skipping over chars
       p->col_num = 0;
       break;
     } else if (isspace(p->mem_buf[p->buf_idx])) {
+      p->buf_idx++;
       p->col_num++;
     } else {
       break; // Terminate on non-whitespace char
@@ -5747,7 +5748,7 @@ void _read_return_atom(void *data, object cont, port_type *p)
   p->buf_idx--;
   p->col_num--;
 
-  p->tok_buf[p->tok_end + 1] = '\0'; // TODO: what if buffer is full?
+  p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
   printf("TODO: return atom from %s\n", p->tok_buf);
   return_closcall1(data, cont, boolean_f);

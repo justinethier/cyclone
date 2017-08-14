@@ -698,7 +698,8 @@
   " Cyc_io_read_token(data, k, port);")
 
 (write
-  (read-token (open-input-file "test.scm")))
+  (parse2 (open-input-file "test.scm")))
+  ;(read-token (open-input-file "test.scm")))
 
 ;; Notes on writing a fast parser:
 ; - Interface to the user is (read). This needs to be fast
@@ -729,8 +730,19 @@
 
 (define (parse2 fp)
   (let ((token (read-token fp))) ;; TODO: this will be a C call
+    ;(write `(token ,token))
     (cond
       ;; Open paren, start read loop
+      ((eq? token #\()
+       (let loop ((lis '())
+                  (t (parse2 fp)))
+         (cond
+           ;; TODO: EOF
+           ((eq? t #\))
+            (reverse lis))
+           (else
+            (loop (cons t lis) (parse2 fp)))))
+      )
       ;; Close parent, stop current read loop
       ;; Quote
       ;; , - could be unquote or unquote-splicing
