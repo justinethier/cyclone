@@ -5914,6 +5914,62 @@ void _read_literal_identifier(void *data, port_type *p)
   }
 }
 
+void _read_return_character(void *data, port_type *p)
+{
+  p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
+  p->tok_end = 0; // Reset for next atom
+  if (strlen(p->tok_buf) == 1) {
+    return_thread_runnable(data, obj_char2obj(p->tok_buf[0]));
+  } else if(strncmp(p->tok_buf, "alarm", 5) == 0) {
+    return_thread_runnable(data, obj_char2obj('\a'));
+  } else if(strncmp(p->tok_buf, "backspace", 9) == 0) {
+    return_thread_runnable(data, obj_char2obj('\b'));
+  } else if(strncmp(p->tok_buf, "delete", 6) == 0) {
+    return_thread_runnable(data, obj_char2obj(127));
+  } else if(strncmp(p->tok_buf, "newline", 7) == 0) {
+    return_thread_runnable(data, obj_char2obj('\n'));
+  } else if(strncmp(p->tok_buf, "null", 4) == 0) {
+    return_thread_runnable(data, obj_char2obj('\0'));
+  } else if(strncmp(p->tok_buf, "return", 6) == 0) {
+    return_thread_runnable(data, obj_char2obj('\r'));
+  } else if(strncmp(p->tok_buf, "space", 5) == 0) {
+    return_thread_runnable(data, obj_char2obj(' '));
+  } else if(strncmp(p->tok_buf, "tab", 3) == 0) {
+    return_thread_runnable(data, obj_char2obj('\t'));
+  } else if(strlen(p->tok_buf) > 1 && p->tok_buf[0] == 'x') {
+    const char *buf = p->tok_buf + 1;
+    int result = strtol(buf, NULL, 16);
+    return_thread_runnable(data, obj_char2obj(result));
+  } else {
+    char buf[31];
+    snprintf(buf, 30, "Unable to parse character %s", p->tok_buf);
+    _read_error(data, p, buf);
+  }
+}
+
+void _read_character(void *data, port_type *p) 
+{
+  char c;
+  while(1) {
+    // Read more data into buffer, if needed
+    if (p->buf_idx == p->mem_buf_len) {
+      if (!read_from_port(p)){
+        _read_return_character(data, p);
+      }
+    }
+    c = p->mem_buf[p->buf_idx++];
+    p->col_num++;
+
+    if (p->tok_buf && (isspace(c) || c == ')')) {
+      p->buf_idx--;
+      p->col_num--;
+      _read_return_character(data, p);
+    } else {
+      _read_add_to_tok_buf(p, c);
+    }
+  }
+}
+
 int _read_is_numeric(const char *tok)
 {
   int len = strlen(tok);
