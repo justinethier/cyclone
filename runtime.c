@@ -6106,7 +6106,13 @@ void Cyc_io_read_token(void *data, object cont, object port)
       _read_whitespace(p);
     } else if (c == '(' || c == ')' || c == '\'' || c == '`') {
       if (p->tok_end) _read_return_atom(data, cont, p);
-      return_thread_runnable(data, obj_char2obj(c));
+      //return_thread_runnable(data, obj_char2obj(c));
+      // Encode within a vector so we can distinguish between these and chars such as #\(
+      make_empty_vector(vec);
+      vec.num_elements = 1;
+      vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+      vec.elements[0] = obj_char2obj(c);
+      return_thread_runnable(data, &vec);
     } else if (c == ',') {
       if (p->tok_end) _read_return_atom(data, cont, p);
 

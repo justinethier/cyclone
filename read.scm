@@ -701,6 +701,9 @@
   (parse2 (open-input-file "test.scm")))
   ;(read-token (open-input-file "test.scm")))
 
+TODO: getting there, but still not parsed correctly:
+(eq? c #\))
+
 ;; Notes on writing a fast parser:
 ; - Interface to the user is (read). This needs to be fast
 ; - Could read input a line at a time, but then need to buffer in the port_type object
@@ -732,17 +735,6 @@
   (let ((token (read-token fp))) ;; TODO: this will be a C call
     ;(write `(token ,token))
     (cond
-      ;; Open paren, start read loop
-      ((eq? token #\()
-       (let loop ((lis '())
-                  (t (parse2 fp)))
-         (cond
-           ((eof-object? t)
-            (error "missing closing parenthesis"))
-           ((eq? t #\))
-            (reverse lis))
-           (else
-            (loop (cons t lis) (parse2 fp))))))
       ((vector? token)
        (cond
         ((= (vector-length token) 2) ;; Special case: number
@@ -752,7 +744,26 @@
              (exact (string->number (vector-ref token 0) (vector-ref token 1)))
              (inexact (string->number (vector-ref token 0) (vector-ref token 1)))))
         ((= (vector-length token) 1) ;; Special case: error
-         (error (vector-ref token 0)))
+         (cond
+           ;; Open paren, start read loop
+           ((eq? (vector-ref token 0) #\()
+            (let loop ((lis '())
+                       (t (parse2 fp)))
+              (cond
+                ((eof-object? t)
+                 (error "missing closing parenthesis"))
+                ((eq? t #\))  TODO: here and below, need to wait for the vectorized close?
+                 (reverse lis))
+                (else
+                 (loop (cons t lis) (parse2 fp))))))
+           ((eq? (vector-ref token 0) #\')
+            (list 'quote (parse2 fp)))
+           ((eq? (vector-ref token 0) #\`)
+            (list 'quasiquote (parse2 fp)))
+           ((eq? (vector-ref token 0) #\,)
+            (list 'unquote (parse2 fp)))
+           (else
+            (error (vector-ref token 0)))))
         (else
          (let loop ((lis '())
                     (t (parse2 fp)))
@@ -773,12 +784,6 @@
             (apply bytevector (reverse lis)))
            (else
             (loop (cons t lis) (parse2 fp))))))
-      ((eq? token #\')
-       (list 'quote (parse2 fp)))
-      ((eq? token #\`)
-       (list 'quasiquote (parse2 fp)))
-      ((eq? token #\,)
-       (list 'unquote (parse2 fp)))
       ((eq? token (string->symbol ",@"))
        (list 'unquote-splicing (parse2 fp)))
       ((eq? token (string->symbol "#;"))
