@@ -5965,7 +5965,6 @@ void Cyc_io_read_token(void *data, object cont, object port)
     if (c == ';') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_line_comment(p);
-      // TODO: but then what, want to go back
     } else if (c == '\n') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       p->line_num++;
@@ -6014,6 +6013,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->col_num += 4;
         }
         return_thread_runnable(data, boolean_f);
+      // TODO: character
       // TODO: numbers
               /*
               ((eq? #\e next-c)
@@ -6056,7 +6056,6 @@ void Cyc_io_read_token(void *data, object cont, object port)
         } else {
           _read_error(data, p, "Unhandled input sequence");
         }
-      // TODO: character
       } else if (c == '|') { // Block comment
         _read_multiline_comment(p);
         continue;
@@ -6068,6 +6067,33 @@ void Cyc_io_read_token(void *data, object cont, object port)
         snprintf(buf, 30, "Unhandled input sequence %c", c);
         _read_error(data, p, buf);
       }
+    } else if (c == '|' && !p->tok_end) {
+      // TODO: literal identifier
+/*
+;; Parse literal identifier encountered within pipes
+(define (parse-literal-identifier fp toks all? parens ptbl)
+  (let ((sym (parse-li-rec fp '() ptbl)))
+    (if all?
+      (parse fp '() (cons sym toks) all? #f parens ptbl)
+      sym)))
+
+;; Helper for parse-literal-identifier
+(define (parse-li-rec fp tok ptbl)
+  (let ((c (get-next-char fp ptbl))
+        (next (lambda (c) (parse-li-rec fp (cons c tok) ptbl))))
+    (cond
+      ((eq? #\| c) 
+       (let ((str (if (null? tok) 
+                      ""
+                      (list->string 
+                        (reverse tok)))))
+        (string->symbol str)))
+      ((eof-object? c) 
+       (parse-error "EOF encountered parsing literal identifier" 
+         (in-port:get-lnum ptbl)
+         (in-port:get-cnum ptbl)))
+      (else
+        (next c))))) */
     } else {
       // No special meaning, add char to current token (an atom)
       _read_add_to_tok_buf(p, c);
