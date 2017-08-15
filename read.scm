@@ -744,15 +744,21 @@
            (else
             (loop (cons t lis) (parse2 fp))))))
       ((vector? token)
-       (let loop ((lis '())
-                  (t (parse2 fp)))
-         (cond
-           ((eof-object? t)
-            (error "missing closing parenthesis"))
-           ((eq? t #\))
-            (list->vector (reverse lis)))
-           (else
-            (loop (cons t lis) (parse2 fp))))))
+       (cond
+        ((= (vector-length token) 2) ;; Special case, number
+         (string->number (vector-ref token 0) (vector-ref token 1)))
+        ((= (vector-length token) 1) ;; Special case, number
+         (error (vector-ref token 0)))
+        (else
+         (let loop ((lis '())
+                    (t (parse2 fp)))
+           (cond
+             ((eof-object? t)
+              (error "missing closing parenthesis"))
+             ((eq? t #\))
+              (list->vector (reverse lis)))
+             (else
+              (loop (cons t lis) (parse2 fp))))))))
       ;;((bytevector? token)
       ;; (let loop ((lis '())
       ;;            (t (parse2 fp)))

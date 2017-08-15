@@ -5695,9 +5695,17 @@ int read_from_port(port_type *p)
 void _read_error(void *data, port_type *p, const char *msg) 
 {
   char buf[1024];
-  snprintf(buf, 1023, "Error (line %d, column %d): %s", 
+  snprintf(buf, 1023, "(line %d, column %d): %s", 
            p->line_num, p->col_num, msg);
-  Cyc_rt_raise_msg(data, buf);
+  // TODO: can't do this because thread is blocked, need to return a value to cont.
+  // the cont could receive an error and raise it though
+  //Cyc_rt_raise_msg(data, buf);
+  make_string(str, buf);
+  make_empty_vector(vec);
+  vec.num_elements = 1;
+  vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+  vec.elements[0] = &str;
+  return_thread_runnable(data, &vec);
 }
 
 void _read_line_comment(port_type *p)
@@ -5817,7 +5825,6 @@ void _read_string(void *data, object cont, port_type *p)
         buf[i] = '\0';
         {
           int result = (int)strtol(buf, NULL, 16);
-          //return_closcall1(data, cont, obj_char2obj(result));
           p->tok_buf[p->tok_end++] = (char)result;
         }
         break;
@@ -5831,7 +5838,7 @@ void _read_string(void *data, object cont, port_type *p)
       p->tok_end = 0; // Reset for next atom
       {
         make_string(str, p->tok_buf);
-        return_closcall1(data, cont, &str);
+        return_thread_runnable(data, &str);
       }
     } else if (c == '\\') {
       escaped = 1;
@@ -5866,19 +5873,30 @@ void _read_return_atom(void *data, object cont, port_type *p)
   p->tok_end = 0; // Reset for next atom
 
   if (_read_is_numeric(p->tok_buf)) {
+    make_empty_vector(vec);
     make_string(str, p->tok_buf);
-    Cyc_string2number_(data, cont, &str);
+
+    vec.num_elements = 2;
+    vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+    vec.elements[0] = &str;
+    vec.elements[1] = obj_int2obj(10);
+    return_thread_runnable(data, &vec);
+
+    //Cyc_string2number_(data, cont, &str);
+    // TODO: can't do that, need to return_thread_runnable
+    // for now could cheat (just like with errors): return a specially-marked
+    // vector and call string->number on buf from there
   } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
              strncmp("-inf.0", p->tok_buf, 6) == 0) {
-    make_double(d, 2.0);
-    Cyc_expt(data, cont, &d, obj_int2obj(1000000));
+    make_double(d, pow(2.0, 1000000));
+    return_thread_runnable(data, &d);
   } else if (strncmp("+nan.0", p->tok_buf, 6) == 0 ||
              strncmp("-nan.0", p->tok_buf, 6) == 0) {
     make_double(d, 0.0 / 0.0);
-    return_closcall1(data, cont, &d);
+    return_thread_runnable(data, &d);
   } else {
     sym = find_or_add_symbol(p->tok_buf);
-    return_closcall1(data, cont, sym);
+    return_thread_runnable(data, sym);
   }
 }
 
@@ -5886,7 +5904,7 @@ void _read_return_atom(void *data, object cont, port_type *p)
  if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { \
    int rv = read_from_port(p); \
    if (!rv) { \
-     return_closcall1(data, cont, Cyc_EOF); \
+     return_thread_runnable(data, Cyc_EOF); \
    } \
  } 
 
@@ -5897,12 +5915,13 @@ void Cyc_io_read_token(void *data, object cont, object port)
   char c;
 
   // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
+  set_thread_blocked(data, cont);
   while (1) {
     // Read data if buffer is full/empty
     if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
       int rv = read_from_port(p);
       if (!rv) {
-        return_closcall1(data, cont, Cyc_EOF);
+        return_thread_runnable(data, Cyc_EOF);
       }
     }
 
@@ -5924,7 +5943,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
       _read_whitespace(p);
     } else if (c == '(' || c == ')' || c == '\'' || c == '`') {
       if (p->tok_end) _read_return_atom(data, cont, p);
-      return_closcall1(data, cont, obj_char2obj(c));
+      return_thread_runnable(data, obj_char2obj(c));
     } else if (c == ',') {
       if (p->tok_end) _read_return_atom(data, cont, p);
 
@@ -5933,9 +5952,9 @@ void Cyc_io_read_token(void *data, object cont, object port)
         object unquote_splicing = find_or_add_symbol(",@");
         p->buf_idx++;
         p->col_num++;
-        return_closcall1(data, cont, unquote_splicing);
+        return_thread_runnable(data, unquote_splicing);
       } else {
-        return_closcall1(data, cont, obj_char2obj(c));
+        return_thread_runnable(data, obj_char2obj(c));
       }
     } else if (c == '"') {
       if (p->tok_end) _read_return_atom(data, cont, p);
@@ -5953,7 +5972,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->buf_idx += 3;
           p->col_num += 3;
         }
-        return_closcall1(data, cont, boolean_t);
+        return_thread_runnable(data, boolean_t);
       } else if (c == 'f') {
         if ((p->mem_buf_len - p->buf_idx) >= 4 &&
             p->mem_buf[p->buf_idx + 0] == 'a' &&
@@ -5963,13 +5982,13 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->buf_idx += 4;
           p->col_num += 4;
         }
-        return_closcall1(data, cont, boolean_f);
+        return_thread_runnable(data, boolean_f);
       // TODO: numbers
       // TODO: bytevector
       // TODO: vector
       } else if (c == '(') {
         make_empty_vector(vec);
-        return_closcall1(data, cont, &vec);
+        return_thread_runnable(data, &vec);
       }
       // TODO: character
       // TODO: datum comment
