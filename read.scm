@@ -777,6 +777,9 @@
        (list 'unquote (parse2 fp)))
       ((eq? token (string->symbol ",@"))
        (list 'unquote-splicing (parse2 fp)))
+      ((eq? token (string->symbol "#;"))
+       (parse2 fp) ;; Ignore next datum
+       (parse2 fp))
       ;; Other special cases?
       (else
         token))))
