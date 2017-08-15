@@ -6145,7 +6145,8 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->col_num += 4;
         }
         return_thread_runnable(data, boolean_f);
-      // TODO: character
+      } else if (c == '\\') {
+        _read_character(data, p);
       } else if (c == 'e') {
         _read_number(data, p, 10, 1);
       } else if (c == 'i') {
