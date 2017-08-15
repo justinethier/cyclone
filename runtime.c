@@ -5960,7 +5960,7 @@ void _read_character(void *data, port_type *p)
     c = p->mem_buf[p->buf_idx++];
     p->col_num++;
 
-    if (p->tok_buf && (isspace(c) || c == ')')) {
+    if (p->tok_end && (isspace(c) || c == ')')) {
       p->buf_idx--;
       p->col_num--;
       _read_return_character(data, p);
