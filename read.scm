@@ -745,9 +745,13 @@
             (loop (cons t lis) (parse2 fp))))))
       ((vector? token)
        (cond
-        ((= (vector-length token) 2) ;; Special case, number
+        ((= (vector-length token) 2) ;; Special case: number
          (string->number (vector-ref token 0) (vector-ref token 1)))
-        ((= (vector-length token) 1) ;; Special case, number
+        ((= (vector-length token) 3) ;; Special case: exact/inexact number
+         (if (vector-ref token 2)
+             (exact (string->number (vector-ref token 0) (vector-ref token 1)))
+             (inexact (string->number (vector-ref token 0) (vector-ref token 1)))))
+        ((= (vector-length token) 1) ;; Special case: error
          (error (vector-ref token 0)))
         (else
          (let loop ((lis '())

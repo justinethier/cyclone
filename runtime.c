@@ -5936,11 +5936,11 @@ void _read_return_number(void *data, port_type *p, int base, int exact)
   p->tok_end = 0; // Reset for next atom
   make_empty_vector(vec);
   make_string(str, p->tok_buf);
-  vec.num_elements = 2;
+  vec.num_elements = 3;
   vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
   vec.elements[0] = &str;
   vec.elements[1] = obj_int2obj(base);
-// TODO: need to pass exact or inexact
+  vec.elements[2] = exact ? boolean_t : boolean_f;
   return_thread_runnable(data, &vec);
 }
 
@@ -6090,7 +6090,6 @@ void Cyc_io_read_token(void *data, object cont, object port)
         }
         return_thread_runnable(data, boolean_f);
       // TODO: character
-      // TODO: numbers
       } else if (c == 'e') {
         _read_number(data, p, 10, 1);
       } else if (c == 'i') {
