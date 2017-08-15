@@ -5725,7 +5725,39 @@ void _read_line_comment(port_type *p)
   }
 }
 
-void _read_multiline_comment(port_type *p) {}
+void _read_multiline_comment(port_type *p)
+{
+  int maybe_end = 0;
+
+  while(1) {
+    // Read more data into buffer, if needed
+    if (p->buf_idx == p->mem_buf_len) {
+      if (!read_from_port(p)){
+        break; // Return if buf is empty
+      }
+    }
+
+    if (p->mem_buf[p->buf_idx] == '#' && maybe_end) {
+      p->buf_idx++;
+      break;
+    }
+
+    if (p->mem_buf[p->buf_idx] == '|') {
+      maybe_end = 1;
+    } else {
+      maybe_end = 0;
+    }
+
+    if (p->mem_buf[p->buf_idx] == '\n') {
+      p->line_num++;
+      p->col_num = 0;
+    } else {
+      p->col_num++;
+    }
+    p->buf_idx++;
+  }
+}
+
 void _read_whitespace(port_type *p) 
 {
   while(1) {
@@ -5964,7 +5996,10 @@ void Cyc_io_read_token(void *data, object cont, object port)
       c = p->mem_buf[p->buf_idx++];
       p->col_num++;
       // TODO: block comment
-      if (c == 't') {
+      if (c == '|') {
+        _read_multiline_comment(p);
+        continue;
+      } else if (c == 't') {
         if ((p->mem_buf_len - p->buf_idx) >= 3 &&
             p->mem_buf[p->buf_idx + 0] == 'r' &&
             p->mem_buf[p->buf_idx + 1] == 'u' &&
@@ -5992,7 +6027,11 @@ void Cyc_io_read_token(void *data, object cont, object port)
       }
       // TODO: character
       // TODO: datum comment
-      _read_error(data, p, "Unhandled input sequence");
+      {
+        char buf[31];
+        snprintf(buf, 30, "Unhandled input sequence %c", c);
+        _read_error(data, p, buf);
+      }
     } else {
       // No special meaning, add char to current token (an atom)
       _read_add_to_tok_buf(p, c);
