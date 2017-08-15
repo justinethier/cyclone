@@ -5995,13 +5995,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
       _read_next_char(data, cont, p); // Fill buffer
       c = p->mem_buf[p->buf_idx++];
       p->col_num++;
-      if (c == '|') { // Block comment
-        _read_multiline_comment(p);
-        continue;
-      } else if (c == ';') { // Datum comment
-        object sym = find_or_add_symbol("#;");
-        return_thread_runnable(data, sym);
-      } else if (c == 't') {
+      if (c == 't') {
         if ((p->mem_buf_len - p->buf_idx) >= 3 &&
             p->mem_buf[p->buf_idx + 0] == 'r' &&
             p->mem_buf[p->buf_idx + 1] == 'u' &&
@@ -6021,15 +6015,55 @@ void Cyc_io_read_token(void *data, object cont, object port)
         }
         return_thread_runnable(data, boolean_f);
       // TODO: numbers
-      // TODO: bytevector
-      // TODO: vector
-      } else if (c == '(') {
+              /*
+              ((eq? #\e next-c)
+               (parse-number fp toks all? parens ptbl 
+                 10 (lambda (num)
+                      (exact
+                        (string->number (list->string num))))))
+              ((eq? #\i next-c)
+               (parse-number fp toks all? parens ptbl 
+                 10 (lambda (num)
+                      (inexact
+                        (string->number (list->string num))))))
+              ((eq? #\b next-c)
+               (parse-number fp toks all? parens ptbl 
+                 2 (lambda (num) (string->number (list->string num) 2))))
+              ((eq? #\o next-c)
+               (parse-number fp toks all? parens ptbl 
+                 8 (lambda (num) (string->number (list->string num) 8))))
+              ((eq? #\x next-c)
+               (parse-number fp toks all? parens ptbl 
+                 16 (lambda (num) (string->number (list->string num) 16))))
+              */
+      } else if (c == '(') { // Vector
         make_empty_vector(vec);
         return_thread_runnable(data, &vec);
-      }
+      } else if (c == 'u') { // Bytevector
+        _read_next_char(data, cont, p); // Fill buffer
+        c = p->mem_buf[p->buf_idx++];
+        p->col_num++;
+        if (c == '8') {
+          _read_next_char(data, cont, p); // Fill buffer
+          c = p->mem_buf[p->buf_idx++];
+          p->col_num++;
+          if (c == '(') {
+            make_empty_bytevector(vec);
+            return_thread_runnable(data, &vec);
+          } else {
+            _read_error(data, p, "Unhandled input sequence");
+          }
+        } else {
+          _read_error(data, p, "Unhandled input sequence");
+        }
       // TODO: character
-      // TODO: datum comment
-      {
+      } else if (c == '|') { // Block comment
+        _read_multiline_comment(p);
+        continue;
+      } else if (c == ';') { // Datum comment
+        object sym = find_or_add_symbol("#;");
+        return_thread_runnable(data, sym);
+      } else {
         char buf[31];
         snprintf(buf, 30, "Unhandled input sequence %c", c);
         _read_error(data, p, buf);
