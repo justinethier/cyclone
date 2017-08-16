@@ -699,9 +699,16 @@
 
 (define-c Cyc-opaque-eq?
   "(void *data, int argc, closure _, object k, object opq, object obj)"
+  " if (Cyc_is_opaque(opq) == boolean_f) 
+      return_closcall1(data, k, boolean_f);
+    return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+
+(define-c Cyc-opaque-unsafe-eq?
+  "(void *data, int argc, closure _, object k, object opq, object obj)"
   " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
 
 (write
+  ;(call-parse2 (open-input-file "scheme/cyclone/cgen.sld")))
   (call-parse2 (open-input-file "test.scm")))
   ;(read-token (open-input-file "test.scm")))
 
@@ -748,21 +755,21 @@
       ((Cyc-opaque? token)
        (cond
          ;; Open paren, start read loop
-         ((Cyc-opaque-eq? token #\()
+         ((Cyc-opaque-unsafe-eq? token #\()
           (let loop ((lis '())
                      (t (parse2 fp)))
             (cond
               ((eof-object? t)
                (error "missing closing parenthesis"))
-              ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
+              ((Cyc-opaque-eq? t #\))
                (reverse lis))
               (else
                (loop (cons t lis) (parse2 fp))))))
-         ((Cyc-opaque-eq? token #\')
+         ((Cyc-opaque-unsafe-eq? token #\')
           (list 'quote (parse2 fp)))
-         ((Cyc-opaque-eq? token #\`)
+         ((Cyc-opaque-unsafe-eq? token #\`)
           (list 'quasiquote (parse2 fp)))
-         ((Cyc-opaque-eq? token #\,)
+         ((Cyc-opaque-unsafe-eq? token #\,)
           (list 'unquote (parse2 fp)))
          (else
           token))) ;; TODO: error if this is returned to original caller of parse2
@@ -782,7 +789,7 @@
            (cond
              ((eof-object? t)
               (error "missing closing parenthesis"))
-             ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
+             ((Cyc-opaque-eq? t #\))
               (list->vector (reverse lis)))
              (else
               (loop (cons t lis) (parse2 fp))))))))
@@ -792,7 +799,7 @@
          (cond
            ((eof-object? t)
             (error "missing closing parenthesis"))
-           ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
+           ((Cyc-opaque-eq? t #\))
             (apply bytevector (reverse lis)))
            (else
             (loop (cons t lis) (parse2 fp))))))
