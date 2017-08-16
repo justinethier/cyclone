@@ -672,15 +672,6 @@
       (parse fp '() '() #f #f 0 (reg-port fp)))))
 
 
-(define-c reading-from-file?
-  "(void *data, int argc, closure _, object k, object port)"
-  " object result = boolean_f;
-    Cyc_check_port(data, port);
-    if (((port_type *)port)->flags == 1) {
-      result = boolean_t;
-    }
-    return_closcall1(data, k, result);")
-
 ;    ;; Test code
 ;    ;(let ((fp (open-input-file "tests/begin.scm")))
 ;    ;(let ((fp (open-input-file "tests/strings.scm")))
@@ -692,6 +683,15 @@
 ;     (write (cyc-read fp)))
 ;  (repl))
 ;(repl)
+
+(define-c reading-from-file?
+  "(void *data, int argc, closure _, object k, object port)"
+  " object result = boolean_f;
+    Cyc_check_port(data, port);
+    if (((port_type *)port)->flags == 1) {
+      result = boolean_t;
+    }
+    return_closcall1(data, k, result);")
 
 (define-c read-token
   "(void *data, int argc, closure _, object k, object port)"
@@ -762,7 +762,10 @@
               ((eof-object? t)
                (error "missing closing parenthesis"))
               ((Cyc-opaque-eq? t #\))
-               (reverse lis))
+               (if (and (> (length lis) 2)
+                        (equal? (cadr lis) (string->symbol ".")))
+                   (->dotted-list (reverse lis))
+                   (reverse lis)))
               (else
                (loop (cons t lis) (parse2 fp))))))
          ((Cyc-opaque-unsafe-eq? token #\')
