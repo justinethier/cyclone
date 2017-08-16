@@ -703,7 +703,9 @@
     (let ((fp (if (null? args)
                   (current-input-port)
                   (car args))))
-      (parse fp '() '() #f #f 0 (reg-port fp)))))
+      (if (reading-from-file? fp)
+          (call-parse2 fp)
+          (parse fp '() '() #f #f 0 (reg-port fp))))))
 
 ;; read-all -> port -> [objects]
 (define (read-all . args)
@@ -728,5 +730,105 @@
 ;     (write (cyc-read fp)))
 ;  (repl))
 ;(repl)
+
+;;;;
+;;;; New, faster parser
+;;;;
+
+(define-c reading-from-file?
+  "(void *data, int argc, closure _, object k, object port)"
+  " object result = boolean_f;
+    Cyc_check_port(data, port);
+    if (((port_type *)port)->flags == 1) {
+      result = boolean_t;
+    }
+    return_closcall1(data, k, result);")
+
+(define-c read-token
+  "(void *data, int argc, closure _, object k, object port)"
+  " Cyc_io_read_token(data, k, port);")
+
+(define-c Cyc-opaque-eq?
+  "(void *data, int argc, closure _, object k, object opq, object obj)"
+  " if (Cyc_is_opaque(opq) == boolean_f) 
+      return_closcall1(data, k, boolean_f);
+    return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+
+(define-c Cyc-opaque-unsafe-eq?
+  "(void *data, int argc, closure _, object k, object opq, object obj)"
+  " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+
+(define (call-parse2 fp)
+  (let ((result (parse2 fp)))
+    (if (Cyc-opaque? result)
+        (error "unexpected closing parenthesis")
+        result)))
+
+(define (parse2 fp)
+  (let ((token (read-token fp))) ;; TODO: this will be a C call
+    ;(write `(token ,token))
+    (cond
+      ((Cyc-opaque? token)
+       (cond
+         ;; Open paren, start read loop
+         ((Cyc-opaque-unsafe-eq? token #\()
+          (let loop ((lis '())
+                     (t (parse2 fp)))
+            (cond
+              ((eof-object? t)
+               (error "missing closing parenthesis"))
+              ((Cyc-opaque-eq? t #\))
+               (if (and (> (length lis) 2)
+                        (equal? (cadr lis) (string->symbol ".")))
+                   (->dotted-list (reverse lis))
+                   (reverse lis)))
+              (else
+               (loop (cons t lis) (parse2 fp))))))
+         ((Cyc-opaque-unsafe-eq? token #\')
+          (list 'quote (parse2 fp)))
+         ((Cyc-opaque-unsafe-eq? token #\`)
+          (list 'quasiquote (parse2 fp)))
+         ((Cyc-opaque-unsafe-eq? token #\,)
+          (list 'unquote (parse2 fp)))
+         (else
+          token))) ;; TODO: error if this is returned to original caller of parse2
+      ((vector? token)
+       (cond
+        ((= (vector-length token) 2) ;; Special case: number
+         (string->number (vector-ref token 0) (vector-ref token 1)))
+        ((= (vector-length token) 3) ;; Special case: exact/inexact number
+         (if (vector-ref token 2)
+             (exact (string->number (vector-ref token 0) (vector-ref token 1)))
+             (inexact (string->number (vector-ref token 0) (vector-ref token 1)))))
+        ((= (vector-length token) 1) ;; Special case: error
+         (error (vector-ref token 0)))
+        (else
+         (let loop ((lis '())
+                    (t (parse2 fp)))
+           (cond
+             ((eof-object? t)
+              (error "missing closing parenthesis"))
+             ((Cyc-opaque-eq? t #\))
+              (list->vector (reverse lis)))
+             (else
+              (loop (cons t lis) (parse2 fp))))))))
+      ((bytevector? token)
+       (let loop ((lis '())
+                  (t (parse2 fp)))
+         (cond
+           ((eof-object? t)
+            (error "missing closing parenthesis"))
+           ((Cyc-opaque-eq? t #\))
+            (apply bytevector (reverse lis)))
+           (else
+            (loop (cons t lis) (parse2 fp))))))
+      ((eq? token (string->symbol ",@"))
+       (list 'unquote-splicing (parse2 fp)))
+      ((eq? token (string->symbol "#;"))
+       (parse2 fp) ;; Ignore next datum
+       (parse2 fp))
+      ;; Other special cases?
+      (else
+        token))))
 
   ))

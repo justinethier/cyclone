@@ -709,7 +709,7 @@
 
 (write
   ;(call-parse2 (open-input-file "scheme/cyclone/cgen.sld")))
-  (call-parse2 (open-input-file "test.scm")))
+  (call-parse2 (open-input-file "test.out")))
   ;(read-token (open-input-file "test.scm")))
 
 ;TODO: getting there, but still not parsed correctly:

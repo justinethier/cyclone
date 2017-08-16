@@ -5682,11 +5682,14 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
 /** Read */
 int read_from_port(port_type *p)
 {
-  size_t rv;
+  size_t rv = 0;
   FILE *fp = p->fp;
   char *buf = p->mem_buf;
 
   rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
+  //if (NULL == fgets(buf, CYC_IO_BUF_LEN, fp)) {
+  //  rv = 0;
+  //}
   p->mem_buf_len = rv;
   p->buf_idx = 0;
   return rv;
