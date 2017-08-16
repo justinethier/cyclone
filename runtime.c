@@ -6064,10 +6064,14 @@ void _read_return_atom(void *data, object cont, port_type *p)
   }
 }
 
+/**
+ * Helper macro for Cyc_io_read_token
+ */
 #define _read_next_char(data, cont, p) \
  if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { \
    int rv = read_from_port(p); \
    if (!rv) { \
+     if (p->tok_end) _read_return_atom(data, cont, p); \
      return_thread_runnable(data, Cyc_EOF); \
    } \
  } 
@@ -6081,13 +6085,8 @@ void Cyc_io_read_token(void *data, object cont, object port)
   // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
   set_thread_blocked(data, cont);
   while (1) {
-    // Read data if buffer is full/empty
-    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
-      int rv = read_from_port(p);
-      if (!rv) {
-        return_thread_runnable(data, Cyc_EOF);
-      }
-    }
+    // Do an I/O read for more data if buffer is full/empty
+    _read_next_char(data, cont, p);
 
     // Process input one char at a time
     c = p->mem_buf[p->buf_idx++];
