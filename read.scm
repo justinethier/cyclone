@@ -702,7 +702,7 @@
   " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
 
 (write
-  (parse2 (open-input-file "test.scm")))
+  (call-parse2 (open-input-file "test.scm")))
   ;(read-token (open-input-file "test.scm")))
 
 ;TODO: getting there, but still not parsed correctly:
@@ -734,6 +734,12 @@
       (parse2 fp)
       
       )))
+
+(define (call-parse2 fp)
+  (let ((result (parse2 fp)))
+    (if (Cyc-opaque? result)
+        (error "unexpected closing parenthesis")
+        result)))
 
 (define (parse2 fp)
   (let ((token (read-token fp))) ;; TODO: this will be a C call
