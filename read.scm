@@ -697,12 +697,16 @@
   "(void *data, int argc, closure _, object k, object port)"
   " Cyc_io_read_token(data, k, port);")
 
+(define-c Cyc-opaque-eq?
+  "(void *data, int argc, closure _, object k, object opq, object obj)"
+  " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+
 (write
   (parse2 (open-input-file "test.scm")))
   ;(read-token (open-input-file "test.scm")))
 
-TODO: getting there, but still not parsed correctly:
-(eq? c #\))
+;TODO: getting there, but still not parsed correctly:
+;(eq? c #\))
 
 ;; Notes on writing a fast parser:
 ; - Interface to the user is (read). This needs to be fast
@@ -735,6 +739,27 @@ TODO: getting there, but still not parsed correctly:
   (let ((token (read-token fp))) ;; TODO: this will be a C call
     ;(write `(token ,token))
     (cond
+      ((Cyc-opaque? token)
+       (cond
+         ;; Open paren, start read loop
+         ((Cyc-opaque-eq? token #\()
+          (let loop ((lis '())
+                     (t (parse2 fp)))
+            (cond
+              ((eof-object? t)
+               (error "missing closing parenthesis"))
+              ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
+               (reverse lis))
+              (else
+               (loop (cons t lis) (parse2 fp))))))
+         ((Cyc-opaque-eq? token #\')
+          (list 'quote (parse2 fp)))
+         ((Cyc-opaque-eq? token #\`)
+          (list 'quasiquote (parse2 fp)))
+         ((Cyc-opaque-eq? token #\,)
+          (list 'unquote (parse2 fp)))
+         (else
+          token))) ;; TODO: error if this is returned to original caller of parse2
       ((vector? token)
        (cond
         ((= (vector-length token) 2) ;; Special case: number
@@ -744,33 +769,14 @@ TODO: getting there, but still not parsed correctly:
              (exact (string->number (vector-ref token 0) (vector-ref token 1)))
              (inexact (string->number (vector-ref token 0) (vector-ref token 1)))))
         ((= (vector-length token) 1) ;; Special case: error
-         (cond
-           ;; Open paren, start read loop
-           ((eq? (vector-ref token 0) #\()
-            (let loop ((lis '())
-                       (t (parse2 fp)))
-              (cond
-                ((eof-object? t)
-                 (error "missing closing parenthesis"))
-                ((eq? t #\))  TODO: here and below, need to wait for the vectorized close?
-                 (reverse lis))
-                (else
-                 (loop (cons t lis) (parse2 fp))))))
-           ((eq? (vector-ref token 0) #\')
-            (list 'quote (parse2 fp)))
-           ((eq? (vector-ref token 0) #\`)
-            (list 'quasiquote (parse2 fp)))
-           ((eq? (vector-ref token 0) #\,)
-            (list 'unquote (parse2 fp)))
-           (else
-            (error (vector-ref token 0)))))
+         (error (vector-ref token 0)))
         (else
          (let loop ((lis '())
                     (t (parse2 fp)))
            (cond
              ((eof-object? t)
               (error "missing closing parenthesis"))
-             ((eq? t #\))
+             ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
               (list->vector (reverse lis)))
              (else
               (loop (cons t lis) (parse2 fp))))))))
@@ -780,7 +786,7 @@ TODO: getting there, but still not parsed correctly:
          (cond
            ((eof-object? t)
             (error "missing closing parenthesis"))
-           ((eq? t #\))
+           ((and (Cyc-opaque? t) (Cyc-opaque-eq? t #\)))
             (apply bytevector (reverse lis)))
            (else
             (loop (cons t lis) (parse2 fp))))))
