@@ -6119,7 +6119,9 @@ void Cyc_io_read_token(void *data, object cont, object port)
         p->col_num++;
         return_thread_runnable(data, unquote_splicing);
       } else {
-        return_thread_runnable(data, obj_char2obj(c));
+        // Again, special encoding for syntax
+        make_c_opaque(opq, obj_char2obj(c));
+        return_thread_runnable(data, &opq);
       }
     } else if (c == '"') {
       if (p->tok_end) _read_return_atom(data, cont, p);
