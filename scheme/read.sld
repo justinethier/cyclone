@@ -765,7 +765,7 @@
         result)))
 
 (define (parse2 fp)
-  (let ((token (read-token fp))) ;; TODO: this will be a C call
+  (let ((token (read-token fp)))
     ;(write `(token ,token))
     (cond
       ((Cyc-opaque? token)
@@ -791,7 +791,7 @@
          ((Cyc-opaque-unsafe-eq? token #\,)
           (list 'unquote (parse2 fp)))
          (else
-          token))) ;; TODO: error if this is returned to original caller of parse2
+          token))) ;; error if this is returned to original caller of parse2
       ((vector? token)
        (cond
         ((= (vector-length token) 2) ;; Special case: number
