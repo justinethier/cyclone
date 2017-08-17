@@ -791,7 +791,7 @@ typedef struct {
   unsigned short read_len;
 } port_type;
 
-#define CYC_IO_BUF_LEN 4096
+#define CYC_IO_BUF_LEN 1024
 
 /** Create a new port object in the nursery */
 #define make_port(p,f,m) \
