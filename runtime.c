@@ -5680,6 +5680,12 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
 }
 
 /** Read */
+
+/**
+ * @brief Helper function to perform a buffered read from an input port
+ * @param p Input port
+ * @return Number of characters read, or 0 for EOF/error
+ */
 int read_from_port(port_type *p)
 {
   size_t rv = 0;
@@ -5700,6 +5706,12 @@ int read_from_port(port_type *p)
   return rv;
 }
 
+/**
+ * @brief Helper function to raise an error from (read)
+ * @param data Thread data object
+ * @param p Input port
+ * @param msg Error message
+ */
 void _read_error(void *data, port_type *p, const char *msg) 
 {
   char buf[1024];
@@ -5716,6 +5728,10 @@ void _read_error(void *data, port_type *p, const char *msg)
   return_thread_runnable(data, &vec);
 }
 
+/**
+ * @brief Helper function to read past a comment
+ * @param p Input port
+ */
 void _read_line_comment(port_type *p)
 {
   while(1) {
@@ -5733,6 +5749,10 @@ void _read_line_comment(port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to read past a block comment
+ * @param p Input port
+ */
 void _read_multiline_comment(port_type *p)
 {
   int maybe_end = 0;
@@ -5766,6 +5786,10 @@ void _read_multiline_comment(port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to read past whitespace characters
+ * @param p Input port
+ */
 void _read_whitespace(port_type *p) 
 {
   while(1) {
@@ -5789,6 +5813,11 @@ void _read_whitespace(port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to add a character to the port's token buffer
+ * @param p Input port
+ * @param c Character to add
+ */
 static void _read_add_to_tok_buf(port_type *p, char c)
 {
   // FUTURE: more efficient to try and use mem_buf directly??
@@ -5804,6 +5833,12 @@ static void _read_add_to_tok_buf(port_type *p, char c)
   p->tok_buf[p->tok_end++] = c;
 }
 
+/**
+ * @brief Helper function to read a string
+ * @param data Thread data object
+ * @param cont Current continuation
+ * @param p Input port
+ */
 void _read_string(void *data, object cont, port_type *p) 
 {
   char c;
@@ -5892,6 +5927,11 @@ void _read_string(void *data, object cont, port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to read a literal identifier
+ * @param data Thread data object
+ * @param p Input port
+ */
 void _read_literal_identifier(void *data, port_type *p) 
 {
   char c;
@@ -5922,6 +5962,11 @@ void _read_literal_identifier(void *data, port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to read a character token
+ * @param data Thread data object
+ * @param p Input port
+ */
 void _read_return_character(void *data, port_type *p)
 {
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
@@ -5955,6 +6000,11 @@ void _read_return_character(void *data, port_type *p)
   }
 }
 
+/**
+ * @brief Helper function to read a character token
+ * @param data Thread data object
+ * @param p Input port
+ */
 void _read_character(void *data, port_type *p) 
 {
   char c;
@@ -5978,6 +6028,9 @@ void _read_character(void *data, port_type *p)
   }
 }
 
+/**
+ * @brief Determine if given string is numeric
+ */
 int _read_is_numeric(const char *tok)
 {
   int len = strlen(tok);
@@ -5987,12 +6040,23 @@ int _read_is_numeric(const char *tok)
            ((len > 1) && (tok[1] == '.' || isdigit(tok[1])) && (tok[0] == '-' || tok[0] == '+'))));
 }
 
+/**
+ * @brief Helper function, determine if given number is a hex digit
+ * @param c Character to check
+ */
 int _read_is_hex_digit(char c)
 {
   return (c >= 'a' && c <= 'f') ||
          (c >= 'A' && c <= 'F');
 }
 
+/**
+ * @brief Helper function, return read number.
+ * @param data Thread data object
+ * @param p Input port
+ * @param base Number base
+ * @param exact Return an exact number if true
+ */
 void _read_return_number(void *data, port_type *p, int base, int exact)
 {
   // TODO: validation?
@@ -6008,6 +6072,13 @@ void _read_return_number(void *data, port_type *p, int base, int exact)
   return_thread_runnable(data, &vec);
 }
 
+/**
+ * @brief Helper function, read number.
+ * @param data Thread data object
+ * @param p Input port
+ * @param base Number base
+ * @param exact Return an exact number if true
+ */
 void _read_number(void *data, port_type *p, int base, int exact) 
 {
   char c;
@@ -6039,6 +6110,12 @@ void _read_number(void *data, port_type *p, int base, int exact)
   }
 }
 
+/**
+ * @brief Helper function, return read atom.
+ * @param data Thread data object
+ * @param cont Current continuation
+ * @param p Input port
+ */
 void _read_return_atom(void *data, object cont, port_type *p) 
 {
   object sym;
@@ -6073,7 +6150,7 @@ void _read_return_atom(void *data, object cont, port_type *p)
 }
 
 /**
- * Helper macro for Cyc_io_read_token
+ * @brief Helper macro for Cyc_io_read_token
  */
 #define _read_next_char(data, cont, p) \
  if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { \
@@ -6084,6 +6161,12 @@ void _read_return_atom(void *data, object cont, port_type *p)
    } \
  } 
 
+/**
+ * @brief Read next token from the input port.
+ * @param data Thread data object
+ * @param cont Current continuation
+ * @param port Input port
+ */
 void Cyc_io_read_token(void *data, object cont, object port)
 {
   Cyc_check_port(data, port);
