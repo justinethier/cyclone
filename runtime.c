@@ -5979,6 +5979,8 @@ void _read_return_character(void *data, port_type *p)
     return_thread_runnable(data, obj_char2obj('\b'));
   } else if(strncmp(p->tok_buf, "delete", 6) == 0) {
     return_thread_runnable(data, obj_char2obj(127));
+  } else if(strncmp(p->tok_buf, "escape", 6) == 0) {
+    return_thread_runnable(data, obj_char2obj(27));
   } else if(strncmp(p->tok_buf, "newline", 7) == 0) {
     return_thread_runnable(data, obj_char2obj('\n'));
   } else if(strncmp(p->tok_buf, "null", 4) == 0) {
