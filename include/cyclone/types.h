@@ -788,9 +788,10 @@ typedef struct {
   size_t tok_buf_len; 
   char *mem_buf;
   size_t mem_buf_len;
+  unsigned short read_len;
 } port_type;
 
-#define CYC_IO_BUF_LEN 1024
+#define CYC_IO_BUF_LEN 4096
 
 /** Create a new port object in the nursery */
 #define make_port(p,f,m) \
@@ -809,15 +810,16 @@ typedef struct {
   p.tok_buf = NULL; \
   p.tok_buf_len = 0; \
   p.mem_buf = NULL; \
-  p.mem_buf_len = 0;
+  p.mem_buf_len = 0; \
+  p.read_len = 1;
 
-#define make_file_backed_port(p,f,m) \
+#define make_input_port(p,f,rl) \
   port_type p; \
   p.hdr.mark = gc_color_red; \
   p.hdr.grayed = 0; \
   p.tag = port_tag; \
   p.fp = f; \
-  p.mode = m; \
+  p.mode = 1; \
   p.flags = 1; \
   p.line_num = 1; \
   p.col_num = 1; \
@@ -827,7 +829,8 @@ typedef struct {
   p.tok_buf = malloc(CYC_IO_BUF_LEN); \
   p.tok_buf_len = CYC_IO_BUF_LEN; \
   p.mem_buf = malloc(CYC_IO_BUF_LEN); \
-  p.mem_buf_len = 0;
+  p.mem_buf_len = 0; \
+  p.read_len = rl;
 
 /**
  * @brief Vector type 

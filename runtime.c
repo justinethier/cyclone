@@ -3382,7 +3382,7 @@ port_type Cyc_stdout()
 
 port_type Cyc_stdin()
 {
-  make_port(p, stdin, 1);
+  make_input_port(p, stdin, 1);
   return p;
 }
 
@@ -3397,7 +3397,7 @@ port_type Cyc_io_open_input_file(void *data, object str)
   const char *fname;
   Cyc_check_str(data, str);
   fname = ((string_type *) str)->str;
-  make_file_backed_port(p, NULL, 1);
+  make_input_port(p, NULL, CYC_IO_BUF_LEN);
   p.fp = fopen(fname, "r");
   if (p.fp == NULL) {
     Cyc_rt_raise2(data, "Unable to open file", str);
@@ -5694,7 +5694,7 @@ int read_from_port(port_type *p)
 
   while(1) {
     errno = 0;
-    rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
+    rv = fread(buf, sizeof(char), p->read_len, fp);
 
     if (rv != 0 || !ferror(fp) || errno != EINTR) {
       break;
