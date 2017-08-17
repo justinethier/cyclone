@@ -1,9 +1,10 @@
 # Changelog
 
-## Next Release - TBD
+## 0.6 - TBD
 
 Features
 
+- Added a faster version of `read`.
 - Added SRFI 143 - Fixnums.
 
 Bug Fixes
