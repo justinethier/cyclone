@@ -801,8 +801,8 @@ typedef struct {
   p.fp = f; \
   p.mode = m; \
   p.flags = 0; \
-  p.line_num = 0; \
-  p.col_num = 0; \
+  p.line_num = 1; \
+  p.col_num = 1; \
   p.buf_idx = 0; \
   p.tok_start = 0; \
   p.tok_end = 0; \
@@ -819,8 +819,8 @@ typedef struct {
   p.fp = f; \
   p.mode = m; \
   p.flags = 1; \
-  p.line_num = 0; \
-  p.col_num = 0; \
+  p.line_num = 1; \
+  p.col_num = 1; \
   p.buf_idx = 0; \
   p.tok_start = 0; \
   p.tok_end = 0; \
