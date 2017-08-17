@@ -703,7 +703,7 @@
     (let ((fp (if (null? args)
                   (current-input-port)
                   (car args))))
-      (if (reading-from-file? fp)
+      (if #t ;(reading-from-file? fp)
           (call-parse2 fp)
           (parse fp '() '() #f #f 0 (reg-port fp))))))
 
