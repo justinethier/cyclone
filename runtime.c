@@ -5686,10 +5686,15 @@ int read_from_port(port_type *p)
   FILE *fp = p->fp;
   char *buf = p->mem_buf;
 
-  rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
-  //if (NULL == fgets(buf, CYC_IO_BUF_LEN, fp)) {
-  //  rv = 0;
-  //}
+  while(1) {
+    errno = 0;
+    rv = fread(buf, sizeof(char), CYC_IO_BUF_LEN, fp);
+
+    if (rv != 0 || !ferror(fp) || errno != EINTR) {
+      break;
+    }
+  }
+
   p->mem_buf_len = rv;
   p->buf_idx = 0;
   return rv;
