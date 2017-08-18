@@ -54,7 +54,7 @@
                     (car args))))
       (let ((result (parse fp)))
         (if (Cyc-opaque? result)
-          (error "unexpected closing parenthesis")
+          (read-error fp "unexpected closing parenthesis")
           result)))))
 
 ;; read-all -> port -> [objects]
@@ -82,6 +82,17 @@
   "(void *data, int argc, closure _, object k, object port)"
   " Cyc_io_read_token(data, k, port);")
 
+(define-c read-error
+  "(void *data, int argc, closure _, object k, object port, object msg)"
+  " char buf[1024];
+    port_type *p;
+    Cyc_check_port(data, port);
+    Cyc_check_str(data, msg);
+    p = ((port_type *)port);
+    snprintf(buf, 1023, \"(line %d, column %d): %s\", 
+           p->line_num, p->col_num, string_str(msg));
+    Cyc_rt_raise_msg(data, buf);")
+
 (define-c Cyc-opaque-eq?
   "(void *data, int argc, closure _, object k, object opq, object obj)"
   " if (Cyc_is_opaque(opq) == boolean_f) 
@@ -104,7 +115,7 @@
                      (t (parse fp)))
             (cond
               ((eof-object? t)
-               (error "missing closing parenthesis"))
+               (read-error fp "missing closing parenthesis"))
               ((Cyc-opaque-eq? t #\))
                (if (and (> (length lis) 2)
                         (equal? (cadr lis) (string->symbol ".")))
@@ -135,7 +146,7 @@
                     (t (parse fp)))
            (cond
              ((eof-object? t)
-              (error "missing closing parenthesis"))
+              (read-error fp "missing closing parenthesis"))
              ((Cyc-opaque-eq? t #\))
               (list->vector (reverse lis)))
              (else
@@ -145,7 +156,7 @@
                   (t (parse fp)))
          (cond
            ((eof-object? t)
-            (error "missing closing parenthesis"))
+            (read-error fp "missing closing parenthesis"))
            ((Cyc-opaque-eq? t #\))
             (apply bytevector (reverse lis)))
            (else

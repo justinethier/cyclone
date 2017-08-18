@@ -10,6 +10,7 @@ Features
 Bug Fixes
 
 - Prevent `remainder` from crashing the runtime due to divide by zero.
+- Avoid printing an unnecessary colon after certain error messages.
 
 ## 0.5.4 - August 3, 2017
 

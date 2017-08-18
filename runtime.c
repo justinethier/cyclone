@@ -5745,7 +5745,7 @@ void _read_line_comment(port_type *p)
     }
     if (p->mem_buf[p->buf_idx++] == '\n') {
       p->line_num++; // Ignore col_num since we are just skipping over chars
-      p->col_num = 0;
+      p->col_num = 1;
       break;
     }
   }
@@ -5780,7 +5780,7 @@ void _read_multiline_comment(port_type *p)
 
     if (p->mem_buf[p->buf_idx] == '\n') {
       p->line_num++;
-      p->col_num = 0;
+      p->col_num = 1;
     } else {
       p->col_num++;
     }
@@ -5804,7 +5804,7 @@ void _read_whitespace(port_type *p)
     if (p->mem_buf[p->buf_idx] == '\n') {
       p->buf_idx++;
       p->line_num++; // Ignore col_num since we are just skipping over chars
-      p->col_num = 0;
+      p->col_num = 1;
       break;
     } else if (isspace(p->mem_buf[p->buf_idx])) {
       p->buf_idx++;
@@ -5921,7 +5921,7 @@ void _read_string(void *data, object cont, port_type *p)
       escaped = 1;
     } else if (c == '\n') {
       p->line_num++;
-      p->col_num = 0;
+      p->col_num = 1;
       _read_add_to_tok_buf(p, c);
     } else {
       _read_add_to_tok_buf(p, c);
@@ -5956,7 +5956,7 @@ void _read_literal_identifier(void *data, port_type *p)
       }
     } else if (c == '\n') {
       p->line_num++;
-      p->col_num = 0;
+      p->col_num = 1;
       _read_add_to_tok_buf(p, c);
     } else {
       _read_add_to_tok_buf(p, c);
@@ -6194,7 +6194,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
     } else if (c == '\n') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       p->line_num++;
-      p->col_num = 0;
+      p->col_num = 1;
     } else if (isspace(c)) {
       if (p->tok_end) _read_return_atom(data, cont, p);
       _read_whitespace(p);
