@@ -36,7 +36,7 @@ port_type *Cyc_io_open_input_string(void *data, object str)
 {
 //  // Allocate port on the heap so the location of mem_buf does not change
   port_type *p;
-  make_port(sp, NULL, 0);
+  make_input_port(sp, NULL, CYC_IO_BUF_LEN);
 
   Cyc_check_str(data, str);
   p = (port_type *)Cyc_heap_alloc_port(data, &sp);
@@ -57,7 +57,7 @@ port_type *Cyc_io_open_input_bytevector(void *data, object bv)
 {
 //  // Allocate port on the heap so the location of mem_buf does not change
   port_type *p;
-  make_port(sp, NULL, 0);
+  make_input_port(sp, NULL, CYC_IO_BUF_LEN);
 
   Cyc_check_bvec(data, bv);
   p = (port_type *)Cyc_heap_alloc_port(data, &sp);
