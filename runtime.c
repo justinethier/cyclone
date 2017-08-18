@@ -516,7 +516,9 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
           type_of(car(err)) == string_tag) {
         is_msg = 0;
         Cyc_display(data, car(err), stderr);
-        fprintf(stderr, ": ");
+        if (cdr(err)) {
+          fprintf(stderr, ": ");
+        }
       } else {
         Cyc_write(data, car(err), stderr);
         fprintf(stderr, " ");

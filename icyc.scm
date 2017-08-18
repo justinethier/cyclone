@@ -36,7 +36,8 @@
             ((pair? obj)
              (when (string? (car obj))
                (display (car obj))
-               (display ": ")
+               (if (not (null? (cdr obj)))
+                   (display ": "))
                (set! obj (cdr obj)))
              (for-each
                (lambda (o)
