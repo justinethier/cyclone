@@ -263,7 +263,7 @@
     (define-c %socket-input-port
       "(void *data, int argc, closure _, object k, object sockfd)"
       " FILE *fp = fdopen(obj_obj2int(sockfd), \"r\");
-        make_port(port, fp, 1);
+        make_input_port(port, fp, 1);
         return_closcall1(data, k, &port);")
 
     (define (socket-output-port sock)
