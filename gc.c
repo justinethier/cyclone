@@ -495,6 +495,8 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       hp->tok_buf_len = ((port_type *) obj)->tok_buf_len;
       hp->mem_buf = ((port_type *)obj)->mem_buf;
       hp->mem_buf_len = ((port_type *)obj)->mem_buf_len;
+      hp->str_bv_in_mem_buf = ((port_type *)obj)->str_bv_in_mem_buf;
+      hp->str_bv_in_mem_buf_len = ((port_type *)obj)->str_bv_in_mem_buf_len;
       hp->read_len = ((port_type *)obj)->read_len;
       return (char *)hp;
     }

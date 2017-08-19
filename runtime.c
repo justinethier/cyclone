@@ -3444,6 +3444,11 @@ object Cyc_io_close_port(void *data, object port)
       ((port_type *)port)->mem_buf = NULL;
       ((port_type *)port)->mem_buf_len = 0;
     }
+    if (((port_type *)port)->str_bv_in_mem_buf != NULL){
+      free( ((port_type *)port)->str_bv_in_mem_buf );
+      ((port_type *)port)->str_bv_in_mem_buf = NULL;
+      ((port_type *)port)->str_bv_in_mem_buf_len = 0;
+    }
     if (((port_type *)port)->tok_buf != NULL){
       free( ((port_type *)port)->tok_buf );
       ((port_type *)port)->tok_buf = NULL;
