@@ -790,7 +790,7 @@ typedef struct {
   size_t mem_buf_len;
   unsigned short read_len;
   char *str_bv_in_mem_buf;
-  char *str_bv_in_mem_buf_len;
+  size_t str_bv_in_mem_buf_len;
 } port_type;
 
 #define CYC_IO_BUF_LEN 1024
