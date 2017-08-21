@@ -3496,69 +3496,6 @@ object Cyc_io_file_exists(void *data, object filename)
   return boolean_f;
 }
 
-//  TODO: port arg is optional! (maybe handle that in expansion section??)
-object Cyc_io_read_char(void *data, object cont, object port)
-{
-  port_type *p = (port_type *)port;
-  int c;
-  Cyc_check_port(data, port);
-  if (p->fp == NULL) {
-    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
-  }
-  {
-    set_thread_blocked(data, cont);
-    c = fgetc(((port_type *) port)->fp);
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
-  }
-  return Cyc_EOF;
-}
-
-/* TODO: this function needs some work, but approximates what is needed */
-object Cyc_io_read_line(void *data, object cont, object port)
-{
-  FILE *stream = ((port_type *) port)->fp;
-  char buf[1024];
-  //int i = 0, c;
-
-  if (stream == NULL) {
-    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
-  }
-  set_thread_blocked(data, cont);
-  errno = 0;
-  if (fgets(buf, 1023, stream) != NULL) {
-    make_string(s, buf);
-    return_thread_runnable(data, &s);
-  } else {
-    if (feof(stream)) {
-      return_thread_runnable(data, Cyc_EOF);
-    } else {
-      // TODO: can't do this because we said thread could be blocked
-      //Cyc_rt_raise2(data, "Error reading from file: ", obj_int2obj(errno));
-      return_thread_runnable(data, Cyc_EOF);
-    }
-  }
-  return NULL;
-}
-
-object Cyc_io_peek_char(void *data, object cont, object port)
-{
-  FILE *stream;
-  int c;
-
-  Cyc_check_port(data, port);
-  {
-    stream = ((port_type *) port)->fp;
-    if (stream == NULL) {
-      Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
-    }
-    set_thread_blocked(data, cont);
-    c = fgetc(stream);
-    ungetc(c, stream);
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
-  }
-  return Cyc_EOF;
-}
-
 // Functions internal to the runtime that use malloc
 list malloc_make_pair(object a, object d)
 {
@@ -6165,6 +6102,73 @@ void _read_return_atom(void *data, object cont, port_type *p)
      return_thread_runnable(data, Cyc_EOF); \
    } \
  } 
+
+object Cyc_io_peek_char(void *data, object cont, object port)
+{
+  FILE *stream;
+  port_type *p;
+  int c;
+
+  Cyc_check_port(data, port);
+  {
+    p = (port_type *)port;
+    stream = ((port_type *) port)->fp;
+    if (stream == NULL) {
+      Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+    }
+    set_thread_blocked(data, cont);
+    _read_next_char(data, cont, p);
+    c = p->mem_buf[p->buf_idx];
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+  }
+  return Cyc_EOF;
+}
+
+//  TODO: port arg is optional! (maybe handle that in expansion section??)
+object Cyc_io_read_char(void *data, object cont, object port)
+{
+  port_type *p = (port_type *)port;
+  int c;
+  Cyc_check_port(data, port);
+  if (p->fp == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
+  {
+    set_thread_blocked(data, cont);
+    _read_next_char(data, cont, p);
+    c = p->mem_buf[p->buf_idx++];
+    p->col_num++;
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+  }
+  return Cyc_EOF;
+}
+
+/* TODO: this function needs some work, but approximates what is needed */
+object Cyc_io_read_line(void *data, object cont, object port)
+{
+  FILE *stream = ((port_type *) port)->fp;
+  char buf[1024];
+  //int i = 0, c;
+
+  if (stream == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
+  set_thread_blocked(data, cont);
+  errno = 0;
+  if (fgets(buf, 1023, stream) != NULL) {
+    make_string(s, buf);
+    return_thread_runnable(data, &s);
+  } else {
+    if (feof(stream)) {
+      return_thread_runnable(data, Cyc_EOF);
+    } else {
+      // TODO: can't do this because we said thread could be blocked
+      //Cyc_rt_raise2(data, "Error reading from file: ", obj_int2obj(errno));
+      return_thread_runnable(data, Cyc_EOF);
+    }
+  }
+  return NULL;
+}
 
 /**
  * @brief Read next token from the input port.
