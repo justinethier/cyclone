@@ -103,12 +103,22 @@
   "(void *data, int argc, closure _, object k, object opq, object obj)"
   " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
 
+(define-c Cyc-opaque-unsafe-string?
+  "(void *data, int argc, closure _, object k, object opq)"
+  " return_closcall1(data, k, Cyc_is_string(opaque_ptr(opq)));")
+
+(define-c Cyc-opaque-unsafe-string->number
+  "(void *data, int argc, closure _, object k, object opq)"
+  " Cyc_string2number_(data, k, opaque_ptr(opq));")
+
 (define (parse fp)
   (let ((token (read-token fp)))
     ;(write `(token ,token))
     (cond
       ((Cyc-opaque? token)
        (cond
+         ((Cyc-opaque-unsafe-string? token)
+          (Cyc-opaque-unsafe-string->number token))
          ;; Open paren, start read loop
          ((Cyc-opaque-unsafe-eq? token #\()
           (let loop ((lis '())
@@ -133,8 +143,6 @@
           token))) ;; error if this is returned to original caller of parse
       ((vector? token)
        (cond
-        ((= (vector-length token) 2) ;; Special case: number
-         (string->number (vector-ref token 0) (vector-ref token 1)))
         ((= (vector-length token) 3) ;; Special case: exact/inexact number
          (if (vector-ref token 2)
              (exact (string->number (vector-ref token 0) (vector-ref token 1)))

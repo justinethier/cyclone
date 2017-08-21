@@ -6137,13 +6137,9 @@ void _read_return_atom(void *data, object cont, port_type *p)
   p->tok_end = 0; // Reset for next atom
 
   if (_read_is_numeric(p->tok_buf)) {
-    make_empty_vector(vec);
     make_string(str, p->tok_buf);
-    vec.num_elements = 2;
-    vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
-    vec.elements[0] = &str;
-    vec.elements[1] = obj_int2obj(10);
-    return_thread_runnable(data, &vec);
+    make_c_opaque(opq, &str);
+    return_thread_runnable(data, &opq);
   } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
              strncmp("-inf.0", p->tok_buf, 6) == 0) {
     make_double(d, pow(2.0, 1000000));
