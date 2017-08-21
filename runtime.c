@@ -6150,6 +6150,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
   char buf[1024];
   //int i = 0, c;
 
+  Cyc_check_port(data, port);
   if (stream == NULL) {
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
   }
