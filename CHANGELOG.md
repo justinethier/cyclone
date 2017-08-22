@@ -2,6 +2,10 @@
 
 ## 0.6.1 - TBD
 
+Bug Fixes
+
+- Fix possibility of crashing when calling `close-port`.
+
 ## 0.6 - August 21, 2017
 
 Features

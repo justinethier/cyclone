@@ -813,6 +813,8 @@ typedef struct {
   p.tok_buf_len = 0; \
   p.mem_buf = NULL; \
   p.mem_buf_len = 0; \
+  p.str_bv_in_mem_buf = NULL; \
+  p.str_bv_in_mem_buf_len = 0; \
   p.read_len = 1;
 
 #define make_input_port(p,f,rl) \
@@ -832,6 +834,8 @@ typedef struct {
   p.tok_buf_len = CYC_IO_BUF_LEN; \
   p.mem_buf = malloc(CYC_IO_BUF_LEN); \
   p.mem_buf_len = 0; \
+  p.str_bv_in_mem_buf = NULL; \
+  p.str_bv_in_mem_buf_len = 0; \
   p.read_len = rl;
 
 /**
