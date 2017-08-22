@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.6.1 - TBD
+## 0.6.1 - August 22, 2017
 
 Bug Fixes
 
-- Fix possibility of crashing when calling `close-port`.
+- Fixed regression: there was the possibility of crashing when calling `close-port`.
 
 ## 0.6 - August 21, 2017
 
