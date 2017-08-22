@@ -1972,7 +1972,6 @@ object Cyc_string2number_(void *data, object cont, object str)
   int result, rv;
   double n;
   char *s;
-  Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
   if (type_of(str) == string_tag && ((string_type *) str)->str) {
     s = ((string_type *) str)->str;
@@ -2077,7 +2076,6 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...)
 
 object Cyc_string_length(void *data, object str)
 {
-  Cyc_check_obj(data, string_tag, str);
   Cyc_check_str(data, str);
   return obj_int2obj(string_len(str));
 }
