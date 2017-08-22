@@ -15,6 +15,10 @@
     read-all
     include
     include-ci)
+  (inline
+    Cyc-opaque-eq?
+    Cyc-opaque-unsafe-eq?
+    Cyc-opaque-unsafe-string?)
   (begin
 
 (define-syntax include
@@ -97,15 +101,23 @@
   "(void *data, int argc, closure _, object k, object opq, object obj)"
   " if (Cyc_is_opaque(opq) == boolean_f) 
       return_closcall1(data, k, boolean_f);
-    return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+    return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));"
+  "(void *data, object ptr, object opq, object obj)"
+  " if (Cyc_is_opaque(opq) == boolean_f) 
+      return(boolean_f);
+    return(equalp( opaque_ptr(opq), obj ));")
 
 (define-c Cyc-opaque-unsafe-eq?
   "(void *data, int argc, closure _, object k, object opq, object obj)"
-  " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));")
+  " return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));"
+  "(void *data, object ptr, object opq, object obj)"
+  " return(equalp( opaque_ptr(opq), obj ));")
 
 (define-c Cyc-opaque-unsafe-string?
   "(void *data, int argc, closure _, object k, object opq)"
-  " return_closcall1(data, k, Cyc_is_string(opaque_ptr(opq)));")
+  " return_closcall1(data, k, Cyc_is_string(opaque_ptr(opq)));"
+  "(void *data, object ptr, object opq)"
+  " return(Cyc_is_string(opaque_ptr(opq)));")
 
 (define-c Cyc-opaque-unsafe-string->number
   "(void *data, int argc, closure _, object k, object opq)"
