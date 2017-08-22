@@ -53,6 +53,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 - [`srfi 128`](api/srfi/128) - [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
 - [`srfi 132`](api/srfi/132) - [Sort libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
 - [`srfi 133`](api/srfi/133) - [Vector library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
+- [`srfi 143`](api/srfi/143) - [Fixnums](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
 # Cyclone Libraries
 
