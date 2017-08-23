@@ -18,7 +18,8 @@
   (inline
     Cyc-opaque-eq?
     Cyc-opaque-unsafe-eq?
-    Cyc-opaque-unsafe-string?)
+    Cyc-opaque-unsafe-string?
+    Cyc-opaque-unsafe-string->number)
   (begin
 
 (define-syntax include
