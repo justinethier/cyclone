@@ -5,6 +5,7 @@
 Features
 
 - Relocated `string-join` to `(scheme cyclone util)` and added a corresponding `string-split` function.
+- Allow optimization of `define-c` functions marked as `inline` even if an alternative non-CPS version of the function is not defined.
 
 ## 0.6.1 - August 22, 2017
 
