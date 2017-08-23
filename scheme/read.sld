@@ -22,6 +22,10 @@
     Cyc-opaque-unsafe-string->number)
   (begin
 
+(define *sym-dot* (string->symbol "."))
+(define *sym-unquote-splicing* (string->symbol ",@"))
+(define *sym-datum-comment* (string->symbol "#;"))
+
 (define-syntax include
   (er-macro-transformer
    (lambda (expr rename compare)
@@ -46,7 +50,7 @@
 (define (->dotted-list lst)
   (cond
     ((null? lst) '())
-    ((equal? (car lst) (string->symbol "."))
+    ((equal? (car lst) *sym-dot*)
      (cadr lst))
     (else
       (cons (car lst) (->dotted-list (cdr lst))))))
@@ -141,7 +145,7 @@
                (read-error fp "missing closing parenthesis"))
               ((Cyc-opaque-eq? t #\))
                (if (and (> (length lis) 2)
-                        (equal? (cadr lis) (string->symbol ".")))
+                        (equal? (cadr lis) *sym-dot*))
                    (->dotted-list (reverse lis))
                    (reverse lis)))
               (else
@@ -182,9 +186,9 @@
             (apply bytevector (reverse lis)))
            (else
             (loop (cons t lis) (parse fp))))))
-      ((eq? token (string->symbol ",@"))
+      ((eq? token *sym-unquote-splicing*)
        (list 'unquote-splicing (parse fp)))
-      ((eq? token (string->symbol "#;"))
+      ((eq? token *sym-datum-comment*)
        (parse fp) ;; Ignore next datum
        (parse fp))
       ;; Other special cases?
