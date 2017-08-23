@@ -60,7 +60,9 @@ The `(scheme cyclone util`) library contains various utility functions.
 - [`set!->exp                  `](#set-exp)
 - [`set!->var                  `](#set-var)
 - [`set!?                      `](#set)
+- [`string-join                `](#string-join)
 - [`string-replace-all         `](#string-replace-all)
+- [`string-split               `](#string-split)
 - [`tagged-list?               `](#tagged-list?)
 - [`take                       `](#take)
 
@@ -180,7 +182,20 @@ The `(scheme cyclone util`) library contains various utility functions.
 
 # set!? 
 
+# string-join
+
+    (string-join list deliminator)
+
+Create a single string from a list of strings, adding `deliminator` between each of the strings. `deliminator` may be either a character or string.
+
 # string-replace-all
+
+# string-split
+
+    (string-split string deliminator)
+
+Create a list of strings from the given string, creating a new one at each instance of the `deliminator` character.
+
 
 # tagged-list?
 

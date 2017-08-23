@@ -54,18 +54,6 @@
 (define (emit-newline)
   (newline))
 
-(define (string-join lst delim)
-  (cond
-    ((null? lst) 
-      "")
-    ((= (length lst) 1) 
-      (car lst))
-    (else
-      (string-append 
-        (car lst) 
-        delim 
-        (string-join (cdr lst) delim)))))
-
 ;; Escape chars in a C-string, so it can be safely written to a C file
 (define (cstr:escape-chars str)
   (letrec ((next (lambda (head tail)
