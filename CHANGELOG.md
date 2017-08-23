@@ -2,6 +2,10 @@
 
 ## 0.6.2 - TBD
 
+Features
+
+- Relocated `string-join` to `(scheme cyclone util)` and added a corresponding `string-split` function.
+
 ## 0.6.1 - August 22, 2017
 
 Bug Fixes
