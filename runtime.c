@@ -3319,8 +3319,6 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
 {
   int i = 0, j = 0;
   object result;
-  Cyc_check_num(data, num1);
-  Cyc_check_num(data, num2);
   if (obj_is_int(num1)) {
     if (obj_is_int(num2)){
       i = obj_obj2int(num1);
@@ -3331,9 +3329,12 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       Cyc_int2bignum(obj_obj2int(num1), &(bn->bn));
       Cyc_bignum_remainder(data, cont, bn, num2, bn);
     }
-    else {
+    else if (is_object_type(num2) && type_of(num2) == double_tag){
       i = obj_obj2int(num1);
       j = ((double_type *)num2)->value; 
+    }
+    else {
+      goto typeerror;
     }
   } else if (is_object_type(num1) && type_of(num1) == bignum_tag) {
     if (obj_is_int(num2)){
@@ -3345,13 +3346,16 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       alloc_bignum(data, rem);
       Cyc_bignum_remainder(data, cont, num1, num2, rem);
     }
-    else {
+    else if (is_object_type(num2) && type_of(num2) == double_tag){
       j = ((double_type *)num2)->value; 
       alloc_bignum(data, bn);
       Cyc_int2bignum(obj_obj2int(j), &(bn->bn));
       Cyc_bignum_remainder(data, cont, num1, bn, bn);
     }
-  } else { // num1 is double...
+    else {
+      goto typeerror;
+    }
+  } else if (is_object_type(num1) && type_of(num1) == double_tag){
     if (obj_is_int(num2)){
       i = ((double_type *)num1)->value; 
       j = obj_obj2int(num2);
@@ -3362,14 +3366,27 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       Cyc_int2bignum(obj_obj2int(i), &(bn->bn));
       Cyc_bignum_remainder(data, cont, bn, num2, bn);
     }
-    else {
+    else if (is_object_type(num2) && type_of(num2) == double_tag){
       i = ((double_type *)num1)->value; 
       j = ((double_type *)num2)->value; 
+    } 
+    else {
+      goto typeerror;
     }
+  } else {
+    goto typeerror;
   }
   if (j == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
   result = obj_int2obj(i % j);
   return_closcall1(data, cont, result); 
+typeerror:
+  {
+    make_string(s, "Bad argument type");
+    make_pair(c2, num2, NULL);
+    make_pair(c1, num1, &c2);
+    make_pair(c0, &s, &c1);
+    Cyc_rt_raise(data, &c0);
+  }
 }
 
 /* I/O functions */
