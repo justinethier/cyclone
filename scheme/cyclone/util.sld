@@ -71,6 +71,9 @@
     ;; Inlines (TBD, this may move)
     define-c-inline?
     define-c->inline-var
+    ;; String functions
+    string-join
+    string-split
     ;; Scheme library functions
     gensym
     delete
@@ -689,5 +692,40 @@
    list  ;; Not a keyword but reserved type
    ))
 ;; END name mangling section
+
+;; string-join :: [string] -> Maybe (string, char) -> string
+(define (string-join lst delim)
+  (let ((delim* (if (char? delim) (string delim) delim)))
+    (cond
+      ((null? lst) 
+        "")
+      ((= (length lst) 1) 
+        (car lst))
+      (else
+        (string-append 
+          (car lst) 
+          delim* 
+          (string-join (cdr lst) delim*))))))
+
+;; string-split :: string -> char -> [string]
+;; Based on code from: https://codereview.stackexchange.com/q/75172/6414
+(define (string-split str delim)
+  (let ((add (lambda (current output)
+               (cons (list->string (reverse current)) output))))
+    (let loop ((input (string->list str))
+               (output '())
+               (current '()))
+;(write `(DEBUG ,input ,output ,current))
+      (if (null? input)
+          (if (not (null? output))
+              (reverse (add current output))
+              '())
+          (let ((char (car input))
+                (input (cdr input)))
+            (if (char=? char delim)
+                (if (null? current)
+                    (loop input output current) ;; Ignore delim by itself
+                    (loop input (add current output) '()))
+                (loop input output (cons char current))))))))
 
     ))

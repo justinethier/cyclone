@@ -27,7 +27,6 @@
     emits
     emits*
     emit-newline
-    string-join
   )
   (inline
     global-not-lambda?
