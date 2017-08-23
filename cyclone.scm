@@ -199,6 +199,12 @@
             ;(write `(DEBUG add inline ,(define->var e) ,(define-c->inline-var e)))))
         input-program)
 
+      ;; Inlines do not have to be non-CPS, they are really two separate things.
+      ;; So keep track of all functions marked as inline because there are still
+      ;; possibilities for optimization even if the function must call into its
+      ;; continuation.
+      (opt:add-inlinable-functions inlines) 
+
       ;; Trim down the export list to any exports that are just "pass throughs"
       ;; from imported libraries. That is, they are not actually defined in
       ;; the library being compiled
