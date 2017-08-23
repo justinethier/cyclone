@@ -6213,9 +6213,14 @@ void Cyc_io_read_token(void *data, object cont, object port)
       _read_next_char(data, cont, p); // Do another buffer read if needed
       if (p->mem_buf[p->buf_idx] == '@') {
         object unquote_splicing = find_or_add_symbol(",@");
+        make_empty_vector(vec);
+        vec.num_elements = 2;
+        vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+        vec.elements[0] = unquote_splicing;
+        vec.elements[1] = boolean_f;
         p->buf_idx++;
         p->col_num++;
-        return_thread_runnable(data, unquote_splicing);
+        return_thread_runnable(data, &vec);
       } else {
         // Again, special encoding for syntax
         make_c_opaque(opq, obj_char2obj(c));
@@ -6284,7 +6289,12 @@ void Cyc_io_read_token(void *data, object cont, object port)
         continue;
       } else if (c == ';') { // Datum comment
         object sym = find_or_add_symbol("#;");
-        return_thread_runnable(data, sym);
+        make_empty_vector(vec);
+        vec.num_elements = 2;
+        vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+        vec.elements[0] = sym;
+        vec.elements[1] = boolean_f;
+        return_thread_runnable(data, &vec);
       } else {
         char buf[31];
         snprintf(buf, 30, "Unhandled input sequence %c", c);

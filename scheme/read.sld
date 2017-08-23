@@ -164,6 +164,16 @@
          (if (vector-ref token 2)
              (exact (string->number (vector-ref token 0) (vector-ref token 1)))
              (inexact (string->number (vector-ref token 0) (vector-ref token 1)))))
+        ((= (vector-length token) 2) ;; Special case: special symbols
+         (let ((t (vector-ref token 0)))
+           (cond
+             ((eq? t *sym-unquote-splicing*)
+              (list 'unquote-splicing (parse fp)))
+             ((eq? t *sym-datum-comment*)
+              (parse fp) ;; Ignore next datum
+              (parse fp))
+             (else
+              (error "Unexpected token" t)))))
         ((= (vector-length token) 1) ;; Special case: error
          (error (vector-ref token 0)))
         (else
@@ -186,12 +196,6 @@
             (apply bytevector (reverse lis)))
            (else
             (loop (cons t lis) (parse fp))))))
-      ((eq? token *sym-unquote-splicing*)
-       (list 'unquote-splicing (parse fp)))
-      ((eq? token *sym-datum-comment*)
-       (parse fp) ;; Ignore next datum
-       (parse fp))
-      ;; Other special cases?
       (else
         token))))
   ))
