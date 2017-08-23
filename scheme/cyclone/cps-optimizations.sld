@@ -23,6 +23,7 @@
       optimize-cps 
       analyze-cps
       ;analyze-lambda-side-effects
+      opt:add-inlinable-functions
       opt:contract
       opt:inline-prims
       opt:beta-expand
@@ -62,7 +63,13 @@
       adbf:side-effects adbf:set-side-effects!
   )
   (begin
-    (define 
+    ;; The following two defines allow non-CPS functions to still be considered
+    ;; for certain inlining optimizations.
+    (define *inlinable-functions* '())
+    (define (opt:add-inlinable-functions lis)
+      (set! *inlinable-functions* lis))
+
+    (define
       *contract-env* 
       (let ((env (create-environment '() '())))
         (eval '(define Cyc-fast-plus +) env)
@@ -1194,8 +1201,10 @@
           (analyze:find-inlinable-vars (if->else exp) args))
         ((app? exp)
          (cond
-          ((and (prim? (car exp))
-                (not (prim:mutates? (car exp))))
+          ((or
+            (member (car exp) *inlinable-functions*)
+            (and (prim? (car exp))
+                 (not (prim:mutates? (car exp)))))
            ;; If primitive does not mutate its args, ignore if ivar is used
            (for-each
             (lambda (e)
