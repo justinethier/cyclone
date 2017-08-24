@@ -2253,6 +2253,7 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   size_t element_vec_size;
   va_list ap;
   make_pair(tmp_pair, NULL, NULL);
+  make_c_opaque(opq, NULL);
   va_start(ap, len);
   if (argc > 1) {
     fill = va_arg(ap, object);
@@ -2282,6 +2283,9 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     // Otherwise if next minor GC misses fill it could be catastrophic
     car(&tmp_pair) = fill;
     add_mutation(data, &tmp_pair, -1, fill);
+    // Add a special object to indicate full vector must be scanned by GC
+    opaque_ptr(&opq) = v;
+    add_mutation(data, &opq, -1, v);
   } else {
     v = alloca(sizeof(vector_type));
     ((vector) v)->hdr.mark = gc_color_red;
@@ -4841,6 +4845,13 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         gc_move2heap(((vector) o)->elements[i]);
       } else if (type_of(o) == forward_tag) {
         // Already transported, skip
+      } else if (type_of(o) == c_opaque_tag) {
+        // Special case, pull out vector and inspect each element
+        vector_type *v = opaque_ptr(o);
+        int i;
+        for (i = 0; i < ((vector) v)->num_elements; i++) {
+          gc_move2heap(((vector) v)->elements[i]);
+        }
       } else {
         printf("Unexpected type %d transporting mutation\n", type_of(o));
         exit(1);
