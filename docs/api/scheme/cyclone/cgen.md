@@ -13,7 +13,6 @@ The `(scheme cyclone cgen)` library compiles scheme code to a Cheney-on-the-MTA 
 - [`emits`](#emits)
 - [`emits*`](#emits-1)
 - [`emit-newline`](#emit-newline)
-- [`string-join`](#string-join)
 
 # mta:code-gen
 
@@ -51,9 +50,4 @@ Call `emits` for each of the given strings.
 
 `display` a newline to the current output port.
 
-# string-join
-
-    (string-join list deliminator)
-
-Create a single string from a list of strings, adding `deliminator` between each of the strings.
 
