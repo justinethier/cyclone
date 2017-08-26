@@ -1,4 +1,5 @@
-;; Testing optimizations
+;; Testing the next set of optimizations
+;; To run: ./opt-test < opt-test.data
 ;;
 ;; Timings: T430
 ;; Baseline - 2.511
