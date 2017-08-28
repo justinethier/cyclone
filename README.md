@@ -47,7 +47,9 @@ Getting Started
 Documentation
 -------------
 
-- The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
+- The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone and provides information on the Scheme language features implemented by Cyclone.
+
+- An [API Reference](docs/API.md) is available for all libraries provided by Cyclone, including a complete alphabetical listing.
 
 - If you need a resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
