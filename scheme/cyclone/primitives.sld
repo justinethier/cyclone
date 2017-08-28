@@ -903,16 +903,20 @@
 
     (define (prim:inline-convert-prim-call prim-call)
       (cond
-        ((and (equal? (car prim-call) '+) (= (length prim-call) 3))
-         (cons 'Cyc-fast-plus (cdr prim-call)))
-        ((and (equal? (car prim-call) '-) (= (length prim-call) 3))
-         (cons 'Cyc-fast-sub (cdr prim-call)))
+        ((equal? (car prim-call) '+)
+         (->dyadic (cons 'Cyc-fast-plus (cdr prim-call))))
+        ((equal? (car prim-call) '*)
+         (->dyadic (cons 'Cyc-fast-mul (cdr prim-call))))
+        ;((and (equal? (car prim-call) '-) (= (length prim-call) 3))
+        ; (cons 'Cyc-fast-sub (cdr prim-call)))
         ((and (equal? (car prim-call) '-) (= (length prim-call) 2))
          `(Cyc-fast-sub 0 ,@(cdr prim-call)))
-        ((and (equal? (car prim-call) '*) (= (length prim-call) 3))
-         (cons 'Cyc-fast-mul (cdr prim-call)))
-        ((and (equal? (car prim-call) '/) (= (length prim-call) 3))
-         (cons 'Cyc-fast-div (cdr prim-call)))
+        ((equal? (car prim-call) '-)
+         (->dyadic (cons 'Cyc-fast-sub (cdr prim-call))))
+        ((equal? (car prim-call) '/)
+         (->dyadic (cons 'Cyc-fast-div (cdr prim-call))))
+        ;((and (equal? (car prim-call) '/) (= (length prim-call) 3))
+        ; (cons 'Cyc-fast-div (cdr prim-call)))
         ((and (equal? (car prim-call) '=) (= (length prim-call) 3))
          (cons 'Cyc-fast-eq (cdr prim-call)))
         ((and (equal? (car prim-call) '>) (= (length prim-call) 3))
@@ -925,6 +929,20 @@
          (cons 'Cyc-fast-lte (cdr prim-call)))
         (else
          prim-call)))
+
+    ;; Take an expression containing a single function call and break it up
+    ;; into many calls of 2 arguments each.
+    (define (->dyadic expr)
+      (cond
+        ((< (length expr) 4)
+         expr)
+        (else
+         (let ((fnc (car expr)))
+           (foldl
+             (lambda (x acc)
+               (list fnc acc x))
+             `(,fnc ,(cadr expr) ,(caddr expr))
+             (cdddr expr))))))
 
   ;; Map from a Scheme function to a primitive, if possible.
   ;;
