@@ -52,15 +52,9 @@ Documentation
 
 - The [User Manual](docs/User-Manual) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
 
-- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler-Revised-2017) provides high-level details on how the compiler was written and how it works.
+- If you need a resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
-- There is a [Development Guide](docs/Development) with instructions for common tasks when hacking on the compiler itself.
-
-- Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
-
-- This [Benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other R<sup>7</sup>RS and R<sup>6</sup>RS Schemes using a common set of benchmarks.
-
-- Finally, if you need another resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
+- Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
 
 Example Programs
 ----------------
@@ -76,6 +70,15 @@ Cyclone provides several example programs, including:
 - [Game of Life PNG Image Generator]({{ page.ghproj }}examples/game-of-life-png) - A modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI).
 
 - Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`]({{ page.ghproj }}cyclone.scm) and [`icyc.scm`]({{ page.ghproj }}icyc.scm) to create executables for Cyclone's compiler and interpreter.
+
+Compiler Internals
+------------------
+
+- [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler-Revised-2017) provides high-level details on how the compiler was written and how it works.
+
+- There is a [Development Guide](docs/Development) with instructions for common tasks when hacking on the compiler itself.
+
+- Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
 License
 -------
