@@ -4,8 +4,6 @@ Cyclone is a brand-new Scheme-to-C compiler that allows practical application de
 
 Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard, with the intent to support as much of that language as possible.
 
-This [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
-
 Getting Started
 ---------------
 
@@ -52,6 +50,8 @@ Documentation
 - An [API Reference](docs/API.md) is available for all libraries provided by Cyclone, including a complete alphabetical listing.
 
 - If you need a resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
+
+- Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
 
 Example Programs
 ----------------
