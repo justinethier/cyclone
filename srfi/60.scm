@@ -139,15 +139,19 @@
 
 (define bitwise-not lognot)
 
-(define-c bitwise-if
-  "(void* data, int argc, closure _, object k, 
-          object mask, object n0, object n1)"
-  "Cyc_check_fixnum(data, mask); // TODO: bignum support
-   Cyc_check_fixnum(data, n0);
-   Cyc_check_fixnum(data, n1);
-   int m = unbox_number(mask);
-   int result = (m & ((int)unbox_number(n0))) | ((~m) & ((int)unbox_number(n1)));
-   return_closcall1(data, k, obj_int2obj(result));")
+;;(define-c bitwise-if
+;;  "(void* data, int argc, closure _, object k, 
+;;          object mask, object n0, object n1)"
+;;  "Cyc_check_fixnum(data, mask); // TODO: bignum support
+;;   Cyc_check_fixnum(data, n0);
+;;   Cyc_check_fixnum(data, n1);
+;;   int m = unbox_number(mask);
+;;   int result = (m & ((int)unbox_number(n0))) | ((~m) & ((int)unbox_number(n1)));
+;;   return_closcall1(data, k, obj_int2obj(result));")
+
+(define (bitwise-if mask n0 n1)
+  (logior (logand mask n0)
+          (logand (lognot mask) n1)))
 
 (define bitwise-merge bitwise-if)
 
