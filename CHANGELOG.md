@@ -5,6 +5,7 @@
 Features
 
 - Allow the compiler to optimize calls to `+`, `-`, `*`, and `/` that accept more than 2 arguments.
+- Added support for bignums to `bitwise-if` from SRFI 60.
 
 ## 0.6.2 - August 25, 2017
 
