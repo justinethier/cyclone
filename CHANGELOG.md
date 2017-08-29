@@ -2,6 +2,10 @@
 
 ## 0.6.3 - TBD
 
+Features
+
+- Allow the compiler to optimize calls to `+`, `-`, `*`, and `/` that accept more than 2 arguments.
+
 ## 0.6.2 - August 25, 2017
 
 Features
