@@ -50,7 +50,7 @@ Getting Started
 Documentation
 -------------
 
-- The [User Manual](docs/User-Manual) covers in detail how to use Cyclone, and provides information and API documentation on the Scheme language features implemented by Cyclone.
+- The [User Manual](docs/User-Manual) covers in detail how to use Cyclone and provides information on the Scheme language features implemented by Cyclone.
 
 - An [API Reference](docs/API) is available for all libraries provided by Cyclone, including a complete alphabetical listing.
 
