@@ -7,6 +7,10 @@ Features
 - Allow the compiler to optimize calls to `+`, `-`, `*`, and `/` that accept more than 2 arguments.
 - Added support for bignums to `bitwise-if` from SRFI 60.
 
+Bug Fixes
+
+- Fix `read-line` to remove trailing newlines. Thanks to wasamasa for the bug report!
+
 ## 0.6.2 - August 25, 2017
 
 Features

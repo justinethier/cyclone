@@ -6174,7 +6174,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
 {
   FILE *stream = ((port_type *) port)->fp;
   char buf[1024];
-  //int i = 0, c;
+  int len;
 
   Cyc_check_port(data, port);
   if (stream == NULL) {
@@ -6183,8 +6183,15 @@ object Cyc_io_read_line(void *data, object cont, object port)
   set_thread_blocked(data, cont);
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
-    make_string(s, buf);
-    return_thread_runnable(data, &s);
+    len = strlen(buf);
+    {
+      // Remove trailing newline
+      if (len > 0 && buf[len - 1] == '\n') {
+        buf[len - 1] = '\0';
+      }
+      make_string_noalloc(s, buf, len);
+      return_thread_runnable(data, &s);
+    }
   } else {
     if (feof(stream)) {
       return_thread_runnable(data, Cyc_EOF);
