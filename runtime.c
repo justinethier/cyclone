@@ -6185,11 +6185,12 @@ object Cyc_io_read_line(void *data, object cont, object port)
   if (fgets(buf, 1023, stream) != NULL) {
     len = strlen(buf);
     {
-      // Remove trailing newline
-      if (len > 0 && buf[len - 1] == '\n') {
+      // Remove any trailing CR / newline chars
+      while (len > 0 && (buf[len - 1] == '\n' ||
+                         buf[len - 1] == '\r')) {
         len--;
-        buf[len] = '\0';
       }
+      buf[len] = '\0';
       make_string_noalloc(s, buf, len);
       return_thread_runnable(data, &s);
     }

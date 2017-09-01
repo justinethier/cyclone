@@ -9,7 +9,7 @@ Features
 
 Bug Fixes
 
-- Fix `read-line` to remove trailing newlines. Thanks to wasamasa for the bug report!
+- Fix `read-line` to remove trailing carriage return and/or newline characters. Thanks to wasamasa for the bug report!
 
 ## 0.6.2 - August 25, 2017
 
