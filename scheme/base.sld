@@ -129,6 +129,7 @@
     write-char
     write-string
     flush-output-port
+    read-char
     read-line
     read-string
     input-port?
@@ -627,6 +628,10 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
+    (define (read-char . port)
+      (if (null? port)
+        (Cyc-read-char (current-input-port))
+        (Cyc-read-char (car port))))
     (define (read-line . port)
       (if (null? port)
         (Cyc-read-line (current-input-port))
