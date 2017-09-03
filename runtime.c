@@ -1019,6 +1019,7 @@ static object _Cyc_write(void *data, object x, FILE * port)
       case '\t': fprintf(port, "\\t"); break;
       case '\v': fprintf(port, "\\v"); break;
       case '\\': fprintf(port, "\\\\"); break;
+      case '\"': fprintf(port, "\\\""); break;
       default:
         fputc(*s, port);
         break;

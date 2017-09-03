@@ -10,6 +10,7 @@ Features
 Bug Fixes
 
 - Fix `read-line` to remove trailing carriage return and/or newline characters. Thanks to wasamasa for the bug report!
+- Added a fix from wasamasa to escape double quotation marks in strings when output via `write`.
 
 ## 0.6.2 - August 25, 2017
 
