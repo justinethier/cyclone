@@ -129,6 +129,7 @@
     write-char
     write-string
     flush-output-port
+    peek-char
     read-char
     read-line
     read-string
@@ -628,6 +629,10 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
+    (define (peek-char . port)
+      (if (null? port)
+        (Cyc-peek-char (current-input-port))
+        (Cyc-peek-char (car port))))
     (define (read-char . port)
       (if (null? port)
         (Cyc-read-char (current-input-port))

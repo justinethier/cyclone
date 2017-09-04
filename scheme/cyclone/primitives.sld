@@ -187,7 +187,7 @@
          file-exists?
          delete-file
          Cyc-read-char
-         peek-char
+         Cyc-peek-char
          Cyc-read-line
          Cyc-write-char
          Cyc-write
@@ -348,7 +348,7 @@
          (file-exists? 1 1)
          (delete-file 1 1)
          (Cyc-read-char 1 1)
-         (peek-char 1 1)
+         (Cyc-peek-char 1 1)
          (Cyc-read-line 1 1)
          (Cyc-write-char 1 2)
          (Cyc-write 1 2)
@@ -429,7 +429,7 @@
 ;                      file-exists?
 ;                      delete-file
 ;                      Cyc-read-char
-;                      peek-char
+;                      Cyc-peek-char
 ;                      Cyc-read-line
 ;                      Cyc-write-char
 ;                      Cyc-write
@@ -499,7 +499,7 @@
          ((eq? p 'file-exists?)          "Cyc_io_file_exists")
          ((eq? p 'delete-file)           "Cyc_io_delete_file")
          ((eq? p 'Cyc-read-char)             "Cyc_io_read_char")
-         ((eq? p 'peek-char)             "Cyc_io_peek_char")
+         ((eq? p 'Cyc-peek-char)             "Cyc_io_peek_char")
          ((eq? p 'Cyc-read-line)         "Cyc_io_read_line")
          ((eq? p 'Cyc-display)           "Cyc_display_va")
          ((eq? p 'Cyc-write)             "Cyc_write_va")
@@ -653,7 +653,7 @@
         file-exists?
         delete-file
         Cyc-read-char
-        peek-char
+        Cyc-peek-char
         Cyc-read-line
         Cyc-write-char
         integer->char
@@ -745,7 +745,7 @@
         ((eq? p 'apply)  "object")
         ((eq? p 'Cyc-read-line) "object")
         ((eq? p 'Cyc-read-char) "object")
-        ((eq? p 'peek-char) "object")
+        ((eq? p 'Cyc-peek-char) "object")
         ((eq? p 'command-line-arguments) "object")
         ((eq? p 'number->string) "object")
         ((eq? p 'symbol->string) "object")
@@ -805,7 +805,7 @@
                  = > < >= <=
                  command-line-arguments
                  Cyc-read-line
-                 Cyc-read-char peek-char
+                 Cyc-read-char Cyc-peek-char
                  cons cell))
                (member exp *udf-prims*))))
 
@@ -816,7 +816,7 @@
                          + - * /
                          = > < >= <=
                          Cyc-list
-                         Cyc-read-char peek-char 
+                         Cyc-read-char Cyc-peek-char 
                          symbol->string list->string substring string-append string->number
                          make-bytevector
                          bytevector-append
