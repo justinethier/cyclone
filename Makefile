@@ -44,6 +44,11 @@ clean :
 	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; make clean
 	rm -rf html tests/*.o tests/*.c
+	rm -f tests/srfi-28-tests
+	rm -f tests/srfi-60-tests
+	rm -f tests/srfi-121-tests
+	rm -f tests/srfi-143-tests
+	rm -f tests/array-list-tests
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)

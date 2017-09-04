@@ -66,12 +66,12 @@
     (define random-source-make-reals
       (case-lambda
         ((s)
-         (random-source-make-reals s (/ m)))
+         (random-source-make-reals s (/ 1.0 m)))
         ((s unit)
          (if (not (< 0.0 unit 1.0))
              (error "unit must be between 0.0 and 1.0 (exclusive), but got " unit))
          (let ((numgen (random-source-make-integers s)))
-           (define r (exact (floor (/ unit))))
+           (define r (exact (floor (/ 1.0 unit))))
            (lambda ()
              (* (numgen r) unit))))))
     
