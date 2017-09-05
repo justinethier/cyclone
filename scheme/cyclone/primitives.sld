@@ -939,7 +939,9 @@
   ;;
   ;; Note the only reason to do this is to change from a CPS-style
   ;; function to one that can be inlined with no CPS, which yields
-  ;; a significant speed improvement.
+  ;; a significant speed improvement. Or, alternatively there can 
+  ;; also be a speed improvement if the prim can avoid having to 
+  ;; load C varargs.
   (define (prim:func->prim func-sym num-args)
     (define mappings
       '(
@@ -948,6 +950,8 @@
          (char<?  2 Cyc-fast-char-lt )
          (char>=? 2 Cyc-fast-char-gte)
          (char<=? 2 Cyc-fast-char-lte)
+         (read-char 1 Cyc-read-char)
+         (peek-char 1 Cyc-peek-char)
        ))
     (let ((m (assoc func-sym mappings))
           (udf (assoc func-sym *udf-cps->inline*)) 
