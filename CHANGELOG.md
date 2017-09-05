@@ -11,6 +11,7 @@ Bug Fixes
 
 - Fix `read-line` to remove trailing carriage return and/or newline characters. Thanks to wasamasa for the bug report!
 - String ports created by `open-input-string` returned an extra garbage byte. This has been fixed by a patch from wasamasa.
+- Prevent segfaults when allocating large strings using `make-string`.
 - Added a fix from wasamasa to escape double quotation marks in strings when output via `write`.
 
 ## 0.6.2 - August 25, 2017
