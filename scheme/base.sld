@@ -946,6 +946,39 @@
                       fill)))
         (list->string
           (apply make-list (cons k fill*)))))
+;    (define (make-string k . fill)
+;      (Cyc-make-string k (if (null? fill) #\space (car fill))))
+;    (define-c Cyc-make-string
+;      "(void *data, int argc, closure _, object k, object count, object fill)"
+;      " object s = NULL;
+;        Cyc_check_int(data, count);
+;        // TODO: type check fill
+;        char c = obj_obj2char(fill);
+;        int len = obj_obj2int(count);
+;        if (len >= MAX_STACK_OBJ) {
+;          int heap_grown;
+;          s = gc_alloc(((gc_thread_data *)data)->heap, 
+;                       sizeof(string_type) + len + 1,
+;                       boolean_f, // OK to populate manually over here
+;                       (gc_thread_data *)data, 
+;                       &heap_grown);
+;          ((string_type *) s)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+;          ((string_type *) s)->hdr.grayed = 0;
+;          ((string_type *) s)->tag = string_tag; 
+;          ((string_type *) s)->len = len;
+;          ((string_type *) s)->str = (((char *)s) + sizeof(string_type));
+;        } else {
+;          s = alloca(sizeof(string_type));
+;          ((string_type *)s)->hdr.mark = gc_color_red; 
+;          ((string_type *)s)->hdr.grayed = 0;
+;          ((string_type *)s)->tag = string_tag; 
+;          ((string_type *)s)->len = len;
+;          ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
+;        }
+;        memset(((string_type *)s)->str, c, len);
+;        ((string_type *)s)->str[len] = '\\0';
+;        return_closcall1(data, k, &s);
+;      ")
     (define-syntax parameterize
       (syntax-rules ()
         ((parameterize
