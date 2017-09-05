@@ -45,7 +45,7 @@ port_type *Cyc_io_open_input_string(void *data, object str)
   p->str_bv_in_mem_buf = malloc(sizeof(char) * (string_len(str) + 1));
   p->str_bv_in_mem_buf_len = string_len(str);
   memcpy(p->str_bv_in_mem_buf, string_str(str), string_len(str));
-  p->fp = fmemopen(p->str_bv_in_mem_buf, string_len(str) + 1, "r");
+  p->fp = fmemopen(p->str_bv_in_mem_buf, string_len(str), "r");
 #endif
   if (p->fp == NULL){
     Cyc_rt_raise2(data, "Unable to open input memory stream", obj_int2obj(errno));
