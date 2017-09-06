@@ -6151,7 +6151,11 @@ object Cyc_io_peek_char(void *data, object cont, object port)
   return Cyc_EOF;
 }
 
-//  TODO: port arg is optional! (maybe handle that in expansion section??)
+//object Cyc_io_char_ready(void *data, object cont, object port)
+//{
+//  // TODO: inspect mem_buf and associated fields to see if data is ready
+//}
+
 object Cyc_io_read_char(void *data, object cont, object port)
 {
   port_type *p = (port_type *)port;
