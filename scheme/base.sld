@@ -645,21 +645,23 @@
       (let ((port (if (null? opts)
                       (current-input-port)
                       (car opts))))
-        (let loop ((acc '())
-                   (i k)
-                   (chr #f))
-          (cond
-            ((eof-object? chr)
-             (list->string 
-               (reverse acc)))
-            ((zero? i)
-             (list->string 
-               (reverse 
-                 (if chr (cons chr acc) acc))))
-            (else
-             (loop (if chr (cons chr acc) acc)
-                   (- i 1)
-                   (read-char port)))))))
+        (if (eof-object? (peek-char port))
+            (eof-object)
+            (let loop ((acc '())
+                       (i k)
+                       (chr #f))
+              (cond
+               ((eof-object? chr)
+                (list->string
+                 (reverse acc)))
+               ((zero? i)
+                (list->string
+                 (reverse
+                  (if chr (cons chr acc) acc))))
+               (else
+                (loop (if chr (cons chr acc) acc)
+                      (- i 1)
+                      (read-char port))))))))
     (define (flush-output-port . port)
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))
