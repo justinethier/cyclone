@@ -13,6 +13,7 @@ Bug Fixes
 - String ports created by `open-input-string` returned an extra garbage byte. This has been fixed by a patch from wasamasa.
 - Prevent segfaults when allocating large strings using `make-string`.
 - Added a fix from wasamasa to escape double quotation marks in strings when output via `write`.
+- wasamasa patched `read-string` to return EOF when no characters can be read.
 
 ## 0.6.2 - August 25, 2017
 
