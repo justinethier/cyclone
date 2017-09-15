@@ -113,9 +113,9 @@
     current-input-port
     current-error-port
     call-with-port
-    ; TODO: error-object?
-    ; TODO: error-object-message
-    ; TODO: error-object-irritants
+    error-object?
+    error-object-message
+    error-object-irritants
     ; TODO: file-error?
     ; TODO: read-error?
     error
@@ -1053,6 +1053,12 @@
       (make-parameter (Cyc-stdin)))
     (define current-error-port
       (make-parameter (Cyc-stderr)))
+    ;; TODO: only a first-step, error objects need to be more robust
+    (define (error-object? x) 
+      (and (pair? x) 
+           (string? (car x))))
+    (define error-object-message car)
+    (define error-object-irritants cdr)
     (define (error msg . args)
       (raise (cons msg args)))
     (define (raise obj)
