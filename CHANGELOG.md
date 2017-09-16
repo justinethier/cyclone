@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.3 - TBD
+## 0.6.3 - September 16, 2017
 
 Features
 
