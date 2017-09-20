@@ -26,6 +26,10 @@
 #include <sys/syscall.h>        /* Linux-only? */
 #endif
 
+// 64-bit is 3, 32-bit is 2
+#define GC_BLOCK_BITS 5
+#define GC_BLOCK_SIZE (1 << GC_BLOCK_BITS)
+
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
@@ -34,9 +38,9 @@
 #define gc_free_chunk_size (sizeof(gc_free_list))
 
 #define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((uintptr_t)-1)-((1<<(bits))-1)))
-// 64-bit is 3, 32-bit is 2
+
 //#define gc_word_align(n) gc_align((n), 2)
-#define gc_heap_align(n) gc_align(n, 5)
+#define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
 
 #if INTPTR_MAX == INT64_MAX
   #define REST_HEAP_MIN_SIZE 128
