@@ -82,6 +82,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj);
 #define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj);
 #define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj);
+#define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj);
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
