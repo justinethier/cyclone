@@ -29,7 +29,7 @@
   
 ; c-compile-and-emit : (string -> A) exp -> void
 (define (c-compile-and-emit input-program program:imports/code 
-                            lib-deps src-file append-dirs prepend-dirs)
+                            lib-deps change-lib-deps! src-file append-dirs prepend-dirs)
   (call/cc 
     (lambda (return)
       (define globals '())
@@ -172,6 +172,36 @@
       (set! input-program (macro:cleanup input-program rename-env))
       (trace:info "---------------- after macro expansion cleanup:")
       (trace:info input-program) ;pretty-print
+
+      ;; If a program, check to see if any macros expanded into top-level imports
+      (when program?
+        (let ((program:imports/code (import-reduction input-program (base-expander))))
+          (when (not (null? (car program:imports/code)))
+;(trace:info "debug")
+;(trace:info program:imports/code)
+            (trace:info "-------------- macro expanded into import expression(s):")
+            (set! imports (append imports (car program:imports/code)))
+            (trace:info "imports:")
+            (trace:info imports)
+            (set! imported-vars (lib:imports->idb imports append-dirs prepend-dirs))
+            (trace:info "resolved imports:")
+            (trace:info imported-vars)
+            (let ((meta (lib:resolve-meta imports append-dirs prepend-dirs)))
+              (set! *defined-macros* (append meta *defined-macros*))
+              (trace:info "resolved macros:")
+              (trace:info meta))
+            (set! input-program (cdr program:imports/code))
+            ;(set! lib-deps (append lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)))
+            (let ((new-lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)))
+              (for-each
+                (lambda (dep)
+                  (if (not (member dep lib-deps))
+                      (set! lib-deps (cons dep lib-deps))))
+                new-lib-deps)
+              (change-lib-deps! lib-deps))
+            (trace:info lib-deps)
+          )))
+      ;; END additional top-level imports
 
       ;; Separate global definitions from the rest of the top-level code
       (set! input-program 
@@ -531,8 +561,15 @@
              (with-output-to-file 
                src-file
                (lambda ()
-                 (c-compile-and-emit program program:imports/code 
-                                     lib-deps in-file append-dirs prepend-dirs)))))
+                 (c-compile-and-emit 
+                   program 
+                   program:imports/code 
+                   lib-deps 
+                   (lambda (new-lib-deps)
+                     (set! lib-deps new-lib-deps))
+                   in-file 
+                   append-dirs 
+                   prepend-dirs)))))
          (result (create-c-file in-prog)))
 
     ;; Compile the generated C file

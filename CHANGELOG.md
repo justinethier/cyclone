@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7 - TBD
+
+Features
+
+- Allow a program to have macros expand into a top-level `import` expression.
+
 ## 0.6.3 - September 16, 2017
 
 Features
