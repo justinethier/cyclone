@@ -451,6 +451,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       memcpy(s, string_str(obj), string_len(obj) + 1);
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = string_tag;
+      string_num_cp(hp) = string_num_cp(obj);
       string_len(hp) = string_len(obj);
       string_str(hp) = s;
       return (char *)hp;
