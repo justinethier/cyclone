@@ -721,9 +721,13 @@ typedef enum {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
+  int num_cp;
   int len;
   char *str;
 } string_type;
+
+// TODO: below macros are obsolete, need new ones that populate num_cp and
+// raise an error if an invalid UTF-8 char is detected
 
 /** Create a new string in the nursery */
 #define make_string(cs, s) string_type cs; \
@@ -731,6 +735,7 @@ typedef struct {
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; \
+  cs.num_cp = len; \
   cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
@@ -744,6 +749,7 @@ typedef struct {
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = len; \
+  cs.num_cp = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
@@ -755,9 +761,48 @@ typedef struct {
 #define make_string_noalloc(cs, s, length) string_type cs; \
 { cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = length; \
+  cs.num_cp = length; \
   cs.str = s; }
 
-/** Get the length of a string */
+///** Create a new string in the nursery */
+//#define make_string(cs, s) string_type cs; \
+//{ int len = strlen(s); \
+//  cs.hdr.mark = gc_color_red; \
+//  cs.hdr.grayed = 0; \
+//  cs.tag = string_tag; \
+//  cs.num_cp = len; \
+//  cs.len = len; \
+//  cs.str = alloca(sizeof(char) * (len + 1)); \
+//  memcpy(cs.str, s, len + 1);}
+//
+///** 
+// * Create a new string with the given length 
+// * (so it does not need to be computed) 
+// */
+//#define make_string_with_len(cs, s, length) string_type cs;  \
+//{ int len = length; \
+//  cs.hdr.mark = gc_color_red; \
+//  cs.hdr.grayed = 0; \
+//  cs.tag = string_tag; cs.len = len; \
+//  cs.num_cp = len; \
+//  cs.str = alloca(sizeof(char) * (len + 1)); \
+//  memcpy(cs.str, s, len); \
+//  cs.str[len] = '\0';}
+//
+///**
+// * Create a string object using the given C string and length.
+// * No allocation is done for the given C string.
+// */
+//#define make_string_noalloc(cs, s, length) string_type cs; \
+//{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+//  cs.tag = string_tag; cs.len = length; \
+//  cs.num_cp = length; \
+//  cs.str = s; }
+
+/** Get the length of a string, in characters (code points) */
+#define string_num_cp(x) (((string_type *) x)->num_cp)
+
+/** Get the length of a string, in bytes */
 #define string_len(x) (((string_type *) x)->len)
 
 /** Get a string object's C string */
