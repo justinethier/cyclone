@@ -716,7 +716,7 @@ void Cyc_set_globals_changed(gc_thread_data *thd);
 #define CYC_UTF8_ACCEPT 0
 #define CYC_UTF8_REJECT 1
 uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
-int Cyc_utf8_count_code_points(uint8_t* s, size_t* count);
+int Cyc_utf8_count_code_points(uint8_t* s);
 uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
 uint32_t Cyc_utf8_validate(char *str, size_t len);
 /**@}*/

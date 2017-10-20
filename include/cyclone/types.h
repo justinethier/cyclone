@@ -764,17 +764,20 @@ typedef struct {
   cs.num_cp = length; \
   cs.str = s; }
 
-///** Create a new string in the nursery */
-//#define make_string(cs, s) string_type cs; \
-//{ int len = strlen(s); \
-//  cs.hdr.mark = gc_color_red; \
-//  cs.hdr.grayed = 0; \
-//  cs.tag = string_tag; \
-//  cs.num_cp = len; \
-//  cs.len = len; \
-//  cs.str = alloca(sizeof(char) * (len + 1)); \
-//  memcpy(cs.str, s, len + 1);}
-//
+/** Create a new string in the nursery */
+#define make_utf8_string(data, cs, s) string_type cs; \
+{ int len = strlen(s); \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
+  cs.tag = string_tag; \
+  cs.num_cp = Cyc_utf8_count_code_points(s); \
+  if (cs.num_cp < 0) { \
+    Cyc_rt_raise_msg(data, "Invalid UTF-8 characters in string"); \
+  } \
+  cs.len = len; \
+  cs.str = alloca(sizeof(char) * (len + 1)); \
+  memcpy(cs.str, s, len + 1);}
+
 ///** 
 // * Create a new string with the given length 
 // * (so it does not need to be computed) 

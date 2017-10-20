@@ -6403,15 +6403,18 @@ uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
  * Count the number of code points in a string.
  * Based on example code from Bjoern Hoehrmann.
  */
-int Cyc_utf8_count_code_points(uint8_t* s, size_t* count) {
+int Cyc_utf8_count_code_points(uint8_t* s) {
   uint32_t codepoint;
   uint32_t state = 0;
+  int count;
 
-  for (*count = 0; *s; ++s)
+  for (count = 0; *s; ++s)
     if (!Cyc_utf8_decode(&state, &codepoint, *s))
-      *count += 1;
+      count += 1;
 
-  return state != CYC_UTF8_ACCEPT;
+  if (state != CYC_UTF8_ACCEPT)
+    return -1;
+  return count;
 }
 
 // TODO: index into X codepoint in a string 
