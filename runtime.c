@@ -2121,9 +2121,10 @@ object Cyc_string_ref(void *data, object str, object k)
     Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
 
-TODO: we can take the fast path if num_cp == len, since that implies all chars are just 1 byte. 
-      would be the case for all string functions that need to be updated to be (possibly) O(n)
-  {
+  // Take fast path if all chars are just 1 byte
+  if (string_num_cp(str) == string_len(str)) {
+    return obj_char2obj(raw[idx]);
+  } else {
     char_type codepoint;
     uint32_t state = 0;
     int count;
@@ -2153,7 +2154,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
   raw = string_str(str);
   s = unbox_number(start);
   e = unbox_number(end);
-  len = string_len(str);
+  len = string_num_cp(str);
 
   if (s > e) {
     Cyc_rt_raise2(data, "substring - start cannot be greater than end", start);
@@ -2167,8 +2168,29 @@ object Cyc_substring(void *data, object cont, object str, object start,
     e = len;
   }
 
-  {
+  if (string_num_cp(str) == string_len(str)){ // Fast path for ASCII
     make_string_with_len(sub, raw + s, e - s);
+    _return_closcall1(data, cont, &sub);
+  } else {
+    const char *tmp = raw;
+    char_type codepoint;
+    uint32_t state = 0;
+    int count, start_i = 0, end_i = 0;
+
+    for (count = 0; *tmp; ++tmp){
+      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+        if (count == s) {
+          start_i = end_i;
+        } else if (count == e) {
+          break;
+        }
+        count += 1;
+      }
+      end_i++;
+    }
+    if (state != CYC_UTF8_ACCEPT)
+       Cyc_rt_raise2(data, "substring - invalid character in string", str);
+    make_utf8_string_with_len(sub, raw + start_i, end_i - start_i, e - s);
     _return_closcall1(data, cont, &sub);
   }
 }

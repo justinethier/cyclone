@@ -788,12 +788,12 @@ typedef struct {
  * Create a new string with the given length 
  * (so it does not need to be computed) 
  */
-#define make_utf8_string_with_len(cs, s, length, num_cp) string_type cs;  \
+#define make_utf8_string_with_len(cs, s, length, num_code_points) string_type cs;  \
 { int len = length; \
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = len; \
-  cs.num_cp = num_cp; \
+  cs.num_cp = num_code_points; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
