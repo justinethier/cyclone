@@ -2101,7 +2101,45 @@ object Cyc_string_set(void *data, object str, object k, object chr)
   len = string_len(str);
 
   Cyc_check_bounds(data, "string-set!", len, idx);
-  raw[idx] = obj_obj2char(chr);
+
+  // Take fast path if all chars are just 1 byte
+  if (string_num_cp(str) == string_len(str)) {
+    raw[idx] = obj_obj2char(chr);
+  } else {
+    // TODO: utf8 support
+    // find codepoint at k, figure out how many bytes it is,
+    // allocate a new string (start) + chr + (end)
+    // or don't allocate if chr uses as many or fewer bytes 
+    // than the codepoint it is replacing
+
+    char *tmp = raw;
+    char_type codepoint;
+    uint32_t state = 0;
+    int i = 0, count, start_len = 0, start_cp = 0;
+
+    for (count = 0; *tmp; ++tmp){
+      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+        if (count < idx) {
+          start_len = i;
+          start_cp = count;
+        } else if (count == idx) {
+          break;
+        }
+        count += 1;
+      }
+      i++;
+    }
+    if (state != CYC_UTF8_ACCEPT)
+       Cyc_rt_raise2(data, "string-set! - invalid character at index", k);
+
+    // TODO: perform actual mutation
+    //
+    // Now we know length of start (both in codepoints and bytes),
+    // and we know the codepoint to be replaced. by calculating its length
+    // we can compute where the end portion starts, and by using str we can
+    // figure out how many remaining bytes/codepoints are in end
+
+  }
   return str;
 }
 
