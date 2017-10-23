@@ -2041,7 +2041,7 @@ object Cyc_string_cmp(void *data, object str1, object str2)
       str[i] = ((string_type *)str1)->str; \
       len[i] = string_len((str1)); \
       total_len += len[i]; \
-      total_cp += string_num_cp((str[i])); \
+      total_cp += string_num_cp((str1)); \
     } \
     for (i = 1; i < argc; i++) { \
       tmp = va_arg(ap, object); \
@@ -2049,7 +2049,7 @@ object Cyc_string_cmp(void *data, object str1, object str2)
       str[i] = ((string_type *)tmp)->str; \
       len[i] = string_len((tmp)); \
       total_len += len[i]; \
-      total_cp += string_num_cp((str[i])); \
+      total_cp += string_num_cp((tmp)); \
     } \
     buffer = bufferp = alloca(sizeof(char) * total_len); \
     for (i = 0; i < argc; i++) { \
