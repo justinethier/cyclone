@@ -2121,6 +2121,8 @@ object Cyc_string_ref(void *data, object str, object k)
     Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
 
+TODO: we can take the fast path if num_cp == len, since that implies all chars are just 1 byte. 
+      would be the case for all string functions that need to be updated to be (possibly) O(n)
   {
     char_type codepoint;
     uint32_t state = 0;
