@@ -2081,7 +2081,7 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...)
 object Cyc_string_length(void *data, object str)
 {
   Cyc_check_str(data, str);
-  return obj_int2obj(string_len(str));
+  return obj_int2obj(string_num_cp(str));
 }
 
 object Cyc_string_set(void *data, object str, object k, object chr)
