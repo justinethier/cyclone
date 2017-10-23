@@ -466,6 +466,12 @@ void clear_mutations(void *data);
 #define CYC_FIXNUM_MIN -1073741824
 
 /**
+ * Explicit character type now that we are using UTF-8.
+ * Chars are still value types though
+ */
+typedef uint32_t char_type;
+
+/**
  * Determine if an object is an integer.
  */
 #define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
@@ -778,29 +784,29 @@ typedef struct {
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
 
-///** 
-// * Create a new string with the given length 
-// * (so it does not need to be computed) 
-// */
-//#define make_string_with_len(cs, s, length) string_type cs;  \
-//{ int len = length; \
-//  cs.hdr.mark = gc_color_red; \
-//  cs.hdr.grayed = 0; \
-//  cs.tag = string_tag; cs.len = len; \
-//  cs.num_cp = len; \
-//  cs.str = alloca(sizeof(char) * (len + 1)); \
-//  memcpy(cs.str, s, len); \
-//  cs.str[len] = '\0';}
-//
-///**
-// * Create a string object using the given C string and length.
-// * No allocation is done for the given C string.
-// */
-//#define make_string_noalloc(cs, s, length) string_type cs; \
-//{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
-//  cs.tag = string_tag; cs.len = length; \
-//  cs.num_cp = length; \
-//  cs.str = s; }
+/** 
+ * Create a new string with the given length 
+ * (so it does not need to be computed) 
+ */
+#define make_utf8_string_with_len(cs, s, length, num_cp) string_type cs;  \
+{ int len = length; \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
+  cs.tag = string_tag; cs.len = len; \
+  cs.num_cp = num_cp; \
+  cs.str = alloca(sizeof(char) * (len + 1)); \
+  memcpy(cs.str, s, len); \
+  cs.str[len] = '\0';}
+
+/**
+ * Create a string object using the given C string and length.
+ * No allocation is done for the given C string.
+ */
+#define make_utf8_string_noalloc(cs, s, length) string_type cs; \
+{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+  cs.tag = string_tag; cs.len = length; \
+  cs.num_cp = length; \
+  cs.str = s; }
 
 /** Get the length of a string, in characters (code points) */
 #define string_num_cp(x) (((string_type *) x)->num_cp)

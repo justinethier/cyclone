@@ -2041,7 +2041,7 @@ object Cyc_string_cmp(void *data, object str1, object str2)
       str[i] = ((string_type *)str1)->str; \
       len[i] = string_len((str1)); \
       total_len += len[i]; \
-      total_cp += string_num_cp(str1); \
+      total_cp += string_num_cp((str[i])); \
     } \
     for (i = 1; i < argc; i++) { \
       tmp = va_arg(ap, object); \
@@ -2049,7 +2049,7 @@ object Cyc_string_cmp(void *data, object str1, object str2)
       str[i] = ((string_type *)tmp)->str; \
       len[i] = string_len((tmp)); \
       total_len += len[i]; \
-      total_cp += string_num_cp(tmp); \
+      total_cp += string_num_cp((str[i])); \
     } \
     buffer = bufferp = alloca(sizeof(char) * total_len); \
     for (i = 0; i < argc; i++) { \
@@ -2058,7 +2058,7 @@ object Cyc_string_cmp(void *data, object str1, object str2)
     } \
     *bufferp = '\0'; \
     make_string(result, buffer); \
-    string_num_cp(result) = total_cp; \
+    string_num_cp((&result)) = total_cp; \
     va_end(ap); \
     _return_closcall1(data, cont, &result); \
 }
@@ -2081,7 +2081,7 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...)
 object Cyc_string_length(void *data, object str)
 {
   Cyc_check_str(data, str);
-  return obj_int2obj(string_num_cp(str));
+  return obj_int2obj(string_len(str));
 }
 
 object Cyc_string_set(void *data, object str, object k, object chr)
@@ -2115,13 +2115,27 @@ object Cyc_string_ref(void *data, object str, object k)
 
   raw = string_str(str);
   idx = unbox_number(k);
-  len = string_len(str);
+  len = string_num_cp(str);
 
   if (idx < 0 || idx >= len) {
     Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
 
-  return obj_char2obj(raw[idx]);
+  {
+    char_type codepoint;
+    uint32_t state = 0;
+    int count;
+
+    for (count = 0; *raw; ++raw){
+      if (!Cyc_utf8_decode(&state, &codepoint, *raw)){
+        if (count == idx) break; // Reached requested index
+        count += 1;
+      }
+    }
+    if (state != CYC_UTF8_ACCEPT)
+       Cyc_rt_raise2(data, "string-ref - invalid character at index", k);
+    return obj_char2obj(codepoint);
+  }
 }
 
 object Cyc_substring(void *data, object cont, object str, object start,
