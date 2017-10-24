@@ -976,7 +976,14 @@
           ((string_type *)s)->num_cp = num_cp;
           ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
         }
-        memset(((string_type *)s)->str, c, len);
+        //if (num_cp == 1) { /* Fast path */
+          memset(((string_type *)s)->str, c, len);
+        //} else {
+        //  int i;
+        //  uint32_t*
+        //  for (i = 0; i < len; i++) {
+        //  }
+        //}
         ((string_type *)s)->str[len] = '\\0';
         return_closcall1(data, k, s);
       ")
