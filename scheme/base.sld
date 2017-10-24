@@ -952,7 +952,8 @@
       " object s = NULL;
         Cyc_check_int(data, count);
         char c = obj_obj2char(fill);
-        int len = obj_obj2int(count);
+        int num_cp = obj_obj2int(count);
+        int len = num_cp * uint32_num_bytes(c);
         if (len >= MAX_STACK_OBJ) {
           int heap_grown;
           s = gc_alloc(((gc_thread_data *)data)->heap, 
@@ -964,6 +965,7 @@
           ((string_type *) s)->hdr.grayed = 0;
           ((string_type *) s)->tag = string_tag; 
           ((string_type *) s)->len = len;
+          ((string_type *) s)->num_cp = num_cp;
           ((string_type *) s)->str = (((char *)s) + sizeof(string_type));
         } else {
           s = alloca(sizeof(string_type));
@@ -971,6 +973,7 @@
           ((string_type *)s)->hdr.grayed = 0;
           ((string_type *)s)->tag = string_tag; 
           ((string_type *)s)->len = len;
+          ((string_type *)s)->num_cp = num_cp;
           ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
         }
         memset(((string_type *)s)->str, c, len);
