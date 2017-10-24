@@ -2106,6 +2106,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
   if (string_num_cp(str) == string_len(str)) {
     raw[idx] = obj_obj2char(chr);
   } else {
+fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), len);
     // TODO: utf8 support
     // find codepoint at k, figure out how many bytes it is,
     // allocate a new string (start) + chr + (end)
@@ -2569,6 +2570,10 @@ object Cyc_utf82string(void *data, object cont, object bv, object start,
     st.str = alloca(sizeof(char) * (len + 1));
     memcpy(st.str, &buf[s], len);
     st.str[len] = '\0';
+    st.num_cp = Cyc_utf8_count_code_points((uint8_t *)(st.str));
+    if (st.num_cp < 0) {
+       Cyc_rt_raise2(data, "utf8->string - error decoding UTF 8", bv);
+    }
     _return_closcall1(data, cont, &st);
   }
 }
@@ -2595,6 +2600,11 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   if (e < 0 || e < s || e > string_len(str)) {
     Cyc_rt_raise2(data, "string->utf8 - invalid end", end);
   }
+
+  // TODO: we have code point positions s, e, and length. We need to take those
+  // and walk the string to figure out the starting and ending BYTE positions
+
+  // TODO: fast path, can keep below if string_num_cp(str) == string_len(str)
 
   result.len = len;
   result.data = alloca(sizeof(char) * len);
