@@ -719,6 +719,7 @@ uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 int Cyc_utf8_count_code_points(uint8_t* s);
 uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
 uint32_t Cyc_utf8_validate(char *str, size_t len);
+int uint32_num_bytes(uint32_t val);
 /**@}*/
 
 #endif                          /* CYCLONE_RUNTIME_H */

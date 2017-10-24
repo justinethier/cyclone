@@ -178,6 +178,7 @@ void pack_env_variables(void *data, object k)
     svar->hdr.grayed = 0;
     svar->tag = string_tag; 
     svar->len = eqpos - e;
+    svar->num_cp = svar->len; // TODO: proper UTF-8 support!
     svar->str = alloca(sizeof(char) * (svar->len));
     strncpy(svar->str, e, svar->len);
     (svar->str)[svar->len] = '\0';
@@ -189,6 +190,7 @@ void pack_env_variables(void *data, object k)
     sval->hdr.grayed = 0;
     sval->tag = string_tag; 
     sval->len = strlen(eqpos);
+    sval->num_cp = sval->len; // TODO: proper UTF-8 support!
     sval->str = eqpos;
     set_pair(tmp, svar, sval);
     set_pair(p, tmp, NULL);
@@ -6551,6 +6553,14 @@ uint32_t Cyc_utf8_validate(char *str, size_t len) {
     }
 
     return state;
+}
+
+int uint32_num_bytes(uint32_t x) {
+  // TODO: could compute log(val) / log(256)
+  if (x < 0x100) return 1;
+  if (x < 0x10000) return 2;
+  if (x < 0x1000000) return 3;
+  return 4;
 }
 
 ////////////// END UTF-8 Section //////////////
