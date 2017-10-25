@@ -2595,23 +2595,41 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   e = unbox_number(end);
   len = e - s;
 
-  if (s < 0 || (s >= string_len(str) && len > 0)) {
+  if (s < 0 || (s >= string_num_cp(str) && len > 0)) {
     Cyc_rt_raise2(data, "string->utf8 - invalid start", start);
   }
 
-  if (e < 0 || e < s || e > string_len(str)) {
+  if (e < 0 || e < s || e > string_num_cp(str)) {
     Cyc_rt_raise2(data, "string->utf8 - invalid end", end);
   }
 
-  // TODO: we have code point positions s, e, and length. We need to take those
-  // and walk the string to figure out the starting and ending BYTE positions
-
-  // TODO: fast path, can keep below if string_num_cp(str) == string_len(str)
-
-  result.len = len;
-  result.data = alloca(sizeof(char) * len);
-  memcpy(&result.data[0], &(string_str(str))[s], len);
-  _return_closcall1(data, cont, &result);
+  // Fast path
+  if (string_num_cp(str) == string_len(str)) { // TODO: disable for testing purposes
+    result.len = len;
+    result.data = alloca(sizeof(char) * len);
+    memcpy(&result.data[0], &(string_str(str))[s], len);
+    _return_closcall1(data, cont, &result);
+  } else {
+    int i, start_i = 0, end_i = 0;
+    const char *tmp = string_str(str);
+    char_type codepoint;
+    uint32_t state = 0;
+    for (i = 0; *tmp; ++tmp) {
+      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+        if (i == s) {
+          start_i = i;
+        } else if (i == e) {
+          break;
+        }
+      }
+      i++;
+    }
+    end_i = i;
+    result.len = end_i - start_i;
+    result.data = alloca(sizeof(char) * result.len);
+    memcpy(&result.data[0], &(string_str(str))[start_i], result.len);
+    _return_closcall1(data, cont, &result);
+  }
 }
 
 object Cyc_bytevector_u8_ref(void *data, object bv, object k)
@@ -6562,5 +6580,67 @@ int uint32_num_bytes(uint32_t x) {
   if (x < 0x1000000) return 3;
   return 4;
 }
+
+/**
+ * This function takes one or more 32-bit chars and encodes them 
+ * as an array of UTF-8 bytes.
+ * FROM: https://www.cprogramming.com/tutorial/utf8.c
+ *
+ * @param dest    Destination byte buffer
+ * @param sz      size of dest buffer in bytes
+ * @param src     Buffer of source data, in 32-bit characters
+ * @param srcsz   number of source characters, or -1 if 0-terminated
+ *
+ * @return Number of characters converted
+ *
+ * dest will only be '\0'-terminated if there is enough space. this is
+ * for consistency; imagine there are 2 bytes of space left, but the next
+ * character requires 3 bytes. in this case we could NUL-terminate, but in
+ * general we can't when there's insufficient space. therefore this function
+ * only NUL-terminates if all the characters fit, and there's space for
+ * the NUL as well.
+ * the destination string will never be bigger than the source string.
+ */
+int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz)
+{
+    u_int32_t ch;
+    int i = 0;
+    char *dest_end = dest + sz;
+
+    while (srcsz<0 ? src[i]!=0 : i < srcsz) {
+        ch = src[i];
+        if (ch < 0x80) {
+            if (dest >= dest_end)
+                return i;
+            *dest++ = (char)ch;
+        }
+        else if (ch < 0x800) {
+            if (dest >= dest_end-1)
+                return i;
+            *dest++ = (ch>>6) | 0xC0;
+            *dest++ = (ch & 0x3F) | 0x80;
+        }
+        else if (ch < 0x10000) {
+            if (dest >= dest_end-2)
+                return i;
+            *dest++ = (ch>>12) | 0xE0;
+            *dest++ = ((ch>>6) & 0x3F) | 0x80;
+            *dest++ = (ch & 0x3F) | 0x80;
+        }
+        else if (ch < 0x110000) {
+            if (dest >= dest_end-3)
+                return i;
+            *dest++ = (ch>>18) | 0xF0;
+            *dest++ = ((ch>>12) & 0x3F) | 0x80;
+            *dest++ = ((ch>>6) & 0x3F) | 0x80;
+            *dest++ = (ch & 0x3F) | 0x80;
+        }
+        i++;
+    }
+    if (dest < dest_end)
+        *dest = '\0';
+    return i;
+}
+
 
 ////////////// END UTF-8 Section //////////////

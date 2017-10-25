@@ -715,6 +715,13 @@ void Cyc_set_globals_changed(gc_thread_data *thd);
 /**@{*/
 #define CYC_UTF8_ACCEPT 0
 #define CYC_UTF8_REJECT 1
+
+/**
+ * Simple macro to make it more convenient to convert a single char
+ */
+#define Cyc_utf8_encode_char(dest, dest_size, char_value) \
+  Cyc_utf8_encode(dest, dest_size, &char_value, 1)
+
 uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 int Cyc_utf8_count_code_points(uint8_t* s);
 uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
