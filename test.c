@@ -38,6 +38,12 @@ uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
 }
 
 /**
+ * Simple macro to make it more convenient to convert a single char
+ */
+#define Cyc_utf8_encode_char(dest, dest_size, char_value) \
+  Cyc_utf8_encode(dest, dest_size, &char_value, 1)
+
+/**
  * This function takes one or more 32-bit chars and encodes them 
  * as an array of UTF-8 bytes.
  * FROM: https://www.cprogramming.com/tutorial/utf8.c
@@ -102,7 +108,7 @@ void encode(uint32_t val) {
   char dest[5];
   int rv, i;
 
-  rv = Cyc_utf8_encode(dest, 5, &val, 1);
+  rv = Cyc_utf8_encode_char(dest, 5, val);
   printf("%x %d \n", val, rv);
   for(i = 0; i < 5; i++) {
     printf("[%x] ", (uint8_t)dest[i]);
