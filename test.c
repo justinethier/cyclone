@@ -37,20 +37,27 @@ uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
   return *state;
 }
 
-// FROM: https://www.cprogramming.com/tutorial/utf8.c
-/* srcsz = number of source characters, or -1 if 0-terminated
-   sz = size of dest buffer in bytes
-
-   returns # characters converted
-   dest will only be '\0'-terminated if there is enough space. this is
-   for consistency; imagine there are 2 bytes of space left, but the next
-   character requires 3 bytes. in this case we could NUL-terminate, but in
-   general we can't when there's insufficient space. therefore this function
-   only NUL-terminates if all the characters fit, and there's space for
-   the NUL as well.
-   the destination string will never be bigger than the source string.
-*/
-int u8_toutf8(char *dest, int sz, u_int32_t *src, int srcsz)
+/**
+ * This function takes one or more 32-bit chars and encodes them 
+ * as an array of UTF-8 bytes.
+ * FROM: https://www.cprogramming.com/tutorial/utf8.c
+ *
+ * @param dest    Destination byte buffer
+ * @param sz      size of dest buffer in bytes
+ * @param src     Buffer of source data, in 32-bit characters
+ * @param srcsz   number of source characters, or -1 if 0-terminated
+ *
+ * @return Number of characters converted
+ *
+ * dest will only be '\0'-terminated if there is enough space. this is
+ * for consistency; imagine there are 2 bytes of space left, but the next
+ * character requires 3 bytes. in this case we could NUL-terminate, but in
+ * general we can't when there's insufficient space. therefore this function
+ * only NUL-terminates if all the characters fit, and there's space for
+ * the NUL as well.
+ * the destination string will never be bigger than the source string.
+ */
+int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz)
 {
     u_int32_t ch;
     int i = 0;
@@ -91,14 +98,16 @@ int u8_toutf8(char *dest, int sz, u_int32_t *src, int srcsz)
     return i;
 }
 
-void encoding() {
+void encode(uint32_t val) {
   char dest[5];
-  int rv;
-  uint32_t val = 0x03bb;
+  int rv, i;
 
-  rv = u8_toutf8(dest, 5, &val, 1);
-  printf("%d %x\n", rv, dest);
-TODO: above seems broken, should encode to 0xCEBB (see below)
+  rv = Cyc_utf8_encode(dest, 5, &val, 1);
+  printf("%x %d \n", val, rv);
+  for(i = 0; i < 5; i++) {
+    printf("[%x] ", (uint8_t)dest[i]);
+  }
+  printf("\n");
   return;
 }
 
@@ -124,6 +133,8 @@ void main(){
   }
   printf("state = %d, cp = %d\n", state, codepoint);
 
-  encoding();
+  encode(0x3bb);
+  encode(65);
+  encode(0xcebb);
   return;
 }
