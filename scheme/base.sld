@@ -950,10 +950,12 @@
     (define-c Cyc-make-string
       "(void *data, int argc, closure _, object k, object count, object fill)"
       " object s = NULL;
+        char ch_buf[5];
         Cyc_check_int(data, count);
-        char c = obj_obj2char(fill);
+        char_type c = obj_obj2char(fill);
+        Cyc_utf8_encode_char(ch_buf, 5, &c);
         int num_cp = obj_obj2int(count);
-        int len = num_cp * uint32_num_bytes(c);
+TODO: read encoded ch_buf        int len = num_cp * uint32_num_bytes(c);
         if (len >= MAX_STACK_OBJ) {
           int heap_grown;
           s = gc_alloc(((gc_thread_data *)data)->heap, 
