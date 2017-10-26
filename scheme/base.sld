@@ -953,9 +953,9 @@
         char ch_buf[5];
         Cyc_check_int(data, count);
         char_type c = obj_obj2char(fill);
-        Cyc_utf8_encode_char(ch_buf, 5, &c);
+        Cyc_utf8_encode_char(ch_buf, 5, c);
         int num_cp = obj_obj2int(count);
-TODO: read encoded ch_buf        int len = num_cp * uint32_num_bytes(c);
+        int len = num_cp * strlen(ch_buf);
         if (len >= MAX_STACK_OBJ) {
           int heap_grown;
           s = gc_alloc(((gc_thread_data *)data)->heap, 
@@ -978,14 +978,15 @@ TODO: read encoded ch_buf        int len = num_cp * uint32_num_bytes(c);
           ((string_type *)s)->num_cp = num_cp;
           ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
         }
-        //if (num_cp == 1) { /* Fast path */
-          memset(((string_type *)s)->str, c, len);
-        //} else {
-        //  int i;
-        //  uint32_t*
-        //  for (i = 0; i < len; i++) {
-        //  }
-        //}
+        if (0 && num_cp == 1) { /* Fast path */
+          memset(((string_type *)s)->str, ch_buf[0], len);
+        } else {
+          char *buf = ((string_type *)s)->str;
+          int bi, si, slen = strlen(ch_buf);
+          for (bi = 0, si = 0; bi < len; bi++, si++) {
+            buf[bi] = ch_buf[si % slen];
+          }
+        }
         ((string_type *)s)->str[len] = '\\0';
         return_closcall1(data, k, s);
       ")
