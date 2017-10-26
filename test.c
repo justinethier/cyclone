@@ -117,9 +117,19 @@ void encode(uint32_t val) {
   return;
 }
 
+void multi_byte_memset(char *buf, int blen, char *src, int slen)
+{
+  int bi, si;
+  for (bi = 0, si = 0; bi < blen; bi++, si++) {
+    buf[bi] = src[si % slen];
+  }
+}
+
 void main(){
   char c[128];
   uint8_t cv[] = {0xEC, 0xBA, 0xBB, 0x00}; // Lambda (0x03bb) is encoded with leading 0xCE
+  uint8_t cv2[] = {0xCE, 0xBB}; // Lambda (0x03bb) is encoded with leading 0xCE
+  //uint8_t cv2[] = {0xEC, 0xBA, 0xBB}; // Lambda (0x03bb) is encoded with leading 0xCE
 //  uint8_t cv[] = {0xCE, 0xBB, 0x00}; // Lambda (0x03bb) is encoded with leading 0xCE
   char *cptr;
   uint32_t state = CYC_UTF8_ACCEPT, codepoint, val = 0x32363435;
@@ -132,6 +142,9 @@ void main(){
 //  }
 //  c[127] = '\0';
 //  printf("%s\n", c);
+  multi_byte_memset(c, 126, cv2, 2);
+  c[127] = '\0';
+  printf("TEST: %s\n", c);
 
   ptr = cv;
   for (i = 0; i < 3; i++) {
