@@ -6313,7 +6313,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
 {
   FILE *stream = ((port_type *) port)->fp;
   char buf[1024];
-  int len;
+  int len, num_cp;
 
   Cyc_check_port(data, port);
   if (stream == NULL) {
@@ -6322,7 +6322,8 @@ object Cyc_io_read_line(void *data, object cont, object port)
   set_thread_blocked(data, cont);
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
-    len = strlen(buf);
+    // TODO: not good enough for UTF-8, what if we stopped reading in the middle of a code point?
+    Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &num_cp, &len);
     {
       // Remove any trailing CR / newline chars
       while (len > 0 && (buf[len - 1] == '\n' ||
@@ -6331,6 +6332,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
       }
       buf[len] = '\0';
       make_string_noalloc(s, buf, len);
+      s.num_cp = num_cp;
       return_thread_runnable(data, &s);
     }
   } else {
@@ -6537,6 +6539,22 @@ int Cyc_utf8_count_code_points(uint8_t* s) {
   if (state != CYC_UTF8_ACCEPT)
     return -1;
   return count;
+}
+
+int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, int *cpts, int *bytes) {
+  uint32_t codepoint;
+  uint32_t state = 0;
+  *cpts = 0;
+  *bytes = 0;
+  for (; *s; ++s){
+    *bytes += 1;
+    if (!Cyc_utf8_decode(&state, &codepoint, *s))
+      *cpts += 1;
+  }
+
+  if (state != CYC_UTF8_ACCEPT)
+    return -1;
+  return 0;
 }
 
 // TODO: index into X codepoint in a string 
