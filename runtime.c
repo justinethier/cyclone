@@ -1835,21 +1835,34 @@ object Cyc_string2symbol(void *data, object str)
 
 object Cyc_list2string(void *data, object cont, object lst)
 {
-  char *buf;
-  int i = 0;
-  object len;
+  char *buf, cbuf[5];
+  int i = 0, len = 0;
+  object cbox, tmp = lst;
+  char_type ch;
 
   Cyc_check_pair_or_null(data, lst);
-  len = Cyc_length(data, lst);  // Inefficient, walks whole list
+
+  // Need to walk the list of chars to compute multibyte length
+  while (tmp) {
+    if (is_value_type(tmp) || ((list) tmp)->tag != pair_tag) {
+      Cyc_rt_raise2(data, "length - invalid parameter, expected list", tmp);
+    }
+    cbox = car(tmp);
+    ch = obj_obj2char(cbox);
+    if (!obj_is_char(cbox)) {
+      Cyc_rt_raise2(data, "Expected character but received", cbox);
+    }
+    len += Cyc_utf8_encode_char(cbuf, 5, ch);
+    tmp = cdr(tmp);
+  }
 
   {
-    make_string_noalloc(str, NULL, (obj_obj2int(len)));
-    str.str = buf = alloca(sizeof(char) * (obj_obj2int(len) + 1));
+    make_string_noalloc(str, NULL, len);
+    str.str = buf = alloca(sizeof(char) * (len + 1));
     while ((lst != NULL)) {
-      if (!obj_is_char(car(lst))) {
-        Cyc_rt_raise2(data, "Expected character but received", car(lst));
-      }
-      buf[i++] = obj_obj2char(car(lst));
+      cbox = car(lst);
+      ch = obj_obj2char(cbox); // Already validated, can assume chars now
+      i += Cyc_utf8_encode_char(&(buf[i]), 5, ch);
       lst = cdr(lst);
     }
     buf[i] = '\0';
