@@ -102,6 +102,7 @@ void Cyc_io_get_output_string(void *data, object cont, object port)
   }
   {
     make_string_with_len(s, p->str_bv_in_mem_buf, p->str_bv_in_mem_buf_len);
+    s.num_cp = Cyc_utf8_count_code_points((uint8_t *)string_str(&s));
     return_closcall1(data, cont, &s);
   }
 }
