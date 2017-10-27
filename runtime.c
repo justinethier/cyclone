@@ -6586,13 +6586,13 @@ uint32_t Cyc_utf8_validate(char *str, size_t len) {
     return state;
 }
 
-int uint32_num_bytes(uint32_t x) {
-  // TODO: could compute log(val) / log(256)
-  if (x < 0x100) return 1;
-  if (x < 0x10000) return 2;
-  if (x < 0x1000000) return 3;
-  return 4;
-}
+//int uint32_num_bytes(uint32_t x) {
+//  // TODO: could compute log(val) / log(256)
+//  if (x < 0x100) return 1;
+//  if (x < 0x10000) return 2;
+//  if (x < 0x1000000) return 3;
+//  return 4;
+//}
 
 /**
  * This function takes one or more 32-bit chars and encodes them 
