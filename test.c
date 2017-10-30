@@ -125,6 +125,29 @@ void multi_byte_memset(char *buf, int blen, char *src, int slen)
   }
 }
 
+void substring(int s, int e) {
+  uint8_t raw[] = {65, 66, 0xCE, 0xBB};
+
+    const char *tmp = raw;
+    uint32_t codepoint;
+    uint32_t state = 0;
+    int count, start_i = 0, end_i = 0;
+
+    for (count = 0; *tmp; ++tmp){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
+        if (count == s) {
+          start_i = end_i;
+        } else if (count == e) {
+          break;
+        }
+        count += 1;
+      }
+      end_i++;
+    }
+    raw[end_i] = '\0';
+    printf("raw=%s, s=%d, e=%d, start_i=%d, end_i=%d\n", raw, s, e, start_i, end_i);
+}
+
 void main(){
   char c[128];
   uint8_t cv[] = {0xEC, 0xBA, 0xBB, 0x00}; // Lambda (0x03bb) is encoded with leading 0xCE
@@ -157,5 +180,9 @@ void main(){
   encode(0xcebb);
 
   printf("%06X\n", 0x0fff);
+  substring(0, 1);
+  substring(0, 2);
+  substring(1, 3);
+  substring(1, 4);
   return;
 }
