@@ -6001,8 +6001,15 @@ void _read_string(void *data, object cont, port_type *p)
         }
         buf[i] = '\0';
         {
-          int result = (int)strtol(buf, NULL, 16);
-          p->tok_buf[p->tok_end++] = (char)result;
+          char_type result = strtol(buf, NULL, 16);
+          char cbuf[5];
+          int i;
+          Cyc_utf8_encode_char(cbuf, 5, result);
+// TODO: infinite loop here or above if ; is not provided???
+          for (i = 0; cbuf[i] != 0; i++) {
+            _read_add_to_tok_buf(p, cbuf[i]);
+          }
+          //p->tok_buf[p->tok_end++] = (char)result;
         }
         break;
       }
@@ -6014,7 +6021,10 @@ void _read_string(void *data, object cont, port_type *p)
       p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
       p->tok_end = 0; // Reset for next atom
       {
+// TODO: need to change this below, but run into trouble in icyc, eg:
+//       (string-ref "ab\x3bb;" 2) crashes
         make_string(str, p->tok_buf);
+        //make_utf8_string(data, str, p->tok_buf);
         return_thread_runnable(data, &str);
       }
     } else if (c == '\\') {

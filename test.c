@@ -155,5 +155,7 @@ void main(){
   encode(0x3bb);
   encode(65);
   encode(0xcebb);
+
+  printf("%06X\n", 0x0fff);
   return;
 }
