@@ -2143,7 +2143,7 @@ fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), le
     int i = 0, count, start_len = 0, start_cp = 0;
 
     for (count = 0; *tmp; ++tmp){
-      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
         if (count < idx) {
           start_len = i;
           start_cp = count;
@@ -2193,7 +2193,7 @@ object Cyc_string_ref(void *data, object str, object k)
     int count;
 
     for (count = 0; *raw; ++raw){
-      if (!Cyc_utf8_decode(&state, &codepoint, *raw)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*raw)){
         if (count == idx) break; // Reached requested index
         count += 1;
       }
@@ -2241,7 +2241,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
     int count, start_i = 0, end_i = 0;
 
     for (count = 0; *tmp; ++tmp){
-      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
         if (count == s) {
           start_i = end_i;
         } else if (count == e) {
@@ -2637,7 +2637,7 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
     char_type codepoint;
     uint32_t state = 0;
     for (i = 0; *tmp; ++tmp) {
-      if (!Cyc_utf8_decode(&state, &codepoint, *tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
         if (i == s) {
           start_i = i;
         } else if (i == e) {
@@ -6023,8 +6023,8 @@ void _read_string(void *data, object cont, port_type *p)
       {
 // TODO: need to change this below, but run into trouble in icyc, eg:
 //       (string-ref "ab\x3bb;" 2) crashes
-        make_string(str, p->tok_buf);
-        //make_utf8_string(data, str, p->tok_buf);
+        //make_string(str, p->tok_buf);
+        make_utf8_string(data, str, p->tok_buf);
         return_thread_runnable(data, &str);
       }
     } else if (c == '\\') {

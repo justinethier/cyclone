@@ -776,7 +776,7 @@ typedef struct {
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; \
-  cs.num_cp = Cyc_utf8_count_code_points(s); \
+  cs.num_cp = Cyc_utf8_count_code_points((uint8_t *)s); \
   if (cs.num_cp < 0) { \
     Cyc_rt_raise_msg(data, "Invalid UTF-8 characters in string"); \
   } \
