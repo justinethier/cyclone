@@ -494,12 +494,12 @@ typedef uint32_t char_type;
 /**
  * Convert from an object to a char.
  */
-#define obj_obj2char(x) (char)((long)(x)>>2)
+#define obj_obj2char(x) (char_type)((uintmax_t)(x)>>2)
 
 /**
  * Convert from a char to an object.
  */
-#define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
+#define obj_char2obj(c) ((void *)((((uintmax_t)c)<<2) | 2))
 
 /**
  * Is the given object a value type?

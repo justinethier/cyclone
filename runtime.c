@@ -804,7 +804,10 @@ object Cyc_display(void *data, object x, FILE * port)
     return quote_void;
   }
   if (obj_is_char(x)) {
-    fprintf(port, "%c", obj_obj2char(x));
+    char cbuf[5];
+    char_type unbox = obj_obj2char(x);
+    Cyc_utf8_encode_char(cbuf, 5, unbox);
+    fprintf(port, "%s", cbuf);
     return quote_void;
   }
   if (obj_is_int(x)) {
@@ -984,7 +987,7 @@ static object _Cyc_write(void *data, object x, FILE * port)
     return quote_void;
   }
   if (obj_is_char(x)) {
-    char c = obj_obj2char(x);
+    char_type c = obj_obj2char(x);
     switch (c) {
     case 0:   fprintf(port, "#\\null"); break;
     case 7:   fprintf(port, "#\\alarm"); break;
@@ -995,11 +998,13 @@ static object _Cyc_write(void *data, object x, FILE * port)
     case 27:  fprintf(port, "#\\escape"); break;
     case 32:  fprintf(port, "#\\space"); break;
     case 127: fprintf(port, "#\\delete"); break;
-    default:
-      fprintf(port, "#\\%c", obj_obj2char(x));
+    default: {
+      char cbuf[5];
+      Cyc_utf8_encode_char(cbuf, 5, c);
+      fprintf(port, "#\\%s", cbuf);
       break;
+      }
     }
-    //fprintf(port, "#\\%c", obj_obj2char(x));
     return quote_void;
   }
   if (obj_is_int(x)) {
@@ -1097,7 +1102,10 @@ object Cyc_write_char(void *data, object c, object port)
   if (obj_is_char(c)) {
     FILE *fp = ((port_type *) port)->fp;
     if (fp){
-      fprintf(fp, "%c", obj_obj2char(c));
+      char cbuf[5];
+      char_type unbox = obj_obj2char(c);
+      Cyc_utf8_encode_char(cbuf, 5, unbox);
+      fprintf(fp, "%s", cbuf);
     }
   } else {
     Cyc_rt_raise2(data, "Argument is not a character", c);
@@ -2119,6 +2127,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
 
   // Take fast path if all chars are just 1 byte
   if (string_num_cp(str) == string_len(str)) {
+    // TODO: not good enough, chr could be multi-byte
     raw[idx] = obj_obj2char(chr);
   } else {
 fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), len);
@@ -6323,6 +6332,8 @@ object Cyc_io_read_line(void *data, object cont, object port)
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
     // TODO: not good enough for UTF-8, what if we stopped reading in the middle of a code point?
+    // should reserve 3 extra bytes and, if last code point is not complete, read one byte at a
+    // time until it has been read
     Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &num_cp, &len);
     {
       // Remove any trailing CR / newline chars
