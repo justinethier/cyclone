@@ -2755,7 +2755,7 @@ object Cyc_char2integer(object chr)
 
 object Cyc_integer2char(void *data, object n)
 {
-  int val = 0;
+  char_type val = 0;
 
   Cyc_check_num(data, n);
   val = unbox_number(n);
@@ -6095,7 +6095,7 @@ void _read_return_character(void *data, port_type *p)
     return_thread_runnable(data, obj_char2obj('\t'));
   } else if(strlen(p->tok_buf) > 1 && p->tok_buf[0] == 'x') {
     const char *buf = p->tok_buf + 1;
-    int result = strtol(buf, NULL, 16);
+    char_type result = strtol(buf, NULL, 16);
     return_thread_runnable(data, obj_char2obj(result));
   } else {
     char buf[31];
