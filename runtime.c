@@ -6319,17 +6319,21 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 object Cyc_io_read_char(void *data, object cont, object port)
 {
   port_type *p = (port_type *)port;
-  int c;
   Cyc_check_port(data, port);
   if (p->fp == NULL) {
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
   }
   {
+    uint32_t state = CYC_UTF8_ACCEPT;
+    char_type codepoint;
+    int c;
     set_thread_blocked(data, cont);
-    _read_next_char(data, cont, p);
-    c = p->mem_buf[p->buf_idx++];
+    do {
+      _read_next_char(data, cont, p);
+      c = p->mem_buf[p->buf_idx++];
+    } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
     p->col_num++;
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
   }
   return Cyc_EOF;
 }
