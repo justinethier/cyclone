@@ -2254,18 +2254,6 @@ object Cyc_substring(void *data, object cont, object str, object start,
         }
       }
     }
-    //int count, start_i = 0, end_i = 0;
-    //for (count = 0; *tmp; ++tmp){
-    //  if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
-    //    if (count == s) {
-    //      start_i = end_i;
-    //    } else if (count == e) {
-    //      break;
-    //    }
-    //    count += 1;
-    //  }
-    //  end_i++;
-    //}
     if (state != CYC_UTF8_ACCEPT)
        Cyc_rt_raise2(data, "substring - invalid character in string", str);
     make_utf8_string_with_len(sub, raw + start_i, end_i - start_i, e - s);
@@ -2647,21 +2635,25 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
     memcpy(&result.data[0], &(string_str(str))[s], len);
     _return_closcall1(data, cont, &result);
   } else {
-    int i, start_i = 0, end_i = 0;
     const char *tmp = string_str(str);
     char_type codepoint;
     uint32_t state = 0;
-    for (i = 0; *tmp; ++tmp) {
+    int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
+    for (num_ch = 0; *tmp; ++tmp){
+      cur_ch_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
-        if (i == s) {
-          start_i = i;
-        } else if (i == e) {
+        end_i += cur_ch_bytes;
+        num_ch += 1;
+        cur_ch_bytes = 0;
+
+        if (num_ch == s) {
+          start_i = end_i;
+        }
+        if (num_ch == e) {
           break;
         }
       }
-      i++;
     }
-    end_i = i;
     result.len = end_i - start_i;
     result.data = alloca(sizeof(char) * result.len);
     memcpy(&result.data[0], &(string_str(str))[start_i], result.len);
