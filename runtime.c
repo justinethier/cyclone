@@ -2238,19 +2238,34 @@ object Cyc_substring(void *data, object cont, object str, object start,
     const char *tmp = raw;
     char_type codepoint;
     uint32_t state = 0;
-    int count, start_i = 0, end_i = 0;
-
-    for (count = 0; *tmp; ++tmp){
+    int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
+    for (num_ch = 0; *tmp; ++tmp){
+      cur_ch_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
-        if (count == s) {
+        end_i += cur_ch_bytes;
+        num_ch += 1;
+        cur_ch_bytes = 0;
+
+        if (num_ch == s) {
           start_i = end_i;
-        } else if (count == e) {
+        }
+        if (num_ch == e) {
           break;
         }
-        count += 1;
       }
-      end_i++;
     }
+    //int count, start_i = 0, end_i = 0;
+    //for (count = 0; *tmp; ++tmp){
+    //  if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
+    //    if (count == s) {
+    //      start_i = end_i;
+    //    } else if (count == e) {
+    //      break;
+    //    }
+    //    count += 1;
+    //  }
+    //  end_i++;
+    //}
     if (state != CYC_UTF8_ACCEPT)
        Cyc_rt_raise2(data, "substring - invalid character in string", str);
     make_utf8_string_with_len(sub, raw + start_i, end_i - start_i, e - s);

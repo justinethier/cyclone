@@ -132,7 +132,7 @@ void substring(int s, int e, const char *expected) {
     uint32_t state = 0;
     int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
     for (num_ch = 0; *tmp; ++tmp){
-      //printf("char = %d\n", (int)*tmp);
+      cur_ch_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
         end_i += cur_ch_bytes;
         num_ch += 1;
@@ -144,18 +144,9 @@ void substring(int s, int e, const char *expected) {
         if (num_ch == e) {
           break;
         }
-
-        //if (num_ch == s) {
-        //  start_i = end_i;
-        //} else if (num_ch == (e - 1)) {
-        //  end_i += cur_ch_bytes;
-        //  if (s == e) start_i = end_i;
-        //  break;
-        //}
       }
-      cur_ch_bytes++;
     }
-    raw[end_i + 1] = '\0';
+    raw[end_i] = '\0';
     printf("expected=%s, raw=%s, s=%d, e=%d, start_i=%d, end_i=%d\n", expected, raw + start_i, s, e, start_i, end_i);
 }
 
