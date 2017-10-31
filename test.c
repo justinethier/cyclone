@@ -125,27 +125,38 @@ void multi_byte_memset(char *buf, int blen, char *src, int slen)
   }
 }
 
-void substring(int s, int e) {
-  uint8_t raw[] = {65, 66, 0xCE, 0xBB};
-
+void substring(int s, int e, const char *expected) {
+  uint8_t raw[] = {65, 66, 0xCE, 0xBB, 67};
     const char *tmp = raw;
     uint32_t codepoint;
     uint32_t state = 0;
-    int count, start_i = 0, end_i = 0;
-
-    for (count = 0; *tmp; ++tmp){
+    int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
+    for (num_ch = 0; *tmp; ++tmp){
+      //printf("char = %d\n", (int)*tmp);
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
-        if (count == s) {
+        end_i += cur_ch_bytes;
+        num_ch += 1;
+        cur_ch_bytes = 0;
+
+        if (num_ch == s) {
           start_i = end_i;
-        } else if (count == e) {
+        }
+        if (num_ch == e) {
           break;
         }
-        count += 1;
+
+        //if (num_ch == s) {
+        //  start_i = end_i;
+        //} else if (num_ch == (e - 1)) {
+        //  end_i += cur_ch_bytes;
+        //  if (s == e) start_i = end_i;
+        //  break;
+        //}
       }
-      end_i++;
+      cur_ch_bytes++;
     }
-    raw[end_i] = '\0';
-    printf("raw=%s, s=%d, e=%d, start_i=%d, end_i=%d\n", raw, s, e, start_i, end_i);
+    raw[end_i + 1] = '\0';
+    printf("expected=%s, raw=%s, s=%d, e=%d, start_i=%d, end_i=%d\n", expected, raw + start_i, s, e, start_i, end_i);
 }
 
 void main(){
@@ -180,9 +191,12 @@ void main(){
   encode(0xcebb);
 
   printf("%06X\n", 0x0fff);
-  substring(0, 1);
-  substring(0, 2);
-  substring(1, 3);
-  substring(1, 4);
+  substring(0, 1, "A   ");
+  substring(0, 2, "AB  ");
+  substring(1, 3, "Bx  ");
+  substring(1, 4, "BxC ");
+  substring(2, 2, "    ");
+  substring(2, 3, "x   ");
+  substring(2, 4, "xC  ");
   return;
 }
