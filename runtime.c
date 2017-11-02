@@ -1860,7 +1860,8 @@ object Cyc_list2string(void *data, object cont, object lst)
     if (!obj_is_char(cbox)) {
       Cyc_rt_raise2(data, "Expected character but received", cbox);
     }
-    len += Cyc_utf8_encode_char(cbuf, 5, ch);
+    Cyc_utf8_encode_char(cbuf, 5, ch);
+    len += strlen(cbuf);
     tmp = cdr(tmp);
   }
 
@@ -1870,7 +1871,8 @@ object Cyc_list2string(void *data, object cont, object lst)
     while ((lst != NULL)) {
       cbox = car(lst);
       ch = obj_obj2char(cbox); // Already validated, can assume chars now
-      i += Cyc_utf8_encode_char(&(buf[i]), 5, ch);
+      Cyc_utf8_encode_char(&(buf[i]), 5, ch);
+      i += strlen(buf+i);
       lst = cdr(lst);
     }
     buf[i] = '\0';
@@ -6013,6 +6015,7 @@ void _read_string(void *data, object cont, port_type *p)
           int i;
           Cyc_utf8_encode_char(cbuf, 5, result);
 // TODO: infinite loop here or above if ; is not provided???
+// only because it is still waiting for the ; after it reads the closing quote
           for (i = 0; cbuf[i] != 0; i++) {
             _read_add_to_tok_buf(p, cbuf[i]);
           }
