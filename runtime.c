@@ -6118,9 +6118,23 @@ void _read_return_character(void *data, port_type *p)
     char_type result = strtol(buf, NULL, 16);
     return_thread_runnable(data, obj_char2obj(result));
   } else {
-    char buf[31];
-    snprintf(buf, 30, "Unable to parse character %s", p->tok_buf);
-    _read_error(data, p, buf);
+    uint32_t state = CYC_UTF8_ACCEPT;
+    char_type codepoint;
+    uint8_t *s = (uint8_t *)p->tok_buf;
+    while(s) {
+      if (!Cyc_utf8_decode(&state, &codepoint, *s)) {
+        s++;
+        break;
+      }
+      s++;
+    }
+    if (state == CYC_UTF8_ACCEPT && *s == '\0') {
+      return_thread_runnable(data, obj_char2obj(codepoint));
+    } else {
+      char buf[31];
+      snprintf(buf, 30, "Unable to parse character %s", p->tok_buf);
+      _read_error(data, p, buf);
+    }
   }
 }
 
