@@ -5945,6 +5945,28 @@ static void _read_add_to_tok_buf(port_type *p, char c)
 }
 
 /**
+ * @brief Determine if given string is numeric
+ */
+int _read_is_numeric(const char *tok)
+{
+  int len = strlen(tok);
+  return (len &&
+          ((isdigit(tok[0])) ||
+           ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
+           ((len > 1) && (tok[1] == '.' || isdigit(tok[1])) && (tok[0] == '-' || tok[0] == '+'))));
+}
+
+/**
+ * @brief Helper function, determine if given number is a hex digit
+ * @param c Character to check
+ */
+int _read_is_hex_digit(char c)
+{
+  return (c >= 'a' && c <= 'f') ||
+         (c >= 'A' && c <= 'F');
+}
+
+/**
  * @brief Helper function to read a string
  * @param data Thread data object
  * @param cont Current continuation
@@ -6003,6 +6025,10 @@ void _read_string(void *data, object cont, port_type *p)
             p->buf_idx++;
             break;
           }
+          // TODO: verify if hex digit is valid
+          //if (!isdigit(p->buf_idx) && !_read_is_hex_digit(p->buf_idx)) {
+          //  _read_error(data, p, "invalid hex digit in string");
+          //}
           buf[i] = p->mem_buf[p->buf_idx];
           p->buf_idx++;
           p->col_num++;
@@ -6166,28 +6192,6 @@ void _read_character(void *data, port_type *p)
       _read_add_to_tok_buf(p, c);
     }
   }
-}
-
-/**
- * @brief Determine if given string is numeric
- */
-int _read_is_numeric(const char *tok)
-{
-  int len = strlen(tok);
-  return (len &&
-          ((isdigit(tok[0])) ||
-           ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
-           ((len > 1) && (tok[1] == '.' || isdigit(tok[1])) && (tok[0] == '-' || tok[0] == '+'))));
-}
-
-/**
- * @brief Helper function, determine if given number is a hex digit
- * @param c Character to check
- */
-int _read_is_hex_digit(char c)
-{
-  return (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F');
 }
 
 /**
