@@ -6094,6 +6094,7 @@ void _read_return_character(void *data, port_type *p)
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
   if (strlen(p->tok_buf) == 1) {
+    // ASCII char, consider merging with below?
     return_thread_runnable(data, obj_char2obj(p->tok_buf[0]));
   } else if(strncmp(p->tok_buf, "alarm", 5) == 0) {
     return_thread_runnable(data, obj_char2obj('\a'));
@@ -6118,6 +6119,7 @@ void _read_return_character(void *data, port_type *p)
     char_type result = strtol(buf, NULL, 16);
     return_thread_runnable(data, obj_char2obj(result));
   } else {
+    // Try to read a UTF-8 char and if so return it, otherwise throw an error
     uint32_t state = CYC_UTF8_ACCEPT;
     char_type codepoint;
     uint8_t *s = (uint8_t *)p->tok_buf;
