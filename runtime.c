@@ -6304,6 +6304,8 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 {
   FILE *stream;
   port_type *p;
+  uint32_t state = CYC_UTF8_ACCEPT;
+  char_type codepoint;
   int c;
 
   Cyc_check_port(data, port);
@@ -6316,7 +6318,13 @@ object Cyc_io_peek_char(void *data, object cont, object port)
     set_thread_blocked(data, cont);
     _read_next_char(data, cont, p);
     c = p->mem_buf[p->buf_idx];
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+    if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
+      // TODO: only have a partial UTF8 code point, read more chars.
+      // Problem is that there may not be enough space to store them
+      // and do need to set them aside since we are just peeking here
+      // and not actually supposed to be reading past chars.
+    }
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
   }
   return Cyc_EOF;
 }
