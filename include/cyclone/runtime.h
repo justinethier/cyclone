@@ -194,6 +194,7 @@ int binstr2int(const char *str);
 int octstr2int(const char *str);
 object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
 object Cyc_string_length(void *data, object str);
+object Cyc_string_byte_length(void *data, object str);
 object Cyc_substring(void *data, object cont, object str, object start,
                      object end);
 object Cyc_string_ref(void *data, object str, object k);
