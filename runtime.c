@@ -178,10 +178,10 @@ void pack_env_variables(void *data, object k)
     svar->hdr.grayed = 0;
     svar->tag = string_tag; 
     svar->len = eqpos - e;
-    svar->num_cp = svar->len; // TODO: proper UTF-8 support!
     svar->str = alloca(sizeof(char) * (svar->len));
     strncpy(svar->str, e, svar->len);
     (svar->str)[svar->len] = '\0';
+    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *)svar->str);
 
     if (eqpos) {
       eqpos++;
@@ -190,7 +190,7 @@ void pack_env_variables(void *data, object k)
     sval->hdr.grayed = 0;
     sval->tag = string_tag; 
     sval->len = strlen(eqpos);
-    sval->num_cp = sval->len; // TODO: proper UTF-8 support!
+    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *)eqpos);
     sval->str = eqpos;
     set_pair(tmp, svar, sval);
     set_pair(p, tmp, NULL);
