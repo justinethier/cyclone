@@ -521,7 +521,15 @@
             (string-append "&" cvar-name) ; Code is just the variable name
             (list     ; Allocate integer on the C stack
               (string-append 
-                "make_string(" cvar-name ", " (->cstr exp) ");")))))
+                "make_utf8_string_with_len(" 
+                cvar-name 
+                ", " 
+                (->cstr exp) 
+                ", " 
+                (number->string (string-byte-length exp))
+                ", " 
+                (number->string (string-length exp))
+                ");")))))
 ;TODO: not good enough, need to store new symbols in a table so they can
 ;be inserted into the C program
     ((symbol? exp)
@@ -535,6 +543,10 @@
 ;; might not be allowed in C, etc.
 (define (->cstr str) 
   (string-append "\"" (cstr:escape-chars str) "\""))
+
+(define-c string-byte-length
+  "(void *data, int argc, closure _, object k, object s)"
+  " return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Primitives
