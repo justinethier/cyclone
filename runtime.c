@@ -6365,8 +6365,10 @@ object Cyc_io_read_char(void *data, object cont, object port)
 object Cyc_io_read_line(void *data, object cont, object port)
 {
   FILE *stream = ((port_type *) port)->fp;
-  char buf[1024];
-  int len, num_cp;
+  char buf[1027];
+  int len, num_cp, i = 0;
+  char_type codepoint;
+  uint32_t state;
 
   Cyc_check_port(data, port);
   if (stream == NULL) {
@@ -6375,10 +6377,21 @@ object Cyc_io_read_line(void *data, object cont, object port)
   set_thread_blocked(data, cont);
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
-    // TODO: not good enough for UTF-8, what if we stopped reading in the middle of a code point?
-    // should reserve 3 extra bytes and, if last code point is not complete, read one byte at a
-    // time until it has been read
-    Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &num_cp, &len);
+    state = Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &codepoint, &num_cp, &len);
+    // Check if we stopped reading in the middle of a code point and
+    // if so, read one byte at a time until that code point is finished.
+    while (state != CYC_UTF8_ACCEPT && i < 3) {
+      int c = fgetc(stream);
+      buf[len] = c;
+      len++;
+      Cyc_utf8_decode(&state, &codepoint, (uint8_t)c);
+      if (state == CYC_UTF8_ACCEPT) {
+        num_cp++;
+        break;
+      }
+      i++;
+    }
+
     {
       // Remove any trailing CR / newline chars
       while (len > 0 && (buf[len - 1] == '\n' ||
@@ -6596,19 +6609,18 @@ int Cyc_utf8_count_code_points(uint8_t* s) {
   return count;
 }
 
-int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, int *cpts, int *bytes) {
-  uint32_t codepoint;
+int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes) {
   uint32_t state = 0;
   *cpts = 0;
   *bytes = 0;
   for (; *s; ++s){
     *bytes += 1;
-    if (!Cyc_utf8_decode(&state, &codepoint, *s))
+    if (!Cyc_utf8_decode(&state, codepoint, *s))
       *cpts += 1;
   }
 
   if (state != CYC_UTF8_ACCEPT)
-    return -1;
+    return state;
   return 0;
 }
 
