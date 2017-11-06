@@ -560,7 +560,7 @@ void Cyc_rt_raise(void *data, object err)
 
 void Cyc_rt_raise2(void *data, const char *msg, object err)
 {
-  make_string(s, msg);
+  make_utf8_string(data, s, msg);
   make_pair(c3, err, NULL);
   make_pair(c2, &s, &c3);
   make_pair(c1, boolean_f, &c2);
@@ -573,7 +573,7 @@ void Cyc_rt_raise2(void *data, const char *msg, object err)
 
 void Cyc_rt_raise_msg(void *data, const char *err)
 {
-  make_string(s, err);
+  make_utf8_string(data, s, err);
   Cyc_rt_raise(data, &s);
 }
 
@@ -1826,7 +1826,7 @@ object Cyc_symbol2string(void *data, object cont, object sym)
   Cyc_check_sym(data, sym);
   {
     const char *desc = symbol_desc(sym);
-    make_string(str, desc);
+    make_utf8_string(data, str, desc);
     _return_closcall1(data, cont, &str);
 }}
 
@@ -2273,22 +2273,22 @@ object Cyc_installation_dir(void *data, object cont, object type)
       strncmp(((symbol) type)->desc, "sld", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_SLD);
-    make_string(str, buf);
+    make_utf8_string(data, str, buf);
     _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
              strncmp(((symbol) type)->desc, "lib", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_LIB);
-    make_string(str, buf);
+    make_utf8_string(data, str, buf);
     _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
              strncmp(((symbol) type)->desc, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
-    make_string(str, buf);
+    make_utf8_string(data, str, buf);
     _return_closcall1(data, cont, &str);
   } else {
-    make_string(str, CYC_INSTALL_DIR);
+    make_utf8_string(data, str, CYC_INSTALL_DIR);
     _return_closcall1(data, cont, &str);
   }
 }
@@ -2302,22 +2302,22 @@ object Cyc_compilation_environment(void *data, object cont, object var)
     if (strncmp(((symbol) var)->desc, "cc-prog", 8) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_PROG);
-      make_string(str, buf);
+      make_utf8_string(data, str, buf);
       _return_closcall1(data, cont, &str);
     } else if (strncmp(((symbol) var)->desc, "cc-exec", 8) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_EXEC);
-      make_string(str, buf);
+      make_utf8_string(data, str, buf);
       _return_closcall1(data, cont, &str);
     } else if (strncmp(((symbol) var)->desc, "cc-lib", 7) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_LIB);
-      make_string(str, buf);
+      make_utf8_string(data, str, buf);
       _return_closcall1(data, cont, &str);
     } else if (strncmp(((symbol) var)->desc, "cc-so", 6) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_SO);
-      make_string(str, buf);
+      make_utf8_string(data, str, buf);
       _return_closcall1(data, cont, &str);
     }
   }
@@ -2343,7 +2343,7 @@ object Cyc_command_line_arguments(void *data, object cont)
   for (i = _cyc_argc; i > 1; i--) {     // skip program name
     object ps = alloca(sizeof(string_type));
     object pl = alloca(sizeof(pair_type));
-    make_string(s, _cyc_argv[i - 1]);
+    make_utf8_string(data, s, _cyc_argv[i - 1]);
     memcpy(ps, &s, sizeof(string_type));
     ((list) pl)->hdr.mark = gc_color_red;
     ((list) pl)->hdr.grayed = 0;
@@ -5775,7 +5775,7 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   handle = dlopen(string_str(filename), RTLD_GLOBAL | RTLD_LAZY);
   if (handle == NULL) {
     snprintf(buffer, 256, "%s", dlerror());
-    make_string(s, buffer);
+    make_utf8_string(data, s, buffer);
     Cyc_rt_raise2(data, "Unable to import library", &s);
   }
   dlerror();    /* Clear any existing error */
@@ -5783,7 +5783,7 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
   if (entry_pt == NULL) {
     snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
-    make_string(s, buffer);
+    make_utf8_string(data, s, buffer);
     Cyc_rt_raise2(data, "Unable to load symbol", &s);
   }
   mclosure1(clo, entry_pt, cont);
@@ -5832,6 +5832,7 @@ void _read_error(void *data, port_type *p, const char *msg)
   // the cont could receive an error and raise it though
   //Cyc_rt_raise_msg(data, buf);
   make_string(str, buf);
+  str.num_cp = Cyc_utf8_count_code_points((uint8_t *)buf);
   make_empty_vector(vec);
   vec.num_elements = 1;
   vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
@@ -6057,9 +6058,6 @@ void _read_string(void *data, object cont, port_type *p)
       p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
       p->tok_end = 0; // Reset for next atom
       {
-// TODO: need to change this below, but run into trouble in icyc, eg:
-//       (string-ref "ab\x3bb;" 2) crashes
-        //make_string(str, p->tok_buf);
         make_utf8_string(data, str, p->tok_buf);
         return_thread_runnable(data, &str);
       }
@@ -6273,6 +6271,7 @@ void _read_return_atom(void *data, object cont, port_type *p)
 
   if (_read_is_numeric(p->tok_buf)) {
     make_string(str, p->tok_buf);
+    str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
     make_c_opaque(opq, &str);
     return_thread_runnable(data, &opq);
   } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
