@@ -6025,10 +6025,12 @@ void _read_string(void *data, object cont, port_type *p)
             p->buf_idx++;
             break;
           }
-          // TODO: verify if hex digit is valid
-          //if (!isdigit(p->buf_idx) && !_read_is_hex_digit(p->buf_idx)) {
-          //  _read_error(data, p, "invalid hex digit in string");
-          //}
+          // Verify if hex digit is valid
+          if (!isdigit(p->mem_buf[p->buf_idx]) && 
+              !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
+            p->buf_idx++;
+            _read_error(data, p, "invalid hex digit in string");
+          }
           buf[i] = p->mem_buf[p->buf_idx];
           p->buf_idx++;
           p->col_num++;
@@ -6040,8 +6042,6 @@ void _read_string(void *data, object cont, port_type *p)
           char cbuf[5];
           int i;
           Cyc_utf8_encode_char(cbuf, 5, result);
-// TODO: infinite loop here or above if ; is not provided???
-// only because it is still waiting for the ; after it reads the closing quote
           for (i = 0; cbuf[i] != 0; i++) {
             _read_add_to_tok_buf(p, cbuf[i]);
           }
