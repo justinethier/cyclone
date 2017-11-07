@@ -2189,6 +2189,12 @@ fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), le
     // - buf_len < bytes, just replace, but pad with NULL chars.
     //                    in this case need to ensure string_len is not 
     //                    reduced because original value still matters for GC purposes
+    //else if (buf_len < bytes) {
+    //  for (i = 0; i < buf_len; i++) {
+    //    this_cp[i] = buf[i];
+    //  }
+    // TODO: memcpy remaining string, ensure trailing null is setup correctly, consolidate with above??
+    //}
     else {
       Cyc_rt_raise2(data, "string-set! - unable to modify character", chr);
     }
