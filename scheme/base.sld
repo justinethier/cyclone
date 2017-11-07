@@ -958,7 +958,8 @@
           Cyc_rt_raise2(data, \"Expected character buf received\", fill);
         }
         c = obj_obj2char(fill);
-        buflen = Cyc_utf8_encode_char(ch_buf, 5, c);
+        Cyc_utf8_encode_char(ch_buf, 5, c);
+        buflen = strlen(ch_buf);
         num_cp = obj_obj2int(count);
         len = num_cp * buflen;
         if (len >= MAX_STACK_OBJ) {
