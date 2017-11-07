@@ -2150,27 +2150,26 @@ fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), le
     // or don't allocate if chr uses as many or fewer bytes 
     // than the codepoint it is replacing
 
-    char *tmp = raw;
+    char *tmp = raw, *this_cp = raw;
     char_type codepoint;
     uint32_t state = 0;
-    int i = 0, count, start_len = 0, start_cp = 0, bytes = 0;
+    int i = 0, count, bytes = 0;
 
     for (count = 0; *tmp; ++tmp){
       bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
-        if (count < idx) {
-          start_len = i;
-          start_cp = count;
-        } else if (count == idx) {
+        if (count == idx) {
           break;
         }
+        this_cp = tmp + 1;
         count += 1;
         bytes = 0;
       }
       i++;
     }
-    if (state != CYC_UTF8_ACCEPT)
+    if (state != CYC_UTF8_ACCEPT) {
        Cyc_rt_raise2(data, "string-set! - invalid character at index", k);
+    }
 
     // TODO: perform actual mutation
     //
@@ -2181,11 +2180,18 @@ fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), le
     //
     // 3 cases: 
     // - buf_len = bytes, just straight replace
+    if (buf_len == bytes) {
+      for (i = 0; i < buf_len; i++) {
+        this_cp[i] = buf[i];
+      }
+    }
     // - buf_len > bytes, will need to allocate more memory (!!)
     // - buf_len < bytes, just replace, but pad with NULL chars.
     //                    in this case need to ensure string_len is not 
     //                    reduced because original value still matters for GC purposes
-
+    else {
+      Cyc_rt_raise2(data, "string-set! - unable to modify character", chr);
+    }
   }
   return str;
 }
