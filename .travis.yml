@@ -1,0 +1,45 @@
+language: c
+sudo: required
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - libtommath-dev
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          packages:
+            - libtommath-dev
+            - clang-3.9
+    - os: osx
+      image: xcode8
+notifications:
+  email: false
+before_install:
+  - if [ "$(uname)" = "Darwin" ]; then
+      brew update;
+      brew install -v libtommath concurrencykit;
+    fi
+  - |
+      git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
+      cd ${HOME}/ck
+      git checkout v0.6.0
+      ./configure PREFIX=/usr
+      make all
+      sudo make install
+      if [ "$(uname)" = "Linux" ]; then
+        sudo ldconfig
+      fi
+  - |
+      git clone https://github.com/justinethier/cyclone-bootstrap.git ${HOME}/cyclone-bootstrap
+      cd ${HOME}/cyclone-bootstrap
+      make
+      sudo make install
+script:
+  - make
+  - sudo make install
+  - make test
