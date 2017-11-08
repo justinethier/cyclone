@@ -38,11 +38,11 @@ all : cyclone icyc libs
 test : libs $(TESTS)
 
 example :
-	cd $(EXAMPLE_DIR) ; make
+	cd $(EXAMPLE_DIR) ; $(MAKE)
 
 clean :
 	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
-	cd $(EXAMPLE_DIR) ; make clean
+	cd $(EXAMPLE_DIR) ; $(MAKE) clean
 	rm -rf html tests/*.o tests/*.c
 	rm -f tests/srfi-28-tests
 	rm -f tests/srfi-60-tests
@@ -107,10 +107,10 @@ indent : gc.c runtime.c mstreams.c $(HEADER_DIR)/*.h
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
 sld :
-	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo make install-bin
+	cyclone $(SLDPATH)/$(SLD).sld && sudo cp $(SLDPATH)/$(SLD).c /usr/local/share/cyclone/$(SLDPATH)/  && sudo cp $(SLDPATH)/$(SLD).sld /usr/local/share/cyclone/$(SLDPATH)/ && sudo cp $(SLDPATH)/$(SLD).o /usr/local/share/cyclone/$(SLDPATH)/ && cyclone cyclone.scm && cyclone icyc.scm && sudo $(MAKE) install-bin
 
 debug :
-	sudo ls; cyclone scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo make install-includes && sudo make install-libs && ./cyclone generate-c.scm
+	sudo ls; cyclone scheme/cyclone/cgen.sld && sudo cp scheme/cyclone/cgen.* /usr/local/share/cyclone/scheme/cyclone/ && cyclone cyclone.scm && sudo $(MAKE) install-includes && sudo $(MAKE) install-libs && ./cyclone generate-c.scm
 
 doc :
 	doxygen Doxyfile
@@ -128,10 +128,10 @@ $(EXAMPLES) : %: %.scm
 	$(CYCLONE) $<
 
 game-of-life :
-	cd $(EXAMPLE_DIR)/game-of-life ; make
+	cd $(EXAMPLE_DIR)/game-of-life ; $(MAKE)
 
 hello-library/hello : 
-	cd $(EXAMPLE_DIR)/hello-library ; make
+	cd $(EXAMPLE_DIR)/hello-library ; $(MAKE)
 
 libs : $(COBJECTS)
 
