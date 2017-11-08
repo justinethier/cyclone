@@ -2139,39 +2139,35 @@ object Cyc_string_set(void *data, object str, object k, object chr)
 
   Cyc_check_bounds(data, "string-set!", len, idx);
 
-  // Take fast path if all chars are just 1 byte
   if (string_num_cp(str) == string_len(str) && buf_len == 1) {
+    // Take fast path if all chars are just 1 byte
     raw[idx] = obj_obj2char(chr);
   } else {
-fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), len);
-    // TODO: utf8 support
-    // find codepoint at k, figure out how many bytes it is,
-    // allocate a new string (start) + chr + (end)
-    // or don't allocate if chr uses as many or fewer bytes 
-    // than the codepoint it is replacing
-
+    // Slower path for UTF-8, need to handle replacement differently 
+    // depending upon how the new char affects length of the string
     char *tmp = raw, *this_cp = raw;
     char_type codepoint;
     uint32_t state = 0;
-    int i = 0, count, bytes = 0;
+    int i = 0, count, prev_cp_bytes = 0, cp_idx;
 
     for (count = 0; *tmp; ++tmp){
-      bytes++;
+      prev_cp_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
         if (count == idx) {
           break;
         }
         this_cp = tmp + 1;
         count += 1;
-        bytes = 0;
+        prev_cp_bytes = 0;
       }
       i++;
     }
+    cp_idx = i;
     if (state != CYC_UTF8_ACCEPT) {
        Cyc_rt_raise2(data, "string-set! - invalid character at index", k);
     }
 
-    // TODO: perform actual mutation
+    // Perform actual mutation
     //
     // Now we know length of start (both in codepoints and bytes),
     // and we know the codepoint to be replaced. by calculating its length
@@ -2179,22 +2175,26 @@ fprintf(stderr, "DEBUG %s, num_cp = %d, len = %d\n", raw, string_num_cp(str), le
     // figure out how many remaining bytes/codepoints are in end
     //
     // 3 cases: 
-    // - buf_len = bytes, just straight replace
-    if (buf_len == bytes) {
+    // - 1) buf_len = prev_cp_bytes, just straight replace
+    if (buf_len == prev_cp_bytes) {
       for (i = 0; i < buf_len; i++) {
         this_cp[i] = buf[i];
       }
     }
-    // - buf_len > bytes, will need to allocate more memory (!!)
-    // - buf_len < bytes, just replace, but pad with NULL chars.
-    //                    in this case need to ensure string_len is not 
-    //                    reduced because original value still matters for GC purposes
-    //else if (buf_len < bytes) {
-    //  for (i = 0; i < buf_len; i++) {
-    //    this_cp[i] = buf[i];
-    //  }
-    // TODO: memcpy remaining string, ensure trailing null is setup correctly, consolidate with above??
-    //}
+    // - 2) buf_len < prev_cp_bytes, replace and shift chars down
+    else if (buf_len < prev_cp_bytes) {
+      // Replace code point with shorter one
+      for (i = 0; i < buf_len; i++) {
+        this_cp[i] = buf[i];
+      }
+      // Move string down to eliminate unneeded chars
+      memmove(this_cp + buf_len, this_cp + prev_cp_bytes, len - cp_idx);
+      // Null terminate the shorter string.
+      // Ensure string_len is not reduced because original 
+      // value still matters for GC purposes
+      raw[len - (prev_cp_bytes - buf_len)] = '\0'; 
+    }
+    // - 3) TODO: buf_len > prev_cp_bytes, will need to allocate more memory (!!)
     else {
       Cyc_rt_raise2(data, "string-set! - unable to modify character", chr);
     }
