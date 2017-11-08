@@ -6338,7 +6338,8 @@ object Cyc_io_peek_char(void *data, object cont, object port)
   port_type *p;
   uint32_t state = CYC_UTF8_ACCEPT;
   char_type codepoint;
-  int c;
+  int c, i = 0, at_mem_buf_end = 0;
+  char buf[5];
 
   Cyc_check_port(data, port);
   {
@@ -6348,14 +6349,39 @@ object Cyc_io_peek_char(void *data, object cont, object port)
       Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
     }
     set_thread_blocked(data, cont);
-    _read_next_char(data, cont, p);
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+      _read_next_char(data, cont, p);
+    }
     c = p->mem_buf[p->buf_idx];
-    if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
-      // TODO: only have a partial UTF8 code point, read more chars.
+    if (Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
+      // Only have a partial UTF8 code point, read more chars.
       // Problem is that there may not be enough space to store them
       // and do need to set them aside since we are just peeking here
       // and not actually supposed to be reading past chars.
+
+      buf[0] = c;
+      i = 1;
+      while (1) { // TODO: limit to 4 chars??
+        if (p->mem_buf_len == p->buf_idx + i) {
+          // No more buffered chars
+          at_mem_buf_end = 1;
+          c = fgetc(stream);
+          if (c == EOF) break; // TODO: correct to do this here????
+        } else {
+          c = p->mem_buf[p->buf_idx + i];
+        }
+        buf[i++] = c;
+        if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
+          break;
+        }
+      }
     }
+    if (at_mem_buf_end && c != EOF) {
+      p->buf_idx = 0;
+      p->mem_buf_len = i;
+      memmove(p->mem_buf, buf, i);
+    }
+
     return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
   }
   return Cyc_EOF;
@@ -6393,7 +6419,9 @@ object Cyc_io_read_char(void *data, object cont, object port)
     do {
       _read_next_char(data, cont, p);
       c = p->mem_buf[p->buf_idx++];
+      if (c == EOF) break;
     } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
+// TODO: limit above to 4 chars and then thrown an error?
     p->col_num++;
     return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
   }
