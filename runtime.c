@@ -1860,8 +1860,12 @@ object Cyc_list2string(void *data, object cont, object lst)
     if (!obj_is_char(cbox)) {
       Cyc_rt_raise2(data, "Expected character but received", cbox);
     }
-    Cyc_utf8_encode_char(cbuf, 5, ch);
-    len += strlen(cbuf);
+    if (!ch) {
+      len++;
+    } else {
+      Cyc_utf8_encode_char(cbuf, 5, ch);
+      len += strlen(cbuf);
+    }
     tmp = cdr(tmp);
   }
 
@@ -1871,8 +1875,12 @@ object Cyc_list2string(void *data, object cont, object lst)
     while ((lst != NULL)) {
       cbox = car(lst);
       ch = obj_obj2char(cbox); // Already validated, can assume chars now
-      Cyc_utf8_encode_char(&(buf[i]), 5, ch);
-      i += strlen(buf+i);
+      if (!ch) {
+        i++;
+      } else {
+        Cyc_utf8_encode_char(&(buf[i]), 5, ch);
+        i += strlen(buf+i);
+      }
       lst = cdr(lst);
     }
     buf[i] = '\0';
@@ -2130,8 +2138,12 @@ object Cyc_string_set(void *data, object str, object k, object chr)
   }
 
   input_char = obj_obj2char(chr);
-  Cyc_utf8_encode_char(buf, 5, input_char);
-  buf_len = strlen(buf);
+  if (!input_char) {
+    buf_len = 1;
+  } else {
+    Cyc_utf8_encode_char(buf, 5, input_char);
+    buf_len = strlen(buf);
+  }
 
   raw = string_str(str);
   idx = unbox_number(k);
