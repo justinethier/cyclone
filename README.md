@@ -1,4 +1,4 @@
-https://travis-ci.org/justinethier/cyclone.svg?branch=master
+<img src="https://travis-ci.org/justinethier/cyclone.svg?branch=master">
 
 [<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
