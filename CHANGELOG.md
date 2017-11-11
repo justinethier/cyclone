@@ -5,6 +5,7 @@
 Features
 
 - Allow a program to have macros expand into a top-level `import` expression.
+- Added continuous integration support thanks to Alex Arslan.
 
 ## 0.6.3 - September 16, 2017
 
