@@ -6375,7 +6375,7 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 
       buf[0] = c;
       i = 1;
-      while (1) { // TODO: limit to 4 chars??
+      while (i < 5) { // TODO: limit to 4 chars??
         if (p->mem_buf_len == p->buf_idx + i) {
           // No more buffered chars
           at_mem_buf_end = 1;
