@@ -2162,6 +2162,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
     uint32_t state = 0;
     int i = 0, count, prev_cp_bytes = 0, cp_idx;
 
+    // Find index to change, and how many bytes it is
     for (count = 0; *tmp; ++tmp){
       prev_cp_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
@@ -2208,7 +2209,8 @@ object Cyc_string_set(void *data, object str, object k, object chr)
     }
     // - 3) TODO: buf_len > prev_cp_bytes, will need to allocate more memory (!!)
     else {
-      Cyc_rt_raise2(data, "string-set! - unable to modify character", chr);
+      // TODO: maybe we can try a little harder here, at least in some cases
+      Cyc_rt_raise2(data, "string-set! - Unable to allocate memory to store multibyte character", chr);
     }
   }
   return str;
