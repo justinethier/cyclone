@@ -950,9 +950,22 @@
     (define-c Cyc-make-string
       "(void *data, int argc, closure _, object k, object count, object fill)"
       " object s = NULL;
+        char ch_buf[5];
+        char_type c;
+        int buflen, num_cp, len;
         Cyc_check_int(data, count);
-        char c = obj_obj2char(fill);
-        int len = obj_obj2int(count);
+        if (!obj_is_char(fill)) {
+          Cyc_rt_raise2(data, \"Expected character buf received\", fill);
+        }
+        c = obj_obj2char(fill);
+        if (!c) {
+          buflen = 1;
+        } else {
+          Cyc_utf8_encode_char(ch_buf, 5, c);
+          buflen = strlen(ch_buf);
+        }
+        num_cp = obj_obj2int(count);
+        len = num_cp * buflen;
         if (len >= MAX_STACK_OBJ) {
           int heap_grown;
           s = gc_alloc(((gc_thread_data *)data)->heap, 
@@ -964,6 +977,7 @@
           ((string_type *) s)->hdr.grayed = 0;
           ((string_type *) s)->tag = string_tag; 
           ((string_type *) s)->len = len;
+          ((string_type *) s)->num_cp = num_cp;
           ((string_type *) s)->str = (((char *)s) + sizeof(string_type));
         } else {
           s = alloca(sizeof(string_type));
@@ -971,9 +985,18 @@
           ((string_type *)s)->hdr.grayed = 0;
           ((string_type *)s)->tag = string_tag; 
           ((string_type *)s)->len = len;
+          ((string_type *)s)->num_cp = num_cp;
           ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
         }
-        memset(((string_type *)s)->str, c, len);
+        if (num_cp == 1) { /* Fast path */
+          memset(((string_type *)s)->str, ch_buf[0], len);
+        } else {
+          char *buf = ((string_type *)s)->str;
+          int bi, si, slen = buflen;
+          for (bi = 0, si = 0; bi < len; bi++, si++) {
+            buf[bi] = ch_buf[si % slen];
+          }
+        }
         ((string_type *)s)->str[len] = '\\0';
         return_closcall1(data, k, s);
       ")

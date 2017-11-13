@@ -24,7 +24,7 @@
         for (i = _cyc_argc; i > 0; i--) {
           object ps = alloca(sizeof(string_type));
           object pl = alloca(sizeof(pair_type));
-          make_string(s, _cyc_argv[i - 1]);
+          make_utf8_string(data, s, _cyc_argv[i - 1]);
           memcpy(ps, &s, sizeof(string_type));
           ((list)pl)->hdr.mark = gc_color_red;
           ((list)pl)->hdr.grayed = 0;
@@ -44,7 +44,7 @@
         if (v == NULL) {
           return_closcall1(data, k, boolean_f);
         } else {
-          make_string(str, v);
+          make_utf8_string(data, str, v);
           return_closcall1(data, k, &str);
         }
       ")

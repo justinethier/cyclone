@@ -466,6 +466,12 @@ void clear_mutations(void *data);
 #define CYC_FIXNUM_MIN -1073741824
 
 /**
+ * Explicit character type now that we are using UTF-8.
+ * Chars are still value types though
+ */
+typedef uint32_t char_type;
+
+/**
  * Determine if an object is an integer.
  */
 #define obj_is_int(x)  ((unsigned long)(x) & (unsigned long)1)
@@ -488,12 +494,12 @@ void clear_mutations(void *data);
 /**
  * Convert from an object to a char.
  */
-#define obj_obj2char(x) (char)((long)(x)>>2)
+#define obj_obj2char(x) (char_type)((uintmax_t)(x)>>2)
 
 /**
  * Convert from a char to an object.
  */
-#define obj_char2obj(c) ((void *)((((unsigned long)c)<<2) | 2))
+#define obj_char2obj(c) ((void *)((((uintmax_t)c)<<2) | 2))
 
 /**
  * Is the given object a value type?
@@ -721,9 +727,13 @@ typedef enum {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
+  int num_cp;
   int len;
   char *str;
 } string_type;
+
+// TODO: below macros are obsolete, need new ones that populate num_cp and
+// raise an error if an invalid UTF-8 char is detected
 
 /** Create a new string in the nursery */
 #define make_string(cs, s) string_type cs; \
@@ -731,6 +741,7 @@ typedef struct {
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; \
+  cs.num_cp = len; \
   cs.len = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len + 1);}
@@ -744,6 +755,7 @@ typedef struct {
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = len; \
+  cs.num_cp = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
   memcpy(cs.str, s, len); \
   cs.str[len] = '\0';}
@@ -755,9 +767,51 @@ typedef struct {
 #define make_string_noalloc(cs, s, length) string_type cs; \
 { cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
   cs.tag = string_tag; cs.len = length; \
+  cs.num_cp = length; \
   cs.str = s; }
 
-/** Get the length of a string */
+/** Create a new string in the nursery */
+#define make_utf8_string(data, cs, s) string_type cs; \
+{ int len = strlen(s); \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
+  cs.tag = string_tag; \
+  cs.num_cp = Cyc_utf8_count_code_points((uint8_t *)s); \
+  if (cs.num_cp < 0) { \
+    Cyc_rt_raise_msg(data, "Invalid UTF-8 characters in string"); \
+  } \
+  cs.len = len; \
+  cs.str = alloca(sizeof(char) * (len + 1)); \
+  memcpy(cs.str, s, len + 1);}
+
+/** 
+ * Create a new string with the given length 
+ * (so it does not need to be computed) 
+ */
+#define make_utf8_string_with_len(cs, s, length, num_code_points) string_type cs;  \
+{ int len = length; \
+  cs.hdr.mark = gc_color_red; \
+  cs.hdr.grayed = 0; \
+  cs.tag = string_tag; cs.len = len; \
+  cs.num_cp = num_code_points; \
+  cs.str = alloca(sizeof(char) * (len + 1)); \
+  memcpy(cs.str, s, len); \
+  cs.str[len] = '\0';}
+
+/**
+ * Create a string object using the given C string and length.
+ * No allocation is done for the given C string.
+ */
+#define make_utf8_string_noalloc(cs, s, length) string_type cs; \
+{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+  cs.tag = string_tag; cs.len = length; \
+  cs.num_cp = length; \
+  cs.str = s; }
+
+/** Get the length of a string, in characters (code points) */
+#define string_num_cp(x) (((string_type *) x)->num_cp)
+
+/** Get the length of a string, in bytes */
 #define string_len(x) (((string_type *) x)->len)
 
 /** Get a string object's C string */

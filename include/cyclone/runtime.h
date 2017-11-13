@@ -194,6 +194,7 @@ int binstr2int(const char *str);
 int octstr2int(const char *str);
 object Cyc_string_append(void *data, object cont, int argc, object str1, ...);
 object Cyc_string_length(void *data, object str);
+object Cyc_string_byte_length(void *data, object str);
 object Cyc_substring(void *data, object cont, object str, object start,
                      object end);
 object Cyc_string_ref(void *data, object str, object k);
@@ -705,6 +706,29 @@ object register_library(const char *name);
 extern list global_table;
 void add_global(object * glo);
 void Cyc_set_globals_changed(gc_thread_data *thd);
+/**@}*/
+
+/**
+ * \defgroup prim_utf8 UTF-8
+ *
+ * @brief Unicode processing using UTF-8
+ */
+/**@{*/
+#define CYC_UTF8_ACCEPT 0
+#define CYC_UTF8_REJECT 1
+
+/**
+ * Simple macro to make it more convenient to convert a single char
+ */
+#define Cyc_utf8_encode_char(dest, dest_size, char_value) \
+  Cyc_utf8_encode(dest, dest_size, &char_value, 1)
+
+int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz);
+uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
+int Cyc_utf8_count_code_points(uint8_t* s);
+int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
+uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
+uint32_t Cyc_utf8_validate(char *str, size_t len);
 /**@}*/
 
 #endif                          /* CYCLONE_RUNTIME_H */
