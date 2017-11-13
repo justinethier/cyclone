@@ -16,7 +16,7 @@
 (thread-start!
   (make-thread
     (lambda ()
-      (thread-sleep! 3000)
+      (thread-sleep! 3)
       (set! *done* #t)
       (condition-variable-broadcast! cv)
       (trace "broadcast thread done"))))
@@ -42,7 +42,7 @@
   (cond
     (*done*
       (mutex-unlock! m)
-      (thread-sleep! 500)
+      (thread-sleep! 0.5)
       (trace "main thread done"))
     (else
       (mutex-unlock! m cv) ;; Wait on cv

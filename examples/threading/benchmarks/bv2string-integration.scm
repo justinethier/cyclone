@@ -176,7 +176,7 @@
     (thread-start! t)))
 
 (define (wait-for-all-async)
-  (thread-sleep! 1) ;; TODO: not good enough, figure out a better solution
+  (thread-sleep! 0) ;; TODO: not good enough, figure out a better solution
   (let loop ()
     (define t #f)
     (mutex-lock! m)

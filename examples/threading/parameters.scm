@@ -12,20 +12,20 @@
 (thread-start!
   (make-thread
     (lambda ()
-      (thread-sleep! 1200)
+      (thread-sleep! 1.2)
       (display "started thread, this should be written to console")
       (newline)
       (display "thread done")
       (newline)
       (flush-output-port (current-output-port)))))
 
-(thread-sleep! 1000) ;; Prevent race condition replacing stdout before thread is spawned
+(thread-sleep! 1) ;; Prevent race condition replacing stdout before thread is spawned
 (write `(1 2 3))
 (define fp (open-output-file "tmp.txt"))
 (parameterize
   ((current-output-port fp))
   (write `(4 5 6))
-  (thread-sleep! 3000)
+  (thread-sleep! 3)
 )
 (close-port fp)
 (write `(7 8 9))

@@ -5692,11 +5692,11 @@ void Cyc_exit_thread(gc_thread_data * thd)
 object Cyc_thread_sleep(void *data, object timeout)
 {
   struct timespec tim;
-  long value;
+  double value;
   Cyc_check_num(data, timeout);
   value = unbox_number(timeout);
-  tim.tv_sec = value;
-  tim.tv_nsec = (value % 1000000) * NANOSECONDS_PER_MILLISECOND;
+  tim.tv_sec = (long)value;
+  tim.tv_nsec = (long)((value - tim.tv_sec) * 1000 * NANOSECONDS_PER_MILLISECOND);
   nanosleep(&tim, NULL);
   return boolean_t;
 }

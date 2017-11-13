@@ -8,6 +8,10 @@ Features
 - Allow a program to have macros expand into a top-level `import` expression.
 - Added continuous integration support thanks to Alex Arslan.
 
+Bug Fixes
+
+- Incorporated a patch from @0-8-15 to pass seconds to `thread-sleep!` instead of milliseconds. Fractional seconds are accepted as well for high-resolution timers.
+
 ## 0.6.3 - September 16, 2017
 
 Features

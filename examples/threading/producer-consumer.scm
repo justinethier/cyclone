@@ -43,7 +43,7 @@
        (newline)
        (set! sleep? #t)))
     (mutex-unlock! *lock*)
-    (if sleep? (thread-sleep! 1000))
+    (if sleep? (thread-sleep! 1))
     (loop)))
 
 (thread-start! (make-thread producer))

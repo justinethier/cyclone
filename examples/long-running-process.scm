@@ -19,10 +19,10 @@
            (write "consumer sleeping")
            (set! sleep? #t)))
         (mutex-unlock! *lock*)
-        (if sleep? (thread-sleep! 1000))
+        (if sleep? (thread-sleep! 1))
         (loop)))) 
    '())
 
   (write `(,i))
-  (thread-sleep! 5)
+  (thread-sleep! 0.005)
   (loop (+ i 1)))
