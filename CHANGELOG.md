@@ -4,6 +4,7 @@
 
 Features
 
+- Finally added Unicode support using UTF-8!
 - Allow a program to have macros expand into a top-level `import` expression.
 - Added continuous integration support thanks to Alex Arslan.
 

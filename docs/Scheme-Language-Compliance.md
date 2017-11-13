@@ -36,8 +36,8 @@ Section | Status | Comments
 6.3 Booleans | Yes |
 6.4 Pairs and lists | Yes |
 6.5 Symbols | Yes |
-6.6 Characters | Partial | No unicode support.
-6.7 Strings | Partial | No unicode support.
+6.6 Characters | Yes |
+6.7 Strings | Yes |
 6.8 Vectors | Yes |
 6.9 Bytevectors | Yes | 
 6.10 Control features | Yes | `dynamic-wind` is limited, and does not work across calls to continuations.
