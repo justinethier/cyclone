@@ -5688,15 +5688,15 @@ void Cyc_exit_thread(gc_thread_data * thd)
   pthread_exit(NULL);           // For now, just a proof of concept
 }
 
-// For now, accept a number of milliseconds to sleep
+// Accept a number of seconds to sleep according to SRFI-18
 object Cyc_thread_sleep(void *data, object timeout)
 {
   struct timespec tim;
   long value;
   Cyc_check_num(data, timeout);
   value = unbox_number(timeout);
-  tim.tv_sec = value / 1000;
-  tim.tv_nsec = (value % 1000) * NANOSECONDS_PER_MILLISECOND;
+  tim.tv_sec = value;
+  tim.tv_nsec = (value % 1000000) * NANOSECONDS_PER_MILLISECOND;
   nanosleep(&tim, NULL);
   return boolean_t;
 }
