@@ -10,7 +10,7 @@ Features
 
 Bug Fixes
 
-- Incorporated a patch from @0-8-15 to pass seconds to `thread-sleep!` instead of milliseconds. Fractional seconds are accepted as well for high-resolution timers.
+- Incorporated a patch from [0-8-15](https://github.com/0-8-15) to pass seconds to `thread-sleep!` instead of milliseconds. Fractional seconds are accepted as well for high-resolution timers.
 
 ## 0.6.3 - September 16, 2017
 
