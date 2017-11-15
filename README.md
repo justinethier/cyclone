@@ -9,7 +9,7 @@ Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Sch
 Features
 --------
 
-- Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md)
+- Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md). This includes support for libraries, exceptions, record types, and Unicode.
 - Hygienic macros based on `syntax-rules`
 - Low-level explicit renaming macros
 - Guaranteed tail call optimizations
