@@ -6,6 +6,21 @@ Cyclone is a brand-new Scheme-to-C compiler that allows practical application de
 
 Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard, and the intent is to support as much of that language as possible.
 
+Features
+--------
+
+- Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md)
+- Hygienic macros based on `syntax-rules`
+- Low-level explicit renaming macros
+- Guaranteed tail call optimizations
+- Native multithreading support
+- A foreign function interface that allows easy integration with C
+- A concurrent, generational garbage collector based on Cheney on the MTA
+- Includes an optimizing Scheme-to-C compiler,
+- ... as well as an interpreter for debugging
+- Support for [many popular SRFI’s](docs/API.md#srfi-libraries)
+- Online user manual and API documentation
+
 Getting Started
 ---------------
 
