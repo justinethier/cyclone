@@ -10,7 +10,7 @@ Features
 --------
 
 - Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md). 
-- New features from R<sup>7</sup>RS include libraries, exceptions, record types, and Unicode.
+- New features from R<sup>7</sup>RS including libraries, exceptions, record types, and Unicode.
 - Hygienic macros based on `syntax-rules`
 - Low-level explicit renaming macros
 - Guaranteed tail call optimizations
