@@ -10,7 +10,8 @@ Features
 --------
 
 - Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md). 
-- New features from R<sup>7</sup>RS including libraries, exceptions, record types, and Unicode.
+- New features from R<sup>7</sup>RS including libraries, exceptions, and record types.
+- Built-in support for Unicode strings and characters.
 - Hygienic macros based on `syntax-rules`
 - Low-level explicit renaming macros
 - Guaranteed tail call optimizations
@@ -19,7 +20,7 @@ Features
 - A concurrent, generational garbage collector based on Cheney on the MTA
 - Includes an optimizing Scheme-to-C compiler,
 - ... as well as an interpreter for debugging
-- Support for [many popular SRFI’s](docs/API.md#srfi-libraries)
+- Support for [many popular SRFI's](docs/API.md#srfi-libraries)
 - Online user manual and API documentation
 
 Getting Started
