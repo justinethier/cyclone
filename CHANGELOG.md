@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7 - TBD
+## 0.7 - November 17, 2017
 
 Features
 
