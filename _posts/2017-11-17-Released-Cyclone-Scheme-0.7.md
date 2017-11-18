@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Released Cyclone Scheme 0.7
-excerpt: This is the first Cyclone release with Unicode support
+excerpt: This is the first Cyclone release with Unicode support.
 ---
 
 Features
