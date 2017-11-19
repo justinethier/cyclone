@@ -530,19 +530,15 @@
         (lambda (expr rename compare)
           (apply error (cdr expr)))))
 
-    ;; TODO: The whitespace characters are space, tab, line feed, form feed (not in parser yet), and carriage return.
     (define call-with-current-continuation call/cc)
-    ;; TODO: this is from r7rs, but is not really good enough by itself
-    ;(define (values . things)
-    ;  (call/cc
-    ;    (lambda (cont) (apply cont things))))
+
+    ;; Extended from r7rs definition to work in our Scheme
     (define values 
       (lambda args
         (if (and (not (null? args)) (null? (cdr args)))
             (car args)
             (cons (cons 'multiple 'values) args)))) 
-    ;; TODO: just need something good enough for bootstrapping (for now)
-    ;; does not have to be perfect (this is not, does not handle call/cc or exceptions)
+
     (define call-with-values
       (lambda (producer consumer)
         (let ((x (producer)))
