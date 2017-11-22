@@ -511,6 +511,12 @@
 
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
+
+;; TODO: need a local version of each expand that receives a local env built by
+;;       let-syntax forms
+;;(define (expand exp env rename-env local-env)
+;;(define (_expand exp env rename-env)
+
 (define (expand exp env rename-env)
   (define (log e)
     (display  
@@ -578,6 +584,23 @@
           ;; of the macros are defined. may need to make a special pass
           ;; to do loading or expansion of macro bodies
           `(define ,name ,(expand body env rename-env)))))))
+    ((let-syntax? exp)
+     (let* ((body (cddr exp))
+            (bindings (cadr exp))
+            (bindings-as-macros
+              (map 
+                (lambda (b)
+                  (let ((name (car b))
+                        (binding (cadr b)))
+                    (cons name (if (tagged-list? 'syntax-rules binding)
+                                   (expand binding env rename-env)
+                                   binding)))) 
+                bindings))
+            ; TODO: (new-local-macro-env (append bindings-as-macros local-env))
+           )
+(trace:error `(let-syntax ,bindings-as-macros))
+       (expand body env rename-env) ;; TODO: new-local-macro-env 
+       ))
     ((app? exp)
      (cond
        ((symbol? (car exp))

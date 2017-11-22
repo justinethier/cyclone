@@ -9,17 +9,17 @@
 ;; (given-that if (set! if 'now))
 ;; if)) ;; => now
 
-;;(let ((x 'outer))
-;;  (let-syntax ((m (syntax-rules () ((m) x))))
-;;    (let ((x 'inner))
-;;      (m)))) ;; Should be outer
-
-(write 
 (let ((x 'outer))
-  (define-syntax m ;; Testing this out, but let-syntax needs to work, too
-   (syntax-rules () ((m) x)))
+  (let-syntax ((m (syntax-rules () ((m) x))))
     (let ((x 'inner))
-      (m))) ;; Should be outer
-      )
+      (m)))) ;; Should be outer
 
-(write (m)) ;; Should be an error, of course
+;(write 
+;(let ((x 'outer))
+;  (define-syntax m ;; Testing this out, but let-syntax needs to work, too
+;   (syntax-rules () ((m) x)))
+;    (let ((x 'inner))
+;      (m))) ;; Should be outer
+;      )
+;
+;(write (m)) ;; Should be an error, of course
