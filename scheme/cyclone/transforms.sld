@@ -658,6 +658,7 @@
           env
           rename-env))
        ((or (define-syntax? this-exp)
+            (let-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
             (if? this-exp))
