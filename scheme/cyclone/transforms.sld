@@ -518,6 +518,9 @@
 ;;(define (_expand exp env rename-env)
 
 (define (expand exp env rename-env)
+  (_expand exp env rename-env '()))
+
+(define (_expand exp env rename-env local-env)
   (define (log e)
     (display  
       (list 'expand e 'env 
@@ -532,22 +535,22 @@
     ((ref? exp)        exp)
     ((quote? exp)      exp)
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
-                          ,@(expand-body '() (lambda->exp exp) env rename-env)
+                          ,@(_expand-body '() (lambda->exp exp) env rename-env local-env)
                           ;,@(map 
                           ;  ;; TODO: use extend env here?
-                          ;  (lambda (expr) (expand expr env rename-env))
+                          ;  (lambda (expr) (_expand expr env rename-env local-env))
                           ;  (lambda->exp exp))
                          ))
     ((define? exp)     (if (define-lambda? exp)
-                           (expand (define->lambda exp) env rename-env)
-                          `(define ,(expand (define->var exp) env rename-env)
-                                ,@(expand (define->exp exp) env rename-env))))
-    ((set!? exp)       `(set! ,(expand (set!->var exp) env rename-env)
-                              ,(expand (set!->exp exp) env rename-env)))
-    ((if-syntax? exp)  `(if ,(expand (if->condition exp) env rename-env)
-                            ,(expand (if->then exp) env rename-env)
+                           (_expand (define->lambda exp) env rename-env local-env)
+                          `(define ,(_expand (define->var exp) env rename-env local-env)
+                                ,@(_expand (define->exp exp) env rename-env local-env))))
+    ((set!? exp)       `(set! ,(_expand (set!->var exp) env rename-env local-env)
+                              ,(_expand (set!->exp exp) env rename-env local-env)))
+    ((if-syntax? exp)  `(if ,(_expand (if->condition exp) env rename-env local-env)
+                            ,(_expand (if->then exp) env rename-env local-env)
                             ,(if (if-else? exp)
-                                 (expand (if->else exp) env rename-env)
+                                 (_expand (if->else exp) env rename-env local-env)
                                  ;; Insert default value for missing else clause
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
@@ -560,9 +563,9 @@
             (body (cadr trans)))
        (cond
         ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
-         (expand
-           `(define-syntax ,name ,(expand trans env rename-env))
-           env rename-env))
+         (_expand
+           `(define-syntax ,name ,(_expand trans env rename-env local-env))
+           env rename-env local-env))
         (else
          ;; TODO: for now, do not let a compiled macro be re-defined.
          ;; this is a hack for performance compiling (scheme base)
@@ -583,7 +586,7 @@
           ;; TODO: may run into issues with expanding now, before some
           ;; of the macros are defined. may need to make a special pass
           ;; to do loading or expansion of macro bodies
-          `(define ,name ,(expand body env rename-env)))))))
+          `(define ,name ,(_expand body env rename-env local-env)))))))
     ((let-syntax? exp)
      (let* ((body (cddr exp))
             (bindings (cadr exp))
@@ -593,24 +596,26 @@
                   (let ((name (car b))
                         (binding (cadr b)))
                     (cons name (if (tagged-list? 'syntax-rules binding)
-                                   (expand binding env rename-env)
+                                   (_expand binding env rename-env local-env)
                                    binding)))) 
                 bindings))
             ; TODO: (new-local-macro-env (append bindings-as-macros local-env))
            )
 (trace:error `(let-syntax ,bindings-as-macros))
-       (expand body env rename-env) ;; TODO: new-local-macro-env 
+       (_expand body env rename-env local-env) ;; TODO: new-local-macro-env 
        ))
     ((app? exp)
      (cond
        ((symbol? (car exp))
         (let ((val (env:lookup (car exp) env #f)))
           (if (tagged-list? 'macro val)
-            (expand ; Could expand into another macro
+            (_expand ; Could expand into another macro
               (macro:expand exp val env rename-env)
-              env rename-env)
+              env 
+              rename-env 
+              local-env)
             (map
-              (lambda (expr) (expand expr env rename-env))
+              (lambda (expr) (_expand expr env rename-env local-env))
               exp))))
        (else
          ;; TODO: note that map does not guarantee that expressions are
@@ -618,7 +623,7 @@
          ;; in reverse order. Might be better to use a fold here and
          ;; elsewhere in (expand).
          (map 
-          (lambda (expr) (expand expr env rename-env))
+          (lambda (expr) (_expand expr env rename-env local-env))
           exp))))
     (else
       (error "unknown exp: " exp))))
@@ -629,6 +634,9 @@
 
 ;; Helper to expand a lambda body, so we can splice in any begin's
 (define (expand-body result exp env rename-env)
+  (_expand-body result exp env rename-env '()))
+
+(define (_expand-body result exp env rename-env local-env)
   (define (log e)
     (display (list 'expand-body e 'env 
               (env:frame-variables (env:first-frame env))) 
@@ -647,39 +655,42 @@
             (quote? this-exp)
             (define-c? this-exp))
 ;(log this-exp)
-        (expand-body (cons this-exp result) (cdr exp) env rename-env))
+        (_expand-body (cons this-exp result) (cdr exp) env rename-env local-env))
        ((define? this-exp)
 ;(log this-exp)
-        (expand-body 
+        (_expand-body 
           (cons
-            (expand this-exp env rename-env)
+            (_expand this-exp env rename-env local-env)
             result)
           (cdr exp)
           env
-          rename-env))
+          rename-env
+          local-env))
        ((or (define-syntax? this-exp)
             (let-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
             (if? this-exp))
 ;(log (car this-exp))
-        (expand-body 
+        (_expand-body 
           (cons
-            (expand this-exp env rename-env)
+            (_expand this-exp env rename-env local-env)
             result)
           (cdr exp)
           env
-          rename-env))
+          rename-env 
+          local-env))
        ;; Splice in begin contents and keep expanding body
        ((begin? this-exp)
         (let* ((expr this-exp)
                (begin-exprs (begin->exps expr)))
 ;(log (car this-exp))
-        (expand-body
+        (_expand-body
          result
          (append begin-exprs (cdr exp))
          env
-         rename-env)))
+         rename-env
+         local-env)))
        ((app? this-exp)
         (cond
           ((symbol? (caar exp))
@@ -691,34 +702,37 @@
               ;; including nested begins
               (let ((expanded (macro:expand this-exp val env rename-env)))
 ;(log `(DONE WITH macro:expand))
-                (expand-body
+                (_expand-body
                   result
                   (cons 
                     expanded ;(macro:expand this-exp val env)
                     (cdr exp))
                   env
-                  rename-env))
+                  rename-env
+                  local-env))
               ;; No macro, use main expand function to process
-              (expand-body
+              (_expand-body
                (cons 
                  (map
-                  (lambda (expr) (expand expr env rename-env))
+                  (lambda (expr) (_expand expr env rename-env local-env))
                   this-exp)
                  result)
                (cdr exp)
                env
-               rename-env))))
+               rename-env
+               local-env))))
           (else
 ;(log 'app)
-           (expand-body
+           (_expand-body
              (cons 
                (map
-                (lambda (expr) (expand expr env rename-env))
+                (lambda (expr) (_expand expr env rename-env local-env))
                 this-exp)
                result)
              (cdr exp)
              env
-             rename-env))))
+             rename-env
+             local-env))))
        (else
         (error "unknown exp: " this-exp))))))
 
