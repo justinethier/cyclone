@@ -4,20 +4,45 @@
 #
 # Configuration options for the makefile
 
+OS ?= $(shell uname)
+CC ?= cc
+
+LIBS = -pthread -lcyclone -lck -lm -ltommath
+ifneq ($(OS),FreeBSD)
+# libdl is part of libc on FreeBSD
+LIBS += -ldl
+endif
+
 # Compiler options
-CFLAGS       ?= -O2 -fPIC -Wall -march=armv6k -Iinclude -L.
+CFLAGS       ?= -O2 -fPIC -Wall -march=armv6k -Iinclude
 COMP_CFLAGS  ?= -O2 -fPIC -Wall -march=armv6k -I$(PREFIX)/include -L$(PREFIX)/lib
 # Use these lines instead for debugging or profiling
 #CFLAGS = -g -Wall
 #CFLAGS = -g -pg -Wall
-CC      ?= cc
-LIBS = -pthread -lcyclone -lck -lm -ltommath -ldl
+
+# Linker options
+LDFLAGS ?= -L.
+ifeq ($(OS),Darwin)
+LDFLAGS     += -Wl,-export_dynamic -Wl,-undefined -Wl,dynamic_lookup
+COMP_CFLAGS += -Wl,-export_dynamic
+else
+LDFLAGS     += -Wl,--export-dynamic
+COMP_CFLAGS += -Wl,--export-dynamic
+endif
+
+# /usr/local is not in the search path by default on FreeBSD, so if libtommath and/or
+# concurrencykit was installed via Ports, it won't be picked up without explicitly looking
+# for it here
+ifeq ($(OS),FreeBSD)
+LDFLAGS += -L/usr/local/lib
+CFLAGS  += -I/usr/local/include
+endif
 
 # Commands "baked into" cyclone for invoking the C compiler
 CC_PROG ?= "$(CC) ~src-file~ $(COMP_CFLAGS) -c -o ~exec-file~.o"
 CC_EXEC ?= "$(CC) ~exec-file~.o ~obj-files~ $(LIBS) $(COMP_CFLAGS) -o ~exec-file~"
 CC_LIB  ?= "$(CC) ~src-file~ $(COMP_CFLAGS) -c -o ~exec-file~.o"
-CC_SO   ?= "$(CC) -shared -rdynamic -o ~exec-file~.so ~exec-file~.o"
+CC_SO   ?= "$(CC) -shared $(LDFLAGS) -o ~exec-file~.so ~exec-file~.o"
 
 AR        ?= ar
 #CD        ?= cd
@@ -39,46 +64,26 @@ DESTDIR   ?=
 
 # Automatically detect platform-specific flags, instead of using autoconf
 #CYC_PLATFORM_HAS_MEMSTREAM ?= 1
-CYC_PLATFORM_HAS_MEMSTREAM := $(shell echo "main(){char *buf; int len; open_memstream(&buf, &len);}" | gcc -xc - >/dev/null 2>/dev/null && echo 1 || echo 0)
-CYC_PLATFORM_HAS_FMEMOPEN := $(shell echo "main(){char *buf; fmemopen(&buf, 0, \"r\");}" | gcc -xc - >/dev/null 2>/dev/null && echo 1 || echo 0)
+CYC_PLATFORM_HAS_MEMSTREAM := $(shell echo "main(){char *buf; int len; open_memstream(&buf, &len);}" | $(CC) -xc - >/dev/null 2>/dev/null && echo 1 || echo 0)
+CYC_PLATFORM_HAS_FMEMOPEN := $(shell echo "main(){char *buf; fmemopen(&buf, 0, \"r\");}" | $(CC) -xc - >/dev/null 2>/dev/null && echo 1 || echo 0)
 
 # code from chibi's makefile to detect platform
 ifndef PLATFORM
-ifeq ($(shell uname),Darwin)
+ifeq ($(OS),Darwin)
 PLATFORM=macosx
-else
-ifeq ($(shell uname),FreeBSD)
+else ifneq (,$(findstring $(OS),FreeBSD NetBSD OpenBSD DragonFly))
 PLATFORM=bsd
-else
-ifeq ($(shell uname),NetBSD)
-PLATFORM=bsd
-else
-ifeq ($(shell uname),OpenBSD)
-PLATFORM=bsd
-else
-ifeq ($(shell uname),DragonFly)
-PLATFORM=bsd
-else
-ifeq ($(shell uname -o),Msys)
+else ifeq ($(shell uname -o),Msys)
 PLATFORM=mingw
 SOLIBDIR = $(BINDIR)
 DIFFOPTS = -b
-else
-ifeq ($(shell uname -o),Cygwin)
+else ifeq ($(shell uname -o),Cygwin)
 PLATFORM=cygwin
 SOLIBDIR = $(BINDIR)
 DIFFOPTS = -b
-else
-ifeq ($(shell uname -o),GNU/Linux)
+else ifeq ($(shell uname -o),GNU/Linux)
 PLATFORM=linux
 else
 PLATFORM=unix
-endif
-endif
-endif
-endif
-endif
-endif
-endif
 endif
 endif
