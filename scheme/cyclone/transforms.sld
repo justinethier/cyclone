@@ -588,26 +588,35 @@
           ;; to do loading or expansion of macro bodies
           `(define ,name ,(_expand body env rename-env local-env)))))))
     ((let-syntax? exp)
-     (let* ((body (cddr exp))
+     (let* ((body (cons 'begin (cddr exp)))
             (bindings (cadr exp))
             (bindings-as-macros
               (map 
                 (lambda (b)
-                  (let ((name (car b))
-                        (binding (cadr b)))
-                    (cons name (if (tagged-list? 'syntax-rules binding)
-                                   (_expand binding env rename-env local-env)
-                                   binding)))) 
+                  (let* ((name (car b))
+                         (binding (cadr b))
+                         (binding-body (cadr binding)))
+                    (cons 
+                      name 
+                      (list 
+                        'macro
+                        (if (tagged-list? 'syntax-rules binding)
+                                     ;; TODO: is this ok?
+                                     (cadr (_expand binding env rename-env local-env))
+                                     binding-body)))))
                 bindings))
-            ; TODO: (new-local-macro-env (append bindings-as-macros local-env))
+            (new-local-macro-env (append bindings-as-macros local-env))
            )
-(trace:error `(let-syntax ,bindings-as-macros))
-       (_expand body env rename-env local-env) ;; TODO: new-local-macro-env 
+(trace:error `(let-syntax ,new-local-macro-env))
+       (_expand body env rename-env new-local-macro-env) ;; TODO: new-local-macro-env 
        ))
     ((app? exp)
      (cond
        ((symbol? (car exp))
-        (let ((val (env:lookup (car exp) env #f)))
+        (let ((val (let ((local (assoc (car exp) local-env)))
+                     (if local
+                         (cdr local)
+                         (env:lookup (car exp) env #f)))))
           (if (tagged-list? 'macro val)
             (_expand ; Could expand into another macro
               (macro:expand exp val env rename-env)
@@ -695,7 +704,10 @@
         (cond
           ((symbol? (caar exp))
 ;(log (car this-exp))
-           (let ((val (env:lookup (caar exp) env #f)))
+           (let ((val (let ((local (assoc (caar exp) local-env)))
+                       (if local
+                          (cdr local)
+                          (env:lookup (caar exp) env #f)))))
 ;(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,

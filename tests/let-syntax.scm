@@ -9,10 +9,12 @@
 ;; (given-that if (set! if 'now))
 ;; if)) ;; => now
 
+(write
 (let ((x 'outer))
   (let-syntax ((m (syntax-rules () ((m) x))))
     (let ((x 'inner))
       (m)))) ;; Should be outer
+      )
 
 ;(write 
 ;(let ((x 'outer))
