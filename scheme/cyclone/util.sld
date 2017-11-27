@@ -11,6 +11,9 @@
           (scheme char))
   (export
     ;; Code analysis
+    define-syntax?
+    let-syntax?
+    letrec-syntax?
     tagged-list?
     if?
     if-syntax?
@@ -120,7 +123,15 @@
     (or 
       (= (length exp) 3)
       (= (length exp) 4))))
-       
+
+(define (define-syntax? exp)
+  (tagged-list? 'define-syntax exp))
+
+(define (let-syntax? exp)
+  (tagged-list? 'let-syntax exp))
+
+(define (letrec-syntax? exp)
+  (tagged-list? 'letrec-syntax exp))
 
 ; begin? : exp -> boolean
 (define (begin? exp) 

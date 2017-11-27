@@ -13,9 +13,6 @@
           (scheme cyclone util)
   )
   (export
-    define-syntax?
-    let-syntax?
-    letrec-syntax?
     macro:macro?
     macro:expand
     macro:add!
@@ -51,15 +48,6 @@
     (define (macro:get-defined-macros) *macro:defined-macros*)
 
     ;; Macro section
-    (define (define-syntax? exp)
-      (tagged-list? 'define-syntax exp))
-
-    (define (let-syntax? exp)
-      (tagged-list? 'let-syntax exp))
-
-    (define (letrec-syntax? exp)
-      (tagged-list? 'letrec-syntax exp))
-
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
     (define (macro:expand exp macro mac-env rename-env)
