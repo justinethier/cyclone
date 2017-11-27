@@ -67,8 +67,6 @@
     app->args 
     precompute-prim-app? 
     begin->exps 
-    define-lambda? 
-    define->lambda 
     closure? 
     closure->lam 
     closure->env 
@@ -410,26 +408,6 @@
 ; begin->exps : begin-exp -> list[exp]
 (define (begin->exps exp)
   (cdr exp))
-
-(define (define-lambda? exp)
-  (let ((var (cadr exp)))
-    (or
-      ;; Standard function
-      (and (list? var) 
-           (> (length var) 0)
-           (symbol? (car var)))
-      ;; Varargs function
-      (and (pair? var)
-           (symbol? (car var))))))
-
-(define (define->lambda exp)
-  (cond
-    ((define-lambda? exp)
-     (let ((var (caadr exp))
-           (args (cdadr exp))
-           (body (cddr exp)))
-       `(define ,var (lambda ,args ,@body))))
-    (else exp)))
 
 ; closure? : exp -> boolean
 (define (closure? exp) 
