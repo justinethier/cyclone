@@ -18,7 +18,6 @@
           (scheme cyclone ast)
           (scheme cyclone common)
           (scheme cyclone libraries)
-          (scheme cyclone macros)
           (scheme cyclone primitives)
           (scheme cyclone pretty-print)
           (scheme cyclone util)

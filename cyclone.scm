@@ -20,7 +20,6 @@
         (scheme cyclone primitives)
         (scheme cyclone transforms)
         (scheme cyclone cps-optimizations)
-        (scheme cyclone macros)
         (scheme cyclone libraries))
 
 (define *optimization-level* 2) ;; Default level
