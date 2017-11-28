@@ -11,6 +11,7 @@
   (import 
     (scheme cyclone util)
     (scheme cyclone libraries) ;; for handling import sets
+    (scheme cyclone primitives)
     (scheme base)
     (scheme file)
     (scheme write) ;; Only used for debugging
