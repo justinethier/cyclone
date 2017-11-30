@@ -401,6 +401,9 @@
         ((and (syntax? exp)
               (not (null? (cdr exp))))
          (analyze-syntax exp env))
+        ;;((and (tagged-list? 'let-syntax exp)
+        ;;      (not (null? (cdr exp))))
+        ;; (analyze-let-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -446,6 +449,12 @@
     (lambda (env)
       (env:define-variable! var (vproc env) env)
       'ok)))
+
+(define (analyze-let-syntax exp a-env)
+  ;; TODO: probably just create a fresh env for renames
+  ;; TODO: expand, do we need to clean as well?
+  ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
+)
 
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
