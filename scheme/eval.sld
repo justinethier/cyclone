@@ -459,8 +459,8 @@
     ;; TODO: probably just create a fresh env for renames
     ;; TODO: expand, do we need to clean as well?
     ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
-(write `(DEBUG ,cleaned))
-(newline)
+;(write `(DEBUG ,cleaned))
+;(newline)
     (analyze cleaned a-env)))
 
 (define (analyze-syntax exp a-env)
@@ -848,8 +848,8 @@
       (current-error-port))
     (newline (current-error-port)))
   ;(log exp)
-(write `(expand ,exp))
-(newline)
+;(write `(expand ,exp))
+;(newline)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
@@ -939,8 +939,8 @@
                      (if local
                          (cdr local)
                          (env:lookup (car exp) env #f)))))
-(write `(app DEBUG ,(car exp) ,val))
-(newline)
+;(write `(app DEBUG ,(car exp) ,val))
+;(newline)
           (cond
            ((tagged-list? 'macro val)
             (_expand ; Could expand into another macro
