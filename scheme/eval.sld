@@ -384,10 +384,10 @@
 ;; - env => Environment used to expand macros
 ;;
 (define (analyze exp env)
-;(newline)
-;(display "/* ")
-;(write (list 'analyze exp))
-;(display " */")
+(newline)
+(display "/* ")
+(write (list 'analyze exp))
+(display " */")
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
@@ -459,8 +459,10 @@
     ;; TODO: probably just create a fresh env for renames
     ;; TODO: expand, do we need to clean as well?
     ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
-;(write `(DEBUG ,cleaned))
-;(newline)
+(display "/* ")
+(write `(DEBUG ,cleaned))
+(display "*/ ")
+(newline)
     (analyze cleaned a-env)))
 
 (define (analyze-syntax exp a-env)
@@ -848,8 +850,10 @@
       (current-error-port))
     (newline (current-error-port)))
   ;(log exp)
-;(write `(expand ,exp))
-;(newline)
+(display "/* ")
+(write `(expand ,exp))
+(display "*/ ")
+(newline)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
@@ -939,8 +943,10 @@
                      (if local
                          (cdr local)
                          (env:lookup (car exp) env #f)))))
-;(write `(app DEBUG ,(car exp) ,val))
-;(newline)
+(display "/* ")
+(write `(app DEBUG ,(car exp) ,val))
+(display "*/ ")
+(newline)
           (cond
            ((tagged-list? 'macro val)
             (_expand ; Could expand into another macro
