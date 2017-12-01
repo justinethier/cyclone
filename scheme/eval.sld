@@ -401,9 +401,9 @@
         ((and (syntax? exp)
               (not (null? (cdr exp))))
          (analyze-syntax exp env))
-        ;;((and (tagged-list? 'let-syntax exp)
-        ;;      (not (null? (cdr exp))))
-        ;; (analyze-let-syntax exp env))
+        ((and (tagged-list? 'let-syntax exp)
+              (not (null? (cdr exp))))
+         (analyze-let-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -451,10 +451,15 @@
       'ok)))
 
 (define (analyze-let-syntax exp a-env)
-  ;; TODO: probably just create a fresh env for renames
-  ;; TODO: expand, do we need to clean as well?
-  ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
-)
+  (let* ((rename-env (env:extend-environment '() '() '()))
+         (expanded (expand exp (macro:get-env) rename-env))
+        )
+    ;; TODO: probably just create a fresh env for renames
+    ;; TODO: expand, do we need to clean as well?
+    ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
+(write `(DEBUG ,expanded))
+(newline)
+    (analyze expanded a-env)))
 
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
@@ -841,7 +846,8 @@
       (current-error-port))
     (newline (current-error-port)))
   ;(log exp)
-  ;(trace:error `(expand ,exp))
+(write `(expand ,exp))
+(newline)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
