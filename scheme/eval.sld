@@ -452,14 +452,16 @@
 
 (define (analyze-let-syntax exp a-env)
   (let* ((rename-env (env:extend-environment '() '() '()))
-         (expanded (expand exp (macro:get-env) rename-env))
+         (expanded (expand exp a-env rename-env))
+         ;(expanded (expand exp (macro:get-env) rename-env))
+         (cleaned (macro:cleanup expanded rename-env))
         )
     ;; TODO: probably just create a fresh env for renames
     ;; TODO: expand, do we need to clean as well?
     ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
-(write `(DEBUG ,expanded))
+(write `(DEBUG ,cleaned))
 (newline)
-    (analyze expanded a-env)))
+    (analyze cleaned a-env)))
 
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
@@ -937,15 +939,25 @@
                      (if local
                          (cdr local)
                          (env:lookup (car exp) env #f)))))
-          (if (tagged-list? 'macro val)
+(write `(app DEBUG ,(car exp) ,val))
+(newline)
+          (cond
+           ((tagged-list? 'macro val)
             (_expand ; Could expand into another macro
               (macro:expand exp val env rename-env)
               env 
               rename-env 
-              local-env)
+              local-env))
+           ((Cyc-macro? val)
+            (_expand ; Could expand into another macro
+              (macro:expand exp (list 'macro val) env rename-env)
+              env 
+              rename-env 
+              local-env))
+           (else
             (map
               (lambda (expr) (_expand expr env rename-env local-env))
-              exp))))
+              exp)))))
        (else
          ;; TODO: note that map does not guarantee that expressions are
          ;; evaluated in order. For example, the list might be processed
