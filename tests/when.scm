@@ -1,9 +1,9 @@
 (import (scheme base) (scheme write))
-(define-syntax when
+(define-syntax my-when
   (syntax-rules ()
-    ((when test result1 result2 ...)
+    ((my-when test result1 result2 ...)
      (if test
          (begin result1 result2 ...)))))
 
 (write
-  (when #t 1))
+  (my-when #t 1))
