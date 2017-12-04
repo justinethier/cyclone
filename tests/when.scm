@@ -8,10 +8,10 @@
 (define-syntax my-when2
   (syntax-rules ()
     ((my-when test result1 result2 ...)
-     (list test))))
+     (list result2 ...))))
 
-(write
-  (my-when2 #t 1))
+;(write
+;  (my-when2 #t 1))
 
  (define my-when2*
    (lambda (expr$28 rename$29 compare$30)
@@ -46,5 +46,34 @@
                  (car v.1$36))
                 #f))
             (cdr expr$28))))))
+
+
+;; TODO: seems broken
+(define-syntax my-when4
+  (syntax-rules ()
+    ((my-when test result1 result2 ...)
+     (let-syntax 
+       ((second
+         (syntax-rules ()
+           ((second a b c)
+            b))))
+       (second 33 44 55)))))
 (write
-  (my-when2* '(my-when2* 't 1) (lambda (a) a) (lambda X #f)))
+  (my-when4 't 1 2 3))
+
+
+;  (my-when2 
+;    't 
+;    1 
+;    (let-syntax 
+;      ((my-when3
+;        (syntax-rules ()
+;          ((my-when3 test result1 result2 ...)
+;           (list result2 ...)))))
+;      (my-when3 33 44 55))
+;    2
+;    3))
+;(write
+;  (my-when2 '(my-when2 't 1 2 3) (lambda (a) a) (lambda X #f)))
+;(write
+;  (my-when2 '(my-when2 "testing" 1) (lambda (a) a) (lambda X #f)))
