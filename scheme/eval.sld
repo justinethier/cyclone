@@ -922,14 +922,24 @@
                   (let* ((name (car b))
                          (binding (cadr b))
                          (binding-body (cadr binding)))
+;(define tmp (env:lookup (car binding) env #f))
+;(display "/* ")
+;(write `(DEBUG expand let-syntax 
+;  ,(if (tagged-list? 'macro tmp)
+;       (Cyc-get-cvar (cadr tmp))
+;       tmp)
+;  ,syntax-rules))
+;(display "*/ ")
+;(newline)
                     (cons 
                       name 
                       (list 
                         'macro
-                        (if (tagged-list? 'syntax-rules binding)
-                                     ;; TODO: is this ok?
-                                     (cadr (_expand binding env rename-env local-env))
-                                     binding-body)))))
+                        ;; Broken for renames, replace w/below: (if (tagged-list? 'syntax-rules binding)
+                        (if (macro:syntax-rules? (env:lookup (car binding) env #f))
+                            ;; TODO: is this ok?
+                            (cadr (_expand binding env rename-env local-env))
+                            binding-body)))))
                 bindings))
             (new-local-macro-env (append bindings-as-macros local-env))
            )
@@ -974,6 +984,13 @@
           exp))))
     (else
       (error "unknown exp: " exp))))
+
+(define (macro:syntax-rules? exp)
+  (eq? 
+    syntax-rules
+    (if (tagged-list? 'macro exp)
+        (Cyc-get-cvar (cadr exp))
+        exp)))
 
 ;; Nicer interface to expand-body
 (define (expand-lambda-body exp env rename-env)
