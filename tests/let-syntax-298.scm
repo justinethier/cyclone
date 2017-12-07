@@ -8,9 +8,11 @@
      (let-syntax ((foo (syntax-rules () ((_) 'ok))))
        (foo)))))
 
-;(define-syntax foo (syntax-rules ()))
+(define-syntax foo (syntax-rules () ((_) 'foo)))
 
 (write
 (bar)
 )
-;(foo) 
+(write
+(foo) 
+)

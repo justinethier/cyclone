@@ -74,7 +74,8 @@
                   ((test maybe-symbol t f) t)
                   ((test x t f) f))))
              (test abracadabra kt kf)))))
-;;(write (symbol?? a))
+(write (symbol?? a #t #f))
+(write (symbol?? "a" #t #f))
 
 (write
   (let-syntax 
