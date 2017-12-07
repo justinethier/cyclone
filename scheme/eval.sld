@@ -887,7 +887,7 @@
             (trans (caddr exp))
             (body (cadr trans)))
        (cond
-        ((tagged-list? 'syntax-rules trans) ;; TODO: what if syntax-rules is renamed?
+        ((macro:syntax-rules? (env:lookup (car trans) env #f)) ;; Handles renamed 'syntax-rules' identifier
          (_expand
            `(define-syntax ,name ,(_expand trans env rename-env local-env))
            env rename-env local-env))

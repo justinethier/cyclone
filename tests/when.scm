@@ -4,14 +4,14 @@
 ;    ((my-when test result1 result2 ...)
 ;     (if test
 ;         (begin result1 result2 ...)))))
-;
-;(define-syntax my-when2
-;  (syntax-rules ()
-;    ((my-when test result1 result2 ...)
-;     (list result2 ...))))
-;
-;;(write
-;;  (my-when2 #t 1))
+
+(define-syntax my-when2
+  (syntax-rules ()
+    ((my-when test result1 result2 ...)
+     (list result2 ...))))
+
+(write
+  (my-when2 #t 1))
 ;
 ; (define my-when2*
 ;   (lambda (expr$28 rename$29 compare$30)
