@@ -2,6 +2,10 @@
 
 ## 0.7.1 - TBD
 
+Features
+
+- WIP: let-syntax
+
 ## 0.7 - November 17, 2017
 
 Features
