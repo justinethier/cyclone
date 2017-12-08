@@ -468,23 +468,21 @@
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
     (cond
-      ((tagged-list? 'er-macro-transformer (caddr exp))
-        (let ((sproc (make-macro (cadr (caddr exp))))) ;(analyze-syntax-lambda (cadr (caddr exp)) a-env)))
+      ((tagged-list? 'er-macro-transformer (caddr exp)) ;; TODO: need to handle renamed er symbol here??
+        (let ((sproc (make-macro (cadr (caddr exp)))))
           (lambda (env)
             (env:define-variable! var sproc env)
             'ok)))
       (else
-        ;; TODO: need to support syntax-rules, and other methods of
-        ;; building a macro. maybe call into something like 
-        ;; analyze-syntax-lambda instead of erroring here
-        (error "macro syntax not supported yet")))))
-
-;(define (analyze-syntax-lambda exp a-env)
-;  (let ((vars (lambda-parameters exp))
-;        (bproc (analyze-sequence (lambda-body exp) a-env)))
-;    (write `(debug ,(lambda-body exp)))
-;    ;(lambda (env) 
-;      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
+        ;; Just expand the syntax rules
+        ;; Possibly want to check the macro system here
+        (let* ((rename-env (env:extend-environment '() '() '()))
+               (expanded (expand exp a-env rename-env))
+               (cleaned (macro:cleanup expanded rename-env)))
+          (let ((sproc (make-macro (caddr cleaned))))
+            (lambda (env)
+              (env:define-variable! var sproc env)
+              'ok)))))))
 
 (define (analyze-import exp env)
   (lambda (env)
