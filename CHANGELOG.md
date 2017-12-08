@@ -4,7 +4,12 @@
 
 Features
 
-- WIP: let-syntax
+- Added `let-syntax` to the compiler and interpreter.
+- Allow `eval` to recognize `syntax-rules` macros.
+
+Internal Changes
+
+- Relocated all macro expansion code to the `(scheme eval)` module. `(scheme cyclone macros)` is now obsolete.
 
 ## 0.7 - November 17, 2017
 

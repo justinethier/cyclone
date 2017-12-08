@@ -85,18 +85,18 @@
          b))))
     (second 33 44 55)))
 
-
-;  (my-when2 
-;    't 
-;    1 
-;    (let-syntax 
-;      ((my-when3
-;        (syntax-rules ()
-;          ((my-when3 test result1 result2 ...)
-;           (list result2 ...)))))
-;      (my-when3 33 44 55))
-;    2
-;    3))
+(write
+  (my-when2 
+    't 
+    1 
+    (let-syntax 
+      ((my-when3
+        (syntax-rules ()
+          ((my-when3 test result1 result2 ...)
+           (list result2 ...)))))
+      (my-when3 33 44 55))
+    2
+    3))
 ;(write
 ;  (my-when2 '(my-when2 't 1 2 3) (lambda (a) a) (lambda X #f)))
 ;(write
