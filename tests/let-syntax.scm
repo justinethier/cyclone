@@ -1,5 +1,22 @@
 (import (scheme base) (scheme write))
 
+(define-syntax my-let
+  (syntax-rules
+    ()
+    ((my-let ((name val) ...) body1 body2 ...)
+     ((lambda (name ...) body1 body2 ...) val ...))
+    ((my-let tag ((name val) ...) body1 body2 ...)
+     ((letrec ((tag (lambda (name ...) body1 body2 ...)))
+        tag)
+      val ...))))
+(write
+(my-let ((x 'outer))
+  (let-syntax ((m (syntax-rules () ((m) x))))
+    (my-let ((x 'inner))
+      (m)))) ;; Should be outer
+      )
+
+
 ;; (let-syntax ((given-that (syntax-rules ()
 ;; ((given-that test stmt1 stmt2 ...)
 ;; (if test
