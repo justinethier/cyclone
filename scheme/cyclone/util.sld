@@ -663,6 +663,7 @@
      (define . define)
      (define-syntax . define-syntax)
      (let-syntax . let-syntax)
+     (letrec-syntax . letrec-syntax)
      (define-c . define-c)
      (if . if)
      (lambda . lambda)
