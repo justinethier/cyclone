@@ -950,9 +950,14 @@
         (let ((val (let ((local (assoc (car exp) local-env)))
                      (if local
                          (cdr local)
-                         (env:lookup (car exp) env #f)))))
+                         (let ((v (env:lookup (car exp) env #f)))
+                           v ;; TODO: below was for looking up a renamed macro. may want to consider using it
+                             ;; in the symbol condition below...
+                           #;(if v
+                               v
+                               (env:lookup (car exp) rename-env #f)))))))
 ;;(display "/* ")
-;;(write `(app DEBUG ,(car exp) ,val))
+;;(write `(app DEBUG ,(car exp) ,val ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
 ;;(display "*/ ")
 ;;(newline)
           (cond
@@ -968,6 +973,21 @@
               env 
               rename-env 
               local-env))
+;; TODO: if we are doing this, only want to do so if the original variable is a macro.
+;;       this is starting to get overly complicated though.
+;; if nothing else should encapsulate the above lookup into a function and call that
+;; in both places (above and here) to simplify things
+;; 
+;;           ((and (symbol? val) 
+;;                 (not (eq? val (car exp))))
+;;            ;; Original macro symbol was renamed. So try again with the orignal symbol
+;;(display "/* ")
+;;(write `(app DEBUG-syms ,(car exp) ,val ,local-env ,(cdr exp)))
+;;(display "*/ ")
+;;(newline)
+;;            (_expand 
+;;              (cons val (cdr exp))
+;;              env rename-env local-env))
            (else
             (map
               (lambda (expr) (_expand expr env rename-env local-env))

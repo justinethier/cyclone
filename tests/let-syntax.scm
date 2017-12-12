@@ -1,5 +1,15 @@
 (import (scheme base) (scheme write) (scheme cyclone pretty-print))
 
+;; Just testing, may want to remove this one once the recursive macro expansion works
+  (define-syntax my-or2 (syntax-rules ()
+            ((my-or2) #f)
+            ((my-or2 e) e)
+            ((my-or2 e1 e2 ...)
+             (let ((temp e1)) (if temp temp (my-or2 e2 ...))))))
+(write (my-or2 #t))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (let-syntax
   ((my-or (syntax-rules ()
             ((my-or) #f)
