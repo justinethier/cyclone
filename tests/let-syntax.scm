@@ -1,5 +1,18 @@
 (import (scheme base) (scheme write) (scheme cyclone pretty-print))
 
+(let-syntax
+  ((my-or (syntax-rules ()
+            ((my-or) #f)
+            ((my-or e) e)
+            ((my-or e1 e2 ...)
+             (let ((temp e1)) (if temp temp (my-or e2 ...)))))))
+  (let ((x #f) 
+        (y 7) 
+        (temp 8) 
+        (my-let odd?) 
+        (my-if even?))
+    (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
+
 #;(letrec-syntax
   ((my-or (syntax-rules ()
             ((my-or) #f)
