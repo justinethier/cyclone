@@ -404,6 +404,9 @@
         ((and (tagged-list? 'let-syntax exp)
               (not (null? (cdr exp))))
          (analyze-let-syntax exp env))
+        ((and (tagged-list? 'letrec-syntax exp)
+              (not (null? (cdr exp))))
+         (analyze-letrec-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -464,6 +467,14 @@
 ;;(display "*/ ")
 ;;(newline)
     (analyze cleaned a-env)))
+
+;; TODO: following is just a placeholder, does not work yet
+(define (analyze-letrec-syntax exp a-env)
+  (let* ((body-env a-env) ;;(env:extend-environment '() '() a-env))
+         (expanded (expand exp body-env body-env))
+         (cleaned (macro:cleanup expanded body-env))
+        )
+    (analyze cleaned body-env)))
 
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
