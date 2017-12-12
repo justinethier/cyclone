@@ -33,6 +33,40 @@
     (define internal-def 'ok))
   internal-def)
 
+;; From Husk:
+;;
+; Examples from the source to R5RS pitfall 3.3
+;; (assert/equal
+;;   (let ((a 1))
+;;      (letrec-syntax
+;;          ((foo (syntax-rules ()
+;;                  ((_ b)
+;;                   (bar a b))))
+;;           (bar (syntax-rules ()
+;;                  ((_ c d)
+;;                   (cons c (let ((c 3))
+;;                             (list d c 'c)))))))
+;;        (let ((a 2))
+;;          (foo a))))
+;;   '(1 2 3 a))
+;; 
+;; ; Examples from/based on pitfall 8.3                                                                                                         (assert/equal 1
+;;   (let ((x 1))
+;;     (let-syntax ((foo (syntax-rules () ((_) 2))))
+;;       (define x (foo))
+;;       3)
+;;     x))
+;; (assert/equal 1
+;;   (let ((x 1))
+;;     (letrec-syntax ((foo (syntax-rules () ((_) 2))))                                                                                               (define x (foo))
+;;       3)
+;;     x))
+;; 
+;; ; Issue #151 - Preserve hygiene across syntax-rules and ER macros
+;; (assert/equal
+;;     (let ((unquote 'foo)) `(,'bar))
+;;     '(,'bar))
+
 
 #;(let ((a 1))
      (let-syntax
