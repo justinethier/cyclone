@@ -1,16 +1,41 @@
 (import (scheme base) (scheme write) (scheme cyclone pretty-print))
 
 ;; Just testing, may want to remove this one once the recursive macro expansion works
-  (define-syntax my-or2 (syntax-rules ()
-            ((my-or2) #f)
-            ((my-or2 e) e)
-            ((my-or2 e1 e2 ...)
-             (let ((temp e1)) (if temp temp (my-or2 e2 ...))))))
-(write (my-or2 #t))
+;  (define-syntax my-or2 (syntax-rules ()
+;            ((my-or2) #f)
+;            ((my-or2 e) e)
+;            ((my-or2 e1 e2 ...)
+;             (let ((temp e1)) (if temp temp (my-or2 e2 ...))))))
+;(write (my-or2 #t))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  (define-syntax my-or (syntax-rules ()
+            ((my-or) #f)
+            ((my-or e) e)
+            ((my-or e1 e2 ...)
+             (let ((temp e1)) (if temp temp (my-or e2 ...))))))
+  (write
+  (let ((x #f) 
+        (y 7) 
+        (temp 8) 
+        (my-let odd?) 
+        (my-if even?))
+    (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
 
-(let-syntax
+         (define-syntax foo (syntax-rules ()
+                 ((_ b)
+                  (bar a b))))
+          (define-syntax bar (syntax-rules ()                                                                                                                               ((_ c d)
+                  (cons c (let ((c 3))
+                            (list d c 'c))))))
+       (write
+       (let ((a 2))
+         (foo a)))
+
+;; Chibi also fails with the same error when this is a let-synatx macro,
+;; so it may be that Cyclone works just fine here! Obviously it needs
+;; to be able to handle this macro in letrec-syntax form, though
+#;(let-syntax
   ((my-or (syntax-rules ()
             ((my-or) #f)
             ((my-or e) e)
