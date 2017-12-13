@@ -5,6 +5,7 @@
 Features
 
 - Added `let-syntax` to the compiler and interpreter.
+TBD: `letrec-syntax`
 - Allow `eval` to recognize `syntax-rules` macros.
 
 Internal Changes
