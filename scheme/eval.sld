@@ -468,13 +468,12 @@
 ;;(newline)
     (analyze cleaned a-env)))
 
-;; TODO: following is just a placeholder, does not work yet
 (define (analyze-letrec-syntax exp a-env)
-  (let* ((body-env a-env) ;;(env:extend-environment '() '() a-env))
-         (expanded (expand exp body-env body-env))
-         (cleaned (macro:cleanup expanded body-env))
+  (let* ((rename-env (env:extend-environment '() '() '()))
+         (expanded (expand exp a-env rename-env))
+         (cleaned (macro:cleanup expanded rename-env))
         )
-    (analyze cleaned body-env)))
+    (analyze cleaned a-env)))
 
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
@@ -954,6 +953,28 @@
            )
 ;(trace:error `(let-syntax ,new-local-macro-env))
        (_expand body env rename-env new-local-macro-env) ;; TODO: new-local-macro-env 
+       ))
+    ;; TODO: does not work yet:
+    ((letrec-syntax? exp)
+     (let* ((body (cons 'begin (cddr exp)))
+            (body-env (env:extend-environment '() '() env))
+            (bindings (cadr exp))
+            ;(new-local-macro-env (append bindings-as-macros local-env))
+           )
+       (for-each
+         (lambda (b)
+           (let* ((name (car b))
+                  (binding (cadr b))
+                  (binding-body (cadr binding))
+                  (macro-val
+                    (list 
+                      'macro
+                      (if (macro:syntax-rules? (env:lookup (car binding) body-env #f))
+                          (cadr (_expand binding body-env rename-env local-env))
+                          binding-body))))
+           (env:define-variable! name macro-val) body-env))
+         bindings)
+       (_expand body body-env rename-env local-env) ;;new-local-macro-env) ;; TODO: new-local-macro-env 
        ))
     ((app? exp)
      (cond

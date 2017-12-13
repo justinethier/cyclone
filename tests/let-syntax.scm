@@ -9,28 +9,28 @@
 ;(write (my-or2 #t))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (define-syntax my-or (syntax-rules ()
-            ((my-or) #f)
-            ((my-or e) e)
-            ((my-or e1 e2 ...)
-             (let ((temp e1)) (if temp temp (my-or e2 ...))))))
-  (write
-  (let ((x #f) 
-        (y 7) 
-        (temp 8) 
-        (my-let odd?) 
-        (my-if even?))
-    (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
-
-         (define-syntax foo (syntax-rules ()
-                 ((_ b)
-                  (bar a b))))
-          (define-syntax bar (syntax-rules ()                                                                                                                               ((_ c d)
-                  (cons c (let ((c 3))
-                            (list d c 'c))))))
-       (write
-       (let ((a 2))
-         (foo a)))
+;  (define-syntax my-or (syntax-rules ()
+;            ((my-or) #f)
+;            ((my-or e) e)
+;            ((my-or e1 e2 ...)
+;             (let ((temp e1)) (if temp temp (my-or e2 ...))))))
+;  (write
+;  (let ((x #f) 
+;        (y 7) 
+;        (temp 8) 
+;        (my-let odd?) 
+;        (my-if even?))
+;    (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
+;
+;         (define-syntax foo (syntax-rules ()
+;                 ((_ b)
+;                  (bar a b))))
+;          (define-syntax bar (syntax-rules ()                                                                                                                               ((_ c d)
+;                  (cons c (let ((c 3))
+;                            (list d c 'c))))))
+;       (write
+;       (let ((a 2))
+;         (foo a)))
 
 ;; Chibi also fails with the same error when this is a let-synatx macro,
 ;; so it may be that Cyclone works just fine here! Obviously it needs
@@ -48,7 +48,10 @@
         (my-if even?))
     (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
 
-#;(letrec-syntax
+;; TODO: below should work with "let" and "if" instead of "my-let" and "my-if"
+;; TODO: below does not work in eval - WTF?
+(write
+(letrec-syntax
   ((my-or (syntax-rules ()
             ((my-or) #f)
             ((my-or e) e)
@@ -57,16 +60,19 @@
   (let ((x #f) 
         (y 7) 
         (temp 8) 
-        (let odd?) 
-        (if even?))
-    (my-or x (let temp) (if y) y))) ;; ==> 7
+        (my-let odd?) 
+        (my-if even?))
+    (my-or x (my-let temp) (my-if y) y))) ;; ==> 7
+)
 
 
-;; From Chibi
-#;(let ()
-  (letrec-syntax ()
-    (define internal-def 'ok))
-  internal-def)
+;; From Chibi - isn't this a bug though?
+;(write
+;(let ()
+;  (letrec-syntax ()
+;    (define internal-def 'ok))
+;  internal-def)
+;)
 
 ;; From Husk:
 ;;
