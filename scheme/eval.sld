@@ -858,10 +858,10 @@
       (current-error-port))
     (newline (current-error-port)))
   ;(log exp)
-;;(display "/* ")
-;;(write `(expand ,exp))
-;;(display "*/ ")
-;;(newline)
+(display "/* ")
+(write `(expand ,exp))
+(display "*/ ")
+(newline)
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
@@ -988,10 +988,10 @@
                            #;(if v
                                v
                                (env:lookup (car exp) rename-env #f)))))))
-;;(display "/* ")
-;;(write `(app DEBUG ,(car exp) ,val ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
-;;(display "*/ ")
-;;(newline)
+(display "/* ")
+(write `(app DEBUG ,(car exp) ,val ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
+(display "*/ ")
+(newline)
           (cond
            ((tagged-list? 'macro val)
             (_expand ; Could expand into another macro
@@ -1081,6 +1081,7 @@
           rename-env
           local-env))
        ((or (define-syntax? this-exp)
+            (letrec-syntax? this-exp)
             (let-syntax? this-exp)
             (lambda? this-exp)
             (set!? this-exp)
