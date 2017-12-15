@@ -4,14 +4,13 @@
 
 Features
 
-- Added `let-syntax` to the compiler and interpreter.
-TBD: `letrec-syntax`
-- Allow `eval` to recognize `syntax-rules` macros.
+- Added `let-syntax` and `letrec-syntax` to the compiler and interpreter.
 - Added the `(scheme repl)` library and `interaction-environment` function from R7RS.
+- Allow `eval` to recognize `syntax-rules` macros.
 
 Internal Changes
 
-- Relocated all macro expansion code to the `(scheme eval)` module. `(scheme cyclone macros)` is now obsolete.
+- Relocated all macro expansion code to the `(scheme eval)` module. Cyclone's `(scheme cyclone macros)` library is now obsolete.
 
 ## 0.7 - November 17, 2017
 
