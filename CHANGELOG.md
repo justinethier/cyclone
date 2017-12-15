@@ -7,6 +7,7 @@ Features
 - Added `let-syntax` to the compiler and interpreter.
 TBD: `letrec-syntax`
 - Allow `eval` to recognize `syntax-rules` macros.
+- Added the `(scheme repl)` library and `interaction-environment` function from R7RS.
 
 Internal Changes
 
