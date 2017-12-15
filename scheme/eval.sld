@@ -470,6 +470,24 @@
 
 (define (analyze-letrec-syntax exp a-env)
   (let* ((rename-env (env:extend-environment '() '() '()))
+
+;; (vars (foldl (lambda (lis acc) (append acc (car lis))) '() a-env))
+;; (vals (foldl (lambda (lis acc) (append acc (cdr lis))) '() a-env))
+;; (zipped (apply map list vars (list vals)))
+;; (defined-macros
+;;   (filter
+;;     (lambda (v)
+;;       (Cyc-macro? (Cyc-get-cvar (cdr v))))
+;;     zipped))
+;; (macro-env 
+;;   (env:extend-environment
+;;     (map car defined-macros)
+;;     (map (lambda (v)
+;;            (list 'macro (cdr v)))
+;;          defined-macros)
+;;     '())) ;; base-env
+
+         ;(expanded (expand exp macro-env rename-env))
          (expanded (expand exp a-env rename-env))
          (cleaned (macro:cleanup expanded rename-env))
         )
@@ -989,7 +1007,7 @@
                                v
                                (env:lookup (car exp) rename-env #f)))))))
 (display "/* ")
-(write `(app DEBUG ,(car exp) ,val ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
+(write `(app DEBUG ,(car exp) ,val ,env ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
 (display "*/ ")
 (newline)
           (cond
