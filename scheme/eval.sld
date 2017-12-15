@@ -972,12 +972,10 @@
 ;(trace:error `(let-syntax ,new-local-macro-env))
        (_expand body env rename-env new-local-macro-env) ;; TODO: new-local-macro-env 
        ))
-    ;; TODO: does not work yet:
     ((letrec-syntax? exp)
      (let* ((body (cons 'begin (cddr exp)))
             (body-env (env:extend-environment '() '() env))
             (bindings (cadr exp))
-            ;(new-local-macro-env (append bindings-as-macros local-env))
            )
        (for-each
          (lambda (b)
@@ -992,7 +990,7 @@
                           binding-body))))
            (env:define-variable! name macro-val) body-env))
          bindings)
-       (_expand body body-env rename-env local-env) ;;new-local-macro-env) ;; TODO: new-local-macro-env 
+       (_expand body body-env rename-env local-env)
        ))
     ((app? exp)
      (cond
