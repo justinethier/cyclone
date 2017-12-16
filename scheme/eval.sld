@@ -485,7 +485,8 @@
      (map (lambda (v)
             (list 'macro (cadr v)))
           defined-macros)
-     (create-environment '() '())))
+     a-env))
+     ;(create-environment '() '())))
 
          (expanded (expand exp macro-env rename-env))
          ;(expanded (expand exp a-env rename-env))
