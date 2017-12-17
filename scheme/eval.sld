@@ -470,26 +470,24 @@
 
 (define (analyze-letrec-syntax exp a-env)
   (let* ((rename-env (env:extend-environment '() '() '()))
-
- (vars (foldl (lambda (lis acc) (append acc (car lis))) '() a-env))
- (vals (foldl (lambda (lis acc) (append acc (cdr lis))) '() a-env))
- (zipped (apply map list vars (list vals)))
- (defined-macros
-   (filter
-     (lambda (v)
-       (Cyc-macro? (Cyc-get-cvar (cadr v))))
-     zipped))
- (macro-env 
-   (env:extend-environment
-     (map car defined-macros)
-     (map (lambda (v)
-            (list 'macro (cadr v)))
-          defined-macros)
-     a-env))
-     ;(create-environment '() '())))
-
+         ;; Build up a macro env
+         (vars (foldl (lambda (lis acc) (append acc (car lis))) '() a-env))
+         (vals (foldl (lambda (lis acc) (append acc (cdr lis))) '() a-env))
+         (zipped (apply map list vars (list vals)))
+         (defined-macros
+           (filter
+             (lambda (v)
+               (Cyc-macro? (Cyc-get-cvar (cadr v))))
+             zipped))
+         (macro-env 
+           (env:extend-environment
+             (map car defined-macros)
+             (map (lambda (v)
+                    (list 'macro (cadr v)))
+                  defined-macros)
+             a-env)) ;(create-environment '() '())))
+         ;; Proceed with macro env
          (expanded (expand exp macro-env rename-env))
-         ;(expanded (expand exp a-env rename-env))
          (cleaned (macro:cleanup expanded rename-env))
         )
     (analyze cleaned a-env)))
@@ -854,17 +852,11 @@
       (clean expr '()))
       
     ; TODO: get macro name, transformer
-    ; TODO: let-syntax forms
 
 ;; Macro expansion
 
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
-
-;; TODO: need a local version of each expand that receives a local env built by
-;;       let-syntax forms
-;;(define (expand exp env rename-env local-env)
-;;(define (_expand exp env rename-env)
 
 (define (expand exp env rename-env)
   (_expand exp env rename-env '()))
