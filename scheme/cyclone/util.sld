@@ -11,12 +11,17 @@
           (scheme char))
   (export
     ;; Code analysis
+    define-syntax?
+    let-syntax?
+    letrec-syntax?
     tagged-list?
     if?
     if-syntax?
     begin?
     lambda?
     pair->list 
+    define-lambda? 
+    define->lambda 
     formals->list
     lambda-formals->list
     lambda-varargs?
@@ -120,7 +125,15 @@
     (or 
       (= (length exp) 3)
       (= (length exp) 4))))
-       
+
+(define (define-syntax? exp)
+  (tagged-list? 'define-syntax exp))
+
+(define (let-syntax? exp)
+  (tagged-list? 'let-syntax exp))
+
+(define (letrec-syntax? exp)
+  (tagged-list? 'letrec-syntax exp))
 
 ; begin? : exp -> boolean
 (define (begin? exp) 
@@ -238,6 +251,26 @@
     (if (not (pair? lst))
         (cons lst '())
         (cons (car lst) (loop (cdr lst))))))
+
+(define (define-lambda? exp)
+  (let ((var (cadr exp)))
+    (or
+      ;; Standard function
+      (and (list? var) 
+           (> (length var) 0)
+           (symbol? (car var)))
+      ;; Varargs function
+      (and (pair? var)
+           (symbol? (car var))))))
+
+(define (define->lambda exp)
+  (cond
+    ((define-lambda? exp)
+     (let ((var (caadr exp))
+           (args (cdadr exp))
+           (body (cddr exp)))
+       `(define ,var (lambda ,args ,@body))))
+    (else exp)))
 
 ; lambda->formals : lambda-exp -> list[symbol]
 (define (lambda->formals exp)
@@ -629,6 +662,8 @@
    '(
      (define . define)
      (define-syntax . define-syntax)
+     (let-syntax . let-syntax)
+     (letrec-syntax . letrec-syntax)
      (define-c . define-c)
      (if . if)
      (lambda . lambda)

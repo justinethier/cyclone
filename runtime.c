@@ -4208,8 +4208,8 @@ void _symbol_127(void *data, object cont, object args)
 
 void _Cyc_91get_91cvar(void *data, object cont, object args)
 {
-  printf("not implemented\n");
-  exit(1);
+  Cyc_check_num_args(data, "Cyc-get-cvar", 1, args);
+  return_closcall1(data, cont, Cyc_get_cvar((car(args))));
 }
 
 void _Cyc_91set_91cvar_67(void *data, object cont, object args)

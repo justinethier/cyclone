@@ -9,6 +9,7 @@
 (define-library (scheme cyclone cgen)
   (import (scheme base)
           (scheme char)
+          (scheme eval)
           (scheme inexact)
           (scheme write)
           (scheme cyclone primitives)

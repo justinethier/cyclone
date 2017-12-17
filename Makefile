@@ -206,6 +206,7 @@ bootstrap : icyc libs
 	cp scheme/char.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/complex.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/eval.c $(BOOTSTRAP_DIR)/scheme
+	cp scheme/repl.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/file.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/inexact.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/lazy.c $(BOOTSTRAP_DIR)/scheme

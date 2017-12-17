@@ -11,6 +11,7 @@
   (import 
     (scheme cyclone util)
     (scheme cyclone libraries) ;; for handling import sets
+    (scheme cyclone primitives)
     (scheme base)
     (scheme file)
     (scheme write) ;; Only used for debugging
@@ -25,6 +26,17 @@
     %import
     imported?
     %set-import-dirs!
+    *defined-macros* 
+    get-macros
+    macro:macro?
+    macro:expand
+    macro:add!
+    macro:cleanup
+    macro:load-env!
+    macro:get-env
+    macro:get-defined-macros
+    expand 
+    expand-lambda-body
   )
   (inline
     primitive-implementation
@@ -43,6 +55,7 @@
     assignment-value
     assignment-variable
     variable?
+    macro:macro?
   )
   (begin
 
@@ -371,10 +384,10 @@
 ;; - env => Environment used to expand macros
 ;;
 (define (analyze exp env)
-;(newline)
-;(display "/* ")
-;(write (list 'analyze exp))
-;(display " */")
+;;(newline)
+;;(display "/* ")
+;;(write (list 'analyze exp))
+;;(display " */")
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
@@ -388,6 +401,12 @@
         ((and (syntax? exp)
               (not (null? (cdr exp))))
          (analyze-syntax exp env))
+        ((and (tagged-list? 'let-syntax exp)
+              (not (null? (cdr exp))))
+         (analyze-let-syntax exp env))
+        ((and (tagged-list? 'letrec-syntax exp)
+              (not (null? (cdr exp))))
+         (analyze-letrec-syntax exp env))
         ((and (if? exp) 
               (not (null? (cdr exp))))
          (analyze-if exp env))
@@ -434,26 +453,63 @@
       (env:define-variable! var (vproc env) env)
       'ok)))
 
+(define (analyze-let-syntax exp a-env)
+  (let* ((rename-env (env:extend-environment '() '() '()))
+         (expanded (expand exp a-env rename-env))
+         ;(expanded (expand exp (macro:get-env) rename-env))
+         (cleaned (macro:cleanup expanded rename-env))
+        )
+    ;; TODO: probably just create a fresh env for renames
+    ;; TODO: expand, do we need to clean as well?
+    ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
+;;(display "/* ")
+;;(write `(DEBUG ,cleaned))
+;;(display "*/ ")
+;;(newline)
+    (analyze cleaned a-env)))
+
+(define (analyze-letrec-syntax exp a-env)
+  (let* ((rename-env (env:extend-environment '() '() '()))
+         ;; Build up a macro env
+         (vars (foldl (lambda (lis acc) (append acc (car lis))) '() a-env))
+         (vals (foldl (lambda (lis acc) (append acc (cdr lis))) '() a-env))
+         (zipped (apply map list vars (list vals)))
+         (defined-macros
+           (filter
+             (lambda (v)
+               (Cyc-macro? (Cyc-get-cvar (cadr v))))
+             zipped))
+         (macro-env 
+           (env:extend-environment
+             (map car defined-macros)
+             (map (lambda (v)
+                    (list 'macro (cadr v)))
+                  defined-macros)
+             a-env)) ;(create-environment '() '())))
+         ;; Proceed with macro env
+         (expanded (expand exp macro-env rename-env))
+         (cleaned (macro:cleanup expanded rename-env))
+        )
+    (analyze cleaned a-env)))
+
 (define (analyze-syntax exp a-env)
   (let ((var (cadr exp)))
     (cond
-      ((tagged-list? 'er-macro-transformer (caddr exp))
-        (let ((sproc (make-macro (cadr (caddr exp))))) ;(analyze-syntax-lambda (cadr (caddr exp)) a-env)))
+      ((tagged-list? 'er-macro-transformer (caddr exp)) ;; TODO: need to handle renamed er symbol here??
+        (let ((sproc (make-macro (cadr (caddr exp)))))
           (lambda (env)
             (env:define-variable! var sproc env)
             'ok)))
       (else
-        ;; TODO: need to support syntax-rules, and other methods of
-        ;; building a macro. maybe call into something like 
-        ;; analyze-syntax-lambda instead of erroring here
-        (error "macro syntax not supported yet")))))
-
-;(define (analyze-syntax-lambda exp a-env)
-;  (let ((vars (lambda-parameters exp))
-;        (bproc (analyze-sequence (lambda-body exp) a-env)))
-;    (write `(debug ,(lambda-body exp)))
-;    ;(lambda (env) 
-;      (make-macro `(lambda ,vars ,@(lambda-body exp)))))
+        ;; Just expand the syntax rules
+        ;; Possibly want to check the macro system here
+        (let* ((rename-env (env:extend-environment '() '() '()))
+               (expanded (expand exp a-env rename-env))
+               (cleaned (macro:cleanup expanded rename-env)))
+          (let ((sproc (make-macro (caddr cleaned))))
+            (lambda (env)
+              (env:define-variable! var sproc env)
+              'ok)))))))
 
 (define (analyze-import exp env)
   (lambda (env)
@@ -662,5 +718,456 @@
   "(void *data, int argc, closure _, object k, object name)"
   " Cyc_check_str(data, name);
     return_closcall1(data, k, is_library_loaded(string_str(name))); ")
+
+;; Macro section
+    ;; top-level macro environment
+    (define *macro:env* '())
+
+    ;; A list of all macros defined by the program/library being compiled
+    (define *macro:defined-macros* '())
+
+    (define (macro:add! name body)
+      (set! *macro:defined-macros* 
+        (cons (cons name body) *macro:defined-macros*))
+      #t)
+
+    (define (macro:load-env! defined-macros base-env)
+      (set! *macro:env* (env:extend-environment
+                          (map car defined-macros)
+                          (map (lambda (v)
+                                 (list 'macro (cdr v)))
+                               defined-macros)
+                          base-env)))
+
+    (define (macro:get-env) *macro:env*)
+
+    (define (macro:get-defined-macros) *macro:defined-macros*)
+
+    ;; Macro section
+    (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
+
+    (define (macro:expand exp macro mac-env rename-env)
+      (let* ((use-env (env:extend-environment '() '() '()))
+             (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
+                                  (procedure? (cadr macro))))
+             (result #f))
+        ;(newline)
+        ;(display "/* ")
+        ;(display (list 'macro:expand exp macro compiled-macro?))
+        ;(display "*/ ")
+
+          ;; Invoke ER macro
+        (set! result
+          (cond
+            ((not macro)
+              (error "macro not found" exp))
+            (compiled-macro?
+              ((Cyc-get-cvar (cadr macro))
+                exp
+                (Cyc-er-rename use-env mac-env)
+                (Cyc-er-compare? use-env rename-env)))
+            (else
+              (eval
+                (list
+                  (Cyc-get-cvar (cadr macro))
+                  (list 'quote exp)
+                  (Cyc-er-rename use-env mac-env)
+                  (Cyc-er-compare? use-env rename-env))
+                mac-env))))
+;        (newline)
+;        (display "/* ")
+;        (display (list 'macro:expand exp macro compiled-macro?))
+;        (newline)
+;        (display (list result))
+;        (display "*/ ")
+          (macro:add-renamed-vars! use-env rename-env)
+          result))
+
+    (define (macro:add-renamed-vars! env renamed-env)
+      (let ((frame (env:first-frame renamed-env)))
+        (for-each
+          (lambda (var val)
+            (env:add-binding-to-frame! var val frame))
+          (env:all-variables env)
+          (env:all-values env))))
+
+    (define (macro:cleanup expr rename-env)
+      (define (clean expr bv) ;; Bound variables
+;(newline)
+;(display "/* macro:cleanup->clean, bv =")
+;(write bv)
+;(newline)
+;(write expr)
+;(newline)
+;(display "*/ ")
+         (cond 
+           ((const? expr)      expr)
+           ((null? expr)       expr)
+           ((quote? expr)      
+            (let ((atom (cadr expr)))
+              ;; Clean up any renamed symbols that are quoted
+              ;; TODO: good enough for quoted pairs or do
+              ;;       we need to traverse those, too?
+              (if (ref? atom)
+                 `(quote ,(clean atom bv))
+                 expr)))
+           ((define-c? expr)   expr)
+           ((ref? expr)        
+            ;; if symbol has been renamed and is not a bound variable,
+            ;; undo the rename
+            (let ((val (env:lookup expr rename-env #f)))
+              (if (and val (not (member expr bv)))
+                  (clean val bv)
+                  expr)))
+           ((if-syntax? expr)
+            `(if ,(clean (if->condition expr) bv)
+                 ,(clean (if->then expr) bv)
+                 ,(if (if-else? expr)
+                      (clean (if->else expr) bv)
+                      #f)))
+           ((lambda? expr)
+            `(lambda ,(lambda->formals expr)
+               ,@(map (lambda (e) 
+                        (clean e (append 
+                                   (lambda-formals->list expr) 
+                                   bv)))
+                      (lambda->exp expr))))
+           ;; At this point defines cannot be in lambda form. 
+           ;; EG: (define (f x) ...)
+           ((define? expr)
+            (let ((bv* (cons (define->var expr) bv)))
+              `(define ,(define->var expr)
+                       ,@(map
+                          (lambda (e) (clean e bv*)) 
+                          (define->exp expr)))))
+           ;; For now, assume set is not introducing a new binding
+           ((set!? expr)
+            `(set! ,(clean (set!->var expr) bv)
+                   ,(clean (set!->exp expr) bv)))
+           ((app? expr) 
+            (map (lambda (e) (clean e bv)) 
+                 expr))
+           (else
+            (error "macro cleanup unexpected expression: " expr))))
+      (clean expr '()))
+      
+    ; TODO: get macro name, transformer
+
+;; Macro expansion
+
+;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
+; expand : exp -> exp
+
+(define (expand exp env rename-env)
+  (_expand exp env rename-env '()))
+
+(define (_expand exp env rename-env local-env)
+  (define (log e)
+    (display  
+      (list 'expand e 'env 
+        (env:frame-variables (env:first-frame env))) 
+      (current-error-port))
+    (newline (current-error-port)))
+  ;(log exp)
+;;(display "/* ")
+;;(write `(expand ,exp))
+;;(display "*/ ")
+;;(newline)
+  (cond
+    ((const? exp)      exp)
+    ((prim? exp)       exp)
+    ((ref? exp)        exp)
+    ((quote? exp)      exp)
+    ((lambda? exp)     `(lambda ,(lambda->formals exp)
+                          ,@(_expand-body '() (lambda->exp exp) env rename-env local-env)
+                          ;,@(map 
+                          ;  ;; TODO: use extend env here?
+                          ;  (lambda (expr) (_expand expr env rename-env local-env))
+                          ;  (lambda->exp exp))
+                         ))
+    ((define? exp)     (if (define-lambda? exp)
+                           (_expand (define->lambda exp) env rename-env local-env)
+                          `(define ,(_expand (define->var exp) env rename-env local-env)
+                                ,@(_expand (define->exp exp) env rename-env local-env))))
+    ((set!? exp)       `(set! ,(_expand (set!->var exp) env rename-env local-env)
+                              ,(_expand (set!->exp exp) env rename-env local-env)))
+    ((if-syntax? exp)  `(if ,(_expand (if->condition exp) env rename-env local-env)
+                            ,(_expand (if->then exp) env rename-env local-env)
+                            ,(if (if-else? exp)
+                                 (_expand (if->else exp) env rename-env local-env)
+                                 ;; Insert default value for missing else clause
+                                 ;; FUTURE: append the empty (unprinted) value
+                                 ;; instead of #f
+                                 #f)))
+    ((define-c? exp) exp)
+    ((define-syntax? exp)
+     ;(trace:info `(define-syntax ,exp))
+     (let* ((name (cadr exp))
+            (trans (caddr exp))
+            (body (cadr trans)))
+       (cond
+        ((macro:syntax-rules? (env:lookup (car trans) env #f)) ;; Handles renamed 'syntax-rules' identifier
+         (_expand
+           `(define-syntax ,name ,(_expand trans env rename-env local-env))
+           env rename-env local-env))
+        (else
+         ;; TODO: for now, do not let a compiled macro be re-defined.
+         ;; this is a hack for performance compiling (scheme base)
+         (let ((macro (env:lookup name env #f)))
+          (cond
+            ((and (tagged-list? 'macro macro)
+                  (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
+                      (procedure? (cadr macro))))
+             ;(trace:info `(DEBUG compiled macro ,name do not redefine))
+            )
+            (else
+             ;; Use this to keep track of macros for filtering unused defines
+             (set! *defined-macros* (cons (cons name body) *defined-macros*))
+             ;; Keep track of macros added during compilation.
+             ;; TODO: why in both places?
+             (macro:add! name body)
+             (env:define-variable! name (list 'macro body) env)))
+          ;; Keep as a 'define' form so available at runtime
+          ;; TODO: may run into issues with expanding now, before some
+          ;; of the macros are defined. may need to make a special pass
+          ;; to do loading or expansion of macro bodies
+          `(define ,name ,(_expand body env rename-env local-env)))))))
+    ((let-syntax? exp)
+     (let* ((body (cons 'begin (cddr exp)))
+            (bindings (cadr exp))
+            (bindings-as-macros
+              (map 
+                (lambda (b)
+                  (let* ((name (car b))
+                         (binding (cadr b))
+                         (binding-body (cadr binding)))
+;(define tmp (env:lookup (car binding) env #f))
+;(display "/* ")
+;(write `(DEBUG expand let-syntax 
+;  ,(if (tagged-list? 'macro tmp)
+;       (Cyc-get-cvar (cadr tmp))
+;       tmp)
+;  ,syntax-rules))
+;(display "*/ ")
+;(newline)
+                    (cons 
+                      name 
+                      (list 
+                        'macro
+                        ;; Broken for renames, replace w/below: (if (tagged-list? 'syntax-rules binding)
+                        (if (macro:syntax-rules? (env:lookup (car binding) env #f))
+                            ;; TODO: is this ok?
+                            (cadr (_expand binding env rename-env local-env))
+                            binding-body)))))
+                bindings))
+            (new-local-macro-env (append bindings-as-macros local-env))
+           )
+;(trace:error `(let-syntax ,new-local-macro-env))
+       (_expand body env rename-env new-local-macro-env) ;; TODO: new-local-macro-env 
+       ))
+    ((letrec-syntax? exp)
+     (let* ((body (cons 'begin (cddr exp)))
+            (body-env (env:extend-environment '() '() env))
+            (bindings (cadr exp))
+           )
+       (for-each
+         (lambda (b)
+           (let* ((name (car b))
+                  (binding (cadr b))
+                  (binding-body (cadr binding))
+                  (macro-val
+                    (list 
+                      'macro
+                      (if (macro:syntax-rules? (env:lookup (car binding) body-env #f))
+                          (cadr (_expand binding body-env rename-env local-env))
+                          binding-body))))
+           (env:define-variable! name macro-val) body-env))
+         bindings)
+       (_expand body body-env rename-env local-env)
+       ))
+    ((app? exp)
+     (cond
+       ((symbol? (car exp))
+        (let ((val (let ((local (assoc (car exp) local-env)))
+                     (if local
+                         (cdr local)
+                         (let ((v (env:lookup (car exp) env #f)))
+                           v ;; TODO: below was for looking up a renamed macro. may want to consider using it
+                             ;; in the symbol condition below...
+                           #;(if v
+                               v
+                               (env:lookup (car exp) rename-env #f)))))))
+;;(display "/* ")
+;;(write `(app DEBUG ,(car exp) ,val ,env ,local-env ,rename-env ,(env:lookup (car exp) env #f)))
+;;(display "*/ ")
+;;(newline)
+          (cond
+           ((tagged-list? 'macro val)
+            (_expand ; Could expand into another macro
+              (macro:expand exp val env rename-env)
+              env 
+              rename-env 
+              local-env))
+           ((Cyc-macro? val)
+            (_expand ; Could expand into another macro
+              (macro:expand exp (list 'macro val) env rename-env)
+              env 
+              rename-env 
+              local-env))
+;; TODO: if we are doing this, only want to do so if the original variable is a macro.
+;;       this is starting to get overly complicated though.
+;; if nothing else should encapsulate the above lookup into a function and call that
+;; in both places (above and here) to simplify things
+;; 
+;;           ((and (symbol? val) 
+;;                 (not (eq? val (car exp))))
+;;            ;; Original macro symbol was renamed. So try again with the orignal symbol
+;;(display "/* ")
+;;(write `(app DEBUG-syms ,(car exp) ,val ,local-env ,(cdr exp)))
+;;(display "*/ ")
+;;(newline)
+;;            (_expand 
+;;              (cons val (cdr exp))
+;;              env rename-env local-env))
+           (else
+            (map
+              (lambda (expr) (_expand expr env rename-env local-env))
+              exp)))))
+       (else
+         ;; TODO: note that map does not guarantee that expressions are
+         ;; evaluated in order. For example, the list might be processed
+         ;; in reverse order. Might be better to use a fold here and
+         ;; elsewhere in (expand).
+         (map 
+          (lambda (expr) (_expand expr env rename-env local-env))
+          exp))))
+    (else
+      (error "unknown exp: " exp))))
+
+(define (macro:syntax-rules? exp)
+  (eq? 
+    syntax-rules
+    (if (tagged-list? 'macro exp)
+        (Cyc-get-cvar (cadr exp))
+        exp)))
+
+;; Nicer interface to expand-body
+(define (expand-lambda-body exp env rename-env)
+  (expand-body '() exp env rename-env))
+
+;; Helper to expand a lambda body, so we can splice in any begin's
+(define (expand-body result exp env rename-env)
+  (_expand-body result exp env rename-env '()))
+
+(define (_expand-body result exp env rename-env local-env)
+  (define (log e)
+    (display (list 'expand-body e 'env 
+              (env:frame-variables (env:first-frame env))) 
+             (current-error-port))
+    (newline (current-error-port)))
+
+  (if (null? exp) 
+    (reverse result)
+    (let ((this-exp (car exp)))
+;(display (list 'expand-body this-exp) (current-error-port))
+;(newline (current-error-port))
+      (cond
+       ((or (const? this-exp)
+            (prim? this-exp)
+            (ref? this-exp)
+            (quote? this-exp)
+            (define-c? this-exp))
+;(log this-exp)
+        (_expand-body (cons this-exp result) (cdr exp) env rename-env local-env))
+       ((define? this-exp)
+;(log this-exp)
+        (_expand-body 
+          (cons
+            (_expand this-exp env rename-env local-env)
+            result)
+          (cdr exp)
+          env
+          rename-env
+          local-env))
+       ((or (define-syntax? this-exp)
+            (letrec-syntax? this-exp)
+            (let-syntax? this-exp)
+            (lambda? this-exp)
+            (set!? this-exp)
+            (if? this-exp))
+;(log (car this-exp))
+        (_expand-body 
+          (cons
+            (_expand this-exp env rename-env local-env)
+            result)
+          (cdr exp)
+          env
+          rename-env 
+          local-env))
+       ;; Splice in begin contents and keep expanding body
+       ((begin? this-exp)
+        (let* ((expr this-exp)
+               (begin-exprs (begin->exps expr)))
+;(log (car this-exp))
+        (_expand-body
+         result
+         (append begin-exprs (cdr exp))
+         env
+         rename-env
+         local-env)))
+       ((app? this-exp)
+        (cond
+          ((symbol? (caar exp))
+;(log (car this-exp))
+           (let ((val (let ((local (assoc (caar exp) local-env)))
+                       (if local
+                          (cdr local)
+                          (env:lookup (caar exp) env #f)))))
+;(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
+            (if (tagged-list? 'macro val)
+              ;; Expand macro here so we can catch begins in the expanded code,
+              ;; including nested begins
+              (let ((expanded (macro:expand this-exp val env rename-env)))
+;(log `(DONE WITH macro:expand))
+                (_expand-body
+                  result
+                  (cons 
+                    expanded ;(macro:expand this-exp val env)
+                    (cdr exp))
+                  env
+                  rename-env
+                  local-env))
+              ;; No macro, use main expand function to process
+              (_expand-body
+               (cons 
+                 (map
+                  (lambda (expr) (_expand expr env rename-env local-env))
+                  this-exp)
+                 result)
+               (cdr exp)
+               env
+               rename-env
+               local-env))))
+          (else
+;(log 'app)
+           (_expand-body
+             (cons 
+               (map
+                (lambda (expr) (_expand expr env rename-env local-env))
+                this-exp)
+               result)
+             (cdr exp)
+             env
+             rename-env
+             local-env))))
+       (else
+        (error "unknown exp: " this-exp))))))
+
+;; Container for built-in macros
+(define (get-macros) *defined-macros*)
+(define *defined-macros* (list))
+
+(define (begin->exps exp)
+  (cdr exp))
 
   ))
