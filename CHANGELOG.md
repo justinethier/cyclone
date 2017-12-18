@@ -12,6 +12,10 @@ Internal Changes
 
 - Relocated all macro expansion code to the `(scheme eval)` module. Cyclone's `(scheme cyclone macros)` library is now obsolete.
 
+Bug Fixes
+
+- Added the `full-unicode` feature since Unicode is supported as of the 0.7 release.
+
 ## 0.7 - November 17, 2017
 
 Features
