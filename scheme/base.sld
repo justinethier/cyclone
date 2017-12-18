@@ -187,10 +187,10 @@
 ;    write-bytevector
 ;
 ;    : No unicode support at this time
-;    peek-u8
-;    read-u8
+    peek-u8
+    read-u8
 ;    u8-ready?
-;    write-u8
+    write-u8
 ;
 ;    ; No complex or rational numbers at this time
 ;    rationalize
@@ -626,17 +626,27 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
-;;;; 
-;; TODO: stubs for the u8 single-byte I/O functions
-;;object Cyc_write_u8(void *data, object c, object port);
-;;object Cyc_io_read_u8(void *data, object cont, object port);
-;;object Cyc_io_peek_u8(void *data, object cont, object port);
-;;    (define-c get-param-objs
-;;      "(void *data, int argc, closure _, object k)"
-;;      " gc_thread_data *thd = (gc_thread_data *)data;
-;;        //Cyc_st_add(data, \"scheme/base.sld:get-param-objs\");
-;;        return_closcall1(data, k, thd->param_objs); ")
-;;;;
+    (define-c _read-u8
+      "(void *data, int argc, closure _, object k, object port)"
+      " Cyc_io_read_u8(data, k, port);")
+    (define-c _peek-u8
+      "(void *data, int argc, closure _, object k, object port)"
+      " Cyc_io_peek_u8(data, k, port);")
+    (define-c _write-u8
+      "(void *data, int argc, closure _, object k, object chr, object port)"
+      " return_closcall1(data, k, Cyc_write_u8(data, chr, port));")
+    (define (read-u8 . port)
+      (if (null? port)
+        (_read-u8 (current-input-port))
+        (_read-u8 (car port))))
+    (define (peek-u8 . port)
+      (if (null? port)
+        (_peek-u8 (current-input-port))
+        (_peek-u8 (car port))))
+    (define (write-u8 chr . port)
+      (if (null? port)
+        (_write-u8 chr (current-input-port))
+        (_write-u8 chr (car port))))
     (define (peek-char . port)
       (if (null? port)
         (Cyc-peek-char (current-input-port))
