@@ -236,6 +236,7 @@
             (string-append "version-" *version-number*))
           '(r7rs 
             ieee-float
+            full-unicode
             posix))))
 
     (define (Cyc-version) *version-number*)
