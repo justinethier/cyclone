@@ -645,7 +645,7 @@
         (_peek-u8 (car port))))
     (define (write-u8 chr . port)
       (if (null? port)
-        (_write-u8 chr (current-input-port))
+        (_write-u8 chr (current-output-port))
         (_write-u8 chr (car port))))
     (define (peek-char . port)
       (if (null? port)

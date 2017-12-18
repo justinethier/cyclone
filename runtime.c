@@ -1119,7 +1119,7 @@ object Cyc_write_u8(void *data, object c, object port)
   if (obj_is_char(c)) {
     FILE *fp = ((port_type *) port)->fp;
     if (fp){
-      char_type unbox = obj_obj2char(c);
+      char unbox = (char) obj_obj2char(c);
       fprintf(fp, "%c", unbox);
     }
   } else {
