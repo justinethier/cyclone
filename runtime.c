@@ -1113,6 +1113,21 @@ object Cyc_write_char(void *data, object c, object port)
   return quote_void;
 }
 
+object Cyc_write_u8(void *data, object c, object port)
+{
+  Cyc_check_port(data, port);
+  if (obj_is_char(c)) {
+    FILE *fp = ((port_type *) port)->fp;
+    if (fp){
+      char_type unbox = obj_obj2char(c);
+      fprintf(fp, "%c", unbox);
+    }
+  } else {
+    Cyc_rt_raise2(data, "Argument is not a character", c);
+  }
+  return quote_void;
+}
+
 /* Fast versions of member and assoc */
 object memberp(void *data, object x, list l)
 {
@@ -6401,6 +6416,29 @@ object Cyc_io_peek_char(void *data, object cont, object port)
   return Cyc_EOF;
 }
 
+object Cyc_io_peek_u8(void *data, object cont, object port)
+{
+  FILE *stream;
+  port_type *p;
+  int c;
+
+  Cyc_check_port(data, port);
+  {
+    p = (port_type *)port;
+    stream = ((port_type *) port)->fp;
+    if (stream == NULL) {
+      Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+    }
+    set_thread_blocked(data, cont);
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+      _read_next_char(data, cont, p);
+    }
+    c = p->mem_buf[p->buf_idx];
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+  }
+  return Cyc_EOF;
+}
+
 // TODO: full requirements are:
 //
 // Returns #t if a character is ready on the textual input
@@ -6436,6 +6474,26 @@ object Cyc_io_read_char(void *data, object cont, object port)
       if (c == EOF) break;
     } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
 // TODO: limit above to 4 chars and then thrown an error?
+    p->col_num++;
+    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
+  }
+  return Cyc_EOF;
+}
+
+object Cyc_io_read_u8(void *data, object cont, object port)
+{
+  port_type *p = (port_type *)port;
+  Cyc_check_port(data, port);
+  if (p->fp == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
+  {
+    char_type codepoint;
+    int c;
+    set_thread_blocked(data, cont);
+    _read_next_char(data, cont, p);
+    c = p->mem_buf[p->buf_idx++];
+    codepoint = (char_type) c;
     p->col_num++;
     return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
   }
