@@ -626,6 +626,17 @@
       (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
+;;;; 
+;; TODO: stubs for the u8 single-byte I/O functions
+;;object Cyc_write_u8(void *data, object c, object port);
+;;object Cyc_io_read_u8(void *data, object cont, object port);
+;;object Cyc_io_peek_u8(void *data, object cont, object port);
+;;    (define-c get-param-objs
+;;      "(void *data, int argc, closure _, object k)"
+;;      " gc_thread_data *thd = (gc_thread_data *)data;
+;;        //Cyc_st_add(data, \"scheme/base.sld:get-param-objs\");
+;;        return_closcall1(data, k, thd->param_objs); ")
+;;;;
     (define (peek-char . port)
       (if (null? port)
         (Cyc-peek-char (current-input-port))
