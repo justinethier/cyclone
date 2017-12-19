@@ -4,7 +4,7 @@
 
 Features
 
-- Added `let-syntax` and `letrec-syntax` to the compiler and interpreter.
+- Added support for `let-syntax` and `letrec-syntax`.
 - Added the `(scheme repl)` library and `interaction-environment` function from R7RS.
 - Allow `eval` to recognize `syntax-rules` macros.
 - Added single-byte oriented I/O functions `read-u8`, `peek-u8`, and `write-u8` from R7RS.
