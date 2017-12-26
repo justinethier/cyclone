@@ -15,6 +15,7 @@
 ;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
+          ;; Debugging: (scheme write)
           (scheme read)
           (scheme process-context)
           (scheme cyclone util)
@@ -273,8 +274,8 @@
          (dir (if (or (tagged-list? 'scheme import)
                       (tagged-list? 'srfi import)
                       (tagged-list? 'cyclone import))
-                  (Cyc-installation-dir 'sld)
-                  "./")))
+                  (list (Cyc-installation-dir 'sld) "./")
+                  (list "./"))))
     (call/cc
       (lambda (return)
         (for-each
@@ -282,11 +283,11 @@
             (let ((f (string-append path "/" filename)))
               (if (file-exists? f) 
                   (return f))))
-          (append prepend-dirs (list dir) append-dirs))
+          (append prepend-dirs dir append-dirs))
         ;; Not found, just return base name
         (lib:check-system-path
-          (if (> (string-length dir) 0)
-              (string-append dir "/" filename)
+          (if (> (length dir) 0)
+              (string-append (car dir) "/" filename)
               filename))))
   ))
 
@@ -306,20 +307,22 @@
                       ;(tagged-list? 'srfi import)
                       (tagged-list? 'cyclone import)
                   )
-                  (Cyc-installation-dir 'sld)
-                  "")))
+                  (list (Cyc-installation-dir 'sld) "./")
+                  (list "./"))))
     (call/cc
       (lambda (return)
         (for-each
           (lambda (path)
             (let ((f (string-append path "/" filename)))
+              ;(write `(DEBUG ,path ,f ,(file-exists? f)))
+              ;(newline)
               (if (file-exists? f) 
                   (return f))))
-          (append prepend-dirs (list dir) append-dirs))
+          (append prepend-dirs dir append-dirs))
         ;; Not found, just return base name
         (lib:check-system-path
-          (if (> (string-length dir) 0)
-              (string-append dir "/" filename)
+          (if (> (string-length (car dir)) 0)
+              (string-append (car dir) "/" filename)
               filename))))
     ;(if (tagged-list? 'scheme import)
     ;  (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
