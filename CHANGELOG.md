@@ -2,6 +2,10 @@
 
 ## 0.7.2 - TBD
 
+Bug Fixes
+
+- Fixed `utf8->string` and `list->string` to handle strings that exceed the maximum stack object size by allocating them on the heap.
+
 ## 0.7.1 - December 21, 2017
 
 Features

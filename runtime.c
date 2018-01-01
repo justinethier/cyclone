@@ -1859,7 +1859,7 @@ object Cyc_string2symbol(void *data, object str)
 object Cyc_list2string(void *data, object cont, object lst)
 {
   char *buf, cbuf[5];
-  int i = 0, len = 0;
+  int i = 0, len = 0, num_cp = 0;
   object cbox, tmp = lst;
   char_type ch;
 
@@ -1877,16 +1877,19 @@ object Cyc_list2string(void *data, object cont, object lst)
     }
     if (!ch) {
       len++;
+      num_cp++; // Failsafe?
     } else {
       Cyc_utf8_encode_char(cbuf, 5, ch);
       len += strlen(cbuf);
+      num_cp++;
     }
     tmp = cdr(tmp);
   }
 
   {
-    make_string_noalloc(str, NULL, len);
-    str.str = buf = alloca(sizeof(char) * (len + 1));
+    object str;
+    alloc_string(data, str, len, num_cp);
+    buf = ((string_type *)str)->str;
     while ((lst != NULL)) {
       cbox = car(lst);
       ch = obj_obj2char(cbox); // Already validated, can assume chars now
@@ -1899,7 +1902,7 @@ object Cyc_list2string(void *data, object cont, object lst)
       lst = cdr(lst);
     }
     buf[i] = '\0';
-    _return_closcall1(data, cont, &str);
+    _return_closcall1(data, cont, str);
   }
 }
 
@@ -2656,15 +2659,12 @@ object Cyc_utf82string(void *data, object cont, object bv, object start,
   }
 
   {
-    make_string_noalloc(st, NULL, len);
-    st.str = alloca(sizeof(char) * (len + 1));
-    memcpy(st.str, &buf[s], len);
-    st.str[len] = '\0';
-    st.num_cp = Cyc_utf8_count_code_points((uint8_t *)(st.str));
-    if (st.num_cp < 0) {
-       Cyc_rt_raise2(data, "utf8->string - error decoding UTF 8", bv);
-    }
-    _return_closcall1(data, cont, &st);
+    object st;
+    alloc_string(data, st, len, len);
+    memcpy(((string_type *)st)->str, &buf[s], len);
+    ((string_type *)st)->str[len] = '\0';
+    ((string_type *)st)->num_cp = Cyc_utf8_count_code_points((uint8_t *)(((string_type *)st)->str));
+    _return_closcall1(data, cont, st);
   }
 }
 
