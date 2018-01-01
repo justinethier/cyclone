@@ -808,6 +808,33 @@ typedef struct {
   cs.num_cp = length; \
   cs.str = s; }
 
+/**
+ * Allocate a new string, either on the stack or heap depending upon size
+ */
+#define alloc_string(_data, _s, _len, _num_cp) \
+  if (_len >= MAX_STACK_OBJ) { \
+    int heap_grown; \
+    _s = gc_alloc(((gc_thread_data *)data)->heap,  \
+                 sizeof(string_type) + _len + 1, \
+                 boolean_f, /* OK to populate manually over here */ \
+                 (gc_thread_data *)data,  \
+                 &heap_grown); \
+    ((string_type *) _s)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color; \
+    ((string_type *) _s)->hdr.grayed = 0; \
+    ((string_type *) _s)->tag = string_tag; \
+    ((string_type *) _s)->len = _len; \
+    ((string_type *) _s)->num_cp = _num_cp; \
+    ((string_type *) _s)->str = (((char *)_s) + sizeof(string_type)); \
+  } else { \
+    _s = alloca(sizeof(string_type)); \
+    ((string_type *)_s)->hdr.mark = gc_color_red;  \
+    ((string_type *)_s)->hdr.grayed = 0; \
+    ((string_type *)_s)->tag = string_tag;  \
+    ((string_type *)_s)->len = _len; \
+    ((string_type *)_s)->num_cp = _num_cp; \
+    ((string_type *)_s)->str = alloca(sizeof(char) * (_len + 1)); \
+  }
+
 /** Get the length of a string, in characters (code points) */
 #define string_num_cp(x) (((string_type *) x)->num_cp)
 
