@@ -2610,7 +2610,6 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
 {
   int s, e;
   int len;
-  make_empty_bytevector(result);
 
   Cyc_check_bvec(data, bv);
   Cyc_check_num(data, start);
@@ -2628,10 +2627,27 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
     Cyc_rt_raise2(data, "bytevector-copy - invalid end", end);
   }
 
-  result.len = len;
-  result.data = alloca(sizeof(char) * len);
-  memcpy(&result.data[0], &(((bytevector) bv)->data)[s], len);
-  _return_closcall1(data, cont, &result);
+  if (len >= MAX_STACK_OBJ) {
+    int heap_grown;
+    object result = gc_alloc(((gc_thread_data *)data)->heap,
+                  sizeof(bytevector_type) + len,
+                  boolean_f, // OK to populate manually over here
+                  (gc_thread_data *)data, 
+                  &heap_grown);
+    ((bytevector) result)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    ((bytevector) result)->hdr.grayed = 0;
+    ((bytevector) result)->tag = bytevector_tag;
+    ((bytevector) result)->len = len;
+    ((bytevector) result)->data = (char *)(((char *)result) + sizeof(bytevector_type));
+    memcpy(&(((bytevector) result)->data[0]), &(((bytevector) bv)->data)[s], len);
+    _return_closcall1(data, cont, result);
+  } else {
+    make_empty_bytevector(result);
+    result.len = len;
+    result.data = alloca(sizeof(char) * len);
+    memcpy(&result.data[0], &(((bytevector) bv)->data)[s], len);
+    _return_closcall1(data, cont, &result);
+  }
 }
 
 object Cyc_utf82string(void *data, object cont, object bv, object start,
