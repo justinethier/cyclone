@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Fixed `utf8->string`, `string->utf8`, and `list->string` to use the heap to allocate objects that exceed the maximum size for objects on the stack.
+- Fixed `utf8->string`, `string->utf8`, `list->vector`, and `list->string` to use the heap to allocate objects that exceed the maximum size for objects on the stack.
 
 ## 0.7.1 - December 21, 2017
 
