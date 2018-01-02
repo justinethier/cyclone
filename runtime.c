@@ -2714,12 +2714,11 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
       _return_closcall1(data, cont, &result);
     }
   } else {
-// TODO: if len > MAX_STACK_OBJ
-    make_empty_bytevector(result);
     const char *tmp = string_str(str);
     char_type codepoint;
     uint32_t state = 0;
     int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
+    // Figure out start / end indices
     for (num_ch = 0; *tmp; ++tmp){
       cur_ch_bytes++;
       if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
@@ -2735,10 +2734,28 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
         }
       }
     }
-    result.len = end_i - start_i;
-    result.data = alloca(sizeof(char) * result.len);
-    memcpy(&result.data[0], &(string_str(str))[start_i], result.len);
-    _return_closcall1(data, cont, &result);
+    len = end_i - start_i;
+    if (len >= MAX_STACK_OBJ) {
+      int heap_grown;
+      object bv = gc_alloc(((gc_thread_data *)data)->heap,
+                    sizeof(bytevector_type) + len,
+                    boolean_f, // OK to populate manually over here
+                    (gc_thread_data *)data, 
+                    &heap_grown);
+      ((bytevector) bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+      ((bytevector) bv)->hdr.grayed = 0;
+      ((bytevector) bv)->tag = bytevector_tag;
+      ((bytevector) bv)->len = len;
+      ((bytevector) bv)->data = (char *)(((char *)bv) + sizeof(bytevector_type));
+      memcpy(&(((bytevector) bv)->data[0]), &(string_str(str))[start_i], len);
+      _return_closcall1(data, cont, bv);
+    } else {
+      make_empty_bytevector(result);
+      result.len = len;
+      result.data = alloca(sizeof(char) * result.len);
+      memcpy(&result.data[0], &(string_str(str))[start_i], result.len);
+      _return_closcall1(data, cont, &result);
+    }
   }
 }
 
