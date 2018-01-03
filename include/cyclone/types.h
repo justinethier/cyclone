@@ -835,6 +835,28 @@ typedef struct {
     ((string_type *)_s)->str = alloca(sizeof(char) * (_len + 1)); \
   }
 
+#define alloc_bytevector(_data, _bv, _len) \
+  if (_len >= MAX_STACK_OBJ) { \
+    int heap_grown; \
+    _bv = gc_alloc(((gc_thread_data *)data)->heap, \
+                  sizeof(bytevector_type) + _len, \
+                  boolean_f, /* OK to populate manually over here */ \
+                  (gc_thread_data *)data, \
+                  &heap_grown); \
+    ((bytevector) _bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color; \
+    ((bytevector) _bv)->hdr.grayed = 0; \
+    ((bytevector) _bv)->tag = bytevector_tag; \
+    ((bytevector) _bv)->len = _len; \
+    ((bytevector) _bv)->data = (char *)(((char *)_bv) + sizeof(bytevector_type)); \
+  } else { \
+    _bv = alloca(sizeof(bytevector_type)); \
+    ((bytevector) _bv)->hdr.mark = gc_color_red; \
+    ((bytevector) _bv)->hdr.grayed = 0; \
+    ((bytevector) _bv)->tag = bytevector_tag; \
+    ((bytevector) _bv)->len = _len; \
+    ((bytevector) _bv)->data = alloca(sizeof(char) * _len); \
+  }
+
 /** Get the length of a string, in characters (code points) */
 #define string_num_cp(x) (((string_type *) x)->num_cp)
 
