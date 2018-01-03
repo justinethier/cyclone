@@ -230,12 +230,13 @@
       "(void *data, int argc, closure _, object k, object sockfd, object size, object flags)"
       " // TODO: type checking 
         int len = obj_obj2int(size);
-        make_empty_bytevector(bv);
-        bv.data = alloca(sizeof(char) * len);
+        object bv;
+        alloc_bytevector(data, bv, len);
+        ((bytevector)bv)->data = alloca(sizeof(char) * len);
 
         set_thread_blocked(data, k);
-        bv.len = recv(obj_obj2int(sockfd), bv.data, len, obj_obj2int(flags));
-        return_thread_runnable(data, &bv);
+        ((bytevector)bv)->len = recv(obj_obj2int(sockfd), ((bytevector)bv)->data, len, obj_obj2int(flags));
+        return_thread_runnable(data, bv);
       ")
 
     (define (socket-shutdown sock how)
