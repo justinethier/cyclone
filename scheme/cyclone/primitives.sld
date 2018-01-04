@@ -105,6 +105,7 @@
          >=
          <=
          apply
+         Cyc-fast-apply
          %halt
          exit
          system
@@ -240,6 +241,7 @@
          (>= 2 #f)
          (<= 2 #f)
          (apply 1 #f)
+         (Cyc-fast-apply 2 #f)
          (%halt 1 1)
          (exit 1 1)
          (system 1 1)
@@ -486,6 +488,7 @@
          ((eq? p '>=)                    "Cyc_num_gte")
          ((eq? p '<=)                    "Cyc_num_lte")
          ((eq? p 'apply)                 "apply_va")
+         ((eq? p 'Cyc-fast-apply)        "apply")
          ((eq? p '%halt)                 "__halt")
          ((eq? p 'exit)                  "__halt")
          ((eq? p 'Cyc-default-exception-handler)  "Cyc_default_exception_handler")
@@ -632,6 +635,7 @@
         <=
         Cyc-fast-member
         Cyc-fast-assoc
+        Cyc-fast-apply
         apply
         car
         cdr
@@ -743,6 +747,7 @@
         ((eq? p 'string->number) "object")
         ((eq? p 'string-append) "object")
         ((eq? p 'apply)  "object")
+        ((eq? p 'Cyc-fast-apply)  "object")
         ((eq? p 'Cyc-read-line) "object")
         ((eq? p 'Cyc-read-char) "object")
         ((eq? p 'Cyc-peek-char) "object")
@@ -802,6 +807,7 @@
                  Cyc-fast-char-gte
                  Cyc-fast-char-lte
                  + - * / apply 
+                 Cyc-fast-apply
                  = > < >= <=
                  command-line-arguments
                  Cyc-read-line
@@ -813,6 +819,7 @@
     (define (prim:cont? exp)
       (and (prim? exp)
            (member exp '(Cyc-read-line apply command-line-arguments number->string 
+                         Cyc-fast-apply
                          + - * /
                          = > < >= <=
                          Cyc-list
@@ -914,6 +921,7 @@
         ((and (equal? (car prim-call) '<) (= (length prim-call) 3))  (cons 'Cyc-fast-lt (cdr prim-call)))
         ((and (equal? (car prim-call) '>=) (= (length prim-call) 3)) (cons 'Cyc-fast-gte (cdr prim-call)))
         ((and (equal? (car prim-call) '<=) (= (length prim-call) 3)) (cons 'Cyc-fast-lte (cdr prim-call)))
+        ((and (equal? (car prim-call) 'apply) (= (length prim-call) 3)) (cons 'Cyc-fast-apply (cdr prim-call)))
         (else
          prim-call)))
 

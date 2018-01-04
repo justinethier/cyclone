@@ -2,6 +2,10 @@
 
 ## 0.7.2 - TBD
 
+Features
+
+- Compile a faster version of `apply` when only two arguments are received.
+
 Bug Fixes
 
 - Fixed many functions including `utf8->string`, `string->utf8`, `bytevector-copy`, `list->vector`, and `list->string` to heap allocate objects that exceed the maximum size for objects on the stack.
