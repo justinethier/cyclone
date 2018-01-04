@@ -4,7 +4,7 @@
 
 Features
 
-- Compile a faster version of `apply` when only two arguments are received.
+- The compiler now emits a faster version of `apply` in cases where only two arguments are received.
 
 Bug Fixes
 
