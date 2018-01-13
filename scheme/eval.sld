@@ -878,6 +878,11 @@
     ((prim? exp)       exp)
     ((ref? exp)        exp)
     ((quote? exp)      exp)
+TODO: rename all lambda formals and update rename-env accordingly.
+will also require renaming refs later on here in expand...
+can we use Cyc-er-rename to do this? maybe just use gensym directly as a first-cut
+TODO: also need to figure out how to deep-copy rename-env and associate it with
+any defined macro. would need to pull that out when macro is expanded later
     ((lambda? exp)     `(lambda ,(lambda->formals exp)
                           ,@(_expand-body '() (lambda->exp exp) env rename-env local-env)
                           ;,@(map 
