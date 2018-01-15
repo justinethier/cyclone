@@ -882,7 +882,11 @@
   (cond
     ((const? exp)      exp)
     ((prim? exp)       exp)
-    ((ref? exp)        exp)
+    ((ref? exp)        
+     (let ((renamed (assoc exp local-renamed)))
+       (if renamed
+           (cdr renamed) ;; Extract renamed symbol
+           exp)))
     ((quote? exp)      exp)
 ;; TODO: rename all lambda formals and update rename-env accordingly.
 ;; will also require renaming refs later on here in expand...
@@ -898,10 +902,7 @@
                  (map cdr a-lookup)
                  ltype))
             )
-        `(lambda ,(lambda->formals exp)
-        ;; TODO: want this line instead of the above, but need to solve a crash
-        ;;       when compiling unit tests first (!!!)
-        ;`(lambda ,new-formals ;,(lambda->formals exp)
+        `(lambda ,new-formals ;,(lambda->formals exp)
                  ,@(_expand-body 
                      '() 
                      (lambda->exp exp) 

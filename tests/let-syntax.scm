@@ -4,7 +4,7 @@
 (let ((x 'outer))
   ;(let-syntax ((m (syntax-rules () ((m) x))))
     (let ((x 'inner))
-      (list)))) ;; Should be outer
+      (x)))) ;; Should be outer
    ;   )
 ;;;; Just testing, may want to remove this one once the recursive macro expansion works
 ;;;  (define-syntax my-or2 (syntax-rules ()
