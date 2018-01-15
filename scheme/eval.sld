@@ -1103,12 +1103,18 @@
             (quote? this-exp)
             (define-c? this-exp))
 ;(log this-exp)
-        (_expand-body (cons this-exp result) (cdr exp) env rename-env local-env local-renamed))
+        (_expand-body 
+          (cons this-exp result) 
+          (cdr exp) 
+          env 
+          rename-env 
+          local-env 
+          local-renamed))
        ((define? this-exp)
 ;(log this-exp)
         (_expand-body 
           (cons
-            (_expand this-exp env rename-env local-env)
+            (_expand this-exp env rename-env local-env local-renamed)
             result)
           (cdr exp)
           env
@@ -1128,7 +1134,8 @@
           (cdr exp)
           env
           rename-env 
-          local-env local-renamed))
+          local-env 
+          local-renamed))
        ;; Splice in begin contents and keep expanding body
        ((begin? this-exp)
         (let* ((expr this-exp)
@@ -1139,7 +1146,8 @@
          (append begin-exprs (cdr exp))
          env
          rename-env
-         local-env local-renamed)))
+         local-env 
+         local-renamed)))
        ((app? this-exp)
         (cond
           ((symbol? (caar exp))
@@ -1161,30 +1169,33 @@
                     (cdr exp))
                   env
                   rename-env
-                  local-env local-renamed))
+                  local-env 
+                  local-renamed))
               ;; No macro, use main expand function to process
               (_expand-body
                (cons 
                  (map
-                  (lambda (expr) (_expand expr env rename-env local-env))
+                  (lambda (expr) (_expand expr env rename-env local-env local-renamed))
                   this-exp)
                  result)
                (cdr exp)
                env
                rename-env
-               local-env local-renamed))))
+               local-env 
+               local-renamed))))
           (else
 ;(log 'app)
            (_expand-body
              (cons 
                (map
-                (lambda (expr) (_expand expr env rename-env local-env))
+                (lambda (expr) (_expand expr env rename-env local-env local-renamed))
                 this-exp)
                result)
              (cdr exp)
              env
              rename-env
-             local-env local-renamed))))
+             local-env 
+             local-renamed))))
        (else
         (error "unknown exp: " this-exp))))))
 
