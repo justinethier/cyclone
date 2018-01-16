@@ -894,14 +894,30 @@
 ;; TODO: also need to figure out how to deep-copy rename-env and associate it with
 ;; any defined macro. would need to pull that out when macro is expanded later
     ((lambda? exp)     
-      (let* ((args (lambda-formals->list exp))
+      (let* ((use-env (env:extend-environment '() '() '()))
+             (args (lambda-formals->list exp))
              (ltype (lambda-formals-type exp))
-             (a-lookup (map (lambda (a) (cons a (gensym a))) args))
+             ;(a-lookup (map (lambda (a) (cons a (gensym a))) args))
+             ;; Experimenting with ER renaming. still think there may be a problem with
+             ;; this, though. because when a nested lambda comes around with the same
+             ;; identifier as an enclosing lambda, its vars would not be given unique renames
+             (a-lookup
+              (map
+               (lambda (a)
+                (let ((a/r (cons a (Cyc-er-rename use-env env))))
+                  (env:define-variable! (cdr a/r) (car a/r) rename-env)
+                  a/r))
+               args))
              (new-formals
                (list->lambda-formals
                  (map cdr a-lookup)
                  ltype))
             )
+ (newline)
+ (display "/* ")
+ (display (list 'expand a-lookup))
+ (newline)
+ (display "*/ ")
         `(lambda ,new-formals ;,(lambda->formals exp)
                  ,@(_expand-body 
                      '() 
