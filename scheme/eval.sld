@@ -917,11 +917,11 @@
                  (map cdr a-lookup)
                  ltype))
             )
- (newline)
- (display "/* ")
- (display (list 'expand a-lookup))
- (newline)
- (display "*/ ")
+;; (newline)
+;; (display "/* ")
+;; (display (list 'expand a-lookup))
+;; (newline)
+;; (display "*/ ")
         `(lambda ,new-formals ;,(lambda->formals exp)
                  ,@(_expand-body 
                      '() 
@@ -1120,7 +1120,6 @@
       (cond
        ((or (const? this-exp)
             (prim? this-exp)
-            (ref? this-exp)
             (quote? this-exp)
             (define-c? this-exp))
 ;(log this-exp)
@@ -1131,6 +1130,18 @@
           rename-env 
           local-env 
           local-renamed))
+       ((ref? this-exp)        
+        (let* ((renamed (assoc this-exp local-renamed))
+               (sym (if renamed
+                        (cdr renamed) ;; Extract renamed symbol
+                        this-exp)))
+          (_expand-body 
+            (cons sym result) 
+            (cdr exp) 
+            env 
+            rename-env 
+            local-env 
+            local-renamed)))
        ((define? this-exp)
 ;(log this-exp)
         (_expand-body 
