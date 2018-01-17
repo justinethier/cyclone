@@ -904,8 +904,12 @@
              (a-lookup
               (map
                (lambda (a)
-                (let ((a/r (cons a (Cyc-er-rename use-env env))))
-                  (env:define-variable! (cdr a/r) (car a/r) rename-env)
+                (let ((a/r (cons a (gensym a))))
+      I think we want to pass these a-lookup bindings to Cyc-er-rename and
+      use them to rename any locals. ideally want this stored with macro def
+      for define-syntax. I think we get it for free with let*-syntax
+                  ;; TODO: define needed?
+                  ;(env:define-variable! (cdr a/r) (car a/r) rename-env)
                   a/r))
                args))
              (new-formals
