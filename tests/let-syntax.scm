@@ -1,5 +1,8 @@
 (import (scheme base) (scheme write) (scheme cyclone pretty-print))
 
+(write 
+ ((lambda (x) x) 1))
+
 (write
 (let ((x 'outer))
   (let-syntax ((m (syntax-rules () ((m) x))))
