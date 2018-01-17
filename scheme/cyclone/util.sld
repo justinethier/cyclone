@@ -614,14 +614,16 @@
 
 ;;; Explicit renaming macros
 
-(define (Cyc-er-rename use-env mac-env)
+(define (Cyc-er-rename use-env mac-env binding-lis)
   ((lambda (renames)
      (lambda (identifier)
 ;(Cyc-write `(ER rename ,identifier) (current-output-port))
 ;(Cyc-display "\n"  (current-output-port))
-       ((lambda (cell)
-          (if cell
-              (cdr cell)
+       ((lambda (binding-cell cell)
+          (cond
+           (binding-cell (cdr binding-cell))
+           (cell (cdr cell))
+           (else
               ((lambda (name)
                  (set! renames (cons (cons identifier name) renames))
                  name)
@@ -654,7 +656,8 @@
                ; forms other than symbols, if that is done.
                ;
                ;(make-syntactic-closure mac-env '() identifier)
-              )))
+              ))))
+        (assq identifier binding-lis)
         (assq identifier renames))
        ))
    ;; TODO: For now, do not allow renaming of special form symbols to 

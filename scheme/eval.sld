@@ -563,7 +563,7 @@
                ;; Compiled macro, call directly
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
-                                    (Cyc-er-rename use-env a-env)
+                                    (Cyc-er-rename use-env a-env '())
                                     (Cyc-er-compare? use-env use-env))) 
                         a-env)
                ;; Interpreted macro, build expression and eval
@@ -571,7 +571,7 @@
                              (list (cons 'quote 
                                          (list (cons (car exp) 
                                                      (operands exp))))
-                                   (Cyc-er-rename use-env a-env)
+                                   (Cyc-er-rename use-env a-env '())
                                    (Cyc-er-compare? use-env use-env)))))
                  (analyze
                    (eval expr a-env) ;; Expand macro
@@ -746,7 +746,7 @@
     ;; Macro section
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
-    (define (macro:expand exp macro mac-env rename-env)
+    (define (macro:expand exp macro mac-env rename-env local-renamed)
       (let* ((use-env (env:extend-environment '() '() '()))
              (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro))))
@@ -764,14 +764,14 @@
             (compiled-macro?
               ((Cyc-get-cvar (cadr macro))
                 exp
-                (Cyc-er-rename use-env mac-env)
+                (Cyc-er-rename use-env mac-env local-renamed)
                 (Cyc-er-compare? use-env rename-env)))
             (else
               (eval
                 (list
                   (Cyc-get-cvar (cadr macro))
                   (list 'quote exp)
-                  (Cyc-er-rename use-env mac-env)
+                  (Cyc-er-rename use-env mac-env local-renamed)
                   (Cyc-er-compare? use-env rename-env))
                 mac-env))))
 ;        (newline)
@@ -905,9 +905,9 @@
               (map
                (lambda (a)
                 (let ((a/r (cons a (gensym a))))
-      I think we want to pass these a-lookup bindings to Cyc-er-rename and
-      use them to rename any locals. ideally want this stored with macro def
-      for define-syntax. I think we get it for free with let*-syntax
+;      I think we want to pass these a-lookup bindings to Cyc-er-rename and
+;      use them to rename any locals. ideally want this stored with macro def
+;      for define-syntax. I think we get it for free with let*-syntax
                   ;; TODO: define needed?
                   ;(env:define-variable! (cdr a/r) (car a/r) rename-env)
                   a/r))
@@ -1050,13 +1050,13 @@
           (cond
            ((tagged-list? 'macro val)
             (_expand ; Could expand into another macro
-              (macro:expand exp val env rename-env)
+              (macro:expand exp val env rename-env local-renamed)
               env 
               rename-env 
               local-env local-renamed))
            ((Cyc-macro? val)
             (_expand ; Could expand into another macro
-              (macro:expand exp (list 'macro val) env rename-env)
+              (macro:expand exp (list 'macro val) env rename-env local-renamed)
               env 
               rename-env 
               local-env local-renamed))
@@ -1181,7 +1181,7 @@
             (if (tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
-              (let ((expanded (macro:expand this-exp val env rename-env)))
+              (let ((expanded (macro:expand this-exp val env rename-env local-renamed)))
 ;(log `(DONE WITH macro:expand))
                 (_expand-body
                   result
