@@ -978,7 +978,7 @@
              ;; Keep track of macros added during compilation.
              ;; TODO: why in both places?
              (macro:add! name body)
-             (env:define-variable! name (list 'macro body) env)))
+             (env:define-variable! name (list 'macro body local-renamed) env)))
           ;; Keep as a 'define' form so available at runtime
           ;; TODO: may run into issues with expanding now, before some
           ;; of the macros are defined. may need to make a special pass
@@ -1035,7 +1035,8 @@
                       'macro
                       (if (macro:syntax-rules? (env:lookup (car binding) body-env #f))
                           (cadr (_expand binding body-env rename-env local-env local-renamed))
-                          binding-body))))
+                          binding-body)
+                      local-renamed)))
            (env:define-variable! name macro-val) body-env))
          bindings)
        (_expand body body-env rename-env local-env local-renamed)
