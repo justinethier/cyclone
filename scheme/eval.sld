@@ -746,10 +746,16 @@
     ;; Macro section
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
-    (define (macro:expand exp macro mac-env rename-env local-renamed)
+    (define (macro:get-local-renames macro current-rename-lis)
+      (if (eq? 3 (length macro))
+          (caddr macro)
+          current-rename-lis))
+
+    (define (macro:expand exp macro mac-env rename-env local-renamed-lis)
       (let* ((use-env (env:extend-environment '() '() '()))
              (compiled-macro? (or (Cyc-macro? (Cyc-get-cvar (cadr macro)))
                                   (procedure? (cadr macro))))
+             (local-renamed (macro:get-local-renames macro local-renamed-lis))
              (result #f))
         ;(newline)
         ;(display "/* ")
@@ -1004,7 +1010,10 @@
                         (if (macro:syntax-rules? (env:lookup (car binding) env #f))
                             ;; TODO: is this ok?
                             (cadr (_expand binding env rename-env local-env local-renamed))
-                            binding-body)))))
+                            binding-body)
+                        ;; Preserve local renames at macro definition time
+                        local-renamed
+                        ))))
                 bindings))
             (new-local-macro-env (append bindings-as-macros local-env))
            )
