@@ -888,7 +888,9 @@
 ;;(newline)
   (cond
     ((const? exp)      exp)
-    ((prim? exp)       exp)
+    ((and (prim? exp) ;; Allow lambda vars to shadown primitives
+          (not (assoc exp local-renamed)))
+     exp)
     ((ref? exp)        
      (let ((renamed (assoc exp local-renamed)))
        (if renamed
@@ -1130,7 +1132,8 @@
 ;(newline (current-error-port))
       (cond
        ((or (const? this-exp)
-            (prim? this-exp)
+            (and (prim? this-exp)
+                 (not (assoc this-exp local-renamed)))
             (quote? this-exp)
             (define-c? this-exp))
 ;(log this-exp)
