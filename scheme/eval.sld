@@ -747,7 +747,8 @@
     (define (macro:macro? exp defined-macros) (assoc (car exp) defined-macros))
 
     (define (macro:get-local-renames macro current-rename-lis)
-      (if (eq? 3 (length macro))
+      (if (and (eq? 3 (length macro)) 
+               (not (null? (caddr macro))))
           (caddr macro)
           current-rename-lis))
 
@@ -759,7 +760,7 @@
              (result #f))
         ;(newline)
         ;(display "/* ")
-        ;(display (list 'macro:expand exp macro compiled-macro?))
+        ;(display (list 'macro:expand exp macro compiled-macro? local-renamed))
         ;(display "*/ ")
 
           ;; Invoke ER macro
