@@ -171,7 +171,7 @@
   (test
     '((unquote (quote bar)))
      (let ((unquote 'foo)) `(,'bar))
-      '(,'bar))
+   )
 )
 
 ;; ;;

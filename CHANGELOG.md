@@ -8,6 +8,7 @@ Features
 
 Bug Fixes
 
+- Made several improvements to macro hygiene by renaming local variable bindings during expansion. Added a unit test module covering many test cases.
 - Fixed many functions including `utf8->string`, `string->utf8`, `bytevector-copy`, `list->vector`, and `list->string` to heap allocate objects that exceed the maximum size for objects on the stack.
 
 ## 0.7.1 - December 21, 2017
