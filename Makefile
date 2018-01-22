@@ -50,6 +50,7 @@ clean :
 	rm -f tests/srfi-121-tests
 	rm -f tests/srfi-143-tests
 	rm -f tests/array-list-tests
+	rm -f tests/macro-hygiene
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
