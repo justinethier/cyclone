@@ -1,5 +1,6 @@
 ;; A temporary test file, based on code from:
 ;; http://synthcode.com/scheme/match-simple.scm
+;; See also - https://github.com/LemonBoy/matchable-egg/blob/master/match.scm
 (import (scheme base) (scheme write))
 
 (define-syntax match
@@ -162,7 +163,7 @@
 ;(display (tst 42))
 
 ;(display (match-one '(a . b) (? pair? x) 1 0))
-(display (match 
+#;(display (match 
            "test"
            ;'(c . d) ;;"test" 
            ;((? pair? x) x)
@@ -170,32 +171,30 @@
            (_ 'no-match)
           ))
 
- ;; Expanded version of above, what is going on?
- (display
-   ((lambda (tmp$1539$1543)
-      ((lambda (fail$1534$1545 fail$1537$1544)
-         (set! fail$1534$1545 (lambda () 'no-match))
-         (set! fail$1537$1544
-           (lambda () (error "no matches" tmp$1539$1543)))
-         (if (string? tmp$1539$1543)
-           (if (pair? tmp$1539$1543)
-             ((lambda (tmp1$1558$1559)
-                ((lambda (abracadabra$1561$1612)
-                   ((lambda (tmp2$1555$1608$1613)
-                      (if (if (pair? tmp2$1555$1608$1613)
-                            (null? (cdr tmp2$1555$1608$1613))
-                            #f)
-                        ((lambda (tmp$1617$1621)
-                           ((lambda (abracadabra$1623$1670)
-                              abracadabra$1623$1670)
-                            tmp$1617$1621))
-                         (car tmp2$1555$1608$1613))
-                        (fail$1534$1545)))
-                    (cdr tmp$1539$1543)))
-                 tmp1$1558$1559))
-              (car tmp$1539$1543))
-             (fail$1534$1545))
-           (fail$1534$1545)))
-       #f
-       #f))
-    "test"))
+(display (match (list 1 2 3) ((a b c) b)) )(newline)
+(display (match (list 1 2 1) ((a a b) 1) ((a b a) 2)))(newline)
+(display (match (list 1 2 1) ((_ _ b) 1) ((a b a) 2)) )(newline)
+(display (match 'a ('b 1) ('a 2)) )(newline)
+;(display (match (list 1 2 3) (`(1 ,b ,c) (list b c))) )(newline)
+;(display (match (list 1 2) ((1 2 3 ...) #t)) )(newline)
+;(display (match (list 1 2 3) ((1 2 3 ...) #t)) )(newline)
+;(display (match (list 1 2 3 3 3) ((1 2 3 ...) #t)) )(newline)
+;(display (match (list 1 2) ((a b c ...) c)) )(newline)
+;(display (match (list 1 2 3) ((a b c ...) c)) )(newline)
+;(display (match (list 1 2 3 4 5) ((a b c ...) c)) )(newline)
+;(display (match (list 1 2 3 4) ((a b c ... d e) c)) )(newline)
+;(display (match (list 1 2 3 4 5) ((a b c ... d e) c)) )(newline)
+;(display (match (list 1 2 3 4 5 6 7) ((a b c ... d e) c)) )(newline)
+;(display (match (list 1 2) ((a b c ..1) c)) )(newline)
+;(display (match (list 1 2 3) ((a b c ..1) c)) )(newline)
+(display (match 1 ((and) #t)) )(newline)
+(display (match 1 ((and x) x)) )(newline)
+(display (match 1 ((and x 1) x)) )(newline)
+(display (match 1 ((or) #t) (else #f)) )(newline)
+;(display (match 1 ((or x) x)) )(newline)
+;(display (match 1 ((or x 2) x)) )(newline)
+(display (match 1 ((not 2) #t)) )(newline)
+(display (match 1 ((? odd? x) x)) )(newline)
+;(display (match '(1 . 2) ((= car x) x)) )(newline)
+;(display (match 4 ((= square x) x)) )(newline)
+
