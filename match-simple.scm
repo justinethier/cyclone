@@ -161,10 +161,41 @@
 ;(display (tst "gehtdurch"))
 ;(display (tst 42))
 
+;(display (match-one '(a . b) (? pair? x) 1 0))
 (display (match 
-           '(a . b) ;;"test" 
-           ((? pair? x) x)
+           "test"
+           ;'(c . d) ;;"test" 
+           ;((? pair? x) x)
            ((? string? x) x)
            (_ 'no-match)
           ))
 
+ ;; Expanded version of above, what is going on?
+ (display
+   ((lambda (tmp$1539$1543)
+      ((lambda (fail$1534$1545 fail$1537$1544)
+         (set! fail$1534$1545 (lambda () 'no-match))
+         (set! fail$1537$1544
+           (lambda () (error "no matches" tmp$1539$1543)))
+         (if (string? tmp$1539$1543)
+           (if (pair? tmp$1539$1543)
+             ((lambda (tmp1$1558$1559)
+                ((lambda (abracadabra$1561$1612)
+                   ((lambda (tmp2$1555$1608$1613)
+                      (if (if (pair? tmp2$1555$1608$1613)
+                            (null? (cdr tmp2$1555$1608$1613))
+                            #f)
+                        ((lambda (tmp$1617$1621)
+                           ((lambda (abracadabra$1623$1670)
+                              abracadabra$1623$1670)
+                            tmp$1617$1621))
+                         (car tmp2$1555$1608$1613))
+                        (fail$1534$1545)))
+                    (cdr tmp$1539$1543)))
+                 tmp1$1558$1559))
+              (car tmp$1539$1543))
+             (fail$1534$1545))
+           (fail$1534$1545)))
+       #f
+       #f))
+    "test"))
