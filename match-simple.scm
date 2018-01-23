@@ -146,7 +146,10 @@
 ;     (begin . body))
 ;    ((_ ((pat expr) . rest) . body)
 ;     (match expr (pat (match-let* rest . body))))))
-;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; match-simple ends, this is the unit test section:
+
 ;(define tst
 ;  (match-lambda
 ;     ((a b) (vector 'fromlist a b))
@@ -158,6 +161,10 @@
 ;(display (tst "gehtdurch"))
 ;(display (tst 42))
 
-(display (match "test" ((? string? x) x)))
-
+(display (match 
+           '(a . b) ;;"test" 
+           ((? pair? x) x)
+           ((? string? x) x)
+           (_ 'no-match)
+          ))
 
