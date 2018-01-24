@@ -14,6 +14,15 @@
 )
 
 (test-group
+  "predicates"
+  ;; Fails on cyclone, works on chibi
+  ;(test "test" (match "test" ((? string? s) s) (else #f)))
+
+  (test #(fromlist 1 2) (match '(1 2) ((a b) (vector 'fromlist a b))))
+  (test #f (match 42 (X #f)))
+)
+
+#;(test-group
   "official tests"
 
   (test 2 (match (list 1 2 3) ((a b c) b)) )
