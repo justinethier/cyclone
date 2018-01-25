@@ -13,7 +13,11 @@
       (chibi test)))
 )
 
-(test-group
+(display
+  (match "test" ((? string? s) s) (else #f))
+)
+
+#;(test-group
   "predicates"
   ;; Fails on cyclone, works on chibi
   ;(test "test" (match "test" ((? string? s) s) (else #f)))
