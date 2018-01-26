@@ -14,8 +14,26 @@
 )
 
 (display
-  (match "test" ((? string? s) s) (else #f))
+  ;(match "test" ((? string? s) s) (else #f))
+  ;(let ((v "test"))
+  ;  (match-next v ("test" (set! "test")) ((? string? s) s) (else #f)))
+  ;(let ((v "test"))
+  ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+  ;    (match-one v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
+  (let ((v "test"))
+    (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+     (match-check-ellipsis
+      s
+      (match-extract-vars (? string? s) (match-gen-ellipsis v (? string? s) ()  ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()) () ())
+      (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()))))
+
 )
+
+;(expand (match "test" ((? string? s) s) (else #f)))*/
+;(expand (match-two$171 v$1 (? string? s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
+;(expand (match-one$266 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
+;(expand (match-check-ellipsis$270 s (match-extract-vars$269 and$262 (match-gen-ellipsis$268 v$1 and$262 () ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()) () ()) (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ())))*/
+;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
 #;(test-group
   "predicates"
