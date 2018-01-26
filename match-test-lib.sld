@@ -965,6 +965,20 @@
 ;; Otherwise COND-EXPANDed bits.
 
 (cond-expand
+ (cyclone
+  (define-syntax match-check-ellipsis
+    (er-macro-transformer
+     (lambda (expr rename compare)
+       (if (compare '... (cadr expr))
+           (car (cddr expr))
+           (cadr (cddr expr))))))
+  (define-syntax match-check-identifier
+    (er-macro-transformer
+     (lambda (expr rename compare)
+       (if (symbol? (cadr expr)) ;; TODO: good enough?
+           (car (cddr expr))
+           (cadr (cddr expr)))))))
+
  (chibi
   (define-syntax match-check-ellipsis
     (er-macro-transformer
