@@ -15,17 +15,35 @@
 
 (display
   ;(match "test" ((? string? s) s) (else #f))
+  ;
   ;(let ((v "test"))
   ;  (match-next v ("test" (set! "test")) ((? string? s) s) (else #f)))
+  ;
   ;(let ((v "test"))
   ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
   ;    (match-one v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
+  ;
+  ;(let ((v "test"))
+  ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+  ;   (match-check-ellipsis
+  ;    s
+  ;    (match-extract-vars (? string? s) (match-gen-ellipsis v (? string? s) ()  ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()) () ())
+  ;    (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()))))
+  ;
+  ;(let ((v "test"))
+  ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+  ;   (match-check-ellipsis
+  ;    s
+  ;    (match-extract-vars (? string? s) (match-gen-ellipsis v (? string? s) ()  ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()) () ())
+  ;    (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()))))
+  ;
+  ;(let ((v "test"))
+  ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+  ;   (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
+  ;
   (let ((v "test"))
     (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
-     (match-check-ellipsis
-      s
-      (match-extract-vars (? string? s) (match-gen-ellipsis v (? string? s) ()  ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()) () ())
-      (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ()))))
+     (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
 
 )
 
