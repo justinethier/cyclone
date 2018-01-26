@@ -48,14 +48,13 @@
 ;       (match-one v (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
 ;       (failure))))
 
-;   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
-; (match 1 ((my-and x) x))
+;; Following two are broken when using "and" but if we replace "and" with "my-and" in 
+;; the lib's match-two macro and recompile, the following both work here with "my-and".
+;; Something funny going on here...
+   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
+; (match 1 ((and x) x))
 ;  (match-two "test" ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (begin) ())
 
-(match-check-ellipsis 
-  (and x)
-  1
-  0)
 ;; I think there is some kind of interaction going on here with the "and" macro, where it
 ;; is being expanded even though it is part of the syntax-rules literals and should not be.
 ;; Just a guess, need to prove it, but it could explain why we fall into this case even though
