@@ -40,10 +40,31 @@
   ;(let ((v "test"))
   ;  (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
   ;   (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
-  ;
-  (let ((v "test"))
-    (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
-     (match-two v ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (failure) ())))
+  ; END expansions we are sure about, below is just WIP:
+
+;  (let ((v "test"))
+;    (let ((failure (lambda () (match-next v ("test" (set! "test")) (else #f)))))
+;     (if (string? v) 
+;       (match-one v (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
+;       (failure))))
+
+;   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
+; (match 1 ((my-and x) x))
+;  (match-two "test" ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (begin) ())
+
+(match-check-ellipsis 
+  (and x)
+  1
+  0)
+;; I think there is some kind of interaction going on here with the "and" macro, where it
+;; is being expanded even though it is part of the syntax-rules literals and should not be.
+;; Just a guess, need to prove it, but it could explain why we fall into this case even though
+;; pattern should have been (and p) - though not 100% sure, just a guess at this point
+;    ((match-two v (p) g+s sk fk i)
+;     (if (and (pair? v) (null? (cdr v)))
+;         (let ((w (car v)))
+;           (match-one w p ((car v) (set-car! v)) sk fk i))
+;         fk))
 
 )
 
