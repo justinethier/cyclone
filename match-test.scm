@@ -51,8 +51,9 @@
 ;; Following two are broken when using "and" but if we replace "and" with "my-and" in 
 ;; the lib's match-two macro and recompile, the following both work here with "my-and".
 ;; Something funny going on here...
-   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
+;   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
 ; (match 1 ((and x) x))
+  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin . x)) (begin) ())
 ;  (match-two "test" ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (begin) ())
 
 ;; I think there is some kind of interaction going on here with the "and" macro, where it
