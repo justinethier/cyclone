@@ -27,7 +27,7 @@
     ;; Go directly to MATCH-TWO.
     ((match-one . x)
      (match-two . x))))
-(define-syntax match-two
+#;(define-syntax match-two
   (syntax-rules (_ ___ ..1 *** quote quasiquote ? $ struct @ object = and or not set! get!)
     ((match-two v () g+s (sk ...) fk i)
      (if (null? v) (sk ... i) fk))
@@ -115,7 +115,7 @@
                   (if (equal? v x) (sk ... (id ...)) fk)))
       (if (equal? v x) (sk ... (id ...)) fk)))
     ))
-#;(define-syntax match-two
+(define-syntax match-two
   (syntax-rules (_ ___ ..1 *** quote quasiquote ? $ struct @ object = my-and or not set! get!)
     ((match-two v () g+s (sk ...) fk i)
      (if (null? v) (sk ... i) fk))
@@ -211,7 +211,7 @@
 
 (display
   ;; Works fine with my-and, but change back to and (and above in match-two) and it is broken
-  ;(match-two 1 (my-and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
+  (match-two 1 (my-and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
 ;; With my-and the initial expansions are:
 ;/* (expand (match-two 1 (my-and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()))*/ 
 ;/* (expand (match-one$2095 1 x (1 (set! 1)) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin)) (begin) ()))*/ 
@@ -219,10 +219,26 @@
 ;/* (expand (match-check-identifier$2105 x (let-syntax ((new-sym?$2100 (syntax-rules$2104 () ((new-sym?$2100 x sk2$2102 fk2$2101) sk2$2102) ((new-sym?$2100 y$2103 sk2$2102 fk2$2101) fk2$2101)))) (new-sym?$2100 random-sym-to-match$2099 (let$2098 ((x 1)) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) (x))) (if (equal? 1 x) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()) (begin)))) (if (equal? 1 x) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()) (begin))))*/ 
 
   ;; Alternatively, with and the initial expansions are:
-  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
+;  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
 ;/* (expand (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()))*/ 
 ;/* (expand (if (pair? 1) (let$2108 ((w$2107 (car 1)) (x$2105 (cdr 1))) (match-one$2106 w$2107 and ((car 1) (set-car! 1)) (match-one$2106 x$2105 (x) ((cdr 1) (set-cdr! 1)) (match-drop-ids (begin x)) (begin)) (begin) ())) (begin)))*/ 
 ;/* (expand (pair? 1))*/ 
 ;/* (expand 1)*/ 
 ;/* (expand pair?)*/ 
+
+;; 
+;; All of this seems like it may be a problem with ER macro (compare?)
+;; Consider this comparison of and:
+;; (Cyc-er-compare? and and$2094)
+;; (find-original-sym and #f)
+;; (find-original-sym and$2094 #f)
+;; (compare and and$2094 and and$2094 #f)
+;; 
+;; vs the comparison of my-and (which immediately kicks us into the proper macro expansion):
+;; 
+;; (Cyc-er-compare? my-and my-and$2094)
+;; (find-original-sym my-and #f)
+;; (find-original-sym my-and$2094 my-and)
+;; (find-original-sym my-and #f)
+;; (compare my-and my-and$2094 my-and my-and #t)
 )
