@@ -39,121 +39,118 @@ many times it is used, and does not bind the result in the body.
 
     (match (list 1 2 1) ((_ _ b) 1) ((a b a) 2))
 
-;;> To match a literal identifier (or list or any other literal), use
-;;> \scheme{quote}.
+To match a literal identifier (or list or any other literal), use `quote`.
 
-;;> \example{(match 'a ('b 1) ('a 2))}
+    (match 'a ('b 1) ('a 2))
 
-;;> Analogous to its normal usage in scheme, \scheme{quasiquote} can
-;;> be used to quote a mostly literally matching object with selected
-;;> parts unquoted.
+Analogous to its normal usage in scheme, `quasiquote` can
+be used to quote a mostly literally matching object with selected
+parts unquoted.
 
-;;> \example|{(match (list 1 2 3) (`(1 ,b ,c) (list b c)))}|
+    (match (list 1 2 3) (`(1 ,b ,c) (list b c)))
 
-;;> Often you want to match any number of a repeated pattern.  Inside
-;;> a list pattern you can append \scheme{...} after an element to
-;;> match zero or more of that pattern (like a regexp Kleene star).
+Often you want to match any number of a repeated pattern.  Inside
+a list pattern you can append `...` after an element to
+match zero or more of that pattern (like a regexp Kleene star).
 
-;;> \example{(match (list 1 2) ((1 2 3 ...) #t))}
-;;> \example{(match (list 1 2 3) ((1 2 3 ...) #t))}
-;;> \example{(match (list 1 2 3 3 3) ((1 2 3 ...) #t))}
+    (match (list 1 2) ((1 2 3 ...) #t))
+    (match (list 1 2 3) ((1 2 3 ...) #t))
+    (match (list 1 2 3 3 3) ((1 2 3 ...) #t))
 
-;;> Pattern variables matched inside the repeated pattern are bound to
-;;> a list of each matching instance in the body.
+Pattern variables matched inside the repeated pattern are bound to
+a list of each matching instance in the body.
 
-;;> \example{(match (list 1 2) ((a b c ...) c))}
-;;> \example{(match (list 1 2 3) ((a b c ...) c))}
-;;> \example{(match (list 1 2 3 4 5) ((a b c ...) c))}
+    (match (list 1 2) ((a b c ...) c))
+    (match (list 1 2 3) ((a b c ...) c))
+    (match (list 1 2 3 4 5) ((a b c ...) c))
 
-;;> More than one \scheme{...} may not be used in the same list, since
-;;> this would require exponential backtracking in the general case.
-;;> However, \scheme{...} need not be the final element in the list,
-;;> and may be succeeded by a fixed number of patterns.
+More than one `...` may not be used in the same list, since
+this would require exponential backtracking in the general case.
+However, `...` need not be the final element in the list,
+and may be succeeded by a fixed number of patterns.
 
-;;> \example{(match (list 1 2 3 4) ((a b c ... d e) c))}
-;;> \example{(match (list 1 2 3 4 5) ((a b c ... d e) c))}
-;;> \example{(match (list 1 2 3 4 5 6 7) ((a b c ... d e) c))}
+    (match (list 1 2 3 4) ((a b c ... d e) c))
+    (match (list 1 2 3 4 5) ((a b c ... d e) c))
+    (match (list 1 2 3 4 5 6 7) ((a b c ... d e) c))
 
-;;> \scheme{___} is provided as an alias for \scheme{...} when it is
-;;> inconvenient to use the ellipsis (as in a syntax-rules template).
+`___` is provided as an alias for `...` when it is
+inconvenient to use the ellipsis (as in a syntax-rules template).
 
-;;> The \scheme{..1} syntax is exactly like the \scheme{...} except
-;;> that it matches one or more repetitions (like a regexp "+").
+The `..1` syntax is exactly like the `...` except
+that it matches one or more repetitions (like a regexp "+").
 
-;;> \example{(match (list 1 2) ((a b c ..1) c))}
-;;> \example{(match (list 1 2 3) ((a b c ..1) c))}
+    (match (list 1 2) ((a b c ..1) c))
+    (match (list 1 2 3) ((a b c ..1) c))
 
-;;> The boolean operators \scheme{and}, \scheme{or} and \scheme{not}
-;;> can be used to group and negate patterns analogously to their
-;;> Scheme counterparts.
+The boolean operators `and`, `or`, and `not`
+can be used to group and negate patterns analogously to their
+Scheme counterparts.
 
-;;> The \scheme{and} operator ensures that all subpatterns match.
-;;> This operator is often used with the idiom \scheme{(and x pat)} to
-;;> bind \var{x} to the entire value that matches \var{pat}
-;;> (c.f. "as-patterns" in ML or Haskell).  Another common use is in
-;;> conjunction with \scheme{not} patterns to match a general case
-;;> with certain exceptions.
+The `and` operator ensures that all subpatterns match.
+This operator is often used with the idiom `(and x pat)` to
+bind `x` to the entire value that matches `pat`
+(c.f. "as-patterns" in ML or Haskell).  Another common use is in
+conjunction with `not` patterns to match a general case
+with certain exceptions.
 
-;;> \example{(match 1 ((and) #t))}
-;;> \example{(match 1 ((and x) x))}
-;;> \example{(match 1 ((and x 1) x))}
+    (match 1 ((and) #t))
+    (match 1 ((and x) x))
+    (match 1 ((and x 1) x))
 
-;;> The \scheme{or} operator ensures that at least one subpattern
-;;> matches.  If the same identifier occurs in different subpatterns,
-;;> it is matched independently.  All identifiers from all subpatterns
-;;> are bound if the \scheme{or} operator matches, but the binding is
-;;> only defined for identifiers from the subpattern which matched.
+The `or` operator ensures that at least one subpattern
+matches.  If the same identifier occurs in different subpatterns,
+it is matched independently.  All identifiers from all subpatterns
+are bound if the `or` operator matches, but the binding is
+only defined for identifiers from the subpattern which matched.
 
-;;> \example{(match 1 ((or) #t) (else #f))}
-;;> \example{(match 1 ((or x) x))}
-;;> \example{(match 1 ((or x 2) x))}
+    (match 1 ((or) #t) (else #f))
+    (match 1 ((or x) x))
+    (match 1 ((or x 2) x))
 
-;;> The \scheme{not} operator succeeds if the given pattern doesn't
-;;> match.  None of the identifiers used are available in the body.
+The `not` operator succeeds if the given pattern doesn't
+match.  None of the identifiers used are available in the body.
 
-;;> \example{(match 1 ((not 2) #t))}
+    (match 1 ((not 2) #t))
 
-;;> The more general operator \scheme{?} can be used to provide a
-;;> predicate.  The usage is \scheme{(? predicate pat ...)} where
-;;> \var{predicate} is a Scheme expression evaluating to a predicate
-;;> called on the value to match, and any optional patterns after the
-;;> predicate are then matched as in an \scheme{and} pattern.
+The more general operator `?` can be used to provide a
+predicate.  The usage is `(? predicate pat ...)` where
+`predicate` is a Scheme expression evaluating to a predicate
+called on the value to match, and any optional patterns after the
+predicate are then matched as in an `and` pattern.
 
-;;> \example{(match 1 ((? odd? x) x))}
+    (match 1 ((? odd? x) x))
 
-;;> The field operator \scheme{=} is used to extract an arbitrary
-;;> field and match against it.  It is useful for more complex or
-;;> conditional destructuring that can't be more directly expressed in
-;;> the pattern syntax.  The usage is \scheme{(= field pat)}, where
-;;> \var{field} can be any expression, and should result in a
-;;> procedure of one argument, which is applied to the value to match
-;;> to generate a new value to match against \var{pat}.
+The field operator `=` is used to extract an arbitrary
+field and match against it.  It is useful for more complex or
+conditional destructuring that can't be more directly expressed in
+the pattern syntax.  The usage is `(= field pat)`, where
+`field` can be any expression, and should result in a
+procedure of one argument, which is applied to the value to match
+to generate a new value to match against `pat`.
 
-;;> Thus the pattern \scheme{(and (= car x) (= cdr y))} is equivalent
-;;> to \scheme{(x . y)}, except it will result in an immediate error
+;;> Thus the pattern `(and (= car x) (= cdr y))` is equivalent
+;;> to `(x . y)`, except it will result in an immediate error
 ;;> if the value isn't a pair.
 
-;;> \example{(match '(1 . 2) ((= car x) x))}
-;;> \example{(match 4 ((= square x) x))}
+    (match '(1 . 2) ((= car x) x))
+    (match 4 ((= square x) x))
 
-;;> The record operator \scheme{$} is used as a concise way to match
-;;> records defined by SRFI-9 (or SRFI-99).  The usage is
-;;> \scheme{($ rtd field ...)}, where \var{rtd} should be the record
-;;> type descriptor specified as the first argument to
-;;> \scheme{define-record-type}, and each \var{field} is a subpattern
-;;> matched against the fields of the record in order.  Not all fields
-;;> must be present.
+The record operator `$` is used as a concise way to match
+records defined by SRFI-9 (or SRFI-99).  The usage is
+`($ rtd field ...)`, where `rtd` should be the record
+type descriptor specified as the first argument to
+`define-record-type`, and each `field` is a subpattern
+matched against the fields of the record in order.  Not all fields
+must be present.
 
-;;> \example{
-;;> (let ()
-;;>   (define-record-type employee
-;;>     (make-employee name title)
-;;>     employee?
-;;>     (name get-name)
-;;>     (title get-title))
-;;>   (match (make-employee "Bob" "Doctor")
-;;>     (($ employee n t) (list t n))))
-;;> }
+    (let ()
+      (define-record-type employee
+        (make-employee name title)
+        employee?
+        (name get-name)
+        (title get-title))
+      (match (make-employee "Bob" "Doctor")
+        (($ employee n t) (list t n))))
 
 ;;> For records with more fields it can be helpful to match them by
 ;;> name rather than position.  For this you can use the \scheme{@}
