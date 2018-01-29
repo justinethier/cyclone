@@ -1,12 +1,19 @@
 # Match Library
 
-The `(scheme cyclone match)` library provides a hygienic pattern matcher, based on Alex Shinn's portable `match.scm`. From that documentation:
-
-A portable hygienic pattern matcher.
+The `(scheme cyclone match)` library provides a hygienic pattern matcher, based on Alex Shinn's portable `match.scm`. The documentation below is based on the documentation from that portable hygienic pattern matcher.
 
 This is a full superset of the popular [match](http://www.cs.indiana.edu/scheme-repository/code.match.html) package by Andrew Wright, written in fully portable `syntax-rules` and thus preserving hygiene.
 
 The most notable extensions are the ability to use *non-linear* patterns - patterns in which the same identifier occurs multiple times, tail patterns after ellipsis, and the experimental tree patterns.
+
+## Index
+
+- [`match`](#match)
+- [`match-lambda`](#match-lambda)
+- [`match-lambda*`](#match-lambda-1)
+- [`match-let`](#match-let)
+- [`match-letrec`](#match-letrec)
+- [`match-let*`](#match-let-1)
 
 ## Patterns
 
@@ -165,57 +172,47 @@ operator, originally a Gauche extension:
       (match (make-employee "Bob" "Doctor")
         ((@ employee (title t) (name n)) (list t n))))
 
-;;> The \scheme{set!} and \scheme{get!} operators are used to bind an
-;;> identifier to the setter and getter of a field, respectively.  The
-;;> setter is a procedure of one argument, which mutates the field to
-;;> that argument.  The getter is a procedure of no arguments which
-;;> returns the current value of the field.
+The `set!` and `get!` operators are used to bind an
+identifier to the setter and getter of a field, respectively.  The
+setter is a procedure of one argument, which mutates the field to
+that argument.  The getter is a procedure of no arguments which
+returns the current value of the field.
 
-;;> \example{(let ((x (cons 1 2))) (match x ((1 . (set! s)) (s 3) x)))}
-;;> \example{(match '(1 . 2) ((1 . (get! g)) (g)))}
+    (let ((x (cons 1 2))) (match x ((1 . (set! s)) (s 3) x)))
+    (match '(1 . 2) ((1 . (get! g)) (g)))
 
-;;> The new operator \scheme{***} can be used to search a tree for
-;;> subpatterns.  A pattern of the form \scheme{(x *** y)} represents
-;;> the subpattern \var{y} located somewhere in a tree where the path
-;;> from the current object to \var{y} can be seen as a list of the
-;;> form \scheme{(x ...)}.  \var{y} can immediately match the current
-;;> object in which case the path is the empty list.  In a sense it's
-;;> a 2-dimensional version of the \scheme{...} pattern.
+The new operator `***` can be used to search a tree for
+subpatterns.  A pattern of the form `(x *** y)` represents
+the subpattern `y` located somewhere in a tree where the path
+from the current object to `y` can be seen as a list of the
+form `(x ...)`.  `y` can immediately match the current
+object in which case the path is the empty list.  In a sense it's
+a 2-dimensional version of the `...` pattern.
 
-;;> As a common case the pattern \scheme{(_ *** y)} can be used to
-;;> search for \var{y} anywhere in a tree, regardless of the path
-;;> used.
+As a common case the pattern `(_ *** y)` can be used to
+search for `y` anywhere in a tree, regardless of the path
+used.
 
-;;> \example{(match '(a (a (a b))) ((x *** 'b) x))}
-;;> \example{(match '(a (b) (c (d e) (f g))) ((x *** 'g) x))}
+    (match '(a (a (a b))) ((x *** 'b) x))
+    (match '(a (b) (c (d e) (f g))) ((x *** 'g) x))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Notes
+## Notes
 
-;; The implementation is a simple generative pattern matcher - each
-;; pattern is expanded into the required tests, calling a failure
-;; continuation if the tests fail.  This makes the logic easy to
-;; follow and extend, but produces sub-optimal code in cases where you
-;; have many similar clauses due to repeating the same tests.
-;; Nonetheless a smart compiler should be able to remove the redundant
-;; tests.  For MATCH-LET and DESTRUCTURING-BIND type uses there is no
-;; performance hit.
+The implementation is a simple generative pattern matcher - each
+pattern is expanded into the required tests, calling a failure
+continuation if the tests fail.  This makes the logic easy to
+follow and extend, but produces sub-optimal code in cases where you
+have many similar clauses due to repeating the same tests.
+Nonetheless a smart compiler should be able to remove the redundant
+tests.  For MATCH-LET and DESTRUCTURING-BIND type uses there is no
+performance hit.
 
-;; The original version was written on 2006/11/29 and described in the
-;; following Usenet post:
-;;   http://groups.google.com/group/comp.lang.scheme/msg/0941234de7112ffd
-;; and is still available at
-;;   http://synthcode.com/scheme/match-simple.scm
-;; It's just 80 lines for the core MATCH, and an extra 40 lines for
-;; MATCH-LET, MATCH-LAMBDA and other syntactic sugar.
-;;
+The original version was written on 2006/11/29 and described in the
+following Usenet post: http://groups.google.com/group/comp.lang.scheme/msg/0941234de7112ffd
+and is still available at http://synthcode.com/scheme/match-simple.scm
 
-- [`match`](#match)
-- [`match-lambda`](#match-lambda)
-- [`match-lambda*`](#match-lambda-1)
-- [`match-let`](#match-let)
-- [`match-letrec`](#match-letrec)
-- [`match-let*`](#match-let-1)
+It's just 80 lines for the core MATCH, and an extra 40 lines for
+MATCH-LET, MATCH-LAMBDA and other syntactic sugar.
 
 # match
 
