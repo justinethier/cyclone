@@ -634,6 +634,9 @@
                    ((tagged-list? 'macro val)
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
+                      ;; Also update rename over here so it is available for 
+                      ;; use later on by compare
+                      (env:define-variable! renamed identifier use-env)
                       renamed))
                    ((eq? val 'not-defined)
                      ;; Unrenamed variable identifier
