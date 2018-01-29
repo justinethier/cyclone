@@ -135,9 +135,9 @@ the pattern syntax.  The usage is `(= field pat)`, where
 procedure of one argument, which is applied to the value to match
 to generate a new value to match against `pat`.
 
-;;> Thus the pattern `(and (= car x) (= cdr y))` is equivalent
-;;> to `(x . y)`, except it will result in an immediate error
-;;> if the value isn't a pair.
+Thus the pattern `(and (= car x) (= cdr y))` is equivalent
+to `(x . y)`, except it will result in an immediate error
+if the value isn't a pair.
 
     (match '(1 . 2) ((= car x) x))
     (match 4 ((= square x) x))
