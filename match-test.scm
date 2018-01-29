@@ -74,6 +74,8 @@
 ;(expand (match-check-ellipsis$270 s (match-extract-vars$269 and$262 (match-gen-ellipsis$268 v$1 and$262 () ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()) () ()) (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ())))*/
 ;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
+;(display (match 1 ((or x 2) x)) )(newline)
+
 (test-group
   "predicates"
   (test "test" (match "test" ((? string? s) s) (else #f)))
@@ -120,9 +122,27 @@
 
   (test #t (match 1 ((not 2) #t)) )
 
-;; Fails on cyclone but passes on chibi
   (test 1 (match 1 ((? odd? x) x)))
   (test 1 (match '(1 . 2) ((= car x) x)) )
   (test 16 (match 4 ((= square x) x)) )
+
+;; TODO: Fails on cyclone but passes on chibi
+;; expect '("Doctor" "Bob")
+#;(display
+    (let ()
+      (define-record-type employee
+        (make-employee name title)
+        employee?
+        (name get-name)
+        (title get-title))
+      (match (make-employee "Bob" "Doctor")
+        (($ employee n t) (list t n))))
+)
+
+  (test '(1 . 3) (let ((x (cons 1 2))) (match x ((1 . (set! s)) (s 3) x))))
+  (test 2 (match '(1 . 2) ((1 . (get! g)) (g))))
+  (test '(a a a) (match '(a (a (a b))) ((x *** 'b) x)))
+  (test '(a c f) (match '(a (b) (c (d e) (f g))) ((x *** 'g) x)))
+
 )
 (test-exit)
