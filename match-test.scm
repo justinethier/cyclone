@@ -13,7 +13,7 @@
       (chibi test)))
 )
 
-(display
+#;(display
   ;(match "test" ((? string? s) s) (else #f))
   ;
   ;(let ((v "test"))
@@ -53,7 +53,7 @@
 ;; Something funny going on here...
 ;   (match-one "test" (and s) ("test" (set! "test")) (match-drop-ids (begin s)) (failure) ())
 ; (match 1 ((and x) x))
-  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin . x)) (begin) ())
+  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
 ;  (match-two "test" ((? string? s) s) ("test" (set! "test")) (match-drop-ids (begin . s)) (begin) ())
 
 ;; I think there is some kind of interaction going on here with the "and" macro, where it
@@ -74,16 +74,15 @@
 ;(expand (match-check-ellipsis$270 s (match-extract-vars$269 and$262 (match-gen-ellipsis$268 v$1 and$262 () ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()) () ()) (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ())))*/
 ;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
-#;(test-group
+(test-group
   "predicates"
-  ;; Fails on cyclone, works on chibi
-  ;(test "test" (match "test" ((? string? s) s) (else #f)))
+  (test "test" (match "test" ((? string? s) s) (else #f)))
 
   (test #(fromlist 1 2) (match '(1 2) ((a b) (vector 'fromlist a b))))
   (test #f (match 42 (X #f)))
 )
 
-#;(test-group
+(test-group
   "official tests"
 
   (test 2 (match (list 1 2 3) ((a b c) b)) )
@@ -91,8 +90,7 @@
   (test 1 (match (list 1 2 1) ((_ _ b) 1) ((a b a) 2)) )
   (test 2 (match 'a ('b 1) ('a 2)) )
 
-;; fails on cyclone, works in chibi
-;(display (match (list 1 2 3) (`(1 ,b ,c) (list b c))) )(newline)
+  (test '(2 3) (match (list 1 2 3) (`(1 ,b ,c) (list b c))))
 
   (test #t (match (list 1 2) ((1 2 3 ...) #t)) )
   (test #t (match (list 1 2 3) ((1 2 3 ...) #t)) )
@@ -108,23 +106,22 @@
 ;;; Pattern not matched
 ;(display (match (list 1 2) ((a b c ..1) c)) )(newline)
 ;;; Should have matched??
-;(display (match (list 1 2 3) ((a b c ..1) c)) )(newline)
+  (test '(3) (match (list 1 2 3) ((a b c ..1) c)))
 
-;; Next 3 fail on cyclone but pass on chibi
-;(display (match 1 ((and) #t)) )(newline)
-;(display (match 1 ((and x) x)) )(newline)
-;(display (match 1 ((and x 1) x)) )(newline)
+  (test #t (match 1 ((and) #t)))
+  (test 1 (match 1 ((and x) x)))
+  (test 1 (match 1 ((and x 1) x)))
 
   (test #f (match 1 ((or) #t) (else #f)) )
 
-;; Next 2 fail on cyclone but pass on chibi
-;(display (match 1 ((or x) x)) )(newline)
+  (test 1 (match 1 ((or x) x)))
+;; Next fails on cyclone but pass on chibi
 ;(display (match 1 ((or x 2) x)) )(newline)
 
   (test #t (match 1 ((not 2) #t)) )
 
 ;; Fails on cyclone but passes on chibi
-;(display (match 1 ((? odd? x) x)) )(newline)
+  (test 1 (match 1 ((? odd? x) x)))
   (test 1 (match '(1 . 2) ((= car x) x)) )
   (test 16 (match 4 ((= square x) x)) )
 )
