@@ -209,7 +209,8 @@ performance hit.
 
 The original version was written on 2006/11/29 and described in the
 following Usenet post: http://groups.google.com/group/comp.lang.scheme/msg/0941234de7112ffd
-and is still available at http://synthcode.com/scheme/match-simple.scm
+
+and is still available at: http://synthcode.com/scheme/match-simple.scm
 
 It's just 80 lines for the core MATCH, and an extra 40 lines for
 MATCH-LET, MATCH-LAMBDA and other syntactic sugar.
