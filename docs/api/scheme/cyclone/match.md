@@ -13,10 +13,10 @@ The `(scheme cyclone match)` library ...
 
 # match-lambda
 
-# match-lamdba-1
+# match-lamdba*
 
 # match-let
 
 # match-letrec
 
-# match-let-1
+# match-let*
