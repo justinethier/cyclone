@@ -4,6 +4,7 @@
 
 Features
 
+- Added a `(scheme cyclone match)` library based on Alex Shinn's `match.scm` portable hygienic pattern matcher.
 - The compiler now emits a faster version of `apply` in cases where only two arguments are received.
 
 Bug Fixes
