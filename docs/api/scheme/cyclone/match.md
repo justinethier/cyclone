@@ -152,20 +152,18 @@ must be present.
       (match (make-employee "Bob" "Doctor")
         (($ employee n t) (list t n))))
 
-;;> For records with more fields it can be helpful to match them by
-;;> name rather than position.  For this you can use the \scheme{@}
-;;> operator, originally a Gauche extension:
+For records with more fields it can be helpful to match them by
+name rather than position.  For this you can use the `@`
+operator, originally a Gauche extension:
 
-;;> \example{
-;;> (let ()
-;;>   (define-record-type employee
-;;>     (make-employee name title)
-;;>     employee?
-;;>     (name get-name)
-;;>     (title get-title))
-;;>   (match (make-employee "Bob" "Doctor")
-;;>     ((@ employee (title t) (name n)) (list t n))))
-;;> }
+    (let ()
+      (define-record-type employee
+        (make-employee name title)
+        employee?
+        (name get-name)
+        (title get-title))
+      (match (make-employee "Bob" "Doctor")
+        ((@ employee (title t) (name n)) (list t n))))
 
 ;;> The \scheme{set!} and \scheme{get!} operators are used to bind an
 ;;> identifier to the setter and getter of a field, respectively.  The
@@ -211,9 +209,6 @@ must be present.
 ;; It's just 80 lines for the core MATCH, and an extra 40 lines for
 ;; MATCH-LET, MATCH-LAMBDA and other syntactic sugar.
 ;;
-;; A variant of this file which uses COND-EXPAND in a few places for
-;; performance can be found at
-;;   http://synthcode.com/scheme/match-cond-expand.scm
 
 - [`match`](#match)
 - [`match-lambda`](#match-lambda)
