@@ -74,10 +74,37 @@
 ;(expand (match-check-ellipsis$270 s (match-extract-vars$269 and$262 (match-gen-ellipsis$268 v$1 and$262 () ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()) () ()) (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ())))*/
 ;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
-TODO: this does not work, try expanding it manually like we did with the other failing macros. maybe we can discover what's going wrong...
-(display (match 1 ((or x 2) x)) )(newline)
+;;TODO: this does not work, try expanding it manually like we did with the other failing macros. maybe we can discover what's going wrong...
+;(display (match 1 ((or x 2) x)) )(newline)
+(display
+;  (let ((v 1))
+;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+;    (match-two v (or x 2) (1 (set! 1)) (match-drop-ids (begin x)) (failure) ())))
 
-(test-group
+;  (let ((v 1))
+;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+;;     ;(match-two v (or x 2) (1 (set! 1)) (match-drop-ids (begin x)) (failure) ())
+;     (match-extract-vars (or x 2) (match-gen-or v (x 2) (1 (set! 1)) (begin x) (failure) ()) () ())))
+
+;  (let ((v 1))
+;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+;     (match-gen-or v (x 2) (1 (set! 1)) (begin x) (failure) () ((x p-ls)))))
+
+;  (let ((v 1))
+;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+;     ;(match-gen-or v (x 2) (1 (set! 1)) (begin x) (failure) () ((x p-ls)))))
+;     (let ((sk2 (lambda (x) (begin (x)))))
+;       (match-gen-or-step v (x 2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
+
+  (let ((v 1))
+    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+     ;(match-gen-or v (x 2) (1 (set! 1)) (begin x) (failure) () ((x p-ls)))))
+     (let ((sk2 (lambda (x) (begin (x)))))
+       (let ((fk2 (lambda () (match-gen-or-step v (2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
+         (match-one v x (1 (set! 1)) (match-drop-ids (sk2 x)) (fk2) ())))))
+)
+
+#;(test-group
   "predicates"
   (test "test" (match "test" ((? string? s) s) (else #f)))
 
@@ -85,7 +112,7 @@ TODO: this does not work, try expanding it manually like we did with the other f
   (test #f (match 42 (X #f)))
 )
 
-(test-group
+#;(test-group
   "official tests"
 
   (test 2 (match (list 1 2 3) ((a b c) b)) )
