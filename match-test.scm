@@ -74,7 +74,8 @@
 ;(expand (match-check-ellipsis$270 s (match-extract-vars$269 and$262 (match-gen-ellipsis$268 v$1 and$262 () ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()) () ()) (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ())))*/
 ;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
-;(display (match 1 ((or x 2) x)) )(newline)
+TODO: this does not work, try expanding it manually like we did with the other failing macros. maybe we can discover what's going wrong...
+(display (match 1 ((or x 2) x)) )(newline)
 
 (test-group
   "predicates"
