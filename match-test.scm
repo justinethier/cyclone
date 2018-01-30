@@ -9,6 +9,7 @@
       (scheme cyclone test)))
   (chibi
     (import
+      (chibi ast)
       (chibi match)
       (chibi test)))
 )
@@ -75,8 +76,19 @@
 ;(expand (match-two$267 v$1 (and$262 s) ("test" (set! "test")) (match-drop-ids$9 (begin s)) (failure$5) ()))*/
 
 ;;TODO: this does not work, try expanding it manually like we did with the other failing macros. maybe we can discover what's going wrong...
+;; NOTE there is a warning in chibi on this one. maybe this is not a big deal
 ;(display (match 1 ((or x 2) x)) )(newline)
 (display
+    (let ()
+      (define-record-type employee
+        (make-employee name title)
+        employee?
+        (name get-name)
+        (title get-title))
+      (match (make-employee "Bob" "Doctor")
+        (($ employee n t) (list t n))))
+)
+#;(display
 ;  (let ((v 1))
 ;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
 ;    (match-two v (or x 2) (1 (set! 1)) (match-drop-ids (begin x)) (failure) ())))
@@ -96,12 +108,24 @@
 ;     (let ((sk2 (lambda (x) (begin (x)))))
 ;       (match-gen-or-step v (x 2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
 
-  (let ((v 1))
-    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
-     ;(match-gen-or v (x 2) (1 (set! 1)) (begin x) (failure) () ((x p-ls)))))
-     (let ((sk2 (lambda (x) (begin (x)))))
-       (let ((fk2 (lambda () (match-gen-or-step v (2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
-         (match-one v x (1 (set! 1)) (match-drop-ids (sk2 x)) (fk2) ())))))
+  ;(let ((v 1))
+  ;  (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+  ;   (let ((sk2 (lambda (x) (begin (x)))))
+  ;     (let ((fk2 (lambda () (match-gen-or-step v (2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
+  ;       (match-one v x (1 (set! 1)) (match-drop-ids (sk2 x)) (fk2) ())))))
+
+; Broken, but is this the wrong expansion? Did we already fail?
+;  (let ((v 1))
+;    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+;     (let ((sk2 (lambda (x) (begin (x)))))
+;       (match-gen-or-step v (2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
+
+  ;; Errs out but does not choke on macro expansion
+  ;(let ((v 1))
+  ; (let ((sk2 (lambda (x) (begin (x)))))
+  ;  (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+  ;       (match-one v x (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
+
 )
 
 #;(test-group

@@ -208,8 +208,25 @@
   (syntax-rules ()
     ((_ expr ids ...) expr)))
 
+(define-syntax match-gen-or-step
+  (syntax-rules ()
+    ((_ v () g+s sk fk . x)
+     ;; no OR clauses, call the failure continuation
+     fk)
+    ((_ v (p) . x)
+     ;; last (or only) OR clause, just expand normally
+     (match-one v p . x))
+    ((_ v (p . q) g+s sk fk i)
+     ;; match one and try the remaining on failure
+     (let ((fk2 (lambda () (match-gen-or-step v q g+s sk fk i))))
+       (match-one v p g+s sk (fk2) i)))
+    ))
 
 (display
+  (let ((v 1))
+    (let ((failure (lambda () (match-next v (1 (set! 1)) (else #f)))))
+     (let ((sk2 (lambda (x) (begin (x)))))
+       (match-gen-or-step v (2) (1 (set! 1)) (match-drop-ids (sk2 x)) (failure) ()))))
   ;; Works fine with my-and, but change back to and (and above in match-two) and it is broken
   ;(match-two 1 (my-and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
 ;; With my-and the initial expansions are:
@@ -219,7 +236,7 @@
 ;/* (expand (match-check-identifier$2105 x (let-syntax ((new-sym?$2100 (syntax-rules$2104 () ((new-sym?$2100 x sk2$2102 fk2$2101) sk2$2102) ((new-sym?$2100 y$2103 sk2$2102 fk2$2101) fk2$2101)))) (new-sym?$2100 random-sym-to-match$2099 (let$2098 ((x 1)) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) (x))) (if (equal? 1 x) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()) (begin)))) (if (equal? 1 x) (match-one$2095 1 (my-and$2094) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()) (begin))))*/ 
 
   ;; Alternatively, with and the initial expansions are:
-  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
+;  (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ())
 ;/* (expand (match-two 1 (and x) (1 (set! 1)) (match-drop-ids (begin x)) (begin) ()))*/ 
 ;/* (expand (if (pair? 1) (let$2108 ((w$2107 (car 1)) (x$2105 (cdr 1))) (match-one$2106 w$2107 and ((car 1) (set-car! 1)) (match-one$2106 x$2105 (x) ((cdr 1) (set-cdr! 1)) (match-drop-ids (begin x)) (begin)) (begin) ())) (begin)))*/ 
 ;/* (expand (pair? 1))*/ 
