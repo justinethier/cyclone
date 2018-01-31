@@ -25,6 +25,7 @@ COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
+					 $(TEST_DIR)/match-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
@@ -51,6 +52,7 @@ clean :
 	rm -f tests/srfi-143-tests
 	rm -f tests/array-list-tests
 	rm -f tests/macro-hygiene
+	rm -f tests/match-tests
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
