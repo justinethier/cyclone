@@ -90,7 +90,38 @@
         (($ employee n t) (list t n))))
 )
 
-(test-group
+(define lst 1)
+(display
+(match
+   lst
+   ((? string? s) s)
+   (else 0)
+   )
+)
+(define (calc-time lst)
+  (match
+   lst
+   ((? string? s) s)
+   (else 0)
+   ;(() 0)
+;   ((and (? number? n) (or s seconds sec) ) ;. rest)
+;    (+ (* #e1 n) )) ;(calc-time rest)))
+;   (((and (?  number?) ?n) (or m min minutes) . ?rest)
+;    (+ (* #e60 n) (calc-time rest)))
+;   (((and (? number?) ?n) (or hours h) . ?rest)
+;    (+ (* #e60 60 n) (calc-time rest)))
+;   (((and (? number?) ?n) (or d days day) . ?rest)
+;    (+ (* #e60 60 24 n) (calc-time rest)))
+;   (((and (? number?) ?n) (or w week weeks) . ?rest)
+;    (+ (* #e60 60 24 7 n) (calc-time rest)))
+))
+
+(display
+  (list 
+    (calc-time (10 's))
+))
+
+#;(test-group
   "predicates"
   (test "test" (match "test" ((? string? s) s) (else #f)))
 
@@ -98,7 +129,7 @@
   (test #f (match 42 (X #f)))
 )
 
-(test-group
+#;(test-group
   "official tests"
 
   (test 2 (match (list 1 2 3) ((a b c) b)) )
