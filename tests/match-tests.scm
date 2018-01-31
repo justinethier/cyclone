@@ -90,41 +90,6 @@
         (($ employee n t) (list t n))))
 )
 
-(define (calc-time lst)
-  (match
-   lst
-   ;(() 0)
-   (((? number? n) (or 's 'seconds 'sec) . rest)
-    (+ 0 (* #e1 n) (calc-time rest)))
-;   ;; TODO: interesting compiler error with these lines:
-;   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
-;    (+ (* #e1 n) )) ;(calc-time rest)))
-   (((? number? n) (or 'm 'min 'minutes) . rest)
-    (+ (* #e60 n) (calc-time rest)))
-   (((? number? n) (or 'hours 'h) . rest)
-    (+ (* #e60 60 n) (calc-time rest)))
-   (((? number? n) (or 'd 'days 'day) . rest)
-    (+ (* #e60 60 24 n) (calc-time rest)))
-   (((? number? n) (or 'w 'week 'weeks) . rest)
-    (+ (* #e60 60 24 7 n) (calc-time rest)))
-   (else 0)
-))
-
-(newline)
-(display
-  (list 
-    (calc-time '(5 min 10 sec))
-    (calc-time '(1 day 5 min 10 sec))
-))
-
-#;(test-group
-  "predicates"
-  (test "test" (match "test" ((? string? s) s) (else #f)))
-
-  (test #(fromlist 1 2) (match '(1 2) ((a b) (vector 'fromlist a b))))
-  (test #f (match 42 (X #f)))
-)
-
 #;(test-group
   "official tests"
 
@@ -186,4 +151,40 @@
   (test '(a c f) (match '(a (b) (c (d e) (f g))) ((x *** 'g) x)))
 
 )
+
+#;(test-group
+  "predicates"
+  (test "test" (match "test" ((? string? s) s) (else #f)))
+
+  (test #(fromlist 1 2) (match '(1 2) ((a b) (vector 'fromlist a b))))
+  (test #f (match 42 (X #f)))
+)
+
+(define (calc-time lst)
+  (match
+   lst
+   ;(() 0)
+   (((? number? n) (or 's 'seconds 'sec) . rest)
+    (+ 0 (* #e1 n) (calc-time rest)))
+;   ;; TODO: interesting compiler error with these lines:
+;   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
+;    (+ (* #e1 n) )) ;(calc-time rest)))
+   (((? number? n) (or 'm 'min 'minutes) . rest)
+    (+ (* #e60 n) (calc-time rest)))
+   (((? number? n) (or 'hours 'h) . rest)
+    (+ (* #e60 60 n) (calc-time rest)))
+   (((? number? n) (or 'd 'days 'day) . rest)
+    (+ (* #e60 60 24 n) (calc-time rest)))
+   (((? number? n) (or 'w 'week 'weeks) . rest)
+    (+ (* #e60 60 24 7 n) (calc-time rest)))
+   (else 0)
+))
+
+(test-group
+  "example"
+  (test (+ (* 5 60) 10) (calc-time '(5 min 10 sec)))
+  (test (+ (* 24 60 60) (* 60 5) 10) (calc-time '(1 day 5 min 10 sec)))
+  (test (+ (* 24 60 60) (* 60 60) (* 60 5) 10) (calc-time '(0 weeks 1 day 1 h 5 min 10 sec)))
+)
+
 (test-exit)
