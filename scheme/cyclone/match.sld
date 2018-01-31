@@ -1,9 +1,15 @@
-(define-library (match-test-lib)
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; This module provides a hygienic pattern matcher based on 
+;;;; code from Chibi Scheme's (chibi match) library. Which in
+;;;; turn was built using Alex Shinn's match.scm.
+;;;;
+(define-library (scheme cyclone match)
   (import 
     (scheme base) 
-    (scheme write)
+    ;(scheme write)
   )
-;(chibi) (import (chibi) (scheme base) (scheme write))
   ;(export match match-lambda match-lambda* match-let match-letrec match-let*)
   (export
     match-syntax-error
