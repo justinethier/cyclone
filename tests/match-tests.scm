@@ -90,32 +90,23 @@
         (($ employee n t) (list t n))))
 )
 
-(define lst 1)
-(display
-(match
-   lst
-   ((? string? s) s)
-   (else 0)
-   )
-)
 (define (calc-time lst)
   (match
    lst
    ;(() 0)
-   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
-    (+ 0 (* #e1 n) )) ;(calc-time rest)))
-    ;; TODO: interesting compiler error with this line:
+   (((? number? n) (or 's 'seconds 'sec) . rest)
+    (+ 0 (* #e1 n) (calc-time rest)))
+;   ;; TODO: interesting compiler error with these lines:
+;   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
 ;    (+ (* #e1 n) )) ;(calc-time rest)))
-   (((?  number? n) (or 'm 'min 'minutes) . rest)
+   (((? number? n) (or 'm 'min 'minutes) . rest)
     (+ (* #e60 n) (calc-time rest)))
-;   (((and (?  number?) ?n) (or m min minutes) . ?rest)
-;    (+ (* #e60 n) (calc-time rest)))
-;   (((and (? number?) ?n) (or hours h) . ?rest)
-;    (+ (* #e60 60 n) (calc-time rest)))
-;   (((and (? number?) ?n) (or d days day) . ?rest)
-;    (+ (* #e60 60 24 n) (calc-time rest)))
-;   (((and (? number?) ?n) (or w week weeks) . ?rest)
-;    (+ (* #e60 60 24 7 n) (calc-time rest)))
+   (((? number? n) (or 'hours 'h) . rest)
+    (+ (* #e60 60 n) (calc-time rest)))
+   (((? number? n) (or 'd 'days 'day) . rest)
+    (+ (* #e60 60 24 n) (calc-time rest)))
+   (((? number? n) (or 'w 'week 'weeks) . rest)
+    (+ (* #e60 60 24 7 n) (calc-time rest)))
    (else 0)
 ))
 
@@ -123,6 +114,7 @@
 (display
   (list 
     (calc-time '(5 min 10 sec))
+    (calc-time '(1 day 5 min 10 sec))
 ))
 
 #;(test-group
