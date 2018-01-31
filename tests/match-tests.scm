@@ -101,11 +101,13 @@
 (define (calc-time lst)
   (match
    lst
-   ((? string? s) s)
-   (else 0)
    ;(() 0)
-;   ((and (? number? n) (or s seconds sec) ) ;. rest)
+   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
+    (+ 0 (* #e1 n) )) ;(calc-time rest)))
+    ;; TODO: interesting compiler error with this line:
 ;    (+ (* #e1 n) )) ;(calc-time rest)))
+   (((?  number? n) (or 'm 'min 'minutes) . rest)
+    (+ (* #e60 n) (calc-time rest)))
 ;   (((and (?  number?) ?n) (or m min minutes) . ?rest)
 ;    (+ (* #e60 n) (calc-time rest)))
 ;   (((and (? number?) ?n) (or hours h) . ?rest)
@@ -114,11 +116,13 @@
 ;    (+ (* #e60 60 24 n) (calc-time rest)))
 ;   (((and (? number?) ?n) (or w week weeks) . ?rest)
 ;    (+ (* #e60 60 24 7 n) (calc-time rest)))
+   (else 0)
 ))
 
+(newline)
 (display
   (list 
-    (calc-time (10 's))
+    (calc-time '(5 min 10 sec))
 ))
 
 #;(test-group
