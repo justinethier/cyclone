@@ -68,7 +68,7 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 - [`scheme cyclone common`](api/scheme/cyclone/common.md)
 - [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations.md)
 - [`scheme cyclone libraries`](api/scheme/cyclone/libraries.md)
-- [`scheme cyclone macros`](api/scheme/cyclone/macros.md)
+- [`scheme cyclone match`](api/scheme/cyclone/match.md)
 - [`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)
 - [`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)
 - [`scheme cyclone util`](api/scheme/cyclone/util.md)
