@@ -79,7 +79,7 @@
 ;;TODO: this does not work, try expanding it manually like we did with the other failing macros. maybe we can discover what's going wrong...
 ;; NOTE there is a warning in chibi on this one. maybe this is not a big deal
 ;(display (match 1 ((or x 2) x)) )(newline)
-#;(display
+(display
     (let ()
       (define-record-type employee
         (make-employee name title)
@@ -90,7 +90,19 @@
         (($ employee n t) (list t n))))
 )
 
-#;(test-group
+;; TODO: slot-ref needs to be extended to support this
+#;(display
+ (let ()
+   (define-record-type employee
+     (make-employee name title)
+     employee?
+     (name get-name)
+     (title get-title))
+   (match (make-employee "Bob" "Doctor")
+     ((@ employee (title t) (name n)) (list t n))))
+ )
+
+(test-group
   "official tests"
 
   (test 2 (match (list 1 2 3) ((a b c) b)) )
@@ -132,9 +144,7 @@
   (test 1 (match '(1 . 2) ((= car x) x)) )
   (test 16 (match 4 ((= square x) x)) )
 
-;; TODO: Fails on cyclone but passes on chibi
-;; expect '("Doctor" "Bob")
-#;(display
+  (test '("Doctor" "Bob")
     (let ()
       (define-record-type employee
         (make-employee name title)
@@ -142,8 +152,7 @@
         (name get-name)
         (title get-title))
       (match (make-employee "Bob" "Doctor")
-        (($ employee n t) (list t n))))
-)
+        (($ employee n t) (list t n)))))
 
   (test '(1 . 3) (let ((x (cons 1 2))) (match x ((1 . (set! s)) (s 3) x))))
   (test 2 (match '(1 . 2) ((1 . (get! g)) (g))))

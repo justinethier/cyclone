@@ -20,4 +20,11 @@
   ;; Why is name false after this, instead of 'employee??
   (newline)(display ((make-constructor "make-employee" employee)))
   (newline)(display employee)
+  (newline)(display (is-a? e employee))
+  (newline)(display (is-a? e employee2))
 )
+
+(define (is-a? obj rtype)
+  (and (record? obj)
+       (record? rtype)
+       (equal? (vector-ref obj 1) rtype)))
