@@ -95,11 +95,13 @@
   (match
    lst
    ;(() 0)
-   (((? number? n) (or 's 'seconds 'sec) . rest)
-    (+ 0 (* #e1 n) (calc-time rest)))
-;   ;; TODO: interesting compiler error with these lines:
-;   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
-;    (+ (* #e1 n) )) ;(calc-time rest)))
+;; Temporarily commenting these 2 lines out to track down compiler error with the next:
+;   (((? number? n) (or 's 'seconds 'sec) . rest)
+;    (+ 0 (* #e1 n) (calc-time rest)))
+   ;; TODO: interesting compiler error with these lines:
+   (((? number? n) (or 's 'seconds 'sec) ) ;. rest)
+    (+ (* #e1 n) )) ;(calc-time rest)))
+;;
    (((? number? n) (or 'm 'min 'minutes) . rest)
     (+ (* #e60 n) (calc-time rest)))
    (((? number? n) (or 'hours 'h) . rest)
