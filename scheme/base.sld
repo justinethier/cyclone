@@ -19,11 +19,13 @@
     ;; Record types
     define-record-type
     record?
+    is-a?
     register-simple-type
     make-type-predicate
     make-constructor
     make-getter
     make-setter
+    slot-ref
     slot-set!
     type-slot-offset
     ;; END records
@@ -1803,6 +1805,10 @@
 (define (slot-set! name obj idx val)
   (let ((vec obj)) ;; TODO: get actual slots from obj
     (vector-set! (vector-ref vec 2) idx val)))
+(define (slot-ref name obj field)
+  ;; TODO: type check
+  ;; TODO: support field as number or symbol
+  (vector-ref (vector-ref obj 2) field))
 (define (make-getter sym name idx)
   (lambda (obj)
     (vector-ref (vector-ref obj 2) idx)))
@@ -1825,6 +1831,11 @@
   (and (vector? obj)
        (> (vector-length obj) 0)
        (equal? record-marker (vector-ref obj 0))))
+
+(define (is-a? obj rtype)
+  (and (record? obj)
+       (record? rtype)
+       (equal? (vector-ref obj 1) rtype)))
 
 (define-syntax define-record-type
   (er-macro-transformer
@@ -1850,7 +1861,7 @@
        `(,(rename 'begin)
          ;; type
          (,_define ,name (,_register 
-                          ,name ;,name-str 
+                          ,name-str 
                           ,parent 
                           ',(map car fields)))
          ;; predicate
