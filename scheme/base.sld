@@ -1806,9 +1806,12 @@
   (let ((vec obj)) ;; TODO: get actual slots from obj
     (vector-set! (vector-ref vec 2) idx val)))
 (define (slot-ref name obj field)
-  ;; TODO: type check
-  ;; TODO: support field as number or symbol
-  (vector-ref (vector-ref obj 2) field))
+  (let* ((idx (cond 
+                ((symbol? field)
+                 (type-slot-offset name field))
+                (else
+                  field)))) ;; Assumes field is a number
+  (vector-ref (vector-ref obj 2) idx)))
 (define (make-getter sym name idx)
   (lambda (obj)
     (vector-ref (vector-ref obj 2) idx)))
