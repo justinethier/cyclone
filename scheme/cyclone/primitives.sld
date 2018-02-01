@@ -910,6 +910,8 @@
 
     (define (prim:inline-convert-prim-call prim-call)
       (cond
+        ((and (equal? (car prim-call) '+) (= (length prim-call) 2)) `(Cyc-fast-plus 0 ,@(cdr prim-call)))
+        ((and (equal? (car prim-call) '*) (= (length prim-call) 2)) `(Cyc-fast-mul 1 ,@(cdr prim-call)))
         ((equal? (car prim-call) '+) (->dyadic (cons 'Cyc-fast-plus (cdr prim-call))))
         ((equal? (car prim-call) '*) (->dyadic (cons 'Cyc-fast-mul (cdr prim-call))))
         ((and (equal? (car prim-call) '-) (= (length prim-call) 2)) `(Cyc-fast-sub 0 ,@(cdr prim-call))) ;; Special case, fast negation
