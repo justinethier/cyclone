@@ -40,7 +40,7 @@
          )
    (string-append 
      (string (string-ref fnc 0))
-     "[`" fnc "`](" file "" link ")")))
+     "[`" fnc "`](" file "" link "")))
 
 ;(display (convert-line line))
 (define (loop)
