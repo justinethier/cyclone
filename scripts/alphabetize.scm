@@ -24,6 +24,7 @@
         (display "- - -")
         (newline))
       (display (substring line 1 (string-length line)))
+      (newline)
     )
     (loop))))
 (loop)
