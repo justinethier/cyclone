@@ -217,12 +217,57 @@ MATCH-LET, MATCH-LAMBDA and other syntactic sugar.
 
 # match
 
+*Syntax*
+
+    (match {expression} {clauses})
+
+where `{clauses}` has the form:
+
+    (pattern body ...)
+
+This is the primary match macro. See the [Patterns](#patterns) section above for complete details.
+
 # match-lambda
+
+*Syntax*
+
+    (match-lambda (pattern body ...))
+
+Shortcut for `lambda` + `match`.  Creates a procedure of one argument, and matches that argument against each clause.
+
+(define-syntax match-lambda
+  (syntax-rules ()
+    ((_ (pattern . body) ...) (lambda (expr) (match expr (pattern . body) ...)))))
 
 # match-lambda*
 
+*Syntax*
+
+    (match-lambda* (pattern body ...))
+
+Similar to `match-lambda`.  Creates a procedure of any number of arguments, and matches the argument list against each clause.
+
 # match-let
+
+*Syntax*
+
+    (match-let ((var value) ...) body ...)
+    (match-let loop ((var value) ...) body ...)
+
+Matches each var to the corresponding expression, and evaluates the body with all match variables in scope.  Raises an error if any of the expressions fail to match.  Syntax analogous to named let can also be used for recursive functions which match on their arguments as in `match-lambda*`.
 
 # match-letrec
 
+*Syntax*
+
+    (match-letrec ((var value) ...) body ...)
+
+Similar to `match-let`, but analogously to `letrec` matches and binds the variables with all match variables in scope.
+
 # match-let*
+
+*Syntax*
+
+    (match-let* ((var value) ...) body ...)
+
+Similar to `match-let`, but analogously to `let*` matches and binds the variables in sequence, with preceding match variables in scope.
