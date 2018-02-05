@@ -235,10 +235,6 @@ This is the primary match macro. See the [Patterns](#patterns) section above for
 
 Shortcut for `lambda` + `match`.  Creates a procedure of one argument, and matches that argument against each clause.
 
-(define-syntax match-lambda
-  (syntax-rules ()
-    ((_ (pattern . body) ...) (lambda (expr) (match expr (pattern . body) ...)))))
-
 # match-lambda*
 
 *Syntax*
