@@ -9,9 +9,9 @@ The `(scheme eval)` library exports procedures for evaluating Scheme data as pro
 
 For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.pdf).
 
-- [`eval`]              (#eval)
+- [`eval`](#eval)
 - [`create-environment`](#create-environment)
-- [`setup-environment`] (#setup-environment)
+- [`setup-environment`](#setup-environment)
 
 # eval
 
