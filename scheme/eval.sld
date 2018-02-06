@@ -545,6 +545,8 @@
         (error "Empty sequence -- ANALYZE"))
     (loop (car procs) (cdr procs))))
 
+TODO: instead of defining use-env inline, need to define it as part of eval and pass it around.
+that way subsequent calls to analyze can pick it up so symbols can be renamed properly
 (define (pre-analyze-application exp a-env)
   ;; Notes:
   ;; look up symbol in env, and expand if it is a macro
@@ -564,7 +566,7 @@
                (analyze (apply macro-op
                               (list (cons (car exp) (operands exp))
                                     (Cyc-er-rename use-env a-env '())
-                                    (Cyc-er-compare? use-env use-env))) 
+                                    (Cyc-er-compare? use-env a-env))) 
                         a-env)
                ;; Interpreted macro, build expression and eval
                (let ((expr (cons macro-op 
@@ -572,7 +574,7 @@
                                          (list (cons (car exp) 
                                                      (operands exp))))
                                    (Cyc-er-rename use-env a-env '())
-                                   (Cyc-er-compare? use-env use-env)))))
+                                   (Cyc-er-compare? use-env a-env)))))
                  (analyze
                    (eval expr a-env) ;; Expand macro
                    a-env))))))
