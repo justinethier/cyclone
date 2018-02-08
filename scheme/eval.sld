@@ -573,10 +573,12 @@
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
                (let ((expanded
-                        (apply macro-op
-                              (list (cons (car exp) (operands exp))
-                                    (Cyc-er-rename rename-env a-env '())
-                                    (Cyc-er-compare? rename-env a-env)))))
+                        (macro:expand exp (list 'macro macro-op) a-env rename-env '())
+                        ;(apply macro-op
+                        ;      (list (cons (car exp) (operands exp))
+                        ;            (Cyc-er-rename rename-env a-env '())
+                        ;            (Cyc-er-compare? rename-env a-env)))
+                     ))
 (display "/* ")
 (write `(DEBUG expand ,exp ))
 (newline)
@@ -587,13 +589,14 @@
                           a-env
                           rename-env))
                ;; Interpreted macro, build expression and eval
-               (let* ((expr (cons macro-op 
-                             (list (cons 'quote 
-                                         (list (cons (car exp) 
-                                                     (operands exp))))
-                                   (Cyc-er-rename rename-env a-env '())
-                                   (Cyc-er-compare? rename-env a-env))))
-                       (expanded (eval expr a-env)) ;; Expand macro
+               (let* (;(expr (cons macro-op 
+                      ;       (list (cons 'quote 
+                      ;                   (list (cons (car exp) 
+                      ;                               (operands exp))))
+                      ;             (Cyc-er-rename rename-env a-env '())
+                      ;             (Cyc-er-compare? rename-env a-env))))
+                      ; (expanded (eval expr a-env)) ;; Expand macro
+                      (expanded (macro:expand exp (list 'macro macro-op) a-env rename-env '()))
                      )
 (display "/* ")
 (write `(DEBUG expand ,exp))
