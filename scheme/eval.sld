@@ -463,10 +463,14 @@
     ;; TODO: probably just create a fresh env for renames
     ;; TODO: expand, do we need to clean as well?
     ;; TODO: run results back through analyze: (analyze (expand env? rename-env?
-;;(display "/* ")
-;;(write `(DEBUG ,cleaned))
-;;(display "*/ ")
-;;(newline)
+(display "/* ")
+(write `(DEBUG let-syntax ,exp ))
+(newline)
+(write `(DEBUG EXPANDED ,expanded))
+(newline)
+(write `(DEBUG CLEANED ,cleaned))
+(display "*/ ")
+(newline)
     (analyze cleaned a-env rename-env)))
 
 (define (analyze-letrec-syntax exp a-env rename-env)
@@ -491,6 +495,12 @@
          (expanded (expand exp macro-env rename-env))
          (cleaned (macro:cleanup expanded rename-env))
         )
+(display "/* ")
+(write `(DEBUG letrec-syntax ,exp ))
+(newline)
+(write `(DEBUG EXPANDED ,cleaned))
+(display "*/ ")
+(newline)
     (analyze cleaned a-env rename-env)))
 
 (define (analyze-syntax exp a-env)
@@ -562,21 +572,37 @@
              ;(define use-env (env:extend-environment '() '() '()))
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
-               (analyze (apply macro-op
+               (let ((expanded
+                        (apply macro-op
                               (list (cons (car exp) (operands exp))
                                     (Cyc-er-rename rename-env a-env '())
-                                    (Cyc-er-compare? rename-env a-env))) 
-                        a-env
-                        rename-env)
+                                    (Cyc-er-compare? rename-env a-env)))))
+(display "/* ")
+(write `(DEBUG expand ,exp ))
+(newline)
+(write `(EXPANDED ,expanded))
+(display "*/ ")
+(newline)
+                 (analyze expanded 
+                          a-env
+                          rename-env))
                ;; Interpreted macro, build expression and eval
-               (let ((expr (cons macro-op 
+               (let* ((expr (cons macro-op 
                              (list (cons 'quote 
                                          (list (cons (car exp) 
                                                      (operands exp))))
                                    (Cyc-er-rename rename-env a-env '())
-                                   (Cyc-er-compare? rename-env a-env)))))
+                                   (Cyc-er-compare? rename-env a-env))))
+                       (expanded (eval expr a-env)) ;; Expand macro
+                     )
+(display "/* ")
+(write `(DEBUG expand ,exp))
+(newline)
+(write `(EXPANDED ,expanded))
+(display "*/ ")
+(newline)
                  (analyze
-                   (eval expr a-env) ;; Expand macro
+                   expanded
                    a-env
                    rename-env))))))
     (cond
@@ -885,10 +911,10 @@
       (current-error-port))
     (newline (current-error-port)))
   ;(log exp)
-;;(display "/* ")
-;;(write `(expand ,exp))
-;;(display "*/ ")
-;;(newline)
+(display "/* ")
+(write `(expand ,exp))
+(display "*/ ")
+(newline)
   (cond
     ((const? exp)      exp)
     ((and (prim? exp) ;; Allow lambda vars to shadown primitives
