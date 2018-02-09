@@ -84,8 +84,8 @@
 (define (eval exp . env)
   (define rename-env (env:extend-environment '() '() '()))
   (if (null? env)
-      ((analyze exp *global-environment* rename-env) *global-environment*)
-      ((analyze exp (car env) rename-env) (car env))))
+      ((analyze exp *global-environment* rename-env '()) *global-environment*)
+      ((analyze exp (car env) rename-env '()) (car env))))
 
 (define (eval-from-c exp . _env)
   (let ((env (if (null? _env) *global-environment* (car _env))))
@@ -384,7 +384,7 @@
 ;; - exp => Code to analyze
 ;; - env => Environment used to expand macros
 ;;
-(define (analyze exp env rename-env)
+(define (analyze exp env rename-env local-renamed)
 ;;(newline)
 ;;(display "/* ")
 ;;(write (list 'analyze exp))
@@ -392,28 +392,28 @@
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
-        ((variable? exp) (analyze-variable exp))
+        ((variable? exp) (analyze-variable exp local-renamed))
         ((and (assignment? exp)
               (not (null? (cdr exp))))
-         (analyze-assignment exp env rename-env))
+         (analyze-assignment exp env rename-env local-renamed))
         ((and (definition? exp)
               (not (null? (cdr exp))))
-         (analyze-definition exp env rename-env))
+         (analyze-definition exp env rename-env local-renamed))
         ((and (syntax? exp)
               (not (null? (cdr exp))))
-         (analyze-syntax exp env))
+         (analyze-syntax exp env local-renamed))
         ((and (tagged-list? 'let-syntax exp)
               (not (null? (cdr exp))))
-         (analyze-let-syntax exp env rename-env))
+         (analyze-let-syntax exp env rename-env local-renamed))
         ((and (tagged-list? 'letrec-syntax exp)
               (not (null? (cdr exp))))
-         (analyze-letrec-syntax exp env rename-env))
+         (analyze-letrec-syntax exp env rename-env local-renamed))
         ((and (if? exp) 
               (not (null? (cdr exp))))
-         (analyze-if exp env rename-env))
+         (analyze-if exp env rename-env local-renamed))
         ((and (lambda? exp) 
               (not (null? (cdr exp))))
-         (analyze-lambda exp env rename-env))
+         (analyze-lambda exp env rename-env local-renamed))
 
         ((tagged-list? 'import exp)
          (analyze-import exp env))
@@ -425,7 +425,7 @@
 
         ((procedure? exp)
          (lambda (env) exp))
-        ((application? exp) (pre-analyze-application exp env rename-env))
+        ((application? exp) (pre-analyze-application exp env rename-env local-renamed))
         (else
          (error "Unknown expression type -- ANALYZE" exp))))
          ;(lambda () 'TODO-unknown-exp-type)))) ; JAE - this is a debug line
@@ -437,26 +437,32 @@
   (let ((qval (cadr exp)))
     (lambda (env) qval)))
 
-(define (analyze-variable exp)
-  (lambda (env) (env:lookup-variable-value exp env)))
+(define (analyze-variable exp local-renamed)
+  (lambda (env) 
+    (let ((renamed (assoc exp local-renamed)))
+      (env:lookup-variable-value 
+        (if renamed 
+            (cdr renamed) ;; Extract renamed symbol
+            exp)
+        env))))
 
-(define (analyze-assignment exp a-env rename-env)
+(define (analyze-assignment exp a-env rename-env local-renamed)
   (let ((var (assignment-variable exp))
-        (vproc (analyze (assignment-value exp) a-env rename-env)))
+        (vproc (analyze (assignment-value exp) a-env rename-env local-renamed)))
     (lambda (env)
       (env:set-variable-value! var (vproc env) env)
       'ok)))
 
-(define (analyze-definition exp a-env rename-env)
+(define (analyze-definition exp a-env rename-env local-renamed)
   (let ((var (definition-variable exp))
-        (vproc (analyze (definition-value exp) a-env rename-env)))
+        (vproc (analyze (definition-value exp) a-env rename-env local-renamed)))
     (lambda (env)
       (env:define-variable! var (vproc env) env)
       'ok)))
 
-(define (analyze-let-syntax exp a-env rename-env)
+(define (analyze-let-syntax exp a-env rename-env local-renamed)
   (let* (;(rename-env (env:extend-environment '() '() '()))
-         (expanded (expand exp a-env rename-env))
+         (expanded (_expand exp a-env rename-env '() local-renamed))
          ;(expanded (expand exp (macro:get-env) rename-env))
          (cleaned (macro:cleanup expanded rename-env))
         )
@@ -473,9 +479,9 @@
 ;(write `(DEBUG env ,a-env))
 ;(display "*/ ")
 ;(newline)
-    (analyze cleaned a-env rename-env)))
+    (analyze cleaned a-env rename-env local-renamed)))
 
-(define (analyze-letrec-syntax exp a-env rename-env)
+(define (analyze-letrec-syntax exp a-env rename-env local-renamed)
   (let* (;(rename-env (env:extend-environment '() '() '()))
          ;; Build up a macro env
          (vars (foldl (lambda (lis acc) (append acc (car lis))) '() a-env))
@@ -494,7 +500,7 @@
                   defined-macros)
              a-env)) ;(create-environment '() '())))
          ;; Proceed with macro env
-         (expanded (expand exp macro-env rename-env))
+         (expanded (_expand exp macro-env rename-env '() local-renamed))
          (cleaned (macro:cleanup expanded rename-env))
         )
 ;(display "/* ")
@@ -503,9 +509,9 @@
 ;(write `(DEBUG EXPANDED ,cleaned))
 ;(display "*/ ")
 ;(newline)
-    (analyze cleaned a-env rename-env)))
+    (analyze cleaned a-env rename-env local-renamed)))
 
-(define (analyze-syntax exp a-env)
+(define (analyze-syntax exp a-env local-renamed)
   (let ((var (cadr exp)))
     (cond
       ((tagged-list? 'er-macro-transformer (caddr exp)) ;; TODO: need to handle renamed er symbol here??
@@ -517,7 +523,8 @@
         ;; Just expand the syntax rules
         ;; Possibly want to check the macro system here
         (let* ((rename-env (env:extend-environment '() '() '()))
-               (expanded (expand exp a-env rename-env))
+               (expanded (_expand exp a-env rename-env '() local-renamed))
+               ;(expanded (expand exp a-env rename-env))
                (cleaned (macro:cleanup expanded rename-env)))
           (let ((sproc (make-macro (caddr cleaned))))
             (lambda (env)
@@ -531,21 +538,33 @@
     (apply %import (cdr exp))
     'ok))
 
-(define (analyze-if exp a-env rename-env)
-  (let ((pproc (analyze (if-predicate exp) a-env rename-env))
-        (cproc (analyze (if-consequent exp) a-env rename-env))
-        (aproc (analyze (if-alternative exp) a-env rename-env)))
+(define (analyze-if exp a-env rename-env local-renamed)
+  (let ((pproc (analyze (if-predicate exp) a-env rename-env local-renamed))
+        (cproc (analyze (if-consequent exp) a-env rename-env local-renamed))
+        (aproc (analyze (if-alternative exp) a-env rename-env local-renamed)))
     (lambda (env)
       (if (pproc env)
           (cproc env)
           (aproc env)))))
 
-(define (analyze-lambda exp a-env rename-env)
-  (let ((vars (lambda-parameters exp))
-        (bproc (analyze-sequence (lambda-body exp) a-env rename-env)))
+(define (analyze-lambda exp a-env rename-env local-renamed)
+  (let* ((vars (lambda-parameters exp))
+         (args (lambda-formals->list exp))
+         (a-lookup
+          (map
+           (lambda (a)
+            (let ((a/r (cons a (gensym a))))
+              a/r))
+           args))
+         (bproc (analyze-sequence 
+                  (lambda-body exp) 
+                  a-env 
+                  rename-env 
+                  local-renamed ;; TODO: (append a-lookup local-renamed)
+                  )))
     (lambda (env) (make-procedure vars bproc env))))
 
-(define (analyze-sequence exps a-env rename-env)
+(define (analyze-sequence exps a-env rename-env local-renamed)
   (define (sequentially proc1 proc2)
     (lambda (env) (proc1 env) (proc2 env)))
   (define (loop first-proc rest-procs)
@@ -553,12 +572,12 @@
         first-proc
         (loop (sequentially first-proc (car rest-procs))
               (cdr rest-procs))))
-  (let ((procs (map (lambda (e) (analyze e a-env rename-env)) exps)))
+  (let ((procs (map (lambda (e) (analyze e a-env rename-env local-renamed)) exps)))
     (if (null? procs)
         (error "Empty sequence -- ANALYZE"))
     (loop (car procs) (cdr procs))))
 
-(define (pre-analyze-application exp a-env rename-env)
+(define (pre-analyze-application exp a-env rename-env local-renamed)
   ;; Notes:
   ;; look up symbol in env, and expand if it is a macro
   ;; Adds some extra overhead into eval, which is not ideal. may need to 
@@ -575,7 +594,7 @@
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
                (let ((expanded
-                        (macro:expand exp (list 'macro macro-op) a-env rename-env '())
+                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)
                         ;(apply macro-op
                         ;      (list (cons (car exp) (operands exp))
                         ;            (Cyc-er-rename rename-env a-env '())
@@ -589,7 +608,8 @@
 ;(newline)
                  (analyze expanded 
                           a-env
-                          rename-env))
+                          rename-env
+                          local-renamed))
                ;; Interpreted macro, build expression and eval
                (let* (;(expr (cons macro-op 
                       ;       (list (cons 'quote 
@@ -598,7 +618,7 @@
                       ;             (Cyc-er-rename rename-env a-env '())
                       ;             (Cyc-er-compare? rename-env a-env))))
                       ; (expanded (eval expr a-env)) ;; Expand macro
-                      (expanded (macro:expand exp (list 'macro macro-op) a-env rename-env '()))
+                      (expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
                      )
 ;(display "/* ")
 ;(write `(DEBUG expand ,exp))
@@ -609,7 +629,8 @@
                  (analyze
                    expanded
                    a-env
-                   rename-env))))))
+                   rename-env
+                   local-renamed))))))
     (cond
       ;; compiled macro
       ((Cyc-macro? var)
@@ -623,12 +644,12 @@
        (expand (cdr op)))
       ;; normal function
       (else
-       (analyze-application exp a-env rename-env)))))
+       (analyze-application exp a-env rename-env local-renamed)))))
 
-(define (analyze-application exp a-env rename-env)
-  (let ((fproc (analyze (operator exp) a-env rename-env))
+(define (analyze-application exp a-env rename-env local-renamed)
+  (let ((fproc (analyze (operator exp) a-env rename-env local-renamed))
         (aprocs (map (lambda (o)
-                       (analyze o a-env rename-env))
+                       (analyze o a-env rename-env local-renamed))
                      (operands exp))))
     (lambda (env)
       (execute-application (fproc env)
