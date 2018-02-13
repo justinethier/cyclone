@@ -385,10 +385,10 @@
 ;; - env => Environment used to expand macros
 ;;
 (define (analyze exp env rename-env local-renamed)
-;;(newline)
-;;(display "/* ")
-;;(write (list 'analyze exp))
-;;(display " */")
+;(newline)
+;(display "/* ")
+;(write (list 'analyze exp))
+;(display " */")
   (cond ((self-evaluating? exp) 
          (analyze-self-evaluating exp))
         ((quoted? exp) (analyze-quoted exp))
@@ -438,13 +438,22 @@
     (lambda (env) qval)))
 
 (define (analyze-variable exp local-renamed)
-  (lambda (env) 
-    (let ((renamed (assoc exp local-renamed)))
-      (env:lookup-variable-value 
-        (if renamed 
-            (cdr renamed) ;; Extract renamed symbol
-            exp)
-        env))))
+  (let* ((lookup (assoc exp local-renamed))
+         ;; TODO: doing too much here, need to figure out a way to speed things up!
+         (sym (cond
+                ((pair? lookup)
+                 (car lookup))
+                (else
+                  (call/cc (lambda (return)
+                    (for-each
+                      (lambda (v/r)
+                        ;; Map renamed symbol back to one in env
+                        (if (eq? exp (cdr v/r))
+                            (return (car v/r))))
+                      local-renamed)
+                    (return exp))))))) ;; Not found, keep input symbol
+    (lambda (env) 
+      (env:lookup-variable-value sym env))))
 
 (define (analyze-assignment exp a-env rename-env local-renamed)
   (let ((var (assignment-variable exp))
@@ -560,7 +569,8 @@
                   (lambda-body exp) 
                   a-env 
                   rename-env 
-                  local-renamed ;; TODO: (append a-lookup local-renamed)
+                  (append a-lookup local-renamed)
+                  ;local-renamed ;; TODO: (append a-lookup local-renamed)
                   )))
     (lambda (env) (make-procedure vars bproc env))))
 
