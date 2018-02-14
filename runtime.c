@@ -1174,6 +1174,22 @@ list assoc(void *data, object x, list l)
   }
   return boolean_f;
 }
+
+/**
+ * Same as assoc but check the cdr of each item for equality
+ */
+list assoc_cdr(void *data, object x, list l)
+{
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
+    return boolean_f;
+  for (; (l != NULL); l = cdr(l)) {
+    list la = car(l);
+    Cyc_check_pair(data, la);
+    if (boolean_f != equalp(x, cdr(la)))
+      return la;
+  }
+  return boolean_f;
+}
 /* END member and assoc */
 
 // Internal function, do not use this anywhere outside the runtime

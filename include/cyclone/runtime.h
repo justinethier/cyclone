@@ -159,6 +159,7 @@ object memberp(void *data, object x, list l);
 object memqp(void *data, object x, list l);
 list assq(void *data, object x, list l);
 list assoc(void *data, object x, list l);
+list assoc_cdr(void *data, object x, list l);
 /**@}*/
 
 /**
