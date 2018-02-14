@@ -138,7 +138,7 @@
 ;; ;;; Examples from the source to R5RS pitfall 3.3
 ;; ;;;; (assert/equal
   (test
-   '(1 2 3 a$273)
+   '(1 2 3 a$1383)
    ;'(1 2 3 a)
     (let ((a 1))
        (letrec-syntax
