@@ -347,8 +347,7 @@
     primitive-procedures))
 
 (define (apply-primitive-procedure proc args)
-  (apply ;apply-in-underlying-scheme
-   (primitive-implementation proc) args))
+  (apply (primitive-implementation proc) args))
 
 ;; TODO: temporary testing
 ;; also, it would be nice to pass around something other than
@@ -568,9 +567,7 @@
                   (lambda-body exp) 
                   a-env 
                   rename-env 
-                  (append a-lookup local-renamed)
-                  ;local-renamed ;; TODO: (append a-lookup local-renamed)
-                  )))
+                  (append a-lookup local-renamed))))
     (lambda (env) (make-procedure vars bproc env))))
 
 (define (analyze-sequence exps a-env rename-env local-renamed)
@@ -603,38 +600,13 @@
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
                (let ((expanded
-                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)
-                        ;(apply macro-op
-                        ;      (list (cons (car exp) (operands exp))
-                        ;            (Cyc-er-rename rename-env a-env '())
-                        ;            (Cyc-er-compare? rename-env a-env)))
-                     ))
-;(display "/* ")
-;(write `(DEBUG expand ,exp ))
-;(newline)
-;(write `(EXPANDED ,expanded))
-;(display "*/ ")
-;(newline)
+                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)))
                  (analyze expanded 
                           a-env
                           rename-env
                           local-renamed))
                ;; Interpreted macro, build expression and eval
-               (let* (;(expr (cons macro-op 
-                      ;       (list (cons 'quote 
-                      ;                   (list (cons (car exp) 
-                      ;                               (operands exp))))
-                      ;             (Cyc-er-rename rename-env a-env '())
-                      ;             (Cyc-er-compare? rename-env a-env))))
-                      ; (expanded (eval expr a-env)) ;; Expand macro
-                      (expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
-                     )
-;(display "/* ")
-;(write `(DEBUG expand ,exp))
-;(newline)
-;(write `(EXPANDED ,expanded))
-;(display "*/ ")
-;(newline)
+               (let* ((expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)))
                  (analyze
                    expanded
                    a-env
@@ -1277,9 +1249,7 @@
 ;(log `(DONE WITH macro:expand))
                 (_expand-body
                   result
-                  (cons 
-                    expanded ;(macro:expand this-exp val env)
-                    (cdr exp))
+                  (cons expanded (cdr exp))
                   env
                   rename-env
                   local-env 
@@ -1288,9 +1258,7 @@
               (let ((expanded (macro:expand this-exp (list 'macro val) env rename-env local-renamed)))
                 (_expand-body
                   result
-                  (cons 
-                    expanded ;(macro:expand this-exp val env)
-                    (cdr exp))
+                  (cons expanded (cdr exp))
                   env
                   rename-env
                   local-env 
