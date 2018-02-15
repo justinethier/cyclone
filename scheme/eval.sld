@@ -1269,7 +1269,8 @@
                           (cdr local)
                           (env:lookup (caar exp) env #f)))))
 ;(log `(DONE WITH env:lookup ,(caar exp) ,val ,(tagged-list? 'macro val)))
-            (if (tagged-list? 'macro val)
+            (cond
+             ((tagged-list? 'macro val)
               ;; Expand macro here so we can catch begins in the expanded code,
               ;; including nested begins
               (let ((expanded (macro:expand this-exp val env rename-env local-renamed)))
@@ -1282,7 +1283,19 @@
                   env
                   rename-env
                   local-env 
-                  local-renamed))
+                  local-renamed)))
+             ((Cyc-macro? val)
+              (let ((expanded (macro:expand this-exp (list 'macro val) env rename-env local-renamed)))
+                (_expand-body
+                  result
+                  (cons 
+                    expanded ;(macro:expand this-exp val env)
+                    (cdr exp))
+                  env
+                  rename-env
+                  local-env 
+                  local-renamed)))
+             (else
               ;; No macro, use main expand function to process
               (_expand-body
                (cons 
@@ -1294,7 +1307,7 @@
                env
                rename-env
                local-env 
-               local-renamed))))
+               local-renamed)))))
           (else
 ;(log 'app)
            (_expand-body
