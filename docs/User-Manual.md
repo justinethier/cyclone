@@ -1,6 +1,6 @@
 ---
 layout: main
-title: API
+title: User Manual
 ---
 
 # User Manual
