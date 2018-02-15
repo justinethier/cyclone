@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.2 - TBD
+## 0.7.2 - February 15, 2018
 
 Features
 
