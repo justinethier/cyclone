@@ -23,9 +23,13 @@
      ast:set-lambda-body!
      ast:lambda-has-cont 
      ast:set-lambda-has-cont!
+     ast:get-next-lambda-id!
   )
   (begin
     (define *lambda-id* 0)
+    (define (ast:get-next-lambda-id!)
+      (set! *lambda-id* (+ 1 *lambda-id*))
+      *lambda-id*)
     (define-record-type <lambda-ast>
      (ast:%make-lambda id args body has-cont)
      ast:lambda?
