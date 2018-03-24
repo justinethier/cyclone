@@ -683,7 +683,7 @@
         ((app? exp)
          ;; Beta expansion of functions only called once, from CWC
          (if (beta-expand/called-once? exp)
-             (set! exp (beta-expand-app exp)))
+             (set! exp (beta-expand-app exp #f)))
          ;; END
 
          (let* ((fnc (opt:contract (car exp))))
@@ -1337,7 +1337,7 @@
           (return #f))))
 
     ;; Check app and beta expand if possible, else just return given code
-    (define (beta-expand-app exp)
+    (define (beta-expand-app exp rename-lambdas)
       (let* ((args (cdr exp))
              (var (adb:get/default (car exp) #f))
              ;; Function definition, or #f if none
@@ -1366,34 +1366,56 @@
                (list? formals)
                (= (length args) (length formals)))
           ;(trace:error `(JAE DEBUG beta expand ,exp))
-          (beta-expansion-app exp fnc) ; exp
+          (beta-expansion-app exp fnc rename-lambdas) ; exp
          )
          (else exp)))) ;; beta expansion failed
 
     ;; Replace function call with body of fnc
-    (define (beta-expansion-app exp fnc)
+    (define (beta-expansion-app exp fnc rename-lambdas)
       ;; Mapping from a formal => actual arg
       (define formals/actuals 
         (map cons (ast:lambda-args fnc) (cdr exp)))
-      (define (replace ref)
+      (define (replace ref renamed)
         (let ((r (assoc ref formals/actuals)))
-            (if r (cdr r) ref)))
-      (define (scan exp)
+            (if r 
+                (scan (cdr r) renamed) 
+                ;ref
+                (let ((rn (assoc ref renamed)))
+                  (if rn
+                      (cdr rn)
+                      ref)))))
+      (define (scan exp renamed)
         (cond
          ((ast:lambda? exp)
-          (ast:%make-lambda
-            (ast:lambda-id exp)
-            (ast:lambda-args exp)
-            (scan (ast:lambda-body exp))
-            (ast:lambda-has-cont exp)))
+          (if rename-lambdas
+            (let* ((args (ast:lambda-formals->list exp))
+                   (ltype (ast:lambda-formals-type exp))
+                   (a-lookup (map (lambda (a) (cons a (gensym a))) args)))
+              (ast:%make-lambda
+                ;; if rename-lambdas also need to rename lambda formals here and
+                ;; setup and a-lookup to replace any refs with the renamed formal. the
+                ;; problem is, if we don't do this, there will be multiple lambda's with
+                ;; the same arg, which causes problems when the optimizer tries to replace
+                ;; one with its value, since different instances will have different values
+                (ast:get-next-lambda-id!)
+                (list->lambda-formals
+                   (map (lambda (p) (cdr p)) a-lookup)  
+                   ltype)
+                (scan (ast:lambda-body exp) (append a-lookup renamed))
+                (ast:lambda-has-cont exp)))
+            (ast:%make-lambda
+              (ast:lambda-id exp)
+              (ast:lambda-args exp)
+              (scan (ast:lambda-body exp) renamed)
+              (ast:lambda-has-cont exp))))
          ((ref? exp)
-          (replace exp))
+          (replace exp renamed))
          ((quote? exp)
           exp)
          ((app? exp)
-          (map scan exp))
+          (map (lambda (e) (scan e renamed)) exp))
          (else exp)))
-      (scan (car (ast:lambda-body fnc))))
+      (scan (car (ast:lambda-body fnc)) '()))
 
     ;; Full beta expansion phase, make a pass over all of the program's AST
     (define (opt:beta-expand exp)
@@ -1420,7 +1442,7 @@
              ,(opt:beta-expand (if->else exp))))
        ((app? exp)
         (let ((code (if (beta-expand? exp)
-                        (beta-expand-app exp)
+                        (beta-expand-app exp #t)
                         exp)))
           (map opt:beta-expand code)))
        (else exp)))
