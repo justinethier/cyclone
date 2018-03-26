@@ -2,6 +2,10 @@
 
 ## 0.7.3 - TBD
 
+Bug Fixes
+
+- Fixed a CPS optimization issue where multiple copies of the same lambda are introduced during beta expansion, which causes the optimizer to potentially pick up the wrong value when optimizing-out function calls later on. Thanks to @Chant on Github for providing the report and a test program demonstrating the issue.
+
 ## 0.7.2 - February 15, 2018
 
 Features
