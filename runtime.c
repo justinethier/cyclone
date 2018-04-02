@@ -6629,6 +6629,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
       while (len > 0 && (buf[len - 1] == '\n' ||
                          buf[len - 1] == '\r')) {
         len--;
+        num_cp--;
       }
       buf[len] = '\0';
       make_string_noalloc(s, buf, len);
