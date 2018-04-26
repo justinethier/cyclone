@@ -2,6 +2,10 @@
 
 ## 0.7.3 - TBD
 
+Features
+
+- Added basic support for square and curly brackets in place of parentheses.
+
 Bug Fixes
 
 - Fixed an off-by-one error in `read-line` where the function erroneously reported an extra character was read from `stdin`. Thanks to wasamasa for the bug report.
