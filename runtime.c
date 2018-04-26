@@ -6235,6 +6235,7 @@ void _read_string(void *data, object cont, port_type *p)
 void _read_literal_identifier(void *data, port_type *p) 
 {
   char c;
+  int escaped = 0;
   while(1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
@@ -6245,13 +6246,82 @@ void _read_literal_identifier(void *data, port_type *p)
     c = p->mem_buf[p->buf_idx++];
     p->col_num++;
 
-    if (c == '|') {
+    if (escaped) {
+      escaped = 0;
+      switch (c) {
+      case '"':
+      case '\'':
+      case '?':
+      case '|':
+      case '\\':
+        _read_add_to_tok_buf(p, c);
+        break;
+      case 'a':
+        _read_add_to_tok_buf(p, '\a');
+        break;
+      case 'b':
+        _read_add_to_tok_buf(p, '\b');
+        break;
+      case 'n':
+        _read_add_to_tok_buf(p, '\n');
+        break;
+      case 'r':
+        _read_add_to_tok_buf(p, '\r');
+        break;
+      case 't':
+        _read_add_to_tok_buf(p, '\t');
+        break;
+      case 'x': {
+        char buf[32];
+        int i = 0;
+        while (i < 31){
+          if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
+            int rv = read_from_port(p); 
+            if (!rv) { 
+              break;
+            }
+          }
+          if (p->mem_buf[p->buf_idx] == ';'){
+            p->buf_idx++;
+            break;
+          }
+          // Verify if hex digit is valid
+          if (!isdigit(p->mem_buf[p->buf_idx]) && 
+              !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
+            p->buf_idx++;
+            _read_error(data, p, "invalid hex digit in literal identifier");
+          }
+          buf[i] = p->mem_buf[p->buf_idx];
+          p->buf_idx++;
+          p->col_num++;
+          i++;
+        }
+        buf[i] = '\0';
+        {
+          char_type result = strtol(buf, NULL, 16);
+          char cbuf[5];
+          int i;
+          Cyc_utf8_encode_char(cbuf, 5, result);
+          for (i = 0; cbuf[i] != 0; i++) {
+            _read_add_to_tok_buf(p, cbuf[i]);
+          }
+          //p->tok_buf[p->tok_end++] = (char)result;
+        }
+        break;
+      }
+      default:
+        _read_error(data, p, "invalid escape character in literal identifier"); // TODO: char
+        break;
+      }
+    } else if (c == '|') {
       p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
       p->tok_end = 0; // Reset for next atom
       {
         object sym = find_or_add_symbol(p->tok_buf);
         return_thread_runnable(data, sym);
       }
+    } else if (c == '\\') {
+      escaped = 1;
     } else if (c == '\n') {
       p->line_num++;
       p->col_num = 1;
