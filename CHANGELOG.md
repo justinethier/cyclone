@@ -4,7 +4,7 @@
 
 Features
 
-- Improve hash table lookup performance for symbols and increase the max bound of hash tables to `(2 ^ 30) - 1`.
+- Improved hash table lookup performance for symbols and increased the max bound of hash tables to `(2 ^ 30) - 1`.
 - Added basic support for square and curly brackets in place of parentheses.
 
 Bug Fixes
