@@ -44,7 +44,9 @@
           ;(scheme cyclone util)
   )
   (begin
-(define *default-bound* (- (expt 2 29) 3))
+
+;; Increased to (2^30) - 1, hardcode to ensure fixnum
+(define *default-bound* 1073741823) ;;(- (expt 2 29) 3))
 
 (define (%string-hash s ch-conv bound)
   (let ((hash 31)
@@ -63,15 +65,21 @@
   (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound))))
     (%string-hash s char-downcase bound)))
 
-(define (symbol-hash s . maybe-bound)
-  (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound))))
-    (%string-hash (symbol->string s) (lambda (x) x) bound)))
+;; Symbols are unique by memory location, so replace old string comparison
+(define-c symbol-hash
+  "(void *data, int argc, closure _, object k, object sym)"
+  " return_closcall1(data, k, obj_int2obj(((long)sym) & 0x7FFFFFFF)); "
+  "(void *data, object ptr, object sym)"
+  " return obj_int2obj(((long)sym) & 0x7FFFFFFF); ")
 
 (define (hash obj . maybe-bound)
   (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound))))
     (cond ((integer? obj) (modulo obj bound))
     ((string? obj) (string-hash obj bound))
-    ((symbol? obj) (symbol-hash obj bound))
+    ((symbol? obj) 
+     ;(symbol-hash obj bound)
+     (modulo (symbol-hash obj) bound)
+    )
     ((real? obj) (modulo (+ (numerator obj) (denominator obj)) bound))
     ((number? obj)
      (modulo (+ (hash (real-part obj)) (* 3 (hash (imag-part obj))))
