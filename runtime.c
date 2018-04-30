@@ -6851,6 +6851,16 @@ void Cyc_io_read_token(void *data, object cont, object port)
       }
     } else if (c == '|' && !p->tok_end) {
       _read_literal_identifier(data, p);
+    } else if (c == '[' || c == '{') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
+      // Special encoding so we can distinguish from chars such as #\(
+      make_c_opaque(opq, obj_char2obj('(')); // Cheap support for brackets
+      return_thread_runnable(data, &opq);
+    } else if (c == ']' || c == '}') {
+      if (p->tok_end) _read_return_atom(data, cont, p);
+      // Special encoding so we can distinguish from chars such as #\(
+      make_c_opaque(opq, obj_char2obj(')')); // Cheap support for brackets
+      return_thread_runnable(data, &opq);
     } else {
       // No special meaning, add char to current token (an atom)
       _read_add_to_tok_buf(p, c);
