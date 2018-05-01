@@ -93,7 +93,10 @@
     ((procedure? obj) (error "hash: procedures cannot be hashed" obj))
     (else 1))))
 
-(define hash-by-identity hash)
+(define (hash-by-identity obj . maybe-bound)
+  (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound)))
+        (mem-loc (symbol-hash obj))) ;; Obj memory location (or value) as fixnum
+    (modulo mem-loc bound)))
 
 (define (vector-hash v bound)
   (let ((hashvalue 571)
