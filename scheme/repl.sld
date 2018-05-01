@@ -9,9 +9,49 @@
 (define-library (scheme repl)
   (export 
     interaction-environment
-  )
-  (import (scheme eval))
+    repl)
+  (import (scheme base)
+          (scheme eval)
+          (scheme read)
+          (scheme write))
   (begin
     (define (interaction-environment)
       (setup-environment))
-  ))
+    (define (repl)
+      (with-handler
+        (lambda (obj)
+          (display "Error: ")
+          (cond
+            ((error-object? obj)
+             (display (error-object-message obj))
+             (if (not (null? (error-object-irritants obj)))
+                 (display ": "))
+             (for-each
+               (lambda (o)
+                 (write o)
+                 (display " "))
+               (error-object-irritants obj)))
+            ((pair? obj)
+             (when (string? (car obj))
+               (display (car obj))
+               (if (not (null? (cdr obj)))
+                   (display ": "))
+               (set! obj (cdr obj)))
+             (for-each
+               (lambda (o)
+                 (write o)
+                 (display " "))
+               obj))
+            (else
+              (display obj)))
+          (newline)
+          (repl))
+        (display "cyclone> ")
+        (let ((c (eval (read))))
+          (cond
+            ((not (eof-object? c))
+             (write c)
+             (newline)
+             (repl))
+            (else 
+              (display "\n"))))))))
