@@ -17,4 +17,4 @@ This procedure returns a specifier for a mutable environment that is the same as
 
     (repl)
 
-Start an interactive REPL. This is not a standard function provided by R7RS.
+Starts an interactive REPL. This is not a standard function provided by R7RS.
