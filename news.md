@@ -1,5 +1,5 @@
 ---
-layout: main
+layout: news
 title: News
 ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 ---
