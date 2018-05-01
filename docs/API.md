@@ -1008,6 +1008,7 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`remove                    `](api/scheme/cyclone/transforms#remove)
 [`remove!`](api/srfi/1#remove-1)
 [`remove`](api/srfi/1#remove)
+[`repl`](api/scheme/repl#repl)
 [`reverse!`](api/srfi/1#reverse)
 [`reverse-list->vector`](api/srfi/133#reverse-list-vector)
 [`reverse-vector->generator`](api/srfi/121#reverse-vector-generator)
