@@ -26,6 +26,7 @@ This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specific
 - [`scheme load`](api/scheme/load.md)
 - [`scheme process-context`](api/scheme/process-context.md)
 - [`scheme read`](api/scheme/read.md)
+- [`scheme repl`](api/scheme/repl.md)
 - [`scheme time`](api/scheme/time.md)
 - [`scheme write`](api/scheme/write.md)
 
