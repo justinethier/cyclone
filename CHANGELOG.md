@@ -5,7 +5,7 @@
 Features
 
 - Made several performance improvements to SRFI 69 hash tables, including:
-    - Improved hash table lookup performance for symbols 
+    - Improved hash table lookup performance for symbols.
     - Increased the max bound of hash tables to `(2 ^ 30) - 1`.
     - Changed `hash-by-identity` to a high-performance builtin.
 - Added basic support for square and curly brackets in place of parentheses.
