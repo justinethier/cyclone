@@ -15,6 +15,7 @@
         (scheme lazy)
         (scheme load)
         (scheme read)
+        (scheme repl)
         (scheme write)
         (scheme inexact)
         (scheme process-context)
@@ -24,45 +25,6 @@
         ;(srfi 2)
         ;(srfi 133)
         (srfi 69))
-
-;(define *icyc-env* (setup-environment))
-(define (repl:next-line)
-  (call/cc
-    (lambda (k)
-      (with-exception-handler
-        (lambda (obj)
-          (display "Error: ")
-          (cond
-            ((pair? obj)
-             (when (string? (car obj))
-               (display (car obj))
-               (if (not (null? (cdr obj)))
-                   (display ": "))
-               (set! obj (cdr obj)))
-             (for-each
-               (lambda (o)
-                 (write o)
-                 (display " "))
-               obj))
-            (else
-              (display obj)))
-          (newline)
-          (k #t))
-        (lambda ()
-          (repl)))))
-  (repl:next-line))
-
-(define (repl)
-  (display "cyclone> ")
-  (let ((c (eval (read) #;*icyc-env*)))
-    (cond
-      ((not (eof-object? c))
-       (write c)
-       (newline)
-       (repl:next-line))
-      (else 
-        (display "\n")
-        (exit 0)))))
 
 ;; Collect values for the given command line arguments and option.
 ;; Will return a list of values for the option.
@@ -150,5 +112,5 @@ Options:
      (if (and (>= (length args) 1)
               (not (member (car (reverse args)) '("-s"))))
          (load (car (reverse args)) #;*icyc-env*))
-     (repl:next-line))))
+     (repl))))
 

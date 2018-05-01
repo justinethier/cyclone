@@ -8,6 +8,7 @@ Features
     - Improved hash table lookup performance for symbols.
     - Increased the max bound of hash tables to `(2 ^ 30) - 1`.
     - Changed `hash-by-identity` to a high-performance builtin.
+- Added a `repl` function to `(scheme repl)` to make it easy to use a REPL from your own code.
 - Added basic support for square and curly brackets in place of parentheses.
 
 Bug Fixes
