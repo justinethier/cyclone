@@ -63,8 +63,8 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        {% if page.title == "Cyclone Scheme" %}
         <div id="recent-news" style="
+            {% if page.title == "Cyclone Scheme" %} display: none; {% endif %}
             position: absolute;
             /* float: left; */
             left: 675px;
@@ -88,7 +88,6 @@
             {{ post.excerpt }}
           {% endfor %}
         </div>      
-        {% endif %}"
       {{ content }}
       </section>
     </div>
