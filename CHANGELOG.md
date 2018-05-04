@@ -5,7 +5,7 @@
 Features
 
 - Made several performance improvements to SRFI 69 hash tables, including:
-    - Improved hash table lookup performance for symbols.
+    - Massively improved lookup performance for symbols.
     - Increased the max bound of hash tables to `(2 ^ 30) - 1`.
     - Changed `hash-by-identity` to a high-performance builtin.
 - Added a `repl` function to `(scheme repl)` to make it easy to use a REPL from your own code.
