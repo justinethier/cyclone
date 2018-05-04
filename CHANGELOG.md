@@ -16,7 +16,6 @@ Bug Fixes
 - Fixed an off-by-one error in `read-line` where the function erroneously reported an extra character was read from `stdin`. Thanks to wasamasa for the bug report.
 - Fixed a CPS optimization issue where multiple copies of the same lambda are introduced during beta expansion, which causes the optimizer to potentially pick up the wrong value when optimizing-out function calls later on. Thanks to @Chant on Github for providing the report and a test program demonstrating the issue.
 - Updated the parser to recognize mnemonic escapes (EG: `\n`, `\a`, etc) and inline hex escapes as part of a symbol.
-- Prevent a possible infinite loop during beta expansion optimization.
 
 ## 0.7.2 - February 15, 2018
 
