@@ -64,28 +64,27 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <div id="news" style="
-            float: left;
-            left: -425px;
+            position: absolute;
+            /* float: left; */
+            left: 675px;
             width: 350px;
             /* height: 50px; */
-            background: #007edf;
+            /* background: #007edf; */
             /* display: inline-block; */
-            /* vertical-align: top; */ /* here */
-            position: absolute;
             /*padding-left: 25px; */
             /*padding-right: 25px; */
-            padding: 25px;
-            text-color: #fff;
+            /* padding: 25px; */
+            /* vertical-align: top; */ /* here */
+            /* text-color: #fff; */
+            font-size: smaller;
         ">
+          <h2>Recent News</h2>
           {% for post in site.posts limit:3 %}
-            <h3>
+            <h4>
               <a href="{{ post.url }}">{{ post.title }}</a>
-            </h3>
-            <br />
+            </h4>
             <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
-            <br />
             {{ post.excerpt }}
-            <br />
           {% endfor %}
         </div>      
       {{ content }}
