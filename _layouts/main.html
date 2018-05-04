@@ -63,6 +63,27 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
+        <div id="news" style="
+            float: left;
+            left: -350px;
+            width: 300px;
+            /* height: 50px; */
+            background: #999;
+            /* display: inline-block; */
+            /* vertical-align: top; */ /* here */
+            position: absolute;
+            padding-left: 25px;
+            padding-right: 25px;
+        ">
+          {% for post in site.posts limit:3 %}
+            [{{ post.title }}](./{{ post.url }})
+            <br />
+            <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
+            <br />
+            {{ post.excerpt }}
+            <br />
+          {% endfor %}
+        </div>      
       {{ content }}
       </section>
     </div>
