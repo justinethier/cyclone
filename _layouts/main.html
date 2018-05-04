@@ -65,18 +65,22 @@
       <section id="main_content" class="inner">
         <div id="news" style="
             float: left;
-            left: -350px;
-            width: 300px;
+            left: -425px;
+            width: 350px;
             /* height: 50px; */
-            background: #999;
+            background: #007edf;
             /* display: inline-block; */
             /* vertical-align: top; */ /* here */
             position: absolute;
-            padding-left: 25px;
-            padding-right: 25px;
+            /*padding-left: 25px; */
+            /*padding-right: 25px; */
+            padding: 25px;
+            text-color: #fff;
         ">
           {% for post in site.posts limit:3 %}
-            [{{ post.title }}](./{{ post.url }})
+            <h3>
+              <a href="{{ post.url }}">{{ post.title }}</a>
+            </h3>
             <br />
             <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
             <br />
