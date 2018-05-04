@@ -1377,7 +1377,8 @@
         (map cons (ast:lambda-args fnc) (cdr exp)))
       (define (replace ref renamed)
         (let ((r (assoc ref formals/actuals)))
-            (if r 
+            (if (and r 
+                     (not (eq? (car r) (cdr r)))) ;; Prevent an inf loop
                 (scan (cdr r) renamed) 
                 ;ref
                 (let ((rn (assoc ref renamed)))
