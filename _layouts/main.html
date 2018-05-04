@@ -63,7 +63,8 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <div id="news" style="
+        {% if page.title == "Cyclone Scheme" %}
+        <div id="recent-news" style="
             position: absolute;
             /* float: left; */
             left: 675px;
@@ -81,12 +82,13 @@
           <h2>Recent News</h2>
           {% for post in site.posts limit:3 %}
             <h4>
-              <a href="{{ post.url }}">{{ post.title }}</a>
+              <a href="/cyclone/{{ post.url }}">{{ post.title }}</a>
             </h4>
             <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
             {{ post.excerpt }}
           {% endfor %}
         </div>      
+        {% endif %}"
       {{ content }}
       </section>
     </div>
