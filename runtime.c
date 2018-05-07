@@ -6103,9 +6103,8 @@ static void _read_add_to_tok_buf(port_type *p, char c)
 /**
  * @brief Determine if given string is numeric
  */
-int _read_is_numeric(const char *tok)
+int _read_is_numeric(const char *tok, int len)
 {
-  int len = strlen(tok);
   return (len &&
           ((isdigit(tok[0])) ||
            ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
@@ -6115,9 +6114,8 @@ int _read_is_numeric(const char *tok)
 /**
  * @brief Determine if given string is a complex number
  */
-int _read_is_complex_number(const char *tok)
+int _read_is_complex_number(const char *tok, int len)
 {
-  int len = strlen(tok);
   // Assumption: tok already passed checks from _read_is_numeric
   return (tok[len - 1] == 'i' ||
           tok[len - 1] == 'I');
@@ -6451,6 +6449,37 @@ void _read_return_number(void *data, port_type *p, int base, int exact)
 }
 
 /**
+ * @brief Helper function, parse&return read complex number.
+ * @param data Thread data object
+ * @param p Input port
+ * @param base Number base
+ * @param exact Return an exact number if true
+ */
+void _read_return_complex_number(void *data, port_type *p, int len)
+{
+//      TODO: return complex num, see _read_return_number for possible template
+//      probably want to have that function extract/identify the real/imaginary components.
+//      can just scan the buffer and read out start/end index of each number.
+  int i;
+  make_empty_vector(vec);
+  make_string(str, p->tok_buf);
+  vec.num_elements = 2;
+  vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+  vec.elements[0] = &str;
+  i = 0;
+  if (p->tok_buf[0] == '-' || p->tok_buf[0] == '+') {
+    i++;
+  }
+  for (; i < len; i++) {
+    if (!isdigit(p->tok_buf[i]) && p->tok_buf[i] != '.' && p->tok_buf[i] != 'e' && p->tok_buf[i] != 'E') {
+      break;
+    }
+  }
+  vec.elements[1] = obj_int2obj(i);
+  return_thread_runnable(data, &vec);
+}
+
+/**
  * @brief Helper function, read number.
  * @param data Thread data object
  * @param p Input port
@@ -6497,6 +6526,7 @@ void _read_number(void *data, port_type *p, int base, int exact)
 void _read_return_atom(void *data, object cont, port_type *p) 
 {
   object sym;
+  int len = p->tok_end;
 
   // Back up a char, since we always get here after reaching a terminal char
   // indicating we have the full atom
@@ -6505,14 +6535,12 @@ void _read_return_atom(void *data, object cont, port_type *p)
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
 
-  if (_read_is_numeric(p->tok_buf)) {
+  if (_read_is_numeric(p->tok_buf, len)) {
     make_string(str, p->tok_buf);
     str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
     make_c_opaque(opq, &str);
-    if (_read_is_complex_number(p->tok_buf)) { // TODO: hopefully not much performance impact from this check
-      TODO: return complex num, see _read_return_number for possible template
-      probably want to have that function extract/identify the real/imaginary components.
-      can just scan the buffer and read out start/end index of each number.
+    if (_read_is_complex_number(p->tok_buf, len)) {
+      _read_return_complex_number(data, p, len);
     } else {
       return_thread_runnable(data, &opq);
     }

@@ -172,6 +172,20 @@
              ((eq? t *sym-datum-comment*)
               (parse fp) ;; Ignore next datum
               (parse fp))
+             ((string? t) ;; Special case: complex number
+              (let* ((end (vector-ref token 1))
+                     (len (string-length t))
+                    )
+                (if (= (+ 1 end) len)
+                  (let ((real "0")
+                        (imag (substring t 0 end))) ;; Only an imag part
+                    (write `(DEBUG ,t ,end ,len real ,(string->number real) imag ,(string->number imag))))
+                  (let ((real (substring t 0 end))
+                        (imag (substring t (+ 1 end) (- len 1))))
+                    (if (= 0 (string-length imag))
+                        (set! imag "1"))
+                    (write `(DEBUG ,t ,end ,len real ,(string->number real) imag ,(string->number imag))))))
+                t)
              (else
               (error "Unexpected token" t)))))
         ((= (vector-length token) 1) ;; Special case: error
