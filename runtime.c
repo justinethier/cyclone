@@ -653,7 +653,7 @@ int equal(object x, object y)
   //       ((integer_type *) x)->value == ((integer_type *) y)->value);
   case complex_num_tag:
     return (is_object_type(y) &&
-            type_of(y) == double_tag &&
+            type_of(y) == complex_num_tag &&
             ((complex_num_type *) x)->value == ((complex_num_type *) y)->value);
 
   default:
