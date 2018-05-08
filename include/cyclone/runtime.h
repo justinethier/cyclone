@@ -390,6 +390,7 @@ object Cyc_num_op_va_list(void *data, int argc,
 void Cyc_int2bignum(int n, mp_int *bn);
 object Cyc_bignum_normalize(void *data, object n);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
+void Cyc_make_rectangular(void *data, object k, object r, object i);
 double MRG32k3a (double seed);
 /**@}*/
 /**

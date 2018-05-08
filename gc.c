@@ -575,6 +575,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       hp->value = ((integer_type *) obj)->value;
       return (char *)hp;
     }
+  case complex_num_tag:{
+      complex_num_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = complex_num_tag;
+      hp->value = ((complex_num_type *) obj)->value;
+      return (char *)hp;
+    }
   default:
     fprintf(stderr, "gc_copy_obj: bad tag obj=%p obj.tag=%d\n", (object) obj,
             type_of(obj));
@@ -1012,6 +1019,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(cond_var_type));
   if (t == integer_tag)
     return gc_heap_align(sizeof(integer_type));
+  if (t == complex_num_tag)
+    return gc_heap_align(sizeof(complex_num_type));
 
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %d\n", obj,
           t);

@@ -646,11 +646,16 @@ int equal(object x, object y)
   //          type_of(y) == bignum_tag &&
   //          MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
   }
-  case integer_tag:
-    return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
-        (is_object_type(y) &&
-         type_of(y) == integer_tag &&
-         ((integer_type *) x)->value == ((integer_type *) y)->value);
+  //case integer_tag:
+  //  return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
+  //      (is_object_type(y) &&
+  //       type_of(y) == integer_tag &&
+  //       ((integer_type *) x)->value == ((integer_type *) y)->value);
+  case complex_num_tag:
+    return (is_object_type(y) &&
+            type_of(y) == double_tag &&
+            ((complex_num_type *) x)->value == ((complex_num_type *) y)->value);
+
   default:
     return x == y;
   }
@@ -931,6 +936,23 @@ object Cyc_display(void *data, object x, FILE * port)
     // TODO: check return value
     mp_toradix_n(&bignum_value(x), buf, 10, bufsz);
     fprintf(port, "%s", buf);
+    break;
+  }
+  case complex_num_tag: {
+    char rbuf[33], ibuf[33];
+    const char *plus="+", *empty="";
+    double dreal = creal(((complex_num_type *) x)->value);
+    double dimag = cimag(((complex_num_type *) x)->value);
+    double2buffer(rbuf, 32, dreal);
+    double2buffer(ibuf, 32, dimag);
+    if (dreal == 0.0) {
+      fprintf(port, "%si", ibuf);
+    } else {
+      fprintf(port, "%s%s%si", 
+        rbuf, 
+        (dimag < 0.0) ? empty : plus,
+        ibuf);
+    }
     break;
   }
   default:
@@ -1538,7 +1560,8 @@ object Cyc_is_number(object o)
   if ((o != NULL) && (obj_is_int(o) || (!is_value_type(o)
                                         && (type_of(o) == integer_tag
                                             || type_of(o) == bignum_tag
-                                            || type_of(o) == double_tag))))
+                                            || type_of(o) == double_tag
+                                            || type_of(o) == complex_num_tag))))
     return boolean_t;
   return boolean_f;
 }
@@ -5060,6 +5083,11 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
           gc_alloc(heap, sizeof(integer_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
+  case complex_num_tag:{
+      complex_num_type *hp =
+          gc_alloc(heap, sizeof(complex_num_type), obj, thd, heap_grown);
+      return gc_fixup_moved_obj(thd, alloci, obj, hp);
+    }
   default:
     fprintf(stderr, "gc_move: bad tag obj=%p obj.tag=%d\n", (object) obj,
             type_of(obj));
@@ -5205,6 +5233,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
     case port_tag:
     case cvar_tag:
     case c_opaque_tag:
+    case complex_num_tag:
       break;
       // These types are not heap-allocated
     case eof_tag:
@@ -5861,6 +5890,20 @@ object Cyc_bit_set(void *data, object n1, object n2)
   Cyc_check_int(data, n2);
   return (obj_int2obj( 
             obj_obj2int(n1) | obj_obj2int(n2)));
+}
+
+object Cyc_num2double(void *data, object ptr, object z)
+{
+ return_inexact_double_op_no_cps(data, ptr, (double), z);
+}
+
+void Cyc_make_rectangular(void *data, object k, object r, object i) 
+{
+  double_type dr, di;
+  Cyc_num2double(data, &dr, r);
+  Cyc_num2double(data, &di, i);
+  make_complex_num(num, double_value(&dr), double_value(&di));
+  return_closcall1(data, k, &num);
 }
 
 /* RNG section */
