@@ -10,6 +10,7 @@
 #define CYCLONE_TYPES_H
 
 #include <math.h>
+#include <complex.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -55,6 +56,7 @@ enum object_tag {
       , string_tag              // 18
       , symbol_tag              // 19
       , vector_tag              // 20
+      , complex_num_tag         // 21
 };
 
 #define type_is_pair_prim(clo) \
@@ -675,6 +677,15 @@ typedef struct {
 /** Allocate a new bignum on the heap */
 #define alloc_bignum(data, p) \
   bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
+
+/**
+ * @brief Complex number
+ */
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  double complex value;
+} complex_num_type;
 
 /**
  * @brief Double-precision floating point type, also known as a flonum.
