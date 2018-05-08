@@ -6113,6 +6113,17 @@ int _read_is_numeric(const char *tok)
 }
 
 /**
+ * @brief Determine if given string is a complex number
+ */
+int _read_is_complex_number(const char *tok)
+{
+  int len = strlen(tok);
+  // Assumption: tok already passed checks from _read_is_numeric
+  return (tok[len - 1] == 'i' ||
+          tok[len - 1] == 'I');
+}
+
+/**
  * @brief Helper function, determine if given number is a hex digit
  * @param c Character to check
  */
@@ -6498,7 +6509,13 @@ void _read_return_atom(void *data, object cont, port_type *p)
     make_string(str, p->tok_buf);
     str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
     make_c_opaque(opq, &str);
-    return_thread_runnable(data, &opq);
+    if (_read_is_complex_number(p->tok_buf)) { // TODO: hopefully not much performance impact from this check
+      TODO: return complex num, see _read_return_number for possible template
+      probably want to have that function extract/identify the real/imaginary components.
+      can just scan the buffer and read out start/end index of each number.
+    } else {
+      return_thread_runnable(data, &opq);
+    }
   } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
              strncmp("-inf.0", p->tok_buf, 6) == 0) {
     make_double(d, pow(2.0, 1000000));
