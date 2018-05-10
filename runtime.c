@@ -1581,6 +1581,13 @@ object Cyc_is_real(object o)
   return Cyc_is_number(o);
 }
 
+object Cyc_is_complex(object o)
+{
+  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == complex_num_tag)
+    return boolean_t;
+  return boolean_f;
+}
+
 object Cyc_is_fixnum(object o)
 {
   if (obj_is_int(o))
