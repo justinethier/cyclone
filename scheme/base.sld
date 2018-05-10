@@ -1265,7 +1265,11 @@
         return boolean_t;
       return boolean_f;")
   (define (inexact? num) (not (exact? num)))
-  (define complex? number?) 
+  (define-c complex?
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_closcall1(data, k, Cyc_is_complex(z)); "
+    "(void *data, object ptr, object z)"
+    " return Cyc_is_complex(z); ")
   (define rational? number?)
   (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
   (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
