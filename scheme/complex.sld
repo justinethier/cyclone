@@ -27,7 +27,13 @@
     (define (magnitude z) 
       (error "Complex numbers are not supported at this time"))
     (define (make-rectangular x y)
-      (error "Complex numbers are not supported at this time"))
+      (Cyc-make-rect x y))
     (define (make-polar x y)
       (error "Complex numbers are not supported at this time"))
+
+    (define-c Cyc-make-rect
+      "(void *data, int argc, closure _, object k, object r, object i)"
+      " Cyc_check_num(data, r);
+        Cyc_check_num(data, i);
+        Cyc_make_rectangular(data, k, r, i); ")
 ))
