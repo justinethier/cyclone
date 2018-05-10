@@ -728,6 +728,9 @@ typedef struct {
 /** Access a bignum's `mp_int` directly */
 #define bignum_value(x) (((bignum_type *) x)->bn)
 
+/** Access the complex number directly */
+#define complex_num_value(x) (((complex_num_type *) x)->value)
+
 /**
  * This enumeration complements the comparison types from LibTomMath,
  * and provides constants for each of the comparison operators.

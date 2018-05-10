@@ -1434,6 +1434,10 @@ int FUNC_OP(void *data, object x, object y) { \
       result = Cyc_bignum_cmp(BN_CMP, x, tx, y, ty); \
     } else if (tx == double_tag && ty == bignum_tag) { \
       result = (double_value(x)) OP mp_get_double(&bignum_value(y)); \
+    } else if (tx == complex_num_tag && ty == complex_num_tag) { \
+      result = (complex_num_value(x)) == (complex_num_value(y)); \
+    } else if (tx == complex_num_tag && ty != complex_num_tag) { \
+    } else if (tx != complex_num_tag && ty == complex_num_tag) { \
     } else { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
@@ -1511,6 +1515,12 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
       return Cyc_bignum_cmp(BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
     } else if (tx == double_tag && ty == bignum_tag) { \
       return (double_value(x)) OP mp_get_double(&bignum_value(x)) ? boolean_t : boolean_f; \
+    } else if (tx == complex_num_tag && ty == complex_num_tag) { \
+      return ((complex_num_value(x)) == (complex_num_value(y))) ? boolean_t : boolean_f; \
+    } else if (tx == complex_num_tag && ty != complex_num_tag) { \
+      return boolean_f; \
+    } else if (tx != complex_num_tag && ty == complex_num_tag) { \
+      return boolean_f; \
     } else { \
         goto bad_arg_type_error; \
     } \
