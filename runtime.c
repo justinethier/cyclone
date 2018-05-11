@@ -3089,7 +3089,7 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == integer_tag && ty == complex_num_tag) { \
         x->complex_num_t.hdr.mark = gc_color_red; \
         x->complex_num_t.hdr.grayed = 0; \
-        x->complex_num_t.tag = double_tag; \
+        x->complex_num_t.tag = complex_num_tag; \
         x->complex_num_t.value = x->integer_t.value OP ((complex_num_type *)y)->value; \
     } else if (tx == bignum_tag && ty == complex_num_tag) { \
         double d = mp_get_double(&(x->bignum_t.bn)); \
@@ -3498,7 +3498,7 @@ object Cyc_div_op(void *data, common_type * x, object y)
   } else if (tx == integer_tag && ty == complex_num_tag) {
       x->complex_num_t.hdr.mark = gc_color_red;
       x->complex_num_t.hdr.grayed = 0;
-      x->complex_num_t.tag = double_tag;
+      x->complex_num_t.tag = complex_num_tag;
       x->complex_num_t.value = x->integer_t.value / ((complex_num_type *)y)->value;
   } else if (tx == bignum_tag && ty == complex_num_tag) {
       double d = mp_get_double(&(x->bignum_t.bn));
