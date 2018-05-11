@@ -3076,6 +3076,22 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->double_t.value = d OP ((double_type *)y)->value; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
         BN_OP(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn)); \
+    } else if (tx == complex_num_tag && ty == complex_num_tag) { \
+        x->complex_num_t.value = x->complex_num_t.value OP ((complex_num_type *)y)->value; \
+    } else if (tx == complex_num_tag && ty == -1) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == complex_num_tag && ty == integer_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == complex_num_tag && ty == bignum_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == complex_num_tag && ty == double_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == integer_tag && ty == complex_num_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == bignum_tag && ty == complex_num_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+    } else if (tx == double_tag && ty == complex_num_tag) { \
+        /* TODO: need to add support!! */ goto bad_arg_type_error; \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -3538,6 +3554,11 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->bignum_t.hdr.grayed = 0;
     buf->bignum_t.tag = bignum_tag;
     mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n));
+  } else if (type_of(n) == complex_num_tag) {
+    buf->complex_num_t.hdr.mark = gc_color_red;
+    buf->complex_num_t.hdr.grayed = 0;
+    buf->complex_num_t.tag = complex_num_tag;
+    buf->complex_num_t.value = ((complex_num_type *) n)->value;
   } else {
     goto bad_arg_type_error;
   }
@@ -3556,6 +3577,9 @@ object Cyc_num_op_va_list(void *data, int argc,
     } else if (type_of(&tmp) == double_tag){
       buf->double_t.tag = double_tag;
       buf->double_t.value = double_value(&tmp);
+    } else if (type_of(&tmp) == complex_num_tag){
+      buf->complex_num_t.tag = complex_num_tag;
+      buf->complex_num_t.value = complex_num_value(&tmp);
     } else {
       buf->bignum_t.tag = bignum_tag;
       buf->bignum_t.bn.used = tmp.bignum_t.bn.used;
