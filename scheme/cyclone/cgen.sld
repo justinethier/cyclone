@@ -9,6 +9,7 @@
 (define-library (scheme cyclone cgen)
   (import (scheme base)
           (scheme char)
+          (scheme complex)
           (scheme eval)
           (scheme inexact)
           (scheme write)
@@ -487,6 +488,24 @@
                 ;; TODO: need error checking, this is just a first cut:
                 "mp_read_radix(&bignum_value(" cvar-name "), \"" num2str "\", 10);"))))
     )
+    ((complex? exp)
+      (let* ((cvar-name (mangle (gensym 'c)))
+             (num2str (lambda (n)
+                        (cond
+                          ;; The following two may not be very portable, 
+                          ;; may be better to use C99:
+                          ((nan? n) "(0./0.)")
+                          ((infinite? n) "(1./0.)")
+                          (else
+                            (number->string n)))))
+             (rnum (num2str (real-part exp)))
+             (inum (num2str (imag-part exp)))
+            )
+        (c-code/vars
+            (string-append "&" cvar-name) ; Code is just the variable name
+            (list     ; Allocate on the C stack
+              (string-append 
+                "make_complex_num(" cvar-name ", " rnum ", " inum ");")))))
     ((integer? exp) 
 ;     (let ((cvar-name (mangle (gensym 'c))))
 ;        (c-code/vars
