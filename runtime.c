@@ -3083,15 +3083,16 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == complex_num_tag && ty == integer_tag) { \
         /* TODO: need to add support!! */ goto bad_arg_type_error; \
     } else if (tx == complex_num_tag && ty == bignum_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.value = x->complex_num_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == complex_num_tag && ty == double_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.value = x->complex_num_t.value OP complex_num_value(y); \
     } else if (tx == integer_tag && ty == complex_num_tag) { \
         /* TODO: need to add support!! */ goto bad_arg_type_error; \
     } else if (tx == bignum_tag && ty == complex_num_tag) { \
         /* TODO: need to add support!! */ goto bad_arg_type_error; \
     } else if (tx == double_tag && ty == complex_num_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.value = x->double_t.value OP complex_num_value(y); \
+        x->complex_num_t.tag = complex_num_tag; \
     } else { \
         goto bad_arg_type_error; \
     } \
