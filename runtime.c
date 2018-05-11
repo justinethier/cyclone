@@ -3079,20 +3079,30 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == complex_num_tag && ty == complex_num_tag) { \
         x->complex_num_t.value = x->complex_num_t.value OP ((complex_num_type *)y)->value; \
     } else if (tx == complex_num_tag && ty == -1) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.value = x->complex_num_t.value OP (obj_obj2int(y)); \
     } else if (tx == complex_num_tag && ty == integer_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.value = x->complex_num_t.value OP ((integer_type *)y)->value; \
     } else if (tx == complex_num_tag && ty == bignum_tag) { \
         x->complex_num_t.value = x->complex_num_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == complex_num_tag && ty == double_tag) { \
         x->complex_num_t.value = x->complex_num_t.value OP complex_num_value(y); \
     } else if (tx == integer_tag && ty == complex_num_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
+        x->complex_num_t.hdr.mark = gc_color_red; \
+        x->complex_num_t.hdr.grayed = 0; \
+        x->complex_num_t.tag = double_tag; \
+        x->complex_num_t.value = x->integer_t.value OP ((complex_num_type *)y)->value; \
     } else if (tx == bignum_tag && ty == complex_num_tag) { \
-        /* TODO: need to add support!! */ goto bad_arg_type_error; \
-    } else if (tx == double_tag && ty == complex_num_tag) { \
-        x->complex_num_t.value = x->double_t.value OP complex_num_value(y); \
+        double d = mp_get_double(&(x->bignum_t.bn)); \
+        mp_clear(&(x->bignum_t.bn)); \
+        x->complex_num_t.hdr.mark = gc_color_red; \
+        x->complex_num_t.hdr.grayed = 0; \
         x->complex_num_t.tag = complex_num_tag; \
+        x->complex_num_t.value = d OP ((complex_num_type *)y)->value; \
+    } else if (tx == double_tag && ty == complex_num_tag) { \
+        x->complex_num_t.hdr.mark = gc_color_red; \
+        x->complex_num_t.hdr.grayed = 0; \
+        x->complex_num_t.tag = complex_num_tag; \
+        x->complex_num_t.value = x->double_t.value OP complex_num_value(y); \
     } else { \
         goto bad_arg_type_error; \
     } \
@@ -3475,6 +3485,33 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.value = d / ((double_type *)y)->value;
   } else if (tx == bignum_tag && ty == bignum_tag) {
     mp_div(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL);
+  } else if (tx == complex_num_tag && ty == complex_num_tag) {
+      x->complex_num_t.value = x->complex_num_t.value / ((complex_num_type *)y)->value;
+  } else if (tx == complex_num_tag && ty == -1) {
+      x->complex_num_t.value = x->complex_num_t.value / (obj_obj2int(y));
+  } else if (tx == complex_num_tag && ty == integer_tag) {
+      x->complex_num_t.value = x->complex_num_t.value / ((integer_type *)y)->value;
+  } else if (tx == complex_num_tag && ty == bignum_tag) {
+      x->complex_num_t.value = x->complex_num_t.value / mp_get_double(&bignum_value(y));
+  } else if (tx == complex_num_tag && ty == double_tag) {
+      x->complex_num_t.value = x->complex_num_t.value / complex_num_value(y);
+  } else if (tx == integer_tag && ty == complex_num_tag) {
+      x->complex_num_t.hdr.mark = gc_color_red;
+      x->complex_num_t.hdr.grayed = 0;
+      x->complex_num_t.tag = double_tag;
+      x->complex_num_t.value = x->integer_t.value / ((complex_num_type *)y)->value;
+  } else if (tx == bignum_tag && ty == complex_num_tag) {
+      double d = mp_get_double(&(x->bignum_t.bn));
+      mp_clear(&(x->bignum_t.bn));
+      x->complex_num_t.hdr.mark = gc_color_red;
+      x->complex_num_t.hdr.grayed = 0;
+      x->complex_num_t.tag = complex_num_tag;
+      x->complex_num_t.value = d / ((complex_num_type *)y)->value;
+  } else if (tx == double_tag && ty == complex_num_tag) {
+      x->complex_num_t.hdr.mark = gc_color_red;
+      x->complex_num_t.hdr.grayed = 0;
+      x->complex_num_t.tag = complex_num_tag;
+      x->complex_num_t.value = x->double_t.value / complex_num_value(y);
   } else {
     goto bad_arg_type_error;
   }
