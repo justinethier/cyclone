@@ -1884,6 +1884,21 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
         snprintf(buffer, 1024, "%d", ((integer_type *) n)->value);
       } else if (type_of(n) == double_tag) {
         double2buffer(buffer, 1024, ((double_type *) n)->value);
+      } else if (type_of(n) == complex_num_tag) {
+        char rbuf[33], ibuf[33];
+        const char *plus="+", *empty="";
+        double dreal = creal(((complex_num_type *) n)->value);
+        double dimag = cimag(((complex_num_type *) n)->value);
+        double2buffer(rbuf, 32, dreal);
+        double2buffer(ibuf, 32, dimag);
+        if (dreal == 0.0) {
+          snprintf(buffer, 1024, "%si", ibuf);
+        } else {
+          snprintf(buffer, 1024, "%s%s%si", 
+            rbuf, 
+            (dimag < 0.0) ? empty : plus,
+            ibuf);
+        }
       } else {
         Cyc_rt_raise2(data, "number->string - Unexpected object", n);
       }
