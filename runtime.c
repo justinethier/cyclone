@@ -3168,6 +3168,9 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
         mp_add(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
         return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, ((obj_obj2int(x)) + complex_num_value(y)));
+      return ptr;
     }
   }
   // x is double
@@ -3180,6 +3183,9 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       assign_double(ptr, double_value(x) + mp_get_double(&bignum_value(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, double_value(x) + complex_num_value(y));
       return ptr;
     }
   }
@@ -3200,6 +3206,25 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       alloc_bignum(data, bn);
       mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
       return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) + complex_num_value(y));
+      return ptr;
+    }
+  }
+  // x is complex
+  if (is_object_type(x) && type_of(x) == complex_num_tag) {
+    if (obj_is_int(y)){
+      assign_complex_num(ptr, complex_num_value(x) + (double)(obj_obj2int(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_complex_num(ptr, complex_num_value(x) + double_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, complex_num_value(x) + complex_num_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_complex_num(ptr, complex_num_value(x) + mp_get_double(&bignum_value(y)));
+      return ptr;
     }
   }
   // still here, raise an error 
@@ -3243,6 +3268,9 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
         mp_sub(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
         return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, ((obj_obj2int(x)) - complex_num_value(y)));
+      return ptr;
     }
   }
   // x is double
@@ -3255,6 +3283,9 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       assign_double(ptr, double_value(x) - mp_get_double(&bignum_value(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, double_value(x) - complex_num_value(y));
       return ptr;
     }
   }
@@ -3275,6 +3306,25 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       alloc_bignum(data, bn);
       mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
       return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) - complex_num_value(y));
+      return ptr;
+    }
+  }
+  // x is complex
+  if (is_object_type(x) && type_of(x) == complex_num_tag) {
+    if (obj_is_int(y)){
+      assign_complex_num(ptr, complex_num_value(x) - (double)(obj_obj2int(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_complex_num(ptr, complex_num_value(x) - double_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, complex_num_value(x) - complex_num_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_complex_num(ptr, complex_num_value(x) - mp_get_double(&bignum_value(y)));
+      return ptr;
     }
   }
   // still here, raise an error 
@@ -3318,6 +3368,9 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
         mp_mul(&bnx, &bignum_value(y), &bignum_value(bn));
         mp_clear(&bnx);
         return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, ((obj_obj2int(x)) * complex_num_value(y)));
+      return ptr;
     }
   }
   // x is double
@@ -3330,6 +3383,9 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       assign_double(ptr, double_value(x) * mp_get_double(&bignum_value(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, double_value(x) * complex_num_value(y));
       return ptr;
     }
   }
@@ -3350,6 +3406,25 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       alloc_bignum(data, bn);
       mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
       return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) * complex_num_value(y));
+      return ptr;
+    }
+  }
+  // x is complex
+  if (is_object_type(x) && type_of(x) == complex_num_tag) {
+    if (obj_is_int(y)){
+      assign_complex_num(ptr, complex_num_value(x) * (double)(obj_obj2int(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_complex_num(ptr, complex_num_value(x) * double_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, complex_num_value(x) * complex_num_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_complex_num(ptr, complex_num_value(x) * mp_get_double(&bignum_value(y)));
+      return ptr;
     }
   }
   // still here, raise an error 
@@ -3383,6 +3458,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
         mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL);
         mp_clear(&bnx);
         return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, ((obj_obj2int(x)) / complex_num_value(y)));
+      return ptr;
     }
   }
   // x is double
@@ -3395,6 +3473,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       assign_double(ptr, double_value(x) / mp_get_double(&bignum_value(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, double_value(x) / complex_num_value(y));
       return ptr;
     }
   }
@@ -3415,6 +3496,25 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       alloc_bignum(data, bn);
       mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(bn), NULL);
       return bn;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) / complex_num_value(y));
+      return ptr;
+    }
+  }
+  // x is complex
+  if (is_object_type(x) && type_of(x) == complex_num_tag) {
+    if (obj_is_int(y)){
+      assign_complex_num(ptr, complex_num_value(x) / (double)(obj_obj2int(y)));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == double_tag) {
+      assign_complex_num(ptr, complex_num_value(x) / double_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
+      assign_complex_num(ptr, complex_num_value(x) / complex_num_value(y));
+      return ptr;
+    } else if (is_object_type(y) && type_of(y) == bignum_tag) {
+      assign_complex_num(ptr, complex_num_value(x) / mp_get_double(&bignum_value(y)));
+      return ptr;
     }
   }
   // still here, raise an error 

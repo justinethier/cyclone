@@ -695,6 +695,13 @@ typedef struct {
   n.tag = complex_num_tag; \
   n.value = (r + (i * I));
 
+/** Assign given complex value to the given complex number object pointer */
+#define assign_complex_num(pobj,v) \
+  ((complex_num_type *)pobj)->hdr.mark = gc_color_red; \
+  ((complex_num_type *)pobj)->hdr.grayed = 0; \
+  ((complex_num_type *)pobj)->tag = complex_num_tag; \
+  complex_num_value(pobj) = v;
+
 /**
  * @brief Double-precision floating point type, also known as a flonum.
  */
