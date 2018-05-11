@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8 - TBD
+
+Features
+
+- Added support for complex numbers.
+
 ## 0.7.3 - May 7, 2018
 
 Features
