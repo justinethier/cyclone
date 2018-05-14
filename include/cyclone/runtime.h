@@ -311,6 +311,44 @@ void Cyc_io_read_token(void *data, object cont, object port);
   } \
   return_closcall1(data, cont, &d)
 
+#define return_inexact_double_or_cplx_op_no_cps(data, ptr, OP, CPLX_OP, z) \
+  double unboxed; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    unboxed = OP(obj_obj2int(z)); \
+  } else if (type_of(z) == integer_tag) { \
+    unboxed = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    unboxed = OP(mp_get_double(&bignum_value(z))); \
+  } else if (type_of(z) == complex_num_tag) { \
+    double complex unboxed = CPLX_OP(complex_num_value(z)); \
+    assign_complex_num(ptr, unboxed); \
+    return ptr; \
+  } else { \
+    unboxed = OP(((double_type *)z)->value); \
+  } \
+  assign_double(ptr, unboxed); \
+  return ptr;
+
+#define return_inexact_double_or_cplx_op(data, cont, OP, CPLX_OP, z) \
+  make_double(d, 0.0); \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    d.value = OP(obj_obj2int(z)); \
+  } else if (type_of(z) == integer_tag) { \
+    d.value = OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    d.value = OP(mp_get_double(&bignum_value(z))); \
+  } else if (type_of(z) == complex_num_tag) { \
+    complex_num_type cn; \
+    double complex unboxed = CPLX_OP(complex_num_value(z)); \
+    assign_complex_num((&cn), unboxed); \
+    return_closcall1(data, cont, &cn); \
+  } else { \
+    d.value = OP(((double_type *)z)->value); \
+  } \
+  return_closcall1(data, cont, &d)
+
 #define return_exact_double_op(data, cont, OP, z) \
   int i = 0; \
   Cyc_check_num(data, z); \

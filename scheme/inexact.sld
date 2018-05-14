@@ -27,14 +27,16 @@
       (er-macro-transformer
         (lambda (expr rename compare)
           (let* ((fnc (cadr expr))
-                 (op (caddr expr)))
+                 (op (caddr expr))
+                 (complex-op (cadddr expr))
+                )
            `(define-c ,fnc
               "(void *data, int argc, closure _, object k, object z)"
               ,(string-append
-                " return_inexact_double_op(data, k, " op ", z);")
+                " return_inexact_double_or_cplx_op(data, k, " op ", " complex-op ", z);")
               "(void *data, object ptr, object z)"
               ,(string-append
-                " return_inexact_double_op_no_cps(data, ptr, " op ", z);"))))))
+                " return_inexact_double_or_cplx_op_no_cps(data, ptr, " op ", " complex-op ", z);"))))))
 
     (define-c nan?
       "(void *data, int argc, closure _, object k, object z)"
@@ -65,13 +67,13 @@
           (c-log z1)
           (let ((z2* (car z2)))
             (/ (c-log z1) (c-log z2*)))))
-    (define-inexact-op c-log "log")
-    (define-inexact-op exp "exp")
-    (define-inexact-op sqrt "sqrt")
-    (define-inexact-op sin "sin")
-    (define-inexact-op cos "cos")
-    (define-inexact-op tan "tan")
-    (define-inexact-op asin "asin")
-    (define-inexact-op acos "acos")
-    (define-inexact-op atan "atan")
+    (define-inexact-op c-log "log"   "clog")
+    (define-inexact-op exp   "exp"   "cexp")
+    (define-inexact-op sqrt  "sqrt"  "csqrt")
+    (define-inexact-op sin   "sin"   "csin")
+    (define-inexact-op cos   "cos"   "ccos")
+    (define-inexact-op tan   "tan"   "ctan")
+    (define-inexact-op asin  "asin"  "casin")
+    (define-inexact-op acos  "acos"  "cacos")
+    (define-inexact-op atan  "atan"  "catan")
 ))
