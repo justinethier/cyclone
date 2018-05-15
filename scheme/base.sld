@@ -1195,9 +1195,9 @@
   (define exact truncate)
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, (double), z); "
+    " return_inexact_double_or_cplx_op(data, k, (double), (double complex), z); "
     "(void *data, object ptr, object z)"
-    " return_inexact_double_op_no_cps(data, ptr, (double), z);")
+    " return_inexact_double_or_cplx_op_no_cps(data, ptr, (double), (double complex), z);")
   (define-c abs
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
