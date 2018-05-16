@@ -28,6 +28,7 @@ void main() {
   print_stats("cond_var_type  ", sizeof(cond_var_type  ), gc_heap_align(sizeof(cond_var_type  ))  );
   print_stats("cvar_type      ", sizeof(cvar_type      ), gc_heap_align(sizeof(cvar_type      ))  );
   print_stats("double_type    ", sizeof(double_type    ), gc_heap_align(sizeof(double_type    ))  );
+  print_stats("complex_num_type    ", sizeof(complex_num_type    ), gc_heap_align(sizeof(complex_num_type    ))  );
   print_stats("integer_type   ", sizeof(integer_type   ), gc_heap_align(sizeof(integer_type   ))  );
   print_stats("macro_type     ", sizeof(macro_type     ), gc_heap_align(sizeof(macro_type     ))  );
   print_stats("mutex_type     ", sizeof(mutex_type     ), gc_heap_align(sizeof(mutex_type     ))  );

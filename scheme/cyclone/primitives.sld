@@ -705,11 +705,11 @@
     ;; Determine if primitive receives a pointer to a local C variable
     (define (prim/c-var-pointer p)
       (cond
-        ((eq? p 'Cyc-fast-plus) "double_type")
-        ((eq? p 'Cyc-fast-sub) "double_type")
-        ((eq? p 'Cyc-fast-mul) "double_type")
-        ((eq? p 'Cyc-fast-div) "double_type")
-        ((member p *udf-prims*) "double_type")
+        ((eq? p 'Cyc-fast-plus) "complex_num_type")
+        ((eq? p 'Cyc-fast-sub) "complex_num_type")
+        ((eq? p 'Cyc-fast-mul) "complex_num_type")
+        ((eq? p 'Cyc-fast-div) "complex_num_type")
+        ((member p *udf-prims*) "complex_num_type")
         (else #f)))
 
     ;; Determine if primitive assigns (allocates) a C variable
