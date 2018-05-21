@@ -49,22 +49,22 @@
         (cond
           ((and-let* ( 
              ;; Find lambda with initial #f assignment
-             ((lambda? (car exp)))
+             ((ast:lambda? (car exp)))
              ((pair? (cdr exp)))
              ((not (cadr exp)))
-             (= 1 (length (lambda->formals (car exp))))
+             (= 1 (length (ast:lambda-args (car exp))))
              ;; Get information for continuation
-             (loop-sym (car (lambda->formals (car exp))))
-             (inner-exp (car (lambda->exp (car exp))))
+             (loop-sym (car (ast:lambda-args (car exp))))
+             (inner-exp (car (ast:lambda-body (car exp))))
              ((app? inner-exp))
-             ((lambda? (car inner-exp)))
+             ((ast:lambda? (car inner-exp)))
              ;; Find the set (assumes CPS conversion)
              ((pair? (cdr inner-exp)))
              ((set!? (cadr inner-exp)))
              ((equal? (set!->var (cadr inner-exp)) loop-sym))
              ;; Check the set's continuation
-             ((app? (car (lambda->exp (car inner-exp)))))
-             ((equal? (caar (lambda->exp (car inner-exp))) loop-sym))
+             ((app? (car (ast:lambda-body (car inner-exp)))))
+             ((equal? (caar (ast:lambda-body (car inner-exp))) loop-sym))
             )
            (write `(found named lambda loop ,loop-sym))
            ;; Continue scanning
@@ -135,6 +135,6 @@
         #f))))
 
 (scan 
-  ;(ast:sexp->ast 
-    sexp);)
+  (ast:sexp->ast 
+    sexp))
 
