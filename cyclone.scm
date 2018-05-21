@@ -405,23 +405,23 @@
            ;; No need for call/cc yet
            (set! input-program cps))))
       (trace:info "---------------- after CPS:")
-      (trace:info input-program) ;pretty-print
+      (trace:info (ast:ast->pp-sexp input-program))
 
       (when (> *optimization-level* 0)
         (set! input-program
           (optimize-cps input-program))
         (trace:info "---------------- after cps optimizations (1):")
-        (trace:info input-program)
+        (trace:info (ast:ast->pp-sexp input-program))
 
         (set! input-program
           (optimize-cps input-program))
         (trace:info "---------------- after cps optimizations (2):")
-        (trace:info input-program)
+        (trace:info (ast:ast->pp-sexp input-program))
         
         (set! input-program
           (optimize-cps input-program))
         (trace:info "---------------- after cps optimizations (3):")
-        (trace:info input-program)
+        (trace:info (ast:ast->pp-sexp input-program))
       )
     
       (set! input-program
