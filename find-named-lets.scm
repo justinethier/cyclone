@@ -18,6 +18,7 @@
 ;;                 (loop$14$171 zr$13$170 zi$12$169 c$11$168))
 ;;               #f)
 
+  (define (find-named-lets exp)
     (define (scan exp)
       (cond
        ((ast:lambda? exp)
@@ -73,6 +74,7 @@
           (else
             (map scan exp))))
        (else exp)))
+    (scan exp))
 
 ;; Test code follows:
 (define sexp
@@ -134,7 +136,7 @@
                      (Cyc-fast-plus c$15$172 1))))))))
         #f))))
 
-(scan 
+(find-named-lets
   (ast:sexp->ast 
     sexp))
 
