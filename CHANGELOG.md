@@ -5,6 +5,7 @@
 Features
 
 - Added support for complex numbers.
+- When printing intermediate forms during debugging via `-t` Cyclone will now emit less verbose S-expressions for code in CPS form.
 
 ## 0.7.3 - May 7, 2018
 
