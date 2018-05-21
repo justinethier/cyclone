@@ -1,7 +1,10 @@
 (import
   (scheme base)
   (scheme cyclone ast)
+  (scheme cyclone util)
+  (scheme cyclone pretty-print)
   (scheme write)
+  (srfi 2)
 )
 
 ;; TODO: can we scan the ast to find loops created by named lets?
@@ -43,21 +46,46 @@
              ,(scan (if->then exp))
              ,(scan (if->else exp))))
        ((app? exp)
-        (map scan exp))
+        (cond
+          ((and-let* ( 
+             ;; Find lambda with initial #f assignment
+             ((lambda? (car exp)))
+             ((pair? (cdr exp)))
+             ((not (cadr exp)))
+             (= 1 (length (lambda->formals (car exp))))
+             ;; Get information for continuation
+             (loop-sym (car (lambda->formals (car exp))))
+             (inner-exp (car (lambda->exp (car exp))))
+             ((app? inner-exp))
+             ((lambda? (car inner-exp)))
+             ;; Find the set (assumes CPS conversion)
+             ((pair? (cdr inner-exp)))
+             ((set!? (cadr inner-exp)))
+             ((equal? (set!->var (cadr inner-exp)) loop-sym))
+             ;; Check the set's continuation
+             ((app? (car (lambda->exp (car inner-exp)))))
+             ((equal? (caar (lambda->exp (car inner-exp))) loop-sym))
+            )
+           (write `(found named lambda loop ,loop-sym))
+           ;; Continue scanning
+           (map scan exp)
+          ))
+          (else
+            (map scan exp))))
        (else exp)))
 
 ;; Test code follows:
 (define sexp
  '(define count
-     (lambda-165-cont
+     (lambda
        (k$296 r$5$163
               i$4$162
               step$3$161
               x$2$160
               y$1$159)
-       ((lambda-155
+       ((lambda
           (loop$14$171)
-          ((lambda-139
+          ((lambda
              (r$299)
              (loop$14$171
                k$296
@@ -73,7 +101,7 @@
                    step$3$161))
                0))
            (set! loop$14$171
-             (lambda-154-cont
+             (lambda
                (k$301 zr$17$174 zi$16$173 c$15$172)
                (if (Cyc-fast-eq c$15$172 64)
                  (k$301 c$15$172)
@@ -105,4 +133,8 @@
                            step$3$161)))
                      (Cyc-fast-plus c$15$172 1))))))))
         #f))))
+
+(scan 
+  ;(ast:sexp->ast 
+    sexp);)
 
