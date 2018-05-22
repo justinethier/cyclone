@@ -5,7 +5,8 @@
 Features
 
 - Added support for complex numbers.
-- When printing intermediate forms during debugging via `-t` Cyclone will now emit less verbose S-expressions for code in CPS form.
+- When printing intermediate forms during debugging via `-t` Cyclone will now emit less verbose S-expressions for code in CPS form. To support this effort and make debugging easier, added helper functions `ast:ast->sexp`, `ast:sexp->ast`, and `ast:ast->pp-sexp` to `(scheme cyclone ast)`.
+
 
 ## 0.7.3 - May 7, 2018
 
