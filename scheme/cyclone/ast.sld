@@ -25,8 +25,14 @@
      ast:set-lambda-has-cont!
      ast:get-next-lambda-id!
      ast:ast->pp-sexp
+     ast:ast->sexp
+     ast:sexp->ast
   )
   (begin
+    (define ast:ast->sexp ast->sexp)
+
+    (define ast:sexp->ast sexp->ast)
+
     (define *lambda-id* 0)
 
     (define (ast:get-next-lambda-id!)
@@ -77,5 +83,55 @@
              ,(ast:ast->pp-sexp (if->else exp))))
        ((app? exp)
         (map ast:ast->pp-sexp exp))
+       (else exp)))
+
+    ;; Transform AST back to an equivalent sexp
+    (define (ast->sexp exp)
+      (cond
+       ((ast:lambda? exp)
+        (let* ((id (ast:lambda-id exp))
+               (has-cont (ast:lambda-has-cont exp))
+               (sym 'lambda))
+          `(,sym ,(ast:lambda-args exp)
+             ,@(map ast->sexp (ast:lambda-body exp)))))
+       ((quote? exp) exp)
+       ((const? exp) exp)
+       ((ref? exp) exp)
+       ((define? exp)
+        `(define ,(define->var exp)
+                 ,@(ast->sexp (define->exp exp))))
+       ((set!? exp)
+        `(set! ,(set!->var exp)
+               ,(ast->sexp (set!->exp exp))))
+       ((if? exp)       
+        `(if ,(ast->sexp (if->condition exp))
+             ,(ast->sexp (if->then exp))
+             ,(ast->sexp (if->else exp))))
+       ((app? exp)
+        (map ast->sexp exp))
+       (else exp)))
+
+    ;; Transform given SEXP into AST form.
+    (define (sexp->ast exp)
+      (cond
+       ((lambda? exp)
+        (ast:make-lambda 
+          (lambda->formals exp)
+          (map sexp->ast (lambda->exp exp))))
+       ((quote? exp) exp)
+       ((const? exp) exp)
+       ((ref? exp) exp)
+       ((define? exp)
+        `(define ,(define->var exp)
+                 ,@(sexp->ast (define->exp exp))))
+       ((set!? exp)
+        `(set! ,(set!->var exp)
+               ,(sexp->ast (set!->exp exp))))
+       ((if? exp)       
+        `(if ,(sexp->ast (if->condition exp))
+             ,(sexp->ast (if->then exp))
+             ,(sexp->ast (if->else exp))))
+       ((app? exp)
+        (map sexp->ast exp))
        (else exp)))
 ))
