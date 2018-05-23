@@ -23,6 +23,8 @@
       inlinable-top-level-lambda?
       optimize-cps 
       analyze-cps
+      analyze-find-lambdas
+      analyze:find-named-lets
       ;analyze-lambda-side-effects
       opt:add-inlinable-functions
       opt:contract
@@ -35,7 +37,6 @@
       adb:get-db
       simple-lambda?
       one-instance-of-new-mutable-obj?
-      opt:find-named-lets
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -1460,6 +1461,7 @@
        (else exp)))
 
     (define (analyze-cps exp)
+      (analyze:find-named-lets exp)
       (analyze-find-lambdas exp -1)
       (analyze-lambda-side-effects exp -1)
       (analyze-lambda-side-effects exp -1) ;; 2nd pass guarantees lambda purity
@@ -1617,7 +1619,7 @@
  `(lambda ()
     ,(convert exp #f '())))
 
-(define (opt:find-named-lets exp)
+(define (analyze:find-named-lets exp)
   (define (scan exp lp)
     (cond
      ((ast:lambda? exp)
@@ -1633,22 +1635,22 @@
                        '() 
                        (formals->list args*)))
             )
-        ;; TODO: (when lp
-        ;; TODO:   (for-each
-        ;; TODO:     (lambda (a)
-        ;; TODO:       (write `(,a defined in a loop))
-        ;; TODO:       (newline))
-        ;; TODO:     args)
-        ;; TODO: )
+        (when lp
+          (for-each
+            (lambda (a)
+              (with-var! a (lambda (var)
+                (adbv:set-def-in-loop! var #t))))
+            args))
         `(,sym ,(ast:lambda-args exp)
            ,@(map (lambda (e) (scan e lp)) (ast:lambda-body exp))))
      )
      ((quote? exp) exp)
      ((const? exp) exp)
      ((ref? exp) 
-      ;; TODO: (when lp
-      ;; TODO:     (write `(found variable ,exp within a loop))
-      ;; TODO:     (newline))
+      (when lp
+(trace:error `(found var ref ,exp in loop))
+        (with-var! exp (lambda (var)
+          (adbv:set-ref-in-loop! var #t))))
       exp)
      ((define? exp)
       `(define ,(define->var exp)
@@ -1681,8 +1683,9 @@
            ((app? (car (ast:lambda-body (car inner-exp)))))
            ((equal? (caar (ast:lambda-body (car inner-exp))) loop-sym))
           )
-         ; TODO: (write `(found named lambda loop ,loop-sym))
-         ;; Continue scanning
+(trace:error `(found loop in ,exp))
+         ;; TODO: do we want to record the lambda that is a loop?
+         ;; Continue scanning, indicating we are in a loop
          (map (lambda (e) (scan e #t)) exp)
         ))
         (else
