@@ -9,6 +9,7 @@
 
 ;; TODO:
 ;; - identify refs within named lets
+;;   and also, whether refs are defined (or not) in loop
 ;; - will probably need to hook into analysis DB in production version
 ;; - will this find function work for optimized CPS? should test that, too
 ;; - does find need to be more robust? Are there false positives?
@@ -24,7 +25,18 @@
                          "lambda-"
                          (number->string id)
                          (if has-cont "-cont" ""))))
+               (args* (ast:lambda-args exp))
+               (args (if (null? args*) 
+                         '() 
+                         (formals->list args*)))
               )
+          (when lp
+            (for-each
+              (lambda (a)
+                (write `(,a defined in a loop))
+                (newline))
+              args)
+          )
           `(,sym ,(ast:lambda-args exp)
              ,@(map (lambda (e) (scan e lp)) (ast:lambda-body exp))))
        )
