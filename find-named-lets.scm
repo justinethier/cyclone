@@ -7,19 +7,14 @@
   (srfi 2)
 )
 
-;; TODO: can we scan the ast to find loops created by named lets?
-;;
-;; This is the typical structure of such a loop:
-;; 
-;;              ((lambda (loop$14$171)
-;;                 (set! loop$14$171
-;;                   (lambda (zr$17$174 zi$16$173 c$15$172)
-;;                     (...)))
-;;                 (loop$14$171 zr$13$170 zi$12$169 c$11$168))
-;;               #f)
+;; TODO:
+;; - identify refs within named lets
+;; - will probably need to hook into analysis DB in production version
+;; - will this find function work for optimized CPS? should test that, too
+;; - does find need to be more robust? Are there false positives?
 
   (define (find-named-lets exp)
-    (define (scan exp)
+    (define (scan exp lp)
       (cond
        ((ast:lambda? exp)
         (let* ((id (ast:lambda-id exp))
@@ -31,21 +26,25 @@
                          (if has-cont "-cont" ""))))
               )
           `(,sym ,(ast:lambda-args exp)
-             ,@(map scan (ast:lambda-body exp))))
+             ,@(map (lambda (e) (scan e lp)) (ast:lambda-body exp))))
        )
        ((quote? exp) exp)
        ((const? exp) exp)
-       ((ref? exp) exp)
+       ((ref? exp) 
+        (when lp
+            (write `(found variable ,exp within a loop))
+            (newline))
+        exp)
        ((define? exp)
         `(define ,(define->var exp)
-                 ,@(scan (define->exp exp))))
+                 ,@(scan (define->exp exp) lp)))
        ((set!? exp)
         `(set! ,(set!->var exp)
-               ,(scan (set!->exp exp))))
+               ,(scan (set!->exp exp) lp)))
        ((if? exp)       
-        `(if ,(scan (if->condition exp))
-             ,(scan (if->then exp))
-             ,(scan (if->else exp))))
+        `(if ,(scan (if->condition exp) lp)
+             ,(scan (if->then exp) lp)
+             ,(scan (if->else exp) lp)))
        ((app? exp)
         (cond
           ((and-let* ( 
@@ -69,12 +68,12 @@
             )
            (write `(found named lambda loop ,loop-sym))
            ;; Continue scanning
-           (map scan exp)
+           (map (lambda (e) (scan e #t)) exp)
           ))
           (else
-            (map scan exp))))
+            (map (lambda (e) (scan e lp)) exp))))
        (else exp)))
-    (scan exp))
+    (scan exp #f))
 
 ;; Test code follows:
 (define sexp
