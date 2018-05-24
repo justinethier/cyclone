@@ -147,7 +147,137 @@
                      (Cyc-fast-plus c$15$172 1))))))))
         #f))))
 
+(define sexp-after-cps-no-opts
+'((define count
+   (lambda-165-cont
+     (k$296 r$5$163
+            i$4$162
+            step$3$161
+            x$2$160
+            y$1$159)
+     ((lambda-164
+        (max-count$7$165 radius^2$6$164)
+        ((lambda-163
+           (r$316)
+           ((lambda-162
+              (r$315)
+              ((lambda-161
+                 (r$297)
+                 ((lambda-160
+                    (r$314)
+                    ((lambda-159
+                       (r$313)
+                       ((lambda-158
+                          (r$298)
+                          ((lambda-157
+                             (cr$9$167 ci$8$166)
+                             ((lambda-156
+                                (zr$13$170 zi$12$169 c$11$168)
+                                ((lambda-155
+                                   (loop$14$171)
+                                   ((lambda-140
+                                      (r$300)
+                                      ((lambda-139
+                                         (r$299)
+                                         (loop$14$171
+                                           k$296
+                                           zr$13$170
+                                           zi$12$169
+                                           c$11$168))
+                                       (set! loop$14$171 r$300)))
+                                    (lambda-154-cont
+                                      (k$301 zr$17$174 zi$16$173 c$15$172)
+                                      ((lambda-153
+                                         (r$302)
+                                         (if r$302
+                                           (k$301 c$15$172)
+                                           ((lambda-152
+                                              (r$303)
+                                              ((lambda-151
+                                                 (r$304)
+                                                 ((lambda-150
+                                                    (zr^2$19$176 zi^2$18$175)
+                                                    ((lambda-149
+                                                       (r$312)
+                                                       ((lambda-148
+                                                          (r$305)
+                                                          (if r$305
+                                                            (k$301 c$15$172)
+                                                            ((lambda-147
+                                                               (r$311)
+                                                               ((lambda-146
+                                                                  (r$306)
+                                                                  ((lambda-145
+                                                                     (r$310)
+                                                                     ((lambda-144
+                                                                        (r$309)
+                                                                        ((lambda-143
+                                                                           (r$307)
+                                                                           ((lambda-142
+                                                                              (new-zr$21$178
+                                                                                new-zi$20$177)
+                                                                              ((lambda-141
+                                                                                 (r$308)
+                                                                                 (loop$14$171
+                                                                                   k$301
+                                                                                   new-zr$21$178
+                                                                                   new-zi$20$177
+                                                                                   r$308))
+                                                                               (Cyc-fast-plus
+                                                                                 c$15$172
+                                                                                 1)))
+                                                                            r$306
+                                                                            r$307))
+                                                                         (Cyc-fast-plus
+                                                                           r$309
+                                                                           ci$8$166)))
+                                                                      (Cyc-fast-mul
+                                                                        2.0
+                                                                        r$310)))
+                                                                   (Cyc-fast-mul
+                                                                     zr$17$174
+                                                                     zi$16$173)))
+                                                                (Cyc-fast-plus
+                                                                  r$311
+                                                                  cr$9$167)))
+                                                             (Cyc-fast-sub
+                                                               zr^2$19$176
+                                                               zi^2$18$175))))
+                                                        (Cyc-fast-gt
+                                                          r$312
+                                                          radius^2$6$164)))
+                                                     (Cyc-fast-plus
+                                                       zr^2$19$176
+                                                       zi^2$18$175)))
+                                                  r$303
+                                                  r$304))
+                                               (Cyc-fast-mul
+                                                 zi$16$173
+                                                 zi$16$173)))
+                                            (Cyc-fast-mul
+                                              zr$17$174
+                                              zr$17$174))))
+                                       (Cyc-fast-eq
+                                         c$15$172
+                                         max-count$7$165)))))
+                                 #f))
+                              cr$9$167
+                              ci$8$166
+                              0))
+                           r$297
+                           r$298))
+                        (Cyc-fast-plus i$4$162 r$313)))
+                     (Cyc-fast-mul r$314 step$3$161)))
+                  (inexact__inline__ y$1$159)))
+               (Cyc-fast-plus r$5$163 r$315)))
+            (Cyc-fast-mul r$316 step$3$161)))
+         (inexact__inline__ x$2$160)))
+      64
+      16.0)))))
+
 (find-named-lets
   (ast:sexp->ast 
-    sexp))
+    sexp-after-cps-no-opts))
+    ;;sexp))
+
 
