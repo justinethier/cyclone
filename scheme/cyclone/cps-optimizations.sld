@@ -864,6 +864,10 @@
                       (with-var param (lambda (var)
 ;(trace:error `(DEBUG ,param ,(adbv:ref-by var)))
                         (and 
+                          ;; If param is referenced in a loop (but defined outside)
+                          ;; do not inline function into the loop
+                          (or (not (adbv:ref-in-loop? var))
+                              (adbv:def-in-loop? var))
                           ;; If param is never referenced, then prim is being
                           ;; called for side effects, possibly on a global
                           (not (null? (adbv:ref-by var)))
