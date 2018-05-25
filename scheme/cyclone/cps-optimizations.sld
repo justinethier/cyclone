@@ -1652,7 +1652,7 @@
      ((const? exp) exp)
      ((ref? exp) 
       (when lp
-(trace:error `(found var ref ,exp in loop))
+        ;(trace:error `(found var ref ,exp in loop))
         (with-var! exp (lambda (var)
           (adbv:set-ref-in-loop! var #t))))
       exp)
@@ -1687,7 +1687,7 @@
            ((app? (car (ast:lambda-body (car inner-exp)))))
            ((equal? (caar (ast:lambda-body (car inner-exp))) loop-sym))
           )
-(trace:error `(found loop in ,exp))
+         ;;(trace:error `(found loop in ,exp))
          ;; TODO: do we want to record the lambda that is a loop?
          ;; Continue scanning, indicating we are in a loop
          (map (lambda (e) (scan e #t)) exp)
