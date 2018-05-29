@@ -10,6 +10,9 @@ The `(scheme cyclone ast)` library defines abstract syntax tree types used durin
 - [`ast:set-lambda-args!`](#astset-lambda-args)
 - [`ast:lambda-body`](#astlambda-body)
 - [`ast:set-lambda-body!`](#astset-lambda-body)
+- [`ast:ast->sexp`](#astast-sexp)
+- [`ast:sexp->ast`](#astsexp-ast) 
+- [`ast:ast->pp-sexp`](#astast-pp-sexp)
 
 # ast:make-lambda
     (ast:make-lambda args body)
@@ -39,4 +42,16 @@ The `(scheme cyclone ast)` library defines abstract syntax tree types used durin
 # ast:set-lambda-body!
 
     (ast:set-lambda-body! lambda-obj body)
+
+# ast:ast->sexp
+
+    (ast:ast->sexp exp)
+
+# ast:sexp->ast
+
+    (ast:sexp->ast exp)
+
+# ast:ast->pp-sexp
+
+    (ast:ast->pp-sexp exp)
 
