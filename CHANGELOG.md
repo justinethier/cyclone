@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8 - TBD
+## 0.8 - May 30, 2018
 
 Features
 
