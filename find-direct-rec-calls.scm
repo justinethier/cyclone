@@ -8,78 +8,36 @@
 )
 
   (define (find-direct-recursive-calls exp)
-    (define (scan exp ?args?)
-      ;;(cond
-      ;; ((ast:lambda? exp)
-      ;;  (let* ((id (ast:lambda-id exp))
-      ;;         (has-cont (ast:lambda-has-cont exp))
-      ;;         (sym (string->symbol 
-      ;;                (string-append
-      ;;                   "lambda-"
-      ;;                   (number->string id)
-      ;;                   (if has-cont "-cont" ""))))
-      ;;         (args* (ast:lambda-args exp))
-      ;;         (args (if (null? args*) 
-      ;;                   '() 
-      ;;                   (formals->list args*)))
-      ;;        )
-      ;;    (when lp
-      ;;      (for-each
-      ;;        (lambda (a)
-      ;;          (write `(,a defined in a loop))
-      ;;          (newline))
-      ;;        args)
-      ;;    )
-      ;;    `(,sym ,(ast:lambda-args exp)
-      ;;       ,@(map (lambda (e) (scan e lp)) (ast:lambda-body exp))))
-      ;; )
-      ;; ((quote? exp) exp)
-      ;; ((const? exp) exp)
-      ;; ((ref? exp) 
-      ;;  (when lp
-      ;;      (write `(found variable ,exp within a loop))
-      ;;      (newline))
-      ;;  exp)
-      ;; ((define? exp)
-      ;;  `(define ,(define->var exp)
-      ;;           ,@(scan (define->exp exp) lp)))
-      ;; ((set!? exp)
-      ;;  `(set! ,(set!->var exp)
-      ;;         ,(scan (set!->exp exp) lp)))
-      ;; ((if? exp)       
-      ;;  `(if ,(scan (if->condition exp) lp)
-      ;;       ,(scan (if->then exp) lp)
-      ;;       ,(scan (if->else exp) lp)))
-      ;; ((app? exp)
-      ;;  (cond
-      ;;    ((and-let* ( 
-      ;;       ;; Find lambda with initial #f assignment
-      ;;       ((ast:lambda? (car exp)))
-      ;;       ((pair? (cdr exp)))
-      ;;       ((not (cadr exp)))
-      ;;       (= 1 (length (ast:lambda-args (car exp))))
-      ;;       ;; Get information for continuation
-      ;;       (loop-sym (car (ast:lambda-args (car exp))))
-      ;;       (inner-exp (car (ast:lambda-body (car exp))))
-      ;;       ((app? inner-exp))
-      ;;       ((ast:lambda? (car inner-exp)))
-      ;;       ;; Find the set (assumes CPS conversion)
-      ;;       ((pair? (cdr inner-exp)))
-      ;;       ((set!? (cadr inner-exp)))
-      ;;       ((equal? (set!->var (cadr inner-exp)) loop-sym))
-      ;;       ;; Check the set's continuation
-      ;;       ((app? (car (ast:lambda-body (car inner-exp)))))
-      ;;       ((equal? (caar (ast:lambda-body (car inner-exp))) loop-sym))
-      ;;      )
-      ;;     (write `(found named lambda loop ,loop-sym))
-      ;;     ;; Continue scanning
-      ;;     (map (lambda (e) (scan e #t)) exp)
-      ;;    ))
-      ;;    (else
-      ;;      (map (lambda (e) (scan e lp)) exp))))
-      ;; (else exp)))
-    )
-    (scan exp #f)
+    (define (scan exp def-sym)
+      (write `(scan ,def-sym ,exp)) (newline)
+      (cond
+       ((ast:lambda? exp)
+        #f)
+       ((quote? exp) exp)
+       ((const? exp) exp)
+       ((ref? exp) 
+        exp)
+       ((define? exp) #f)
+       ((set!? exp) #f)
+       ((if? exp)       
+        (scan (if->condition exp) def-sym)
+        (scan (if->then exp) def-sym)
+        (scan (if->else exp) def-sym))
+       ((app? exp)
+        (when (equal? (car exp) def-sym)
+          (write `(possible direct recursive call ,exp)))
+       )
+       (else #f)))
+    (for-each
+      (lambda (exp)
+        (cond
+          ((and-let* (((define? exp))
+                      (def-exps (define->exp exp))
+                      (ast:lambda? (car def-exps))
+                     )
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
+          (else #f)))
+        exp)
   )
 
 ;; TEST code:
@@ -88,17 +46,17 @@
  (define l12 #f)
  (define l6 #f)
  (define mas
-   (lambda-136-cont
+   (lambda
      (k$247 x$4$135 y$3$134 z$2$133)
      (shorterp
-       (lambda-135
+       (lambda
          (r$248)
          (if r$248
-           (mas (lambda-133
+           (mas (lambda
                   (r$249)
-                  (mas (lambda-131
+                  (mas (lambda
                          (r$250)
-                         (mas (lambda-129
+                         (mas (lambda
                                 (r$251)
                                 (mas k$247 r$249 r$250 r$251))
                               (cdr z$2$133)
@@ -114,7 +72,7 @@
        y$3$134
        x$4$135)))
  (define shorterp
-   (lambda-128-cont
+   (lambda
      (k$240 x$6$131 y$5$130)
      (if (null? y$5$130)
        (k$240 #f)
@@ -123,5 +81,6 @@
          (shorterp k$240 (cdr x$6$131) (cdr y$5$130))))))
 ))
 
+;(pretty-print (ast:sexp->ast sexp))
 (find-direct-recursive-calls
   (ast:sexp->ast sexp))
