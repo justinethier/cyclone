@@ -1,14 +1,10 @@
-;; Instead of just porting this to cps-optmizations should consider
-;; creating a new subdirectory under scheme/cyclone/cps-optimizations and starting to place
-;; things like this there as new libraries, to isolate them, improve testability, and help
-;; make optimizations easiser to maintain
 (import
   (scheme base)
   (scheme cyclone ast)
   (scheme cyclone util)
   (scheme cyclone pretty-print)
   (scheme write)
-  ;(srfi 2)
+  (srfi 2)
 )
 
   (define (find-direct-recursive-calls exp)
@@ -106,7 +102,5 @@
          (shorterp k$240 (cdr x$6$131) (cdr y$5$130))))))
 ))
 
-(write `(todo exp def-exps ,(ast:lambda? 0) (ast:lambda? (car def-exps))))(newline)
 (find-direct-recursive-calls
   (ast:sexp->ast sexp))
-(write 'done)
