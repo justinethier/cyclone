@@ -25,6 +25,7 @@
       analyze-cps
       analyze-find-lambdas
       analyze:find-named-lets
+      analyze:find-direct-recursive-calls
       ;analyze-lambda-side-effects
       opt:add-inlinable-functions
       opt:contract
@@ -1466,6 +1467,7 @@
 
     (define (analyze-cps exp)
       (analyze:find-named-lets exp)
+      (analyze:find-direct-recursive-calls exp)
       (analyze-find-lambdas exp -1)
       (analyze-lambda-side-effects exp -1)
       (analyze-lambda-side-effects exp -1) ;; 2nd pass guarantees lambda purity
@@ -1696,5 +1698,62 @@
           (map (lambda (e) (scan e lp)) exp))))
      (else exp)))
   (scan exp #f))
+
+;; Find any top-level functions that call themselves directly
+(define (analyze:find-direct-recursive-calls exp)
+  ;; Check arguments to the top level function to make sure 
+  ;; they are "safe" for further optimizations.
+  ;; Right now this is very conservative.
+  (define (check-args args)
+    (define (check exp)
+      (cond
+        ((quote? exp) #t)
+        ((const? exp) #t)
+        ((ref? exp) #t)
+        ((app? exp)
+         (and 
+           ;; TODO: Very conservative right now, could include more
+           (member (car exp) '(car cdr))
+           (check-args (cdr exp))))
+        (else #f)))
+    (every check args))
+
+  (define (scan exp def-sym)
+    ;(trace:info `(analyze:find-direct-recursive-calls scan ,def-sym ,exp))
+    (cond
+     ((ast:lambda? exp)
+      ;; Reject if there are nested functions
+      #f)
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) 
+      exp)
+     ((define? exp) #f)
+     ((set!? exp) #f)
+     ((if? exp)       
+      (scan (if->condition exp) def-sym) ;; OK to check??
+      (scan (if->then exp) def-sym)
+      (scan (if->else exp) def-sym))
+     ((app? exp)
+      (when (equal? (car exp) def-sym)
+        (if (check-args (cddr exp)) ;; Skip func and continuation
+          (trace:info `("direct recursive call" ,exp))
+          (trace:info `("not a direct recursive call" ,exp))
+       )
+      )
+     )
+     (else #f)))
+  (if (pair? exp)
+      (for-each
+        (lambda (exp)
+          ;;(write exp) (newline)
+          (and-let* (((define? exp))
+                      (def-exps (define->exp exp))
+                     ((vector? (car def-exps)))
+                     ((ast:lambda? (car def-exps)))
+                     )
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
+          exp))
+)
 
 ))
