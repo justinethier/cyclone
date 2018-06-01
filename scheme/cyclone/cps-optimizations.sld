@@ -62,6 +62,8 @@
       adbv:set-def-in-loop!
       adbv:ref-in-loop? 
       adbv:set-ref-in-loop!
+      adbv:direct-rec-call? 
+      adbv:set-direct-rec-call!
       ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
@@ -109,6 +111,7 @@
         cont
         def-in-loop
         ref-in-loop
+        direct-rec-call
       )
       adb:variable?
       (global adbv:global? adbv:set-global!)
@@ -132,8 +135,11 @@
       ;; Is the variable mutated indirectly? (EG: set-car! of a cdr)
       (mutated-indirectly adbv:mutated-indirectly? adbv:set-mutated-indirectly!)
       (cont adbv:cont? adbv:set-cont!)
+      ;; Following two indicate if a variable is defined/referenced in a loop
       (def-in-loop adbv:def-in-loop? adbv:set-def-in-loop!)
       (ref-in-loop adbv:ref-in-loop? adbv:set-ref-in-loop!)
+      ;; Does a top-level function directly call itself?
+      (direct-rec-call adbv:direct-rec-call? adbv:set-direct-rec-call!)
     )
 
     (define (adbv-set-assigned-value-helper! sym var value)
@@ -162,7 +168,25 @@
     )
 
     (define (adb:make-var)
-      (%adb:make-var '? '? #f #f #f 0 '() #f #f 0 0 #t #f #f #f #f))
+      (%adb:make-var 
+        '?  ; global 
+        '?  ; defined-by 
+        #f  ; defines-lambda-id
+        #f  ; const 
+        #f  ; const-value  
+        0   ; ref-count 
+        '() ; ref-by             
+        #f  ; reassigned 
+        #f  ; assigned-value 
+        0   ; app-fnc-count 
+        0   ; app-arg-count
+        #t  ; inlinable 
+        #f  ; mutated-indirectly
+        #f  ; cont
+        #f  ; def-in-loop
+        #f  ; ref-in-loop
+        #f  ; direct-rec-call
+      ))
 
     (define-record-type <analysis-db-function>
       (%adb:make-fnc simple unused-params assigned-to-var side-effects)
@@ -1736,12 +1760,13 @@
       (scan (if->else exp) def-sym))
      ((app? exp)
       (when (equal? (car exp) def-sym)
-        (if (check-args (cddr exp)) ;; Skip func and continuation
+        (cond
+         ((check-args (cddr exp)) ;; Skip func and continuation
           (trace:info `("direct recursive call" ,exp))
-          (trace:info `("not a direct recursive call" ,exp))
-       )
-      )
-     )
+          (with-var! def-sym (lambda (var)
+            (adbv:set-direct-rec-call! var #t))))
+         (else
+          (trace:info `("not a direct recursive call" ,exp))))))
      (else #f)))
   (if (pair? exp)
       (for-each
