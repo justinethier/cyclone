@@ -55,17 +55,11 @@
       (lambda (exp)
         (write exp) (newline)
         (and-let* (((define? exp))
-                   (def-exps (define->exp exp))
-                   (vector? (car def-exps))
-                   (ast:lambda? (car def-exps))
+                    (def-exps (define->exp exp))
+                   ((vector? (car def-exps)))
+                   ((ast:lambda? (car def-exps)))
                    )
-         (write (vector? 1))
-         #;(write `(todo exp 
-                   (vector? (car def-exps))  ;; Crashes the program, WTF?
-                   ,(vector? 1) ;; Why would this crash the program????
-                   ,(car def-exps)  ;; Seems fine though???
-                   def-exps (ast:lambda? '(test 1)) (ast:lambda? (car def-exps))))(newline)
-         ;;(scan (car (ast:lambda-body (car def-exps))) (define->var exp))
+         (scan (car (ast:lambda-body (car def-exps))) (define->var exp))
          ))
         exp)
   )
@@ -75,7 +69,7 @@
  (define l18 #f)
  (define l12 #f)
  (define l6 #f)
- #;(define mas
+ (define mas
    (lambda
      (k$247 x$4$135 y$3$134 z$2$133)
      (shorterp
@@ -102,7 +96,7 @@
        y$3$134
        x$4$135)))
  (define *num-passed* 1)
- #;(define shorterp
+ (define shorterp
    (lambda
      (k$240 x$6$131 y$5$130)
      (if (null? y$5$130)
