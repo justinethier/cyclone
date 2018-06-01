@@ -1763,6 +1763,9 @@
         (cond
          ((check-args (cddr exp)) ;; Skip func and continuation
           (trace:info `("direct recursive call" ,exp))
+          ;; TODO: No, not good enough! consider _list-index from scheme base. At the
+          ;; least we need to account for newly-allocated closures being passed as the cont.
+          ;; But it seems neither that function or foldr is a direct call
           (with-var! def-sym (lambda (var)
             (adbv:set-direct-rec-call! var #t))))
          (else
