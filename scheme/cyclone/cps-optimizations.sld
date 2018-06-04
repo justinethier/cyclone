@@ -1770,7 +1770,7 @@
          ((and
             (check-cont (cadr exp))
             (check-args (cddr exp)))
-          (trace:info `("direct recursive call" ,exp))
+          (trace:info `("direct recursive call" ,exp ,(cadr exp) ,(check-cont (cadr exp))))
           (with-var! def-sym (lambda (var)
             (adbv:set-direct-rec-call! var #t))))
          (else
