@@ -1725,6 +1725,12 @@
 
 ;; Find any top-level functions that call themselves directly
 (define (analyze:find-direct-recursive-calls exp)
+  ;; Verify the continuation is simple and there is no closure allocation
+  (define (check-cont k)
+    (cond
+      ((ref? k) #t)
+      (else #f)))
+
   ;; Check arguments to the top level function to make sure 
   ;; they are "safe" for further optimizations.
   ;; Right now this is very conservative.
@@ -1761,16 +1767,16 @@
      ((app? exp)
       (when (equal? (car exp) def-sym)
         (cond
-         ((check-args (cddr exp)) ;; Skip func and continuation
+         ((and
+            (check-cont (cadr exp))
+            (check-args (cddr exp)))
           (trace:info `("direct recursive call" ,exp))
-          ;; TODO: No, not good enough! consider _list-index from scheme base. At the
-          ;; least we need to account for newly-allocated closures being passed as the cont.
-          ;; But it seems neither that function or foldr is a direct call
           (with-var! def-sym (lambda (var)
             (adbv:set-direct-rec-call! var #t))))
          (else
           (trace:info `("not a direct recursive call" ,exp))))))
      (else #f)))
+
   (if (pair? exp)
       (for-each
         (lambda (exp)

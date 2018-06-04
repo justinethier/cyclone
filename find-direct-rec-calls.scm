@@ -8,6 +8,12 @@
 )
 
   (define (find-direct-recursive-calls exp)
+    ;; Verify the continuation is simple and there is no closure allocation
+    (define (check-cont k)
+      (cond
+        ((ref? k) #t)
+        (else #f)))
+
     (define (check-args args)
       (define (check exp)
         (cond
@@ -35,12 +41,14 @@
        ((define? exp) #f)
        ((set!? exp) #f)
        ((if? exp)       
-        (scan (if->condition exp) def-sym) ;; OK to check??
+        ;;(scan (if->condition exp) def-sym) ;; Not a tail call
         (scan (if->then exp) def-sym)
         (scan (if->else exp) def-sym))
        ((app? exp)
         (when (equal? (car exp) def-sym)
-          (if (check-args (cddr exp)) ;; Skip func and continuation
+          (if (and
+                (check-args (cddr exp))
+                (check-cont (cadr exp)))
             (write `(direct recursive call ,exp))
             (write `(not a direct recursive call ,exp))
          )
