@@ -91,6 +91,37 @@
            (k$247 z$2$133)))
        y$3$134
        x$4$135)))
+ (define foldr
+   (lambda
+     (k$6632 func$362$3486 end$361$3485 lst$360$3484)
+     (if (null? lst$360$3484)
+       (k$6632 end$361$3485)
+       (foldr (lambda
+                (r$6635)
+                (func$362$3486 k$6632 (car lst$360$3484) r$6635))
+              func$362$3486
+              end$361$3485
+              (cdr lst$360$3484)))))
+ (define _list-index
+   (lambda
+     (k$3902 e$2456$2587 lst$2455$2586)
+     (if (null? lst$2455$2586)
+       (k$3902 -1)
+       (if (eq? (car lst$2455$2586) e$2456$2587)
+         (k$3902 0)
+         (_list-index
+           (lambda
+             (r$3908)
+             (if (Cyc-fast-eq r$3908 -1)
+               (k$3902 -1)
+               (_list-index
+                 (lambda
+                   (r$3906)
+                   (k$3902 (Cyc-fast-plus 1 r$3906)))
+                 e$2456$2587
+                 (cdr lst$2455$2586))))
+           e$2456$2587
+           (cdr lst$2455$2586))))))
  (define *num-passed* 1)
  (define shorterp
    (lambda
