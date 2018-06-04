@@ -15,6 +15,7 @@
           (scheme write)
           (scheme cyclone primitives)
           (scheme cyclone transforms)
+          (scheme cyclone cps-optimizations)
           (scheme cyclone util)
           (scheme cyclone libraries)
   )
