@@ -1219,6 +1219,11 @@
              (and
                (> (string-length tmp-ident) 3)
                (equal? "self" (substring tmp-ident 0 4))))
+           (has-loop?
+             (and (not has-closure?) ;; Only top-level functions for now
+                  (pair? trace)
+                  (not (null? (cdr trace)))
+                  (adbv:direct-rec-call? (adb:get (cdr trace)))))
            (formals*
              (string-append
                 (if has-closure? 
@@ -1261,7 +1266,12 @@
                          (c:append
                            (c-code 
                              ;; Only trace when entering initial defined function
-                             (if has-closure? "" (st:->code trace)))
+                             (cond
+                               (has-closure? "")
+                               (else
+                                 (string-append
+                                   (if has-loop? "\nloop:\n" "")
+                                   (st:->code trace)))))
                            body)
                          "  ")
                        "; \n"
