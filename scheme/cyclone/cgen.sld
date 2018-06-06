@@ -716,6 +716,29 @@
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
+        ((and (pair? trace)
+              (not (null? (cdr trace)))
+              (adbv:direct-rec-call? (adb:get (cdr trace)))
+              TODO: what to put here? only want this for the direct rec calls...
+              (equal? (car exp) (cdr trace))
+         )
+         (let* ((cgen 
+                  (c-compile-args
+                     args 
+                     append-preamble 
+                     ""
+                     "" ;;this-cont
+                     trace
+                     cps?)))
+           (c-code
+             (string-append
+               ;(c:allocs->str (c:allocs cgen))
+               "\n"
+               (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
+               "\n"
+               "goto loop;")))
+        )
+         
         ((lambda? fun)
          (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
                                                                ;; properly, wait until this comes up in an example
