@@ -711,7 +711,7 @@
 
 ;; c-compile-app : app-exp (string -> void) -> string
 (define (c-compile-app exp append-preamble cont trace cps?)
-  ;(trace:debug `(c-compile-app: ,exp))
+  (trace:info `(c-compile-app: ,exp ,trace))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
@@ -719,8 +719,9 @@
         ((and (pair? trace)
               (not (null? (cdr trace)))
               (adbv:direct-rec-call? (adb:get (cdr trace)))
-              TODO: what to put here? only want this for the direct rec calls...
-              (equal? (car exp) (cdr trace))
+              (tagged-list? '%closure-ref fun)
+              (equal? (cadr fun) (cdr trace)) ;; Needed?
+              (equal? (car args) (cdr trace))
          )
          (let* ((cgen 
                   (c-compile-args
