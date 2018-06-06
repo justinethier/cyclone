@@ -716,6 +716,7 @@
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
+        ;; Direct recursive call of top-level function
         ((and (pair? trace)
               (not (null? (cdr trace)))
               (adbv:direct-rec-call? (adb:get (cdr trace)))
@@ -724,8 +725,9 @@
               (equal? (car args) (cdr trace))
          )
          (let* ((cgen 
+                  ;; TODO: skip the closure, just cdr the cdr???
                   (c-compile-args
-                     args 
+                     (cdr args)
                      append-preamble 
                      ""
                      "" ;;this-cont
