@@ -801,6 +801,11 @@
 ;;
                )
            (trace:info `(loop ,cgen-lis ,parent-args))
+;; Output so far on ntakl:
+;;(loop (("Cyc_cdr(data, x_736_73133)" ())
+;;       ("Cyc_cdr(data, y_735_73132)" ()))
+;;      (k$241 x$6$133 y$5$132))
+
            (c-code
              (string-append
                cgen-allocs ;(c:allocs->str (c:allocs cgen))
