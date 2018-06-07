@@ -724,20 +724,32 @@
               (equal? (cadr fun) (cdr trace)) ;; Needed?
               (equal? (car args) (cdr trace))
          )
-         (let* ((cgen 
-                  ;; TODO: skip the closure, just cdr the cdr???
-                  (c-compile-args
-                     (cdr args)
-                     append-preamble 
-                     ""
-                     "" ;;this-cont
-                     trace
-                     cps?)))
+         (let* ((cgen-lis
+                  ;; TODO: need a way to get the original args to the top-level function
+                  ;; TODO: probably need a specilized function here instead
+                  
+                  ;(c-compile-args
+                  ;   (cddr args) ;; Skip the closure
+                  ;   append-preamble 
+                  ;   ""
+                  ;   "" ;;this-cont
+                  ;   trace
+                  ;   cps?)
+                  (map 
+                    (lambda (e)
+                     (c-compile-exp e append-preamble "" "" cps?))
+                    (cddr args)) ;; Skip the closure
+                  )
+                (cgen-allocs 
+                  (apply string-append 
+                    (map (lambda (a) (c:allocs->str (c:allocs a))) cgen-lis)))
+               )
+           (trace:info `(loop ,cgen-lis))
            (c-code
              (string-append
-               ;(c:allocs->str (c:allocs cgen))
+               cgen-allocs ;(c:allocs->str (c:allocs cgen))
                "\n"
-               (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
+               ;; TODO: (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
                "\n"
                "goto loop;")))
         )
