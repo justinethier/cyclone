@@ -15,6 +15,7 @@
           (scheme write)
           (scheme cyclone primitives)
           (scheme cyclone transforms)
+          (scheme cyclone ast)
           (scheme cyclone cps-optimizations)
           (scheme cyclone util)
           (scheme cyclone libraries)
@@ -744,6 +745,8 @@
                   (apply string-append 
                     (map (lambda (a) (c:allocs->str (c:allocs a))) cgen-lis)))
 
+                (parent-fnc (adbv:assigned-value (adb:get (cdr trace))))
+                (parent-args (ast:lambda-args (if (pair? parent-fnc) (car parent-fnc) parent-fnc)))
 ;; TODO: extract top-level function args from anaylsis DB??
 ;;       (shorterp
 ;;         .
@@ -797,7 +800,7 @@
 ;;             #t)))
 ;;
                )
-           (trace:info `(loop ,cgen-lis))
+           (trace:info `(loop ,cgen-lis ,parent-args))
            (c-code
              (string-append
                cgen-allocs ;(c:allocs->str (c:allocs cgen))
