@@ -743,6 +743,59 @@
                 (cgen-allocs 
                   (apply string-append 
                     (map (lambda (a) (c:allocs->str (c:allocs a))) cgen-lis)))
+
+;; TODO: extract top-level function args from anaylsis DB??
+;;       (shorterp
+;;         .
+;;         #((record-marker)
+;;           #((record-marker)
+;;             "<analysis-db-variable>"
+;;             (global
+;;               defined-by
+;;               defines-lambda-id
+;;               const
+;;               const-value
+;;               ref-count
+;;               ref-by
+;;               reassigned
+;;               assigned-value
+;;               app-fnc-count
+;;               app-arg-count
+;;               inlinable
+;;               mutated-indirectly
+;;               cont
+;;               def-in-loop
+;;               ref-in-loop
+;;               direct-rec-call))
+;;           #(?
+;;             -1
+;;             130
+;;             #f
+;;             #f
+;;             3
+;;             (130 -1 138)
+;;             #f
+;;             (#((record-marker)
+;;                #((record-marker)
+;;                  "<lambda-ast>"
+;;                  (id args body has-cont))
+;;                #(130
+;;                  (k$241 x$6$133 y$5$132)
+;;                  ((if (null? y$5$132)
+;;                     (k$241 #f)
+;;                     (if (null? x$6$133)
+;;                       (k$241 #t)
+;;                       (shorterp k$241 (cdr x$6$133) (cdr y$5$132)))))
+;;                  #t)))
+;;             2
+;;             0
+;;             #f
+;;             #f
+;;             #f
+;;             #f
+;;             #f
+;;             #t)))
+;;
                )
            (trace:info `(loop ,cgen-lis))
            (c-code
