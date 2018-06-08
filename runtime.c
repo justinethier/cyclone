@@ -1557,13 +1557,13 @@ object Cyc_is_boolean(object o)
 //    return boolean_t;
 //  return boolean_f;
 //}
-
-object Cyc_is_null(object o)
-{
-  if (o == NULL)
-    return boolean_t;
-  return boolean_f;
-}
+//
+//object Cyc_is_null(object o)
+//{
+//  if (o == NULL)
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_is_number(object o)
 {

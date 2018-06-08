@@ -626,6 +626,8 @@ typedef boolean_type *boolean;
 
 #define boolean_desc(x) (((boolean_type *) x)->desc)
 
+#define make_boolean(x) (x ? boolean_t : boolean_f)
+
 /**
  * @brief Symbols are similar to strings, but only one instance of each
  * unique symbol is created, so comparisons are O(1).
