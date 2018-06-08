@@ -724,18 +724,11 @@
               (tagged-list? '%closure-ref fun)
               (equal? (cadr fun) (cdr trace)) ;; Needed?
               (equal? (car args) (cdr trace))
+              ;; Make sure continuation is not a lambda, because
+              ;; that means a closure may be allocated
+              (ref? (cadr args))
          )
          (let* ((cgen-lis
-                  ;; TODO: need a way to get the original args to the top-level function
-                  ;; TODO: probably need a specilized function here instead
-                  
-                  ;(c-compile-args
-                  ;   (cddr args) ;; Skip the closure
-                  ;   append-preamble 
-                  ;   ""
-                  ;   "" ;;this-cont
-                  ;   trace
-                  ;   cps?)
                   (map 
                     (lambda (e)
                      (c-compile-exp e append-preamble "" "" cps?))
@@ -767,12 +760,7 @@
                       parent-args
                       cgen-lis)))
                )
-           ;;(trace:info `(loop ,cgen-lis ,parent-args))
-;; Output so far on ntakl:
-;;(loop (("Cyc_cdr(data, x_736_73133)" ())
-;;       ("Cyc_cdr(data, y_735_73132)" ()))
-;;      (k$241 x$6$133 y$5$132))
-
+           ;;(trace:info `(loop ,args ,(cadr args) ,cgen-lis ,parent-args))
            (c-code
              (string-append
                cgen-allocs ;(c:allocs->str (c:allocs cgen))
