@@ -1720,13 +1720,13 @@ object Cyc_is_procedure(void *data, object o)
 //    return boolean_t;
 //  return boolean_f;
 //}
-
-object Cyc_eq(object x, object y)
-{
-  if (x == y)
-    return boolean_t;
-  return boolean_f;
-}
+//
+//object Cyc_eq(object x, object y)
+//{
+//  if (x == y)
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_set_cell(void *data, object l, object val)
 {

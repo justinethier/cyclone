@@ -435,7 +435,8 @@ double MRG32k3a (double seed);
  * \defgroup prim_eq Equality and type predicates
  */
 /**@{*/
-object Cyc_eq(object x, object y);
+//object Cyc_eq(object x, object y);
+#define Cyc_eq(x, y) (make_boolean(x == y))
 int equal(object, object);
 object equalp(object, object);
 object Cyc_has_cycle(object lst);
