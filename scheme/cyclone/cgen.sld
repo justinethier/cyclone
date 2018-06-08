@@ -712,7 +712,7 @@
 
 ;; c-compile-app : app-exp (string -> void) -> string
 (define (c-compile-app exp append-preamble cont trace cps?)
-  (trace:info `(c-compile-app: ,exp ,trace))
+  ;;(trace:info `(c-compile-app: ,exp ,trace))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
@@ -746,61 +746,28 @@
                     (map (lambda (a) (c:allocs->str (c:allocs a))) cgen-lis)))
 
                 (parent-fnc (adbv:assigned-value (adb:get (cdr trace))))
-                (parent-args (ast:lambda-args (if (pair? parent-fnc) (car parent-fnc) parent-fnc)))
-;; TODO: extract top-level function args from anaylsis DB??
-;;       (shorterp
-;;         .
-;;         #((record-marker)
-;;           #((record-marker)
-;;             "<analysis-db-variable>"
-;;             (global
-;;               defined-by
-;;               defines-lambda-id
-;;               const
-;;               const-value
-;;               ref-count
-;;               ref-by
-;;               reassigned
-;;               assigned-value
-;;               app-fnc-count
-;;               app-arg-count
-;;               inlinable
-;;               mutated-indirectly
-;;               cont
-;;               def-in-loop
-;;               ref-in-loop
-;;               direct-rec-call))
-;;           #(?
-;;             -1
-;;             130
-;;             #f
-;;             #f
-;;             3
-;;             (130 -1 138)
-;;             #f
-;;             (#((record-marker)
-;;                #((record-marker)
-;;                  "<lambda-ast>"
-;;                  (id args body has-cont))
-;;                #(130
-;;                  (k$241 x$6$133 y$5$132)
-;;                  ((if (null? y$5$132)
-;;                     (k$241 #f)
-;;                     (if (null? x$6$133)
-;;                       (k$241 #t)
-;;                       (shorterp k$241 (cdr x$6$133) (cdr y$5$132)))))
-;;                  #t)))
-;;             2
-;;             0
-;;             #f
-;;             #f
-;;             #f
-;;             #f
-;;             #f
-;;             #t)))
-;;
+                (parent-args 
+                  (cdr ;; Skip continuation
+                    (ast:lambda-args 
+                      (if (pair? parent-fnc) 
+                          (car parent-fnc)
+                          parent-fnc))))
+                (cgen-body
+                  (apply
+                    string-append
+                    (map
+                      (lambda (arg body-exp)
+                        (string-append
+                          (mangle arg)
+                          " = "
+                          (c:body body-exp)
+                          ";"
+                        )
+                      )
+                      parent-args
+                      cgen-lis)))
                )
-           (trace:info `(loop ,cgen-lis ,parent-args))
+           ;;(trace:info `(loop ,cgen-lis ,parent-args))
 ;; Output so far on ntakl:
 ;;(loop (("Cyc_cdr(data, x_736_73133)" ())
 ;;       ("Cyc_cdr(data, y_735_73132)" ()))
@@ -810,7 +777,7 @@
              (string-append
                cgen-allocs ;(c:allocs->str (c:allocs cgen))
                "\n"
-               ;; TODO: (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
+               cgen-body ;; TODO: (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
                "\n"
                "goto loop;")))
         )
@@ -1369,8 +1336,10 @@
                                (has-closure? "")
                                (else
                                  (string-append
+                                   (st:->code trace)
+                                   ;; TODO: probably needs brackets afterwards...
                                    (if has-loop? "\nloop:\n" "")
-                                   (st:->code trace)))))
+                                 ))))
                            body)
                          "  ")
                        "; \n"
