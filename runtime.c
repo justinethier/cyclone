@@ -1542,15 +1542,15 @@ declare_num_cmp(Cyc_num_lt,  Cyc_num_lt_op,  Cyc_num_fast_lt_op, dispatch_num_lt
 declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, Cyc_num_fast_gte_op, dispatch_num_gte, >=, CYC_BN_GTE);
 declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, Cyc_num_fast_lte_op, dispatch_num_lte, <=, CYC_BN_LTE);
 
-object Cyc_is_boolean(object o)
-{
-  if ((o != NULL) &&
-      !is_value_type(o) &&
-      ((list) o)->tag == boolean_tag && ((boolean_f == o) || (boolean_t == o)))
-    return boolean_t;
-  return boolean_f;
-}
-
+//object Cyc_is_boolean(object o)
+//{
+//  if ((o != NULL) &&
+//      !is_value_type(o) &&
+//      ((list) o)->tag == boolean_tag && ((boolean_f == o) || (boolean_t == o)))
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
 //object Cyc_is_pair(object o)
 //{
 //  if (is_object_type(o) && ((list) o)->tag == pair_tag)

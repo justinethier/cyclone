@@ -439,7 +439,8 @@ object Cyc_eq(object x, object y);
 int equal(object, object);
 object equalp(object, object);
 object Cyc_has_cycle(object lst);
-object Cyc_is_boolean(object o);
+//object Cyc_is_boolean(object o);
+#define Cyc_is_boolean(o) (make_boolean(o == boolean_f || o == boolean_t))
 #define Cyc_is_pair(o) ((is_object_type(o) && ((list) o)->tag == pair_tag) ? boolean_t : boolean_f)
 #define Cyc_is_null(o) (make_boolean(o == NULL))
 //TODO: convert all of these to macros (if it makes sense, most should), and remove them from runtime.c:
