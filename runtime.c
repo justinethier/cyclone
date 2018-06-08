@@ -1588,12 +1588,12 @@ object Cyc_is_complex(object o)
   return boolean_f;
 }
 
-object Cyc_is_fixnum(object o)
-{
-  if (obj_is_int(o))
-    return boolean_t;
-  return boolean_f;
-}
+//object Cyc_is_fixnum(object o)
+//{
+//  if (obj_is_int(o))
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_is_integer(object o)
 {
@@ -1604,68 +1604,68 @@ object Cyc_is_integer(object o)
   return boolean_f;
 }
 
-object Cyc_is_bignum(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bignum_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_symbol(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == symbol_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
+//object Cyc_is_bignum(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bignum_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_symbol(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == symbol_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
 //object Cyc_is_vector(object o)
 //{
 //  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == vector_tag)
 //    return boolean_t;
 //  return boolean_f;
 //}
-
-object Cyc_is_bytevector(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bytevector_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_port(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == port_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_mutex(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == mutex_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_cond_var(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == cond_var_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_string(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == string_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_char(object o)
-{
-  if (obj_is_char(o))
-    return boolean_t;
-  return boolean_f;
-}
+//
+//object Cyc_is_bytevector(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bytevector_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_port(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == port_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_mutex(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == mutex_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_cond_var(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == cond_var_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_string(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == string_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_char(object o)
+//{
+//  if (obj_is_char(o))
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_is_procedure(void *data, object o)
 {
@@ -1688,38 +1688,38 @@ object Cyc_is_procedure(void *data, object o)
   return boolean_f;
 }
 
-object Cyc_is_macro(object o)
-{
-  int tag;
-  if ((o != NULL) && !is_value_type(o)) {
-    tag = type_of(o);
-    if (tag == macro_tag) {
-      return boolean_t;
-    }
-  }
-  return boolean_f;
-}
-
-object Cyc_is_eof_object(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && type_of(o) == eof_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_cvar(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && type_of(o) == cvar_tag)
-    return boolean_t;
-  return boolean_f;
-}
-
-object Cyc_is_opaque(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == c_opaque_tag)
-    return boolean_t;
-  return boolean_f;
-}
+//object Cyc_is_macro(object o)
+//{
+//  int tag;
+//  if ((o != NULL) && !is_value_type(o)) {
+//    tag = type_of(o);
+//    if (tag == macro_tag) {
+//      return boolean_t;
+//    }
+//  }
+//  return boolean_f;
+//}
+//
+//object Cyc_is_eof_object(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && type_of(o) == eof_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_cvar(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && type_of(o) == cvar_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
+//
+//object Cyc_is_opaque(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == c_opaque_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_eq(object x, object y)
 {
