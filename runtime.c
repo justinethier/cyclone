@@ -1618,12 +1618,12 @@ object Cyc_is_symbol(object o)
   return boolean_f;
 }
 
-object Cyc_is_vector(object o)
-{
-  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == vector_tag)
-    return boolean_t;
-  return boolean_f;
-}
+//object Cyc_is_vector(object o)
+//{
+//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == vector_tag)
+//    return boolean_t;
+//  return boolean_f;
+//}
 
 object Cyc_is_bytevector(object o)
 {
