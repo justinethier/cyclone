@@ -1836,7 +1836,7 @@ void gc_collector_trace()
     CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
 // TODO: ideally, want to use a lock-free data structure to prevent
 // having to use a mutex here. see corresponding code in gc_mark_gray
-      pthread_mutex_lock(&(m->lock));
+      //pthread_mutex_lock(&(m->lock));
       while (m->last_read < m->last_write) {
         clean = 0;
 #if GC_DEBUG_VERBOSE
@@ -1848,13 +1848,13 @@ void gc_collector_trace()
         gc_empty_collector_stack();
         (m->last_read)++;       // Inc here to prevent off-by-one error
       }
-      pthread_mutex_unlock(&(m->lock));
+      //pthread_mutex_unlock(&(m->lock));
 
       // Try checking the condition once more after giving the
       // mutator a chance to respond, to prevent exiting early.
       // This is experimental, not sure if it is necessary
       if (clean) {
-        pthread_mutex_lock(&(m->lock));
+        //pthread_mutex_lock(&(m->lock));
         if (m->last_read < m->last_write) {
 #if GC_SAFETY_CHECKS
           fprintf(stderr,
@@ -1864,7 +1864,7 @@ void gc_collector_trace()
         } else if (m->pending_writes) {
           clean = 0;
         }
-        pthread_mutex_unlock(&(m->lock));
+        //pthread_mutex_unlock(&(m->lock));
       }
     }
   }
