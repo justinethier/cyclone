@@ -294,6 +294,10 @@ struct gc_thread_data_t {
   int gc_status;
   int last_write;
   int last_read;
+  // Need this because minor GC may still be moving objects to the heap and
+  // if we try to trace before minor GC is done, some of the objects may be
+  // missed. So we "pend" them until minor GC is done and we know everything
+  // is on the heap.
   int pending_writes;
   mark_buffer *mark_buffer;
   int mark_buffer_len;
