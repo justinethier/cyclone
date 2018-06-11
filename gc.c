@@ -97,6 +97,64 @@ static struct ck_malloc my_allocator = {
   .realloc = my_realloc
 };
 
+/** Mark buffers 
+ *
+ * For these, we need a buffer than can grow as needed but that can also be
+ * used concurrently by both a mutator thread and a collector thread.
+ */
+
+static mark_buffer *mark_buffer_init(unsigned initial_size)
+{
+  mark_buffer *mb = malloc(sizeof(mark_buffer));
+  mb->buf = malloc(sizeof(void *) * initial_size);
+  mb->buf_len = initial_size;
+  mb->next = NULL;
+  return mb;
+}
+
+static void *mark_buffer_get(mark_buffer *mb, unsigned i) // TODO: macro?
+{
+  while (i >= mb->buf_len) {
+    // Not on this page, try the next one
+    i -= mb->buf_len;
+    mb = mb->next;
+    if (mb == NULL) { // Safety check
+      // For now this is a fatal error, could return NULL instead
+      fprintf(stderr, "mark_buffer_get ran out of mark buffers, exiting\n");
+      exit(1);
+    }
+  }
+  return mb->buf[i];
+}
+
+static void mark_buffer_set(mark_buffer *mb, unsigned i, void *obj)
+{
+  // Find index i
+  while (i >= mb->buf_len) {
+    // Not on this page, try the next one
+    i -= mb->buf_len;
+    if (mb->next == NULL) { 
+      // If it does not exist, allocate a new buffer
+      mb->next = mark_buffer_init(mb->buf_len * 2);
+    }
+    mb = mb->next;
+  }
+  mb->buf[i] = obj;
+}
+
+static void mark_buffer_free(mark_buffer *mb)
+{
+  mark_buffer *next;
+  while (mb) {
+    next = mb->next;
+    free(mb->buf);
+    free(mb);
+    mb = next;
+  }
+}
+
+// END mark buffer
+
 #if GC_DEBUG_TRACE
 const int NUM_ALLOC_SIZES = 10;
 static double allocated_size_counts[10] = {
@@ -1605,9 +1663,7 @@ void gc_mark_gray(gc_thread_data * thd, object obj)
 // Note that ideally this should be a lock-free data structure to make the
 // algorithm more efficient. So this code (and the corresponding collector
 // trace code) should be converted at some point.
-    thd->mark_buffer = vpbuffer_add(thd->mark_buffer,
-                                    &(thd->mark_buffer_len),
-                                    thd->last_write, obj);
+    mark_buffer_set(thd->mark_buffer, thd->last_write, obj);
     (thd->last_write)++;        // Already locked, just do it...
   }
 }
@@ -1626,10 +1682,7 @@ void gc_mark_gray(gc_thread_data * thd, object obj)
 void gc_mark_gray2(gc_thread_data * thd, object obj)
 {
   if (is_object_type(obj) && mark(obj) == gc_color_clear) {
-    thd->mark_buffer = vpbuffer_add(thd->mark_buffer,
-                                    &(thd->mark_buffer_len),
-                                    (thd->last_write + thd->pending_writes),
-                                    obj);
+    mark_buffer_set(thd->mark_buffer, thd->last_write + thd->pending_writes, obj);
     thd->pending_writes++;
   }
 }
@@ -1789,9 +1842,9 @@ void gc_collector_trace()
 #if GC_DEBUG_VERBOSE
         fprintf(stderr,
                 "gc_mark_black mark buffer %p, last_read = %d last_write = %d\n",
-                (m->mark_buffer)[m->last_read], m->last_read, m->last_write);
+                mark_buffer_get(m->mark_buffer, m->last_read), m->last_read, m->last_write);
 #endif
-        gc_mark_black((m->mark_buffer)[m->last_read]);
+        gc_mark_black(mark_buffer_get(m->mark_buffer, m->last_read));
         gc_empty_collector_stack();
         (m->last_read)++;       // Inc here to prevent off-by-one error
       }
@@ -2151,10 +2204,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->pending_writes = 0;
   thd->last_write = 0;
   thd->last_read = 0;
-  thd->mark_buffer = NULL;
-  thd->mark_buffer_len = 128;
-  thd->mark_buffer =
-      vpbuffer_realloc(thd->mark_buffer, &(thd->mark_buffer_len));
+  thd->mark_buffer = mark_buffer_init(128);
   if (pthread_mutex_init(&(thd->heap_lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize thread mutex\n");
     exit(1);
@@ -2215,7 +2265,7 @@ void gc_thread_data_free(gc_thread_data * thd)
     if (thd->moveBuf)
       free(thd->moveBuf);
     if (thd->mark_buffer)
-      free(thd->mark_buffer);
+      mark_buffer_free(thd->mark_buffer);
     if (thd->stack_traces)
       free(thd->stack_traces);
     if (thd->mutations) {

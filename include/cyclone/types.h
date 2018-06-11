@@ -246,6 +246,14 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 /** Unallocated memory */
 #define gc_color_blue 2         
 
+/** Mark buffers */
+typedef struct mark_buffer_t mark_buffer;
+struct mark_buffer_t {
+  void **buf;
+  unsigned buf_len;
+  mark_buffer *next;
+};
+
 /** Threading */
 typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
   CYC_THREAD_STATE_BLOCKED, CYC_THREAD_STATE_BLOCKED_COOPERATING,
@@ -287,7 +295,7 @@ struct gc_thread_data_t {
   int last_write;
   int last_read;
   int pending_writes;
-  void **mark_buffer;
+  mark_buffer *mark_buffer;
   int mark_buffer_len;
   pthread_mutex_t lock;
   pthread_mutex_t heap_lock;
