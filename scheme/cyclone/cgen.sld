@@ -1326,11 +1326,12 @@
                                  (string-append
                                    (st:->code trace)
                                    ;; TODO: probably needs brackets afterwards...
-                                   (if has-loop? "\nloop:\n" "")
+                                   (if has-loop? "\nloop: {\n" "")
                                  ))))
                            body)
                          "  ")
                        "; \n"
+                       (if has-loop? "}\n" "")
                        "}\n"))
       formals*))))
   
