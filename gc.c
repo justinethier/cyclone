@@ -1837,8 +1837,8 @@ void gc_collector_trace()
 // TODO: ideally, want to use a lock-free data structure to prevent
 // having to use a mutex here. see corresponding code in gc_mark_gray
       pthread_mutex_lock(&(m->lock));
-      // JAE - try doing this loop (majority of tracing) without the lock.
-      // we shouldn't need to be locked to do it anyway and we still lock
+      // Try doing this loop (majority of tracing) without the lock. We
+      // shouldn't need to be locked to do it anyway and we still lock
       // below as a fail-safe. One potential issue here, will we be broken
       // if the mark buffer needs to be grown. I think not because we still
       // will only go as far as the mutator already went with the version of
