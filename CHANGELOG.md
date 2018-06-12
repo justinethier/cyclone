@@ -2,6 +2,11 @@
 
 ## 0.8.1 - TBD
 
+Features
+
+- Allow optimization of some simple self-recursive functions.
+- Improve GC performance for large heaps.
+
 ## 0.8 - May 30, 2018
 
 Features
