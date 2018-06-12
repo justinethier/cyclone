@@ -1850,7 +1850,7 @@ void gc_collector_trace()
 #if GC_DEBUG_VERBOSE
         fprintf(stderr,
                 "gc_mark_black mark buffer %p, last_read = %d last_write = %d\n",
-                mark_buffer_get(m->mark_buffer, m->last_read), m->last_read, m->last_write);
+                mark_buffer_get(m->mark_buffer, m->last_read), m->last_read, last_write);
 #endif
         gc_mark_black(mark_buffer_get(m->mark_buffer, m->last_read));
         gc_empty_collector_stack();
@@ -1865,6 +1865,8 @@ void gc_collector_trace()
         pthread_mutex_lock(&(m->lock));
         if (m->last_read < m->last_write) {
 #if GC_SAFETY_CHECKS
+          // Not really an issue anymore with the above change in locking...
+          // Still need to continue tracing though
           fprintf(stderr,
                   "gc_collector_trace - might have exited trace early\n");
 #endif
