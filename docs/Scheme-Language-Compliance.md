@@ -37,7 +37,7 @@ Section | Status | Comments
 5.6 Libraries | Yes |
 5.7 The REPL | Yes |
 6.1 Equivalence predicates | Yes |
-6.2 Numbers | Partial | Only integers and reals are supported at this time.
+6.2 Numbers | Partial | Integers (fixnums and bignums), reals, and complex numbers are supported.
 6.3 Booleans | Yes |
 6.4 Pairs and lists | Yes |
 6.5 Symbols | Yes |
@@ -46,7 +46,7 @@ Section | Status | Comments
 6.8 Vectors | Yes |
 6.9 Bytevectors | Yes | 
 6.10 Control features | Yes | `dynamic-wind` is limited, and does not work across calls to continuations.
-6.11 Exceptions | Partial | Exceptions are implemented but error objects (and associated functions `error-object`, etc) are not at this time. 
+6.11 Exceptions | Yes | 
 6.12 Environments and evaluation | Partial | Only `eval` is implemented at this time.
 6.13 Input and output | Partial | Functions do not differentiate between binary and textual ports.
 6.14 System interface | Yes | 
