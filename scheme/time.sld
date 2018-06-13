@@ -27,9 +27,9 @@
       "(void *data, int argc, closure _, object k)"
       " struct timeval tv;
         make_double(box, 0.0);
-        gettimeofday(&tv, NULL); /* TODO: longer-term use clock_gettime instead */
+        gettimeofday(&tv, NULL); /* TODO: longer-term consider using clock_gettime instead */
         long long jiffy = (tv.tv_sec)*1000000LL + tv.tv_usec;
-        /* TODO: future consideration
+        /* Future consideration:
         mp_int bn_tmp, bn_tmp2, bn_tmp3;
         mp_init(&bn_tmp);
         mp_init(&bn_tmp2);
