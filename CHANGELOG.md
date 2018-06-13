@@ -7,6 +7,10 @@ Features
 - Allow optimization of some simple self-recursive functions.
 - Improve GC performance for large heaps.
 
+Bug Fixes
+
+- Fixed a bug where `current-jiffy` was returning total clock time of the process, which cannot be used to measure time accurately when more than one thread is executing concurrently.
+
 ## 0.8 - May 30, 2018
 
 Features
