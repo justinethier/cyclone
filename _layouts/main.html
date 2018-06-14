@@ -63,23 +63,15 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <div id="recent-news" style="
-            {% if page.title == "Cyclone Scheme" %} {% else %} display: none; {% endif %}
-            position: absolute;
-            left: 690px;
-            width: 350px;
-            font-size: smaller;
-        ">
-          <h2>Recent News</h2>
-          {% for post in site.posts limit:3 %}
-            <h4>
-              <a href="/cyclone/{{ post.url }}">{{ post.title }}</a>
-            </h4>
-            <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
-            {{ post.excerpt }}
-          {% endfor %}
-        </div>      
       {{ content }}
+      <h2>Recent News</h2>
+      {% for post in site.posts limit:3 %}
+        <h4>
+          <a href="/cyclone/{{ post.url }}">{{ post.title }}</a>
+        </h4>
+        <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
+        {{ post.excerpt }}
+      {% endfor %}
       </section>
     </div>
 
