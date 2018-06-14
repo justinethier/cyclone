@@ -98,9 +98,3 @@ Compiler Internals
 - There is a [Development Guide](docs/Development) with instructions for common tasks when hacking on the compiler itself.
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
-
-License
--------
-Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
-
-Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
