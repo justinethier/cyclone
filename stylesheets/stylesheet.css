@@ -437,6 +437,10 @@ Small Device Styles
     font-size:14px;
   }
 
+  #recent-news {
+    display: none;
+  }
+
   #downloads {
     display: none;
   }
