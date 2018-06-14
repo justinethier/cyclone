@@ -1834,15 +1834,14 @@ void gc_collector_trace()
     clean = 1;
 
     CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
-// TODO: ideally, want to use a lock-free data structure to prevent
-// having to use a mutex here. see corresponding code in gc_mark_gray
       pthread_mutex_lock(&(m->lock));
       // Try doing this loop (majority of tracing) without the lock. We
       // shouldn't need to be locked to do it anyway and we still lock
-      // below as a fail-safe. One potential issue here, will we be broken
-      // if the mark buffer needs to be grown. I think not because we still
-      // will only go as far as the mutator already went with the version of
-      // last write we are holding here...
+      // below as a fail-safe. One potential issue here is this would be 
+      // broken if the mark buffer needs to be grown. But this is not a
+      // problem because we will only go as far as the mutator already 
+      // went with the version of last write we are holding here... so
+      // we avoid that race condition.
       last_write = m->last_write;
       pthread_mutex_unlock(&(m->lock)); 
       while (m->last_read < last_write) {
@@ -1856,7 +1855,7 @@ void gc_collector_trace()
         gc_empty_collector_stack();
         (m->last_read)++;       // Inc here to prevent off-by-one error
       }
-      //pthread_mutex_unlock(&(m->lock));
+      //pthread_mutex_unlock(&(m->lock)); // Original lock, DO NOT want to lock whole loop
 
       // Try checking the condition once more after giving the
       // mutator a chance to respond, to prevent exiting early.
