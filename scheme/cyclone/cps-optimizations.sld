@@ -11,6 +11,7 @@
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme eval)
+          ;(scheme write)
           (scheme cyclone util)
           (scheme cyclone ast)
           (scheme cyclone primitives)
@@ -1355,7 +1356,7 @@
                   (or (not called-once?)
                       (= 1 (adbv:app-fnc-count var)))
                   (not (adbv:reassigned? var))
-                  (not (fnc-depth>? (ast:lambda-body fnc) 4))))
+                  (not (fnc-depth>? (ast:lambda-body fnc) 5))))
            )))
         (else #f)))
 
@@ -1398,11 +1399,12 @@
              ;            (if (adbv:cont? var) maybe-cont #f)))
              ;          #f))
             )
-;(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ,cont))
+;(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ))
         (cond
          ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
                (not (adbv:reassigned? var)) ;; Failsafe
+               (not (equal? fnc (adbv:assigned-value var))) ;; Do not expand recursive func
                (not (adbv:cont? var)) ;; TEST, don't delete a continuation
                (list? formals)
                (= (length args) (length formals)))
@@ -1413,11 +1415,16 @@
 
     ;; Replace function call with body of fnc
     (define (beta-expansion-app exp fnc rename-lambdas)
+;(write `(beta-expansion-app ,exp))
+;(newline)
       ;; Mapping from a formal => actual arg
       (define formals/actuals 
         (map cons (ast:lambda-args fnc) (cdr exp)))
+      ;; Replace ref with corresponding argument from function call being replaced
       (define (replace ref renamed)
         (let ((r (assoc ref formals/actuals)))
+;(write `(DEBUG2 replace ,ref ,renamed ,r))
+;(newline)
             (if (and r 
                      (not (eq? (car r) (cdr r)))) ;; Prevent an inf loop
                 (scan (cdr r) renamed) 
