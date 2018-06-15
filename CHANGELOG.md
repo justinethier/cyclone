@@ -10,6 +10,7 @@ Features
 Bug Fixes
 
 - Fixed a bug where `current-jiffy` was returning total clock time of the process, which cannot be used to measure time accurately when more than one thread is executing concurrently.
+- Allow optimizer to beta expand a wider range of function calls and prevent an infinite loop by beta expanding a recursive function with itself.
 
 ## 0.8 - May 30, 2018
 
