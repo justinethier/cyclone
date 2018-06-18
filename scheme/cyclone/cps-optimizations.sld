@@ -65,6 +65,8 @@
       adbv:set-ref-in-loop!
       adbv:direct-rec-call? 
       adbv:set-direct-rec-call!
+      adbv:self-rec-call? 
+      adbv:set-self-rec-call!
       ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
@@ -113,6 +115,7 @@
         def-in-loop
         ref-in-loop
         direct-rec-call
+        self-rec-call
       )
       adb:variable?
       (global adbv:global? adbv:set-global!)
@@ -141,6 +144,8 @@
       (ref-in-loop adbv:ref-in-loop? adbv:set-ref-in-loop!)
       ;; Does a top-level function directly call itself?
       (direct-rec-call adbv:direct-rec-call? adbv:set-direct-rec-call!)
+      ;; Does a function call itself?
+      (self-rec-call adbv:self-rec-call? adbv:set-self-rec-call!)
     )
 
     (define (adbv-set-assigned-value-helper! sym var value)
@@ -187,6 +192,7 @@
         #f  ; def-in-loop
         #f  ; ref-in-loop
         #f  ; direct-rec-call
+        #f  ; self-rec-call
       ))
 
     (define-record-type <analysis-db-function>
@@ -1356,6 +1362,8 @@
                   (or (not called-once?)
                       (= 1 (adbv:app-fnc-count var)))
                   (not (adbv:reassigned? var))
+                  (not (adbv:self-rec-call? var))
+                  ;(not (fnc-depth>? (ast:lambda-body fnc) 4))))
                   (not (fnc-depth>? (ast:lambda-body fnc) 5))))
            )))
         (else #f)))
@@ -1499,6 +1507,7 @@
     (define (analyze-cps exp)
       (analyze:find-named-lets exp)
       (analyze:find-direct-recursive-calls exp)
+      (analyze:find-recursive-calls exp)
       (analyze-find-lambdas exp -1)
       (analyze-lambda-side-effects exp -1)
       (analyze-lambda-side-effects exp -1) ;; 2nd pass guarantees lambda purity
@@ -1784,6 +1793,49 @@
           (trace:info `("not a direct recursive call" ,exp))))))
      (else #f)))
 
+  (if (pair? exp)
+      (for-each
+        (lambda (exp)
+          ;;(write exp) (newline)
+          (and-let* (((define? exp))
+                      (def-exps (define->exp exp))
+                     ((vector? (car def-exps)))
+                     ((ast:lambda? (car def-exps)))
+                     )
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
+          exp))
+)
+
+;; Find functions that call themselves. This is not as restrictive 
+;; as finding "direct" calls.
+(define (analyze:find-recursive-calls exp)
+
+  (define (scan exp def-sym)
+    ;(trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp))
+    (cond
+     ((ast:lambda? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym))
+        (ast:lambda-body exp)))
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) 
+      exp)
+     ((define? exp) #f) ;; TODO ??
+     ((set!? exp) #f) ;; TODO ??
+     ((if? exp)       
+      (scan (if->condition exp) def-sym)
+      (scan (if->then exp) def-sym)
+      (scan (if->else exp) def-sym))
+     ((app? exp)
+      (when (equal? (car exp) def-sym)
+        (trace:info `("recursive call" ,exp))
+        (with-var! def-sym (lambda (var)
+          (adbv:set-self-rec-call! var #t)))))
+     (else #f)))
+
+  ;; TODO: probably not good enough, what about recursive functions that are not top-level??
   (if (pair? exp)
       (for-each
         (lambda (exp)
