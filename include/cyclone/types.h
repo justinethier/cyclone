@@ -1069,18 +1069,18 @@ typedef pair_type *pair;
 
 #define make_list_2(l, a1, a2) \
   make_pair(l##__2, a2, NULL); \
-  make_pair(l, a1, l##__2);
+  make_pair(l, a1, &l##__2);
 
 #define make_list_3(l, a1, a2, a3) \
   make_pair(l##__3, a3, NULL); \
-  make_pair(l##__2, a2, l##__3); \
-  make_pair(l, a1, l##__2);
+  make_pair(l##__2, a2, &l##__3); \
+  make_pair(l, a1, &l##__2);
 
 #define make_list_4(l, a1, a2, a3, a4) \
   make_pair(l##__4, a4, NULL); \
-  make_pair(l##__3, a3, l##__4); \
-  make_pair(l##__2, a2, l##__3); \
-  make_pair(l, a1, l##__2);
+  make_pair(l##__3, a3, &l##__4); \
+  make_pair(l##__2, a2, &l##__3); \
+  make_pair(l, a1, &l##__2);
 
 /**
  * Create a pair with a single value. 

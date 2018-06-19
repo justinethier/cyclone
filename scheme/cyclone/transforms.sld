@@ -913,21 +913,30 @@
                    (append a-lookup defines-a-lookup renamed))
                 (map (lambda (p) (cdr p)) defines-a-lookup)))))
       ((app? ast)
-       (cond
-        ;; Special case, convert these to primitives if possible
-        ((and (eq? (car ast) 'member)
-              (not (assoc (car ast) renamed))
-              (= (length ast) 3))
-         (cons 'Cyc-fast-member
-               (map (lambda (a) (convert a renamed)) (cdr ast))))
-        ((and (eq? (car ast) 'assoc)
-              (not (assoc (car ast) renamed))
-              (= (length ast) 3))
-         (cons 'Cyc-fast-assoc
-               (map (lambda (a) (convert a renamed)) (cdr ast))))
-        ;; Regular case, alpha convert everything
-        (else
-         (map (lambda (a) (convert a renamed)) ast))))
+       (let ((regular-case 
+               (lambda ()
+                 ;; Regular case, alpha convert everything
+                 (map (lambda (a) (convert a renamed)) ast))))
+         (cond
+          ;; If identifier is renamed it is not a special case
+          ((assoc (car ast) renamed)
+           (regular-case))
+          ;; Special case, convert these to primitives if possible
+          ((and (eq? (car ast) 'member) (= (length ast) 3))
+           (cons 'Cyc-fast-member (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'assoc) (= (length ast) 3))
+           (cons 'Cyc-fast-assoc (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'list) (= (length ast) 2))
+           (cons 'Cyc-fast-list-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'list) (= (length ast) 3))
+           (cons 'Cyc-fast-list-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'list) (= (length ast) 4))
+           (cons 'Cyc-fast-list-3 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'list) (= (length ast) 5))
+           (cons 'Cyc-fast-list-4 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;; Regular case, alpha convert everything
+          (else
+           (regular-case)))))
       (else
         (error "unhandled expression: " ast))))
 
