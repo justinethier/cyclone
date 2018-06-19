@@ -1064,6 +1064,24 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+#define make_list_1(l, a1) \
+  make_pair(l, a1, NULL);
+
+#define make_list_2(l, a1, a2) \
+  make_pair(l##__2, a2, NULL); \
+  make_pair(l, a1, l##__2);
+
+#define make_list_3(l, a1, a2, a3) \
+  make_pair(l##__3, a3, NULL); \
+  make_pair(l##__2, a2, l##__3); \
+  make_pair(l, a1, l##__2);
+
+#define make_list_4(l, a1, a2, a3, a4) \
+  make_pair(l##__4, a4, NULL); \
+  make_pair(l##__3, a3, l##__4); \
+  make_pair(l##__2, a2, l##__3); \
+  make_pair(l, a1, l##__2);
+
 /**
  * Create a pair with a single value. 
  * This is useful to create an object that can be modified.

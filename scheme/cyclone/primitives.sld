@@ -115,6 +115,10 @@
          Cyc-default-exception-handler
          Cyc-current-exception-handler
          cons
+         Cyc-fast-list-1
+         Cyc-fast-list-2
+         Cyc-fast-list-3
+         Cyc-fast-list-4
          cell-get
          set-global!
          set-cell!
@@ -251,6 +255,10 @@
          (Cyc-default-exception-handler 1 1)
          (Cyc-current-exception-handler 0 0)
          (cons 2 2)
+         (Cyc-fast-list-1 1 1)
+         (Cyc-fast-list-2 2 2)
+         (Cyc-fast-list-3 3 3)
+         (Cyc-fast-list-4 4 4)
          (cell-get 1 1)
          (set-global! 2 2)
          (set-cell! 2 2)
@@ -598,6 +606,10 @@
          ((eq? p 'eof-object?)   "Cyc_is_eof_object")
          ((eq? p 'symbol?)       "Cyc_is_symbol")
          ((eq? p 'cons)          "make_pair")
+         ((eq? p 'Cyc-fast-list-1) "make_list_1")
+         ((eq? p 'Cyc-fast-list-2) "make_list_2")
+         ((eq? p 'Cyc-fast-list-3) "make_list_3")
+         ((eq? p 'Cyc-fast-list-4) "make_list_4")
          ((eq? p 'cell)          "make_cell")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
@@ -812,6 +824,10 @@
                  command-line-arguments
                  Cyc-read-line
                  Cyc-read-char Cyc-peek-char
+                 Cyc-fast-list-1
+                 Cyc-fast-list-2
+                 Cyc-fast-list-3
+                 Cyc-fast-list-4
                  cons cell))
                (member exp *udf-prims*))))
 
