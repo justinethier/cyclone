@@ -4,13 +4,14 @@
 
 Features
 
+- Improve garbage collector performance for large heaps.
 - Allow optimization of some simple self-recursive functions.
-- Improve GC performance for large heaps.
+- Generate faster compiled code for calls to `list` that contain a small number of arguments.
 
 Bug Fixes
 
-- Fixed a bug where `current-jiffy` was returning total clock time of the process, which cannot be used to measure time accurately when more than one thread is executing concurrently.
-- Allow optimizer to beta expand a wider range of function calls. Also, prevent the possibility of an infinite loop by not beta expanding recursive function calls.
+- Fixed a bug where `current-jiffy` was returning total clock time of the process. This old approach cannot be used to measure time accurately when more than one thread is executing concurrently.
+- Allow optimizer to beta expand a wider range of function calls. More importantly, prevent the possibility of an infinite loop by not beta expanding recursive function calls.
 
 ## 0.8 - May 30, 2018
 
