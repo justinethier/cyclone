@@ -83,6 +83,8 @@
     make-list
     list-copy
     map
+    Cyc-map-loop-1
+    Cyc-for-each-loop-1
     for-each
     list-tail
     list-ref
@@ -785,6 +787,17 @@
                   '())))
           ;; Fast path.
          (foldr (lambda (x y) (cons (f x) y)) '() lis1)))
+
+    ;; Experimenting with faster versions of map, for-each
+    (define (Cyc-map-loop-1 f lst)
+      (if (null? lst)
+        '()
+       (cons (f (car lst)) (Cyc-map-loop-1 f (cdr lst)))))
+    (define (Cyc-for-each-loop-1 f lst)
+      (if (null? lst)
+        '()
+       (begin (f (car lst)) 
+              (Cyc-for-each-loop-1 f (cdr lst)))))
 
     (define (for-each f lis1 . lists)
       (if (not (null? lis1))
