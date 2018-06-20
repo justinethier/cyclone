@@ -525,7 +525,7 @@ typedef uint32_t char_type;
 /**
  * Is the given object an object (non-immediate) type?
  */
-#define is_object_type(x) (x && !is_value_type(x))
+#define is_object_type(x) ((x != NULL) && !is_value_type(x))
 
 /**@}*/
 
