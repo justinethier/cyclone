@@ -6,7 +6,7 @@ Features
 
 - Improve garbage collector performance for large heaps.
 - Allow optimization of some simple self-recursive functions.
-- Generate faster compiled code for calls to `list` that contain a small number of arguments.
+- Generate faster compiled code for calls to `list` that contain a small number of arguments, and for calls to `map` and `for-each` that only pass a single list.
 
 Bug Fixes
 
