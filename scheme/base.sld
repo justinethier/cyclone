@@ -214,7 +214,6 @@
 ;;;;
   )
   (inline
-    exact-integer?
     square
     quotient
     numerator
@@ -1262,8 +1261,19 @@
     " return_inexact_double_op(data, k, sqrt, z);"
     "(void *data, object ptr, object z)"
     " return_inexact_double_op_no_cps(data, ptr, sqrt, z);")
-  (define (exact-integer? num)
-    (and (exact? num) (integer? num)))
+  (define-c exact-integer?
+    "(void *data, int argc, closure _, object k, object num)"
+    " if (obj_is_int(num) || (num != NULL && !is_value_type(num) && 
+                               (type_of(num) == integer_tag || 
+                                type_of(num) == bignum_tag)))
+        return_closcall1(data, k, boolean_t);
+      return_closcall1(data, k, boolean_f); "
+    "(void *data, object ptr, object num)"
+    " if (obj_is_int(num) || (num != NULL && !is_value_type(num) && 
+                               (type_of(num) == integer_tag || 
+                                type_of(num) == bignum_tag)))
+        return boolean_t;
+      return boolean_f;")
   (define-c exact?
     "(void *data, int argc, closure _, object k, object num)"
     " Cyc_check_num(data, num);
