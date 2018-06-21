@@ -70,19 +70,19 @@ void gc_init_heap(long heap_size);
   if ((boolean_f == fnc_test(data, obj))) Cyc_invalid_type_error(data, tag, obj); }
 
 #define Cyc_check_pair_or_null(d,obj) { if (obj != NULL) { Cyc_check_pair(d,obj); }}
-#define Cyc_check_pair(d,obj) Cyc_check_type(d,Cyc_is_pair, pair_tag, obj);
-#define Cyc_check_proc(d,obj) Cyc_check_type2(d,Cyc_is_procedure, closureN_tag, obj);
-#define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj);
-#define Cyc_check_fixnum(d,obj) Cyc_check_type(d,Cyc_is_fixnum, integer_tag, obj);
-#define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj);
-#define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj);
-#define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj);
-#define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj);
-#define Cyc_check_bvec(d,obj) Cyc_check_type(d,Cyc_is_bytevector, bytevector_tag, obj);
-#define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj);
-#define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj);
-#define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj);
-#define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj);
+#define Cyc_check_pair(d,obj) Cyc_check_type(d,Cyc_is_pair, pair_tag, obj)
+#define Cyc_check_proc(d,obj) Cyc_check_type2(d,Cyc_is_procedure, closureN_tag, obj)
+#define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj)
+#define Cyc_check_fixnum(d,obj) Cyc_check_type(d,Cyc_is_fixnum, integer_tag, obj)
+#define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj)
+#define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj)
+#define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj)
+#define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj)
+#define Cyc_check_bvec(d,obj) Cyc_check_type(d,Cyc_is_bytevector, bytevector_tag, obj)
+#define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj)
+#define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj)
+#define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj)
+#define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj)
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
@@ -139,28 +139,6 @@ object Cyc_global_set(void *thd, object * glo, object value);
     } \
   }
 /* Prototypes for primitive functions. */
-
-/**
- * \defgroup prim_pairs Pairs and lists
- * @brief Functions for working with pairs and lists
- */
-/**@{*/
-object Cyc_car(void *data, object lis);
-object Cyc_cdr(void *data, object lis);
-list malloc_make_pair(object, object);
-object Cyc_set_cell(void *, object l, object val);
-object Cyc_set_car(void *, object l, object val);
-object Cyc_set_cdr(void *, object l, object val);
-object Cyc_length(void *d, object l);
-object Cyc_list2vector(void *data, object cont, object l);
-object Cyc_list2string(void *d, object cont, object lst);
-object Cyc_list(void *data, int argc, object cont, ...);
-object memberp(void *data, object x, list l);
-object memqp(void *data, object x, list l);
-list assq(void *data, object x, list l);
-list assoc(void *data, object x, list l);
-list assoc_cdr(void *data, object x, list l);
-/**@}*/
 
 /**
  * \defgroup prim_ctrl Control flow
@@ -790,5 +768,39 @@ int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *
 uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
 uint32_t Cyc_utf8_validate(char *str, size_t len);
 /**@}*/
+
+/**
+ * \defgroup prim_pairs Pairs and lists
+ * @brief Functions for working with pairs and lists
+ */
+/**@{*/
+//object Cyc_car(void *data, object lis);
+//object Cyc_cdr(void *data, object lis);
+static inline object Cyc_car(void *data, object lis)
+{
+  Cyc_check_pair(data, lis);
+  return car(lis);
+}
+
+static inline object Cyc_cdr(void *data, object lis)
+{
+  Cyc_check_pair(data, lis);
+  return cdr(lis);
+}
+list malloc_make_pair(object, object);
+object Cyc_set_cell(void *, object l, object val);
+object Cyc_set_car(void *, object l, object val);
+object Cyc_set_cdr(void *, object l, object val);
+object Cyc_length(void *d, object l);
+object Cyc_list2vector(void *data, object cont, object l);
+object Cyc_list2string(void *d, object cont, object lst);
+object Cyc_list(void *data, int argc, object cont, ...);
+object memberp(void *data, object x, list l);
+object memqp(void *data, object x, list l);
+list assq(void *data, object x, list l);
+list assoc(void *data, object x, list l);
+list assoc_cdr(void *data, object x, list l);
+/**@}*/
+
 
 #endif                          /* CYCLONE_RUNTIME_H */
