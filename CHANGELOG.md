@@ -5,14 +5,17 @@
 Features
 
 - Improve garbage collector performance for large heaps.
+- Generate faster compiled code for:
+  - `car`, `cdr`, and most built-in predicates.
+  - Calls to `list` that contain less than five arguments.
+  - Calls to `map` and `for-each` that only pass a single list.
 - Allow optimization of some simple self-recursive functions.
-- Generate faster compiled code for calls to `car`, `cdr`, and most built-in predicates.
-- Generate faster compiled code for calls to `list` that contain a small number of arguments, and for calls to `map` and `for-each` that only pass a single list.
+- Allow the optimizer to beta expand a wider range of function calls. 
 
 Bug Fixes
 
-- Fixed a bug where `current-jiffy` was returning total clock time of the process. This old approach cannot be used to measure time accurately when more than one thread is executing concurrently.
-- Allow optimizer to beta expand a wider range of function calls. More importantly, prevent the possibility of an infinite loop by not beta expanding recursive function calls.
+- Fixed a bug where `current-jiffy` was returning total clock time of the process. Such an approach cannot be used to measure time accurately when more than one thread is executing concurrently.
+- Prevent the possibility of an infinite loop by not beta expanding recursive function calls.
 
 ## 0.8 - May 30, 2018
 
