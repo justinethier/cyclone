@@ -30139,18 +30139,28 @@ c_73325.elements[0] = lp_732_737_7394;
 return_closcall1(data,(closure)&c_73315,  Cyc_set_cell(data, lp_732_737_7394, &c_73325));; 
 }
 
-static void __lambda_1(void *data, int argc, object self_73246, object k_73143, object n_738_7395, object a_739_7396) {
+static void __lambda_1(void *data, int argc, object self_73246, object k_73143, object n_738_7395_arg, object a_739_7396_arg) {
+object n_738_7395, a_739_7396;
+n_738_7395 = n_738_7395_arg;
+a_739_7396 = a_739_7396_arg;
+loop: {
     object c_73328 = Cyc_num_fast_eq_op(data,n_738_7395, obj_int2obj(0));
 if( (boolean_f != c_73328) ){ 
   return_closcall1(data,  k_73143,  a_739_7396);
 } else { 
   
-complex_num_type local_73336; object c_73337 = Cyc_fast_sub(data,&local_73336,n_738_7395, obj_int2obj(1));
-
-make_pair(c_73340,NULL, a_739_7396);
-return_closcall3(data,  car(((closureN)self_73246)->elements[0]),  k_73143, c_73337, &c_73340);}
-; 
+complex_num_type *local_73336 = alloca(sizeof(complex_num_type));
+object c_73337 = Cyc_fast_sub(data,local_73336,n_738_7395, obj_int2obj(1));
+pair_type *c_73340 = alloca(sizeof(pair_type));
+// TODO: check if stack is full!
+set_pair(c_73340, NULL, a_739_7396);
+//return_closcall3(data,  car(((closureN)self_73246)->elements[0]),  k_73143, c_73337, c_73340);
+n_738_7395 = c_73337;
+a_739_7396 = c_73340;
+goto loop;
 }
+; 
+}}
 
 static void __lambda_0(void *data, int argc, object self_73247, object r_73141) {
   return_closcall3(data,  car(((closureN)self_73247)->elements[2]),  ((closureN)self_73247)->elements[1], ((closureN)self_73247)->elements[3], ((closureN)self_73247)->elements[0]);; 
