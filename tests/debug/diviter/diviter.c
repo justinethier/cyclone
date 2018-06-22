@@ -30044,15 +30044,22 @@ c_73362.elements[0] = lp_7311_7316_73100;
 return_closcall1(data,(closure)&c_73352,  Cyc_set_cell(data, lp_7311_7316_73100, &c_73362));; 
 }
 
-static void __lambda_7(void *data, int argc, object self_73251, object k_73154, object l_7317_73101, object a_7318_73102) {
+static void __lambda_7(void *data, int argc, object self_73251, object k_73154, object l_7317_73101_arg, object a_7318_73102_arg) {
+object l_7317_73101 , a_7318_73102;
+l_7317_73101 = l_7317_73101_arg;
+a_7318_73102 = a_7318_73102_arg;
+loop: {
   if( (boolean_f != Cyc_is_null(l_7317_73101)) ){ 
   return_closcall1(data,  k_73154,  a_7318_73102);
 } else { 
-  
-make_pair(c_73374,Cyc_car(data, l_7317_73101), a_7318_73102);
-return_closcall3(data,  car(((closureN)self_73251)->elements[0]),  k_73154, Cyc_cddr(data, l_7317_73101), &c_73374);}
+pair_type *c_73374 = alloca(sizeof(pair_type));  
+set_pair(c_73374,Cyc_car(data, l_7317_73101), a_7318_73102);
+l_7317_73101 = Cyc_cddr(data, l_7317_73101);
+a_7318_73102 = c_73374;
+//return_closcall3(data,  car(((closureN)self_73251)->elements[0]),  k_73154, Cyc_cddr(data, l_7317_73101), c_73374);}
+goto loop;
 ; 
-}
+}}}
 
 static void __lambda_6(void *data, int argc, object self_73252, object r_73152) {
   return_closcall3(data,  car(((closureN)self_73252)->elements[3]),  ((closureN)self_73252)->elements[1], ((closureN)self_73252)->elements[2], ((closureN)self_73252)->elements[0]);; 
