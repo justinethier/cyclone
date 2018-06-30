@@ -4,7 +4,7 @@
 
 Features
 
-- Improve garbage collector performance for large heaps.
+- Improved garbage collector performance for large heaps.
 - Generate faster compiled code for:
   - `car`, `cdr`, and most built-in predicates.
   - Calls to `list` that contain less than five arguments.
