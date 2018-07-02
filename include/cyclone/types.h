@@ -111,7 +111,7 @@ typedef unsigned char tag_type;
 // Major GC tuning parameters
 
 /** Start GC cycle if % heap space free below this percentage */
-#define GC_COLLECTION_THRESHOLD 0.05
+#define GC_COLLECTION_THRESHOLD 0.0125 //0.05
 
 /** After major GC, grow the heap so at least this percentage is free */
 #define GC_FREE_THRESHOLD 0.40
@@ -170,6 +170,15 @@ typedef enum {
   , HEAP_HUGE    // Huge objects, 1 per page
 } gc_heap_type;
 
+/** The first heap type that is not fixed-size */
+// TODO: disable this for now
+#define LAST_FIXED_SIZE_HEAP_TYPE -1
+//#if INTPTR_MAX == INT64_MAX
+//#define LAST_FIXED_SIZE_HEAP_TYPE HEAP_96
+//#else
+//#define LAST_FIXED_SIZE_HEAP_TYPE HEAP_64
+//#endif
+
 /** The number of `gc_heap_type`'s */
 #define NUM_HEAP_TYPES (HEAP_HUGE + 1)
 
@@ -192,6 +201,13 @@ struct gc_heap_t {
   unsigned int chunk_size;      // 0 for any size, other and heap will only alloc chunks of that size
   unsigned int max_size;
   unsigned int ttl; // Keep empty page alive this many times before freeing
+  unsigned int remaining;
+  unsigned block_size;
+  char *data_end;
+  // Lazy-sweep related data
+  int free_size; // Amount of heap data that is free
+  unsigned char is_full; // Determine if the heap is full
+  unsigned char cached_free_size_status;
   //
   gc_heap *next_free;
   unsigned int last_alloc_size;
@@ -290,7 +306,9 @@ struct gc_thread_data_t {
   object *gc_args;
   short gc_num_args;
   // Data needed for heap GC
-  int gc_alloc_color;
+  unsigned char gc_alloc_color;
+  unsigned char gc_trace_color;
+  uint8_t gc_done_tracing;
   int gc_status;
   int last_write;
   int last_read;
@@ -302,12 +320,13 @@ struct gc_thread_data_t {
   mark_buffer *mark_buffer;
   int mark_buffer_len;
   pthread_mutex_t lock;
-  pthread_mutex_t heap_lock;
+  //pthread_mutex_t heap_lock;
   pthread_t thread_id;
   gc_heap_root *heap;
   uintptr_t *cached_heap_free_sizes;
   uintptr_t *cached_heap_total_sizes;
   int heap_num_huge_allocations;
+  int num_minor_gcs;
   // Data needed for call history
   char **stack_traces;
   int stack_trace_idx;
@@ -329,11 +348,13 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
 void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
 void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
+int gc_is_heap_empty(gc_heap *h);
 void gc_print_stats(gc_heap * h);
 int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
+void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd);
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
 void *gc_alloc_bignum(gc_thread_data *data);
@@ -344,6 +365,7 @@ void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd);
 int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
 void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, char *obj, gc_thread_data * thd);
 void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd, int *heap_grown);
+void gc_init_fixed_size_free_list(gc_heap *h);
 
 //size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
@@ -351,7 +373,8 @@ void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data *
 //void gc_mark(gc_heap *h, object obj);
 void gc_request_mark_globals(void);
 void gc_mark_globals(object globals, object global_table);
-size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
+//size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
+gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
 void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
