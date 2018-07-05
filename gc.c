@@ -184,14 +184,24 @@ void print_allocated_obj_counts()
   }
 }
 
-void print_current_time()
+void print_current_time(FILE *stream)
 {
   time_t rawtime;
   struct tm * timeinfo;
 
   time ( &rawtime );
   timeinfo = localtime ( &rawtime );
-  fprintf(stderr, "%s", asctime (timeinfo));
+  fprintf(stream, "%s", asctime (timeinfo));
+}
+
+void gc_log(FILE *stream, const char *format, ...)
+{
+  va_list vargs;
+  va_start(vargs, format);
+  print_current_time(stream);
+  vfprintf(stream, format, vargs);
+  fprintf(stream, "\n");
+  va_end(vargs);
 }
 #endif
 
@@ -2425,10 +2435,9 @@ void gc_collector()
   //int old_clear, old_mark;
 #if GC_DEBUG_TRACE
   print_allocated_obj_counts();
-  print_current_time();
-  fprintf(stderr, " - Starting gc_collector\n");
+  gc_log(stderr, " - Starting gc_collector");
 #endif
-fprintf(stderr, " - Starting gc_collector\n"); // TODO: DEBUGGING!!!
+//fprintf(stderr, " - Starting gc_collector\n"); // TODO: DEBUGGING!!!
   //clear : 
   ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
   // exchange values of markColor and clearColor
