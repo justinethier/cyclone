@@ -184,21 +184,17 @@ void print_allocated_obj_counts()
   }
 }
 
-void print_current_time(FILE *stream)
-{
-  time_t rawtime;
-  struct tm * timeinfo;
-
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
-  fprintf(stream, "%s", asctime (timeinfo));
-}
-
 void gc_log(FILE *stream, const char *format, ...)
 {
   va_list vargs;
+  time_t rawtime;
+  struct tm * timeinfo;
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+  fprintf(stream, "%.2d:%.2d:%.2d - ", 
+    timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
   va_start(vargs, format);
-  print_current_time(stream);
   vfprintf(stream, format, vargs);
   fprintf(stream, "\n");
   va_end(vargs);
@@ -2435,7 +2431,7 @@ void gc_collector()
   //int old_clear, old_mark;
 #if GC_DEBUG_TRACE
   print_allocated_obj_counts();
-  gc_log(stderr, " - Starting gc_collector");
+  gc_log(stderr, "Starting gc_collector");
 #endif
 //fprintf(stderr, " - Starting gc_collector\n"); // TODO: DEBUGGING!!!
   //clear : 
