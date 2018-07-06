@@ -64,17 +64,7 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
       {{ content }}
-      <h2{% if page.title == "Cyclone Scheme" %}style="display: none;"{% endif %}>
-        Recent News
-      </h2>
-      {% for post in site.posts limit:3 %}
-        <h4>
-          <a href="/cyclone/{{ post.url }}">{{ post.title }}</a>
-        </h4>
-        <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
-        <br />
-        {{ post.excerpt }}
-      {% endfor %}
+      {% if page.title == "Cyclone Scheme" %}{% include recent-news.html %}{% endif %}
       </section>
     </div>
 
