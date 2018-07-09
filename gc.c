@@ -1473,8 +1473,6 @@ void gc_collector_sweep()
 {
   ck_array_iterator_t iterator;
   gc_thread_data *m;
-//  gc_heap *h;
-//  int heap_type;
 //#if GC_DEBUG_TRACE
 //  size_t total_size;
 //  size_t total_free;
@@ -1485,6 +1483,8 @@ void gc_collector_sweep()
 
 // DEBUG diagnostics
 #if GC_DEBUG_SHOW_SWEEP_DIAG
+    int heap_type;
+    gc_heap *h;
     for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
       h = m->heap->heap[heap_type];
       if (h) {
