@@ -1481,19 +1481,6 @@ void gc_collector_sweep()
 
   CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
 
-// DEBUG diagnostics
-#if GC_DEBUG_SHOW_SWEEP_DIAG
-    int heap_type;
-    gc_heap *h;
-    for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-      h = m->heap->heap[heap_type];
-      if (h) {
-        fprintf(stderr, "From collector - Heap %d diagnostics:\n", heap_type);
-        gc_print_stats(h);
-      }
-    }
-#endif
-
 // TODO: what to update in each heap? probably want to reset back to first heap in each mutator
 // may also need to set other things, clear color?
 
@@ -2022,6 +2009,18 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
 //    //    }
 //      }
 //    }
+
+
+    // DEBUG diagnostics
+#if GC_DEBUG_SHOW_SWEEP_DIAG
+    for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+      h_tmp = thd->heap->heap[heap_type];
+      if (h_tmp) {
+        fprintf(stderr, "From collector - Heap %d diagnostics:\n", heap_type);
+        gc_print_stats(h_tmp);
+      }
+    }
+#endif
   }
 
   thd->num_minor_gcs++;
