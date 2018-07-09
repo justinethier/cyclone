@@ -1087,6 +1087,33 @@ void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
   return NULL;
 }
 
+/**
+ * @brief Return number of unswept heaps
+ * @param h   Heap we are starting from (assume first in the chain)
+ * @return    Count of heaps that have not been swept yet.
+ */
+int gc_num_unswept_heaps(gc_heap *h)
+{
+  int count = 0;
+  while (h) {
+    if (h->cached_free_size_status == 1 || 
+        gc_is_heap_empty(h)) {
+      count++;
+    }
+    h = h->next;
+  }
+  return count;
+}
+
+void gc_start_major_collection(gc_thread_data *thd){
+  if (ck_pr_load_int(&gc_stage) == STAGE_RESTING) {
+#if GC_DEBUG_TRACE
+    gc_log(stderr, "gc_start_major_collection - initiating collector");
+#endif
+    ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
+  }
+}
+
 void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd)
 {
   gc_heap *h_start = h, *h_prev;
@@ -1308,7 +1335,12 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
 #if GC_DEBUG_VERBOSE
 fprintf(stderr, "slow alloc of %p\n", result);
 #endif
-    if (!result) {
+    if (result) {
+      // Check if we need to start a major collection
+      if (heap_type != HEAP_HUGE && gc_num_unswept_heaps(h_passed) < 2) {
+        gc_start_major_collection(thd);
+      }
+    } else {
       // Slowest path, allocate a new heap block
       /* A vanilla mark&sweep collector would collect now, but unfortunately */
       /* we can't do that because we have to go through multiple stages, some */
@@ -1323,7 +1355,12 @@ fprintf(stderr, "slow alloc of %p\n", result);
 #if GC_DEBUG_VERBOSE
 fprintf(stderr, "slowest alloc of %p\n", result);
 #endif
-      if (!result) {
+      if (result) {
+        // We had to allocate memory, start a major collection ASAP!
+        if (heap_type != HEAP_HUGE) {
+          gc_start_major_collection(thd);
+        }
+      } else {
         fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
         fprintf(stderr, "Heap type %d diagnostics:\n", heap_type);
         gc_print_stats(h);
