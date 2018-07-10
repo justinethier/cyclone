@@ -125,10 +125,10 @@ typedef unsigned char tag_type;
 #define DEBUG_SHOW_DIAG 0
 
 /** Show diagnostic information before/after sweeping */
-#define GC_DEBUG_SHOW_SWEEP_DIAG 1
+#define GC_DEBUG_SHOW_SWEEP_DIAG 0
 
 /** GC debugging flag */
-#define GC_DEBUG_TRACE 1
+#define GC_DEBUG_TRACE 0
 
 /** GC debugging flag */
 #define GC_DEBUG_VERBOSE 0
