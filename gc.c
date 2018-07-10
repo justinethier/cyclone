@@ -1022,7 +1022,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
             new_size);
 #endif
   }
-//  h_last = gc_heap_last(h);
+  h_last = gc_heap_last(h_last); // Ensure we don't unlink any heaps
 //  cur_size = h_last->size;
 //  new_size = cur_size; //gc_heap_align(((cur_size > size) ? cur_size : size) * 2);
   // allocate larger pages if size will not fit on the page
