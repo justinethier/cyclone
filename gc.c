@@ -1562,6 +1562,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
   gc_heap *orig_heap_ptr = h;
 #endif
   gc_heap *rv = h;
+  int markColor = ck_pr_load_8(&gc_color_mark);
 
   //h->next_free = h;
   h->last_alloc_size = 0;
@@ -1619,7 +1620,8 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
       }
 #endif
 
-      if (mark(p) != thd->gc_alloc_color && 
+      if (mark(p) != markColor &&
+          mark(p) != thd->gc_alloc_color && 
           mark(p) != thd->gc_trace_color) { //gc_color_clear) 
 #if GC_DEBUG_VERBOSE
         fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %d mark %d - alloc color %d trace color %d\n", p,
