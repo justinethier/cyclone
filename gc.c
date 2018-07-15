@@ -1562,7 +1562,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
   gc_heap *orig_heap_ptr = h;
 #endif
   gc_heap *rv = h;
-  int markColor = ck_pr_load_8(&gc_color_mark);
+  //int markColor = ck_pr_load_8(&gc_color_mark);
 
   //h->next_free = h;
   h->last_alloc_size = 0;
@@ -1620,7 +1620,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
       }
 #endif
 
-      if (mark(p) != markColor &&
+      if (//mark(p) != markColor &&
           mark(p) != thd->gc_alloc_color && 
           mark(p) != thd->gc_trace_color) { //gc_color_clear) 
 #if GC_DEBUG_VERBOSE
@@ -1629,7 +1629,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
                 mark(p),
                 thd->gc_alloc_color, thd->gc_trace_color);
 #endif
-        mark(p) = gc_color_blue;        // Needed?
+        //mark(p) = gc_color_blue;        // Needed?
         if (type_of(p) == mutex_tag) {
 #if GC_DEBUG_VERBOSE
           fprintf(stderr, "pthread_mutex_destroy from sweep\n");
@@ -2516,8 +2516,8 @@ void gc_collector()
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - after post_handshake async\n");
 #endif
-  gc_request_mark_globals();
   gc_wait_handshake();
+  gc_request_mark_globals(); // Wait until mutators have new mark color
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - after wait_handshake async\n");
 #endif
