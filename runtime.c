@@ -60,8 +60,12 @@ const char *tag_names[] = {
 void Cyc_invalid_type_error(void *data, int tag, object found)
 {
   char buf[256];
+#if GC_DEBUG_TRACE
+  // Object address can be very useful for GC debugging
+  snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
+#else
   snprintf(buf, 255, "Invalid type: expected %s, found ", tag_names[tag]);
-  //snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
+#endif
   Cyc_rt_raise2(data, buf, found);
 }
 
