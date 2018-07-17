@@ -581,7 +581,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
           fprintf(stderr, "sweep: invalid object at %p", p);
           exit(1);
         }
-        if (type_of(p) > 20) {
+        if (type_of(p) > 21) {
           fprintf(stderr, "sweep: invalid object tag %d at %p", type_of(p), p);
           exit(1);
         }
