@@ -1374,8 +1374,11 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
 #if INTPTR_MAX == INT64_MAX
   } else if (size <= 96) {
     heap_type = HEAP_96;
-    try_alloc = &gc_try_alloc_fixed_size;
-    try_alloc_slow = &gc_try_alloc_slow_fixed_size;
+    try_alloc = &gc_try_alloc;
+    try_alloc_slow = &gc_try_alloc_slow;
+    // TODO:
+    //try_alloc = &gc_try_alloc_fixed_size;
+    //try_alloc_slow = &gc_try_alloc_slow_fixed_size;
 #endif
   } else if (size >= MAX_STACK_OBJ) {
     heap_type = HEAP_HUGE;
