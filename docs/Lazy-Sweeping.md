@@ -1,6 +1,13 @@
+One of the basic improvements to the mark-sweep algorithm suggested by the Garbage Collection Handbook is lazy sweeping. With this approach instead of waiting until tracing is finished and having the collector thread sweep the entire heap at once, each thread will sweep its own heaps as part of the allcation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages. If so, the next one will be selected, the mutator will sweep it to free up space, and the new page will be used for allocation. If insufficient space is available then a major collection is triggered.
 
-Goals
-Performance
+The main goal of this process is to improve performance:
+
+- better locality - heap slots tend to be used after they are swept
+- thread-local data - there is no need to lock the heap for allocation or sweeping since both operations are now performed by each mutator thread
+- accorinding to the GC handbook, it reduces the algorithmic complexity of mark-sweep to be proportional to the size of the live data in the heap, similar to a copying collector
+
+
+Older notes:
 
 Ideally want to improve performance with this approach. Hopefully it improves cache locality since we will only sweep a little bit and then will use the newly-sweeped portion for allocations.
 
