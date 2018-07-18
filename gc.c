@@ -1624,6 +1624,13 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
       }
 #endif
 
+      // Use the object's mark to determine if we keep it. 
+      // Need to check for both colors because:
+      // - Objects that are either newly-allocated or recently traced are given 
+      //   the alloc color, and we need to keep them.
+      // - If the collector is currently tracing, objects not traced yet will 
+      //   have the trace/clear color. We need to keep any of those to make sure
+      //   the collector has a chance to trace the entire heap.
       if (//mark(p) != markColor &&
           mark(p) != thd->gc_alloc_color && 
           mark(p) != thd->gc_trace_color) { //gc_color_clear) 
@@ -2113,6 +2120,11 @@ void gc_mark_gray(gc_thread_data * thd, object obj)
   // From what I can tell, no other thread would be modifying
   // either object type or mark. Both should be stable once the object is placed
   // into the heap, with the collector being the only thread that changes marks.
+  //
+  // Note when marking we check for both clear and purple to prevent against 
+  // timing issues when incrementing colors and since if we ever reach a
+  // purple object during tracing we would want to mark it.
+  // TODO: revisit if checking for gc_color_purple is truly necessary here and elsewhere.
   if (is_object_type(obj) && (mark(obj) == gc_color_clear ||
                               mark(obj) == gc_color_purple)) {     // TODO: sync??
     // Place marked object in a buffer to avoid repeated scans of the heap.
