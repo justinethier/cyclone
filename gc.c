@@ -555,138 +555,105 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
   fprintf(stderr, "Heap %d diagnostics:\n", heap_type);
   gc_print_stats(orig_heap_ptr);
 #endif
-  //for (; h; prev_h = h, h = h->next) {      // All heaps
 
-    if (h->data_end != NULL) {
-      // Special case, bump&pop heap
-      gc_convert_heap_page_to_free_list(h, thd);
-      heap_is_empty = 0; // For now, don't try to free bump&pop
-    } else {
-      //gc_free_list *next;
-      size_t remaining = h->size - (h->size % h->block_size); // - h->block_size; // Remove first one??
-      char *data_end = h->data + remaining;
-      heap_is_empty = 1; // Base case is an empty heap
-      q = h->free_list;
-      while (remaining) {
-        p = data_end - remaining;
-        // find preceding/succeeding free list pointers for p
-        for (r = (q?q->next:NULL); r && ((char *)r < (char *)p); q = r, r = r->next) ;
-        if ((char *)q == (char *)p || (char *)r == (char *)p) {     // this is a free block, skip it
-          //printf("Sweep skip free block %p remaining=%lu\n", p, remaining);
-          remaining -= h->block_size;
-          continue;
-        }
-  #if GC_SAFETY_CHECKS
-        if (!is_object_type(p)) {
-          fprintf(stderr, "sweep: invalid object at %p", p);
-          exit(1);
-        }
-        if (type_of(p) > 21) {
-          fprintf(stderr, "sweep: invalid object tag %d at %p", type_of(p), p);
-          exit(1);
-        }
-  #endif
-        if (mark(p) != thd->gc_alloc_color && 
-            mark(p) != thd->gc_trace_color) { //gc_color_clear) 
-  #if GC_DEBUG_VERBOSE
-          fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %d\n", p,
-                  type_of(p));
-  #endif
-          // Run finalizers
-          if (type_of(p) == mutex_tag) {
-  #if GC_DEBUG_VERBOSE
-            fprintf(stderr, "pthread_mutex_destroy from sweep\n");
-  #endif
-            if (pthread_mutex_destroy(&(((mutex) p)->lock)) != 0) {
-              fprintf(stderr, "Error destroying mutex\n");
-              exit(1);
-            }
-          } else if (type_of(p) == cond_var_tag) {
-  #if GC_DEBUG_VERBOSE
-            fprintf(stderr, "pthread_cond_destroy from sweep\n");
-  #endif
-            if (pthread_cond_destroy(&(((cond_var) p)->cond)) != 0) {
-              fprintf(stderr, "Error destroying condition variable\n");
-              exit(1);
-            }
-          } else if (type_of(p) == bignum_tag) {
-            // TODO: this is no good if we abandon bignum's on the stack
-            // in that case the finalizer is never called
-  #if GC_DEBUG_VERBOSE
-            fprintf(stderr, "mp_clear from sweep\n");
-  #endif
-            mp_clear(&(((bignum_type *)p)->bn));
-          }
-
-          // free p
-          //heap_freed += h->block_size;
-          if (h->free_list == NULL) {
-            // No free list, start one at p
-            q = h->free_list = p;
-            h->free_list->next = NULL;
-            //printf("sweep reclaimed remaining=%d, %p, assign h->free_list\n", remaining, p);
-          } else if ((char *)p < (char *)h->free_list) {
-            // p is before the free list, prepend it as the start
-            // note if this is the case, either there is no free_list (see above case) or 
-            // the free list is after p, which is handled now. these are the only situations
-            // where there is no q
-            s = (gc_free_list *)p;
-            s->next = h->free_list;
-            q = h->free_list = p;
-            //printf("sweep reclaimed remaining=%d, %p, assign h->free_list which was %p\n", remaining, p, h->free_list);
-          } else {
-            s = (gc_free_list *)p;
-            s->next = r;
-            q->next = s;
-            //printf("sweep reclaimed remaining=%d, %p, q=%p, r=%p\n", remaining, p, q, r);
-          }
-          h->free_size += h->block_size;
-        } else {
-          //printf("sweep block is still used remaining=%d p = %p\n", remaining, p);
-        }
-        //next->next = (gc_free_list *)(((char *) next) + h->block_size);
-        //next = next->next;
+  if (h->data_end != NULL) {
+    // Special case, bump&pop heap
+    gc_convert_heap_page_to_free_list(h, thd);
+    heap_is_empty = 0; // For now, don't try to free bump&pop
+  } else {
+    //gc_free_list *next;
+    size_t remaining = h->size - (h->size % h->block_size); // - h->block_size; // Remove first one??
+    char *data_end = h->data + remaining;
+    heap_is_empty = 1; // Base case is an empty heap
+    q = h->free_list;
+    while (remaining) {
+      p = data_end - remaining;
+      // find preceding/succeeding free list pointers for p
+      for (r = (q?q->next:NULL); r && ((char *)r < (char *)p); q = r, r = r->next) ;
+      if ((char *)q == (char *)p || (char *)r == (char *)p) {     // this is a free block, skip it
+        //printf("Sweep skip free block %p remaining=%lu\n", p, remaining);
         remaining -= h->block_size;
-        heap_is_empty = 0;
+        continue;
       }
+#if GC_SAFETY_CHECKS
+      if (!is_object_type(p)) {
+        fprintf(stderr, "sweep: invalid object at %p", p);
+        exit(1);
+      }
+      if (type_of(p) > 21) {
+        fprintf(stderr, "sweep: invalid object tag %d at %p", type_of(p), p);
+        exit(1);
+      }
+#endif
+      if (mark(p) != thd->gc_alloc_color && 
+          mark(p) != thd->gc_trace_color) { //gc_color_clear) 
+#if GC_DEBUG_VERBOSE
+        fprintf(stderr, "sweep is freeing unmarked obj: %p with tag %d\n", p,
+                type_of(p));
+#endif
+        // Run finalizers
+        if (type_of(p) == mutex_tag) {
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "pthread_mutex_destroy from sweep\n");
+#endif
+          if (pthread_mutex_destroy(&(((mutex) p)->lock)) != 0) {
+            fprintf(stderr, "Error destroying mutex\n");
+            exit(1);
+          }
+        } else if (type_of(p) == cond_var_tag) {
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "pthread_cond_destroy from sweep\n");
+#endif
+          if (pthread_cond_destroy(&(((cond_var) p)->cond)) != 0) {
+            fprintf(stderr, "Error destroying condition variable\n");
+            exit(1);
+          }
+        } else if (type_of(p) == bignum_tag) {
+          // TODO: this is no good if we abandon bignum's on the stack
+          // in that case the finalizer is never called
+#if GC_DEBUG_VERBOSE
+          fprintf(stderr, "mp_clear from sweep\n");
+#endif
+          mp_clear(&(((bignum_type *)p)->bn));
+        }
+
+        // free p
+        //heap_freed += h->block_size;
+        if (h->free_list == NULL) {
+          // No free list, start one at p
+          q = h->free_list = p;
+          h->free_list->next = NULL;
+          //printf("sweep reclaimed remaining=%d, %p, assign h->free_list\n", remaining, p);
+        } else if ((char *)p < (char *)h->free_list) {
+          // p is before the free list, prepend it as the start
+          // note if this is the case, either there is no free_list (see above case) or 
+          // the free list is after p, which is handled now. these are the only situations
+          // where there is no q
+          s = (gc_free_list *)p;
+          s->next = h->free_list;
+          q = h->free_list = p;
+          //printf("sweep reclaimed remaining=%d, %p, assign h->free_list which was %p\n", remaining, p, h->free_list);
+        } else {
+          s = (gc_free_list *)p;
+          s->next = r;
+          q->next = s;
+          //printf("sweep reclaimed remaining=%d, %p, q=%p, r=%p\n", remaining, p, q, r);
+        }
+        h->free_size += h->block_size;
+      } else {
+        //printf("sweep block is still used remaining=%d p = %p\n", remaining, p);
+      }
+      //next->next = (gc_free_list *)(((char *) next) + h->block_size);
+      //next = next->next;
+      remaining -= h->block_size;
+      heap_is_empty = 0;
     }
-
-//    ck_pr_add_ptr(&(thd->cached_heap_free_sizes[heap_type]), heap_freed);
-    // Free the heap page if possible.
-    //
-    // With huge heaps, this becomes more important. one of the huge
-    // pages only has one object, so it is likely that the page
-    // will become free at some point and could be reclaimed.
-    //
-    // The newly created flag is used to attempt to avoid situtaions
-    // where a page is allocated because there is not enough free space,
-    // but then we do a sweep and see it is empty so we free it, and
-    // so forth. A better solution might be to keep empty heap pages
-    // off to the side and only free them if there is enough free space
-    // remaining without them.
-    //
-    // Experimenting with only freeing huge heaps
-
-//if (heap_is_empty) {
-//  printf("heap %d %p is empty\n", h->type, h);
-//}
-
-    if (heap_is_empty && 
-          (h->type == HEAP_HUGE || (h->ttl--) <= 0)) {
-      rv = NULL; // Let caller know heap needs to be freed
-    }
-//    if (heap_is_empty && !(h->ttl--)) {
-//        unsigned int h_size = h->size;
-//        gc_heap *new_h = gc_heap_free(h, prev_h);
-//        if (new_h) { // Ensure free succeeded
-//          h = new_h;
-//          ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type] ), h_size);
-//          thd->cached_heap_total_sizes[heap_type] -= h_size;
-//        }
-//    }
-//    sum_freed += heap_freed;
-//    heap_freed = 0;
-//  }
+  }
+  // Free the heap page if possible.
+  if (heap_is_empty && 
+        (h->type == HEAP_HUGE || (h->ttl--) <= 0)) {
+    rv = NULL; // Let caller know heap needs to be freed
+  }
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nAfter sweep -------------------------\n");
@@ -694,8 +661,6 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
   gc_print_stats(orig_heap_ptr);
 #endif
 
-//  if (sum_freed_ptr)
-//    *sum_freed_ptr = sum_freed;
   return rv;
 }
 
@@ -731,9 +696,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
 
 /**
  * @brief Determine if a heap page is empty.
- *        Note this only works for heaps that are not fixed-size.
- * @param h Heap to inspect. The caller should acquire the necessary lock
- *            on this heap.
+ * @param h Heap to inspect. The caller should acquire any necessary locks.
  * @return A truthy value if the heap is empty, 0 otherwise.
  */
 int gc_is_heap_empty(gc_heap *h) 
@@ -741,7 +704,7 @@ int gc_is_heap_empty(gc_heap *h)
   gc_free_list *f;
   if (!h) return 0;
 
-  if (h->data_end) { // Bump&pop
+  if (h->data_end) { // Fixed-size bump&pop
     return (h->remaining == (h->size - (h->size % h->block_size)));
   }
 
@@ -2502,12 +2465,7 @@ void gc_collector()
   //clear : 
   ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
   // exchange values of markColor and clearColor
-//  old_clear = ck_pr_load_8(&gc_color_clear);
-//  old_mark = ck_pr_load_8(&gc_color_mark);
-//  while (!ck_pr_cas_8(&gc_color_clear, old_clear, old_mark)) {
-//  }
-//  while (!ck_pr_cas_8(&gc_color_mark, old_mark, old_clear)) {
-//  }
+  //
   // We now increment both so that clear becomes the old mark color and a
   // new value is used for the mark color. The old clear color becomes
   // purple, indicating any of these objects are garbage
