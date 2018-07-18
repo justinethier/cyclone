@@ -576,7 +576,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
           remaining -= h->block_size;
           continue;
         }
-//  #if GC_SAFETY_CHECKS
+  #if GC_SAFETY_CHECKS
         if (!is_object_type(p)) {
           fprintf(stderr, "sweep: invalid object at %p", p);
           exit(1);
@@ -585,15 +585,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
           fprintf(stderr, "sweep: invalid object tag %d at %p", type_of(p), p);
           exit(1);
         }
-  //      if ((char *)q + h->block_size > (char *)p) {
-  //        fprintf(stderr, "bad size at %p < %p + %u", p, q, h->block_size);
-  //        exit(1);
-  //      }
-  //      if (r && ((char *)p) + size > (char *)r) {
-  //        fprintf(stderr, "sweep: bad size at %p + %zu > %p", p, size, r);
-  //        exit(1);
-  //      }
-//  #endif
+  #endif
         if (mark(p) != thd->gc_alloc_color && 
             mark(p) != thd->gc_trace_color) { //gc_color_clear) 
   #if GC_DEBUG_VERBOSE
@@ -1233,7 +1225,7 @@ void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, char *obj
       }
       #endif
       gc_copy_obj(result, obj, thd);
-      ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
+      //ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
 
       h_passed->next_free = h;
       h->free_size -= size;
@@ -1350,10 +1342,6 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   int heap_type;
   void *(*try_alloc)(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd);
   void *(*try_alloc_slow)(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd);
-  // TODO: check return value, if null (could not alloc) then 
-  // run a collection and check how much free space there is. if less
-  // the allowed ratio, try growing heap.
-  // then try realloc. if cannot alloc now, then throw out of memory error
   size = gc_heap_align(size);
   if (size <= 32) {
     heap_type = HEAP_SM;
@@ -1389,9 +1377,6 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
     try_alloc = &gc_try_alloc;
     try_alloc_slow = &gc_try_alloc_slow;
   }
-//TODO: convert fixed-size heap code and use that here. BUT, create a version of gc_alloc (maybe using macros?)
-//that accepts heap type as an arg and can assume free lists. we can modify gc_move to use the proper new
-//version of gc_alloc (just ifdef if need be for 32 vs 64 bit. this might speed things up a bit
   h = hrt->heap[heap_type];
   h_passed = h;
   // Start searching from the last heap page we had a successful
@@ -1425,7 +1410,6 @@ fprintf(stderr, "slow alloc of %p\n", result);
       /* of which are asynchronous. So... no choice but to grow the heap. */
       gc_grow_heap(h, heap_type, size, 0, thd);
       *heap_grown = 1;
-      //result = (*try_alloc)(h, heap_type, size, obj, thd);
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
@@ -1551,69 +1535,11 @@ void gc_collector_sweep()
 {
   ck_array_iterator_t iterator;
   gc_thread_data *m;
-//#if GC_DEBUG_TRACE
-//  size_t total_size;
-//  size_t total_free;
-//  time_t gc_collector_start = time(NULL);
-//#endif
-
   CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
-
-// TODO: what to update in each heap? probably want to reset back to first heap in each mutator
-// may also need to set other things, clear color?
-
-//    for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-//      h = m->heap->heap[heap_type];
-//      if (h) {
-////        if (heap_type <= LAST_FIXED_SIZE_HEAP_TYPE) {
-////          gc_sweep_fixed_size(h, heap_type, &freed_tmp, m);
-////          freed += freed_tmp;
-////        } else {
-////          gc_sweep(h, heap_type, &freed_tmp, m);
-////          freed += freed_tmp;
-////        }
-//      }
-//    }
-//
-//    // TODO: this loop only includes smallest 2 heaps, is that sufficient??
-//    for (heap_type = 0; heap_type < 2; heap_type++) {
-//      while ( ck_pr_load_ptr(&(m->cached_heap_free_sizes[heap_type])) <
-//             (ck_pr_load_ptr(&(m->cached_heap_total_sizes[heap_type])) * GC_FREE_THRESHOLD)) {
-//#if GC_DEBUG_TRACE
-//        fprintf(stderr, "Less than %f%% of the heap %d is free, growing it\n",
-//                100.0 * GC_FREE_THRESHOLD, heap_type);
-//#endif
-//        if (heap_type == HEAP_SM) {
-//          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
-//        } else if (heap_type == HEAP_64) {
-//          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
-//        } else if (heap_type == HEAP_REST) {
-//          gc_grow_heap(m->heap->heap[heap_type], heap_type, 0, 0, m);
-//        }
-//      }
-//    }
     // Tracing is done, remove the trace color
     m->gc_trace_color = m->gc_alloc_color;
     // Let mutator know we are done tracing
     ck_pr_cas_8(&(m->gc_done_tracing), 0, 1);
-//#if GC_DEBUG_TRACE
-//    total_size = ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_SM])) +
-//                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_64])) + 
-//#if INTPTR_MAX == INT64_MAX
-//                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_96])) + 
-//#endif
-//                 ck_pr_load_ptr(&(m->cached_heap_total_sizes[HEAP_REST]));
-//    total_free = ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_SM])) +
-//                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_64])) + 
-//#if INTPTR_MAX == INT64_MAX
-//                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_96])) + 
-//#endif
-//                 ck_pr_load_ptr(&(m->cached_heap_free_sizes[HEAP_REST]));
-//    fprintf(stderr,
-//            "sweep done, total_size = %zu, total_free = %zu, freed = %zu, elapsed = %ld\n",
-//            total_size, total_free, freed,
-//            (time(NULL) - gc_collector_start));
-//#endif
   }
 #if GC_DEBUG_TRACE
   fprintf(stderr, "all thread heap sweeps done\n");
