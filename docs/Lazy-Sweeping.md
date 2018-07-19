@@ -28,6 +28,23 @@ How do we handle heap growth and GC initiation when we are doing partial, lazy s
 
 Object Coloring
 
+Globals (collector? who sets these?):
+static unsigned char gc_color_mark = 5;   // Black, is swapped during GC
+static unsigned char gc_color_clear = 3;  // White, is swapped during GC
+static unsigned char gc_color_purple = 1;  // There are many "shades" of purple, this is the most recent one
+
+Mutator data:
+  // Data needed for heap GC
+  unsigned char gc_alloc_color;
+  unsigned char gc_trace_color;
+  uint8_t gc_done_tracing;
+  int gc_status;
+  // Lazy-sweep related data
+  int free_size; // Amount of heap data that is free
+  unsigned char is_full; // Determine if the heap is full
+  unsigned char cached_free_size_status;
+
+
 Plan B - Do not force any sweeps
 The plan is to add a new color (purple) that will be used to indicate garbage objects on the heap. That way we can sweep while the collector is busy doing other work such as mark/trace.
 We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When gc starts back up, the clear and mark colors are each incremented by 2. So we would then have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
