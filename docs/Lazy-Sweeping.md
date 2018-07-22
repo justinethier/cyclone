@@ -44,13 +44,30 @@ After a major GC is completed the collector thread swaps the values of the black
 
 # Object Coloring with Lazy Sweeping
 
-The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. 
+The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
 
 (an example might help here)
 
 Thus an object that is really garbage could accidentally be assigned the black color.
 
-The solution is to add a new color (purple) to indicate garbage objects on the heap. That way we can sweep while the collector is busy doing other work such as mark/trace.
+The solution is to add a new color (purple) to indicate garbage objects on the heap. Garbage can then be swept while the collector is busy doing other work such as mark/trace. In order to account for multiple generations of objects the object colors are incremented each cycle instead of being swapped. For example, the collector starts in the following state:
+
+    static unsigned char gc_color_mark = 5;   // Black, is swapped during GC
+    static unsigned char gc_color_clear = 3;  // White, is swapped during GC
+    static unsigned char gc_color_purple = 1;  // There are many "shades" of purple, this is the most recent one
+
+At the start of a new collection each of these values is incremented:
+
+    // We now increment both so that clear becomes the old mark color and a
+    // new value is used for the mark color. The old clear color becomes
+    // purple, indicating any of these objects are garbage
+    ck_pr_add_8(&gc_color_purple, 2);
+    ck_pr_add_8(&gc_color_clear, 2);
+    ck_pr_add_8(&gc_color_mark, 2);
+
+Note we avoid conflicts with the other colors by using odd numbers and incrementing by two.
+
+In this manner there is a purple color representing the current set of garbage. Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
 
 We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When gc starts back up, the clear and mark colors are each incremented by 2. So we would then have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
 
@@ -61,10 +78,6 @@ One is the existing alloc color
 The other is the previous clear color, when we cooperate. We can't free objects of this color because the collector is tracing over them
 After tracing is finished, we would want to remove this color because at that point objects that still have it need to become garbage
 Globals (collector? who sets these?):
-
-static unsigned char gc_color_mark = 5;   // Black, is swapped during GC
-static unsigned char gc_color_clear = 3;  // White, is swapped during GC
-static unsigned char gc_color_purple = 1;  // There are many "shades" of purple, this is the most recent one
 
 Mutator data:
   // Data needed for heap GC
