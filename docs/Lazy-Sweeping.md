@@ -56,7 +56,7 @@ The solution is to add a new color (purple) to indicate garbage objects on the h
     static unsigned char gc_color_clear = 3;  // White, is swapped during GC
     static unsigned char gc_color_purple = 1;  // There are many "shades" of purple, this is the most recent one
 
-At the start of a new collection each of these values is incremented:
+We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When gc starts back up, the clear and mark colors are each incremented by 2:
 
     // We now increment both so that clear becomes the old mark color and a
     // new value is used for the mark color. The old clear color becomes
@@ -65,12 +65,12 @@ At the start of a new collection each of these values is incremented:
     ck_pr_add_8(&gc_color_clear, 2);
     ck_pr_add_8(&gc_color_mark, 2);
 
-Note we avoid conflicts with the other colors by using odd numbers and incrementing by two.
+So we would then have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
 
-In this manner there is a purple color representing the current set of garbage. Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
+(In this manner there is a purple color representing the current set of garbage.)
+Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
 
-We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When gc starts back up, the clear and mark colors are each incremented by 2. So we would then have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
-
+(TODO: graphic here)
 
 Notes:
 If we now have two alloc colors:
