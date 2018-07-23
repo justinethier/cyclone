@@ -27,7 +27,7 @@ The main goal of this process is to improve performance through:
 
 - Better locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap.
 - Thread-local data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
-- Complexity - According to [1](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector.
+- Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector.
 
 Older notes:
 
