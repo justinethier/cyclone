@@ -25,9 +25,9 @@ Instead of waiting until tracing is finished and having the collector thread swe
 
 The main goal of this process is to improve performance through:
 
-- Better locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap.
-- Thread-local data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
-- Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector.
+- Better Locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap.
+- Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
+- Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
 Older notes:
 
@@ -123,6 +123,31 @@ Mutator data:
 
 TODO: discuss fast path (slot on current heap page) and slow path (page full, need to find another one)
 
+Pseudocode:
+
+    result = try_alloc();
+    if (result) {
+      return result;
+    } else {
+      result = try_alloc_slow();
+      if (result) {
+        return result;
+      } else {
+        grow_heap(); // malloc more heap space
+        result = try_alloc_slow();
+        if (result) {
+          return result;
+        } else {
+          out_of_memory_error();
+        }
+      }
+    }
+  
+TODO: try_alloc
+TODO: try_alloc_slow
+
+
+
 (below about selecting next heap page)
 
 Each heap will have to maintain a full bit. This is necessary to avoid wasted work of re-examining heaps that we already know to be full.
@@ -144,23 +169,19 @@ After tracing is finished, we want to assign white color to the same value as th
 
 # Sweeping
 
-      // Use the object's mark to determine if we keep it. 
-      // Need to check for both colors because:
-      // - Objects that are either newly-allocated or recently traced are given 
-      //   the alloc color, and we need to keep them.
-      // - If the collector is currently tracing, objects not traced yet will 
-      //   have the trace/clear color. We need to keep any of those to make sure
-      //   the collector has a chance to trace the entire heap.
-      if (//mark(p) != markColor &&
-          mark(p) != thd->gc_alloc_color && 
-          mark(p) != thd->gc_trace_color) { //gc_color_clear) 
-This makes sweep slightly more expensive because now to determine if an object is garbage it needs to make sure it is not using the allocation color or the white color (remember, we only want to free purple objects, but that color value changes each GC cycle). I think this will be acceptable though because it allows us to only sweep when necessary (IE, a heap does not need to be swept at all during a GC cycle if we don’t need the space) and when we sweep we will only iterate over one heap object.
+Sweep walks an entire heap page, freeing all unused slots along the way. The algorithm itself is mostely unchanged except that to identify an unused object we need to check for two colors:
 
+- Objects that are either newly-allocated or recently traced are given the allocation color and we need to keep them.
+- If the collector is currently tracing, objects not traced yet will have the trace/clear color. We need to keep any of those to make sure the collector has a chance to trace the entire heap.
+
+      if (mark(p) != thd->gc_alloc_color && 
+          mark(p) != thd->gc_trace_color) {
+        ... // Free slot p
+      }
 
 # Starting a Major Collection
 
 The existing GC tracked free space and would start a major GC once the amount of available heap memory was below a threshold. We continue to use the same strategy with lazy sweeping, but during a slow allocation the mutators also check how many heap pages are still free. If that number is too low we trigger a new GC cycle.
-
 
 # Results
 
@@ -169,7 +190,6 @@ Graph benchmarks in the google docs spreadsheet
 
 # Conclusion
 
-TODO: from GC handbook, lazy sweeping performs best when most of the heap is empty
 
 # References
 
