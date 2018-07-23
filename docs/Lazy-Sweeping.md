@@ -1,13 +1,33 @@
+[<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+
+# Lazy Sweeping
+
+- [Introduction](#introduction)
+- [Terms](#terms)
+- [Code](#code)
+- [Object Coloring](#object-coloring)
+  - [Original Cyclone Algorithm](#original-cyclone-algorithm)
+  - [Object Coloring with Lazy Sweeping](#object-coloring-with-lazy-sweeping)
+- [Allocation](#allocation)
+- [Sweeping](#sweeping)
+- [Starting a Major Collection](#starting-a-major-collection)
+- [Results](#results)
+- [Conclusion](#conclusion)
+- [References](#references)
+
+# Introduction
+
 One of the basic improvements to the mark-sweep algorithm suggested by the Garbage Collection Handbook is lazy sweeping. 
 
-With this approach instead of waiting until tracing is finished and having the collector thread sweep the entire heap at once, each thread will sweep its own heaps as part of the allcation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages. If so, the next one will be selected, the mutator will sweep it to free up space, and the new page will be used for allocation. If insufficient space is available then a major collection is triggered.
+Instead of waiting until tracing is finished and having the collector thread sweep the entire heap at once, each mutator thread will sweep its own heaps as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pagesand if so, the mutator will pick one and sweep it to free up space. This amortizes the cost of sweeping.
+
+(If insufficient space is available then a major collection is triggered.)
 
 The main goal of this process is to improve performance through:
 
-- better locality - heap slots tend to be used after they are swept
-- thread-local data - there is no need to lock the heap for allocation or sweeping since both operations are now performed by each mutator thread
-- according to the GC handbook, lazy sweeping reduces the algorithmic complexity of mark-sweep to be proportional to the size of the live data in the heap, similar to a copying collector
-
+- Better locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap.
+- Thread-local data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
+- Complexity - According to [1](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector.
 
 Older notes:
 
@@ -23,8 +43,16 @@ How does alloc know when to call sweep, without either locking the mutator to se
 Maybe we wait for heap page to be empty, then add the check as part of the slow case
 How do we handle heap growth and GC initiation when we are doing partial, lazy sweeps?
 
+# Terms
+- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
+- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
+- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
 
-# Object Coloring with the old collector
+# Object Coloring
+
+TODO: introduction? overview?
+
+## Original Cyclone Algorithm
 
 Before this change, an object could be marked using any of the following colors to indicate the status of its memory:
 
@@ -42,7 +70,7 @@ Only objects marked as white, gray, or black participate in major collections:
 
 After a major GC is completed the collector thread swaps the values of the black and white color. This simple optimization avoids having to revisit any objects while allowing the next cycle to start with a fresh set of white objects.
 
-# Object Coloring with Lazy Sweeping
+## Object Coloring with Lazy Sweeping
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
 
@@ -145,7 +173,7 @@ wrap this up...
 
 # References
 
-- Garbage Collection Handbook
-- riptide (see blog post)
+1. [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
+2. riptide (see blog post)
 
 
