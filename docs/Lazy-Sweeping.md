@@ -169,7 +169,7 @@ Graph benchmarks in the google docs spreadsheet
 
 # Conclusion
 
-wrap this up...
+TODO: from GC handbook, lazy sweeping performs best when most of the heap is empty
 
 # References
 
