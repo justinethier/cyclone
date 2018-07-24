@@ -4,10 +4,9 @@
 
 - [Introduction](#introduction)
 - [Terms](#terms)
-- [Code](#code)
-- [Object Marking](#object-marking)
+- [Marking Objects](#marking-objects)
   - [Tri-color Marking](#tri-color-marking)
-  - [Object Colors Required for Lazy Sweeping](#object-colors-required-for-lazy-sweeping)
+  - [Requirements for Lazy Sweeping](#requirements-for-lazy-sweeping)
 - [Allocation](#allocation)
 - [Sweeping](#sweeping)
 - [Collector Thread](#collector-thread)
@@ -18,11 +17,9 @@
 
 # Introduction
 
-One of the basic improvements to the mark-sweep algorithm suggested by the Garbage Collection Handbook is lazy sweeping. 
+Cyclone uses a concurrent mark-sweep garbage collection algorithm [described in detail here](Garbage-Collector.md). One of the basic improvements to mark-sweep suggested by the [Garbage Collection Handbook](#references) is lazy sweeping. 
 
-Instead of waiting until tracing is finished and having the collector thread sweep the entire heap at once, each mutator thread will sweep its own heaps as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pagesand if so, the mutator will pick one and sweep it to free up space. This amortizes the cost of sweeping.
-
-(If insufficient space is available then a major collection is triggered.)
+The basic idea is that instead of having the collector thread sweep the entire heap at once when tracing is finished, each mutator thread will sweep its own heap incrementally as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages, and if so, the mutator will pick one and sweep it to free up space. This amortizes the cost of sweeping.
 
 The main goal of this process is to improve performance through:
 
@@ -30,29 +27,15 @@ The main goal of this process is to improve performance through:
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
-Older notes:
-
-Original notes:
-Should consider lazy sweeping, riptide does this. Perhaps it would improve cache locality when sweeping fixed-size heaps
-Pseudocode on page 25 of the GC Handbook, but we need to adapt it for cyclone
-Need to pay attention to marking, probably would want to increment both clear/mark values and explicitly check for the mark value now
-Look at heap_lock, think we only use that during alloc or sweep
-One potential issue is gc_thread_data_free which uses the heap_lock to block the main mutator thread while merging in the dead thread’s heap. Will need to figure out another way of doing this locking/merge
-Goal is to remove heap locks and cached heap size atomics (just compute directly)
-Questions
-How does alloc know when to call sweep, without either locking the mutator to set bits, or having alloc need to make a check each time?
-Maybe we wait for heap page to be empty, then add the check as part of the slow case
-How do we handle heap growth and GC initiation when we are doing partial, lazy sweeps?
-
 # Terms
+
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
 - GC - Garbage collector.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
+- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
 
-# Object Marking
-
-TODO: introduction? overview?
+# Marking Objects
 
 ## Tri-color Marking
 
@@ -72,7 +55,7 @@ Only objects marked as white, gray, or black participate in major collections:
 
 After a major GC is completed the collector thread swaps the values of the black and white color. This simple optimization avoids having to revisit any objects while allowing the next cycle to start with a fresh set of white objects.
 
-## Object Colors Required for Lazy Sweeping
+## Requirements for Lazy Sweeping
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
 
@@ -86,7 +69,7 @@ The solution is to add a new color (purple) to indicate garbage objects on the h
     static unsigned char gc_color_clear = 3;  // White, is swapped during GC
     static unsigned char gc_color_purple = 1;  // There are many "shades" of purple, this is the most recent one
 
-We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When gc starts back up, the clear and mark colors are each incremented by 2:
+We can assign a new purple color after tracing is finished. At this point the clear color and the purple color are (essentially) the same, and any new objects are allocated using the mark color. When GC starts back up, the clear and mark colors are each incremented by 2:
 
     // We now increment both so that clear becomes the old mark color and a
     // new value is used for the mark color. The old clear color becomes
@@ -95,37 +78,17 @@ We can assign a new purple color after tracing is finished. At this point the cl
     ck_pr_add_8(&gc_color_clear, 2);
     ck_pr_add_8(&gc_color_mark, 2);
 
-So we would then have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
+So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
 
 (In this manner there is a purple color representing the current set of garbage.)
 Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
 
 (TODO: graphic here)
 
-Notes:
-If we now have two alloc colors:
-One is the existing alloc color
-The other is the previous clear color, when we cooperate. We can't free objects of this color because the collector is tracing over them
-After tracing is finished, we would want to remove this color because at that point objects that still have it need to become garbage
-Globals (collector? who sets these?):
-
-Mutator data:
-  // Data needed for heap GC
-  unsigned char gc_alloc_color;
-  unsigned char gc_trace_color;
-  uint8_t gc_done_tracing;
-  int gc_status;
-  // Lazy-sweep related data
-  int free_size; // Amount of heap data that is free
-  unsigned char is_full; // Determine if the heap is full
-  unsigned char cached_free_size_status;
-
 
 # Allocation
 
-TODO: discuss fast path (slot on current heap page) and slow path (page full, need to find another one)
-
-Pseudocode:
+The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page:
 
     result = try_alloc();
     if (result) {
@@ -145,9 +108,9 @@ Pseudocode:
       }
     }
   
-TODO: try_alloc
-TODO: try_alloc_slow
+A heap page uses a "free list" of available slots to quickly find the next available slot. The `try_alloc` function simply finds the next slot on the free list and returns it, or `NULL` if there is no free slot.
 
+On the other hand, `try_alloc_slow` has to do more work to find the next available heap page, sweep it, and then call `try_alloc` to perform an allocation.
 
 
 (below about selecting next heap page)
@@ -169,11 +132,29 @@ Initialize it to the same as the allocation color
 We want to assign this during cooperation, in preparation for tracing. This can be done using the existing code (note there are 2 places, in case collector cooperates on behalf of a mutator). Actually, during cooperation this value can remain unchanged since it is already assigned properly (IE, it is the white color).
 After tracing is finished, we want to assign white color to the same value as the new allocation color. gc_collector_sweep already loops over all mutators. We can still do this and just atomically update the second alloc color to allow it to be freed again (IE, just set it to the mark color)
 
+Notes:
+If we now have two alloc colors:
+One is the existing alloc color
+The other is the previous clear color, when we cooperate. We can't free objects of this color because the collector is tracing over them
+After tracing is finished, we would want to remove this color because at that point objects that still have it need to become garbage
+Globals (collector? who sets these?):
+
+Mutator data:
+  // Data needed for heap GC
+  unsigned char gc_alloc_color;
+  unsigned char gc_trace_color;
+  uint8_t gc_done_tracing;
+  int gc_status;
+  // Lazy-sweep related data
+  int free_size; // Amount of heap data that is free
+  unsigned char is_full; // Determine if the heap is full
+  unsigned char cached_free_size_status;
+
 # Sweeping
 
-Sweep walks an entire heap page, freeing all unused slots along the way. The algorithm itself is mostely unchanged except that to identify an unused object we need to check for two colors:
+Sweep walks an entire heap page, freeing all unused slots along the way. The algorithm itself is mostly unchanged except that to identify an unused object we need to check for two colors:
 
-- Objects that are either newly-allocated or recently traced are given the allocation color and we need to keep them.
+- Objects that are either newly-allocated or recently traced are given the allocation color; we need to keep them.
 - If the collector is currently tracing, objects not traced yet will have the trace/clear color. We need to keep any of those to make sure the collector has a chance to trace the entire heap.
 
       if (mark(p) != thd->gc_alloc_color && 
@@ -183,9 +164,9 @@ Sweep walks an entire heap page, freeing all unused slots along the way. The alg
 
 # Collector Thread
 
-The main job of the collector thread is now just tracing. 
+As well as coordinating major GC the main job of the collector thread is now just tracing. 
 
-During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing process cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads.
+During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing process cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
 
 Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
 
@@ -258,16 +239,17 @@ mperm | 49.94 | 39.97 | 19.95%
 equal | 0.74 | 0.70 | 4.43%
 bv2string | 7.54 | 7.62 | -1.00%
 
-TODO: explain this
+And the same data is illustrated in the following chart:
 
 <img src="images/benchmarks/lazy-sweep.png" alt="Chart of Results">
 
 # Conclusion
 
+TODO: are results what we expect? observations, impressions, and next steps
 
 # References
 
 1. [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
 2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 3. [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
-
+4. [The Ramsey sweep](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html), by Olin Shivers
