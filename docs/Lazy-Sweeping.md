@@ -80,7 +80,7 @@ We can assign a new purple color after tracing is finished. At this point the cl
     ck_pr_add_8(&gc_color_clear, 2);
     ck_pr_add_8(&gc_color_mark, 2);
 
-So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red (stack) color or the blue color (though that one is presently unused).
+So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red or blue colors.
 
 (In this manner there is a purple color representing the current set of garbage.)
 Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
