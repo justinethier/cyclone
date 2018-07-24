@@ -198,7 +198,8 @@ The existing GC tracked free space and would start a major GC once the amount of
 TODO: compare performance of new GC to old one, perhaps with benchmarks (compare 0.8.1 release with current 0.9 branch)
 Graph benchmarks in the google docs spreadsheet
 
-Benchmark|0.8.1|0.9|Reduced Time
+Benchmark | 0.8.1 | 0.9 | Reduced Time
+--------- | ----- | --- | ------------
 browse | 25.34 | 22.21 | 87.65%
 deriv | 17.17 | 10.83 | 63.10%
 destruc | 38.00 | 30.94 | 81.41%
