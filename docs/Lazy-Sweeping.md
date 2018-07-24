@@ -260,7 +260,7 @@ bv2string | 7.54 | 7.62 | -1.00%
 
 TODO: explain this
 
-<img src="docs/images/benchmarks/lazy-sweep.png" alt="Chart of Results">
+<img src="images/benchmarks/lazy-sweep.png" alt="Chart of Results">
 
 # Conclusion
 
