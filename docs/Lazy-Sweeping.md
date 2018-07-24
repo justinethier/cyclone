@@ -198,6 +198,64 @@ The existing GC tracked free space and would start a major GC once the amount of
 TODO: compare performance of new GC to old one, perhaps with benchmarks (compare 0.8.1 release with current 0.9 branch)
 Graph benchmarks in the google docs spreadsheet
 
+Benchmark|0.8.1|0.9|Reduced Time
+browse | 25.34 | 22.21 | 87.65%
+deriv | 17.17 | 10.83 | 63.10%
+destruc | 38.00 | 30.94 | 81.41%
+diviter | 8.57 | 6.05 | 70.65%
+divrec | 17.98 | 14.49 | 80.54%
+puzzle | 46.97 | 44.97 | 95.75%
+triangl | 26.20 | 25.35 | 96.77%
+tak | 18.73 | 18.36 | 98.01%
+takl | 14.42 | 11.30 | 78.36%
+ntakl | 15.32 | 11.22 | 73.26%
+cpstak | 21.09 | 20.92 | 99.20%
+ctak | 2.78 | 2.77 | 99.72%
+fib | 41.26 | 41.05 | 99.49%
+fibc | 3.52 | 3.47 | 98.63%
+fibfp | 9.56 | 9.57 | 100.12%
+sum | 30.28 | 30.29 | 100.02%
+sumfp | 11.55 | 11.53 | 99.77%
+fft | 21.19 | 17.25 | 81.43%
+mbrot | 16.84 | 15.27 | 90.66%
+mbrotZ | 23.35 | 22.88 | 97.99%
+nucleic | 8.29 | 7.91 | 95.44%
+pi | 0.13 | 0.13 | 98.10%
+pnpoly | 43.64 | 41.80 | 95.78%
+ray | 9.13 | 9.12 | 99.95%
+simplex | 53.26 | 42.60 | 79.98%
+ack | 75.78 | 50.64 | 66.82%
+array1 | 30.84 | 30.65 | 99.40%
+string | 0.28 | 0.26 | 93.09%
+sum1 | 1.01 | 1.00 | 98.77%
+cat | 22.05 | 22.42 | 101.69%
+tail | 1.04 | 0.99 | 95.44%
+wc | 14.46 | 14.75 | 102.07%
+read1 | 3.61 | 3.20 | 88.69%
+conform | 40.67 | 34.00 | 83.60%
+dynamic | 33.84 | 27.61 | 81.59%
+earley | 31.49 | 26.84 | 85.22%
+graphs | 64.84 | 55.22 | 85.16%
+lattice | 84.57 | 68.93 | 81.50%
+matrix | 61.07 | 48.46 | 79.36%
+maze | 23.02 | 18.46 | 80.21%
+mazefun | 23.73 | 20.74 | 87.39%
+nqueens | 47.92 | 45.18 | 94.29%
+paraffins | 15.21 | 10.76 | 70.72%
+parsing | 39.50 | 38.55 | 97.59%
+peval | 32.11 | 27.72 | 86.33%
+primes | 18.79 | 12.83 | 68.26%
+quicksort | 56.64 | 48.13 | 84.97%
+scheme | 23.32 | 21.39 | 91.70%
+slatex | 9.74 | 8.14 | 83.63%
+chudnovsky | 0.09 | 0.09 | 98.21%
+nboyer | 13.80 | 11.84 | 85.76%
+sboyer | 11.90 | 12.09 | 101.60%
+gcbench | 37.12 | 32.37 | 87.21%
+mperm | 49.94 | 39.97 | 80.05%
+equal | 0.74 | 0.70 | 95.57%
+bv2string | 7.54 | 7.62 | 101.00%
+
 # Conclusion
 
 
