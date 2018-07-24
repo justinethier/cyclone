@@ -195,11 +195,12 @@ The existing GC tracked free space and would start a major GC once the amount of
 
 # Results
 
-TODO: compare performance of new GC to old one, perhaps with benchmarks (compare 0.8.1 release with current 0.9 branch)
-Graph benchmarks in the google docs spreadsheet
+A benchmark suite [[3]](#references) was used to compare performance between the previous version of Cyclone (0.8.1) and the new version with lazy sweeping.
 
-Benchmark | 0.8.1 | 0.9 | Reduced Time
---------- | ----- | --- | ------------
+The following table lists the differences in elapsed time (seconds) between versions:
+
+Benchmark | Baseline | Lazy Sweeping | Reduced Time
+--------- | -------- | ------------- | ------------
 browse | 25.34 | 22.21 | 87.65%
 deriv | 17.17 | 10.83 | 63.10%
 destruc | 38.00 | 30.94 | 81.41%
@@ -264,5 +265,5 @@ bv2string | 7.54 | 7.62 | 101.00%
 
 1. [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
 2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
-
+3. [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
 
