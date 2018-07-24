@@ -5,11 +5,12 @@
 - [Introduction](#introduction)
 - [Terms](#terms)
 - [Code](#code)
-- [Object Coloring](#object-coloring)
-  - [Original Cyclone Algorithm](#original-cyclone-algorithm)
-  - [Object Coloring with Lazy Sweeping](#object-coloring-with-lazy-sweeping)
+- [Object Marking](#object-marking)
+  - [Tri-color Marking](#tri-color-marking)
+  - [Object Colors Required for Lazy Sweeping](#object-colors-required-for-lazy-sweeping)
 - [Allocation](#allocation)
 - [Sweeping](#sweeping)
+- [Collector Thread](#collector-thread)
 - [Starting a Major Collection](#starting-a-major-collection)
 - [Results](#results)
 - [Conclusion](#conclusion)
@@ -25,7 +26,7 @@ Instead of waiting until tracing is finished and having the collector thread swe
 
 The main goal of this process is to improve performance through:
 
-- Better Locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap.
+- Better Locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap. This allows programs to make better use of the processor cache.
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
@@ -45,14 +46,15 @@ How do we handle heap growth and GC initiation when we are doing partial, lazy s
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
+- GC - Garbage collector.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
 
-# Object Coloring
+# Object Marking
 
 TODO: introduction? overview?
 
-## Original Cyclone Algorithm
+## Tri-color Marking
 
 Before this change, an object could be marked using any of the following colors to indicate the status of its memory:
 
@@ -70,7 +72,7 @@ Only objects marked as white, gray, or black participate in major collections:
 
 After a major GC is completed the collector thread swaps the values of the black and white color. This simple optimization avoids having to revisit any objects while allowing the next cycle to start with a fresh set of white objects.
 
-## Object Coloring with Lazy Sweeping
+## Object Colors Required for Lazy Sweeping
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
 
@@ -179,9 +181,17 @@ Sweep walks an entire heap page, freeing all unused slots along the way. The alg
         ... // Free slot p
       }
 
+# Collector Thread
+
+The main job of the collector thread is now just tracing. 
+
+During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing process cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads.
+
+Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
+
 # Starting a Major Collection
 
-The existing GC tracked free space and would start a major GC once the amount of available heap memory was below a threshold. We continue to use the same strategy with lazy sweeping, but during a slow allocation the mutators also check how many heap pages are still free. If that number is too low we trigger a new GC cycle.
+The existing GC tracked free space and would start a major GC once the amount of available heap memory was below a threshold. We continue to use the same strategy with lazy sweeping but during a slow allocation the mutator also checks how many heap pages are still free. If that number is too low we trigger a new GC cycle.
 
 # Results
 
@@ -194,6 +204,6 @@ Graph benchmarks in the google docs spreadsheet
 # References
 
 1. [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
-2. riptide (see blog post)
+2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 
 
