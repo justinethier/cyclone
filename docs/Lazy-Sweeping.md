@@ -27,6 +27,8 @@ The main goal of this process is to improve performance through:
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
+In the latest version of Cyclone Scheme (0.9) we have modified major GC to use lazy sweeping. We discuss the changes required to the existing GC, present results, and consider next steps.
+
 # Terms
 
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
