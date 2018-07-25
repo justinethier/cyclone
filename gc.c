@@ -320,7 +320,7 @@ void gc_free_old_thread_data()
 uint64_t gc_heap_free_size(gc_heap *h) {
   uint64_t free_size = 0;
   for (; h; h = h->next){
-    if (h->cached_free_size_status == 1) { // Assume all free prior to sweep
+    if (h->is_unswept == 1) { // Assume all free prior to sweep
       free_size += h->size;
     } else {
       free_size += (h->free_size);
@@ -398,7 +398,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   // Lazy sweeping
   h->free_size = size;
   h->is_full = 0;
-  h->cached_free_size_status = 0;
+  h->is_unswept = 0;
   return h;
 }
 
@@ -1063,7 +1063,7 @@ int gc_num_unswept_heaps(gc_heap *h)
 {
   int count = 0;
   while (h) {
-    if (h->cached_free_size_status == 1 || 
+    if (h->is_unswept == 1 || 
         gc_is_heap_empty(h)) {
       count++;
     }
@@ -1101,10 +1101,10 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
     // check allocation status to make sure we can use it
     if (h->is_full) {
       continue; // Cannot sweep until next GC cycle
-    } else if (h->cached_free_size_status == 1 && !gc_is_heap_empty(h)) { // TODO: empty function does not support fixed-size heaps yet
+    } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) { // TODO: empty function does not support fixed-size heaps yet
       unsigned int h_size = h->size;
       //unsigned int prev_free_size = h->free_size;
-      //if (h->cached_free_size_status == 1) {
+      //if (h->is_unswept == 1) {
       //  prev_free_size = h_size; // Full size was cached
       //}
       gc_heap *keep = gc_sweep(h, heap_type, thd); // Clean up garbage objects
@@ -1218,7 +1218,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     // check allocation status to make sure we can use it
     if (h->is_full) {
       continue; // Cannot sweep until next GC cycle
-    } else if (h->cached_free_size_status == 1 && !gc_is_heap_empty(h)) {
+    } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) {
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
       if (!keep) {
@@ -1534,7 +1534,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
   //h->next_free = h;
   h->last_alloc_size = 0;
   //h->free_size = 0;
-  h->cached_free_size_status = 0;
+  h->is_unswept = 0;
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nBefore sweep -------------------------\n");
@@ -1933,7 +1933,7 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
       for (; h_tmp; h_tmp = h_tmp->next) {
         if (h_tmp && h_tmp->is_full == 1) {
           h_tmp->is_full = 0;
-          h_tmp->cached_free_size_status = 1;
+          h_tmp->is_unswept = 1;
           //// Assume heap is completely free for purposes of GC free space tracking
           //thd->cached_heap_free_sizes[heap_type] += h_tmp->size - h_tmp->free_size;
           //if (thd->cached_heap_free_sizes[heap_type] > thd->cached_heap_total_sizes[heap_type]) {

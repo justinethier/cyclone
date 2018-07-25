@@ -207,7 +207,7 @@ struct gc_heap_t {
   // Lazy-sweep related data
   int free_size; // Amount of heap data that is free
   unsigned char is_full; // Determine if the heap is full
-  unsigned char cached_free_size_status;
+  unsigned char is_unswept;
   //
   gc_heap *next_free;
   unsigned int last_alloc_size;
