@@ -1,6 +1,6 @@
 [<img src="images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
 
-# Lazy Sweeping
+# Garbage Collection Using Lazy Sweeping
 
 - [Introduction](#introduction)
 - [Terms](#terms)
@@ -244,6 +244,17 @@ bv2string | 7.54 | 7.62 | -1.00%
 And the same data is illustrated in the following chart:
 
 <img src="images/benchmarks/lazy-sweep.png" alt="Chart of Results">
+
+Here is an overall summary:
+
+Statistic | Benchmark | Result
+--------- | --------- | ------
+Overall Improvement | N/A |  13.36%
+Average Speedup     | N/A |  10.74%
+Maximum Speedup     | deriv |  36.90%
+Minimum Speedup     | wc |  -2.07%
+
+TODO: discuss why benchmarks turned out the way they did, does wc have no dead objects? what about deriv?
 
 # Conclusion
 
