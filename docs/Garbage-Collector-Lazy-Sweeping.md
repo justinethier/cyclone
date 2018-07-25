@@ -80,32 +80,26 @@ We can assign a new purple color after tracing is finished. At this point the cl
     ck_pr_add_8(&gc_color_clear, 2);
     ck_pr_add_8(&gc_color_mark, 2);
 
-So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red or blue colors.
-
-(In this manner there is a purple color representing the current set of garbage.)
-Effectively any odd numbered mark colors not part of this set represent other "shades" of purple.
-
-(TODO: graphic here)
-
+So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red or blue colors. Effectively any odd numbered colors not part of this set represent other "shades" of purple.
 
 # Allocation
 
 The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page:
 
-    result = try_alloc()
+    result = try_alloc();
     if (result)
-      return result
+      return result;
 
-    result = try_alloc_slow()
+    result = try_alloc_slow();
     if (result) 
-      return result
+      return result;
 
-    grow_heap() // malloc more heap space
-    result = try_alloc_slow()
+    grow_heap(); // malloc more heap space
+    result = try_alloc_slow();
     if (result) 
-      return result
+      return result;
 
-    out_of_memory_error()
+    out_of_memory_error();
   
 A heap page uses a "free list" of available slots to quickly find the next available slot. The `try_alloc` function simply finds the first slot on the free list and returns it, or `NULL` if there is no free slot.
 
