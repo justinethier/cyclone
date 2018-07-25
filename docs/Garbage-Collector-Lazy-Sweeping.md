@@ -92,65 +92,24 @@ Effectively any odd numbered mark colors not part of this set represent other "s
 
 The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page:
 
-    result = try_alloc();
-    if (result) {
-      return result;
-    } else {
-      result = try_alloc_slow();
-      if (result) {
-        return result;
-      } else {
-        grow_heap(); // malloc more heap space
-        result = try_alloc_slow();
-        if (result) {
-          return result;
-        } else {
-          out_of_memory_error();
-        }
-      }
-    }
+    result = try_alloc()
+    if (result)
+      return result
+
+    result = try_alloc_slow()
+    if (result) 
+      return result
+
+    grow_heap() // malloc more heap space
+    result = try_alloc_slow()
+    if (result) 
+      return result
+
+    out_of_memory_error()
   
-A heap page uses a "free list" of available slots to quickly find the next available slot. The `try_alloc` function simply finds the next slot on the free list and returns it, or `NULL` if there is no free slot.
+A heap page uses a "free list" of available slots to quickly find the next available slot. The `try_alloc` function simply finds the first slot on the free list and returns it, or `NULL` if there is no free slot.
 
 On the other hand, `try_alloc_slow` has to do more work to find the next available heap page, sweep it, and then call `try_alloc` to perform an allocation.
-
-
-(below about selecting next heap page)
-
-Each heap will have to maintain a full bit. This is necessary to avoid wasted work of re-examining heaps that we already know to be full.
-Bit is set by the allocate function when no more allocations are possible
-Bit is cleared by the collector after tracing is complete
-Would be better if the mutator could do it to avoid contention
-We could cheat and set a flag on the thread that will be examined during cooperation. When set, the mutator goes through all of its heaps and removes the full bit. Cooperation happens frequently so the update would be timely. Does add one additional comparison per cooperation, but that is not significant. In any case, this is also a convenient time to recompute the amount of free space in each heap.
-TODO: how will sweep compute (and store) amount of free space per heap?
-Guarantees each heap block is only used once per collection cycle
-
-Growing the heap - may need to iterate to the end since we are not necessarily there when we run out of heap space. IE, we do not move the mutator back to the first heap page anymore after a sweep. gc_grow already does this, I think we are OK.
-
-To avoid having to force any sweeps, each thread will maintain two colors that are “safe” from sweeping:
-The allocation color (already present)
-The white color (if we are tracing, otherwise this is also the allocation color)
-Initialize it to the same as the allocation color
-We want to assign this during cooperation, in preparation for tracing. This can be done using the existing code (note there are 2 places, in case collector cooperates on behalf of a mutator). Actually, during cooperation this value can remain unchanged since it is already assigned properly (IE, it is the white color).
-After tracing is finished, we want to assign white color to the same value as the new allocation color. gc_collector_sweep already loops over all mutators. We can still do this and just atomically update the second alloc color to allow it to be freed again (IE, just set it to the mark color)
-
-Notes:
-If we now have two alloc colors:
-One is the existing alloc color
-The other is the previous clear color, when we cooperate. We can't free objects of this color because the collector is tracing over them
-After tracing is finished, we would want to remove this color because at that point objects that still have it need to become garbage
-Globals (collector? who sets these?):
-
-Mutator data:
-  // Data needed for heap GC
-  unsigned char gc_alloc_color;
-  unsigned char gc_trace_color;
-  uint8_t gc_done_tracing;
-  int gc_status;
-  // Lazy-sweep related data
-  int free_size; // Amount of heap data that is free
-  unsigned char is_full; // Determine if the heap is full
-  unsigned char cached_free_size_status;
 
 # Sweeping
 
