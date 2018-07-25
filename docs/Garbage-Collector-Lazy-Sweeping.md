@@ -61,7 +61,7 @@ After a major GC is completed the collector thread swaps the values of the black
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
 
-(an example might help here)
+(TODO: an example might help here)
 
 Thus an object that is really garbage could accidentally be assigned the black color.
 
