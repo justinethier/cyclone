@@ -17,7 +17,7 @@
 
 # Introduction
 
-Cyclone uses a concurrent mark-sweep garbage collection algorithm [described in detail here](Garbage-Collector.md). One of the main improvements to mark-sweep suggested by the [Garbage Collection Handbook](#references) is lazy sweeping. 
+Cyclone uses a concurrent mark-sweep garbage collection algorithm [described in detail here](Garbage-Collector.md). But there are still some basic improvements to mark-sweep that can be made. One such improvement suggested by the [Garbage Collection Handbook](#references) is lazy sweeping. 
 
 The basic idea is that instead of having the collector thread sweep the entire heap at once when tracing is finished, each mutator thread will sweep its own heap incrementally as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages, and if so, the mutator will pick one and sweep it to free up space. This amortizes the cost of sweeping.
 
