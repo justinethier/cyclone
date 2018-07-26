@@ -33,8 +33,10 @@ In the latest version of Cyclone Scheme (0.9) we have modified major GC to use l
 
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
 - GC - Garbage collector.
+- Heap - TODO: also, describe what we mean by "page"
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
+- Sweep - TODO
 - Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
 
 # Marking Objects
@@ -219,3 +221,5 @@ TODO: are results what we expect? observations, impressions, and next steps
 2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 3. [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
 4. [The Ramsey sweep](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html), by Olin Shivers
+5. TODO: 
+Garbage-Collector.md
