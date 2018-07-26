@@ -33,10 +33,10 @@ In the latest version of Cyclone Scheme (0.9) we have modified major GC to use l
 
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
 - GC - Garbage collector.
-- Heap - TODO: also, describe what we mean by "page"
+- Heap - A section of dynamic memory managed by the garbage collector. The heap is not stored as a single contiguous block but rather is broken up into a series of pages.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
-- Sweep - TODO
+- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any free slots are freed.
 - Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
 
 # Marking Objects
@@ -61,11 +61,9 @@ After a major GC is completed the collector thread swaps the values of the black
 
 ## Requirements for Lazy Sweeping
 
-The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle.
+The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. Thus an object that is really garbage could accidentally be assigned the black color.
 
-(TODO: an example might help here)
-
-Thus an object that is really garbage could accidentally be assigned the black color.
+For example, suppose a heap page consists entirely of white objects after a GC is finished. All of the objects are garbage and would be freed if the page is swept. However if this page is never swept before the next collection, the collector will swap the values of white/black and during the subsequent cycle all of the objects will appear as if they have the black color. Thus a sweep during this GC cycle would not be able to free any of the objects!
 
 The solution is to add a new color (purple) to indicate garbage objects on the heap. Garbage can then be swept while the collector is busy doing other work such as mark/trace. In order to account for multiple generations of objects the object colors are incremented each cycle instead of being swapped. For example, the collector starts in the following state:
 
@@ -209,6 +207,8 @@ Average Speedup     | N/A |  10.74%
 Maximum Speedup     | deriv |  36.90%
 Minimum Speedup     | wc |  -2.07%
 
+So we achieve on average a speedup of 10.74% with lazy sweeping. It is interesting that there is such a wide range of performance impacts across the whole benchmark suite. Most likely those benchmarks with the biggest speedups are those that are generating the most garbage. Alternatively, benchmarks such as `wc` are likely generating very little garbage. In particular, `wc` spends most of its time running in a tight loop that performs few allocations. Unfortunately there is some additional overhead that slightly increases the runtime for some programs. But the overall performance improvement more than compensates.
+
 TODO: discuss why benchmarks turned out the way they did, does wc have no dead objects? what about deriv?
 
 # Conclusion
@@ -221,5 +221,4 @@ TODO: are results what we expect? observations, impressions, and next steps
 2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 3. [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
 4. [The Ramsey sweep](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html), by Olin Shivers
-5. TODO: 
-Garbage-Collector.md
+5. [The Cyclone Scheme Garbage Collector](Garbage-Collector.md), by Justin Ethier
