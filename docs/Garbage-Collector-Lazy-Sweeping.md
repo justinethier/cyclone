@@ -84,7 +84,9 @@ So we now have purple (assigned the previous clear color), clear (assigned the p
 
 # Allocation
 
-The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page:
+The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page. 
+
+The logic in simplified form is:
 
     result = try_alloc();
     if (result)
