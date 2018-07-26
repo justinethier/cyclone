@@ -198,7 +198,7 @@ bv2string | 7.54 | 7.62 | -1.00%
 
 And the same data is illustrated in the following chart:
 
-<img src="images/benchmarks/lazy-sweep.png" alt="Chart of Results">
+<img src="images/benchmarks/lazy-sweep-benchmark-times.png" alt="Chart of Results">
 
 Here is an overall summary:
 
