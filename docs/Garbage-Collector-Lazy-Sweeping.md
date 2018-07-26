@@ -207,18 +207,16 @@ Average Speedup     | N/A |  10.74%
 Maximum Speedup     | deriv |  36.90%
 Minimum Speedup     | wc |  -2.07%
 
-So we achieve on average a speedup of 10.74% with lazy sweeping. It is interesting that there is such a wide range of performance impacts across the whole benchmark suite. Most likely those benchmarks with the biggest speedups are those that are generating the most garbage. Alternatively, benchmarks such as `wc` are likely generating very little garbage. In particular, `wc` spends most of its time running in a tight loop that performs few allocations. Unfortunately there is some additional overhead that slightly increases the runtime for some programs. But the overall performance improvement more than compensates.
-
-TODO: discuss why benchmarks turned out the way they did, does wc have no dead objects? what about deriv?
+Overall we achieve an average speedup of 10.74% with lazy sweeping. It is interesting that there is such a wide range of performance impacts across the whole benchmark suite. Most likely those benchmarks with the biggest speedups are those that are generating the most garbage. Alternatively, benchmarks such as `wc` are likely generating very little garbage. Case in point, `wc` spends most of its time running in a tight loop that performs few allocations. It is unfortunate that lazy sweeping slightly increases the runtime for some programs but the overall performance improvement more than compensates.
 
 # Conclusion
 
-TODO: are results what we expect? observations, impressions, and next steps
+By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. Though it took some time to integrate lazy sweeping and then re-stabilize the GC code, this opens the possibility to experiment with other larger-scale GC optimizations.
 
 # References
 
 1. [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
-2. [Introducing Riptide: WebKit’s Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
+2. [Introducing Riptide: WebKit's Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 3. [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
 4. [The Ramsey sweep](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html), by Olin Shivers
 5. [The Cyclone Scheme Garbage Collector](Garbage-Collector.md), by Justin Ethier
