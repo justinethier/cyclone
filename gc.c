@@ -1361,7 +1361,8 @@ fprintf(stderr, "slow alloc of %p\n", result);
 #endif
     if (result) {
       // Check if we need to start a major collection
-      if (heap_type != HEAP_HUGE && gc_num_unswept_heaps(h_passed) < 2) {
+      if (heap_type != HEAP_HUGE && gc_num_unswept_heaps(h_passed) < 
+                                    GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT) {
         gc_start_major_collection(thd);
       }
     } else {

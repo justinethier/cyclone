@@ -113,6 +113,9 @@ typedef unsigned char tag_type;
 /** Start GC cycle if % heap space free below this percentage */
 #define GC_COLLECTION_THRESHOLD 0.0125 //0.05
 
+/** Start GC cycle if fewer than this many heap pages are unswept */
+#define GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT 3
+
 /** After major GC, grow the heap so at least this percentage is free */
 #define GC_FREE_THRESHOLD 0.40
 // END GC tuning
