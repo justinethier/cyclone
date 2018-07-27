@@ -209,11 +209,17 @@ Average Speedup     | N/A |  10.74%
 Maximum Speedup     | deriv |  36.90%
 Minimum Speedup     | wc |  -2.07%
 
-Overall we achieve an average speedup of 10.74% with lazy sweeping. It is interesting that there is such a wide range of performance impacts across the whole benchmark suite. Most likely those benchmarks with the biggest speedups are those that are generating the most garbage. Alternatively, benchmarks such as `wc` are likely generating very little garbage. Case in point, `wc` spends most of its time running in a tight loop that performs few allocations. It is unfortunate that lazy sweeping slightly increases the runtime for some programs but the overall performance improvement more than compensates.
+Overall we achieve an average speedup of 10.74% with lazy sweeping, though there is a wide range of performance impacts across the whole benchmark suite. 
+
+Those benchmarks with the biggest speedups are likely those that are generating the most garbage. For example `ack` frequently invokes GC and most of the heap is freed during each GC cycle - this benchmark benefits greatly from lazy sweeping. Alternatively `wc` - which did not realize a speedup - spends most of its time running in a tight loop, invokes GC infrequently, and after a GC cycle there are many live objects left on the heap. 
 
 # Conclusion
 
-By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. Though it took some time to integrate lazy sweeping and then re-stabilize the GC code, this opens the possibility to experiment with other larger-scale GC optimizations.
+By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. It is unfortunate that lazy sweeping slightly increases the runtime for some programs but the overall performance improvement more than compensates.
+
+TODO: how much time? Began work in early March, planning to release in August
+
+Though it took some time to integrate lazy sweeping and then re-stabilize the GC code, this opens the possibility to experiment with other larger-scale GC optimizations.
 
 # References
 
