@@ -36,7 +36,7 @@ In the latest version of Cyclone Scheme (0.9) we have modified major GC to use l
 - Heap - A section of dynamic memory managed by the garbage collector. The heap is not stored as a single contiguous block but rather is broken up into a series of pages.
 - Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
-- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any free slots are freed.
+- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
 - Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
 
 # Marking Objects
