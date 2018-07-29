@@ -2,7 +2,7 @@
 
 ## 0.9 - TBD
 
-This release significantly improves garbage collection performance by using [lazy sweeping](docs/Garbage-Collector-Lazy-Sweeping.md). Improvements are most notable to applications that perform a lot of allocations and have a large number of shortly-lived objects.
+This release significantly improves garbage collection performance by using [lazy sweeping](docs/Garbage-Collection-Using-Lazy-Sweeping.md).
 
 ## 0.8.1 - July 2, 2018
 
