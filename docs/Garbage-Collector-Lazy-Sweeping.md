@@ -215,11 +215,9 @@ Those benchmarks with the biggest speedups are likely those that are generating 
 
 # Conclusion
 
-By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. It is unfortunate that lazy sweeping slightly increases the runtime for some programs but the overall performance improvement more than compensates.
+Though it is unfortunate lazy sweeping slightly increases the runtime for some programs, the overall performance improvement more than compensates. By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. 
 
-TODO: how much time? Began work in early March, planning to release in August
-
-Though it took some time to integrate lazy sweeping and then re-stabilize the GC code, this opens the possibility to experiment with other larger-scale GC optimizations.
+Though this is a large-scale change that took a few months to integrate into Cyclone and then re-stabilize the GC code, this opens up the possibility to experiment with other larger-scale GC optimizations in Cyclone.
 
 # References
 
