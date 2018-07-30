@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9 - TBD
+## 0.9 - July 31, 2018
 
 This release significantly improves garbage collection performance by using [lazy sweeping](docs/Garbage-Collection-Using-Lazy-Sweeping.md).
 
