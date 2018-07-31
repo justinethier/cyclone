@@ -208,7 +208,7 @@ struct gc_heap_t {
   unsigned block_size;
   char *data_end;
   // Lazy-sweep related data
-  int free_size; // Amount of heap data that is free
+  unsigned int free_size; // Amount of heap data that is free
   unsigned char is_full; // Determine if the heap is full
   unsigned char is_unswept;
   //
@@ -219,6 +219,8 @@ struct gc_heap_t {
   //
   gc_free_list *free_list;
   gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
+  int num_children;
+  int num_unswept_children;
   char *data;
 };
 

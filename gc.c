@@ -363,6 +363,8 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
   h->next = NULL;
+  h->num_children = 1;
+  h->num_unswept_children = 0;
   free = h->free_list = (gc_free_list *) h->data;
   next = (gc_free_list *) (((char *)free) + gc_heap_align(gc_free_chunk_size));
   free->size = 0;               // First one is just a dummy record
@@ -648,9 +650,15 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
     }
   }
   // Free the heap page if possible.
-  if (heap_is_empty && 
-        (h->type == HEAP_HUGE || (h->ttl--) <= 0)) {
-    rv = NULL; // Let caller know heap needs to be freed
+  if (heap_is_empty) {
+    if (h->type == HEAP_HUGE || (h->ttl--) <= 0) {
+      rv = NULL; // Let caller know heap needs to be freed
+    } else {
+      // Convert back to bump&pop
+      h->remaining = h->size - (h->size % h->block_size);
+      h->data_end = h->data + h->remaining;
+      h->free_list = NULL; // No free lists with bump&pop
+    }
   }
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
@@ -954,6 +962,8 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
     while (h_last->next) {
       h_last = h_last->next;
     }
+  } else if (heap_type == HEAP_SM || heap_type == HEAP_64) {
+    new_size = gc_heap_align(4096); // Completely insane(?), match linux page size
   } else {
     // Grow heap gradually using fibonnaci sequence.
     size_t prev_size = GROW_HEAP_BY_SIZE;
@@ -1106,6 +1116,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
       //  prev_free_size = h_size; // Full size was cached
       //}
       gc_heap *keep = gc_sweep(h, heap_type, thd); // Clean up garbage objects
+      h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
@@ -1117,6 +1128,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
+          h_passed->num_children--;
           continue;
         }
       }
@@ -1219,6 +1231,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) {
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
+      h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
@@ -1230,6 +1243,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
+          h_passed->num_children--;
           continue;
         }
       }
@@ -1361,7 +1375,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
 #endif
     if (result) {
       // Check if we need to start a major collection
-      if (heap_type != HEAP_HUGE && gc_num_unswept_heaps(h_passed) < 
+      if (heap_type != HEAP_HUGE && h_passed->num_unswept_children <
                                     GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT) {
         gc_start_major_collection(thd);
       }
@@ -1372,6 +1386,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
       /* of which are asynchronous. So... no choice but to grow the heap. */
       gc_grow_heap(h, heap_type, size, 0, thd);
       *heap_grown = 1;
+      h_passed->num_children++;
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
@@ -1922,17 +1937,19 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 
   // If we have finished tracing, clear any "full" bits on the heap
   if(ck_pr_cas_8(&(thd->gc_done_tracing), 1, 0)) {
-    int heap_type;
-    gc_heap *h_tmp;
+    int heap_type, unswept;
+    gc_heap *h_tmp, *h_head;
 #if GC_DEBUG_VERBOSE
 fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
 #endif
     for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
-      h_tmp = thd->heap->heap[heap_type];
+      h_head = h_tmp = thd->heap->heap[heap_type];
+      unswept = 0;
       for (; h_tmp; h_tmp = h_tmp->next) {
         if (h_tmp && h_tmp->is_full == 1) {
           h_tmp->is_full = 0;
           h_tmp->is_unswept = 1;
+          unswept++;
           //// Assume heap is completely free for purposes of GC free space tracking
           //thd->cached_heap_free_sizes[heap_type] += h_tmp->size - h_tmp->free_size;
           //if (thd->cached_heap_free_sizes[heap_type] > thd->cached_heap_total_sizes[heap_type]) {
@@ -1942,6 +1959,7 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
           //h_tmp->free_size = h_tmp->size;
         }
       }
+      h_head->num_unswept_children = unswept;
     }
 
     // At least for now, let the main thread help clean up any terminated threads
