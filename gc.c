@@ -963,7 +963,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
       h_last = h_last->next;
     }
   } else if (heap_type == HEAP_SM || heap_type == HEAP_64) {
-    new_size = gc_heap_align(4096); // Completely insane(?), match linux page size
+    new_size = gc_heap_align(64 * 4096); // Completely insane(?), match linux page size
   } else {
     // Grow heap gradually using fibonnaci sequence.
     size_t prev_size = GROW_HEAP_BY_SIZE;
@@ -1375,8 +1375,10 @@ fprintf(stderr, "slow alloc of %p\n", result);
 #endif
     if (result) {
       // Check if we need to start a major collection
-      if (heap_type != HEAP_HUGE && h_passed->num_unswept_children <
-                                    GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT) {
+      if (heap_type != HEAP_HUGE && 
+        ((try_alloc == &gc_try_alloc_fixed_size && // Fixed-size object heap
+          h_passed->num_unswept_children < (GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT * 128)) ||
+         h_passed->num_unswept_children < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)) {
         gc_start_major_collection(thd);
       }
     } else {
