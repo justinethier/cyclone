@@ -549,6 +549,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
   gc_heap *rv = h;
 
   h->next_free = h;
+  h->is_unswept = 0;
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   fprintf(stderr, "\nBefore sweep -------------------------\n");
@@ -655,9 +656,9 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
       rv = NULL; // Let caller know heap needs to be freed
     } else {
       // Convert back to bump&pop
-      h->remaining = h->size - (h->size % h->block_size);
-      h->data_end = h->data + h->remaining;
-      h->free_list = NULL; // No free lists with bump&pop
+    //  h->remaining = h->size - (h->size % h->block_size);
+    //  h->data_end = h->data + h->remaining;
+    //  h->free_list = NULL; // No free lists with bump&pop
     }
   }
 
@@ -1379,6 +1380,8 @@ fprintf(stderr, "slow alloc of %p\n", result);
         (//(try_alloc == &gc_try_alloc_fixed_size && // Fixed-size object heap
          // h_passed->num_unswept_children < (GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT * 128)) ||
          h_passed->num_unswept_children < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)) {
+//           gc_num_unswept_heaps(h_passed) < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)){
+        printf("major collection h->num_unswept = %d, computed = %d\n",  h_passed->num_unswept_children, gc_num_unswept_heaps(h_passed));
         gc_start_major_collection(thd);
       }
     } else {
@@ -1389,6 +1392,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
       gc_grow_heap(h, heap_type, size, 0, thd);
       *heap_grown = 1;
       //h_passed->num_children++;
+      h_passed->num_unswept_children++;
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
