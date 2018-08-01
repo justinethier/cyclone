@@ -499,6 +499,7 @@ size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd)
         next->next = p;
         next = next->next;
       }
+      h->free_size += h->block_size;
     }
     remaining -= h->block_size;
   }
