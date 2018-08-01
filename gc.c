@@ -363,7 +363,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
   h->next = NULL;
-  h->num_children = 1;
+  //h->num_children = 1;
   h->num_unswept_children = 0;
   free = h->free_list = (gc_free_list *) h->data;
   next = (gc_free_list *) (((char *)free) + gc_heap_align(gc_free_chunk_size));
@@ -962,8 +962,8 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
     while (h_last->next) {
       h_last = h_last->next;
     }
-  } else if (heap_type == HEAP_SM || heap_type == HEAP_64) {
-    new_size = gc_heap_align(64 * 4096); // Completely insane(?), match linux page size
+//  } else if (heap_type == HEAP_SM || heap_type == HEAP_64) {
+//    new_size = gc_heap_align(64 * 4096); // Completely insane(?), match linux page size
   } else {
     // Grow heap gradually using fibonnaci sequence.
     size_t prev_size = GROW_HEAP_BY_SIZE;
@@ -1128,7 +1128,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
-          h_passed->num_children--;
+          //h_passed->num_children--;
           continue;
         }
       }
@@ -1175,10 +1175,10 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
 void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd)
 {
   void *result;
-  gc_heap *h_passed = h;
-  h = h->next_free;
+  //gc_heap *h_passed = h;
+  //h = h->next_free;
 
-  for (; h; h = h->next) {      // All heaps
+  //for (; h; h = h->next) {      // All heaps
     if (h->free_list) {
       result = h->free_list;
       h->free_list = h->free_list->next;
@@ -1200,11 +1200,11 @@ void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, char *obj
       gc_copy_obj(result, obj, thd);
       //ck_pr_sub_ptr(&(thd->cached_heap_free_sizes[heap_type]), size);
 
-      h_passed->next_free = h;
+      //h_passed->next_free = h;
       h->free_size -= size;
       return result;
     }
-  }
+  //}
   return NULL;
 }
 
@@ -1243,7 +1243,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
-          h_passed->num_children--;
+          //h_passed->num_children--;
           continue;
         }
       }
@@ -1376,8 +1376,8 @@ fprintf(stderr, "slow alloc of %p\n", result);
     if (result) {
       // Check if we need to start a major collection
       if (heap_type != HEAP_HUGE && 
-        ((try_alloc == &gc_try_alloc_fixed_size && // Fixed-size object heap
-          h_passed->num_unswept_children < (GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT * 128)) ||
+        (//(try_alloc == &gc_try_alloc_fixed_size && // Fixed-size object heap
+         // h_passed->num_unswept_children < (GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT * 128)) ||
          h_passed->num_unswept_children < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)) {
         gc_start_major_collection(thd);
       }
@@ -1388,7 +1388,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
       /* of which are asynchronous. So... no choice but to grow the heap. */
       gc_grow_heap(h, heap_type, size, 0, thd);
       *heap_grown = 1;
-      h_passed->num_children++;
+      //h_passed->num_children++;
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
