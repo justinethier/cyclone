@@ -1386,7 +1386,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
          // h_passed->num_unswept_children < (GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT * 128)) ||
          h_passed->num_unswept_children < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)) {
 //           gc_num_unswept_heaps(h_passed) < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)){
-        printf("major collection heap_type = %d h->num_unswept = %d, computed = %d\n", heap_type,  h_passed->num_unswept_children, gc_num_unswept_heaps(h_passed));
+//        printf("major collection heap_type = %d h->num_unswept = %d, computed = %d\n", heap_type,  h_passed->num_unswept_children, gc_num_unswept_heaps(h_passed));
         //if (h_passed->num_unswept_children != gc_num_unswept_heaps(h_passed)) {
         //  printf("ERROR, counts do not match!\n");
         //}
