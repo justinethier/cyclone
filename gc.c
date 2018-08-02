@@ -1387,6 +1387,9 @@ fprintf(stderr, "slow alloc of %p\n", result);
          h_passed->num_unswept_children < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)) {
 //           gc_num_unswept_heaps(h_passed) < GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT)){
         printf("major collection heap_type = %d h->num_unswept = %d, computed = %d\n", heap_type,  h_passed->num_unswept_children, gc_num_unswept_heaps(h_passed));
+        //if (h_passed->num_unswept_children != gc_num_unswept_heaps(h_passed)) {
+        //  printf("ERROR, counts do not match!\n");
+        //}
         gc_start_major_collection(thd);
       }
     } else {
@@ -1971,11 +1974,12 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
           //    thd->cached_heap_free_sizes[heap_type], thd->cached_heap_total_sizes[heap_type]);
           //}
           //h_tmp->free_size = h_tmp->size;
-        } else if (gc_is_heap_empty(h_tmp)) {
-          //unswept++;
+        } else if (h_tmp->is_unswept == 1) {
+          unswept++;
         }
       }
       h_head->num_unswept_children = unswept;
+      //printf("set num_unswept_children = %d computed = %d\n", h_head->num_unswept_children, gc_num_unswept_heaps(h_head));
     }
 
     // At least for now, let the main thread help clean up any terminated threads
