@@ -662,7 +662,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
     //  h->free_list = NULL; // No free lists with bump&pop
     }
   } else {
-    (thd->heap->heap[heap_type])->num_unswept_children--;
+    //(thd->heap->heap[heap_type])->num_unswept_children--;
   }
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
@@ -1075,8 +1075,8 @@ int gc_num_unswept_heaps(gc_heap *h)
 {
   int count = 0;
   while (h) {
-    if (h->is_unswept == 1 || 
-        gc_is_heap_empty(h)) {
+    if (h->is_unswept == 1 /*|| 
+        gc_is_heap_empty(h)*/) {
       count++;
     }
     h = h->next;
@@ -1120,6 +1120,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
       //  prev_free_size = h_size; // Full size was cached
       //}
       gc_heap *keep = gc_sweep(h, heap_type, thd); // Clean up garbage objects
+      h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
@@ -1132,7 +1133,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
           //h_passed->num_children--;
-          h_passed->num_unswept_children--;
+          //h_passed->num_unswept_children--;
           continue;
         }
       }
@@ -1235,6 +1236,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) {
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
+      h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
@@ -1247,7 +1249,7 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
           //h_passed->num_children--;
-          h_passed->num_unswept_children--;
+          //h_passed->num_unswept_children--;
           continue;
         }
       }
@@ -1395,7 +1397,7 @@ fprintf(stderr, "slow alloc of %p\n", result);
       gc_grow_heap(h, heap_type, size, 0, thd);
       *heap_grown = 1;
       //h_passed->num_children++;
-      h_passed->num_unswept_children++;
+      //h_passed->num_unswept_children++;
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
@@ -1707,7 +1709,7 @@ gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd)
         rv = NULL; // Let caller know heap needs to be freed
       }
     } else {
-      (thd->heap->heap[heap_type])->num_unswept_children--;
+      //(thd->heap->heap[heap_type])->num_unswept_children--;
     }
 
 #if GC_DEBUG_SHOW_SWEEP_DIAG
@@ -1970,7 +1972,7 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
           //}
           //h_tmp->free_size = h_tmp->size;
         } else if (gc_is_heap_empty(h_tmp)) {
-          unswept++;
+          //unswept++;
         }
       }
       h_head->num_unswept_children = unswept;
@@ -2037,7 +2039,7 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
     thd->cached_heap_free_sizes[HEAP_96]   = gc_heap_free_size(thd->heap->heap[HEAP_96]) ;
     thd->cached_heap_free_sizes[HEAP_REST] = gc_heap_free_size(thd->heap->heap[HEAP_REST]);
 
-//#if GC_DEBUG_VERBOSE
+#if GC_DEBUG_VERBOSE
     fprintf(stderr, "heap %d free %zu total %zu\n", HEAP_SM, thd->cached_heap_free_sizes[HEAP_SM], thd->cached_heap_total_sizes[HEAP_SM]);
     if (thd->cached_heap_free_sizes[HEAP_SM] > thd->cached_heap_total_sizes[HEAP_SM]) {
       fprintf(stderr, "gc_mut_cooperate - Invalid cached heap sizes, free=%zu total=%zu\n", 
@@ -2062,7 +2064,7 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
         thd->cached_heap_free_sizes[HEAP_REST], thd->cached_heap_total_sizes[HEAP_REST]);
       exit(1);
     }
-//#endif
+#endif
 
     // Initiate collection cycle if free space is too low.
     // Threshold is intentially low because we have to go through an
