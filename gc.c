@@ -657,9 +657,9 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
       rv = NULL; // Let caller know heap needs to be freed
     } else {
       // Convert back to bump&pop
-    //  h->remaining = h->size - (h->size % h->block_size);
-    //  h->data_end = h->data + h->remaining;
-    //  h->free_list = NULL; // No free lists with bump&pop
+      h->remaining = h->size - (h->size % h->block_size);
+      h->data_end = h->data + h->remaining;
+      h->free_list = NULL; // No free lists with bump&pop
     }
   } else {
     //(thd->heap->heap[heap_type])->num_unswept_children--;
