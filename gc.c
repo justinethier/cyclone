@@ -644,11 +644,11 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
         h->free_size += h->block_size;
       } else {
         //printf("sweep block is still used remaining=%d p = %p\n", remaining, p);
+        heap_is_empty = 0;
       }
       //next->next = (gc_free_list *)(((char *) next) + h->block_size);
       //next = next->next;
       remaining -= h->block_size;
-      heap_is_empty = 0;
     }
   }
   // Free the heap page if possible.
