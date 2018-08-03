@@ -102,7 +102,7 @@ typedef unsigned char tag_type;
 #define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     
 
 /** Normal size of a heap page */
-#define HEAP_SIZE (32 * 1024 * 1024)    
+#define HEAP_SIZE (8 * 1024 * 1024)    
 
 // End heap page size parameters
 ////////////////////////////////
