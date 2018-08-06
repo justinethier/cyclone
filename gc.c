@@ -541,7 +541,7 @@ size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd)
 gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
 {
   short heap_is_empty;
-  object p;
+  object p, end;
   gc_free_list *q, *r, *s;
 #if GC_DEBUG_SHOW_SWEEP_DIAG
   gc_heap *orig_heap_ptr = h;
@@ -567,14 +567,15 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
     size_t remaining = h->size - (h->size % h->block_size); // - h->block_size; // Remove first one??
     char *data_end = h->data + remaining;
     heap_is_empty = 1; // Base case is an empty heap
+    end = (object)data_end;
+    p = h->data;
     q = h->free_list;
-    while (remaining) {
-      p = data_end - remaining;
+    while (p < end) {
       // find preceding/succeeding free list pointers for p
       for (r = (q?q->next:NULL); r && ((char *)r < (char *)p); q = r, r = r->next) ;
       if ((char *)q == (char *)p || (char *)r == (char *)p) {     // this is a free block, skip it
         //printf("Sweep skip free block %p remaining=%lu\n", p, remaining);
-        remaining -= h->block_size;
+        p = (object) (((char *)p) + h->block_size);
         continue;
       }
 #if GC_SAFETY_CHECKS
@@ -648,7 +649,7 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
       }
       //next->next = (gc_free_list *)(((char *) next) + h->block_size);
       //next = next->next;
-      remaining -= h->block_size;
+      p = (object) (((char *)p) + h->block_size);
     }
   }
   // Free the heap page if possible.
