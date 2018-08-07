@@ -8,7 +8,7 @@
 ;;;;
 (define-library (scheme read)
   (import (scheme base)
-          ;(scheme write)
+          (scheme write)
           (scheme char))
   (export
     read
@@ -134,7 +134,7 @@
 
 (define (parse fp)
   (let ((token (read-token fp)))
-    ;(write `(token ,token))
+    (display "//")(write `(token ,token)) (newline)
     (cond
       ((Cyc-opaque? token)
        (cond
