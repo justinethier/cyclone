@@ -2444,7 +2444,9 @@ void gc_wait_handshake()
               ) {
 //printf("DEBUG - update mutator GC status\n");            
             ck_pr_cas_int(&(m->gc_status), statusm, statusc);
-//printf("DEBUG - collector is cooperating for blocked mutator\n");            
+            #if GC_DEBUG_TRACE
+            fprintf(stderr, "DEBUG - collector is cooperating for blocked mutator\n");            
+            #endif
             buf_len =
                 gc_minor(m, m->stack_limit, m->stack_start, m->gc_cont, NULL,
                          0);
@@ -2816,18 +2818,26 @@ void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 
 void Cyc_apply_from_buf(void *data, int argc, object prim, object * buf);
 
+/**
+ * @brief While a mutator has declared itself blocked, it is possible
+ *        that an object on its stack may be copied to the heap by
+ *        the collector. The purpose of this function is to copy
+ *        such an object again to ensure all fields are updated
+ *        to their latest values.
+ * @param obj   Object to copy
+ * @param thd   Thread data object for the applicable mutator
+ */
 void gc_recopy_obj(object obj, gc_thread_data *thd) 
 {
   // Temporarily change obj type so we can copy it
   object fwd = forward(obj);
   tag_type tag = type_of(fwd);
   type_of(obj) = tag;
-
-fprintf(stderr, "\n!!! Recopying object %p with tag %d !!!\n\n", obj, tag);
-  // Copy it again
-  gc_copy_obj(fwd, obj, thd);
-  // Restore forwarding pointer tag
-  type_of(obj) = forward_tag;
+  #if GC_DEBUG_TRACE
+  fprintf(stderr, "\n!!! Recopying object %p with tag %d !!!\n\n", obj, tag);
+  #endif
+  gc_copy_obj(fwd, obj, thd); // Copy it again
+  type_of(obj) = forward_tag; // Restore forwarding pointer tag on stack obj
 }
 
 /**
