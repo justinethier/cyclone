@@ -6233,7 +6233,7 @@ void _read_error(void *data, port_type *p, const char *msg)
   vec.num_elements = 1;
   vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
   vec.elements[0] = &str;
-  return_thread_runnable(data, &vec);
+  return_thread_runnable_with_obj(data, &vec, p);
 }
 
 /**
@@ -6464,7 +6464,7 @@ void _read_string(void *data, object cont, port_type *p)
       p->tok_end = 0; // Reset for next atom
       {
         make_utf8_string(data, str, p->tok_buf);
-        return_thread_runnable(data, &str);
+        return_thread_runnable_with_obj(data, &str, p);
       }
     } else if (c == '\\') {
       escaped = 1;
@@ -6569,7 +6569,7 @@ void _read_literal_identifier(void *data, port_type *p)
       p->tok_end = 0; // Reset for next atom
       {
         object sym = find_or_add_symbol(p->tok_buf);
-        return_thread_runnable(data, sym);
+        return_thread_runnable_with_obj(data, sym, p);
       }
     } else if (c == '\\') {
       escaped = 1;
@@ -6594,29 +6594,29 @@ void _read_return_character(void *data, port_type *p)
   p->tok_end = 0; // Reset for next atom
   if (strlen(p->tok_buf) == 1) {
     // ASCII char, consider merging with below?
-    return_thread_runnable(data, obj_char2obj(p->tok_buf[0]));
+    return_thread_runnable_with_obj(data, obj_char2obj(p->tok_buf[0]), p);
   } else if(strncmp(p->tok_buf, "alarm", 5) == 0) {
-    return_thread_runnable(data, obj_char2obj('\a'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\a'), p);
   } else if(strncmp(p->tok_buf, "backspace", 9) == 0) {
-    return_thread_runnable(data, obj_char2obj('\b'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\b'), p);
   } else if(strncmp(p->tok_buf, "delete", 6) == 0) {
-    return_thread_runnable(data, obj_char2obj(127));
+    return_thread_runnable_with_obj(data, obj_char2obj(127), p);
   } else if(strncmp(p->tok_buf, "escape", 6) == 0) {
-    return_thread_runnable(data, obj_char2obj(27));
+    return_thread_runnable_with_obj(data, obj_char2obj(27), p);
   } else if(strncmp(p->tok_buf, "newline", 7) == 0) {
-    return_thread_runnable(data, obj_char2obj('\n'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\n'), p);
   } else if(strncmp(p->tok_buf, "null", 4) == 0) {
-    return_thread_runnable(data, obj_char2obj('\0'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\0'), p);
   } else if(strncmp(p->tok_buf, "return", 6) == 0) {
-    return_thread_runnable(data, obj_char2obj('\r'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\r'), p);
   } else if(strncmp(p->tok_buf, "space", 5) == 0) {
-    return_thread_runnable(data, obj_char2obj(' '));
+    return_thread_runnable_with_obj(data, obj_char2obj(' '), p);
   } else if(strncmp(p->tok_buf, "tab", 3) == 0) {
-    return_thread_runnable(data, obj_char2obj('\t'));
+    return_thread_runnable_with_obj(data, obj_char2obj('\t'), p);
   } else if(strlen(p->tok_buf) > 1 && p->tok_buf[0] == 'x') {
     const char *buf = p->tok_buf + 1;
     char_type result = strtol(buf, NULL, 16);
-    return_thread_runnable(data, obj_char2obj(result));
+    return_thread_runnable_with_obj(data, obj_char2obj(result), p);
   } else {
     // Try to read a UTF-8 char and if so return it, otherwise throw an error
     uint32_t state = CYC_UTF8_ACCEPT;
@@ -6630,7 +6630,7 @@ void _read_return_character(void *data, port_type *p)
       s++;
     }
     if (state == CYC_UTF8_ACCEPT && *s == '\0') {
-      return_thread_runnable(data, obj_char2obj(codepoint));
+      return_thread_runnable_with_obj(data, obj_char2obj(codepoint), p);
     } else {
       char buf[31];
       snprintf(buf, 30, "Unable to parse character %s", p->tok_buf);
@@ -6686,7 +6686,7 @@ void _read_return_number(void *data, port_type *p, int base, int exact)
   vec.elements[0] = &str;
   vec.elements[1] = obj_int2obj(base);
   vec.elements[2] = exact ? boolean_t : boolean_f;
-  return_thread_runnable(data, &vec);
+  return_thread_runnable_with_obj(data, &vec, p);
 }
 
 /**
@@ -6717,7 +6717,7 @@ void _read_return_complex_number(void *data, port_type *p, int len)
     }
   }
   vec.elements[1] = obj_int2obj(i);
-  return_thread_runnable(data, &vec);
+  return_thread_runnable_with_obj(data, &vec, p);
 }
 
 /**
@@ -6783,19 +6783,19 @@ void _read_return_atom(void *data, object cont, port_type *p)
     if (_read_is_complex_number(p->tok_buf, len)) {
       _read_return_complex_number(data, p, len);
     } else {
-      return_thread_runnable(data, &opq);
+      return_thread_runnable_with_obj(data, &opq, p);
     }
   } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
              strncmp("-inf.0", p->tok_buf, 6) == 0) {
     make_double(d, pow(2.0, 1000000));
-    return_thread_runnable(data, &d);
+    return_thread_runnable_with_obj(data, &d, p);
   } else if (strncmp("+nan.0", p->tok_buf, 6) == 0 ||
              strncmp("-nan.0", p->tok_buf, 6) == 0) {
     make_double(d, 0.0 / 0.0);
-    return_thread_runnable(data, &d);
+    return_thread_runnable_with_obj(data, &d, p);
   } else {
     sym = find_or_add_symbol(p->tok_buf);
-    return_thread_runnable(data, sym);
+    return_thread_runnable_with_obj(data, sym, p);
   }
 }
 
@@ -6807,7 +6807,7 @@ void _read_return_atom(void *data, object cont, port_type *p)
    int rv = read_from_port(p); \
    if (!rv) { \
      if (p->tok_end) _read_return_atom(data, cont, p); \
-     return_thread_runnable(data, Cyc_EOF); \
+     return_thread_runnable_with_obj(data, Cyc_EOF, p); \
    } \
  } 
 
@@ -6861,7 +6861,7 @@ object Cyc_io_peek_char(void *data, object cont, object port)
       memmove(p->mem_buf, buf, i);
     }
 
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
@@ -6884,7 +6884,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
       _read_next_char(data, cont, p);
     }
     c = p->mem_buf[p->buf_idx];
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
@@ -6925,7 +6925,7 @@ object Cyc_io_read_char(void *data, object cont, object port)
     } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
 // TODO: limit above to 4 chars and then thrown an error?
     p->col_num++;
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
@@ -6945,7 +6945,7 @@ object Cyc_io_read_u8(void *data, object cont, object port)
     c = p->mem_buf[p->buf_idx++];
     codepoint = (char_type) c;
     p->col_num++;
-    return_thread_runnable(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
@@ -6991,15 +6991,15 @@ object Cyc_io_read_line(void *data, object cont, object port)
       buf[len] = '\0';
       make_string_noalloc(s, buf, len);
       s.num_cp = num_cp;
-      return_thread_runnable(data, &s);
+      return_thread_runnable_with_obj(data, &s, port);
     }
   } else {
     if (feof(stream)) {
-      return_thread_runnable(data, Cyc_EOF);
+      return_thread_runnable_with_obj(data, Cyc_EOF, port);
     } else {
       // TODO: can't do this because we said thread could be blocked
       //Cyc_rt_raise2(data, "Error reading from file: ", obj_int2obj(errno));
-      return_thread_runnable(data, Cyc_EOF);
+      return_thread_runnable_with_obj(data, Cyc_EOF, port);
     }
   }
   return NULL;
@@ -7042,7 +7042,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
       if (p->tok_end) _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
       make_c_opaque(opq, obj_char2obj(c));
-      return_thread_runnable(data, &opq);
+      return_thread_runnable_with_obj(data, &opq, p);
     } else if (c == ',') {
       if (p->tok_end) _read_return_atom(data, cont, p);
 
@@ -7056,11 +7056,11 @@ void Cyc_io_read_token(void *data, object cont, object port)
         vec.elements[1] = boolean_f;
         p->buf_idx++;
         p->col_num++;
-        return_thread_runnable(data, &vec);
+        return_thread_runnable_with_obj(data, &vec, p);
       } else {
         // Again, special encoding for syntax
         make_c_opaque(opq, obj_char2obj(c));
-        return_thread_runnable(data, &opq);
+        return_thread_runnable_with_obj(data, &opq, p);
       }
     } else if (c == '"') {
       if (p->tok_end) _read_return_atom(data, cont, p);
@@ -7077,7 +7077,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->buf_idx += 3;
           p->col_num += 3;
         }
-        return_thread_runnable(data, boolean_t);
+        return_thread_runnable_with_obj(data, boolean_t, p);
       } else if (c == 'f') {
         if ((p->mem_buf_len - p->buf_idx) >= 4 &&
             p->mem_buf[p->buf_idx + 0] == 'a' &&
@@ -7087,7 +7087,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->buf_idx += 4;
           p->col_num += 4;
         }
-        return_thread_runnable(data, boolean_f);
+        return_thread_runnable_with_obj(data, boolean_f, p);
       } else if (c == '\\') {
         _read_character(data, p);
       } else if (c == 'e') {
@@ -7102,7 +7102,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
         _read_number(data, p, 16, 1);
       } else if (c == '(') { // Vector
         make_empty_vector(vec);
-        return_thread_runnable(data, &vec);
+        return_thread_runnable_with_obj(data, &vec, p);
       } else if (c == 'u') { // Bytevector
         _read_next_char(data, cont, p); // Fill buffer
         c = p->mem_buf[p->buf_idx++];
@@ -7113,7 +7113,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
           p->col_num++;
           if (c == '(') {
             make_empty_bytevector(vec);
-            return_thread_runnable(data, &vec);
+            return_thread_runnable_with_obj(data, &vec, p);
           } else {
             _read_error(data, p, "Unhandled input sequence");
           }
@@ -7130,7 +7130,7 @@ void Cyc_io_read_token(void *data, object cont, object port)
         vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
         vec.elements[0] = sym;
         vec.elements[1] = boolean_f;
-        return_thread_runnable(data, &vec);
+        return_thread_runnable_with_obj(data, &vec, p);
       } else {
         char buf[31];
         snprintf(buf, 30, "Unhandled input sequence %c", c);
@@ -7142,12 +7142,12 @@ void Cyc_io_read_token(void *data, object cont, object port)
       if (p->tok_end) _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
       make_c_opaque(opq, obj_char2obj('(')); // Cheap support for brackets
-      return_thread_runnable(data, &opq);
+      return_thread_runnable_with_obj(data, &opq, p);
     } else if (c == ']' || c == '}') {
       if (p->tok_end) _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
       make_c_opaque(opq, obj_char2obj(')')); // Cheap support for brackets
-      return_thread_runnable(data, &opq);
+      return_thread_runnable_with_obj(data, &opq, p);
     } else {
       // No special meaning, add char to current token (an atom)
       _read_add_to_tok_buf(p, c);

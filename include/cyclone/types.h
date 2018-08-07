@@ -398,11 +398,20 @@ void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
-void gc_mutator_thread_runnable(gc_thread_data * thd, object result);
+void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object maybe_copied);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
+/**
+ * @brief Return from a blocked thread
+ */
 #define return_thread_runnable(d, r) \
-  gc_mutator_thread_runnable(((gc_thread_data *)d), (r))
+  gc_mutator_thread_runnable(((gc_thread_data *)d), (r), NULL)
+/**
+ * @brief Return from a blocked thread with an object that may have been copied.
+ *        If the object was copied we need to check and may need to copy it again.
+ */
+#define return_thread_runnable_with_obj(d, r, maybe_copied) \
+  gc_mutator_thread_runnable(((gc_thread_data *)d), (r), maybe_copied)
 /*
 //#define do_with_blocked_thread(data, cont, result, body) \
 //  set_thread_blocked((data), (cont)); \
@@ -952,6 +961,7 @@ typedef struct {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
+  void *unused; // Protect against forwarding pointer, ideally would not be needed.
   FILE *fp;
   int mode;
   unsigned char flags;

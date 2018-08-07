@@ -2815,17 +2815,33 @@ void gc_mutator_thread_blocked(gc_thread_data * thd, object cont)
 
 void Cyc_apply_from_buf(void *data, int argc, object prim, object * buf);
 
+void gc_recopy_obj(object obj, gc_thread_data *thd) 
+{
+  // Temporarily change obj type so we can copy it
+  object fwd = forward(obj);
+  tag_type tag = type_of(fwd);
+  type_of(obj) = tag;
+
+fprintf(stderr, "\n!!! Recopying object %p with tag %d !!!\n\n", obj, tag);
+  // Copy it again
+  gc_copy_obj(fwd, obj, thd);
+  // Restore forwarding pointer tag
+  type_of(obj) = forward_tag;
+}
+
 /**
  * @brief Called explicitly from a mutator thread to let the collector know
  * that it has finished blocking. 
  * @param thd Mutator's thread data
  * @param result  Data returned by the blocking function
+ * @param maybe_copied An object used by the mutator while blocked that may 
+ *                     have been copied to the heap by the collector.
  *
  * In addition, if the collector cooperated on behalf of the mutator while 
  * it was blocking, the mutator will move any remaining stack objects to 
  * the heap and longjmp.
  */
-void gc_mutator_thread_runnable(gc_thread_data * thd, object result)
+void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object maybe_copied)
 {
   char stack_limit;
   // Transition from blocked back to runnable using CAS.
@@ -2845,6 +2861,13 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result)
     // Setup value to send to continuation
     thd->gc_args[0] = result;
     thd->gc_num_args = 1;
+    // Check if obj was copied while we slept
+    if (maybe_copied && 
+        is_object_type(maybe_copied) && 
+        gc_is_stack_obj(thd, maybe_copied) &&
+        type_of(maybe_copied) == forward_tag) {
+      gc_recopy_obj(maybe_copied, thd);
+    }
     // Move any remaining stack objects (should only be the result?) to heap
     gc_minor(thd, &stack_limit, thd->stack_start, thd->gc_cont, thd->gc_args,
              thd->gc_num_args);
