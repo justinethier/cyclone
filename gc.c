@@ -1914,6 +1914,7 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 #if GC_DEBUG_VERBOSE
       debug_print = 1;
 #endif
+//printf("DEBUG - mutator is cooperating\n");            
       // Mark thread "roots":
       // Begin by marking current continuation, which may have already
       // been on the heap prior to latest minor GC
