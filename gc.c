@@ -7,13 +7,13 @@
  *
  * Heap garbage collector used by the Cyclone runtime for major collections.
  *
- * Tracing GC algorithm is based on the one from "Implementing an on-the-fly 
- * garbage collector for Java", by Domani et al.
+ * Concurrent Mark-Sweep GC algorithm is based on the one from 
+ * "Implementing an on-the-fly * garbage collector for Java", by Domani et al.
  *
- * The heap implementation (alloc / sweep, etc) is based on code from Chibi Scheme.
+ * Data structures for the heap implementation are based on code from Chibi Scheme.
  *
  * Note there is also a minor GC (in runtime.c) that collects objects allocated 
- * on the stack, based on "Cheney on the MTA" (but without the copying collector). 
+ * on the stack, based on "Cheney on the MTA".
  */
 
 #include <ck_array.h>
