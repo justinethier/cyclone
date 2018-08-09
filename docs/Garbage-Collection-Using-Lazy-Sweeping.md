@@ -123,7 +123,7 @@ Sweep walks an entire heap page, freeing all unused slots along the way. The alg
 
 As well as coordinating major GC the main job of the collector thread is now just tracing. 
 
-During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing process cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
+During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing algorithm cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
 
 Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
 
@@ -196,7 +196,7 @@ mperm | 49.94 | 39.97 | 19.95%
 equal | 0.74 | 0.70 | 4.43%
 bv2string | 7.54 | 7.62 | -1.00%
 
-And the same data is illustrated in the following chart:
+This data is illustrated in the following chart:
 
 <img src="images/benchmarks/lazy-sweep-benchmark-times.png" alt="Chart of Results">
 
@@ -209,7 +209,7 @@ Average Speedup     | N/A |  10.74%
 Maximum Speedup     | deriv |  36.90%
 Minimum Speedup     | wc |  -2.07%
 
-Overall we achieve an average speedup of 10.74% with lazy sweeping, though there is a wide range of performance impacts across the whole benchmark suite. 
+Overall we achieve an average speedup of 10.74% with lazy sweeping, though there are a wide range of performance impacts across the whole benchmark suite. 
 
 Those benchmarks with the biggest speedups are likely those that are generating the most garbage. For example `ack` frequently invokes GC and most of the heap is freed during each GC cycle - this benchmark benefits greatly from lazy sweeping. Alternatively `wc` - which did not realize a speedup - spends most of its time running in a tight loop, invokes GC infrequently, and after a GC cycle there are many live objects left on the heap. 
 
