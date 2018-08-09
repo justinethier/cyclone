@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.1
+## 0.9.1 - August 9, 2018
 
 Bug Fixes
 
