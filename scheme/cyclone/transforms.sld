@@ -726,22 +726,31 @@
 ; wrap-mutables : exp -> exp
 (define (wrap-mutables exp globals)
   
-  (define (wrap-mutable-formals formals body-exp)
+  (define (wrap-mutable-formals id formals body-exp has-cont)
     (if (not (pair? formals))
-        body-exp
+        (list body-exp)
         (if (is-mutable? (car formals))
-            `((lambda (,(car formals))
-                ,(wrap-mutable-formals (cdr formals) body-exp))
-              (cell ,(car formals)))
-            (wrap-mutable-formals (cdr formals) body-exp))))
+            (list (ast:%make-lambda
+                    id
+                    (car formals)
+                    (wrap-mutable-formals id (cdr formals) body-exp has-cont)
+                    has-cont)
+                  `(cell ,(car formals)))
+            (wrap-mutable-formals id (cdr formals) body-exp has-cont))))
   
   (cond
     ; Core forms:
     ((ast:lambda? exp)
-     `(lambda ,(ast:lambda-args exp)
-       ,(wrap-mutable-formals 
+     (ast:%make-lambda
+       (ast:lambda-id exp)
+       (ast:lambda-args exp)
+       (wrap-mutable-formals 
+         (ast:lambda-id exp)
          (ast:lambda-formals->list exp)
-         (wrap-mutables (car (ast:lambda-body exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
+         (wrap-mutables (car (ast:lambda-body exp)) globals)
+         (ast:lambda-has-cont exp))
+       (ast:lambda-has-cont exp)
+       )) ;; Assume single expr in lambda body, since after CPS phase
     ((const? exp)    exp)
     ((ref? exp)      (if (and (not (member exp globals))
                               (is-mutable? exp))
@@ -749,9 +758,7 @@
                          exp))
     ((prim? exp)     exp)
     ((quote? exp)    exp)
-    ((lambda? exp)   `(lambda ,(lambda->formals exp)
-                        ,(wrap-mutable-formals (lambda-formals->list exp)
-                                               (wrap-mutables (car (lambda->exp exp)) globals)))) ;; Assume single expr in lambda body, since after CPS phase
+    ((lambda? exp)   (error `(Unexpected lambda in wrap-mutables ,exp)))
     ((set!? exp)     `(,(if (member (set!->var exp) globals)
                             'set-global!
                             'set-cell!) 

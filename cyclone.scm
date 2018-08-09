@@ -432,7 +432,7 @@
             (wrap-mutables expr globals))
           input-program))
       (trace:info "---------------- after wrap-mutables:")
-      (trace:info input-program) ;pretty-print
+      (trace:info (ast:ast->pp-sexp input-program))
     
       (set! input-program 
         (map
