@@ -119,39 +119,57 @@
                   (lp$13$17$56 k$93 (Cyc-fast-plus k$18$57 1)))))))))
       #f)))))
 
-;; After 1 rounds of optimizations the structure is:
+;; Before any rounds of optimizations the structure is:
 ; (define fit
-;   (lambda
+;   (lambda-28-cont
 ;     (k$89 i$10$52 j$11$53)
-;     ((lambda
-;        (lp$13$17$56)
-;        ((lambda (r$91) (lp$13$17$56 k$89 0))
-;         (set! lp$13$17$56
-;           (lambda
-;             (k$93 k$18$57)
-;             ((lambda
-;                (k$98)
-;                (if (Cyc-fast-gt
-;                      k$18$57
-;                      (vector-ref *piecemax* i$10$52))
-;                  (k$98 (Cyc-fast-gt
-;                          k$18$57
-;                          (vector-ref *piecemax* i$10$52)))
-;                  (if (vector-ref (vector-ref *p* i$10$52) k$18$57)
-;                    (k$98 (vector-ref
-;                            *puzzle*
-;                            (Cyc-fast-plus j$11$53 k$18$57)))
-;                    (k$98 #f))))
-;              (lambda
-;                (r$94)
-;                (if r$94
-;                  (if (Cyc-fast-gt
-;                        k$18$57
-;                        (vector-ref *piecemax* i$10$52))
-;                    (k$93 #t)
-;                    (k$93 #f))
-;                  (lp$13$17$56 k$93 (Cyc-fast-plus k$18$57 1)))))))))
-;      #f)))
+;     ((lambda-27
+;        (r$90)
+;        ((lambda-26
+;           (end$12$54)
+;           ((lambda-25
+;              (k$16$55)
+;              ((lambda-24
+;                 (lp$13$17$56)
+;                 ((lambda-13
+;                    (r$92)
+;                    ((lambda-12 (r$91) (lp$13$17$56 k$89 k$16$55))
+;                     (set! lp$13$17$56 r$92)))
+;                  (lambda-23-cont
+;                    (k$93 k$18$57)
+;                    ((lambda-22
+;                       (r$97)
+;                       ((lambda-21
+;                          (tmp$20$22$58)
+;                          ((lambda-20-cont
+;                             (k$98)
+;                             (if tmp$20$22$58
+;                               (k$98 tmp$20$22$58)
+;                               ((lambda-19
+;                                  (r$101)
+;                                  ((lambda-18
+;                                     (r$99)
+;                                     (if r$99
+;                                       ((lambda-17
+;                                          (r$100)
+;                                          (k$98 (vector-ref *puzzle* r$100)))
+;                                        (Cyc-fast-plus j$11$53 k$18$57))
+;                                       (k$98 #f)))
+;                                   (vector-ref r$101 k$18$57)))
+;                                (vector-ref *p* i$10$52))))
+;                           (lambda-16
+;                             (r$94)
+;                             (if r$94
+;                               ((lambda-14 (r$95) (if r$95 (k$93 #t) (k$93 #f)))
+;                                (Cyc-fast-gt k$18$57 end$12$54))
+;                               ((lambda-15 (r$96) (lp$13$17$56 k$93 r$96))
+;                                (Cyc-fast-plus k$18$57 1))))))
+;                        r$97))
+;                     (Cyc-fast-gt k$18$57 end$12$54)))))
+;               #f))
+;            0))
+;         r$90))
+;      (vector-ref *piecemax* i$10$52))))
 
 (write (ast:ast->pp-sexp sexp))
 (newline)
