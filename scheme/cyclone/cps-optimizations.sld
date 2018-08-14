@@ -1710,6 +1710,39 @@
            ,(scan (if->else exp) lp)))
      ((app? exp)
       (cond
+        ;; Detect CPS pattern without any optimizations
+        ((and-let* (
+           ;; Find lambda with initial #f assignment
+           ((ast:lambda? (car exp)))
+           ((pair? (cdr exp)))
+           ((not (cadr exp)))
+           (= 1 (length (ast:lambda-args (car exp))))
+           ;; Get information for continuation
+           (loop-sym (car (ast:lambda-args (car exp))))
+           (inner-exp (car (ast:lambda-body (car exp))))
+           ((app? inner-exp))
+           ((ast:lambda? (car inner-exp)))
+           ;; Find the set (assumes CPS conversion)
+           ((pair? (cdr inner-exp)))
+           ((ast:lambda? (car inner-exp)))
+           (lambda/set (car (ast:lambda-body (car inner-exp))))
+           ((app? lambda/set))
+           ((ast:lambda? (car lambda/set)))
+           ((pair? (cdr lambda/set)))
+           ((set!? (cadr lambda/set)))
+           ((equal? (set!->var (cadr lambda/set)) loop-sym))
+;           (unused (begin (newline) (newline) (write loop-sym) (write (ast:ast->pp-sexp (cadr lambda/set))) (newline)(newline)))
+           ;; Check the set's continuation
+           ((app? (car (ast:lambda-body (car lambda/set)))))
+;           (unused2 (begin (newline) (newline) (write (ast:ast->pp-sexp (car lambda/set))) (newline)(newline)))
+           ((equal? (caar (ast:lambda-body (car lambda/set))) loop-sym))
+         )
+         ;(trace:error `(found loop in ,exp))
+         ;; TODO: do we want to record the lambda that is a loop?
+         ;; Continue scanning, indicating we are in a loop
+         (map (lambda (e) (scan e #t)) exp)
+        ))
+        ;; Detect optimized CPS pattern
         ((and-let* ( 
            ;; Find lambda with initial #f assignment
            ((ast:lambda? (car exp)))
