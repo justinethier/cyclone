@@ -56,6 +56,11 @@
            ,(scan (if->else exp) lp)))
      ((app? exp)
       (cond
+        ;; TODO: need to detect CPS pattern without any optimizations
+        ;((and-let* (
+        ;           )
+        ; 'TODO
+        ;)
         ((and-let* ( 
            ;; Find lambda with initial #f assignment
            ((ast:lambda? (car exp)))
@@ -121,48 +126,48 @@
 
 ;; Before any rounds of optimizations the structure is:
 ; (define fit
-;   (lambda-28-cont
+;   (lambda
 ;     (k$89 i$10$52 j$11$53)
-;     ((lambda-27
+;     ((lambda
 ;        (r$90)
-;        ((lambda-26
+;        ((lambda
 ;           (end$12$54)
-;           ((lambda-25
+;           ((lambda
 ;              (k$16$55)
-;              ((lambda-24
+;              ((lambda
 ;                 (lp$13$17$56)
-;                 ((lambda-13
+;                 ((lambda
 ;                    (r$92)
-;                    ((lambda-12 (r$91) (lp$13$17$56 k$89 k$16$55))
+;                    ((lambda (r$91) (lp$13$17$56 k$89 k$16$55))
 ;                     (set! lp$13$17$56 r$92)))
-;                  (lambda-23-cont
+;                  (lambda
 ;                    (k$93 k$18$57)
-;                    ((lambda-22
+;                    ((lambda
 ;                       (r$97)
-;                       ((lambda-21
+;                       ((lambda
 ;                          (tmp$20$22$58)
-;                          ((lambda-20-cont
+;                          ((lambda
 ;                             (k$98)
 ;                             (if tmp$20$22$58
 ;                               (k$98 tmp$20$22$58)
-;                               ((lambda-19
+;                               ((lambda
 ;                                  (r$101)
-;                                  ((lambda-18
+;                                  ((lambda
 ;                                     (r$99)
 ;                                     (if r$99
-;                                       ((lambda-17
+;                                       ((lambda
 ;                                          (r$100)
 ;                                          (k$98 (vector-ref *puzzle* r$100)))
 ;                                        (Cyc-fast-plus j$11$53 k$18$57))
 ;                                       (k$98 #f)))
 ;                                   (vector-ref r$101 k$18$57)))
 ;                                (vector-ref *p* i$10$52))))
-;                           (lambda-16
+;                           (lambda
 ;                             (r$94)
 ;                             (if r$94
-;                               ((lambda-14 (r$95) (if r$95 (k$93 #t) (k$93 #f)))
+;                               ((lambda (r$95) (if r$95 (k$93 #t) (k$93 #f)))
 ;                                (Cyc-fast-gt k$18$57 end$12$54))
-;                               ((lambda-15 (r$96) (lp$13$17$56 k$93 r$96))
+;                               ((lambda (r$96) (lp$13$17$56 k$93 r$96))
 ;                                (Cyc-fast-plus k$18$57 1))))))
 ;                        r$97))
 ;                     (Cyc-fast-gt k$18$57 end$12$54)))))
@@ -171,6 +176,6 @@
 ;         r$90))
 ;      (vector-ref *piecemax* i$10$52))))
 
-(write (ast:ast->pp-sexp sexp))
+(write (ast:sexp->ast sexp))
 (newline)
-(analyze:find-named-lets (ast:ast->pp-sexp sexp))
+(analyze:find-named-lets (ast:sexp->ast sexp))
