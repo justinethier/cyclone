@@ -104,7 +104,9 @@
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var 
-        global defined-by 
+        global 
+;; TODO:        defined-in-sym
+        defined-by 
         defines-lambda-id
         const const-value  
         ref-count ref-by
@@ -119,6 +121,11 @@
       )
       adb:variable?
       (global adbv:global? adbv:set-global!)
+;; TODO: Symbol of the top-level define the variable is defined in, or *top-level-sym* (??) if
+;; variable is defined at the top level.
+;; TODO:        defined-in-sym
+;; TODO: once this is in place, populate it when mutating indirectly (will need to contain a list of these)
+;; and use it when checking the value of mutated-indirectly
       (defined-by adbv:defined-by adbv:set-defined-by!)
       (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
