@@ -105,7 +105,6 @@
     (define-record-type <analysis-db-variable>
       (%adb:make-var 
         global 
-;; TODO:        defined-in-sym
         defined-by 
         defines-lambda-id
         const const-value  
@@ -121,11 +120,6 @@
       )
       adb:variable?
       (global adbv:global? adbv:set-global!)
-;; TODO: Symbol of the top-level define the variable is defined in, or *top-level-sym* (??) if
-;; variable is defined at the top level.
-;; TODO:        defined-in-sym
-;; TODO: once this is in place, populate it when mutating indirectly (will need to contain a list of these)
-;; and use it when checking the value of mutated-indirectly
       (defined-by adbv:defined-by adbv:set-defined-by!)
       (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
@@ -144,7 +138,7 @@
       ;; Can a ref be safely inlined?
       (inlinable adbv:inlinable adbv:set-inlinable!)
       ;; Is the variable mutated indirectly? (EG: set-car! of a cdr)
-      (mutated-indirectly adbv:mutated-indirectly? adbv:set-mutated-indirectly!)
+      (mutated-indirectly adbv:mutated-indirectly adbv:set-mutated-indirectly!)
       (cont adbv:cont? adbv:set-cont!)
       ;; Following two indicate if a variable is defined/referenced in a loop
       (def-in-loop adbv:def-in-loop? adbv:set-def-in-loop!)
@@ -194,7 +188,7 @@
         0   ; app-fnc-count 
         0   ; app-arg-count
         #t  ; inlinable 
-        #f  ; mutated-indirectly
+        '() ; mutated-indirectly
         #f  ; cont
         #f  ; def-in-loop
         #f  ; ref-in-loop
@@ -458,8 +452,8 @@
 
 ;; TODO: check app for const/const-value, also (for now) reset them
 ;; if the variable is modified via set/define
-    (define (analyze exp lid)
-;(trace:error `(analyze ,lid ,exp ,(app? exp)))
+    (define (analyze exp scope-sym lid)
+;(trace:error `(analyze ,scope-sym ,lid ,exp ,(app? exp)))
       (cond
         ; Core forms:
         ((ast:lambda? exp)
@@ -479,7 +473,7 @@
             (ast:lambda-formals->list exp))
            (for-each
              (lambda (expr)
-               (analyze expr id))
+               (analyze expr scope-sym id))
              (ast:lambda-body exp))))
         ((const? exp) #f)
         ((quote? exp) #f)
@@ -497,7 +491,7 @@
            (adbv-set-assigned-value-helper! (define->var exp) var (define->exp exp))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
-         (analyze (define->exp exp) lid))
+         (analyze (define->exp exp) (define->var exp) lid))
         ((set!? exp)
          ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
          (with-var! (set!->var exp) (lambda (var)
@@ -508,10 +502,10 @@
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
-         (analyze (set!->exp exp) lid))
-        ((if? exp)       `(if ,(analyze (if->condition exp) lid)
-                              ,(analyze (if->then exp) lid)
-                              ,(analyze (if->else exp) lid)))
+         (analyze (set!->exp exp) scope-sym lid))
+        ((if? exp)       `(if ,(analyze (if->condition exp) scope-sym lid)
+                              ,(analyze (if->then exp) scope-sym lid)
+                              ,(analyze (if->else exp) scope-sym lid)))
         
         ; Application:
         ((app? exp)
@@ -535,7 +529,7 @@
                 (if (adbv:assigned-value var)
                     (set! e (adbv:assigned-value var))))))
            ;(trace:error `(find-indirect-mutations ,e))
-           (find-indirect-mutations e))))
+           (find-indirect-mutations e scope-sym))))
 
          ;; TODO: if ast-lambda (car),
          ;; for each arg
@@ -561,7 +555,7 @@
               (app->args exp)))))
          (for-each
            (lambda (e)
-             (analyze e lid))
+             (analyze e scope-sym lid))
            exp))
 ;TODO         ((app? exp)      (map (lambda (e) (wrap-mutables e globals)) exp))
 
@@ -608,7 +602,7 @@
          (for-each (lambda (e) (analyze2 e)) exp))
         (else #f)))
 
-    (define (find-indirect-mutations exp)
+    (define (find-indirect-mutations exp scope-sym)
       (cond
         ; Core forms:
         ;((ast:lambda? exp)
@@ -623,19 +617,24 @@
         ((quote? exp) #f)
         ((ref? exp)
          (with-var! exp (lambda (var)
-           (adbv:set-mutated-indirectly! var #t))))
+           (adbv:set-mutated-indirectly! 
+             var 
+             (cons scope-sym (adbv:mutated-indirectly var))))))
         ;((define? exp)
         ; ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
         ;   (analyze2 (define->exp exp)))
         ;((set!? exp)
         ; ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
         ;   (analyze2 (set!->exp exp)))
-        ((if? exp)       `(if ,(find-indirect-mutations (if->condition exp))
-                              ,(find-indirect-mutations (if->then exp))
-                              ,(find-indirect-mutations (if->else exp))))
+        ((if? exp)       `(if ,(find-indirect-mutations (if->condition exp) scope-sym)
+                              ,(find-indirect-mutations (if->then exp) scope-sym)
+                              ,(find-indirect-mutations (if->else exp) scope-sym)))
         ; Application:
         ((app? exp)
-         (for-each find-indirect-mutations (cdr exp)))
+         (for-each
+           (lambda (e)
+             (find-indirect-mutations e scope-sym))
+           (cdr exp)))
         (else #f)))
 
     ;; TODO: make another pass for simple lambda's
@@ -1127,8 +1126,8 @@
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
-              (if (adbv:mutated-indirectly? var)
-                  (set! cannot-inline #t))
+              ;(if (adbv:mutated-indirectly var)
+              ;    (set! cannot-inline #t))
               (if (not (adbv:inlinable var))
                   (set! fast-inline #f)))))
           ivars)
@@ -1518,7 +1517,7 @@
       (analyze-find-lambdas exp -1)
       (analyze-lambda-side-effects exp -1)
       (analyze-lambda-side-effects exp -1) ;; 2nd pass guarantees lambda purity
-      (analyze exp -1) ;; Top-level is lambda ID -1
+      (analyze exp -1 -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
     )
