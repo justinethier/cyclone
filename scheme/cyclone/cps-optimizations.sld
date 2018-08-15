@@ -790,42 +790,42 @@
     ;; Uses analysis DB, so must be executed after analysis phase
     ;;
     ;; TBD: better to enhance CPS conversion to do this??
-    (define (opt:inline-prims exp . refs*)
+    (define (opt:inline-prims exp scope-sym . refs*)
       (let ((refs (if (null? refs*)
                       (make-hash-table)
                       (car refs*))))
-;(trace:error `(opt:inline-prims ,exp))
+;(trace:error `(opt:inline-prims ,exp ,scope-sym))
         (cond
           ((ref? exp) 
            ;; Replace lambda variables, if necessary
            (let ((key (hash-table-ref/default refs exp #f)))
              (if key
-                 (opt:inline-prims key refs)
+                 (opt:inline-prims key scope-sym refs)
                  exp)))
           ((ast:lambda? exp)
            (ast:%make-lambda
             (ast:lambda-id exp)
             (ast:lambda-args exp)
-            (map (lambda (b) (opt:inline-prims b refs)) (ast:lambda-body exp))
+            (map (lambda (b) (opt:inline-prims b scope-sym refs)) (ast:lambda-body exp))
             (ast:lambda-has-cont exp)))
           ((const? exp) exp)
           ((quote? exp) exp)
           ((define? exp)
            `(define ,(define->var exp)
-                    ,@(opt:inline-prims (define->exp exp) refs))) ;; TODO: map????
+                    ,@(opt:inline-prims (define->exp exp) (define->var exp) refs))) ;; TODO: map????
           ((set!? exp)
            `(set! ,(set!->var exp)
-                  ,(opt:inline-prims (set!->exp exp) refs)))
+                  ,(opt:inline-prims (set!->exp exp) scope-sym refs)))
           ((if? exp)       
            (cond
             ((not (if->condition exp))
-             (opt:inline-prims (if->else exp) refs)) ;; Always false, so replace with else
+             (opt:inline-prims (if->else exp) scope-sym refs)) ;; Always false, so replace with else
             ((const? (if->condition exp))
-             (opt:inline-prims (if->then exp) refs)) ;; Always true, replace with then
+             (opt:inline-prims (if->then exp) scope-sym refs)) ;; Always true, replace with then
             (else
-              `(if ,(opt:inline-prims (if->condition exp) refs)
-                   ,(opt:inline-prims (if->then exp) refs)
-                   ,(opt:inline-prims (if->else exp) refs)))))
+              `(if ,(opt:inline-prims (if->condition exp) scope-sym refs)
+                   ,(opt:inline-prims (if->then exp) scope-sym refs)
+                   ,(opt:inline-prims (if->else exp) scope-sym refs)))))
           ; Application:
           ((app? exp)
 ;(trace:error `(app? ,exp ,(ast:lambda? (car exp))
@@ -893,6 +893,7 @@
                     (ast:lambda-formals->list (car exp)))
                   ,(inline-prim-call? 
                     (ast:lambda-body (car exp))
+                    scope-sym
                     (prim-calls->arg-variables (cdr exp))
                     (ast:lambda-formals->list (car exp)))))
                     #t)
@@ -951,6 +952,7 @@
 
                     (inline-prim-call? 
                       (ast:lambda-body (car exp))
+                      scope-sym
                       (prim-calls->arg-variables (cdr exp))
                       (ast:lambda-formals->list (car exp))))))
              )
@@ -960,7 +962,7 @@
                   (hash-table-set! refs param (car args))
                   (set! args (cdr args)))
                 (ast:lambda-formals->list (car exp))))
-             (opt:inline-prims (car (ast:lambda-body (car exp))) refs))
+             (opt:inline-prims (car (ast:lambda-body (car exp))) scope-sym refs))
             ;; Issue #201 - Attempt to identify case where an if can be inlined
             ((and #f ;; TODO: Disabling for now, see issue for more info
                   (= (length exp) 2)
@@ -1017,13 +1019,13 @@
                (cond
                 (new-if
                   (hash-table-set! refs old-arg new-if)
-                  (opt:inline-prims new-exp refs))
+                  (opt:inline-prims new-exp scope-sym refs))
                 (else
                   ;; Could not inline
-                  (map (lambda (e) (opt:inline-prims e refs)) exp)))
+                  (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp)))
             )) ;;
             (else
-              (map (lambda (e) (opt:inline-prims e refs)) exp))))
+              (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp))))
           (else 
             (error `(Unexpected expression passed to opt:inline-prims ,exp))))))
 
@@ -1116,7 +1118,7 @@
       (filter symbol? (cdr exp)))
 
     ;; Helper for the next function
-    (define (inline-prim-call? exp ivars args)
+    (define (inline-prim-call? exp scope-sym ivars args)
       (let ((fast-inline #t)
             (cannot-inline #f))
         ;; faster and safer but (at least for now) misses some
@@ -1126,8 +1128,8 @@
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
-              ;(if (adbv:mutated-indirectly var)
-              ;    (set! cannot-inline #t))
+              (if (member scope-sym (adbv:mutated-indirectly var))
+                  (set! cannot-inline #t))
               (if (not (adbv:inlinable var))
                   (set! fast-inline #f)))))
           ivars)
@@ -1542,7 +1544,8 @@
       (trace:info (adb:get-db))
       (opt:beta-expand
         (opt:inline-prims 
-          (opt:contract ast)))
+          (opt:contract ast)
+          -1))
     )
 
 ;; Closure-conversion.
