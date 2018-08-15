@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.2 - TBD
+
+Features
+
+- Improved loop detection during CPS optimization phase.
+
+Bug Fixes
+
 ## 0.9.1 - August 9, 2018
 
 Bug Fixes
