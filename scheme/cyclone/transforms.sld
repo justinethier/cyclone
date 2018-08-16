@@ -875,7 +875,40 @@
           ((and (eq? #t (if->then new-ast))
                 (eq? #f (if->else new-ast))
                 (app? (if->condition new-ast))
-                (member (car (if->condition new-ast)) '(Cyc-fast-gt))) ;; Boolean return
+                (member 
+                  (car (if->condition new-ast)) 
+                  '(Cyc-fast-eq
+                    Cyc-fast-gt
+                    Cyc-fast-lt
+                    Cyc-fast-gte
+                    Cyc-fast-lte
+                    Cyc-fast-char-eq
+                    Cyc-fast-char-gt
+                    Cyc-fast-char-lt
+                    Cyc-fast-char-gte
+                    Cyc-fast-char-lte
+                    eq?
+                    eqv?
+                    equal?
+                    boolean?
+                    char?
+                    eof-object?
+                    null?
+                    number?
+                    real?
+                    integer?
+                    pair?
+                    port?
+                    procedure?
+                    Cyc-macro?
+                    vector?
+                    string?
+                    symbol?
+                    =
+                    >
+                    <
+                    >=
+                    <=))) ;; Boolean return
            (if->condition new-ast))
           (else
             new-ast))))
