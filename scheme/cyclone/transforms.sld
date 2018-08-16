@@ -864,13 +864,19 @@
        (let ((new-ast (if (if-else? ast)
                           `(if ,@(map (lambda (a) (convert a renamed)) (cdr ast)))
                           (convert (append ast '(#f)) renamed))))
-         ;; Optimization - convert (if (not a) b c) into (if a c b)
          (cond
+          ;; Optimization - convert (if (not a) b c) into (if a c b)
           ((and (app? (if->condition new-ast))
                 (equal? 'not (app->fun (if->condition new-ast))))
            `(if ,@(app->args (if->condition new-ast))
                 ,(if->else new-ast)
                 ,(if->then new-ast)))
+          ;; Optimization - convert (if expr #t #f) into expr
+          ((and (eq? #t (if->then new-ast))
+                (eq? #f (if->else new-ast))
+                (app? (if->condition new-ast))
+                (member (car (if->condition new-ast)) '(Cyc-fast-gt))) ;; Boolean return
+           (if->condition new-ast))
           (else
             new-ast))))
       ((and (prim-call? ast)
