@@ -1765,7 +1765,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj)
 {
   int idx;
   Cyc_check_vec(data, v);
-  Cyc_check_num(data, k);
+  Cyc_check_fixnum(data, k);
   idx = unbox_number(k);
 
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
@@ -1783,7 +1783,7 @@ object Cyc_vector_ref(void *data, object v, object k)
 {
   int idx;
   Cyc_check_vec(data, v);
-  Cyc_check_num(data, k);
+  Cyc_check_fixnum(data, k);
 
   idx = unbox_number(k);
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
