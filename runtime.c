@@ -2858,7 +2858,7 @@ object Cyc_bytevector_u8_ref(void *data, object bv, object k)
   int val;
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_num(data, k);
+  Cyc_check_fixnum(data, k);
 
   buf = ((bytevector) bv)->data;
   idx = unbox_number(k);
@@ -2877,8 +2877,8 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b)
   int idx, len, val;
 
   Cyc_check_bvec(data, bv);
-  Cyc_check_num(data, k);
-  Cyc_check_num(data, b);
+  Cyc_check_fixnum(data, k);
+  Cyc_check_fixnum(data, b);
 
   buf = ((bytevector) bv)->data;
   idx = unbox_number(k);
