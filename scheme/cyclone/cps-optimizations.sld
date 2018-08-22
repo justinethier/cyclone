@@ -1372,7 +1372,7 @@
                   (not (adbv:reassigned? var))
                   (not (adbv:self-rec-call? var))
                   ;(not (fnc-depth>? (ast:lambda-body fnc) 4))))
-                  (not (fnc-depth>? (ast:lambda-body fnc) 5))))
+                  (not (fnc-depth>? (ast:lambda-body fnc) 8))))
            )))
         (else #f)))
 
@@ -1415,16 +1415,24 @@
              ;            (if (adbv:cont? var) maybe-cont #f)))
              ;          #f))
             )
-;(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ))
+(trace:error `(JAE beta expand ,exp ,var ,fnc ,formals ))
         (cond
          ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
                (not (adbv:reassigned? var)) ;; Failsafe
-               (not (equal? fnc (adbv:assigned-value var))) ;; Do not expand recursive func
+               ;; TODO: can we be smarter about this? maybe scan fnc body and see if there are any
+               ;; referenes to the var sym, at which point we have to bail
+               ;(not (equal? fnc (adbv:assigned-value var))) ;; Do not expand recursive func
+               ;; TODO: not fool-proof but to protect against rec function we can ensure ID of fnc
+               ;; is not in the var's ref-by list
+;               (not (member (ast:lambda-id fnc) (adbv:ref-by var)))
+TODO: no, not good enough, need to scan all of the function body to ensure var is not referenced.
+can check for lambda ID's along the way though, to potentially speed things up
+               ;;
                (not (adbv:cont? var)) ;; TEST, don't delete a continuation
                (list? formals)
                (= (length args) (length formals)))
-          ;(trace:error `(JAE DEBUG beta expand ,exp))
+(trace:error `(JAE DEBUG beta expand 2 ,exp ,(member (ast:lambda-id fnc) (adbv:ref-by var)) ,(ast:lambda-id fnc) ,(adbv:ref-by var)))
           (beta-expansion-app exp fnc rename-lambdas) ; exp
          )
          (else exp)))) ;; beta expansion failed
