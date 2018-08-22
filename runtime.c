@@ -2225,7 +2225,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
   char_type input_char;
 
   Cyc_check_str(data, str);
-  Cyc_check_num(data, k);
+  Cyc_check_fixnum(data, k);
 
   if (boolean_t != Cyc_is_char(chr)) {
     Cyc_rt_raise2(data, "Expected char but received", chr);
@@ -2316,7 +2316,7 @@ object Cyc_string_ref(void *data, object str, object k)
   int idx, len;
 
   Cyc_check_str(data, str);
-  Cyc_check_num(data, k);
+  Cyc_check_fixnum(data, k);
 
   raw = string_str(str);
   idx = unbox_number(k);
@@ -2353,8 +2353,8 @@ object Cyc_substring(void *data, object cont, object str, object start,
   int s, e, len;
 
   Cyc_check_str(data, str);
-  Cyc_check_num(data, start);
-  Cyc_check_num(data, end);
+  Cyc_check_fixnum(data, start);
+  Cyc_check_fixnum(data, end);
 
   raw = string_str(str);
   s = unbox_number(start);
@@ -2767,8 +2767,8 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   int len;
 
   Cyc_check_str(data, str);
-  Cyc_check_num(data, start);
-  Cyc_check_num(data, end);
+  Cyc_check_fixnum(data, start);
+  Cyc_check_fixnum(data, end);
 
   s = unbox_number(start);
   e = unbox_number(end);
