@@ -39,6 +39,7 @@
       adb:get-db
       simple-lambda?
       one-instance-of-new-mutable-obj?
+      calls-sym?
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -1394,6 +1395,42 @@
           (scan exp depth)
           (return #f))))
 
+    ;; Determine if given expression has a call to sym
+    ;; Params:
+    ;;   exp - Expression to scan
+    ;;   sym - Check for calls to this symbol
+    ;;   lambda-ids-calling-sym - List of lambdas that call sym
+    ;; Returns boolean
+    (define (calls-sym? exp sym lambda-ids-calling-sym)
+      (trace:error `(calls-sym? ,exp ,sym ,lambda-ids-calling-sym))
+      (call/cc
+        (lambda (return)
+          (define (scan exp)
+            (cond
+              ((ast:lambda? exp)
+               (if (member (ast:lambda-id exp) lambda-ids-calling-sym)
+                   (return #t))
+               (scan (ast:lambda-body exp)))
+              ((quote? exp) #f)
+              ((define? exp)
+               ;(analyze:find-inlinable-vars (define->var exp) args)
+               (for-each scan (define->exp exp)))
+              ;((set!? exp)
+              ; (analyze:find-inlinable-vars (set!->var exp) args)
+              ; (analyze:find-inlinable-vars (set!->exp exp) args))
+              ((if? exp)
+                (scan (if->condition exp))
+                (scan (if->then exp))
+                (scan (if->else exp)))
+              ((app? exp)
+               (if (and (ref? (car exp))
+                        (eq? sym (car exp)))
+                   (return #t))
+               (for-each scan exp))
+              (else #f)))
+          (scan exp)
+          (return #f))))
+
     ;; Check app and beta expand if possible, else just return given code
     (define (beta-expand-app exp rename-lambdas)
       (let* ((args (cdr exp))
@@ -1420,19 +1457,24 @@
          ;; TODO: what if fnc has no cont? do we need to handle differently?
          ((and (ast:lambda? fnc)
                (not (adbv:reassigned? var)) ;; Failsafe
-               ;; TODO: can we be smarter about this? maybe scan fnc body and see if there are any
-               ;; referenes to the var sym, at which point we have to bail
-               ;(not (equal? fnc (adbv:assigned-value var))) ;; Do not expand recursive func
-               ;; TODO: not fool-proof but to protect against rec function we can ensure ID of fnc
-               ;; is not in the var's ref-by list
-;               (not (member (ast:lambda-id fnc) (adbv:ref-by var)))
-TODO: no, not good enough, need to scan all of the function body to ensure var is not referenced.
-can check for lambda ID's along the way though, to potentially speed things up
-               ;;
-               (not (adbv:cont? var)) ;; TEST, don't delete a continuation
+;               (not (adbv:cont? var)) ;; TEST, don't delete a continuation
                (list? formals)
-               (= (length args) (length formals)))
-(trace:error `(JAE DEBUG beta expand 2 ,exp ,(member (ast:lambda-id fnc) (adbv:ref-by var)) ,(ast:lambda-id fnc) ,(adbv:ref-by var)))
+               (= (length args) (length formals))
+
+               (not (calls-sym? fnc (car exp) (adbv:ref-by var)))
+;               ;; TODO: can we be smarter about this? maybe scan fnc body and see if there are any
+;               ;; referenes to the var sym, at which point we have to bail
+;               ;(not (equal? fnc (adbv:assigned-value var))) ;; Do not expand recursive func
+;               ;; TODO: not fool-proof but to protect against rec function we can ensure ID of fnc
+;               ;; is not in the var's ref-by list
+;               (not (member (ast:lambda-id fnc) (adbv:ref-by var)))
+;TODO: no, not good enough, need to scan all of the function body to ensure var is not referenced.
+;can check for lambda ID's along the way though, to potentially speed things up
+               ;;
+           )
+(trace:error `(JAE DEBUG beta expand 2 ,exp ,(member (ast:lambda-id fnc) (adbv:ref-by var)) ,(ast:lambda-id fnc) ,(adbv:ref-by var)
+               ,(not (calls-sym? fnc (car exp) (adbv:ref-by var)))
+))
           (beta-expansion-app exp fnc rename-lambdas) ; exp
          )
          (else exp)))) ;; beta expansion failed
