@@ -116,6 +116,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </table>
 </div><div class="memdoc">
 
+<p>Copy given object to the heap, if it is from the stack. This function is intended to be called directly from application code. Note that only a shallow-copy is performed! For example, a pair object would be copied to the heap but its <code>car</code> and <code>cdr</code> objects would not. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>Thread data object for the caller. </td></tr>
+    <tr><td class="paramname">obj</td><td>Object to copy. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
     </td>

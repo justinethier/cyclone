@@ -129,6 +129,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </table>
 </div><div class="memdoc">
 
+<p>Decode the next byte of a codepoint. Based on example code from Bjoern Hoehrmann. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>Out parameter, the state of the decoding </td></tr>
+    <tr><td class="paramname">codep</td><td>Out parameter, contains the codepoint </td></tr>
+    <tr><td class="paramname">byte</td><td>Byte to examine </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The current state: <code>CYC_UTF8_ACCEPT</code> if successful otherwise <code>CYC_UTF8_REJECT</code>. </dd></dl>
+
 </div>
 </div>
     </td>

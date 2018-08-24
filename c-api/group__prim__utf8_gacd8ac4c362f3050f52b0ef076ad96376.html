@@ -135,6 +135,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </table>
 </div><div class="memdoc">
 
+<p>Count the number of code points and bytes in a string. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>String to examine </td></tr>
+    <tr><td class="paramname">codepoint</td><td>Out parameter, set to the codepoint. </td></tr>
+    <tr><td class="paramname">cpts</td><td>Out parameter, set to the number of code points </td></tr>
+    <tr><td class="paramname">bytes</td><td>Out parameter, set to the number of bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns <code>CYC_UTF8_ACCEPT</code> on success, otherwise <code>CYC_UTF8_REJECT</code>. </dd></dl>
+
 </div>
 </div>
     </td>
