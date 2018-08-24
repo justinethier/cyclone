@@ -273,6 +273,11 @@ void gc_remove_mutator(gc_thread_data * thd)
   pthread_mutex_unlock(&mutators_lock);
 }
 
+/**
+ * @brief Determine if the given mutator is in the list of active threads.
+ * @param thd Thread data object of the m
+ * @return A true value if the mutator is active, 0 otherwise.
+ */
 int gc_is_mutator_active(gc_thread_data *thd)
 {
   ck_array_iterator_t iterator;
