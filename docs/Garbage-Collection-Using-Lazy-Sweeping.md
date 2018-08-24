@@ -1,7 +1,7 @@
-----
--layout: main
--title: Garbage Collection Using Lazy Sweeping
-----
+---
+layout: main
+title: Garbage Collection Using Lazy Sweeping
+---
 
 # Garbage Collection Using Lazy Sweeping
 
