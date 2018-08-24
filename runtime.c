@@ -311,6 +311,12 @@ static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
 const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
+
+/**
+ * @brief Register a frame in the stack trace circular buffer.
+ * @param data Thread data object
+ * @param frame Name of the frame
+ */
 void Cyc_st_add(void *data, char *frame)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
@@ -322,6 +328,11 @@ void Cyc_st_add(void *data, char *frame)
   }
 }
 
+/**
+ * @brief Print the contents of the given thread's stack trace buffer.
+ * @param data Thread data object
+ * @param out Output stream
+ */
 void Cyc_st_print(void *data, FILE * out)
 {
   /* print to stream, note it is possible that
@@ -505,7 +516,13 @@ void clear_mutations(void *data)
 object Cyc_glo_call_cc = NULL;
 object Cyc_glo_eval_from_c = NULL;
 
-/* Exception handler */
+/**
+ * @brief The default exception handler
+ * @param data Thread data object
+ * @return argc Unused, just here to maintain calling convention
+ * @return _ Unused, just here to maintain calling convention
+ * @return err Object containing data for the error
+ */
 object Cyc_default_exception_handler(void *data, int argc, closure _,
                                      object err)
 {
@@ -541,6 +558,11 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
   return NULL;
 }
 
+/**
+ * @brief Return the current exception handler
+ * @param data Thread data object
+ * @return Object registered as the exception handler, or the default if none.
+ */
 object Cyc_current_exception_handler(void *data)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
@@ -551,7 +573,11 @@ object Cyc_current_exception_handler(void *data)
   }
 }
 
-/* Raise an exception from the runtime code */
+/**
+ * @brief Raise an exception from the runtime code
+ * @param data Thread data object
+ * @param err Data for the error
+ */
 void Cyc_rt_raise(void *data, object err)
 {
   make_pair(c2, err, NULL);
@@ -563,6 +589,12 @@ void Cyc_rt_raise(void *data, object err)
   exit(1);
 }
 
+/**
+ * @brief Raise an exception from the runtime code
+ * @param data Thread data object
+ * @param msg A message describing the error
+ * @param err Data for the error
+ */
 void Cyc_rt_raise2(void *data, const char *msg, object err)
 {
   make_utf8_string(data, s, msg);
@@ -576,6 +608,11 @@ void Cyc_rt_raise2(void *data, const char *msg, object err)
   exit(1);
 }
 
+/**
+ * @brief Raise an exception from the runtime code
+ * @param data Thread data object
+ * @param err A message describing the error
+ */
 void Cyc_rt_raise_msg(void *data, const char *err)
 {
   make_utf8_string(data, s, err);
@@ -5305,6 +5342,11 @@ char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
   } \
 }
 
+/**
+ * @brief Trigger a minor GC for the calling thread.
+ * @param data Thread data object for the caller.
+ * @param cont Continuation to invoke after GC.
+ */
 object Cyc_trigger_minor_gc(void *data, object cont)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
@@ -6027,7 +6069,9 @@ void Cyc_exit_thread(gc_thread_data * thd)
   pthread_exit(NULL);           // For now, just a proof of concept
 }
 
-// Accept a number of seconds to sleep according to SRFI-18
+/**
+ * @brief Accept a number of seconds to sleep according to SRFI-18
+ */
 object Cyc_thread_sleep(void *data, object timeout)
 {
   struct timespec tim;
@@ -6040,8 +6084,14 @@ object Cyc_thread_sleep(void *data, object timeout)
   return boolean_t;
 }
 
-// Copy given object to the heap, if it is from the stack.
-// This function is intended to be called directly from application code
+/**
+ * @brief Copy given object to the heap, if it is from the stack.
+ *        This function is intended to be called directly from application code.
+ *        Note that only a shallow-copy is performed! For example, a pair object
+ *        would be copied to the heap but its `car` and `cdr` objects would not.
+ * @param data Thread data object for the caller.
+ * @param obj Object to copy.
+ */
 object copy2heap(void *data, object obj)
 {
   char stack_pos;
@@ -7184,7 +7234,14 @@ static const uint8_t utf8d[] = {
   12,36,12,12,12,12,12,12,12,12,12,12, 
 };
 
-//uint32_t inline
+/**
+ * @brief Decode the next byte of a codepoint.
+ *        Based on example code from Bjoern Hoehrmann.
+ * @param state Out parameter, the state of the decoding
+ * @param codep Out parameter, contains the codepoint
+ * @param byte Byte to examine
+ * @return The current state: `CYC_UTF8_ACCEPT` if successful otherwise `CYC_UTF8_REJECT`.
+ */
 uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
   uint32_t type = utf8d[byte];
 
@@ -7198,9 +7255,10 @@ uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
 // END Bjoern Hoehrmann
 
 /**
- * @brief
- * Count the number of code points in a string.
- * Based on example code from Bjoern Hoehrmann.
+ * @brief Count the number of code points in a string.
+ *        Based on example code from Bjoern Hoehrmann.
+ * @param s String to examine
+ * @return The number of codepoints found, or -1 if there was an error.
  */
 int Cyc_utf8_count_code_points(uint8_t* s) {
   uint32_t codepoint;
@@ -7216,6 +7274,14 @@ int Cyc_utf8_count_code_points(uint8_t* s) {
   return count;
 }
 
+/**
+ * @brief Count the number of code points and bytes in a string.
+ * @param s String to examine
+ * @param codepoint Out parameter, set to the codepoint.
+ * @param cpts Out parameter, set to the number of code points
+ * @param bytes Out parameter, set to the number of bytes
+ * @return Returns `CYC_UTF8_ACCEPT`  on success, otherwise `CYC_UTF8_REJECT`.
+ */
 int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes) {
   uint32_t state = 0;
   *cpts = 0;

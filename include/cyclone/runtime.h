@@ -752,7 +752,11 @@ void Cyc_set_globals_changed(gc_thread_data *thd);
  * @brief Unicode processing using UTF-8
  */
 /**@{*/
+
+/** @brief Successful state */
 #define CYC_UTF8_ACCEPT 0
+
+/** @brief Invalid state */
 #define CYC_UTF8_REJECT 1
 
 /**
