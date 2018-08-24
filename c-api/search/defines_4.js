@@ -1,6 +1,8 @@
 var searchData=
 [
   ['gc_5falign',['gc_align',['../gc_8c_aaadcbfc1097af52c1820459c56a5682e.html#aaadcbfc1097af52c1820459c56a5682e',1,'gc.c']]],
+  ['gc_5fblock_5fbits',['GC_BLOCK_BITS',['../gc_8c_a212e525686d81386c8d047f63e1c8b88.html#a212e525686d81386c8d047f63e1c8b88',1,'gc.c']]],
+  ['gc_5fblock_5fsize',['GC_BLOCK_SIZE',['../gc_8c_a1ac66c95bfd99ebbe41ffc01bc9cad6a.html#a1ac66c95bfd99ebbe41ffc01bc9cad6a',1,'gc.c']]],
   ['gc_5fcollector_5fmark_5fgray',['gc_collector_mark_gray',['../gc_8c_a098c8f133063f61acf0ea4f61e02f759.html#a098c8f133063f61acf0ea4f61e02f759',1,'gc.c']]],
   ['gc_5ffree_5fchunk_5fsize',['gc_free_chunk_size',['../gc_8c_aa4acc565d76fb74488e23f45d762aada.html#aa4acc565d76fb74488e23f45d762aada',1,'gc.c']]],
   ['gc_5fheap_5falign',['gc_heap_align',['../gc_8c_a8a23f461bddb011176f88973fe68ef8a.html#a8a23f461bddb011176f88973fe68ef8a',1,'gc.c']]],

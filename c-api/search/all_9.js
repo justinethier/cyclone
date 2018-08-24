@@ -8,8 +8,10 @@ var searchData=
   ['integer_5ftag',['integer_tag',['../group__objects_ga3eff9ebd9f241e211e00b991e2ac60fc.html#gga3eff9ebd9f241e211e00b991e2ac60fca71e14b38a45dbccd577a96a2498cf66a',1,'types.h']]],
   ['integer_5ftype',['integer_type',['../structinteger__type.html',1,'']]],
   ['integer_5fvalue',['integer_value',['../group__objects_ga2733c2727ea55735aa0c032013f28568.html#ga2733c2727ea55735aa0c032013f28568',1,'types.h']]],
+  ['is_5ffull',['is_full',['../structgc__heap__t_ac9c00b4132ba3cc8dd2b956c51215d54.html#ac9c00b4132ba3cc8dd2b956c51215d54',1,'gc_heap_t']]],
   ['is_5flibrary_5floaded',['is_library_loaded',['../group__prim__glo_ga780ea900101984491fefd4ca89e038b9.html#ga780ea900101984491fefd4ca89e038b9',1,'is_library_loaded(const char *name):&#160;runtime.c'],['../group__prim__glo_ga780ea900101984491fefd4ca89e038b9.html#ga780ea900101984491fefd4ca89e038b9',1,'is_library_loaded(const char *name):&#160;runtime.c']]],
   ['is_5fobject_5ftype',['is_object_type',['../group__immediates_ga57936aa324ea2422e81e7f3315caf8cc.html#ga57936aa324ea2422e81e7f3315caf8cc',1,'types.h']]],
+  ['is_5funswept',['is_unswept',['../structgc__heap__t_a432699aee23e0b0e8348fdd9f54d28c0.html#a432699aee23e0b0e8348fdd9f54d28c0',1,'gc_heap_t']]],
   ['is_5fvalue_5ftype',['is_value_type',['../group__immediates_gafc6af90619bb95334e37d574a14e4cd5.html#gafc6af90619bb95334e37d574a14e4cd5',1,'types.h']]],
   ['i_2fo',['I/O',['../group__prim__io.html',1,'']]]
 ];
