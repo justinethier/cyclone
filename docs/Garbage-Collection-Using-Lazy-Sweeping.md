@@ -199,10 +199,6 @@ mperm | 49.94 | 39.97 | 19.95%
 equal | 0.74 | 0.70 | 4.43%
 bv2string | 7.54 | 7.62 | -1.00%
 
-This data is illustrated in the following chart:
-
-<img src="images/benchmarks/lazy-sweep-benchmark-times.png" alt="Chart of Results">
-
 Here is an overall summary:
 
 Statistic | Benchmark | Result
