@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.2 - TBD
+## 0.9.2 - August 26, 2018
 
 Features
 
@@ -8,8 +8,6 @@ Features
 - Improved loop detection during CPS optimization phase.
 - Allow optimizing-out of basic `if` expressions of the form `(if (pred? ...) #t #f)` into `(pred? ...)`.
 - Perform slightly faster type checking for string, vector, and bytevector access functions.
-
-Bug Fixes
 
 ## 0.9.1 - August 9, 2018
 
