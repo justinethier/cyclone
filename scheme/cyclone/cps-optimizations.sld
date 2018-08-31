@@ -1573,7 +1573,24 @@
 (define (_closure-convert exp globals optimization-level)
  (define (convert exp self-var free-var-lst)
   (define (cc exp)
+;(trace:error `(cc ,exp))
    (cond
+    ((ast:lambda? exp)
+     (let* ((new-self-var (gensym 'self))
+            (body  (ast:lambda-body exp))
+            (new-free-vars 
+              (difference 
+                (difference (free-vars body) (ast:lambda-formals->list exp))
+                globals)))
+       `(%closure
+          (lambda
+            ,(list->lambda-formals
+               (cons new-self-var (ast:lambda-formals->list exp))
+               (ast:lambda-formals-type exp))
+            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
+          ,@(map (lambda (v) ;; TODO: splice here?
+                    (cc v))
+            new-free-vars))))
     ((const? exp)        exp)
     ((quote? exp)        exp)
     ((ref? exp)
@@ -1591,22 +1608,7 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
-    ((lambda? exp)
-     (let* ((new-self-var (gensym 'self))
-            (body  (lambda->exp exp))
-            (new-free-vars 
-              (difference 
-                (difference (free-vars body) (lambda-formals->list exp))
-                globals)))
-       `(%closure
-          (lambda
-            ,(list->lambda-formals
-               (cons new-self-var (lambda-formals->list exp))
-               (lambda-formals-type exp))
-            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
-          ,@(map (lambda (v) ;; TODO: splice here?
-                    (cc v))
-            new-free-vars))))
+    ((lambda? exp)   (error `(Unexpected lambda in closure-convert ,exp)))
     ((if? exp)  `(if ,@(map cc (cdr exp))))
     ((cell? exp)       `(cell ,(cc (cell->value exp))))
     ((cell-get? exp)   `(cell-get ,(cc (cell-get->cell exp))))
