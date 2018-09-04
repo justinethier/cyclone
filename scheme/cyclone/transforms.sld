@@ -749,7 +749,7 @@
        (wrap-mutable-formals 
          (ast:lambda-id exp)
          (ast:lambda-formals->list exp)
-         (wrap-mutables (car (ast:lambda-body exp)) globals)
+         (list (wrap-mutables (car (ast:lambda-body exp)) globals))
          (ast:lambda-has-cont exp))
        (ast:lambda-has-cont exp)
        )) ;; Assume single expr in lambda body, since after CPS phase
