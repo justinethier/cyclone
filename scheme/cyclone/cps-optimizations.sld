@@ -1583,11 +1583,13 @@
                 (difference (free-vars body) (ast:lambda-formals->list exp))
                 globals)))
        `(%closure
-          (lambda
-            ,(list->lambda-formals
+          ,(ast:%make-lambda
+             (ast:lambda-id exp)
+             (list->lambda-formals
                (cons new-self-var (ast:lambda-formals->list exp))
                (ast:lambda-formals-type exp))
-            ,(convert (car body) new-self-var new-free-vars)) ;; TODO: should this be a map??? was a list in 90-min-scc.
+             (convert (car body) new-self-var new-free-vars)
+             (ast:lambda-has-cont exp))
           ,@(map (lambda (v) ;; TODO: splice here?
                     (cc v))
             new-free-vars))))
@@ -1652,18 +1654,27 @@
                     ; Free vars, create a closure for them
                     (let* ((new-self-var (gensym 'self)))
                       `((%closure 
-                           (lambda
-                             ,(list->lambda-formals
+                          ,(ast:%make-lambda
+                             (ast:lambda-id fn)
+                             (list->lambda-formals
                                 (cons new-self-var (ast:lambda-formals->list fn))
                                 (ast:lambda-formals-type fn))
-                             ,(convert (car body) new-self-var new-free-vars))
+                             (convert (car body) new-self-var new-free-vars)
+                             (ast:lambda-has-cont fn)
+                           )
                            ,@(map (lambda (v) (cc v))
                                   new-free-vars))
                         ,@args))
                     ; No free vars, just create simple lambda
-                    `((lambda ,(ast:lambda-args fn)
-                              ,@(map cc body))
-                      ,@args))))))
+                    `(,(ast:%make-lambda 
+                         (ast:lambda-id fn)
+                         (ast:lambda-args fn)
+                         (map cc body)
+                         (ast:lambda-has-cont fn)
+                       )
+                      ,@args)
+                    
+                    )))))
          ((lambda? fn)   (error `(Unexpected lambda in closure-convert ,exp)))
          (else
            (let ((f (cc fn)))
@@ -1674,8 +1685,10 @@
       (error "unhandled exp: " exp))))
   (cc exp))
 
- `(lambda ()
-    ,(convert exp #f '())))
+ (ast:make-lambda
+   (list)
+   (convert exp #f '())
+   #f))
 
 (define (analyze:find-named-lets exp)
   (define (scan exp lp)
