@@ -84,6 +84,9 @@
           (cond ((pair? obj)        (wr-expr obj col))
                 ((null? obj)        (wr-lst obj col))
                 ((vector? obj)      (wr-lst (vector->list obj) (out "#" col)))
+                ((bytevector? obj)  (wr-lst 
+                                      (map char->integer (string->list (utf8->string obj)))
+                                      (out "#u8" col)))
                 ((boolean? obj)     (out (if obj "#t" "#f") col))
                 ((number? obj)      (out (number->string obj) col))
                 ((symbol? obj)      (out (symbol->string obj) col))
