@@ -2,6 +2,10 @@
 
 ## 0.9.3 - TBD
 
+Features
+
+- Allow pretty printing of bytevectors.
+
 Bug Fixes
 
 - Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of crashing when a non-port object is passed.
