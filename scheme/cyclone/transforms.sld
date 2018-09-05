@@ -734,13 +734,14 @@
         body-exp
         ;(list body-exp)
         (if (is-mutable? (car formals))
-            (list ;(ast:%make-lambda
-                  ;  id
-                  (ast:make-lambda
-                    (list (car formals))
-                    (wrap-mutable-formals id (cdr formals) body-exp has-cont)
-                    has-cont)
-                  `(cell ,(car formals)))
+            (list
+              (list ;(ast:%make-lambda
+                    ;  id
+                    (ast:make-lambda
+                      (list (car formals))
+                      (wrap-mutable-formals id (cdr formals) body-exp has-cont)
+                      has-cont)
+                    `(cell ,(car formals))))
             (wrap-mutable-formals id (cdr formals) body-exp has-cont))))
   
   (cond
