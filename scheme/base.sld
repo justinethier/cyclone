@@ -1360,7 +1360,9 @@
   (define-c input-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
-      Cyc_check_port(data, port);
+      if (boolean_f == Cyc_is_port(port)) {
+        return_closcall1(data, k, boolean_f);
+      }
       return_closcall1(
         data, 
         k, 
@@ -1368,7 +1370,9 @@
   (define-c output-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
-      Cyc_check_port(data, port);
+      if (boolean_f == Cyc_is_port(port)) {
+        return_closcall1(data, k, boolean_f);
+      }
       return_closcall1(
         data, 
         k, 
@@ -1376,7 +1380,9 @@
   (define-c input-port-open?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
-      Cyc_check_port(data, port);
+      if (boolean_f == Cyc_is_port(port)) {
+        return_closcall1(data, k, boolean_f);
+      }
       return_closcall1(
         data, 
         k, 
@@ -1384,7 +1390,9 @@
   (define-c output-port-open?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
-      Cyc_check_port(data, port);
+      if (boolean_f == Cyc_is_port(port)) {
+        return_closcall1(data, k, boolean_f);
+      }
       return_closcall1(
         data, 
         k, 

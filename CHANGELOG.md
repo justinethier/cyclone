@@ -2,6 +2,10 @@
 
 ## 0.9.3 - TBD
 
+Bug Fixes
+
+- Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of crashing when a non-port object is passed.
+
 ## 0.9.2 - August 26, 2018
 
 Features
