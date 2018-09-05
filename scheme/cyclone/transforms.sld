@@ -630,6 +630,9 @@
   (define (search exp)
     (cond
       ; Core forms:
+      ((ast:lambda? exp)
+        (difference (reduce union (map search (ast:lambda-body exp)) '())
+                    (ast:lambda-formals->list exp)))
       ((const? exp)    '())
       ((prim? exp)     '())    
       ((quote? exp)    '())    
