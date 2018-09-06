@@ -717,6 +717,28 @@
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
+        ((ast:lambda? fun)
+         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
+                                                               ;; properly, wait until this comes up in an example
+                (this-cont (string-append "__lambda_" (number->string lid)))
+                (cgen 
+                  (c-compile-args
+                     args 
+                     append-preamble 
+                     ""
+                     this-cont
+                     trace
+                     cps?))
+                (num-cargs (c:num-args cgen)))
+           (set-c-call-arity! num-cargs)
+           (c-code
+             (string-append
+               (c:allocs->str (c:allocs cgen))
+               "return_direct" (number->string num-cargs) 
+               "(data," this-cont
+               (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
+                  (c:body cgen) ");"))))
+
         ;; Direct recursive call of top-level function
         ((and (pair? trace)
               (not (null? (cdr trace)))
@@ -770,28 +792,6 @@
                "goto loop;")))
         )
          
-        ((lambda? fun)
-         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
-                                                               ;; properly, wait until this comes up in an example
-                (this-cont (string-append "__lambda_" (number->string lid)))
-                (cgen 
-                  (c-compile-args
-                     args 
-                     append-preamble 
-                     ""
-                     this-cont
-                     trace
-                     cps?))
-                (num-cargs (c:num-args cgen)))
-           (set-c-call-arity! num-cargs)
-           (c-code
-             (string-append
-               (c:allocs->str (c:allocs cgen))
-               "return_direct" (number->string num-cargs) 
-               "(data," this-cont
-               (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
-                  (c:body cgen) ");"))))
-
         ((prim? fun)
          (let* ((c-fun 
                  (c-compile-prim fun cont))
@@ -1076,6 +1076,7 @@
 (define inline-lambdas '())
 
 ; allocate-lambda : (string -> string) -> lambda-id
+TODO: check everything calling this function and/or using lambdas
 (define (allocate-lambda lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
@@ -1089,7 +1090,7 @@
 ;  (cdr (assv id lambdas)))
 
 (define (lambda->env exp)
-    (let ((formals (lambda-formals->list exp)))
+    (let ((formals (ast:lambda-formals->list exp)))
         (if (pair? formals)
             (car formals)
             'unused)))
@@ -1254,13 +1255,13 @@
     (let* ((formals (c-compile-formals 
                       (if (not cps?)
                           ;; Ignore continuation (k) arg for non-CPS funcs
-                          (cdr (lambda->formals exp))
-                          (lambda->formals exp))
-                      (lambda-formals-type exp)))
-           (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
-                          (mangle (if (pair? (lambda->formals exp))
-                                      (car (lambda->formals exp))
-                                      (lambda->formals exp)))
+                          (cdr (ast:lambda-args exp))
+                          (ast:lambda-args exp))
+                      (ast:lambda-formals-type exp)))
+           (tmp-ident (if (> (length (ast:lambda-formals->list exp)) 0) 
+                          (mangle (if (pair? (ast:lambda-args exp))
+                                      (car (ast:lambda-args exp))
+                                      (ast:lambda-args exp)))
                           ""))
            (return-type
             (if cps? "void" "object"))
@@ -1288,7 +1289,7 @@
                 formals))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
-                        (car (lambda->exp exp)) ;; car ==> assume single expr in lambda body after CPS
+                        (car (ast:lambda-body exp)) ;; car ==> assume single expr in lambda body after CPS
                         append-preamble
                         (mangle env-closure)
                         trace 
@@ -1300,18 +1301,20 @@
                         formals*
                        ") {\n"
                        preamble
+               TODO: this and the rest of the "exp" instances in this function:
                        (if (lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
                          (string-append 
                            ; DEBUGGING:
                            ;"printf(\"%d %d\\n\", argc, " 
-                           ;  (number->string (length (lambda-formals->list exp))) ");"
+                           ;  (number->string (length (ast:lambda-formals->list exp))) ");"
                            "load_varargs(" 
+                TODO: ast equivalents for these next two:
                            (mangle (lambda-varargs-var exp))
                            ", "
                            (mangle (lambda-varargs-var exp))
                            "_raw, argc - " (number->string 
-                                         (- (length (lambda-formals->list exp)) 
+                                         (- (length (ast:lambda-formals->list exp)) 
                                             1
                                             (if has-closure? 1 0)))
                            ");\n");
