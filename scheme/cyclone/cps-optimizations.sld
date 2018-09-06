@@ -1588,7 +1588,7 @@
              (list->lambda-formals
                (cons new-self-var (ast:lambda-formals->list exp))
                (ast:lambda-formals-type exp))
-             (convert (car body) new-self-var new-free-vars)
+             (list (convert (car body) new-self-var new-free-vars))
              (ast:lambda-has-cont exp))
           ,@(map (lambda (v) ;; TODO: splice here?
                     (cc v))
@@ -1659,7 +1659,7 @@
                              (list->lambda-formals
                                 (cons new-self-var (ast:lambda-formals->list fn))
                                 (ast:lambda-formals-type fn))
-                             (convert (car body) new-self-var new-free-vars)
+                             (list (convert (car body) new-self-var new-free-vars))
                              (ast:lambda-has-cont fn)
                            )
                            ,@(map (lambda (v) (cc v))
@@ -1687,7 +1687,7 @@
 
  (ast:make-lambda
    (list)
-   (convert exp #f '())
+   (list (convert exp #f '()))
    #f))
 
 (define (analyze:find-named-lets exp)

@@ -441,15 +441,13 @@
              ((define? expr)
               ;; Global
               `(define ,(define->var expr)
-                 ,@(caddr (closure-convert (define->exp expr) globals *optimization-level*))))
+                 ,@(car (ast:lambda-body (closure-convert (define->exp expr) globals *optimization-level*)))))
              ((define-c? expr)
               expr)
              (else
-              (caddr ;; Strip off superfluous lambda
-                (closure-convert expr globals *optimization-level*)))))
+              (car (ast:lambda-body ;; Strip off superfluous lambda
+                (closure-convert expr globals *optimization-level*))))))
           input-program))
-    ;    (caddr ;; Strip off superfluous lambda
-    ;      (closure-convert input-program)))
       (trace:info "---------------- after closure-convert:")
       (trace:info (ast:ast->pp-sexp input-program))
       
