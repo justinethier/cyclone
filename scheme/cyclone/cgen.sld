@@ -330,6 +330,7 @@
     ((define-c? exp)
      (c-compile-raw-global-lambda exp append-preamble cont trace))
     ; Special case - global function w/out a closure. Create an empty closure
+TODO: convert to ast lambda
     ((tagged-list? 'lambda exp)
      (c-compile-exp
       `(%closure ,exp)
@@ -961,6 +962,7 @@
   ;(write `(add-global ,var-sym ,code))
   (set! *globals* (cons (list var-sym lambda? code) *globals*)))
 (define (c-compile-global exp append-preamble cont trace)
+TODO: assumes lambda's below:
  (let ((var (define->var exp))
        (body (if (equal? 4 (length exp)) ; Simple var assignment contains superfluous %closure-ref
                  (cadddr exp)
@@ -1075,8 +1077,11 @@
 (define lambdas '())
 (define inline-lambdas '())
 
+;; TODO: may need to pass in AST lambda ID and store a mapping
+;;       of cgen lambda ID to it, in order to use data from the 
+;;       analysis DB later on during code generation.
+;;
 ; allocate-lambda : (string -> string) -> lambda-id
-TODO: check everything calling this function and/or using lambdas
 (define (allocate-lambda lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
@@ -1301,18 +1306,16 @@ TODO: check everything calling this function and/or using lambdas
                         formals*
                        ") {\n"
                        preamble
-               TODO: this and the rest of the "exp" instances in this function:
-                       (if (lambda-varargs? exp)
+                       (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
                          (string-append 
                            ; DEBUGGING:
                            ;"printf(\"%d %d\\n\", argc, " 
                            ;  (number->string (length (ast:lambda-formals->list exp))) ");"
                            "load_varargs(" 
-                TODO: ast equivalents for these next two:
-                           (mangle (lambda-varargs-var exp))
+                           (mangle (ast:lambda-varargs-var exp))
                            ", "
-                           (mangle (lambda-varargs-var exp))
+                           (mangle (ast:lambda-varargs-var exp))
                            "_raw, argc - " (number->string 
                                          (- (length (ast:lambda-formals->list exp)) 
                                             1
@@ -1339,6 +1342,18 @@ TODO: check everything calling this function and/or using lambdas
       formals*))))
   
 (define cgen:mangle-global #f)
+
+(define (ast:lambda-varargs-var exp)
+  (if (ast:lambda-varargs? exp)
+    (if (equal? (ast:lambda-formals-type exp) 'args:varargs)
+        (ast:lambda-args exp) ; take symbol directly
+        (car (reverse (ast:lambda-formals->list exp)))) ; Last arg is varargs
+    #f))
+
+(define (ast:lambda-varargs? exp)
+  (let ((type (ast:lambda-formals-type exp)))
+    (or (equal? type 'args:varargs)
+        (equal? type 'args:fixed-with-varargs))))
 
 ;; Convert a library name to string, so it can be 
 ;; appended to the identifiers it exports.
