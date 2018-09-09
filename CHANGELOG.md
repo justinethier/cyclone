@@ -8,7 +8,7 @@ Features
 
 Bug Fixes
 
-- Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of crashing when a non-port object is passed.
+- Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of raising an error when a non-port object is passed.
 
 ## 0.9.2 - August 26, 2018
 
