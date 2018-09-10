@@ -9,6 +9,7 @@ Features
 Bug Fixes
 
 - Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of raising an error when a non-port object is passed.
+- Fix overflow detection when performing fixnum multiplication to avoid undefined behavior in the C runtime.
 
 ## 0.9.2 - August 26, 2018
 
