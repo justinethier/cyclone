@@ -312,6 +312,11 @@
 ;;              require CPS, so this flag is not applicable to them.
 (define (c-compile-exp exp append-preamble cont trace cps?)
   (cond
+    ; Special case - global function w/out a closure. Create an empty closure
+    ((ast:lambda? exp)
+     (c-compile-exp
+      `(%closure ,exp)
+       append-preamble cont trace cps?))
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
     ((prim?  exp)       
@@ -329,12 +334,6 @@
      (c-compile-global exp append-preamble cont trace))
     ((define-c? exp)
      (c-compile-raw-global-lambda exp append-preamble cont trace))
-    ; Special case - global function w/out a closure. Create an empty closure
-TODO: convert to ast lambda
-    ((tagged-list? 'lambda exp)
-     (c-compile-exp
-      `(%closure ,exp)
-       append-preamble cont trace cps?))
     
     ; Application:      
     ((app? exp)         (c-compile-app exp append-preamble cont trace cps?))
@@ -962,14 +961,13 @@ TODO: convert to ast lambda
   ;(write `(add-global ,var-sym ,code))
   (set! *globals* (cons (list var-sym lambda? code) *globals*)))
 (define (c-compile-global exp append-preamble cont trace)
-TODO: assumes lambda's below:
  (let ((var (define->var exp))
        (body (if (equal? 4 (length exp)) ; Simple var assignment contains superfluous %closure-ref
                  (cadddr exp)
                  (car (define->exp exp)))))
    (add-global 
      var 
-     (lambda? body) 
+     (ast:lambda? body) 
      (c-compile-exp 
       body append-preamble cont
       (st:add-function! trace var) #t))
@@ -980,7 +978,7 @@ TODO: assumes lambda's below:
 ;           ,(define-c->inline-var exp)
 ;           ,(prim:udf? (define-c->inline-var exp))
 ;           ))
-   (when (and (lambda? body)
+   (when (and (ast:lambda? body)
               (prim:udf? (define-c->inline-var exp)))
        (add-global-inline 
          var
@@ -1114,10 +1112,12 @@ TODO: assumes lambda's below:
 ;; Note this must be the count before additional closure/CPS arguments
 ;; are added, so we need to detect those and not include them.
 (define (compute-num-args lam)
+ AST TODO: lambda-num-args does not work for AST lambda's
   (let ((count (lambda-num-args lam))) ;; Current arg count, may be too high
     (cond
       ((< count 0) -1) ;; Unlimited
       (else
+  AST TODO:
         (let ((formals (lambda-formals->list lam)))
           (- count
              (if (fl/closure? formals) 1 0)
