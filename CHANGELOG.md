@@ -5,6 +5,7 @@
 Features
 
 - Allow pretty printing of bytevectors.
+- Internal change to the compiler - preserve lambda AST forms throughout compilation process. This should make it easier to implement certain optimizations in future releases.
 
 Bug Fixes
 
