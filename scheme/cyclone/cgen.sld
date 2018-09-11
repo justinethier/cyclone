@@ -1112,16 +1112,26 @@
 ;; Note this must be the count before additional closure/CPS arguments
 ;; are added, so we need to detect those and not include them.
 (define (compute-num-args lam)
- AST TODO: lambda-num-args does not work for AST lambda's
-  (let ((count (lambda-num-args lam))) ;; Current arg count, may be too high
+  (let ((count (ast:lambda-num-args lam))) ;; Current arg count, may be too high
     (cond
       ((< count 0) -1) ;; Unlimited
       (else
-  AST TODO:
-        (let ((formals (lambda-formals->list lam)))
+        (let ((formals (ast:lambda-formals->list lam)))
           (- count
              (if (fl/closure? formals) 1 0)
              (if (fl/cont? formals) 1 0)))))))
+
+;; Minimum number of required arguments for a lambda
+(define (ast:lambda-num-args exp)
+  (let ((type (ast:lambda-formals-type exp))
+        (num (length (ast:lambda-formals->list exp))))
+    (cond
+      ((equal? type 'args:varargs)
+       -1) ;; Unlimited
+      ((equal? type 'args:fixed-with-varargs)
+       (- num 1)) ;; Last arg is optional
+      (else
+        num))))
 
 ;; Formal list with a closure?
 (define (fl/closure? lis)
