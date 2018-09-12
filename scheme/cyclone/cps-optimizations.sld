@@ -1927,6 +1927,35 @@
 )
 
 (define (analyze:find-known-lambdas exp)
-  'TODO)
+TODO: scan for well-known lambdas:
+- app of a lambda is well-known, that's easy
+- lambda can be passed as a cont. If we can identify all the places the cont is called (?) and it is not used for anything but calls, then I suppose that also qualifies as well-known.
+  this is more problematic to generate code for, though.
+  may need a lookup table of symbol to well-known function (if any)
+- ?? must be other cases
+
+  (define (scan exp)
+    (cond
+     ((ast:lambda? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym))
+        (ast:lambda-body exp)))
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) 
+      exp)
+     ((define? exp) #f) ;; TODO ??
+     ((set!? exp) #f) ;; TODO ??
+     ((if? exp)       
+      (scan (if->condition exp) def-sym)
+      (scan (if->then exp) def-sym)
+      (scan (if->else exp) def-sym))
+     ((app? exp)
+     )
+     (else #f)))
+
+;(trace:error `(update-lambda-atv! ,syms ,value))
+  (scan exp))
 
 ))
