@@ -74,6 +74,7 @@
       adbf:simple adbf:set-simple!
       adbf:unused-params adbf:set-unused-params!
       adbf:side-effects adbf:set-side-effects!
+      adbf:well-known adbf:set-well-known!
   )
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
@@ -197,17 +198,33 @@
       ))
 
     (define-record-type <analysis-db-function>
-TODO: well-known (see Dybvig's paper)
-      (%adb:make-fnc simple unused-params assigned-to-var side-effects)
+      (%adb:make-fnc 
+       simple 
+       unused-params 
+       assigned-to-var 
+       side-effects
+       well-known
+      )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
       (assigned-to-var adbf:assigned-to-var adbf:set-assigned-to-var!)
       (side-effects adbf:side-effects adbf:set-side-effects!)
-      ;; TODO: top-level-define ?
+      ;; From Dybvig's Optimizing Closures in O(0) Time paper:
+      ;; A procedure is known at a call site if the call site provably invokes
+      ;; that procedure's lambda-expression and only that lambda-expression. A
+      ;; well-known procedure is one whose value is never used except at call
+      ;; sites where it is known.
+      (well-known adbf:well-known adbf:set-well-known!)
     )
     (define (adb:make-fnc)
-      (%adb:make-fnc '? '? '() #f))
+      (%adb:make-fnc 
+       '?   ;; simple
+       '?   ;; unused-params
+       '()  ;; assigned-to-var
+       #f   ;; side-effects
+       #f   ;; well-known
+      ))
 
     ;; A constant value that cannot be mutated
     ;; A variable only ever assigned to one of these could have all
