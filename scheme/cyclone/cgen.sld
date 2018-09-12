@@ -312,6 +312,11 @@
 ;;              require CPS, so this flag is not applicable to them.
 (define (c-compile-exp exp append-preamble cont trace cps?)
   (cond
+    ; Special case - global function w/out a closure. Create an empty closure
+    ((ast:lambda? exp)
+     (c-compile-exp
+      `(%closure ,exp)
+       append-preamble cont trace cps?))
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
     ((prim?  exp)       
@@ -329,11 +334,6 @@
      (c-compile-global exp append-preamble cont trace))
     ((define-c? exp)
      (c-compile-raw-global-lambda exp append-preamble cont trace))
-    ; Special case - global function w/out a closure. Create an empty closure
-    ((tagged-list? 'lambda exp)
-     (c-compile-exp
-      `(%closure ,exp)
-       append-preamble cont trace cps?))
     
     ; Application:      
     ((app? exp)         (c-compile-app exp append-preamble cont trace cps?))
@@ -717,6 +717,28 @@
     (let* ((args     (app->args exp))
            (fun      (app->fun exp)))
       (cond
+        ((ast:lambda? fun)
+         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
+                                                               ;; properly, wait until this comes up in an example
+                (this-cont (string-append "__lambda_" (number->string lid)))
+                (cgen 
+                  (c-compile-args
+                     args 
+                     append-preamble 
+                     ""
+                     this-cont
+                     trace
+                     cps?))
+                (num-cargs (c:num-args cgen)))
+           (set-c-call-arity! num-cargs)
+           (c-code
+             (string-append
+               (c:allocs->str (c:allocs cgen))
+               "return_direct" (number->string num-cargs) 
+               "(data," this-cont
+               (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
+                  (c:body cgen) ");"))))
+
         ;; Direct recursive call of top-level function
         ((and (pair? trace)
               (not (null? (cdr trace)))
@@ -770,28 +792,6 @@
                "goto loop;")))
         )
          
-        ((lambda? fun)
-         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
-                                                               ;; properly, wait until this comes up in an example
-                (this-cont (string-append "__lambda_" (number->string lid)))
-                (cgen 
-                  (c-compile-args
-                     args 
-                     append-preamble 
-                     ""
-                     this-cont
-                     trace
-                     cps?))
-                (num-cargs (c:num-args cgen)))
-           (set-c-call-arity! num-cargs)
-           (c-code
-             (string-append
-               (c:allocs->str (c:allocs cgen))
-               "return_direct" (number->string num-cargs) 
-               "(data," this-cont
-               (if (> num-cargs 0) "," "") ; TODO: how to propagate continuation - cont " "
-                  (c:body cgen) ");"))))
-
         ((prim? fun)
          (let* ((c-fun 
                  (c-compile-prim fun cont))
@@ -967,7 +967,7 @@
                  (car (define->exp exp)))))
    (add-global 
      var 
-     (lambda? body) 
+     (ast:lambda? body) 
      (c-compile-exp 
       body append-preamble cont
       (st:add-function! trace var) #t))
@@ -978,7 +978,7 @@
 ;           ,(define-c->inline-var exp)
 ;           ,(prim:udf? (define-c->inline-var exp))
 ;           ))
-   (when (and (lambda? body)
+   (when (and (ast:lambda? body)
               (prim:udf? (define-c->inline-var exp)))
        (add-global-inline 
          var
@@ -1075,6 +1075,10 @@
 (define lambdas '())
 (define inline-lambdas '())
 
+;; TODO: may need to pass in AST lambda ID and store a mapping
+;;       of cgen lambda ID to it, in order to use data from the 
+;;       analysis DB later on during code generation.
+;;
 ; allocate-lambda : (string -> string) -> lambda-id
 (define (allocate-lambda lam . cps?)
   (let ((id num-lambdas))
@@ -1089,7 +1093,7 @@
 ;  (cdr (assv id lambdas)))
 
 (define (lambda->env exp)
-    (let ((formals (lambda-formals->list exp)))
+    (let ((formals (ast:lambda-formals->list exp)))
         (if (pair? formals)
             (car formals)
             'unused)))
@@ -1108,14 +1112,26 @@
 ;; Note this must be the count before additional closure/CPS arguments
 ;; are added, so we need to detect those and not include them.
 (define (compute-num-args lam)
-  (let ((count (lambda-num-args lam))) ;; Current arg count, may be too high
+  (let ((count (ast:lambda-num-args lam))) ;; Current arg count, may be too high
     (cond
       ((< count 0) -1) ;; Unlimited
       (else
-        (let ((formals (lambda-formals->list lam)))
+        (let ((formals (ast:lambda-formals->list lam)))
           (- count
              (if (fl/closure? formals) 1 0)
              (if (fl/cont? formals) 1 0)))))))
+
+;; Minimum number of required arguments for a lambda
+(define (ast:lambda-num-args exp)
+  (let ((type (ast:lambda-formals-type exp))
+        (num (length (ast:lambda-formals->list exp))))
+    (cond
+      ((equal? type 'args:varargs)
+       -1) ;; Unlimited
+      ((equal? type 'args:fixed-with-varargs)
+       (- num 1)) ;; Last arg is optional
+      (else
+        num))))
 
 ;; Formal list with a closure?
 (define (fl/closure? lis)
@@ -1254,13 +1270,13 @@
     (let* ((formals (c-compile-formals 
                       (if (not cps?)
                           ;; Ignore continuation (k) arg for non-CPS funcs
-                          (cdr (lambda->formals exp))
-                          (lambda->formals exp))
-                      (lambda-formals-type exp)))
-           (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
-                          (mangle (if (pair? (lambda->formals exp))
-                                      (car (lambda->formals exp))
-                                      (lambda->formals exp)))
+                          (cdr (ast:lambda-args exp))
+                          (ast:lambda-args exp))
+                      (ast:lambda-formals-type exp)))
+           (tmp-ident (if (> (length (ast:lambda-formals->list exp)) 0) 
+                          (mangle (if (pair? (ast:lambda-args exp))
+                                      (car (ast:lambda-args exp))
+                                      (ast:lambda-args exp)))
                           ""))
            (return-type
             (if cps? "void" "object"))
@@ -1288,7 +1304,7 @@
                 formals))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
-                        (car (lambda->exp exp)) ;; car ==> assume single expr in lambda body after CPS
+                        (car (ast:lambda-body exp)) ;; car ==> assume single expr in lambda body after CPS
                         append-preamble
                         (mangle env-closure)
                         trace 
@@ -1300,18 +1316,18 @@
                         formals*
                        ") {\n"
                        preamble
-                       (if (lambda-varargs? exp)
+                       (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
                          (string-append 
                            ; DEBUGGING:
                            ;"printf(\"%d %d\\n\", argc, " 
-                           ;  (number->string (length (lambda-formals->list exp))) ");"
+                           ;  (number->string (length (ast:lambda-formals->list exp))) ");"
                            "load_varargs(" 
-                           (mangle (lambda-varargs-var exp))
+                           (mangle (ast:lambda-varargs-var exp))
                            ", "
-                           (mangle (lambda-varargs-var exp))
+                           (mangle (ast:lambda-varargs-var exp))
                            "_raw, argc - " (number->string 
-                                         (- (length (lambda-formals->list exp)) 
+                                         (- (length (ast:lambda-formals->list exp)) 
                                             1
                                             (if has-closure? 1 0)))
                            ");\n");
@@ -1336,6 +1352,18 @@
       formals*))))
   
 (define cgen:mangle-global #f)
+
+(define (ast:lambda-varargs-var exp)
+  (if (ast:lambda-varargs? exp)
+    (if (equal? (ast:lambda-formals-type exp) 'args:varargs)
+        (ast:lambda-args exp) ; take symbol directly
+        (car (reverse (ast:lambda-formals->list exp)))) ; Last arg is varargs
+    #f))
+
+(define (ast:lambda-varargs? exp)
+  (let ((type (ast:lambda-formals-type exp)))
+    (or (equal? type 'args:varargs)
+        (equal? type 'args:fixed-with-varargs))))
 
 ;; Convert a library name to string, so it can be 
 ;; appended to the identifiers it exports.

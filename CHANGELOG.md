@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.9.3 - TBD
+## 0.9.3 - TBD 
+
+Features
+
+- Allow pretty printing of bytevectors.
+- Internal change to the compiler - preserve lambda AST forms throughout compilation process. This should make it easier to implement certain optimizations in future releases.
+
+Bug Fixes
+
+- Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of raising an error when a non-port object is passed.
+- Fix overflow detection when performing fixnum multiplication to avoid undefined behavior in the C runtime.
 
 ## 0.9.2 - August 26, 2018
 
