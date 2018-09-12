@@ -434,6 +434,10 @@
       (trace:info "---------------- after wrap-mutables:")
       (trace:info (ast:ast->pp-sexp input-program))
     
+      ;; Perform this analysis here since we need it later so it doesn't
+      ;; make sense to execute it multiple times during CPS optimization
+      (analyze:find-known-lambdas input-program)
+
       (set! input-program 
         (map
           (lambda (expr)

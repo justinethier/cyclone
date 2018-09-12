@@ -27,6 +27,7 @@
       analyze-find-lambdas
       analyze:find-named-lets
       analyze:find-direct-recursive-calls
+      analyze:find-known-lambdas
       ;analyze-lambda-side-effects
       opt:add-inlinable-functions
       opt:contract
@@ -1924,5 +1925,8 @@
            (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
           exp))
 )
+
+(define (analyze:find-known-lambdas exp)
+  'TODO)
 
 ))
