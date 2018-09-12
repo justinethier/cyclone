@@ -197,6 +197,7 @@
       ))
 
     (define-record-type <analysis-db-function>
+TODO: well-known (see Dybvig's paper)
       (%adb:make-fnc simple unused-params assigned-to-var side-effects)
       adb:function?
       (simple adbf:simple adbf:set-simple!)
