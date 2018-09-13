@@ -3,8 +3,10 @@
   (scheme cyclone ast)
   (scheme cyclone util)
   (scheme cyclone pretty-print)
+  (scheme cyclone transforms)
   (scheme write)
   (srfi 2)
+  (srfi 69)
 )
 
 (define (analyze:find-known-lambdas exp)
@@ -14,6 +16,21 @@
 ;  this is more problematic to generate code for, though.
 ;  may need a lookup table of symbol to well-known function (if any)
 ;- ?? must be other cases
+
+  ;; Lambda conts that are candidates for well-known functions,
+  ;; we won't know until we check exactly how the cont is used...
+  (define candidates (make-hash-table))
+
+  ;; Add given lambda to candidate table
+  ;; ast:lam - AST Lambda object
+  ;; param-sym - Symbol of the parameter that the lambda is passed as
+  (define (add-candidate! ast:lam param-sym)
+    (hash-table-set! candidates param-sym (ast:lambda-id ast:lam)))
+
+  ;; Remove given lambda from candidate table
+  ;; param-sym - Symbol representing the lambda to remove
+  (define (remove-candidate param-sym)
+    (hash-table-delete! candidates param-sym))
 
   (define (found exp)
     (write `(found known lambda with id ,(ast:lambda-id exp)))
@@ -29,6 +46,7 @@
      ((quote? exp) exp)
      ((const? exp) exp)
      ((ref? exp) 
+      (remove-candidate exp)
       exp)
      ((define? exp) 
       (for-each
@@ -44,6 +62,12 @@
       (cond
         ((ast:lambda? (car exp))
          (found (car exp))
+         (let ((formals (ast:lambda-formals->list (car exp))))
+           (when (and (pair? formals)
+                      (pair? (cdr exp))
+                      (ast:lambda? (cadr exp)))
+             (add-candidate! (cadr exp) (car formals)))
+         )
          ;; Scan the rest of the args
          (for-each
            (lambda (e)
@@ -53,11 +77,18 @@
           (for-each
             (lambda (e)
               (scan e))
-            exp))))
+            ;; Allow candidates to remain if they are just function calls
+            (if (ref? (car exp))
+                (cdr exp)
+                exp)))))
      (else #f)))
 
 ;(trace:error `(update-lambda-atv! ,syms ,value))
-  (scan exp))
+  (scan exp)
+  (write "Other known lambdas:")
+  (write (hash-table->alist candidates))
+  (newline)
+)
 
 ;; TEST code:
 
