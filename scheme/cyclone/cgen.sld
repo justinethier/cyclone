@@ -912,16 +912,31 @@
                    ");")))
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
-               (c-code
-                 (string-append
-                    (c:allocs->str (c:allocs cfun) "\n")
-                    (c:allocs->str (c:allocs cargs) "\n")
-                    "return_closcall" (number->string num-cargs)
-                    "(data,"
-                    this-cont
-                    (if (> num-cargs 0) "," "")
-                    (c:body cargs)
-                    ");"))))))
+               (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
+                 (if (and #f (adbf:well-known fnc))
+                   #f
+                   ;;(c-code
+                   ;;  (string-append
+                   ;;     (c:allocs->str (c:allocs cfun) "\n")
+                   ;;     (c:allocs->str (c:allocs cargs) "\n")
+                   ;;     "return_direct_with_clo" (number->string num-cargs)
+                   ;;     "(data,"
+                   ;;     this-cont
+                   ;;     ","
+                   ;;     // TODO: fnc name, twice
+                   ;;     (if (> num-cargs 0) "," "")
+                   ;;     (c:body cargs)
+                   ;;     ");"))
+                   (c-code
+                     (string-append
+                        (c:allocs->str (c:allocs cfun) "\n")
+                        (c:allocs->str (c:allocs cargs) "\n")
+                        "return_closcall" (number->string num-cargs)
+                        "(data,"
+                        this-cont
+                        (if (> num-cargs 0) "," "")
+                        (c:body cargs)
+                        ");")))))))))
 
         ((equal? 'Cyc-seq fun)
          (let ((exps (foldr
