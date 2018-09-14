@@ -741,7 +741,7 @@
            (fun      (app->fun exp)))
       (cond
         ((ast:lambda? fun)
-         (let* ((lid (allocate-lambda (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
+         (let* ((lid (allocate-lambda fun (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
                                                                ;; properly, wait until this comes up in an example
                 (this-cont (string-append "__lambda_" (number->string lid)))
                 (cgen 
@@ -1043,7 +1043,7 @@
               ,(caddr exp) ;; Args
               ,(cadddr exp) ;; Body
           ))
-          (lid (allocate-lambda lambda-data))
+          (lid (allocate-lambda #f lambda-data))
           (total-num-args
             (let ((count 1)) ;; Start at 1 because there will be one less comma than args
               (string-for-each 
@@ -1117,13 +1117,17 @@
 ;;       of cgen lambda ID to it, in order to use data from the 
 ;;       analysis DB later on during code generation.
 ;;
-; allocate-lambda : (string -> string) -> lambda-id
-(define (allocate-lambda lam . cps?)
+; allocate-lambda : (Either ast boolean) -> (string -> string) -> lambda-id
+(define (allocate-lambda ast:lam lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
     (set! lambdas (cons (list id lam) lambdas))
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
+    (when ast:lam
+      ;; TODO: store the allocated ID within the adbf
+      'todo
+    )
     id))
 
 ; get-lambda : lambda-id -> (symbol -> string)
@@ -1223,7 +1227,7 @@
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
-         (lid (allocate-lambda (c-compile-lambda lam trace cps?) cps?))
+         (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (macro? (assoc (st:->var trace) (get-macros)))
          (call/cc? (and (equal? (car trace) "scheme/base.sld")
                         (equal? (st:->var trace) 'call/cc)))
