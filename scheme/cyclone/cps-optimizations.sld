@@ -40,6 +40,9 @@
       adb:get-db
       simple-lambda?
       one-instance-of-new-mutable-obj?
+      ;; Analysis - well-known lambdas
+      well-known-lambda?
+      analyze:find-known-lambdas
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -1926,36 +1929,98 @@
           exp))
 )
 
+;; Does the given symbol refer to a well-known lambda?
+(define (well-known-lambda? sym)
+  (and *well-known-lambda-sym-lookup-tbl*
+       (hash-table-ref/default *well-known-lambda-sym-lookup-tbl* sym #f)))
+
+(define *well-known-lambda-sym-lookup-tbl* #f)
+
+;; Scan for well-known lambdas:
+;; - app of a lambda is well-known, that's easy
+;; - lambda passed as a cont. If we can identify all the places the cont is
+;;   called and it is not used for anything but calls, then I suppose that
+;;   also qualifies as well-known.
+;; - ?? must be other cases
 (define (analyze:find-known-lambdas exp)
-TODO: scan for well-known lambdas:
-- app of a lambda is well-known, that's easy
-- lambda can be passed as a cont. If we can identify all the places the cont is called (?) and it is not used for anything but calls, then I suppose that also qualifies as well-known.
-  this is more problematic to generate code for, though.
-  may need a lookup table of symbol to well-known function (if any)
-- ?? must be other cases
+  ;; Lambda conts that are candidates for well-known functions,
+  ;; we won't know until we check exactly how the cont is used...
+  (define candidates (make-hash-table))
+
+  ;; Add given lambda to candidate table
+  ;; ast:lam - AST Lambda object
+  ;; param-sym - Symbol of the parameter that the lambda is passed as
+  (define (add-candidate! ast:lam param-sym)
+    (hash-table-set! candidates param-sym ast:lam))
+
+  ;; Remove given lambda from candidate table
+  ;; param-sym - Symbol representing the lambda to remove
+  (define (remove-candidate param-sym)
+    (hash-table-delete! candidates param-sym))
+
+  (define (found exp)
+    (let ((lid (ast:lambda-id exp)))
+      (trace:info `(found known lambda with id ,lid))
+      (with-fnc! lid (lambda (fnc)
+        (adbf:set-well-known! fnc #t)))))
 
   (define (scan exp)
     (cond
      ((ast:lambda? exp)
       (for-each
         (lambda (e)
-          (scan e def-sym))
+          (scan e))
         (ast:lambda-body exp)))
      ((quote? exp) exp)
      ((const? exp) exp)
      ((ref? exp) 
+      (remove-candidate exp)
       exp)
-     ((define? exp) #f) ;; TODO ??
-     ((set!? exp) #f) ;; TODO ??
+     ((define? exp) 
+      (for-each
+        (lambda (e)
+          (scan e))
+        (define->exp exp)))
+     ;((set!? exp) #f) ;; TODO ??
      ((if? exp)       
-      (scan (if->condition exp) def-sym)
-      (scan (if->then exp) def-sym)
-      (scan (if->else exp) def-sym))
+      (scan (if->condition exp))
+      (scan (if->then exp))
+      (scan (if->else exp)))
      ((app? exp)
-     )
+      (cond
+        ((ast:lambda? (car exp))
+         (found (car exp)) ;; We immediately know these lambdas are well-known
+         (let ((formals (ast:lambda-formals->list (car exp))))
+           (when (and (pair? formals)
+                      (pair? (cdr exp))
+                      (ast:lambda? (cadr exp)))
+             (add-candidate! (cadr exp) (car formals)))
+         )
+         ;; Scan the rest of the args
+         (for-each
+           (lambda (e)
+             (scan e))
+           exp))
+        (else 
+          (for-each
+            (lambda (e)
+              (scan e))
+            ;; Allow candidates to remain if they are just function calls
+            (if (ref? (car exp))
+                (cdr exp)
+                exp)))))
      (else #f)))
 
 ;(trace:error `(update-lambda-atv! ,syms ,value))
-  (scan exp))
+  (scan exp)
+  ;; Record all well-known lambdas that were found indirectly
+  (for-each
+    (lambda (sym/lamb)
+      (found (cdr sym/lamb)))
+    (hash-table->alist candidates))
+  ;; Save the candidate list so we can use it to lookup
+  ;; well-known lambda's by var references to them.
+  (set! *well-known-lambda-sym-lookup-tbl* candidates)
+)
 
 ))
