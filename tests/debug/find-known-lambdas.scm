@@ -9,14 +9,20 @@
   (srfi 69)
 )
 
-(define (analyze:find-known-lambdas exp)
-;TODO: scan for well-known lambdas:
-;- app of a lambda is well-known, that's easy
-;- lambda can be passed as a cont. If we can identify all the places the cont is called (?) and it is not used for anything but calls, then I suppose that also qualifies as well-known.
-;  this is more problematic to generate code for, though.
-;  may need a lookup table of symbol to well-known function (if any)
-;- ?? must be other cases
+(define *well-known-lambda-sym-lookup-tbl* #f)
 
+;; Does the given symbol refer to a well-known lambda?
+(define (well-known-lambda? sym)
+  (and *well-known-lambda-sym-lookup-tbl*
+       (hash-table-ref/default *well-known-lambda-sym-lookup-tbl* sym #f)))
+
+;; Scan for well-known lambdas:
+;; - app of a lambda is well-known, that's easy
+;; - lambda passed as a cont. If we can identify all the places the cont is
+;;   called and it is not used for anything but calls, then I suppose that
+;;   also qualifies as well-known.
+;; - ?? must be other cases
+(define (analyze:find-known-lambdas exp)
   ;; Lambda conts that are candidates for well-known functions,
   ;; we won't know until we check exactly how the cont is used...
   (define candidates (make-hash-table))
@@ -25,7 +31,7 @@
   ;; ast:lam - AST Lambda object
   ;; param-sym - Symbol of the parameter that the lambda is passed as
   (define (add-candidate! ast:lam param-sym)
-    (hash-table-set! candidates param-sym (ast:lambda-id ast:lam)))
+    (hash-table-set! candidates param-sym ast:lam))
 
   ;; Remove given lambda from candidate table
   ;; param-sym - Symbol representing the lambda to remove
@@ -33,6 +39,7 @@
     (hash-table-delete! candidates param-sym))
 
   (define (found exp)
+    ;; TODO: turn into a trace, update corresponding adbf in analysis DB
     (write `(found known lambda with id ,(ast:lambda-id exp)))
     (newline))
 
@@ -85,9 +92,14 @@
 
 ;(trace:error `(update-lambda-atv! ,syms ,value))
   (scan exp)
-  (write "Other known lambdas:")
-  (write (hash-table->alist candidates))
+  (for-each
+    (lambda (sym/lamb)
+      (found (cdr sym/lamb)))
+    (hash-table->alist candidates))
   (newline)
+  ;; Save the candidate list so we can use it to lookup
+  ;; well-known lambda's by var references to them.
+  (set! *well-known-lambda-sym-lookup-tbl* candidates)
 )
 
 ;; TEST code:
