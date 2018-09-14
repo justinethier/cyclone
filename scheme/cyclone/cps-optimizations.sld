@@ -1958,9 +1958,11 @@
   (define (remove-candidate param-sym)
     (hash-table-delete! candidates param-sym))
 
-  (define (found exp)
+  (define (found exp . sym)
     (let ((lid (ast:lambda-id exp)))
-      (trace:info `(found known lambda with id ,lid))
+      (if (null? sym)
+          (trace:info `(found known lambda with id ,lid))
+          (trace:info `(found known lambda with id ,lid sym ,(car sym))))
       (with-fnc! lid (lambda (fnc)
         (adbf:set-well-known! fnc #t)))))
 
@@ -2016,7 +2018,7 @@
   ;; Record all well-known lambdas that were found indirectly
   (for-each
     (lambda (sym/lamb)
-      (found (cdr sym/lamb)))
+      (found (cdr sym/lamb) (car sym/lamb)))
     (hash-table->alist candidates))
   ;; Save the candidate list so we can use it to lookup
   ;; well-known lambda's by var references to them.
