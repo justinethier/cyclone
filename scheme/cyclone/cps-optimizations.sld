@@ -72,6 +72,7 @@
       adbv:self-rec-call? 
       adbv:set-self-rec-call!
       with-var
+      with-var!
       ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
@@ -80,7 +81,9 @@
       adbf:unused-params adbf:set-unused-params!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
+      adbf:cgen-id adbf:cgen-id!
       with-fnc
+      with-fnc!
   )
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
@@ -210,6 +213,7 @@
        assigned-to-var 
        side-effects
        well-known
+       cgen-id
       )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
@@ -222,6 +226,8 @@
       ;; well-known procedure is one whose value is never used except at call
       ;; sites where it is known.
       (well-known adbf:well-known adbf:set-well-known!)
+      ;; Store internal ID generated for the lambda by the cgen module
+      (cgen-id adbf:cgen-id adbf:cgen-id!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
@@ -230,6 +236,7 @@
        '()  ;; assigned-to-var
        #f   ;; side-effects
        #f   ;; well-known
+       #f   ;; cgen-id
       ))
 
     ;; A constant value that cannot be mutated
