@@ -1125,8 +1125,10 @@
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
     (when ast:lam
-      ;; TODO: store the allocated ID within the adbf
-      'todo
+       TODO: store the allocated ID within the adbf
+      (with-fnc! ast:lam (lambda ()
+        (adbf:set-cge
+      )
     )
     id))
 

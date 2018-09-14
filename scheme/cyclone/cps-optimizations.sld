@@ -81,7 +81,7 @@
       adbf:unused-params adbf:set-unused-params!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
-      adbf:cgen-id adbf:cgen-id!
+      adbf:cgen-id adbf:set-cgen-id!
       with-fnc
       with-fnc!
   )
@@ -227,7 +227,7 @@
       ;; sites where it is known.
       (well-known adbf:well-known adbf:set-well-known!)
       ;; Store internal ID generated for the lambda by the cgen module
-      (cgen-id adbf:cgen-id adbf:cgen-id!)
+      (cgen-id adbf:cgen-id adbf:set-cgen-id!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
