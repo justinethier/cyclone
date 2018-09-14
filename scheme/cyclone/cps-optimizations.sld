@@ -71,6 +71,7 @@
       adbv:set-direct-rec-call!
       adbv:self-rec-call? 
       adbv:set-self-rec-call!
+      with-var
       ;; Analyze functions
       adb:make-fnc
       %adb:make-fnc
@@ -79,6 +80,7 @@
       adbf:unused-params adbf:set-unused-params!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
+      with-fnc
   )
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
