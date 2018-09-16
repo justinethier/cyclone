@@ -915,6 +915,9 @@
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
                  (if (and #f (adbf:well-known fnc))
                    #f
+                ;; TODO: raw lambda is called:
+                ;; use adbf:cgen-id to get it -
+                ;(this-cont (string-append "__lambda_" (number->string lid)))
                    ;;(c-code
                    ;;  (string-append
                    ;;     (c:allocs->str (c:allocs cfun) "\n")
@@ -1125,11 +1128,8 @@
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
     (when ast:lam
-       TODO: store the allocated ID within the adbf
-      (with-fnc! ast:lam (lambda ()
-        (adbf:set-cge
-      )
-    )
+      (with-fnc! ast:lam (lambda (fnc)
+        (adbf:set-cgen-id! fnc id))))
     id))
 
 ; get-lambda : lambda-id -> (symbol -> string)
