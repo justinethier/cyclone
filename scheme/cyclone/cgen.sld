@@ -131,6 +131,7 @@
     )
     (emit-c-arity-macros (+ arity 1))))
 
+;; Generate macros to call a closures
 (define (c-macro-return-closcall num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
@@ -149,6 +150,7 @@
       " } \\\n"
       "}\n")))
 
+;; Generate macros to directly call a lambda function
 (define (c-macro-return-direct num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
@@ -166,6 +168,7 @@
       "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
       " }}\n")))
 
+;; Generate hybrid macros that can call a function directly but also receives a closure
 (define (c-macro-return-direct-with-closure num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
@@ -913,23 +916,25 @@
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and #f (adbf:well-known fnc))
-                   #f
-                ;; TODO: raw lambda is called:
-                ;; use adbf:cgen-id to get it -
-                ;(this-cont (string-append "__lambda_" (number->string lid)))
-                   ;;(c-code
-                   ;;  (string-append
-                   ;;     (c:allocs->str (c:allocs cfun) "\n")
-                   ;;     (c:allocs->str (c:allocs cargs) "\n")
-                   ;;     "return_direct_with_clo" (number->string num-cargs)
-                   ;;     "(data,"
-                   ;;     this-cont
-                   ;;     ","
-                   ;;     // TODO: fnc name, twice
-                   ;;     (if (> num-cargs 0) "," "")
-                   ;;     (c:body cargs)
-                   ;;     ");"))
+                 (if (adbf:well-known fnc)
+                   (let* ((lid (adbf:cgen-id fnc))
+                          (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
+                         )
+                     (c-code
+                       (string-append
+                          (c:allocs->str (c:allocs cfun) "\n")
+                          (c:allocs->str (c:allocs cargs) "\n")
+                          "return_direct_with_clo" (number->string num-cargs)
+                          "(data,"
+                          this-cont
+                          ","
+                          c-lambda-fnc-str
+                          ","
+                          c-lambda-fnc-str
+                          (if (> num-cargs 0) "," "")
+                          (c:body cargs)
+                          ");"))
+                   )
                    (c-code
                      (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
@@ -1116,11 +1121,8 @@
 (define lambdas '())
 (define inline-lambdas '())
 
-;; TODO: may need to pass in AST lambda ID and store a mapping
-;;       of cgen lambda ID to it, in order to use data from the 
-;;       analysis DB later on during code generation.
-;;
-; allocate-lambda : (Either ast boolean) -> (string -> string) -> lambda-id
+;; allocate-lambda : (Either ast:lambda boolean) -> (string -> string) -> integer
+;; Create/store/return a unique lambda-id for the given function.
 (define (allocate-lambda ast:lam lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
@@ -1128,7 +1130,7 @@
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
     (when ast:lam
-      (with-fnc! ast:lam (lambda (fnc)
+      (with-fnc! (ast:lambda-id ast:lam) (lambda (fnc)
         (adbf:set-cgen-id! fnc id))))
     id))
 
