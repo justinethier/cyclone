@@ -82,6 +82,7 @@
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
       adbf:cgen-id adbf:set-cgen-id!
+      adbf:closure-size adbf:set-closure-size!
       with-fnc
       with-fnc!
   )
@@ -228,6 +229,8 @@
       (well-known adbf:well-known adbf:set-well-known!)
       ;; Store internal ID generated for the lambda by the cgen module
       (cgen-id adbf:cgen-id adbf:set-cgen-id!)
+      ;; Number of elements in the function's closure
+      (closure-size adbf:closure-size adbf:set-closure-size!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
@@ -237,6 +240,7 @@
        #f   ;; side-effects
        #f   ;; well-known
        #f   ;; cgen-id
+       -1   ;; closure-size
       ))
 
     ;; A constant value that cannot be mutated
@@ -1602,6 +1606,9 @@
    (_closure-convert exp globals optimization-level)))
 
 (define (_closure-convert exp globals optimization-level)
+ (define (set-closure-size! id size)
+  (with-fnc! id (lambda (fnc)
+    (adbf:set-closure-size! fnc size))))
  (define (convert exp self-var free-var-lst)
   (define (cc exp)
 ;(trace:error `(cc ,exp))
@@ -1613,6 +1620,9 @@
               (difference 
                 (difference (free-vars body) (ast:lambda-formals->list exp))
                 globals)))
+       (set-closure-size! 
+         (ast:lambda-id exp)
+         (length new-free-vars))
        `(%closure
           ,(ast:%make-lambda
              (ast:lambda-id exp)
@@ -1684,6 +1694,9 @@
                   (if new-free-vars?
                     ; Free vars, create a closure for them
                     (let* ((new-self-var (gensym 'self)))
+                      (set-closure-size! 
+                        (ast:lambda-id fn)
+                        (length new-free-vars))
                       `((%closure 
                           ,(ast:%make-lambda
                              (ast:lambda-id fn)
