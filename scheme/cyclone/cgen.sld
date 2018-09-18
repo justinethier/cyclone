@@ -1232,6 +1232,12 @@
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
+         (use-obj-instead-of-closure? 
+           (with-fnc (ast:lambda-id lam) (lambda (fnc)
+             (and (adbf:well-known fnc) ;; Only optimize well-known functions
+                  (equal? (length free-vars) 1) ;; Sanity check
+                  (equal? (adbf:closure-size fnc) 1) ;; From closure conv
+             ))))
          (macro? (assoc (st:->var trace) (get-macros)))
          (call/cc? (and (equal? (car trace) "scheme/base.sld")
                         (equal? (st:->var trace) 'call/cc)))
@@ -1239,6 +1245,12 @@
           (if call/cc?
             "1" ;; Special case, need to change runtime checks for call/cc
             (number->string (compute-num-args lam))))
+         (create-object (lambda ()
+    TODO: seems broken, why are we getting NULL in the generated code???
+           (trace:error `(create-object free-vars ,free-vars))
+           (c-code/vars
+             (car free-vars)
+             (list))))
          (create-nclosure (lambda ()
            (string-append
              "closureN_type " cv-name ";\n"
@@ -1281,12 +1293,16 @@
               cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
-  (c-code/vars
-    (string-append "&" cv-name)
-    (list 
-      (if (> (length free-vars) 0)
-        (create-nclosure)
-        (create-mclosure))))))
+  (cond
+    (use-obj-instead-of-closure?
+      (create-object))
+    (else
+      (c-code/vars
+        (string-append "&" cv-name)
+        (list 
+          (if (> (length free-vars) 0)
+            (create-nclosure)
+            (create-mclosure))))))))
 
 ; c-compile-formals : list[symbol] -> string
 (define (c-compile-formals formals type)
