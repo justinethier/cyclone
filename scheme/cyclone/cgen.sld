@@ -1223,8 +1223,16 @@
 ;;
 ;; Compile a reference to an element of a closure.
 (define (c-compile-closure-element-ref ast-id var idx)
-  (string-append 
-    "((closureN)" (mangle var) ")->elements[" idx "]"))
+  (with-fnc ast-id (lambda (fnc)
+    (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
+    (cond
+      ((and (adbf:well-known fnc)
+            (pair? (adbf:all-params fnc))
+            (equal? (adbf:closure-size fnc) 1))
+       (mangle (car (adbf:all-params fnc))))
+      (else
+        (string-append 
+          "((closureN)" (mangle var) ")->elements[" idx "]"))))))
 
 
 ;; c-compile-closure : closure-exp (string -> void) -> string
@@ -1319,7 +1327,7 @@
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
   (cond
-    (#f ;;TODO: use-obj-instead-of-closure?
+    (use-obj-instead-of-closure?
       (create-object))
     (else
       (c-code/vars
