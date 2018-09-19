@@ -311,7 +311,7 @@
   (let* ((preamble "")
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n"))))
-         (body (c-compile-exp exp append-preamble "cont" (list src-file) #t)))
+         (body (c-compile-exp exp append-preamble "cont" -1 (list src-file) #t)))
     ;(write `(DEBUG ,body))
     (string-append 
      preamble 
@@ -327,6 +327,7 @@
 ;; append-preamble - ??
 ;; cont - name of the next continuation
 ;;        this is experimental and probably needs refinement
+;; ast-id - The AST lambda ID of the function containing the expression
 ;; trace - trace information. presently a pair containing:
 ;;         * source file
 ;;         * function name (or NULL if none)
@@ -336,13 +337,17 @@
 ;;        be set to false to change the type of compilation.
 ;;        NOTE: this field is not passed everywhere because a lot of forms
 ;;              require CPS, so this flag is not applicable to them.
-(define (c-compile-exp exp append-preamble cont trace cps?)
+(define (c-compile-exp exp append-preamble cont ast-id trace cps?)
   (cond
     ; Special case - global function w/out a closure. Create an empty closure
     ((ast:lambda? exp)
      (c-compile-exp
       `(%closure ,exp)
-       append-preamble cont trace cps?))
+       append-preamble 
+       cont 
+       ast-id
+       trace 
+       cps?))
     ; Core forms:
     ((const? exp)       (c-compile-const exp))
     ((prim?  exp)       
@@ -350,7 +355,7 @@
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
     ((quote? exp)       (c-compile-quote exp))
-    ((if? exp)          (c-compile-if exp append-preamble cont trace cps?))
+    ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
 
     ; IR (2):
     ((tagged-list? '%closure exp)
@@ -362,7 +367,7 @@
      (c-compile-raw-global-lambda exp append-preamble cont trace))
     
     ; Application:      
-    ((app? exp)         (c-compile-app exp append-preamble cont trace cps?))
+    ((app? exp)         (c-compile-app exp append-preamble cont ast-id trace cps?))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
 (define (c-compile-quote qexp)
@@ -715,7 +720,7 @@
       (mangle exp))))
 
 ; c-compile-args : list[exp] (string -> void) -> string
-(define (c-compile-args args append-preamble prefix cont trace cps?)
+(define (c-compile-args args append-preamble prefix cont ast-id trace cps?)
   (letrec ((num-args 0)
          (_c-compile-args 
           (lambda (args append-preamble prefix cont)
@@ -728,7 +733,7 @@
               (c:append/prefix
                 prefix 
                 (c-compile-exp (car args) 
-                  append-preamble cont trace cps?)
+                  append-preamble cont ast-id trace cps?)
                 (_c-compile-args (cdr args) 
                   append-preamble ", " cont)))))))
   (c:tuple/args
@@ -737,7 +742,7 @@
     num-args)))
 
 ;; c-compile-app : app-exp (string -> void) -> string
-(define (c-compile-app exp append-preamble cont trace cps?)
+(define (c-compile-app exp append-preamble cont ast-id trace cps?)
   ;;(trace:info `(c-compile-app: ,exp ,trace))
   (let (($tmp (mangle (gensym 'tmp))))
     (let* ((args     (app->args exp))
@@ -753,6 +758,7 @@
                      append-preamble 
                      ""
                      this-cont
+                     ast-id
                      trace
                      cps?))
                 (num-cargs (c:num-args cgen)))
@@ -779,7 +785,7 @@
          (let* ((cgen-lis
                   (map 
                     (lambda (e)
-                     (c-compile-exp e append-preamble "" "" cps?))
+                     (c-compile-exp e append-preamble "" ast-id "" cps?))
                     (cddr args)) ;; Skip the closure
                   )
                 (cgen-allocs 
@@ -822,7 +828,7 @@
          (let* ((c-fun 
                  (c-compile-prim fun cont))
                 (c-args
-                 (c-compile-args args append-preamble "" "" trace cps?))
+                 (c-compile-args args append-preamble "" "" ast-id trace cps?))
                 (num-args (length args))
                 (num-args-str
                   (string-append 
@@ -872,9 +878,9 @@
 
         ;; TODO: may not be good enough, closure app could be from an element
         ((tagged-list? '%closure-ref fun)
-         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont trace cps?))
+         (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont ast-id trace cps?))
                 (this-cont (c:body cfun))
-                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont trace cps?)))
+                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont ast-id trace cps?)))
            (cond
              ((not cps?)
               (c-code 
@@ -902,7 +908,7 @@
                         fun append-preamble cont trace cps?))
                 (this-cont (string-append "(closure)" (c:body cfun)))
                 (cargs (c-compile-args
-                         args append-preamble "  " this-cont trace cps?))
+                         args append-preamble "  " this-cont ast-id trace cps?))
                 (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
@@ -953,7 +959,7 @@
                          (let ((cp1 (if (ref? expr)
                                         ; Ignore lone ref to avoid C warning
                                         (c-code/vars "" '())
-                                        (c-compile-exp expr append-preamble cont trace cps?)))
+                                        (c-compile-exp expr append-preamble cont ast-id trace cps?)))
                                (cp2 acc))
                            (c-code/vars 
                              (let ((cp1-body (c:body cp1)))
@@ -968,9 +974,9 @@
          (error `(Unsupported function application ,exp)))))))
 
 ; c-compile-if : if-exp -> string
-(define (c-compile-if exp append-preamble cont trace cps?)
+(define (c-compile-if exp append-preamble cont ast-id trace cps?)
   (let* ((compile (lambda (exp)
-                    (c-compile-exp exp append-preamble cont trace cps?)))
+                    (c-compile-exp exp append-preamble cont ast-id trace cps?)))
          (test (compile (if->condition exp)))
          (then (compile (if->then exp)))
          (els (compile (if->else exp))))
@@ -1016,6 +1022,9 @@
      (ast:lambda? body) 
      (c-compile-exp 
       body append-preamble cont
+      (if (ast:lambda? body)
+          (ast:lambda-id body)
+          -1)
       (st:add-function! trace var) #t))
 
    ;; Add inline global definition also, if applicable
@@ -1034,6 +1043,7 @@
          #t ;; always a lambda
          (c-compile-exp 
           body append-preamble cont
+          (ast:lambda-id body)
           (st:add-function! trace var)
           #f ;; inline, so disable CPS on this pass
          )
@@ -1246,8 +1256,8 @@
             "1" ;; Special case, need to change runtime checks for call/cc
             (number->string (compute-num-args lam))))
          (create-object (lambda ()
-    TODO: seems broken, why are we getting NULL in the generated code???
-           (trace:error `(create-object free-vars ,free-vars))
+           ;JAE - this is fine, now need to handle other side (actually reading the value without a closure obj
+           ;(trace:error `(create-object free-vars ,free-vars ,(car free-vars)))
            (c-code/vars
              (car free-vars)
              (list))))
@@ -1294,7 +1304,7 @@
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
   (cond
-    (use-obj-instead-of-closure?
+    (#f ;;TODO: use-obj-instead-of-closure?
       (create-object))
     (else
       (c-code/vars
@@ -1369,6 +1379,7 @@
                         (car (ast:lambda-body exp)) ;; car ==> assume single expr in lambda body after CPS
                         append-preamble
                         (mangle env-closure)
+                        (ast:lambda-id exp)
                         trace 
                         cps?)))
      (cons 
