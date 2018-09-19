@@ -869,12 +869,17 @@
 
         ((equal? '%closure-ref fun)
          (c-code (apply string-append (list
-            "("
-            ;; TODO: probably not the ideal solution, but works for now
-            "(closureN)"
-            (mangle (car args))
-            ")->elements["
-            (number->string (- (cadr args) 1))"]"))))
+            (c-compile-closure-element-ref 
+              ast-id
+              (car args)
+              (number->string (- (cadr args) 1)))
+            ;"("
+            ;;; TODO: probably not the ideal solution, but works for now
+            ;"(closureN)"
+            ;(mangle (car args))
+            ;")->elements["
+            ;(number->string (- (cadr args) 1))"]"
+         ))))
 
         ;; TODO: may not be good enough, closure app could be from an element
         ((tagged-list? '%closure-ref fun)
@@ -1214,6 +1219,14 @@
       (check (cdr lis))
       (check lis))))
 
+;; c-compile-closure-element-ref :: integer -> symbol -> integer -> string
+;;
+;; Compile a reference to an element of a closure.
+(define (c-compile-closure-element-ref ast-id var idx)
+  (string-append 
+    "((closureN)" (mangle var) ")->elements[" idx "]"))
+
+
 ;; c-compile-closure : closure-exp (string -> void) -> string
 ;;
 ;; This function compiles closures generated earlier in the
@@ -1236,8 +1249,10 @@
                 (if (tagged-list? '%closure-ref free-var)
                     (let ((var (cadr free-var))
                           (idx (number->string (- (caddr free-var) 1))))
-                        (string-append 
-                            "((closureN)" (mangle var) ")->elements[" idx "]"))
+                        (c-compile-closure-element-ref (ast:lambda-id lam) var idx)
+                        ;(string-append 
+                        ;    "((closureN)" (mangle var) ")->elements[" idx "]")
+                    )
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
          (cv-name (mangle (gensym 'c)))
