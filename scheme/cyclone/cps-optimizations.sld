@@ -78,6 +78,7 @@
       %adb:make-fnc
       adb:function?
       adbf:simple adbf:set-simple!
+      adbf:all-params adbf:set-all-params!
       adbf:unused-params adbf:set-unused-params!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
@@ -210,6 +211,7 @@
     (define-record-type <analysis-db-function>
       (%adb:make-fnc 
        simple 
+       all-params
        unused-params 
        assigned-to-var 
        side-effects
@@ -218,6 +220,7 @@
       )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
+      (all-params adbf:all-params adbf:set-all-params!)
       (unused-params adbf:unused-params adbf:set-unused-params!)
       (assigned-to-var adbf:assigned-to-var adbf:set-assigned-to-var!)
       (side-effects adbf:side-effects adbf:set-side-effects!)
@@ -235,6 +238,7 @@
     (define (adb:make-fnc)
       (%adb:make-fnc 
        '?   ;; simple
+       #f   ;; all-params
        '?   ;; unused-params
        '()  ;; assigned-to-var
        #f   ;; side-effects
