@@ -1990,6 +1990,7 @@
           (trace:info `(found known lambda with id ,lid))
           (trace:info `(found known lambda with id ,lid sym ,(car sym))))
       (with-fnc! lid (lambda (fnc)
+        (adbf:set-all-params! fnc (ast:lambda-args exp))
         (adbf:set-well-known! fnc #t)))))
 
   (define (scan exp)
