@@ -454,6 +454,9 @@
           input-program))
       (trace:info "---------------- after closure-convert:")
       (trace:info (ast:ast->pp-sexp input-program))
+
+      (trace:info "---------------- analysis db: ")
+      (trace:info (adb:get-db))
       
       (when (not *do-code-gen*)
         (trace:error "DEBUG, existing program")
