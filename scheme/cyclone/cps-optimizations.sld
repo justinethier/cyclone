@@ -1610,8 +1610,9 @@
    (_closure-convert exp globals optimization-level)))
 
 (define (_closure-convert exp globals optimization-level)
- (define (set-closure-size! id size)
+ (define (set-adb-info! id formals size)
   (with-fnc! id (lambda (fnc)
+    (adbf:set-all-params! fnc formals)
     (adbf:set-closure-size! fnc size))))
  (define (convert exp self-var free-var-lst)
   (define (cc exp)
@@ -1623,16 +1624,19 @@
             (new-free-vars 
               (difference 
                 (difference (free-vars body) (ast:lambda-formals->list exp))
-                globals)))
-       (set-closure-size! 
+                globals))
+            (formals (list->lambda-formals
+                       (cons new-self-var (ast:lambda-formals->list exp))
+                       (ast:lambda-formals-type exp)))
+           )
+       (set-adb-info!
          (ast:lambda-id exp)
+         formals
          (length new-free-vars))
        `(%closure
           ,(ast:%make-lambda
              (ast:lambda-id exp)
-             (list->lambda-formals
-               (cons new-self-var (ast:lambda-formals->list exp))
-               (ast:lambda-formals-type exp))
+             formals
              (list (convert (car body) new-self-var new-free-vars))
              (ast:lambda-has-cont exp))
           ,@(map (lambda (v) ;; TODO: splice here?
@@ -1697,16 +1701,20 @@
                      (new-free-vars? (> (length new-free-vars) 0)))
                   (if new-free-vars?
                     ; Free vars, create a closure for them
-                    (let* ((new-self-var (gensym 'self)))
-                      (set-closure-size! 
+                    (let* ((new-self-var (gensym 'self))
+                           (formals
+                             (list->lambda-formals
+                                (cons new-self-var (ast:lambda-formals->list fn))
+                                (ast:lambda-formals-type fn)))
+                          )
+                      (set-adb-info!
                         (ast:lambda-id fn)
+                        formals
                         (length new-free-vars))
                       `((%closure 
                           ,(ast:%make-lambda
                              (ast:lambda-id fn)
-                             (list->lambda-formals
-                                (cons new-self-var (ast:lambda-formals->list fn))
-                                (ast:lambda-formals-type fn))
+                             formals
                              (list (convert (car body) new-self-var new-free-vars))
                              (ast:lambda-has-cont fn)
                            )
@@ -1990,7 +1998,6 @@
           (trace:info `(found known lambda with id ,lid))
           (trace:info `(found known lambda with id ,lid sym ,(car sym))))
       (with-fnc! lid (lambda (fnc)
-        (adbf:set-all-params! fnc (ast:lambda-args exp))
         (adbf:set-well-known! fnc #t)))))
 
   (define (scan exp)
