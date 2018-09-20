@@ -359,7 +359,7 @@
 
     ; IR (2):
     ((tagged-list? '%closure exp)
-     (c-compile-closure exp append-preamble cont trace cps?))
+     (c-compile-closure exp append-preamble cont ast-id trace cps?))
     ; Global definition
     ((define? exp)
      (c-compile-global exp append-preamble cont trace))
@@ -910,7 +910,7 @@
 
         ((tagged-list? '%closure fun)
          (let* ((cfun (c-compile-closure 
-                        fun append-preamble cont trace cps?))
+                        fun append-preamble cont ast-id trace cps?))
                 (this-cont (string-append "(closure)" (c:body cfun)))
                 (cargs (c-compile-args
                          args append-preamble "  " this-cont ast-id trace cps?))
@@ -1043,8 +1043,6 @@
        (add-global-inline 
          var
          (define-c->inline-var exp))
-TODO: seem to be getting ast-id's that don't match closure var's. something is getting set incorrectly
-(trace:error `(JAE DEBUG-ast c-compile-global ,(ast-lambda-id body)
        (add-global 
          (define-c->inline-var exp)
          #t ;; always a lambda
@@ -1228,8 +1226,7 @@ TODO: seem to be getting ast-id's that don't match closure var's. something is g
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and #f ;; TODO: temporarily disabled
-            (adbf:well-known fnc)
+      ((and (adbf:well-known fnc)
             (pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
        (mangle (car (adbf:all-params fnc))))
@@ -1252,7 +1249,7 @@ TODO: seem to be getting ast-id's that don't match closure var's. something is g
 ;;    the closure. The closure conversion phase tags each access
 ;;    to one with the corresponding index so `lambda` can use them.
 ;;
-(define (c-compile-closure exp append-preamble cont trace cps?)
+(define (c-compile-closure exp append-preamble cont ast-id trace cps?)
   (let* ((lam (closure->lam exp))
          (free-vars
            (map
@@ -1260,7 +1257,7 @@ TODO: seem to be getting ast-id's that don't match closure var's. something is g
                 (if (tagged-list? '%closure-ref free-var)
                     (let ((var (cadr free-var))
                           (idx (number->string (- (caddr free-var) 1))))
-                        (c-compile-closure-element-ref (ast:lambda-id lam) var idx)
+                        (c-compile-closure-element-ref ast-id var idx)
                         ;(string-append 
                         ;    "((closureN)" (mangle var) ")->elements[" idx "]")
                     )
@@ -1330,9 +1327,8 @@ TODO: seem to be getting ast-id's that don't match closure var's. something is g
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
   (cond
-    ;; TODO: temporarily disabled
-    ;;(use-obj-instead-of-closure?
-    ;;  (create-object))
+    (use-obj-instead-of-closure?
+      (create-object))
     (else
       (c-code/vars
         (string-append "&" cv-name)
