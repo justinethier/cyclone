@@ -1043,6 +1043,8 @@
        (add-global-inline 
          var
          (define-c->inline-var exp))
+TODO: seem to be getting ast-id's that don't match closure var's. something is getting set incorrectly
+(trace:error `(JAE DEBUG-ast c-compile-global ,(ast-lambda-id body)
        (add-global 
          (define-c->inline-var exp)
          #t ;; always a lambda
