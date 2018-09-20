@@ -1226,7 +1226,8 @@
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and (adbf:well-known fnc)
+      ((and #f ;; TODO: temporarily disabled
+            (adbf:well-known fnc)
             (pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
        (mangle (car (adbf:all-params fnc))))
@@ -1327,8 +1328,9 @@
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
   (cond
-    (use-obj-instead-of-closure?
-      (create-object))
+    ;; TODO: temporarily disabled
+    ;;(use-obj-instead-of-closure?
+    ;;  (create-object))
     (else
       (c-code/vars
         (string-append "&" cv-name)
