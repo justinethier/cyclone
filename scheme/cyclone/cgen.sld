@@ -1645,8 +1645,7 @@
                ")"
                "{"
                   "\nobject obj = "
-                  (mangle (car (adbf:all-params fnc)))
-                  ";\n"
+                  "((closureN)" (mangle (car (adbf:all-params fnc))) ")->elements[0];\n"
                   "__lambda_"
                   (number->string (car l))
                   "(data, argc, obj"
