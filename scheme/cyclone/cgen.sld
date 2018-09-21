@@ -938,9 +938,9 @@
                           "(data,"
                           this-cont
                           ","
-                          c-lambda-fnc-str
-                          ","
                           c-lambda-fnc-gc-ret-str
+                          ","
+                          c-lambda-fnc-str
                           (if (> num-cargs 0) "," "")
                           (c:body cargs)
                           ");"))
@@ -1627,7 +1627,7 @@
           (with-fnc (ast:lambda-id ast) (lambda (fnc)
             (when (and (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
-  (trace:error `(JAE ,l ,fnc))
+;(trace:error `(JAE ,l ,fnc))
            (let* ((params-str (cdadr l))
                   (args-str
                     (string-join
