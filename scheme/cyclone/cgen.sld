@@ -924,7 +924,8 @@
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (adbf:well-known fnc)
+                 (if (and (adbf:well-known fnc)
+                          (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (adbf:cgen-id fnc))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
                           (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid)))
