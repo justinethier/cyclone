@@ -180,7 +180,7 @@
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     mclosure1(c1, (function_type) _clo_fn, clo); \\\n"
-      "     GC(td, &c1, buf, " n "); \\\n"
+      "     GC(td, (closure)(&c1), buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
       "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
@@ -1642,8 +1642,9 @@
              params-str
              ")"
              "{"
-                " object obj = "
+                "\nobject obj = "
                 (mangle (car (adbf:all-params fnc)))
+                ";\n"
                 "__lambda_"
                 (number->string (car l))
                 "(data, argc, obj"
