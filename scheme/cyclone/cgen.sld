@@ -1623,36 +1623,37 @@
     (for-each
      (lambda (l)
       (let ((ast (caddr l)))
-        (with-fnc (ast:lambda-id ast) (lambda (fnc)
-          (when (and (adbf:well-known fnc)
-                     (equal? (adbf:closure-size fnc) 1))
-(trace:error `(JAE ,l ,fnc))
-         (let* ((params-str (cdadr l))
-                (args-str
-                  (string-join
-                    (cdr
-                      (string-split
-                        (string-replace-all params-str "object" "")
-                        #\,))
-                    #\,))
-               )
-           (emit*
-             "static void __lambda_gc_ret_"
-             (number->string (car l))
-             "(void *data, int argc,"
-             params-str
-             ")"
-             "{"
-                "\nobject obj = "
-                (mangle (car (adbf:all-params fnc)))
-                ";\n"
-                "__lambda_"
-                (number->string (car l))
-                "(data, argc, obj"
-                (if (> (string-length args-str) 0)
-                    (string-append "," args-str))
-                ");"
-             "}")))))))
+        (when (ast:lambda? ast)
+          (with-fnc (ast:lambda-id ast) (lambda (fnc)
+            (when (and (adbf:well-known fnc)
+                       (equal? (adbf:closure-size fnc) 1))
+  (trace:error `(JAE ,l ,fnc))
+           (let* ((params-str (cdadr l))
+                  (args-str
+                    (string-join
+                      (cdr
+                        (string-split
+                          (string-replace-all params-str "object" "")
+                          #\,))
+                      #\,))
+                 )
+             (emit*
+               "static void __lambda_gc_ret_"
+               (number->string (car l))
+               "(void *data, int argc,"
+               params-str
+               ")"
+               "{"
+                  "\nobject obj = "
+                  (mangle (car (adbf:all-params fnc)))
+                  ";\n"
+                  "__lambda_"
+                  (number->string (car l))
+                  "(data, argc, obj"
+                  (if (> (string-length args-str) 0)
+                      (string-append "," args-str))
+                  ");"
+               "}"))))))))
      lambdas)
 
     ; Print the definitions:
