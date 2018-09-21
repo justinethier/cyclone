@@ -178,12 +178,9 @@
       "#define return_direct_with_clo" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-;;      "     object buf[" n "]; " arry-assign " \\\n"
-;;      "     mclosure0(c1, (function_type) _clo_fn); \\\n"
-;;      "     GC(td, &c1, buf, " n "); \\\n"
-;;      "     return; \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
-      "     GC(td, clo, buf, " n "); \\\n"
+      "     mclosure1(c1, (function_type) _clo_fn, clo); \\\n"
+      "     GC(td, &c1, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
       "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
@@ -930,6 +927,7 @@
                  (if (adbf:well-known fnc)
                    (let* ((lid (adbf:cgen-id fnc))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
+                          (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid)))
                          )
                      (c-code
                        (string-append
@@ -941,7 +939,7 @@
                           ","
                           c-lambda-fnc-str
                           ","
-                          c-lambda-fnc-str
+                          c-lambda-fnc-gc-ret-str
                           (if (> num-cargs 0) "," "")
                           (c:body cargs)
                           ");"))
@@ -1141,7 +1139,7 @@
 (define (allocate-lambda ast:lam lam . cps?)
   (let ((id num-lambdas))
     (set! num-lambdas (+ 1 num-lambdas))
-    (set! lambdas (cons (list id lam) lambdas))
+    (set! lambdas (cons (list id lam ast:lam) lambdas))
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
     (when ast:lam
@@ -1620,6 +1618,41 @@
     
     (emit "")
     
+    ; Print GC return wrappers
+    (for-each
+     (lambda (l)
+      (let ((ast (caddr l)))
+        (with-fnc (ast:lambda-id ast) (lambda (fnc)
+          (when (and (adbf:well-known fnc)
+                     (equal? (adbf:closure-size fnc) 1))
+(trace:error `(JAE ,l ,fnc))
+         (let* ((params-str (cdadr l))
+                (args-str
+                  (string-join
+                    (cdr
+                      (string-split
+                        (string-replace-all params-str "object" "")
+                        #\,))
+                    #\,))
+               )
+           (emit*
+             "static void __lambda_gc_ret_"
+             (number->string (car l))
+             "(void *data, int argc,"
+             params-str
+             ")"
+             "{"
+                " object obj = "
+                (mangle (car (adbf:all-params fnc)))
+                "__lambda_"
+                (number->string (car l))
+                "(data, argc, obj"
+                (if (> (string-length args-str) 0)
+                    (string-append "," args-str))
+                ");"
+             "}")))))))
+     lambdas)
+
     ; Print the definitions:
     (for-each
      (lambda (l)
