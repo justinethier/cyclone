@@ -738,8 +738,8 @@
         ; Core forms:
         ((ast:lambda? exp)
          (let* ((id (ast:lambda-id exp))
-                (fnc (adb:get id)))
-           (if (adbf:simple fnc)
+                (fnc (adb:get/default id #f)))
+           (if (and fnc (adbf:simple fnc))
                (opt:contract (caar (ast:lambda-body exp))) ;; Optimize-out the lambda
                (ast:%make-lambda
                  (ast:lambda-id exp)
