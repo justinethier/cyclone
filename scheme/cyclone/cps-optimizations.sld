@@ -29,6 +29,7 @@
       analyze:find-direct-recursive-calls
       analyze:find-known-lambdas
       ;analyze-lambda-side-effects
+      opt:renumber-lambdas!
       opt:add-inlinable-functions
       opt:contract
       opt:inline-prims
@@ -1586,6 +1587,26 @@
           (opt:contract ast)
           -1))
     )
+
+;; Renumber lambdas and re-run analysis
+(define (opt:renumber-lambdas! exp)
+  (define (scan exp)
+    (cond
+     ((ast:lambda? exp)
+      (ast:%make-lambda
+        (ast:get-next-lambda-id!)
+        (ast:lambda-args exp)
+        (scan (ast:lambda-body exp))
+        (ast:lambda-has-cont exp)))
+     ((quote? exp)
+      exp)
+     ((app? exp)
+      (map (lambda (e) (scan e)) exp))
+     (else exp)))
+  (let ((result (scan exp)))
+    (adb:clear!)
+    (analyze-cps result)
+    result))
 
 ;; Closure-conversion.
 ;;
