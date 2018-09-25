@@ -42,7 +42,7 @@
       simple-lambda?
       one-instance-of-new-mutable-obj?
       ;; Analysis - well-known lambdas
-      well-known-lambda?
+      well-known-lambda
       analyze:find-known-lambdas
       ;; Analyze variables
       adb:make-var
@@ -1984,8 +1984,10 @@
           exp))
 )
 
+;; well-known-lambda :: symbol -> Either (AST Lambda | Boolean)
 ;; Does the given symbol refer to a well-known lambda?
-(define (well-known-lambda? sym)
+;; If so the corresponding lambda object is returned, else #f.
+(define (well-known-lambda sym)
   (and *well-known-lambda-sym-lookup-tbl*
        (hash-table-ref/default *well-known-lambda-sym-lookup-tbl* sym #f)))
 
