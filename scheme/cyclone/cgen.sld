@@ -893,6 +893,7 @@
                   (c:body cargs)
                   ");")))
              (else
+TODO: need to handle well-known functions:
               (set-c-call-arity! (c:num-args cargs))
               (c-code 
                 (string-append
@@ -923,8 +924,11 @@
                    ");")))
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
+TODO: see corresponding code in %closure-ref that outputs return_closcall.
+need to use (well-known-lambda) to check the ref to see if it is a WKL.
+if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and #f
+                 (if (and ;#f
                           (adbf:well-known fnc)
                           (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (adbf:cgen-id fnc))
@@ -1226,9 +1230,9 @@
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and #f
+      ((and ;#f
             (adbf:well-known fnc)
-            (pair? (adbf:all-params fnc))
+            ;(pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
        (mangle (car (adbf:all-params fnc))))
       (else
@@ -1268,9 +1272,9 @@
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (use-obj-instead-of-closure? 
            (with-fnc (ast:lambda-id lam) (lambda (fnc)
-             (and #f
+             (and ;#f
                   (adbf:well-known fnc) ;; Only optimize well-known functions
-                  (equal? (length free-vars) 1) ;; Sanity check
+                  ;(equal? (length free-vars) 1) ;; Sanity check
                   (equal? (adbf:closure-size fnc) 1) ;; From closure conv
              ))))
          (macro? (assoc (st:->var trace) (get-macros)))
@@ -1628,10 +1632,15 @@
       (let ((ast (caddr l)))
         (when (ast:lambda? ast)
           (with-fnc (ast:lambda-id ast) (lambda (fnc)
-            (when (and #f
+            ;;(when (and 
+            ;;           (adbf:well-known fnc)
+            ;;           (equal? (adbf:closure-size fnc) 1))
+            ;;  (trace:error `(JAE ,(car l) ,l ,fnc)))
+
+            (when (and ;#f
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
-;(trace:error `(JAE ,l ,fnc))
+;(trace:error `(JAE ,(car l) ,l ,fnc))
            (let* ((params-str (cdadr l))
                   (args-str
                     (string-join
