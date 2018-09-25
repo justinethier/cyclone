@@ -425,9 +425,9 @@
       )
     
       ;; TODO: could do this, but it seems like a bit of a band-aid...
-      ;;(set! input-program (opt:renumber-lambdas! input-program))
-      ;;(trace:info "---------------- after renumber lambdas")
-      ;;(trace:info (ast:ast->pp-sexp input-program))
+      (set! input-program (opt:renumber-lambdas! input-program))
+      (trace:info "---------------- after renumber lambdas")
+      (trace:info (ast:ast->pp-sexp input-program))
 
       (set! input-program
         (map
