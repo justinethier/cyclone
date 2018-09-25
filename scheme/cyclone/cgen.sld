@@ -924,7 +924,8 @@
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and (adbf:well-known fnc)
+                 (if (and #f
+                          (adbf:well-known fnc)
                           (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (adbf:cgen-id fnc))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
@@ -1225,7 +1226,8 @@
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and (adbf:well-known fnc)
+      ((and #f
+            (adbf:well-known fnc)
             (pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
        (mangle (car (adbf:all-params fnc))))
@@ -1266,7 +1268,8 @@
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (use-obj-instead-of-closure? 
            (with-fnc (ast:lambda-id lam) (lambda (fnc)
-             (and (adbf:well-known fnc) ;; Only optimize well-known functions
+             (and #f
+                  (adbf:well-known fnc) ;; Only optimize well-known functions
                   (equal? (length free-vars) 1) ;; Sanity check
                   (equal? (adbf:closure-size fnc) 1) ;; From closure conv
              ))))
@@ -1625,7 +1628,8 @@
       (let ((ast (caddr l)))
         (when (ast:lambda? ast)
           (with-fnc (ast:lambda-id ast) (lambda (fnc)
-            (when (and (adbf:well-known fnc)
+            (when (and #f
+                       (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
 ;(trace:error `(JAE ,l ,fnc))
            (let* ((params-str (cdadr l))
