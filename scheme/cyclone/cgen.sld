@@ -893,7 +893,22 @@
                   (c:body cargs)
                   ");")))
              (else
-TODO: need to handle well-known functions:
+;;TODO: need to handle well-known functions:
+              (let* ((wkf (well-known-lambda (car args)))
+                     (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
+                    )
+                (when (and wkf fnc
+                           (adbf:well-known fnc) ;; not really needed
+                           (equal? (adbf:closure-size fnc) 1))
+                  (trace:error `(JAE found well-known lambda in closure-ref call 
+                    ,(car args) 
+                    ,wkf
+TODO: this is not going to work, we are going to need to use ast:lambda-id instead of
+an allocation ID. make that change in allocate-lambda, disable all WKL code, and make
+sure it is stable before proceeding...
+                    cgen id ,(adbf:cgen-id fnc)
+                    )))
+              )
               (set-c-call-arity! (c:num-args cargs))
               (c-code 
                 (string-append
@@ -924,9 +939,9 @@ TODO: need to handle well-known functions:
                    ");")))
              (else ;; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
-TODO: see corresponding code in %closure-ref that outputs return_closcall.
-need to use (well-known-lambda) to check the ref to see if it is a WKL.
-if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
+;TODO: see corresponding code in %closure-ref that outputs return_closcall.
+;need to use (well-known-lambda) to check the ref to see if it is a WKL.
+;if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
                  (if (and ;#f
                           (adbf:well-known fnc)
