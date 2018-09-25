@@ -119,7 +119,7 @@
     (define (adb:lambda-ids)
       (filter number? (hash-table-keys *adb*)))
     (define (adb:max-lambda-id)
-      (foldl max (adb:lambda-ids)))
+      (foldl max 0 (adb:lambda-ids)))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var 
