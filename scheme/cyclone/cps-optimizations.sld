@@ -39,6 +39,8 @@
       adb:get/default
       adb:set!
       adb:get-db
+      adb:lambda-ids
+      adb:max-lambda-id
       simple-lambda?
       one-instance-of-new-mutable-obj?
       ;; Analysis - well-known lambdas
@@ -114,6 +116,10 @@
       (set! *adb* (make-hash-table)))
     (define (adb:get key) (hash-table-ref *adb* key))
     (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
+    (define (adb:lambda-ids)
+      (filter number? (hash-table-keys *adb*)))
+    (define (adb:max-lambda-id)
+      (foldl max (adb:lambda-ids)))
     (define (adb:set! key val) (hash-table-set! *adb* key val))
     (define-record-type <analysis-db-variable>
       (%adb:make-var 
