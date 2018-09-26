@@ -882,7 +882,8 @@
         ((tagged-list? '%closure-ref fun)
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont ast-id trace cps?))
                 (this-cont (c:body cfun))
-                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont ast-id trace cps?)))
+                (cargs (c-compile-args (cdr args) append-preamble "  " this-cont ast-id trace cps?))
+                (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
               (c-code 
@@ -893,33 +894,46 @@
                   (c:body cargs)
                   ");")))
              (else
-;;TODO: need to handle well-known functions:
-;              (let* ((wkf (well-known-lambda (car args)))
-;                     (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
-;                    )
-;                (when (and wkf fnc
-;                           (adbf:well-known fnc) ;; not really needed
-;                           (equal? (adbf:closure-size fnc) 1))
-;                  (trace:error `(JAE found well-known lambda in closure-ref call 
-;                    ,(car args) 
-;                    ,wkf
-;;TODO: this is not going to work, we are going to need to use ast:lambda-id instead of
-;;an allocation ID. make that change in allocate-lambda, disable all WKL code, and make
-;;sure it is stable before proceeding...
-;                    cgen id ,(ast:lambda-id wkf)
-;                    )))
-;              )
+;;TODO: Consolidate with corresponding %closure code??
               (set-c-call-arity! (c:num-args cargs))
-              (c-code 
-                (string-append
-                  (c:allocs->str (c:allocs cfun) "\n")
-                  (c:allocs->str (c:allocs cargs) "\n")
-                  "return_closcall" (number->string (c:num-args cargs))
-                  "(data,"
-                  this-cont
-                  (if (> (c:num-args cargs) 0) "," "")
-                  (c:body cargs)
-                  ");"))))))
+              (let* ((wkf (well-known-lambda (car args)))
+                     (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
+                    )
+                (cond
+                  ((and wkf fnc
+                        (adbf:well-known fnc) ;; not really needed
+                        (equal? (adbf:closure-size fnc) 1))
+                   (let* ((lid (ast:lambda-id wkf))
+                          (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
+                          (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid)))
+                         )
+                     (c-code
+                       (string-append
+                          (c:allocs->str (c:allocs cfun) "\n")
+                          (c:allocs->str (c:allocs cargs) "\n")
+                          "return_direct_with_clo" (number->string num-cargs)
+                          "(data,"
+                          this-cont
+                          ","
+                          c-lambda-fnc-gc-ret-str
+                          ","
+                          c-lambda-fnc-str
+                          (if (> num-cargs 0) "," "")
+                          (c:body cargs)
+                          ");"))
+                   )
+                  )
+                  (else
+                    (c-code 
+                      (string-append
+                        (c:allocs->str (c:allocs cfun) "\n")
+                        (c:allocs->str (c:allocs cargs) "\n")
+                        "return_closcall" (number->string (c:num-args cargs))
+                        "(data,"
+                        this-cont
+                        (if (> (c:num-args cargs) 0) "," "")
+                        (c:body cargs)
+                        ");")))))))))
 
         ((tagged-list? '%closure fun)
          (let* ((cfun (c-compile-closure 
@@ -943,10 +957,10 @@
 ;need to use (well-known-lambda) to check the ref to see if it is a WKL.
 ;if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and #f
+                 (if (and ;#f
                           (adbf:well-known fnc)
                           (equal? (adbf:closure-size fnc) 1))
-                   (let* ((lid (adbf:cgen-id fnc))
+                   (let* ((lid (ast:lambda-id (closure->lam fun)))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
                           (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid)))
                          )
@@ -1249,7 +1263,7 @@
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and #f
+      ((and ;#f
             (adbf:well-known fnc)
             ;(pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
@@ -1291,7 +1305,7 @@
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (use-obj-instead-of-closure? 
            (with-fnc (ast:lambda-id lam) (lambda (fnc)
-             (and #f
+             (and ;#f
                   (adbf:well-known fnc) ;; Only optimize well-known functions
                   ;(equal? (length free-vars) 1) ;; Sanity check
                   (equal? (adbf:closure-size fnc) 1) ;; From closure conv
@@ -1657,7 +1671,7 @@
             ;;           (equal? (adbf:closure-size fnc) 1))
             ;;  (trace:error `(JAE ,(car l) ,l ,fnc)))
 
-            (when (and #f
+            (when (and ;#f
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
 ;(trace:error `(JAE ,(car l) ,l ,fnc))
