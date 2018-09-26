@@ -2011,17 +2011,23 @@
   ;; Lambda conts that are candidates for well-known functions,
   ;; we won't know until we check exactly how the cont is used...
   (define candidates (make-hash-table))
+  (define scopes (make-hash-table))
 
   ;; Add given lambda to candidate table
   ;; ast:lam - AST Lambda object
+  ;; scope-ast:lam - Lambda that is calling ast:lam
   ;; param-sym - Symbol of the parameter that the lambda is passed as
-  (define (add-candidate! ast:lam param-sym)
-    (hash-table-set! candidates param-sym ast:lam))
+  (define (add-candidate! ast:lam scope-ast:lam param-sym)
+    (hash-table-set! candidates param-sym ast:lam)
+    (hash-table-set! scopes param-sym scope-ast:lam)
+  )
 
   ;; Remove given lambda from candidate table
   ;; param-sym - Symbol representing the lambda to remove
   (define (remove-candidate param-sym)
-    (hash-table-delete! candidates param-sym))
+    (hash-table-delete! candidates param-sym)
+    (hash-table-delete! scopes param-sym)
+  )
 
   (define (found exp . sym)
     (let ((lid (ast:lambda-id exp)))
@@ -2031,12 +2037,12 @@
       (with-fnc! lid (lambda (fnc)
         (adbf:set-well-known! fnc #t)))))
 
-  (define (scan exp)
+  (define (scan exp scope)
     (cond
      ((ast:lambda? exp)
       (for-each
         (lambda (e)
-          (scan e))
+          (scan e (ast:lambda-id exp)))
         (ast:lambda-body exp)))
      ((quote? exp) exp)
      ((const? exp) exp)
@@ -2046,13 +2052,13 @@
      ((define? exp) 
       (for-each
         (lambda (e)
-          (scan e))
+          (scan e -1))
         (define->exp exp)))
      ;((set!? exp) #f) ;; TODO ??
      ((if? exp)       
-      (scan (if->condition exp))
-      (scan (if->then exp))
-      (scan (if->else exp)))
+      (scan (if->condition exp) scope)
+      (scan (if->then exp) scope)
+      (scan (if->else exp) scope))
      ((app? exp)
       (cond
         ((ast:lambda? (car exp))
@@ -2061,25 +2067,34 @@
            (when (and (pair? formals)
                       (pair? (cdr exp))
                       (ast:lambda? (cadr exp)))
-             (add-candidate! (cadr exp) (car formals)))
+             (add-candidate! (cadr exp) (car exp) (car formals)))
          )
          ;; Scan the rest of the args
          (for-each
            (lambda (e)
-             (scan e))
+             (scan e scope))
            exp))
         (else 
           (for-each
             (lambda (e)
-              (scan e))
-            ;; Allow candidates to remain if they are just function calls
-            (if (ref? (car exp))
-                (cdr exp)
-                exp)))))
+              (scan e scope))
+            (cond
+             ((ref? (car exp))
+              (let ((cand (hash-table-ref/default scopes (car exp) #f)))
+                (cond
+                  ;; Allow candidates to remain if they are just function calls
+                  ;; and they are called by the same function that defines them
+                  ((and cand
+                        (equal? (ast:lambda-id cand) scope))
+                   (cdr exp))
+                  (else 
+                    exp))))
+             (else
+               exp))))))
      (else #f)))
 
 ;(trace:error `(update-lambda-atv! ,syms ,value))
-  (scan exp)
+  (scan exp -1)
   ;; Record all well-known lambdas that were found indirectly
   (for-each
     (lambda (sym/lamb)
