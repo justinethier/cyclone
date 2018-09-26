@@ -906,7 +906,7 @@
 ;;TODO: this is not going to work, we are going to need to use ast:lambda-id instead of
 ;;an allocation ID. make that change in allocate-lambda, disable all WKL code, and make
 ;;sure it is stable before proceeding...
-;                    cgen id ,(adbf:cgen-id fnc)
+;                    cgen id ,(ast:lambda-id wkf)
 ;                    )))
 ;              )
               (set-c-call-arity! (c:num-args cargs))
@@ -1160,7 +1160,7 @@
 (define (allocate-lambda ast:lam lam . cps?)
   (let ((id num-lambdas))
     (cond
-      ((and ast:lam (equal? cps? '(#f)))
+      ((and ast:lam (not (equal? cps? '(#f))))
         (set! id (ast:lambda-id ast:lam)))
       (else
         (set! num-lambdas (+ 1 num-lambdas))))
