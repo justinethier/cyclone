@@ -894,21 +894,21 @@
                   ");")))
              (else
 ;;TODO: need to handle well-known functions:
-              (let* ((wkf (well-known-lambda (car args)))
-                     (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
-                    )
-                (when (and wkf fnc
-                           (adbf:well-known fnc) ;; not really needed
-                           (equal? (adbf:closure-size fnc) 1))
-                  (trace:error `(JAE found well-known lambda in closure-ref call 
-                    ,(car args) 
-                    ,wkf
-;TODO: this is not going to work, we are going to need to use ast:lambda-id instead of
-;an allocation ID. make that change in allocate-lambda, disable all WKL code, and make
-;sure it is stable before proceeding...
-                    cgen id ,(adbf:cgen-id fnc)
-                    )))
-              )
+;              (let* ((wkf (well-known-lambda (car args)))
+;                     (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
+;                    )
+;                (when (and wkf fnc
+;                           (adbf:well-known fnc) ;; not really needed
+;                           (equal? (adbf:closure-size fnc) 1))
+;                  (trace:error `(JAE found well-known lambda in closure-ref call 
+;                    ,(car args) 
+;                    ,wkf
+;;TODO: this is not going to work, we are going to need to use ast:lambda-id instead of
+;;an allocation ID. make that change in allocate-lambda, disable all WKL code, and make
+;;sure it is stable before proceeding...
+;                    cgen id ,(adbf:cgen-id fnc)
+;                    )))
+;              )
               (set-c-call-arity! (c:num-args cargs))
               (c-code 
                 (string-append

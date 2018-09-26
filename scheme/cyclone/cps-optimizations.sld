@@ -1609,6 +1609,8 @@
      ((app? exp)
       (map (lambda (e) (scan e)) exp))
      (else exp)))
+
+  (ast:reset-lambda-ids!) ;; Convenient to start back from 1
   (let ((result (scan exp)))
     (adb:clear!)
     (analyze-cps result)

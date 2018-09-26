@@ -24,6 +24,7 @@
      ast:lambda-has-cont 
      ast:set-lambda-has-cont!
      ast:get-next-lambda-id!
+     ast:reset-lambda-ids!
      ast:ast->pp-sexp
      ast:ast->sexp
      ast:sexp->ast
@@ -38,6 +39,9 @@
     (define (ast:get-next-lambda-id!)
       (set! *lambda-id* (+ 1 *lambda-id*))
       *lambda-id*)
+
+    (define (ast:reset-lambda-ids!)
+      (set! *lambda-id* 0))
 
     (define-record-type <lambda-ast>
      (ast:%make-lambda id args body has-cont)
