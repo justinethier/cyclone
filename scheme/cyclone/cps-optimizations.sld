@@ -2029,6 +2029,15 @@
     (hash-table-delete! scopes param-sym)
   )
 
+  ;; Determine if the expression is a call to a primitive that receives
+  ;; a continuation. This is important since well-known functions cannot
+  ;; be passed as such a cont.
+  (define (prim-call/cont? exp)
+    (let ((result (and (app? exp)
+                       (prim:cont? (car exp)))))
+      (trace:info `(prim-call/cont? ,exp ,result))
+      result))
+
   (define (found exp . sym)
     (let ((lid (ast:lambda-id exp)))
       (if (null? sym)
@@ -2062,11 +2071,15 @@
      ((app? exp)
       (cond
         ((ast:lambda? (car exp))
-         (found (car exp)) ;; We immediately know these lambdas are well-known
+         (when (not (any prim-call/cont? (cdr exp)))
+           (found (car exp))) ;; We immediately know these lambdas are well-known
          (let ((formals (ast:lambda-formals->list (car exp))))
            (when (and (pair? formals)
                       (pair? (cdr exp))
-                      (ast:lambda? (cadr exp)))
+                      (ast:lambda? (cadr exp))
+                      ;; Lambda is not well-known when called from a runtime prim
+                      ;;(not (any prim-call/cont? (cdr exp)))
+                 )
              (add-candidate! (cadr exp) (car exp) (car formals)))
          )
          ;; Scan the rest of the args
