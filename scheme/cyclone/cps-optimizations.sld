@@ -2098,7 +2098,9 @@
                   ;; Allow candidates to remain if they are just function calls
                   ;; and they are called by the same function that defines them
                   ((and cand
-                        (equal? (ast:lambda-id cand) scope))
+                        (equal? (ast:lambda-id cand) scope)
+                        (not (any prim-call/cont? (cdr exp)))
+                   )
                    (cdr exp))
                   (else 
                     exp))))
