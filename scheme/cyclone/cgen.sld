@@ -41,6 +41,8 @@
   )
   (begin
 
+(define *optimize-well-known-lambdas* #f)
+
 (define (emit line)
   (display line)
   (newline))
@@ -126,7 +128,8 @@
        (emit (c-macro-closcall arity))
        (emit (c-macro-return-closcall arity))
        (emit (c-macro-return-direct arity))
-       (emit (c-macro-return-direct-with-closure arity))
+       (when *optimize-well-known-lambdas*
+         (emit (c-macro-return-direct-with-closure arity))) 
       )
     )
     (emit-c-arity-macros (+ arity 1))))
@@ -901,6 +904,7 @@
                     )
                 (cond
                   ((and wkf fnc
+                        *optimize-well-known-lambdas*
                         (adbf:well-known fnc) ;; not really needed
                         (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (ast:lambda-id wkf))
@@ -957,7 +961,7 @@
 ;need to use (well-known-lambda) to check the ref to see if it is a WKL.
 ;if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and ;#f
+                 (if (and *optimize-well-known-lambdas*
                           (adbf:well-known fnc)
                           (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (ast:lambda-id (closure->lam fun)))
@@ -1263,7 +1267,7 @@
   (with-fnc ast-id (lambda (fnc)
     (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
-      ((and ;#f
+      ((and *optimize-well-known-lambdas*
             (adbf:well-known fnc)
             ;(pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
@@ -1305,7 +1309,7 @@
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (use-obj-instead-of-closure? 
            (with-fnc (ast:lambda-id lam) (lambda (fnc)
-             (and ;#f
+             (and *optimize-well-known-lambdas*
                   (adbf:well-known fnc) ;; Only optimize well-known functions
                   ;(equal? (length free-vars) 1) ;; Sanity check
                   (equal? (adbf:closure-size fnc) 1) ;; From closure conv
@@ -1671,7 +1675,7 @@
             ;;           (equal? (adbf:closure-size fnc) 1))
             ;;  (trace:error `(JAE ,(car l) ,l ,fnc)))
 
-            (when (and ;#f
+            (when (and *optimize-well-known-lambdas*
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
 ;(trace:error `(JAE ,(car l) ,l ,fnc))
