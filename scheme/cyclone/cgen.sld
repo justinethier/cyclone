@@ -128,8 +128,9 @@
        (emit (c-macro-closcall arity))
        (emit (c-macro-return-closcall arity))
        (emit (c-macro-return-direct arity))
+       (emit (c-macro-return-direct-with-closure arity))
        (when *optimize-well-known-lambdas*
-         (emit (c-macro-return-direct-with-closure arity))) 
+         (emit (c-macro-return-direct-with-object arity))) 
       )
     )
     (emit-c-arity-macros (+ arity 1))))
@@ -171,14 +172,31 @@
       "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
       " }}\n")))
 
-;; Generate hybrid macros that can call a function directly but also receives a closure
 (define (c-macro-return-direct-with-closure num-args)
   (let ((args (c-macro-n-prefix num-args ",a"))
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
       ;"/* Check for GC, then call C function directly */\n"
-      "#define return_direct_with_clo" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
+      "#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
+      " char top; \\\n"
+      " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
+      "     object buf[" n "]; " arry-assign "\\\n"
+      "     GC(td, clo, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else { \\\n"
+      "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
+      " }}\n")))
+
+;; Generate hybrid macros that can call a function directly but also receives
+;; an object instead of a closure (closure optimized-out)
+(define (c-macro-return-direct-with-object num-args)
+  (let ((args (c-macro-n-prefix num-args ",a"))
+        (n (number->string num-args))
+        (arry-assign (c-macro-array-assign num-args "buf" "a")))
+    (string-append
+      ;"/* Check for GC, then call C function directly */\n"
+      "#define return_direct_with_obj" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
@@ -915,7 +933,7 @@
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
-                          "return_direct_with_clo" (number->string num-cargs)
+                          "return_direct_with_obj" (number->string num-cargs)
                           "(data,"
                           this-cont
                           ","
@@ -927,6 +945,26 @@
                           ");"))
                    )
                   )
+;;                  TODO: here  and in other case, if well-known but closure size does not match, use
+;;                  other macro to at least call out the __lambda_ function directly. seemed to 
+;;                  speed up C compile times (let's test that!)
+;;      ;;"#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
+                  ((and wkf fnc)
+                   (let* ((lid (ast:lambda-id wkf))
+                          (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
+                         )
+                     (c-code
+                       (string-append
+                          (c:allocs->str (c:allocs cfun) "\n")
+                          (c:allocs->str (c:allocs cargs) "\n")
+                          "return_direct_with_clo" (number->string num-cargs)
+                          "(data,"
+                          this-cont
+                          ","
+                          c-lambda-fnc-str
+                          (if (> num-cargs 0) "," "")
+                          (c:body cargs)
+                          ");"))))
                   (else
                     (c-code 
                       (string-append
@@ -961,7 +999,8 @@
 ;need to use (well-known-lambda) to check the ref to see if it is a WKL.
 ;if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
-                 (if (and *optimize-well-known-lambdas*
+                 (cond
+                  ((and *optimize-well-known-lambdas*
                           (adbf:well-known fnc)
                           (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (ast:lambda-id (closure->lam fun)))
@@ -972,7 +1011,7 @@
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
-                          "return_direct_with_clo" (number->string num-cargs)
+                          "return_direct_with_obj" (number->string num-cargs)
                           "(data,"
                           this-cont
                           ","
@@ -982,7 +1021,24 @@
                           (if (> num-cargs 0) "," "")
                           (c:body cargs)
                           ");"))
-                   )
+                  ))
+                  ((adbf:well-known fnc)
+                   (let* ((lid (ast:lambda-id (closure->lam fun)))
+                          (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
+                         )
+                     (c-code
+                       (string-append
+                          (c:allocs->str (c:allocs cfun) "\n")
+                          (c:allocs->str (c:allocs cargs) "\n")
+                          "return_direct_with_clo" (number->string num-cargs)
+                          "(data,"
+                          this-cont
+                          ","
+                          c-lambda-fnc-str
+                          (if (> num-cargs 0) "," "")
+                          (c:body cargs)
+                          ");"))))
+                  (else
                    (c-code
                      (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
@@ -992,7 +1048,7 @@
                         this-cont
                         (if (> num-cargs 0) "," "")
                         (c:body cargs)
-                        ");")))))))))
+                        ");"))))))))))
 
         ((equal? 'Cyc-seq fun)
          (let ((exps (foldr
