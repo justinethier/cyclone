@@ -2035,7 +2035,7 @@
   (define (prim-call/cont? exp)
     (let ((result (and (app? exp)
                        (prim:cont? (car exp)))))
-      (trace:info `(prim-call/cont? ,exp ,result))
+      ;(trace:info `(prim-call/cont? ,exp ,result))
       result))
 
   (define (found exp . sym)
