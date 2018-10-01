@@ -11,7 +11,7 @@ Bug Fixes
 
 - Fix `input-port?`, `output-port?`, `input-port-open?`, and `output-port-open?` to return `#f` instead of raising an error when a non-port object is passed.
 - Fix overflow detection when performing fixnum multiplication to avoid undefined behavior in the C runtime.
-- Prevent warnings from the C compiler regarding `shifting a negative signed value is undefined`.
+- Prevent warnings from the C compiler regarding `shifting a negative signed value is undefined` and `absolute value function 'abs' given an argument of type 'long' but has parameter of type 'int'`.
 
 ## 0.9.2 - August 26, 2018
 
