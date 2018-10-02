@@ -760,7 +760,7 @@ object Cyc_has_cycle(object lst)
   slow_lst = lst;
   fast_lst = cdr(lst);
   while (1) {
-    if ((fast_lst == NULL))
+    if (fast_lst == NULL)
       return boolean_f;
     if (Cyc_is_pair(fast_lst) == boolean_f)
       return boolean_f;
