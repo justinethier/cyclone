@@ -1985,8 +1985,10 @@ fprintf(stdout, "done tracing, cooperator is clearing full bits\n");
           unswept++;
         }
       }
-      h_head->num_unswept_children = unswept;
-      //printf("set num_unswept_children = %d computed = %d\n", h_head->num_unswept_children, gc_num_unswept_heaps(h_head));
+      if (h_head) {
+        h_head->num_unswept_children = unswept;
+        //printf("set num_unswept_children = %d computed = %d\n", h_head->num_unswept_children, gc_num_unswept_heaps(h_head));
+      }
     }
 
     // At least for now, let the main thread help clean up any terminated threads

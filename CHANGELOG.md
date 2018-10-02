@@ -1,5 +1,11 @@
 # Changelog
 
+## TBD - TBD
+
+Bug Fixes
+
+- Prevent GC segmentation fault on ARM platforms (Raspberry Pi 2).
+
 ## 0.9.3 - October 1, 2018
 
 Features
