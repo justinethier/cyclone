@@ -10,7 +10,21 @@
 (define (fac n) (if (= n 0) 1 (* n (fac (- n 1)))))
 
 (write (fac 10))
-#|
+#| Next-gen runtime:
+
+static void __host_lambda_1(void *data, int pc, TBD) { // rest of args TBD, maybe a C array, length, what else?
+  switch(pc) {
+    3: { // Lambda ID 3
+      // TODO
+      break;
+    }
+    default: 
+      // raise error
+  }
+}
+|#
+
+#| Currently-generated code:
 static void __lambda_3(void *data, int argc, object self_7312, object r_7310) ;
 static void __lambda_1(void *data, int argc, closure _,object k_735, object n_731_732) ;
 static void __lambda_2(void *data, int argc, object self_7311, object r_737) ;
