@@ -14,6 +14,12 @@
 
 static void __host_lambda_1(void *data, int pc, int argc, object *args) { // TODO: self? cont?
   object top;
+  object stack[??];
+  // TODO: stack length?
+
+  // TODO: initialize "stack" here, and unload arguments.
+  // TODO: assume the compile can compute the stack's max size, since it knows the number of args each function has
+
   loop:
   top = alloca(
   // TODO: if exceeded stack limit, initiate minor GC
