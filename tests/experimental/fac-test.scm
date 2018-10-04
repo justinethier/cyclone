@@ -14,14 +14,13 @@
 
 static void __host_lambda_1(void *data, int pc, int argc, object *args) { // TODO: self? cont?
   object top;
-  object stack[??];
-  // TODO: stack length?
-
-  // TODO: initialize "stack" here, and unload arguments.
-  // TODO: assume the compile can compute the stack's max size, since it knows the number of args each function has
+  object stack[3]; // length computed by the compiler based on function arguments
+  // initialize "stack" here, and unload arguments.
+  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
+  memcpy(stack, args, sizeof(object) * argc);
 
   loop:
-  top = alloca(
+  top = alloca(sizeof(object)); // TODO: is there a more efficient way?
   // TODO: if exceeded stack limit, initiate minor GC
   //       bundle up args, pc, and pass them along
 
@@ -29,33 +28,33 @@ static void __host_lambda_1(void *data, int pc, int argc, object *args) { // TOD
     3: { // Lambda ID 3
       //static void __lambda_3(void *data, int argc, object self_7312, object r_7310) {
       //  return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, r_7310);; 
-      return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, args[1]); 
+      return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, stack[1]); 
       break;
     }
     1: { // Lambda ID 1
 //static void __lambda_1(void *data, int argc, closure _,object k_735, object n_731_732) {
-//  Cyc_st_add(data, "fac-test.scm:fac");
-//  object c_7316 = Cyc_num_fast_eq_op(data,n_731_732, obj_int2obj(0));
-//if( (boolean_f != c_7316) ){ 
-//  return_closcall1(data,  k_735,  obj_int2obj(1));
-//} else { 
-//  
-//closureN_type c_7319;
-//c_7319.hdr.mark = gc_color_red;
-// c_7319.hdr.grayed = 0;
-//c_7319.tag = closureN_tag;
-// c_7319.fn = (function_type)__lambda_2;
-//c_7319.num_args = 1;
-//c_7319.num_elements = 2;
-//c_7319.elements = (object *)alloca(sizeof(object) * 2);
-//c_7319.elements[0] = k_735;
-//c_7319.elements[1] = n_731_732;
-//
-//
-//complex_num_type local_7329; object c_7330 = Cyc_fast_sub(data,&local_7329,n_731_732, obj_int2obj(1));
-//return_closcall2(data,  __glo_fac,  &c_7319, c_7330);}
-//; 
-//}
+Cyc_st_add(data, "fac-test.scm:fac");
+// TODO: how much smarter does our compiler need to be to compute local jumps for the below instead of C fnc calls?
+object c_7316 = Cyc_num_fast_eq_op(data, stack[1], obj_int2obj(0));
+if( (boolean_f != c_7316) ){ 
+  return_closcall1(data,  k_735,  obj_int2obj(1));
+} else { 
+  
+closureN_type* c_7319 = alloca(sizeof(closureN_type));
+c_7319->hdr.mark = gc_color_red;
+c_7319->hdr.grayed = 0;
+c_7319->tag = closureN_tag;
+c_7319->fn = (function_type)__lambda_2;
+c_7319->num_args = 1;
+c_7319->num_elements = 2;
+c_7319->elements = (object *)alloca(sizeof(object) * 2);
+c_7319->elements[0] = stack[0];
+c_7319->elements[1] = stack[1];
+
+object local_7329 = alloca(sizeof(complex_num_type));
+object c_7330 = Cyc_fast_sub(data,local_7329, stack[1], obj_int2obj(1));
+return_closcall2(data,  __glo_fac,  &c_7319, c_7330);
+}
       // TODO
       break;
     }
@@ -64,9 +63,9 @@ static void __host_lambda_1(void *data, int pc, int argc, object *args) { // TOD
       //complex_num_type local_7324; object c_7325 = Cyc_fast_mul(data,&local_7324,((closureN)self_7311)->elements[1], r_737);
       //return_closcall1(data,  ((closureN)self_7311)->elements[0],  c_7325);; 
       object local_7324 = alloca(sizeof(complex_num_type));
-      object c_7325 = Cyc_fast_mul(data,local_7324,((closureN)args[0])->elements[1], args[1]);
+      object c_7325 = Cyc_fast_mul(data,local_7324,((closureN)stack[0])->elements[1], stack[1]);
  // TODO: can we be smart enough to call lambda directly, instead of via closure?
-      return_closcall1(data,  ((closureN)args[0])->elements[0],  c_7325); 
+      return_closcall1(data,  ((closureN)stack[0])->elements[0],  c_7325); 
       break;
     }
     default: {
