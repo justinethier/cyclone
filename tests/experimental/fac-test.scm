@@ -12,12 +12,14 @@
 (write (fac 10))
 #| Next-gen runtime:
 
+// TODO: pass pc, args, argc (?? maybe not, already part of fnc calls) via gc_thread_data.
+// that allows all sub-functions to be called via the same function prototype
 static void __host_lambda_1(void *data, int pc, int argc, object *args) { // TODO: self? cont?
   object top;
-  object stack[3]; // length computed by the compiler based on function arguments
-  // initialize "stack" here, and unload arguments.
-  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
-  memcpy(stack, args, sizeof(object) * argc);
+//  object stack[3]; // length computed by the compiler based on function arguments
+//  // initialize "stack" here, and unload arguments.
+//  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
+//  memcpy(stack, args, sizeof(object) * argc);
 
   loop:
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
