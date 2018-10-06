@@ -340,7 +340,12 @@ struct gc_thread_data_t {
   object exception_handler_stack;
   // Parameter object data
   object param_objs;
+  // Support for host functions
+  int pc;
+  object *args;
 };
+
+#define MAX_C_ARGS 128
 
 /* GC prototypes */
 void gc_initialize(void);

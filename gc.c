@@ -2669,6 +2669,8 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
             (1 - STACK_GROWTH_IS_DOWNWARD));
     exit(1);
   }
+  thd->pc = 0;
+  thd->args = calloc(MAX_C_ARGS, sizeof(object));
   thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;
