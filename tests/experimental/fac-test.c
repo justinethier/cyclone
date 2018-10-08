@@ -3208,6 +3208,9 @@ static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object v
   
     
 mclosure0(c_7332, (function_type)__lambda_3);c_7332.num_args = 1;
+TODO: how do we know what calling convention to use for glo_fac? we could use a wrapper that accepts
+the current calling convention and then makes a call to the real function. this sucks in terms of
+performance (unless we can make it up later via a goto loop!) but may be a reasonable starting point
 return_closcall2(data,  __glo_fac,  &c_7332, obj_int2obj(10));
 ;
 }
