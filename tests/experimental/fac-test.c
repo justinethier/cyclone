@@ -3126,6 +3126,7 @@ Cyc_st_add(data, "fac-test.scm:fac");
 // TODO: how much smarter does our compiler need to be to compute local jumps for the below instead of C fnc calls?
 object c_7316 = Cyc_num_fast_eq_op(data, stack[1], obj_int2obj(0));
 if( (boolean_f != c_7316) ){ 
+  TODO: apply reports an invalid obj type here, WTF?
   return_closcall1(data,  stack[0],  obj_int2obj(1));
 } else { 
   
