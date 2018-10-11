@@ -788,6 +788,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = closureN_tag;
       hp->fn = ((closureN) obj)->fn;
+      hp->pc = ((closureN) obj)->pc;
       hp->num_args = ((closureN) obj)->num_args;
       hp->num_elements = ((closureN) obj)->num_elements;
       hp->elements = (object *) (((char *)hp) + sizeof(closureN_type));
@@ -896,6 +897,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = macro_tag;
       hp->fn = ((macro) obj)->fn;
+      hp->pc = ((macro) obj)->pc;
       hp->num_args = ((macro) obj)->num_args;
       return (char *)hp;
     }
@@ -904,6 +906,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = closure1_tag;
       hp->fn = ((closure1) obj)->fn;
+      hp->pc = ((closure1) obj)->pc;
       hp->num_args = ((closure1) obj)->num_args;
       hp->element = ((closure1) obj)->element;
       return (char *)hp;
@@ -2670,7 +2673,7 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
     exit(1);
   }
   thd->pc = 0;
-  thd->args = calloc(MAX_C_ARGS, sizeof(object));
+  thd->args = NULL;
   thd->stack_traces = calloc(MAX_STACK_TRACES, sizeof(char *));
   thd->stack_trace_idx = 0;
   thd->stack_prev_frame = NULL;

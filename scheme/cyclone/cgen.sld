@@ -1392,6 +1392,7 @@
              cv-name ".hdr.grayed = 0;\n"
              cv-name ".tag = closureN_tag;\n "
              cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
+             cv-name ".pc = 0;\n" ;; TODO: need to set this appropriately
              cv-name ".num_args = " num-args-str ";\n"
              cv-name ".num_elements = " (number->string (length free-vars)) ";\n"
              cv-name ".elements = (object *)alloca(sizeof(object) * " 

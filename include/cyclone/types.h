@@ -1214,6 +1214,7 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
+  int pc;
   int num_args;
 } macro_type;
 
@@ -1222,6 +1223,7 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
+  int pc;
   int num_args;
 } closure0_type;
 /** @brief A closed-over function with one variable */
@@ -1229,6 +1231,7 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
+  int pc;
   int num_args;
   object element;
 } closure1_type;
@@ -1237,6 +1240,7 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
+  int pc;
   int num_args;
   int num_elements;
   object *elements;
@@ -1254,10 +1258,11 @@ typedef closure0_type *macro;
   c.hdr.grayed = 0; \
   c.tag = macro_tag; \
   c.fn = f; \
+  c.pc = 0; \
   c.num_args = -1;
 
 #define mclosure0(c, f) \
- static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .num_args = -1 }; /* TODO: need a new macro that initializes num_args */
+ static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .pc = 0, .num_args = -1 }; /* TODO: need a new macro that initializes num_args */
 
 /*
 #define mclosure0(c,f) \
@@ -1275,6 +1280,7 @@ typedef closure0_type *macro;
   c.hdr.grayed = 0; \
   c.tag = closure0_tag; \
   c.fn = f; \
+  c.pc = 0; \
   c.num_args = na;
 
 #define mclosure1(c,f,a) \
@@ -1283,6 +1289,7 @@ typedef closure0_type *macro;
   c.hdr.grayed = 0; \
   c.tag = closure1_tag; \
   c.fn = f; \
+  c.pc = 0; \
   c.num_args = -1; \
   c.element = a;
 
