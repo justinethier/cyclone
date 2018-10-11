@@ -3083,24 +3083,24 @@ extern object __glo_eof_91object_191_191inline_191_191_scheme_base;
 #include "cyclone/runtime.h"
 #include "cyclone/runtime-main.h"
 static void __host_lambda_1(void *data, int argc);
-static void __lambda_2(void *data, int argc, object self_7311, object r_737) {
-  ((gc_thread_data *)data)->pc = 2;
-  ((gc_thread_data *)data)->args[0] = self_7311;
-  ((gc_thread_data *)data)->args[1] = r_737;
-  __host_lambda_1(data, argc);
-}
-static void __lambda_1(void *data, int argc, closure _,object k_735, object n_731_732) {
-  ((gc_thread_data *)data)->pc = 1;
-  ((gc_thread_data *)data)->args[0] = k_735; 
-  ((gc_thread_data *)data)->args[1] = n_731_732;
-  __host_lambda_1(data, argc);
-}
-static void __lambda_3(void *data, int argc, object self_7312, object r_7310) {
-  ((gc_thread_data *)data)->pc = 3;
-  ((gc_thread_data *)data)->args[0] = self_7312;
-  ((gc_thread_data *)data)->args[1] = r_7310;
-  __host_lambda_1(data, argc);
-}
+//static void __lambda_2(void *data, int argc, object self_7311, object r_737) {
+//  ((gc_thread_data *)data)->pc = 2;
+//  ((gc_thread_data *)data)->args[0] = self_7311;
+//  ((gc_thread_data *)data)->args[1] = r_737;
+//  __host_lambda_1(data, argc);
+//}
+//static void __lambda_1(void *data, int argc, closure _,object k_735, object n_731_732) {
+//  ((gc_thread_data *)data)->pc = 1;
+//  ((gc_thread_data *)data)->args[0] = k_735; 
+//  ((gc_thread_data *)data)->args[1] = n_731_732;
+//  __host_lambda_1(data, argc);
+//}
+//static void __lambda_3(void *data, int argc, object self_7312, object r_7310) {
+//  ((gc_thread_data *)data)->pc = 3;
+//  ((gc_thread_data *)data)->args[0] = self_7312;
+//  ((gc_thread_data *)data)->args[1] = r_7310;
+//  __host_lambda_1(data, argc);
+//}
 static void __host_lambda_1(void *data, int argc) {
   object top;
   object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
@@ -3108,7 +3108,7 @@ static void __host_lambda_1(void *data, int argc) {
 //  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
 //  memcpy(stack, args, sizeof(object) * argc);
 
-  loop:
+ while(1) {
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
   // TODO: if exceeded stack limit, initiate minor GC
   //       bundle up args, pc, and pass them along
@@ -3126,7 +3126,7 @@ Cyc_st_add(data, "fac-test.scm:fac");
 // TODO: how much smarter does our compiler need to be to compute local jumps for the below instead of C fnc calls?
 object c_7316 = Cyc_num_fast_eq_op(data, stack[1], obj_int2obj(0));
 if( (boolean_f != c_7316) ){ 
-  TODO: apply reports an invalid obj type here, WTF?
+  //TODO: apply reports an invalid obj type here, WTF?
   return_closcall1(data,  stack[0],  obj_int2obj(1));
 } else { 
   
@@ -3134,7 +3134,9 @@ closureN_type* c_7319 = alloca(sizeof(closureN_type));
 c_7319->hdr.mark = gc_color_red;
 c_7319->hdr.grayed = 0;
 c_7319->tag = closureN_tag;
-c_7319->fn = (function_type)__lambda_2;
+//c_7319->fn = (function_type)__lambda_2;
+c_7319->fn = (function_type)__host_lambda_1;
+c_7319->pc = 2;
 c_7319->num_args = 1;
 c_7319->num_elements = 2;
 c_7319->elements = (object *)alloca(sizeof(object) * 2);
@@ -3164,6 +3166,7 @@ return_closcall2(data,  __glo_fac,  &c_7319, c_7330);
       exit(1);
     }
   }
+    }
 }
 //static void __lambda_3(void *data, int argc, object self_7312, object r_7310) ;
 //static void __lambda_1(void *data, int argc, closure _,object k_735, object n_731_732) ;
@@ -3211,7 +3214,9 @@ static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,c
 Cyc_set_globals_changed((gc_thread_data *)data);
 
   add_global((object *) &__glo_fac);
-  mclosure0(c_7313, (function_type)__lambda_1);c_7313.num_args = 1; 
+  mclosure0(c_7313, (function_type)__host_lambda_1);c_7313.num_args = 1; 
+  c_7313.pc = 1;
+  //mclosure0(c_7313, (function_type)__lambda_1);c_7313.num_args = 1; 
   __glo_fac = &c_7313; 
 
   make_cvar(cvar_7334, (object *)&__glo_fac);make_pair(pair_7335, find_or_add_symbol("fac"), &cvar_7334);
@@ -3226,7 +3231,10 @@ mclosure1(c_7339, c_schemecyclonecommon_entry_pt, &c_7338);
 static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {
   
     
-mclosure0(c_7332, (function_type)__lambda_3);c_7332.num_args = 1;
+mclosure0(c_7332, (function_type)__host_lambda_1);
+c_7332.num_args = 1;
+c_7332.pc = 3;
+//mclosure0(c_7332, (function_type)__lambda_3);c_7332.num_args = 1;
 //TODO: how do we know what calling convention to use for glo_fac? we could use a wrapper that accepts
 //the current calling convention and then makes a call to the real function. this sucks in terms of
 //performance (unless we can make it up later via a goto loop!) but may be a reasonable starting point
