@@ -2808,7 +2808,7 @@ if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 0, (closure)(a1), clo); \
 } else if((clo)->pc) { \
    object buf[1]; buf[0] = a1;\
-   ((gc_thread_data *)td)->args = &buf; \
+   ((gc_thread_data *)td)->args = buf; \
    ((gc_thread_data *)td)->pc = (clo)->pc; \
    ((clo)->fn)(td, 1);\
 } else { \
@@ -2852,7 +2852,7 @@ if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 1, (closure)(a1), clo,a2); \
 } else if((clo)->pc) { \
    object buf[2]; buf[0] = a1;buf[1] = a2; \
-   ((gc_thread_data *)td)->args = &buf; \
+   ((gc_thread_data *)td)->args = buf; \
    ((gc_thread_data *)td)->pc = (clo)->pc; \
    ((clo)->fn)(td, 2);\
 } else { \
@@ -3120,6 +3120,12 @@ static void __host_lambda_1(void *data, int argc) {
 
  while(1) {
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
+// TODO:
+//  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { 
+//     mclosure0(c1, (function_type) __host_lambda_1);
+//     GC(data, &c1, buf, ?); 
+//     return;
+//  }
   // TODO: if exceeded stack limit, initiate minor GC
   //       bundle up args, pc, and pass them along
 
