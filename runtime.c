@@ -5086,6 +5086,14 @@ object apply(void *data, object cont, object func, object args)
     count = Cyc_length(data, args);
     // TODO: validate number of args provided:
     Cyc_check_num_args(data, "<procedure>", ((closure) func)->num_args, args);  // TODO: could be more efficient, eg: cyc_length(args) is called twice.
+
+// TODO:
+//    if (((closure)func)->pc) {
+//      ((gc_thread_data *)data)->pc = ((closure)func)->pc;
+// need to alloc array for args, and load it up...
+//      ((gc_thread_data *)data)->args = ((closure)func)->pc;
+//      ((closure)func)->fn(data, count);
+//    }
     dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont, args);
     break;
 
@@ -5197,6 +5205,10 @@ void Cyc_start_trampoline(gc_thread_data * thd)
 
   if (type_is_pair_prim(thd->gc_cont)) {
     Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
+  } else if (((closure) (thd->gc_cont))->pc) {
+    thd->pc = ((closure) (thd->gc_cont))->pc;
+    thd->args = thd->gc_args;
+    (((closure) (thd->gc_cont))->fn)(thd, thd->gc_num_args);
   } else {
     do_dispatch(thd, thd->gc_num_args, ((closure) (thd->gc_cont))->fn,
                 thd->gc_cont, thd->gc_args);
