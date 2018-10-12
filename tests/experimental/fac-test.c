@@ -3092,7 +3092,7 @@ extern object __glo_square_191_191inline_191_191_scheme_base;
 extern object __glo_eof_91object_191_191inline_191_191_scheme_base;
 #include "cyclone/runtime.h"
 #include "cyclone/runtime-main.h"
-static void __host_lambda_1(void *data, int argc);
+static void __host_lambda_1(void *data, int argc, closure self);
 //static void __lambda_2(void *data, int argc, object self_7311, object r_737) {
 //  ((gc_thread_data *)data)->pc = 2;
 //  ((gc_thread_data *)data)->args[0] = self_7311;
@@ -3111,14 +3111,14 @@ static void __host_lambda_1(void *data, int argc);
 //  ((gc_thread_data *)data)->args[1] = r_7310;
 //  __host_lambda_1(data, argc);
 //}
-static void __host_lambda_1(void *data, int argc) {
+static void __host_lambda_1(void *data, int argc, closure self) {
   object top;
-  object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
 //  // initialize "stack" here, and unload arguments.
 //  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
 //  memcpy(stack, args, sizeof(object) * argc);
 
  while(1) {
+  object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
 // TODO:
 //  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { 
@@ -3161,7 +3161,7 @@ c_7319->elements[1] = stack[1];
 
 object local_7329 = alloca(sizeof(complex_num_type));
 object c_7330 = Cyc_fast_sub(data,local_7329, stack[1], obj_int2obj(1));
-return_closcall2(data,  __glo_fac,  &c_7319, c_7330);
+return_closcall2(data,  __glo_fac,  c_7319, c_7330);
 }
       // TODO
       break;

@@ -2,7 +2,7 @@ OPT=-g
 #OPT=-O2
 
 test-args: test-args.c
-	cc -O2 test-args.c -o test-args
+	cc $(OPT) test-args.c -o test-args
 
 fac-test: fac-test.c
 	cc fac-test.c  $(OPT) -fPIC -Wall -I/usr/local/include -L/usr/local/lib -Wl,--export-dynamic -c -o fac-test.o
