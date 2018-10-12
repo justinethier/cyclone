@@ -5092,7 +5092,7 @@ object apply(void *data, object cont, object func, object args)
 //      ((gc_thread_data *)data)->pc = ((closure)func)->pc;
 // need to alloc array for args, and load it up...
 //      ((gc_thread_data *)data)->args = ((closure)func)->pc;
-//      ((closure)func)->fn(data, count);
+//      ((closure)func)->fn(data, count, cont);
 //    }
     dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont, args);
     break;
@@ -5208,7 +5208,7 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   } else if (((closure) (thd->gc_cont))->pc) {
     thd->pc = ((closure) (thd->gc_cont))->pc;
     thd->args = thd->gc_args;
-    (((closure) (thd->gc_cont))->fn)(thd, thd->gc_num_args);
+    (((closure) (thd->gc_cont))->fn)(thd, thd->gc_num_args, thd->gc_cont);
   } else {
     do_dispatch(thd, thd->gc_num_args, ((closure) (thd->gc_cont))->fn,
                 thd->gc_cont, thd->gc_args);
