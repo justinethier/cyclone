@@ -2810,7 +2810,7 @@ if (type_is_pair_prim(clo)) { \
    object buf[1]; buf[0] = a1;\
    ((gc_thread_data *)td)->args = buf; \
    ((gc_thread_data *)td)->pc = (clo)->pc; \
-   ((clo)->fn)(td, 1);\
+   ((clo)->fn)(td, 1, clo);\
 } else { \
    ((clo)->fn)(td, 1, clo,a1);\
 }
@@ -2854,7 +2854,7 @@ if (type_is_pair_prim(clo)) { \
    object buf[2]; buf[0] = a1;buf[1] = a2; \
    ((gc_thread_data *)td)->args = buf; \
    ((gc_thread_data *)td)->pc = (clo)->pc; \
-   ((clo)->fn)(td, 2);\
+   ((clo)->fn)(td, 2, clo);\
 } else { \
    ((clo)->fn)(td, 2, clo,a1,a2);\
 }
@@ -3133,7 +3133,7 @@ static void __host_lambda_1(void *data, int argc, closure self) {
     case 3: { // Lambda ID 3
       //static void __lambda_3(void *data, int argc, object self_7312, object r_7310) {
       //  return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, r_7310);; 
-      return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, stack[1]); 
+      return_closcall2(data,  __glo_write_scheme_write,  primitive__75halt, stack[0]); 
       break;
     }
     case 1: { // Lambda ID 1
@@ -3142,7 +3142,6 @@ Cyc_st_add(data, "fac-test.scm:fac");
 // TODO: how much smarter does our compiler need to be to compute local jumps for the below instead of C fnc calls?
 object c_7316 = Cyc_num_fast_eq_op(data, stack[1], obj_int2obj(0));
 if( (boolean_f != c_7316) ){ 
-  //TODO: apply reports an invalid obj type here, WTF?
   return_closcall1(data,  stack[0],  obj_int2obj(1));
 } else { 
   
@@ -3171,9 +3170,9 @@ return_closcall2(data,  __glo_fac,  c_7319, c_7330);
       //complex_num_type local_7324; object c_7325 = Cyc_fast_mul(data,&local_7324,((closureN)self_7311)->elements[1], r_737);
       //return_closcall1(data,  ((closureN)self_7311)->elements[0],  c_7325);; 
       object local_7324 = alloca(sizeof(complex_num_type));
-      object c_7325 = Cyc_fast_mul(data,local_7324,((closureN)stack[0])->elements[1], stack[1]);
+      object c_7325 = Cyc_fast_mul(data,local_7324,((closureN)self)->elements[1], stack[0]);
  // TODO: can we be smart enough to call lambda directly, instead of via closure?
-      return_closcall1(data,  ((closureN)stack[0])->elements[0],  c_7325); 
+      return_closcall1(data,  ((closureN)self)->elements[0],  c_7325); 
       break;
     }
     default: {
