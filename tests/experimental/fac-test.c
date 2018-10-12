@@ -3116,16 +3116,21 @@ static void __host_lambda_1(void *data, int argc, closure self) {
 //  // initialize "stack" here, and unload arguments.
 //  // assumes the compile can compute the stack's max size, since it knows the number of args each function has
 //  memcpy(stack, args, sizeof(object) * argc);
+ 
+ static int tmp = 0;
 
  while(1) {
   object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
+  tmp++;
+  if (tmp == 4) {
+    printf("starting GC\n");
 // TODO:
 //  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { 
-//     mclosure0(c1, (function_type) __host_lambda_1);
-//     GC(data, &c1, buf, ?); 
-//     return;
-//  }
+     mclosure0(c1, (function_type) __host_lambda_1);
+     GC(data, &c1, buf, ?); 
+     return;
+  }
   // TODO: if exceeded stack limit, initiate minor GC
   //       bundle up args, pc, and pass them along
 
