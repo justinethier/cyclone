@@ -3123,12 +3123,12 @@ static void __host_lambda_1(void *data, int argc, closure self) {
   object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
   top = alloca(sizeof(object)); // TODO: is there a more efficient way?
   tmp++;
-  if (tmp == 4) {
+//  if (tmp%2) {
+  if ((tmp%2) || stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { 
     printf("starting GC\n");
 // TODO:
-//  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { 
-     mclosure0(c1, (function_type) __host_lambda_1);
-     GC(data, &c1, buf, ?); 
+     //mclosure0(c1, (function_type) __host_lambda_1);
+     GC(data, self, ((gc_thread_data *)data)->args, argc); 
      return;
   }
   // TODO: if exceeded stack limit, initiate minor GC
