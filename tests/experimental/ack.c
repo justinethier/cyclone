@@ -1587,7 +1587,15 @@ return_closcall1(data,  stack[0] /*k_73124*/,  c_73278);
 if( (boolean_f != c_73281) ){ 
   
 object local_73285 = alloca(sizeof(complex_num_type)); object c_73286 = Cyc_fast_sub(data,local_73285,stack[1] /*m_731_7385*/, obj_int2obj(1));
-return_closcall3(data,  __glo_ack,  stack[0] /*k_73124*/, c_73286, obj_int2obj(1));
+//return_closcall3(data,  __glo_ack,  stack[0] /*k_73124*/, c_73286, obj_int2obj(1));
+((gc_thread_data *)data)->args = alloca(sizeof(object) * 3);
+((gc_thread_data *)data)->args[0] = stack[0];
+((gc_thread_data *)data)->args[1] = c_73286;
+((gc_thread_data *)data)->args[2] = obj_int2obj(1);
+((gc_thread_data *)data)->pc = 1;
+self = __glo_ack;
+argc = 3;
+continue;
 } else { 
   
 closureN_type *c_73288 = alloca(sizeof(closureN_type));
@@ -1604,7 +1612,16 @@ c_73288->elements[1] = stack[1]; //m_731_7385;
 
 
 object local_73298 = alloca(sizeof(complex_num_type)); object c_73299 = Cyc_fast_sub(data,local_73298,stack[2] /*n_732_7386*/, obj_int2obj(1));
-return_closcall3(data,  __glo_ack, c_73288, stack[1] /*m_731_7385*/, c_73299);}
+//return_closcall3(data,  __glo_ack, c_73288, stack[1] /*m_731_7385*/, c_73299);
+((gc_thread_data *)data)->args = alloca(sizeof(object) * 3);
+((gc_thread_data *)data)->args[0] = c_73288;
+((gc_thread_data *)data)->args[1] = stack[1];
+((gc_thread_data *)data)->args[2] = c_73299;
+((gc_thread_data *)data)->pc = 1;
+self = __glo_ack;
+argc = 3;
+continue;
+}
 }
   break;
 }
