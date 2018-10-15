@@ -10,6 +10,11 @@
 #define closcall1(td, clo,a1) \
 if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 0, (closure)(a1), clo); \
+} else if((clo)->pc) { \
+   object buf[1]; buf[0] = a1;\
+   ((gc_thread_data *)td)->args = buf; \
+   ((gc_thread_data *)td)->pc = (clo)->pc; \
+   ((clo)->fn)(td, 1, clo);\
 } else { \
    ((clo)->fn)(td, 1, clo,a1);\
 }
@@ -49,6 +54,11 @@ if (type_is_pair_prim(clo)) { \
 #define closcall2(td, clo,a1,a2) \
 if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 1, (closure)(a1), clo,a2); \
+} else if((clo)->pc) { \
+   object buf[2]; buf[0] = a1;buf[1] = a2; \
+   ((gc_thread_data *)td)->args = buf; \
+   ((gc_thread_data *)td)->pc = (clo)->pc; \
+   ((clo)->fn)(td, 2, clo);\
 } else { \
    ((clo)->fn)(td, 2, clo,a1,a2);\
 }
@@ -88,6 +98,11 @@ if (type_is_pair_prim(clo)) { \
 #define closcall3(td, clo,a1,a2,a3) \
 if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 2, (closure)(a1), clo,a2,a3); \
+} else if((clo)->pc) { \
+   object buf[3]; buf[0] = a1;buf[1] = a2; buf[2] = a3; \
+   ((gc_thread_data *)td)->args = buf; \
+   ((gc_thread_data *)td)->pc = (clo)->pc; \
+   ((clo)->fn)(td, 3, clo);\
 } else { \
    ((clo)->fn)(td, 3, clo,a1,a2,a3);\
 }
@@ -127,6 +142,11 @@ if (type_is_pair_prim(clo)) { \
 #define closcall5(td, clo,a1,a2,a3,a4,a5) \
 if (type_is_pair_prim(clo)) { \
    Cyc_apply(td, 4, (closure)(a1), clo,a2,a3,a4,a5); \
+} else if((clo)->pc) { \
+   object buf[5]; buf[0] = a1;buf[1] = a2; buf[2] = a3; buf[3] = a4; buf[4] = a5; \
+   ((gc_thread_data *)td)->args = buf; \
+   ((gc_thread_data *)td)->pc = (clo)->pc; \
+   ((clo)->fn)(td, 5, clo);\
 } else { \
    ((clo)->fn)(td, 5, clo,a1,a2,a3,a4,a5);\
 }
@@ -1544,7 +1564,7 @@ static void __host_lambda_1(void *data, int argc, closure self){
   object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
   object top = alloca(sizeof(object)); // TODO: is there a more efficient way?
   if (stack_overflow(top, (((gc_thread_data *)data)->stack_limit))) { 
-    printf("starting GC\n");
+    //printf("starting GC\n");
      GC(data, self, ((gc_thread_data *)data)->args, argc); 
      return;
   }
@@ -1565,33 +1585,35 @@ return_closcall1(data,  stack[0] /*k_73124*/,  c_73278);
 if( (boolean_f != c_73281) ){ 
   
 object local_73285 = alloca(sizeof(complex_num_type)); object c_73286 = Cyc_fast_sub(data,local_73285,stack[1] /*m_731_7385*/, obj_int2obj(1));
-TODO: pick changes back up here
-return_closcall3(data,  __glo_ack,  k_73124, c_73286, obj_int2obj(1));
+return_closcall3(data,  __glo_ack,  stack[0] /*k_73124*/, c_73286, obj_int2obj(1));
 } else { 
   
-closureN_type c_73288;
-c_73288.hdr.mark = gc_color_red;
- c_73288.hdr.grayed = 0;
-c_73288.tag = closureN_tag;
- c_73288.fn = (function_type)__lambda_2;
-c_73288.pc = 0;
-c_73288.num_args = 1;
-c_73288.num_elements = 2;
-c_73288.elements = (object *)alloca(sizeof(object) * 2);
-c_73288.elements[0] = k_73124;
-c_73288.elements[1] = m_731_7385;
+closureN_type *c_73288 = alloca(sizeof(closureN_type));
+c_73288->hdr.mark = gc_color_red;
+ c_73288->hdr.grayed = 0;
+c_73288->tag = closureN_tag;
+ c_73288->fn = (function_type) __host_lambda_1; //__lambda_2;
+c_73288->pc = 2;
+c_73288->num_args = 1;
+c_73288->num_elements = 2;
+c_73288->elements = (object *)alloca(sizeof(object) * 2);
+c_73288->elements[0] = stack[0]; //k_73124;
+c_73288->elements[1] = stack[1]; //m_731_7385;
 
 
-complex_num_type local_73298; object c_73299 = Cyc_fast_sub(data,&local_73298,n_732_7386, obj_int2obj(1));
-return_closcall3(data,  __glo_ack,  &c_73288, m_731_7385, c_73299);}
+object local_73298 = alloca(sizeof(complex_num_type)); object c_73299 = Cyc_fast_sub(data,local_73298,stack[2] /*n_732_7386*/, obj_int2obj(1));
+return_closcall3(data,  __glo_ack, c_73288, stack[1] /*m_731_7385*/, c_73299);}
 }
   break;
 }
 //static void __lambda_2(void *data, int argc, object self_73215, object r_73129) 
 case 2: {
   
-complex_num_type local_73293; object c_73294 = Cyc_fast_sub(data,&local_73293,((closureN)self_73215)->elements[1], obj_int2obj(1));
-return_closcall3(data,  __glo_ack,  ((closureN)self_73215)->elements[0], c_73294, r_73129);; 
+object local_73293 = alloca(sizeof(complex_num_type)); object c_73294 = Cyc_fast_sub(data,local_73293,((closureN)self /*self_73215*/)->elements[1], obj_int2obj(1));
+
+// TODO: this (and all calls to ack) need to stay internal to this function.
+// but test with this first, then see what the speedup is (Hopefully there is some) to avoiding the fnc calls
+return_closcall3(data,  __glo_ack,  ((closureN)self /*self_73215*/)->elements[0], c_73294, stack[0] /*r_73129*/);; 
 }
     default: {
       // raise error
@@ -1623,7 +1645,8 @@ Cyc_set_globals_changed((gc_thread_data *)data);
   __glo_hide = &c_73316; 
   mclosure0(c_73300, (function_type)__lambda_3);c_73300.num_args = 0; 
   __glo_main = &c_73300; 
-  mclosure0(c_73270, (function_type)__lambda_1);c_73270.num_args = 2; 
+  mclosure0(c_73270, (function_type)__host_lambda_1 /*__lambda_1*/);c_73270.num_args = 2;
+  c_73270.pc = 1;
   __glo_ack = &c_73270; 
 
   make_cvar(cvar_73536, (object *)&__glo_this_91scheme_91implementation_91name);make_pair(pair_73537, find_or_add_symbol("this-scheme-implementation-name"), &cvar_73536);
