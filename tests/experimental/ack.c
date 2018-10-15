@@ -436,8 +436,9 @@ static void __lambda_7(void *data, int argc, object self_73219, object k_73140, 
 static void __lambda_4(void *data, int argc, object self_73216, object k_73141) ;
 static void __lambda_5(void *data, int argc, object self_73217, object r_73142) ;
 static void __lambda_6(void *data, int argc, object self_73218, object r_73143) ;
-static void __lambda_1(void *data, int argc, closure _,object k_73124, object m_731_7385, object n_732_7386) ;
-static void __lambda_2(void *data, int argc, object self_73215, object r_73129) ;
+static void __host_lambda_1(void *data, int argc, closure self);
+//static void __lambda_1(void *data, int argc, closure _,object k_73124, object m_731_7385, object n_732_7386) ;
+//static void __lambda_2(void *data, int argc, object self_73215, object r_73129) ;
 
 static void __lambda_57(void *data, int argc, closure _,object k_73212) {
   Cyc_st_add(data, "ack.scm:this-scheme-implementation-name");
@@ -1535,18 +1536,36 @@ static void __lambda_6(void *data, int argc, object self_73218, object r_73143) 
   return_closcall3(data,  __glo_ack,  ((closureN)self_73218)->elements[0], ((closureN)self_73218)->elements[1], r_73143);; 
 }
 
-static void __lambda_1(void *data, int argc, closure _,object k_73124, object m_731_7385, object n_732_7386) {
+//TODO: update calls into here
+//TODO: update closcall (BTW, these changes not taken into account on benchmarks, we could have even more slowdown (!!)
+//TODO: how to call into host_lambda via switch (need to alloca gc args, for example). we never did that in fac_test
+static void __host_lambda_1(void *data, int argc, closure self){
+ while(1) {
+  object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
+  object top = alloca(sizeof(object)); // TODO: is there a more efficient way?
+  if (stack_overflow(top, (((gc_thread_data *)data)->stack_limit))) { 
+    printf("starting GC\n");
+     GC(data, self, ((gc_thread_data *)data)->args, argc); 
+     return;
+  }
+
+  switch(((gc_thread_data *)data)->pc) {
+
+//static void __lambda_1(void *data, int argc, closure _,object k_73124, object m_731_7385, object n_732_7386) 
+case 1: {
   Cyc_st_add(data, "ack.scm:ack");
-  object c_73273 = Cyc_num_fast_eq_op(data,m_731_7385, obj_int2obj(0));
+  object c_73273 = Cyc_num_fast_eq_op(data, stack[1] /*m_731_7385*/, obj_int2obj(0));
 if( (boolean_f != c_73273) ){ 
   
-complex_num_type local_73277; object c_73278 = Cyc_fast_sum(data,&local_73277,n_732_7386, obj_int2obj(1));
-return_closcall1(data,  k_73124,  c_73278);
+object local_73277 = alloca(sizeof(complex_num_type));
+object c_73278 = Cyc_fast_sum(data,local_73277, stack[2] /*n_732_7386*/, obj_int2obj(1));
+return_closcall1(data,  stack[0] /*k_73124*/,  c_73278);
 } else { 
-    object c_73281 = Cyc_num_fast_eq_op(data,n_732_7386, obj_int2obj(0));
+    object c_73281 = Cyc_num_fast_eq_op(data, stack[2] /*n_732_7386*/, obj_int2obj(0));
 if( (boolean_f != c_73281) ){ 
   
-complex_num_type local_73285; object c_73286 = Cyc_fast_sub(data,&local_73285,m_731_7385, obj_int2obj(1));
+object local_73285 = alloca(sizeof(complex_num_type)); object c_73286 = Cyc_fast_sub(data,local_73285,stack[1] /*m_731_7385*/, obj_int2obj(1));
+TODO: pick changes back up here
 return_closcall3(data,  __glo_ack,  k_73124, c_73286, obj_int2obj(1));
 } else { 
   
@@ -1566,14 +1585,20 @@ c_73288.elements[1] = m_731_7385;
 complex_num_type local_73298; object c_73299 = Cyc_fast_sub(data,&local_73298,n_732_7386, obj_int2obj(1));
 return_closcall3(data,  __glo_ack,  &c_73288, m_731_7385, c_73299);}
 }
-; 
+  break;
 }
-
-static void __lambda_2(void *data, int argc, object self_73215, object r_73129) {
+//static void __lambda_2(void *data, int argc, object self_73215, object r_73129) 
+case 2: {
   
 complex_num_type local_73293; object c_73294 = Cyc_fast_sub(data,&local_73293,((closureN)self_73215)->elements[1], obj_int2obj(1));
 return_closcall3(data,  __glo_ack,  ((closureN)self_73215)->elements[0], c_73294, r_73129);; 
 }
+    default: {
+      // raise error
+      fprintf(stderr, "Unknown PC value %d\n", ((gc_thread_data *)data)->pc);
+      exit(1);
+    }
+}}}
 
 static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);
 extern void c_schemecyclonecommon_entry_pt(void *data, int argc, closure cont, object value);
