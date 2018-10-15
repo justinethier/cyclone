@@ -1564,6 +1564,7 @@ static void __lambda_6(void *data, int argc, object self_73218, object r_73143) 
 static void __host_lambda_1(void *data, int argc, closure self){
  while(1) {
   object *stack = ((gc_thread_data *)data)->args; // TODO: do it inline for benchmarks/production code
+TODO: is this syntax correct below? double-check in GDB
   object top = alloca(sizeof(object)); // TODO: is there a more efficient way?
   if (stack_overflow(top, (((gc_thread_data *)data)->stack_limit))) { 
     //printf("starting GC\n");
