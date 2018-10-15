@@ -1556,8 +1556,10 @@ static void __lambda_6(void *data, int argc, object self_73218, object r_73143) 
   return_closcall3(data,  __glo_ack,  ((closureN)self_73218)->elements[0], ((closureN)self_73218)->elements[1], r_73143);; 
 }
 
-//TODO: update calls into here
 //TODO: update closcall (BTW, these changes not taken into account on benchmarks, we could have even more slowdown (!!)
+// this ran in 56 secs with these closcall changes, which is an increase of 5 seconds (!!!)
+// runtime with function call changes is... TBD
+//
 //TODO: how to call into host_lambda via switch (need to alloca gc args, for example). we never did that in fac_test
 static void __host_lambda_1(void *data, int argc, closure self){
  while(1) {
@@ -1613,7 +1615,15 @@ object local_73293 = alloca(sizeof(complex_num_type)); object c_73294 = Cyc_fast
 
 // TODO: this (and all calls to ack) need to stay internal to this function.
 // but test with this first, then see what the speedup is (Hopefully there is some) to avoiding the fnc calls
-return_closcall3(data,  __glo_ack,  ((closureN)self /*self_73215*/)->elements[0], c_73294, stack[0] /*r_73129*/);; 
+//return_closcall3(data,  __glo_ack,  ((closureN)self /*self_73215*/)->elements[0], c_73294, stack[0] /*r_73129*/);; 
+((gc_thread_data *)data)->args = alloca(sizeof(object) * 3);
+((gc_thread_data *)data)->args[0] = ((closureN)self /*self_73215*/)->elements[0]; 
+((gc_thread_data *)data)->args[1] = c_73294; 
+((gc_thread_data *)data)->args[2] = stack[0];
+((gc_thread_data *)data)->pc = 1;
+self = __glo_ack;
+argc = 3;
+continue;
 }
     default: {
       // raise error
