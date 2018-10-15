@@ -1214,8 +1214,8 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
-  int pc;
-  int num_args;
+  unsigned char pc;
+  unsigned char num_args;
 } macro_type;
 
 /** @brief A closed-over function with no variables */
@@ -1223,16 +1223,16 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
-  int pc;
-  int num_args;
+  unsigned char pc;
+  unsigned char num_args;
 } closure0_type;
 /** @brief A closed-over function with one variable */
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
-  int pc;
-  int num_args;
+  unsigned char pc;
+  unsigned char num_args;
   object element;
 } closure1_type;
 /** @brief A closed-over function with zero or more closed-over variables */
@@ -1240,9 +1240,9 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
-  int pc;
-  int num_args;
-  int num_elements;
+  unsigned char pc;
+  unsigned char num_args;
+  unsigned char num_elements;
   object *elements;
 } closureN_type;
 
