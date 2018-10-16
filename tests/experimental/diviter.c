@@ -1746,6 +1746,15 @@ c_73361->elements[2] = ((closureN)self /*_73252*/)->elements[2];
 
 
 make_cell(c_73390,lp_7311_7316_73100);
+TODO: convert above to use alloca
+//#define make_pair(n,a,d) \
+//  pair_type n; \
+//  n.hdr.mark = gc_color_red; \
+//  n.hdr.grayed = 0; \
+//  n.tag = pair_tag; \
+//  n.pair_car = a; \
+//  n.pair_cdr = d;
+//#define make_cell(n,a) make_pair(n,a,NULL);
 //return_direct_with_clo1(data,(closure)&c_73361,__lambda_76,  &c_73390);; 
 ((gc_thread_data *)data)->args = alloca(sizeof(object) * 1);
 ((gc_thread_data *)data)->args[0] = boolean_f;
