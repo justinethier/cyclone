@@ -1568,6 +1568,7 @@
       (analyze exp -1 -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
+      (analyze:find-recursive-calls2 exp)
     )
 
     ;; NOTES:
@@ -1949,6 +1950,49 @@
           exp))
 )
 
+;; Find functions that call themselves. This is not as restrictive 
+;; as finding "direct" calls.
+(define (analyze:find-recursive-calls exp)
+
+  (define (scan exp def-sym)
+    ;(trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp))
+    (cond
+     ((ast:lambda? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym))
+        (ast:lambda-body exp)))
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) 
+      exp)
+     ((define? exp) #f) ;; TODO ??
+     ((set!? exp) #f) ;; TODO ??
+     ((if? exp)       
+      (scan (if->condition exp) def-sym)
+      (scan (if->then exp) def-sym)
+      (scan (if->else exp) def-sym))
+     ((app? exp)
+      (when (equal? (car exp) def-sym)
+        (trace:info `("recursive call" ,exp))
+        (with-var! def-sym (lambda (var)
+          (adbv:set-self-rec-call! var #t)))))
+     (else #f)))
+
+  ;; TODO: probably not good enough, what about recursive functions that are not top-level??
+  (if (pair? exp)
+      (for-each
+        (lambda (exp)
+          ;;(write exp) (newline)
+          (and-let* (((define? exp))
+                      (def-exps (define->exp exp))
+                     ((vector? (car def-exps)))
+                     ((ast:lambda? (car def-exps)))
+                     )
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
+          exp))
+)
+
 ;; Does given symbol refer to a recursive call to given lambda ID?
 (define (rec-call? sym lid)
   (cond
@@ -1957,8 +2001,8 @@
       (trace:info 
         `(rec-call? ,sym ,lid
              ;; TODO: crap, these are not set yet!!!
-             may need to consider keeping out original version of find-recursive-calls and
-             adding a new version that does a deeper analysis
+             ;; may need to consider keeping out original version of find-recursive-calls and
+             ;; adding a new version that does a deeper analysis
              ,(if var (not (adbv:reassigned? var)) #f)
              ,(if var (adbv:assigned-value var) #f)
              ;,((ast:lambda? var-lam))
@@ -1977,12 +2021,18 @@
    (else
     #f)))
 
-;; Find functions that call themselves. This is not as restrictive 
-;; as finding "direct" calls.
-(define (analyze:find-recursive-calls exp)
+;; Same as the original function, but this one is called at the end of analysis and 
+;; uses data that was previously not available.
+;;
+;; The reason for having two versions of this is that the original is necessary for
+;; beta expansion (and must remain, at least for now) and this one will provide useful
+;; data for code generation.
+;;
+;; TODO: is the above true? not so sure anymore, need to verify that, look at optimize-cps
+(define (analyze:find-recursive-calls2 exp)
 
   (define (scan exp def-sym lid)
-    (trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp ,lid))
+    (trace:info `(analyze:find-recursive-calls2 scan ,def-sym ,exp ,lid))
     (cond
      ((ast:lambda? exp)
       (for-each
@@ -2022,7 +2072,7 @@
   (if (pair? exp)
       (for-each
         (lambda (exp)
-          (trace:info `(analyze:find-recursive-calls ,exp))
+          ;(trace:info `(analyze:find-recursive-calls ,exp))
           (and-let* (((define? exp))
                       (def-exps (define->exp exp))
                      ((vector? (car def-exps)))
@@ -2033,7 +2083,6 @@
         ))
         exp))
 )
-
 ;; well-known-lambda :: symbol -> Either (AST Lambda | Boolean)
 ;; Does the given symbol refer to a well-known lambda?
 ;; If so the corresponding lambda object is returned, else #f.
