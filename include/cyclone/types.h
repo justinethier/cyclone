@@ -1095,6 +1095,14 @@ typedef pair_type *pair;
   n.pair_car = a; \
   n.pair_cdr = d;
 
+#define alloca_pair(n,a,d) \
+  pair_type *n = alloca(sizeof(pair_type)); \
+  n->hdr.mark = gc_color_red; \
+  n->hdr.grayed = 0; \
+  n->tag = pair_tag; \
+  n->pair_car = a; \
+  n->pair_cdr = d;
+
 #define set_pair(n,a,d) \
   n->hdr.mark = gc_color_red; \
   n->hdr.grayed = 0; \
