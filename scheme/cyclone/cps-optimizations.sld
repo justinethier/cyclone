@@ -1951,22 +1951,34 @@
 
 ;; Does given symbol refer to a recursive call to given lambda ID?
 (define (rec-call? sym lid)
-  (trace:info `(rec-call? ,sym ,lid))
-  (and-let* ((var (adb:get/default sym #f))
-             ((not (adbv:reassigned? var)))
-             (var-lam (adbv:assigned-value var))
-             ((ast:lambda? var-lam))
-             (fnc (adb:get/default lid #f))
-            )
-    (trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
-    (equal? lid (ast:lambda-id var-lam))))
+  (cond
+   ((ref? sym)
+    (let ((var (adb:get/default sym #f)))
+      (trace:info `(rec-call? ,sym ,lid
+             ,(if var (not (adbv:reassigned? var)) #f)
+             ,(if var (adbv:assigned-value var) #f)
+             ;,((ast:lambda? var-lam))
+             ,(adb:get/default lid #f)
+             )
+           )
+      (and-let* (((ref? sym))
+                 ((var))
+                 ((not (adbv:reassigned? var)))
+                 (var-lam (adbv:assigned-value var))
+                 ((ast:lambda? var-lam))
+                 (fnc (adb:get/default lid #f))
+                )
+        (trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
+        (equal? lid (ast:lambda-id var-lam)))))
+   (else
+    #f)))
 
 ;; Find functions that call themselves. This is not as restrictive 
 ;; as finding "direct" calls.
 (define (analyze:find-recursive-calls exp)
 
   (define (scan exp def-sym lid)
-    ;(trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp))
+    (trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp ,lid))
     (cond
      ((ast:lambda? exp)
       (for-each
@@ -1978,33 +1990,44 @@
      ((ref? exp) 
       exp)
      ((define? exp) #f) ;; TODO ??
-     ((set!? exp) #f) ;; TODO ??
+     ((set!? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym lid))
+        (cdr exp))
+     )
      ((if? exp)       
       (scan (if->condition exp) def-sym lid)
       (scan (if->then exp) def-sym lid)
       (scan (if->else exp) def-sym lid))
      ((app? exp)
-      (when (or (equal? (car exp) def-sym)
+      (when (or ;(equal? (car exp) def-sym) TODO: def-sym is obsolete, remove it
                 (rec-call? (car exp) lid))
         (trace:info `("recursive call" ,exp))
-        (with-var! def-sym (lambda (var)
-          (adbv:set-self-rec-call! var #t)))))
+        (with-var! (car exp) (lambda (var)
+          (adbv:set-self-rec-call! var #t))))
+      (for-each
+        (lambda (e)
+          (scan e def-sym lid))
+        exp)
+     )
      (else #f)))
 
   ;; TODO: probably not good enough, what about recursive functions that are not top-level??
-TODO: need to address those now, I think we have the support now via (rec-call?)
+;TODO: need to address those now, I think we have the support now via (rec-call?)
   (if (pair? exp)
       (for-each
         (lambda (exp)
-          ;;(write exp) (newline)
+          (trace:info `(analyze:find-recursive-calls ,exp))
           (and-let* (((define? exp))
                       (def-exps (define->exp exp))
                      ((vector? (car def-exps)))
                      ((ast:lambda? (car def-exps)))
                      (id (ast:lambda-id (car def-exps)))
                      )
-           (scan (car (ast:lambda-body (car def-exps))) (define->var exp) id)))
-          exp))
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp) id)
+        ))
+        exp))
 )
 
 ;; well-known-lambda :: symbol -> Either (AST Lambda | Boolean)
