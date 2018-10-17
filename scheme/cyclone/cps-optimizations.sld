@@ -1949,17 +1949,29 @@
           exp))
 )
 
+;; Does given symbol refer to a recursive call to given lambda ID?
+(define (rec-call? sym lid)
+  (trace:info `(rec-call? ,sym ,lid))
+  (and-let* ((var (adb:get/default sym #f))
+             ((not (adbv:reassigned? var)))
+             (var-lam (adbv:assigned-value var))
+             ((ast:lambda? var-lam))
+             (fnc (adb:get/default lid #f))
+            )
+    (trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
+    (equal? lid (ast:lambda-id var-lam))))
+
 ;; Find functions that call themselves. This is not as restrictive 
 ;; as finding "direct" calls.
 (define (analyze:find-recursive-calls exp)
 
-  (define (scan exp def-sym)
+  (define (scan exp def-sym lid)
     ;(trace:info `(analyze:find-recursive-calls scan ,def-sym ,exp))
     (cond
      ((ast:lambda? exp)
       (for-each
         (lambda (e)
-          (scan e def-sym))
+          (scan e def-sym (ast:lambda-id exp)))
         (ast:lambda-body exp)))
      ((quote? exp) exp)
      ((const? exp) exp)
@@ -1968,17 +1980,19 @@
      ((define? exp) #f) ;; TODO ??
      ((set!? exp) #f) ;; TODO ??
      ((if? exp)       
-      (scan (if->condition exp) def-sym)
-      (scan (if->then exp) def-sym)
-      (scan (if->else exp) def-sym))
+      (scan (if->condition exp) def-sym lid)
+      (scan (if->then exp) def-sym lid)
+      (scan (if->else exp) def-sym lid))
      ((app? exp)
-      (when (equal? (car exp) def-sym)
+      (when (or (equal? (car exp) def-sym)
+                (rec-call? (car exp) lid))
         (trace:info `("recursive call" ,exp))
         (with-var! def-sym (lambda (var)
           (adbv:set-self-rec-call! var #t)))))
      (else #f)))
 
   ;; TODO: probably not good enough, what about recursive functions that are not top-level??
+TODO: need to address those now, I think we have the support now via (rec-call?)
   (if (pair? exp)
       (for-each
         (lambda (exp)
@@ -1987,8 +2001,9 @@
                       (def-exps (define->exp exp))
                      ((vector? (car def-exps)))
                      ((ast:lambda? (car def-exps)))
+                     (id (ast:lambda-id (car def-exps)))
                      )
-           (scan (car (ast:lambda-body (car def-exps))) (define->var exp))))
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp) id)))
           exp))
 )
 
