@@ -1954,15 +1954,19 @@
   (cond
    ((ref? sym)
     (let ((var (adb:get/default sym #f)))
-      (trace:info `(rec-call? ,sym ,lid
+      (trace:info 
+        `(rec-call? ,sym ,lid
+             ;; TODO: crap, these are not set yet!!!
+             may need to consider keeping out original version of find-recursive-calls and
+             adding a new version that does a deeper analysis
              ,(if var (not (adbv:reassigned? var)) #f)
              ,(if var (adbv:assigned-value var) #f)
              ;,((ast:lambda? var-lam))
              ,(adb:get/default lid #f)
              )
            )
-      (and-let* (((ref? sym))
-                 ((var))
+      (and-let* (
+                 ((not (equal? var #f)))
                  ((not (adbv:reassigned? var)))
                  (var-lam (adbv:assigned-value var))
                  ((ast:lambda? var-lam))
