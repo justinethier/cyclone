@@ -1998,17 +1998,17 @@
   (cond
    ((ref? sym)
     (let ((var (adb:get/default sym #f)))
-      (trace:info 
-        `(rec-call? ,sym ,lid
-             ;; TODO: crap, these are not set yet!!!
-             ;; may need to consider keeping out original version of find-recursive-calls and
-             ;; adding a new version that does a deeper analysis
-             ,(if var (not (adbv:reassigned? var)) #f)
-             ,(if var (adbv:assigned-value var) #f)
-             ;,((ast:lambda? var-lam))
-             ,(adb:get/default lid #f)
-             )
-           )
+      ;(trace:info 
+      ;  `(rec-call? ,sym ,lid
+      ;       ;; TODO: crap, these are not set yet!!!
+      ;       ;; may need to consider keeping out original version of find-recursive-calls and
+      ;       ;; adding a new version that does a deeper analysis
+      ;       ,(if var (not (adbv:reassigned? var)) #f)
+      ;       ,(if var (adbv:assigned-value var) #f)
+      ;       ;,((ast:lambda? var-lam))
+      ;       ,(adb:get/default lid #f)
+      ;       )
+      ;     )
       (and-let* (
                  ((not (equal? var #f)))
                  ((not (adbv:reassigned? var)))
@@ -2016,7 +2016,7 @@
                  ((ast:lambda? var-lam))
                  (fnc (adb:get/default lid #f))
                 )
-        (trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
+        ;(trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
         (equal? lid (ast:lambda-id var-lam)))))
    (else
     #f)))
@@ -2032,7 +2032,7 @@
 (define (analyze:find-recursive-calls2 exp)
 
   (define (scan exp def-sym lid)
-    (trace:info `(analyze:find-recursive-calls2 scan ,def-sym ,exp ,lid))
+    ;(trace:info `(analyze:find-recursive-calls2 scan ,def-sym ,exp ,lid))
     (cond
      ((ast:lambda? exp)
       (for-each
@@ -2057,7 +2057,7 @@
      ((app? exp)
       (when (or ;(equal? (car exp) def-sym) TODO: def-sym is obsolete, remove it
                 (rec-call? (car exp) lid))
-        (trace:info `("recursive call" ,exp))
+        ;(trace:info `("recursive call" ,exp))
         (with-var! (car exp) (lambda (var)
           (adbv:set-self-rec-call! var #t))))
       (for-each
