@@ -87,6 +87,7 @@
       adbf:well-known adbf:set-well-known!
       adbf:cgen-id adbf:set-cgen-id!
       adbf:closure-size adbf:set-closure-size!
+      adbf:calls-self? adbf:set-calls-self!
       with-fnc
       with-fnc!
   )
@@ -224,6 +225,8 @@
        side-effects
        well-known
        cgen-id
+       closure-size
+       calls-self
       )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
@@ -241,6 +244,8 @@
       (cgen-id adbf:cgen-id adbf:set-cgen-id!)
       ;; Number of elements in the function's closure
       (closure-size adbf:closure-size adbf:set-closure-size!)
+      ;; Does this function call itself?
+      (calls-self adbf:calls-self? adbf:set-calls-self!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
@@ -252,6 +257,7 @@
        #f   ;; well-known
        #f   ;; cgen-id
        -1   ;; closure-size
+       #f   ;; calls-self
       ))
 
     ;; A constant value that cannot be mutated
@@ -2058,6 +2064,8 @@
       (when (or ;(equal? (car exp) def-sym) TODO: def-sym is obsolete, remove it
                 (rec-call? (car exp) lid))
         ;(trace:info `("recursive call" ,exp))
+        (with-fnc! lid (lambda (fnc)
+          (adbf:set-calls-self! fnc #t)))
         (with-var! (car exp) (lambda (var)
           (adbv:set-self-rec-call! var #t))))
       (for-each
