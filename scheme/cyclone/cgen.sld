@@ -398,7 +398,7 @@
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append "make_pair(" cvar "," (c:body a) "," (c:body b) ");")
+          (string-append "alloca_pair(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b))))
     )
     (_c-compile-scalars 
@@ -416,7 +416,7 @@
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
-                (string-append "&" cvar-name)
+                cvar-name ;; Not needed with alloca - (string-append "&" cvar-name)
                 (append
                   (c:allocs cell)
                   (list (c:body cell))))))))))
