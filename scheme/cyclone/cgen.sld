@@ -839,7 +839,7 @@
                "\n"
                cgen-body ;; TODO: (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
                "\n"
-               "goto loop;")))
+               "continue;")))
         )
          
         ((prim? fun)
@@ -1484,10 +1484,15 @@
                (> (string-length tmp-ident) 3)
                (equal? "self" (substring tmp-ident 0 4))))
            (has-loop?
-             (and (not has-closure?) ;; Only top-level functions for now
-                  (pair? trace)
-                  (not (null? (cdr trace)))
-                  (adbv:direct-rec-call? (adb:get (cdr trace)))))
+             (or
+               (adbf:calls-self? (adb:get/default (ast:lambda-id exp) (adb:make-fnc)))
+               ;; Older direct recursive logic
+               (and (not has-closure?) ;; Only top-level functions for now
+                    (pair? trace)
+                    (not (null? (cdr trace)))
+                    (adbv:direct-rec-call? (adb:get (cdr trace))))
+             )
+           )
            (formals*
              (string-append
                 (if has-closure? 
@@ -1536,8 +1541,8 @@
                                (else
                                  (string-append
                                    (st:->code trace)
-                                   ;; TODO: probably needs brackets afterwards...
-                                   (if has-loop? "\nloop: {\n" "")
+                                   TODO: does not work for calls-self, need to invoke that elsewhere...
+                                   (if has-loop? "\n while(1) {\n" "")
                                  ))))
                            body)
                          "  ")
