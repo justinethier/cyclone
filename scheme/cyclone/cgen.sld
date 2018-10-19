@@ -1537,11 +1537,12 @@
                            (c-code 
                              ;; Only trace when entering initial defined function
                              (cond
-                               (has-closure? "")
+                               (has-closure?
+                                (if has-loop? "\n while(1) {\n" "")
+                               )
                                (else
                                  (string-append
                                    (st:->code trace)
-                                   TODO: does not work for calls-self, need to invoke that elsewhere...
                                    (if has-loop? "\n while(1) {\n" "")
                                  ))))
                            body)
