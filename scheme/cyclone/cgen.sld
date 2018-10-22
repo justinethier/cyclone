@@ -922,6 +922,7 @@
                     )
                 (cond
 ;; TODO: check for self-call
+;; TODO: use (self-closure-call? ast self)
 ;;                  ((and fnc
 ;;                        (adbf:calls-self? fnc)
 ;;                        
