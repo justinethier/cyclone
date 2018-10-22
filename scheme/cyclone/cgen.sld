@@ -921,6 +921,10 @@
                      (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
                     )
                 (cond
+;; TODO: check for self-call
+;;                  ((and fnc
+;;                        (adbf:calls-self? fnc)
+;;                        
                   ((and wkf fnc
                         *optimize-well-known-lambdas*
                         (adbf:well-known fnc) ;; not really needed
