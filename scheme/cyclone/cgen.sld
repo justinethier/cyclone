@@ -919,13 +919,25 @@
               (set-c-call-arity! (c:num-args cargs))
               (let* ((wkf (well-known-lambda (car args)))
                      (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
+                     (ast-fnc (adb:get/default ast-id #f))
                     )
                 (cond
-;; TODO: check for self-call
-;; TODO: use (self-closure-call? ast self)
-;;                  ((and fnc
-;;                        (adbf:calls-self? fnc)
-;;                        
+                  ;; Handle recursive calls via iteration, if possible
+                  ((and ast-fnc
+                        (adbf:calls-self? ast-fnc)
+                        (self-closure-call? fun (car (adbf:all-params ast-fnc)))
+                    )
+                    (c-code 
+                      (string-append
+                        (c:allocs->str (c:allocs cfun) "\n")
+                        (c:allocs->str (c:allocs cargs) "\n")
+                        "/* TODO: call self */ return_closcall" (number->string (c:num-args cargs))
+                        "(data,"
+                        this-cont
+                        (if (> (c:num-args cargs) 0) "," "")
+                        (c:body cargs)
+                        ");")))
+                        
                   ((and wkf fnc
                         *optimize-well-known-lambdas*
                         (adbf:well-known fnc) ;; not really needed
