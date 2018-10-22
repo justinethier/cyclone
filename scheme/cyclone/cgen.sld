@@ -927,6 +927,23 @@
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
+;; TODO: need to emit all of this:
+;; GC check (w/fnc args and closure)
+;; arg reassignment
+;; continue statement
+;;
+;; example:
+;; 
+;;  if (stack_overflow(c_73374, (((gc_thread_data *)data)->stack_limit))) {
+;;    //printf("starting GC\n");
+;;    object buf[3]; buf[0] = k_73154; buf[1] = l_7317_73101;buf[2] = a_7318_73102;
+;;    GC(data, self_73251, buf, argc);
+;;  }
+;;//return_closcall3(data,  car(((closureN)self_73251)->elements[0]),  k_73154, Cyc_cddr(data, l_7317_73101), c_73374);
+;;  // same, no need to reassign: k_73154 = k_73154;
+;;  l_7317_73101 = Cyc_cddr(data, l_7317_73101);
+;;  a_7318_73102 = c_73374;
+;;  continue;
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
