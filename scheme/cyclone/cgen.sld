@@ -649,9 +649,20 @@
     (and (> len 0)
          (equal? end (substring str (- len 1) len)))))
 
+TODO: move this into prim module, integrate with existing function somehow
+;;(define (prim->c-func* p use-alloca?)
+;;  (cond
+;;    (else
+;;      (prim->c-func p))))
+TODO: add use-alloca? param to prim:allocates-object? and modify per above
+
 ;; c-compile-prim : prim-exp -> string -> string
-(define (c-compile-prim p cont)
-  (let* ((c-func 
+(define (c-compile-prim p cont ast-id)
+  (let* ((ast-fnc (adb:get/default ast-id #f))
+         ;; Use alloca for stack allocations?
+         (use-alloca? (and ast-fnc
+                           (adbf:calls-self? ast-fnc)))
+         (c-func 
            (if (prim:udf? p)
                (string-append
                  "((inline_function_type)
@@ -874,7 +885,7 @@
          
         ((prim? fun)
          (let* ((c-fun 
-                 (c-compile-prim fun cont))
+                 (c-compile-prim fun cont ast-id))
                 (c-args
                  (c-compile-args args append-preamble "" "" ast-id trace cps?))
                 (num-args (length args))
