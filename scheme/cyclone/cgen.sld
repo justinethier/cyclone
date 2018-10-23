@@ -760,6 +760,7 @@
 ; c-compile-args : list[exp] (string -> void) -> string
 (define (c-compile-args args append-preamble prefix cont ast-id trace cps?)
   (letrec ((num-args 0)
+           (cp-lis '())
          (_c-compile-args 
           (lambda (args append-preamble prefix cont)
             (cond
@@ -767,17 +768,26 @@
               (c-code ""))
              (else
               ;(trace:debug `(c-compile-args ,(car args)))
-              (set! num-args (+ 1 num-args))
-              (c:append/prefix
-                prefix 
-                (c-compile-exp (car args) 
-                  append-preamble cont ast-id trace cps?)
-                (_c-compile-args (cdr args) 
-                  append-preamble ", " cont)))))))
-  (c:tuple/args
-    (_c-compile-args args 
-      append-preamble prefix cont)
-    num-args)))
+              (let ((cp (c-compile-exp (car args) 
+                          append-preamble cont ast-id trace cps?)))
+                (set! num-args (+ 1 num-args))
+                (set! cp-lis (cons cp cp-lis))
+                (c:append/prefix
+                  prefix 
+                  cp
+                  (_c-compile-args (cdr args) 
+                    append-preamble ", " cont))))))))
+  ;; Pass back a container with:
+  ;; - Appened body (string)
+  ;; - Appended allocs (string)
+  ;; - Number of args (numeric)
+  ;; - Remaining args - Actual CP objects (lists of body/alloc) from above
+  (append
+    (c:tuple/args
+      (_c-compile-args args 
+        append-preamble prefix cont)
+      num-args)
+    (reverse cp-lis))))
 
 ;; c-compile-app : app-exp (string -> void) -> string
 (define (c-compile-app exp append-preamble cont ast-id trace cps?)
@@ -924,6 +934,7 @@
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont ast-id trace cps?))
                 (this-cont (c:body cfun))
                 (cargs (c-compile-args (cdr args) append-preamble "  " this-cont ast-id trace cps?))
+                (raw-cargs (cdddr cargs)) ;; Same as above but with lists instead of appended strings
                 (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
@@ -947,33 +958,27 @@
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
-(let* ((params (map mangle (cdr (adbf:all-params ast-fnc))))
-       ;; TODO: doesn't work, arg may contain non-CPS functions which have their own args...
-       (args (map (lambda (s)
-                   (string-replace-all s " " ""))
-                  (string-split (c:body cargs) #\,)))
-       (reassignments (apply string-append
-  (map
-    (lambda (param arg)
-      (cond
-        ((equal? param arg) "") ;; No need to reassign
-        (else
-          (string-append
-            param " = " arg ";\n"))))
-    params
-    args))
-     ))
-;(for-each
-;  (lambda (param arg)
-;    (trace:error `(JAE ,param = ,arg)))
-;  params 
-;  args)
-
+                    (let* ((params (map mangle (cdr (adbf:all-params ast-fnc))))
+                           (args (map car raw-cargs))
+                           (reassignments 
+                             ;; TODO: may need to detect cases where an arg is reassigned before
+                             ;; another one is assigned to that arg's old value, for example:
+                             ;;   a = 1, b = 2, c = a
+                             ;; In this case the code would need to assign to a temporary variable
+                             (apply string-append
+                              (map
+                                (lambda (param arg)
+                                  (cond
+                                    ((equal? param arg) "") ;; No need to reassign
+                                    (else
+                                      (string-append
+                                        param " = " arg ";\n"))))
+                                params
+                                args))))
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
-                        ;; TODO: reassign args
                         reassignments
                         ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
                         "continue_or_gc" (number->string (c:num-args cargs))
