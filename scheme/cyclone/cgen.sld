@@ -947,36 +947,34 @@
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
-;; TODO: need to emit all of this:
-;; arg reassignment
-;; GC check (w/fnc args and closure) - do after so we can just use args directly
-;; continue statement
-;;
-;; example:
-;; 
-;;  if (stack_overflow(c_73374, (((gc_thread_data *)data)->stack_limit))) {
-;;    //printf("starting GC\n");
-;;    object buf[3]; buf[0] = k_73154; buf[1] = l_7317_73101;buf[2] = a_7318_73102;
-;;    GC(data, self_73251, buf, argc);
-;;  }
-;;//return_closcall3(data,  car(((closureN)self_73251)->elements[0]),  k_73154, Cyc_cddr(data, l_7317_73101), c_73374);
-;;  // same, no need to reassign: k_73154 = k_73154;
-;;  l_7317_73101 = Cyc_cddr(data, l_7317_73101);
-;;  a_7318_73102 = c_73374;
-;;  continue;
-
-;; TODO: how to handle varargs (maybe we don't)??
-(for-each
-  (lambda (param arg)
-    (trace:error `(JAE ,param = ,arg)))
-  (cdr (adbf:all-params ast-fnc))
-  (string-split (c:body cargs) #\,))
+(let* ((params (map mangle (cdr (adbf:all-params ast-fnc))))
+       ;; TODO: doesn't work, arg may contain non-CPS functions which have their own args...
+       (args (map (lambda (s)
+                   (string-replace-all s " " ""))
+                  (string-split (c:body cargs) #\,)))
+       (reassignments (apply string-append
+  (map
+    (lambda (param arg)
+      (cond
+        ((equal? param arg) "") ;; No need to reassign
+        (else
+          (string-append
+            param " = " arg ";\n"))))
+    params
+    args))
+     ))
+;(for-each
+;  (lambda (param arg)
+;    (trace:error `(JAE ,param = ,arg)))
+;  params 
+;  args)
 
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
                         ;; TODO: reassign args
+                        reassignments
                         ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
                         "continue_or_gc" (number->string (c:num-args cargs))
                         "(data,"
@@ -985,6 +983,7 @@
                         (c:body cargs)
                         ");"
                       )))
+                  )
                         
                   ((and wkf fnc
                         *optimize-well-known-lambdas*
