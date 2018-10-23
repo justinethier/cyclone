@@ -127,6 +127,7 @@
            (vector-ref *c-call-arity* arity))
        (emit (c-macro-closcall arity))
        (emit (c-macro-return-closcall arity))
+       (emit (c-macro-continue-or-gc arity))
        (emit (c-macro-return-direct arity))
        (emit (c-macro-return-direct-with-closure arity))
        (when *optimize-well-known-lambdas*
@@ -151,6 +152,25 @@
       " } else {\\\n"
       "     closcall" n "(td, (closure) (clo)" args "); \\\n"
       "     return;\\\n"
+      " } \\\n"
+      "}\n")))
+
+;; Generate macros invoke a GC if necessary, otherwise do nothing.
+;; This will be used to support C iteration.
+(define (c-macro-continue-or-gc num-args)
+  (let ((args (c-macro-n-prefix num-args ",a"))
+        (n (number->string num-args))
+        (arry-assign (c-macro-array-assign num-args "buf" "a")))
+    (string-append
+      ;"/* Check for GC, then call given continuation closure */\n"
+      "#define continue_or_gc" n "(td, clo" args ") { \\\n"
+      " char *top = alloca(sizeof(char)); \\\n" ;; TODO: consider speeding up by passing in a var already allocated
+      " if (stack_overflow(top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
+      "     object buf[" n "]; " arry-assign "\\\n"
+      "     GC(td, clo, buf, " n "); \\\n"
+      "     return; \\\n"
+      " } else {\\\n"
+      "     continue;\\\n"
       " } \\\n"
       "}\n")))
 
@@ -928,8 +948,8 @@
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
 ;; TODO: need to emit all of this:
-;; GC check (w/fnc args and closure)
 ;; arg reassignment
+;; GC check (w/fnc args and closure) - do after so we can just use args directly
 ;; continue statement
 ;;
 ;; example:
@@ -948,12 +968,15 @@
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
-                        "/* TODO: call self */ return_closcall" (number->string (c:num-args cargs))
+                        ;; TODO: reassign args
+                        ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
+                        "/* TODO: call self */ continue_or_gc" (number->string (c:num-args cargs))
                         "(data,"
                         this-cont
                         (if (> (c:num-args cargs) 0) "," "")
                         (c:body cargs)
-                        ");")))
+                        ");"
+                      )))
                         
                   ((and wkf fnc
                         *optimize-well-known-lambdas*
