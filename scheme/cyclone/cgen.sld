@@ -964,15 +964,23 @@
 ;;  l_7317_73101 = Cyc_cddr(data, l_7317_73101);
 ;;  a_7318_73102 = c_73374;
 ;;  continue;
+
+;; TODO: how to handle varargs (maybe we don't)??
+(for-each
+  (lambda (param arg)
+    (trace:error `(JAE ,param = ,arg)))
+  (cdr (adbf:all-params ast-fnc))
+  (string-split (c:body cargs) #\,))
+
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
                         ;; TODO: reassign args
                         ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
-                        "/* TODO: call self */ continue_or_gc" (number->string (c:num-args cargs))
+                        "continue_or_gc" (number->string (c:num-args cargs))
                         "(data,"
-                        this-cont
+                        (mangle (car (adbf:all-params ast-fnc))) ;; Call back into self after GC
                         (if (> (c:num-args cargs) 0) "," "")
                         (c:body cargs)
                         ");"
@@ -1378,7 +1386,7 @@
 ;; Compile a reference to an element of a closure.
 (define (c-compile-closure-element-ref ast-id var idx)
   (with-fnc ast-id (lambda (fnc)
-    (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
+    ;(trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
       ((and *optimize-well-known-lambdas*
             (adbf:well-known fnc)
