@@ -457,7 +457,21 @@
     (define (prim-call? exp)
       (and (list? exp) (prim? (car exp))))
 
-    (define (prim->c-func p)
+    (define (prim->c-func p use-alloca?)
+      (cond
+         (use-alloca?
+          ;; Special case, when this flag is set the compiler is requesting a
+          ;; primitive that will allocate data, so any new objects must be
+          ;; created via alloca or such, and cannot be declared as stack vars.
+          ;; This is to support C loops in place of recursion.
+          (cond
+            ((eq? p 'cons)          "alloca_pair")
+            (else
+              (_prim->c-func p))))
+         (else
+           (_prim->c-func p))))
+
+    (define (_prim->c-func p)
       (cond
          ((eq? p 'Cyc-global-vars)       "Cyc_get_global_variables")
          ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
@@ -876,9 +890,10 @@
     ;; Does primitive allocate an object?
     ;; TODO: these are the functions that are defined via macros. This method
     ;; is obsolete and should be replaced by prim:cont? functions over time.
-    (define (prim:allocates-object? exp)
+    (define (prim:allocates-object? exp use-alloca?)
         (and  (prim? exp)
-              (member exp '())))
+              use-alloca?
+              (member exp '(cons))))
     
     ;; Does the primitive only accept/return immutable objects?
     ;; This is useful during optimization

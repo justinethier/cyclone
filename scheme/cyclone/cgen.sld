@@ -649,12 +649,12 @@
     (and (> len 0)
          (equal? end (substring str (- len 1) len)))))
 
-TODO: move this into prim module, integrate with existing function somehow
-;;(define (prim->c-func* p use-alloca?)
-;;  (cond
-;;    (else
-;;      (prim->c-func p))))
-TODO: add use-alloca? param to prim:allocates-object? and modify per above
+;;TODO: move this into prim module, integrate with existing function somehow
+;;;;(define (prim->c-func* p use-alloca?)
+;;;;  (cond
+;;;;    (else
+;;;;      (prim->c-func p))))
+;;TODO: add use-alloca? param to prim:allocates-object? and modify per above
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
@@ -669,7 +669,7 @@ TODO: add use-alloca? param to prim:allocates-object? and modify per above
                    ((closure)"
                     (cgen:mangle-global p)
                  ")->fn)")
-               (prim->c-func p)))
+               (prim->c-func p use-alloca?)))
          ;; Following closure defs are only used for prim:cont? to
          ;; create a new closure for the continuation, if needed.
          ;;
@@ -750,7 +750,7 @@ TODO: add use-alloca? param to prim:allocates-object? and modify per above
         ;;
         (let ((cv-name (mangle (gensym 'c))))
            (c-code/vars
-            (if (prim:allocates-object? p)
+            (if (prim:allocates-object? p use-alloca?)
                 cv-name ;; Already a pointer
                 (string-append "&" cv-name)) ;; Point to data
             (list
@@ -966,6 +966,7 @@ TODO: add use-alloca? param to prim:allocates-object? and modify per above
                 (cond
                   ;; Handle recursive calls via iteration, if possible
                   ((and ast-fnc
+                        #f ;; TODO: temporarily disabled
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
