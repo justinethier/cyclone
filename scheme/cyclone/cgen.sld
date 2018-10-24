@@ -649,19 +649,15 @@
     (and (> len 0)
          (equal? end (substring str (- len 1) len)))))
 
-;;TODO: move this into prim module, integrate with existing function somehow
-;;;;(define (prim->c-func* p use-alloca?)
-;;;;  (cond
-;;;;    (else
-;;;;      (prim->c-func p))))
-;;TODO: add use-alloca? param to prim:allocates-object? and modify per above
+;; Use alloca() for stack allocations?
+(define (alloca? ast-id)
+  (let ((ast-fnc (adb:get/default ast-id #f)))
+    (and ast-fnc 
+         (adbf:calls-self? ast-fnc))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
-  (let* ((ast-fnc (adb:get/default ast-id #f))
-         ;; Use alloca for stack allocations?
-         (use-alloca? (and ast-fnc
-                           (adbf:calls-self? ast-fnc)))
+  (let* ((use-alloca? (alloca? ast-id))
          (c-func 
            (if (prim:udf? p)
                (string-append
@@ -1435,6 +1431,7 @@
 ;;
 (define (c-compile-closure exp append-preamble cont ast-id trace cps?)
   (let* ((lam (closure->lam exp))
+         (use-alloca? (alloca? ast-id))
          (free-vars
            (map
              (lambda (free-var)
@@ -1470,26 +1467,31 @@
              (car free-vars)
              (list))))
          (create-nclosure (lambda ()
-           (string-append
-             "closureN_type " cv-name ";\n"
-             ;; Not ideal, but one more special case to type check call/cc
-             (if call/cc?  "Cyc_check_proc(data, f);\n" "")
-             cv-name ".hdr.mark = gc_color_red;\n "
-             cv-name ".hdr.grayed = 0;\n"
-             cv-name ".tag = closureN_tag;\n "
-             cv-name ".fn = (function_type)__lambda_" (number->string lid) ";\n"
-             cv-name ".num_args = " num-args-str ";\n"
-             cv-name ".num_elements = " (number->string (length free-vars)) ";\n"
-             cv-name ".elements = (object *)alloca(sizeof(object) * " 
-                     (number->string (length free-vars)) ");\n"
-             (let loop ((i 0) 
-                        (vars free-vars))
-               (if  (null? vars)
-                 ""
-                 (string-append 
-                   cv-name ".elements[" (number->string i) "] = " 
-                           (car vars) ";\n"
-                   (loop (+ i 1) (cdr vars))))))))
+           (let ((decl (if use-alloca?
+                           (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
+                           (string-append "closureN_type " cv-name ";\n")))
+                 (sep (if use-alloca? "->" "."))
+                )
+             (string-append
+               decl
+               ;; Not ideal, but one more special case to type check call/cc
+               (if call/cc?  "Cyc_check_proc(data, f);\n" "")
+               cv-name sep "hdr.mark = gc_color_red;\n "
+               cv-name sep "hdr.grayed = 0;\n"
+               cv-name sep "tag = closureN_tag;\n "
+               cv-name sep "fn = (function_type)__lambda_" (number->string lid) ";\n"
+               cv-name sep "num_args = " num-args-str ";\n"
+               cv-name sep "num_elements = " (number->string (length free-vars)) ";\n"
+               cv-name sep "elements = (object *)alloca(sizeof(object) * " 
+                       (number->string (length free-vars)) ");\n"
+               (let loop ((i 0) 
+                          (vars free-vars))
+                 (if  (null? vars)
+                   ""
+                   (string-append 
+                     cv-name sep "elements[" (number->string i) "] = " 
+                             (car vars) ";\n"
+                     (loop (+ i 1) (cdr vars)))))))))
          (create-mclosure (lambda () 
            (let ((prefix 
                     (if macro?
