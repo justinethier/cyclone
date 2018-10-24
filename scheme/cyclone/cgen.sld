@@ -692,12 +692,17 @@
                  (else "")))
          (tdata-comma (if (> (string-length tdata) 0) "," ""))
          (tptr-type (prim/c-var-pointer p))
-         (tptr-comma (if tptr-type ",&" ""))
+         (tptr-comma 
+          (cond
+           ((and tptr-type use-alloca?) ",")
+           (tptr-type ",&")
+           (else "")))
          (tptr (cond
                 (tptr-type (mangle (gensym 'local)))
                 (else "")))
          (tptr-decl
           (cond 
+            ((and tptr-type use-alloca?) (string-append "object " tptr " = alloca(sizeof(" tptr-type ")); "))
             (tptr-type (string-append tptr-type " " tptr "; "))
             (else "")))
          (c-var-assign 
