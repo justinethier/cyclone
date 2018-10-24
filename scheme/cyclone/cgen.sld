@@ -1002,7 +1002,7 @@
                         "(data,"
                         (mangle (car (adbf:all-params ast-fnc))) ;; Call back into self after GC
                         (if (> (c:num-args cargs) 0) "," "")
-                        (c:body cargs)
+                        (string-join params ", ")
                         ");"
                       )))
                   )
