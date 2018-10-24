@@ -971,7 +971,7 @@
                 (cond
                   ;; Handle recursive calls via iteration, if possible
                   ((and ast-fnc
-                        #f ;; TODO: temporarily disabled
+                        ;#f ;; TODO: temporarily disabled
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )
