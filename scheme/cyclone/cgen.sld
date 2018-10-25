@@ -654,9 +654,9 @@
 
 ;; Use alloca() for stack allocations?
 (define (alloca? ast-id)
-  (let ((ast-fnc (adb:get/default ast-id #f)))
-    (and ast-fnc 
-         (adbf:calls-self? ast-fnc))))
+  (let ((adbf:fnc (adb:get/default ast-id #f)))
+    (and adbf:fnc 
+         (adbf:calls-self? adbf:fnc))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
@@ -765,19 +765,26 @@
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Detect closure call of the form:
+;; self-closure-call? :: sexp -> symbol -> integer -> boolean
+;;
+;; Determine whether we have a closure call of the form:
 ;;  (%closure-ref
 ;;     (cell-get (%closure-ref self$249 1))
 ;;     0)
-;;TODO: need adbf, only a closure call if inner-cref's index matches adbf:self-closure-index
-(define (self-closure-call? ast self)
+;;
+;; Parameters:
+;; ast - S-expression to analyze
+;; self - Identifier for the function's "self" closure
+;; closure-index - Index of the function's "self" closure in outer closure
+(define (self-closure-call? ast self closure-index)
+  ;(trace:error `(JAE self-closure-call? ,ast ,self ,closure-index))
   (and-let* (((tagged-list? '%closure-ref ast))
              ((tagged-list? 'cell-get (cadr ast)))
              (inner-cref (cadadr ast))
              ((tagged-list? '%closure-ref inner-cref))
              (equal? self (cadr inner-cref))
              ((equal? 0 (caddr ast)))
-             ((equal? 1 (caddr inner-cref)))
+             ((equal? closure-index (caddr inner-cref)))
             )
     #t))
 
@@ -981,16 +988,20 @@
               (set-c-call-arity! (c:num-args cargs))
               (let* ((wkf (well-known-lambda (car args)))
                      (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
-                     (ast-fnc (adb:get/default ast-id #f))
+                     (adbf:fnc (adb:get/default ast-id #f))
                     )
                 (cond
                   ;; Handle recursive calls via iteration, if possible
-                  ((and ast-fnc
-                        #f ;; TODO: temporarily disabled
-                        (adbf:calls-self? ast-fnc)
-                        (self-closure-call? fun (car (adbf:all-params ast-fnc)))
+                  ((and adbf:fnc
+                        ;#f ;; TODO: temporarily disabled
+                        (adbf:calls-self? adbf:fnc)
+                        (self-closure-call? 
+                          fun 
+                          (car (adbf:all-params adbf:fnc))
+                          (adbf:self-closure-index adbf:fnc)
+                        )
                     )
-                    (let* ((params (map mangle (cdr (adbf:all-params ast-fnc))))
+                    (let* ((params (map mangle (cdr (adbf:all-params adbf:fnc))))
                            (args (map car raw-cargs))
                            (reassignments 
                              ;; TODO: may need to detect cases where an arg is reassigned before
@@ -1016,7 +1027,7 @@
                         ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
                         "continue_or_gc" (number->string (c:num-args cargs))
                         "(data,"
-                        (mangle (car (adbf:all-params ast-fnc))) ;; Call back into self after GC
+                        (mangle (car (adbf:all-params adbf:fnc))) ;; Call back into self after GC
                         (if (> (c:num-args cargs) 0) "," "")
                         (string-join params ", ")
                         ");"
@@ -1434,6 +1445,10 @@
         (string-append 
           "((closureN)" (mangle var) ")->elements[" idx "]"))))))
 
+;; Analyze closure members and assign index of the function's "self" closure, if found
+;; Parameters:
+;;   ast-fnc - Function to check for, in AST lambda form
+;;   closure-args - Members of the closure to scan
 (define (find-closure-assigned-var-index! ast-fnc closure-args)
   (let ((index 0)
         (fnc (adb:get/default (ast:lambda-id ast-fnc) #f)))
@@ -1446,6 +1461,7 @@
           (when (and (ref? arg) (member arg (adbf:assigned-to-var fnc)))
             ;(trace:error `(JAE closure for ,(ast:lambda-id ast-fnc) self ref is index ,index))
             (adbf:set-self-closure-index! fnc index)
+            (adb:set! (ast:lambda-id ast-fnc) fnc)
           )
           (set! index (+ index 1))
         )
@@ -1468,6 +1484,7 @@
 ;;    to one with the corresponding index so `lambda` can use them.
 ;;
 (define (c-compile-closure exp append-preamble cont ast-id trace cps?)
+  (find-closure-assigned-var-index! (closure->lam exp) (cdr exp))
   (let* ((lam (closure->lam exp))
          (use-alloca? (alloca? ast-id))
          (free-vars
@@ -1551,7 +1568,6 @@
               cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
-  (find-closure-assigned-var-index! lam (cdr exp))
   (cond
     (use-obj-instead-of-closure?
       (create-object))
