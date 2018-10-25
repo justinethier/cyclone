@@ -88,6 +88,7 @@
       adbf:well-known adbf:set-well-known!
       adbf:cgen-id adbf:set-cgen-id!
       adbf:closure-size adbf:set-closure-size!
+      adbf:self-closure-index adbf:set-self-closure-index!
       adbf:calls-self? adbf:set-calls-self!
       with-fnc
       with-fnc!
@@ -229,6 +230,7 @@
        well-known
        cgen-id
        closure-size
+       self-closure-index
        calls-self
       )
       adb:function?
@@ -247,6 +249,8 @@
       (cgen-id adbf:cgen-id adbf:set-cgen-id!)
       ;; Number of elements in the function's closure
       (closure-size adbf:closure-size adbf:set-closure-size!)
+      ;; Index of the function in its closure, if applicable
+      (self-closure-index adbf:self-closure-index adbf:set-self-closure-index!)
       ;; Does this function call itself?
       (calls-self adbf:calls-self? adbf:set-calls-self!)
     )
@@ -260,6 +264,7 @@
        #f   ;; well-known
        #f   ;; cgen-id
        -1   ;; closure-size
+       -1   ;; self-closure-index
        #f   ;; calls-self
       ))
 
