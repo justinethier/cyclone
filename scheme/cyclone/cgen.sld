@@ -31,6 +31,8 @@
     emits
     emits*
     emit-newline
+    ;; Helpers
+    self-closure-call?
   )
   (inline
     global-not-lambda?
@@ -418,7 +420,7 @@
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append "alloca_pair(" cvar "," (c:body a) "," (c:body b) ");")
+          (string-append "make_pair(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b))))
     )
     (_c-compile-scalars 
@@ -436,7 +438,8 @@
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
-                cvar-name ;; Not needed with alloca - (string-append "&" cvar-name)
+                ;;cvar-name ;; Not needed with alloca - (string-append "&" cvar-name)
+                (string-append "&" cvar-name)
                 (append
                   (c:allocs cell)
                   (list (c:body cell))))))))))
@@ -762,6 +765,22 @@
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Detect closure call of the form:
+;;  (%closure-ref
+;;     (cell-get (%closure-ref self$249 1))
+;;     0)
+;;TODO: need adbf, only a closure call if inner-cref's index matches adbf:self-closure-index
+(define (self-closure-call? ast self)
+  (and-let* (((tagged-list? '%closure-ref ast))
+             ((tagged-list? 'cell-get (cadr ast)))
+             (inner-cref (cadadr ast))
+             ((tagged-list? '%closure-ref inner-cref))
+             (equal? self (cadr inner-cref))
+             ((equal? 0 (caddr ast)))
+             ((equal? 1 (caddr inner-cref)))
+            )
+    #t))
+
 ; c-compile-ref : ref-exp -> string
 (define (c-compile-ref exp)
   (c-code 
@@ -967,7 +986,7 @@
                 (cond
                   ;; Handle recursive calls via iteration, if possible
                   ((and ast-fnc
-                        ;#f ;; TODO: temporarily disabled
+                        #f ;; TODO: temporarily disabled
                         (adbf:calls-self? ast-fnc)
                         (self-closure-call? fun (car (adbf:all-params ast-fnc)))
                     )

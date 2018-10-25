@@ -92,8 +92,6 @@
       adbf:calls-self? adbf:set-calls-self!
       with-fnc
       with-fnc!
-      ;; Helpers
-      self-closure-call?
   )
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
@@ -1789,22 +1787,6 @@
    (list)
    (list (convert exp #f '()))
    #f))
-
-;; Detect closure call of the form:
-;;  (%closure-ref
-;;     (cell-get (%closure-ref self$249 1))
-;;     0)
-TODO: need adbf, only a closure call if inner-cref's index matches adbf:self-closure-index
-(define (self-closure-call? ast self)
-  (and-let* (((tagged-list? '%closure-ref ast))
-             ((tagged-list? 'cell-get (cadr ast)))
-             (inner-cref (cadadr ast))
-             ((tagged-list? '%closure-ref inner-cref))
-             (equal? self (cadr inner-cref))
-             ((equal? 0 (caddr ast)))
-             ((equal? 1 (caddr inner-cref)))
-            )
-    #t))
 
 (define (analyze:find-named-lets exp)
   (define (scan exp lp)
