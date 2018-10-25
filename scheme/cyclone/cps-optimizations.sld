@@ -83,6 +83,7 @@
       adbf:simple adbf:set-simple!
       adbf:all-params adbf:set-all-params!
       adbf:unused-params adbf:set-unused-params!
+      adbf:assigned-to-var adbf:set-assigned-to-var!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
       adbf:cgen-id adbf:set-cgen-id!
