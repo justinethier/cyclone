@@ -1794,6 +1794,7 @@
 ;;  (%closure-ref
 ;;     (cell-get (%closure-ref self$249 1))
 ;;     0)
+TODO: need adbf, only a closure call if inner-cref's index matches adbf:self-closure-index
 (define (self-closure-call? ast self)
   (and-let* (((tagged-list? '%closure-ref ast))
              ((tagged-list? 'cell-get (cadr ast)))
