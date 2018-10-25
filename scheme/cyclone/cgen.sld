@@ -988,6 +988,7 @@
                                         param " = " arg ";\n"))))
                                 params
                                 args))))
+(trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
@@ -1414,6 +1415,24 @@
         (string-append 
           "((closureN)" (mangle var) ")->elements[" idx "]"))))))
 
+(define (find-closure-assigned-var-index! ast-fnc closure-args)
+  (let ((index 0)
+        (fnc (adb:get/default (ast:lambda-id ast-fnc) #f)))
+    ;(trace:info `(find-closure-assigned-var-index! ,ast-fnc ,fnc ,closure-args))
+    (cond
+      ((and fnc 
+            (pair? (adbf:assigned-to-var fnc)))
+       (for-each
+        (lambda (arg)
+          (when (and (ref? arg) (member arg (adbf:assigned-to-var fnc)))
+            ;(trace:error `(JAE closure for ,(ast:lambda-id ast-fnc) self ref is index ,index))
+            (adbf:set-self-closure-index! fnc index)
+          )
+          (set! index (+ index 1))
+        )
+        closure-args)
+      )
+      (else #f))))
 
 ;; c-compile-closure : closure-exp (string -> void) -> string
 ;;
@@ -1513,6 +1532,7 @@
               cv-name ".num_args = " (number->string (compute-num-args lam)) ";"
               )))))
   ;(trace:info (list 'JAE-DEBUG trace macro?))
+  (find-closure-assigned-var-index! lam (cdr exp))
   (cond
     (use-obj-instead-of-closure?
       (create-object))
