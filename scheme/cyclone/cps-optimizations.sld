@@ -1795,6 +1795,7 @@
              ((tagged-list? '%closure-ref inner-cref))
              (equal? self (cadr inner-cref))
              ((equal? 0 (caddr ast)))
+             ((equal? 1 (caddr inner-cref)))
             )
     #t))
 
