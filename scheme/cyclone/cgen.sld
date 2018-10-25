@@ -1518,7 +1518,10 @@
       (create-object))
     (else
       (c-code/vars
-        (string-append "&" cv-name)
+        (if (and use-alloca?
+                 (> (length free-vars) 0))
+            cv-name
+            (string-append "&" cv-name))
         (list 
           (if (> (length free-vars) 0)
             (create-nclosure)
