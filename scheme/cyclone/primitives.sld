@@ -465,7 +465,12 @@
           ;; created via alloca or such, and cannot be declared as stack vars.
           ;; This is to support C loops in place of recursion.
           (cond
-            ((eq? p 'cons)          "alloca_pair")
+            ((eq? p 'cons)            "alloca_pair")
+            ((eq? p 'Cyc-fast-list-1) "alloca_list_1")
+            ((eq? p 'Cyc-fast-list-2) "alloca_list_2")
+            ((eq? p 'Cyc-fast-list-3) "alloca_list_3")
+            ((eq? p 'Cyc-fast-list-4) "alloca_list_4")
+            ((eq? p 'cell)            "alloca_cell")
             (else
               (_prim->c-func p))))
          (else
