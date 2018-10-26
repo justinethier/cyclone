@@ -1018,7 +1018,7 @@
                                         param " = " arg ";\n"))))
                                 params
                                 args))))
-(trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
+;(trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
                     (c-code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
