@@ -116,15 +116,19 @@
                     (vector-ref vec i))))))
            (mat
             (cdr mat)))
-(make-row->func 1 -1)
-      #;(zebra (first-row-perm 'child)
+;(make-row->func 1 -1)
+      (zebra (first-row-perm 'child)
              (make-row->func 1 -1)
              (make-row->func -1 1)
              mat
              number-of-cols))))
 
+;; TODO: with this test code, why is the fast-eq inlined????
 (write (zunda 1 -1))
-;
+
+(define zebra
+  (lambda (row-perm row->func+ row->func- mat number-of-cols)
+    (write (list row-perm row->func+ row->func- mat number-of-cols))))
 ;(define zebra
 ;  (lambda (row-perm row->func+ row->func- mat number-of-cols)
 ;    (let _-*-
