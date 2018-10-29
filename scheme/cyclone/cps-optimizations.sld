@@ -1082,6 +1082,20 @@
                   ;; Could not inline
                   (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp)))
             )) ;;
+            ;; Lambda with a parameter that is never used; sequence code instead to avoid lambda
+            ((and (ast:lambda? (car exp))
+                  (every
+                    (lambda (param)
+                      (with-var param (lambda (var)
+                        (null? (adbv:ref-by var)))))
+                    (ast:lambda-formals->list (car exp)))
+             )
+             (opt:inline-prims 
+               `(Cyc-seq 
+                  ,@(cdr exp)
+                  ,(ast:lambda-body (car exp))) 
+               scope-sym 
+               refs))
             (else
               (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp))))
           (else 
