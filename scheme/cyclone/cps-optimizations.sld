@@ -353,7 +353,8 @@
                (lambda-body (lambda->exp define-body))
                (fv (filter 
                      (lambda (v)
-                       (not (prim? v)))
+                       (and (not (equal? 'Cyc-seq v))
+                            (not (prim? v))))
                      (free-vars expr)))
               )
 ;(trace:error `(JAE DEBUG ,(define->var expr) ,fv))
@@ -1679,7 +1680,7 @@
             (body  (ast:lambda-body exp))
             (new-free-vars 
               (difference 
-                (difference (free-vars body) (ast:lambda-formals->list exp))
+                (difference (free-vars body) (cons 'Cyc-seq (ast:lambda-formals->list exp)))
                 globals))
             (formals (list->lambda-formals
                        (cons new-self-var (ast:lambda-formals->list exp))
@@ -1725,6 +1726,9 @@
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
        (cond
+         ((tagged-list? 'Cyc-seq exp)
+          (cons 'Cyc-seq
+                (map cc (cdr exp))))
          ((ast:lambda? fn)
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
@@ -1752,7 +1756,7 @@
               (let* ((body  (ast:lambda-body fn))
                      (new-free-vars 
                        (difference
-                         (difference (free-vars body) (ast:lambda-formals->list fn))
+                         (difference (free-vars body) (cons 'Cyc-seq (ast:lambda-formals->list fn)))
                          globals))
                      (new-free-vars? (> (length new-free-vars) 0)))
                   (if new-free-vars?
