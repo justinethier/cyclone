@@ -1726,9 +1726,8 @@
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
        (cond
-         ((tagged-list? 'Cyc-seq exp)
-          (cons 'Cyc-seq
-                (map cc (cdr exp))))
+         ((equal? 'Cyc-seq fn)
+          `(Cyc-seq ,@args))
          ((ast:lambda? fn)
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
