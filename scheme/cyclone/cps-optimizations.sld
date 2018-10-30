@@ -1726,8 +1726,11 @@
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
        (cond
-         TODO: what about application of cyc-seq? does this only occur as a nested form? can we combine here or earlier??
-               I think that is what is causing cc printing to explode exponentially!
+         ;TODO: what about application of cyc-seq? does this only occur as a nested form? can we combine here or earlier??
+         ;      I think that is what is causing cc printing to explode exponentially!
+         ;((tagged-list? 'Cyc-seq fnc)
+        ; (foldl (lambda (sexp acc) (cons sexp acc)) '() (reverse '(a b c (cyc-seq 1) (cyc-seq 2 ((cyc-seq 3))))))
+        ; TODO: maybe just call a function to 'flatten' seq's
          ((equal? 'Cyc-seq fn)
           `(Cyc-seq ,@args))
          ((ast:lambda? fn)
