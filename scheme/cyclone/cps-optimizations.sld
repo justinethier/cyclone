@@ -1726,6 +1726,8 @@
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
        (cond
+         TODO: what about application of cyc-seq? does this only occur as a nested form? can we combine here or earlier??
+               I think that is what is causing cc printing to explode exponentially!
          ((equal? 'Cyc-seq fn)
           `(Cyc-seq ,@args))
          ((ast:lambda? fn)
