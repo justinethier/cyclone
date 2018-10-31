@@ -776,6 +776,9 @@
     
     ; Application:
     ((app? exp)
+     ;; Easy place to clean up nested Cyc-seq expressions
+     (when (tagged-list? 'Cyc-seq exp)
+           (set! exp (flatten-subcalls exp 'Cyc-seq)))
      (let ((result (map (lambda (e) (wrap-mutables e globals)) exp)))
        ;; This code can eliminate a lambda definition. But typically
        ;; the code that would have such a definition has a recursive
@@ -805,6 +808,39 @@
        ;; (else result))))
        result))
     (else            (error "unknown expression type: " exp))))
+
+;; Flatten a list containing subcalls of a given symbol.
+;; For example, the expression: 
+;;
+;;  '(Cyc-seq
+;;         (set! b '(#f . #f))
+;;         ((Cyc-seq
+;;           (set-car!  a 1)
+;;           ((Cyc-seq
+;;             (set-cdr!  a '(2)))))))
+;;
+;; becomes:
+;;
+;;  '(Cyc-seq
+;;     (set! b '(#f . #f))
+;;     (set-car!  a 1)
+;;     (set-cdr!  a '(2)))
+;;
+(define (flatten-subcalls sexp sym)
+  (define (flat sexp acc)
+    (cond
+      ((not (pair? sexp))
+       acc)
+      ((and (app? (car sexp))
+            (app? (caar sexp))
+            (tagged-list? sym (caar sexp)))
+       (flat (cdaar sexp) acc))
+      (else ;;(pair? sexp)
+        (flat (cdr sexp) (cons (car sexp) acc))))
+  )
+  (reverse
+    (flat sexp '())))
+
 
 ;; Alpha conversion
 ;; (aka alpha renaming)
