@@ -1094,7 +1094,7 @@
              (opt:inline-prims 
                `(Cyc-seq 
                   ,@(cdr exp)
-                  ,(ast:lambda-body (car exp))) 
+                  ,@(ast:lambda-body (car exp))) 
                scope-sym 
                refs))
             (else
