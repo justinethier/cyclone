@@ -1086,6 +1086,11 @@
             ;; Lambda with a parameter that is never used; sequence code instead to avoid lambda
             ((and (ast:lambda? (car exp))
                   (every
+                    (lambda (arg)
+                      (or (not (prim-call? arg))
+                          (not (prim:cont? (car arg)))))
+                    (cdr exp))
+                  (every
                     (lambda (param)
                       (with-var param (lambda (var)
                         (null? (adbv:ref-by var)))))
