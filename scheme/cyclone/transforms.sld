@@ -778,7 +778,7 @@
     ((app? exp)
      ;; Easy place to clean up nested Cyc-seq expressions
      (when (tagged-list? 'Cyc-seq exp)
-           (set! exp (flatten-subcalls exp 'Cyc-seq)))
+           (set! exp (flatten-sequence exp)))
      (let ((result (map (lambda (e) (wrap-mutables e globals)) exp)))
        ;; This code can eliminate a lambda definition. But typically
        ;; the code that would have such a definition has a recursive
@@ -828,13 +828,16 @@
 ;;     (set-cdr! a '(2))
 ;;     ((fnc a1 a2 a3)))
 ;;
-(define (flatten-subcalls sexp sym)
+(define (flatten-sequence sexp)
   (define (flat sexp acc)
     (cond
-      ((not (pair? sexp))
+      ((not (pair? sexp)) ;; Stop at end of sexp
        acc)
-      ((and (tagged-list? sym (car sexp)))
+      ((and (tagged-list? 'Cyc-seq (car sexp))) ;; Flatten nexted sequences
         (flat (cdar sexp) acc))
+      ((and (ref? (car sexp)) ;; Remove unused identifiers
+            (not (equal? 'Cyc-seq (car sexp))))
+        (flat (cdr sexp) acc))
       (else ;;(pair? sexp)
         (flat (cdr sexp) (cons (car sexp) acc))))
   )
