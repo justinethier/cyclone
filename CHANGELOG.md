@@ -2,6 +2,10 @@
 
 ## 0.9.4 - TBD
 
+Features (notes)
+- optimize recursive functions using C iteration
+- combine lambda functions that are only called for side effects.
+
 Bug Fixes
 
 - Prevent GC segmentation fault on ARM platforms (Raspberry Pi 2).
