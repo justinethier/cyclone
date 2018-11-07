@@ -581,7 +581,9 @@
          ;; Identify indirect mutations. That is, the result of a function call
          ;; is what is mutated
          (cond
-          ((and (prim:mutates? (car exp)))
+          ((and (prim:mutates? (car exp))
+                (not (member (car exp) '(vector-set!))) ;; TODO: experimental
+           )
            (let ((e (cadr exp)))
             (when (ref? e)
               (with-var e (lambda (var)
@@ -1241,7 +1243,7 @@
           ((member exp args)
            (set-car! arg-used #t))
           ((member exp ivars)
-           ;;(trace:error `(inline-ok? return #f ,exp ,ivars ,args))
+           ;(trace:error `(inline-ok? return #f ,exp ,ivars ,args))
            (return #f))
           (else 
            #t)))
@@ -1277,6 +1279,10 @@
               (if (not (ref? e))
                   (inline-ok? e ivars args arg-used return)))
             (reverse (cdr exp))))
+          TODO: add a new cond here
+          ;; TODO: if mutates, can we check to see if there are any "safe" params which we
+          ;; can safely ignore? for example, on vector-set! we know only the vec arg is being mutated,
+          ;; so ivars in other positions can be ignored
           (else
            (for-each
             (lambda (e)
