@@ -582,6 +582,7 @@
          ;; is what is mutated
          (cond
           ((and (prim:mutates? (car exp))
+                ;; loop3-dev WIP step #1 - do not immediately reject these prims
                 (not (member (car exp) '(vector-set!))) ;; TODO: experimental
            )
            (let ((e (cadr exp)))
@@ -1279,11 +1280,16 @@
               (if (not (ref? e))
                   (inline-ok? e ivars args arg-used return)))
             (reverse (cdr exp))))
-          TODO: add a new cond here
-          ;; TODO: if mutates, can we check to see if there are any "safe" params which we
-          ;; can safely ignore? for example, on vector-set! we know only the vec arg is being mutated,
-          ;; so ivars in other positions can be ignored
-          (else
+          ;; loop3-dev WIP step #2 - some args can be safely ignored
+          ((and (prim? (car exp))
+                (prim:mutates? (car exp))
+                (member (car exp) '(vector-set!))
+           )
+           ;; with vector-set, only arg 1 (the vector) is actually mutated
+           ;; TODO: is this always true? do we have problems with self-recursive vecs??
+           (inline-ok? (cadr exp) ivars args arg-used return) 
+          )
+         (else
            (for-each
             (lambda (e)
               (inline-ok? e ivars args arg-used return))
