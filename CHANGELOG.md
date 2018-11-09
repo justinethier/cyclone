@@ -5,6 +5,7 @@
 Features (notes)
 - optimize recursive functions using C iteration
 - combine lambda functions that are only called for side effects.
+- improve inlining of primitives that work with immutable objects.
 
 Bug Fixes
 
