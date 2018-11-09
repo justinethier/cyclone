@@ -589,7 +589,7 @@
          (cond
           ((and (prim:mutates? (car exp))
                 ;; loop3-dev WIP step #1 - do not immediately reject these prims
-                (not (member (car exp) '(vector-set!))) ;; TODO: experimental
+                ;(not (member (car exp) '(vector-set!))) ;; TODO: experimental
            )
            (let ((e (cadr exp)))
             (when (ref? e)
@@ -1297,14 +1297,14 @@
                   (inline-ok? e ivars args arg-used return)))
             (reverse (cdr exp))))
           ;; loop3-dev WIP step #2 - some args can be safely ignored
-          ((and (prim? (car exp))
-                (prim:mutates? (car exp))
-                (member (car exp) '(vector-set!))
-           )
-           ;; with vector-set, only arg 1 (the vector) is actually mutated
-           ;; TODO: is this always true? do we have problems with self-recursive vecs??
-           (inline-ok? (cadr exp) ivars args arg-used return) 
-          )
+          ;((and (prim? (car exp))
+          ;      (prim:mutates? (car exp))
+          ;      (member (car exp) '(vector-set!))
+          ; )
+          ; ;; with vector-set, only arg 1 (the vector) is actually mutated
+          ; ;; TODO: is this always true? do we have problems with self-recursive vecs??
+          ; (inline-ok? (cadr exp) ivars args arg-used return) 
+          ;)
          (else
            (for-each
             (lambda (e)
