@@ -54,6 +54,8 @@
       adbv:set-global!
       adbv:defined-by 
       adbv:set-defined-by!
+      adbv:mutated-by-set? 
+      adbv:set-mutated-by-set!
       adbv:reassigned? 
       adbv:set-reassigned!
       adbv:assigned-value
@@ -131,6 +133,7 @@
         defines-lambda-id
         const const-value  
         ref-count ref-by
+        mutated-by-set
         reassigned assigned-value 
         app-fnc-count app-arg-count
         inlinable mutated-indirectly
@@ -148,6 +151,7 @@
       (const-value adbv:const-value adbv:set-const-value!)
       (ref-count adbv:ref-count adbv:set-ref-count!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
+      (mutated-by-set adbv:mutated-by-set? adbv:set-mutated-by-set!)
       ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
       ;; a single time via set
@@ -205,6 +209,7 @@
         #f  ; const-value  
         0   ; ref-count 
         '() ; ref-by             
+        #f  ; mutated-by-set
         #f  ; reassigned 
         #f  ; assigned-value 
         0   ; app-fnc-count 
@@ -556,6 +561,7 @@
          (with-var! (set!->var exp) (lambda (var)
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
+           (adbv:set-mutated-by-set! var #t)
            (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
            (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
@@ -989,11 +995,7 @@
                     (cdr exp)
                     (ast:lambda-formals->list (car exp)))
                   (or
-                    ; Issue #172 - Cannot assume that just because a primitive 
-                    ; deals with immutable objects that it is safe to inline.
-                    ; A (set!) could still mutate variables the primitive is
-                    ; using, causing invalid behavior.
-                    ;(prim-calls-inlinable? (cdr exp))
+                    (prim-calls-inlinable? (cdr exp))
 
                     ;; Testing - every arg only used once
                     ;(and
@@ -1166,7 +1168,21 @@
     (define (prim-calls-inlinable? prim-calls)
       (every
         (lambda (prim-call)
-          (prim:immutable-args/result? (car prim-call)))
+          (and 
+            (prim:immutable-args/result? (car prim-call))
+            ; Issue #172 - Cannot assume that just because a primitive 
+            ; deals with immutable objects that it is safe to inline.
+            ; A (set!) could still mutate variables the primitive is
+            ; using, causing invalid behavior.
+            ;
+            ; So, make sure none of the args is mutated via (set!)
+            (every
+              (lambda (arg)
+                (or (not (ref? arg))
+                    (with-var arg (lambda (var)
+                      (not (adbv:mutated-by-set? var))))))
+              (cdr prim-call)))
+          )
         prim-calls))
 
     ;; Check each pair of primitive call / corresponding lambda arg,
