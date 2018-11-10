@@ -32,6 +32,37 @@
       (scan sexp #f)
       (return #t))))
 
+(define (tail-calls->values sexp sym)
+  (call/cc
+    (lambda (return)
+      (define (scan exp)
+      (write `(DEBUG scan ,exp)) (newline)
+        (cond
+         ((ast:lambda? exp)
+          (return #f)) ;; Could be OK if not ref'd...
+         ((ref? exp) 
+          (if (equal? exp sym)
+              (return #f))) ;; Assume not a tail call
+         ((define? exp) 
+          (return #f)) ;; Fail fast
+         ((set!? exp)
+          (return #f)) ;; Fail fast
+         ((if? exp)       
+          `(if ,(if->condition exp) 
+               ,(scan (if->then exp))
+               ,(scan (if->else exp))))
+         ((app? exp)
+          (cond
+            ((and (equal? (car exp) sym)
+                  (= (length exp) 2)
+             )
+             (cadr exp))
+            (else
+             (return #f))))
+         (else exp)))
+      (return
+        (scan sexp)))))
+
 (define (find-local-vars sexp)
   (define (scan exp)
     (cond
@@ -60,11 +91,22 @@
           (ast:lambda? (car exp))
           (equal? (length exp) 2)
           (ast:lambda? (cadr exp))
+          (equal? 1 (length (ast:lambda-args (cadr exp))))
           (local-tail-call-only? 
             (ast:lambda-body (car exp)) 
             (car (ast:lambda-args (car exp)))))
          (write `(tail-call-only? passed for ,exp)) (newline)
-         'TODO)
+         (write `(replace with ,(tail-calls->values 
+                                  (car (ast:lambda-body (car exp)))
+                                  (car (ast:lambda-args (car exp))))))
+         (newline)
+         (let ((value (tail-calls->values
+                        (car (ast:lambda-body (car exp)))
+                        (car (ast:lambda-args (car exp)))))
+               (var (car (ast:lambda-args (cadr exp))))
+               (body (ast:lambda-body (cadr exp))))
+          `((let ((,var ,value))
+            ,body))))
         (else
           (map scan exp))))
      (else 'todo)
@@ -105,4 +147,5 @@
 ;  (ast:ast->pp-sexp
 ;    (ast:sexp->ast sexp)))
 
-(find-local-vars (ast:sexp->ast sexp))
+(pretty-print
+  (find-local-vars (ast:sexp->ast sexp)))

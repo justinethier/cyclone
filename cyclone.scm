@@ -424,6 +424,8 @@
         (trace:info (ast:ast->pp-sexp input-program))
       )
     
+;; TODO: would want to introduce lets right here, at least to start
+
       ;; TODO: could do this, but it seems like a bit of a band-aid...
       (set! input-program (opt:renumber-lambdas! input-program))
       (trace:info "---------------- after renumber lambdas")
