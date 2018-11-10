@@ -148,6 +148,7 @@
     open-input-bytevector
     open-output-bytevector
     features
+    Cyc-add-feature!
     Cyc-version
     any
     every
@@ -237,10 +238,17 @@
         (cons
           (string->symbol 
             (string-append "version-" *version-number*))
-          '(r7rs 
-            ieee-float
-            full-unicode
-            posix))))
+          *other-features*)))
+
+    (define *other-features* 
+            '(r7rs 
+              ieee-float
+              full-unicode
+              posix))
+
+    ;; Designed for internal use only, don't call this in user code!!
+    (define (Cyc-add-feature! sym)
+      (set! *other-features* (cons sym *other-features*)))
 
     (define (Cyc-version) *version-number*)
 
