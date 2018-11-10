@@ -1,6 +1,6 @@
 (import (scheme base) (scheme write) (scheme cyclone ast) (scheme cyclone util) (scheme cyclone pretty-print))
 
-;; TODO: scan sexp, is sym only called in tail-call position?
+;; Scan sexp to determine if sym is only called in a tail-call position
 (define (local-tail-call-only? sexp sym)
   (call/cc
     (lambda (return)
@@ -32,11 +32,12 @@
       (scan sexp #f)
       (return #t))))
 
+;; Transform all tail calls of sym in the sexp to just the value passed
 (define (tail-calls->values sexp sym)
   (call/cc
     (lambda (return)
       (define (scan exp)
-      (write `(DEBUG scan ,exp)) (newline)
+        ;;(write `(DEBUG scan ,exp)) (newline)
         (cond
          ((ast:lambda? exp)
           (return #f)) ;; Could be OK if not ref'd...
@@ -63,28 +64,33 @@
       (return
         (scan sexp)))))
 
-(define (find-local-vars sexp)
+;; Reduce given sexp by replacing certain lambda calls with a let containing
+;; local variables. Based on the way cyclone transforms code, this will
+;; typically be limited to if expressions embedded in other expressions.
+(define (opt:local-var-reduction sexp)
   (define (scan exp)
     (cond
      ((ast:lambda? exp)
-      (for-each
-        scan
-        (ast:lambda-body exp)))
+      (ast:%make-lambda
+        (ast:lambda-id exp)
+        (ast:lambda-args exp)
+        (map scan (ast:lambda-body exp))
+        (ast:lambda-has-cont exp)))
      ((quote? exp) exp)
      ((const? exp) exp)
      ((ref? exp) exp)
      ((define? exp) 
-      (for-each
-        scan
-        (define->exp exp)))
+      `(define
+        ,(define->var exp)
+        ,(map scan (define->exp exp))))
      ((set!? exp)
-      (for-each
-        scan
-        (set!->exp exp)))
+      `(set!
+         ,(set!->var exp)
+         ,(set!->exp exp)))
      ((if? exp)       
-      (scan (if->condition exp))
-      (scan (if->then exp))
-      (scan (if->else exp)))
+      `(if ,(scan (if->condition exp))
+           ,(scan (if->then exp))
+           ,(scan (if->else exp))))
      ((app? exp)
       (cond
         ((and
@@ -95,21 +101,21 @@
           (local-tail-call-only? 
             (ast:lambda-body (car exp)) 
             (car (ast:lambda-args (car exp)))))
-         (write `(tail-call-only? passed for ,exp)) (newline)
-         (write `(replace with ,(tail-calls->values 
-                                  (car (ast:lambda-body (car exp)))
-                                  (car (ast:lambda-args (car exp))))))
-         (newline)
+         ;;(write `(tail-call-only? passed for ,exp)) (newline)
+         ;;(write `(replace with ,(tail-calls->values 
+         ;;                         (car (ast:lambda-body (car exp)))
+         ;;                         (car (ast:lambda-args (car exp))))))
+         ;;(newline)
          (let ((value (tail-calls->values
                         (car (ast:lambda-body (car exp)))
                         (car (ast:lambda-args (car exp)))))
                (var (car (ast:lambda-args (cadr exp))))
                (body (ast:lambda-body (cadr exp))))
-          `((let ((,var ,value))
-            ,body))))
+          `(let ((,var ,value))
+            ,@body)))
         (else
           (map scan exp))))
-     (else 'todo)
+     (else (error "unknown expression type: " exp))
   ))
   (scan sexp))
 
@@ -148,4 +154,5 @@
 ;    (ast:sexp->ast sexp)))
 
 (pretty-print
-  (find-local-vars (ast:sexp->ast sexp)))
+  (ast:ast->pp-sexp
+    (opt:local-var-reduction (ast:sexp->ast sexp))))
