@@ -1,3 +1,12 @@
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2018, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This file is part of the cps-optimizations module.
+;;;;
+
 (cond-expand 
   (program
     (import (scheme base) 
