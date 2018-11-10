@@ -8,6 +8,8 @@ Features (notes)
 - improve inlining of primitives that work with immutable objects.
 - EXPERIMENTAL - Added a new feature `program` to `cond-expand` that is only defined when compiling a program. TODO: what about icyc?
 
+TODO: make sure to add local-var-redux.scm to cyclone-bootstrap! this has not been done yet!!
+
 
 Bug Fixes
 
