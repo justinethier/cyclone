@@ -34,6 +34,7 @@
       opt:contract
       opt:inline-prims
       opt:beta-expand
+      opt:local-var-reduction
       adb:clear!
       adb:get
       adb:get/default
@@ -95,6 +96,7 @@
       with-fnc
       with-fnc!
   )
+  (include "local-var-redux.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
