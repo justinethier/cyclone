@@ -224,7 +224,7 @@ bootstrap : icyc libs
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/cps-opt-local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/match.c $(BOOTSTRAP_DIR)/scheme/cyclone

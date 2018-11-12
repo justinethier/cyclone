@@ -96,7 +96,7 @@
       with-fnc
       with-fnc!
   )
-  (include "local-var-redux.scm")
+  (include "cps-opt-local-var-redux.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
