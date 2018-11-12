@@ -11,7 +11,7 @@
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme eval)
-          (scheme write)
+          ;(scheme write)
           (scheme cyclone util)
           (scheme cyclone ast)
           (scheme cyclone primitives)
