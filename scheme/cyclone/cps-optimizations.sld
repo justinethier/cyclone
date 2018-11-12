@@ -1695,6 +1695,9 @@
           (else 
             (loop (cdr lst) (+ i 1))))))
 
+(define (let->vars exp)
+  (map car (cadr exp)))
+
 (define (closure-convert exp globals . opts)
  (let ((optimization-level 2))
    (if (pair? opts)
@@ -1751,6 +1754,14 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
+    ((tagged-list? 'let exp) ;; Special case now with local var redux
+     `(let 
+        ,(cadr exp) 
+        ,@(convert
+            (caddr exp) 
+            self-var 
+            (filter (lambda (v) (not (member v (let->vars exp)))) free-var-lst)))
+    )
     ((lambda? exp)   (error `(Unexpected lambda in closure-convert ,exp)))
     ((if? exp)  `(if ,@(map cc (cdr exp))))
     ((cell? exp)       `(cell ,(cc (cell->value exp))))
