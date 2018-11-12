@@ -38,8 +38,8 @@
         ,@(map scan (define->exp exp))))
      ((set!? exp)
       `(set!
-         ,(set!->var exp)
-         ,(set!->exp exp)))
+         ,(scan (set!->var exp))
+         ,(scan (set!->exp exp))))
      ((if? exp)       
       `(if ,(scan (if->condition exp))
            ,(scan (if->then exp))
@@ -187,7 +187,7 @@
                              ((lambda
                                 (lp$80$87$681)
                                 (Cyc-seq
-                                  (set-cell!
+                                  (set!
                                     lp$80$87$681
                                     (lambda
                                       (k$1073 i$88$682 first$89$683 row$90$684)
