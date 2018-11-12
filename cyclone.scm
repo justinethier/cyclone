@@ -424,7 +424,9 @@
         (trace:info (ast:ast->pp-sexp input-program))
       )
     
-;; TODO: would want to introduce lets right here, at least to start
+      (set! input-program (opt:local-var-reduction input-program))
+      (trace:info "---------------- after local variable reduction")
+      (trace:info (ast:ast->pp-sexp input-program))
 
       ;; TODO: could do this, but it seems like a bit of a band-aid...
       (set! input-program (opt:renumber-lambdas! input-program))

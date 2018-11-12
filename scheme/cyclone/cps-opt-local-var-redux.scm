@@ -21,7 +21,7 @@
 ;; typically be limited to if expressions embedded in other expressions.
 (define (opt:local-var-reduction sexp)
   (define (scan exp)
-    (write `(DEBUG scan ,exp)) (newline)
+    ;;(write `(DEBUG scan ,exp)) (newline)
     (cond
      ((ast:lambda? exp)
       (ast:%make-lambda
@@ -78,7 +78,7 @@
   (call/cc
     (lambda (return)
       (define (scan exp fail?)
-        (write `(DEBUG lvr:local-tail-call-only? scan ,exp)) (newline)
+        ;;(write `(DEBUG lvr:local-tail-call-only? scan ,exp)) (newline)
         (cond
          ((ast:lambda? exp)
           (return #f)) ;; Could be OK if not ref'd...
@@ -112,7 +112,7 @@
   (call/cc
     (lambda (return)
       (define (scan exp)
-        (write `(DEBUG scan ,exp)) (newline)
+        ;;(write `(DEBUG scan ,exp)) (newline)
         (cond
          ((ast:lambda? exp)
           (return #f)) ;; Could be OK if not ref'd...
@@ -235,38 +235,11 @@
                         row$78$676))
                      (make-vector number-of-cols$68$671)))))))
            (length first-row$65$670)))
-        'now)))))
+        'now))))
+  (define *num-passed* 0) 
+ )
 
 )
-                 #;(lambda
-                    (k$1073 i$88$682 first$89$683 row$90$684)
-                    (if (Cyc-fast-eq
-                          i$88$682
-                          number-of-cols$68$671)
-                      (k$1073
-                        (Cyc-fast-eq
-                          i$88$682
-                          number-of-cols$68$671))
-                      ((lambda
-                         (k$1080)
-                         (if (Cyc-fast-eq
-                               (car first$89$683)
-                               (car row$90$684))
-                           (k$1080 if-equal$76$674)
-                           (k$1080 if-different$77$675)))
-                       (lambda
-                         (r$1079)
-                         (Cyc-seq
-                           (vector-set!
-                             vec$79$677
-                             i$88$682
-                             r$1079)
-                           ((cell-get lp$80$87$681)
-                            k$1073
-                            (Cyc-fast-plus i$88$682 1)
-                            (cdr first$89$683)
-                            (cdr row$90$684)))))))
-    
     ;(pretty-print
     ;  (ast:ast->pp-sexp
     ;    (ast:sexp->ast sexp)))
