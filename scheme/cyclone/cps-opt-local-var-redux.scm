@@ -59,6 +59,8 @@
          ;;                         (car (ast:lambda-body (car exp)))
          ;;                         (car (ast:lambda-args (car exp))))))
          ;;(newline)
+TODO: need to revisit this, may need to replace values with assignments to the "let" variable.
+would need to be able to carry that through to cgen and assign properly over there...
          (let ((value (lvr:tail-calls->values
                         (car (ast:lambda-body (car exp)))
                         (car (ast:lambda-args (car exp)))))
