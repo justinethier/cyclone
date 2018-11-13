@@ -59,11 +59,13 @@
          ;;                         (car (ast:lambda-body (car exp)))
          ;;                         (car (ast:lambda-args (car exp))))))
          ;;(newline)
-TODO: need to revisit this, may need to replace values with assignments to the "let" variable.
-would need to be able to carry that through to cgen and assign properly over there...
+;TODO: need to revisit this, may need to replace values with assignments to the "let" variable.
+;would need to be able to carry that through to cgen and assign properly over there...
          (let ((value (lvr:tail-calls->values
                         (car (ast:lambda-body (car exp)))
-                        (car (ast:lambda-args (car exp)))))
+                        (car (ast:lambda-args (car exp)))
+                        (car (ast:lambda-args (cadr exp)))
+                      ))
                (var (car (ast:lambda-args (cadr exp))))
                (body (ast:lambda-body (cadr exp))))
           `(let ((,var ,value))
@@ -110,7 +112,7 @@ would need to be able to carry that through to cgen and assign properly over the
 
 ;; Local variable reduction helper:
 ;; Transform all tail calls of sym in the sexp to just the value passed
-(define (lvr:tail-calls->values sexp sym)
+(define (lvr:tail-calls->values sexp sym assign-sym)
   (call/cc
     (lambda (return)
       (define (scan exp)
@@ -134,7 +136,7 @@ would need to be able to carry that through to cgen and assign properly over the
             ((and (equal? (car exp) sym)
                   (= (length exp) 2)
              )
-             (cadr exp))
+             `(Cyc-local-set! ,assign-sym ,(cadr exp)))
             (else
              (return #f))))
          (else exp)))

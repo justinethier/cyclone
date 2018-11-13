@@ -1181,6 +1181,13 @@
                        (c-code "")
                        args)))
           exps))
+        ((equal? 'Cyc-local-set! fun)
+         (let ((val-exp (c-compile-exp (caddr exp) append-preamble cont ast-id trace cps?)))
+           (c-code/vars
+             (string-append (mangle (cadr exp) " = " (c:body val-exp) ";"))
+             (c:allocs val-exp)))
+           ;(c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
+        )
         ((equal? 'let fun)
          (let* ((vars/vals (cadr exp))
                 (body (caddr exp))
@@ -1192,13 +1199,16 @@
                             (c-code/vars 
                               (let ((cp1-body (c:body cp1)))
                                 (string-append cp1-body ";" (c:body cp2)))
-                              (append (list (mangle (car var/val))) (c:allocs cp1) (c:allocs cp2)))))
+                              (append 
+                                (list (string-append "object " (mangle (car var/val)) ";"))
+                                (c:allocs cp1) 
+                                (c:allocs cp2)))))
                         (c-code "")
                         vars/vals))
                (body-exp (c-compile-exp 
                            body append-preamble cont ast-id trace cps?))
               )
-          (trace:error `(JAE DEBUG body ,body ,vars/vals ,exp))
+          ;;(trace:error `(JAE DEBUG body ,body ,vars/vals ,exp))
           (c:append vexps body-exp)
          )
         )
