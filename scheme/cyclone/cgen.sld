@@ -1184,10 +1184,22 @@
         ((equal? 'let fun)
          (let* ((vars/vals (cadr exp))
                 (body (caddr exp))
-               )
-          TODO: foldr over  vars/vals
-          TODO: compile body exp and combine with above
-          (c-compile-exp body append-preamble cont ast-id trace cps?)
+                (vexps (foldr
+                        (lambda (var/val acc)
+                          ;; Join expressions; based on c:append 
+                          (let ((cp1 (c-compile-exp (cadr var/val) append-preamble cont ast-id trace cps?))
+                                (cp2 acc))
+                            (c-code/vars 
+                              (let ((cp1-body (c:body cp1)))
+                                (string-append cp1-body ";" (c:body cp2)))
+                              (append (list (mangle (car var/val))) (c:allocs cp1) (c:allocs cp2)))))
+                        (c-code "")
+                        vars/vals))
+               (body-exp (c-compile-exp 
+                           body append-preamble cont ast-id trace cps?))
+              )
+          (trace:error `(JAE DEBUG body ,body ,vars/vals ,exp))
+          (c:append vexps body-exp)
          )
         )
         (else
