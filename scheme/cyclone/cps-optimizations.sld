@@ -1757,7 +1757,12 @@
     ;; Special case now with local var redux
     ((tagged-list? 'let exp) 
      `(let 
-        ,(cadr exp) 
+        ,(map 
+          (lambda (var/val)
+            (let ((var (car var/val))
+                  (val (cadr var/val)))
+            `(,var ,(cc val))))
+          (cadr exp))
         ,(convert
             (caddr exp) 
             self-var 
