@@ -1754,12 +1754,15 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
-    ((tagged-list? 'let exp) ;; Special case now with local var redux
+    ;; Special case now with local var redux
+    ((tagged-list? 'let exp) 
      `(let 
         ,(cadr exp) 
         ,@(convert
             (caddr exp) 
             self-var 
+            ;; Do not closure convert the let's variables because
+            ;; the previous code guarantees they are locals
             (filter (lambda (v) (not (member v (let->vars exp)))) free-var-lst)))
     )
     ((lambda? exp)   (error `(Unexpected lambda in closure-convert ,exp)))
