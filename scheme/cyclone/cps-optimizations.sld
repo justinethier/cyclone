@@ -1758,7 +1758,7 @@
     ((tagged-list? 'let exp) 
      `(let 
         ,(cadr exp) 
-        ,@(convert
+        ,(convert
             (caddr exp) 
             self-var 
             ;; Do not closure convert the let's variables because
