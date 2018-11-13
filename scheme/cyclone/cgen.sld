@@ -1181,6 +1181,15 @@
                        (c-code "")
                        args)))
           exps))
+        ((equal? 'let fun)
+         (let* ((vars/vals (cadr exp))
+                (body (caddr exp))
+               )
+          TODO: foldr over  vars/vals
+          TODO: compile body exp and combine with above
+          (c-compile-exp body append-preamble cont ast-id trace cps?)
+         )
+        )
         (else
          (error `(Unsupported function application ,exp)))))))
 
