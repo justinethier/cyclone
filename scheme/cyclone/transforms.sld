@@ -623,6 +623,7 @@
 
 ; free-vars : exp -> sorted-set[var]
 (define (free-vars ast . opts)
+  (define let-vars '())
   (define bound-only? 
     (and (not (null? opts))
          (car opts)))
@@ -636,7 +637,10 @@
       ((const? exp)    '())
       ((prim? exp)     '())    
       ((quote? exp)    '())    
-      ((ref? exp)      (if bound-only? '() (list exp)))
+      ((ref? exp)      
+       (if (member exp let-vars)
+           '()
+           (if bound-only? '() (list exp))))
       ((lambda? exp)   
         (difference (reduce union (map search (lambda->exp exp)) '())
                     (lambda-formals->list exp)))
@@ -648,6 +652,9 @@
       ((define-c? exp) (list (define->var exp)))
       ((set!? exp)     (union (list (set!->var exp)) 
                               (search (set!->exp exp))))
+      ((tagged-list? 'let exp)
+       (set! let-vars (append (map car (cadr exp)) let-vars))
+       (search (cdr exp)))
       ; Application:
       ((app? exp)       (reduce union (map search exp) '()))
       (else             (error "unknown expression: " exp))))
