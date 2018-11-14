@@ -1718,7 +1718,7 @@
             (body  (ast:lambda-body exp))
             (new-free-vars 
               (difference 
-                (difference (free-vars body) (cons 'Cyc-seq (ast:lambda-formals->list exp)))
+                (difference (free-vars body) (cons 'Cyc-seq (cons 'Cyc-local-set! (ast:lambda-formals->list exp))))
                 globals))
             (formals (list->lambda-formals
                        (cons new-self-var (ast:lambda-formals->list exp))
@@ -1787,6 +1787,8 @@
         ; TODO: maybe just call a function to 'flatten' seq's
          ((equal? 'Cyc-seq fn)
           `(Cyc-seq ,@args))
+         ((equal? 'Cyc-local-set! fn)
+          `(Cyc-local-set! ,@args))
          ((ast:lambda? fn)
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
@@ -1814,7 +1816,7 @@
               (let* ((body  (ast:lambda-body fn))
                      (new-free-vars 
                        (difference
-                         (difference (free-vars body) (cons 'Cyc-seq (ast:lambda-formals->list fn)))
+                         (difference (free-vars body) (cons 'Cyc-seq (cons 'Cyc-local-set! (ast:lambda-formals->list fn))))
                          globals))
                      (new-free-vars? (> (length new-free-vars) 0)))
                   (if new-free-vars?
