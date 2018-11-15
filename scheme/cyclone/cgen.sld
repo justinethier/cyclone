@@ -1182,9 +1182,10 @@
                        args)))
           exps))
         ((equal? 'Cyc-local-set! fun)
+         ;:(trace:error `(JAE DEBUG Cyc-local-set ,exp))
          (let ((val-exp (c-compile-exp (caddr exp) append-preamble cont ast-id trace cps?)))
            (c-code/vars
-             (string-append (mangle (cadr exp) " = " (c:body val-exp) ";"))
+             (string-append (mangle (cadr exp)) " = " (c:body val-exp) ";")
              (c:allocs val-exp)))
            ;(c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
         )
