@@ -652,11 +652,17 @@
     (and (> len 0)
          (equal? end (substring str (- len 1) len)))))
 
+(define *use-alloca* #f)
+
+(define (set-use-alloca! v)
+  (set! *use-alloca* v))
+
 ;; Use alloca() for stack allocations?
 (define (alloca? ast-id)
-  (let ((adbf:fnc (adb:get/default ast-id #f)))
-    (and adbf:fnc 
-         (adbf:calls-self? adbf:fnc))))
+  (or *use-alloca*
+      (let ((adbf:fnc (adb:get/default ast-id #f)))
+        (and adbf:fnc 
+             (adbf:calls-self? adbf:fnc)))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
@@ -1194,9 +1200,11 @@
                 (body (caddr exp))
                 (vexps (foldr
                         (lambda (var/val acc)
+                          (set-use-alloca! #t) ;; Force alloca to ensure safe c stack allocs
                           ;; Join expressions; based on c:append 
                           (let ((cp1 (c-compile-exp (cadr var/val) append-preamble cont ast-id trace cps?))
                                 (cp2 acc))
+                            (set-use-alloca! #f) ;; Revert flag
                             (c-code/vars 
                               (let ((cp1-body (c:body cp1)))
                                 (string-append cp1-body ";" (c:body cp2)))
