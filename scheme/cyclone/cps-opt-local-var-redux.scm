@@ -21,7 +21,7 @@
 ;; typically be limited to if expressions embedded in other expressions.
 (define (opt:local-var-reduction sexp)
   (define (scan exp)
-    ;;(write `(DEBUG scan ,exp)) (newline)
+    ;(write `(DEBUG scan ,exp)) (newline)
     (cond
      ((ast:lambda? exp)
       (ast:%make-lambda
@@ -47,6 +47,7 @@
      ((app? exp)
       (cond
         ((and
+          (list? exp)
           (ast:lambda? (car exp))
           (equal? (length exp) 2)
           (ast:lambda? (cadr exp))
@@ -88,8 +89,8 @@
         (cond
          ((ast:lambda? exp)
           (return #f)) ;; Could be OK if not ref'd...
-         ;((quote? exp) exp)
-         ;((const? exp) exp)
+         ((quote? exp) exp)
+         ((const? exp) exp)
          ((ref? exp) 
           (if (equal? exp sym)
               (return #f))) ;; Assume not a tail call
@@ -122,6 +123,8 @@
         (cond
          ((ast:lambda? exp)
           (return #f)) ;; Could be OK if not ref'd...
+         ((quote? exp) exp)
+         ((const? exp) exp)
          ((ref? exp) 
           (if (equal? exp sym)
               (return #f))) ;; Assume not a tail call
@@ -243,9 +246,100 @@
            (length first-row$65$670)))
         'now))))
   (define *num-passed* 0) 
+ (define write-to-string
+   (lambda
+     (k$3086 x$892$1775)
+     (call-with-output-string
+       k$3086
+       (lambda
+         (k$3088 out$893$1776)
+         ((lambda
+            (x$895$1777)
+            ((lambda
+               (wr$896$1778)
+               (Cyc-seq
+                 (set! wr$896$1778
+                   (lambda
+                     (k$3091 x$897$1779)
+                     (if (pair? x$897$1779)
+                       ((lambda
+                          (k$3112)
+                          (if (symbol? (car x$897$1779))
+                            (if (pair? (cdr x$897$1779))
+                              (if (null? (cddr x$897$1779))
+                                (k$3112
+                                  (assq (car x$897$1779)
+                                        '((quote . "'")
+                                          (quasiquote . "`")
+                                          (unquote . ",")
+                                          (unquote-splicing . ",@"))))
+                                (k$3112 #f))
+                              (k$3112 #f))
+                            (k$3112 #f)))
+                        (lambda
+                          (tmp$900$902$1780)
+                          (if tmp$900$902$1780
+                            ((lambda
+                               (s$903$1781)
+                               (display
+                                 (lambda
+                                   (r$3094)
+                                   (wr$896$1778 k$3091 (cadr x$897$1779)))
+                                 (cdr s$903$1781)
+                                 out$893$1776))
+                             tmp$900$902$1780)
+                            (display
+                              (lambda
+                                (r$3097)
+                                (wr$896$1778
+                                  (lambda
+                                    (r$3098)
+                                    ((lambda
+                                       (lp$907$1783)
+                                       (Cyc-seq
+                                         (set! lp$907$1783
+                                           (lambda
+                                             (k$3103 ls$908$1784)
+                                             (if (pair? ls$908$1784)
+                                               (display
+                                                 (lambda
+                                                   (r$3105)
+                                                   (wr$896$1778
+                                                     (lambda
+                                                       (r$3106)
+                                                       (lp$907$1783
+                                                         k$3103
+                                                         (cdr ls$908$1784)))
+                                                     (car ls$908$1784)))
+                                                 " "
+                                                 out$893$1776)
+                                               (if (null? ls$908$1784)
+                                                 (k$3103 #f)
+                                                 (display
+                                                   (lambda
+                                                     (r$3110)
+                                                     (write k$3103
+                                                            ls$908$1784
+                                                            out$893$1776))
+                                                   " . "
+                                                   out$893$1776)))))
+                                         (lp$907$1783
+                                           (lambda
+                                             (r$3099)
+                                             (display k$3091 ")" out$893$1776))
+                                           (cdr x$897$1779))))
+                                     #f))
+                                  (car x$897$1779)))
+                              "("
+                              out$893$1776))))
+                       (write k$3091 x$897$1779 out$893$1776))))
+                 (wr$896$1778 k$3088 x$895$1777)))
+             #f))
+          x$892$1775)))))
  )
 
 )
+
     ;(pretty-print
     ;  (ast:ast->pp-sexp
     ;    (ast:sexp->ast sexp)))
