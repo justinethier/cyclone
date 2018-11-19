@@ -53,7 +53,9 @@
           (equal? 1 (length (ast:lambda-args (cadr exp))))
           (lvr:local-tail-call-only? 
             (ast:lambda-body (car exp)) 
-            (car (ast:lambda-args (car exp)))))
+            (car (ast:lambda-args (car exp))))
+          (tagged-list? 'Cyc-seq (car (ast:lambda-body (cadr exp)))) ;; TODO: DEBUG line, remove this once it works!
+         )
          ;;(write `(tail-call-only? passed for ,exp)) (newline)
          ;;(write `(replace with ,(lvr:tail-calls->values 
          ;;                         (car (ast:lambda-body (car exp)))
