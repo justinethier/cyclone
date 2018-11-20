@@ -389,12 +389,12 @@
        trace 
        cps?))
     ; Core forms:
-    ((const? exp)       (c-compile-const exp))
+    ((const? exp)       (c-compile-const exp (alloca? ast-id)))
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
-    ((quote? exp)       (c-compile-quote exp))
+    ((quote? exp)       (c-compile-quote exp (alloca? ast-id)))
     ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
 
     ; IR (2):
@@ -410,11 +410,11 @@
     ((app? exp)         (c-compile-app exp append-preamble cont ast-id trace cps?))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
-(define (c-compile-quote qexp)
+(define (c-compile-quote qexp use-alloca)
   (let ((exp (cadr qexp)))
-    (c-compile-scalars exp)))
+    (c-compile-scalars exp use-alloca)))
 
-(define (c-compile-scalars args)
+(define (c-compile-scalars args use-alloca)
   (letrec (
     (num-args 0)
     (create-cons
@@ -429,12 +429,12 @@
         ((null? args)
            (c-code "NULL"))
         ((not (pair? args))
-         (c-compile-const args))
+         (c-compile-const args use-alloca))
         (else
            (let* ((cvar-name (mangle (gensym 'c)))
                   (cell (create-cons
                           cvar-name
-                          (c-compile-const (car args)) 
+                          (c-compile-const (car args) use-alloca) 
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
@@ -447,7 +447,7 @@
     (_c-compile-scalars args) 
     num-args)))
 
-(define (c-compile-vector exp)
+(define (c-compile-vector exp use-alloca)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
            ;; Generate code for each member of the vector 
@@ -455,7 +455,7 @@
             (lambda (i code)
               (if (= i len)
                 code
-                (let ((idx-code (c-compile-const (vector-ref exp i))))
+                (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca)))
                   (loop 
                     (+ i 1)
                     (c-code/vars
@@ -490,7 +490,7 @@
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
-(define (c-compile-bytevector exp)
+(define (c-compile-bytevector exp use-alloca)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (bytevector-length exp))
            ;; Generate code for each member of the vector 
@@ -545,18 +545,18 @@
           (string-append "" cvar-name) ; Code is just the variable name
           (list     ; Allocate integer on the C stack
             (string-append 
-              "object " cvar-name ";\\n "
+              "object " cvar-name ";\n "
               "alloc_string(data," 
               cvar-name 
               ", " 
               blen
               ", " 
               (number->string (string-length exp))
-              ");\\n"
+              ");\n"
               "char " tmp-name "[] = "
               (->cstr exp) 
-              ";\\n"
-              "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\\n"
+              ";\n"
+              "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\n"
               "((string_type *)" cvar-name ")->str[" blen "] = '\\0';"
             )))))
       (else
@@ -579,16 +579,16 @@
 ;; Typically this function is used to compile constant values such as
 ;; a single number, boolean, etc. However, it can be passed a quoted
 ;; item such as a list, to compile as a literal.
-(define (c-compile-const exp #;use-alloca)
+(define (c-compile-const exp use-alloca)
   (cond
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
-     (c-compile-scalars exp))
+     (c-compile-scalars exp use-alloca))
     ((vector? exp)
-     (c-compile-vector exp))
+     (c-compile-vector exp use-alloca))
     ((bytevector? exp)
-     (c-compile-bytevector exp))
+     (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
       (let ((cvar-name (mangle (gensym 'c)))
             (num2str (cond
@@ -650,7 +650,7 @@
      (c-code (string-append "obj_char2obj(" 
                (number->string (char->integer exp)) ")")))
     ((string? exp)
-     (c-compile-string exp #f))
+     (c-compile-string exp use-alloca))
 ;TODO: not good enough, need to store new symbols in a table so they can
 ;be inserted into the C program
     ((symbol? exp)
