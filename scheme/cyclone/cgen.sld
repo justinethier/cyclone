@@ -534,12 +534,15 @@
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
+TODO: c-compile-string exp use-alloca
+consolidate from below and alloc_string
+
 ;; c-compile-const : const-exp -> c-pair
 ;;
 ;; Typically this function is used to compile constant values such as
 ;; a single number, boolean, etc. However, it can be passed a quoted
 ;; item such as a list, to compile as a literal.
-(define (c-compile-const exp)
+(define (c-compile-const exp use-alloca)
   (cond
     ((null? exp)
      (c-code "NULL"))
