@@ -534,15 +534,52 @@
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
-TODO: c-compile-string exp use-alloca
-consolidate from below and alloc_string
+(define (c-compile-string exp use-alloca)
+  (let ((cvar-name (mangle (gensym 'c))))
+    (cond
+      (use-alloca
+       (let ((tmp-name (mangle (gensym 'tmp)))
+             (blen (number->string (string-byte-length exp)))
+            )
+        (c-code/vars
+          (string-append "" cvar-name) ; Code is just the variable name
+          (list     ; Allocate integer on the C stack
+            (string-append 
+              "object " cvar-name ";\\n "
+              "alloc_string(data," 
+              cvar-name 
+              ", " 
+              blen
+              ", " 
+              (number->string (string-length exp))
+              ");\\n"
+              "char " tmp-name "[] = "
+              (->cstr exp) 
+              ";\\n"
+              "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\\n"
+              "((string_type *)" cvar-name ")->str[" blen "] = '\\0';"
+            )))))
+      (else
+        (c-code/vars
+          (string-append "&" cvar-name) ; Code is just the variable name
+          (list     ; Allocate integer on the C stack
+            (string-append 
+              "make_utf8_string_with_len(" 
+              cvar-name 
+              ", " 
+              (->cstr exp) 
+              ", " 
+              (number->string (string-byte-length exp))
+              ", " 
+              (number->string (string-length exp))
+              ");")))))))
 
 ;; c-compile-const : const-exp -> c-pair
 ;;
 ;; Typically this function is used to compile constant values such as
 ;; a single number, boolean, etc. However, it can be passed a quoted
 ;; item such as a list, to compile as a literal.
-(define (c-compile-const exp use-alloca)
+(define (c-compile-const exp #;use-alloca)
   (cond
     ((null? exp)
      (c-code "NULL"))
@@ -613,20 +650,7 @@ consolidate from below and alloc_string
      (c-code (string-append "obj_char2obj(" 
                (number->string (char->integer exp)) ")")))
     ((string? exp)
-      (let ((cvar-name (mangle (gensym 'c))))
-        (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
-            (list     ; Allocate integer on the C stack
-              (string-append 
-                "make_utf8_string_with_len(" 
-                cvar-name 
-                ", " 
-                (->cstr exp) 
-                ", " 
-                (number->string (string-byte-length exp))
-                ", " 
-                (number->string (string-length exp))
-                ");")))))
+     (c-compile-string exp #f))
 ;TODO: not good enough, need to store new symbols in a table so they can
 ;be inserted into the C program
     ((symbol? exp)
