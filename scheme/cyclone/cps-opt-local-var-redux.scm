@@ -71,8 +71,11 @@
                       ))
                (var (car (ast:lambda-args (cadr exp))))
                (body (ast:lambda-body (cadr exp))))
-          `(let ((,var ,value))
-            ,@body)))
+            (if value
+                `(let ((,var ,value))
+                  ,@body)
+                (map scan exp)) ;; failsafe
+        ))
         (else
           (map scan exp))))
      (else (error "unknown expression type: " exp))
@@ -143,10 +146,20 @@
              )
              `(Cyc-local-set! ,assign-sym ,(cadr exp)))
             (else
+             ;; TODO: can we be smarter? Consider example from match.scm match-gen-or-step
              (return #f))))
          (else exp)))
-      (return
-        (scan sexp)))))
+      (cond
+        ;((or (quote? sexp) 
+        ;     (const? sexp))
+        ; ;; Special case, set the value directly
+        ; ;; TODO: this is a bit of a hack, may way to re-think how this
+        ; ;; whole module works at some point, but for now this works.
+        ; (return 
+        ;   `(Cyc-local-set! ,assign-sym ,sexp)))
+        (else
+          (return
+            (scan sexp)))))))
 
 (cond-expand
   (program
@@ -336,6 +349,44 @@
                  (wr$896$1778 k$3088 x$895$1777)))
              #f))
           x$892$1775)))))
+ (define match-gen-or-step
+   (lambda
+     (k$14021
+       expr$3499$3540$3621$9398
+       rename$3500$3541$3622$9399
+       compare$3501$3542$3623$9400)
+     ((lambda
+        (v.1$3507$3599$3659$9436)
+        ((lambda
+           (k$14141)
+           (if (pair? v.1$3507$3599$3659$9436)
+             (Cyc-seq
+               (car v.1$3507$3599$3659$9436)
+               (if (pair? (cdr v.1$3507$3599$3659$9436))
+                 (if (null? (car (cdr v.1$3507$3599$3659$9436)))
+                   (if (pair? (cdr (cdr v.1$3507$3599$3659$9436)))
+                     (Cyc-seq
+                       (car (cdr (cdr v.1$3507$3599$3659$9436)))
+                       (if (pair? (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
+                         (Cyc-seq
+                           (car (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
+                           (if (pair? (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+                             (Cyc-seq
+                               (cdr (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+                               (k$14141
+                                 (cons (car (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+                                       #f)))
+                             (k$14141 #f)))
+                         (k$14141 #f)))
+                     (k$14141 #f))
+                   (k$14141 #f))
+                 (k$14141 #f)))
+             (k$14141 #f)))
+         (lambda
+           (tmp$3544$3546$3624$9401)
+           (list
+            (lambda (r$14022) (k$14021 (car r$14022)))))))
+      (cdr expr$3499$3540$3621$9398))))
  )
 
 )
