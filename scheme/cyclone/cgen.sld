@@ -493,6 +493,9 @@
 (define (c-compile-bytevector exp use-alloca)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (bytevector-length exp))
+           (addr-op (if use-alloca "" "&"))
+           (deref-op (if use-alloca "->" "."))
+           (c-make-macro (if use-alloca "alloca_empty_bytevector" "make_empty_bytevector"))
            ;; Generate code for each member of the vector 
            (loop 
             (lambda (i code)
@@ -509,7 +512,7 @@
                         (c:allocs code) ;; Vector alloc
                         (list ;; Assign this member to vector
                           (string-append 
-                            cvar-name ".data[" (number->string i) "] = (unsigned char)"
+                            cvar-name deref-op "data[" (number->string i) "] = (unsigned char)"
                             byte-val
                             ";"))))
                     ))))
@@ -518,19 +521,19 @@
     (cond
       ((zero? len)
         (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
+            (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                "make_empty_bytevector(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"))))
       (else
         (let ((code
                 (c-code/vars
-                  (string-append "&" cvar-name) ; Code body is just var name
+                  (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
-                      "make_empty_bytevector(" cvar-name ");"
-                      cvar-name ".len = " (number->string len) ";"
-                      cvar-name ".data = alloca(sizeof(char) * " 
+                      c-make-macro "(" cvar-name ");"
+                      cvar-name deref-op "len = " (number->string len) ";"
+                      cvar-name deref-op "data = alloca(sizeof(char) * " 
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
@@ -590,7 +593,6 @@
 ;; TODO: use-alloc support
      (c-compile-vector exp use-alloca))
     ((bytevector? exp)
-;; TODO: use-alloc support
      (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
       (let ((cvar-name (mangle (gensym 'c)))
