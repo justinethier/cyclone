@@ -584,10 +584,13 @@
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
+;; TODO: use-alloc support
      (c-compile-scalars exp use-alloca))
     ((vector? exp)
+;; TODO: use-alloc support
      (c-compile-vector exp use-alloca))
     ((bytevector? exp)
+;; TODO: use-alloc support
      (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
       (let ((cvar-name (mangle (gensym 'c)))
@@ -614,19 +617,15 @@
                             (number->string n)))))
              (rnum (num2str (real-part exp)))
              (inum (num2str (imag-part exp)))
+             (addr-op (if use-alloca "" "&"))
+             (c-make-macro (if use-alloca "alloca_complex_num" "make_complex_num"))
             )
         (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
+            (string-append addr-op cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
-                "make_complex_num(" cvar-name ", " rnum ", " inum ");")))))
+                c-make-macro "(" cvar-name ", " rnum ", " inum ");")))))
     ((integer? exp) 
-;     (let ((cvar-name (mangle (gensym 'c))))
-;        (c-code/vars
-;            (string-append "&" cvar-name) ; Code is just the variable name
-;            (list     ; Allocate integer on the C stack
-;              (string-append 
-;                "make_int(" cvar-name ", " (number->string exp) ");")))))
      (c-code (string-append "obj_int2obj(" 
                (number->string exp) ")")))
     ((real? exp)
@@ -637,12 +636,15 @@
                        ((nan? exp) "(0./0.)")
                        ((infinite? exp) "(1./0.)")
                        (else
-                         (number->string exp)))))
+                         (number->string exp))))
+            (addr-op (if use-alloca "" "&"))
+            (c-make-macro (if use-alloca "alloca_double" "make_double"))
+           )
         (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
+            (string-append addr-op cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
-                "make_double(" cvar-name ", " num2str ");")))))
+                c-make-macro "(" cvar-name ", " num2str ");")))))
     ((boolean? exp) 
       (c-code (string-append
                 (if exp "boolean_t" "boolean_f"))))
