@@ -1058,6 +1058,14 @@ typedef vector_type *vector;
   v.num_elements = 0; \
   v.elements = NULL;
 
+#define alloca_empty_vector(v) \
+  vector_type *v = alloca(sizeof(vector_type)); \
+  v->hdr.mark = gc_color_red; \
+  v->hdr.grayed = 0; \
+  v->tag = vector_tag; \
+  v->num_elements = 0; \
+  v->elements = NULL;
+
 /**
  * @brief Bytevector type 
  *
