@@ -416,11 +416,14 @@
 
 (define (c-compile-scalars args use-alloca)
   (letrec (
+    (addr-op (if use-alloca "" "&"))
+    ;(deref-op (if use-alloca "->" "."))
+    (c-make-macro (if use-alloca "alloca_pair" "make_pair"))
     (num-args 0)
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append "make_pair(" cvar "," (c:body a) "," (c:body b) ");")
+          (string-append c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b))))
     )
     (_c-compile-scalars 
@@ -438,8 +441,7 @@
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
-                ;;cvar-name ;; Not needed with alloca - (string-append "&" cvar-name)
-                (string-append "&" cvar-name)
+                (string-append addr-op cvar-name)
                 (append
                   (c:allocs cell)
                   (list (c:body cell))))))))))
@@ -590,7 +592,6 @@
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
-;; TODO: use-alloc support
      (c-compile-scalars exp use-alloca))
     ((vector? exp)
      (c-compile-vector exp use-alloca))
