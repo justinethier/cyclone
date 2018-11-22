@@ -751,7 +751,9 @@
                   (string-append 
                     (if (or (prim:cont? p) 
                             (equal? (prim/c-var-assign p) "object")
-                            (prim/c-var-pointer p)) ;; Assume returns object
+                            (prim/c-var-pointer p) ;; Assume returns object
+                            (prim->c-func-uses-alloca? p use-alloca?)
+                        )
                         "" 
                         "&")
                     cv-name)
@@ -794,7 +796,8 @@
         ;;
         (let ((cv-name (mangle (gensym 'c))))
            (c-code/vars
-            (if (prim:allocates-object? p use-alloca?)
+            (if (or (prim:allocates-object? p use-alloca?)
+                    (prim->c-func-uses-alloca? p use-alloca?))
                 cv-name ;; Already a pointer
                 (string-append "&" cv-name)) ;; Point to data
             (list
