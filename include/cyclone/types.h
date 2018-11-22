@@ -1163,18 +1163,18 @@ typedef pair_type *pair;
 
 #define alloca_list_2(l, a1, a2) \
   alloca_pair(l##__2, a2, NULL); \
-  alloca_pair(l, a1, &l##__2);
+  alloca_pair(l, a1, l##__2);
 
 #define alloca_list_3(l, a1, a2, a3) \
   alloca_pair(l##__3, a3, NULL); \
-  alloca_pair(l##__2, a2, &l##__3); \
-  alloca_pair(l, a1, &l##__2);
+  alloca_pair(l##__2, a2, l##__3); \
+  alloca_pair(l, a1, l##__2);
 
 #define alloca_list_4(l, a1, a2, a3, a4) \
   alloca_pair(l##__4, a4, NULL); \
-  alloca_pair(l##__3, a3, &l##__4); \
-  alloca_pair(l##__2, a2, &l##__3); \
-  alloca_pair(l, a1, &l##__2);
+  alloca_pair(l##__3, a3, l##__4); \
+  alloca_pair(l##__2, a2, l##__3); \
+  alloca_pair(l, a1, l##__2);
 
 /**
  * Create a pair with a single value. 
