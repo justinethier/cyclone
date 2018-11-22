@@ -17,6 +17,7 @@
     ;; TODO: replace w/list that cannot be precomputed: precompute-prim-app?
     prim-call?
     prim->c-func
+    prim->c-func-uses-alloca?
     prim/data-arg?
     prim/c-var-pointer
     prim/c-var-assign
@@ -456,6 +457,18 @@
 
     (define (prim-call? exp)
       (and (list? exp) (prim? (car exp))))
+
+    (define (prim->c-func-uses-alloca? p use-alloca?)
+      (and
+        use-alloca?
+        (member 
+           p 
+          '(cons
+            Cyc-fast-list-1
+            Cyc-fast-list-2
+            Cyc-fast-list-3
+            Cyc-fast-list-4
+            cell))))
 
     (define (prim->c-func p use-alloca?)
       (cond
