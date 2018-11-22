@@ -593,7 +593,7 @@
 ;; TODO: use-alloc support
      (c-compile-scalars exp use-alloca))
     ((vector? exp)
-     (c-compile-vector exp #t)) ;;use-alloca))
+     (c-compile-vector exp use-alloca))
     ((bytevector? exp)
      (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
