@@ -450,6 +450,9 @@
 (define (c-compile-vector exp use-alloca)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
+           (addr-op (if use-alloca "" "&"))
+           (deref-op (if use-alloca "->" "."))
+           (c-make-macro (if use-alloca "alloca_empty_vector" "make_empty_vector"))
            ;; Generate code for each member of the vector 
            (loop 
             (lambda (i code)
@@ -467,26 +470,26 @@
                         (c:allocs idx-code) ;; Member alloc at index i
                         (list ;; Assign this member to vector
                           (string-append 
-                            cvar-name ".elements[" (number->string i) "] = "
+                            cvar-name deref-op "elements[" (number->string i) "] = "
                             (c:body idx-code)
                             ";")))))))))
           )
     (cond
       ((zero? len)
         (c-code/vars
-            (string-append "&" cvar-name) ; Code is just the variable name
+            (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                "make_empty_vector(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"))))
       (else
         (let ((code
                 (c-code/vars
-                  (string-append "&" cvar-name) ; Code body is just var name
+                  (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
-                      "make_empty_vector(" cvar-name ");"
-                      cvar-name ".num_elements = " (number->string len) ";"
-                      cvar-name ".elements = (object *)alloca(sizeof(object) * " 
+                      c-make-macro "(" cvar-name ");"
+                      cvar-name deref-op "num_elements = " (number->string len) ";"
+                      cvar-name deref-op "elements = (object *)alloca(sizeof(object) * " 
                                          (number->string len) ");")))))
         (loop 0 code))))))
 
@@ -590,8 +593,7 @@
 ;; TODO: use-alloc support
      (c-compile-scalars exp use-alloca))
     ((vector? exp)
-;; TODO: use-alloc support
-     (c-compile-vector exp use-alloca))
+     (c-compile-vector exp #t)) ;;use-alloca))
     ((bytevector? exp)
      (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
