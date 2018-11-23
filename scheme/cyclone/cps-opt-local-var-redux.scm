@@ -107,6 +107,12 @@
           (scan (if->else exp) fail?))
          ((app? exp)
           (cond
+;;; TODO: may need to check for prim:cont? and abort accordingly
+;; check out code generated for scheme/cyclone/util.sld WRT symbol->string
+;; cannot proceed with this since by definition these functions require CPS
+            ((and (prim? (car exp))
+                  (prim:cont? (car exp)))
+             (return #f))
             ((and (equal? (car exp) sym)
                   (not fail?))
              (map (lambda (e) (scan e fail?)) (cdr exp))) ;; Sym is OK, skip
