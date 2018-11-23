@@ -8,6 +8,8 @@ Features (notes)
 - improve inlining of primitives that work with immutable objects.
 - EXPERIMENTAL - Added a new feature `program` to `cond-expand` that is only defined when compiling a program. TODO: what about icyc?
 
+- eliminate functions that are only used to define local variables
+
 TODO: make sure to add local-var-redux.scm to cyclone-bootstrap! this has not been done yet!!
       may be in a better place now, but consider renaming with a 'opt-' prefix. that way we can organize everything better once there are more of these. also it looks like there are at least 2 .scm test files in the same directory that can be removed.
 
