@@ -2,16 +2,16 @@
 
 ## 0.9.4 - TBD
 
-Features (notes)
+Compiler Optimizations
 
- code optimizations:
-- optimize recursive functions by using C iteration
-- combine lambda functions that are only called for side effects.
-- improve inlining of primitives that work with immutable objects.
-- eliminate functions that are only used to define local variables
+- Optimize recursive functions by expressing the recursive calls using C iteration. This optimization is more effective when combined with the other functions listed below as those increase the chances that a loop may be compiled down to a single function which can then be "called" repeatedly using a `while` loop which is more efficient at a low level than repeated calls to C functions.
+- Combine lambda functions that are only called for side effects.
+- Improve inlining of primitives that work with immutable objects.
+- Eliminate functions that are only used to define local variables.
 
- true features:
-- EXPERIMENTAL - Added a new feature `program` to `cond-expand` that is only defined when compiling a program. TODO: what about icyc?
+Features
+
+- Added a new feature `program` to `cond-expand` that is only defined when compiling a program. This allows, for example, a `.scm` file to contain a section of code that can be used to run unit tests when the file is compiled as a program. Or the same file can be used to import code into a library. This is similar to using the `__main__` scope in a python program.
 
 Bug Fixes
 
