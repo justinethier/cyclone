@@ -64,14 +64,21 @@
          ;;(newline)
 ;TODO: need to revisit this, may need to replace values with assignments to the "let" variable.
 ;would need to be able to carry that through to cgen and assign properly over there...
-         (let ((value (lvr:tail-calls->values
-                        (car (ast:lambda-body (car exp)))
-                        (car (ast:lambda-args (car exp)))
-                        (car (ast:lambda-args (cadr exp)))
-                      ))
-               (var (car (ast:lambda-args (cadr exp))))
-               (body (ast:lambda-body (cadr exp))))
-            (if value
+         (let* ((value (lvr:tail-calls->values
+                         (car (ast:lambda-body (car exp)))
+                         (car (ast:lambda-args (car exp)))
+                         (car (ast:lambda-args (cadr exp)))
+                       ))
+                (var (car (ast:lambda-args (cadr exp))))
+                (body (ast:lambda-body (cadr exp)))
+                (av (adb:get/default var #f)) ;; Set to #f if unit testing
+                (ref-count
+                  (if av
+                      (adbv:ref-count av)
+                      1)) ;; Dummy value
+                )
+            (if (and (> ref-count 0)  ;; 0 ==> local var is never used
+                     value)
                 `(let ((,var ,value))
                   ,@body)
                 (map scan exp)) ;; failsafe
