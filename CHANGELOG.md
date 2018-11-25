@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.9.4 - TBD
+## 0.9.4 - November 25, 2018
 
 Compiler Optimizations
 
-- Optimize recursive functions by expressing the recursive calls using C iteration. This optimization is more effective when combined with the others listed below as they collectively increase the chances that a higher-level Scheme loop may be compiled down to a single C function which can then be "called" repeatedly using a `while` loop which is more efficient at a low level than repeated calls to C functions.
+- Optimize recursive functions by expressing the recursive calls using C iteration. This optimization is more effective when combined with the others listed below as they collectively increase the chances that a higher-level Scheme loop may be compiled down to a single C function. These C functions can then be "called" repeatedly using a `while` loop which is more efficient at a low level than repeated function calls.
 - Combine lambda functions that are only called for side effects.
 - Improve inlining of primitives that work with immutable objects.
 - Eliminate functions that are only used to define local variables.
