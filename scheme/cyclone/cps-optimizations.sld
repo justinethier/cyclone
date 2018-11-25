@@ -34,6 +34,7 @@
       opt:contract
       opt:inline-prims
       opt:beta-expand
+      opt:local-var-reduction
       adb:clear!
       adb:get
       adb:get/default
@@ -54,6 +55,8 @@
       adbv:set-global!
       adbv:defined-by 
       adbv:set-defined-by!
+      adbv:mutated-by-set? 
+      adbv:set-mutated-by-set!
       adbv:reassigned? 
       adbv:set-reassigned!
       adbv:assigned-value
@@ -83,13 +86,17 @@
       adbf:simple adbf:set-simple!
       adbf:all-params adbf:set-all-params!
       adbf:unused-params adbf:set-unused-params!
+      adbf:assigned-to-var adbf:set-assigned-to-var!
       adbf:side-effects adbf:set-side-effects!
       adbf:well-known adbf:set-well-known!
       adbf:cgen-id adbf:set-cgen-id!
       adbf:closure-size adbf:set-closure-size!
+      adbf:self-closure-index adbf:set-self-closure-index!
+      adbf:calls-self? adbf:set-calls-self!
       with-fnc
       with-fnc!
   )
+  (include "cps-opt-local-var-redux.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
@@ -128,6 +135,7 @@
         defines-lambda-id
         const const-value  
         ref-count ref-by
+        mutated-by-set
         reassigned assigned-value 
         app-fnc-count app-arg-count
         inlinable mutated-indirectly
@@ -145,6 +153,7 @@
       (const-value adbv:const-value adbv:set-const-value!)
       (ref-count adbv:ref-count adbv:set-ref-count!)
       (ref-by adbv:ref-by adbv:set-ref-by!)
+      (mutated-by-set adbv:mutated-by-set? adbv:set-mutated-by-set!)
       ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
       ;; a single time via set
@@ -202,6 +211,7 @@
         #f  ; const-value  
         0   ; ref-count 
         '() ; ref-by             
+        #f  ; mutated-by-set
         #f  ; reassigned 
         #f  ; assigned-value 
         0   ; app-fnc-count 
@@ -224,6 +234,9 @@
        side-effects
        well-known
        cgen-id
+       closure-size
+       self-closure-index
+       calls-self
       )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
@@ -241,6 +254,10 @@
       (cgen-id adbf:cgen-id adbf:set-cgen-id!)
       ;; Number of elements in the function's closure
       (closure-size adbf:closure-size adbf:set-closure-size!)
+      ;; Index of the function in its closure, if applicable
+      (self-closure-index adbf:self-closure-index adbf:set-self-closure-index!)
+      ;; Does this function call itself?
+      (calls-self adbf:calls-self? adbf:set-calls-self!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
@@ -252,6 +269,8 @@
        #f   ;; well-known
        #f   ;; cgen-id
        -1   ;; closure-size
+       -1   ;; self-closure-index
+       #f   ;; calls-self
       ))
 
     ;; A constant value that cannot be mutated
@@ -341,7 +360,8 @@
                (lambda-body (lambda->exp define-body))
                (fv (filter 
                      (lambda (v)
-                       (not (prim? v)))
+                       (and (not (equal? 'Cyc-seq v))
+                            (not (prim? v))))
                      (free-vars expr)))
               )
 ;(trace:error `(JAE DEBUG ,(define->var expr) ,fv))
@@ -543,6 +563,7 @@
          (with-var! (set!->var exp) (lambda (var)
            (if (adbv:assigned-value var)
                (adbv:set-reassigned! var #t))
+           (adbv:set-mutated-by-set! var #t)
            (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
            (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
            (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
@@ -568,7 +589,10 @@
          ;; Identify indirect mutations. That is, the result of a function call
          ;; is what is mutated
          (cond
-          ((and (prim:mutates? (car exp)))
+          ((and (prim:mutates? (car exp))
+                ;; loop3-dev WIP step #1 - do not immediately reject these prims
+                ;(not (member (car exp) '(vector-set!))) ;; TODO: experimental
+           )
            (let ((e (cadr exp)))
             (when (ref? e)
               (with-var e (lambda (var)
@@ -973,11 +997,7 @@
                     (cdr exp)
                     (ast:lambda-formals->list (car exp)))
                   (or
-                    ; Issue #172 - Cannot assume that just because a primitive 
-                    ; deals with immutable objects that it is safe to inline.
-                    ; A (set!) could still mutate variables the primitive is
-                    ; using, causing invalid behavior.
-                    ;(prim-calls-inlinable? (cdr exp))
+                    (prim-calls-inlinable? (cdr exp))
 
                     ;; Testing - every arg only used once
                     ;(and
@@ -1070,6 +1090,25 @@
                   ;; Could not inline
                   (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp)))
             )) ;;
+            ;; Lambda with a parameter that is never used; sequence code instead to avoid lambda
+            ((and (ast:lambda? (car exp))
+                  (every
+                    (lambda (arg)
+                      (or (not (prim-call? arg))
+                          (not (prim:cont? (car arg)))))
+                    (cdr exp))
+                  (every
+                    (lambda (param)
+                      (with-var param (lambda (var)
+                        (null? (adbv:ref-by var)))))
+                    (ast:lambda-formals->list (car exp)))
+             )
+             (opt:inline-prims 
+               `(Cyc-seq 
+                  ,@(cdr exp)
+                  ,@(ast:lambda-body (car exp))) 
+               scope-sym 
+               refs))
             (else
               (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp))))
           (else 
@@ -1131,7 +1170,21 @@
     (define (prim-calls-inlinable? prim-calls)
       (every
         (lambda (prim-call)
-          (prim:immutable-args/result? (car prim-call)))
+          (and 
+            (prim:immutable-args/result? (car prim-call))
+            ; Issue #172 - Cannot assume that just because a primitive 
+            ; deals with immutable objects that it is safe to inline.
+            ; A (set!) could still mutate variables the primitive is
+            ; using, causing invalid behavior.
+            ;
+            ; So, make sure none of the args is mutated via (set!)
+            (every
+              (lambda (arg)
+                (or (not (ref? arg))
+                    (with-var arg (lambda (var)
+                      (not (adbv:mutated-by-set? var))))))
+              (cdr prim-call)))
+          )
         prim-calls))
 
     ;; Check each pair of primitive call / corresponding lambda arg,
@@ -1209,7 +1262,7 @@
           ((member exp args)
            (set-car! arg-used #t))
           ((member exp ivars)
-           ;;(trace:error `(inline-ok? return #f ,exp ,ivars ,args))
+           ;(trace:error `(inline-ok? return #f ,exp ,ivars ,args))
            (return #f))
           (else 
            #t)))
@@ -1245,7 +1298,16 @@
               (if (not (ref? e))
                   (inline-ok? e ivars args arg-used return)))
             (reverse (cdr exp))))
-          (else
+          ;; loop3-dev WIP step #2 - some args can be safely ignored
+          ;((and (prim? (car exp))
+          ;      (prim:mutates? (car exp))
+          ;      (member (car exp) '(vector-set!))
+          ; )
+          ; ;; with vector-set, only arg 1 (the vector) is actually mutated
+          ; ;; TODO: is this always true? do we have problems with self-recursive vecs??
+          ; (inline-ok? (cadr exp) ivars args arg-used return) 
+          ;)
+         (else
            (for-each
             (lambda (e)
               (inline-ok? e ivars args arg-used return))
@@ -1568,6 +1630,7 @@
       (analyze exp -1 -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
+      (analyze:find-recursive-calls2 exp)
     )
 
     ;; NOTES:
@@ -1632,6 +1695,9 @@
           (else 
             (loop (cdr lst) (+ i 1))))))
 
+(define (let->vars exp)
+  (map car (cadr exp)))
+
 (define (closure-convert exp globals . opts)
  (let ((optimization-level 2))
    (if (pair? opts)
@@ -1652,7 +1718,7 @@
             (body  (ast:lambda-body exp))
             (new-free-vars 
               (difference 
-                (difference (free-vars body) (ast:lambda-formals->list exp))
+                (difference (free-vars body) (cons 'Cyc-seq (cons 'Cyc-local-set! (ast:lambda-formals->list exp))))
                 globals))
             (formals (list->lambda-formals
                        (cons new-self-var (ast:lambda-formals->list exp))
@@ -1688,6 +1754,22 @@
           ,@(map cc (cdr exp)))) ;; TODO: need to splice?
     ((set!? exp)  `(set! ,(set!->var exp)
                          ,(cc (set!->exp exp))))
+    ;; Special case now with local var redux
+    ((tagged-list? 'let exp) 
+     `(let 
+        ,(map 
+          (lambda (var/val)
+            (let ((var (car var/val))
+                  (val (cadr var/val)))
+            `(,var ,(cc val))))
+          (cadr exp))
+        ,(convert
+            (caddr exp) 
+            self-var 
+            ;; Do not closure convert the let's variables because
+            ;; the previous code guarantees they are locals
+            (filter (lambda (v) (not (member v (let->vars exp)))) free-var-lst)))
+    )
     ((lambda? exp)   (error `(Unexpected lambda in closure-convert ,exp)))
     ((if? exp)  `(if ,@(map cc (cdr exp))))
     ((cell? exp)       `(cell ,(cc (cell->value exp))))
@@ -1698,6 +1780,15 @@
      (let ((fn (car exp))
            (args (map cc (cdr exp))))
        (cond
+         ;TODO: what about application of cyc-seq? does this only occur as a nested form? can we combine here or earlier??
+         ;      I think that is what is causing cc printing to explode exponentially!
+         ;((tagged-list? 'Cyc-seq fnc)
+        ; (foldl (lambda (sexp acc) (cons sexp acc)) '() (reverse '(a b c (cyc-seq 1) (cyc-seq 2 ((cyc-seq 3))))))
+        ; TODO: maybe just call a function to 'flatten' seq's
+         ((equal? 'Cyc-seq fn)
+          `(Cyc-seq ,@args))
+         ((equal? 'Cyc-local-set! fn)
+          `(Cyc-local-set! ,@args))
          ((ast:lambda? fn)
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
@@ -1725,7 +1816,7 @@
               (let* ((body  (ast:lambda-body fn))
                      (new-free-vars 
                        (difference
-                         (difference (free-vars body) (ast:lambda-formals->list fn))
+                         (difference (free-vars body) (cons 'Cyc-seq (cons 'Cyc-local-set! (ast:lambda-formals->list fn))))
                          globals))
                      (new-free-vars? (> (length new-free-vars) 0)))
                   (if new-free-vars?
@@ -1992,6 +2083,98 @@
           exp))
 )
 
+;; Does given symbol refer to a recursive call to given lambda ID?
+(define (rec-call? sym lid)
+  (cond
+   ((ref? sym)
+    (let ((var (adb:get/default sym #f)))
+      ;(trace:info 
+      ;  `(rec-call? ,sym ,lid
+      ;       ;; TODO: crap, these are not set yet!!!
+      ;       ;; may need to consider keeping out original version of find-recursive-calls and
+      ;       ;; adding a new version that does a deeper analysis
+      ;       ,(if var (not (adbv:reassigned? var)) #f)
+      ;       ,(if var (adbv:assigned-value var) #f)
+      ;       ;,((ast:lambda? var-lam))
+      ;       ,(adb:get/default lid #f)
+      ;       )
+      ;     )
+      (and-let* (
+                 ((not (equal? var #f)))
+                 ((not (adbv:reassigned? var)))
+                 (var-lam (adbv:assigned-value var))
+                 ((ast:lambda? var-lam))
+                 (fnc (adb:get/default lid #f))
+                )
+        ;(trace:info `(equal? ,lid ,(ast:lambda-id var-lam)))
+        (equal? lid (ast:lambda-id var-lam)))))
+   (else
+    #f)))
+
+;; Same as the original function, but this one is called at the end of analysis and 
+;; uses data that was previously not available.
+;;
+;; The reason for having two versions of this is that the original is necessary for
+;; beta expansion (and must remain, at least for now) and this one will provide useful
+;; data for code generation.
+;;
+;; TODO: is the above true? not so sure anymore, need to verify that, look at optimize-cps
+(define (analyze:find-recursive-calls2 exp)
+
+  (define (scan exp def-sym lid)
+    ;(trace:info `(analyze:find-recursive-calls2 scan ,def-sym ,exp ,lid))
+    (cond
+     ((ast:lambda? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym (ast:lambda-id exp)))
+        (ast:lambda-body exp)))
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) 
+      exp)
+     ((define? exp) #f) ;; TODO ??
+     ((set!? exp)
+      (for-each
+        (lambda (e)
+          (scan e def-sym lid))
+        (cdr exp))
+     )
+     ((if? exp)       
+      (scan (if->condition exp) def-sym lid)
+      (scan (if->then exp) def-sym lid)
+      (scan (if->else exp) def-sym lid))
+     ((app? exp)
+      (when (or ;(equal? (car exp) def-sym) TODO: def-sym is obsolete, remove it
+                (rec-call? (car exp) lid))
+        ;(trace:info `("recursive call" ,exp))
+        (with-fnc! lid (lambda (fnc)
+          (adbf:set-calls-self! fnc #t)))
+        (with-var! (car exp) (lambda (var)
+          (adbv:set-self-rec-call! var #t))))
+      (for-each
+        (lambda (e)
+          (scan e def-sym lid))
+        exp)
+     )
+     (else #f)))
+
+  ;; TODO: probably not good enough, what about recursive functions that are not top-level??
+;TODO: need to address those now, I think we have the support now via (rec-call?)
+  (if (pair? exp)
+      (for-each
+        (lambda (exp)
+          ;(trace:info `(analyze:find-recursive-calls ,exp))
+          (and-let* (((define? exp))
+                      (def-exps (define->exp exp))
+                     ((vector? (car def-exps)))
+                     ((ast:lambda? (car def-exps)))
+                     (id (ast:lambda-id (car def-exps)))
+                     )
+           (scan (car (ast:lambda-body (car def-exps))) (define->var exp) id)
+        ))
+        exp))
+)
 ;; well-known-lambda :: symbol -> Either (AST Lambda | Boolean)
 ;; Does the given symbol refer to a well-known lambda?
 ;; If so the corresponding lambda object is returned, else #f.

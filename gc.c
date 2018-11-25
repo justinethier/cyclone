@@ -864,10 +864,11 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       bignum_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = bignum_tag;
-      ((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
-      ((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
-      ((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
-      ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
+      // Bignums are always heap-allocated so there is nothing to copy
+      //((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
+      //((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
+      //((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
+      //((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
       return (char *)hp;
     }
   case cvar_tag:{
@@ -1282,8 +1283,9 @@ void *gc_alloc_bignum(gc_thread_data *data)
   int heap_grown, result;
   bignum_type *bn;
   bignum_type tmp;
-  tmp.hdr.mark = gc_color_red;
-  tmp.hdr.grayed = 0;
+  // No need to do this since tmp is always local
+  //tmp.hdr.mark = gc_color_red;
+  //tmp.hdr.grayed = 0;
   tmp.tag = bignum_tag;
   bn = gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
 

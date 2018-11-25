@@ -17,6 +17,7 @@
     ;; TODO: replace w/list that cannot be precomputed: precompute-prim-app?
     prim-call?
     prim->c-func
+    prim->c-func-uses-alloca?
     prim/data-arg?
     prim/c-var-pointer
     prim/c-var-assign
@@ -457,7 +458,38 @@
     (define (prim-call? exp)
       (and (list? exp) (prim? (car exp))))
 
-    (define (prim->c-func p)
+    (define (prim->c-func-uses-alloca? p use-alloca?)
+      (and
+        use-alloca?
+        (member 
+           p 
+          '(cons
+            Cyc-fast-list-1
+            Cyc-fast-list-2
+            Cyc-fast-list-3
+            Cyc-fast-list-4
+            cell))))
+
+    (define (prim->c-func p use-alloca?)
+      (cond
+         (use-alloca?
+          ;; Special case, when this flag is set the compiler is requesting a
+          ;; primitive that will allocate data, so any new objects must be
+          ;; created via alloca or such, and cannot be declared as stack vars.
+          ;; This is to support C loops in place of recursion.
+          (cond
+            ((eq? p 'cons)            "alloca_pair")
+            ((eq? p 'Cyc-fast-list-1) "alloca_list_1")
+            ((eq? p 'Cyc-fast-list-2) "alloca_list_2")
+            ((eq? p 'Cyc-fast-list-3) "alloca_list_3")
+            ((eq? p 'Cyc-fast-list-4) "alloca_list_4")
+            ((eq? p 'cell)            "alloca_cell")
+            (else
+              (_prim->c-func p))))
+         (else
+           (_prim->c-func p))))
+
+    (define (_prim->c-func p)
       (cond
          ((eq? p 'Cyc-global-vars)       "Cyc_get_global_variables")
          ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
@@ -876,9 +908,10 @@
     ;; Does primitive allocate an object?
     ;; TODO: these are the functions that are defined via macros. This method
     ;; is obsolete and should be replaced by prim:cont? functions over time.
-    (define (prim:allocates-object? exp)
+    (define (prim:allocates-object? exp use-alloca?)
         (and  (prim? exp)
-              (member exp '())))
+              use-alloca?
+              (member exp '(cons))))
     
     ;; Does the primitive only accept/return immutable objects?
     ;; This is useful during optimization

@@ -748,6 +748,13 @@ typedef struct {
   n.tag = complex_num_tag; \
   n.value = (r + (i * I));
 
+#define alloca_complex_num(n,r,i) \
+  complex_num_type *n = alloca(sizeof(complex_num_type)); \
+  n->hdr.mark = gc_color_red; \
+  n->hdr.grayed = 0; \
+  n->tag = complex_num_tag; \
+  n->value = (r + (i * I));
+
 /** Assign given complex value to the given complex number object pointer */
 #define assign_complex_num(pobj,v) \
   ((complex_num_type *)pobj)->hdr.mark = gc_color_red; \
@@ -771,6 +778,13 @@ typedef struct {
   n.hdr.grayed = 0; \
   n.tag = double_tag; \
   n.value = v;
+
+#define alloca_double(n,v) \
+  double_type *n = alloca(sizeof(double_type)); \
+  n->hdr.mark = gc_color_red; \
+  n->hdr.grayed = 0; \
+  n->tag = double_tag; \
+  n->value = v;
 
 /** Assign given double value to the given double object pointer */
 #define assign_double(pobj,v) \
@@ -1044,6 +1058,14 @@ typedef vector_type *vector;
   v.num_elements = 0; \
   v.elements = NULL;
 
+#define alloca_empty_vector(v) \
+  vector_type *v = alloca(sizeof(vector_type)); \
+  v->hdr.mark = gc_color_red; \
+  v->hdr.grayed = 0; \
+  v->tag = vector_tag; \
+  v->num_elements = 0; \
+  v->elements = NULL;
+
 /**
  * @brief Bytevector type 
  *
@@ -1066,6 +1088,14 @@ typedef bytevector_type *bytevector;
   v.tag = bytevector_tag; \
   v.len = 0; \
   v.data = NULL;
+
+#define alloca_empty_bytevector(v) \
+  bytevector_type *v = alloca(sizeof(bytevector_type)); \
+  v->hdr.mark = gc_color_red; \
+  v->hdr.grayed = 0; \
+  v->tag = bytevector_tag; \
+  v->len = 0; \
+  v->data = NULL;
 
 /**
  * @brief The pair (cons) type.
@@ -1128,11 +1158,30 @@ typedef pair_type *pair;
   make_pair(l##__2, a2, &l##__3); \
   make_pair(l, a1, &l##__2);
 
+#define alloca_list_1(l, a1) \
+  alloca_pair(l, a1, NULL);
+
+#define alloca_list_2(l, a1, a2) \
+  alloca_pair(l##__2, a2, NULL); \
+  alloca_pair(l, a1, l##__2);
+
+#define alloca_list_3(l, a1, a2, a3) \
+  alloca_pair(l##__3, a3, NULL); \
+  alloca_pair(l##__2, a2, l##__3); \
+  alloca_pair(l, a1, l##__2);
+
+#define alloca_list_4(l, a1, a2, a3, a4) \
+  alloca_pair(l##__4, a4, NULL); \
+  alloca_pair(l##__3, a3, l##__4); \
+  alloca_pair(l##__2, a2, l##__3); \
+  alloca_pair(l, a1, l##__2);
+
 /**
  * Create a pair with a single value. 
  * This is useful to create an object that can be modified.
  */
 #define make_cell(n,a) make_pair(n,a,NULL);
+#define alloca_cell(n,a) alloca_pair(n,a,NULL);
 
 /**
  * \defgroup objects_unsafe_cxr Unsafe pair access macros

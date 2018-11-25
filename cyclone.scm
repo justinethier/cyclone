@@ -424,6 +424,10 @@
         (trace:info (ast:ast->pp-sexp input-program))
       )
     
+      (set! input-program (opt:local-var-reduction input-program))
+      (trace:info "---------------- after local variable reduction")
+      (trace:info (ast:ast->pp-sexp input-program))
+
       ;; TODO: could do this, but it seems like a bit of a band-aid...
       (set! input-program (opt:renumber-lambdas! input-program))
       (trace:info "---------------- after renumber lambdas")
@@ -545,10 +549,13 @@
          (in-prog-raw (read-file in-file))
          (program? (not (library? (car in-prog-raw))))
          (in-prog
-          (if program? 
-              in-prog-raw
+          (cond
+            (program? 
+              (Cyc-add-feature! 'program) ;; Load special feature
+              in-prog-raw)
+            (else
               ;; Account for any cond-expand declarations in the library
-              (list (lib:cond-expand (car in-prog-raw) expander))))
+              (list (lib:cond-expand (car in-prog-raw) expander)))))
    ;; TODO: expand in-prog, if a library, using lib:cond-expand. (OK, this works now)
    ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (program:imports/code (if program? (import-reduction in-prog expander) '()))

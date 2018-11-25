@@ -623,6 +623,7 @@
 
 ; free-vars : exp -> sorted-set[var]
 (define (free-vars ast . opts)
+  (define let-vars '())
   (define bound-only? 
     (and (not (null? opts))
          (car opts)))
@@ -636,7 +637,10 @@
       ((const? exp)    '())
       ((prim? exp)     '())    
       ((quote? exp)    '())    
-      ((ref? exp)      (if bound-only? '() (list exp)))
+      ((ref? exp)      
+       (if (member exp let-vars)
+           '()
+           (if bound-only? '() (list exp))))
       ((lambda? exp)   
         (difference (reduce union (map search (lambda->exp exp)) '())
                     (lambda-formals->list exp)))
@@ -648,6 +652,9 @@
       ((define-c? exp) (list (define->var exp)))
       ((set!? exp)     (union (list (set!->var exp)) 
                               (search (set!->exp exp))))
+      ((tagged-list? 'let exp)
+       (set! let-vars (append (map car (cadr exp)) let-vars))
+       (search (cdr exp)))
       ; Application:
       ((app? exp)       (reduce union (map search exp) '()))
       (else             (error "unknown expression: " exp))))
@@ -776,6 +783,9 @@
     
     ; Application:
     ((app? exp)
+     ;; Easy place to clean up nested Cyc-seq expressions
+     (when (tagged-list? 'Cyc-seq exp)
+           (set! exp (flatten-sequence exp)))
      (let ((result (map (lambda (e) (wrap-mutables e globals)) exp)))
        ;; This code can eliminate a lambda definition. But typically
        ;; the code that would have such a definition has a recursive
@@ -805,6 +815,42 @@
        ;; (else result))))
        result))
     (else            (error "unknown expression type: " exp))))
+
+;; Flatten a list containing subcalls of a given symbol.
+;; For example, the expression: 
+;;
+;;  '(Cyc-seq
+;;         (set! b '(#f . #f))
+;;         (Cyc-seq
+;;           (set-car!  a 1)
+;;           (Cyc-seq
+;;             (set-cdr!  a '(2))
+;;             ((fnc a1 a2 a3)))))
+;;
+;; becomes:
+;;
+;;  '(Cyc-seq
+;;     (set! b '(#f . #f))
+;;     (set-car! a 1)
+;;     (set-cdr! a '(2))
+;;     ((fnc a1 a2 a3)))
+;;
+(define (flatten-sequence sexp)
+  (define (flat sexp acc)
+    (cond
+      ((not (pair? sexp)) ;; Stop at end of sexp
+       acc)
+      ((and (tagged-list? 'Cyc-seq (car sexp))) ;; Flatten nexted sequences
+        (flat (cdar sexp) acc))
+      ((and (ref? (car sexp)) ;; Remove unused identifiers
+            (not (equal? 'Cyc-seq (car sexp))))
+        (flat (cdr sexp) acc))
+      (else ;;(pair? sexp)
+        (flat (cdr sexp) (cons (car sexp) acc))))
+  )
+  (reverse
+    (flat sexp '())))
+
 
 ;; Alpha conversion
 ;; (aka alpha renaming)
