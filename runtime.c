@@ -21,6 +21,8 @@
 //int JAE_DEBUG = 0;
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
+
 object Cyc_global_set(void *thd, object * glo, object value)
 {
   gc_mut_update((gc_thread_data *) thd, *glo, value);
@@ -2367,7 +2369,7 @@ object Cyc_string_ref(void *data, object str, object k)
   if (string_num_cp(str) == string_len(str)) {
     return obj_char2obj(raw[idx]);
   } else {
-    char_type codepoint;
+    char_type codepoint = 0;
     uint32_t state = 0;
     int count;
 
@@ -7250,7 +7252,7 @@ static const uint8_t utf8d[] = {
  * @param byte Byte to examine
  * @return The current state: `CYC_UTF8_ACCEPT` if successful otherwise `CYC_UTF8_REJECT`.
  */
-uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
+static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
   uint32_t type = utf8d[byte];
 
   *codep = (*state != CYC_UTF8_ACCEPT) ?
