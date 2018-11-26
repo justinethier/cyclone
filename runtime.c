@@ -2245,6 +2245,39 @@ object Cyc_string_append(void *data, object cont, int _argc, object str1, ...)
   Cyc_string_append_va_list(data, _argc);
 }
 
+// TODO:
+//object Cyc_string_append2(void *data, object cont, int _argc, object str1, object str2)
+//{
+//    int i = 0, total_cp = 0, total_len = 1;
+//    int *len = alloca(sizeof(int) * argc);
+//    char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
+//    object tmp;
+//    if (argc > 0) {
+//      Cyc_check_str(data, str1);
+//      str[i] = ((string_type *)str1)->str;
+//      len[i] = string_len((str1));
+//      total_len += len[i];
+//      total_cp += string_num_cp((str1));
+//    }
+//    for (i = 1; i < argc; i++) {
+//TODO:      tmp = va_arg(ap, object);
+//      Cyc_check_str(data, tmp);
+//      str[i] = ((string_type *)tmp)->str;
+//      len[i] = string_len((tmp));
+//      total_len += len[i];
+//      total_cp += string_num_cp((tmp));
+//    }
+//    buffer = bufferp = alloca(sizeof(char) * total_len);
+//    for (i = 0; i < argc; i++) {
+//        memcpy(bufferp, str[i], len[i]);
+//        bufferp += len[i];
+//    }
+//    *bufferp = '\0';
+//    make_string(result, buffer);
+//    string_num_cp((&result)) = total_cp;
+//    _return_closcall1(data, cont, &result);
+//}
+
 object Cyc_string_length(void *data, object str)
 {
   Cyc_check_str(data, str);
