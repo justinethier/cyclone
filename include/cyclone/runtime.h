@@ -767,7 +767,6 @@ void Cyc_set_globals_changed(gc_thread_data *thd);
 
 int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz);
 int Cyc_utf8_count_code_points(uint8_t* s);
-int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
 uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
 uint32_t Cyc_utf8_validate(char *str, size_t len);
 /**@}*/

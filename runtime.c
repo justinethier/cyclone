@@ -22,6 +22,7 @@
 //int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
+static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
 
 object Cyc_global_set(void *thd, object * glo, object value)
 {
@@ -7292,7 +7293,7 @@ int Cyc_utf8_count_code_points(uint8_t* s) {
  * @param bytes Out parameter, set to the number of bytes
  * @return Returns `CYC_UTF8_ACCEPT`  on success, otherwise `CYC_UTF8_REJECT`.
  */
-int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes) {
+static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes) {
   uint32_t state = 0;
   *cpts = 0;
   *bytes = 0;
