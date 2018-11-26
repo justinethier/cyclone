@@ -4,7 +4,7 @@
 
 Features
 
-- Improve performance of runtime function `Cyc_utf8_decode`.
+- Improve performance of many internal C runtime functions by declaring them `static`.
 
 ## 0.9.4 - November 25, 2018
 
