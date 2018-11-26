@@ -2105,7 +2105,7 @@ Convert string s to int out.
 
 @return Indicates if the operation succeeded, or why it failed.
 */
-str2int_errno str2int(int *out, char *s, int base) 
+static str2int_errno str2int(int *out, char *s, int base) 
 {
     char *end;
     if (s[0] == '\0' || isspace((unsigned char) s[0]))
