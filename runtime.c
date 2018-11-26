@@ -6283,7 +6283,7 @@ int read_from_port(port_type *p)
  * @param p Input port
  * @param msg Error message
  */
-void _read_error(void *data, port_type *p, const char *msg) 
+static void _read_error(void *data, port_type *p, const char *msg) 
 {
   char buf[1024];
   snprintf(buf, 1023, "(line %d, column %d): %s", 
@@ -6304,7 +6304,7 @@ void _read_error(void *data, port_type *p, const char *msg)
  * @brief Helper function to read past a comment
  * @param p Input port
  */
-void _read_line_comment(port_type *p)
+static void _read_line_comment(port_type *p)
 {
   while(1) {
     // Read more data into buffer, if needed
@@ -6325,7 +6325,7 @@ void _read_line_comment(port_type *p)
  * @brief Helper function to read past a block comment
  * @param p Input port
  */
-void _read_multiline_comment(port_type *p)
+static void _read_multiline_comment(port_type *p)
 {
   int maybe_end = 0;
 
@@ -6362,7 +6362,7 @@ void _read_multiline_comment(port_type *p)
  * @brief Helper function to read past whitespace characters
  * @param p Input port
  */
-void _read_whitespace(port_type *p) 
+static void _read_whitespace(port_type *p) 
 {
   while(1) {
     // Read more data into buffer, if needed
@@ -6408,7 +6408,7 @@ static void _read_add_to_tok_buf(port_type *p, char c)
 /**
  * @brief Determine if given string is numeric
  */
-int _read_is_numeric(const char *tok, int len)
+static int _read_is_numeric(const char *tok, int len)
 {
   return (len &&
           ((isdigit(tok[0])) ||
@@ -6419,7 +6419,7 @@ int _read_is_numeric(const char *tok, int len)
 /**
  * @brief Determine if given string is a complex number
  */
-int _read_is_complex_number(const char *tok, int len)
+static int _read_is_complex_number(const char *tok, int len)
 {
   // Assumption: tok already passed checks from _read_is_numeric
   return (tok[len - 1] == 'i' ||
@@ -6430,7 +6430,7 @@ int _read_is_complex_number(const char *tok, int len)
  * @brief Helper function, determine if given number is a hex digit
  * @param c Character to check
  */
-int _read_is_hex_digit(char c)
+static int _read_is_hex_digit(char c)
 {
   return (c >= 'a' && c <= 'f') ||
          (c >= 'A' && c <= 'F');
@@ -6442,7 +6442,7 @@ int _read_is_hex_digit(char c)
  * @param cont Current continuation
  * @param p Input port
  */
-void _read_string(void *data, object cont, port_type *p) 
+static void _read_string(void *data, object cont, port_type *p) 
 {
   char c;
   int escaped = 0;
@@ -6547,7 +6547,7 @@ void _read_string(void *data, object cont, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-void _read_literal_identifier(void *data, port_type *p) 
+static void _read_literal_identifier(void *data, port_type *p) 
 {
   char c;
   int escaped = 0;
@@ -6652,7 +6652,7 @@ void _read_literal_identifier(void *data, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-void _read_return_character(void *data, port_type *p)
+static void _read_return_character(void *data, port_type *p)
 {
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
@@ -6708,7 +6708,7 @@ void _read_return_character(void *data, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-void _read_character(void *data, port_type *p) 
+static void _read_character(void *data, port_type *p) 
 {
   char c;
   while(1) {
@@ -6738,7 +6738,7 @@ void _read_character(void *data, port_type *p)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-void _read_return_number(void *data, port_type *p, int base, int exact)
+static void _read_return_number(void *data, port_type *p, int base, int exact)
 {
   // TODO: validation?
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
@@ -6760,7 +6760,7 @@ void _read_return_number(void *data, port_type *p, int base, int exact)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-void _read_return_complex_number(void *data, port_type *p, int len)
+static void _read_return_complex_number(void *data, port_type *p, int len)
 {
 //      TODO: return complex num, see _read_return_number for possible template
 //      probably want to have that function extract/identify the real/imaginary components.
@@ -6791,7 +6791,7 @@ void _read_return_complex_number(void *data, port_type *p, int len)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-void _read_number(void *data, port_type *p, int base, int exact) 
+static void _read_number(void *data, port_type *p, int base, int exact) 
 {
   char c;
   while(1) {
@@ -6828,7 +6828,7 @@ void _read_number(void *data, port_type *p, int base, int exact)
  * @param cont Current continuation
  * @param p Input port
  */
-void _read_return_atom(void *data, object cont, port_type *p) 
+static void _read_return_atom(void *data, object cont, port_type *p) 
 {
   object sym;
   int len = p->tok_end;
