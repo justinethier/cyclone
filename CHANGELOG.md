@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.5 - TBD
+
+Features
+
+- Improve performance of runtime function `Cyc_utf8_decode`.
+
 ## 0.9.4 - November 25, 2018
 
 Compiler Optimizations
