@@ -1029,67 +1029,6 @@
                   (set! args (cdr args)))
                 (ast:lambda-formals->list (car exp))))
              (opt:inline-prims (car (ast:lambda-body (car exp))) scope-sym refs))
-            ;; Issue #201 - Attempt to identify case where an if can be inlined
-            ((and #f ;; TODO: Disabling for now, see issue for more info
-                  (= (length exp) 2)
-                  (ast:lambda? (car exp))
-                  (ast:lambda? (cadr exp))
-                  (ast:lambda-has-cont (car exp))
-                  (= 1 (length (ast:lambda-formals->list (car exp))))
-                  (= 1 (length (ast:lambda-formals->list (cadr exp))))
-                  (if? (car (ast:lambda-body (car exp))))
-;; TODO: think we can get rid of this simplification now
-                  ;; Simplification, for now only allow then/else that call a cont
-                  ;; immediately, to prevent having to scan/rewrite those expressions
-                  (let ((if-exp (car (ast:lambda-body (car exp))))
-                        (kont (car (ast:lambda-formals->list (car exp)))))
-                    (and 
-                      (app? (if->then if-exp))
-                      (app? (if->else if-exp))
-                      ;(equal? kont (car (if->then if-exp)))
-                      ;(equal? kont (car (if->else if-exp)))
-                      ))
-                  ;;
-                  (not
-                    (with-fnc (ast:lambda-id (car exp)) (lambda (fnc)
-                      (adbf:side-effects fnc))))
-                  )
-;(trace:error `(DEBUG2 ,exp))
-             (let* ((new-exp (car (ast:lambda-body (cadr exp))))
-                    (old-if (car (ast:lambda-body (car exp))))
-                    (old-k (car (ast:lambda-formals->list (car exp))))
-                    (old-arg (car (ast:lambda-formals->list (cadr exp))))
-; TODO: what about nested if's? may need another pass above to make sure
-;; the if is simple enough to inline
-;TODO: can logic from inlinable-top-level-lambda? be repurposed to
-;scan old-if to make sure everything is inlinable???
-                    (new-if 
-                      (inline-if:scan-and-replace
-                        `(Cyc-if ,(if->condition old-if)
-                                 ,(if->then old-if)
-                                 ,(if->else old-if))
-                        old-k))
-                    )
-               #;(trace:error `(DEBUG if inline candidate 
-                               ,exp
-                               old-k:
-                               ,old-k
-                               old-arg:
-                               ,old-arg
-                               new-if:
-                               ,new-if
-                               new-exp:
-                               ,new-exp
-                               ))
-
-               (cond
-                (new-if
-                  (hash-table-set! refs old-arg new-if)
-                  (opt:inline-prims new-exp scope-sym refs))
-                (else
-                  ;; Could not inline
-                  (map (lambda (e) (opt:inline-prims e scope-sym refs)) exp)))
-            )) ;;
             ;; Lambda with a parameter that is never used; sequence code instead to avoid lambda
             ((and (ast:lambda? (car exp))
                   (every
