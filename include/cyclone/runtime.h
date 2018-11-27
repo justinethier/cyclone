@@ -719,10 +719,7 @@ void Cyc_rt_raise_msg(void *data, const char *err);
  */
 /**@{*/
 object add_symbol(symbol_type * psym);
-object add_symbol_by_name(const char *name);
-object find_symbol_by_name(const char *name);
 object find_or_add_symbol(const char *name);
-char *_strdup(const char *s);
 /**@}*/
 
 /**

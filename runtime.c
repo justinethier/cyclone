@@ -368,7 +368,7 @@ void Cyc_st_print(void *data, FILE * out)
 
  For now, GC of symbols is missing. long-term it probably would be desirable
 */
-char *_strdup(const char *s)
+static char *_strdup(const char *s)
 {
   char *d = malloc(strlen(s) + 1);
   if (d) {
@@ -377,7 +377,7 @@ char *_strdup(const char *s)
   return d;
 }
 
-object find_symbol_by_name(const char *name)
+static object find_symbol_by_name(const char *name)
 {
   symbol_type tmp = { {0}, symbol_tag, name};
   object result = set_get(&symbol_table, &tmp);
@@ -396,7 +396,7 @@ object add_symbol(symbol_type * psym)
   return psym;
 }
 
-object add_symbol_by_name(const char *name)
+static object add_symbol_by_name(const char *name)
 {
   symbol_type sym = { {0}, symbol_tag, _strdup(name)};
   symbol_type *psym = malloc(sizeof(symbol_type));
