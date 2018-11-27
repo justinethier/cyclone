@@ -1856,6 +1856,7 @@
            ((ast:lambda? (car exp)))
            ((pair? (cdr exp)))
            ((not (cadr exp)))
+           ((list? (ast:lambda-args (car exp))))
            (= 1 (length (ast:lambda-args (car exp))))
            ;; Get information for continuation
            (loop-sym (car (ast:lambda-args (car exp))))
