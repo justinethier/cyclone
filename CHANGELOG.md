@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.5 - TBD
+## 0.9.5 - November 28, 2018
 
 Features
 
