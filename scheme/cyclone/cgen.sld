@@ -803,7 +803,9 @@
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
-        (c-code (string-append c-func "(" tdata))))))
+        (c-code/vars 
+          (string-append c-func "(" tdata tptr-comma tptr)
+          (list tptr-decl))))))
 
 ;; END primitives
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

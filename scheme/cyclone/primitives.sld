@@ -765,10 +765,11 @@
         ((eq? p 'Cyc-stderr) "port_type")
         ((eq? p 'open-input-file) "port_type")
         ((eq? p 'open-output-file) "port_type")
-        ((eq? p 'Cyc-fast-plus) "object")
-        ((eq? p 'Cyc-fast-sub) "object")
-        ((eq? p 'Cyc-fast-mul) "object")
-        ((eq? p 'Cyc-fast-div) "object")
+        ; TODO: can we remove all of these?? What actually needs to remain?
+        ;((eq? p 'Cyc-fast-plus) "object")
+        ;((eq? p 'Cyc-fast-sub) "object")
+        ;((eq? p 'Cyc-fast-mul) "object")
+        ;((eq? p 'Cyc-fast-div) "object")
         ((eq? p '+) "object")
         ((eq? p '-) "object")
         ((eq? p '*) "object")
@@ -836,10 +837,11 @@
                  make-vector list->vector
                  symbol->string number->string 
                  substring
-                 Cyc-fast-plus
-                 Cyc-fast-sub
-                 Cyc-fast-mul
-                 Cyc-fast-div
+        ; TODO: can we remove all of these?? What actually needs to remain?
+                 ;Cyc-fast-plus
+                 ;Cyc-fast-sub
+                 ;Cyc-fast-mul
+                 ;Cyc-fast-div
                  Cyc-fast-eq
                  Cyc-fast-gt
                  Cyc-fast-lt
@@ -850,7 +852,8 @@
                  Cyc-fast-char-lt
                  Cyc-fast-char-gte
                  Cyc-fast-char-lte
-                 + - * / apply 
+                 + - * / 
+                 apply 
                  Cyc-fast-apply
                  = > < >= <=
                  command-line-arguments
