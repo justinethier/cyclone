@@ -8,7 +8,7 @@
  * Heap garbage collector used by the Cyclone runtime for major collections.
  *
  * Concurrent Mark-Sweep GC algorithm is based on the one from 
- * "Implementing an on-the-fly * garbage collector for Java", by Domani et al.
+ * "Implementing an on-the-fly garbage collector for Java", by Domani et al.
  *
  * Data structures for the heap implementation are based on code from Chibi Scheme.
  *
