@@ -470,6 +470,9 @@
             Cyc-fast-list-4
             cell))))
 
+;; TODO: get rid of this function and replace this with the same type of pre-alloc that
+;;       we do for fast numeric operations. That will allow us to prevent out-of-order 
+;;       execution for these as part of Cyc-seq
     (define (prim->c-func p use-alloca?)
       (cond
          (use-alloca?
@@ -756,34 +759,38 @@
         ((member p *udf-prims*) "complex_num_type")
         (else #f)))
 
+;; TODO: this only makes sense for macros, all functions need to be removed from here.
+;;       longer-term we need to fix issues with these functions, Cyc-seq, and the
+;;       possibility of out-of-order execution due to prims being evaluated at the
+;;       C declaration instead of in the body of the function
+;; TODO: does make sense for conts, those can't be in Cyc-seq. OK to keep those here
     ;; Determine if primitive assigns (allocates) a C variable
     ;; EG: int v = prim();
     (define (prim/c-var-assign p)
       (cond
-        ((eq? p 'Cyc-stdout) "port_type")
-        ((eq? p 'Cyc-stdin) "port_type")
-        ((eq? p 'Cyc-stderr) "port_type")
-        ((eq? p 'open-input-file) "port_type")
-        ((eq? p 'open-output-file) "port_type")
-        ; TODO: can we remove all of these?? What actually needs to remain?
+        ;((eq? p 'Cyc-stdout) "port_type")
+        ;((eq? p 'Cyc-stdin) "port_type")
+        ;((eq? p 'Cyc-stderr) "port_type")
+        ;((eq? p 'open-input-file) "port_type")
+        ;((eq? p 'open-output-file) "port_type")
         ;((eq? p 'Cyc-fast-plus) "object")
         ;((eq? p 'Cyc-fast-sub) "object")
         ;((eq? p 'Cyc-fast-mul) "object")
-        ;((eq? p 'Cyc-fast-div) "object")
+        ;;((eq? p 'Cyc-fast-div) "object")
         ((eq? p '+) "object")
         ((eq? p '-) "object")
         ((eq? p '*) "object")
         ((eq? p '/) "object")
-        ((eq? p 'Cyc-fast-eq) "object")
-        ((eq? p 'Cyc-fast-gt) "object")
-        ((eq? p 'Cyc-fast-lt) "object")
-        ((eq? p 'Cyc-fast-gte) "object")
-        ((eq? p 'Cyc-fast-lte) "object")
-        ((eq? p 'Cyc-fast-char-eq) "object")
-        ((eq? p 'Cyc-fast-char-gt) "object")
-        ((eq? p 'Cyc-fast-char-lt) "object")
-        ((eq? p 'Cyc-fast-char-gte) "object")
-        ((eq? p 'Cyc-fast-char-lte) "object")
+        ;((eq? p 'Cyc-fast-eq) "object")
+        ;((eq? p 'Cyc-fast-gt) "object")
+        ;((eq? p 'Cyc-fast-lt) "object")
+        ;((eq? p 'Cyc-fast-gte) "object")
+        ;((eq? p 'Cyc-fast-lte) "object")
+        ;((eq? p 'Cyc-fast-char-eq) "object")
+        ;((eq? p 'Cyc-fast-char-gt) "object")
+        ;((eq? p 'Cyc-fast-char-lt) "object")
+        ;((eq? p 'Cyc-fast-char-gte) "object")
+        ;((eq? p 'Cyc-fast-char-lte) "object")
         ((eq? p '=) "object")
         ((eq? p '>) "object")
         ((eq? p '<) "object")
@@ -819,11 +826,11 @@
         (and (prim? exp)
              (or
                (member exp '(
-                 Cyc-stdout
-                 Cyc-stdin
-                 Cyc-stderr
-                 open-input-file
-                 open-output-file
+                 ;Cyc-stdout
+                 ;Cyc-stdin
+                 ;Cyc-stderr
+                 ;open-input-file
+                 ;open-output-file
                  Cyc-installation-dir
                  Cyc-compilation-environment
                  string->number 
@@ -837,21 +844,20 @@
                  make-vector list->vector
                  symbol->string number->string 
                  substring
-        ; TODO: can we remove all of these?? What actually needs to remain?
                  ;Cyc-fast-plus
                  ;Cyc-fast-sub
                  ;Cyc-fast-mul
                  ;Cyc-fast-div
-                 Cyc-fast-eq
-                 Cyc-fast-gt
-                 Cyc-fast-lt
-                 Cyc-fast-gte
-                 Cyc-fast-lte
-                 Cyc-fast-char-eq
-                 Cyc-fast-char-gt
-                 Cyc-fast-char-lt
-                 Cyc-fast-char-gte
-                 Cyc-fast-char-lte
+                 ;Cyc-fast-eq
+                 ;Cyc-fast-gt
+                 ;Cyc-fast-lt
+                 ;Cyc-fast-gte
+                 ;Cyc-fast-lte
+                 ;Cyc-fast-char-eq
+                 ;Cyc-fast-char-gt
+                 ;Cyc-fast-char-lt
+                 ;Cyc-fast-char-gte
+                 ;Cyc-fast-char-lte
                  + - * / 
                  apply 
                  Cyc-fast-apply
