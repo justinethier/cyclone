@@ -770,11 +770,11 @@
     ;; EG: int v = prim();
     (define (prim/c-var-assign p)
       (cond
-        ;((eq? p 'Cyc-stdout) "port_type")
-        ;((eq? p 'Cyc-stdin) "port_type")
-        ;((eq? p 'Cyc-stderr) "port_type")
-        ;((eq? p 'open-input-file) "port_type")
-        ;((eq? p 'open-output-file) "port_type")
+        ((eq? p 'Cyc-stdout) "port_type")
+        ((eq? p 'Cyc-stdin) "port_type")
+        ((eq? p 'Cyc-stderr) "port_type")
+        ((eq? p 'open-input-file) "port_type")
+        ((eq? p 'open-output-file) "port_type")
         ;((eq? p 'Cyc-fast-plus) "object")
         ;((eq? p 'Cyc-fast-sub) "object")
         ;((eq? p 'Cyc-fast-mul) "object")
@@ -828,11 +828,11 @@
         (and (prim? exp)
              (or
                (member exp '(
-                 ;Cyc-stdout
-                 ;Cyc-stdin
-                 ;Cyc-stderr
-                 ;open-input-file
-                 ;open-output-file
+                 Cyc-stdout
+                 Cyc-stdin
+                 Cyc-stderr
+                 open-input-file
+                 open-output-file
                  Cyc-installation-dir
                  Cyc-compilation-environment
                  string->number 
