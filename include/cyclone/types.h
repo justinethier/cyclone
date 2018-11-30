@@ -1140,6 +1140,14 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+#define set_pair_as_expr(n,a,d) \
+ (((pair)(n))->hdr.mark = gc_color_red, \
+  ((pair)(n))->hdr.grayed = 0, \
+  ((pair)(n))->tag = pair_tag, \
+  ((pair)(n))->pair_car = a, \
+  ((pair)(n))->pair_cdr = d, \
+  (n))
+
 #define make_list_1(l, a1) \
   make_pair(l, a1, NULL);
 

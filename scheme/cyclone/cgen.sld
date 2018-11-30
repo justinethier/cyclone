@@ -733,8 +733,8 @@
          (tptr-type (prim/c-var-pointer p))
          (tptr-comma 
           (cond
-           ((and tptr-type use-alloca?) ",")
-           (tptr-type ",&")
+           ((and tptr-type use-alloca?) tdata-comma)
+           (tptr-type (string-append tdata-comma "&"))
            (else "")))
          (tptr (cond
                 (tptr-type (mangle (gensym 'local)))
