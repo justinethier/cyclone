@@ -259,10 +259,11 @@ bootstrap : icyc libs
 	cp srfi/128.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/128.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/132.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/133.c $(BOOTSTRAP_DIR)/srfi
+	cp srfi/143.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/list-queues/*.scm $(BOOTSTRAP_DIR)/srfi/list-queues
 	cp srfi/sets/*.scm $(BOOTSTRAP_DIR)/srfi/sets
 	cp srfi/sorting/*.scm $(BOOTSTRAP_DIR)/srfi/sorting
-	cp srfi/133.c $(BOOTSTRAP_DIR)/srfi
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
