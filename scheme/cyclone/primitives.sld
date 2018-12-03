@@ -463,7 +463,7 @@
         use-alloca?
         (member 
            p 
-          '(cons
+          '(;cons
             Cyc-fast-list-1
             Cyc-fast-list-2
             Cyc-fast-list-3
@@ -481,7 +481,7 @@
           ;; created via alloca or such, and cannot be declared as stack vars.
           ;; This is to support C loops in place of recursion.
           (cond
-            ((eq? p 'cons)            "alloca_pair")
+            ;((eq? p 'cons)            "alloca_pair")
             ((eq? p 'Cyc-fast-list-1) "alloca_list_1")
             ((eq? p 'Cyc-fast-list-2) "alloca_list_2")
             ((eq? p 'Cyc-fast-list-3) "alloca_list_3")
@@ -640,8 +640,8 @@
          ((eq? p 'string?)       "Cyc_is_string")
          ((eq? p 'eof-object?)   "Cyc_is_eof_object")
          ((eq? p 'symbol?)       "Cyc_is_symbol")
-         ((eq? p 'cons)          "make_pair")
-         ;((eq? p 'cons)          "set_pair_as_expr")
+         ;((eq? p 'cons)          "make_pair")
+         ((eq? p 'cons)          "set_pair_as_expr")
          ((eq? p 'Cyc-fast-list-1) "make_list_1")
          ((eq? p 'Cyc-fast-list-2) "make_list_2")
          ((eq? p 'Cyc-fast-list-3) "make_list_3")
@@ -753,7 +753,7 @@
     ;; Determine if primitive receives a pointer to a local C variable
     (define (prim/c-var-pointer p)
       (cond
-        ;((eq? p 'cons) "pair_type")
+        ((eq? p 'cons) "pair_type")
         ((eq? p 'Cyc-fast-plus) "complex_num_type")
         ((eq? p 'Cyc-fast-sub) "complex_num_type")
         ((eq? p 'Cyc-fast-mul) "complex_num_type")
@@ -871,7 +871,7 @@
                  Cyc-fast-list-2
                  Cyc-fast-list-3
                  Cyc-fast-list-4
-                 cons
+                 ;cons
                  cell))
                (member exp *udf-prims*))))
 
@@ -923,7 +923,10 @@
     (define (prim:allocates-object? exp use-alloca?)
         (and  (prim? exp)
               use-alloca?
-              (member exp '(cons))))
+              (member exp 
+                '(
+                ;cons
+                ))))
     
     ;; Does the primitive only accept/return immutable objects?
     ;; This is useful during optimization
