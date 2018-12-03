@@ -1188,8 +1188,9 @@ typedef pair_type *pair;
  * Create a pair with a single value. 
  * This is useful to create an object that can be modified.
  */
-#define make_cell(n,a) make_pair(n,a,NULL);
-#define alloca_cell(n,a) alloca_pair(n,a,NULL);
+#define make_cell(n,a) make_pair(n,a,NULL)
+#define alloca_cell(n,a) alloca_pair(n,a,NULL)
+#define set_cell_as_expr(n,a) set_pair_as_expr(n,a,NULL)
 
 /**
  * \defgroup objects_unsafe_cxr Unsafe pair access macros
