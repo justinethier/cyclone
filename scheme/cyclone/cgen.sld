@@ -1047,6 +1047,10 @@
                         )
                     )
                     (let* ((params (map mangle (cdr (adbf:all-params adbf:fnc))))
+                           (tmp-params (map
+                                         (lambda (param)
+                                           (string-append "tmp_" param))
+                                         params))
                            (args (map car raw-cargs))
                            (reassignments 
                              ;; TODO: may need to detect cases where an arg is reassigned before
@@ -1057,18 +1061,27 @@
                               (map
                                 (lambda (param arg)
                                   (cond
+                                    ;; TODO: with tmps this is not really applicable anymore:
                                     ((equal? param arg) "") ;; No need to reassign
                                     (else
                                       (string-append
                                         param " = " arg ";\n"))))
-                                params
-                                args))))
+                                tmp-params
+                                args)))
+                           (swap-tmps
+                             (apply string-append
+                               (map
+                                (lambda (p tmp)
+                                  (string-append " " p " = " tmp "; "))
+                                params tmp-params)))
+                           )
 ;(trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
-                    (c-code 
+                    (c-code/vars 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
                         reassignments
+                        swap-tmps
                         ;; TODO: consider passing in a "top" instead of always calling alloca in macro below:
                         "continue_or_gc" (number->string (c:num-args cargs))
                         "(data,"
@@ -1076,7 +1089,12 @@
                         (if (> (c:num-args cargs) 0) "," "")
                         (string-join params ", ")
                         ");"
-                      )))
+                      )
+                      (map 
+                        (lambda (param)
+                          (string-append " object " param "; "))
+                        tmp-params)
+                      ))
                   )
                         
                   ((and wkf fnc
