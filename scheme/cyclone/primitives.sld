@@ -468,7 +468,8 @@
             Cyc-fast-list-2
             Cyc-fast-list-3
             Cyc-fast-list-4
-            cell))))
+            ;cell
+           ))))
 
 ;; TODO: get rid of this function and replace this with the same type of pre-alloc that
 ;;       we do for fast numeric operations. That will allow us to prevent out-of-order 
@@ -486,7 +487,7 @@
             ((eq? p 'Cyc-fast-list-2) "alloca_list_2")
             ((eq? p 'Cyc-fast-list-3) "alloca_list_3")
             ((eq? p 'Cyc-fast-list-4) "alloca_list_4")
-            ((eq? p 'cell)            "alloca_cell")
+            ;((eq? p 'cell)            "alloca_cell")
             (else
               (_prim->c-func p))))
          (else
@@ -646,7 +647,8 @@
          ((eq? p 'Cyc-fast-list-2) "make_list_2")
          ((eq? p 'Cyc-fast-list-3) "make_list_3")
          ((eq? p 'Cyc-fast-list-4) "make_list_4")
-         ((eq? p 'cell)          "make_cell")
+         ;((eq? p 'cell)          "make_cell")
+         ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
          ((eq? p 'set-global!)   "global_set")
@@ -754,6 +756,7 @@
     (define (prim/c-var-pointer p)
       (cond
         ((eq? p 'cons) "pair_type")
+        ((eq? p 'cell) "pair_type")
         ((eq? p 'Cyc-fast-plus) "complex_num_type")
         ((eq? p 'Cyc-fast-sub) "complex_num_type")
         ((eq? p 'Cyc-fast-mul) "complex_num_type")
@@ -872,7 +875,8 @@
                  Cyc-fast-list-3
                  Cyc-fast-list-4
                  ;cons
-                 cell))
+                 ;cell
+                ))
                (member exp *udf-prims*))))
 
     ;; Pass continuation as the function's first parameter?
