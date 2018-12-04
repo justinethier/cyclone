@@ -1154,8 +1154,8 @@ typedef struct { pair_type a; pair_type b; pair_type c;} list_3_type;
 typedef struct { pair_type a; pair_type b; pair_type c; pair_type d;} list_4_type;
 
 #define set_list_2_as_expr(l, a1, a2) \
-  (set_pair_as_expr(((list_2_type *)(l))->b, a2, NULL), \
-   set_pair_as_expr(((list_2_type *)(l))->a, a1, &((list_2_type)(l)->b)))
+  (set_pair_as_expr(&(((list_2_type *)(l))->b), a2, NULL), \
+   set_pair_as_expr(&(((list_2_type *)(l))->a), a1, &(((list_2_type *)(l))->b)))
 
 // DEPRECATED
 #define make_list_1(l, a1) \
