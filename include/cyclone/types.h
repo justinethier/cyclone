@@ -1148,6 +1148,16 @@ typedef pair_type *pair;
   ((pair)(n))->pair_cdr = d, \
   (n))
 
+//typedef list_1_type pair_type;
+typedef struct { pair_type a; pair_type b; } list_2_type;
+typedef struct { pair_type a; pair_type b; pair_type c;} list_3_type;
+typedef struct { pair_type a; pair_type b; pair_type c; pair_type d;} list_4_type;
+
+#define set_list_2_as_expr(l, a1, a2) \
+  (set_pair_as_expr(((list_2_type)(l))->b, a2, NULL), \
+   set_pair_as_expr(((list_2_type)(l))->a, a1, &((list_2_type)(l)->b)))
+
+// DEPRECATED
 #define make_list_1(l, a1) \
   make_pair(l, a1, NULL);
 
@@ -1183,6 +1193,7 @@ typedef pair_type *pair;
   alloca_pair(l##__3, a3, l##__4); \
   alloca_pair(l##__2, a2, l##__3); \
   alloca_pair(l, a1, l##__2);
+// END DEPRECATED
 
 /**
  * Create a pair with a single value. 
