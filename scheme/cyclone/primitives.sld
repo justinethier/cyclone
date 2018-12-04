@@ -116,10 +116,10 @@
          Cyc-default-exception-handler
          Cyc-current-exception-handler
          cons
-         Cyc-fast-list-1
-         Cyc-fast-list-2
-         Cyc-fast-list-3
-         Cyc-fast-list-4
+         ;Cyc-fast-list-1
+         ;Cyc-fast-list-2
+         ;Cyc-fast-list-3
+         ;Cyc-fast-list-4
          cell-get
          set-global!
          set-cell!
@@ -256,10 +256,10 @@
          (Cyc-default-exception-handler 1 1)
          (Cyc-current-exception-handler 0 0)
          (cons 2 2)
-         (Cyc-fast-list-1 1 1)
-         (Cyc-fast-list-2 2 2)
-         (Cyc-fast-list-3 3 3)
-         (Cyc-fast-list-4 4 4)
+         ;(Cyc-fast-list-1 1 1)
+         ;(Cyc-fast-list-2 2 2)
+         ;(Cyc-fast-list-3 3 3)
+         ;(Cyc-fast-list-4 4 4)
          (cell-get 1 1)
          (set-global! 2 2)
          (set-cell! 2 2)
@@ -464,10 +464,10 @@
         (member 
            p 
           '(;cons
-            Cyc-fast-list-1
+            ;Cyc-fast-list-1
             ;Cyc-fast-list-2
-            Cyc-fast-list-3
-            Cyc-fast-list-4
+            ;Cyc-fast-list-3
+            ;Cyc-fast-list-4
             ;cell
            ))))
 
@@ -483,10 +483,10 @@
           ;; This is to support C loops in place of recursion.
           (cond
             ;((eq? p 'cons)            "alloca_pair")
-            ((eq? p 'Cyc-fast-list-1) "alloca_list_1")
+            ;((eq? p 'Cyc-fast-list-1) "alloca_list_1")
             ;((eq? p 'Cyc-fast-list-2) "alloca_list_2")
-            ((eq? p 'Cyc-fast-list-3) "alloca_list_3")
-            ((eq? p 'Cyc-fast-list-4) "alloca_list_4")
+            ;((eq? p 'Cyc-fast-list-3) "alloca_list_3")
+            ;((eq? p 'Cyc-fast-list-4) "alloca_list_4")
             ;((eq? p 'cell)            "alloca_cell")
             (else
               (_prim->c-func p))))
@@ -643,11 +643,11 @@
          ((eq? p 'symbol?)       "Cyc_is_symbol")
          ;((eq? p 'cons)          "make_pair")
          ((eq? p 'cons)          "set_pair_as_expr")
-         ((eq? p 'Cyc-fast-list-1) "make_list_1")
-         ((eq? p 'Cyc-fast-list-2) "set_list_2_as_expr")
-         ;((eq? p 'Cyc-fast-list-2) "make_list_2")
-         ((eq? p 'Cyc-fast-list-3) "make_list_3")
-         ((eq? p 'Cyc-fast-list-4) "make_list_4")
+         ;((eq? p 'Cyc-fast-list-1) "make_list_1")
+         ;((eq? p 'Cyc-fast-list-2) "set_list_2_as_expr")
+         ;;((eq? p 'Cyc-fast-list-2) "make_list_2")
+         ;((eq? p 'Cyc-fast-list-3) "make_list_3")
+         ;((eq? p 'Cyc-fast-list-4) "make_list_4")
          ;((eq? p 'cell)          "make_cell")
          ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
@@ -758,7 +758,7 @@
       (cond
         ((eq? p 'cons) "pair_type")
         ((eq? p 'cell) "pair_type")
-        ((eq? p 'Cyc-fast-list-2) "list_2_type")
+        ;((eq? p 'Cyc-fast-list-2) "list_2_type")
         ((eq? p 'Cyc-fast-plus) "complex_num_type")
         ((eq? p 'Cyc-fast-sub) "complex_num_type")
         ((eq? p 'Cyc-fast-mul) "complex_num_type")
@@ -872,10 +872,10 @@
                  command-line-arguments
                  Cyc-read-line
                  Cyc-read-char Cyc-peek-char
-                 Cyc-fast-list-1
+                 ;Cyc-fast-list-1
                  ;Cyc-fast-list-2
-                 Cyc-fast-list-3
-                 Cyc-fast-list-4
+                 ;Cyc-fast-list-3
+                 ;Cyc-fast-list-4
                  ;cons
                  ;cell
                 ))
