@@ -1259,7 +1259,7 @@ list assoc_cdr(void *data, object x, list l)
 }
 /* END member and assoc */
 
-object Cyc_fast_list_2(void *data, object ptr, object a1, object a2) 
+object Cyc_fast_list_2(object ptr, object a1, object a2) 
 {
   list_2_type *l = (list_2_type *)ptr;
   set_pair( ((pair)(&(l->b))), a2, NULL);
@@ -1267,7 +1267,7 @@ object Cyc_fast_list_2(void *data, object ptr, object a1, object a2)
   return ptr;
 }
 
-object Cyc_fast_list_3(void *data, object ptr, object a1, object a2, object a3) 
+object Cyc_fast_list_3(object ptr, object a1, object a2, object a3) 
 {
   list_3_type *l = (list_3_type *)ptr;
   set_pair( ((pair)(&(l->c))), a3, NULL);
@@ -1276,7 +1276,7 @@ object Cyc_fast_list_3(void *data, object ptr, object a1, object a2, object a3)
   return ptr;
 }
 
-object Cyc_fast_list_4(void *data, object ptr, object a1, object a2, object a3, object a4) 
+object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4) 
 {
   list_4_type *l = (list_4_type *)ptr;
   set_pair( ((pair)(&(l->d))), a4, NULL);
