@@ -1259,6 +1259,33 @@ list assoc_cdr(void *data, object x, list l)
 }
 /* END member and assoc */
 
+object Cyc_fast_list_2(void *data, object ptr, object a1, object a2) 
+{
+  list_2_type *l = (list_2_type *)ptr;
+  set_pair( ((pair)(&(l->b))), a2, NULL);
+  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  return ptr;
+}
+
+object Cyc_fast_list_3(void *data, object ptr, object a1, object a2, object a3) 
+{
+  list_3_type *l = (list_3_type *)ptr;
+  set_pair( ((pair)(&(l->c))), a3, NULL);
+  set_pair( ((pair)(&(l->b))), a2, ((pair)(&(l->c))));
+  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  return ptr;
+}
+
+object Cyc_fast_list_4(void *data, object ptr, object a1, object a2, object a3, object a4) 
+{
+  list_4_type *l = (list_4_type *)ptr;
+  set_pair( ((pair)(&(l->d))), a4, NULL);
+  set_pair( ((pair)(&(l->c))), a3, ((pair)(&(l->d))));
+  set_pair( ((pair)(&(l->b))), a2, ((pair)(&(l->c))));
+  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  return ptr;
+}
+
 // Internal function, do not use this anywhere outside the runtime
 object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 {

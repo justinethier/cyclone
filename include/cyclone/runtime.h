@@ -397,6 +397,9 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y);
 object Cyc_fast_sub(void *data, object ptr, object x, object y);
 object Cyc_fast_mul(void *data, object ptr, object x, object y);
 object Cyc_fast_div(void *data, object ptr, object x, object y);
+object Cyc_fast_list_2(void *data, object ptr, object x, object y);
+object Cyc_fast_list_3(void *data, object ptr, object a1, object a2, object a3);
+object Cyc_fast_list_4(void *data, object ptr, object a1, object a2, object a3, object a4);
 object Cyc_bit_unset(void *data, object n1, object n2); 
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,

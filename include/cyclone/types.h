@@ -1153,48 +1153,6 @@ typedef struct { pair_type a; pair_type b; } list_2_type;
 typedef struct { pair_type a; pair_type b; pair_type c;} list_3_type;
 typedef struct { pair_type a; pair_type b; pair_type c; pair_type d;} list_4_type;
 
-#define set_list_2_as_expr(l, a1, a2) \
-  (set_pair_as_expr(&(((list_2_type *)(l))->b), a2, NULL), \
-   set_pair_as_expr(&(((list_2_type *)(l))->a), a1, &(((list_2_type *)(l))->b)))
-
-// DEPRECATED
-#define make_list_1(l, a1) \
-  make_pair(l, a1, NULL);
-
-#define make_list_2(l, a1, a2) \
-  make_pair(l##__2, a2, NULL); \
-  make_pair(l, a1, &l##__2);
-
-#define make_list_3(l, a1, a2, a3) \
-  make_pair(l##__3, a3, NULL); \
-  make_pair(l##__2, a2, &l##__3); \
-  make_pair(l, a1, &l##__2);
-
-#define make_list_4(l, a1, a2, a3, a4) \
-  make_pair(l##__4, a4, NULL); \
-  make_pair(l##__3, a3, &l##__4); \
-  make_pair(l##__2, a2, &l##__3); \
-  make_pair(l, a1, &l##__2);
-
-#define alloca_list_1(l, a1) \
-  alloca_pair(l, a1, NULL);
-
-#define alloca_list_2(l, a1, a2) \
-  alloca_pair(l##__2, a2, NULL); \
-  alloca_pair(l, a1, l##__2);
-
-#define alloca_list_3(l, a1, a2, a3) \
-  alloca_pair(l##__3, a3, NULL); \
-  alloca_pair(l##__2, a2, l##__3); \
-  alloca_pair(l, a1, l##__2);
-
-#define alloca_list_4(l, a1, a2, a3, a4) \
-  alloca_pair(l##__4, a4, NULL); \
-  alloca_pair(l##__3, a3, l##__4); \
-  alloca_pair(l##__2, a2, l##__3); \
-  alloca_pair(l, a1, l##__2);
-// END DEPRECATED
-
 /**
  * Create a pair with a single value. 
  * This is useful to create an object that can be modified.
