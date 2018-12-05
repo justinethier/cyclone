@@ -1057,6 +1057,11 @@
                              ;; another one is assigned to that arg's old value, for example:
                              ;;   a = 1, b = 2, c = a
                              ;; In this case the code would need to assign to a temporary variable
+                             ;;
+                             ;; Right now we just play it safe and always assign to temporary variables,
+                             ;; even when we don't need to. I suppose in theory the C compiler can
+                             ;; figure that out (??) but it would be cleaner overall if we could here.
+                             ;; Something to consider for the future.
                              (apply string-append
                               (map
                                 (lambda (param arg)
