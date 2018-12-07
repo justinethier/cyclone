@@ -1351,9 +1351,10 @@ typedef union {
   complex_num_type complex_num_t;
 } common_type;
 
-#define return_copy(ptr, obj) \
+#define return_copy(ptr, o) \
 { \
   tag_type t; \
+  object obj = o; \
   if (!is_object_type(obj)) \
     return obj; \
   t = type_of(obj); \
