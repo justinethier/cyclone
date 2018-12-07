@@ -2,6 +2,11 @@
 
 ## 0.9.6 - TBD
 
+Bug Fixes
+
+- Cleaned up generated code to ensure calls to primitives from functions that are combined are not executed out of order.
+- Fixed the `return_copy` macro in the runtime to handle being passed an expression instead of an object.
+
 ## 0.9.5 - November 28, 2018
 
 Features
