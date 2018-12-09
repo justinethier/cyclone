@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.6 - TBD
+## 0.9.6 - December 9, 2018
 
 Bug Fixes
 
