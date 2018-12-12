@@ -223,6 +223,7 @@
     negative?
     positive?
     zero?
+    list?
     not
     string>=?
     string>?
@@ -706,16 +707,11 @@
     (define (newline . port) 
       (apply write-char (cons #\newline port)))
     (define (not x) (if x #f #t))
-    (define (list? o)
-      (define (_list? obj)
-        (cond
-          ((null? obj) #t)
-          ((pair? obj)
-           (_list? (cdr obj)))
-          (else #f)))
-      (if (Cyc-has-cycle? o)
-        #t
-        (_list? o)))
+    (define-c list?
+      "(void *data, int argc, closure _, object k, object o)"
+      " return_closcall1(data, k, Cyc_is_list(o));"
+      "(void *data, object ptr, object o)"
+      " return Cyc_is_list(o);")
     (define (zero? n) (= n 0))
     (define (positive? n) (> n 0))
     (define (negative? n) (< n 0))
