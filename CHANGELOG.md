@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.7 - TBD
+
+Features
+
+- Faster version of `list?`.
+
 ## 0.9.6 - December 9, 2018
 
 Bug Fixes
