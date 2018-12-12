@@ -2006,7 +2006,19 @@
       (when (equal? (car exp) def-sym)
         (trace:info `("recursive call" ,exp))
         (with-var! def-sym (lambda (var)
-          (adbv:set-self-rec-call! var #t)))))
+
+;; TODO: want to set on the fnc as well, problem is base.sld:list-tail (and other globals?) has an
+;;       assigned value of (list ast-lamdda) instead of just ast-lambda - WTF?
+;; search for adbv-set-assigned-value-helper! - can we just get car of (define->exp)???
+;;           (and-let*
+;;             ((a-value (adbv:assigned-value var))
+;;              ((ast:lambda? a-value))
+;;              (lid (ast:lambda-id a-value)))
+;;             (with-fnc! lid (lambda (fnc)
+;;               (adbf:set-calls-self! fnc #t))))
+
+          (adbv:set-self-rec-call! var #t)))
+        ))
      (else #f)))
 
   ;; TODO: probably not good enough, what about recursive functions that are not top-level??
