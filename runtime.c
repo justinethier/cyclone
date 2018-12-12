@@ -780,6 +780,39 @@ object Cyc_has_cycle(object lst)
 }
 
 /**
+ * Predicate - is the object a proper list?
+ * Based on `Cyc_has_cycle` so it is safe to call on circular lists.
+ */
+object Cyc_is_list(object lst)
+{
+  object slow_lst, fast_lst;
+  if ((lst == NULL)){
+    return boolean_t;
+  } else if (is_value_type(lst)) {
+    return boolean_f;
+  } else if (is_object_type(lst) && type_of(lst) != pair_tag) {
+    return boolean_f;
+  }
+  slow_lst = lst;
+  fast_lst = cdr(lst);
+  while (1) {
+    if (fast_lst == NULL)
+      return boolean_t;
+    if (Cyc_is_pair(fast_lst) == boolean_f)
+      return boolean_f; // Improper list
+    if ((cdr(fast_lst)) == NULL)
+      return boolean_t;
+    if (Cyc_is_pair(cdr(fast_lst)) == boolean_f)
+      return boolean_f; // Improper
+    if (slow_lst == fast_lst)
+      return boolean_t; // Cycle; we have a list
+
+    slow_lst = cdr(slow_lst);
+    fast_lst = cddr(fast_lst);
+  }
+}
+
+/**
  * Write string representation of a double to a buffer.
  * Added code from Chibi Scheme to print a ".0" if the 
  * double is a whole number (EG: 3.0) to avoid confusion

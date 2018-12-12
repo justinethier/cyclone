@@ -421,6 +421,7 @@ double MRG32k3a (double seed);
 int equal(object, object);
 object equalp(object, object);
 object Cyc_has_cycle(object lst);
+object Cyc_is_list(object lst);
 //object Cyc_is_boolean(object o);
 #define Cyc_is_boolean(o) (make_boolean(o == boolean_f || o == boolean_t))
 #define Cyc_is_pair(o) ((is_object_type(o) && ((list) o)->tag == pair_tag) ? boolean_t : boolean_f)
