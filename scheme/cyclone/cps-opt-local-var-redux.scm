@@ -12,6 +12,7 @@
     (import (scheme base) 
             (scheme write) 
             (scheme cyclone ast) 
+            (scheme cyclone primitives)
             (scheme cyclone util) 
             (scheme cyclone pretty-print))))
 
@@ -71,10 +72,14 @@
                        ))
                 (var (car (ast:lambda-args (cadr exp))))
                 (body (ast:lambda-body (cadr exp)))
-                (av (adb:get/default var #f)) ;; Set to #f if unit testing
+                (av (cond-expand
+                      (program #f)
+                      (else (adb:get/default var #f))))
                 (ref-count
                   (if av
-                      (adbv:ref-count av)
+                      (cond-expand
+                        (program #f)
+                        (else (adbv:ref-count av)))
                       1)) ;; Dummy value
                 )
             (if (and (> ref-count 0)  ;; 0 ==> local var is never used
@@ -178,228 +183,244 @@
   (program
     (define sexp
 '(
- (define zunda
-   ((lambda
-      (k$1057 first-row-perm$61$668 mat$62$669)
-      (first-row-perm$61$668
-        (lambda
-          (first-row$65$670)
-          ((lambda
-             (number-of-cols$68$671)
-             ((lambda
-                (make-row->func$71$672)
-                (first-row-perm$61$668
-                  (lambda
-                    (r$1062)
-                    (make-row->func$71$672
-                      (lambda
-                        (r$1063)
-                        (make-row->func$71$672
-                          (lambda
-                            (r$1064)
-                            (zebra k$1057
-                                   r$1062
-                                   r$1063
-                                   r$1064
-                                   (cdr mat$62$669)
-                                   number-of-cols$68$671))
-                          -1
-                          1))
-                      1
-                      -1))
-                  'child))
-              (lambda
-                (k$1066 if-equal$76$674 if-different$77$675)
-                (k$1066
-                  (lambda
-                    (k$1067 row$78$676)
-                    ((lambda
-                       (vec$79$677)
-                       ((lambda
-                          (first$85$679 row$86$680)
-                          ((lambda
-                             (lp$80$87$681)
-                             ((lambda
-                                (lp$80$87$681)
-                                (Cyc-seq
-                                  (set!
-                                    lp$80$87$681
-                                    (lambda
-                                      (k$1073 i$88$682 first$89$683 row$90$684)
-                                      (if (Cyc-fast-eq
-                                            i$88$682
-                                            number-of-cols$68$671)
-                                        (k$1073
-                                          (Cyc-fast-eq
-                                            i$88$682
-                                            number-of-cols$68$671))
-                                        ((lambda
-                                           (k$1080)
-                                           (if (Cyc-fast-eq
+ ;(define zunda
+ ;  ((lambda
+ ;     (k$1057 first-row-perm$61$668 mat$62$669)
+ ;     (first-row-perm$61$668
+ ;       (lambda
+ ;         (first-row$65$670)
+ ;         ((lambda
+ ;            (number-of-cols$68$671)
+ ;            ((lambda
+ ;               (make-row->func$71$672)
+ ;               (first-row-perm$61$668
+ ;                 (lambda
+ ;                   (r$1062)
+ ;                   (make-row->func$71$672
+ ;                     (lambda
+ ;                       (r$1063)
+ ;                       (make-row->func$71$672
+ ;                         (lambda
+ ;                           (r$1064)
+ ;                           (zebra k$1057
+ ;                                  r$1062
+ ;                                  r$1063
+ ;                                  r$1064
+ ;                                  (cdr mat$62$669)
+ ;                                  number-of-cols$68$671))
+ ;                         -1
+ ;                         1))
+ ;                     1
+ ;                     -1))
+ ;                 'child))
+ ;             (lambda
+ ;               (k$1066 if-equal$76$674 if-different$77$675)
+ ;               (k$1066
+ ;                 (lambda
+ ;                   (k$1067 row$78$676)
+ ;                   ((lambda
+ ;                      (vec$79$677)
+ ;                      ((lambda
+ ;                         (first$85$679 row$86$680)
+ ;                         ((lambda
+ ;                            (lp$80$87$681)
+ ;                            ((lambda
+ ;                               (lp$80$87$681)
+ ;                               (Cyc-seq
+ ;                                 (set!
+ ;                                   lp$80$87$681
+ ;                                   (lambda
+ ;                                     (k$1073 i$88$682 first$89$683 row$90$684)
+ ;                                     (if (Cyc-fast-eq
+ ;                                           i$88$682
+ ;                                           number-of-cols$68$671)
+ ;                                       (k$1073
+ ;                                         (Cyc-fast-eq
+ ;                                           i$88$682
+ ;                                           number-of-cols$68$671))
+ ;                                       ((lambda
+ ;                                          (k$1080)
+ ;                                          (if (Cyc-fast-eq
 
-                                                 (car first$89$683)
-                                                 (car row$90$684))
-                                             (k$1080 if-equal$76$674)
-                                             (k$1080 if-different$77$675)))
-                                         (lambda
-                                           (r$1079)
-                                           (Cyc-seq
-                                             (vector-set!
-                                               vec$79$677
-                                               i$88$682
-                                               r$1079)
-                                             ((cell-get lp$80$87$681)
-                                              k$1073
-                                              (Cyc-fast-plus i$88$682 1)
-                                              (cdr first$89$683)
-                                              (cdr row$90$684))))))))
-                                  ((cell-get lp$80$87$681)
-                                   (lambda
-                                     (r$1069)
-                                     (k$1067
-                                       (lambda
-                                         (k$1070 i$92$686)
-                                         (k$1070
-                                           (vector-ref vec$79$677 i$92$686)))))
-                                   0
-                                   first$85$679
-                                   row$86$680)))
-                              (cell lp$80$87$681)))
-                           #f))
-                        first-row$65$670
-                        row$78$676))
-                     (make-vector number-of-cols$68$671)))))))
-           (length first-row$65$670)))
-        'now))))
-  (define *num-passed* 0) 
- (define write-to-string
+ ;                                                (car first$89$683)
+ ;                                                (car row$90$684))
+ ;                                            (k$1080 if-equal$76$674)
+ ;                                            (k$1080 if-different$77$675)))
+ ;                                        (lambda
+ ;                                          (r$1079)
+ ;                                          (Cyc-seq
+ ;                                            (vector-set!
+ ;                                              vec$79$677
+ ;                                              i$88$682
+ ;                                              r$1079)
+ ;                                            ((cell-get lp$80$87$681)
+ ;                                             k$1073
+ ;                                             (Cyc-fast-plus i$88$682 1)
+ ;                                             (cdr first$89$683)
+ ;                                             (cdr row$90$684))))))))
+ ;                                 ((cell-get lp$80$87$681)
+ ;                                  (lambda
+ ;                                    (r$1069)
+ ;                                    (k$1067
+ ;                                      (lambda
+ ;                                        (k$1070 i$92$686)
+ ;                                        (k$1070
+ ;                                          (vector-ref vec$79$677 i$92$686)))))
+ ;                                  0
+ ;                                  first$85$679
+ ;                                  row$86$680)))
+ ;                             (cell lp$80$87$681)))
+ ;                          #f))
+ ;                       first-row$65$670
+ ;                       row$78$676))
+ ;                    (make-vector number-of-cols$68$671)))))))
+ ;          (length first-row$65$670)))
+ ;       'now))))
+ ; (define *num-passed* 0) 
+ ;(define write-to-string
+ ;  (lambda
+ ;    (k$3086 x$892$1775)
+ ;    (call-with-output-string
+ ;      k$3086
+ ;      (lambda
+ ;        (k$3088 out$893$1776)
+ ;        ((lambda
+ ;           (x$895$1777)
+ ;           ((lambda
+ ;              (wr$896$1778)
+ ;              (Cyc-seq
+ ;                (set! wr$896$1778
+ ;                  (lambda
+ ;                    (k$3091 x$897$1779)
+ ;                    (if (pair? x$897$1779)
+ ;                      ((lambda
+ ;                         (k$3112)
+ ;                         (if (symbol? (car x$897$1779))
+ ;                           (if (pair? (cdr x$897$1779))
+ ;                             (if (null? (cddr x$897$1779))
+ ;                               (k$3112
+ ;                                 (assq (car x$897$1779)
+ ;                                       '((quote . "'")
+ ;                                         (quasiquote . "`")
+ ;                                         (unquote . ",")
+ ;                                         (unquote-splicing . ",@"))))
+ ;                               (k$3112 #f))
+ ;                             (k$3112 #f))
+ ;                           (k$3112 #f)))
+ ;                       (lambda
+ ;                         (tmp$900$902$1780)
+ ;                         (if tmp$900$902$1780
+ ;                           ((lambda
+ ;                              (s$903$1781)
+ ;                              (display
+ ;                                (lambda
+ ;                                  (r$3094)
+ ;                                  (wr$896$1778 k$3091 (cadr x$897$1779)))
+ ;                                (cdr s$903$1781)
+ ;                                out$893$1776))
+ ;                            tmp$900$902$1780)
+ ;                           (display
+ ;                             (lambda
+ ;                               (r$3097)
+ ;                               (wr$896$1778
+ ;                                 (lambda
+ ;                                   (r$3098)
+ ;                                   ((lambda
+ ;                                      (lp$907$1783)
+ ;                                      (Cyc-seq
+ ;                                        (set! lp$907$1783
+ ;                                          (lambda
+ ;                                            (k$3103 ls$908$1784)
+ ;                                            (if (pair? ls$908$1784)
+ ;                                              (display
+ ;                                                (lambda
+ ;                                                  (r$3105)
+ ;                                                  (wr$896$1778
+ ;                                                    (lambda
+ ;                                                      (r$3106)
+ ;                                                      (lp$907$1783
+ ;                                                        k$3103
+ ;                                                        (cdr ls$908$1784)))
+ ;                                                    (car ls$908$1784)))
+ ;                                                " "
+ ;                                                out$893$1776)
+ ;                                              (if (null? ls$908$1784)
+ ;                                                (k$3103 #f)
+ ;                                                (display
+ ;                                                  (lambda
+ ;                                                    (r$3110)
+ ;                                                    (write k$3103
+ ;                                                           ls$908$1784
+ ;                                                           out$893$1776))
+ ;                                                  " . "
+ ;                                                  out$893$1776)))))
+ ;                                        (lp$907$1783
+ ;                                          (lambda
+ ;                                            (r$3099)
+ ;                                            (display k$3091 ")" out$893$1776))
+ ;                                          (cdr x$897$1779))))
+ ;                                    #f))
+ ;                                 (car x$897$1779)))
+ ;                             "("
+ ;                             out$893$1776))))
+ ;                      (write k$3091 x$897$1779 out$893$1776))))
+ ;                (wr$896$1778 k$3088 x$895$1777)))
+ ;            #f))
+ ;         x$892$1775)))))
+ ;(define match-gen-or-step
+ ;  (lambda
+ ;    (k$14021
+ ;      expr$3499$3540$3621$9398
+ ;      rename$3500$3541$3622$9399
+ ;      compare$3501$3542$3623$9400)
+ ;    ((lambda
+ ;       (v.1$3507$3599$3659$9436)
+ ;       ((lambda
+ ;          (k$14141)
+ ;          (if (pair? v.1$3507$3599$3659$9436)
+ ;            (Cyc-seq
+ ;              (car v.1$3507$3599$3659$9436)
+ ;              (if (pair? (cdr v.1$3507$3599$3659$9436))
+ ;                (if (null? (car (cdr v.1$3507$3599$3659$9436)))
+ ;                  (if (pair? (cdr (cdr v.1$3507$3599$3659$9436)))
+ ;                    (Cyc-seq
+ ;                      (car (cdr (cdr v.1$3507$3599$3659$9436)))
+ ;                      (if (pair? (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
+ ;                        (Cyc-seq
+ ;                          (car (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
+ ;                          (if (pair? (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+ ;                            (Cyc-seq
+ ;                              (cdr (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+ ;                              (k$14141
+ ;                                (cons (car (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
+ ;                                      #f)))
+ ;                            (k$14141 #f)))
+ ;                        (k$14141 #f)))
+ ;                    (k$14141 #f))
+ ;                  (k$14141 #f))
+ ;                (k$14141 #f)))
+ ;            (k$14141 #f)))
+ ;        (lambda
+ ;          (tmp$3544$3546$3624$9401)
+ ;          (list
+ ;           (lambda (r$14022) (k$14021 (car r$14022)))))))
+ ;     (cdr expr$3499$3540$3621$9398))))
+
+ (define slot-set!
    (lambda
-     (k$3086 x$892$1775)
-     (call-with-output-string
-       k$3086
-       (lambda
-         (k$3088 out$893$1776)
-         ((lambda
-            (x$895$1777)
-            ((lambda
-               (wr$896$1778)
-               (Cyc-seq
-                 (set! wr$896$1778
-                   (lambda
-                     (k$3091 x$897$1779)
-                     (if (pair? x$897$1779)
-                       ((lambda
-                          (k$3112)
-                          (if (symbol? (car x$897$1779))
-                            (if (pair? (cdr x$897$1779))
-                              (if (null? (cddr x$897$1779))
-                                (k$3112
-                                  (assq (car x$897$1779)
-                                        '((quote . "'")
-                                          (quasiquote . "`")
-                                          (unquote . ",")
-                                          (unquote-splicing . ",@"))))
-                                (k$3112 #f))
-                              (k$3112 #f))
-                            (k$3112 #f)))
-                        (lambda
-                          (tmp$900$902$1780)
-                          (if tmp$900$902$1780
-                            ((lambda
-                               (s$903$1781)
-                               (display
-                                 (lambda
-                                   (r$3094)
-                                   (wr$896$1778 k$3091 (cadr x$897$1779)))
-                                 (cdr s$903$1781)
-                                 out$893$1776))
-                             tmp$900$902$1780)
-                            (display
-                              (lambda
-                                (r$3097)
-                                (wr$896$1778
-                                  (lambda
-                                    (r$3098)
-                                    ((lambda
-                                       (lp$907$1783)
-                                       (Cyc-seq
-                                         (set! lp$907$1783
-                                           (lambda
-                                             (k$3103 ls$908$1784)
-                                             (if (pair? ls$908$1784)
-                                               (display
-                                                 (lambda
-                                                   (r$3105)
-                                                   (wr$896$1778
-                                                     (lambda
-                                                       (r$3106)
-                                                       (lp$907$1783
-                                                         k$3103
-                                                         (cdr ls$908$1784)))
-                                                     (car ls$908$1784)))
-                                                 " "
-                                                 out$893$1776)
-                                               (if (null? ls$908$1784)
-                                                 (k$3103 #f)
-                                                 (display
-                                                   (lambda
-                                                     (r$3110)
-                                                     (write k$3103
-                                                            ls$908$1784
-                                                            out$893$1776))
-                                                   " . "
-                                                   out$893$1776)))))
-                                         (lp$907$1783
-                                           (lambda
-                                             (r$3099)
-                                             (display k$3091 ")" out$893$1776))
-                                           (cdr x$897$1779))))
-                                     #f))
-                                  (car x$897$1779)))
-                              "("
-                              out$893$1776))))
-                       (write k$3091 x$897$1779 out$893$1776))))
-                 (wr$896$1778 k$3088 x$895$1777)))
-             #f))
-          x$892$1775)))))
- (define match-gen-or-step
-   (lambda
-     (k$14021
-       expr$3499$3540$3621$9398
-       rename$3500$3541$3622$9399
-       compare$3501$3542$3623$9400)
+     (k$7170
+       name$2424$3603
+       obj$2425$3604
+       idx$2426$3605
+       val$2427$3606)
      ((lambda
-        (v.1$3507$3599$3659$9436)
+        (vec$2428$3607)
         ((lambda
-           (k$14141)
-           (if (pair? v.1$3507$3599$3659$9436)
-             (Cyc-seq
-               (car v.1$3507$3599$3659$9436)
-               (if (pair? (cdr v.1$3507$3599$3659$9436))
-                 (if (null? (car (cdr v.1$3507$3599$3659$9436)))
-                   (if (pair? (cdr (cdr v.1$3507$3599$3659$9436)))
-                     (Cyc-seq
-                       (car (cdr (cdr v.1$3507$3599$3659$9436)))
-                       (if (pair? (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
-                         (Cyc-seq
-                           (car (cdr (cdr (cdr v.1$3507$3599$3659$9436))))
-                           (if (pair? (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
-                             (Cyc-seq
-                               (cdr (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
-                               (k$14141
-                                 (cons (car (cdr (cdr (cdr (cdr v.1$3507$3599$3659$9436)))))
-                                       #f)))
-                             (k$14141 #f)))
-                         (k$14141 #f)))
-                     (k$14141 #f))
-                   (k$14141 #f))
-                 (k$14141 #f)))
-             (k$14141 #f)))
-         (lambda
-           (tmp$3544$3546$3624$9401)
-           (list
-            (lambda (r$14022) (k$14021 (car r$14022)))))))
-      (cdr expr$3499$3540$3621$9398))))
+           (r$7171)
+           (k$7170
+             (vector-set! r$7171 idx$2426$3605 val$2427$3606)))
+         (vector-ref vec$2428$3607 2)))
+      obj$2425$3604)))
  )
 
 )
