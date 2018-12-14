@@ -122,7 +122,7 @@ doc :
 
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean full bootstrap tags indent debug test doc
+.PHONY: clean full bench bootstrap tags indent debug test doc
 
 $(TESTS) : %: %.scm
 	$(CYCLONE) -I . $<
@@ -189,6 +189,9 @@ libcyclone.a : runtime.o gc.o dispatch.o mstreams.o
 
 full : 
 	make clean ; make && make test && make bootstrap && cd ../cyclone-bootstrap && make clean && ./install.sh
+
+bench :
+	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone
 
 bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
