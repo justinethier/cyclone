@@ -825,7 +825,7 @@
         ((eq? p 'list->vector) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
-        ((member p *udf-prims*) "object")
+        ;((member p *udf-prims*) "object")
         (else #f)))
 
     ;; Determine if primitive creates a C variable
@@ -879,7 +879,8 @@
                  ;cons
                  ;cell
                 ))
-               (member exp *udf-prims*))))
+               ;(member exp *udf-prims*)
+               )))
 
     ;; Pass continuation as the function's first parameter?
     (define (prim:cont? exp)
