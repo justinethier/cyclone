@@ -122,7 +122,7 @@ doc :
 
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean bootstrap tags indent debug test doc
+.PHONY: clean full bootstrap tags indent debug test doc
 
 $(TESTS) : %: %.scm
 	$(CYCLONE) -I . $<
@@ -186,6 +186,9 @@ libcyclone.a : runtime.o gc.o dispatch.o mstreams.o
 #Linking against static library
 #gcc -static main.c -L. -lmean -o statically_linked
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
+
+full : 
+	make clean ; make && make test && cd ../cyclone-bootstrap && make clean && ./install.sh
 
 bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
