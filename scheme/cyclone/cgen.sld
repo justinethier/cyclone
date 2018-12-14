@@ -992,7 +992,9 @@
                   (let ()
                     ;; Add a comma if necessary
                     (if (or (str-ending? (c:body c-fun) "(")
-                            (prim:cont/no-args? fun))
+                            (prim:cont/no-args? fun)
+                            (and (prim:udf? fun)
+                                 (zero? num-args)))
                       c-fun
                       (c:append c-fun (c-code ", "))))
                   c-args*)
