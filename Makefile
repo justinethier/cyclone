@@ -188,7 +188,7 @@ libcyclone.a : runtime.o gc.o dispatch.o mstreams.o
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
 full : 
-	make clean ; make && make test && cd ../cyclone-bootstrap && make clean && ./install.sh
+	make clean ; make && make test && make bootstrap && cd ../cyclone-bootstrap && make clean && ./install.sh
 
 bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
