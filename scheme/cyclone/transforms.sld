@@ -177,9 +177,27 @@
   (else #f))
 
 ; symbol<? : symbol symobl -> boolean
-(define (symbol<? sym1 sym2)
-  (string<? (symbol->string sym1)
-            (symbol->string sym2)))
+;(define (symbol<? sym1 sym2)
+;  (string<? (symbol->string sym1)
+;            (symbol->string sym2)))
+
+(define-c symbol<?
+  "(void *data, int argc, closure _, object k, object sym1, object sym2)"
+  "
+     Cyc_check_sym(data, sym1);
+     Cyc_check_sym(data, sym2);
+     object result = (strcmp(symbol_desc(sym1), symbol_desc(sym2)) < 0) 
+                     ? boolean_t : boolean_f;
+     return_closcall1(data, k, result);
+  "
+  "(void *data, object ptr, object sym1, object sym2)"
+  " 
+     Cyc_check_sym(data, sym1);
+     Cyc_check_sym(data, sym2);
+     object result = (strcmp(symbol_desc(sym1), symbol_desc(sym2)) < 0) 
+                     ? boolean_t : boolean_f;
+     return result;
+  ")
 
 ; insert : symbol sorted-set[symbol] -> sorted-set[symbol]
 (define (insert sym S)
