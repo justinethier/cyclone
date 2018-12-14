@@ -6,6 +6,10 @@ Features
 
 - Faster version of `list?`.
 
+Bug Fixes
+
+- Modified generated code for `(inline)` functions to eliminate the possibility of out-of-order execution.
+
 ## 0.9.6 - December 9, 2018
 
 Bug Fixes
