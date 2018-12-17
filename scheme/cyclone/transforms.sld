@@ -223,6 +223,21 @@
       set2
       (insert (car set1) (union (cdr set1) set2))))
 
+;(define (union x y)
+;  (let ((result (my-union x y)))
+;    (trace:error `(union ,x ,y ,result ,(old-union x y)))
+;    result))
+;
+;(define my-union
+;  (lambda (l1 l2)
+;    (if (null? l1)
+;        l2 ;; TODO: sort l2 (or figure out why we get passed an unsorted list
+;        (if (null? l2)
+;            l1 ;; TODO: sort l1
+;            (if (symbol<? (car l1) (car l2))
+;                (cons (car l1) (my-union (cdr l1) l2))
+;                (cons (car l2) (my-union (cdr l2) l1)))))))
+
 ; difference : sorted-set[symbol] sorted-set[symbol] -> sorted-set[symbol]
 (define (difference set1 set2)
   ; NOTE: This can be similarly optimized.
