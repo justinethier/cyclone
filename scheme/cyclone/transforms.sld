@@ -200,13 +200,64 @@
   ")
 
 ; insert : symbol sorted-set[symbol] -> sorted-set[symbol]
-(define (insert sym S)
-  (if (not (pair? S))
-      (list sym)
-      (cond
-        ((eq? sym (car S))       S)
-        ((symbol<? sym (car S))  (cons sym S))
-        (else (cons (car S) (insert sym (cdr S)))))))
+;(define (insert sym S)
+;  (if (not (pair? S))
+;      (list sym)
+;      (cond
+;        ((eq? sym (car S))       S)
+;        ((symbol<? sym (car S))  (cons sym S))
+;        (else (cons (car S) (insert sym (cdr S)))))))
+(define-c insert
+ "(void *data, int argc, closure _,object k_7318, object sym_731_7312, object S_732_7313)"
+ "
+ pair_type *acc = NULL, *acc_tail = NULL;
+ object result;
+ while(1) {
+  if( (boolean_f != Cyc_is_pair(S_732_7313)) ){ 
+    if( (boolean_f != Cyc_eq(sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
+      //return_closcall1(data,  k_7318,  S_732_7313);
+      result = S_732_7313;
+      break;
+    } else { 
+      if (strcmp(symbol_desc(sym_731_7312), 
+                 symbol_desc(Cyc_car(data, S_732_7313))) < 0) {
+        //pair_type local_7356; 
+        //return_closcall1(data,  k_7318,  set_pair_as_expr(&local_7356, sym_731_7312, S_732_7313));
+        pair_type* local_7356 = alloca(sizeof(pair_type));
+        set_pair(local_7356, sym_731_7312, S_732_7313);
+        result = local_7356;
+        break;
+      } else { 
+        pair_type *p = alloca(sizeof(pair_type));
+        set_pair(p, Cyc_car(data, S_732_7313), NULL);
+        if (acc == NULL) {
+          acc = p;
+          acc_tail = acc;
+        } else {
+          cdr(acc_tail) = p;
+          acc_tail = p;
+        }
+        S_732_7313 = Cyc_cdr(data, S_732_7313);
+        continue;
+      }
+    }
+  } else { 
+    //pair_type local_7363; 
+    //return_closcall1(data,  k_7318,  set_cell_as_expr(&local_7363, sym_731_7312));
+    pair_type *local_7363 = alloca(sizeof(pair_type));
+    set_pair(local_7363, sym_731_7312, NULL);
+    result = local_7363;
+    break;
+  }
+}
+
+if (acc) {
+  cdr(acc_tail) = result;
+  return_closcall1(data, k_7318, (object)acc);
+} else {
+  return_closcall1(data, k_7318, result);
+}
+")
 
 ; remove : symbol sorted-set[symbol] -> sorted-set[symbol]
 (define (remove sym S)
