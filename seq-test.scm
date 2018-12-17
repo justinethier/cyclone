@@ -26,6 +26,12 @@
 (write (insert 'a '())) (newline)
 (write (insert 'a '(b c))) (newline)
 (write (insert 'a '(a b c))) (newline)
+(newline)
+(write (fast-insert 'a '(c d b a a a a))) (newline)
+(write (fast-insert 'a '(c d b a a a a))) (newline)
+(write (fast-insert 'a '())) (newline)
+(write (fast-insert 'a '(b c))) (newline)
+(write (fast-insert 'a '(a b c))) (newline)
 
 (define (insert sym S)
   (if (not (pair? S))
