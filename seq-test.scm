@@ -54,9 +54,11 @@
       result = S_732_7313;
       break;
     } else { 
-      complex_num_type local_7350; 
-      if( (boolean_f != ((inline_function_type)
-                         ((closure)__glo_symbol_121_127_191_191inline_191_191)->fn)(data,&local_7350, sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
+      if (strcmp(symbol_desc(sym_731_7312), 
+                 symbol_desc(Cyc_car(data, S_732_7313))) < 0) {
+      //complex_num_type local_7350; 
+      //if( (boolean_f != ((inline_function_type)
+      //                   ((closure)__glo_symbol_121_127_191_191inline_191_191)->fn)(data,&local_7350, sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
         //pair_type local_7356; 
         //return_closcall1(data,  k_7318,  set_pair_as_expr(&local_7356, sym_731_7312, S_732_7313));
         pair_type* local_7356 = alloca(sizeof(pair_type));
