@@ -21,14 +21,74 @@
      return result;
   ")
 
+(write (insert 'a '(c d b a a a a))) (newline)
+(write (insert 'a '(c d b a a a a))) (newline)
+(write (insert 'a '())) (newline)
+(write (insert 'a '(b c))) (newline)
+(write (insert 'a '(a b c))) (newline)
+
 (define (insert sym S)
   (if (not (pair? S))
       (list sym)
       (cond
         ((eq? sym (car S))       S)
         ((symbol<? sym (car S))  (cons sym S))
-        (else (insert sym (cdr S))))))
-        ;(else (cons (car S) (insert sym (cdr S)))))))
+        ;(else (insert sym (cdr S))))))
+        (else (cons (car S) (insert sym (cdr S)))))))
+
+(define-c fast-insert
+ "(void *data, int argc, closure _,object k_7318, object sym_731_7312, object S_732_7313)"
+ "
+ pair_type *acc = NULL, *acc_tail = NULL;
+ object result;
+ while(1) {
+  if( (boolean_f != Cyc_is_pair(S_732_7313)) ){ 
+    if( (boolean_f != Cyc_eq(sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
+      //return_closcall1(data,  k_7318,  S_732_7313);
+      result = S_732_7313;
+      break;
+    } else { 
+      complex_num_type local_7350; 
+      if( (boolean_f != ((inline_function_type)
+                         ((closure)__glo_symbol_121_127_191_191inline_191_191)->fn)(data,&local_7350, sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
+        //pair_type local_7356; 
+        //return_closcall1(data,  k_7318,  set_pair_as_expr(&local_7356, sym_731_7312, S_732_7313));
+        pair_type* local_7356 = alloca(sizeof(pair_type));
+        set_pair(local_7356, sym_731_7312, S_732_7313);
+        result = local_7356;
+        break;
+      } else { 
+        pair_type *p = alloca(sizeof(pair_type));
+        set_pair(p, Cyc_car(data, S_732_7313), NULL);
+        if (acc == NULL) {
+          acc = p;
+          acc_tail = acc;
+        } else {
+          cdr(acc_tail) = p;
+          acc_tail = p;
+        }
+        S_732_7313 = Cyc_cdr(data, S_732_7313);
+        continue;
+      }
+    }
+  } else { 
+    //pair_type local_7363; 
+    //return_closcall1(data,  k_7318,  set_cell_as_expr(&local_7363, sym_731_7312));
+    pair_type *local_7363 = alloca(sizeof(pair_type));
+    set_pair(local_7363, sym_731_7312, NULL);
+    result = local_7363;
+    break;
+  }
+}
+
+if (acc) {
+  cdr(acc_tail) = result;
+  return_closcall1(data, k_7318, (object)acc);
+} else {
+  return_closcall1(data, k_7318, result);
+}
+")
+
 ;
 ;(define (union set1 set2)
 ;  (inner-union set1 (dedupe set2)))
@@ -51,11 +111,11 @@
 ;
 ;(write (union '(a a a a b b c c c) '()))
 ;(write (union '(a b c) '(a a a a b b c c c) ))
-
-(define (union set1 set2)
-  ; NOTE: This should be implemented as merge for efficiency.
-  (if (not (pair? set1))
-      set2
-      (insert 'todo #;(car set1) (union (cdr set1) set2))))
-
-(write (union '(a b) '(c d)))
+;
+;(define (union set1 set2)
+;  ; NOTE: This should be implemented as merge for efficiency.
+;  (if (not (pair? set1))
+;      set2
+;      (insert 'todo #;(car set1) (union (cdr set1) set2))))
+;
+;(write (union '(a b) '(c d)))
