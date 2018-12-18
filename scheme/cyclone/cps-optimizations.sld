@@ -929,9 +929,7 @@
                       (and
                         arg ;; #f is a special value for init, so do not optimize it for now
                         (or (const? arg)
-                            (quote? arg)
-                            (ref? arg)
-                        )))
+                            (quote? arg))))
                     (cdr exp))
                 )
                 ;; Check for primitive calls that can be optimized out
