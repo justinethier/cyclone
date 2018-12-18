@@ -12,6 +12,7 @@
         (scheme file)
         (scheme lazy)
         (scheme read)
+        (scheme time)
         (scheme write)
         (scheme cyclone ast)
         (scheme cyclone common)
@@ -25,12 +26,13 @@
 (define *optimization-level* 2) ;; Default level
 
 ; Placeholder for future enhancement to show elapsed time by phase:
-;(define *start* (current-second))
-;(define (elapsed label)
-;  (display "Elapsed is " (current-error-port))
-;  (display (- (current-second) *start*) (current-error-port))
-;  (display (string-append " at " label) (current-error-port))
-;  (newline (current-error-port)))
+(define *start* (current-second))
+(define *report-elapsed* #t)
+(define (report:elapsed label)
+  (display "Elapsed is " (current-error-port))
+  (display (- (current-second) *start*) (current-error-port))
+  (display (string-append " at " label) (current-error-port))
+  (newline (current-error-port)))
 
 ;; Code emission.
   
@@ -54,6 +56,7 @@
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
     
+      (report:elapsed "---------------- input program:")
       (trace:info "---------------- input program:")
       (trace:info input-program) ;pretty-print
 
@@ -121,13 +124,16 @@
                        input-program)))))
         ))
 
+      (report:elapsed "inline candidates:")
       (trace:info "inline candidates:")
       (trace:info inlines)
 
       ;; Process library imports
+      (report:elapsed "imports:")
       (trace:info "imports:")
       (trace:info imports)
       (set! imported-vars (lib:imports->idb imports append-dirs prepend-dirs))
+      (report:elapsed "resolved imports:")
       (trace:info "resolved imports:")
       (trace:info imported-vars)
       (let ((meta (lib:resolve-meta imports append-dirs prepend-dirs)))
@@ -173,10 +179,12 @@
                  (list expanded))
                 (else
                   (error `(Unhandled expansion ,expanded))))))))
+      (report:elapsed "---------------- after macro expansion:")
       (trace:info "---------------- after macro expansion:")
       (trace:info input-program) ;pretty-print
 ; TODO:
       (set! input-program (macro:cleanup input-program rename-env))
+      (report:elapsed "---------------- after macro expansion cleanup:")
       (trace:info "---------------- after macro expansion cleanup:")
       (trace:info input-program) ;pretty-print
 
@@ -191,6 +199,7 @@
             (trace:info "imports:")
             (trace:info imports)
             (set! imported-vars (lib:imports->idb imports append-dirs prepend-dirs))
+            (report:elapsed "resolved imports:")
             (trace:info "resolved imports:")
             (trace:info imported-vars)
             (let ((meta (lib:resolve-meta imports append-dirs prepend-dirs)))
@@ -221,6 +230,7 @@
           (set! input-program 
             (filter-unused-variables input-program lib-exports)))
 
+      (report:elapsed "---------------- after processing globals")
       (trace:info "---------------- after processing globals")
       (trace:info input-program) ;pretty-print
 
@@ -260,6 +270,7 @@
                   ;; but by definition must be defined in an imported lib
                   (and (not module-global?) imported-var?)))))
           lib-pass-thru-exports))
+      (report:elapsed "pass thru exports:")
       (trace:info "pass thru exports:")
       (trace:info lib-pass-thru-exports)
     
@@ -273,6 +284,7 @@
           (lambda (expr)
             (alpha-convert expr globals return))
           input-program))
+      (report:elapsed "---------------- after alpha conversion:")
       (trace:info "---------------- after alpha conversion:")
       (trace:info input-program) ;pretty-print
 
@@ -340,6 +352,7 @@
           (lambda (expr)
             (prim-convert expr))
           input-program))
+      (report:elapsed "---------------- after func->primitive conversion:")
       (trace:info "---------------- after func->primitive conversion:")
       (trace:info input-program) ;pretty-print
 
@@ -367,6 +380,7 @@
                 (cons (define-c->inline-var e) module-globals))
               (prim:add-udf! (define->var e) (define-c->inline-var e))))
           input-program)
+        (report:elapsed "---------------- results of inlinable-top-level-lambda analysis: ")
         (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
         (trace:info inlinable-scheme-fncs))
     
@@ -413,32 +427,38 @@
          (else
            ;; No need for call/cc yet
            (set! input-program cps))))
+      (report:elapsed "---------------- after CPS:")
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
       (when (> *optimization-level* 0)
         (set! input-program
           (optimize-cps input-program))
+        (report:elapsed "---------------- after cps optimizations (1):")
         (trace:info "---------------- after cps optimizations (1):")
         (trace:info (ast:ast->pp-sexp input-program))
 
         (set! input-program
           (optimize-cps input-program))
+        (report:elapsed "---------------- after cps optimizations (2):")
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info (ast:ast->pp-sexp input-program))
         
         (set! input-program
           (optimize-cps input-program))
+        (report:elapsed "---------------- after cps optimizations (3):")
         (trace:info "---------------- after cps optimizations (3):")
         (trace:info (ast:ast->pp-sexp input-program))
       )
     
       (set! input-program (opt:local-var-reduction input-program))
+      (report:elapsed "---------------- after local variable reduction")
       (trace:info "---------------- after local variable reduction")
       (trace:info (ast:ast->pp-sexp input-program))
 
       ;; TODO: could do this, but it seems like a bit of a band-aid...
       (set! input-program (opt:renumber-lambdas! input-program))
+      (report:elapsed "---------------- after renumber lambdas")
       (trace:info "---------------- after renumber lambdas")
       (trace:info (ast:ast->pp-sexp input-program))
 
@@ -449,6 +469,7 @@
             (analyze-mutable-variables expr)
             (wrap-mutables expr globals))
           input-program))
+      (report:elapsed "---------------- after wrap-mutables:")
       (trace:info "---------------- after wrap-mutables:")
       (trace:info (ast:ast->pp-sexp input-program))
     
@@ -470,9 +491,11 @@
               (car (ast:lambda-body ;; Strip off superfluous lambda
                 (closure-convert expr globals *optimization-level*))))))
           input-program))
+      (report:elapsed "---------------- after closure-convert:")
       (trace:info "---------------- after closure-convert:")
       (trace:info (ast:ast->pp-sexp input-program))
 
+      (report:elapsed "---------------- analysis db: ")
       (trace:info "---------------- analysis db: ")
       (trace:info (adb:get-db))
       
@@ -486,6 +509,7 @@
       (trace:info "---------------- module globals: ")
       (trace:info module-globals)
 
+      (report:elapsed "---------------- C code:")
       (trace:info "---------------- C code:")
       (mta:code-gen input-program 
                     program? 
