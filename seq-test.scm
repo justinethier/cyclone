@@ -127,3 +127,27 @@ if (acc) {
 ;      (insert 'todo #;(car set1) (union (cdr set1) set2))))
 ;
 ;(write (union '(a b) '(c d)))
+
+(define (union l1 l2)
+  (inner-union #f l1 l2))
+
+(define inner-union
+  (lambda (last l1 l2)
+    (if (null? l1)
+        l2 ;; TODO: sort l2 (or figure out why we get passed an unsorted list
+        (if (null? l2)
+            l1 ;; TODO: sort l1
+            ;; TODO: also have an eq? check to eliminate duplicates
+            (if (symbol<? (car l1) (car l2))
+                (if (eq? last (car l1))
+                    (inner-union last (cdr l1) l2)
+                    (cons (car l1) (inner-union (car l1) (cdr l1) l2)))
+                (if (eq? last (car l2))
+                    (inner-union last l1 (cdr l2))
+                    (cons (car l2) (inner-union (car l2) l1 (cdr l2)))))))))
+
+(write
+  (union '(a b c) '(d e f)))
+(newline)
+(write
+  (union '(p) '(p)))
