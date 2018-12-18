@@ -28,12 +28,13 @@
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
 ;; TODO: make this a cmd line option
-(define *report-elapsed* #t)
+(define *report-elapsed* #f)
 (define (report:elapsed label)
-  (display "Elapsed is " (current-error-port))
-  (display (- (current-second) *start*) (current-error-port))
-  (display (string-append " at " label) (current-error-port))
-  (newline (current-error-port)))
+  (when *report-elapsed*
+    (display "Elapsed is " (current-error-port))
+    (display (- (current-second) *start*) (current-error-port))
+    (display (string-append " at " label) (current-error-port))
+    (newline (current-error-port))))
 
 ;; Code emission.
   
