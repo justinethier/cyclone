@@ -268,11 +268,12 @@ if (acc) {
           (cons (car S) (remove sym (cdr S))))))
           
 ; union : sorted-set[symbol] sorted-set[symbol] -> sorted-set[symbol]
-(define (union set1 set2)
+;(define (union set1 set2)
+(define (sort+uniq set1 set2) ;; Sorts set1 and removes duplicates from it
   ; NOTE: This should be implemented as merge for efficiency.
   (if (not (pair? set1))
       set2
-      (insert (car set1) (union (cdr set1) set2))))
+      (insert (car set1) (sort+uniq (cdr set1) set2))))
 
 ;(define (union x y)
 ;  (let ((result (my-union x y)))
@@ -285,16 +286,29 @@ if (acc) {
 ;;  see if we can combine that (EG: sorting globals) along with the below (which we can then convert to C)
 ;;  to speed things up
 ;;
-;(define my-union
-;  (lambda (l1 l2)
-;    (if (null? l1)
-;        l2 ;; TODO: sort l2 (or figure out why we get passed an unsorted list
-;        (if (null? l2)
-;            l1 ;; TODO: sort l1
-;            ;; TODO: also have an eq? check to eliminate duplicates
-;            (if (symbol<? (car l1) (car l2))
-;                (cons (car l1) (my-union (cdr l1) l2))
-;                (cons (car l2) (my-union (cdr l2) l1)))))))
+(define (union l1 l2)
+  (trace:error `(union ,l1 ,l2))
+  (inner-union #f l1 l2))
+
+(define inner-union
+  (lambda (last l1 l2)
+    (if (null? l1)
+        (next last l2)
+        (if (null? l2)
+            (next last l1)
+            ;; TODO: also have an eq? check to eliminate duplicates
+            (if (symbol<? (car l1) (car l2))
+                (if (eq? last (car l1))
+                    (inner-union last (cdr l1) l2)
+                    (cons (car l1) (inner-union (car l1) (cdr l1) l2)))
+                (if (eq? last (car l2))
+                    (inner-union last l1 (cdr l2))
+                    (cons (car l2) (inner-union (car l2) l1 (cdr l2)))))))))
+
+(define (next sym lis)
+  (if (and (pair? lis) (eq? sym (car lis)))
+      (next sym (cdr lis))
+      lis))
 
 ; difference : sorted-set[symbol] sorted-set[symbol] -> sorted-set[symbol]
 (define (difference set1 set2)
@@ -723,7 +737,7 @@ if (acc) {
     (cond
       ; Core forms:
       ((ast:lambda? exp)
-        (difference (reduce union (map search (ast:lambda-body exp)) '())
+        (difference (sort+uniq (reduce union (map search (ast:lambda-body exp)) '()) '())
                     (ast:lambda-formals->list exp)))
       ((const? exp)    '())
       ((prim? exp)     '())    
@@ -733,7 +747,7 @@ if (acc) {
            '()
            (if bound-only? '() (list exp))))
       ((lambda? exp)   
-        (difference (reduce union (map search (lambda->exp exp)) '())
+        (difference (sort+uniq (reduce union (map search (lambda->exp exp)) '()) '())
                     (lambda-formals->list exp)))
       ((if-syntax? exp)  (union (search (if->condition exp))
                               (union (search (if->then exp))
@@ -749,7 +763,7 @@ if (acc) {
       ; Application:
       ((app? exp)       (reduce union (map search exp) '()))
       (else             (error "unknown expression: " exp))))
-  (search ast))
+  (sort+uniq (search ast) '()))
 
 
 
@@ -1133,9 +1147,9 @@ if (acc) {
       (else
         (error "unhandled expression: " ast))))
 
-  (let* ((fv (difference (free-vars ast) globals))
+  (let* ((fv (difference (sort+uniq (free-vars ast) '()) globals))
          ;; Only find set! and lambda vars
-         (bound-vars (union globals (free-vars ast #t)))
+         (bound-vars (union (sort+uniq globals '()) (free-vars ast #t)))
          ;; vars never bound in prog, but could be built-in
          (unbound-vars (difference fv bound-vars))
          ;; vars we know nothing about - error!
@@ -1182,7 +1196,7 @@ if (acc) {
                     (map (lambda (p) (cdr p)) a-lookup)  
                     ltype)
                  ,@(convert (let ((fv* (union
-                                         define-vars
+                                         (sort+uniq define-vars '())
                                          (difference fv (built-in-syms))))
                                  (ast* (lambda->exp body)))
                              (if (> (length fv*) 0)
