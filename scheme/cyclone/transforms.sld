@@ -207,27 +207,28 @@
 ;        ((eq? sym (car S))       S)
 ;        ((symbol<? sym (car S))  (cons sym S))
 ;        (else (cons (car S) (insert sym (cdr S)))))))
+;
 (define-c insert
  "(void *data, int argc, closure _,object k_7318, object sym_731_7312, object S_732_7313)"
  "
  pair_type *acc = NULL, *acc_tail = NULL;
  object result;
  while(1) {
-  if( (boolean_f != Cyc_is_pair(S_732_7313)) ){ 
-    if( (boolean_f != Cyc_eq(sym_731_7312, Cyc_car(data, S_732_7313))) ){ 
+  if( (boolean_f != Cyc_is_pair(S_732_7313)) ){
+    if( (boolean_f != Cyc_eq(sym_731_7312, Cyc_car(data, S_732_7313))) ){
       //return_closcall1(data,  k_7318,  S_732_7313);
       result = S_732_7313;
       break;
-    } else { 
-      if (strcmp(symbol_desc(sym_731_7312), 
+    } else {
+      if (strcmp(symbol_desc(sym_731_7312),
                  symbol_desc(Cyc_car(data, S_732_7313))) < 0) {
-        //pair_type local_7356; 
+        //pair_type local_7356;
         //return_closcall1(data,  k_7318,  set_pair_as_expr(&local_7356, sym_731_7312, S_732_7313));
         pair_type* local_7356 = alloca(sizeof(pair_type));
         set_pair(local_7356, sym_731_7312, S_732_7313);
         result = local_7356;
         break;
-      } else { 
+      } else {
         pair_type *p = alloca(sizeof(pair_type));
         set_pair(p, Cyc_car(data, S_732_7313), NULL);
         if (acc == NULL) {
@@ -241,8 +242,8 @@
         continue;
       }
     }
-  } else { 
-    //pair_type local_7363; 
+  } else {
+    //pair_type local_7363;
     //return_closcall1(data,  k_7318,  set_cell_as_expr(&local_7363, sym_731_7312));
     pair_type *local_7363 = alloca(sizeof(pair_type));
     set_pair(local_7363, sym_731_7312, NULL);
@@ -268,47 +269,11 @@ if (acc) {
           (cons (car S) (remove sym (cdr S))))))
           
 ; union : sorted-set[symbol] sorted-set[symbol] -> sorted-set[symbol]
-;(define (union set1 set2)
-(define (sort+uniq set1 set2) ;; Sorts set1 and removes duplicates from it
+(define (union set1 set2)
   ; NOTE: This should be implemented as merge for efficiency.
   (if (not (pair? set1))
       set2
-      (insert (car set1) (sort+uniq (cdr set1) set2))))
-
-;(define (union x y)
-;  (let ((result (my-union x y)))
-;    (trace:error `(union ,x ,y ,result ,(old-union x y)))
-;    result))
-;
-;; TODO: can use the old union to sort a list, EG: 
-;;       cyclone> (union '(x d e d d g e c g a c be) '())
-;;       (a be c d e g x)
-;;  see if we can combine that (EG: sorting globals) along with the below (which we can then convert to C)
-;;  to speed things up
-;;
-(define (union l1 l2)
-  (trace:error `(union ,l1 ,l2))
-  (inner-union #f l1 l2))
-
-(define inner-union
-  (lambda (last l1 l2)
-    (if (null? l1)
-        (next last l2)
-        (if (null? l2)
-            (next last l1)
-            ;; TODO: also have an eq? check to eliminate duplicates
-            (if (symbol<? (car l1) (car l2))
-                (if (eq? last (car l1))
-                    (inner-union last (cdr l1) l2)
-                    (cons (car l1) (inner-union (car l1) (cdr l1) l2)))
-                (if (eq? last (car l2))
-                    (inner-union last l1 (cdr l2))
-                    (cons (car l2) (inner-union (car l2) l1 (cdr l2)))))))))
-
-(define (next sym lis)
-  (if (and (pair? lis) (eq? sym (car lis)))
-      (next sym (cdr lis))
-      lis))
+      (insert (car set1) (union (cdr set1) set2))))
 
 ; difference : sorted-set[symbol] sorted-set[symbol] -> sorted-set[symbol]
 (define (difference set1 set2)
@@ -737,7 +702,7 @@ if (acc) {
     (cond
       ; Core forms:
       ((ast:lambda? exp)
-        (difference (sort+uniq (reduce union (map search (ast:lambda-body exp)) '()) '())
+        (difference (reduce union (map search (ast:lambda-body exp)) '())
                     (ast:lambda-formals->list exp)))
       ((const? exp)    '())
       ((prim? exp)     '())    
@@ -747,7 +712,7 @@ if (acc) {
            '()
            (if bound-only? '() (list exp))))
       ((lambda? exp)   
-        (difference (sort+uniq (reduce union (map search (lambda->exp exp)) '()) '())
+        (difference (reduce union (map search (lambda->exp exp)) '())
                     (lambda-formals->list exp)))
       ((if-syntax? exp)  (union (search (if->condition exp))
                               (union (search (if->then exp))
@@ -763,7 +728,7 @@ if (acc) {
       ; Application:
       ((app? exp)       (reduce union (map search exp) '()))
       (else             (error "unknown expression: " exp))))
-  (sort+uniq (search ast) '()))
+  (search ast))
 
 
 
@@ -1147,9 +1112,9 @@ if (acc) {
       (else
         (error "unhandled expression: " ast))))
 
-  (let* ((fv (difference (sort+uniq (free-vars ast) '()) globals))
+  (let* ((fv (difference (free-vars ast) globals))
          ;; Only find set! and lambda vars
-         (bound-vars (union (sort+uniq globals '()) (free-vars ast #t)))
+         (bound-vars (union (free-vars ast #t) globals))
          ;; vars never bound in prog, but could be built-in
          (unbound-vars (difference fv bound-vars))
          ;; vars we know nothing about - error!
@@ -1196,7 +1161,7 @@ if (acc) {
                     (map (lambda (p) (cdr p)) a-lookup)  
                     ltype)
                  ,@(convert (let ((fv* (union
-                                         (sort+uniq define-vars '())
+                                         define-vars
                                          (difference fv (built-in-syms))))
                                  (ast* (lambda->exp body)))
                              (if (> (length fv*) 0)

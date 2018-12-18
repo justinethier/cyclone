@@ -267,6 +267,7 @@
       ; set!'s below, since all remaining phases operate on set!, not define.
       ;
       ; TODO: consider moving some of this alpha-conv logic below back into trans?
+      (set! globals (union globals '())) ;; Ensure list is sorted
       (set! input-program 
         (map
           (lambda (expr)
