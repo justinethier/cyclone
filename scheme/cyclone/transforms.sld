@@ -279,12 +279,19 @@ if (acc) {
 ;    (trace:error `(union ,x ,y ,result ,(old-union x y)))
 ;    result))
 ;
+;; TODO: can use the old union to sort a list, EG: 
+;;       cyclone> (union '(x d e d d g e c g a c be) '())
+;;       (a be c d e g x)
+;;  see if we can combine that (EG: sorting globals) along with the below (which we can then convert to C)
+;;  to speed things up
+;;
 ;(define my-union
 ;  (lambda (l1 l2)
 ;    (if (null? l1)
 ;        l2 ;; TODO: sort l2 (or figure out why we get passed an unsorted list
 ;        (if (null? l2)
 ;            l1 ;; TODO: sort l1
+;            ;; TODO: also have an eq? check to eliminate duplicates
 ;            (if (symbol<? (car l1) (car l2))
 ;                (cons (car l1) (my-union (cdr l1) l2))
 ;                (cons (car l2) (my-union (cdr l2) l1)))))))
