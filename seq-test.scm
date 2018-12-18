@@ -134,9 +134,9 @@ if (acc) {
 (define inner-union
   (lambda (last l1 l2)
     (if (null? l1)
-        l2 ;; TODO: sort l2 (or figure out why we get passed an unsorted list
+        (next last l2)
         (if (null? l2)
-            l1 ;; TODO: sort l1
+            (next last l1)
             ;; TODO: also have an eq? check to eliminate duplicates
             (if (symbol<? (car l1) (car l2))
                 (if (eq? last (car l1))
@@ -145,6 +145,11 @@ if (acc) {
                 (if (eq? last (car l2))
                     (inner-union last l1 (cdr l2))
                     (cons (car l2) (inner-union (car l2) l1 (cdr l2)))))))))
+
+(define (next sym lis)
+  (if (and (pair? lis) (eq? sym (car lis)))
+      (next sym (cdr lis))
+      lis))
 
 (write
   (union '(a b c) '(d e f)))
