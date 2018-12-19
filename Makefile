@@ -155,6 +155,9 @@ dispatch.c : generate-c.scm
 
 libcyclone.a : $(CFILES) $(HEADERS)
 
+hashset.o : hashset.c $(HEADERS)
+	$(CCOMP) -c $< -o $@
+
 dispatch.o : dispatch.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
 
@@ -179,7 +182,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_CC_SO=\"$(CC_SO)\" \
 					$< -o $@
 
-libcyclone.a : runtime.o gc.o dispatch.o mstreams.o 
+libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
 	$(AR) rcs $@ $^ 
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
@@ -201,12 +204,14 @@ bootstrap : icyc libs
 	cp $(HEADER_DIR)/runtime-main.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/runtime.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
+	cp $(HEADER_DIR)/hashset.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp srfi/*.scm $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
 	cp mstreams.c $(BOOTSTRAP_DIR)
+	cp hashset.c $(BOOTSTRAP_DIR)
 	cp gc.c $(BOOTSTRAP_DIR)
 	cp dispatch.c $(BOOTSTRAP_DIR)
 	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
@@ -231,6 +236,7 @@ bootstrap : icyc libs
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-opt-local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/hashset.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/match.c $(BOOTSTRAP_DIR)/scheme/cyclone
