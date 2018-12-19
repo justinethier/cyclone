@@ -8,7 +8,9 @@
 ;;;;
 (define-library (scheme cyclone primitives)
   (import (scheme base)
+          (scheme cyclone hashset)
           ;(scheme write)
+          (srfi 69)
   )
   (export
     prim?
@@ -47,9 +49,11 @@
     (define (prim:udf? exp)
       (memq exp *udf-prims*))
 
+    (define *hs-prims* (hs-create))
+
     ; prim? : exp -> boolean
     (define (prim? exp)
-      (or (memq exp *primitives*)
+      (or (hs-member? *hs-prims* exp)
           (memq exp *udf-prims*)))
     
     ;; Does primitive mutate any of its arguments?
@@ -1046,4 +1050,6 @@
          (cdr udf))
         ;; No match; keep original function
         (else func-sym)))) 
+
+  (hs-add-all! *hs-prims* *primitives*)
 ))
