@@ -8,7 +8,7 @@
 ;;;; This module contains a hashset based on code from:
 ;;;; https://github.com/avsej/hashset.c
 ;;;;
-(define-library (scheme cyclone pretty-print)
+(define-library (scheme cyclone hashset)
     (export
     )
     (import (scheme base)
