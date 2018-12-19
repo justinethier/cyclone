@@ -45,16 +45,16 @@
         (cons (cons cps-sym inline-sym) *udf-cps->inline*))
       (set! *udf-prims* (cons inline-sym *udf-prims*)))
     (define (prim:udf? exp)
-      (member exp *udf-prims*))
+      (memq exp *udf-prims*))
 
     ; prim? : exp -> boolean
     (define (prim? exp)
-      (or (member exp *primitives*)
-          (member exp *udf-prims*)))
+      (or (memq exp *primitives*)
+          (memq exp *udf-prims*)))
     
     ;; Does primitive mutate any of its arguments?
     (define (prim:mutates? exp)
-      (member 
+      (memq 
         exp
        '(
          Cyc-set-cvar!
@@ -400,7 +400,7 @@
 ;        (pair? ast)
 ;        (prim? (car ast))
 ;        ;; Does not make sense to precompute these
-;        (not (member (car ast)
+;        (not (memq (car ast)
 ;                    '(Cyc-global-vars
 ;                      Cyc-get-cvar
 ;                      Cyc-set-cvar!
@@ -656,7 +656,7 @@
     ;; Does the primitive require passing thread data as its first argument?
     (define (prim/data-arg? p)
      (or
-      (member p '(
+      (memq p '(
         Cyc-list
         Cyc-fast-plus
         Cyc-fast-sub
@@ -748,7 +748,7 @@
         set-cdr!
         procedure?
         set-cell!))
-       (member p *udf-prims*)))
+       (memq p *udf-prims*)))
 
     ;; Determine if primitive receives a pointer to a local C variable
     (define (prim/c-var-pointer p)
@@ -763,7 +763,7 @@
         ((eq? p 'Cyc-fast-sub) "complex_num_type")
         ((eq? p 'Cyc-fast-mul) "complex_num_type")
         ((eq? p 'Cyc-fast-div) "complex_num_type")
-        ((member p *udf-prims*) "complex_num_type")
+        ((memq p *udf-prims*) "complex_num_type")
         (else #f)))
 
 ;; TODO: this only makes sense for macros, all functions need to be removed from here.
@@ -825,14 +825,14 @@
         ((eq? p 'list->vector) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
-        ;((member p *udf-prims*) "object")
+        ;((memq p *udf-prims*) "object")
         (else #f)))
 
     ;; Determine if primitive creates a C variable
     (define (prim/cvar? exp)
         (and (prim? exp)
              (or
-               (member exp '(
+               (memq exp '(
                  Cyc-stdout
                  Cyc-stdin
                  Cyc-stderr
@@ -879,13 +879,13 @@
                  ;cons
                  ;cell
                 ))
-               ;(member exp *udf-prims*)
+               ;(memq exp *udf-prims*)
                )))
 
     ;; Pass continuation as the function's first parameter?
     (define (prim:cont? exp)
       (and (prim? exp)
-           (member exp '(Cyc-read-line apply command-line-arguments number->string 
+           (memq exp '(Cyc-read-line apply command-line-arguments number->string 
                          Cyc-fast-apply
                          + - * /
                          = > < >= <=
@@ -908,12 +908,12 @@
     ;; Primitive functions that pass a continuation or thread data but have no other arguments
     (define (prim:cont/no-args? exp)
       (and (prim? exp)
-           (member exp '(command-line-arguments Cyc-current-exception-handler))))
+           (memq exp '(command-line-arguments Cyc-current-exception-handler))))
 
     ;; Pass an integer arg count as the function's first parameter?
     (define (prim:arg-count? exp)
         (and (prim? exp)
-             (member exp '(error Cyc-write Cyc-display 
+             (memq exp '(error Cyc-write Cyc-display 
                            number->string string->number string-append 
                            apply
                            make-bytevector
@@ -930,7 +930,7 @@
     (define (prim:allocates-object? exp use-alloca?)
         (and  (prim? exp)
               use-alloca?
-              (member exp 
+              (memq exp 
                 '(
                 ;cons
                 ))))
@@ -938,7 +938,7 @@
     ;; Does the primitive only accept/return immutable objects?
     ;; This is useful during optimization
     (define (prim:immutable-args/result? sym)
-      (member sym 
+      (memq sym 
              '(= > < >= <=
                + - * /
                Cyc-fast-plus
