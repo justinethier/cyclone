@@ -5,6 +5,7 @@
 Features
 
 - Faster version of `list?`.
+- Faster compilation of large files.
 
 Bug Fixes
 
