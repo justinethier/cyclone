@@ -10,6 +10,13 @@
 ;;;;
 (define-library (scheme cyclone hashset)
     (export
+      hs-create
+      hs-destroy!
+      hs-num-items
+      hs-add!
+      hs-add-all!
+      hs-remove!
+      hs-member?
     )
     (import (scheme base)
             (scheme write))
@@ -24,7 +31,7 @@
     return_closcall1(data, k, &opq);
   ")
 
-(define-c hs-destroy
+(define-c hs-destroy!
   "(void *data, int argc, closure _, object k, object opq )"
   "
     hashset_t hs = (hashset_t)(opaque_ptr(opq));
@@ -40,7 +47,7 @@
     return_closcall1(data, k, obj_int2obj(count));
   ")
 
-(define-c hs-add
+(define-c hs-add!
   "(void *data, int argc, closure _, object k, object opq, object item )"
   "
     hashset_t hs = (hashset_t)(opaque_ptr(opq));
@@ -48,7 +55,13 @@
     return_closcall1(data, k, obj_int2obj(rv));
   ")
 
-(define-c hs-remove
+(define (hs-add-all! hs lis)
+  (for-each
+    (lambda (p)
+      (hs-add! hs p))
+    lis))
+
+(define-c hs-remove!
   "(void *data, int argc, closure _, object k, object opq, object item )"
   "
     hashset_t hs = (hashset_t)(opaque_ptr(opq));
