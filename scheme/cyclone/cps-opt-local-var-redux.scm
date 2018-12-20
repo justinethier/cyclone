@@ -52,6 +52,7 @@
           (ast:lambda? (car exp))
           (equal? (length exp) 2)
           (ast:lambda? (cadr exp))
+          (list? (ast:lambda-args (cadr exp)))
           (equal? 1 (length (ast:lambda-args (cadr exp))))
           (lvr:local-tail-call-only? 
             (ast:lambda-body (car exp)) 
