@@ -988,6 +988,8 @@
                   (every
                     (lambda (arg)
                       (and (prim-call? arg)
+                           ;; Do not inline functions that are looping over lists, seems counter-productive
+                           (not (member (car arg) '( member assoc Cyc-fast-member Cyc-fast-assoc assq assv memq memv)))
                            (not (prim:cont? (car arg)))))
                     (cdr exp))
                   ;; Disallow primitives that allocate a new obj,
@@ -1609,10 +1611,11 @@
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
-      (opt:beta-expand
+      ;(opt:beta-expand ;; TODO: temporarily disabled, causes problems with massive expansions in compiler benchmark, need to revist how to throttle/limit this (program size? heuristics? what else??)
         (opt:inline-prims 
           (opt:contract ast)
-          -1))
+          -1)
+      ;)
     )
 
 ;; Renumber lambdas and re-run analysis
