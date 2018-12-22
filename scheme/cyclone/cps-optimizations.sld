@@ -138,6 +138,7 @@
         mutated-by-set
         reassigned assigned-value 
         app-fnc-count app-arg-count
+        cannot-inline
         inlinable mutated-indirectly
         cont
         def-in-loop
@@ -163,6 +164,8 @@
       (app-fnc-count adbv:app-fnc-count adbv:set-app-fnc-count!)
       ;; Number of times variable is passed as an app-argument
       (app-arg-count adbv:app-arg-count adbv:set-app-arg-count!)
+      ;; Variable cannot be inlined
+      (cannot-inline adbv:cannot-inline adbv:set-cannot-inline!)
       ;; Can a ref be safely inlined?
       (inlinable adbv:inlinable adbv:set-inlinable!)
       ;; Is the variable mutated indirectly? (EG: set-car! of a cdr)
@@ -216,6 +219,7 @@
         #f  ; assigned-value 
         0   ; app-fnc-count 
         0   ; app-arg-count
+        #f  ; cannot-inline
         #t  ; inlinable 
         '() ; mutated-indirectly
         #f  ; cont
@@ -595,6 +599,8 @@
            )
            (let ((e (cadr exp)))
             (when (ref? e)
+              (with-var! e (lambda (var)
+                (adbv:set-cannot-inline! var #t)))
               (with-var e (lambda (var)
                 (if (adbv:assigned-value var)
                     (set! e (adbv:assigned-value var))))))
@@ -1165,6 +1171,15 @@
         ;; opportunities for optimization because it takes a global
         ;; approach rather than considering the specific variables
         ;; involved for any given optimization.
+        ;
+        ; TODO: this one is experimental, not sure if it really helps at all. still, 
+        ;       there may well be cases where inlining the var being mutated will cause problems!
+        ;(for-each
+        ;  (lambda (v)
+        ;    (with-var v (lambda (var)
+        ;      (if (adbv:cannot-inline var)
+        ;          (set! cannot-inline #t)))))
+        ;  args)
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
