@@ -61,6 +61,8 @@
       (memq 
         exp
        '(
+         apply
+         Cyc-fast-apply
          Cyc-set-cvar!
          Cyc-spawn-thread!
          Cyc-end-thread!
