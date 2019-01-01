@@ -14,87 +14,71 @@
             (scheme cyclone ast) 
             (scheme cyclone primitives)
             (scheme cyclone util) 
-            (scheme cyclone pretty-print))))
+            (scheme cyclone pretty-print)
+            (srfi 69)
+            )))
 
 ;; TODO:
 ;; analyze call graph. not exactly sure how this is going to work yet, but the goal is to be able to figure out which
 ;; variables a primitive call is dependent upon. We then need to be able to query if any of those variables are mutated 
 ;; (ideally in fnc body) in which case we cannot inline the prim call.
 ;; 
+;; Notes:
+;; Should we pass a copy of the current call graph and then dump it off when a new variable is encountered? In which case, when do we reset the graph? Maybe we just build it up as an a-list as we go, so it resets itself automatically? Then each a-list can exist as part of analysis DB for the variable... would that work?
+
 #;(define (analyze:build-call-graph sexp)
-  (define (scan exp)
+  ;; Add new entry for each var as it is found...
+  (define lookup-tbl (make-hash-table))
+
+  ;; Pass over the sexp
+  ;; exp - S-expression to scan
+  ;; vars - alist of current set of variables
+  (define (scan exp vars)
     ;(write `(DEBUG scan ,exp)) (newline)
     (cond
      ((ast:lambda? exp)
-      (ast:%make-lambda
-        (ast:lambda-id exp)
-        (ast:lambda-args exp)
-        (map scan (ast:lambda-body exp))
-        (ast:lambda-has-cont exp)))
-     ((quote? exp) exp)
-     ((const? exp) exp)
-     ((ref? exp) exp)
+      (for-each
+        (lambda (a)
+          (scan a vars))
+        (ast:lambda-args exp))
+      (for-each
+        (lambda (e)
+          (scan e vars))
+        (ast:lambda-body exp))
+     )
+     ((quote? exp) #f)
+     ((const? exp) #f)
+     ((ref? exp) 
+      (hash-table-set! lookup-tbl ref vars)
+     )
      ((define? exp) 
-      `(define
-        ,(define->var exp)
-        ,@(map scan (define->exp exp))))
+      (scan (define->exp exp) '()))
      ((set!? exp)
-      `(set!
-         ,(scan (set!->var exp))
-         ,(scan (set!->exp exp))))
+      ;; TODO: probably need to keep track of var here
+      (scan (set!->var exp) vars)
+      (scan (set!->exp exp) vars))
      ((if? exp)       
-      `(if ,(scan (if->condition exp))
-           ,(scan (if->then exp))
-           ,(scan (if->else exp))))
+      (scan (if->condition exp) vars)
+      (scan (if->then exp) vars)
+      (scan (if->else exp) vars))
      ((app? exp)
       (cond
-        ((and
-          (list? exp)
-          (ast:lambda? (car exp))
-          (equal? (length exp) 2)
-          (ast:lambda? (cadr exp))
-          (list? (ast:lambda-args (cadr exp)))
-          (equal? 1 (length (ast:lambda-args (cadr exp))))
-          (lvr:local-tail-call-only? 
-            (ast:lambda-body (car exp)) 
-            (car (ast:lambda-args (car exp))))
-          ;(tagged-list? 'Cyc-seq (car (ast:lambda-body (cadr exp)))) ;; TODO: DEBUG line, remove this once it works!
-         )
-         ;;(write `(tail-call-only? passed for ,exp)) (newline)
-         ;;(write `(replace with ,(lvr:tail-calls->values 
-         ;;                         (car (ast:lambda-body (car exp)))
-         ;;                         (car (ast:lambda-args (car exp))))))
-         ;;(newline)
-;TODO: need to revisit this, may need to replace values with assignments to the "let" variable.
-;would need to be able to carry that through to cgen and assign properly over there...
-         (let* ((value (lvr:tail-calls->values
-                         (car (ast:lambda-body (car exp)))
-                         (car (ast:lambda-args (car exp)))
-                         (car (ast:lambda-args (cadr exp)))
-                       ))
-                (var (car (ast:lambda-args (cadr exp))))
-                (body (ast:lambda-body (cadr exp)))
-                (av (cond-expand
-                      (program #f)
-                      (else (adb:get/default var #f))))
-                (ref-count
-                  (if av
-                      (cond-expand
-                        (program #f)
-                        (else (adbv:ref-count av)))
-                      1)) ;; Dummy value
-                )
-            (if (and (> ref-count 0)  ;; 0 ==> local var is never used
-                     value)
-                `(let ((,var ,value))
-                  ,@body)
-                (map scan exp)) ;; failsafe
-        ))
-        (else
-          (map scan exp))))
+       ((ast:lambda? (car exp))
+        ;; TODO: reset vars???
+        (for-each
+          (lambda (e)
+            (scan e '()))
+          (cdr exp)))
+       (else
+         TODO: no, need to collect vars, and pass them to cont (second arg). car can be ignored
+         (for-each
+          (lambda (e)
+            (scan e vars))
+          (cdr exp)))))
      (else (error "unknown expression type: " exp))
   ))
-  (scan sexp))
+  (scan sexp '())
+  lookup-tbl)
 
 
 (cond-expand
