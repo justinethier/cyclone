@@ -77,6 +77,17 @@
       adbv:set-direct-rec-call!
       adbv:self-rec-call? 
       adbv:set-self-rec-call!
+      adbv:app-fnc-count
+      adbv:set-app-fnc-count!
+      adbv:app-arg-count
+      adbv:set-app-arg-count!
+      adbv:cannot-inline
+      adbv:set-cannot-inline!
+      adbv:inlinable
+      adbv:set-inlinable!
+      adbv:mutated-indirectly
+      adbv:set-mutated-indirectly!
+      adbv:cont? adbv:set-cont!
       with-var
       with-var!
       ;; Analyze functions
