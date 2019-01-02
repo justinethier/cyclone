@@ -28,6 +28,7 @@
       analyze:find-named-lets
       analyze:find-direct-recursive-calls
       analyze:find-known-lambdas
+      analyze:find-inlinable-vars
       ;analyze-lambda-side-effects
       opt:renumber-lambdas!
       opt:add-inlinable-functions
