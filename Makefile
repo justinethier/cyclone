@@ -236,6 +236,7 @@ bootstrap : icyc libs
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-opt-local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/cps-opt-analyze-call-graph.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/hashset.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
