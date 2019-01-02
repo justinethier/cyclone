@@ -26,7 +26,7 @@
 ;; Notes:
 ;; Should we pass a copy of the current call graph and then dump it off when a new variable is encountered? In which case, when do we reset the graph? Maybe we just build it up as an a-list as we go, so it resets itself automatically? Then each a-list can exist as part of analysis DB for the variable... would that work?
 
-#;(define (analyze:build-call-graph sexp)
+(define (analyze:build-call-graph sexp)
   ;; Add new entry for each var as it is found...
   (define lookup-tbl (make-hash-table))
 
@@ -34,7 +34,7 @@
   ;; exp - S-expression to scan
   ;; vars - alist of current set of variables
   (define (scan exp vars)
-    ;(write `(DEBUG scan ,exp)) (newline)
+    (write `(DEBUG scan ,(ast:ast->pp-sexp exp))) (newline)
     (cond
      ((ast:lambda? exp)
       (for-each
@@ -49,7 +49,7 @@
      ((quote? exp) #f)
      ((const? exp) #f)
      ((ref? exp) 
-      (hash-table-set! lookup-tbl ref vars)
+      (hash-table-set! lookup-tbl exp vars)
      )
      ((define? exp) 
       (scan (define->exp exp) '()))
@@ -64,17 +64,36 @@
      ((app? exp)
       (cond
        ((ast:lambda? (car exp))
-        ;; TODO: reset vars???
+        ;; Track deps on lambda var(s)
+        (for-each
+          (lambda (e)
+            (scan e vars))
+          (ast:lambda-args (car exp)))
+
+        ;; Scan body, with reset vars (??)
         (for-each
           (lambda (e)
             (scan e '()))
-          (cdr exp)))
+          (ast:lambda-body (car exp))))
+       ((and (ref? (car exp))
+             (list? exp) 
+             (> (length exp) 1))
+         (let* ((cont (cadr exp))
+                ;; TODO: what if arg is not a ref? Is that possible after cps (probably, with inlining)?
+                (args (filter ref? (cddr exp)))
+                (vars* (append args vars))
+              )
+         (scan cont vars*)
+         ;(for-each
+         ; (lambda (e)
+         ;   (scan e vars*))
+         ; (cdr exp))
+       ))
        (else
-         TODO: no, need to collect vars, and pass them to cont (second arg). car can be ignored
-         (for-each
+        (for-each
           (lambda (e)
             (scan e vars))
-          (cdr exp)))))
+          exp))))
      (else (error "unknown expression type: " exp))
   ))
   (scan sexp '())
@@ -133,6 +152,11 @@
       (ast:ast->pp-sexp
         (ast:sexp->ast sexp)))
     
+    (newline)
+    (newline)
+
+    (let ((ht (analyze:build-call-graph (ast:sexp->ast sexp))))
+      (pretty-print (hash-table->alist ht)))
     ;(pretty-print
     ;  (ast:ast->pp-sexp
     ;    (opt:local-var-reduction (ast:sexp->ast sexp)))
