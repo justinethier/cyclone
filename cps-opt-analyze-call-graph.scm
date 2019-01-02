@@ -13,6 +13,7 @@
             (scheme write) 
             (scheme cyclone ast) 
             (scheme cyclone primitives)
+            (scheme cyclone cps-optimizations)
             (scheme cyclone util) 
             (scheme cyclone pretty-print)
             (srfi 69)
@@ -25,6 +26,22 @@
 ;; 
 ;; Notes:
 ;; Should we pass a copy of the current call graph and then dump it off when a new variable is encountered? In which case, when do we reset the graph? Maybe we just build it up as an a-list as we go, so it resets itself automatically? Then each a-list can exist as part of analysis DB for the variable... would that work?
+
+;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
+(define (inline-ok-from-call-graph? ref tbl)
+  (and-let* ((vars (hash-table-ref/default tbl ref #f)))
+    (call/cc
+      (lambda (return)
+        (for-each 
+          (lambda (v)
+            (and-let* ((adb-var (adb:get/default v #f)))
+              (when (not (adbv:inlinable adb-var))
+                (write `(cannot inline ,ref)) (newline)
+                (return #f))
+            )
+          )
+          (cdr vars)) ;; Skip ref itself
+        (return #t)))))
 
 (define (analyze:build-call-graph sexp)
   ;; Add new entry for each var as it is found...
@@ -156,7 +173,14 @@
     (newline)
 
     (let ((ht (analyze:build-call-graph (ast:sexp->ast sexp))))
-      (pretty-print (hash-table->alist ht)))
+      (pretty-print (hash-table->alist ht))
+      (newline)
+;; TODO: store table and call these to test various vars:
+(analyze:find-inlinable-vars (ast:sexp->ast sexp) '()) ;; Identify variables safe to inline
+(pretty-print (inline-ok-from-call-graph? 'r$39 ht))
+(newline)
+    )
+
     ;(pretty-print
     ;  (ast:ast->pp-sexp
     ;    (opt:local-var-reduction (ast:sexp->ast sexp)))
