@@ -16,6 +16,7 @@
             (scheme cyclone cps-optimizations)
             (scheme cyclone util) 
             (scheme cyclone pretty-print)
+            (srfi 2)
             (srfi 69)
             )))
 
@@ -178,6 +179,8 @@
 ;; TODO: store table and call these to test various vars:
 (analyze:find-inlinable-vars (ast:sexp->ast sexp) '()) ;; Identify variables safe to inline
 (pretty-print (inline-ok-from-call-graph? 'r$39 ht))
+(newline)
+(pretty-print (inline-ok-from-call-graph? 'zzz ht))
 (newline)
     )
 
