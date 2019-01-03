@@ -20,7 +20,6 @@
             (srfi 2)
             (srfi 69)
             )
-    (define trace:error write)
     ))
 
 ;; TODO:
@@ -40,7 +39,7 @@
           (lambda (v)
             (and-let* ((adb-var (adb:get/default v #f)))
               (when (not (adbv:inlinable adb-var))
-                (trace:error `(cannot inline ,ref))
+                ;(trace:error `(cannot inline ,ref))
                 (return #f))
             )
           )
@@ -55,7 +54,7 @@
   ;; exp - S-expression to scan
   ;; vars - alist of current set of variables
   (define (scan exp vars)
-    (trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
+    ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
     (cond
      ((ast:lambda? exp)
       (for-each
@@ -123,6 +122,7 @@
 
 (cond-expand
   (program
+    (define trace:error write)
     (define sexp
 '(
 
