@@ -18,7 +18,9 @@
             (scheme cyclone pretty-print)
             (srfi 2)
             (srfi 69)
-            )))
+            )
+    (define trace:error write)
+    ))
 
 ;; TODO:
 ;; analyze call graph. not exactly sure how this is going to work yet, but the goal is to be able to figure out which
@@ -37,7 +39,7 @@
           (lambda (v)
             (and-let* ((adb-var (adb:get/default v #f)))
               (when (not (adbv:inlinable adb-var))
-                (write `(cannot inline ,ref)) (newline)
+                (trace:error `(cannot inline ,ref))
                 (return #f))
             )
           )
@@ -52,7 +54,7 @@
   ;; exp - S-expression to scan
   ;; vars - alist of current set of variables
   (define (scan exp vars)
-    (write `(DEBUG scan ,(ast:ast->pp-sexp exp))) (newline)
+    (trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
     (cond
      ((ast:lambda? exp)
       (for-each

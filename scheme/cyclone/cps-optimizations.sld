@@ -109,6 +109,7 @@
       with-fnc!
   )
   (include "cps-opt-local-var-redux.scm")
+  (include "cps-opt-analyze-call-graph.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
@@ -130,9 +131,12 @@
         (eval '(define Cyc-fast-lte <=) env)
         env))
     (define *adb* (make-hash-table))
+    (define *adb-call-graph* (make-hash-table))
     (define (adb:get-db) *adb*)
     (define (adb:clear!)
-      (set! *adb* (make-hash-table)))
+      (set! *adb* (make-hash-table))
+      (set! *adb-call-graph* (make-hash-table))
+    )
     (define (adb:get key) (hash-table-ref *adb* key))
     (define (adb:get/default key default) (hash-table-ref/default *adb* key default))
     (define (adb:lambda-ids)
@@ -1598,6 +1602,7 @@
       (analyze exp -1 -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
+      ;(set! *adb-call-graph* (analyze:build-call-graph exp))
       (analyze:find-recursive-calls2 exp)
       ;(analyze:set-calls-self)
     )
