@@ -1004,6 +1004,9 @@
                           (not (null? (adbv:ref-by var)))
                           ;; Need to keep variable because it is mutated
                           (not (adbv:reassigned? var))
+
+                          ;; Make sure param is not computed by vars that may be mutated
+                          (inline-ok-from-call-graph? param *adb-call-graph*)
                     ))))
                     (ast:lambda-formals->list (car exp)))
                   ;; Check all args are valid primitives that can be inlined
@@ -1602,7 +1605,7 @@
       (analyze exp -1 -1) ;; Top-level is lambda ID -1
       (analyze2 exp) ;; Second pass
       (analyze:find-inlinable-vars exp '()) ;; Identify variables safe to inline
-      ;(set! *adb-call-graph* (analyze:build-call-graph exp))
+      (set! *adb-call-graph* (analyze:build-call-graph exp))
       (analyze:find-recursive-calls2 exp)
       ;(analyze:set-calls-self)
     )

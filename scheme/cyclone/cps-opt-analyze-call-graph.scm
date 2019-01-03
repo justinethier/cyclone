@@ -32,7 +32,9 @@
 
 ;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
 (define (inline-ok-from-call-graph? ref tbl)
-  (and-let* ((vars (hash-table-ref/default tbl ref #f)))
+  (and-let* ((vars (hash-table-ref/default tbl ref #f))
+             ((pair? vars))
+            )
     (call/cc
       (lambda (return)
         (for-each 
