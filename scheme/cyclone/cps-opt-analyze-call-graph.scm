@@ -13,6 +13,7 @@
             (scheme write) 
             (scheme cyclone ast) 
             (scheme cyclone primitives)
+            (scheme cyclone transforms)
             (scheme cyclone cps-optimizations)
             (scheme cyclone util) 
             (scheme cyclone pretty-print)
@@ -60,7 +61,7 @@
       (for-each
         (lambda (a)
           (scan a vars))
-        (ast:lambda-args exp))
+        (ast:lambda-formals->list exp))
       (for-each
         (lambda (e)
           (scan e vars))
@@ -88,7 +89,7 @@
         (for-each
           (lambda (e)
             (scan e vars))
-          (ast:lambda-args (car exp)))
+          (ast:lambda-formals->list (car exp)))
 
         ;; Scan body, with reset vars (??)
         (for-each
