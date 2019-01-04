@@ -22,32 +22,33 @@
             )
     ))
 
-;; TODO:
-;; analyze call graph. not exactly sure how this is going to work yet, but the goal is to be able to figure out which
-;; variables a primitive call is dependent upon. We then need to be able to query if any of those variables are mutated 
-;; (ideally in fnc body) in which case we cannot inline the prim call.
-;; 
-;; Notes:
-;; Should we pass a copy of the current call graph and then dump it off when a new variable is encountered? In which case, when do we reset the graph? Maybe we just build it up as an a-list as we go, so it resets itself automatically? Then each a-list can exist as part of analysis DB for the variable... would that work?
-
+;; symbol -> hash-table -> boolean
 ;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
 (define (inline-ok-from-call-graph? ref tbl)
-  (and-let* ((vars (hash-table-ref/default tbl ref #f))
-             ((pair? vars))
-            )
+;(let ((result 
+  (let ((vars (hash-table-ref/default tbl ref #f)))
     (call/cc
       (lambda (return)
-        (for-each 
-          (lambda (v)
-            (and-let* ((adb-var (adb:get/default v #f)))
-              (when (not (adbv:inlinable adb-var))
-                ;(trace:error `(cannot inline ,ref))
-                (return #f))
+        (when (pair? vars)
+          ;; If there are vars, make sure each one is safe to inline
+          (for-each 
+            (lambda (v)
+              (and-let* ((adb-var (adb:get/default v #f)))
+                (when (not (adbv:inlinable adb-var))
+                  ;(trace:error `(cannot inline ,ref))
+                  (return #f))
+              )
             )
-          )
-          (cdr vars)) ;; Skip ref itself
+            (cdr vars))) ;; Skip ref itself
         (return #t)))))
+;)
+;(trace:error `(inline-ok-from-call-graph? ,result ,ref ,(hash-table-ref/default tbl ref #f)))
+;result))
 
+
+;; Analyze call graph. The goal is to be able to figure out which variables a primitive call 
+;; is dependent upon. We then need to be able to query if any of those variables are mutated 
+;; (ideally in fnc body) in which case we cannot inline the prim call.
 (define (analyze:build-call-graph sexp)
   ;; Add new entry for each var as it is found...
   (define lookup-tbl (make-hash-table))
@@ -127,6 +128,14 @@
     (define trace:error write)
     (define sexp
 '(
+
+;; Test case from compiler benchmark.
+;; The original code is:
+;; (define (test obj)
+;;   (let ((m (length (queue->list objects-dumped))))
+;;     (queue-put! objects-dumped obj)
+;;     (queue-put! object-queue obj)
+;;     m))
 
  (define test
    (lambda
