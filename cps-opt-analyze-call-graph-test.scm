@@ -9,6 +9,10 @@
   (scheme base)
   (scheme write)
 )
+(inline
+  my-not)
+
+    (define (my-not x) (if x #f #t))
 
 (define (queue-empty) (cons '() '()))
 (define objects-dumped (queue-empty))
@@ -34,3 +38,4 @@
 (queue-put! objects-dumped 'b)
 (write (queue->list objects-dumped))
 (write (test 'c))
+(write (my-not (test 'd)))
