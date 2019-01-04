@@ -10,8 +10,10 @@
   (scheme write)
 )
 (inline
+  my-string<=?
   my-not)
 
+    (define (my-string<=? str1 str2) (<= (string-cmp str1 str2) 0))
     (define (my-not x) (if x #f #t))
 
 (define (queue-empty) (cons '() '()))
@@ -39,3 +41,4 @@
 (write (queue->list objects-dumped))
 (write (test 'c))
 (write (my-not (test 'd)))
+(write (my-string<=? (symbol->string (car objects-dumped))))
