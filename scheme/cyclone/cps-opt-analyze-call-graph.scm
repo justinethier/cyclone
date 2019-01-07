@@ -25,7 +25,7 @@
 ;; symbol -> hash-table -> boolean
 ;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
 (define (inline-ok-from-call-graph? ref tbl)
-(let ((result 
+;(let ((result 
   (let ((vars (hash-table-ref/default tbl ref #f)))
     (call/cc
       (lambda (return)
@@ -41,9 +41,9 @@
             )
             (cdr vars))) ;; Skip ref itself
         (return #t)))))
-)
-(trace:error `(inline-ok-from-call-graph? ,ref ,result ,(hash-table-ref/default tbl ref #f)))
-result))
+;)
+;(trace:error `(inline-ok-from-call-graph? ,ref ,result ,(hash-table-ref/default tbl ref #f)))
+;result))
 
 
 ;; Analyze call graph. The goal is to be able to figure out which variables a primitive call 
@@ -92,12 +92,17 @@ result))
           (lambda (e)
             (scan e vars))
           (ast:lambda-formals->list (car exp)))
-
         ;; Scan body, with reset vars (??)
         (for-each
           (lambda (e)
             (scan e '()))
-          (ast:lambda-body (car exp))))
+          (ast:lambda-body (car exp)))
+        ;; Scan lambda arg(s), again also with reset vars
+        (for-each
+          (lambda (e)
+            (scan e '()))
+          (cdr exp))
+       )
        ((and (ref? (car exp))
              (list? exp) 
              (> (length exp) 1))
@@ -125,7 +130,9 @@ result))
 
 (cond-expand
   (program
-    (define trace:error write)
+    (define (trace:error exp)
+      (write exp)
+      (newline))
     (define sexp
 '(
 
