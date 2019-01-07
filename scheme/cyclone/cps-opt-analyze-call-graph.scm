@@ -25,7 +25,7 @@
 ;; symbol -> hash-table -> boolean
 ;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
 (define (inline-ok-from-call-graph? ref tbl)
-;(let ((result 
+(let ((result 
   (let ((vars (hash-table-ref/default tbl ref #f)))
     (call/cc
       (lambda (return)
@@ -41,9 +41,9 @@
             )
             (cdr vars))) ;; Skip ref itself
         (return #t)))))
-;)
-;(trace:error `(inline-ok-from-call-graph? ,result ,ref ,(hash-table-ref/default tbl ref #f)))
-;result))
+)
+(trace:error `(inline-ok-from-call-graph? ,ref ,result ,(hash-table-ref/default tbl ref #f)))
+result))
 
 
 ;; Analyze call graph. The goal is to be able to figure out which variables a primitive call 
@@ -137,28 +137,80 @@
 ;;     (queue-put! object-queue obj)
 ;;     m))
 
+; (define test
+;   (lambda
+;     (k$38 obj$5$11)
+;     (queue->list
+;       (lambda
+;         (r$42)
+;         ((lambda
+;            (r$39)
+;            ((lambda
+;               (m$6$12)
+;               (queue-put!
+;                 (lambda
+;                   (r$40)
+;                   (queue-put!
+;                     (lambda (r$41) (k$38 m$6$12))
+;                     object-queue
+;                     obj$5$11))
+;                 objects-dumped
+;                 obj$5$11))
+;             r$39))
+;          (length r$42)))
+;       objects-dumped)))
+
  (define test
    (lambda
-     (k$38 obj$5$11)
-     (queue->list
-       (lambda
-         (r$42)
-         ((lambda
-            (r$39)
-            ((lambda
-               (m$6$12)
-               (queue-put!
-                 (lambda
-                   (r$40)
-                   (queue-put!
-                     (lambda (r$41) (k$38 m$6$12))
-                     object-queue
-                     obj$5$11))
-                 objects-dumped
-                 obj$5$11))
-             r$39))
-          (length r$42)))
-       objects-dumped)))
+     (k$99 obj$27$45)
+     ((lambda
+        (k$107)
+        (proc-obj?
+          (lambda
+            (r$108)
+            (if r$108
+              (proc-obj-code
+                (lambda (r$109) (k$107 (not__inline__ r$109)))
+                obj$27$45)
+              (k$107 #f)))
+          obj$27$45))
+      (lambda
+        (r$100)
+        (if r$100
+          (k$99 #f)
+          (queue->list
+            (lambda
+              (r$106)
+              (pos-in-list
+                (lambda
+                  (r$101)
+                  ((lambda
+                     (n$29$46)
+                     (if n$29$46
+                       (k$99 n$29$46)
+                       (queue->list
+                         (lambda
+                           (r$105)
+                           ((lambda
+                              (r$102)
+                              ((lambda
+                                 (m$30$47)
+                                 (queue-put!
+                                   (lambda
+                                     (r$103)
+                                     (queue-put!
+                                       (lambda (r$104) (k$99 m$30$47))
+                                       object-queue
+                                       obj$27$45))
+                                   objects-dumped
+                                   obj$27$45))
+                               r$102))
+                            (length r$105)))
+                         objects-dumped)))
+                   r$101))
+                obj$27$45
+                r$106))
+            objects-dumped))))))
 
  ;; Doesn't really matter, but lets leave this for now
  (define slot-set!
@@ -192,7 +244,7 @@
       (newline)
 ;; TODO: store table and call these to test various vars:
 (analyze:find-inlinable-vars (ast:sexp->ast sexp) '()) ;; Identify variables safe to inline
-(pretty-print (inline-ok-from-call-graph? 'r$39 ht))
+(pretty-print (inline-ok-from-call-graph? 'm$30$47 ht))
 (newline)
 (pretty-print (inline-ok-from-call-graph? 'zzz ht))
 (newline)
