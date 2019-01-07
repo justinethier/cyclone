@@ -28,17 +28,43 @@
     (set-cdr! queue entry)
     x))
 
+(define (pos-in-list x l)
+  (let loop ((l l) (i 0))
+    (cond ((not (pair? l)) #f)
+          ((eq? (car l) x) i)
+          (else (loop (cdr l) (+ i 1))))))
 
-(define (test obj)
-  (let ((m (length (queue->list objects-dumped))))
-    (queue-put! objects-dumped obj)
-    (queue-put! object-queue obj)
-    m)
-)
+(define (proc-obj-code obj) (vector-ref obj 3))
+
+(define (proc-obj? x)
+  (and (vector? x)
+       (> (vector-length x) 0)
+       (eq? (vector-ref x 0) proc-obj-tag)))
+
+(define proc-obj-tag (list 'proc-obj))
+
+ (define (test obj)
+   (if (and (proc-obj? obj) (not (proc-obj-code obj)))
+     #f
+     (let ((n (pos-in-list obj (queue->list objects-dumped))))
+       (if n
+         n
+         (let ((m (length (queue->list objects-dumped))))
+           (queue-put! objects-dumped obj)
+           (queue-put! object-queue obj)
+           m)))))
+
+
+;(define (test obj)
+;  (let ((m (length (queue->list objects-dumped))))
+;    (queue-put! objects-dumped obj)
+;    (queue-put! object-queue obj)
+;    m)
+;)
 
 (queue-put! objects-dumped 'a)
 (queue-put! objects-dumped 'b)
 (write (queue->list objects-dumped))
 (write (test 'c))
 (write (my-not (test 'd)))
-(write (my-string<=? (symbol->string (car objects-dumped))))
+;(write (my-string<=? (symbol->string (car objects-dumped))))
