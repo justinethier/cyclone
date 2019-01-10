@@ -1461,7 +1461,8 @@
                   ;; case we do not want to beta-expand as a contraction
                   ;; because duplicate instances of the same code may be
                   ;; introduced, causing problems downstream.
-                  (not (contains-if? (ast:lambda-body fnc)))
+                  (and called-once?
+                       (not (contains-if? (ast:lambda-body fnc))))
              ))
            )))
         (else #f)))
