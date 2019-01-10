@@ -1455,7 +1455,14 @@
                   (not (adbv:reassigned? var))
                   (not (adbv:self-rec-call? var))
                   ;(not (fnc-depth>? (ast:lambda-body fnc) 4))))
-                  (not (fnc-depth>? (ast:lambda-body fnc) 5))))
+                  (not (fnc-depth>? (ast:lambda-body fnc) 5))
+                  ;; Issue here is we can run into code that calls the 
+                  ;; same continuation from both if branches. In this
+                  ;; case we do not want to beta-expand as a contraction
+                  ;; because duplicate instances of the same code may be
+                  ;; introduced, causing problems downstream.
+                  (not (contains-if? (ast:lambda-body fnc)))
+             ))
            )))
         (else #f)))
 
@@ -1475,6 +1482,19 @@
                 exp))
               (else #f)))
           (scan exp depth)
+          (return #f))))
+
+    (define (contains-if? exp)
+      (call/cc
+        (lambda (return)
+          (define (scan exp)
+            (cond
+              ((ast:lambda? exp)  (scan (ast:lambda-body exp)))
+              ((quote? exp)       #f)
+              ((if? exp)          (return #t))
+              ((app? exp)         (for-each scan exp))
+              (else #f)))
+          (scan exp)
           (return #f))))
 
     ;; Check app and beta expand if possible, else just return given code
