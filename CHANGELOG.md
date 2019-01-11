@@ -6,9 +6,11 @@ Features
 
 - Faster version of `list?`.
 - Faster compilation of large files.
+- Do not inline `member` or `assoc` to avoid looping over the same list multiple times.
 
 Bug Fixes
 
+- Do not inline primitive calls when arguments to the call are mutated in the function body or mutated elsewhere via `set!`.
 - Modified generated code for `(inline)` functions to eliminate the possibility of out-of-order execution.
 
 ## 0.9.6 - December 9, 2018
