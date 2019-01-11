@@ -1193,16 +1193,20 @@
         ;
         ; TODO: this one is experimental, not sure if it really helps at all. still, 
         ;       there may well be cases where inlining the var being mutated will cause problems!
-        ;(for-each
-        ;  (lambda (v)
-        ;    (with-var v (lambda (var)
-        ;      (if (adbv:cannot-inline var)
-        ;          (set! cannot-inline #t)))))
-        ;  args)
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
-              (if (member scope-sym (adbv:mutated-indirectly var))
+              (if (adbv:mutated-by-set? var)
+                  (set! cannot-inline #t)))))
+          args)
+        (for-each
+          (lambda (v)
+            (with-var v (lambda (var)
+              (if (or (member scope-sym (adbv:mutated-indirectly var))
+                      (adbv:mutated-by-set? var)) ;; TOO restrictive, only matters if set! occurs in body we
+                                                  ;; are inlining to. Also, does not catch cases where the
+                                                  ;; var might be mutated by a function call outside this
+                                                  ;; module (but hopefully we already catch that elsewhere).
                   (set! cannot-inline #t))
               (if (not (adbv:inlinable var))
                   (set! fast-inline #f)))))
