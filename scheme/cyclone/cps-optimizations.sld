@@ -1186,13 +1186,6 @@
     (define (inline-prim-call? exp scope-sym ivars args)
       (let ((fast-inline #t)
             (cannot-inline #f))
-        ;; faster and safer but (at least for now) misses some
-        ;; opportunities for optimization because it takes a global
-        ;; approach rather than considering the specific variables
-        ;; involved for any given optimization.
-        ;
-        ; TODO: this one is experimental, not sure if it really helps at all. still, 
-        ;       there may well be cases where inlining the var being mutated will cause problems!
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
@@ -1217,6 +1210,11 @@
         (else
           (if fast-inline
               ;; Fast path, no need for more analysis
+              ;; faster and safer but (at least for now) misses some
+              ;; opportunities for optimization because it takes a global
+              ;; approach rather than considering the specific variables
+              ;; involved for any given optimization. That's why we call
+              ;; inline-ok? below if this is false.
               fast-inline
               ;; Fast path failed, see if we can inline anyway
               (call/cc
