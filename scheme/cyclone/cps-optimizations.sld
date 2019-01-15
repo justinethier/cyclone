@@ -1196,8 +1196,8 @@
           (lambda (v)
             (with-var v (lambda (var)
               (if (or (member scope-sym (adbv:mutated-indirectly var))
-                      (adbv:mutated-by-set? var)) ;; TOO restrictive, only matters if set! occurs in body we
-                                                  ;; are inlining to. Also, does not catch cases where the
+                      (adbv:mutated-by-set? var)  ;; TOO restrictive, only matters if set! occurs in body we
+                  )                               ;; are inlining to. Also, does not catch cases where the
                                                   ;; var might be mutated by a function call outside this
                                                   ;; module (but hopefully we already catch that elsewhere).
                   (set! cannot-inline #t))
@@ -1463,8 +1463,9 @@
                   ;; case we do not want to beta-expand as a contraction
                   ;; because duplicate instances of the same code may be
                   ;; introduced, causing problems downstream.
-                  (and called-once?
-                       (not (contains-if? (ast:lambda-body fnc))))
+                  (or (not called-once?)
+                      (and called-once?
+                           (not (contains-if? (ast:lambda-body fnc)))))
              ))
            )))
         (else #f)))
