@@ -1207,6 +1207,7 @@
     (define (inline-prim-call? exp scope-sym ivars args)
       (let ((fast-inline #t)
             (cannot-inline #f))
+        ;; TODO: causes problems doing this here???
         ;(for-each
         ;  (lambda (v)
         ;    (with-var v (lambda (var)
@@ -1489,8 +1490,8 @@
                       (= 1 (adbv:app-fnc-count var)))
                   (not (adbv:reassigned? var))
                   (not (adbv:self-rec-call? var))
-                  ;(not (fnc-depth>? (ast:lambda-body fnc) 4))))
-                  (not (fnc-depth>? (ast:lambda-body fnc) 5))
+                  (not (fnc-depth>? (ast:lambda-body fnc) 4))
+                  ;(not (fnc-depth>? (ast:lambda-body fnc) 5))
                   ;; Issue here is we can run into code that calls the 
                   ;; same continuation from both if branches. In this
                   ;; case we do not want to beta-expand as a contraction
@@ -1703,11 +1704,11 @@
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
-      ;(opt:beta-expand ;; TODO: temporarily disabled, causes problems with massive expansions in compiler benchmark, need to revist how to throttle/limit this (program size? heuristics? what else??)
+      (opt:beta-expand ;; TODO: temporarily disabled, causes problems with massive expansions in compiler benchmark, need to revist how to throttle/limit this (program size? heuristics? what else??)
         (opt:inline-prims 
           (opt:contract ast)
           -1)
-      ;)
+      )
     )
 
 ;; Renumber lambdas and re-run analysis
