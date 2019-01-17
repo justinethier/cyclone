@@ -1207,17 +1207,17 @@
     (define (inline-prim-call? exp scope-sym ivars args)
       (let ((fast-inline #t)
             (cannot-inline #f))
-        (for-each
-          (lambda (v)
-            (with-var v (lambda (var)
-              (if (adbv:mutated-by-set? var)
-                  (set! cannot-inline #t)))))
-          args)
+        ;(for-each
+        ;  (lambda (v)
+        ;    (with-var v (lambda (var)
+        ;      (if (adbv:mutated-by-set? var)
+        ;          (set! cannot-inline #t)))))
+        ;  args)
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
               (if (or (member scope-sym (adbv:mutated-indirectly var))
-                      (adbv:mutated-by-set? var)  ;; TOO restrictive, only matters if set! occurs in body we
+                     ;(adbv:mutated-by-set? var)  ;; TOO restrictive, only matters if set! occurs in body we
                   )                               ;; are inlining to. Also, does not catch cases where the
                                                   ;; var might be mutated by a function call outside this
                                                   ;; module (but hopefully we already catch that elsewhere).
@@ -1306,6 +1306,18 @@
           ; (inline-ok? (cadr exp) ivars args arg-used return) 
           ;)
          (else
+           ;(when (ref? (car exp))
+           ; (with-var (car exp) (lambda (var)
+           ;   (when (adbv:defines-lambda-id var)
+           ;     ;TODO: return #f if any ivars are members of vars-mutated-by-set from the adbf
+           ;     (with-fnc (adbv:defines-lambda-id var) (lambda (fnc)
+           ;       (for-each
+           ;         (lambda (ivar)
+           ;           (if (member ivar (adbf:vars-mutated-by-set fnc))
+           ;             (return #f))
+           ;         )
+           ;         ivars))))
+           ; )))
            (for-each
             (lambda (e)
               (inline-ok? e ivars args arg-used return))
