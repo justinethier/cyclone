@@ -105,6 +105,8 @@
       adbf:closure-size adbf:set-closure-size!
       adbf:self-closure-index adbf:set-self-closure-index!
       adbf:calls-self? adbf:set-calls-self!
+      adbf:vars-mutated-by-set
+      adbf:set-vars-mutated-by-set!
       with-fnc
       with-fnc!
   )
@@ -257,6 +259,7 @@
        closure-size
        self-closure-index
        calls-self
+       vars-mutated-by-set
       )
       adb:function?
       (simple adbf:simple adbf:set-simple!)
@@ -278,6 +281,8 @@
       (self-closure-index adbf:self-closure-index adbf:set-self-closure-index!)
       ;; Does this function call itself?
       (calls-self adbf:calls-self? adbf:set-calls-self!)
+      ;; Variables this function mutates via (set!)
+      (vars-mutated-by-set adbf:vars-mutated-by-set adbf:set-vars-mutated-by-set!)
     )
     (define (adb:make-fnc)
       (%adb:make-fnc 
@@ -291,6 +296,7 @@
        -1   ;; closure-size
        -1   ;; self-closure-index
        #f   ;; calls-self
+      '()   ;; vars-mutated-by-set
       ))
 
     ;; A constant value that cannot be mutated
@@ -560,7 +566,17 @@
            (for-each
              (lambda (expr)
                (analyze expr scope-sym id))
-             (ast:lambda-body exp))))
+             (ast:lambda-body exp))
+           ;; Keep track of mutations made by child lambda's
+           (when (> lid 0)
+             (with-fnc id (lambda (inner-fnc)
+               (let ((vars-set (adbf:vars-mutated-by-set inner-fnc)))
+                 (when (pair? vars-set)
+                  (with-fnc! lid (lambda (outer-fnc)
+                    (adbf:set-vars-mutated-by-set!
+                      outer-fnc
+                      (append vars-set (adbf:vars-mutated-by-set outer-fnc))))))))))
+        ))
         ((const? exp) #f)
         ((quote? exp) #f)
         ((ref? exp)
@@ -579,6 +595,11 @@
            (adbv:set-const-value! var #f)))
          (analyze (define->exp exp) (define->var exp) lid))
         ((set!? exp)
+         (when (ref? (set!->var exp))
+           (with-fnc! lid (lambda (fnc)
+            (adbf:set-vars-mutated-by-set!
+              fnc
+              (cons (set!->var exp) (adbf:vars-mutated-by-set fnc))))))
          ;(let ((var (adb:get/default (set!->var exp) (adb:make-var))))
          (with-var! (set!->var exp) (lambda (var)
            (if (adbv:assigned-value var)
