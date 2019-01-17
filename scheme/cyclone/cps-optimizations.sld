@@ -1306,18 +1306,18 @@
           ; (inline-ok? (cadr exp) ivars args arg-used return) 
           ;)
          (else
-           ;(when (ref? (car exp))
-           ; (with-var (car exp) (lambda (var)
-           ;   (when (adbv:defines-lambda-id var)
-           ;     ;TODO: return #f if any ivars are members of vars-mutated-by-set from the adbf
-           ;     (with-fnc (adbv:defines-lambda-id var) (lambda (fnc)
-           ;       (for-each
-           ;         (lambda (ivar)
-           ;           (if (member ivar (adbf:vars-mutated-by-set fnc))
-           ;             (return #f))
-           ;         )
-           ;         ivars))))
-           ; )))
+           (when (ref? (car exp))
+            (with-var (car exp) (lambda (var)
+              (when (adbv:defines-lambda-id var)
+                ;TODO: return #f if any ivars are members of vars-mutated-by-set from the adbf
+                (with-fnc (adbv:defines-lambda-id var) (lambda (fnc)
+                  (for-each
+                    (lambda (ivar)
+                      (if (member ivar (adbf:vars-mutated-by-set fnc))
+                        (return #f))
+                    )
+                    ivars))))
+            )))
            (for-each
             (lambda (e)
               (inline-ok? e ivars args arg-used return))
