@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.7 - TBD
+## 0.9.7 - January 19, 2019
 
 Features
 
