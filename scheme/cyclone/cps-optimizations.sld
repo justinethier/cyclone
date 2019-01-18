@@ -1704,10 +1704,14 @@
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
-      (opt:beta-expand ;; TODO: temporarily disabled, causes problems with massive expansions in compiler benchmark, need to revist how to throttle/limit this (program size? heuristics? what else??)
-        (opt:inline-prims 
-          (opt:contract ast)
-          -1)
+      (let ((new-ast (opt:inline-prims 
+                       (opt:contract ast) -1)))
+        ;; Just a hack for now, need to fix beta expand in compiler benchmark
+        (if (< (length (filter define? new-ast)) 1000)
+          (opt:beta-expand new-ast) ;; TODO: temporarily disabled, causes problems with massive expansions 
+                                    ;; in compiler benchmark, need to revist how to throttle/limit this 
+                                    ;; (program size? heuristics? what else??)
+          new-ast)
       )
     )
 
