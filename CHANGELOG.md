@@ -5,15 +5,14 @@
 Features
 
 - Faster version of `list?`.
-- Faster compilation of large files.
+- Faster compilation of large source files.
 - Do not inline `member` or `assoc` to avoid looping over the same list multiple times.
-
-TODO: do not perform beta expansion of large source files (need to investigate this more, this is just an interum solution)
 
 Bug Fixes
 
 - Do not inline primitive calls when arguments to the call are mutated in the function body or mutated elsewhere via `set!`.
 - Modified generated code for `(inline)` functions to eliminate the possibility of out-of-order execution.
+- Fix a bug where beta expansion of an `if` expression can lead to compilation errors.
 
 ## 0.9.6 - December 9, 2018
 
