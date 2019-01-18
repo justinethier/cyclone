@@ -8,6 +8,8 @@ Features
 - Faster compilation of large files.
 - Do not inline `member` or `assoc` to avoid looping over the same list multiple times.
 
+TODO: do not perform beta expansion of large source files (need to investigate this more, this is just an interum solution)
+
 Bug Fixes
 
 - Do not inline primitive calls when arguments to the call are mutated in the function body or mutated elsewhere via `set!`.
