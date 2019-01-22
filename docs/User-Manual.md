@@ -40,10 +40,10 @@ The following packages are required:
 - [LibTomMath](https://github.com/libtom/libtommath)
 - [Concurrency Kit](http://concurrencykit.org/)
 
-  NOTE: The best way to install `libck` is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.5.2` below with the latest version available from their website:
+  NOTE: The best way to install `libck` is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.6.0` below with the latest version available from their website:
     
-        wget http://concurrencykit.org/releases/ck-0.5.2.tar.gz
-        tar xfz ck-0.5.2.tar.gz ; cd ck-0.5.2 ; ./configure PREFIX=/usr && make all && sudo make install
+        wget http://concurrencykit.org/releases/ck-0.6.0.tar.gz
+        tar xfz ck-0.6.0.tar.gz ; cd ck-0.6.0 ; ./configure PREFIX=/usr && make all && sudo make install
         sudo ldconfig
 
 On a Debian variant such as Ubuntu the necessary packages may be installed via the command:
@@ -58,7 +58,7 @@ The following command can be used to install dependencies on Fedora, though `lib
 
 Cyclone cannot be built directly on a system that does not have Cyclone binaries installed because the compiler is [self-hosting](https://en.wikipedia.org/wiki/Self-hosting). The easiest way to install Cyclone binaries is to build from source using [cyclone-bootstrap](https://github.com/justinethier/cyclone-bootstrap):
 
-    $ git clone git@github.com:justinethier/cyclone-bootstrap.git
+    $ git clone https://github.com/justinethier/cyclone-bootstrap.git
     $ cd cyclone-bootstrap
     $ ./install.sh
 
