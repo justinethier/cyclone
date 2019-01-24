@@ -16,6 +16,7 @@ TODO: ideas for future improvement
  ???
  
  needs to ensure minimal performance impacts
+ TODO: how does an object become shared between threads? need to enumerate all the possible ways. Does it have to involve either a set! or mutation of a global variable? perhaps we can track these somehow.
 
 Older Notes:
 
