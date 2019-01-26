@@ -2189,7 +2189,7 @@
         (if (null? lib-pass-thru-exports)
             (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
             ;; GC to ensure objects are moved when exporting exports.
-            ;; therwise there will be broken hearts :(
+            ;; Otherwise there will be broken hearts :(
             (emit*
               "  mclosure1(clo, c_" (lib:name->string lib-name) "_entry_pt_first_lambda, ((closure1_type *)cont)->element);\n"
               "  object buf[1]; buf[0] = cont;\n"
