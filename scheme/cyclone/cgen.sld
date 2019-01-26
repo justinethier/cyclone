@@ -24,7 +24,7 @@
     autogen
     autogen:defprimitives 
     autogen:primitive-procedures 
-    ;c-compile-program
+    ;;c-compile-program
     emit
     emit*
     emits
@@ -139,7 +139,7 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      ;"/* Check for GC, then call given continuation closure */\n"
+     ;;"/* Check for GC, then call given continuation closure */\n"
       "#define return_closcall" n "(td, clo" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
@@ -159,9 +159,9 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      ;"/* Check for GC, then call given continuation closure */\n"
+     ;;"/* Check for GC, then call given continuation closure */\n"
       "#define continue_or_gc" n "(td, clo" args ") { \\\n"
-      " char *top = alloca(sizeof(char)); \\\n" ;; TODO: consider speeding up by passing in a var already allocated
+      " char *top = alloca(sizeof(char)); \\\n" ; TODO: consider speeding up by passing in a var already allocated
       " if (stack_overflow(top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
       "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td, clo, buf, " n "); \\\n"
@@ -177,7 +177,7 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      ;"/* Check for GC, then call C function directly */\n"
+     ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct" n "(td, _fn" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
@@ -194,7 +194,7 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      ;"/* Check for GC, then call C function directly */\n"
+     ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
@@ -212,7 +212,7 @@
         (n (number->string num-args))
         (arry-assign (c-macro-array-assign num-args "buf" "a")))
     (string-append
-      ;"/* Check for GC, then call C function directly */\n"
+     ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_obj" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
       " char top; \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
@@ -345,7 +345,7 @@
          (append-preamble (lambda (s)
                             (set! preamble (string-append preamble "  " s "\n"))))
          (body (c-compile-exp exp append-preamble "cont" -1 (list src-file) #t)))
-    ;(write `(DEBUG ,body))
+    ;; (write `(DEBUG ,body))
     (string-append 
      preamble 
      (c:serialize body "  ")
@@ -363,13 +363,13 @@
 ;;         * function name (or NULL if none)
 ;; cps? - Determine whether to compile using continuation passing style.
 ;;        Normally this is always enabled, but sometimes a function has a
-;;        version that can be inlined (as an optimization), so this will 
+;;        version that can be inlined (as an optimization), so this will
 ;;        be set to false to change the type of compilation.
 ;;        NOTE: this field is not passed everywhere because a lot of forms
 ;;              require CPS, so this flag is not applicable to them.
 (define (c-compile-exp exp append-preamble cont ast-id trace cps?)
   (cond
-    ; Special case - global function w/out a closure. Create an empty closure
+   ;; Special case - global function w/out a closure. Create an empty closure
     ((ast:lambda? exp)
      (c-compile-exp
       `(%closure ,exp)
@@ -378,7 +378,7 @@
        ast-id
        trace 
        cps?))
-    ; Core forms:
+    ;; Core forms:
     ((const? exp)       (c-compile-const exp (alloca? ast-id)))
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
@@ -387,16 +387,16 @@
     ((quote? exp)       (c-compile-quote exp (alloca? ast-id)))
     ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
 
-    ; IR (2):
+    ;; IR (2):
     ((tagged-list? '%closure exp)
      (c-compile-closure exp append-preamble cont ast-id trace cps?))
-    ; Global definition
+    ;; Global definition
     ((define? exp)
      (c-compile-global exp append-preamble cont trace))
     ((define-c? exp)
      (c-compile-raw-global-lambda exp append-preamble cont trace))
     
-    ; Application:      
+    ;; Application:
     ((app? exp)         (c-compile-app exp append-preamble cont ast-id trace cps?))
     (else               (error "unknown exp in c-compile-exp: " exp))))
 
@@ -407,13 +407,13 @@
 (define (c-compile-scalars args use-alloca)
   (letrec (
     (addr-op (if use-alloca "" "&"))
-    ;(deref-op (if use-alloca "->" "."))
+    ;; (deref-op (if use-alloca "->" "."))
     (c-make-macro (if use-alloca "alloca_pair" "make_pair"))
     (num-args 0)
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-          (string-append c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");")
+         (string-append c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");")
           (append (c:allocs a) (c:allocs b)))))
     (_c-compile-scalars 
      (lambda (args)
@@ -444,7 +444,7 @@
            (addr-op (if use-alloca "" "&"))
            (deref-op (if use-alloca "->" "."))
            (c-make-macro (if use-alloca "alloca_empty_vector" "make_empty_vector"))
-           ;; Generate code for each member of the vector 
+           ;; Generate code for each member of the vector
            (loop 
             (lambda (i code)
               (if (= i len)
@@ -453,13 +453,13 @@
                   (loop 
                     (+ i 1)
                     (c-code/vars
-                      ;; The vector's C variable
+                     ;; The vector's C variable
                       (c:body code)
                       ;; Allocations
                       (append
-                        (c:allocs code) ;; Vector alloc
-                        (c:allocs idx-code) ;; Member alloc at index i
-                        (list ;; Assign this member to vector
+                       (c:allocs code) ;; Vector alloc
+                       (c:allocs idx-code) ;; Member alloc at index i
+                       (list ;; Assign this member to vector
                           (string-append 
                             cvar-name deref-op "elements[" (number->string i) "] = "
                             (c:body idx-code)
@@ -489,7 +489,7 @@
            (addr-op (if use-alloca "" "&"))
            (deref-op (if use-alloca "->" "."))
            (c-make-macro (if use-alloca "alloca_empty_bytevector" "make_empty_bytevector"))
-           ;; Generate code for each member of the vector 
+           ;; Generate code for each member of the vector
            (loop 
             (lambda (i code)
               (if (= i len)
@@ -498,12 +498,12 @@
                   (loop 
                     (+ i 1)
                     (c-code/vars
-                      ;; The bytevector's C variable
+                     ;; The bytevector's C variable
                       (c:body code)
                       ;; Allocations
                       (append
-                        (c:allocs code) ;; Vector alloc
-                        (list ;; Assign this member to vector
+                       (c:allocs code) ;; Vector alloc
+                       (list ;; Assign this member to vector
                           (string-append 
                             cvar-name deref-op "data[" (number->string i) "] = (unsigned char)"
                             byte-val
@@ -586,7 +586,7 @@
                        (else
                          (number->string exp)))))
         (c-code/vars
-            (string-append "" cvar-name) ; Code is just the variable name
+         (string-append "" cvar-name) ; Code is just the variable name
             (list     ; Allocate pointer on the C stack
               (string-append 
                 "alloc_bignum(data, " cvar-name "); "
@@ -596,8 +596,8 @@
       (let* ((cvar-name (mangle (gensym 'c)))
              (num2str (lambda (n)
                         (cond
-                          ;; The following two may not be very portable, 
-                          ;; may be better to use C99:
+                         ;; The following two may not be very portable,
+                         ;; may be better to use C99:
                           ((nan? n) "(0./0.)")
                           ((infinite? n) "(1./0.)")
                           (else
@@ -617,7 +617,7 @@
     ((real? exp)
       (let ((cvar-name (mangle (gensym 'c)))
             (num2str (cond
-                       ;; The following two may not be very portable, 
+                      ;; The following two may not be very portable,
                        ;; may be better to use C99:
                        ((nan? exp) "(0./0.)")
                        ((infinite? exp) "(1./0.)")
@@ -626,7 +626,7 @@
             (addr-op (if use-alloca "" "&"))
             (c-make-macro (if use-alloca "alloca_double" "make_double")))
         (c-code/vars
-            (string-append addr-op cvar-name) ; Code is just the variable name
+         (string-append addr-op cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
                 c-make-macro "(" cvar-name ", " num2str ");")))))
@@ -721,7 +721,7 @@
                 (else "")))
          (tptr-decl
           (cond 
-            ((and tptr-type use-alloca?) (string-append "object " tptr " = alloca(sizeof(" tptr-type ")); "))
+           ((and tptr-type use-alloca?) (string-append "object " tptr " = alloca(sizeof(" tptr-type ")); "))
             (tptr-type (string-append tptr-type " " tptr "; "))
             (else "")))
          (c-var-assign 
@@ -731,14 +731,14 @@
                   (string-append 
                     (if (or (prim:cont? p) 
                             (equal? (prim/c-var-assign p) "object")
-                            (prim/c-var-pointer p) ;; Assume returns object
+                            (prim/c-var-pointer p) ; Assume returns object
                             (prim->c-func-uses-alloca? p use-alloca?))
                         "" 
                         "&")
                     cv-name)
                   (list
                     (string-append 
-                      ;; Define closure if necessary (apply only)
+                     ;; Define closure if necessary (apply only)
                       (cond
                        (closure-def closure-def)
                        (else ""))
@@ -767,18 +767,18 @@
      ((prim/c-var-assign p)
       (c-var-assign (prim/c-var-assign p)))
      ((prim/cvar? p)
-        ;;
-        ;; TODO: look at functions that would actually fall into this
-        ;; branch, I think they are just the macro's like list->vector???
-        ;; may be able to remove this using prim:cont? and simplify
-        ;; the logic
-        ;;
+      ;;
+      ;; TODO: look at functions that would actually fall into this
+      ;; branch, I think they are just the macro's like list->vector???
+      ;; may be able to remove this using prim:cont? and simplify
+      ;; the logic
+      ;;
         (let ((cv-name (mangle (gensym 'c))))
            (c-code/vars
             (if (or (prim:allocates-object? p use-alloca?)
                     (prim->c-func-uses-alloca? p use-alloca?))
-                cv-name ;; Already a pointer
-                (string-append "&" cv-name)) ;; Point to data
+                cv-name ; Already a pointer
+                (string-append "&" cv-name)) ; Point to data
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
@@ -801,7 +801,7 @@
 ;; self - Identifier for the function's "self" closure
 ;; closure-index - Index of the function's "self" closure in outer closure
 (define (self-closure-call? ast self closure-index)
-  ;(trace:error `(JAE self-closure-call? ,ast ,self ,closure-index))
+  ;; (trace:error `(JAE self-closure-call? ,ast ,self ,closure-index))
   (and-let* (((tagged-list? '%closure-ref ast))
              ((tagged-list? 'cell-get (cadr ast)))
              (inner-cref (cadadr ast))
@@ -811,14 +811,14 @@
              ((equal? closure-index (caddr inner-cref))))
     #t))
 
-; c-compile-ref : ref-exp -> string
+;; c-compile-ref : ref-exp -> string
 (define (c-compile-ref exp)
   (c-code 
     (if (member exp *global-syms*)
       (cgen:mangle-global exp)
       (mangle exp))))
 
-; c-compile-args : list[exp] (string -> void) -> string
+;; c-compile-args : list[exp] (string -> void) -> string
 (define (c-compile-args args append-preamble prefix cont ast-id trace cps?)
   (letrec ((num-args 0)
            (cp-lis '())
@@ -828,7 +828,7 @@
              ((not (pair? args))
               (c-code ""))
              (else
-              ;(trace:debug `(c-compile-args ,(car args)))
+              ;; (trace:debug `(c-compile-args ,(car args)))
               (let ((cp (c-compile-exp (car args) 
                           append-preamble cont ast-id trace cps?)))
                 (set! num-args (+ 1 num-args))
@@ -838,11 +838,11 @@
                   cp
                   (_c-compile-args (cdr args) 
                     append-preamble ", " cont))))))))
-  ;; Pass back a container with:
-  ;; - Appened body (string)
-  ;; - Appended allocs (string)
-  ;; - Number of args (numeric)
-  ;; - Remaining args - Actual CP objects (lists of body/alloc) from above
+    ;; Pass back a container with:
+    ;; - Appened body (string)
+    ;; - Appended allocs (string)
+    ;; - Number of args (numeric)
+    ;; - Remaining args - Actual CP objects (lists of body/alloc) from above
   (append
     (c:tuple/args
       (_c-compile-args args 
@@ -858,8 +858,9 @@
            (fun      (app->fun exp)))
       (cond
         ((ast:lambda? fun)
-         (let* ((lid (allocate-lambda fun (c-compile-lambda fun trace #t))) ;; TODO: pass in free vars? may be needed to track closures
-                                                               ;; properly, wait until this comes up in an example
+         (let* ((lid (allocate-lambda fun (c-compile-lambda fun trace #t)))
+                ;; TODO: pass in free vars? may be needed to track closures
+                ;; properly, wait until this comes up in an example
                 (this-cont (string-append "__lambda_" (number->string lid)))
                 (cgen 
                   (c-compile-args
@@ -885,7 +886,7 @@
               (not (null? (cdr trace)))
               (adbv:direct-rec-call? (adb:get (cdr trace)))
               (tagged-list? '%closure-ref fun)
-              (equal? (cadr fun) (cdr trace)) ;; Needed?
+              (equal? (cadr fun) (cdr trace)) ; Needed?
               (equal? (car args) (cdr trace))
               ;; Make sure continuation is not a lambda, because
               ;; that means a closure may be allocated
@@ -894,14 +895,14 @@
                   (map 
                     (lambda (e)
                      (c-compile-exp e append-preamble "" ast-id "" cps?))
-                    (cddr args))) ;; Skip the closure
+                    (cddr args))) ; Skip the closure
                 (cgen-allocs 
                   (apply string-append 
                     (map (lambda (a) (c:allocs->str (c:allocs a))) cgen-lis)))
 
                 (parent-fnc (adbv:assigned-value (adb:get (cdr trace))))
                 (parent-args 
-                  (cdr ;; Skip continuation
+                  (cdr ; Skip continuation
                     (ast:lambda-args 
                       (if (pair? parent-fnc) 
                           (car parent-fnc)
@@ -921,9 +922,9 @@
            ;;(trace:info `(loop ,args ,(cadr args) ,cgen-lis ,parent-args))
            (c-code
              (string-append
-               cgen-allocs ;(c:allocs->str (c:allocs cgen))
+              cgen-allocs ; (c:allocs->str (c:allocs cgen))
                "\n"
-               cgen-body ;; TODO: (c:body cgen) ;; TODO: re-assign function args, longer-term using temp variables
+               cgen-body ; TODO: (c:body cgen) ; TODO: re-assign function args, longer-term using temp variables
                "\n"
                "continue;"))))
          
@@ -945,7 +946,7 @@
               (c-code/vars
                 (c:body c-fun)
                 (append
-                  (c:allocs c-args*) ;; fun alloc depends upon arg allocs
+                  (c:allocs c-args*) ; fun alloc depends upon arg allocs
                   (list (string-append 
                     (car (c:allocs c-fun)) 
                     (if (prim/c-var-assign fun)
@@ -978,12 +979,12 @@
               ast-id
               (car args)
               (number->string (- (cadr args) 1)))
-            ;"("
+            ;;"("
             ;;; TODO: probably not the ideal solution, but works for now
-            ;"(closureN)"
-            ;(mangle (car args))
-            ;")->elements["
-            ;(number->string (- (cadr args) 1))"]"
+            ;;"(closureN)"
+            ;; (mangle (car args))
+            ;;")->elements["
+            ;; (number->string (- (cadr args) 1))"]"
             ))))
 
         ;; TODO: may not be good enough, closure app could be from an element
@@ -991,7 +992,7 @@
          (let* ((cfun (c-compile-args (list (car args)) append-preamble "  " cont ast-id trace cps?))
                 (this-cont (c:body cfun))
                 (cargs (c-compile-args (cdr args) append-preamble "  " this-cont ast-id trace cps?))
-                (raw-cargs (cdddr cargs)) ;; Same as above but with lists instead of appended strings
+                (raw-cargs (cdddr cargs)) ; Same as above but with lists instead of appended strings
                 (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
@@ -1003,7 +1004,7 @@
                   (c:body cargs)
                   ");")))
              (else
-;;TODO: Consolidate with corresponding %closure code??
+              ;;TODO: Consolidate with corresponding %closure code??
               (set-c-call-arity! (c:num-args cargs))
               (let* ((wkf (well-known-lambda (car args)))
                      (fnc (if wkf (adb:get/default (ast:lambda-id wkf) #f) #f))
@@ -1024,21 +1025,21 @@
                                          params))
                            (args (map car raw-cargs))
                            (reassignments 
-                             ;; TODO: may need to detect cases where an arg is reassigned before
-                             ;; another one is assigned to that arg's old value, for example:
-                             ;;   a = 1, b = 2, c = a
-                             ;; In this case the code would need to assign to a temporary variable
-                             ;;
-                             ;; Right now we just play it safe and always assign to temporary variables,
-                             ;; even when we don't need to. I suppose in theory the C compiler can
-                             ;; figure that out (??) but it would be cleaner overall if we could here.
-                             ;; Something to consider for the future.
+                            ;; TODO: may need to detect cases where an arg is reassigned before
+                            ;; another one is assigned to that arg's old value, for example:
+                            ;;   a = 1, b = 2, c = a
+                            ;; In this case the code would need to assign to a temporary variable
+                            ;;
+                            ;; Right now we just play it safe and always assign to temporary variables,
+                            ;; even when we don't need to. I suppose in theory the C compiler can
+                            ;; figure that out (??) but it would be cleaner overall if we could here.
+                            ;; Something to consider for the future.
                              (apply string-append
                               (map
                                 (lambda (param arg)
                                   (cond
-                                    ;; TODO: with tmps this is not really applicable anymore:
-                                    ((equal? param arg) "") ;; No need to reassign
+                                   ;; TODO: with tmps this is not really applicable anymore:
+                                   ((equal? param arg) "") ; No need to reassign
                                     (else
                                       (string-append
                                         param " = " arg ";\n"))))
@@ -1050,7 +1051,7 @@
                                 (lambda (p tmp)
                                   (string-append " " p " = " tmp "; "))
                                 params tmp-params))))
-;(trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
+                      ;; (trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
                     (c-code/vars 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
@@ -1071,7 +1072,7 @@
                         
                   ((and wkf fnc
                         *optimize-well-known-lambdas*
-                        (adbf:well-known fnc) ;; not really needed
+                        (adbf:well-known fnc) ; not really needed
                         (equal? (adbf:closure-size fnc) 1))
                    (let* ((lid (ast:lambda-id wkf))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
@@ -1090,10 +1091,10 @@
                           (if (> num-cargs 0) "," "")
                           (c:body cargs)
                           ");"))))
-;;                  TODO: here  and in other case, if well-known but closure size does not match, use
-;;                  other macro to at least call out the __lambda_ function directly. seemed to 
-;;                  speed up C compile times (let's test that!)
-;;      ;;"#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
+                  ;; TODO: here  and in other case, if well-known but closure size does not match, use
+                  ;; other macro to at least call out the __lambda_ function directly. seemed to
+                  ;; speed up C compile times (let's test that!)
+                  ;; "#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
                   ((and wkf fnc)
                    (let* ((lid (ast:lambda-id wkf))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid))))
@@ -1137,11 +1138,11 @@
                    "return_copy(ptr,"
                    (c:body cargs)
                    ");")))
-             (else ;; CPS, IE normal behavior
+             (else ; CPS, IE normal behavior
                (set-c-call-arity! num-cargs)
-;TODO: see corresponding code in %closure-ref that outputs return_closcall.
-;need to use (well-known-lambda) to check the ref to see if it is a WKL.
-;if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
+               ;; TODO: see corresponding code in %closure-ref that outputs return_closcall.
+               ;; need to use (well-known-lambda) to check the ref to see if it is a WKL.
+               ;; if so, lookup ast and use cgen-id to map back to emit the lambda_gc_ret there
                (with-fnc (ast:lambda-id (closure->lam fun)) (lambda (fnc)
                  (cond
                   ((and *optimize-well-known-lambdas*
@@ -1194,16 +1195,16 @@
         ((equal? 'Cyc-seq fun)
          (let ((exps (foldr
                        (lambda (expr acc)
-                         ;; Join expressions; based on c:append 
+                         ;; Join expressions; based on c:append
                          (let ((cp1 (if (ref? expr)
-                                        ; Ignore lone ref to avoid C warning
+                                        ;; Ignore lone ref to avoid C warning
                                         (c-code/vars "" '())
                                         (c-compile-exp expr append-preamble cont ast-id trace cps?)))
                                (cp2 acc))
                            (c-code/vars 
                              (let ((cp1-body (c:body cp1)))
                                (if (zero? (string-length cp1-body))
-                                   (c:body cp2) ;; Ignore cp1 if necessary
+                                   (c:body cp2) ; Ignore cp1 if necessary
                                    (string-append cp1-body ";" (c:body cp2))))
                              (append (c:allocs cp1) (c:allocs cp2)))))
                        (c-code "")
@@ -1215,7 +1216,7 @@
            (c-code/vars
              (string-append (mangle (cadr exp)) " = " (c:body val-exp) ";")
              (c:allocs val-exp)))
-           ;(c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
+         ;; (c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
         )
         ((equal? 'let fun)
          (let* ((vars/vals (cadr exp))
@@ -1223,10 +1224,10 @@
                 (vexps (foldr
                         (lambda (var/val acc)
                           (set-use-alloca! #t) ;; Force alloca to ensure safe c stack allocs
-                          ;; Join expressions; based on c:append 
+                          ;; Join expressions; based on c:append
                           (let ((cp1 (c-compile-exp (cadr var/val) append-preamble cont ast-id trace cps?))
                                 (cp2 acc))
-                            (set-use-alloca! #f) ;; Revert flag
+                            (set-use-alloca! #f) ; Revert flag
                             (c-code/vars 
                               (let ((cp1-body (c:body cp1)))
                                 (string-append cp1-body ";" (c:body cp2)))
@@ -1238,12 +1239,12 @@
                         vars/vals))
                (body-exp (c-compile-exp 
                            body append-preamble cont ast-id trace cps?)))
-          ;;(trace:error `(JAE DEBUG body ,body ,vars/vals ,exp))
+           ;;(trace:error `(JAE DEBUG body ,body ,vars/vals ,exp))
           (c:append vexps body-exp)))
         (else
          (error `(Unsupported function application ,exp)))))))
 
-; c-compile-if : if-exp -> string
+;; c-compile-if : if-exp -> string
 (define (c-compile-if exp append-preamble cont ast-id trace cps?)
   (let* ((compile (lambda (exp)
                     (c-compile-exp exp append-preamble cont ast-id trace cps?)))
@@ -1266,13 +1267,13 @@
   (set! *global-inlines* (cons (cons orig-sym inline-sym) *global-inlines*)))
 
 ;; Add a global inlinable function that is written in Scheme.
-;; This is more challenging than define-c forms since the 
+;; This is more challenging than define-c forms since the
 ;; code must be compiled again to work without CPS.
-;(define *global-inline-scms* '())
-;(define (add-global-inline-scm-lambda var-sym code)
-;  (add-global-inline var-sym )
-;  (set! *global-inline-scms* 
-;        (cons (list var-sym code) *global-inline-scms*)))
+;; (define *global-inline-scms* '())
+;; (define (add-global-inline-scm-lambda var-sym code)
+;;  (add-global-inline var-sym )
+;;  (set! *global-inline-scms*
+;;        (cons (list var-sym code) *global-inline-scms*)))
 
 ;; Global compilation
 (define *globals* '())
@@ -1280,7 +1281,7 @@
 (define (global-lambda? global) (cadr global))
 (define (global-not-lambda? global) (not (cadr global)))
 (define (add-global var-sym lambda? code)
-  ;(write `(add-global ,var-sym ,code))
+  ;; (write `(add-global ,var-sym ,code))
   (set! *globals* (cons (list var-sym lambda? code) *globals*)))
 (define (c-compile-global exp append-preamble cont trace)
  (let ((var (define->var exp))
@@ -1298,11 +1299,11 @@
       (st:add-function! trace var) #t))
 
    ;; Add inline global definition also, if applicable
-;   (trace:error `(JAE DEBUG ,var 
-;           ,(lambda? body) 
-;           ,(define-c->inline-var exp)
-;           ,(prim:udf? (define-c->inline-var exp))
-;           ))
+   ;;   (trace:error `(JAE DEBUG ,var
+   ;;           ,(lambda? body)
+   ;;           ,(define-c->inline-var exp)
+   ;;           ,(prim:udf? (define-c->inline-var exp))
+   ;;           ))
    (when (and (ast:lambda? body)
               (prim:udf? (define-c->inline-var exp)))
        (add-global-inline 
@@ -1310,12 +1311,12 @@
          (define-c->inline-var exp))
        (add-global 
          (define-c->inline-var exp)
-         #t ;; always a lambda
+         #t ; always a lambda
          (c-compile-exp 
           body append-preamble cont
           (ast:lambda-id body)
           (st:add-function! trace var)
-          #f ;; inline, so disable CPS on this pass
+          #f ; inline, so disable CPS on this pass
          )))
 
    (c-code/vars "" (list ""))))
@@ -1327,38 +1328,38 @@
                 'precompiled-lambda))
           (lambda-data
             `(,precompiled-sym
-              ,(caddr exp) ;; Args
-              ,(cadddr exp))) ;; Body
+              ,(caddr exp) ; Args
+              ,(cadddr exp))) ; Body
           (lid (allocate-lambda #f lambda-data))
           (total-num-args
-            (let ((count 1)) ;; Start at 1 because there will be one less comma than args
+            (let ((count 1)) ; Start at 1 because there will be one less comma than args
               (string-for-each 
                 (lambda (c) 
                   (if (equal? #\, c) (set! count (+ count 1))))
                 (caddr exp))
-              count)) ;; args
+              count)) ; args
           ;; Subtract "internal" args added for runtime
           (num-args
             (- total-num-args 4)))
      ;; Is the function also defined inline?
-     ;(trace:error `(JAE define-c ,exp))
+     ;; (trace:error `(JAE define-c ,exp))
      (cond
       ((> (length exp) 4)
-       ;(trace:error `(JAE define-c inline detected))
+       ;; (trace:error `(JAE define-c inline detected))
        (let ((fnc-sym 
                (define-c->inline-var exp)))
-          ;(trace:error `(JAE define-c inline detected ,fnc-sym))
+         ;; (trace:error `(JAE define-c inline detected ,fnc-sym))
          (add-global-inline (define->var exp) fnc-sym)
          (c-compile-raw-global-lambda 
            `(define-c ,fnc-sym ,@(cddddr exp))
            append-preamble 
            cont 
            trace
-           #f)))) ;; Inline this one; CPS will not be used
+           #f)))) ; Inline this one; CPS will not be used
      ;; Add this define-c
      (add-global 
        (define->var exp)
-       #t ;(lambda? body) 
+       #t ; (lambda? body) 
        (let ((cv-name (mangle (gensym 'c))))
          (c-code/vars 
            (string-append "&" cv-name)
@@ -1375,24 +1376,24 @@
 
 (define (allocate-symbol sym)
   (if (not (member sym *symbols*))
-           ;(not (Cyc-reserved-symbol? sym)))
+      ;; (not (Cyc-reserved-symbol? sym)))
       (set! *symbols* (cons sym *symbols*))))
 
 ;; Lambda compilation.
 
-;; Lambdas get compiled into procedures that, 
+;; Lambdas get compiled into procedures that,
 ;; once given a C name, produce a C function
 ;; definition with that name.
 
-;; These procedures are stored up and eventually 
+;; These procedures are stored up and eventually
 ;; emitted.
 
-; type lambda-id = natural
+;; type lambda-id = natural
 
-; num-lambdas : natural
+;; num-lambdas : natural
 (define num-lambdas 0)
 
-; lambdas : alist[lambda-id,string -> string]
+;; lambdas : alist[lambda-id,string -> string]
 (define lambdas '())
 (define inline-lambdas '())
 
@@ -1408,14 +1409,14 @@
     (set! lambdas (cons (list id lam ast:lam) lambdas))
     (if (equal? cps? '(#f))
         (set! inline-lambdas (cons id inline-lambdas)))
-    ;(when ast:lam
-    ;  (with-fnc! (ast:lambda-id ast:lam) (lambda (fnc)
-    ;    (adbf:set-cgen-id! fnc id))))
+    ;; (when ast:lam
+    ;;  (with-fnc! (ast:lambda-id ast:lam) (lambda (fnc)
+    ;;    (adbf:set-cgen-id! fnc id))))
     id))
 
-; get-lambda : lambda-id -> (symbol -> string)
-;(define (get-lambda id)
-;  (cdr (assv id lambdas)))
+;; get-lambda : lambda-id -> (symbol -> string)
+;; (define (get-lambda id)
+;;  (cdr (assv id lambdas)))
 
 (define (lambda->env exp)
     (let ((formals (ast:lambda-formals->list exp)))
@@ -1423,23 +1424,23 @@
             (car formals)
             'unused)))
 
-;           (tmp-ident (if (> (length (lambda-formals->list exp)) 0) 
-;                          (mangle (if (pair? (lambda->formals exp))
-;                                      (car (lambda->formals exp))
-;                                      (lambda->formals exp)))
-;                          ""))
-;           (has-closure? 
-;             (and
-;               (> (string-length tmp-ident) 3)
-;               (equal? "self" (substring tmp-ident 0 4))))
+;;           (tmp-ident (if (> (length (lambda-formals->list exp)) 0)
+;;                          (mangle (if (pair? (lambda->formals exp))
+;;                                      (car (lambda->formals exp))
+;;                                      (lambda->formals exp)))
+;;                          ""))
+;;           (has-closure?
+;;             (and
+;;               (> (string-length tmp-ident) 3)
+;;               (equal? "self" (substring tmp-ident 0 4))))
 
 ;; Compute the minimum number of arguments a function expects.
 ;; Note this must be the count before additional closure/CPS arguments
 ;; are added, so we need to detect those and not include them.
 (define (compute-num-args lam)
-  (let ((count (ast:lambda-num-args lam))) ;; Current arg count, may be too high
+  (let ((count (ast:lambda-num-args lam))) ; Current arg count, may be too high
     (cond
-      ((< count 0) -1) ;; Unlimited
+     ((< count 0) -1) ; Unlimited
       (else
         (let ((formals (ast:lambda-formals->list lam)))
           (- count
@@ -1452,9 +1453,9 @@
         (num (length (ast:lambda-formals->list exp))))
     (cond
       ((equal? type 'args:varargs)
-       -1) ;; Unlimited
+       -1) ; Unlimited
       ((equal? type 'args:fixed-with-varargs)
-       (- num 1)) ;; Last arg is optional
+       (- num 1)) ; Last arg is optional
       (else
         num))))
 
@@ -1488,11 +1489,11 @@
 ;; Compile a reference to an element of a closure.
 (define (c-compile-closure-element-ref ast-id var idx)
   (with-fnc ast-id (lambda (fnc)
-    ;(trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
+    ;; (trace:info `(c-compile-closure-element-ref ,ast-id ,var ,idx ,fnc))
     (cond
       ((and *optimize-well-known-lambdas*
             (adbf:well-known fnc)
-            ;(pair? (adbf:all-params fnc))
+            ;; (pair? (adbf:all-params fnc))
             (equal? (adbf:closure-size fnc) 1))
        (mangle (car (adbf:all-params fnc))))
       (else
@@ -1506,14 +1507,14 @@
 (define (find-closure-assigned-var-index! ast-fnc closure-args)
   (let ((index 0)
         (fnc (adb:get/default (ast:lambda-id ast-fnc) #f)))
-    ;(trace:info `(find-closure-assigned-var-index! ,ast-fnc ,fnc ,closure-args))
+    ;; (trace:info `(find-closure-assigned-var-index! ,ast-fnc ,fnc ,closure-args))
     (cond
       ((and fnc 
             (pair? (adbf:assigned-to-var fnc)))
        (for-each
         (lambda (arg)
           (when (and (ref? arg) (member arg (adbf:assigned-to-var fnc)))
-            ;(trace:error `(JAE closure for ,(ast:lambda-id ast-fnc) self ref is index ,index))
+            ;; (trace:error `(JAE closure for ,(ast:lambda-id ast-fnc) self ref is index ,index))
             (adbf:set-self-closure-index! fnc index)
             (adb:set! (ast:lambda-id ast-fnc) fnc))
           (set! index (+ index 1)))
@@ -1545,8 +1546,8 @@
                     (let ((var (cadr free-var))
                           (idx (number->string (- (caddr free-var) 1))))
                         (c-compile-closure-element-ref ast-id var idx)
-                        ;(string-append 
-                        ;    "((closureN)" (mangle var) ")->elements[" idx "]")
+                        ;; (string-append
+                        ;;    "((closureN)" (mangle var) ")->elements[" idx "]")
                     )
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
@@ -1555,19 +1556,19 @@
          (use-obj-instead-of-closure? 
            (with-fnc (ast:lambda-id lam) (lambda (fnc)
              (and *optimize-well-known-lambdas*
-                  (adbf:well-known fnc) ;; Only optimize well-known functions
-                  ;(equal? (length free-vars) 1) ;; Sanity check
-                  (equal? (adbf:closure-size fnc) 1))))) ;; From closure conv
+                  (adbf:well-known fnc) ; Only optimize well-known functions
+                  ;; (equal? (length free-vars) 1) ; Sanity check
+                  (equal? (adbf:closure-size fnc) 1))))) ; From closure conv
          (macro? (assoc (st:->var trace) (get-macros)))
          (call/cc? (and (equal? (car trace) "scheme/base.sld")
                         (equal? (st:->var trace) 'call/cc)))
          (num-args-str 
           (if call/cc?
-            "1" ;; Special case, need to change runtime checks for call/cc
+            "1" ; Special case, need to change runtime checks for call/cc
             (number->string (compute-num-args lam))))
          (create-object (lambda ()
-           ;JAE - this is fine, now need to handle other side (actually reading the value without a closure obj
-           ;(trace:error `(create-object free-vars ,free-vars ,(car free-vars)))
+           ;; JAE - this is fine, now need to handle other side (actually reading the value without a closure obj
+           ;; (trace:error `(create-object free-vars ,free-vars ,(car free-vars)))
            (c-code/vars
              (car free-vars)
              (list))))
@@ -1608,14 +1609,14 @@
               "(" cv-name ", "
               ;; NOTE:
               ;; Hopefully will not cause issues with varargs when casting to
-              ;; generic function type below. Works fine in gcc, not sure if 
+              ;; generic function type below. Works fine in gcc, not sure if
               ;; this is portable to other compilers though
               "(function_type)__lambda_" (number->string lid)
               (if (> (length free-vars) 0) "," "")
               (string-join free-vars ", ")
               ");"
               cv-name ".num_args = " (number->string (compute-num-args lam)) ";")))))
-  ;(trace:info (list 'JAE-DEBUG trace macro?))
+  ;; (trace:info (list 'JAE-DEBUG trace macro?))
   (cond
     (use-obj-instead-of-closure?
       (create-object))
@@ -1630,7 +1631,7 @@
             (create-nclosure)
             (create-mclosure))))))))
 
-; c-compile-formals : list[symbol] -> string
+;; c-compile-formals : list[symbol] -> string
 (define (c-compile-formals formals type)
   (cond
    ((and (not (pair? formals))
@@ -1650,7 +1651,7 @@
        (else
         ""))))))
 
-; c-compile-lambda : lamda-exp (string -> void) -> (string -> string)
+;; c-compile-lambda : lamda-exp (string -> void) -> (string -> string)
 (define (c-compile-lambda exp trace cps?)
   (let* ((preamble "")
          (append-preamble (lambda (s)
@@ -1681,7 +1682,7 @@
              (or
                (adbf:calls-self? (adb:get/default (ast:lambda-id exp) (adb:make-fnc)))
                ;; Older direct recursive logic
-               (and (not has-closure?) ;; Only top-level functions for now
+               (and (not has-closure?) ; Only top-level functions for now
                     (pair? trace)
                     (not (null? (cdr trace)))
                     (adbv:direct-rec-call? (adb:get (cdr trace))))))
@@ -1695,7 +1696,7 @@
                 formals))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
-                        (car (ast:lambda-body exp)) ;; car ==> assume single expr in lambda body after CPS
+                        (car (ast:lambda-body exp)) ; car ==> assume single expr in lambda body after CPS
                         append-preamble
                         (mangle env-closure)
                         (ast:lambda-id exp)
@@ -1711,9 +1712,9 @@
                        (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
                          (string-append 
-                           ; DEBUGGING:
-                           ;"printf(\"%d %d\\n\", argc, " 
-                           ;  (number->string (length (ast:lambda-formals->list exp))) ");"
+                          ;; DEBUGGING:
+                          ;; "printf(\"%d %d\\n\", argc, "
+                          ;;  (number->string (length (ast:lambda-formals->list exp))) ");"
                            "load_varargs(" 
                            (mangle (ast:lambda-varargs-var exp))
                            ", "
@@ -1727,7 +1728,7 @@
                        (c:serialize
                          (c:append
                            (c-code 
-                             ;; Only trace when entering initial defined function
+                            ;; Only trace when entering initial defined function
                              (cond
                                (has-closure?
                                 (if has-loop? "\n while(1) {\n" ""))
@@ -1884,7 +1885,7 @@
         *symbols*)
 
     ;; Emit lambdas:
-    ; Print the prototypes:
+    ;; Print the prototypes:
     (for-each
      (lambda (l)
       (cond
@@ -1916,7 +1917,7 @@
     
     (emit "")
     
-    ; Print GC return wrappers
+    ;; Print GC return wrappers
     (for-each
      (lambda (l)
       (let ((ast (caddr l)))
@@ -1930,7 +1931,7 @@
             (when (and *optimize-well-known-lambdas*
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
-;(trace:error `(JAE ,(car l) ,l ,fnc))
+              ;; (trace:error `(JAE ,(car l) ,l ,fnc))
            (let* ((params-str (cdadr l))
                   (args-str
                     (string-join
@@ -1957,7 +1958,7 @@
                "}"))))))))
      lambdas)
 
-    ; Print the definitions:
+    ;; Print the definitions:
     (for-each
      (lambda (l)
       (cond
@@ -1983,7 +1984,7 @@
          (emit ((caadr l) (string-append "__lambda_" (number->string (car l))))))))
      lambdas)
   
-    ; Emit inlinable function list
+    ;; Emit inlinable function list
     (cond
       ((not program?)
         (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure _, object cont){ ")
@@ -2024,7 +2025,7 @@
               (emit* "(((closure)cont)->fn)(data, 1, cont, NULL);"))
           (emit* " } "))))
 
-    ; Emit entry point
+    ;; Emit entry point
     (cond
       (program?
         (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);")
@@ -2035,7 +2036,7 @@
         (emit "static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,cont; { "))
       (else
         (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
-        ; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        ;; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
       ))
 
     ;; Set global-changed indicator
@@ -2085,15 +2086,15 @@
 
         ;; Expose list of inlinable lambda functions
         (when (not program?)
-          (let ( ;(cvar-sym (mangle (gensym 'cvar)))
+          (let ( ;; (cvar-sym (mangle (gensym 'cvar)))
                 (pair-sym (mangle (gensym 'pair)))
                 (clo-sym (mangle (gensym 'clo)))
                 (fnc (string-append
                        "c_" (lib:name->string lib-name) "_inlinable_lambdas")))
            (emits* 
-               "  mclosure0(" clo-sym ", " fnc "); "
-              ; "  make_cvar(" cvar-sym 
-              ; ", (object *)&" fnc ");"
+            "  mclosure0(" clo-sym ", " fnc "); "
+            ;; "  make_cvar(" cvar-sym
+            ;; ", (object *)&" fnc ");"
                )
            (emits*
                "make_pair(" pair-sym ", find_or_add_symbol(\"" fnc
@@ -2169,7 +2170,7 @@
             "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {")
-          ; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
+          ;; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
           (emit compiled-program)
           (emit ";")))
       (else
@@ -2187,8 +2188,8 @@
                "\");")
         (if (null? lib-pass-thru-exports)
             (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
-            ; GC to ensure objects are moved when exporting exports.
-            ; Otherwise there will be broken hearts :(
+            ;; GC to ensure objects are moved when exporting exports.
+            ;; therwise there will be broken hearts :(
             (emit*
               "  mclosure1(clo, c_" (lib:name->string lib-name) "_entry_pt_first_lambda, ((closure1_type *)cont)->element);\n"
               "  object buf[1]; buf[0] = cont;\n"
@@ -2237,7 +2238,7 @@
                *primitives*))))
     (cond-expand
       (chicken
-       (pp code fp)) ;; CHICKEN pretty-print
+       (pp code fp)) ; CHICKEN pretty-print
       (else
        (write code fp)))))
 
