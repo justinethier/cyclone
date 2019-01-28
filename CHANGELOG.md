@@ -2,6 +2,14 @@
 
 ## 0.9.8 - TBD
 
+Bug Fixes
+
+- Arthur Maciel fixed a bug in the compiler back-end where a terminating semi-colon would not be emitted in the C code generated for a short program.
+
+Internal Compiler Enhancements
+
+- Arthur Maciel updated the `cgen` module to follow the [Riastradh style rules](https://mumble.net/~campbell/scheme/style.txt) for updating comments. Thanks Arthur!
+
 ## 0.9.7 - January 19, 2019
 
 Features
