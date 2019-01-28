@@ -334,10 +334,16 @@
     (append (c:allocs cp1) (c:allocs cp2))))
 
 (define (c:serialize cp prefix)
+  (let* ((body (c:body cp))
+         (blen (string-length body)))
     (string-append
-        (c:allocs->str (c:allocs cp) prefix)
-        prefix
-        (c:body cp)))
+     (c:allocs->str (c:allocs cp) prefix)
+     prefix
+     body
+     (if (and (> blen 0)
+              (not (eq? #\; (string-ref body (- blen 1))))) ; last char
+         ";"
+         ""))))
 
 ;; c-compile-program : exp -> string
 (define (c-compile-program exp src-file)
@@ -348,8 +354,7 @@
     ;; (write `(DEBUG ,body))
     (string-append 
      preamble 
-     (c:serialize body "  ")
-     " ;\n")))
+     (c:serialize body "  "))))
 
 ;; c-compile-exp : exp (string -> void) -> string
 ;;
