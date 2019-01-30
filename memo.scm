@@ -24,3 +24,18 @@
 
 (write (mfnc 1 1)) (newline)
 (write (mfnc 1 1)) (newline)
+
+(define (ack m n)
+  (cond ((= m 0) (+ n 1))
+        ((= n 0) (ack (- m 1) 1))
+        (else (ack (- m 1) (ack m (- n 1))))))
+(write
+  (ack 3 12))
+
+(define mack (memoize _mack))
+(define (_mack m n)
+  (cond ((= m 0) (+ n 1))
+        ((= n 0) (mack (- m 1) 1))
+        (else (mack (- m 1) (mack m (- n 1))))))
+(write
+  (_mack 3 12))
