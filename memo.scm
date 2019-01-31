@@ -25,17 +25,31 @@
 (write (mfnc 1 1)) (newline)
 (write (mfnc 1 1)) (newline)
 
+; Original versions:
 (define (ack m n)
   (cond ((= m 0) (+ n 1))
         ((= n 0) (ack (- m 1) 1))
         (else (ack (- m 1) (ack m (- n 1))))))
-(write
-  (ack 3 12))
+(define (fib n)
+  (if (< n 2)
+      n
+      (+ (fib (- n 1))
+         (fib (- n 2)))))
 
-(define mack (memoize _mack))
-(define (_mack m n)
-  (cond ((= m 0) (+ n 1))
-        ((= n 0) (mack (- m 1) 1))
-        (else (mack (- m 1) (mack m (- n 1))))))
-(write
-  (_mack 3 12))
+; Fast versions:
+;(define ack (memoize _ack))
+;(define (_ack m n)
+;  (cond ((= m 0) (+ n 1))
+;        ((= n 0) (ack (- m 1) 1))
+;        (else (ack (- m 1) (ack m (- n 1))))))
+;
+;(define fib (memoize _fib))
+;(define (_fib n)
+;  (if (< n 2)
+;      n
+;      (+ (fib (- n 1))
+;         (fib (- n 2)))))
+
+(write (ack 3 12))
+(newline)
+(write (fib 40))
