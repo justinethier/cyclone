@@ -8,6 +8,11 @@
 ;;;; This module contains a hashset based on code from:
 ;;;; https://github.com/avsej/hashset.c
 ;;;;
+;;;; NOTE this module only checks for shallow equality (IE: eq?) which
+;;;; makes it suitable to test only certain types such as symbols,
+;;;; numbers, etc. Hashset should NOT be used to store strings, lists,
+;;;; vectors, and objects that require tests for deep equality (IE: equal?).
+;;;;
 (define-library (scheme cyclone hashset)
     (export
       hs-create
