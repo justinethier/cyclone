@@ -24,11 +24,48 @@
 
 ;; TODO: function to actually scan a def to see if that def can be memoized
 (define (memoizable? var body)
+  (define (scan exp return)
+    ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
+    (write `(DEBUG scan ,(ast:ast->pp-sexp exp))) (newline)
+    (cond
+     ;; TODO: reject if a lambda is returned
+     ((ast:lambda? exp)
+      (scan (ast:lambda-body exp))
+     )
+     ((quote? exp) exp)
+     ((const? exp) #t)
+     ((ref? exp) exp)
+     ((define? exp)
+      (return #f))
+     ((set!? exp)
+      (return #f))
+     ((if? exp)
+      (scan (if->condition exp) return)
+      (scan (if->then exp) return)
+      (scan (if->else exp) return))
+     ((app? exp)
+      ;TODO: call must be var or on approved list
+      (when (not (member (car exp) (list var '+ '-)))
+        (return #f))
+      (for-each
+        (lambda (e)
+          (scan e return))
+        (cdr exp)))
+     (else exp)
+  ))
   (cond
-    ((and (ref? var)
-          (ast:lambda? body)
-          (eq? (ast:lambda-formals-type body) 'args:fixed))
-     #t) ;; TODO: no, need to scan further
+    ((and-let* 
+      ((ref? var)
+       (ast:lambda? body)
+       (eq? (ast:lambda-formals-type body) 'args:fixed)
+       (adb:get/default var #f)
+       (adbv:self-rec-call? var)
+      ) 
+      #t)
+     (call/cc
+      (lambda (return)
+        (scan body return)
+        (return #t))))
     (else #f))
 )
 
@@ -132,7 +169,10 @@
 
 ))
 
-(analyze:memoize-pure-fncs (ast:sexp->ast sexp))
+(let ((ast (ast:sexp->ast sexp)))
+  (analyze-cps ast)
+  ;(analyze:find-recursive-calls ast)
+  (analyze:memoize-pure-fncs ast))
 
 ;;    (pretty-print
 ;;      (ast:ast->pp-sexp
