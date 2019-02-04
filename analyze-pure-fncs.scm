@@ -22,84 +22,49 @@
             )
     ))
 
+;; TODO: function to actually scan a def to see if that def can be memoized
+(define (memoizable? var body)
+  (cond
+    ((and (ref? var)
+          (ast:lambda? body)
+          (eq? (ast:lambda-formals-type body) 'args:fixed))
+     #t) ;; TODO: no, need to scan further
+    (else #f))
+)
 
 (define (analyze:memoize-pure-fncs sexp)
-;;  ;; Add new entry for each var as it is found...
-;;  (define lookup-tbl (make-hash-table))
-;;
-;;  ;; Pass over the sexp
-;;  ;; exp - S-expression to scan
-;;  ;; vars - alist of current set of variables
-;;  (define (scan exp vars)
-;;    ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
-;;    (cond
-;;     ((ast:lambda? exp)
-;;      (for-each
-;;        (lambda (a)
-;;          (scan a vars))
-;;        (ast:lambda-formals->list exp))
-;;      (for-each
-;;        (lambda (e)
-;;          (scan e vars))
-;;        (ast:lambda-body exp))
-;;     )
-;;     ((quote? exp) #f)
-;;     ((const? exp) #f)
-;;     ((ref? exp) 
-;;      (hash-table-set! lookup-tbl exp vars)
-;;     )
-;;     ((define? exp) 
-;;      (scan (define->exp exp) '()))
-;;     ((set!? exp)
-;;      ;; TODO: probably need to keep track of var here
-;;      (scan (set!->var exp) vars)
-;;      (scan (set!->exp exp) vars))
-;;     ((if? exp)       
-;;      (scan (if->condition exp) vars)
-;;      (scan (if->then exp) vars)
-;;      (scan (if->else exp) vars))
-;;     ((app? exp)
-;;      (cond
-;;       ((ast:lambda? (car exp))
-;;        ;; Track deps on lambda var(s)
-;;        (for-each
-;;          (lambda (e)
-;;            (scan e vars))
-;;          (ast:lambda-formals->list (car exp)))
-;;        ;; Scan body, with reset vars (??)
-;;        (for-each
-;;          (lambda (e)
-;;            (scan e '()))
-;;          (ast:lambda-body (car exp)))
-;;        ;; Scan lambda arg(s), again also with reset vars
-;;        (for-each
-;;          (lambda (e)
-;;            (scan e '()))
-;;          (cdr exp))
-;;       )
-;;       ((and (ref? (car exp))
-;;             (list? exp) 
-;;             (> (length exp) 1))
-;;         (let* ((cont (cadr exp))
-;;                ;; TODO: what if arg is not a ref? Is that possible after cps (probably, with inlining)?
-;;                (args (filter ref? (cddr exp)))
-;;                (vars* (append args vars))
-;;              )
-;;         (scan cont vars*)
-;;         ;(for-each
-;;         ; (lambda (e)
-;;         ;   (scan e vars*))
-;;         ; (cdr exp))
-;;       ))
-;;       (else
-;;        (for-each
-;;          (lambda (e)
-;;            (scan e vars))
-;;          exp))))
-;;     (else (error "unknown expression type: " exp))
-;;  ))
-;;  (scan sexp '())
-;;  lookup-tbl
+  ;; exp - S-expression to scan
+  (define (scan exp)
+    ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
+    (cond
+     ((ast:lambda? exp)
+      exp
+     )
+     ((quote? exp) exp)
+     ((const? exp) exp)
+     ((ref? exp) exp)
+     ((define? exp) 
+      ;; TODO: support non-top-level defines in the future as well
+
+      ;; TODO: is this a candidate function? if so, scan it using (memoizable?)
+      (let ((var (define->var exp))
+            (body (car (define->exp exp))))
+        (cond
+          ((memoizable? var body)
+            (write `(DEBUG ,var is memoizable))
+            (newline)
+            exp)
+          (else exp))))
+     ;((set!? exp)
+     ; ;; TODO: probably need to keep track of var here
+     ; (scan (set!->var exp) vars)
+     ; (scan (set!->exp exp) vars))
+     ((if? exp) exp)
+     ((app? exp)
+      (map scan exp))
+     (else exp)
+  ))
+  (scan sexp)
 )
 
 
@@ -166,6 +131,8 @@
       (Cyc-fast-lt n$16$25 2))))
 
 ))
+
+(analyze:memoize-pure-fncs (ast:sexp->ast sexp))
 
 ;;    (pretty-print
 ;;      (ast:ast->pp-sexp
