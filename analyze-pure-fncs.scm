@@ -126,6 +126,18 @@
           ((memoizable? var body)
             (write `(DEBUG ,var is memoizable))
             (newline)
+            ;; TODO: easy to rename function via gensym. however, also
+            ;; need to inject this into top-level:
+            ;; (define fib #f)
+            ;; and wrap top-level portion with
+            ;;   (memoize
+            ;;     (lambda-22
+            ;;       (r$78)
+            ;;       (Cyc-seq
+            ;;         (set-global! ack r$78)
+            ;;         .. existing top-level goes here
+            ;;     ))
+            ;;     _ack)
             exp)
           (else exp))))
      ;((set!? exp)
@@ -208,7 +220,9 @@
 (let ((ast (ast:sexp->ast sexp)))
   (analyze-cps ast)
   ;(analyze:find-recursive-calls ast)
-  (analyze:memoize-pure-fncs ast))
+  (pretty-print
+    (ast:ast->pp-sexp
+      (analyze:memoize-pure-fncs ast))))
 
 ;;    (pretty-print
 ;;      (ast:ast->pp-sexp
