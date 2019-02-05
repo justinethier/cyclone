@@ -24,13 +24,17 @@
 
 ;; TODO: function to actually scan a def to see if that def can be memoized
 (define (memoizable? var body)
+  (define cont #f)
   (define (scan exp return)
     ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
-    (write `(DEBUG scan ,(ast:ast->pp-sexp exp))) (newline)
+    (write `(DEBUG scan ,var ,cont ,(ast:ast->pp-sexp exp))) (newline)
     (cond
      ;; TODO: reject if a lambda is returned
      ((ast:lambda? exp)
-      (scan (ast:lambda-body exp))
+      (map
+        (lambda (e)
+          (scan e return))
+        (ast:lambda-body exp))
      )
      ((quote? exp) exp)
      ((const? exp) #t)
@@ -44,9 +48,40 @@
       (scan (if->then exp) return)
       (scan (if->else exp) return))
      ((app? exp)
-      ;TODO: call must be var or on approved list
-      (when (not (member (car exp) (list var '+ '-)))
-        (return #f))
+      (cond
+        ;(write `( ,(car exp) ,var ,cont)) (newline)
+        ((ast:lambda? (car exp))
+         (scan (car exp) return))
+        ((or
+            (equal? (car exp) var)  ;; Recursive call to self
+            (equal? (car exp) cont) ;; Continuation of fnc
+         )
+         #t) ;; OK to ignore this call 
+        ((not (member 
+                (car exp)
+               '(+ - * / = 
+                Cyc-fast-plus
+                Cyc-fast-sub
+                Cyc-fast-mul
+                Cyc-fast-div
+                Cyc-fast-eq
+                Cyc-fast-gt
+                Cyc-fast-lt
+                Cyc-fast-gte
+                Cyc-fast-lte
+                Cyc-fast-char-eq
+                Cyc-fast-char-gt
+                Cyc-fast-char-lt
+                Cyc-fast-char-gte
+                Cyc-fast-char-lte
+                =
+                >
+                <
+                >=
+                <=
+                )))
+         ;; Call not on approved list
+         (return #f)))
       (for-each
         (lambda (e)
           (scan e return))
@@ -64,6 +99,7 @@
       #t)
      (call/cc
       (lambda (return)
+        (set! cont (car (ast:lambda-args body)))
         (scan body return)
         (return #t))))
     (else #f))
