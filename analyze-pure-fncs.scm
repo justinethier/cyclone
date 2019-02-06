@@ -93,6 +93,7 @@
       ((ref? var)
        (ast:lambda? body)
        (eq? (ast:lambda-formals-type body) 'args:fixed)
+       (< (length (ast:lambda-args body)) 4) ;; Too many combinations w/more args
        (adb:get/default var #f)
        (adbv:self-rec-call? var)
       ) 
@@ -106,6 +107,8 @@
 )
 
 (define (analyze:memoize-pure-fncs sexp)
+  (define memo-tbl '())
+
   ;; exp - S-expression to scan
   (define (scan exp)
     ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
@@ -124,6 +127,7 @@
             (body (car (define->exp exp))))
         (cond
           ((memoizable? var body)
+           (let ((new-var (gensym var)))
             (write `(DEBUG ,var is memoizable))
             (newline)
             ;; TODO: easy to rename function via gensym. however, also
@@ -138,7 +142,9 @@
             ;;         .. existing top-level goes here
             ;;     ))
             ;;     _ack)
-            exp)
+            (set! memo-tbl (cons (cons var new-var) memo-tbl))
+            `(define ,new-var ,body)
+            ))
           (else exp))))
      ;((set!? exp)
      ; ;; TODO: probably need to keep track of var here
@@ -149,7 +155,25 @@
       (map scan exp))
      (else exp)
   ))
-  (scan sexp)
+  (let ((new-exp (scan sexp)))
+    (cond
+      ((not (null? memo-tbl))
+       (append
+        (map 
+          (lambda (var/new-var)
+            `(define ,(car var/new-var) #f))
+          memo-tbl)
+        (map
+          (lambda (exp)
+            (cond
+              ((define? exp) exp) ;; not top-level
+              (else
+                ;; TODO: fold
+                ;;(foldl (lambda (exp acc) `(memo (lambda(,(car exp)) ,acc))) '(test) '((a . b) (c . d)))
+exp ;; TODO: just using this for debugging!
+              )))
+          new-exp)))
+      (else new-exp)))
 )
 
 
@@ -214,6 +238,68 @@
                   r$60))
            (Cyc-fast-sub n$16$25 1))))
       (Cyc-fast-lt n$16$25 2))))
+ ((lambda
+    ()
+    ((lambda
+       (r$65)
+       (FNC
+         (lambda
+           (r$81)
+           ((lambda
+              (r$66)
+              (mfnc (lambda
+                      (r$80)
+                      (write (lambda
+                               (r$67)
+                               (newline
+                                 (lambda
+                                   (r$68)
+                                   (mfnc (lambda
+                                           (r$79)
+                                           (write (lambda
+                                                    (r$69)
+                                                    (newline
+                                                      (lambda
+                                                        (r$70)
+                                                        (FNC
+                                                          (lambda
+                                                            (r$78)
+                                                            ((lambda
+                                                               (r$71)
+                                                               (FNC
+                                                                 (lambda
+                                                                   (r$77)
+                                                                   ((lambda
+                                                                      (r$72)
+                                                                      (ack (lambda
+                                                                             (r$76)
+                                                                             (write (lambda
+                                                                                      (r$73)
+                                                                                      (newline
+                                                                                        (lambda
+                                                                                          (r$74)
+                                                                                          (fib (lambda
+                                                                                                 (r$75)
+                                                                                                 (write %halt
+                                                                                                        r$75))
+                                                                                               40))))
+                                                                                    r$76))
+                                                                           3
+                                                                           12))
+                                                                    (set! fib
+                                                                      r$77)))
+                                                                 _fib))
+                                                             (set! ack r$78)))
+                                                          _ack))))
+                                                  r$79))
+                                         1
+                                         1))))
+                             r$80))
+                    1
+                    1))
+            (set! mfnc r$81)))
+         fnc))
+     0)))
 
 ))
 
