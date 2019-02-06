@@ -38,7 +38,9 @@
      )
      ((quote? exp) exp)
      ((const? exp) #t)
-     ((ref? exp) exp)
+     ((ref? exp) 
+      TODO: if exp is a global, return false
+      exp)
      ((define? exp)
       (return #f))
      ((set!? exp)
