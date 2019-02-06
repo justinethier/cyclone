@@ -39,7 +39,7 @@
      ((quote? exp) exp)
      ((const? exp) #t)
      ((ref? exp) 
-      TODO: if exp is a global, return false
+      TODO: if exp is a global (IE: free var), return false
       exp)
      ((define? exp)
       (return #f))
@@ -170,9 +170,22 @@
             (cond
               ((define? exp) exp) ;; not top-level
               (else
-                ;; TODO: fold
-                ;;(foldl (lambda (exp acc) `(memo (lambda(,(car exp)) ,acc))) '(test) '((a . b) (c . d)))
-exp ;; TODO: just using this for debugging!
+                ;; Memoize all of the functions at top-level
+                (foldl 
+                  (lambda (var/new-var acc)
+                    (let ((rsym (gensym 'r))
+                          (var (car var/new-var))
+                          (new-var (cdr var/new-var)))
+                      `(memoize
+                        (,(gensym 'lambda)
+                          (,rsym)
+                          (Cyc-seq
+                            (set-global! ,var ,rsym)
+                            ,acc
+                        ))
+                        ,new-var)))
+                  exp
+                  memo-tbl)
               )))
           new-exp)))
       (else new-exp)))
