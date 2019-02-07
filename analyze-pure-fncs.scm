@@ -25,7 +25,7 @@
 ;; TODO: function to actually scan a def to see if that def can be memoized
 (define (memoizable? var body)
   (define cont #f)
-  (define (scan exp return)
+  (define (scan exp return locals)
     ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
     (write `(DEBUG scan ,var ,cont ,(ast:ast->pp-sexp exp))) (newline)
     (cond
@@ -33,27 +33,29 @@
      ((ast:lambda? exp)
       (map
         (lambda (e)
-          (scan e return))
+          (scan e return (append locals (ast:lambda-formals->list exp))))
         (ast:lambda-body exp))
      )
      ((quote? exp) exp)
      ((const? exp) #t)
      ((ref? exp) 
-      TODO: if exp is a global (IE: free var), return false
+      ;; Reject if we have any free variables, in case those are mutated
+      (when (not (member exp locals))
+        (return #f))
       exp)
      ((define? exp)
       (return #f))
      ((set!? exp)
       (return #f))
      ((if? exp)
-      (scan (if->condition exp) return)
-      (scan (if->then exp) return)
-      (scan (if->else exp) return))
+      (scan (if->condition exp) return locals)
+      (scan (if->then exp) return locals)
+      (scan (if->else exp) return locals))
      ((app? exp)
       (cond
         ;(write `( ,(car exp) ,var ,cont)) (newline)
         ((ast:lambda? (car exp))
-         (scan (car exp) return))
+         (scan (car exp) return locals))
         ((or
             (equal? (car exp) var)  ;; Recursive call to self
             (equal? (car exp) cont) ;; Continuation of fnc
@@ -86,7 +88,7 @@
          (return #f)))
       (for-each
         (lambda (e)
-          (scan e return))
+          (scan e return locals))
         (cdr exp)))
      (else exp)
   ))
@@ -103,7 +105,7 @@
      (call/cc
       (lambda (return)
         (set! cont (car (ast:lambda-args body)))
-        (scan body return)
+        (scan body return (cons var (ast:lambda-formals->list body)))
         (return #t))))
     (else #f))
 )
