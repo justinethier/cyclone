@@ -112,6 +112,7 @@
   )
   (include "cps-opt-local-var-redux.scm")
   (include "cps-opt-analyze-call-graph.scm")
+  (include "cps-opt-memoize-pure-fncs.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
@@ -1712,6 +1713,7 @@
                                     ;; in compiler benchmark, need to revist how to throttle/limit this 
                                     ;; (program size? heuristics? what else??)
           new-ast)
+TODO: integrate (define (opt:memoize-pure-fncs sexp)
       )
     )
 
