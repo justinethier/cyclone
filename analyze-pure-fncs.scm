@@ -22,7 +22,9 @@
             )
     ))
 
-;; TODO: function to actually scan a def to see if that def can be memoized
+;; Predicate to determine if a function can be memoized
+;; var - symbol - global name of the function
+;; body - lambda ast - Function object
 (define (memoizable? var body)
   (define cont #f)
   (define (scan exp return locals)
@@ -110,7 +112,8 @@
     (else #f))
 )
 
-(define (analyze:memoize-pure-fncs sexp)
+;; Transformation to memoize simple recursive numeric functions
+(define (opt:memoize-pure-fncs sexp)
   (define memo-tbl '())
 
   ;; exp - S-expression to scan
@@ -125,8 +128,6 @@
      ((ref? exp) exp)
      ((define? exp) 
       ;; TODO: support non-top-level defines in the future as well
-
-      ;; TODO: is this a candidate function? if so, scan it using (memoizable?)
       (let ((var (define->var exp))
             (body (car (define->exp exp))))
         (cond
@@ -325,7 +326,7 @@
   ;(analyze:find-recursive-calls ast)
   (pretty-print
     (ast:ast->pp-sexp
-      (analyze:memoize-pure-fncs ast))))
+      (opt:memoize-pure-fncs ast))))
 
 ;;    (pretty-print
 ;;      (ast:ast->pp-sexp
