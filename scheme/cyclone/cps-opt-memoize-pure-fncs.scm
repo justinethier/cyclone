@@ -29,7 +29,7 @@
   (define cont #f)
   (define (scan exp return locals)
     ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
-    (write `(DEBUG scan ,var ,cont ,(ast:ast->pp-sexp exp))) (newline)
+    ;(write `(DEBUG scan ,var ,cont ,(ast:ast->pp-sexp exp))) (newline)
     (cond
      ;; TODO: reject if a lambda is returned
      ((ast:lambda? exp)
@@ -133,8 +133,8 @@
         (cond
           ((memoizable? var body)
            (let ((new-var (gensym var)))
-            (write `(DEBUG ,var is memoizable))
-            (newline)
+            ;(write `(DEBUG ,var is memoizable))
+            ;(newline)
             ;; TODO: easy to rename function via gensym. however, also
             ;; need to inject this into top-level:
             ;; (define fib #f)

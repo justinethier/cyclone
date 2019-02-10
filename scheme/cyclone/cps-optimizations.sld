@@ -1708,12 +1708,12 @@
       (let ((new-ast (opt:inline-prims 
                        (opt:contract ast) -1)))
         ;; Just a hack for now, need to fix beta expand in compiler benchmark
+       (opt:memoize-pure-fncs 
         (if (< (length (filter define? new-ast)) 1000)
           (opt:beta-expand new-ast) ;; TODO: temporarily disabled, causes problems with massive expansions 
                                     ;; in compiler benchmark, need to revist how to throttle/limit this 
                                     ;; (program size? heuristics? what else??)
-          new-ast)
-TODO: integrate (define (opt:memoize-pure-fncs sexp)
+          new-ast))
       )
     )
 
