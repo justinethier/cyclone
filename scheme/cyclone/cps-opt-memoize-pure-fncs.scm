@@ -28,7 +28,7 @@
 (define (memoizable? var body)
   (define cont #f)
   (define (scan exp return locals)
-    ;(trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
+    (trace:error `(DEBUG scan ,(ast:ast->pp-sexp exp)))
     ;(write `(DEBUG scan ,var ,cont ,(ast:ast->pp-sexp exp))) (newline)
     (cond
      ;; TODO: reject if a lambda is returned
@@ -163,6 +163,10 @@
   (let ((new-exp (scan sexp)))
     (cond
       ((not (null? memo-tbl))
+       (when (pair? module-globals)
+         (set-cdr! 
+          module-globals
+          (append (cdr module-globals) (map cdr memo-tbl))))
        (append
         (map 
           (lambda (var/new-var)
@@ -207,7 +211,6 @@
    (lambda
      (k$41 x$5$21 y$6$22)
      (k$41 (Cyc-fast-plus x$5$21 y$6$22))))
- (define mfnc #f)
  (define ack
    (lambda
      (k$46 m$7$23 n$8$24)

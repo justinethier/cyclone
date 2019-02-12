@@ -433,21 +433,28 @@
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
+      (define 
+        *cps-opt-options*
+        (list
+          (cons 'module-globals module-globals)
+          ;(cons)
+          ))
+              
       (when (> *optimization-level* 0)
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program *cps-opt-options*))
         (report:elapsed "---------------- after cps optimizations (1):")
         (trace:info "---------------- after cps optimizations (1):")
         (trace:info (ast:ast->pp-sexp input-program))
 
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program *cps-opt-options*))
         (report:elapsed "---------------- after cps optimizations (2):")
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info (ast:ast->pp-sexp input-program))
         
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program *cps-opt-options*))
         (report:elapsed "---------------- after cps optimizations (3):")
         (trace:info "---------------- after cps optimizations (3):")
         (trace:info (ast:ast->pp-sexp input-program))
