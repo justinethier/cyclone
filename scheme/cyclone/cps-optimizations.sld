@@ -1700,7 +1700,7 @@
     ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
     ;; END notes
 
-    (define (optimize-cps ast)
+    (define (optimize-cps ast . options)
       (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
@@ -1715,10 +1715,12 @@
                                            ;; (program size? heuristics? what else??)
         )
 
-        ;; TODO: when memo flag (need to pass in) is enabled
-        (when #t
-          (set! new-ast (opt:memoize-pure-fncs new-ast)))
-
+        ;; Memoize pure functions, if instructed
+        (let ((module-globals (assoc 'module-globals options)))
+          (when (and module-globals #t ;; TODO: (assoc 'memoize-pure-functions options)
+                )
+            (set! new-ast (opt:memoize-pure-fncs new-ast module-globals)))
+        )
         new-ast
       )
     )

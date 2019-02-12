@@ -113,7 +113,7 @@
 )
 
 ;; Transformation to memoize simple recursive numeric functions
-(define (opt:memoize-pure-fncs sexp)
+(define (opt:memoize-pure-fncs sexp module-globals)
   (define memo-tbl '())
 
   ;; exp - S-expression to scan
@@ -321,12 +321,13 @@
 
 ))
 
-(let ((ast (ast:sexp->ast sexp)))
+(let ((ast (ast:sexp->ast sexp))
+      (module-globals (list)))
   (analyze-cps ast)
   ;(analyze:find-recursive-calls ast)
   (pretty-print
     (ast:ast->pp-sexp
-      (opt:memoize-pure-fncs ast))))
+      (opt:memoize-pure-fncs ast module-globals))))
 
 ;;    (pretty-print
 ;;      (ast:ast->pp-sexp
