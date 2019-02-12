@@ -1716,10 +1716,10 @@
         )
 
         ;; Memoize pure functions, if instructed
-        (let ((module-globals (assoc 'module-globals options)))
-          (when (and module-globals #t ;; TODO: (assoc 'memoize-pure-functions options)
+        (let ((module-globals-pair (assoc 'module-globals options)))
+          (when (and module-globals-pair #t ;; TODO: (assoc 'memoize-pure-functions options)
                 )
-            (set! new-ast (opt:memoize-pure-fncs new-ast module-globals)))
+            (set! new-ast (opt:memoize-pure-fncs new-ast (cdr module-globals-pair))))
         )
         new-ast
       )
