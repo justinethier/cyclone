@@ -439,7 +439,14 @@
           (cons 'module-globals module-globals)
           ;(cons)
           ))
-              
+TODO: use this function to set module-globals and globals, then pass it instead of options above
+      (define (inject-globals lis)
+          (cons 'module-globals module-globals)
+      ;(set! globals (union globals '())) ;; Ensure list is sorted
+      )
+TODO: pass this function to check flags, instead of having search logic in CPS opt module
+(define (flag-set? flag)
+
       (when (> *optimization-level* 0)
         (set! input-program
           (optimize-cps input-program *cps-opt-options*))
