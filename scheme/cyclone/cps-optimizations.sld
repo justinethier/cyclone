@@ -1716,8 +1716,8 @@
         )
 
         ;; Memoize pure functions, if instructed
-        (let ((module-globals-pair (assoc 'module-globals options)))
-          (when (and module-globals-pair #t ;; TODO: (assoc 'memoize-pure-functions options)
+        (let ((module-globals-pair (assoc 'module-globals (car options))))
+          (when (and module-globals-pair #t ;; TODO: (assoc 'memoize-pure-functions (car options))
                 )
             (set! new-ast (opt:memoize-pure-fncs new-ast (cdr module-globals-pair))))
         )
