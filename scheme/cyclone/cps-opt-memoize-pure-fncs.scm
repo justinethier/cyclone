@@ -187,17 +187,17 @@
                 ;; Memoize all of the functions at top-level
                 (foldl 
                   (lambda (var/new-var acc)
-                    (let ((rsym (gensym 'r))
-                          (var (car var/new-var))
-                          (new-var (cdr var/new-var)))
+                    (let* ((rsym (gensym 'r))
+                           (var (car var/new-var))
+                           (new-var (cdr var/new-var))
+                           (body
+                             `((Cyc-seq
+                                 (set-global! ,var ,rsym)
+                                 ,acc)))
+                          )
                       `(memoize
-                        (,(gensym 'lambda)
-                          (,rsym)
-                          (Cyc-seq
-                            (set-global! ,var ,rsym)
-                            ,acc
-                        ))
-                        ,new-var)))
+                         ,(ast:make-lambda (list rsym) body)
+                         ,new-var)))
                   exp
                   memo-tbl)
               )))
