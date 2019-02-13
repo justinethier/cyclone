@@ -1700,7 +1700,7 @@
     ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
     ;; END notes
 
-    (define (optimize-cps ast . options)
+    (define (optimize-cps ast add-globals! flag-set?)
       (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
@@ -1716,10 +1716,8 @@
         )
 
         ;; Memoize pure functions, if instructed
-        (let ((module-globals-pair (assoc 'module-globals (car options))))
-          (when (and module-globals-pair #t ;; TODO: (assoc 'memoize-pure-functions (car options))
-                )
-            (set! new-ast (opt:memoize-pure-fncs new-ast (cdr module-globals-pair))))
+        (when (and (procedure? flag-set?) (flag-set? 'memoize-pure-functions))
+          (set! new-ast (opt:memoize-pure-fncs new-ast add-globals!))
         )
         new-ast
       )

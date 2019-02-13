@@ -433,35 +433,40 @@
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
-      (define 
-        *cps-opt-options*
-        (list
-          (cons 'module-globals module-globals)
-          ;(cons)
-          ))
-TODO: use this function to set module-globals and globals, then pass it instead of options above
-      (define (inject-globals lis)
-          (cons 'module-globals module-globals)
-      ;(set! globals (union globals '())) ;; Ensure list is sorted
+      ;(define 
+      ;  *cps-opt-options*
+      ;  (list
+      ;    (cons 'module-globals module-globals)
+      ;    ;(cons)
+      ;    ))
+;TODO: use this function to set module-globals and globals, then pass it instead of options above
+      (define (inject-globals! lis)
+        (set! module-globals (append module-globals lis))
+        (set! globals (append globals lis))
+        (set! globals (union globals '())) ;; Ensure list is sorted
       )
-TODO: pass this function to check flags, instead of having search logic in CPS opt module
-(define (flag-set? flag)
+;TODO: pass this function to check flags, instead of having search logic in CPS opt module
+      (define (flag-set? flag)
+        (cond
+          ((eq? flag 'memoize-pure-functions)
+           #t)
+          (else #f)))
 
       (when (> *optimization-level* 0)
         (set! input-program
-          (optimize-cps input-program *cps-opt-options*))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (1):")
         (trace:info "---------------- after cps optimizations (1):")
         (trace:info (ast:ast->pp-sexp input-program))
 
         (set! input-program
-          (optimize-cps input-program *cps-opt-options*))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (2):")
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info (ast:ast->pp-sexp input-program))
         
         (set! input-program
-          (optimize-cps input-program *cps-opt-options*))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (3):")
         (trace:info "---------------- after cps optimizations (3):")
         (trace:info (ast:ast->pp-sexp input-program))
