@@ -42,8 +42,7 @@
   )
   (import (scheme base)
           (scheme char)
-          (scheme complex)
-          ;(scheme cyclone util)
+          ;(scheme complex)
   )
   (begin
 
@@ -74,6 +73,24 @@
   "(void *data, object ptr, object sym)"
   " return obj_int2obj(((long)sym) & 0x7FFFFFFF); ")
 
+(define-c %real-part
+  "(void *data, int argc, closure _, object k, object z)"
+  " if (boolean_t == Cyc_is_complex(z)) {
+      make_double(d, creal(complex_num_value(z)));
+      return_closcall1(data, k, &d); 
+    } else {
+      return_closcall1(data, k, z); 
+    } ")
+
+(define-c %imag-part
+  "(void *data, int argc, closure _, object k, object z)"
+  " if (boolean_t == Cyc_is_complex(z)) {
+      make_double(d, cimag(complex_num_value(z)));
+      return_closcall1(data, k, &d); 
+    } else {
+      return_closcall1(data, k, z); 
+    } ")
+
 (define (hash obj . maybe-bound)
   (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound))))
     (cond ((integer? obj) (modulo obj bound))
@@ -84,7 +101,7 @@
     )
     ((real? obj) (modulo (+ (numerator obj) (denominator obj)) bound))
     ((number? obj)
-     (modulo (+ (hash (real-part obj)) (* 3 (hash (imag-part obj))))
+     (modulo (+ (hash (%real-part obj)) (* 3 (hash (%imag-part obj))))
        bound))
     ((char? obj) (modulo (char->integer obj) bound))
     ((vector? obj) (vector-hash obj bound))
