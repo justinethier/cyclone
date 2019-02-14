@@ -193,7 +193,7 @@
                                  (set-global! ,var ,rsym)
                                  ,acc)))
                           )
-                      `(memoize
+                      `(Cyc-memoize
                          ,(ast:make-lambda (list rsym) body)
                          ,new-var)))
                   exp
