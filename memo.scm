@@ -1,6 +1,6 @@
 ;; Temporary test file, try with the ack function
 (import (scheme base) 
-        (srfi 69)
+        ;(srfi 69)
         (scheme write))
 
 ; (define (memoize function) 
