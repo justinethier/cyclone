@@ -433,23 +433,25 @@
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
-      ;(define 
-      ;  *cps-opt-options*
-      ;  (list
-      ;    (cons 'module-globals module-globals)
-      ;    ;(cons)
-      ;    ))
-;TODO: use this function to set module-globals and globals, then pass it instead of options above
       (define (inject-globals! lis)
+        ;; TODO: done here as proof-of-concept
+        (let ((dep (lib:list->import-set '(srfi 69))))
+          (when (not (member dep lib-deps))
+            (set! globals (append globals '(Cyc-memoize)))
+            (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
+            (set! lib-deps (cons dep lib-deps))
+            (change-lib-deps! lib-deps)))
+
         (set! module-globals (append module-globals lis))
         (set! globals (append globals lis))
         (set! globals (union globals '())) ;; Ensure list is sorted
       )
-;TODO: pass this function to check flags, instead of having search logic in CPS opt module
+
       (define (flag-set? flag)
         (cond
           ((eq? flag 'memoize-pure-functions)
-           #t)
+           #t) ;; TODO: read this in from command line
+               ;; TODO: probably will need to disable this for libraries, since srfi-69 dep would need to be carried around otherwise
           (else #f)))
 
       (when (> *optimization-level* 0)
