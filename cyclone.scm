@@ -442,13 +442,9 @@
 
       (define (inject-globals! lis)
         ;; TODO: done here as proof-of-concept
-        (let ((dep (lib:list->import-set '(srfi 69))))
-          (when (not (member dep lib-deps))
-            (set! globals (append globals '(Cyc-memoize)))
-            (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
-            ;(set! lib-deps (cons dep lib-deps))
-            ;(change-lib-deps! lib-deps)
-          )
+        (when (not (member globals 'Cyc-memoize))
+          (set! globals (append globals '(Cyc-memoize)))
+          (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
         )
         (inject-import '(scheme char))
         (inject-import '(srfi 69))
