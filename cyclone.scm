@@ -442,7 +442,7 @@
 
       (define (inject-globals! lis)
         ;; TODO: done here as proof-of-concept
-        (when (not (member globals 'Cyc-memoize))
+        (when (not (member 'Cyc-memoize globals))
           (set! globals (append globals '(Cyc-memoize)))
           (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
         )
