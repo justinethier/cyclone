@@ -433,14 +433,25 @@
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
+      (define (inject-import lis)
+        (let ((dep (lib:list->import-set lis)))
+          (when (not (member dep lib-deps))
+            (set! lib-deps (cons dep lib-deps))
+            (change-lib-deps! lib-deps)))
+      )
+
       (define (inject-globals! lis)
         ;; TODO: done here as proof-of-concept
         (let ((dep (lib:list->import-set '(srfi 69))))
           (when (not (member dep lib-deps))
             (set! globals (append globals '(Cyc-memoize)))
             (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
-            (set! lib-deps (cons dep lib-deps))
-            (change-lib-deps! lib-deps)))
+            ;(set! lib-deps (cons dep lib-deps))
+            ;(change-lib-deps! lib-deps)
+          )
+        )
+        (inject-import '(srfi 69))
+        (inject-import '(scheme char))
 
         (set! module-globals (append module-globals lis))
         (set! globals (append globals lis))
