@@ -37,6 +37,8 @@
     string-hash
     string-ci-hash
     hash-by-identity
+    ;; Cyclone Custom
+    Cyc-memoize
   )
   (import (scheme base)
           (scheme char)
@@ -308,5 +310,26 @@
 
 (define (hash-table-values hash-table)
   (hash-table-fold hash-table (lambda (key val acc) (cons val acc)) '()))
+
+;; Cyclone-specific
+;;
+;; Take a function and return another function that will store the results
+;; of calling the original function, and return those cached results on 
+;; subsequent requests.
+(define (Cyc-memoize function) 
+  (let ((table (make-hash-table))) ;(make-equal?-map))) 
+    (lambda args 
+      (apply values 
+             ;(map-get table 
+             (hash-table-ref table 
+                      args 
+                      ;; If the entry isn't there, call the function.    
+                      (lambda () 
+                        (call-with-values 
+                          (lambda () (apply function args)) 
+                          (lambda results 
+                            ;(map-put! table args results) 
+                            (hash-table-set! table args results) 
+                            results)))))))) 
 
 ))
