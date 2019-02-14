@@ -436,7 +436,7 @@
       (define (inject-import lis)
         (let ((dep (lib:list->import-set lis)))
           (when (not (member dep lib-deps))
-            (set! lib-deps (cons dep lib-deps))
+            (set! lib-deps (append lib-deps (list dep)))
             (change-lib-deps! lib-deps)))
       )
 
@@ -450,8 +450,8 @@
             ;(change-lib-deps! lib-deps)
           )
         )
-        (inject-import '(srfi 69))
         (inject-import '(scheme char))
+        (inject-import '(srfi 69))
 
         (set! module-globals (append module-globals lis))
         (set! globals (append globals lis))
