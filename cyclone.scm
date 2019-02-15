@@ -24,6 +24,7 @@
         (scheme cyclone libraries))
 
 (define *optimization-level* 2) ;; Default level
+(define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
 
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
@@ -441,13 +442,17 @@
       )
 
       (define (inject-globals! lis)
-        ;; TODO: done here as proof-of-concept
+        ;; FUTURE: these lines are specifically for memoization optizations.
+        ;;  if we need to make this more generic and have other globals
+        ;;  injected, then this code will need to be relocated, maybe into
+        ;;  an 'inject-memoization!' or such helper.
         (when (not (member 'Cyc-memoize globals))
           (set! globals (append globals '(Cyc-memoize)))
           (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
         )
         (inject-import '(scheme char))
         (inject-import '(srfi 69))
+        ;; END memoization-specific code
 
         (set! module-globals (append module-globals lis))
         (set! globals (append globals lis))
@@ -456,9 +461,7 @@
 
       (define (flag-set? flag)
         (cond
-          ((eq? flag 'memoize-pure-functions)
-           #t) ;; TODO: read this in from command line
-               ;; TODO: probably will need to disable this for libraries, since srfi-69 dep would need to be carried around otherwise
+          ((eq? flag 'memoize-pure-functions) *optimize:memoize-pure-functions*)
           (else #f)))
 
       (when (> *optimization-level* 0)
@@ -761,6 +764,10 @@
   ;; Set optimization level(s)
   (if (member "-O0" args)
       (set! *optimization-level* 0))
+  (if (member "-memoization-optimizations" args)
+      (set! *optimize:memoize-pure-functions* #t))
+  (if (member "-no-memoization-optimizations" args)
+      (set! *optimize:memoize-pure-functions* #f))
   ;; TODO: place more optimization reading here as necessary
   ;; End optimizations
   (if (member "-t" args)
@@ -774,7 +781,7 @@
 Usage: cyclone [OPTIONS] FILENAME
 Run the Cyclone Scheme compiler.
 
-Options:
+General options:
 
  -A directory    Append directory to the list of directories that are searched 
                  in order to locate imported libraries.
@@ -789,13 +796,20 @@ Options:
                  a library module.
  -CS cc-commands Specify a custom command line for the C compiler to compile
                  a shared object module.
- -Ox             Optimization level, higher means more optimizations will
-                 be used. Set to 0 to disable optimizations.
  -d              Only generate intermediate C files, do not compile them
  -t              Show intermediate trace output in generated C files
  -h, --help      Display usage information
  -v              Display version information
  -vn             Display version number
+
+Optimization options:
+
+ -Ox             Optimization level, higher means more optimizations will
+                 be used. Set to 0 to disable optimizations.
+ -memoization-optimizations     Memoize recursive calls to pure functions, 
+                                where possible (enabled by default).
+ -no-memoization-optimizations  Disable the above memoization optimization.
+
 ")
      (newline))
     ((member "-v" args)
