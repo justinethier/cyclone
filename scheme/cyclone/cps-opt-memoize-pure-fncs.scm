@@ -107,6 +107,7 @@
       (ref? var)
       (ast:lambda? body)
       (eq? (ast:lambda-formals-type body) 'args:fixed)
+      (> (length (ast:lambda-args body)) 1) ;; Need some args other than the cont
       (< (length (ast:lambda-args body)) 4) ;; Too many combinations w/more args
       (adb:get/default var #f)
       (adbv:self-rec-call? (adb:get/default var #f))
