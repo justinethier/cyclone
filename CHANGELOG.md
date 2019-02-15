@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.8 - TBD
+## 0.9.8 - February 16, 2019
 
 Features
 
