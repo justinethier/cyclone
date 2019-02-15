@@ -461,7 +461,9 @@
 
       (define (flag-set? flag)
         (cond
-          ((eq? flag 'memoize-pure-functions) *optimize:memoize-pure-functions*)
+          ((eq? flag 'memoize-pure-functions) 
+           (and program? ;; Only for programs, because SRFI 69 becomes a new dep
+                *optimize:memoize-pure-functions*))
           (else #f)))
 
       (when (> *optimization-level* 0)
