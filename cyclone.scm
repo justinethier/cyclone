@@ -450,6 +450,9 @@
           (set! globals (append globals '(Cyc-memoize)))
           (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
         )
+   TODO: this blows up compiling the tail-call-opt example program...
+        (inject-import '(scheme cyclone common))
+        (inject-import '(scheme base))
         (inject-import '(scheme char))
         (inject-import '(srfi 69))
         ;; END memoization-specific code
