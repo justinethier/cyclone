@@ -1422,28 +1422,17 @@ object Cyc_num_cmp_va_list(void *data, int argc,
  * Code is from: https://github.com/libtom/libtommath/issues/3
  */
 #define PRECISION 53
-double mp_get_double(mp_int *a)
+double mp_get_double(const mp_int *a)
 {
-    static const int NEED_DIGITS = (PRECISION + 2 * DIGIT_BIT - 2) / DIGIT_BIT;
-    static const double DIGIT_MULTI = (mp_digit)1 << DIGIT_BIT;
-
-    int i, limit;
-    double d = 0.0;
-
-    mp_clamp(a);
-    i = USED(a);
-    limit = i <= NEED_DIGITS ? 0 : i - NEED_DIGITS;
-
-    while (i-- > limit) {
-        d += DIGIT(a, i);
-        d *= DIGIT_MULTI;
-    }
-
-    if(SIGN(a) == MP_NEG)
-        d *= -1.0;
-
-    d *= pow(2.0, i * DIGIT_BIT);
-    return d;
+   int i;
+   double d = 0.0, fac = 1.0;
+   for (i = 0; i < DIGIT_BIT; ++i) {
+      fac *= 2.0;
+   }
+   for (i = a->used; i --> 0;) {
+      d = (d * fac) + (double)DIGIT(a, i);
+   }
+   return (a->sign == MP_NEG) ? -d : d;
 }
 
 // Convert a bignum back to fixnum if possible
