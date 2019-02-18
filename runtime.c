@@ -1671,7 +1671,14 @@ object Cyc_is_number(object o)
 
 object Cyc_is_real(object o)
 {
-  return Cyc_is_number(o);
+  if ((o != NULL) && (obj_is_int(o) || 
+      (!is_value_type(o) && (type_of(o) == integer_tag
+                          || type_of(o) == bignum_tag
+                          || type_of(o) == double_tag
+                          || (type_of(o) == complex_num_tag &&
+                              cimag(complex_num_value(o)) == 0.0))))) // Per R7RS
+    return boolean_t;
+  return boolean_f;
 }
 
 object Cyc_is_complex(object o)
@@ -1691,8 +1698,9 @@ object Cyc_is_complex(object o)
 object Cyc_is_integer(object o)
 {
   if ((o != NULL) && (obj_is_int(o) ||
-                      (!is_value_type(o) && type_of(o) == integer_tag) ||
-                      (!is_value_type(o) && type_of(o) == bignum_tag)))
+      (!is_value_type(o) && type_of(o) == integer_tag) ||
+      (!is_value_type(o) && type_of(o) == bignum_tag) ||
+      (!is_value_type(o) && type_of(o) == double_tag && double_value(o) == round(double_value(o))))) // Per R7RS
     return boolean_t;
   return boolean_f;
 }
