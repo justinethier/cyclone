@@ -864,11 +864,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       bignum_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = bignum_tag;
-      // Bignums are always heap-allocated so there is nothing to copy
-      //((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
-      //((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
-      //((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
-      //((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
+      ((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
+      ((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
+      ((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
+      ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
       return (char *)hp;
     }
   case cvar_tag:{
