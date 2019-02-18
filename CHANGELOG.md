@@ -4,8 +4,8 @@
 
 Bug Fixes
 
-- Fix from Petr Pražák to fix compilation error with newer versions of LibTomMath.
-- Fixed runtime to avoid cases where bignums are not initialized properly and instead retain a value of zero.
+- Fix from Petr Pražák to avoid compilation errors when using newer versions of LibTomMath.
+- Avoid cases where bignums are not initialized properly by the runtime and incorrectly retain a value of zero.
 
 ## 0.9.8 - February 16, 2019
 
