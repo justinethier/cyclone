@@ -8,10 +8,7 @@ Bug Fixes
 - Avoid cases where bignums are not initialized properly by the runtime and incorrectly retain a value of zero.
 - Handle the following edge cases from R7RS:
 
-  > If z is a complex number, then (real? z) is true if and
-  > only if (zero? (imag-part z)) is true. If x is an inexact
-  > real number, then (integer? x) is true if and only if (=
-  > x (round x)).
+  > If `z` is a complex number, then `(real? z)` is true if and only if `(zero? (imag-part z))` is true. If `x` is an inexact real number, then `(integer? x)` is true if and only if `(= > x (round x))`.
 
 ## 0.9.8 - February 16, 2019
 
