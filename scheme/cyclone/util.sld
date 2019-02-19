@@ -169,6 +169,7 @@
 (define (const? exp)
   (or (integer? exp)
       (real? exp)
+      (complex? exp)
       (string? exp)
       (vector? exp)
       (bytevector? exp)
