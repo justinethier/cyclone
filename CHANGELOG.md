@@ -9,9 +9,6 @@ Bug Fixes
 - Handle the following edge case from R7RS:
 
   > If `z` is a complex number, then `(real? z)` is true if and only if `(zero? (imag-part z))` is true. 
-  
-  
-TBD: If `x` is an inexact real number, then `(integer? x)` is true if and only if `(= x (round x))`.
 
 ## 0.9.8 - February 16, 2019
 
