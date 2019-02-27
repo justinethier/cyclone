@@ -23,6 +23,7 @@
     register-simple-type
     make-type-predicate
     make-constructor
+    make-constructor/args
     make-getter
     make-setter
     slot-ref
@@ -1831,18 +1832,18 @@
          (equal? (vector-ref obj 0) record-marker)
          (equal? (vector-ref obj 1) name))))
 (define (make-constructor make name)
-  (lambda ()
+  (lambda args
     (let* ((field-tags (vector-ref name 2))
            (field-values (make-vector (length field-tags) #f))
-    ;       (new (make-vector 3 #f))
           )
-    ;  (vector-set! new 0 record-marker)
-    ;  (vector-set! new 1 name)
-    ;  (vector-set! new 2 field-values)
-    ;  new
-      (vector record-marker name field-values)
-    )
-    ));
+      (vector record-marker name field-values))))
+(define (make-constructor/args make name)
+  (lambda args
+    (let* ((field-tags (vector-ref name 2))
+           (field-values (list->vector args)))
+      (when (not (equal? (length field-tags) (length args)))
+        (error "invalid number of arguments passed to record type constructor" args))
+      (vector record-marker name field-values))))
 (define (type-slot-offset name sym)
   (let ((field-tags (vector-ref name 2)))
     (_list-index sym field-tags)))
@@ -1940,27 +1941,10 @@
                 fields)
          ;; constructor
          (,_define ,make
-           ,(let lp ((ls make-fields) (sets '()))
-              (cond
-               ((null? ls)
-                `(,_let ((%make (,(rename 'make-constructor)
-                                 ,(symbol->string make) ;(identifier->symbol make))
-                                 ,name)))
-                   (,_lambda ,make-fields
-                     (,_let ((res (%make)))
-                       ,@sets
-                       res))))
-               (else
-                (let ((field (assq (car ls) fields)))
-                  (cond
-                   ((not field)
-                    (error "unknown record field in constructor" (car ls)))
-                   ((pair? (cddr field))
-                    (lp (cdr ls)
-                        (cons `(,(car (cddr field)) res ,(car ls)) sets)))
-                   (else
-                    (lp (cdr ls)
-                        (cons `(,_slot-set! ,name res (,_type_slot_offset ,name ',(car ls)) ,(car ls))
-                              sets)))))))))
+            (,_let ((%make (,(rename 'make-constructor/args)
+                            ,(symbol->string make) ;(identifier->symbol make))
+                            ,name)))
+              (,_lambda ,make-fields
+                (%make ,@make-fields))))
   )))))
 ))

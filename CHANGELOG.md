@@ -2,6 +2,10 @@
 
 ## 0.9.10 - TBD
 
+Features
+
+- Faster initialization of objects create via `define-record-type`.
+
 ## 0.9.9 - February 19, 2019
 
 Bug Fixes
