@@ -1841,6 +1841,8 @@
   (lambda args
     (let* ((field-tags (vector-ref name 2))
            (field-values (list->vector args)))
+      (when (not (equal? (length field-tags) (length args)))
+        (error "invalid number of arguments passed to record type constructor" args))
       (vector record-marker name field-values))))
 (define (type-slot-offset name sym)
   (let ((field-tags (vector-ref name 2)))
@@ -1939,10 +1941,18 @@
                 fields)
          ;; constructor
          (,_define ,make
-            (,_lambda ,make-fields
-              (,(rename 'vector)
-              ',record-marker
-               ,name
-               (,(rename 'vector)
-                ,@make-fields)))))))))
+            (,_let ((%make (,(rename 'make-constructor/args)
+                            ,(symbol->string make) ;(identifier->symbol make))
+                            ,name)))
+              (,_lambda ,make-fields
+                (%make ,@make-fields))))
+         ; Possible alternate version that inlines make-constructor/args
+         ;(,_define ,make
+         ;   (,_lambda ,make-fields
+         ;     (,(rename 'vector)
+         ;     ',record-marker
+         ;      ,name
+         ;      (,(rename 'vector)
+         ;       ,@make-fields))))
+  )))))
 ))
