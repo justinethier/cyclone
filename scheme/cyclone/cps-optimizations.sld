@@ -1154,6 +1154,13 @@
           Cyc-utf8->string
           Cyc-string->utf8
           list->vector
+          Cyc-fast-list-1
+          Cyc-fast-list-2
+          Cyc-fast-list-3
+          Cyc-fast-list-4
+          Cyc-fast-vector-2
+          Cyc-fast-vector-3
+          Cyc-fast-vector-4
           )))
 
     (define (prim-calls-inlinable? prim-calls)
