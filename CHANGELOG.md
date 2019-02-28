@@ -5,6 +5,7 @@
 Features
 
 - Faster initialization of objects create via `define-record-type`.
+- Allow the compiler to generate a faster version of `vector` when it is called directly with a small number of arguments.
 
 ## 0.9.9 - February 19, 2019
 
