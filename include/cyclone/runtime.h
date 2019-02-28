@@ -400,6 +400,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y);
 object Cyc_fast_list_2(object ptr, object x, object y);
 object Cyc_fast_list_3(object ptr, object a1, object a2, object a3);
 object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4);
+object Cyc_fast_vector_2(object ptr, object a1, object a2);
+object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3);
+object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4);
 object Cyc_bit_unset(void *data, object n1, object n2); 
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,

@@ -1049,6 +1049,10 @@ typedef struct {
 } vector_type;
 typedef vector_type *vector;
 
+typedef struct { vector_type v; object arr[2]; } vector_2_type;
+typedef struct { vector_type v; object arr[3]; } vector_3_type;
+typedef struct { vector_type v; object arr[4]; } vector_4_type;
+
 /** Create a new vector in the nursery */
 #define make_empty_vector(v) \
   vector_type v; \

@@ -1319,6 +1319,48 @@ object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4)
   return ptr;
 }
 
+object Cyc_fast_vector_2(object ptr, object a1, object a2) 
+{
+  vector_2_type *v = (vector_2_type *)ptr;
+  v->v.hdr.mark = gc_color_red; 
+  v->v.hdr.grayed = 0; 
+  v->v.tag = vector_tag; 
+  v->v.num_elements = 2; 
+  v->v.elements = v->arr;
+  v->v.elements[0] = a1;
+  v->v.elements[1] = a2;
+  return ptr;
+}
+
+object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3) 
+{
+  vector_3_type *v = (vector_3_type *)ptr;
+  v->v.hdr.mark = gc_color_red; 
+  v->v.hdr.grayed = 0; 
+  v->v.tag = vector_tag; 
+  v->v.num_elements = 3; 
+  v->v.elements = v->arr;
+  v->v.elements[0] = a1;
+  v->v.elements[1] = a2;
+  v->v.elements[2] = a3;
+  return ptr;
+}
+
+object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4) 
+{
+  vector_4_type *v = (vector_4_type *)ptr;
+  v->v.hdr.mark = gc_color_red; 
+  v->v.hdr.grayed = 0; 
+  v->v.tag = vector_tag; 
+  v->v.num_elements = 4; 
+  v->v.elements = v->arr;
+  v->v.elements[0] = a1;
+  v->v.elements[1] = a2;
+  v->v.elements[2] = a3;
+  v->v.elements[3] = a4;
+  return ptr;
+}
+
 // Internal function, do not use this anywhere outside the runtime
 object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 {
