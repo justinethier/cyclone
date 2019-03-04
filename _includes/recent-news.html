@@ -3,7 +3,7 @@
         <h4>
           <a href="/cyclone/{{ post.url }}">{{ post.title }}</a>
         </h4>
-        <span class="date-labels">{{post.date | date: "%B %d %Y" }}</span>
+        <span class="date-labels">{{post.date | date: "%B %e, %Y" }}</span>
         <br />
         {{ post.excerpt }}
       {% endfor %}
