@@ -7,7 +7,7 @@ ghproj: "http://github.com/justinethier/cyclone/tree/master/"
 {% for post in site.posts %}
   [{{ post.title }}](./{{ post.url }})
   <br />
-  <span class="date-labels">{{post.date | date: "%b %d %Y" }}</span>
+  <span class="date-labels">{{post.date | date: "%B %d %Y" }}</span>
   <br />
   {{ post.excerpt }}
   <br />
