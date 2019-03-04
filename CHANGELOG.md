@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.10 - TBD
+## 0.9.10 - March 5, 2019
 
 Features
 
