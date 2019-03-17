@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10 - TBD
+
+Features
+
+- Allow passing the `'bin` symbol to `Cyc-installation-dir` to return the location of the installation directory for binaries.
+
 ## 0.9.10 - March 5, 2019
 
 Features
