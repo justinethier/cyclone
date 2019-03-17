@@ -174,6 +174,7 @@ runtime.o : runtime.c $(HEADERS)
 	$(CCOMP) -c \
 					-DCYC_INSTALL_DIR=\"$(PREFIX)\" \
 					-DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
+					-DCYC_INSTALL_BIN=\"$(BINDIR)\" \
 					-DCYC_INSTALL_INC=\"$(INCDIR)\" \
 					-DCYC_INSTALL_SLD=\"$(DATADIR)\" \
 					-DCYC_CC_PROG=\"$(CC_PROG)\" \

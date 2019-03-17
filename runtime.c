@@ -2562,6 +2562,12 @@ object Cyc_installation_dir(void *data, object cont, object type)
     make_utf8_string(data, str, buf);
     _return_closcall1(data, cont, &str);
   } else if (Cyc_is_symbol(type) == boolean_t &&
+             strncmp(((symbol) type)->desc, "bin", 5) == 0) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_BIN);
+    make_utf8_string(data, str, buf);
+    _return_closcall1(data, cont, &str);
+  } else if (Cyc_is_symbol(type) == boolean_t &&
              strncmp(((symbol) type)->desc, "inc", 5) == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s", CYC_INSTALL_INC);
