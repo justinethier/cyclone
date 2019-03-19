@@ -201,7 +201,7 @@ The C compiler is invoked to generate machine code for the Scheme module, and to
 ## Garbage Collector
 
 ### Background: Cheney on the MTA
-A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
+A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
 Baker explains how it works:
 
@@ -460,7 +460,7 @@ Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://git
 
 ## References
 
-1. [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+1. [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf), by Henry Baker
 2. [CHICKEN Scheme](http://www.call-cc.org/)
 3. [CHICKEN Scheme - Internals](https://wiki.call-cc.org/Internals)
 4. [Chibi Scheme](https://github.com/ashinn/chibi-scheme)

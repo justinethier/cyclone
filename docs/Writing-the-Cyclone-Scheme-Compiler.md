@@ -72,7 +72,7 @@ During this phase C code is sometimes returned for later use instead of being ou
 The C code is carefully generated so that a Scheme library (`.sld` file) is compiled into a C module. Functions and variables exported from the library become C globals in the generated code.
 
 ## C Runtime
-A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
+A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
 Baker explains how it works:
 
@@ -165,7 +165,7 @@ Want to give Cyclone a try? Install a copy using [cyclone-bootstrap](https://git
 
 ## References
 
-- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf), by Henry Baker
 - [CHICKEN Scheme](http://www.call-cc.org/)
 - [Chibi Scheme](https://github.com/ashinn/chibi-scheme)
 - [Compiling Scheme to C with closure conversion](http://matt.might.net/articles/compiling-scheme-to-c/), by Matt Might
