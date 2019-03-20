@@ -446,6 +446,12 @@
                 `(,(cadr exprs) ,(rename 'tmp)))
                (else
                 `(,(rename 'begin) ,@exprs))))
+            (define (agg-cond tmp-sym lis)
+              (if (null? lis)
+                  #f
+                  `(if (eq? ,tmp-sym (,(rename 'quote) ,(car lis)))
+                       #t
+                       ,(agg-cond tmp-sym (cdr lis)))))
             (define (clause ls)
               (cond
                ((null? ls) #f)
@@ -457,8 +463,10 @@
                   ,(body (cdar ls))
                   ,(clause (cdr ls))))
                (else
-                `(,(rename 'if) (,(rename 'memv) ,(rename 'tmp)
-                                 (,(rename 'quote) ,(caar ls)))
+                `(,(rename 'if) 
+                      ,(agg-cond (rename 'tmp) (caar ls))
+                      ;(,(rename 'memv) ,(rename 'tmp)
+                      ; (,(rename 'quote) ,(caar ls)))
                   ,(body (cdar ls))
                   ,(clause (cdr ls))))))
             `(let ((,(rename 'tmp) ,(cadr expr)))
