@@ -3,6 +3,9 @@
   (scheme base)
   (scheme write))
 
+;; TODO: can we prove that the define is being used like "let" and not "letrec"?
+;; If so, can simplify things a bit, perhaps
+
 ;(define (test)
 ;  (define (fnc x y z) (write (list x y z)))
 ;    (fnc 1 2 3)
@@ -32,11 +35,28 @@
 ;      #f)))
 ; (test %halt))
 
+
+;(define (test)
+;  (letrec ((fnc (lambda (x y z) (write (list x y z)))))
+;    (fnc 1 2 3)
+;    (fnc 1 2 3))
+;  )
+
+
+
 (define (test)
   (let ((fnc (lambda (x y z) (write (list x y z)))))
     (fnc 1 2 3)
     (fnc 1 2 3))
   )
+;"---------------- after macro expansion:"
+; */
+;/* 
+;((define test
+;   (lambda ()
+;     ((lambda (fnc$1) (fnc$1 1 2 3) (fnc$1 1 2 3))
+;      (lambda (x$2 y$3 z$4) (write (list x$2 y$3 z$4))))))
+; (test))
 ;"---------------- after wrap-mutables:"
 ; */
 ;/* 
