@@ -4,7 +4,12 @@
 
 Features
 
+- Speed up `case` expressions by using nested `if` expressions instead of the `memv` primitive to evaluate conditions with more than one constant. The nested expressions have better cache locality and also avoid any additional object allocation or initialization.
 - Allow passing the `'bin` symbol to `Cyc-installation-dir` to return the location of the installation directory for binaries.
+
+Bug Fixes
+
+- Prevent the possibility of a segmentation fault when passing am improper list to the `member` and `assoc` family of functions.
 
 ## 0.9.10 - March 5, 2019
 

@@ -1231,8 +1231,8 @@ object Cyc_write_u8(void *data, object c, object port)
 /* Fast versions of member and assoc */
 object memberp(void *data, object x, list l)
 {
-  Cyc_check_pair_or_null(data, l);
   for (; l != NULL; l = cdr(l)) {
+    Cyc_check_pair_or_null(data, l);
     if (boolean_f != equalp(x, car(l)))
       return l;
   }
@@ -1241,8 +1241,8 @@ object memberp(void *data, object x, list l)
 
 object memqp(void *data, object x, list l)
 {
-  Cyc_check_pair_or_null(data, l);
   for (; l != NULL; l = cdr(l)) {
+    Cyc_check_pair_or_null(data, l);
     if ((x == car(l)))
       return l;
   }
@@ -1254,6 +1254,7 @@ list assq(void *data, object x, list l)
   if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
     return boolean_f;
   for (; (l != NULL); l = cdr(l)) {
+    Cyc_check_pair(data, l);
     list la = car(l);
     Cyc_check_pair(data, la);
     if ((x == car(la)))
@@ -1267,6 +1268,7 @@ list assoc(void *data, object x, list l)
   if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
     return boolean_f;
   for (; (l != NULL); l = cdr(l)) {
+    Cyc_check_pair(data, l);
     list la = car(l);
     Cyc_check_pair(data, la);
     if (boolean_f != equalp(x, car(la)))
