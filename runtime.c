@@ -5325,7 +5325,23 @@ void gc_request_mark_globals(void)
   gc_mark_globals(Cyc_global_variables, global_table);
 }
 
-char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
+/**
+ * @brief Add an object to the move buffer
+ * @param d Mutator data object containing the buffer
+ * @param alloci  Pointer to the next open slot in the buffer
+ * @param obj     Object to add
+ */
+static void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
+{
+  if (*alloci == d->moveBufLen) {
+    gc_thr_grow_move_buffer(d);
+  }
+
+  d->moveBuf[*alloci] = obj;
+  (*alloci)++;
+}
+
+static char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
                          object hp)
 {
   int acquired_lock = 0;

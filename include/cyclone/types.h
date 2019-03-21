@@ -381,7 +381,6 @@ void gc_mark_globals(object globals, object global_table);
 //size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
 gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
-void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
                          long stack_size);
 void gc_thread_data_free(gc_thread_data * thd);
