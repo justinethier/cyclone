@@ -446,6 +446,8 @@
 (define (c-compile-vector exp use-alloca)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
+           (ev-name (mangle (gensym 'e)))
+           (elem-decl (string-append "object * " ev-name " [" (number->string len) "];\n"))
            (addr-op (if use-alloca "" "&"))
            (deref-op (if use-alloca "->" "."))
            (c-make-macro (if use-alloca "alloca_empty_vector" "make_empty_vector"))
@@ -482,10 +484,10 @@
                   (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
+                      elem-decl
                       c-make-macro "(" cvar-name ");"
                       cvar-name deref-op "num_elements = " (number->string len) ";"
-                      cvar-name deref-op "elements = (object *)alloca(sizeof(object) * " 
-                                         (number->string len) ");")))))
+                      cvar-name deref-op "elements = (object *)" ev-name ";")))))
         (loop 0 code))))))
 
 (define (c-compile-bytevector exp use-alloca)
@@ -1578,12 +1580,15 @@
              (car free-vars)
              (list))))
          (create-nclosure (lambda ()
-           (let ((decl (if use-alloca?
-                           (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
-                           (string-append "closureN_type " cv-name ";\n")))
-                 (sep (if use-alloca? "->" ".")))
+           (let* ((decl (if use-alloca?
+                            (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
+                            (string-append "closureN_type " cv-name ";\n")))
+                  (ev-name (mangle (gensym 'e)))
+                  (elem-decl (string-append "object * " ev-name " [" (number->string (length free-vars)) "];\n"))
+                  (sep (if use-alloca? "->" ".")))
              (string-append
                decl
+               elem-decl
                ;; Not ideal, but one more special case to type check call/cc
                (if call/cc?  "Cyc_check_proc(data, f);\n" "")
                cv-name sep "hdr.mark = gc_color_red;\n "
@@ -1592,8 +1597,7 @@
                cv-name sep "fn = (function_type)__lambda_" (number->string lid) ";\n"
                cv-name sep "num_args = " num-args-str ";\n"
                cv-name sep "num_elements = " (number->string (length free-vars)) ";\n"
-               cv-name sep "elements = (object *)alloca(sizeof(object) * " 
-                       (number->string (length free-vars)) ");\n"
+               cv-name sep "elements = (object *)" ev-name ";\n";
                (let loop ((i 0) 
                           (vars free-vars))
                  (if  (null? vars)
