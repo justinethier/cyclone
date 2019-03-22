@@ -447,7 +447,11 @@
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
            (ev-name (mangle (gensym 'e)))
-           (elem-decl (string-append "object * " ev-name " [" (number->string len) "];\n"))
+           (elem-decl 
+             (if use-alloca
+                 (string-append "object *" ev-name " = (object *)alloca(sizeof(object) * " 
+                                              (number->string len) ");")
+                 (string-append "object " ev-name " [" (number->string len) "];\n")))
            (addr-op (if use-alloca "" "&"))
            (deref-op (if use-alloca "->" "."))
            (c-make-macro (if use-alloca "alloca_empty_vector" "make_empty_vector"))
@@ -1584,7 +1588,11 @@
                             (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
                             (string-append "closureN_type " cv-name ";\n")))
                   (ev-name (mangle (gensym 'e)))
-                  (elem-decl (string-append "object * " ev-name " [" (number->string (length free-vars)) "];\n"))
+                  (elem-decl 
+                    (if use-alloca?
+                        (string-append "object *" ev-name " = (object *)alloca(sizeof(object) * " 
+                                                     (number->string (length free-vars)) ");")
+                        (string-append "object " ev-name " [" (number->string (length free-vars)) "];\n")))
                   (sep (if use-alloca? "->" ".")))
              (string-append
                decl
