@@ -5365,7 +5365,7 @@ static char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
   return (char *)hp;
 }
 
-char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
+static char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
 {
   gc_heap_root *heap = thd->heap;
   if (!is_object_type(obj))
