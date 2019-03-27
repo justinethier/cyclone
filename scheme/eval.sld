@@ -1078,7 +1078,7 @@
                           (cadr (_expand binding body-env rename-env local-env local-renamed))
                           binding-body)
                       local-renamed)))
-           (env:define-variable! name macro-val) body-env))
+           (env:define-variable! name macro-val body-env)))
          bindings)
        (_expand body body-env rename-env local-env local-renamed)
        ))
