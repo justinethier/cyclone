@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.10 - TBD
+## 0.10 - March 28, 2019
 
 Features
 
