@@ -384,12 +384,12 @@
        trace 
        cps?))
     ;; Core forms:
-    ((const? exp)       (c-compile-const exp (alloca? ast-id)))
+    ((const? exp)       (c-compile-const exp (alloca? ast-id trace)))
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
-    ((quote? exp)       (c-compile-quote exp (alloca? ast-id)))
+    ((quote? exp)       (c-compile-quote exp (alloca? ast-id trace)))
     ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
 
     ;; IR (2):
@@ -683,15 +683,22 @@
   (set! *use-alloca* v))
 
 ;; Use alloca() for stack allocations?
-(define (alloca? ast-id)
+(define (alloca? ast-id trace)
   (or *use-alloca*
       (let ((adbf:fnc (adb:get/default ast-id #f)))
-        (and adbf:fnc 
-             (adbf:calls-self? adbf:fnc)))))
+        (or
+          ;; Newer logic
+          (and adbf:fnc 
+               (adbf:calls-self? adbf:fnc))
+          ;; Older direct recursive logic 
+          (and
+            (pair? trace)
+            (not (null? (cdr trace)))
+            (adbv:direct-rec-call? (adb:get (cdr trace))))))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
-  (let* ((use-alloca? (alloca? ast-id))
+  (let* ((use-alloca? (alloca? ast-id #f))
          (c-func 
            (if (prim:udf? p)
                (string-append
@@ -1549,7 +1556,7 @@
 (define (c-compile-closure exp append-preamble cont ast-id trace cps?)
   (find-closure-assigned-var-index! (closure->lam exp) (cdr exp))
   (let* ((lam (closure->lam exp))
-         (use-alloca? (alloca? ast-id))
+         (use-alloca? (alloca? ast-id trace))
          (free-vars
            (map
              (lambda (free-var)
