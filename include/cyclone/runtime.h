@@ -543,7 +543,24 @@ object copy2heap(void *data, object obj);
  * @brief Functions for maintaining call history.
  */
 /**@{*/
-void Cyc_st_add(void *data, char *frame);
+
+//void Cyc_st_add(void *data, char *frame); migrated from runtime.c
+/**
+ * @brief Register a frame in the stack trace circular buffer.
+ * @param data Thread data object
+ * @param frame Name of the frame
+ */
+#define Cyc_st_add(data, frame) \
+{ \
+  gc_thread_data *thd = (gc_thread_data *) data; \
+  /* Do not allow recursion to remove older frames */ \
+  if ((char *)frame != thd->stack_prev_frame) { \
+    thd->stack_prev_frame = frame; \
+    thd->stack_traces[thd->stack_trace_idx] = frame; \
+    thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES; \
+  } \
+}
+
 void Cyc_st_print(void *data, FILE * out);
 /**@}*/
 

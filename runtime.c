@@ -316,22 +316,6 @@ const object quote_void = &Cyc_void_symbol;
 /* Stack Traces */
 
 /**
- * @brief Register a frame in the stack trace circular buffer.
- * @param data Thread data object
- * @param frame Name of the frame
- */
-void Cyc_st_add(void *data, char *frame)
-{
-  gc_thread_data *thd = (gc_thread_data *) data;
-  // Do not allow recursion to remove older frames
-  if (frame != thd->stack_prev_frame) {
-    thd->stack_prev_frame = frame;
-    thd->stack_traces[thd->stack_trace_idx] = frame;
-    thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
-  }
-}
-
-/**
  * @brief Print the contents of the given thread's stack trace buffer.
  * @param data Thread data object
  * @param out Output stream
