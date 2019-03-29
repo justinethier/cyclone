@@ -231,12 +231,13 @@
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
       "#define closcall" n "(td, clo" args ") \\\n"
-        (wrap (string-append "if (type_is_pair_prim(clo)) { \\\n"
-                             "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
-                             "}"))
-        (wrap " else { \\\n")
+        ;(wrap (string-append "if (type_is_pair_prim(clo)) { \\\n"
+        ;                     "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
+        ;                     "}"))
+        ;(wrap " else { \\\n")
         "   ((clo)->fn)(td, " n ", clo" args ")"
-        (wrap ";\\\n}"))))
+        ;(wrap ";\\\n}")
+        )))
 
 (define (c-macro-n-prefix n prefix)
   (if (> n 0)

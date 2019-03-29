@@ -1325,13 +1325,13 @@ typedef closure0_type *macro;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  const char *desc;
   function_type fn;
+  const char *desc;
 } primitive_type;
 typedef primitive_type *primitive;
 
 #define defprimitive(name, desc, fnc) \
-static primitive_type name##_primitive = {primitive_tag, #desc, fnc}; \
+static primitive_type name##_primitive = {primitive_tag, fnc, #desc}; \
 static const object primitive_##name = &name##_primitive
 
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
