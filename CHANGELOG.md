@@ -2,6 +2,10 @@
 
 ## 0.11 - TBD
 
+Features
+
+- Improve performance of compiled code a bit by inlining code that tracks call history instead of using a dedicated function in the runtime.
+
 ## 0.10 - March 28, 2019
 
 Features
