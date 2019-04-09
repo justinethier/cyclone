@@ -13,6 +13,10 @@ ifneq ($(OS),FreeBSD)
 LIBS += -ldl
 endif
 
+LIBRARY_OUTPUT_FILE = libcyclone.a
+CREATE_LIBRARY_COMMAND = $(AR)
+CREATE_LIBRARY_FLAGS = rcs
+
 # Compiler options
 CFLAGS       ?= -O2 -fPIC -Wall -march=armv6k -Iinclude
 COMP_CFLAGS  ?= -O2 -fPIC -Wall -march=armv6k -I$(PREFIX)/include -L$(PREFIX)/lib
