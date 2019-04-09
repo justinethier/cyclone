@@ -5,6 +5,7 @@
 Features
 
 - Improve performance of compiled code a bit by inlining code that tracks call history instead of using a dedicated function in the runtime.
+- Updated build instructions for Mac, thanks Adam Feuer!
 
 ## 0.10 - March 28, 2019
 
