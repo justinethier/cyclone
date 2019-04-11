@@ -11,7 +11,7 @@
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme eval)
-          ;(scheme write)
+          (scheme write)
           (scheme cyclone util)
           (scheme cyclone ast)
           (scheme cyclone primitives)
@@ -716,7 +716,7 @@
                               ,(analyze2 (if->else exp))))
         ; Application:
         ((app? exp)
-         ;(trace:info `(DEBUG ,exp ,(validate:num-function-args exp)))
+         (validate:num-function-args exp) ;; Extra validation
          (for-each (lambda (e) (analyze2 e)) exp))
         (else #f)))
 
@@ -2385,7 +2385,7 @@
 
 ;; Analysis - validation section
 
-;; Does given symbol define a procedure?
+;; FUTURE (?): Does given symbol define a procedure?
 ;(define (avld:procedure? sym) #f)
 
 ;; Does the given function call pass enough arguments?
@@ -2400,11 +2400,23 @@
              ((ast:lambda? lam))
              (formals-type (ast:lambda-formals-type lam))
              ((equal? 'args:fixed formals-type)) ;; Could validate fixed-with-varargs, too
-             (argc (length (ast:lambda-args lam)))
-            )
-     (cond
-      ((not (= argc (- (length ast) 1)))
-       'error-not-enough-args))
-    ))
+             (expected-argc (length (ast:lambda-args lam)))
+             (argc (- (length ast) 1)) )
+     (when (not (= argc expected-argc))
+       (compiler-error 
+        "Expected "
+        (number->string expected-argc)
+        " arguments to "
+        (symbol->string (car ast))
+        " but received "
+        (number->string argc))) ))
+
+;; Declare a compiler error and quit
+;; Preferable to (error) since a stack trace is meaningless here.
+;; Ideally want to supplement this with original line number data and such.
+(define (compiler-error . strs)
+  (display (apply string-append strs) (current-error-port))
+  (newline (current-error-port))
+  (exit 1))
 
 ))
