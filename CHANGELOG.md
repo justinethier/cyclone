@@ -4,8 +4,13 @@
 
 Features
 
+- During compilation validate the number of arguments passed to locally-defined functions.
 - Improve performance of compiled code a bit by inlining code that tracks call history instead of using a dedicated function in the runtime.
 - Updated build instructions for Mac, thanks Adam Feuer!
+
+Bug Fixes
+
+- Allow `exit` to return an integer value as the return code to the OS.
 
 ## 0.10 - March 28, 2019
 
