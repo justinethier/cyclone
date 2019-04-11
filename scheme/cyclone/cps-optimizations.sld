@@ -2391,11 +2391,15 @@
 ;; Does the given function call pass enough arguments?
 (define (validate:num-function-args ast)
   (and-let* (((app? ast))
+             ;; Prims are checked elsewhere
              ((not (prim? (car ast))))
              ((ref? (car ast)))
+             ;; Do not validate macros
+             ((not (env:lookup (car ast) (macro:get-env) #f)))
              (var (adb:get/default (car ast) #f))
              (lam* (adbv:assigned-value var))
              ((pair? lam*))
+             ;; Assigned value is boxed in a cell, extract it
              (lam (car lam*))
              ((ast:lambda? lam))
              (formals-type (ast:lambda-formals-type lam))
