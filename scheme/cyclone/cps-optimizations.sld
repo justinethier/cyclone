@@ -48,6 +48,8 @@
       ;; Analysis - well-known lambdas
       well-known-lambda
       analyze:find-known-lambdas
+      ;; Analysis - validation
+      validate:num-function-args
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -714,6 +716,7 @@
                               ,(analyze2 (if->else exp))))
         ; Application:
         ((app? exp)
+         ;(trace:info `(DEBUG ,exp ,(validate:num-function-args exp)))
          (for-each (lambda (e) (analyze2 e)) exp))
         (else #f)))
 
@@ -2378,5 +2381,30 @@
   ;; well-known lambda's by var references to them.
   (set! *well-known-lambda-sym-lookup-tbl* candidates)
 )
+
+
+;; Analysis - validation section
+
+;; Does given symbol define a procedure?
+;(define (avld:procedure? sym) #f)
+
+;; Does the given function call pass enough arguments?
+(define (validate:num-function-args ast)
+  (and-let* (((app? ast))
+             ((not (prim? (car ast))))
+             ((ref? (car ast)))
+             (var (adb:get/default (car ast) #f))
+             (lam* (adbv:assigned-value var))
+             ((pair? lam*))
+             (lam (car lam*))
+             ((ast:lambda? lam))
+             (formals-type (ast:lambda-formals-type lam))
+             ((equal? 'args:fixed formals-type)) ;; Could validate fixed-with-varargs, too
+             (argc (length (ast:lambda-args lam)))
+            )
+     (cond
+      ((not (= argc (- (length ast) 1)))
+       'error-not-enough-args))
+    ))
 
 ))
