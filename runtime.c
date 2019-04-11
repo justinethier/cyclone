@@ -3122,6 +3122,10 @@ void Cyc_halt(object obj)
 #if DEBUG_SHOW_DIAG
   gc_print_stats(Cyc_heap);
 #endif
+  if (obj_is_int(obj)) {
+    exit(obj_obj2int(obj));
+  }
+
   exit(0);
 }
 
