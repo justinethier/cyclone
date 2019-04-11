@@ -2403,6 +2403,8 @@
              (expected-argc (length (ast:lambda-args lam)))
              (argc (- (length ast) 1)) )
      (when (not (= argc expected-argc))
+       (compiler-msg "Compiler Error: ")
+       (compiler-msg ast)
        (compiler-error 
         "Expected "
         (number->string expected-argc)
@@ -2418,5 +2420,22 @@
   (display (apply string-append strs) (current-error-port))
   (newline (current-error-port))
   (exit 1))
+
+;; Display a compilation message to the user
+(define (compiler-msg . sexp)
+  (display (apply sexp->string sexp) (current-error-port))
+  (newline (current-error-port)))
+
+;; Convert given scheme expressions to a string, via (display)
+;; TODO: move to util module
+(define (sexp->string . sexps)
+  (let ((p (open-output-string)))
+    (for-each
+      (lambda (sexp)
+        (apply display (cons sexp (list p))))
+      sexps)
+    (let ((result (get-output-string p)))
+      (close-port p)
+      result)))
 
 ))
