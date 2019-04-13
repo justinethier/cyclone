@@ -184,7 +184,8 @@ runtime.o : runtime.c $(HEADERS)
 					$< -o $@
 
 libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
-	$(AR) rcs $@ $^ 
+	$(CREATE_LIBRARY_COMMAND) $(CREATE_LIBRARY_FLAGS) $@ $&
+	$(RANLIB_COMMAND)
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library
