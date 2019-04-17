@@ -30,8 +30,8 @@ Getting Started
 
     Mac users wanting to use Homebrew can do the following:
     - If Homebrew is not already installed: follow the instructions at https://brew.sh/ to install the homebrew package manager. 
-    - brew tap adamfeuer/cyclone
-    - brew install adamfeuer/cyclone/cyclone
+    - brew tap cyclone-scheme/cyclone
+    - brew install cyclone-scheme/cyclone/cyclone
 
     Arch Linux users can install using the AUR: https://aur.archlinux.org/packages/cyclone-scheme/
 
