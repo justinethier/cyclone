@@ -26,7 +26,10 @@ Features
 Getting Started
 ---------------
 
-1. To install Cyclone on your machine for the first time use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, and Windows (via MSYS).
+1. To install Cyclone on your machine for the first time on Linux and Windows, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, and Windows (via MSYS). Mac users wanting to use Homebrew can do the following:
+  - If Homebrew is not already installed: follow the instructions at https://brew.sh/ to install the homebrew package manager. 
+  - brew tap adamfeuer/cyclone
+  - brew install adamfeuer/cyclone/cyclone
 
 2. After installing you can run the `cyclone` command to compile a single Scheme file:
 
