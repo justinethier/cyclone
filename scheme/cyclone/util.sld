@@ -253,26 +253,6 @@
         (cons lst '())
         (cons (car lst) (loop (cdr lst))))))
 
-(define (define-lambda? exp)
-  (let ((var (cadr exp)))
-    (or
-      ;; Standard function
-      (and (list? var) 
-           (> (length var) 0)
-           (symbol? (car var)))
-      ;; Varargs function
-      (and (pair? var)
-           (symbol? (car var))))))
-
-(define (define->lambda exp)
-  (cond
-    ((define-lambda? exp)
-     (let ((var (caadr exp))
-           (args (cdadr exp))
-           (body (cddr exp)))
-       `(define ,var (lambda ,args ,@body))))
-    (else exp)))
-
 ; lambda->formals : lambda-exp -> list[symbol]
 (define (lambda->formals exp)
   (cadr exp))
