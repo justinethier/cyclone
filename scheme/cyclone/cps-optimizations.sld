@@ -2388,14 +2388,22 @@
 ;; FUTURE (?): Does given symbol define a procedure?
 ;(define (avld:procedure? sym) #f)
 
+;; Predicate: Does given symbol refer to a macro?
+(define (is-macro? sym)
+ (and-let* ((val (env:lookup sym (macro:get-env) #f)))
+   (or (tagged-list? 'macro val)
+       (Cyc-macro? val))))
+
 ;; Does the given function call pass enough arguments?
 (define (validate:num-function-args ast)
+  ;;(trace:error `(validate:num-function-args ,(car ast) ,ast ,(env:lookup (car ast) (macro:get-env) #f)))
   (and-let* (((app? ast))
              ;; Prims are checked elsewhere
              ((not (prim? (car ast))))
              ((ref? (car ast)))
              ;; Do not validate macros
-             ((not (env:lookup (car ast) (macro:get-env) #f)))
+             ((not (is-macro? (car ast))))
+             ;; Extract lambda definition
              (var (adb:get/default (car ast) #f))
              (lam* (adbv:assigned-value var))
              ((pair? lam*))
