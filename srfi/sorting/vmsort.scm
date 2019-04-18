@@ -104,7 +104,7 @@
   (call-with-values
    (lambda () (vector-start+end v maybe-args))
    (lambda (start end)
-     (let ((ans (vector-copy v start end)))
+     (let ((ans (r7rs-vector-copy v start end)))
        (vector-merge-sort! < ans)
        ans))))
 
@@ -211,7 +211,7 @@
 			    temp v (not v=v0?))))))))))
        (lambda (ignored-len ignored-ansvec ansvec=v0?)
 	 (if (not ansvec=v0?)
-             (vector-copy! v0 l temp0 l r))))))
+             (r7rs-vector-copy! v0 l temp0 l r))))))
 
 
 ;;; Copyright

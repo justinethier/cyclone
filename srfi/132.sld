@@ -1,5 +1,15 @@
 (define-library (srfi 132)
-  (import (scheme base))
+
+
+
+  (import (except (scheme base) vector-copy vector-copy!)
+          (rename (only (scheme base) vector-copy vector-copy! vector-fill!)
+                  (vector-copy  r7rs-vector-copy)
+                  (vector-copy! r7rs-vector-copy!)
+                  (vector-fill! r7rs-vector-fill!)
+                  ))
+
+ ; (import (scheme base))
   (import (scheme cxr))
   (export list-sorted? vector-sorted? list-merge vector-merge list-sort vector-sort
           list-stable-sort vector-stable-sort list-merge! vector-merge! list-sort! vector-sort!
