@@ -237,7 +237,7 @@ struct gc_heap_root_t {
  */
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned char mark;           // mark bits (only need 2)
+  unsigned char mark;           // mark bits 
   unsigned char grayed;         // stack object to be grayed when moved to heap
 };
 
