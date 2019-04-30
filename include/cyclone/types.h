@@ -237,8 +237,9 @@ struct gc_heap_root_t {
  */
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned char mark;           // mark bits 
-  unsigned char grayed;         // stack object to be grayed when moved to heap
+  unsigned char mark;      // mark bits 
+  unsigned char grayed;    // stack object to be grayed when moved to heap
+  unsigned char immutable; // Flag normally mutable obj (EG: pair) as read-only
 };
 
 /** Get an object's `mark` value */
@@ -246,6 +247,9 @@ struct gc_header_type_t {
 
 /** Get an object's `grayed` value */
 #define grayed(x) (((list) x)->hdr.grayed)
+
+//** Access an object's "immutable" field */
+#define immutable(x) (((list) x)->hdr.immutable)
 
 /** Enums for tri-color marking */
 typedef enum { STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2
