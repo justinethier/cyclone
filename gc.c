@@ -797,6 +797,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case pair_tag:{
       list hp = dest;
       hp->hdr.mark = thd->gc_alloc_color;
+      hp->hdr.immutable = immutable(obj);
       type_of(hp) = pair_tag;
       car(hp) = car(obj);
       cdr(hp) = cdr(obj);
@@ -808,6 +809,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       s = ((char *)hp) + sizeof(string_type);
       memcpy(s, string_str(obj), string_len(obj) + 1);
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = string_tag;
       string_num_cp(hp) = string_num_cp(obj);
       string_len(hp) = string_len(obj);
@@ -824,6 +826,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case vector_tag:{
       vector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = vector_tag;
       hp->num_elements = ((vector) obj)->num_elements;
       hp->elements = (object *) (((char *)hp) + sizeof(vector_type));
@@ -833,6 +836,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case bytevector_tag:{
       bytevector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = bytevector_tag;
       hp->len = ((bytevector) obj)->len;
       hp->data = (((char *)hp) + sizeof(bytevector_type));
@@ -911,6 +915,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case c_opaque_tag:{
       c_opaque_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = c_opaque_tag;
       hp->ptr = ((c_opaque_type *) obj)->ptr;
       return (char *)hp;
