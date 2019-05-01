@@ -1020,6 +1020,7 @@
                        &heap_grown);
           ((string_type *) s)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
           ((string_type *) s)->hdr.grayed = 0;
+          ((string_type *) s)->hdr.immutable = 0;
           ((string_type *) s)->tag = string_tag; 
           ((string_type *) s)->len = len;
           ((string_type *) s)->num_cp = num_cp;
@@ -1028,6 +1029,7 @@
           s = alloca(sizeof(string_type));
           ((string_type *)s)->hdr.mark = gc_color_red; 
           ((string_type *)s)->hdr.grayed = 0;
+          ((string_type *)s)->hdr.immutable = 0;
           ((string_type *)s)->tag = string_tag; 
           ((string_type *)s)->len = len;
           ((string_type *)s)->num_cp = num_cp;
