@@ -72,6 +72,11 @@ void Cyc_invalid_type_error(void *data, int tag, object found)
   Cyc_rt_raise2(data, buf, found);
 }
 
+void Cyc_immutable_obj_error(void *data, object obj)
+{
+  Cyc_rt_raise2(data, "Unable to modify immutable object ", obj);
+}
+
 void Cyc_check_obj(void *data, int tag, object obj)
 {
   if (!is_object_type(obj)) {
@@ -1869,8 +1874,10 @@ object Cyc_set_cell(void *data, object l, object val)
 
 object Cyc_set_car(void *data, object l, object val)
 {
-  if (Cyc_is_pair(l) == boolean_f)
+  if (Cyc_is_pair(l) == boolean_f) {
     Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
   gc_mut_update((gc_thread_data *) data, car(l), val);
   car(l) = val;
   add_mutation(data, l, -1, val);
@@ -1879,8 +1886,10 @@ object Cyc_set_car(void *data, object l, object val)
 
 object Cyc_set_cdr(void *data, object l, object val)
 {
-  if (Cyc_is_pair(l) == boolean_f)
+  if (Cyc_is_pair(l) == boolean_f) {
     Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
   cdr(l) = val;
   add_mutation(data, l, -1, val);
@@ -1892,6 +1901,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj)
   int idx;
   Cyc_check_vec(data, v);
   Cyc_check_fixnum(data, k);
+  Cyc_verify_mutable(data, v);
   idx = unbox_number(k);
 
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
@@ -2352,6 +2362,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
 
   Cyc_check_str(data, str);
   Cyc_check_fixnum(data, k);
+  Cyc_verify_mutable(data, str);
 
   if (boolean_t != Cyc_is_char(chr)) {
     Cyc_rt_raise2(data, "Expected char but received", chr);
@@ -3011,6 +3022,7 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b)
   Cyc_check_bvec(data, bv);
   Cyc_check_fixnum(data, k);
   Cyc_check_fixnum(data, b);
+  Cyc_verify_mutable(data, bv);
 
   buf = ((bytevector) bv)->data;
   idx = unbox_number(k);
