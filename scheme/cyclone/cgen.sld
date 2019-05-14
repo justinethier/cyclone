@@ -407,19 +407,29 @@
 
 (define (c-compile-quote qexp use-alloca)
   (let ((exp (cadr qexp)))
-    (c-compile-scalars exp use-alloca)))
+    (c-compile-scalars exp use-alloca #t)))
 
-(define (c-compile-scalars args use-alloca)
+(define (c-compile-scalars args use-alloca quoted)
   (letrec (
     (addr-op (if use-alloca "" "&"))
     ;; (deref-op (if use-alloca "->" "."))
     (c-make-macro (if use-alloca "alloca_pair" "make_pair"))
+    (set-mutability
+      (lambda (cvar)
+        (cond
+          ((and quoted use-alloca)
+           (string-append cvar "->hdr.immutable = 1;"))
+          (quoted ;; no alloca
+           (string-append cvar ".hdr.immutable = 1;"))
+          (else "")))) ;; Mutable (default)
     (num-args 0)
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-         (string-append c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");")
-          (append (c:allocs a) (c:allocs b)))))
+         (string-append 
+           c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");"
+           (set-mutability cvar))
+         (append (c:allocs a) (c:allocs b)))))
     (_c-compile-scalars 
      (lambda (args)
        (cond
@@ -586,7 +596,7 @@
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
-     (c-compile-scalars exp use-alloca))
+     (c-compile-scalars exp use-alloca #f)) ;; TODO: quoted should be an input param
     ((vector? exp)
      (c-compile-vector exp use-alloca))
     ((bytevector? exp)
