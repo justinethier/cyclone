@@ -425,7 +425,7 @@
      (string-append cvar ".hdr.immutable = 1;"))
     (else ""))) ;; Mutable (default), no need to set anything
 
-(define (c-compile-scalars args use-alloca quoted)
+(define (c-compile-scalars args use-alloca immutable)
   (letrec (
     (addr-op (if use-alloca "" "&"))
     ;; (deref-op (if use-alloca "->" "."))
@@ -436,7 +436,7 @@
         (c-code/vars
          (string-append 
            c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");"
-           (c-set-immutable-field cvar use-alloca quoted))
+           (c-set-immutable-field cvar use-alloca immutable))
          (append (c:allocs a) (c:allocs b)))))
     (_c-compile-scalars 
      (lambda (args)
@@ -449,7 +449,7 @@
            (let* ((cvar-name (mangle (gensym 'c)))
                   (cell (create-cons
                           cvar-name
-                          (c-compile-const (car args) use-alloca) 
+                          (c-compile-const (car args) use-alloca immutable) 
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
@@ -599,12 +599,16 @@
 ;; Typically this function is used to compile constant values such as
 ;; a single number, boolean, etc. However, it can be passed a quoted
 ;; item such as a list, to compile as a literal.
-(define (c-compile-const exp use-alloca)
+;;
+;; exp - Expression to compile
+;; use-alloca - Should C objects be dynamically allocated on the stack?
+;; immutable - Should C object be flagged as immutable?
+(define (c-compile-const exp use-alloca immutable)
   (cond
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
-     (c-compile-scalars exp use-alloca #f)) ;; TODO: quoted should be an input param
+     (c-compile-scalars exp use-alloca immutable))
     ((vector? exp)
      (c-compile-vector exp use-alloca))
     ((bytevector? exp)
