@@ -409,26 +409,34 @@
   (let ((exp (cadr qexp)))
     (c-compile-scalars exp use-alloca #t)))
 
+;; Emit code to set an object's immutable field
+;;
+;; Params:
+;;  cvar - String - Name of C variable containing the object.
+;;  use-alloca - Boolean - Is C var dynamically allocated?
+;;  immutable - Boolean - Is object immutable?
+;;
+;; Returns a string containing generated C code
+(define (c-set-immutable-field cvar use-alloca immutable)
+  (cond
+    ((and immutable use-alloca)
+     (string-append cvar "->hdr.immutable = 1;"))
+    (immutable ;; no alloca
+     (string-append cvar ".hdr.immutable = 1;"))
+    (else ""))) ;; Mutable (default), no need to set anything
+
 (define (c-compile-scalars args use-alloca quoted)
   (letrec (
     (addr-op (if use-alloca "" "&"))
     ;; (deref-op (if use-alloca "->" "."))
     (c-make-macro (if use-alloca "alloca_pair" "make_pair"))
-    (set-mutability
-      (lambda (cvar)
-        (cond
-          ((and quoted use-alloca)
-           (string-append cvar "->hdr.immutable = 1;"))
-          (quoted ;; no alloca
-           (string-append cvar ".hdr.immutable = 1;"))
-          (else "")))) ;; Mutable (default)
     (num-args 0)
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
          (string-append 
            c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");"
-           (set-mutability cvar))
+           (c-set-immutable-field cvar use-alloca quoted))
          (append (c:allocs a) (c:allocs b)))))
     (_c-compile-scalars 
      (lambda (args)
