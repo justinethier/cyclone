@@ -384,7 +384,7 @@
        trace 
        cps?))
     ;; Core forms:
-    ((const? exp)       (c-compile-const exp (alloca? ast-id trace)))
+    ((const? exp)       (c-compile-const exp (alloca? ast-id trace) #f)) ;; TODO: OK to hardcode immutable to false here??
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
      (c-code (string-append "primitive_" (mangle exp))))
@@ -444,7 +444,7 @@
         ((null? args)
            (c-code "NULL"))
         ((not (pair? args))
-         (c-compile-const args use-alloca))
+         (c-compile-const args use-alloca immutable))
         (else
            (let* ((cvar-name (mangle (gensym 'c)))
                   (cell (create-cons
@@ -461,7 +461,7 @@
     (_c-compile-scalars args) 
     num-args)))
 
-(define (c-compile-vector exp use-alloca)
+(define (c-compile-vector exp use-alloca immutable)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
            (ev-name (mangle (gensym 'e)))
@@ -478,7 +478,7 @@
             (lambda (i code)
               (if (= i len)
                 code
-                (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca)))
+                (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca immutable)))
                   (loop 
                     (+ i 1)
                     (c-code/vars
@@ -499,7 +499,8 @@
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                c-make-macro "(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"
+                (c-set-immutable-field cvar-name use-alloca immutable)))))
       (else
         (let ((code
                 (c-code/vars
@@ -509,7 +510,9 @@
                       elem-decl
                       c-make-macro "(" cvar-name ");"
                       cvar-name deref-op "num_elements = " (number->string len) ";"
-                      cvar-name deref-op "elements = (object *)" ev-name ";")))))
+                      cvar-name deref-op "elements = (object *)" ev-name ";"
+                      (c-set-immutable-field cvar-name use-alloca immutable)
+                      )))))
         (loop 0 code))))))
 
 (define (c-compile-bytevector exp use-alloca)
@@ -610,7 +613,7 @@
     ((pair? exp)
      (c-compile-scalars exp use-alloca immutable))
     ((vector? exp)
-     (c-compile-vector exp use-alloca))
+     (c-compile-vector exp use-alloca immutable))
     ((bytevector? exp)
      (c-compile-bytevector exp use-alloca))
     ((bignum? exp)
