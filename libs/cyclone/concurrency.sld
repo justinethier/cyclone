@@ -9,8 +9,25 @@
 ;
 ;what role do atomics play? how does that affect GC?
  (import
+   (scheme base)
  )
  (export
+   immutable?
  )
- (begin)
+ (begin
+   (define (dummy) #f)
+   (define-c immutable?
+     "(void *data, int argc, closure _, object k, object obj)"
+     "object result = boolean_f;
+      if (is_object_type(obj) &&
+          (type_of(obj) == pair_tag ||
+           type_of(obj) == vector_tag ||
+           type_of(obj) == bytevector_tag ||
+           type_of(obj) == string_tag
+          ) &&
+          immutable(obj) ) {
+        result = boolean_t;
+      }
+      return_closcall1(data, k, result); ")
+ )
 )
