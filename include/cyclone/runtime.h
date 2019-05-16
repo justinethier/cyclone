@@ -134,6 +134,7 @@ object Cyc_global_set(void *thd, object * glo, object value);
         } \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
+        var[i].hdr.immutable = 0; \
         var[i].tag = pair_tag; \
         var[i].pair_car = tmp; \
         var[i].pair_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
