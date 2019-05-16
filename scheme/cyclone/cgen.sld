@@ -421,7 +421,7 @@
   (cond
     ((and immutable use-alloca)
      (string-append cvar "->hdr.immutable = 1;"))
-    (immutable ;; no alloca
+    ((and immutable (not use-alloca))
      (string-append cvar ".hdr.immutable = 1;"))
     (else ""))) ;; Mutable (default), no need to set anything
 
@@ -586,7 +586,10 @@
               ";\n"
               "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\n"
               "((string_type *)" cvar-name ")->str[" blen "] = '\\0';"
-              (c-set-immutable-field cvar-name use-alloca immutable)
+              (c-set-immutable-field 
+                (string-append
+                  "((string_type *)" cvar-name ")")
+                use-alloca immutable)
             )))))
       (else
         (c-code/vars
