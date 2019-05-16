@@ -515,7 +515,7 @@
                       )))))
         (loop 0 code))))))
 
-(define (c-compile-bytevector exp use-alloca)
+(define (c-compile-bytevector exp use-alloca immutable)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (bytevector-length exp))
            (addr-op (if use-alloca "" "&"))
@@ -546,7 +546,9 @@
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                c-make-macro "(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"
+                (c-set-immutable-field cvar-name use-alloca immutable)
+              ))))
       (else
         (let ((code
                 (c-code/vars
@@ -556,10 +558,12 @@
                       c-make-macro "(" cvar-name ");"
                       cvar-name deref-op "len = " (number->string len) ";"
                       cvar-name deref-op "data = alloca(sizeof(char) * " 
-                                         (number->string len) ");")))))
+                                         (number->string len) ");"
+                      (c-set-immutable-field cvar-name use-alloca immutable)
+                    )))))
         (loop 0 code))))))
 
-(define (c-compile-string exp use-alloca)
+(define (c-compile-string exp use-alloca immutable)
   (let ((cvar-name (mangle (gensym 'c))))
     (cond
       (use-alloca
@@ -581,7 +585,9 @@
               (->cstr exp) 
               ";\n"
               "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\n"
-              "((string_type *)" cvar-name ")->str[" blen "] = '\\0';")))))
+              "((string_type *)" cvar-name ")->str[" blen "] = '\\0';"
+              (c-set-immutable-field cvar-name use-alloca immutable)
+            )))))
       (else
         (c-code/vars
           (string-append "&" cvar-name) ; Code is just the variable name
@@ -595,7 +601,9 @@
               (number->string (string-byte-length exp))
               ", " 
               (number->string (string-length exp))
-              ");")))))))
+              ");"
+              (c-set-immutable-field cvar-name use-alloca immutable)
+            )))))))
 
 ;; c-compile-const : const-exp -> c-pair
 ;;
@@ -615,7 +623,7 @@
     ((vector? exp)
      (c-compile-vector exp use-alloca immutable))
     ((bytevector? exp)
-     (c-compile-bytevector exp use-alloca))
+     (c-compile-bytevector exp use-alloca immutable))
     ((bignum? exp)
       (let ((cvar-name (mangle (gensym 'c)))
             (num2str (cond
@@ -673,7 +681,7 @@
      (c-code (string-append "obj_char2obj(" 
                (number->string (char->integer exp)) ")")))
     ((string? exp)
-     (c-compile-string exp use-alloca))
+     (c-compile-string exp use-alloca immutable))
 ;TODO: not good enough, need to store new symbols in a table so they can
 ;be inserted into the C program
     ((symbol? exp)
