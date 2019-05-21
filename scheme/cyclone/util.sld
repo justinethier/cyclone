@@ -76,6 +76,9 @@
     ;; Inlines (TBD, this may move)
     define-c-inline?
     define-c->inline-var
+    ;; Immutable objects
+    immutable?
+    Cyc-set-immutable!
     ;; String functions
     string-join
     string-split
@@ -750,4 +753,39 @@
                     (loop input (add current output) '()))
                 (loop input output (cons char current))))))))
 
-    ))
+;; Immutable Object section
+
+;; Predicate - is the given object immutable?
+(define-c immutable?
+  "(void *data, int argc, closure _, object k, object obj)"
+  "object result = boolean_t;
+   if (is_object_type(obj) &&
+       (type_of(obj) == pair_tag ||
+        type_of(obj) == vector_tag ||
+        type_of(obj) == bytevector_tag ||
+        type_of(obj) == string_tag
+       ) &&
+       !immutable(obj) ) {
+     result = boolean_f;
+   }
+   return_closcall1(data, k, result); ")
+
+;; Internal helper function - set immutable field on a single obj
+(define-c _Cyc-set-immutable!
+   "(void *data, int argc, closure _, object k, object obj, object val)"
+   "object result = boolean_f;
+    if (is_object_type(obj)) {
+      immutable(obj) = (val == boolean_f) ? 0 : 1;
+      result = boolean_t;
+    }
+    return_closcall1(data, k, result); ")
+
+;; Recursively update the immutable field for the given object
+(define (Cyc-set-immutable! obj val)
+  (_Cyc-set-immutable! obj val)
+  (cond
+    ((pair? obj) (for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))
+    ((vector? obj) (vector-for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))))
+;; END immutables
+
+))
