@@ -434,7 +434,7 @@
 
 (define (analyze-quoted exp)
   (let ((qval (cadr exp)))
-    (Cyc-set-immutable! qval) ;; TODO: OK? Don't want to modify a persistent object
+    (Cyc-set-immutable! qval #t) ;; TODO: OK? Don't want to modify a persistent object
     (lambda (env) qval)))
 
 (define-c assoc-cdr
