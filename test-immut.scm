@@ -2,17 +2,18 @@
 (import (scheme base) (scheme write))
 
 
+   ;; TODO: make #t respect object type
    (define-c immutable?
      "(void *data, int argc, closure _, object k, object obj)"
-     "object result = boolean_f;
+     "object result = boolean_t;
       if (is_object_type(obj) &&
           (type_of(obj) == pair_tag ||
            type_of(obj) == vector_tag ||
            type_of(obj) == bytevector_tag ||
            type_of(obj) == string_tag
           ) &&
-          immutable(obj) ) {
-        result = boolean_t;
+          !immutable(obj) ) {
+        result = boolean_f;
       }
       return_closcall1(data, k, result); ")
 
@@ -28,10 +29,11 @@
 (define (Cyc-set-immutable! obj val)
   (_Cyc-set-immutable! obj val)
   (cond
-    ((pair? obj) (map (lambda (o) (_Cyc-set-immutable! o val)) obj))
-    ((vector? obj) (vector-map (lambda (o) (_Cyc-set-immutable! o val)) obj))))
+    ((pair? obj) (for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))
+    ((vector? obj) (vector-for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))))
 
 (define lis '(1 2 3))
+(define vec '#((1) 2 3))
 
 (write
   (list
@@ -42,5 +44,16 @@
     (immutable? (car lis))
     (set-car! lis 'a)
     lis
+))
+(newline)
+(write
+  (list
+    (immutable? vec) 
+    (immutable? (vector-ref vec 0))
+    ;(Cyc-set-immutable! vec #f)
+    (immutable? vec) 
+    (immutable? (vector-ref vec 0))
+    (vector-set! vec 0 'x)
+    vec
   )
 )
