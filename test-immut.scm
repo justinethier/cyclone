@@ -25,13 +25,19 @@
     }
     return_closcall1(data, k, result); ")
 
+(define (Cyc-set-immutable! obj val)
+  (_Cyc-set-immutable! obj val)
+  (cond
+    ((pair? obj) (map (lambda (o) (_Cyc-set-immutable! o val)) obj))
+    ((vector? obj) (vector-map (lambda (o) (_Cyc-set-immutable! o val)) obj))))
+
 (define lis '(1 2 3))
 
 (write
   (list
     (immutable? lis)
     (immutable? (car lis))
-    (_Cyc-set-immutable! lis #f)
+    (Cyc-set-immutable! lis #f)
     (immutable? lis)
     (immutable? (car lis))
     (set-car! lis 'a)
