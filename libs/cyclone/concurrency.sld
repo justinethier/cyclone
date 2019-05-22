@@ -8,6 +8,13 @@
 ;what objects to support - atomics, refs, ??
 ;
 ;what role do atomics play? how does that affect GC?
+
+;; Some additional notes:
+;; Add atomic bit field to cvar, maybe even an atomic type field too (?)
+;; 
+;; (Make-shared exprs)
+;; Safe way to allocate vars on heap. Tbd if an obj with pointers always necessitates a minor GC 
+;;
  (import
    (scheme base)
  )
