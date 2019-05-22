@@ -784,7 +784,9 @@
 (define (Cyc-set-immutable! obj val)
   (_Cyc-set-immutable! obj val)
   (cond
-    ((pair? obj) (for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))
+    ((pair? obj) 
+     (_Cyc-set-immutable! (car obj) val)
+     (_Cyc-set-immutable! (cdr obj) val))
     ((vector? obj) (vector-for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))))
 ;; END immutables
 

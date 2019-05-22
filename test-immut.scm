@@ -29,7 +29,9 @@
 (define (Cyc-set-immutable! obj val)
   (_Cyc-set-immutable! obj val)
   (cond
-    ((pair? obj) (for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))
+    ((pair? obj) 
+     (_Cyc-set-immutable! (car obj) val)
+     (_Cyc-set-immutable! (cdr obj) val))
     ((vector? obj) (vector-for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))))
 
 (define lis '(1 2 3))
@@ -50,7 +52,7 @@
   (list
     (immutable? vec) 
     (immutable? (vector-ref vec 0))
-    ;(Cyc-set-immutable! vec #f)
+    (Cyc-set-immutable! vec #f)
     (immutable? vec) 
     (immutable? (vector-ref vec 0))
     (vector-set! vec 0 'x)
