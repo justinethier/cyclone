@@ -196,7 +196,7 @@ full :
 	make clean ; make && make test && make bootstrap && cd ../cyclone-bootstrap && make clean && ./install.sh
 
 bench :
-	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone && grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
+	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone ; grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
 
 bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
