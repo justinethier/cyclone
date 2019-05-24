@@ -15,7 +15,7 @@ Section | Status | Comments
 3.1 Variables, syntactic keywords, and regions | Yes |
 3.2 Disjointness of types | Yes |
 3.3 External representations | Yes |
-3.4 Storage model | Yes | No immutable types at this time.
+3.4 Storage model | Yes |
 3.5 Proper tail recursion | Yes |
 4.1 Primitive expression types | Yes |
 4.2 Derived expression types | Yes | 
