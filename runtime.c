@@ -6261,6 +6261,8 @@ object copy2heap(void *data, object obj)
                   &on_stack);
 }
 
+// TODO: version of above that will perform a deep copy (via GC) if necessary
+
 // Generic buffer functions
 void **vpbuffer_realloc(void **buf, int *len)
 {
