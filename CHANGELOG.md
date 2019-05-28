@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.1 - TBD
+## 0.11.1 - May 25, 2019
 
 Features
 
