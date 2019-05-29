@@ -895,6 +895,13 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       // NOTE: don't copy cond_var itself, caller will do that (this is a special case)
       return (char *)hp;
     }
+  case atomic_tag:{
+      atomic_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = atomic_tag;
+      hp->obj = ((atomic_type *)obj)->obj; // TODO: should access via CK atomic operations, though this may not be needed at all since we alloc directly on heap
+      return (char *)hp;
+    }
   case macro_tag:{
       macro_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
@@ -1505,6 +1512,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(mutex_type));
   if (t == cond_var_tag)
     return gc_heap_align(sizeof(cond_var_type));
+  if (t == atomic_tag)
+    return gc_heap_align(sizeof(atomic_type));
   if (t == integer_tag)
     return gc_heap_align(sizeof(integer_type));
   if (t == complex_num_tag)

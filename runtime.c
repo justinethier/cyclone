@@ -57,6 +57,7 @@ const char *tag_names[] = {
       /*symbol_tag    */ , "symbol"
       /*vector_tag    */ , "vector"
       /*complex_num_tag*/ , "complex number"
+      /*atomic_tag*/ , "atomic"
   , "Reserved for future use"
 };
 
