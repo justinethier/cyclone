@@ -453,6 +453,7 @@ object Cyc_is_integer(object o);
 #define Cyc_is_bytevector(o) (make_boolean(is_object_type(o) && ((list) o)->tag == bytevector_tag))
 #define Cyc_is_port(o)       (make_boolean(is_object_type(o) && ((list) o)->tag == port_tag))
 #define Cyc_is_mutex(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == mutex_tag))
+#define Cyc_is_atomic(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == atomic_tag))
 #define Cyc_is_cond_var(o)   (make_boolean(is_object_type(o) && ((list) o)->tag == cond_var_tag))
 #define Cyc_is_symbol(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == symbol_tag))
 #define Cyc_is_string(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == string_tag))

@@ -919,6 +919,9 @@ object Cyc_display(void *data, object x, FILE * port)
   case cond_var_tag:
     fprintf(port, "<condition variable %p>", x);
     break;
+  case atomic_tag:
+    fprintf(port, "<atom %p>", x);
+    break;
   case boolean_tag:
     fprintf(port, "#%s", ((boolean_type *) x)->desc);
     break;
