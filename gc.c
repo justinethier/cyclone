@@ -2239,6 +2239,13 @@ void gc_mark_black(object obj)
         }
         break;
       }
+    case atomic_tag: {
+        atomic_type *a = (atomic_type *)obj;
+        object o = ck_pr_load_ptr(&(a->obj));
+        if (obj) {
+          gc_collector_mark_gray(obj, o);
+        }
+      }
     default:
       break;
     }
