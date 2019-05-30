@@ -15,6 +15,9 @@
 ;; (atom? obj)
 ;; (atom obj)
 
+(import (scheme base) (scheme write))
+(include-c-header "<ck_pr.h>")
+
 (define-c atom?
   "(void *data, int argc, closure _, object k, object obj)"
   " object result = Cyc_is_atomic(obj);
@@ -32,6 +35,7 @@
     tmp.tag = atomic_tag;
     tmp.obj = obj;
     atm = gc_alloc(((gc_thread_data *)data)->heap, sizeof(atomic_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+    ck_pr_store_ptr(&(atm->obj), obj); // Needed??
     return_closcall1(data, k, atm); ")
 
 (define (atom . obj)
@@ -39,8 +43,15 @@
       (make-atom (car obj))
       (make-atom #f)))
 
-;; TODO:
 ;; - ref atomic
+(define-c ref
+  "(void *data, int argc, closure _, object k, object obj)"
+  " atomic a;
+    if (Cyc_is_atomic(obj) != boolean_t) {
+      Cyc_rt_raise2(data, \"Type error: expected atom\", obj);
+    }
+    a = (atomic) obj;
+    return_closcall1(data, k, ck_pr_load_ptr(&(a->obj)));")
 
 ;; TODO:
 ;; - swap, see https://clojure.github.io/clojure/clojure.core-api.html#clojure.core/swap!
@@ -48,3 +59,9 @@
 
 ;; TODO:
 ;; - compare and swap?
+
+(define a (make-atom '(1 2)))
+(write
+  (list
+    a
+    (ref a)))
