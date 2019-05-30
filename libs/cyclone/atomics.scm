@@ -47,21 +47,38 @@
 (define-c ref
   "(void *data, int argc, closure _, object k, object obj)"
   " atomic a;
-    if (Cyc_is_atomic(obj) != boolean_t) {
-      Cyc_rt_raise2(data, \"Type error: expected atom\", obj);
-    }
+    Cyc_check_atomic(data, obj);
     a = (atomic) obj;
     return_closcall1(data, k, ck_pr_load_ptr(&(a->obj)));")
 
 ;; TODO:
 ;; - swap, see https://clojure.github.io/clojure/clojure.core-api.html#clojure.core/swap!
 ;; (swap! atom f)(swap! atom f x)(swap! atom f x y)(swap! atom f x y & args)
+(define (swap! atom f . opts)
+  'TODO)
 
-;; TODO:
-;; - compare and swap?
+;; (compare-and-set! atom oldval newval)
+;; https://clojuredocs.org/clojure.core/compare-and-set!
+;; Atomically sets the value of atom to newval if and only if the
+;; current value of the atom is identical to oldval. Returns true if
+;; set happened, else false
+(define-c compare-and-set!
+  "(void *data, int argc, closure _, object k, object obj, object oldval, object newval)"
+  " atomic a;
+    Cyc_check_atomic(data, obj);
+    a = (atomic) obj;
+    bool result = ck_pr_cas_ptr(&(a->obj), oldval, newval);
+    object rv = result ? boolean_t : boolean_f;
+    return_closcall1(data, k, rv); ")
 
-(define a (make-atom '(1 2)))
+(define lis '(1 2))
+(define a (make-atom lis))
 (write
   (list
     a
-    (ref a)))
+    (ref a)
+    (compare-and-set! a 1 lis)
+    (ref a)
+    (compare-and-set! a lis 1)
+    (ref a)
+))
