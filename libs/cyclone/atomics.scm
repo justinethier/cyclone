@@ -53,10 +53,29 @@
 
 ;; TODO:
 ;; - swap, see https://clojure.github.io/clojure/clojure.core-api.html#clojure.core/swap!
+;; Clojure docs:
+;; Atomically swaps the value of atom to be:
+;; (apply f current-value-of-atom args). Note that f may be called
+;; multiple times, and thus should be free of side effects.  Returns
+;; the value that was swapped in.
 ;; (swap! atom f)(swap! atom f x)(swap! atom f x y)(swap! atom f x y & args)
+;;
+;; Notes:
+;; swap! takes the current value of the Atom, calls the function on it (in this case, inc), and sets the new value. However, just before setting the new value, it checks to make sure the old value is still in there. If it's different, it starts over. It calls the function again with the new value it found. It keeps doing this until it finally writes the value. Because it can check the value and write it in one go, it's an atomic operation, hence the name.
+;; 
+;; That means the function can get called multiple times. That means it needs to be a pure function. Another thing is that you can't control the order of the function calls. If multiple threads are swapping to an Atom at the same time, order is out of the window. So make sure your functions are independent of order, like we talked about before.
+;;
 (define (swap! atom f . opts)
   'TODO)
 
+TODO: once swap works, need to figure out the strategy for handling thread-local and mutable objects.
+do we ensure an object is neither before being allowed to be added to an atom?
+
+  nice thing about enforcing immutabiility is we don't need to check an entire structure (pair, vec, bv) for members on the stack, we can just check the first element
+
+also need a process for bulk initialization of atoms, instead of forcing a GC for each init.
+
+TODO: need an internal version of this and an external one
 ;; (compare-and-set! atom oldval newval)
 ;; https://clojuredocs.org/clojure.core/compare-and-set!
 ;; Atomically sets the value of atom to newval if and only if the
