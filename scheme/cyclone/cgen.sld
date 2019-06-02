@@ -384,12 +384,12 @@
        trace 
        cps?))
     ;; Core forms:
-    ((const? exp)       (c-compile-const exp (alloca? ast-id)))
+    ((const? exp)       (c-compile-const exp (alloca? ast-id trace) #f)) ;; TODO: OK to hardcode immutable to false here??
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
      (c-code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
-    ((quote? exp)       (c-compile-quote exp (alloca? ast-id)))
+    ((quote? exp)       (c-compile-quote exp (alloca? ast-id trace)))
     ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
 
     ;; IR (2):
@@ -407,9 +407,25 @@
 
 (define (c-compile-quote qexp use-alloca)
   (let ((exp (cadr qexp)))
-    (c-compile-scalars exp use-alloca)))
+    (c-compile-scalars exp use-alloca #t)))
 
-(define (c-compile-scalars args use-alloca)
+;; Emit code to set an object's immutable field
+;;
+;; Params:
+;;  cvar - String - Name of C variable containing the object.
+;;  use-alloca - Boolean - Is C var dynamically allocated?
+;;  immutable - Boolean - Is object immutable?
+;;
+;; Returns a string containing generated C code
+(define (c-set-immutable-field cvar use-alloca immutable)
+  (cond
+    ((and immutable use-alloca)
+     (string-append cvar "->hdr.immutable = 1;"))
+    ((and immutable (not use-alloca))
+     (string-append cvar ".hdr.immutable = 1;"))
+    (else ""))) ;; Mutable (default), no need to set anything
+
+(define (c-compile-scalars args use-alloca immutable)
   (letrec (
     (addr-op (if use-alloca "" "&"))
     ;; (deref-op (if use-alloca "->" "."))
@@ -418,20 +434,22 @@
     (create-cons
       (lambda (cvar a b)
         (c-code/vars
-         (string-append c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");")
-          (append (c:allocs a) (c:allocs b)))))
+         (string-append 
+           c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");"
+           (c-set-immutable-field cvar use-alloca immutable))
+         (append (c:allocs a) (c:allocs b)))))
     (_c-compile-scalars 
      (lambda (args)
        (cond
         ((null? args)
            (c-code "NULL"))
         ((not (pair? args))
-         (c-compile-const args use-alloca))
+         (c-compile-const args use-alloca immutable))
         (else
            (let* ((cvar-name (mangle (gensym 'c)))
                   (cell (create-cons
                           cvar-name
-                          (c-compile-const (car args) use-alloca) 
+                          (c-compile-const (car args) use-alloca immutable) 
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
              (c-code/vars
@@ -443,9 +461,15 @@
     (_c-compile-scalars args) 
     num-args)))
 
-(define (c-compile-vector exp use-alloca)
+(define (c-compile-vector exp use-alloca immutable)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (vector-length exp))
+           (ev-name (mangle (gensym 'e)))
+           (elem-decl 
+             (if use-alloca
+                 (string-append "object *" ev-name " = (object *)alloca(sizeof(object) * " 
+                                              (number->string len) ");")
+                 (string-append "object " ev-name " [" (number->string len) "];\n")))
            (addr-op (if use-alloca "" "&"))
            (deref-op (if use-alloca "->" "."))
            (c-make-macro (if use-alloca "alloca_empty_vector" "make_empty_vector"))
@@ -454,7 +478,7 @@
             (lambda (i code)
               (if (= i len)
                 code
-                (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca)))
+                (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca immutable)))
                   (loop 
                     (+ i 1)
                     (c-code/vars
@@ -475,20 +499,23 @@
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                c-make-macro "(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"
+                (c-set-immutable-field cvar-name use-alloca immutable)))))
       (else
         (let ((code
                 (c-code/vars
                   (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
+                      elem-decl
                       c-make-macro "(" cvar-name ");"
                       cvar-name deref-op "num_elements = " (number->string len) ";"
-                      cvar-name deref-op "elements = (object *)alloca(sizeof(object) * " 
-                                         (number->string len) ");")))))
+                      cvar-name deref-op "elements = (object *)" ev-name ";"
+                      (c-set-immutable-field cvar-name use-alloca immutable)
+                      )))))
         (loop 0 code))))))
 
-(define (c-compile-bytevector exp use-alloca)
+(define (c-compile-bytevector exp use-alloca immutable)
   (letrec ((cvar-name (mangle (gensym 'vec)))
            (len (bytevector-length exp))
            (addr-op (if use-alloca "" "&"))
@@ -519,7 +546,9 @@
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
-                c-make-macro "(" cvar-name ");"))))
+                c-make-macro "(" cvar-name ");"
+                (c-set-immutable-field cvar-name use-alloca immutable)
+              ))))
       (else
         (let ((code
                 (c-code/vars
@@ -529,10 +558,12 @@
                       c-make-macro "(" cvar-name ");"
                       cvar-name deref-op "len = " (number->string len) ";"
                       cvar-name deref-op "data = alloca(sizeof(char) * " 
-                                         (number->string len) ");")))))
+                                         (number->string len) ");"
+                      (c-set-immutable-field cvar-name use-alloca immutable)
+                    )))))
         (loop 0 code))))))
 
-(define (c-compile-string exp use-alloca)
+(define (c-compile-string exp use-alloca immutable)
   (let ((cvar-name (mangle (gensym 'c))))
     (cond
       (use-alloca
@@ -554,7 +585,12 @@
               (->cstr exp) 
               ";\n"
               "memcpy(((string_type *)" cvar-name ")->str, " tmp-name "," blen ");\n"
-              "((string_type *)" cvar-name ")->str[" blen "] = '\\0';")))))
+              "((string_type *)" cvar-name ")->str[" blen "] = '\\0';"
+              (c-set-immutable-field 
+                (string-append
+                  "((string_type *)" cvar-name ")")
+                use-alloca immutable)
+            )))))
       (else
         (c-code/vars
           (string-append "&" cvar-name) ; Code is just the variable name
@@ -568,23 +604,29 @@
               (number->string (string-byte-length exp))
               ", " 
               (number->string (string-length exp))
-              ");")))))))
+              ");"
+              (c-set-immutable-field cvar-name use-alloca immutable)
+            )))))))
 
 ;; c-compile-const : const-exp -> c-pair
 ;;
 ;; Typically this function is used to compile constant values such as
 ;; a single number, boolean, etc. However, it can be passed a quoted
 ;; item such as a list, to compile as a literal.
-(define (c-compile-const exp use-alloca)
+;;
+;; exp - Expression to compile
+;; use-alloca - Should C objects be dynamically allocated on the stack?
+;; immutable - Should C object be flagged as immutable?
+(define (c-compile-const exp use-alloca immutable)
   (cond
     ((null? exp)
      (c-code "NULL"))
     ((pair? exp)
-     (c-compile-scalars exp use-alloca))
+     (c-compile-scalars exp use-alloca immutable))
     ((vector? exp)
-     (c-compile-vector exp use-alloca))
+     (c-compile-vector exp use-alloca immutable))
     ((bytevector? exp)
-     (c-compile-bytevector exp use-alloca))
+     (c-compile-bytevector exp use-alloca immutable))
     ((bignum? exp)
       (let ((cvar-name (mangle (gensym 'c)))
             (num2str (cond
@@ -642,7 +684,7 @@
      (c-code (string-append "obj_char2obj(" 
                (number->string (char->integer exp)) ")")))
     ((string? exp)
-     (c-compile-string exp use-alloca))
+     (c-compile-string exp use-alloca immutable))
 ;TODO: not good enough, need to store new symbols in a table so they can
 ;be inserted into the C program
     ((symbol? exp)
@@ -677,15 +719,22 @@
   (set! *use-alloca* v))
 
 ;; Use alloca() for stack allocations?
-(define (alloca? ast-id)
+(define (alloca? ast-id trace)
   (or *use-alloca*
       (let ((adbf:fnc (adb:get/default ast-id #f)))
-        (and adbf:fnc 
-             (adbf:calls-self? adbf:fnc)))))
+        (or
+          ;; Newer logic
+          (and adbf:fnc 
+               (adbf:calls-self? adbf:fnc))
+          ;; Older direct recursive logic 
+          (and
+            (pair? trace)
+            (not (null? (cdr trace)))
+            (adbv:direct-rec-call? (adb:get (cdr trace))))))))
 
 ;; c-compile-prim : prim-exp -> string -> string
 (define (c-compile-prim p cont ast-id)
-  (let* ((use-alloca? (alloca? ast-id))
+  (let* ((use-alloca? (alloca? ast-id #f))
          (c-func 
            (if (prim:udf? p)
                (string-append
@@ -1543,7 +1592,7 @@
 (define (c-compile-closure exp append-preamble cont ast-id trace cps?)
   (find-closure-assigned-var-index! (closure->lam exp) (cdr exp))
   (let* ((lam (closure->lam exp))
-         (use-alloca? (alloca? ast-id))
+         (use-alloca? (alloca? ast-id trace))
          (free-vars
            (map
              (lambda (free-var)
@@ -1578,12 +1627,19 @@
              (car free-vars)
              (list))))
          (create-nclosure (lambda ()
-           (let ((decl (if use-alloca?
-                           (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
-                           (string-append "closureN_type " cv-name ";\n")))
-                 (sep (if use-alloca? "->" ".")))
+           (let* ((decl (if use-alloca?
+                            (string-append "closureN_type * " cv-name " = alloca(sizeof(closureN_type));\n")
+                            (string-append "closureN_type " cv-name ";\n")))
+                  (ev-name (mangle (gensym 'e)))
+                  (elem-decl 
+                    (if use-alloca?
+                        (string-append "object *" ev-name " = (object *)alloca(sizeof(object) * " 
+                                                     (number->string (length free-vars)) ");")
+                        (string-append "object " ev-name " [" (number->string (length free-vars)) "];\n")))
+                  (sep (if use-alloca? "->" ".")))
              (string-append
                decl
+               elem-decl
                ;; Not ideal, but one more special case to type check call/cc
                (if call/cc?  "Cyc_check_proc(data, f);\n" "")
                cv-name sep "hdr.mark = gc_color_red;\n "
@@ -1592,8 +1648,7 @@
                cv-name sep "fn = (function_type)__lambda_" (number->string lid) ";\n"
                cv-name sep "num_args = " num-args-str ";\n"
                cv-name sep "num_elements = " (number->string (length free-vars)) ";\n"
-               cv-name sep "elements = (object *)alloca(sizeof(object) * " 
-                       (number->string (length free-vars)) ");\n"
+               cv-name sep "elements = (object *)" ev-name ";\n";
                (let loop ((i 0) 
                           (vars free-vars))
                  (if  (null? vars)

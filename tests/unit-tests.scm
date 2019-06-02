@@ -105,8 +105,8 @@
     (assert:equal "set local x" x #t))
  #f)
 
-(define a '(#f #f))
-(define b '(#f . #f))
+(define a (list #f #f))
+(define b (cons #f #f))
 
 (set-car! a 1)
 (set-cdr! a '(2))

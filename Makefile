@@ -174,6 +174,7 @@ runtime.o : runtime.c $(HEADERS)
 	$(CCOMP) -c \
 					-DCYC_INSTALL_DIR=\"$(PREFIX)\" \
 					-DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
+					-DCYC_INSTALL_BIN=\"$(BINDIR)\" \
 					-DCYC_INSTALL_INC=\"$(INCDIR)\" \
 					-DCYC_INSTALL_SLD=\"$(DATADIR)\" \
 					-DCYC_CC_PROG=\"$(CC_PROG)\" \
@@ -183,7 +184,8 @@ runtime.o : runtime.c $(HEADERS)
 					$< -o $@
 
 libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
-	$(AR) rcs $@ $^ 
+	$(CREATE_LIBRARY_COMMAND) $(CREATE_LIBRARY_FLAGS) $@ $&
+	$(RANLIB_COMMAND)
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
 # Note compiler will have to link to this, eg:
 #Linking against static library
@@ -194,7 +196,7 @@ full :
 	make clean ; make && make test && make bootstrap && cd ../cyclone-bootstrap && make clean && ./install.sh
 
 bench :
-	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone
+	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone ; grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
 
 bootstrap : icyc libs
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
@@ -237,6 +239,7 @@ bootstrap : icyc libs
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-opt-local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-opt-analyze-call-graph.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp scheme/cyclone/cps-opt-memoize-pure-fncs.scm $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/hashset.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone

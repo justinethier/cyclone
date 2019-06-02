@@ -122,6 +122,9 @@
          Cyc-default-exception-handler
          Cyc-current-exception-handler
          cons
+         Cyc-fast-vector-2
+         Cyc-fast-vector-3
+         Cyc-fast-vector-4
          Cyc-fast-list-1
          Cyc-fast-list-2
          Cyc-fast-list-3
@@ -262,6 +265,9 @@
          (Cyc-default-exception-handler 1 1)
          (Cyc-current-exception-handler 0 0)
          (cons 2 2)
+         (Cyc-fast-vector-2 2 2)
+         (Cyc-fast-vector-3 3 3)
+         (Cyc-fast-vector-4 4 4)
          (Cyc-fast-list-1 1 1)
          (Cyc-fast-list-2 2 2)
          (Cyc-fast-list-3 3 3)
@@ -648,6 +654,9 @@
          ((eq? p 'eof-object?)   "Cyc_is_eof_object")
          ((eq? p 'symbol?)       "Cyc_is_symbol")
          ((eq? p 'cons)          "set_pair_as_expr")
+         ((eq? p 'Cyc-fast-vector-2) "Cyc_fast_vector_2")
+         ((eq? p 'Cyc-fast-vector-3) "Cyc_fast_vector_3")
+         ((eq? p 'Cyc-fast-vector-4) "Cyc_fast_vector_4")
          ((eq? p 'Cyc-fast-list-1) "set_cell_as_expr")
          ((eq? p 'Cyc-fast-list-2) "Cyc_fast_list_2")
          ((eq? p 'Cyc-fast-list-3) "Cyc_fast_list_3")
@@ -761,6 +770,9 @@
       (cond
         ((eq? p 'cons) "pair_type")
         ((eq? p 'cell) "pair_type")
+        ((eq? p 'Cyc-fast-vector-2) "vector_2_type")
+        ((eq? p 'Cyc-fast-vector-3) "vector_3_type")
+        ((eq? p 'Cyc-fast-vector-4) "vector_4_type")
         ((eq? p 'Cyc-fast-list-1) "pair_type")
         ((eq? p 'Cyc-fast-list-2) "list_2_type")
         ((eq? p 'Cyc-fast-list-3) "list_3_type")

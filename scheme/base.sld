@@ -23,6 +23,7 @@
     register-simple-type
     make-type-predicate
     make-constructor
+    make-constructor/args
     make-getter
     make-setter
     slot-ref
@@ -445,6 +446,12 @@
                 `(,(cadr exprs) ,(rename 'tmp)))
                (else
                 `(,(rename 'begin) ,@exprs))))
+            (define (agg-cond tmp-sym lis)
+              (if (null? lis)
+                  #f
+                  `(if (eq? ,tmp-sym (,(rename 'quote) ,(car lis)))
+                       #t
+                       ,(agg-cond tmp-sym (cdr lis)))))
             (define (clause ls)
               (cond
                ((null? ls) #f)
@@ -456,8 +463,10 @@
                   ,(body (cdar ls))
                   ,(clause (cdr ls))))
                (else
-                `(,(rename 'if) (,(rename 'memv) ,(rename 'tmp)
-                                 (,(rename 'quote) ,(caar ls)))
+                `(,(rename 'if) 
+                      ,(agg-cond (rename 'tmp) (caar ls))
+                      ;(,(rename 'memv) ,(rename 'tmp)
+                      ; (,(rename 'quote) ,(caar ls)))
                   ,(body (cdar ls))
                   ,(clause (cdr ls))))))
             `(let ((,(rename 'tmp) ,(cadr expr)))
@@ -989,7 +998,7 @@
         char ch_buf[5];
         char_type c;
         int buflen, num_cp, len;
-        Cyc_check_int(data, count);
+        Cyc_check_fixnum(data, count);
         if (!obj_is_char(fill)) {
           Cyc_rt_raise2(data, \"Expected character buf received\", fill);
         }
@@ -1011,6 +1020,7 @@
                        &heap_grown);
           ((string_type *) s)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
           ((string_type *) s)->hdr.grayed = 0;
+          ((string_type *) s)->hdr.immutable = 0;
           ((string_type *) s)->tag = string_tag; 
           ((string_type *) s)->len = len;
           ((string_type *) s)->num_cp = num_cp;
@@ -1019,6 +1029,7 @@
           s = alloca(sizeof(string_type));
           ((string_type *)s)->hdr.mark = gc_color_red; 
           ((string_type *)s)->hdr.grayed = 0;
+          ((string_type *)s)->hdr.immutable = 0;
           ((string_type *)s)->tag = string_tag; 
           ((string_type *)s)->len = len;
           ((string_type *)s)->num_cp = num_cp;
@@ -1818,26 +1829,31 @@
 ;; Record-type definitions
 (define record-marker (list 'record-marker))
 (define (register-simple-type name parent field-tags)
-  (let ((new (make-vector 3 #f)))
-    (vector-set! new 0 record-marker)
-    (vector-set! new 1 name)
-    (vector-set! new 2 field-tags)
-    new))
+  (vector record-marker name field-tags)
+  ;(let ((new (make-vector 3 #f)))
+  ;  (vector-set! new 0 record-marker)
+  ;  (vector-set! new 1 name)
+  ;  (vector-set! new 2 field-tags)
+  ;  new)
+)
 (define (make-type-predicate pred name)
   (lambda (obj)
     (and (vector? obj)
          (equal? (vector-ref obj 0) record-marker)
          (equal? (vector-ref obj 1) name))))
 (define (make-constructor make name)
-  (lambda ()
+  (lambda args
     (let* ((field-tags (vector-ref name 2))
            (field-values (make-vector (length field-tags) #f))
-           (new (make-vector 3 #f))
           )
-      (vector-set! new 0 record-marker)
-      (vector-set! new 1 name)
-      (vector-set! new 2 field-values)
-      new)))
+      (vector record-marker name field-values))))
+(define (make-constructor/args make name)
+  (lambda args
+    (let* ((field-tags (vector-ref name 2))
+           (field-values (list->vector args)))
+      (when (not (equal? (length field-tags) (length args)))
+        (error "invalid number of arguments passed to record type constructor" args))
+      (vector record-marker name field-values))))
 (define (type-slot-offset name sym)
   (let ((field-tags (vector-ref name 2)))
     (_list-index sym field-tags)))
@@ -1858,16 +1874,12 @@
   (lambda (obj val)
     (vector-set! (vector-ref obj 2) idx val)))
 
-;; Find index of element in list, or -1 if not found
+;; Find index of element in list, or #f if not found
 (define _list-index
-  (lambda (e lst)
-    (if (null? lst)
-      -1
-      (if (eq? (car lst) e)
-        0
-        (if (= (_list-index e (cdr lst)) -1) 
-          -1
-          (+ 1 (_list-index e (cdr lst))))))))
+  (lambda (e lst1)
+    (let lp ((lis lst1) (n 0))
+      (and (not (null? lis))
+           (if (eq? e (car lis)) n (lp (cdr lis) (+ n 1)))))))
 
 (define (record? obj)
   (and (vector? obj)
@@ -1935,27 +1947,18 @@
                 fields)
          ;; constructor
          (,_define ,make
-           ,(let lp ((ls make-fields) (sets '()))
-              (cond
-               ((null? ls)
-                `(,_let ((%make (,(rename 'make-constructor)
-                                 ,(symbol->string make) ;(identifier->symbol make))
-                                 ,name)))
-                   (,_lambda ,make-fields
-                     (,_let ((res (%make)))
-                       ,@sets
-                       res))))
-               (else
-                (let ((field (assq (car ls) fields)))
-                  (cond
-                   ((not field)
-                    (error "unknown record field in constructor" (car ls)))
-                   ((pair? (cddr field))
-                    (lp (cdr ls)
-                        (cons `(,(car (cddr field)) res ,(car ls)) sets)))
-                   (else
-                    (lp (cdr ls)
-                        (cons `(,_slot-set! ,name res (,_type_slot_offset ,name ',(car ls)) ,(car ls))
-                              sets)))))))))
+            (,_let ((%make (,(rename 'make-constructor/args)
+                            ,(symbol->string make) ;(identifier->symbol make))
+                            ,name)))
+              (,_lambda ,make-fields
+                (%make ,@make-fields))))
+         ; Possible alternate version that inlines make-constructor/args
+         ;(,_define ,make
+         ;   (,_lambda ,make-fields
+         ;     (,(rename 'vector)
+         ;     ',record-marker
+         ;      ,name
+         ;      (,(rename 'vector)
+         ;       ,@make-fields))))
   )))))
 ))

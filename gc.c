@@ -797,6 +797,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case pair_tag:{
       list hp = dest;
       hp->hdr.mark = thd->gc_alloc_color;
+      hp->hdr.immutable = immutable(obj);
       type_of(hp) = pair_tag;
       car(hp) = car(obj);
       cdr(hp) = cdr(obj);
@@ -808,6 +809,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       s = ((char *)hp) + sizeof(string_type);
       memcpy(s, string_str(obj), string_len(obj) + 1);
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = string_tag;
       string_num_cp(hp) = string_num_cp(obj);
       string_len(hp) = string_len(obj);
@@ -824,6 +826,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case vector_tag:{
       vector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = vector_tag;
       hp->num_elements = ((vector) obj)->num_elements;
       hp->elements = (object *) (((char *)hp) + sizeof(vector_type));
@@ -833,6 +836,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case bytevector_tag:{
       bytevector_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = bytevector_tag;
       hp->len = ((bytevector) obj)->len;
       hp->data = (((char *)hp) + sizeof(bytevector_type));
@@ -864,11 +868,10 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       bignum_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
       type_of(hp) = bignum_tag;
-      // Bignums are always heap-allocated so there is nothing to copy
-      //((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
-      //((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
-      //((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
-      //((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
+      ((bignum_type *)hp)->bn.used = ((bignum_type *)obj)->bn.used;
+      ((bignum_type *)hp)->bn.alloc = ((bignum_type *)obj)->bn.alloc;
+      ((bignum_type *)hp)->bn.sign = ((bignum_type *)obj)->bn.sign;
+      ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
       return (char *)hp;
     }
   case cvar_tag:{
@@ -912,6 +915,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case c_opaque_tag:{
       c_opaque_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
+      immutable(hp) = immutable(obj);
       type_of(hp) = c_opaque_tag;
       hp->ptr = ((c_opaque_type *) obj)->ptr;
       return (char *)hp;
@@ -1752,22 +1756,6 @@ void gc_thr_grow_move_buffer(gc_thread_data * d)
 #if GC_DEBUG_TRACE
   fprintf(stderr, "grew moveBuffer, len = %d\n", d->moveBufLen);
 #endif
-}
-
-/**
- * @brief Add an object to the move buffer
- * @param d Mutator data object containing the buffer
- * @param alloci  Pointer to the next open slot in the buffer
- * @param obj     Object to add
- */
-void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
-{
-  if (*alloci == d->moveBufLen) {
-    gc_thr_grow_move_buffer(d);
-  }
-
-  d->moveBuf[*alloci] = obj;
-  (*alloci)++;
 }
 
 // END heap definitions

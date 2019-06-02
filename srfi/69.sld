@@ -37,11 +37,12 @@
     string-hash
     string-ci-hash
     hash-by-identity
+    ;; Cyclone Custom
+    Cyc-memoize
   )
   (import (scheme base)
           (scheme char)
-          (scheme complex)
-          ;(scheme cyclone util)
+          ;(scheme complex)
   )
   (begin
 
@@ -72,6 +73,24 @@
   "(void *data, object ptr, object sym)"
   " return obj_int2obj(((long)sym) & 0x7FFFFFFF); ")
 
+(define-c %real-part
+  "(void *data, int argc, closure _, object k, object z)"
+  " if (boolean_t == Cyc_is_complex(z)) {
+      make_double(d, creal(complex_num_value(z)));
+      return_closcall1(data, k, &d); 
+    } else {
+      return_closcall1(data, k, z); 
+    } ")
+
+(define-c %imag-part
+  "(void *data, int argc, closure _, object k, object z)"
+  " if (boolean_t == Cyc_is_complex(z)) {
+      make_double(d, cimag(complex_num_value(z)));
+      return_closcall1(data, k, &d); 
+    } else {
+      return_closcall1(data, k, z); 
+    } ")
+
 (define (hash obj . maybe-bound)
   (let ((bound (if (null? maybe-bound) *default-bound* (car maybe-bound))))
     (cond ((integer? obj) (modulo obj bound))
@@ -80,9 +99,10 @@
      ;(symbol-hash obj bound)
      (modulo (symbol-hash obj) bound)
     )
-    ((real? obj) (modulo (+ (numerator obj) (denominator obj)) bound))
+    ((and (real? obj) (not (complex? obj)))
+     (modulo (+ (numerator obj) (denominator obj)) bound))
     ((number? obj)
-     (modulo (+ (hash (real-part obj)) (* 3 (hash (imag-part obj))))
+     (modulo (+ (hash (%real-part obj)) (* 3 (hash (%imag-part obj))))
        bound))
     ((char? obj) (modulo (char->integer obj) bound))
     ((vector? obj) (vector-hash obj bound))
@@ -308,5 +328,26 @@
 
 (define (hash-table-values hash-table)
   (hash-table-fold hash-table (lambda (key val acc) (cons val acc)) '()))
+
+;; Cyclone-specific
+;;
+;; Take a function and return another function that will store the results
+;; of calling the original function, and return those cached results on 
+;; subsequent requests.
+(define (Cyc-memoize function) 
+  (let ((table (make-hash-table))) ;(make-equal?-map))) 
+    (lambda args 
+      (apply values 
+             ;(map-get table 
+             (hash-table-ref table 
+                      args 
+                      ;; If the entry isn't there, call the function.    
+                      (lambda () 
+                        (call-with-values 
+                          (lambda () (apply function args)) 
+                          (lambda results 
+                            ;(map-put! table args results) 
+                            (hash-table-set! table args results) 
+                            results)))))))) 
 
 ))

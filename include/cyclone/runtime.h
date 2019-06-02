@@ -64,6 +64,8 @@ void gc_init_heap(long heap_size);
   } \
 }
 
+#define Cyc_verify_mutable(data, obj) { \
+  if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
   if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 #define Cyc_check_type2(data, fnc_test, tag, obj) { \
@@ -84,6 +86,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj)
 #define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj)
 void Cyc_invalid_type_error(void *data, int tag, object found);
+void Cyc_immutable_obj_error(void *data, object obj);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
 /**@}*/
@@ -131,6 +134,7 @@ object Cyc_global_set(void *thd, object * glo, object value);
         } \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
+        var[i].hdr.immutable = 0; \
         var[i].tag = pair_tag; \
         var[i].pair_car = tmp; \
         var[i].pair_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
@@ -400,6 +404,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y);
 object Cyc_fast_list_2(object ptr, object x, object y);
 object Cyc_fast_list_3(object ptr, object a1, object a2, object a3);
 object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4);
+object Cyc_fast_vector_2(object ptr, object a1, object a2);
+object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3);
+object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4);
 object Cyc_bit_unset(void *data, object n1, object n2); 
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,
@@ -540,7 +547,24 @@ object copy2heap(void *data, object obj);
  * @brief Functions for maintaining call history.
  */
 /**@{*/
-void Cyc_st_add(void *data, char *frame);
+
+//void Cyc_st_add(void *data, char *frame); migrated from runtime.c
+/**
+ * @brief Register a frame in the stack trace circular buffer.
+ * @param data Thread data object
+ * @param frame Name of the frame
+ */
+#define Cyc_st_add(data, frame) \
+{ \
+  gc_thread_data *thd = (gc_thread_data *) data; \
+  /* Do not allow recursion to remove older frames */ \
+  if ((char *)frame != thd->stack_prev_frame) { \
+    thd->stack_prev_frame = frame; \
+    thd->stack_traces[thd->stack_trace_idx] = frame; \
+    thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES; \
+  } \
+}
+
 void Cyc_st_print(void *data, FILE * out);
 /**@}*/
 

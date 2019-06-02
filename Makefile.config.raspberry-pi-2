@@ -4,6 +4,8 @@
 #
 # Configuration options for the makefile
 
+& = $(filter-out %.h %.d,$^)
+
 OS ?= $(shell uname)
 CC ?= cc
 
@@ -12,6 +14,10 @@ ifneq ($(OS),FreeBSD)
 # libdl is part of libc on FreeBSD
 LIBS += -ldl
 endif
+
+LIBRARY_OUTPUT_FILE = libcyclone.a
+CREATE_LIBRARY_COMMAND = $(AR)
+CREATE_LIBRARY_FLAGS = rcs
 
 # Compiler options
 CFLAGS       ?= -O2 -fPIC -Wall -march=armv6k -Iinclude

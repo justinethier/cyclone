@@ -28,6 +28,7 @@
           memcpy(ps, &s, sizeof(string_type));
           ((list)pl)->hdr.mark = gc_color_red;
           ((list)pl)->hdr.grayed = 0;
+          ((list)pl)->hdr.immutable = 0;
           ((list)pl)->tag = pair_tag;
           ((list)pl)->pair_car = ps;
           ((list)pl)->pair_cdr = lis;

@@ -24,6 +24,7 @@
         (scheme cyclone libraries))
 
 (define *optimization-level* 2) ;; Default level
+(define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
 
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
@@ -433,21 +434,56 @@
       (trace:info "---------------- after CPS:")
       (trace:info (ast:ast->pp-sexp input-program))
 
+      (define (inject-import lis)
+        (let ((dep (lib:list->import-set lis)))
+          (when (not (member dep lib-deps))
+            (set! lib-deps (append lib-deps (list dep)))
+            (change-lib-deps! lib-deps)))
+      )
+
+      (define (inject-globals! lis)
+        ;; FUTURE: these lines are specifically for memoization optizations.
+        ;;  if we need to make this more generic and have other globals
+        ;;  injected, then this code will need to be relocated, maybe into
+        ;;  an 'inject-memoization!' or such helper.
+        (when (not (member 'Cyc-memoize globals))
+          (set! globals (append globals '(Cyc-memoize)))
+          (set! imported-vars (cons (lib:list->import-set '(Cyc-memoize srfi 69)) imported-vars))
+        )
+
+        (inject-import '(scheme cyclone common))
+        (inject-import '(scheme base))
+        (inject-import '(scheme char))
+        (inject-import '(srfi 69))
+        ;; END memoization-specific code
+
+        (set! module-globals (append module-globals lis))
+        (set! globals (append globals lis))
+        (set! globals (union globals '())) ;; Ensure list is sorted
+      )
+
+      (define (flag-set? flag)
+        (cond
+          ((eq? flag 'memoize-pure-functions) 
+           (and program? ;; Only for programs, because SRFI 69 becomes a new dep
+                *optimize:memoize-pure-functions*))
+          (else #f)))
+
       (when (> *optimization-level* 0)
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (1):")
         (trace:info "---------------- after cps optimizations (1):")
         (trace:info (ast:ast->pp-sexp input-program))
 
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (2):")
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info (ast:ast->pp-sexp input-program))
         
         (set! input-program
-          (optimize-cps input-program))
+          (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (3):")
         (trace:info "---------------- after cps optimizations (3):")
         (trace:info (ast:ast->pp-sexp input-program))
@@ -733,6 +769,10 @@
   ;; Set optimization level(s)
   (if (member "-O0" args)
       (set! *optimization-level* 0))
+  (if (member "-memoization-optimizations" args)
+      (set! *optimize:memoize-pure-functions* #t))
+  (if (member "-no-memoization-optimizations" args)
+      (set! *optimize:memoize-pure-functions* #f))
   ;; TODO: place more optimization reading here as necessary
   ;; End optimizations
   (if (member "-t" args)
@@ -746,7 +786,7 @@
 Usage: cyclone [OPTIONS] FILENAME
 Run the Cyclone Scheme compiler.
 
-Options:
+General options:
 
  -A directory    Append directory to the list of directories that are searched 
                  in order to locate imported libraries.
@@ -761,13 +801,20 @@ Options:
                  a library module.
  -CS cc-commands Specify a custom command line for the C compiler to compile
                  a shared object module.
- -Ox             Optimization level, higher means more optimizations will
-                 be used. Set to 0 to disable optimizations.
  -d              Only generate intermediate C files, do not compile them
  -t              Show intermediate trace output in generated C files
  -h, --help      Display usage information
  -v              Display version information
  -vn             Display version number
+
+Optimization options:
+
+ -Ox             Optimization level, higher means more optimizations will
+                 be used. Set to 0 to disable optimizations.
+ -memoization-optimizations     Memoize recursive calls to pure functions, 
+                                where possible (enabled by default).
+ -no-memoization-optimizations  Disable the above memoization optimization.
+
 ")
      (newline))
     ((member "-v" args)

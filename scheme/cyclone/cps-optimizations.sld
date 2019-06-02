@@ -11,7 +11,7 @@
 (define-library (scheme cyclone cps-optimizations)
   (import (scheme base)
           (scheme eval)
-          ;(scheme write)
+          (scheme write)
           (scheme cyclone util)
           (scheme cyclone ast)
           (scheme cyclone primitives)
@@ -48,6 +48,8 @@
       ;; Analysis - well-known lambdas
       well-known-lambda
       analyze:find-known-lambdas
+      ;; Analysis - validation
+      validate:num-function-args
       ;; Analyze variables
       adb:make-var
       %adb:make-var
@@ -112,6 +114,7 @@
   )
   (include "cps-opt-local-var-redux.scm")
   (include "cps-opt-analyze-call-graph.scm")
+  (include "cps-opt-memoize-pure-fncs.scm")
   (begin
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
@@ -305,6 +308,7 @@
     (define (const-atomic? exp)
       (or (integer? exp)
           (real? exp)
+          (complex? exp)
           ;(string? exp)
           ;(vector? exp)
           ;(bytevector? exp)
@@ -712,6 +716,7 @@
                               ,(analyze2 (if->else exp))))
         ; Application:
         ((app? exp)
+         (validate:num-function-args exp) ;; Extra validation
          (for-each (lambda (e) (analyze2 e)) exp))
         (else #f)))
 
@@ -1152,6 +1157,13 @@
           Cyc-utf8->string
           Cyc-string->utf8
           list->vector
+          Cyc-fast-list-1
+          Cyc-fast-list-2
+          Cyc-fast-list-3
+          Cyc-fast-list-4
+          Cyc-fast-vector-2
+          Cyc-fast-vector-3
+          Cyc-fast-vector-4
           )))
 
     (define (prim-calls-inlinable? prim-calls)
@@ -1699,7 +1711,7 @@
     ;; TODO: re-run phases again until program is stable (less than n opts made, more than r rounds performed, etc)
     ;; END notes
 
-    (define (optimize-cps ast)
+    (define (optimize-cps ast add-globals! flag-set?)
       (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
@@ -1707,11 +1719,18 @@
       (let ((new-ast (opt:inline-prims 
                        (opt:contract ast) -1)))
         ;; Just a hack for now, need to fix beta expand in compiler benchmark
-        (if (< (length (filter define? new-ast)) 1000)
-          (opt:beta-expand new-ast) ;; TODO: temporarily disabled, causes problems with massive expansions 
-                                    ;; in compiler benchmark, need to revist how to throttle/limit this 
-                                    ;; (program size? heuristics? what else??)
-          new-ast)
+        (when (< (length (filter define? new-ast)) 1000)
+          (set! new-ast 
+                (opt:beta-expand new-ast)) ;; TODO: temporarily disabled, causes problems with massive expansions 
+                                           ;; in compiler benchmark, need to revist how to throttle/limit this 
+                                           ;; (program size? heuristics? what else??)
+        )
+
+        ;; Memoize pure functions, if instructed
+        (when (and (procedure? flag-set?) (flag-set? 'memoize-pure-functions))
+          (set! new-ast (opt:memoize-pure-fncs new-ast add-globals!))
+        )
+        new-ast
       )
     )
 
@@ -2362,5 +2381,73 @@
   ;; well-known lambda's by var references to them.
   (set! *well-known-lambda-sym-lookup-tbl* candidates)
 )
+
+
+;; Analysis - validation section
+
+;; FUTURE (?): Does given symbol define a procedure?
+;(define (avld:procedure? sym) #f)
+
+;; Predicate: Does given symbol refer to a macro?
+(define (is-macro? sym)
+ (and-let* ((val (env:lookup sym (macro:get-env) #f)))
+   (or (tagged-list? 'macro val)
+       (Cyc-macro? val))))
+
+;; Does the given function call pass enough arguments?
+(define (validate:num-function-args ast)
+  ;;(trace:error `(validate:num-function-args ,(car ast) ,ast ,(env:lookup (car ast) (macro:get-env) #f)))
+  (and-let* (((app? ast))
+             ;; Prims are checked elsewhere
+             ((not (prim? (car ast))))
+             ((ref? (car ast)))
+             ;; Do not validate macros
+             ((not (is-macro? (car ast))))
+             ;; Extract lambda definition
+             (var (adb:get/default (car ast) #f))
+             (lam* (adbv:assigned-value var))
+             ((pair? lam*))
+             ;; Assigned value is boxed in a cell, extract it
+             (lam (car lam*))
+             ((ast:lambda? lam))
+             (formals-type (ast:lambda-formals-type lam))
+             ((equal? 'args:fixed formals-type)) ;; Could validate fixed-with-varargs, too
+             (expected-argc (length (ast:lambda-args lam)))
+             (argc (- (length ast) 1)) )
+     (when (not (= argc expected-argc))
+       (compiler-msg "Compiler Error: ")
+       (compiler-msg ast)
+       (compiler-error 
+        "Expected "
+        (number->string expected-argc)
+        " arguments to "
+        (symbol->string (car ast))
+        " but received "
+        (number->string argc))) ))
+
+;; Declare a compiler error and quit
+;; Preferable to (error) since a stack trace is meaningless here.
+;; Ideally want to supplement this with original line number data and such.
+(define (compiler-error . strs)
+  (display (apply string-append strs) (current-error-port))
+  (newline (current-error-port))
+  (exit 1))
+
+;; Display a compilation message to the user
+(define (compiler-msg . sexp)
+  (display (apply sexp->string sexp) (current-error-port))
+  (newline (current-error-port)))
+
+;; Convert given scheme expressions to a string, via (display)
+;; TODO: move to util module
+(define (sexp->string . sexps)
+  (let ((p (open-output-string)))
+    (for-each
+      (lambda (sexp)
+        (apply display (cons sexp (list p))))
+      sexps)
+    (let ((result (get-output-string p)))
+      (close-port p)
+      result)))
 
 ))

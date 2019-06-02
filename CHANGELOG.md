@@ -1,6 +1,69 @@
 # Changelog
 
-## 0.9.8 - TBD
+## 0.11.1 - May 25, 2019
+
+Features
+
+- Added support for immutable objects. Any quoted pairs, vectors, bytevectors, or strings will now be flagged as immutable, per R7RS.
+
+Bug Fixes
+
+- Fixed a bug where the compiler would not always validate the number of arguments passed to a locally-defined function.
+
+## 0.11 - April 16, 2019
+
+Features
+
+- During compilation validate the number of arguments passed to locally-defined functions.
+- Improve performance of compiled code a bit by inlining code that tracks call history instead of using a dedicated function in the runtime.
+- Updated build instructions for Mac, thanks Adam Feuer!
+
+Bug Fixes
+
+- Allow `exit` to return an integer value as the return code to the OS.
+
+## 0.10 - March 28, 2019
+
+Features
+
+- Improve performance in generated C code by allocating data for closures statically where possible, instead of via `alloca`.
+- Speed up `case` expressions by using nested `if` expressions instead of the `memv` primitive to evaluate conditions with more than one constant. The nested expressions have better cache locality and also avoid any additional object allocation or initialization.
+- Allow passing the `'bin` symbol to `Cyc-installation-dir` to return the location of the installation directory for binaries.
+
+Bug Fixes
+
+- Prevent the possibility of a segmentation fault when passing am improper list to the `member` and `assoc` family of functions.
+
+## 0.9.10 - March 5, 2019
+
+Features
+
+- Faster initialization of objects create via `define-record-type`.
+- Generate faster compiled code for calls to `vector` that contain less than five arguments.
+
+## 0.9.9 - February 19, 2019
+
+Bug Fixes
+
+- Fix from Petr Pražák to avoid compilation errors when using newer versions of LibTomMath.
+- Avoid cases where bignums are not initialized properly by the runtime and incorrectly retain a value of zero.
+- Handle the following edge case from R7RS:
+
+  > If `z` is a complex number, then `(real? z)` is true if and only if `(zero? (imag-part z))` is true. 
+
+## 0.9.8 - February 16, 2019
+
+Features
+
+- Memoize recursive calls to pure functions where possible.
+
+Bug Fixes
+
+- Arthur Maciel fixed a bug in the compiler back-end where a terminating semi-colon would not be emitted in the C code generated for a short program.
+
+Internal Compiler Enhancements
+
+- Arthur Maciel updated the `cgen` module to follow the [Riastradh style rules](https://mumble.net/~campbell/scheme/style.txt) for updating comments. Thanks Arthur!
 
 Bug Fixes
 

@@ -317,7 +317,7 @@ Ultimately, a garbage collector is tricky to implement and the focus must primar
 - [Baby's First Garbage Collector](http://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/), by Bob Nystrom
 - [Chibi-Scheme](https://github.com/ashinn/chibi-scheme)
 - [CHICKEN internals: the garbage collector](http://www.more-magic.net/posts/internals-gc.html), by Peter Bex
-- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](http://www.pipeline.com/~hbaker1/CheneyMTA.html), by Henry Baker
+- [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf), by Henry Baker
 - Fragmentation Tolerant Real Time Garbage Collection (PhD Dissertation), by Filip Pizlo
 - [The Garbage Collection Handbook: The Art of Automatic Memory Management](http://gchandbook.org/), by Antony Hosking, Eliot Moss, and Richard Jones
 - Implementing an on-the-fly garbage collector for Java, by Domani et al

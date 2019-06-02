@@ -237,8 +237,9 @@ struct gc_heap_root_t {
  */
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned char mark;           // mark bits (only need 2)
-  unsigned char grayed;         // stack object to be grayed when moved to heap
+  unsigned char mark;      // mark bits 
+  unsigned char grayed;    // stack object to be grayed when moved to heap
+  unsigned char immutable; // Flag normally mutable obj (EG: pair) as read-only
 };
 
 /** Get an object's `mark` value */
@@ -246,6 +247,9 @@ struct gc_header_type_t {
 
 /** Get an object's `grayed` value */
 #define grayed(x) (((list) x)->hdr.grayed)
+
+//** Access an object's "immutable" field */
+#define immutable(x) (((list) x)->hdr.immutable)
 
 /** Enums for tri-color marking */
 typedef enum { STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2
@@ -381,7 +385,6 @@ void gc_mark_globals(object globals, object global_table);
 //size_t gc_sweep(gc_heap * h, int heap_type, size_t * sum_freed_ptr, gc_thread_data *thd);
 gc_heap *gc_sweep(gc_heap * h, int heap_type, gc_thread_data *thd);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
-void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj);
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
                          long stack_size);
 void gc_thread_data_free(gc_thread_data * thd);
@@ -610,6 +613,7 @@ typedef cvar_type *cvar;
   cvar_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
+  n.hdr.immutable = 0; \
   n.tag = cvar_tag; \
   n.pvar = v;
 
@@ -632,6 +636,7 @@ typedef c_opaque_type *c_opaque;
   c_opaque_type var; \
   var.hdr.mark = gc_color_red; \
   var.hdr.grayed = 0; \
+  var.hdr.immutable = 0; \
   var.tag = c_opaque_tag; \
   var.ptr = p;
 
@@ -836,6 +841,7 @@ typedef struct {
 { int len = strlen(s); \
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
+  cs.hdr.immutable = 0; \
   cs.tag = string_tag; \
   cs.num_cp = len; \
   cs.len = len; \
@@ -850,6 +856,7 @@ typedef struct {
 { int len = length; \
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
+  cs.hdr.immutable = 0; \
   cs.tag = string_tag; cs.len = len; \
   cs.num_cp = len; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
@@ -861,7 +868,7 @@ typedef struct {
  * No allocation is done for the given C string.
  */
 #define make_string_noalloc(cs, s, length) string_type cs; \
-{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; cs.hdr.immutable = 0; \
   cs.tag = string_tag; cs.len = length; \
   cs.num_cp = length; \
   cs.str = s; }
@@ -871,6 +878,7 @@ typedef struct {
 { int len = strlen(s); \
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
+  cs.hdr.immutable = 0; \
   cs.tag = string_tag; \
   cs.num_cp = Cyc_utf8_count_code_points((uint8_t *)s); \
   if (cs.num_cp < 0) { \
@@ -888,6 +896,7 @@ typedef struct {
 { int len = length; \
   cs.hdr.mark = gc_color_red; \
   cs.hdr.grayed = 0; \
+  cs.hdr.immutable = 0; \
   cs.tag = string_tag; cs.len = len; \
   cs.num_cp = num_code_points; \
   cs.str = alloca(sizeof(char) * (len + 1)); \
@@ -899,7 +908,7 @@ typedef struct {
  * No allocation is done for the given C string.
  */
 #define make_utf8_string_noalloc(cs, s, length) string_type cs; \
-{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; \
+{ cs.hdr.mark = gc_color_red; cs.hdr.grayed = 0; cs.hdr.immutable = 0; \
   cs.tag = string_tag; cs.len = length; \
   cs.num_cp = length; \
   cs.str = s; }
@@ -917,6 +926,7 @@ typedef struct {
                  &heap_grown); \
     ((string_type *) _s)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color; \
     ((string_type *) _s)->hdr.grayed = 0; \
+    ((string_type *) _s)->hdr.immutable = 0; \
     ((string_type *) _s)->tag = string_tag; \
     ((string_type *) _s)->len = _len; \
     ((string_type *) _s)->num_cp = _num_cp; \
@@ -925,6 +935,7 @@ typedef struct {
     _s = alloca(sizeof(string_type)); \
     ((string_type *)_s)->hdr.mark = gc_color_red;  \
     ((string_type *)_s)->hdr.grayed = 0; \
+    ((string_type *)_s)->hdr.immutable = 0; \
     ((string_type *)_s)->tag = string_tag;  \
     ((string_type *)_s)->len = _len; \
     ((string_type *)_s)->num_cp = _num_cp; \
@@ -941,6 +952,7 @@ typedef struct {
                   &heap_grown); \
     ((bytevector) _bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color; \
     ((bytevector) _bv)->hdr.grayed = 0; \
+    ((bytevector) _bv)->hdr.immutable = 0; \
     ((bytevector) _bv)->tag = bytevector_tag; \
     ((bytevector) _bv)->len = _len; \
     ((bytevector) _bv)->data = (char *)(((char *)_bv) + sizeof(bytevector_type)); \
@@ -948,6 +960,7 @@ typedef struct {
     _bv = alloca(sizeof(bytevector_type)); \
     ((bytevector) _bv)->hdr.mark = gc_color_red; \
     ((bytevector) _bv)->hdr.grayed = 0; \
+    ((bytevector) _bv)->hdr.immutable = 0; \
     ((bytevector) _bv)->tag = bytevector_tag; \
     ((bytevector) _bv)->len = _len; \
     ((bytevector) _bv)->data = alloca(sizeof(char) * _len); \
@@ -1000,6 +1013,7 @@ typedef struct {
   port_type p; \
   p.hdr.mark = gc_color_red; \
   p.hdr.grayed = 0; \
+  p.hdr.immutable = 0; \
   p.tag = port_tag; \
   p.fp = f; \
   p.mode = m; \
@@ -1021,6 +1035,7 @@ typedef struct {
   port_type p; \
   p.hdr.mark = gc_color_red; \
   p.hdr.grayed = 0; \
+  p.hdr.immutable = 0; \
   p.tag = port_tag; \
   p.fp = f; \
   p.mode = 1; \
@@ -1049,11 +1064,16 @@ typedef struct {
 } vector_type;
 typedef vector_type *vector;
 
+typedef struct { vector_type v; object arr[2]; } vector_2_type;
+typedef struct { vector_type v; object arr[3]; } vector_3_type;
+typedef struct { vector_type v; object arr[4]; } vector_4_type;
+
 /** Create a new vector in the nursery */
 #define make_empty_vector(v) \
   vector_type v; \
   v.hdr.mark = gc_color_red; \
   v.hdr.grayed = 0; \
+  v.hdr.immutable = 0; \
   v.tag = vector_tag; \
   v.num_elements = 0; \
   v.elements = NULL;
@@ -1062,6 +1082,7 @@ typedef vector_type *vector;
   vector_type *v = alloca(sizeof(vector_type)); \
   v->hdr.mark = gc_color_red; \
   v->hdr.grayed = 0; \
+  v->hdr.immutable = 0; \
   v->tag = vector_tag; \
   v->num_elements = 0; \
   v->elements = NULL;
@@ -1085,6 +1106,7 @@ typedef bytevector_type *bytevector;
   bytevector_type v; \
   v.hdr.mark = gc_color_red; \
   v.hdr.grayed = 0; \
+  v.hdr.immutable = 0; \
   v.tag = bytevector_tag; \
   v.len = 0; \
   v.data = NULL;
@@ -1093,6 +1115,7 @@ typedef bytevector_type *bytevector;
   bytevector_type *v = alloca(sizeof(bytevector_type)); \
   v->hdr.mark = gc_color_red; \
   v->hdr.grayed = 0; \
+  v->hdr.immutable = 0; \
   v->tag = bytevector_tag; \
   v->len = 0; \
   v->data = NULL;
@@ -1121,6 +1144,7 @@ typedef pair_type *pair;
   pair_type n; \
   n.hdr.mark = gc_color_red; \
   n.hdr.grayed = 0; \
+  n.hdr.immutable = 0; \
   n.tag = pair_tag; \
   n.pair_car = a; \
   n.pair_cdr = d;
@@ -1129,6 +1153,7 @@ typedef pair_type *pair;
   pair_type *n = alloca(sizeof(pair_type)); \
   n->hdr.mark = gc_color_red; \
   n->hdr.grayed = 0; \
+  n->hdr.immutable = 0; \
   n->tag = pair_tag; \
   n->pair_car = a; \
   n->pair_cdr = d;
@@ -1136,6 +1161,7 @@ typedef pair_type *pair;
 #define set_pair(n,a,d) \
   n->hdr.mark = gc_color_red; \
   n->hdr.grayed = 0; \
+  n->hdr.immutable = 0; \
   n->tag = pair_tag; \
   n->pair_car = a; \
   n->pair_cdr = d;
@@ -1143,6 +1169,7 @@ typedef pair_type *pair;
 #define set_pair_as_expr(n,a,d) \
  (((pair)(n))->hdr.mark = gc_color_red, \
   ((pair)(n))->hdr.grayed = 0, \
+  ((pair)(n))->hdr.immutable = 0, \
   ((pair)(n))->tag = pair_tag, \
   ((pair)(n))->pair_car = a, \
   ((pair)(n))->pair_cdr = d, \
@@ -1378,7 +1405,7 @@ void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
 
 /* Bignum utility functions */
-double mp_get_double(mp_int *a);
+double mp_get_double(const mp_int *a);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_int2bignum(int n, mp_int *bn);
 
