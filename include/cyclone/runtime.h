@@ -66,6 +66,8 @@ void gc_init_heap(long heap_size);
 
 #define Cyc_verify_mutable(data, obj) { \
   if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
+#define Cyc_verify_immutable(data, obj) { \
+  if (!immutable(obj)) Cyc_mutable_obj_error(data, obj); }
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
   if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 #define Cyc_check_type2(data, fnc_test, tag, obj) { \
@@ -88,6 +90,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj)
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_immutable_obj_error(void *data, object obj);
+void Cyc_mutable_obj_error(void *data, object obj);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
 /**@}*/

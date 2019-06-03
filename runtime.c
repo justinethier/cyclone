@@ -78,6 +78,11 @@ void Cyc_immutable_obj_error(void *data, object obj)
   Cyc_rt_raise2(data, "Unable to modify immutable object ", obj);
 }
 
+void Cyc_mutable_obj_error(void *data, object obj)
+{
+  Cyc_rt_raise2(data, "Expected immutable object ", obj);
+}
+
 void Cyc_check_obj(void *data, int tag, object obj)
 {
   if (!is_object_type(obj)) {
