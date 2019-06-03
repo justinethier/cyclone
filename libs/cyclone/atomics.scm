@@ -30,6 +30,7 @@
   " int heap_grown;
     atomic atm;
     atomic_type tmp;
+    Cyc_verify_immutable(data, obj); // TODO: verify obj is not on local stack???
     tmp.hdr.mark = gc_color_red;
     tmp.hdr.grayed = 0;
     tmp.tag = atomic_tag;
@@ -65,17 +66,33 @@
 ;; 
 ;; That means the function can get called multiple times. That means it needs to be a pure function. Another thing is that you can't control the order of the function calls. If multiple threads are swapping to an Atom at the same time, order is out of the window. So make sure your functions are independent of order, like we talked about before.
 ;;
-(define (swap! atom f . opts)
-  'TODO)
+(define (swap! atom f . args)
+  (let* ((oldval (ref atom))
+         (newval (apply f oldval args)))
+  ;; TODO: newval could be on the stack, need to ensure it is moved...
+  ;; maybe call (make-shared newval)
+    (if (compare-and-set! atom oldval newval)
+        newval ;; value did not change, return new one
+        (apply swap! atom f args) ;; Value changed, try again
+        )))
 
-TODO: once swap works, need to figure out the strategy for handling thread-local and mutable objects.
-do we ensure an object is neither before being allowed to be added to an atom?
+;; TODO: (make-shared obj)
+;; likely implemented in runtime.c, either needs obj to be an immedate or 
+;; an obj without children we can move to the heap or
+;; an object with children that we have to minor GC before it can be moved to the heap.
+;; in the last case, how do we return a ref to the heap object?
 
-  nice thing about enforcing immutabiility is we don't need to check an entire structure (pair, vec, bv) for members on the stack, we can just check the first element
+;
+;TODO: once swap works, need to figure out the strategy for handling thread-local and mutable objects.
+;do we ensure an object is neither before being allowed to be added to an atom?
+;
+;  nice thing about enforcing immutabiility is we don't need to check an entire structure (pair, vec, bv) for members on the stack, we can just check the first element
+;
+;also need a process for bulk initialization of atoms, instead of forcing a GC for each init.
+;
+;TODO: need an internal version of this and an external one
 
-also need a process for bulk initialization of atoms, instead of forcing a GC for each init.
 
-TODO: need an internal version of this and an external one
 ;; (compare-and-set! atom oldval newval)
 ;; https://clojuredocs.org/clojure.core/compare-and-set!
 ;; Atomically sets the value of atom to newval if and only if the
@@ -85,6 +102,7 @@ TODO: need an internal version of this and an external one
   "(void *data, int argc, closure _, object k, object obj, object oldval, object newval)"
   " atomic a;
     Cyc_check_atomic(data, obj);
+    Cyc_verify_immutable(data, newval);
     a = (atomic) obj;
     bool result = ck_pr_cas_ptr(&(a->obj), oldval, newval);
     object rv = result ? boolean_t : boolean_f;
