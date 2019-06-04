@@ -403,6 +403,7 @@ void gc_wait_handshake();
 void gc_start_collector();
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
 void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object maybe_copied);
+void Cyc_make_shared_object(void *data, object k, object obj);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
 /**

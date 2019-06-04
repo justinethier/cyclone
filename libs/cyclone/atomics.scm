@@ -76,6 +76,9 @@
         (apply swap! atom f args) ;; Value changed, try again
         )))
 
+(define-c make-shared
+  "(void *data, int argc, closure _, object k, object obj)"
+  " Cyc_make_shared_object(data, k, obj); ")
 ;; TODO: (make-shared obj)
 ;; likely implemented in runtime.c, either needs obj to be an immedate or 
 ;; an obj without children we can move to the heap or
@@ -119,3 +122,6 @@
     (compare-and-set! a lis 1)
     (ref a)
 ))
+(newline)
+(write
+  (make-shared '(1 (2))))
