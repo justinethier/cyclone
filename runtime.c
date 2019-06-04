@@ -5679,6 +5679,54 @@ void GC(void *data, closure cont, object * args, int num_args)
 }
 
 /**
+ * Move a thread-local object to the heap
+ */
+
+void Cyc_make_shared_object(void *data, object k, object obj)
+{
+  if (!is_object_type(obj) || // Immediates do not have to be moved
+      gc_is_stack_obj(data, obj)) { // Not thread-local, assume already on heap
+    return_closcall1(data, k, obj);
+  }
+
+  switch(type_of(obj)) {
+  // These are never on the stack
+  //  cond_var_tag    = 6
+  //  mutex_tag       = 14
+  //  atomic_tag      = 22
+  //  boolean_tag     = 0
+  // These should never be on the stack
+  //  Cvar_tag        = 7
+  TODO:
+      , bytevector_tag  = 1
+      , c_opaque_tag    = 2
+      , closure0_tag    = 3
+      , closure1_tag    = 4
+      , closureN_tag    = 5
+      , double_tag      = 8
+      , eof_tag         = 9
+      , forward_tag     = 10
+      , integer_tag     = 11
+      , bignum_tag      = 12
+      , macro_tag       = 13
+      , pair_tag        = 15
+      , port_tag        = 16 
+      , primitive_tag   = 17
+      , string_tag      = 18
+      , symbol_tag      = 19
+      , vector_tag      = 20
+      , complex_num_tag = 21
+  case pair_type:
+  case vector_type:
+    // TODO: must initiate minor GC, how to ensure we return new ref to obj?
+    break;
+  default:
+    printf("Invalid shared object type %d\n", type_of(obj));
+    exit(1);
+  }
+}
+
+/**
  * Receive a list of arguments and apply them to the given function
  */
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
