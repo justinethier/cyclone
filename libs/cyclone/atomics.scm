@@ -25,12 +25,15 @@
 ;; 
 ;; Alloc on the heap since by definition atoms are used by multiple threads
 ;; 
-(define-c make-atom
+(define-c %make-atom
   "(void *data, int argc, closure _, object k, object obj)"
   " int heap_grown;
     atomic atm;
     atomic_type tmp;
     Cyc_verify_immutable(data, obj); // TODO: verify obj is not on local stack???
+    if (gc_is_stack_obj(data, obj)){
+      Cyc_rt_raise2(data, \"Atom cannot be a thread-local object\", obj);
+    }
     tmp.hdr.mark = gc_color_red;
     tmp.hdr.grayed = 0;
     tmp.tag = atomic_tag;
@@ -39,10 +42,13 @@
     ck_pr_store_ptr(&(atm->obj), obj); // Needed??
     return_closcall1(data, k, atm); ")
 
+(define (make-atom obj)
+  (%make-atom (make-shared obj)))
+
 (define (atom . obj)
   (if (pair? obj)
-      (make-atom (car obj))
-      (make-atom #f)))
+      (%make-atom (make-shared (car obj)))
+      (%make-atom #f)))
 
 ;; - ref atomic
 (define-c ref
@@ -68,9 +74,7 @@
 ;;
 (define (swap! atom f . args)
   (let* ((oldval (ref atom))
-         (newval (apply f oldval args)))
-  ;; TODO: newval could be on the stack, need to ensure it is moved...
-  ;; maybe call (make-shared newval)
+         (newval (make-shared (apply f oldval args))))
     (if (compare-and-set! atom oldval newval)
         newval ;; value did not change, return new one
         (apply swap! atom f args) ;; Value changed, try again
@@ -106,6 +110,9 @@
   " atomic a;
     Cyc_check_atomic(data, obj);
     Cyc_verify_immutable(data, newval);
+    if (gc_is_stack_obj(data, obj)){
+      Cyc_rt_raise2(data, \"Atom cannot be a thread-local object\", obj);
+    }
     a = (atomic) obj;
     bool result = ck_pr_cas_ptr(&(a->obj), oldval, newval);
     object rv = result ? boolean_t : boolean_f;
