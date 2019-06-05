@@ -5691,7 +5691,7 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   }
 
   switch(type_of(obj)) {
-  // These are never on the stack
+  // These are never on the stack, ignore them
   //  cond_var_tag    = 6
   //  mutex_tag       = 14
   //  atomic_tag      = 22
@@ -5701,22 +5701,50 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   //  closure0_tag    = 3
   //  eof_tag         = 9
   //  macro_tag       = 13
-  // These should never be on the stack
-  //  Cvar_tag        = 7
-//  TODO:
-//      , bytevector_tag  = 1
-//      , c_opaque_tag    = 2
-//      , closure1_tag    = 4
-//      , closureN_tag    = 5
-//      , double_tag      = 8
-//      , port_tag        = 16 
-//      , primitive_tag   = 17
-//      , string_tag      = 18
-//      , complex_num_tag = 21
+  //  primitive_tag   = 17
+
+  // Copy stack-allocated objects with no children to the heap:
+  case string_tag:{
+      string_type *hp = gc_alloc(heap,
+                                 sizeof(string_type) + ((string_len(obj) + 1)),
+                                 obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  case double_tag:{
+      double_type *hp =
+          gc_alloc(heap, sizeof(double_type), obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  case bytevector_tag:{
+      bytevector_type *hp = gc_alloc(heap,
+                                     sizeof(bytevector_type) +
+                                     sizeof(char) * (((bytevector) obj)->len),
+                                     obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  case port_tag:{
+      port_type *hp =
+          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  case c_opaque_tag:{
+      c_opaque_type *hp =
+          gc_alloc(heap, sizeof(c_opaque_type), obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  case complex_num_tag:{
+      complex_num_type *hp =
+          gc_alloc(heap, sizeof(complex_num_type), obj, thd, heap_grown);
+      return_closcall1(data, k, hp);
+    }
+  // Objs w/children force minor GC to guarantee everything is relocated:
+  case cvar_tag:
+  case closure1_tag:
+  case closureN_tag:
   case pair_tag:
   case vector_tag:
     buf[0] = obj;
-    GC(data, k, buf, 1); // Ensure whole obj is relocated to heap
+    GC(data, k, buf, 1);
     break;
   default:
     printf("Invalid shared object type %d\n", type_of(obj));
