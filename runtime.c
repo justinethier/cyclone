@@ -5519,7 +5519,8 @@ object Cyc_trigger_minor_gc(void *data, object cont)
 }
 
 /**
- * Do a minor GC
+ * Do a minor GC, tracing all of the live objects from the calling thread's
+ * stack and moving them to the heap.
  * \ingroup gc_minor
  */
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
@@ -5590,6 +5591,8 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
   }
   clear_mutations(data);        // Reset for next time
 
+  // Collect globals but only if a change was made. This avoids traversing a
+  // long list of objects unless absolutely necessary.
   if (((gc_thread_data *) data)->globals_changed) {
       ((gc_thread_data *) data)->globals_changed = 0;
     // Transport globals
@@ -5707,39 +5710,15 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   //  primitive_tag   = 17
 
   // Copy stack-allocated objects with no children to the heap:
-  case string_tag:{
-      string_type *hp = gc_alloc(heap,
-                                 sizeof(string_type) + ((string_len(obj) + 1)),
-                                 obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
-  case double_tag:{
-      double_type *hp =
-          gc_alloc(heap, sizeof(double_type), obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
-  case bytevector_tag:{
-      bytevector_type *hp = gc_alloc(heap,
-                                     sizeof(bytevector_type) +
-                                     sizeof(char) * (((bytevector) obj)->len),
-                                     obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
-  case port_tag:{
-      port_type *hp =
-          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
-  case c_opaque_tag:{
-      c_opaque_type *hp =
-          gc_alloc(heap, sizeof(c_opaque_type), obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
-  case complex_num_tag:{
-      complex_num_type *hp =
-          gc_alloc(heap, sizeof(complex_num_type), obj, thd, heap_grown);
-      return_closcall1(data, k, hp);
-    }
+  case string_tag:
+  case double_tag:
+  case bytevector_tag:
+  case port_tag:
+  case c_opaque_tag:
+  case complex_num_tag: {
+    object hp = gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd, heap_grown);
+    return_closcall1(data, k, hp);
+  }
   // Objs w/children force minor GC to guarantee everything is relocated:
   case cvar_tag:
   case closure1_tag:
