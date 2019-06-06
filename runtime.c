@@ -5689,7 +5689,7 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   object buf[1];
   int tmp, *heap_grown = &tmp;
   if (!is_object_type(obj) || // Immediates do not have to be moved
-      gc_is_stack_obj(data, obj)) { // Not thread-local, assume already on heap
+      !gc_is_stack_obj(data, obj)) { // Not thread-local, assume already on heap
     return_closcall1(data, k, obj);
   }
 
