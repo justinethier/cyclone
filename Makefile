@@ -20,6 +20,7 @@ TEST_DIR = tests
 # Source files
 SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
 					 $(wildcard srfi/*.sld) \
+					 $(wildcard libs/cyclone/*.sld) \
 					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
@@ -43,7 +44,7 @@ example :
 	cd $(EXAMPLE_DIR) ; $(MAKE)
 
 clean :
-	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta libs/cyclone/*.o libs/cyclone/*.so libs/cyclone/*.c libs/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; $(MAKE) clean
 	rm -rf html tests/*.o tests/*.c
 	rm -f tests/srfi-28-tests
@@ -57,6 +58,7 @@ clean :
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(MKDIR) $(DESTDIR)$(DATADIR)/cyclone
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sets
@@ -68,8 +70,12 @@ install : libs install-libs install-includes install-bin
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/match.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.sld $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.scm $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0755 libs/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0755 srfi/*.so $(DESTDIR)$(DATADIR)/srfi
@@ -86,6 +92,8 @@ uninstall :
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/cyclone/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/cyclone
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/list-queues/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/sets/*.*
@@ -199,6 +207,7 @@ bench :
 	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone ; grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
 
 bootstrap : icyc libs
+	mkdir -p $(BOOTSTRAP_DIR)/libs/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/srfi
 	mkdir -p $(BOOTSTRAP_DIR)/$(HEADER_DIR)
@@ -208,7 +217,9 @@ bootstrap : icyc libs
 	cp $(HEADER_DIR)/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/hashset.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
+	cp libs/cyclone/*.sld $(BOOTSTRAP_DIR)/libs/cyclone
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp libs/cyclone/*.c $(BOOTSTRAP_DIR)/libs/cyclone
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp srfi/*.scm $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
