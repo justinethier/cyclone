@@ -25,6 +25,11 @@
 ;; 
 ;; Alloc on the heap since by definition atoms are used by multiple threads
 ;; 
+;; We also enforce that an object added to an atom must be an immutable and shared (IE, not thread-local).
+;; Because we enforce these guarantees:
+;; - The only way for application-code to change the object is via atomic calls. No other synchronization is required
+;; - Atoms do not need to have a write barrier because the atom's heap object can never refer to a stack object
+;; - We do not need to travese an entire pair/vector to determine all members are shared. Only the first object needs to be checked.
 (define-c %make-atom
   "(void *data, int argc, closure _, object k, object obj)"
   " int heap_grown;
@@ -32,7 +37,7 @@
     atomic_type tmp;
     Cyc_verify_immutable(data, obj); // TODO: verify obj is not on local stack???
     if (gc_is_stack_obj(data, obj)){
-      Cyc_rt_raise2(data, \"Atom cannot be a thread-local object\", obj);
+      Cyc_rt_raise2(data, \"Atom cannot contain a thread-local object\", obj);
     }
     tmp.hdr.mark = gc_color_red;
     tmp.hdr.grayed = 0;
@@ -80,25 +85,22 @@
         (apply swap! atom f args) ;; Value changed, try again
         )))
 
+;; Return a reference to an object that can be safely shared by many threads.
+;; 
+;; If the given object is atomic or already shared it it simply returned.
+;; Otherwise it is necessary to create a copy of the object.
+;;
+;; Note this function may trigger a minor GC if a thread-local pair or vector 
+;; is passed.
 (define-c make-shared
   "(void *data, int argc, closure _, object k, object obj)"
   " Cyc_make_shared_object(data, k, obj); ")
-;; TODO: (make-shared obj)
-;; likely implemented in runtime.c, either needs obj to be an immedate or 
-;; an obj without children we can move to the heap or
-;; an object with children that we have to minor GC before it can be moved to the heap.
-;; in the last case, how do we return a ref to the heap object?
 
-;
-;TODO: once swap works, need to figure out the strategy for handling thread-local and mutable objects.
-;do we ensure an object is neither before being allowed to be added to an atom?
-;
-;  nice thing about enforcing immutabiility is we don't need to check an entire structure (pair, vec, bv) for members on the stack, we can just check the first element
-;
-;also need a process for bulk initialization of atoms, instead of forcing a GC for each init.
-;
-;TODO: need an internal version of this and an external one
-
+;; Allow all objects currently on the calling thread's local stack to be shared
+;; with other threads.
+(define-c share-all!
+  "(void *data, int argc, closure _, object k)"
+  " Cyc_trigger_minor_gc(data, k); ")
 
 ;; (compare-and-set! atom oldval newval)
 ;; https://clojuredocs.org/clojure.core/compare-and-set!
@@ -111,7 +113,7 @@
     Cyc_check_atomic(data, obj);
     Cyc_verify_immutable(data, newval);
     if (gc_is_stack_obj(data, obj)){
-      Cyc_rt_raise2(data, \"Atom cannot be a thread-local object\", obj);
+      Cyc_rt_raise2(data, \"Atom cannot contain a thread-local object\", obj);
     }
     a = (atomic) obj;
     bool result = ck_pr_cas_ptr(&(a->obj), oldval, newval);
