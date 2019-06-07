@@ -1943,6 +1943,23 @@ object Cyc_vector_ref(void *data, object v, object k)
   return ((vector) v)->elements[idx];
 }
 
+object _unsafe_Cyc_vector_ref(object v, object k)
+{
+  int idx;
+  if (Cyc_is_vector(v) == boolean_f ||
+      Cyc_is_fixnum(k) == boolean_f)
+  {
+    return NULL;
+  }
+
+  idx = unbox_number(k);
+  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+    return NULL;
+  }
+
+  return ((vector) v)->elements[idx];
+}
+
 object Cyc_vector_length(void *data, object v)
 {
   if ((v != NULL) && !is_value_type(v) && ((list) v)->tag == vector_tag) {
@@ -6185,10 +6202,21 @@ void *Cyc_init_thread(object thread_and_thunk)
 {
   vector_type *t;
   c_opaque_type *o;
-  object op, parent, child;
+  object op, parent, child, tmp;
   long stack_start;
   gc_thread_data *thd;
-  thd = malloc(sizeof(gc_thread_data));
+
+  // Extract passed-in thread data object
+  tmp = car(thread_and_thunk); 
+  t = (vector_type *)tmp;
+  op = _unsafe_Cyc_vector_ref(t, obj_int2obj(2)); // Field set in thread-start!
+  if (op == NULL) {
+    // Should never happen
+    thd = malloc(sizeof(gc_thread_data));
+  } else {
+    o = (c_opaque_type *)op;
+    thd = (gc_thread_data *)(opaque_ptr(o));
+  }
   gc_thread_data_init(thd, 0, (char *)&stack_start, global_stack_size);
   thd->scm_thread_obj = car(thread_and_thunk);
   thd->gc_cont = cdr(thread_and_thunk);
@@ -6198,7 +6226,7 @@ void *Cyc_init_thread(object thread_and_thunk)
 
   // Copy thread params from the calling thread
   t = (vector_type *)thd->scm_thread_obj;
-  op = Cyc_vector_ref(thd, t, obj_int2obj(2)); // Field set in thread-start!
+  op = Cyc_vector_ref(thd, t, obj_int2obj(5)); // Field set in thread-start!
   o = (c_opaque_type *)op;
   parent = ((gc_thread_data *)o->ptr)->param_objs; // Unbox parent thread's data
   child = NULL;

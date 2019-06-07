@@ -70,7 +70,8 @@
         ;; - internal thread id (implementation-specific)
         ;; - name
         ;; - specific
-        (vector 'cyc-thread-obj thunk #f name-str #f)))
+        ;; - internal
+        (vector 'cyc-thread-obj thunk #f name-str #f #f)))
 
     (define (thread-name t) (vector-ref t 3))
     (define (thread-specific t) (vector-ref t 4))
@@ -83,7 +84,7 @@
             t)))
 
     (define *primordial-thread*
-      (vector 'cyc-thread-obj #f #f "main thread" #f))
+      (vector 'cyc-thread-obj #f #f "main thread" #f #f))
 
     (define-c %current-thread
       "(void *data, int argc, closure _, object k)"
@@ -96,15 +97,22 @@
         make_c_opaque(co, td);
         return_closcall1(data, k, &co); ")
 
+    (define-c %alloc-thread-data
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *td = malloc(sizeof(gc_thread_data));
+        make_c_opaque(co, td);
+        return_closcall1(data, k, &co); ")
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
-      ;; t contains any closures on the "parent" thread's stack
+      ;; it contains any closures on the "parent" thread's stack
       (let* ((thunk (vector-ref t 1)) 
              (thread-params (cons t (lambda ()
-                                      (vector-set! t 2 (%get-thread-data))
+                                      (vector-set! t 5 #f)
                                       (thunk)))))
-        (vector-set! t 2 (%get-thread-data)) ;; Temporarily make parent thread
+        (vector-set! t 5 (%get-thread-data)) ;; Temporarily make parent thread
                                              ;; data available for child init
+        (vector-set! t 2 (%alloc-thread-data))  ;; Data for new thread
         (Cyc-minor-gc)
         (Cyc-spawn-thread! thread-params)
         ))
