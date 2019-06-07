@@ -73,7 +73,6 @@ install : libs install-libs install-includes install-bin
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 libs/cyclone/*.sld $(DESTDIR)$(DATADIR)/cyclone
-	$(INSTALL) -m0644 libs/cyclone/*.scm $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 libs/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0755 libs/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
