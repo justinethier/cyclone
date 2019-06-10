@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.2 - TBD
+
+Bug Fixes
+
+- Fixed `thread-join!` to wait properly both for running threads and new threads that have not yet been started.
+
 ## 0.11.1 - May 25, 2019
 
 Features
