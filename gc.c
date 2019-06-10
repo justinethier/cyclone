@@ -66,8 +66,11 @@ static int mark_stack_i = 0;
 //    thread terminates (normally or not).
 static gc_thread_data *primordial_thread = NULL;
 
+/** Data new mutator threads that are not running yet */
+static ck_array_t new_mutators;
 /** Data for each individual mutator thread */
-ck_array_t Cyc_mutators, old_mutators;
+static ck_array_t Cyc_mutators;
+static ck_array_t old_mutators;
 static pthread_mutex_t mutators_lock;
 
 static void my_free(void *p, size_t m, bool d)
@@ -214,6 +217,10 @@ void gc_initialize(void)
     exit(1);
   }
 
+  if (ck_array_init(&new_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0) {
+    fprintf(stderr, "Unable to initialize mutator array\n");
+    exit(1);
+  }
   if (ck_array_init(&old_mutators, CK_ARRAY_MODE_SPMC, &my_allocator, 10) == 0) {
     fprintf(stderr, "Unable to initialize mutator array\n");
     exit(1);
@@ -230,7 +237,25 @@ void gc_initialize(void)
 }
 
 /**
- * @brief  Add data for a new mutator
+ * @brief  Add data for a new mutator that is not yet scheduled to run.
+ *         This is done so there is a record in the system even if the 
+ *         thread is not running, to prevent race conditions for any
+ *         functions (EG: thread-join!) that need to access the thread.
+ * @param  thd  Thread data for the mutator
+ */
+void gc_add_new_unrunning_mutator(gc_thread_data * thd)
+{
+  pthread_mutex_lock(&mutators_lock);
+  if (ck_array_put_unique(&new_mutators, (void *)thd) < 0) {
+    fprintf(stderr, "Unable to allocate memory for a new thread, exiting\n");
+    exit(1);
+  }
+  ck_array_commit(&new_mutators);
+  pthread_mutex_unlock(&mutators_lock);
+}
+
+/**
+ * @brief  Add data for a new mutator that is starting to run.
  * @param  thd  Thread data for the mutator
  */
 void gc_add_mutator(gc_thread_data * thd)
@@ -246,6 +271,10 @@ void gc_add_mutator(gc_thread_data * thd)
   // Main thread is always the first one added
   if (primordial_thread == NULL) {
       primordial_thread = thd;
+  } else {
+    // At this point the mutator is running, so remove it from the new list
+    ck_array_remove(&new_mutators, (void *)thd);
+    ck_array_commit(&new_mutators);
   }
 }
 
@@ -283,6 +312,23 @@ int gc_is_mutator_active(gc_thread_data *thd)
   ck_array_iterator_t iterator;
   gc_thread_data *m;
   CK_ARRAY_FOREACH(&Cyc_mutators, &iterator, &m) {
+    if (m == thd) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/**
+ * @brief Determine if the given mutator is in the list of new threads.
+ * @param thd Thread data object of the m
+ * @return A true value if the mutator is found, 0 otherwise.
+ */
+int gc_is_mutator_new(gc_thread_data *thd)
+{
+  ck_array_iterator_t iterator;
+  gc_thread_data *m;
+  CK_ARRAY_FOREACH(&new_mutators, &iterator, &m) {
     if (m == thd) {
       return 1;
     }

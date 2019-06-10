@@ -33,7 +33,8 @@
 (thread-start! t2)
 
 (write (thread? t))
-(thread-sleep! 1)
+(write (thread? t2))
+(newline)
 ;; Main thread - wait for thread to broadcast it is done
 (thread-join! t)
 (thread-join! t2)

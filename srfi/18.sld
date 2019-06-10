@@ -71,7 +71,13 @@
         ;; - name
         ;; - specific
         ;; - internal
-        (vector 'cyc-thread-obj thunk #f name-str #f #f)))
+        (vector 
+          'cyc-thread-obj 
+          thunk 
+          (%alloc-thread-data)  ;; Internal data for new thread
+          name-str 
+          #f 
+          #f)))
 
     (define (thread-name t) (vector-ref t 3))
     (define (thread-specific t) (vector-ref t 4))
@@ -100,6 +106,7 @@
     (define-c %alloc-thread-data
       "(void *data, int argc, closure _, object k)"
       " gc_thread_data *td = malloc(sizeof(gc_thread_data));
+        gc_add_new_unrunning_mutator(td); /* Register this thread */
         make_c_opaque(co, td);
         return_closcall1(data, k, &co); ")
 
@@ -112,7 +119,6 @@
                                       (thunk)))))
         (vector-set! t 5 (%get-thread-data)) ;; Temporarily make parent thread
                                              ;; data available for child init
-        (vector-set! t 2 (%alloc-thread-data))  ;; Data for new thread
         (Cyc-minor-gc)
         (Cyc-spawn-thread! thread-params)
         ))
@@ -131,7 +137,8 @@
         set_thread_blocked(data, k);
         /* Cannot join to detached thread! pthread_join(td->thread_id, NULL);*/
         while (1) {
-          if (!gc_is_mutator_active(td)){
+          if (!gc_is_mutator_new(td) && 
+              !gc_is_mutator_active(td)){
             break;
           }
           gc_sleep_ms(250);
