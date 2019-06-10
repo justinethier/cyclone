@@ -2,6 +2,10 @@
 
 ## 0.11.2 - TBD
 
+Features
+
+- TODO: new library for atomics
+
 Bug Fixes
 
 - Fixed `thread-join!` to wait properly both for running threads and new threads that have not yet been started.
