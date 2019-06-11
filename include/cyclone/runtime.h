@@ -67,7 +67,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_verify_mutable(data, obj) { \
   if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
 #define Cyc_verify_immutable(data, obj) { \
-  if (is_object_type(obj) && !immutable(obj)) Cyc_mutable_obj_error(data, obj); }
+  if (boolean_f == Cyc_is_immutable(obj)) Cyc_mutable_obj_error(data, obj); }
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
   if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 #define Cyc_check_type2(data, fnc_test, tag, obj) { \
@@ -472,6 +472,7 @@ object Cyc_is_procedure(void *data, object o);
 #define Cyc_is_eof_object(o)  (make_boolean(is_object_type(o) && ((list) o)->tag == eof_tag))
 #define Cyc_is_cvar(o)        (make_boolean(is_object_type(o) && ((list) o)->tag == cvar_tag))
 #define Cyc_is_opaque(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == c_opaque_tag))
+object Cyc_is_immutable(object obj);
 /**@}*/
 
 /**

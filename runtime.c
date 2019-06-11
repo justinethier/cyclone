@@ -1877,6 +1877,20 @@ object Cyc_is_procedure(void *data, object o)
 //  return boolean_f;
 //}
 
+object Cyc_is_immutable(object obj)
+{
+  if (is_object_type(obj) &&
+      (type_of(obj) == pair_tag ||
+       type_of(obj) == vector_tag ||
+       type_of(obj) == bytevector_tag ||
+       type_of(obj) == string_tag
+      ) &&
+      !immutable(obj) ) {
+    return boolean_f;
+  }
+  return boolean_t;
+}
+
 object Cyc_set_cell(void *data, object l, object val)
 {
   // FUTURE: always use "unsafe" car here, since set-cell is added by cyclone
