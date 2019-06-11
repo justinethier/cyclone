@@ -11,7 +11,7 @@
 
 (define (sum-loop n)
   (mutex-lock! m)
-  (set! *sum* (+ *sum* 1))
+  (set! *sum* (make-shared (+ *sum* 1)))
   (mutex-unlock! m)
   ;(swap! *sum* + 1)
   (if (zero? n)
@@ -42,5 +42,7 @@
 (thread-join! t5)
 (thread-join! t6)
 (display "main thread done, sum = ")
+(mutex-lock! m)
 (display *sum*)
 (newline)
+(mutex-unlock! m)

@@ -273,8 +273,10 @@ void gc_add_mutator(gc_thread_data * thd)
       primordial_thread = thd;
   } else {
     // At this point the mutator is running, so remove it from the new list
+    pthread_mutex_lock(&mutators_lock);
     ck_array_remove(&new_mutators, (void *)thd);
     ck_array_commit(&new_mutators);
+    pthread_mutex_unlock(&mutators_lock);
   }
 }
 
