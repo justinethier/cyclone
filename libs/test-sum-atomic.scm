@@ -8,7 +8,7 @@
 ;(define cv (make-condition-variable))
 ;(define m (make-mutex))
 
-(define *sum* (make-atom 0))
+(define *sum* (make-atom 0.0))
 
 (define (sum-loop n)
   ;;(set! *sum* (+ *sum* 1))
@@ -18,7 +18,7 @@
       (sum-loop (- n 1))))
 
 (define (sum-entry-pt)
-  (sum-loop (* 10 100 100)))
+  (sum-loop (* 10 10 100 100)))
 
 ;; Thread - Do something, then let main thread know when we are done
 (define t1 (make-thread sum-entry-pt))

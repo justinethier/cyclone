@@ -2,21 +2,24 @@
 (import (scheme base)
         (scheme read)
         (scheme write)
+        (cyclone concurrency)
         (srfi 18))
 
-;(define cv (make-condition-variable))
-;(define m (make-mutex))
+(define m (make-mutex))
 
-(define *sum* 0)
+(define *sum* 0.0)
 
 (define (sum-loop n)
+  (mutex-lock! m)
   (set! *sum* (+ *sum* 1))
+  (mutex-unlock! m)
+  ;(swap! *sum* + 1)
   (if (zero? n)
-      'done
+      (display "thread done\n")
       (sum-loop (- n 1))))
 
 (define (sum-entry-pt)
-  (sum-loop (* 10 100 100 100)))
+  (sum-loop (* 10 10 100 100)))
 
 ;; Thread - Do something, then let main thread know when we are done
 (define t1 (make-thread sum-entry-pt))
