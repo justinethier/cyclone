@@ -281,35 +281,35 @@ Similar to `match-let`, but analogously to `let*` matches and binds the variable
 
 
 
-#make-atom
+# make-atom
 
 TODO
 
-#atom
+# atom
 
 TODO
 
-#atom-1
+# atom-1
 
 TODO
 
-#ref
+# ref
 
 TODO
 
-#swap
+# swap
 
 TODO
 
-#compare-and-set
+# compare-and-set
 
 TODO
 
-#make-shared
+# make-shared
 
 TODO
 
-#share-all
+# share-all
 
 TODO
 
