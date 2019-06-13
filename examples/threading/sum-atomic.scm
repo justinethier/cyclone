@@ -1,4 +1,4 @@
-;;;; A simple example of using a condition variable to simulate thread-join
+;;;; Example of having multiple threads sum a variable using an atom.
 (import (scheme base)
         (scheme read)
         (scheme write)
@@ -18,7 +18,7 @@
       (sum-loop (- n 1))))
 
 (define (sum-entry-pt)
-  (sum-loop (* 10 100 100 100)))
+  (sum-loop (* 100 100 100)))
 
 ;; Thread - Do something, then let main thread know when we are done
 (define t1 (make-thread sum-entry-pt))
@@ -50,5 +50,5 @@
 (thread-join! t8)
 (thread-join! t9)
 (display "main thread done, sum = ")
-(display (ref *sum*))
+(display (deref *sum*))
 (newline)

@@ -1,11 +1,9 @@
-;;;; A simple example of using a condition variable to simulate thread-join
+;;;; Example of using multiple threads to sum a variable without synchronization.
+;;;; Returns inconsistent and wrong results due to a lack of thread coordination.
 (import (scheme base)
         (scheme read)
         (scheme write)
         (srfi 18))
-
-;(define cv (make-condition-variable))
-;(define m (make-mutex))
 
 (define *sum* 0)
 
@@ -16,7 +14,7 @@
       (sum-loop (- n 1))))
 
 (define (sum-entry-pt)
-  (sum-loop (* 10 100 100 100)))
+  (sum-loop (* 100 100 100)))
 
 ;; Thread - Do something, then let main thread know when we are done
 (define t1 (make-thread sum-entry-pt))
