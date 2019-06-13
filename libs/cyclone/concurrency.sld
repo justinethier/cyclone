@@ -20,7 +20,7 @@
    make-atom
    atom
    atom?
-   ref
+   deref
    swap!
    compare-and-set!
    ;; Shared objects
@@ -66,8 +66,8 @@
       (%make-atom (make-shared (car obj)))
       (%make-atom #f)))
 
-;; - ref atomic
-(define-c ref
+;; - deref atomic
+(define-c deref
   "(void *data, int argc, closure _, object k, object obj)"
   " atomic a;
     Cyc_check_atomic(data, obj);
@@ -88,7 +88,7 @@
 ;; That means the function can get called multiple times. That means it needs to be a pure function. Another thing is that you can't control the order of the function calls. If multiple threads are swapping to an Atom at the same time, order is out of the window. So make sure your functions are independent of order, like we talked about before.
 ;;
 (define (swap! atom f . args)
-  (let* ((oldval (ref atom))
+  (let* ((oldval (deref atom))
          (newval (make-shared (apply f oldval args))))
     (if (compare-and-set! atom oldval newval)
         newval ;; value did not change, return new one
