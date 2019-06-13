@@ -31,7 +31,7 @@ If the given object is atomic or already shared it it simply returned. Otherwise
 
 Note this function may trigger a minor GC if a thread-local pair or vector is passed.
 
-### share-all
+### share-all!
 
   (share-all!)
 
@@ -58,7 +58,7 @@ Create a new atom referencing `obj`.
 
 Create a new atom in the same manner as `make-atom`. If `obj` is not provided it will default to `#f`.
 
-### atom-1
+### atom?
 
     (atom? obj)
 
@@ -70,7 +70,7 @@ Type predicate, returns `#t` if `obj` is an atom and `#f` otherwise.
 
 Dereference an atom by returning its current value. 
 
-### swap
+### swap!
 
     (swap! atom f . args)
 
@@ -89,7 +89,7 @@ TODO - notes:
 ;; That means the function can get called multiple times. That means it needs to be a pure function. Another thing is that you can't control the order of the function calls. If multiple threads are swapping to an Atom at the same time, order is out of the window. So make sure your functions are independent of order, like we talked about before.
 ;;
 
-### compare-and-set
+### compare-and-set!
 
     (compare-and-set! atm oldval newval)
 
