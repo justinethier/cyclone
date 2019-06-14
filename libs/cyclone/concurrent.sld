@@ -10,7 +10,7 @@
 ;; once that starts going, double-back to how to allocate shared objects effectively.
 ;; probably want a (make-shared)
 ;; may also way a way to allocate multiple shared objects at once (since a minor GC will likely be req'd)
-(define-library (cyclone concurrency)
+(define-library (cyclone concurrent)
  (import
    (scheme base)
  )
