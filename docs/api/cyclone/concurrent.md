@@ -1,6 +1,6 @@
 # Concurrency Library
 
-The `(cyclone concurrency)` library provides functions to make it easier to write concurrent programs.
+The `(cyclone concurrent)` library provides functions to make it easier to write concurrent programs.
 
 ## Index
 
@@ -15,11 +15,15 @@ The `(cyclone concurrency)` library provides functions to make it easier to writ
 
 ## Shared Objects
 
-By default Cyclone allocates new objects in a thread-local stack. This is very efficient for computations done within a thread but is problematic when an object must be shared by multiple threads. 
+By default Cyclone allocates new objects in a thread-local stack. This is very efficient for computations done within a thread but is problematic when an object must be shared by multiple threads. An object on another thread's stack could be overwritten or moved at any time, causing undefined behavior.
 
-TODO: explain this better
+Shared objects are the method that Cyclone uses to deal with this problem. A shared object is any object that is located in a segment of memory that may be shared across threads. Note that concurrency primitives must still be used to coordinate access to these objects among multiple threads!
 
-TODO: list objects shared by default (mutex, atom, cond-var, etc) or not affected (immediates, booleans, symbols, etc)
+The following types of objects are already shared:
+
+- Concurrency primitives (mutex, conditional variable, atom). These object are always allocated on the heap since the intent is for multiple threads to use them for synchronization.
+
+- Booleans, bignums, fixnum integers, symbols, and the EOF object.
 
 ### make-shared
 
