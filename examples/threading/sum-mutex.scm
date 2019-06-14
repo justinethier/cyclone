@@ -2,7 +2,7 @@
 (import (scheme base)
         (scheme read)
         (scheme write)
-        (cyclone concurrency)
+        (cyclone concurrent)
         (srfi 18))
 
 (define m (make-mutex))
