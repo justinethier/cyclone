@@ -15,15 +15,17 @@ The `(cyclone concurrent)` library provides functions to make it easier to write
 
 ## Shared Objects
 
-By default Cyclone allocates new objects in a thread-local stack. This is very efficient for computations done within a thread but is problematic when an object must be shared by multiple threads. An object on another thread's stack could be overwritten or moved at any time, causing undefined behavior.
+By default Cyclone allocates new objects in a thread-local stack. This is very efficient for single-threaded code but becomes problematic when an object must be shared by multiple threads. An object on another thread's stack could be overwritten or moved at any time, causing undefined behavior.
 
-Shared objects are the method that Cyclone uses to deal with this problem. A shared object is any object that is located in a segment of memory that may be shared across threads. Note that concurrency primitives must still be used to coordinate access to these objects among multiple threads!
+Shared objects are the method that Cyclone uses to deal with this problem. A shared object is an object located in a segment of memory that can be safely used by any thread. Note that concurrency primitives must still be used to coordinate access to these objects among multiple threads!
 
 The following types of objects are already shared:
 
 - Concurrency primitives (mutex, conditional variable, atom). These object are always allocated on the heap since the intent is for multiple threads to use them for synchronization.
 
-- Booleans, bignums, fixnum integers, symbols, and the EOF object.
+- Fixnum integers and characters. These are immediates (IE, value types) so there is no object reference.
+
+- Booleans, bignums, symbols, and the EOF object.
 
 ### make-shared
 
@@ -37,7 +39,7 @@ Note this function may trigger a minor GC if a thread-local pair or vector is pa
 
 ### share-all!
 
-  (share-all!)
+    (share-all!)
 
 Allow all objects currently on the calling thread's local stack to be shared with other threads.
 
