@@ -2,6 +2,8 @@
 
 The `(cyclone concurrent)` library provides functions to make it easier to write concurrent programs.
 
+TODO: explain relationship to SRFI 18
+
 ## Index
 
 - [`make-shared`](#make-shared)
@@ -15,9 +17,9 @@ The `(cyclone concurrent)` library provides functions to make it easier to write
 
 ## Shared Objects
 
-By default Cyclone allocates new objects in a thread-local stack. This is very efficient for single-threaded code but becomes problematic when an object must be shared by multiple threads. An object on another thread's stack could be overwritten or moved at any time, causing undefined behavior.
+Cyclone allocates most new objects in a thread-local stack. This is efficient for single-threaded code but causes problems when an object must be used by multiple threads. An object on another thread's stack could be overwritten or moved at any time, leading to undefined behavior.
 
-Shared objects are the method that Cyclone uses to deal with this problem. A shared object is an object located in a segment of memory that can be safely used by any thread. Note that concurrency primitives must still be used to coordinate access to these objects among multiple threads!
+Cyclone deals with this problem using the concept of Shared Objects. A shared object is an object located in a segment of memory that is available for use by any thread. Note that concurrency primitives must still be used to safely coordinate access to these objects!
 
 The following types of objects are already shared:
 
