@@ -23,6 +23,8 @@
    deref
    swap!
    compare-and-set!
+   ;; Immutable objects
+   immutable?
    ;; Shared objects
    make-shared
    share-all!
@@ -95,23 +97,6 @@
         (apply swap! atom f args) ;; Value changed, try again
         )))
 
-;; Return a reference to an object that can be safely shared by many threads.
-;; 
-;; If the given object is atomic or already shared it it simply returned.
-;; Otherwise it is necessary to create a copy of the object.
-;;
-;; Note this function may trigger a minor GC if a thread-local pair or vector 
-;; is passed.
-(define-c make-shared
-  "(void *data, int argc, closure _, object k, object obj)"
-  " Cyc_make_shared_object(data, k, obj); ")
-
-;; Allow all objects currently on the calling thread's local stack to be shared
-;; with other threads.
-(define-c share-all!
-  "(void *data, int argc, closure _, object k)"
-  " Cyc_trigger_minor_gc(data, k); ")
-
 ;; (compare-and-set! atom oldval newval)
 ;; https://clojuredocs.org/clojure.core/compare-and-set!
 ;; Atomically sets the value of atom to newval if and only if the
@@ -129,6 +114,38 @@
     bool result = ck_pr_cas_ptr(&(a->obj), oldval, newval);
     object rv = result ? boolean_t : boolean_f;
     return_closcall1(data, k, rv); ")
+
+;; Return a reference to an object that can be safely shared by many threads.
+;; 
+;; If the given object is atomic or already shared it it simply returned.
+;; Otherwise it is necessary to create a copy of the object.
+;;
+;; Note this function may trigger a minor GC if a thread-local pair or vector 
+;; is passed.
+(define-c make-shared
+  "(void *data, int argc, closure _, object k, object obj)"
+  " Cyc_make_shared_object(data, k, obj); ")
+
+;; Allow all objects currently on the calling thread's local stack to be shared
+;; with other threads.
+(define-c share-all!
+  "(void *data, int argc, closure _, object k)"
+  " Cyc_trigger_minor_gc(data, k); ")
+
+;; Predicate - is the given object immutable?
+(define-c immutable?
+  "(void *data, int argc, closure _, object k, object obj)"
+  "object result = boolean_t;
+   if (is_object_type(obj) &&
+       (type_of(obj) == pair_tag ||
+        type_of(obj) == vector_tag ||
+        type_of(obj) == bytevector_tag ||
+        type_of(obj) == string_tag
+       ) &&
+       !immutable(obj) ) {
+     result = boolean_f;
+   }
+   return_closcall1(data, k, result); ")
 
  )
 )
