@@ -8,6 +8,7 @@ TODO: explain relationship to SRFI 18
 
 - [`make-shared`](#make-shared)
 - [`share-all!`](#share-all)
+- [`immutable?`](#immutable)
 - [`make-atom`](#make-atom)
 - [`atom`](#atom)
 - [`atom?`](#atom-1)
@@ -47,9 +48,47 @@ Allow all objects currently on the calling thread's local stack to be shared wit
 
 Note this function will trigger a minor garbage collection on the calling thread.
 
+## Immutable objects
+
+Many types of objects are mutable by default: pairs, strings, vectors, and bytevectors. However, if an object is declared as a literal constant then it will be designated immutable. The easiest way to do this is to use a single-quote, EG:
+
+    cyclone> (import (cyclone concurrent))
+    ok
+    Error: Expected immutable object : (1 2)
+    cyclone> (define my-lis '(1 2))
+    ok
+    cyclone> (immutable? my-lis)
+    #t
+
+It is an error to attempt to call a mutation procedure (such as `set-car!` or `string-set!`) on an immutable object.
+
+### immutable? 
+    (immutable? obj)
+
+Predicate that returns `#t` if `obj` is immutable and `#f` otherwise.
+
 ## Atoms
 
-TODO: atomics based on those from Clojure
+This section provides atomic operations. The API is modelled after Clojure's [Atoms](https://clojure.org/reference/atoms). Per the Clojure docs:
+
+> Atoms are an efficient way to represent some state that will never need to be coordinated with any other, and for which you wish to make synchronous changes.
+
+An atom may only reference a shared object that is immutable. This guarantees that the value the atom is referencing cannot be modified unexpectedly by another thread.
+
+For example:
+
+    cyclone> (import (cyclone concurrent))
+    ok
+    cyclone> (make-atom (list 1 2))
+    Error: Expected immutable object : (1 2)
+    cyclone> (make-atom (make-shared (list 1 2)))
+    Error: Expected immutable object : (1 2)
+    cyclone> (make-atom (make-shared '(1 2)))
+    <atom 0x7f742b99bb00>
+
+
+TODO: link to sum examples
+TODO: memoization example?
 
 ### make-atom
 
@@ -82,15 +121,14 @@ Dereference an atom by returning its current value.
 
     (swap! atom f . args)
 
-TODO - notes:
-;; - swap, see https://clojure.github.io/clojure/clojure.core-api.html#clojure.core/swap!
-;; Clojure docs:
-;; Atomically swaps the value of atom to be:
-;; (apply f current-value-of-atom args). Note that f may be called
-;; multiple times, and thus should be free of side effects.  Returns
-;; the value that was swapped in.
-;; (swap! atom f)(swap! atom f x)(swap! atom f x y)(swap! atom f x y & args)
-;;
+Atomically swaps the value of `atom` to be:
+
+    (apply f current-value-of-atom args) 
+    
+Note that `f` may be called multiple times and thus should be free of side effects. Returns the value that was swapped in.
+
+Based on the procedure of the same name from Clojure.
+
 ;; Notes:
 ;; swap! takes the current value of the Atom, calls the function on it (in this case, inc), and sets the new value. However, just before setting the new value, it checks to make sure the old value is still in there. If it's different, it starts over. It calls the function again with the new value it found. It keeps doing this until it finally writes the value. Because it can check the value and write it in one go, it's an atomic operation, hence the name.
 ;; 
@@ -99,12 +137,7 @@ TODO - notes:
 
 ### compare-and-set!
 
-    (compare-and-set! atm oldval newval)
+    (compare-and-set! atom oldval newval)
 
-Atomically sets the value of `atm` to `newval` if and only if the current value of the atom is identical to `oldval`. Returns `#t` if set happened, else `#f`.
-
-TODO
-;; (compare-and-set! atom oldval newval)
-;; https://clojuredocs.org/clojure.core/compare-and-set!
-
+Atomically changes the value of `atom` to `newval` but only if the value of `atom` is currently equal to `oldval`. Based on the procedure of the same name from Clojure. This is also commonly known as the compare-and-swap (CAS) atomic instruction.
 
