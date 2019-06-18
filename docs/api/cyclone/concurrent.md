@@ -22,13 +22,15 @@ Cyclone allocates most new objects in a thread-local stack. This is efficient fo
 
 Cyclone deals with this problem using the concept of Shared Objects. A shared object is an object located in a segment of memory that is available for use by any thread. Note that concurrency primitives must still be used to safely coordinate access to these objects!
 
-The following types of objects are already shared:
+The following types of objects are always shared:
 
-- Concurrency primitives (mutex, conditional variable, atom). These object are always allocated on the heap since the intent is for multiple threads to use them for synchronization.
+- Concurrency primitives (mutex, conditional variable, atom). These object are allocated on the heap since the intent is for multiple threads to use them for synchronization.
 
 - Fixnum integers and characters. These are immediates (IE, value types) so there is no object reference.
 
 - Booleans, bignums, symbols, and the EOF object.
+
+All other objects must be shared before they can be safely used by multiple threads.
 
 ### make-shared
 
