@@ -18,7 +18,7 @@ This library complements the functionality provided by [SRFI 18](../srfi/18.md).
 
 ## Shared Objects
 
-Cyclone allocates new objects using the current thread's local stack. This is efficient for single-threaded code but causes problems when an object must be used by other threads. An object on another thread's stack could be overwritten or moved at any time, leading to undefined behavior. The solution is Shared Objects. A shared object is an object located in a section of memory available for use by any thread.
+Cyclone allocates new objects using the current thread's local stack. This is efficient for single-threaded code but makes it difficult to use an object from another thread. An object on a local stack could be overwritten or moved at any time, leading to undefined behavior.  The solution is to guarantee an object is located in a section of memory available for use by any thread. We call these shared objects.
 
 Note that concurrency primitives must still be used to safely coordinate access to shared objects!
 
@@ -92,9 +92,7 @@ For example:
 Example programs:
 
 - Summing numbers using atomic operations: [`sum-atomic.scm`](../../../examples/threading/sum-atomic.scm)
-
-TODO: link to sum examples
-TODO: memoization example?
+- For comparison, summing numbers using locks: [`sum-atomic.scm`](../../../examples/threading/sum-atomic.scm)
 
 ### make-atom
 
