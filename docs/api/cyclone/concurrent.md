@@ -6,15 +6,14 @@ This library complements the functionality provided by [SRFI 18](../srfi/18.md).
 
 ## Index
 
-### [Shared Objects](#shared-objects)
+[Shared Objects](#shared-objects)
 - [`make-shared`](#make-shared)
 - [`share-all!`](#share-all)
 
-### [Immutability](#immutability)
+[Immutability](#immutability)
 - [`immutable?`](#immutable)
 
-### [Atoms](#atoms)
-
+[Atoms](#atoms)
 - [`make-atom`](#make-atom)
 - [`atom`](#atom)
 - [`atom?`](#atom-1)
