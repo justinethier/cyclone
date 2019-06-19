@@ -4,7 +4,8 @@
 
 Features
 
-- TODO: new library for atomics
+- Added a new library `(cycone concurrent)` with support for atomics, immutability, and shared objects.
+- Relocated existing libraries to `(cyclone match)` and `(cyclone test)`.
 
 Bug Fixes
 
