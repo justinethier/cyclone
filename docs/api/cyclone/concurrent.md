@@ -1,14 +1,20 @@
 # Concurrency Library
 
-The `(cyclone concurrent)` library provides functions to make it easier to write concurrent programs.
+The `(cyclone concurrent)` library makes it easier to write concurrent programs using Cyclone.
 
 This library complements the functionality provided by [SRFI 18](../srfi/18.md).
 
 ## Index
 
+### [Shared Objects](#shared-objects)
 - [`make-shared`](#make-shared)
 - [`share-all!`](#share-all)
+
+### [Immutability](#immutability)
 - [`immutable?`](#immutable)
+
+### [Atoms](#atoms)
+
 - [`make-atom`](#make-atom)
 - [`atom`](#atom)
 - [`atom?`](#atom-1)
@@ -50,7 +56,7 @@ Allow all objects currently on the calling thread's local stack to be shared wit
 
 Note this function will trigger a minor garbage collection on the calling thread.
 
-## Immutable objects
+## Immutability
 
 Many types of objects are mutable by default: pairs, strings, vectors, and bytevectors. However, if an object is declared as a literal constant then it will be designated immutable. 
 
