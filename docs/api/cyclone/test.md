@@ -1,6 +1,6 @@
 # Test Library
 
-The `(scheme cyclone test)` library contains a testing framework ported from `(chibi test)` which in turn was ported from CHICKEN.
+The `(cyclone test)` library contains a testing framework ported from `(chibi test)` which in turn was ported from CHICKEN.
 
 - [`warning`](#warning)
 - [`test-group-inc!`](#test-group-inc)
