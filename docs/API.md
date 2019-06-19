@@ -57,6 +57,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 These libraries are provided by Cyclone with a stable API that is unlikely to change:
 
 - [`cyclone concurrent`](api/cyclone/concurrent.md)
+- [`cyclone match`](api/cyclone/match.md)
 - [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md)
 - [`scheme cyclone test`](api/scheme/cyclone/test.md)
@@ -70,7 +71,6 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 - [`scheme cyclone common`](api/scheme/cyclone/common.md)
 - [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations.md)
 - [`scheme cyclone libraries`](api/scheme/cyclone/libraries.md)
-- [`scheme cyclone match`](api/scheme/cyclone/match.md)
 - [`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)
 - [`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)
 - [`scheme cyclone util`](api/scheme/cyclone/util.md)
