@@ -1,4 +1,4 @@
-(import (scheme base) (scheme cyclone test) (srfi 117))
+(import (scheme base) (cyclone test) (srfi 117))
 ;(cond-expand
 ;  (chicken (use test srfi-117))
 ;  (chibi (import (chibi test) (list-queues)))

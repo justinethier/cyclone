@@ -58,9 +58,9 @@ These libraries are provided by Cyclone with a stable API that is unlikely to ch
 
 - [`cyclone concurrent`](api/cyclone/concurrent.md)
 - [`cyclone match`](api/cyclone/match.md)
+- [`cyclone test`](api/cyclone/test.md)
 - [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md)
-- [`scheme cyclone test`](api/scheme/cyclone/test.md)
 
 # Internal Compiler API
 

@@ -6,7 +6,7 @@
   (cyclone
     (import
       (cyclone match)
-      (scheme cyclone test)))
+      (cyclone test)))
   (chibi
     (import
       (chibi ast)

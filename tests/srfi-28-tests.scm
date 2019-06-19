@@ -1,7 +1,7 @@
 (import
   (scheme base)
   (srfi 28)
-  (scheme cyclone test))
+  (cyclone test))
 
 (test-group
   "format"

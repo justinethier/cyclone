@@ -1,7 +1,7 @@
 (import 
   (scheme base) 
   (scheme write) 
-  (scheme cyclone test)
+  (cyclone test)
   (scheme cyclone pretty-print))
 
 (define (output sexp)

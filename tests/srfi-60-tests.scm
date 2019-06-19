@@ -22,7 +22,7 @@
 (import 
   (scheme base)
   (srfi 60)
-  (scheme cyclone test))
+  (cyclone test))
 
 (define a #b1100)
 (define b #b1010)

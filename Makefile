@@ -68,12 +68,12 @@ install : libs install-libs install-includes install-bin
 	$(INSTALL) -m0755 scheme/*.so $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 libs/cyclone/test.meta $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 libs/cyclone/match.meta $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 libs/cyclone/*.sld $(DESTDIR)$(DATADIR)/cyclone
-#	$(INSTALL) -m0644 libs/cyclone/*.scm $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.scm $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 libs/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0755 libs/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
@@ -261,9 +261,9 @@ bootstrap : icyc libs
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.meta $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp libs/cyclone/test.c $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/test.meta $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/test.scm $(BOOTSTRAP_DIR)/cyclone
 	cp scheme/cyclone/array-list.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/array-list.meta $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/array-list.sld $(BOOTSTRAP_DIR)/scheme/cyclone #just in case
