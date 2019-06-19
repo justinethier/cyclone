@@ -5,7 +5,7 @@
 - [Standard Libraries](#standard-libraries)
 - [SRFI Libraries](#srfi-libraries)
 - [Cyclone Libraries](#cyclone-libraries)
-- [Cyclone Compiler API](#cyclone-compiler-api)
+- [Internal Compiler API](#internal-compiler-api)
 - [C API](#c-api)
 - [Index](#index)
 
@@ -54,13 +54,14 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 # Cyclone Libraries
 
-These libraries are provided by Cyclone with a stable API that is unlikely to change.
+These libraries are provided by Cyclone with a stable API that is unlikely to change:
 
+- [`cyclone concurrent`](api/cyclone/concurrent.md)
 - [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md)
 - [`scheme cyclone test`](api/scheme/cyclone/test.md)
 
-# Cyclone Compiler API
+# Internal Compiler API
 
 These libraries are used by the Cyclone compiler. Some of these are stable and unlikely to change, whereas others could change as the compiler evolves.
 
