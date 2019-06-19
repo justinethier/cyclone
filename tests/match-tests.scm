@@ -5,7 +5,7 @@
 (cond-expand
   (cyclone
     (import
-      (scheme cyclone match)
+      (cyclone match)
       (scheme cyclone test)))
   (chibi
     (import

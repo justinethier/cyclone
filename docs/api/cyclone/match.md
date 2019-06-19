@@ -1,6 +1,6 @@
 # Match Library
 
-The `(scheme cyclone match)` library provides a hygienic pattern matcher, based on Alex Shinn's portable `match.scm`.
+The `(cyclone match)` library provides a hygienic pattern matcher, based on Alex Shinn's portable `match.scm`.
 
 This is a full superset of the popular [match](http://www.cs.indiana.edu/scheme-repository/code.match.html) package by Andrew Wright, written in fully portable `syntax-rules` and thus preserving hygiene.
 
