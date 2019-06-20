@@ -26,6 +26,15 @@
 (define (future-call thunk)
   (let ((ftr (vector *future-sym* 'todo)))
     ;; TODO: setup and call the thread here
+
+;; Sketching out what is needed:
+;;(define (sum-entry-pt)
+;;  (sum-loop (* 100 100 100)))
+;;
+;;;; Thread - Do something, then let main thread know when we are done
+;;(define t9 (make-thread sum-entry-pt))
+;;(thread-start! t1)
+
     ftr))
 
 
