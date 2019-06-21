@@ -6,7 +6,7 @@
 (define-library (futures)
   (import (scheme base)
           (scheme write)
-          (cyclone concurrency)
+          (cyclone concurrent)
           (srfi 18)
   )
   (export
@@ -14,6 +14,8 @@
     future-call
     future-deref
   )
+  (begin
+
 ;(define *future-sym* (string->symbol "  future  "))
 ;(define (future? obj)
 ;  (and (vector? obj) (eq? (vector-ref obj 0) *future-sym*)))
@@ -47,8 +49,8 @@
          (tfnc (lambda ()
                  (mutex-lock! lock) 
                  (let ((result (thunk))) ;; TODO: Catch exceptions (?)
-                   (set-done! #t)
-                   (set-result! result)
+                   (set-done! ftr #t)
+                   (set-result! ftr result)
                    ;(vector-set! ftr 1 #t) ;; Done
                    ;(vector-set! ftr 2 result)
                    (mutex-unlock! lock) 
