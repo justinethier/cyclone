@@ -174,7 +174,7 @@
          (tfnc (lambda ()
                  (mutex-lock! lock) 
                  (let ((result (thunk))) ;; TODO: Catch exceptions (?)
-                   (set-result! ftr result)
+                   (set-result! ftr (make-shared result))
                    (set-done! ftr #t)
                    (mutex-unlock! lock) 
                  )))
