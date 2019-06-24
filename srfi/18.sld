@@ -196,7 +196,12 @@
         }
         return_closcall1(data, k, lock); ")
 
-    (define-c mutex-lock!
+    (define (mutex-lock! mutex . timeout)
+      (if (pair? timeout)
+          (%mutex-timedlock! mutex (car timeout))
+          (%mutex-lock! mutex)))
+
+    (define-c %mutex-lock!
       "(void *data, int argc, closure _, object k, object obj)"
       " mutex m = (mutex) obj;
         Cyc_check_mutex(data, obj);
@@ -204,6 +209,30 @@
         if (pthread_mutex_lock(&(m->lock)) != 0) {
           fprintf(stderr, \"Error locking mutex\\n\");
           exit(1);
+        }
+        return_thread_runnable(data, boolean_t); ")
+
+    ;; TODO: WIP, this is broken right now!
+    (define-c %mutex-timedlock!
+      "(void *data, int argc, closure _, object k, object obj, object timeout)"
+      " mutex m = (mutex) obj;
+        struct timespec tim;
+        double value;
+        Cyc_check_mutex(data, obj);
+        Cyc_check_num(data, timeout);
+        value = unbox_number(timeout);
+printf(\"tv_sec = %ld\\n\", tim.tv_sec);
+printf(\"tv_nsec = %ld\\n\", tim.tv_nsec);
+        set_thread_blocked(data, k);
+//        clock_gettime(CLOCK_REALTIME, &tim);
+//        clock_gettime(CLOCK_MONOTONIC, &tim);
+        gettimeofday(&tim, NULL);
+        tim.tv_sec += (long)value;
+        tim.tv_nsec += (long)((value - tim.tv_sec) * 1000 * NANOSECONDS_PER_MILLISECOND);
+        int result = pthread_mutex_timedlock(&(m->lock), &tim);
+        if (result != 0) {
+printf(\"result = %d\\n\", result);
+          return_thread_runnable(data, boolean_f);
         }
         return_thread_runnable(data, boolean_t); ")
 
