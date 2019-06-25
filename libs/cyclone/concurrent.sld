@@ -10,18 +10,21 @@
  )
  (include-c-header "<ck_pr.h>")
  (export
+   ;; Generic Concurrency
+   deref
    ;; Atoms
    make-atom
    atom
    atom?
-   deref
    swap!
    compare-and-set!
+   atom-deref
    ;; Futures
    future?
    future
    future-call
    future-deref
+   future-done?
    ;; Immutable objects
    immutable?
    ;; Shared objects
@@ -29,6 +32,13 @@
    share-all!
  )
  (begin
+
+;; Dereference the given concurrency object
+(define (deref obj)
+  (cond
+    ((atom? obj) (atom-deref obj))
+    ((future? obj) (future-deref obj))
+    (else obj)))
 
 (define-c atom?
   "(void *data, int argc, closure _, object k, object obj)"
@@ -68,7 +78,7 @@
       (%make-atom #f)))
 
 ;; - deref atomic
-(define-c deref
+(define-c atom-deref
   "(void *data, int argc, closure _, object k, object obj)"
   " atomic a;
     Cyc_check_atomic(data, obj);
@@ -183,11 +193,12 @@
     (thread-start! t)
     ftr))
 
-;;(define (future-done? ftr)
-;;  (when (not (future? ftr))
-;;    (error "Expected future but received" ftr))
-;; TODO: may be a good candidate for a timed mutex lock, just return #f if minimum timeout is exceeded
-;;)
+(define (future-done? ftr)
+  (when (not (future? ftr))
+    (error "Expected future but received" ftr))
+  (let ((result (mutex-lock! (get-lock ftr) 0.01))) ;; Not ideal but short block on failure
+    (if result (mutex-unlock! (get-lock ftr))) ;; Ensure mutex is always  not want to hold mutex longunlocked
+    (if result #t #f))) ;; Bit awkward, but ensure boolean result
 
 ;; TODO: (future-cancel ftr)
 ;; TODO: (future-cancelled? ftr)
