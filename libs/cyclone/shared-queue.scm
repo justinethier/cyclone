@@ -19,34 +19,35 @@
 ;- queue-empty?
 
 (import (scheme base)
+        (cyclone test)
         (cyclone concurrent)
         (srfi 18)
         (scheme write))
 
 (define *default-table-size* 64)
 
-TODO: how will data structure work?
-probably want a circular queue, add at end and remove from start
-need to keep track of those positions, they may wrap around the end
-of the queue
-so we need - start, end
-capacity is length of the vector
-if start == end, vector is empty
-if start == end after an add, then vector is full, need to resize
-
-TODO: should create a corresponding file of tests for this
+;TODO: how will data structure work?
+;probably want a circular queue, add at end and remove from start
+;need to keep track of those positions, they may wrap around the end
+;of the queue
+;so we need - start, end
+;capacity is length of the vector
+;if start == end, vector is empty
+;if start == end after an add, then vector is full, need to resize
 
   (define-record-type <queue>
-    (%make-queue store size lock)
+    (%make-queue store start end lock)
     queue?
     (store q:store q:set-store!)
-    (size q:size q:set-size!)
+    (start q:start q:set-start!)
+    (end q:end q:set-end!)
     (lock q:lock q:set-lock!))
 
 (define (make-queue)
   (make-shared
     (%make-queue
       (make-vector *default-table-size* #f)
+      0
       0
       (make-mutex))))
 
@@ -73,17 +74,17 @@ TODO: should create a corresponding file of tests for this
   (mutex-unlock! (q:lock q))
 )
 
-(define (%queue-resize! q)
-  ;; TODO: assumes we already have the lock
-  ;; TODO: error if size is larger than fixnum??
-  (let ((old-store (q:store q))
-        (new-store (make-vector (* (vector-length old-store) 2) #f)))
-    (q:set-size! q 0)
-    (let loop ((i (vector-length old-store)))
-      (when (not (zero? i))
-        (%queue-add! q (vector-ref 
-        (loop (- i 1)))))
-)
+;(define (%queue-resize! q)
+;  ;; TODO: assumes we already have the lock
+;  ;; TODO: error if size is larger than fixnum??
+;  (let ((old-store (q:store q))
+;        (new-store (make-vector (* (vector-length old-store) 2) #f)))
+;    (q:set-size! q 0)
+;    (let loop ((i (vector-length old-store)))
+;      (when (not (zero? i))
+;        (%queue-add! q (vector-ref 
+;        (loop (- i 1)))))
+;)
 
 ;- (queue ...) constructor
 ;- queue-add! - add item to the queue
@@ -95,3 +96,7 @@ TODO: should create a corresponding file of tests for this
 ;- queue-size (current length)
 ;- queue-capacity (max size until resize occurs)
 ;- queue-empty?
+
+;(test-group "basic")
+;(test #t (shared-queue? (make-queue)))
+;(test-exit)
