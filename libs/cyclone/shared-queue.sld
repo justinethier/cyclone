@@ -91,16 +91,21 @@
 )
 
 (define (%queue-resize! q)
-  (write "TODO: resize the queue")(newline)
-;  ;; TODO: assumes we already have the lock
-;  ;; TODO: error if size is larger than fixnum??
-;  (let ((old-store (q:store q))
-;        (new-store (make-vector (* (vector-length old-store) 2) #f)))
-;    (q:set-size! q 0)
-;    (let loop ((i (vector-length old-store)))
-;      (when (not (zero? i))
-;        (%queue-add! q (vector-ref 
-;        (loop (- i 1)))))
+ ;; (write "TODO: resize the queue")(newline)
+  ;; TODO: assumes we already have the lock
+  ;; TODO: error if size is larger than fixnum??
+  (let* ((old-start (q:start q))
+         (old-end (q:end q))
+         (old-store (q:store q))
+         (new-store (make-vector (* (vector-length old-store) 2) #f)))
+    (q:set-start! q 0)
+    (q:set-end! q 0)
+    (q:set-store! q new-store)
+    (let loop ((i 0)
+               (start old-start))
+      (when (not (= i (vector-length old-store)))
+        (%queue-add! q (vector-ref old-store start))
+        (loop (+ i 1) (inc start (vector-length old-store))))))
 )
 
 ;- queue-remove! - remove item (when to block? would be nice if we can block until an item becomes available)
