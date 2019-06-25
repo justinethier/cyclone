@@ -1,3 +1,5 @@
+;;;; A temporary test file, this code needs to be separated into a library and a set of unit tests
+
 ;TODO: a queue that can be shared among threads
 ;objects on the queue must be shared objects, possibly immutable (but more flexible if not)
 ;consider making the queue vector-based, and increase size by 2 if capacity is exceeded?
