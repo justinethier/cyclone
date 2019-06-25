@@ -172,7 +172,7 @@ Type predicate, returns `#t` if `obj` is a future and `#f` otherwise.
 
     (future expr ...)
 
-Executes the given statements on another thread and returns a future object that can be dereferenced later to retrieve the cached result.
+Executes the given expressions on another thread and returns a future object that can be dereferenced later to retrieve the cached result. Note the result will be the value obtained from executing the last expression.
 
 ### future-call
 
