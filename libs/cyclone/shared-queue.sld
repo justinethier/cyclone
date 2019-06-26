@@ -12,11 +12,7 @@
 ;- queue-remove! - remove item (when to block? would be nice if we can block until an item becomes available)
 ;            maybe block by default, but have an optional timeout
 ;- queue-get - ?? 
-;- queue-clear!
 ;- queue->list
-;- queue-size (current length)
-;- queue-capacity (max size until resize occurs)
-;- queue-empty?
 
 (define-library (shared-queue)
 
@@ -33,6 +29,10 @@
   queue-add!
   %queue-add! ;; DEBUG
   %queue-remove!
+  queue-clear!
+  queue-size
+  queue-capacity
+  queue-empty?
 )
 
 (begin
@@ -54,7 +54,9 @@
     (store q:store q:set-store!)
     (start q:start q:set-start!)
     (end q:end q:set-end!)
-    (lock q:lock q:set-lock!))
+    (lock q:lock q:set-lock!)
+    ;(empty-lock q:empty-lock q:set-empty-lock!)
+    )
 
 (define (make-queue)
   (make-shared
@@ -62,7 +64,9 @@
       (make-vector *default-table-size* #f)
       0
       0
-      (make-mutex))))
+      (make-mutex)
+      ;(make-mutex)
+      )))
 
 (define (queue . elems)
   (let ((q (make-queue)))
@@ -71,6 +75,7 @@
         (%queue-add! q elem))
       (reverse elems))))
 
+;; Increment an index, possibly back around to the beginning of the queue
 (define (inc index capacity)
   (if (= index (- capacity 1))
       0
@@ -108,10 +113,15 @@
         (loop (+ i 1) (inc start (vector-length old-store))))))
 )
 
+(define (queue-remove! q obj)
+  (let ((result #f))
+    (mutex-lock! (q:lock q))
+    (set! result (%queue-remove! q obj))
+    (mutex-unlock! (q:lock q))
+    result))
+
 ;- queue-remove! - remove item (when to block? would be nice if we can block until an item becomes available)
 ;            maybe block by default, but have an optional timeout
-
-;; TODO: queue-remove! which locks and call this function
 (define (%queue-remove! q)
   (cond
     ((= (q:start q) (q:end q))
@@ -122,12 +132,41 @@
         result)))
 )
 
-;- queue-get - ?? 
-;- queue-clear!
+(define (queue-clear! q)
+  (mutex-lock! (q:lock q))
+  (q:set-start! q 0)
+  (q:set-end! q 0)
+  (mutex-unlock! (q:lock q)))
+
+;; Return current length of the queue
+(define (queue-size q)
+  (define result 0)
+  (mutex-lock! (q:lock q))
+  (set! result (%queue-size q))
+  (mutex-unlock! (q:lock q))
+  result)
+
+(define (%queue-size q)
+  (let ((start (q:start q))
+        (end (q:end q))
+        (capacity (vector-length (q:store))))
+    (cond
+      ((< end start) (+ (- capacity start) end))
+      ((> end start) (- end start))
+      (else 0)))) ;; (= end start)
+
+(define (queue-empty? q)
+  (= 0 (queue-size q)))
+
+;; Return max size of the queue (until resize occurs)
+(define (queue-capacity q)
+  (define result 0)
+  (mutex-lock! (q:lock q))
+  (set! result (vector-length (q:store q)))
+  (mutex-unlock! (q:lock q))
+  result)
+
 ;- queue->list
-;- queue-size (current length)
-;- queue-capacity (max size until resize occurs)
-;- queue-empty?
 
 ;(test-group "basic")
 ;(test #t (shared-queue? (make-queue)))
