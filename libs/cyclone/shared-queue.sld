@@ -150,7 +150,7 @@
 (define (%queue-size q)
   (let ((start (q:start q))
         (end (q:end q))
-        (capacity (vector-length (q:store))))
+        (capacity (vector-length (q:store q))))
     (cond
       ((< end start) (+ (- capacity start) end))
       ((> end start) (- end start))
