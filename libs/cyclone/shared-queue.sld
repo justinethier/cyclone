@@ -114,6 +114,9 @@
         (loop (+ i 1) (inc start (vector-length old-store))))))
 )
 
+;; Blocks if queue is empty (!)
+;; should we have a failsafe if the same thread that is doing adds, then
+;; does a blocking remove??
 (define (queue-remove! q)
   (let loop ()
     (mutex-lock! (q:lock q))

@@ -8,9 +8,16 @@
 
 (define q (make-queue))
 (define (consume)
+  (%consume)
+  (%consume))
+(define (%consume)
   (let ((val (queue-remove! q)))
-    (write `(removed ,val))
-    (thread-sleep! 2)))
+    (if (procedure? val)
+      (set! val (val)))
+    (write `(removed ,val ,(current-thread)))
+    (newline)
+    (thread-sleep! 1))
+)
 (define t1 (make-thread consume))
 (define t2 (make-thread consume))
 
@@ -19,7 +26,10 @@
 
 (thread-sleep! 1)
 (queue-add! q 'a)
-(queue-add! q 'b)
+(queue-add! q (lambda () (+ 1 2 3)))
+(queue-add! q 'c)
+(queue-add! q 'd)
+(queue-add! q 'e)
 
 (thread-join! t1)
 (thread-join! t2)
