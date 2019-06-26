@@ -28,7 +28,8 @@
   queue
   queue-add!
   %queue-add! ;; DEBUG
-  %queue-remove!
+  queue-remove!
+  %queue-remove! ;; DEBUG
   queue-clear!
   queue-size
   queue-capacity
@@ -113,10 +114,10 @@
         (loop (+ i 1) (inc start (vector-length old-store))))))
 )
 
-(define (queue-remove! q obj)
+(define (queue-remove! q)
   (let ((result #f))
     (mutex-lock! (q:lock q))
-    (set! result (%queue-remove! q obj))
+    (set! result (%queue-remove! q))
     (mutex-unlock! (q:lock q))
     result))
 
@@ -167,8 +168,4 @@
   result)
 
 ;- queue->list
-
-;(test-group "basic")
-;(test #t (shared-queue? (make-queue)))
-;(test-exit)
 ))
