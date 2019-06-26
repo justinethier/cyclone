@@ -29,7 +29,6 @@
   queue-add!
   %queue-add! ;; DEBUG
   queue-remove!
-  %queue-remove! ;; DEBUG
   queue-clear!
   queue-size
   queue-capacity
@@ -50,13 +49,13 @@
 ;if start == end after an add, then vector is full, need to resize
 
   (define-record-type <queue>
-    (%make-queue store start end lock)
+    (%make-queue store start end lock cv)
     queue?
     (store q:store q:set-store!)
     (start q:start q:set-start!)
     (end q:end q:set-end!)
     (lock q:lock q:set-lock!)
-    ;(empty-lock q:empty-lock q:set-empty-lock!)
+    (cv q:cv q:set-cv!)
     )
 
 (define (make-queue)
@@ -66,7 +65,7 @@
       0
       0
       (make-mutex)
-      ;(make-mutex)
+      (make-condition-variable)
       )))
 
 (define (queue . elems)
@@ -94,6 +93,7 @@
   (mutex-lock! (q:lock q))
   (%queue-add! q obj)
   (mutex-unlock! (q:lock q))
+  (condition-variable-signal! (q:cv q))
 )
 
 (define (%queue-resize! q)
@@ -115,23 +115,19 @@
 )
 
 (define (queue-remove! q)
-  (let ((result #f))
+  (let loop ()
     (mutex-lock! (q:lock q))
-    (set! result (%queue-remove! q))
-    (mutex-unlock! (q:lock q))
-    result))
 
-;- queue-remove! - remove item (when to block? would be nice if we can block until an item becomes available)
-;            maybe block by default, but have an optional timeout
-(define (%queue-remove! q)
-  (cond
-    ((= (q:start q) (q:end q))
-     (write "queue is already empty"))
-    (else
-      (let ((result (vector-ref (q:store q) (q:start q))))
-        (q:set-start! q (inc (q:start q) (vector-length (q:store q))))
-        result)))
-)
+    (cond
+      ((= (q:start q) (q:end q))
+       ;; Wait for CV, indicating data is ready
+       (mutex-unlock! (q:lock q) (q:cv q))
+       (loop))
+      (else
+        (let ((result (vector-ref (q:store q) (q:start q))))
+          (q:set-start! q (inc (q:start q) (vector-length (q:store q))))
+          (mutex-unlock! (q:lock q))
+          result)))))
 
 (define (queue-clear! q)
   (mutex-lock! (q:lock q))
