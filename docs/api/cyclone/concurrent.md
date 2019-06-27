@@ -13,7 +13,7 @@ This library complements the multithreading support provided by [SRFI 18](../srf
 [Immutability](#immutability)
 - [`immutable?`](#immutable)
 
-[Generic Concurrency](#generic-concurrency)
+[General](#general)
 - [`deref`](#deref)
 
 [Atoms](#atoms)
@@ -87,7 +87,7 @@ It is an error to call a mutation procedure (such as `set-car!` or `string-set!`
 
 Predicate that returns `#t` if `obj` is immutable and `#f` otherwise.
 
-## Generic Concurrency
+## General
 
 ### deref
 
