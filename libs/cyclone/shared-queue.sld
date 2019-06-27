@@ -49,11 +49,12 @@
 ;if start == end after an add, then vector is full, need to resize
 
   (define-record-type <queue>
-    (%make-queue store start end lock cv)
+    (%make-queue store start end wait-count lock cv)
     queue?
     (store q:store q:set-store!)
     (start q:start q:set-start!)
     (end q:end q:set-end!)
+    (wait-count q:wait-count q:set-wait-count)
     (lock q:lock q:set-lock!)
     (cv q:cv q:set-cv!)
     )
@@ -62,6 +63,7 @@
   (make-shared
     (%make-queue
       (make-vector *default-table-size* #f)
+      0
       0
       0
       (make-mutex)
@@ -118,14 +120,21 @@
 ;; should we have a failsafe if the same thread that is doing adds, then
 ;; does a blocking remove??
 (define (queue-remove! q)
-  (let loop ()
+  (let loop ((waiting #f))
     (mutex-lock! (q:lock q))
+    ;; If thread was previously waiting, clear that status
+    (when waiting
+      (set! waiting #f)
+      (q:set-wait-count q (- (q:wait-count q) 1)))
 
     (cond
       ((= (q:start q) (q:end q))
+       ;; Let Q know we are waiting
+       (set! waiting #t)
+       (q:set-wait-count q (+ (q:wait-count q) 1))
        ;; Wait for CV, indicating data is ready
        (mutex-unlock! (q:lock q) (q:cv q))
-       (loop))
+       (loop waiting))
       (else
         (let ((result (vector-ref (q:store q) (q:start q))))
           (q:set-start! q (inc (q:start q) (vector-length (q:store q))))
