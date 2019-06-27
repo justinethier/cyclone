@@ -156,7 +156,9 @@ Based on the procedure of the same name from Clojure.
 
     (compare-and-set! atom oldval newval)
 
-Atomically changes the value of `atom` to `newval` but only if the value of `atom` is currently equal to `oldval`. Based on the procedure of the same name from Clojure. This is also commonly known as the compare-and-swap (CAS) atomic instruction.
+Atomically changes the value of `atom` to `newval` but only if the value of `atom` is currently equal to `oldval`. This is also commonly known as the compare-and-swap (CAS) atomic instruction.
+
+Based on the procedure of the same name from Clojure. 
 
 ## Futures
 
