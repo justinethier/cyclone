@@ -40,7 +40,7 @@
   thread-pool-size
   thread-pool-idling-count
   thread-pool-idling?
-;  thread-pool-push-task!
+  thread-pool-push-task!
 ;  ;;thread-pool-wait-all!
 ;  ;;thread-pool-release!
 )
@@ -199,11 +199,10 @@
 
 
   (define-record-type <thread-pool>
-    (%make-thread-pool jobq threads num-threads )
+    (%make-thread-pool jobq threads )
     thread-pool?
     (jobq tp:jobq tp-set-jobq!)
     (threads tp:threads tp:set-threads!)
-    (num-threads tp:num-threads tp:set-num-threads!)
     )
 
 (define (default-handler err) #f)
@@ -212,17 +211,23 @@
     (lambda ()
         (let loop ()
           (with-handler
-            default-handler ;; TODO: allow passing this in
+            (lambda (e)
+              (write `(error ,e))
+              (newline)
+            )
+          ;  default-handler ;; TODO: allow passing this in
             (let ((thunk (queue-remove! q)))
               (thunk))
-        )))))
+          )
+          (loop)
+        ))))
 
-(define (make-thread-pool size)
+(define (make-thread-pool size) ;; TODO: optional exception handler
   (let ((tp (%make-thread-pool (make-queue) '() size)))
     (do ((i size (- i 1))) 
         ((zero? i)) 
       (let ((t (%make-thread-pool-thread (tp:jobq tp))))
-        (tp:set-threads! (cons t (tp:threads)))
+        (tp:set-threads! tp (cons t (tp:threads tp)))
         (thread-start! t)))
     (share-all!)
     tp))
@@ -236,7 +241,8 @@
 (define (thread-pool-idling? tp)
   (> (thread-pool-idling-count tp) 0))
 
-; TODO:  thread-pool-push-task!
+(define (thread-pool-push-task! tp thunk)
+  (queue-add! (tp:jobq tp) (make-shared thunk)))
 
 ; ?? - thread-pool-wait-all!
 
