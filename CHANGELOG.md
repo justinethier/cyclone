@@ -4,7 +4,7 @@
 
 Features
 
-- Added a new library `(cycone concurrent)` with support for atomics, immutability, and shared objects.
+- Added a new library `(cycone concurrent)` with support for atomics, futures, immutability, and shared objects.
 - Relocated existing libraries to `(cyclone match)` and `(cyclone test)`.
 - Extended `mutex-lock!` to support an optional `timeout` parameter, per the SRFI 18 spec.
 
