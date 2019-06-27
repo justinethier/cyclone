@@ -97,7 +97,9 @@ Dereference; returns the current value of the given concurrency object.
 
 ## Atoms
 
-This section provides atomic operations. The API is modelled after Clojure's [Atoms](https://clojure.org/reference/atoms). Per the Clojure docs:
+This section provides atomic operations modelled after Clojure's [Atoms](https://clojure.org/reference/atoms). 
+
+Per the Clojure docs:
 
 > Atoms are an efficient way to represent some state that will never need to be coordinated with any other, and for which you wish to make synchronous changes.
 
