@@ -51,9 +51,9 @@ All other objects must be explicitly shared before they can be safely used by mu
 
     (make-shared obj)
 
-Return a reference to an object that can be safely shared by many threads.
+Return an object that can be safely shared by many threads.
 
-If the given object is atomic or already shared it it simply returned. Otherwise it is necessary to create a copy of the object.
+If the given object is already shared it it simply returned. Otherwise it is necessary to create a copy of the object.
 
 Note this function may trigger a minor GC if a thread-local pair or vector is passed.
 
