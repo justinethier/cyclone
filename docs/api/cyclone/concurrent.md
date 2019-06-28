@@ -291,9 +291,11 @@ Predicate to determine if `obj` is a thread pool. Returns `#t` if so, `#f` other
 
 ### make-thread-pool 
 
-    (make-thread-pool thread-count)
+    (make-thread-pool thread-count [handler])
 
 Create a new thread pool consisting of `thread-count` threads.
+
+If `handler` is specified then it will be used as each thread's default exception handler.
 
 ### thread-pool-size
 
@@ -323,7 +325,7 @@ Add a new task to the given thread pool `tp`.
 
 ### thread-pool-release!  
 
-    (thread-pool-release! tp . how)
+    (thread-pool-release! tp [how])
 
 Call this if the thread pool `tp` will no longer be used. All thread pool threads are stopped and cleaned up by the system. 
 
