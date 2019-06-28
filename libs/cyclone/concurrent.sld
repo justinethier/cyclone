@@ -7,6 +7,7 @@
  (import
    (scheme base)
    (srfi 18)
+   (scheme write) ;; TODO: debugging only!
  )
  (include-c-header "<ck_pr.h>")
  (export
@@ -43,6 +44,7 @@
    thread-pool-idling-count
    thread-pool-idling?
    thread-pool-push-task!
+   ;thread-pool-release!
    ;; Immutable objects
    immutable?
    ;; Shared objects
@@ -389,28 +391,32 @@
     (threads tp:threads tp:set-threads!)
     )
 
-(define (default-handler err) #f)
-(define (%make-thread-pool-thread q) ;; TODO: optional exception handler
+(define (thread-pool-default-handler err) 
+;; TODO: why is this never being called??
+(write "called default error handler") (newline)
+#f)
+
+(define (%make-thread-pool-thread q handler)
   (make-thread 
     (lambda ()
         (let loop ()
           (with-handler
-            (lambda (e)
-              ;(write `(error ,e))
-              (newline)
-            )
-          ;  default-handler ;; TODO: allow passing this in
+            handler
             (let ((thunk (shared-queue-remove! q)))
               (thunk))
           )
           (loop)
         ))))
 
-(define (make-thread-pool size) ;; TODO: optional exception handler
-  (let ((tp (%make-thread-pool (make-shared-queue) '() size)))
+(define (make-thread-pool size . opts)
+  (let ((tp (%make-thread-pool (make-shared-queue) '() size))
+        (handler (if (and (pair? opts)
+                          (procedure? (car opts)))
+                     (car opts)
+                     thread-pool-default-handler)))
     (do ((i size (- i 1))) 
         ((zero? i)) 
-      (let ((t (%make-thread-pool-thread (tp:jobq tp))))
+      (let ((t (%make-thread-pool-thread (tp:jobq tp) (make-shared handler))))
         (tp:set-threads! tp (cons t (tp:threads tp)))
         (thread-start! t)))
     (share-all!)
@@ -427,6 +433,9 @@
 
 (define (thread-pool-push-task! tp thunk)
   (shared-queue-add! (tp:jobq tp) (make-shared thunk)))
+
+;; Stop all thread pool threads, effectively GC'ing the thread pool
+;; TODO: (define (thread-pool-release! tp . opts) ;; opt is how - 'terminate (unsafe) / join(safe)
 
 ; ?? - thread-pool-wait-all!
 
