@@ -30,6 +30,36 @@ This library complements the multithreading support provided by [SRFI 18](../srf
 - [`future-deref`](#future-deref)
 - [`future-done?`](#future-done)
 
+   ;; Shared Queues
+
+;; Shared Queues
+;;
+;; Each is a vector containing a circular buffer of objects that are intended
+;; to be shared among many threads. All operations are locked and thread-safe,
+;; and the queue will ensure any objects added are made into shared objects for
+;; use by other threads.
+;;
+;; Removal from a queue is a blocking operation, so threads can easily wait for
+;; new data to arrive.
+   shared-queue?
+   make-shared-queue
+   shared-queue
+   shared-queue-add!
+   shared-queue-remove!
+   shared-queue-clear!
+   shared-queue-size
+   shared-queue-wait-count
+   shared-queue-capacity
+   shared-queue-empty?
+   ;; Thread Pool
+   make-thread-pool 
+   thread-pool?
+   thread-pool-size
+   thread-pool-idling-count
+   thread-pool-idling?
+   thread-pool-push-task!
+   ;thread-pool-release!
+
 
 ## Shared Objects
 
