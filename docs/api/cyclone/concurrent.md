@@ -38,13 +38,13 @@ This library complements the multithreading support provided by [SRFI 18](../srf
 - [`shared-queue-remove!`](#shared-queue-remove)
 - [`shared-queue-clear!`](#shared-queue-clear)
 - [`shared-queue-size`](#shared-queue-size)
-- [`shared-queue-wait-count`](#shared-queue-wait-count)
 - [`shared-queue-capacity`](#shared-queue-capacity)
+- [`shared-queue-wait-count`](#shared-queue-wait-count)
 - [`shared-queue-empty?`](#shared-queue-empty)
 
 [Thread Pool](#thread-pool)
-- [`make-thread-pool`](#make-thread-pool)
 - [`thread-pool?`](#thread-pool-1)
+- [`make-thread-pool`](#make-thread-pool)
 - [`thread-pool-size`](#thread-pool-size)
 - [`thread-pool-idling-count`](#thread-pool-idling-count)
 - [`thread-pool-idling?`](#thread-pool-idling)
@@ -283,10 +283,50 @@ Returns `#t` if the given queue is empty, and `#f` otherwise.
 
 ## Thread Pool
 
-- [make-thread-pool 
-- [thread-pool?
-- [thread-pool-size
-- [thread-pool-idling-count
-- [thread-pool-idling?
-- [thread-pool-push-task!
-- [thread-pool-release!
+### thread-pool? 
+
+    (thread-pool? obj)
+
+Predicate to determine if `obj` is a thread pool. Returns `#t` if so, `#f` otherwise.
+
+### make-thread-pool 
+
+    (make-thread-pool thread-count)
+
+Create a new thread pool consisting of `thread-count` threads.
+
+### thread-pool-size
+
+    (thread-pool-size tp)
+
+Return the number of threads in thread pool `tp`.
+
+### thread-pool-idling-count
+
+    (thread-pool-idling-count tp)
+
+Return number of idle threads in thread pool `tp`.
+
+### thread-pool-idling?
+
+    (thread-pool-idling? tp)
+
+Return `#t` if any of the given thread pool's threads are idle, `#f` otherwise.
+
+### thread-pool-push-task!
+
+    (thread-pool-push-task! tp thunk)
+
+Add a new task to the given thread pool `tp`.
+
+`thunk` is a function accepting no arguments and will be queued to run on the next available thread.
+
+### thread-pool-release!  
+
+    (thread-pool-release! tp . how)
+
+Call this if the thread pool `tp` will no longer be used. All thread pool threads are stopped and cleaned up by the system. 
+
+Note that if `how` is passed `'terminate` the threads will be stopped immediately using `thread-terminate!`. This is a potentially unsafe operation. Otherwise the threads will be stopped in a safe manner.
+
+
