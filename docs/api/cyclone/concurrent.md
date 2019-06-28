@@ -30,35 +30,26 @@ This library complements the multithreading support provided by [SRFI 18](../srf
 - [`future-deref`](#future-deref)
 - [`future-done?`](#future-done)
 
-   ;; Shared Queues
+[Shared Queues](#shared-queues)
+- [`shared-queue?`](#shared-queue)
+- [`make-shared-queue`](#make-shared-queue)
+- [`shared-queue`](#shared-queue)
+- [`shared-queue-add!`](#shared-queue-add)
+- [`shared-queue-remove!`](#shared-queue-remove)
+- [`shared-queue-clear!`](#shared-queue-clear)
+- [`shared-queue-size`](#shared-queue-size)
+- [`shared-queue-wait-count`](#shared-queue-wait-count)
+- [`shared-queue-capacity`](#shared-queue-capacity)
+- [`shared-queue-empty?`](#shared-queue-empty)
 
-;; Shared Queues
-;;
-;; Each is a vector containing a circular buffer of objects that are intended
-;; to be shared among many threads. All operations are locked and thread-safe,
-;; and the queue will ensure any objects added are made into shared objects for
-;; use by other threads.
-;;
-;; Removal from a queue is a blocking operation, so threads can easily wait for
-;; new data to arrive.
-   shared-queue?
-   make-shared-queue
-   shared-queue
-   shared-queue-add!
-   shared-queue-remove!
-   shared-queue-clear!
-   shared-queue-size
-   shared-queue-wait-count
-   shared-queue-capacity
-   shared-queue-empty?
-   ;; Thread Pool
-   make-thread-pool 
-   thread-pool?
-   thread-pool-size
-   thread-pool-idling-count
-   thread-pool-idling?
-   thread-pool-push-task!
-   ;thread-pool-release!
+[Thread Pool](#thread-pool)
+- [`make-thread-pool`](#make-thread-pool)
+- [`thread-pool?`](#thread-pool-1)
+- [`thread-pool-size`](#thread-pool-size)
+- [`thread-pool-idling-count`](#thread-pool-idling-count)
+- [`thread-pool-idling?`](#thread-pool-idling)
+- [`thread-pool-push-task!`](#thread-pool-push-task)
+- [`thread-pool-release!`](#thread-pool-release)
 
 
 ## Shared Objects
@@ -221,3 +212,81 @@ Invokes `thunk` on another thread and returns a future object that can be derefe
     (future-done? obj)
 
 Returns `#t` if the future has finished executing on another thread, and `#f` otherwise.
+
+## Shared Queues
+
+A shared queue contains a circular buffer of objects intended to be shared among many threads. All operations are locked and thread-safe, and the queue will ensure any objects added are made into shared objects for use by other threads.
+
+Removal from a queue is a blocking operation, so threads can easily wait for new data to arrive.
+
+### shared-queue?
+
+    (shared-queue? obj)
+
+Predicate to determine if `obj` is a shared queue. Returns `#t` if so, `#f` otherwise.
+
+### make-shared-queue      
+
+    (make-shared-queue)
+
+Create a new shared queue.
+
+### shared-queue
+
+    (shared-queue . elements)
+
+Create a new shared queue containing the given elements.
+
+### shared-queue-add!
+
+    (shared-queue-add! q obj)
+
+Add `obj` to the given shared queue `q`.
+
+### shared-queue-remove!
+
+    (shared-queue-remove! q)
+
+Removes an element from the front of shared queue `q` and returns it to the caller. If `q` is empty the calling thread will be blocked until an element is available.
+
+This function is meant to be called on a different thread than the thread(s) adding data to `q`.
+
+### shared-queue-clear! 
+
+    (shared-queue-clear! q)
+
+Remove all elements from the given shared queue `q`.
+
+### shared-queue-size       
+
+    (shared-queue-size q)
+
+Return the number of elements in the given shared queue.
+
+### shared-queue-capacity
+
+    (shared-queue-capacity q)
+
+Return the maximum capacity of `q`. Note that when this capacity is exceeded the queue will automatically be resized.
+
+### shared-queue-wait-count
+
+    (shared-queue-wait-count q)
+
+Return the number of threads currently blocked waiting for data from `q`.
+
+### shared-queue-empty?     
+
+    (shared-queue-empty? q)
+
+Returns `#t` if the given queue is empty, and `#f` otherwise.
+
+## Thread Pool
+
+- [make-thread-pool 
+- [thread-pool?
+- [thread-pool-size
+- [thread-pool-idling-count
+- [thread-pool-idling?
+- [thread-pool-push-task!
+- [thread-pool-release!
