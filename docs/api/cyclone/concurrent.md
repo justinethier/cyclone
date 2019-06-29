@@ -283,6 +283,8 @@ Returns `#t` if the given queue is empty, and `#f` otherwise.
 
 ## Thread Pool
 
+A thread pool is used to start several OS-level threads that will be used to execute jobs queued to the pool via `thread-pool-push-task!`. This allows an application to run asynchronous tasks on other threads while avoiding the overhead of starting a new thread for each task.
+
 ### thread-pool? 
 
     (thread-pool? obj)
