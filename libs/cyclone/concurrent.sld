@@ -391,10 +391,7 @@
     (threads tp:threads tp:set-threads!)
     )
 
-(define (thread-pool-default-handler err) 
-;; TODO: why is this never being called??
-(write "called default error handler") (newline)
-#f)
+(define (thread-pool-default-handler err) #f)
 
 (define (%make-thread-pool-thread q handler)
   (make-thread 
