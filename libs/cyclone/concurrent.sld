@@ -435,7 +435,17 @@
   (shared-queue-add! (tp:jobq tp) (make-shared thunk)))
 
 ;; Stop all thread pool threads, effectively GC'ing the thread pool
-;; TODO: (define (thread-pool-release! tp . opts) ;; opt is how - 'terminate (unsafe) / join(safe)
+;; For now just uses thread-terminate for this purpose. The theory being that each 
+;; thread is not supposed to hold its own state anyway, and the TP is finishing up,
+;; so do not anticipate this termination method causing any problems with (EG) 
+;; orphaned resources, etc.
+(define (thread-pool-release! tp)
+  (let ((terminate (lambda () (thread-terminate! (current-thread)))))
+    (for-each
+     (lambda (thread)
+       ;; Force each thread to terminate
+       (thread-pool-push-task! tp terminate))
+     (tp:threads tp))))
 
 ; ?? - thread-pool-wait-all!
 
