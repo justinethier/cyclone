@@ -44,7 +44,7 @@
    thread-pool-idling-count
    thread-pool-idling?
    thread-pool-push-task!
-   ;thread-pool-release!
+   thread-pool-release!
    ;; Immutable objects
    immutable?
    ;; Shared objects
