@@ -1,6 +1,9 @@
 ;;;; Cyclone Scheme
 ;;;; https://github.com/justinethier/cyclone
 ;;;;
+;;;; Copyright (c) 2014-2019, Justin Ethier
+;;;; All rights reserved.
+;;;;
 ;;;; A library for writing concurrent programs using Cyclone.
 ;;;;
 (define-library (cyclone concurrent)
