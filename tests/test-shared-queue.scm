@@ -1,7 +1,6 @@
 (import 
   (scheme base)
   (cyclone concurrent)
-  ;(srfi 18)
   (cyclone test))
 
 (test-group "basic"
