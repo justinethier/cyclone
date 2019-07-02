@@ -327,10 +327,8 @@ Add a new task to the given thread pool `tp`.
 
 ### thread-pool-release!  
 
-    (thread-pool-release! tp [how])
+    (thread-pool-release! tp)
 
-Call this if the thread pool `tp` will no longer be used. All thread pool threads are stopped and cleaned up by the system. 
-
-Note that if `how` is passed `'terminate` the threads will be stopped immediately using `thread-terminate!`. This is a potentially unsafe operation. Otherwise the threads will be stopped in a safe manner.
+Call this if the thread pool `tp` will no longer be used. Stops and cleans up all thread pool threads. 
 
 
