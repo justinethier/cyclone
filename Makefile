@@ -25,6 +25,7 @@ SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
+					 $(TEST_DIR)/test-shared-queue.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
 					 $(TEST_DIR)/match-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
