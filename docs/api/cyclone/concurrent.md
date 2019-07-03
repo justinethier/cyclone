@@ -142,8 +142,8 @@ For example:
 
 Example programs:
 
-- Summing numbers using atomic operations: [`sum-atomic.scm`](../../../examples/threading/sum-atomic.scm)
-- For comparison, summing numbers using locks: [`sum-mutex.scm`](../../../examples/threading/sum-mutex.scm)
+- Summing numbers using atomic operations: [`sum-atomic.scm`](https://github.com/justinethier/cyclone/tree/master/examples/threading/sum-atomic.scm)
+- For comparison, summing numbers using locks: [`sum-mutex.scm`](https://github.com/justinethier/cyclone/tree/master/examples/threading/sum-mutex.scm)
 
 ### make-atom
 
