@@ -54,7 +54,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 # Cyclone Libraries
 
-These libraries are provided by Cyclone with a stable API that is unlikely to change:
+These libraries are provided as Cyclone-specific extensions:
 
 - [`cyclone concurrent`](api/cyclone/concurrent.md) - A helper library for writing concurrent code.
 - [`cyclone match`](api/cyclone/match.md) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
