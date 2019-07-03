@@ -9,7 +9,7 @@ title: API
 - [Standard Libraries](#standard-libraries)
 - [SRFI Libraries](#srfi-libraries)
 - [Cyclone Libraries](#cyclone-libraries)
-- [Cyclone Compiler API](#cyclone-compiler-api)
+- [Internal Compiler API](#internal-compiler-api)
 - [C API](#c-api)
 - [Index](#index)
 
@@ -58,13 +58,15 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 # Cyclone Libraries
 
-These libraries are provided by Cyclone with a stable API that is unlikely to change.
+These libraries are provided by Cyclone with a stable API that is unlikely to change:
 
+- [`cyclone concurrent`](api/cyclone/concurrent) - A helper library for writing concurrent code.
+- [`cyclone match`](api/cyclone/match) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
+- [`cyclone test`](api/cyclone/test) - A unit testing framework ported from `(chibi test)`.
 - [`scheme cyclone array-list`](api/scheme/cyclone/array-list)
-- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print)
-- [`scheme cyclone test`](api/scheme/cyclone/test)
+- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print) - A pretty printer.
 
-# Cyclone Compiler API
+# Internal Compiler API
 
 These libraries are used by the Cyclone compiler. Some of these are stable and unlikely to change, whereas others could change as the compiler evolves.
 
@@ -73,7 +75,6 @@ These libraries are used by the Cyclone compiler. Some of these are stable and u
 - [`scheme cyclone common`](api/scheme/cyclone/common)
 - [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations)
 - [`scheme cyclone libraries`](api/scheme/cyclone/libraries)
-- [`scheme cyclone match`](api/scheme/cyclone/match)
 - [`scheme cyclone primitives`](api/scheme/cyclone/primitives)
 - [`scheme cyclone transforms`](api/scheme/cyclone/transforms)
 - [`scheme cyclone util`](api/scheme/cyclone/util)
