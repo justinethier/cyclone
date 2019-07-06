@@ -147,23 +147,23 @@ A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance) lists differenc
 
 # Multithreaded Programming
 
+## Overview
+
 The [`srfi 18`](api/srfi/18) library may be imported to provide support for multithreaded programs. See the [SRFI 18 specification](http://srfi.schemers.org/srfi-18/srfi-18.html) for more background information.
 
-Due to how Cyclone's garbage collector is implemented, objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. There are two ways to meet this guarantee:
+Many helper functions are provided by [`(cyclone concurrent)`](api/cyclone/concurrent) to make it easier to write multithreaded programs.
 
-- Use the `->heap` function to place a copy of an object on the heap. Note this will only create a copy of a single object. A vector of objects would not have the contents of the vector moved, and a list would only have its immediate cons cell copied:
+## Memory Layout
 
-        (->heap (list))
+Cyclone's garbage collector moves objects in memory from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. 
 
-- The `Cyc-minor-gc` function may be used to trigger a minor garbage collection for the executing thread. This is a more expensive operation than `->heap` but guarantees all objects on the thread's stack are copied to the heap:
-
-        (Cyc-minor-gc)
+The easiest way to meet this guarantee is to use one of the `make-shared` and `share-all!` functions from `(cyclone concurrent)`. Several of the other constructs from that library (such as futures and shared queues) use these functions internally to guarantee objects are safely shared between threads.
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
 - Characters and integers are stored using value types and do not need to be garbage collected.
 - Symbols are stored in a global table rather than the stack/heap.
-- Mutexes are always allocated on the heap since by definition they are used by more than one thread.
+- Mutexes, Atomics, and other concurrency-oriented objects are always allocated on the heap since by definition they are used by more than one thread.
 
 # Foreign Function Interface
 
