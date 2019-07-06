@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.11.2 - TBD
+## 0.11.2 - July 7, 2019
 
 Features
 
-- Added a new library `(cycone concurrent)` with support for atomics, futures, immutability, shared objects, shared queues, and thread pools. Overall the goal is to make it much easier to write multithreaded programs using Cyclone.
+- Added a new library `(cycone concurrent)` with support for atomics, futures, shared queues, and thread pools. As well as helpers for immutability and shared objects. Overall the goal is for this library to make it much easier to write multithreaded programs using Cyclone.
 - Relocated existing libraries to `(cyclone match)` and `(cyclone test)`.
 - Extended `mutex-lock!` to support an optional `timeout` parameter, per the SRFI 18 spec.
 
