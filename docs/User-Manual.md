@@ -152,9 +152,9 @@ Many helper functions are provided by [`(cyclone concurrent)`](api/cyclone/concu
 
 ## Memory Layout
 
-Due to how Cyclone's garbage collector is implemented, objects are relocated in memory when they are moved from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. 
+Cyclone's garbage collector moves objects in memory from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. 
 
-The easiest way to meet this guarantee is to use one of the `make-shared` and `share-all!` functions from `(cyclone concurrent)`.
+The easiest way to meet this guarantee is to use one of the `make-shared` and `share-all!` functions from `(cyclone concurrent)`. Several of the other constructs from that library (such as futures and shared queues) use these functions internally to guarantee objects are safely shared between threads.
 
 Finally, note there are some objects that are not relocated so the above does not apply:
 
