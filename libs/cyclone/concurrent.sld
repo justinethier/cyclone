@@ -69,9 +69,9 @@
 ;; Returns true if a value has been produced for a promise, delay, future or lazy sequence.
 (define (realized? obj)
   (cond
-    ;; TODO: ((future? obj) 
-    ;; TODO: ((shared-delay? obj)
-    ;; TODO: ((shared-promise? obj)
+    ;; TODO: ((future? obj) (future-done? obj))
+    ;; TODO: ((shared-delay? obj) (shared-delay-realized? obj))
+    ;; TODO: ((shared-promise? obj) (shared-promise-realized? obj))
     (else #f)))
 
 (define-c atom?
@@ -225,7 +225,7 @@
          (t (make-thread tfnc))
         )
     (thread-start! t)
-    ftr))
+    (make-shared ftr)))
 
 (define (future-done? ftr)
   (when (not (future? ftr))
