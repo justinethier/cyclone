@@ -27,8 +27,10 @@
    ;; Delays
    make-shared-delay
    shared-delay
+   shared-delay?
    ;; Promises
    make-shared-promise
+   shared-promise?
    deliver
    ;; Futures
    future?
@@ -213,15 +215,12 @@
   (when (not (shared-delay? d))
     (error "Expected future but received" d))
   (mutex-lock! (sd:lock d))
-  (cond
-    ((sd:done d) 
-     (sd:value d))
-    (else
+  (when (not (sd:done d))
      (sd:set-value! d 
        (make-shared ((sd:value d)))) ;; Exec thunk and store result
-     (sd:set-done! d #t)))
+     (sd:set-done! d #t))
   (mutex-unlock! (sd:lock d))
-)
+  (sd:value d))
 
 (define (shared-delay-realized? obj)
   (let ((rv #f))
