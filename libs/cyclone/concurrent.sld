@@ -16,6 +16,7 @@
  (export
    ;; Generic Concurrency
    deref
+   realized?
    ;; Atoms
    make-atom
    atom
@@ -61,7 +62,17 @@
   (cond
     ((atom? obj) (atom-deref obj))
     ((future? obj) (future-deref obj))
+    ((shared-queue? obj) (shared-queue-remove! obj))
     (else obj)))
+
+;; TODO: (realized? obj) - see clojure docs
+;; Returns true if a value has been produced for a promise, delay, future or lazy sequence.
+(define (realized? obj)
+  (cond
+    ;; TODO: ((future? obj) 
+    ;; TODO: ((shared-delay? obj)
+    ;; TODO: ((shared-promise? obj)
+    (else #f)))
 
 (define-c atom?
   "(void *data, int argc, closure _, object k, object obj)"
