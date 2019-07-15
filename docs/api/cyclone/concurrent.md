@@ -1,8 +1,8 @@
 # Concurrency Library
 
-The `(cyclone concurrent)` library makes it easier to write concurrent programs using Cyclone.
+The `(cyclone concurrent)` library makes it easier to write concurrent programs using Cyclone, and complements the lower-level multithreading support provided by [SRFI 18](../srfi/18.md).
 
-This library complements the multithreading support provided by [SRFI 18](../srfi/18.md).
+Much of the API is based on, or inspired by, similar constructs from Clojure.
 
 ## Index
 
