@@ -4,7 +4,7 @@ The `(cyclone concurrent)` library makes it easier to write concurrent programs 
 
 Much of the API is based on, or inspired by, similar constructs from Clojure.
 
-Shared Queues and Thread Pools are loosly based off of API's from [Sagittarius Scheme](https://bitbucket.org/ktakashi/sagittarius-scheme/wiki/Home).
+Shared Queues and Thread Pools are loosly based on API's from [Sagittarius Scheme](https://bitbucket.org/ktakashi/sagittarius-scheme/wiki/Home).
 
 ## Index
 
