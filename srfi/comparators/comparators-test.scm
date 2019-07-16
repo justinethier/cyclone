@@ -1,4 +1,4 @@
-(import (scheme base) (scheme cyclone test) (scheme write) (srfi 128) #;(comparators))
+(import (scheme base) (cyclone test) (scheme write) (srfi 128) #;(comparators))
 ;(load "../comparators/r7rs-shim.scm")
 
 (define (print x) (display x) (newline))

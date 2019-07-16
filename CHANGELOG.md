@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.11.3 - TBD
+
+Features
+
+- Added support for delays and promises to `(cyclone concurrent)`. Note functions/macros for both types of objects are prefixed with `shared-` to differentiate them from R7RS definitions from `(scheme lazy)`.
+
+## 0.11.2 - July 7, 2019
+
+Features
+
+- Added a new library `(cyclone concurrent)` with support for atomics, futures, shared queues, and thread pools. As well as helpers for immutability and shared objects. Overall the goal is for this library to make it much easier to write multithreaded programs using Cyclone.
+- Relocated existing libraries to `(cyclone match)` and `(cyclone test)`.
+- Extended `mutex-lock!` to support an optional `timeout` parameter, per the SRFI 18 spec.
+
+Bug Fixes
+
+- Fixed `thread-join!` to wait properly both for running threads and new threads that have not yet been started.
+
 ## 0.11.1 - May 25, 2019
 
 Features

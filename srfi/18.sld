@@ -70,7 +70,14 @@
         ;; - internal thread id (implementation-specific)
         ;; - name
         ;; - specific
-        (vector 'cyc-thread-obj thunk #f name-str #f)))
+        ;; - internal
+        (vector 
+          'cyc-thread-obj 
+          thunk 
+          (%alloc-thread-data)  ;; Internal data for new thread
+          name-str 
+          #f 
+          #f)))
 
     (define (thread-name t) (vector-ref t 3))
     (define (thread-specific t) (vector-ref t 4))
@@ -83,7 +90,7 @@
             t)))
 
     (define *primordial-thread*
-      (vector 'cyc-thread-obj #f #f "main thread" #f))
+      (vector 'cyc-thread-obj #f #f "main thread" #f #f))
 
     (define-c %current-thread
       "(void *data, int argc, closure _, object k)"
@@ -96,14 +103,21 @@
         make_c_opaque(co, td);
         return_closcall1(data, k, &co); ")
 
+    (define-c %alloc-thread-data
+      "(void *data, int argc, closure _, object k)"
+      " gc_thread_data *td = malloc(sizeof(gc_thread_data));
+        gc_add_new_unrunning_mutator(td); /* Register this thread */
+        make_c_opaque(co, td);
+        return_closcall1(data, k, &co); ")
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
-      ;; t contains any closures on the "parent" thread's stack
+      ;; it contains any closures on the "parent" thread's stack
       (let* ((thunk (vector-ref t 1)) 
              (thread-params (cons t (lambda ()
-                                      (vector-set! t 2 (%get-thread-data))
+                                      (vector-set! t 5 #f)
                                       (thunk)))))
-        (vector-set! t 2 (%get-thread-data)) ;; Temporarily make parent thread
+        (vector-set! t 5 (%get-thread-data)) ;; Temporarily make parent thread
                                              ;; data available for child init
         (Cyc-minor-gc)
         (Cyc-spawn-thread! thread-params)
@@ -123,7 +137,8 @@
         set_thread_blocked(data, k);
         /* Cannot join to detached thread! pthread_join(td->thread_id, NULL);*/
         while (1) {
-          if (!gc_is_mutator_active(td)){
+          if (!gc_is_mutator_new(td) && 
+              !gc_is_mutator_active(td)){
             break;
           }
           gc_sleep_ms(250);
@@ -181,7 +196,12 @@
         }
         return_closcall1(data, k, lock); ")
 
-    (define-c mutex-lock!
+    (define (mutex-lock! mutex . timeout)
+      (if (pair? timeout)
+          (%mutex-timedlock! mutex (car timeout))
+          (%mutex-lock! mutex)))
+
+    (define-c %mutex-lock!
       "(void *data, int argc, closure _, object k, object obj)"
       " mutex m = (mutex) obj;
         Cyc_check_mutex(data, obj);
@@ -189,6 +209,26 @@
         if (pthread_mutex_lock(&(m->lock)) != 0) {
           fprintf(stderr, \"Error locking mutex\\n\");
           exit(1);
+        }
+        return_thread_runnable(data, boolean_t); ")
+
+    (define-c %mutex-timedlock!
+      "(void *data, int argc, closure _, object k, object obj, object timeout)"
+      " mutex m = (mutex) obj;
+        struct timespec tim;
+        double value;
+        Cyc_check_mutex(data, obj);
+        Cyc_check_num(data, timeout);
+        value = unbox_number(timeout);
+        set_thread_blocked(data, k);
+        clock_gettime(CLOCK_REALTIME, &tim);
+        //clock_gettime(CLOCK_MONOTONIC, &tim);
+        //gettimeofday(&tim, NULL);
+        tim.tv_sec += (long)value;
+        tim.tv_nsec += (long)((value - ((long)value)) * 1000 * NANOSECONDS_PER_MILLISECOND);
+        int result = pthread_mutex_timedlock(&(m->lock), &tim);
+        if (result != 0) {
+          return_thread_runnable(data, boolean_f);
         }
         return_thread_runnable(data, boolean_t); ")
 

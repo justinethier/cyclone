@@ -1,4 +1,4 @@
-(import (scheme base)) (import (srfi 143)) (import (scheme cyclone test))
+(import (scheme base)) (import (srfi 143)) (import (cyclone test))
 (test-group "fixnum"
 (test-group "fixnum/arithmetic"
   (test #t (fixnum? 32767))

@@ -24,7 +24,7 @@
   (scheme base)
   (srfi 27)
   (scheme cyclone array-list)
-  (scheme cyclone test))
+  (cyclone test))
 
 (define test-size 2000)
 

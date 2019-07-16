@@ -1,6 +1,6 @@
-(import (scheme base) (srfi 133) (scheme cyclone test))
+(import (scheme base) (srfi 133) (cyclone test))
 #;(cond-expand
-  (cyclone (import (scheme base) (srfi 133) (scheme cyclone test)))
+  (cyclone (import (scheme base) (srfi 133) (cyclone test)))
   (chicken (use test srfi-133))
   (chibi (import (scheme base) (chibi test) (vectors))))
 (test-group "vectors"

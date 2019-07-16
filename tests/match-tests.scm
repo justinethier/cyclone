@@ -5,8 +5,8 @@
 (cond-expand
   (cyclone
     (import
-      (scheme cyclone match)
-      (scheme cyclone test)))
+      (cyclone match)
+      (cyclone test)))
   (chibi
     (import
       (chibi ast)

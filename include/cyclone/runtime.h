@@ -66,6 +66,8 @@ void gc_init_heap(long heap_size);
 
 #define Cyc_verify_mutable(data, obj) { \
   if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
+#define Cyc_verify_immutable(data, obj) { \
+  if (boolean_f == Cyc_is_immutable(obj)) Cyc_mutable_obj_error(data, obj); }
 #define Cyc_check_type(data, fnc_test, tag, obj) { \
   if ((boolean_f == fnc_test(obj))) Cyc_invalid_type_error(data, tag, obj); }
 #define Cyc_check_type2(data, fnc_test, tag, obj) { \
@@ -84,9 +86,11 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj)
 #define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj)
 #define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj)
+#define Cyc_check_atomic(d,obj) Cyc_check_type(d,Cyc_is_atomic, atomic_tag, obj)
 #define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj)
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_immutable_obj_error(void *data, object obj);
+void Cyc_mutable_obj_error(void *data, object obj);
 void Cyc_check_obj(void *data, int tag, object obj);
 void Cyc_check_bounds(void *data, const char *label, int len, int index);
 /**@}*/
@@ -453,6 +457,7 @@ object Cyc_is_integer(object o);
 #define Cyc_is_bytevector(o) (make_boolean(is_object_type(o) && ((list) o)->tag == bytevector_tag))
 #define Cyc_is_port(o)       (make_boolean(is_object_type(o) && ((list) o)->tag == port_tag))
 #define Cyc_is_mutex(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == mutex_tag))
+#define Cyc_is_atomic(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == atomic_tag))
 #define Cyc_is_cond_var(o)   (make_boolean(is_object_type(o) && ((list) o)->tag == cond_var_tag))
 #define Cyc_is_symbol(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == symbol_tag))
 #define Cyc_is_string(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == string_tag))
@@ -467,6 +472,7 @@ object Cyc_is_procedure(void *data, object o);
 #define Cyc_is_eof_object(o)  (make_boolean(is_object_type(o) && ((list) o)->tag == eof_tag))
 #define Cyc_is_cvar(o)        (make_boolean(is_object_type(o) && ((list) o)->tag == cvar_tag))
 #define Cyc_is_opaque(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == c_opaque_tag))
+object Cyc_is_immutable(object obj);
 /**@}*/
 
 /**

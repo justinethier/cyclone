@@ -2,7 +2,7 @@
   (scheme base) 
   (scheme char)
   (scheme complex)
-  (scheme cyclone test)
+  (cyclone test)
   (srfi 113)
   (srfi 128)
 )

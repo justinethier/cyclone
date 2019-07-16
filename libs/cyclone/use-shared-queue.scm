@@ -1,0 +1,35 @@
+;; Example of multiple threads using a shared queue 
+(import
+  (scheme base)
+  (scheme write)
+  (srfi 18)
+  (cyclone concurrent))
+
+(define q (make-shared-queue))
+(define (consume)
+  (%consume)
+  (%consume))
+(define (%consume)
+  (let ((val (shared-queue-remove! q)))
+    (if (procedure? val)
+      (set! val (val)))
+    (write `(removed ,val ,(current-thread)))
+    (newline)
+    (thread-sleep! 1))
+)
+(define t1 (make-thread consume))
+(define t2 (make-thread consume))
+
+(thread-start! t1)
+(thread-start! t2)
+
+(thread-sleep! 1)
+(shared-queue-add! q 'a)
+(shared-queue-add! q (lambda () (+ 1 2 3)))
+(shared-queue-add! q 'c)
+(shared-queue-add! q 'd)
+(shared-queue-add! q 'e)
+
+(thread-join! t1)
+(thread-join! t2)
+(write "done")

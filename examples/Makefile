@@ -10,6 +10,9 @@ TARGETS = \
   threading/many-writers \
   threading/producer-consumer \
   threading/thread-join \
+  threading/sum-atomic \
+  threading/sum-mutex \
+  threading/sum-nosync \
   game-of-life/life \
   hello-library/hello \
 
@@ -36,6 +39,12 @@ threading/many-writers     : threading/many-writers.scm
 threading/producer-consumer: threading/producer-consumer.scm
 	cyclone $^
 threading/thread-join      : threading/thread-join.scm
+	cyclone $^
+threading/sum-atomic   : threading/sum-atomic.scm
+	cyclone $^
+threading/sum-mutex    :  threading/sum-mutex.scm
+	cyclone $^
+threading/sum-nosync   : threading/sum-nosync.scm
 	cyclone $^
 game-of-life/life:
 	cd game-of-life ; make

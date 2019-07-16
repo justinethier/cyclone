@@ -35,28 +35,29 @@ typedef void *object;
  *\ingroup objects
  */
 enum object_tag {
-  boolean_tag = 0               // 0
-      , bytevector_tag          // 1
-      , c_opaque_tag            // 2
-      , closure0_tag            // 3
-      , closure1_tag            // 4
-      , closureN_tag            // 5
-      , cond_var_tag            // 6
-      , cvar_tag                // 7
-      , double_tag              // 8
-      , eof_tag                 // 9
-      , forward_tag             // 10
-      , integer_tag             // 11
-      , bignum_tag              // 12
-      , macro_tag               // 13
-      , mutex_tag               // 14
-      , pair_tag                // 15
-      , port_tag                // 16 
-      , primitive_tag           // 17
-      , string_tag              // 18
-      , symbol_tag              // 19
-      , vector_tag              // 20
-      , complex_num_tag         // 21
+        boolean_tag     = 0
+      , bytevector_tag  = 1
+      , c_opaque_tag    = 2
+      , closure0_tag    = 3
+      , closure1_tag    = 4
+      , closureN_tag    = 5
+      , cond_var_tag    = 6
+      , cvar_tag        = 7
+      , double_tag      = 8
+      , eof_tag         = 9
+      , forward_tag     = 10
+      , integer_tag     = 11
+      , bignum_tag      = 12
+      , macro_tag       = 13
+      , mutex_tag       = 14
+      , pair_tag        = 15
+      , port_tag        = 16 
+      , primitive_tag   = 17
+      , string_tag      = 18
+      , symbol_tag      = 19
+      , vector_tag      = 20
+      , complex_num_tag = 21
+      , atomic_tag      = 22
 };
 
 #define type_is_pair_prim(clo) \
@@ -348,9 +349,11 @@ struct gc_thread_data_t {
 
 /* GC prototypes */
 void gc_initialize(void);
+void gc_add_new_unrunning_mutator(gc_thread_data * thd);
 void gc_add_mutator(gc_thread_data * thd);
 void gc_remove_mutator(gc_thread_data * thd);
 int gc_is_mutator_active(gc_thread_data *thd);
+int gc_is_mutator_new(gc_thread_data *thd);
 void gc_sleep_ms(int ms);
 gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
                         size_t chunk_size, gc_thread_data *thd);
@@ -402,6 +405,7 @@ void gc_wait_handshake();
 void gc_start_collector();
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
 void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object maybe_copied);
+void Cyc_make_shared_object(void *data, object k, object obj);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
 /**
@@ -666,6 +670,18 @@ typedef struct {
   pthread_cond_t cond;
 } cond_var_type;
 typedef cond_var_type *cond_var;
+
+/**
+ * @brief The atomic thread synchronization type
+ *
+ * Atomics are always allocated directly on the heap.
+ */
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  object obj;
+} atomic_type;
+typedef atomic_type *atomic;
 
 /** 
  * @brief The boolean type: True or False

@@ -4,7 +4,7 @@
 ;;;; This module contains a testing framework ported from (chibi test)
 ;;;; which in turn was ported from CHICKEN.
 ;;;;
-(define-library (scheme cyclone test)
+(define-library (cyclone test)
   (export
    warning test-group-inc! print-exception ;; TODO: should not be needed here
                          ;; must be a problem with referential transparency

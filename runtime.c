@@ -57,6 +57,7 @@ const char *tag_names[] = {
       /*symbol_tag    */ , "symbol"
       /*vector_tag    */ , "vector"
       /*complex_num_tag*/ , "complex number"
+      /*atomic_tag*/ , "atomic"
   , "Reserved for future use"
 };
 
@@ -75,6 +76,11 @@ void Cyc_invalid_type_error(void *data, int tag, object found)
 void Cyc_immutable_obj_error(void *data, object obj)
 {
   Cyc_rt_raise2(data, "Unable to modify immutable object ", obj);
+}
+
+void Cyc_mutable_obj_error(void *data, object obj)
+{
+  Cyc_rt_raise2(data, "Expected immutable object ", obj);
 }
 
 void Cyc_check_obj(void *data, int tag, object obj)
@@ -917,6 +923,9 @@ object Cyc_display(void *data, object x, FILE * port)
     break;
   case cond_var_tag:
     fprintf(port, "<condition variable %p>", x);
+    break;
+  case atomic_tag:
+    fprintf(port, "<atom %p>", x);
     break;
   case boolean_tag:
     fprintf(port, "#%s", ((boolean_type *) x)->desc);
@@ -1868,6 +1877,20 @@ object Cyc_is_procedure(void *data, object o)
 //  return boolean_f;
 //}
 
+object Cyc_is_immutable(object obj)
+{
+  if (is_object_type(obj) &&
+      (type_of(obj) == pair_tag ||
+       type_of(obj) == vector_tag ||
+       type_of(obj) == bytevector_tag ||
+       type_of(obj) == string_tag
+      ) &&
+      !immutable(obj) ) {
+    return boolean_f;
+  }
+  return boolean_t;
+}
+
 object Cyc_set_cell(void *data, object l, object val)
 {
   // FUTURE: always use "unsafe" car here, since set-cell is added by cyclone
@@ -1929,6 +1952,23 @@ object Cyc_vector_ref(void *data, object v, object k)
   idx = unbox_number(k);
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
     Cyc_rt_raise2(data, "vector-ref - invalid index", obj_int2obj(idx));
+  }
+
+  return ((vector) v)->elements[idx];
+}
+
+object _unsafe_Cyc_vector_ref(object v, object k)
+{
+  int idx;
+  if (Cyc_is_vector(v) == boolean_f ||
+      Cyc_is_fixnum(k) == boolean_f)
+  {
+    return NULL;
+  }
+
+  idx = unbox_number(k);
+  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+    return NULL;
   }
 
   return ((vector) v)->elements[idx];
@@ -5510,7 +5550,8 @@ object Cyc_trigger_minor_gc(void *data, object cont)
 }
 
 /**
- * Do a minor GC
+ * Do a minor GC, tracing all of the live objects from the calling thread's
+ * stack and moving them to the heap.
  * \ingroup gc_minor
  */
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
@@ -5581,6 +5622,8 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
   }
   clear_mutations(data);        // Reset for next time
 
+  // Collect globals but only if a change was made. This avoids traversing a
+  // long list of objects unless absolutely necessary.
   if (((gc_thread_data *) data)->globals_changed) {
       ((gc_thread_data *) data)->globals_changed = 0;
     // Transport globals
@@ -5667,6 +5710,59 @@ void GC(void *data, closure cont, object * args, int num_args)
   gc_mut_cooperate((gc_thread_data *) data, alloci);
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
+}
+
+/**
+ * Move a thread-local object to the heap
+ */
+
+void Cyc_make_shared_object(void *data, object k, object obj)
+{
+  gc_thread_data *thd = (gc_thread_data *)data;
+  gc_heap_root *heap = thd->heap;
+  object buf[1];
+  int tmp, *heap_grown = &tmp;
+  if (!is_object_type(obj) || // Immediates do not have to be moved
+      !gc_is_stack_obj(data, obj)) { // Not thread-local, assume already on heap
+    return_closcall1(data, k, obj);
+  }
+
+  switch(type_of(obj)) {
+  // These are never on the stack, ignore them
+  //  cond_var_tag    = 6
+  //  mutex_tag       = 14
+  //  atomic_tag      = 22
+  //  boolean_tag     = 0
+  //  bignum_tag      = 12
+  //  symbol_tag      = 19
+  //  closure0_tag    = 3
+  //  eof_tag         = 9
+  //  macro_tag       = 13
+  //  primitive_tag   = 17
+
+  // Copy stack-allocated objects with no children to the heap:
+  case string_tag:
+  case double_tag:
+  case bytevector_tag:
+  case port_tag:
+  case c_opaque_tag:
+  case complex_num_tag: {
+    object hp = gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd, heap_grown);
+    return_closcall1(data, k, hp);
+  }
+  // Objs w/children force minor GC to guarantee everything is relocated:
+  case cvar_tag:
+  case closure1_tag:
+  case closureN_tag:
+  case pair_tag:
+  case vector_tag:
+    buf[0] = obj;
+    GC(data, k, buf, 1);
+    break;
+  default:
+    printf("Invalid shared object type %d\n", type_of(obj));
+    exit(1);
+  }
 }
 
 /**
@@ -6120,10 +6216,21 @@ void *Cyc_init_thread(object thread_and_thunk)
 {
   vector_type *t;
   c_opaque_type *o;
-  object op, parent, child;
+  object op, parent, child, tmp;
   long stack_start;
   gc_thread_data *thd;
-  thd = malloc(sizeof(gc_thread_data));
+
+  // Extract passed-in thread data object
+  tmp = car(thread_and_thunk); 
+  t = (vector_type *)tmp;
+  op = _unsafe_Cyc_vector_ref(t, obj_int2obj(2)); // Field set in thread-start!
+  if (op == NULL) {
+    // Should never happen
+    thd = malloc(sizeof(gc_thread_data));
+  } else {
+    o = (c_opaque_type *)op;
+    thd = (gc_thread_data *)(opaque_ptr(o));
+  }
   gc_thread_data_init(thd, 0, (char *)&stack_start, global_stack_size);
   thd->scm_thread_obj = car(thread_and_thunk);
   thd->gc_cont = cdr(thread_and_thunk);
@@ -6133,7 +6240,7 @@ void *Cyc_init_thread(object thread_and_thunk)
 
   // Copy thread params from the calling thread
   t = (vector_type *)thd->scm_thread_obj;
-  op = Cyc_vector_ref(thd, t, obj_int2obj(2)); // Field set in thread-start!
+  op = Cyc_vector_ref(thd, t, obj_int2obj(5)); // Field set in thread-start!
   o = (c_opaque_type *)op;
   parent = ((gc_thread_data *)o->ptr)->param_objs; // Unbox parent thread's data
   child = NULL;

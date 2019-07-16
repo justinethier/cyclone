@@ -77,7 +77,6 @@
     define-c-inline?
     define-c->inline-var
     ;; Immutable objects
-    immutable?
     Cyc-set-immutable!
     ;; String functions
     string-join
@@ -754,21 +753,6 @@
                 (loop input output (cons char current))))))))
 
 ;; Immutable Object section
-
-;; Predicate - is the given object immutable?
-(define-c immutable?
-  "(void *data, int argc, closure _, object k, object obj)"
-  "object result = boolean_t;
-   if (is_object_type(obj) &&
-       (type_of(obj) == pair_tag ||
-        type_of(obj) == vector_tag ||
-        type_of(obj) == bytevector_tag ||
-        type_of(obj) == string_tag
-       ) &&
-       !immutable(obj) ) {
-     result = boolean_f;
-   }
-   return_closcall1(data, k, result); ")
 
 ;; Internal helper function - set immutable field on a single obj
 (define-c _Cyc-set-immutable!

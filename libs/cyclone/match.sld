@@ -5,7 +5,7 @@
 ;;;; code from Chibi Scheme's (chibi match) library. Which in
 ;;;; turn was built using Alex Shinn's match.scm.
 ;;;;
-(define-library (scheme cyclone match)
+(define-library (cyclone match)
   (import 
     (scheme base) 
     ;(scheme write)

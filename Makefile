@@ -20,10 +20,12 @@ TEST_DIR = tests
 # Source files
 SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
 					 $(wildcard srfi/*.sld) \
+					 $(wildcard libs/cyclone/*.sld) \
 					 $(wildcard $(SCHEME_DIR)/cyclone/*.sld)
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
+					 $(TEST_DIR)/test-shared-queue.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
 					 $(TEST_DIR)/match-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
@@ -43,7 +45,7 @@ example :
 	cd $(EXAMPLE_DIR) ; $(MAKE)
 
 clean :
-	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
+	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta libs/cyclone/*.o libs/cyclone/*.so libs/cyclone/*.c libs/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
 	cd $(EXAMPLE_DIR) ; $(MAKE) clean
 	rm -rf html tests/*.o tests/*.c
 	rm -f tests/srfi-28-tests
@@ -57,6 +59,7 @@ clean :
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
 	$(MKDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(MKDIR) $(DESTDIR)$(DATADIR)/cyclone
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
 	$(MKDIR) $(DESTDIR)$(DATADIR)/srfi/sets
@@ -66,10 +69,14 @@ install : libs install-libs install-includes install-bin
 	$(INSTALL) -m0755 scheme/*.so $(DESTDIR)$(DATADIR)/scheme
 	$(INSTALL) -m0644 scheme/cyclone/*.sld $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/test.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
-	$(INSTALL) -m0644 scheme/cyclone/match.meta $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 libs/cyclone/test.meta $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/match.meta $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.sld $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.scm $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/*.o $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0755 libs/cyclone/*.so $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 srfi/*.sld $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0644 srfi/*.o $(DESTDIR)$(DATADIR)/srfi
 	$(INSTALL) -m0755 srfi/*.so $(DESTDIR)$(DATADIR)/srfi
@@ -86,6 +93,8 @@ uninstall :
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/scheme/cyclone
+	$(RM) $(DESTDIR)$(DATADIR)/cyclone/*.*
+	$(RMDIR) $(DESTDIR)$(DATADIR)/cyclone
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/list-queues/*.*
 	$(RMDIR) $(DESTDIR)$(DATADIR)/srfi/list-queues
 	$(RM) $(DESTDIR)$(DATADIR)/srfi/sets/*.*
@@ -199,6 +208,7 @@ bench :
 	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone ; grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
 
 bootstrap : icyc libs
+	mkdir -p $(BOOTSTRAP_DIR)/libs/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/scheme/cyclone
 	mkdir -p $(BOOTSTRAP_DIR)/srfi
 	mkdir -p $(BOOTSTRAP_DIR)/$(HEADER_DIR)
@@ -208,7 +218,9 @@ bootstrap : icyc libs
 	cp $(HEADER_DIR)/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/hashset.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
+	cp libs/cyclone/*.sld $(BOOTSTRAP_DIR)/libs/cyclone
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp libs/cyclone/*.c $(BOOTSTRAP_DIR)/libs/cyclone
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp srfi/*.scm $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
@@ -243,16 +255,16 @@ bootstrap : icyc libs
 	cp scheme/cyclone/hashset.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/libraries.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/match.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/match.meta $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp libs/cyclone/match.c $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/match.meta $(BOOTSTRAP_DIR)/cyclone
 	cp scheme/cyclone/pretty-print.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/primitives.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cgen.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/util.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.meta $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/test.scm $(BOOTSTRAP_DIR)/scheme/cyclone
+	cp libs/cyclone/test.c $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/test.meta $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/test.scm $(BOOTSTRAP_DIR)/cyclone
 	cp scheme/cyclone/array-list.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/array-list.meta $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/array-list.sld $(BOOTSTRAP_DIR)/scheme/cyclone #just in case

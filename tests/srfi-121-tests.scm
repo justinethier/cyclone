@@ -23,7 +23,7 @@
   (scheme base)
   (srfi 121)
   (only (srfi 1) unfold)
-  (scheme cyclone test))
+  (cyclone test))
 
 (define g
   (make-coroutine-generator
