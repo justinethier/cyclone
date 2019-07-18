@@ -2,6 +2,9 @@
 
 ## 0.11.3 - TBD
 
+TODO: mention cyclone-winds even though not part of this official release
+https://github.com/cyclone-scheme/cyclone-winds
+
 Features
 
 - Added support for delays and promises to `(cyclone concurrent)`. Note functions/macros for both types of objects are prefixed with `shared-` to differentiate them from R7RS definitions from `(scheme lazy)`.
@@ -9,6 +12,10 @@ Features
 Bug Fixes
 
 - Fixed the MSYS2 build script and instructions, so it is possible to build on Windows again!
+
+Deprecated
+
+- `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
 
 ## 0.11.2 - July 7, 2019
 
