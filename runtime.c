@@ -3193,6 +3193,10 @@ void Cyc_halt(object obj)
     exit(obj_obj2int(obj));
   }
 
+  if (obj == boolean_f) {
+    exit(1);
+  }
+
   exit(0);
 }
 
