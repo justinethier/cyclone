@@ -10,8 +10,8 @@
   (export
     call-with-input-file 
     call-with-output-file
-    ;delete-file 
-    ;file-exists?
+    delete-file 
+    file-exists?
     ;open-binary-input-file 
     ;open-binary-output-file
     ;open-input-file 
@@ -25,6 +25,10 @@
       (call-with-port (open-input-file string) proc))
     (define (call-with-output-file string proc)
       (call-with-port (open-output-file string) proc))
+    (define file-exists? file-exists?)
+    (define delete-file delete-file)
+    (define (call-with-input-file string proc)
+      (call-with-port (open-input-file string) proc))
     (define (with-input-from-file string thunk)
       ;; Have to do this the long way since parameterize is not available
       (let ((old (current-input-port))
