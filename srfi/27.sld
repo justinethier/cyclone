@@ -22,7 +22,7 @@
   (begin
     ;; Numbers taken from bsd random
     ;(define mult 1103515245)
-    (define incr 12345)
+    (define incr (exact (current-second)))
     (define m 536870912)
     ;; Cutting off seems like a good idea
     ;(define cutoff 100)
