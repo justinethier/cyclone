@@ -12,10 +12,9 @@ Features
 Bug Fixes
 
 - Fixed the MSYS2 build script and instructions, so it is possible to build on Windows again!
-- Fixed `exit` to return the appropriate status code when a boolean is passed, per R7RS:
 - Modified `(srfi 27)` to use the timer to seed the pseudorandom number generator.
-
-> If no argument is supplied, or if obj is #t, the exit procedure should communicate to the operating system that the program exited normally. If obj is #f, the exit procedure should communicate to the operating system that the program exited abnormally.
+- Fixed `exit` to return the appropriate status code when a boolean is passed, per R7RS:
+    > If no argument is supplied, or if obj is #t, the exit procedure should communicate to the operating system that the program exited normally. If obj is #f, the exit procedure should communicate to the operating system that the program exited abnormally.
 
 Deprecated
 
