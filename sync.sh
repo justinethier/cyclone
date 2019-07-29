@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # A simple script to automate copying changed files to cyclone-bootstrap.
 # Sometimes this is easier than rebuilding everything from this repo.
