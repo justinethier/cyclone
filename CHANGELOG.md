@@ -7,6 +7,7 @@ https://github.com/cyclone-scheme/cyclone-winds
 
 Features
 
+- Arthur Maciel added instructions for building Cyclone on FreeBSD.
 - Added support for delays and promises to `(cyclone concurrent)`. Note functions/macros for both types of objects are prefixed with `shared-` to differentiate them from R7RS definitions from `(scheme lazy)`.
 
 Bug Fixes
