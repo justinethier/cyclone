@@ -202,7 +202,7 @@ libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
 full : 
-	make clean ; make && make test && make bootstrap && cd ../cyclone-bootstrap && make clean && ./install.sh
+	$(MAKE) clean ; $(MAKE) && $(MAKE) test && $(MAKE) bootstrap && cd ../cyclone-bootstrap && $(MAKE) clean && ./install.sh
 
 bench :
 	cd ../r7rs-benchmarks && rm results.Cyclone && ./bench cyclone all && grep Elapsed results.Cyclone >out.txt ; grep Elapsed results.Cyclone |wc ; grep -i -e error -e limit -e crash results.Cyclone ; grep Elapsed results.Cyclone | cut -d" " -f 3 ; true
