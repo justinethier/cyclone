@@ -240,7 +240,9 @@
         (cons
           (string->symbol 
             (string-append "version-" *version-number*))
-          *other-features*)))
+          (cons
+            (string->symbol (Cyc-compilation-environment 'platform))
+            *other-features*))))
 
     (define *other-features* 
             '(r7rs 

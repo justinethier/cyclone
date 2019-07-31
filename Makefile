@@ -190,6 +190,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_CC_EXEC=\"$(CC_EXEC)\" \
 					-DCYC_CC_LIB=\"$(CC_LIB)\" \
 					-DCYC_CC_SO=\"$(CC_SO)\" \
+					-DCYC_PLATFORM=\"$(PLATFORM)\" \
 					$< -o $@
 
 libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
