@@ -27,7 +27,7 @@ before_install:
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
       cd ${HOME}/ck
-      git checkout v0.6.0
+      git checkout 0.6.0
       ./configure PREFIX=/usr
       make all
       sudo make install
