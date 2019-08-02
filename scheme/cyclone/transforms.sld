@@ -1103,6 +1103,8 @@ if (acc) {
            (cons 'Cyc-fast-vector-3 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'vector) (= (length ast) 5))
            (cons 'Cyc-fast-vector-4 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'vector) (= (length ast) 6))
+           (cons 'Cyc-fast-vector-5 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'list) (= (length ast) 2))
            (cons 'Cyc-fast-list-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'list) (= (length ast) 3))

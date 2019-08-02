@@ -411,6 +411,7 @@ object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4);
 object Cyc_fast_vector_2(object ptr, object a1, object a2);
 object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3);
 object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4);
+object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4, object a5);
 object Cyc_bit_unset(void *data, object n1, object n2); 
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,

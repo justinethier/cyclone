@@ -1164,6 +1164,7 @@
           Cyc-fast-vector-2
           Cyc-fast-vector-3
           Cyc-fast-vector-4
+          Cyc-fast-vector-5
           )))
 
     (define (prim-calls-inlinable? prim-calls)

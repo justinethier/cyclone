@@ -125,6 +125,7 @@
          Cyc-fast-vector-2
          Cyc-fast-vector-3
          Cyc-fast-vector-4
+         Cyc-fast-vector-5
          Cyc-fast-list-1
          Cyc-fast-list-2
          Cyc-fast-list-3
@@ -268,6 +269,7 @@
          (Cyc-fast-vector-2 2 2)
          (Cyc-fast-vector-3 3 3)
          (Cyc-fast-vector-4 4 4)
+         (Cyc-fast-vector-5 5 5)
          (Cyc-fast-list-1 1 1)
          (Cyc-fast-list-2 2 2)
          (Cyc-fast-list-3 3 3)
@@ -657,6 +659,7 @@
          ((eq? p 'Cyc-fast-vector-2) "Cyc_fast_vector_2")
          ((eq? p 'Cyc-fast-vector-3) "Cyc_fast_vector_3")
          ((eq? p 'Cyc-fast-vector-4) "Cyc_fast_vector_4")
+         ((eq? p 'Cyc-fast-vector-5) "Cyc_fast_vector_5")
          ((eq? p 'Cyc-fast-list-1) "set_cell_as_expr")
          ((eq? p 'Cyc-fast-list-2) "Cyc_fast_list_2")
          ((eq? p 'Cyc-fast-list-3) "Cyc_fast_list_3")
@@ -773,6 +776,7 @@
         ((eq? p 'Cyc-fast-vector-2) "vector_2_type")
         ((eq? p 'Cyc-fast-vector-3) "vector_3_type")
         ((eq? p 'Cyc-fast-vector-4) "vector_4_type")
+        ((eq? p 'Cyc-fast-vector-5) "vector_5_type")
         ((eq? p 'Cyc-fast-list-1) "pair_type")
         ((eq? p 'Cyc-fast-list-2) "list_2_type")
         ((eq? p 'Cyc-fast-list-3) "list_3_type")
