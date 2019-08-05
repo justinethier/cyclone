@@ -1921,9 +1921,7 @@
                           ,parent 
                           ',(map car fields)))
          ;; predicate
-         (,_define ,pred (,(rename 'make-type-predicate)
-                          ,pred ;(symbol->string pred) ;(identifier->symbol pred))
-                          ,name))
+         (,_define ,pred (,(rename 'make-type-predicate) 0 ,name))
          ;; fields
          ,@(map (lambda (f)
                   (and (pair? f) (pair? (cdr f))
