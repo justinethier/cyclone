@@ -614,6 +614,17 @@
                    rename-env
                    local-renamed))))))
     (cond
+;      ;; special case
+;      ((eq? 'begin op)
+;(newline)
+;(display "/* ")
+;(write (list 'begin exp))
+;(display "*/ ")
+;       (let ((fncs (map (lambda (expr) 
+;                          (pre-analyze-application expr a-env rename-env local-renamed))
+;                        (cdr exp))))
+;         (lambda (env)
+;           (foldl (lambda (fnc _) (fnc env)) #f fncs))))
       ;; compiled macro
       ((Cyc-macro? var)
        (expand var))
@@ -795,10 +806,10 @@
                                   (procedure? (cadr macro))))
              (local-renamed (macro:get-local-renames macro local-renamed-lis))
              (result #f))
-        ;(newline)
-        ;(display "/* ")
-        ;(display (list 'macro:expand exp macro compiled-macro? local-renamed))
-        ;(display "*/ ")
+;        (newline)
+;        (display "/* ")
+;        (write (list 'macro:expand exp macro compiled-macro? local-renamed))
+;        (display "*/ ")
 
           ;; Invoke ER macro
         (set! result
@@ -820,9 +831,9 @@
                 mac-env))))
 ;        (newline)
 ;        (display "/* ")
-;        (display (list 'macro:expand exp macro compiled-macro?))
+;        (write (list 'macro:expand exp macro compiled-macro?))
 ;        (newline)
-;        (display (list result))
+;        (write (list result))
 ;        (display "*/ ")
           (macro:add-renamed-vars! use-env rename-env)
           result))
