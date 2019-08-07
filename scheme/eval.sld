@@ -614,17 +614,22 @@
                    rename-env
                    local-renamed))))))
     (cond
-      ;; special case - a begin can splice in definitions, so we can't use the
-      ;; built-in macro that just expands them in a new lambda scope. Instead
-      ;; we nest them below within the same lexical environment.
+      ;; special case - begin can splice in definitions, so we can't use the
+      ;; built-in macro that just expands them within a new lambda scope. 
+      ;; Instead we nest them below within the same lexical environment.
       ((eq? 'begin op)
 ;(newline)
 ;(display "/* ")
 ;(write (list exp))
 ;(display "*/ ")
-       (let ((fncs (map (lambda (expr) 
-                          (analyze expr a-env rename-env local-renamed))
-                        (cdr exp))))
+       (let ((fncs 
+               ;; Our map starts from the end, we reverse
+               ;; so everything is evaluated in order, then
+               ;; reverse again so results are in order
+               (reverse
+                 (map (lambda (expr) 
+                        (analyze expr a-env rename-env local-renamed))
+                      (reverse (cdr exp))))))
          (lambda (env)
            (foldl (lambda (fnc _) (fnc env)) #f fncs))))
       ;; compiled macro
