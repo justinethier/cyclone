@@ -18,6 +18,8 @@ Bug Fixes
 - Modified `(srfi 27)` to use the timer to seed the pseudorandom number generator.
 - Fixed `exit` to return the appropriate status code when a boolean is passed, per R7RS:
     > If no argument is supplied, or if obj is #t, the exit procedure should communicate to the operating system that the program exited normally. If obj is #f, the exit procedure should communicate to the operating system that the program exited abnormally.
+- Enhanced the interpreter (`eval`) to properly support splicing in definitions introduced by `begin`.
+- Fixed `define-record-type` so now it works in the interpreter.
 
 Deprecated
 
