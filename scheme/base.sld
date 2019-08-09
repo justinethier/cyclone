@@ -85,7 +85,9 @@
     list-copy
     map
     Cyc-map-loop-1
+    Cyc-map-loop-2
     Cyc-for-each-loop-1
+    Cyc-for-each-loop-2
     for-each
     list-tail
     list-ref
@@ -807,11 +809,20 @@
       (if (null? lst)
         '()
        (cons (f (car lst)) (Cyc-map-loop-1 f (cdr lst)))))
+    (define (Cyc-map-loop-2 f lst1 lst2)
+      (if (or (null? lst1) (null? lst2))
+        '()
+       (cons (f (car lst1) (car lst2)) (Cyc-map-loop-2 f (cdr lst1) (cdr lst2)))))
     (define (Cyc-for-each-loop-1 f lst)
       (if (null? lst)
         '()
        (begin (f (car lst)) 
               (Cyc-for-each-loop-1 f (cdr lst)))))
+    (define (Cyc-for-each-loop-2 f lst1 lst2)
+      (if (or (null? lst1) (null? lst2))
+        '()
+       (begin (f (car lst1) (car lst2)) 
+              (Cyc-for-each-loop-2 f (cdr lst1) (cdr lst2)))))
 
     (define (for-each f lis1 . lists)
       (if (not (null? lis1))

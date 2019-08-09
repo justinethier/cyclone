@@ -1115,8 +1115,12 @@ if (acc) {
            (cons 'Cyc-fast-list-4 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'for-each) (= (length ast) 3))
            (cons 'Cyc-for-each-loop-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'for-each) (= (length ast) 4))
+           (cons 'Cyc-for-each-loop-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'map) (= (length ast) 3))
            (cons 'Cyc-map-loop-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'map) (= (length ast) 4))
+           (cons 'Cyc-map-loop-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ;; Regular case, alpha convert everything
           (else
            (regular-case)))))
