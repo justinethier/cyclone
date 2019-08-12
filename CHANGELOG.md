@@ -1,9 +1,15 @@
 # Changelog
 
-## 0.11.3 - TBD
+## Next Release - TBD
 
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
+
+Deprecated
+
+- `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
+
+## 0.11.3 - TBD
 
 Features
 
@@ -20,10 +26,6 @@ Bug Fixes
     > If no argument is supplied, or if obj is #t, the exit procedure should communicate to the operating system that the program exited normally. If obj is #f, the exit procedure should communicate to the operating system that the program exited abnormally.
 - Enhanced the interpreter (`eval`) to properly support splicing in definitions introduced by `begin`.
 - Fixed `define-record-type` so now it works in the interpreter.
-
-Deprecated
-
-- `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
 
 ## 0.11.2 - July 7, 2019
 
