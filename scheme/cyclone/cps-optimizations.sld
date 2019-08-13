@@ -69,9 +69,8 @@
       adbv:const-value
       adbv:set-const-value!
       adbv:ref-count
-      adbv:set-ref-count!
+      adbv:set-ref-by-and-count!
       adbv:ref-by
-      adbv:set-ref-by!
       adbv:def-in-loop? 
       adbv:set-def-in-loop!
       adbv:ref-in-loop? 
@@ -173,8 +172,8 @@
       (defines-lambda-id adbv:defines-lambda-id adbv:set-defines-lambda-id!)
       (const adbv:const? adbv:set-const!)
       (const-value adbv:const-value adbv:set-const-value!)
-      (ref-count adbv:ref-count adbv:set-ref-count!)
-      (ref-by adbv:ref-by adbv:set-ref-by!)
+      (ref-count adbv:ref-count %adbv:set-ref-count!)
+      (ref-by adbv:ref-by %adbv:set-ref-by!)
       (mutated-by-set adbv:mutated-by-set? adbv:set-mutated-by-set!)
       ;; TODO: need to set reassigned flag if variable is SET, however there is at least
       ;; one exception for local define's, which are initialized to #f and then assigned
@@ -200,6 +199,12 @@
       ;; Does a function call itself?
       (self-rec-call adbv:self-rec-call? adbv:set-self-rec-call!)
     )
+
+    (define (adbv:set-ref-by-and-count! var lambda-id)
+      (let ((ref-bys (adbv:ref-by var)))
+        ;(when (not (member lambda-id ref-bys)) ;; Assume low ref-by count
+          (%adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
+          (%adbv:set-ref-by! var (cons lambda-id ref-bys)))) ;)
 
     (define (adbv-set-assigned-value-helper! sym var value)
       (define (update-lambda-atv! syms value)
@@ -585,15 +590,13 @@
         ((quote? exp) #f)
         ((ref? exp)
          (let ((var (adb:get/default exp (adb:make-var))))
-          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
-          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+          (adbv:set-ref-by-and-count! var lid)
          ))
         ((define? exp)
          ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
          (with-var! (define->var exp) (lambda (var)
            (adbv:set-defined-by! var lid)
-           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
-           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           (adbv:set-ref-by-and-count! var lid)
            (adbv-set-assigned-value-helper! (define->var exp) var (define->exp exp))
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
@@ -610,8 +613,7 @@
                (adbv:set-reassigned! var #t))
            (adbv:set-mutated-by-set! var #t)
            (adbv-set-assigned-value-helper! (set!->var exp) var (set!->exp exp))
-           (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
-           (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+           (adbv:set-ref-by-and-count! var lid)
            (adbv:set-const! var #f)
            (adbv:set-const-value! var #f)))
          (analyze (set!->exp exp) scope-sym lid))
@@ -702,8 +704,7 @@
 ;; TODO:
 ;        ((ref? exp)
 ;         (let ((var (adb:get/default exp (adb:make-var))))
-;          (adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
-;          (adbv:set-ref-by! var (cons lid (adbv:ref-by var)))
+;          (adbv:set-ref-by-and-count! var lid)
 ;         ))
         ((define? exp)
          ;(let ((var (adb:get/default (define->var exp) (adb:make-var))))
@@ -977,6 +978,7 @@
                       (and
                         arg ;; #f is a special value for init, so do not optimize it for now
                         (or (const? arg)
+                            ;;(ref? arg) ;; DEBUG
                             (quote? arg))))
                     (cdr exp))
                 )
