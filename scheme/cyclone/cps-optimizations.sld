@@ -202,9 +202,9 @@
 
     (define (adbv:set-ref-by-and-count! var lambda-id)
       (let ((ref-bys (adbv:ref-by var)))
-        ;(when (not (member lambda-id ref-bys)) ;; Assume low ref-by count
+        (when (not (member lambda-id ref-bys)) ;; Assume low ref-by count
           (%adbv:set-ref-count! var (+ 1 (adbv:ref-count var)))
-          (%adbv:set-ref-by! var (cons lambda-id ref-bys)))) ;)
+          (%adbv:set-ref-by! var (cons lambda-id ref-bys)))) )
 
     (define (adbv-set-assigned-value-helper! sym var value)
       (define (update-lambda-atv! syms value)
@@ -967,9 +967,12 @@
                       (with-var param (lambda (var)
                         (and 
                           ;; At least for now, do not replace if referenced by multiple functions
-                          (<= (length (adbv:ref-by var)) 1)
+;; TODO: comment-out below to simulate issue with fixed ref counts, why does this cause compilation problems?
+;;                          (<= (length (adbv:ref-by var)) 1)
                           ;; Need to keep variable because it is mutated
                           (not (adbv:reassigned? var))
+                          ;; Make sure param is not computed by vars that may be mutated
+                          (inline-ok-from-call-graph? param *adb-call-graph*)
                     ))))
                     (ast:lambda-formals->list (car exp)))
                   ;; Args are all constants
@@ -977,6 +980,7 @@
                     (lambda (arg)
                       (and
                         arg ;; #f is a special value for init, so do not optimize it for now
+                        (not (vector? arg)) ;; AST lambda's are vectors, do not inline them!!
                         (or (const? arg)
                             ;;(ref? arg) ;; DEBUG
                             (quote? arg))))
@@ -1721,6 +1725,8 @@
       (trace:info (adb:get-db))
       (let ((new-ast (opt:inline-prims 
                        (opt:contract ast) -1)))
+        ;(trace:info "---------------- new ast:")
+        ;(trace:info new-ast)
         ;; Just a hack for now, need to fix beta expand in compiler benchmark
         (when (< (length (filter define? new-ast)) 1000)
           (set! new-ast 
