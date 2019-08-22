@@ -5,6 +5,11 @@
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
 
+Bug Fixes
+
+- Raise a useful error instead of aborting the whole program (!) when apply attempts to execute an object of the wrong type.
+- Better handling of edge cases where an object of the wrong type is executed instead of a closure. Previously there were cases where this would cause the runtime to crash.
+
 Deprecated
 
 - `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
