@@ -5314,9 +5314,9 @@ object apply(void *data, object cont, object func, object args)
       }
     }
 
-  default:
-    printf("Invalid object type %d\n", type_of(func));
-    exit(1);
+  default: {
+      Cyc_rt_raise2(data, "Call of non-procedure: ", func);
+    }
   }
   return NULL;                  // Never reached
 }
