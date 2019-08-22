@@ -35,20 +35,20 @@ typedef void *object;
  *\ingroup objects
  */
 enum object_tag {
-        boolean_tag     = 0
-      , bytevector_tag  = 1
-      , c_opaque_tag    = 2
-      , closure0_tag    = 3
-      , closure1_tag    = 4
-      , closureN_tag    = 5
-      , cond_var_tag    = 6
-      , cvar_tag        = 7
-      , double_tag      = 8
-      , eof_tag         = 9
-      , forward_tag     = 10
-      , integer_tag     = 11
-      , bignum_tag      = 12
-      , macro_tag       = 13
+        closure0_tag    = 0
+      , closure1_tag    = 1
+      , closureN_tag    = 2
+      , macro_tag       = 3 // Keep closures here for quick type checking
+      , boolean_tag     = 4
+      , bytevector_tag  = 5
+      , c_opaque_tag    = 6
+      , cond_var_tag    = 7
+      , cvar_tag        = 8
+      , double_tag      = 9
+      , eof_tag         = 10
+      , forward_tag     = 11
+      , integer_tag     = 12
+      , bignum_tag      = 13
       , mutex_tag       = 14
       , pair_tag        = 15
       , port_tag        = 16 
@@ -60,8 +60,17 @@ enum object_tag {
       , atomic_tag      = 22
 };
 
-#define type_is_pair_prim(clo) \
-  (type_of(clo) >= pair_tag)
+/**
+ * Returns a true value if object is not a closure, or false otherwise
+ */
+#define type_is_not_closure(clo) \
+  ((clo == NULL) || is_value_type(clo) || (type_of(clo) > macro_tag))
+
+/**
+ * Returns a true value if object is not a closure, or false otherwise
+ */
+#define type_is_pair_prim(clo) (type_is_not_closure(clo))
+
 
 /**
  * Defines the size of object tags
