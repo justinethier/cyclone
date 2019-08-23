@@ -67,12 +67,6 @@ enum object_tag {
   ((obj == NULL) || is_value_type(obj) || (type_of(obj) > macro_tag))
 
 /**
- * Returns a true value if object is not a closure, or false otherwise
- */
-#define type_is_pair_prim(clo) (obj_is_not_closure(clo))
-
-
-/**
  * Defines the size of object tags
  * \ingroup objects
  */
