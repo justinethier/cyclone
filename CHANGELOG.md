@@ -14,7 +14,7 @@ Deprecated
 
 - `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
 
-## 0.11.3 - TBD
+## 0.11.3 - August 14, 2019
 
 Features
 
