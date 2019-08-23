@@ -14,7 +14,7 @@
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, a1) \
-if (type_is_pair_prim(clo)) { \
+if (obj_is_not_closure(clo)) { \
    Cyc_apply(td, 0, (closure)(a1), clo); \
 } else { \
    ((clo)->fn)(td, 1, clo, a1);\

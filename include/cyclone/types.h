@@ -63,13 +63,13 @@ enum object_tag {
 /**
  * Returns a true value if object is not a closure, or false otherwise
  */
-#define type_is_not_closure(clo) \
-  ((clo == NULL) || is_value_type(clo) || (type_of(clo) > macro_tag))
+#define obj_is_not_closure(obj) \
+  ((obj == NULL) || is_value_type(obj) || (type_of(obj) > macro_tag))
 
 /**
  * Returns a true value if object is not a closure, or false otherwise
  */
-#define type_is_pair_prim(clo) (type_is_not_closure(clo))
+#define type_is_pair_prim(clo) (obj_is_not_closure(clo))
 
 
 /**

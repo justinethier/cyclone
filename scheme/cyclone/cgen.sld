@@ -231,7 +231,7 @@
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
       "#define closcall" n "(td, clo" args ") \\\n"
-        (wrap (string-append "if (type_is_pair_prim(clo)) { \\\n"
+        (wrap (string-append "if (obj_is_not_closure(clo)) { \\\n"
                              "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
                              "}"))
         (wrap " else { \\\n")
