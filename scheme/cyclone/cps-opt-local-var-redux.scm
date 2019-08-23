@@ -89,6 +89,21 @@
                   ,@body)
                 (map scan exp)) ;; failsafe
         ))
+TODO: can we do this for generic lambda application, too? 
+        ((and
+          (list? exp)
+          (ast:lambda? (car exp))
+          (>= (length exp) 2)
+          ;; TODO: need to run any validation on the args???
+          ;; probably do NOT want any lambda's embedded in them, if that is even possible at this point
+          ;;
+          ;(ast:lambda? (cadr exp))
+          ;(list? (ast:lambda-args (cadr exp)))
+          ;(equal? 1 (length (ast:lambda-args (cadr exp))))
+         )
+         (write `(lambda app of ,(cdr exp)))
+         (newline)
+          (map scan exp)) ;; TODO: placeholder
         (else
           (map scan exp))))
      (else (error "unknown expression type: " exp))
@@ -406,22 +421,110 @@
  ;          (list
  ;           (lambda (r$14022) (k$14021 (car r$14022)))))))
  ;     (cdr expr$3499$3540$3621$9398))))
+ ;
+ ; (define slot-set!
+ ;   (lambda
+ ;     (k$7170
+ ;       name$2424$3603
+ ;       obj$2425$3604
+ ;       idx$2426$3605
+ ;       val$2427$3606)
+ ;     ((lambda
+ ;        (vec$2428$3607)
+ ;        ((lambda
+ ;           (r$7171)
+ ;           (k$7170
+ ;             (vector-set! r$7171 idx$2426$3605 val$2427$3606)))
+ ;         (vector-ref vec$2428$3607 2)))
+ ;      obj$2425$3604)))
 
- (define slot-set!
+ (define div
    (lambda
-     (k$7170
-       name$2424$3603
-       obj$2425$3604
-       idx$2426$3605
-       val$2427$3606)
+     (k$904 x$19$588 y$20$589)
      ((lambda
-        (vec$2428$3607)
+        (k$915)
+        (if (exact-integer?__inline__ x$19$588)
+          (if (exact-integer?__inline__ y$20$589)
+            (k$915 (Cyc-fast-gte x$19$588 0))
+            (k$915 #f))
+          (k$915 #f)))
+      (lambda
+        (r$905)
+        (if r$905
+          (k$904 (quotient__inline__ x$19$588 y$20$589))
+          (if (Cyc-fast-lt y$20$589 0)
+            (if (Cyc-fast-eq
+                  (Cyc-fast-sub
+                    x$19$588
+                    (Cyc-fast-mul
+                      (quotient__inline__ x$19$588 y$20$589)
+                      y$20$589))
+                  0)
+              (k$904 (quotient__inline__ x$19$588 y$20$589))
+              (k$904 (Cyc-fast-plus
+                       (quotient__inline__ x$19$588 y$20$589)
+                       1)))
+            (if (Cyc-fast-eq
+                  (Cyc-fast-sub
+                    x$19$588
+                    (Cyc-fast-mul
+                      (quotient__inline__ x$19$588 y$20$589)
+                      y$20$589))
+                  0)
+              (k$904 (quotient__inline__ x$19$588 y$20$589))
+              (k$904 (Cyc-fast-sub
+                       (quotient__inline__ x$19$588 y$20$589)
+                       1)))))))))
+
+ (define get-set-root
+   (lambda
+     (k$960 s$92$614)
+     ((lambda
+        (r$94$615)
         ((lambda
-           (r$7171)
-           (k$7170
-             (vector-set! r$7171 idx$2426$3605 val$2427$3606)))
-         (vector-ref vec$2428$3607 2)))
-      obj$2425$3604)))
+           (lp$95$616)
+           (Cyc-seq
+             (set! lp$95$616
+               (lambda
+                 (k$963 r$96$617)
+                 (if (pair? (cdr r$96$617))
+                   (lp$95$616 k$963 (cdr r$96$617))
+                   ((lambda
+                      (k$967)
+                      ((lambda
+                         (r$968)
+                         (if r$968
+                           (k$967 #f)
+                           ((lambda
+                              (x$103$619)
+                              ((lambda
+                                 (lp$104$620)
+                                 (Cyc-seq
+                                   (set! lp$104$620
+                                     (lambda
+                                       (k$971 x$105$621)
+                                       ((lambda
+                                          (next$106$622)
+                                          ((lambda
+                                             (r$973)
+                                             (if r$973
+                                               (k$971 #f)
+                                               (Cyc-seq
+                                                 (set-cdr! x$105$621 r$96$617)
+                                                 (lp$104$620
+                                                   k$971
+                                                   next$106$622))))
+                                           (eq? r$96$617 next$106$622)))
+                                        (cdr x$105$621))))
+                                   (lp$104$620 k$967 x$103$619)))
+                               #f))
+                            s$92$614)))
+                       (eq? r$96$617 s$92$614)))
+                    (lambda (r$966) (k$963 r$96$617))))))
+             (lp$95$616 k$960 r$94$615)))
+         #f))
+      s$92$614)))
+
  )
 
 )
