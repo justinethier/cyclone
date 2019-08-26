@@ -89,26 +89,46 @@
                   ,@body)
                 (map scan exp)) ;; failsafe
         ))
-TODO: can we do this for generic lambda application, too? 
+;;TODO: can we do this for generic lambda application, too? 
         ((and
           (list? exp)
           (ast:lambda? (car exp))
           (>= (length exp) 2)
-          ;; TODO: need to run any validation on the args???
-          ;; probably do NOT want any lambda's embedded in them, if that is even possible at this point
-          ;;
-          ;(ast:lambda? (cadr exp))
-          ;(list? (ast:lambda-args (cadr exp)))
-          ;(equal? 1 (length (ast:lambda-args (cadr exp))))
+          (list? (ast:lambda-args (car exp)))
+          (equal? 1 (length (ast:lambda-args (car exp))))
+          (every lvr:safe-param? (cdr exp))
          )
          (write `(lambda app of ,(cdr exp)))
          (newline)
-          (map scan exp)) ;; TODO: placeholder
+         ; (map scan exp)
+         (let* ((value (cadr exp))
+                (var (car (ast:lambda-args (car exp))))
+                (body (ast:lambda-body (car exp)))
+               )
+           `(let ((,var ,value))
+             ,@(scan body)))
+        )
         (else
           (map scan exp))))
      (else (error "unknown expression type: " exp))
   ))
   (scan sexp))
+
+;; Is it safe to convert the lambda parameter to a local variable?
+(define (lvr:safe-param? p)
+  (let ((result
+  (or
+    (const? p)
+    (ref? p)
+    (and (app? p)
+         (prim? (car p))
+         (not (prim:cont? (car p))))
+  ))
+  )
+(write `(arg ,p result ,result))
+(newline)
+result
+))
 
 ;; Local variable reduction helper:
 ;; Scan sexp to determine if sym is only called in a tail-call position
