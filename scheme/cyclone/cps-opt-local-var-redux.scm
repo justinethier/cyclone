@@ -98,8 +98,8 @@
           (equal? 1 (length (ast:lambda-args (car exp))))
           (every lvr:safe-param? (cdr exp))
          )
-         (write `(lambda app of ,(cdr exp)))
-         (newline)
+         ;(write `(lambda app of ,(cdr exp)))
+         ;(newline)
          ; (map scan exp)
          (let* ((value (cadr exp))
                 (var (car (ast:lambda-args (car exp))))
@@ -117,16 +117,18 @@
 ;; Is it safe to convert the lambda parameter to a local variable?
 (define (lvr:safe-param? p)
   (let ((result
-  (or
-    (const? p)
-    (ref? p)
-    (and (app? p)
-         (prim? (car p))
-         (not (prim:cont? (car p))))
-  ))
+  (and
+    p ;; Reject #f for now due to issues with boxing mutables
+    (or
+      (const? p)
+      (ref? p)
+      (and (app? p)
+           (prim? (car p))
+           (not (prim:cont? (car p))))
+    )))
   )
-(write `(arg ,p result ,result))
-(newline)
+;(write `(arg ,p result ,result))
+;(newline)
 result
 ))
 
