@@ -105,7 +105,7 @@
                 (var (car (ast:lambda-args (car exp))))
                 (body (ast:lambda-body (car exp)))
                )
-           `(let ((,var ,value))
+           `(let ((,var (Cyc-local-set! ,var ,value))) ;; TODO: better if we didn't need this silly set!
              ,@(scan body)))
         )
         (else
