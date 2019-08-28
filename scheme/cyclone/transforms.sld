@@ -805,6 +805,25 @@ if (acc) {
     (else
      (error "unknown expression type: " exp))))
 
+;; Return list of the let's variables/values
+(define (let->var/vals exp)
+  (cadr exp))
+
+(define (let->first-var exp)
+  (and-let* (((tagged-list? 'let exp))
+             (vars/vals (let->var/vals exp))
+             ((pair? vars/vals)))
+    (caar vars/vals)))
+
+(define (let->first-val exp)
+  (and-let* (((tagged-list? 'let exp))
+             (vars/vals (let->var/vals exp))
+             ((pair? vars/vals)))
+    (cadar vars/vals)))
+
+;; Return let body as a list
+(define (let->body exp)
+  (cddr exp))
 
 ; wrap-mutables : exp -> exp
 (define (wrap-mutables exp globals)
@@ -854,6 +873,17 @@ if (acc) {
                           ,(wrap-mutables (if->then exp) globals)
                           ,(wrap-mutables (if->else exp) globals)))
     
+    ;; Special case, a local let variable is mutated
+    ((and (tagged-list? 'let exp)
+          (is-mutable? (let->first-var exp))
+          (tagged-list? 'Cyc-local-set! (let->first-val exp)))
+     (let* ((var (let->first-var exp))
+            (val (let->first-val exp))
+            (body (let->body exp))
+           )
+      `(let ((,var (Cyc-local-set! ,var (cell ,(wrap-mutables (caddr val) globals)))))
+         ,@(wrap-mutables body globals))))
+
     ; Application:
     ((app? exp)
      ;; Easy place to clean up nested Cyc-seq expressions
