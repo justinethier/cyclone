@@ -119,6 +119,8 @@
   (let ((result
   (and
     p ;; Reject #f for now due to issues with boxing mutables
+    (not (ast:lambda? p)) ;; Reject for now, there are problems with closures
+                          ;; that depend on other "let" vars
     (or
       (const? p)
       (ref? p)
