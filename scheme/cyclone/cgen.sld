@@ -713,6 +713,11 @@
     (and (> len 0)
          (equal? end (substring str (- len 1) len)))))
 
+(define *decl-and-assign-local-var* #f)
+
+(define (set-decl-and-assign-local-var! v)
+  (set! *decl-and-assign-local-var* v))
+
 (define *use-alloca* #f)
 
 (define (set-use-alloca! v)
@@ -1267,9 +1272,17 @@
         ((equal? 'Cyc-local-set! fun)
          ;:(trace:error `(JAE DEBUG Cyc-local-set ,exp))
          (let ((val-exp (c-compile-exp (caddr exp) append-preamble cont ast-id trace cps?)))
-           (c-code/vars
-             (string-append (mangle (cadr exp)) " = " (c:body val-exp) ";")
-             (c:allocs val-exp)))
+           (if *decl-and-assign-local-var*
+               (c-code/vars ;; Declare and assign using the same statement
+                 ""
+                 (append
+                   (c:allocs val-exp)
+                   (list
+                     (string-append "object " (mangle (cadr exp)) " = " (c:body val-exp) ";")))
+                 )
+                 (c-code/vars ;; Must separate decl/assign due to scoping
+                   (string-append (mangle (cadr exp)) " = " (c:body val-exp) ";")
+                   (c:allocs val-exp))))
          ;; (c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
         )
         ((equal? 'let fun)
@@ -1277,18 +1290,23 @@
                 (body (caddr exp))
                 (vexps (foldr
                         (lambda (var/val acc)
+                         (let ((if-expr? (tagged-list? 'if (cadr var/val))))
+                          (set-decl-and-assign-local-var! (not if-expr?)) ;; How to declare local variables
                           (set-use-alloca! #t) ;; Force alloca to ensure safe c stack allocs
                           ;; Join expressions; based on c:append
                           (let ((cp1 (c-compile-exp (cadr var/val) append-preamble cont ast-id trace cps?))
                                 (cp2 acc))
                             (set-use-alloca! #f) ; Revert flag
+                            (set-decl-and-assign-local-var! #f)
                             (c-code/vars 
                               (let ((cp1-body (c:body cp1)))
                                 (string-append cp1-body ";" (c:body cp2)))
                               (append 
-                                (list (string-append "object " (mangle (car var/val)) ";"))
+                                (if if-expr? ;; Must alloc separately from assignment for "if", since if blocks shadown the definition
+                                    (list (string-append "object " (mangle (car var/val)) ";"))
+                                    '())
                                 (c:allocs cp1) 
-                                (c:allocs cp2)))))
+                                (c:allocs cp2))))))
                         (c-code "")
                         vars/vals))
                (body-exp (c-compile-exp 
@@ -1768,6 +1786,13 @@
                        "(void *data, " arg-argc
                         formals*
                        ") {\n"
+                       (cond
+                         (has-closure?
+                          (if has-loop? "\n while(1) {\n" ""))
+                         (else
+                           (string-append
+                             (st:->code trace)
+                             (if has-loop? "\n while(1) {\n" ""))))
                        preamble
                        (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
@@ -1785,18 +1810,8 @@
                                             (if has-closure? 1 0)))
                            ");\n");
                          "") ; No varargs, skip
-                       (c:serialize
-                         (c:append
-                           (c-code 
-                            ;; Only trace when entering initial defined function
-                             (cond
-                               (has-closure?
-                                (if has-loop? "\n while(1) {\n" ""))
-                               (else
-                                 (string-append
-                                   (st:->code trace)
-                                   (if has-loop? "\n while(1) {\n" "")))))
-                           body)
+                       (c:serialize 
+                         body
                          "  ")
                        "; \n"
                        (if has-loop? "}\n" "")
