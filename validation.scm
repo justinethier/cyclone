@@ -1,3 +1,8 @@
+(import 
+  (scheme base)
+  (scheme read)
+  (scheme cyclone pretty-print)
+  (scheme cyclone util))
 ;; TODO: a temporary file to develop a transform pass that validates the number of arguments passed to
 ;; built-in forms, and throws an error if any issues are found. The goal is to provide friendlier validation
 ;; for the compiler
@@ -6,47 +11,67 @@
 ;; TODO: will relocate this to another place, probably a separate file in scheme/cyclone
 
 (define (validate-syntax exp)
-  'TODO
-)
+  ;; Only need to track local vars if they shadow one of our keywords
+  (define (include-var? v)
+    (member v '(define set! if lambda let)))
 
-;; free-vars : exp -> sorted-set[var]
-;(define (free-vars ast . opts)
-;  (define let-vars '())
-;  (define bound-only? 
-;    (and (not (null? opts))
-;         (car opts)))
-;
-;  (define (search exp)
-;    (cond
-;      ; Core forms:
-;      ((ast:lambda? exp)
-;        (difference (reduce union (map search (ast:lambda-body exp)) '())
-;                    (ast:lambda-formals->list exp)))
-;      ((const? exp)    '())
-;      ((quote? exp)    '())    
-;      ((ref? exp)      
-;       (cond
-;        ((prim? exp)     
-;         '())    
-;        (else
-;         (if (member exp let-vars)
-;             '()
-;             (if bound-only? '() (list exp))))))
-;      ((lambda? exp)   
-;        (difference (reduce union (map search (lambda->exp exp)) '())
-;                    (lambda-formals->list exp)))
-;      ((if-syntax? exp)  (union (search (if->condition exp))
-;                              (union (search (if->then exp))
-;                                     (search (if->else exp)))))
-;      ((define? exp)     (union (list (define->var exp))
-;                              (search (define->exp exp))))
-;      ((define-c? exp) (list (define->var exp)))
-;      ((set!? exp)     (union (list (set!->var exp)) 
-;                              (search (set!->exp exp))))
-;      ((tagged-list? 'let exp)
-;       (set! let-vars (append (map car (cadr exp)) let-vars))
-;       (search (cdr exp)))
-;      ; Application:
-;      ((app? exp)       (reduce union (map search exp) '()))
-;      (else             (error "unknown expression: " exp))))
-;  (search ast))
+  (define (check-if exp)
+    (let ((args (length exp)))
+      (cond
+        ((< args 3)
+         (error "Not enough arguments" exp))
+        ((> args 4)
+         (error "Too many arguments" exp)))))
+
+  (define (search exp vars)
+    ;(pretty-print `(search ,exp))(newline)
+    (cond
+      ;((ast:lambda? exp) 'TODO)
+      ((const? exp) #f)
+      ((quote? exp) #f)
+      ((ref? exp)   #f) 
+      ((lambda? exp)   
+        ;(difference (reduce union (map search (lambda->exp exp)) '())
+        ;            (lambda-formals->list exp))
+        
+        ;; TODO: validation checks
+
+        (for-each 
+          (lambda (e)
+            (search e vars))
+          (lambda-formals->list exp))
+      )
+      ((if? exp)
+       (check-if exp)
+       (search (if->condition exp) vars)
+       (search (if->then exp) vars)
+       (search (if->else exp) vars))
+      ((define? exp)
+       ;; TODO: validation
+       (search (define->var exp) vars)
+       (for-each
+        (lambda (e)
+          (search e vars))
+        (define->exp exp)))
+      ((define-c? exp) #f)
+      ((set!? exp)  
+       (search (set!->var exp) vars) 
+       (search (set!->exp exp) vars))
+      ;((tagged-list? 'let exp)
+      ; (set! let-vars (append (map car (cadr exp)) let-vars))
+      ; (search (cdr exp)))
+      ; Application:
+      ((app? exp)
+       (for-each
+        (lambda (e)
+          (search e vars))
+        exp))
+      (else
+        (error "unknown expression: " exp))))
+  (search exp '()))
+
+;(if)
+;(if 1 2 3 4)
+
+ (let ((sexp (read-all (open-input-file "validation.scm"))))
+  (validate-syntax sexp))
