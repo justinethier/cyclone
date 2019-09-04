@@ -7,6 +7,7 @@ https://github.com/cyclone-scheme/cyclone-winds
 
 Bug Fixes
 
+- Validate the number of arguments passed to `if` expressions.
 - Raise a useful error instead of aborting the whole program (!) when apply attempts to execute an object of the wrong type.
 - Better handling of edge cases where an object of the wrong type is executed instead of a closure. Previously there were cases where this would cause the runtime to crash.
 
