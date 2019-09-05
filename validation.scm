@@ -23,6 +23,21 @@
         ((> args 4)
          (error "Too many arguments" exp)))))
 
+  (define (check-define exp) 
+    'todo)
+
+  (define (check-set exp) 
+    'todo)
+
+  (define (check-lambda exp) 
+        ;(difference (reduce union (map search (lambda->exp exp)) '())
+        ;            (lambda-formals->list exp))
+    'todo)
+
+  ;; TODO: could check primitives, etc
+
+  ;; TODO: what if any keywords are shadowed? need to populate vars
+
   (define (search exp vars)
     ;(pretty-print `(search ,exp))(newline)
     (cond
@@ -31,23 +46,19 @@
       ((quote? exp) #f)
       ((ref? exp)   #f) 
       ((lambda? exp)   
-        ;(difference (reduce union (map search (lambda->exp exp)) '())
-        ;            (lambda-formals->list exp))
-        
-        ;; TODO: validation checks
-
+       (if (not (member 'lambda vars)) (check-lambda exp))
         (for-each 
           (lambda (e)
             (search e vars))
-          (lambda-formals->list exp))
+          (lambda->exp exp))
       )
       ((if? exp)
-       (check-if exp)
+       (if (not (member 'if vars)) (check-if exp))
        (search (if->condition exp) vars)
        (search (if->then exp) vars)
        (search (if->else exp) vars))
       ((define? exp)
-       ;; TODO: validation
+       (if (not (member 'define vars)) (check-define exp))
        (search (define->var exp) vars)
        (for-each
         (lambda (e)
@@ -55,8 +66,10 @@
         (define->exp exp)))
       ((define-c? exp) #f)
       ((set!? exp)  
+       (if (not (member 'set! vars)) (check-set exp))
        (search (set!->var exp) vars) 
        (search (set!->exp exp) vars))
+      ; Future?
       ;((tagged-list? 'let exp)
       ; (set! let-vars (append (map car (cadr exp)) let-vars))
       ; (search (cdr exp)))
