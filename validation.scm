@@ -37,9 +37,11 @@
   ;; TODO: could check primitives, etc
 
   ;; TODO: what if any keywords are shadowed? need to populate vars
+  (define (update-vars syms vars)
+    (append vars (filter include-var? syms)))
 
   (define (search exp vars)
-    ;(pretty-print `(search ,exp))(newline)
+    (pretty-print `(search ,exp ,vars))(newline)
     (cond
       ;((ast:lambda? exp) 'TODO)
       ((const? exp) #f)
@@ -49,26 +51,28 @@
        (if (not (member 'lambda vars)) (check-lambda exp))
         (for-each 
           (lambda (e)
-            (search e vars))
+            (search e (update-vars (lambda-formals->list exp) vars)))
           (lambda->exp exp))
       )
-      ((if? exp)
-       (if (not (member 'if vars)) (check-if exp))
+      ((and (if? exp)
+            (not (member 'if vars)))
+       (check-if exp)
        (search (if->condition exp) vars)
        (search (if->then exp) vars)
-       (search (if->else exp) vars))
+       (when (> (length exp) 3)
+        (search (if->else exp) vars)))
       ((define? exp)
        (if (not (member 'define vars)) (check-define exp))
        (search (define->var exp) vars)
        (for-each
         (lambda (e)
-          (search e vars))
+          (search e (update-vars (list (define->var exp)) vars)))
         (define->exp exp)))
       ((define-c? exp) #f)
       ((set!? exp)  
        (if (not (member 'set! vars)) (check-set exp))
        (search (set!->var exp) vars) 
-       (search (set!->exp exp) vars))
+       (search (set!->exp exp) (update-vars (list (set!->var exp)) vars)))
       ; Future?
       ;((tagged-list? 'let exp)
       ; (set! let-vars (append (map car (cadr exp)) let-vars))
