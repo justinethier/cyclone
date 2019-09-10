@@ -57,7 +57,9 @@
     (append vars (filter include-var? syms)))
 
   (define (search exp vars)
-    (pretty-print `(search ,exp ,vars))(newline)
+    (cond-expand
+      (program
+        (pretty-print `(search ,exp ,vars))(newline))) ;; Debugging
     (cond
       ;((ast:lambda? exp) 'TODO)
       ((const? exp) #f)
