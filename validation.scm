@@ -24,15 +24,23 @@
          (error "Too many arguments" exp)))))
 
   (define (check-define exp) 
-    'todo)
+    (let ((args (length exp)))
+      (cond
+        ((< args 2)
+         (error "Not enough arguments" exp)))))
 
   (define (check-set exp) 
-    'todo)
+    (let ((args (length exp)))
+      (cond
+        ((< args 2)
+         (error "Not enough arguments" exp)))))
 
   (define (check-lambda exp) 
-        ;(difference (reduce union (map search (lambda->exp exp)) '())
-        ;            (lambda-formals->list exp))
-    'todo)
+    (let ((num-args (length exp)))
+      (cond
+        ((< num-args 2)
+         (error "Not enough arguments" exp))))
+    (lambda-formals-type exp)) ;; Validates type information
 
   ;; TODO: could check primitives, etc
 
