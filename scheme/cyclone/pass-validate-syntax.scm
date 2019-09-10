@@ -18,7 +18,7 @@
 ;;
 ;; TODO: call this from cyclone.scm after it works, probably after "resolve macros"
 
-(define (validate-syntax exp)
+(define (validate-keyword-syntax exp)
   ;; Only need to track local vars if they shadow one of our keywords
   (define (include-var? v)
     (member v '(define set! if lambda let)))
@@ -109,4 +109,4 @@
     ;(if 1 2 3 4)
     
      (let ((sexp (read-all (open-input-file "validation.scm"))))
-      (validate-syntax sexp))))
+      (validate-keyword-syntax sexp))))
