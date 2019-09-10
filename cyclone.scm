@@ -222,6 +222,9 @@
           )))
       ;; END additional top-level imports
 
+      ;; Validate syntax of basic forms
+      (validate-keyword-syntax input-program)
+
       ;; Separate global definitions from the rest of the top-level code
       (set! input-program 
           (isolate-globals input-program program? lib-name rename-env))
