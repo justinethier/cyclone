@@ -96,6 +96,7 @@
     alpha-convert 
     cps-convert 
     prim-convert
+    validate-keyword-syntax
   )
   (inline
     cell-get->cell
@@ -118,6 +119,7 @@
     let->bindings
     void
   )
+  (include "pass-validate-syntax.scm")
   (begin
 
 (define (built-in-syms)
