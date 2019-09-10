@@ -1,14 +1,22 @@
-(import 
-  (scheme base)
-  (scheme read)
-  (scheme cyclone pretty-print)
-  (scheme cyclone util))
-;; TODO: a temporary file to develop a transform pass that validates the number of arguments passed to
-;; built-in forms, and throws an error if any issues are found. The goal is to provide friendlier validation
-;; for the compiler
+;;;; Cyclone Scheme
+;;;; https://github.com/justinethier/cyclone
+;;;;
+;;;; Copyright (c) 2014-2019, Justin Ethier
+;;;; All rights reserved.
+;;;;
+;;;; This file validates basic syntax of special forms.
+;;;; It receives S-expressions, not AST records
+;;;;
+
+(cond-expand
+  (program
+    (import 
+      (scheme base)
+      (scheme read)
+      (scheme cyclone pretty-print)
+      (scheme cyclone util))))
 ;;
 ;; TODO: call this from cyclone.scm after it works, probably after "resolve macros"
-;; TODO: will relocate this to another place, probably a separate file in scheme/cyclone
 
 (define (validate-syntax exp)
   ;; Only need to track local vars if they shadow one of our keywords
@@ -95,8 +103,10 @@
         (error "unknown expression: " exp))))
   (search exp '()))
 
-;(if)
-;(if 1 2 3 4)
-
- (let ((sexp (read-all (open-input-file "validation.scm"))))
-  (validate-syntax sexp))
+(cond-expand
+  (program
+    ;(if)
+    ;(if 1 2 3 4)
+    
+     (let ((sexp (read-all (open-input-file "validation.scm"))))
+      (validate-syntax sexp))))
