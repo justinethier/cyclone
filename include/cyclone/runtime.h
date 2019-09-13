@@ -440,12 +440,13 @@ object Cyc_is_list(object lst);
 #define Cyc_is_null(o) (make_boolean(o == NULL))
 //TODO: convert all of these to macros (if it makes sense, most should), and remove them from runtime.c:
 object Cyc_is_number(object o);
-object Cyc_is_complex(object o);
 object Cyc_is_real(object o);
 object Cyc_is_integer(object o);
 #define Cyc_is_fixnum(o) (make_boolean(obj_is_int(o)))
 //object Cyc_is_fixnum(object o);
 #define Cyc_is_bignum(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == bignum_tag))
+//object Cyc_is_complex(object o);
+#define Cyc_is_complex(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == complex_num_tag))
 //object Cyc_is_bignum(object o);
 //object Cyc_is_vector(object o);
 //object Cyc_is_bytevector(object o);
