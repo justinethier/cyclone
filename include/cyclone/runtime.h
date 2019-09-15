@@ -243,6 +243,8 @@ port_type Cyc_stdin(void);
 port_type Cyc_stderr(void);
 port_type Cyc_io_open_input_file(void *data, object str);
 port_type Cyc_io_open_output_file(void *data, object str);
+port_type Cyc_io_open_binary_input_file(void *data, object str);
+port_type Cyc_io_open_binary_output_file(void *data, object str);
 port_type *Cyc_io_open_output_string(void *data);
 port_type *Cyc_io_open_input_string(void *data, object str);
 port_type *Cyc_io_open_input_bytevector(void *data, object bv);

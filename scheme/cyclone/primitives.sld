@@ -196,6 +196,8 @@
          symbol?
          open-input-file
          open-output-file
+         open-binary-input-file
+         open-binary-output-file
          close-port
          close-input-port
          close-output-port
@@ -366,6 +368,8 @@
          (symbol? 1 1)
          (open-input-file 1 1)
          (open-output-file 1 1)
+         (open-binary-input-file 1 1)
+         (open-binary-output-file 1 1)
          (close-port 1 1)
          (close-input-port 1 1)
          (close-output-port 1 1)
@@ -553,6 +557,8 @@
          ((eq? p 'Cyc-current-exception-handler)  "Cyc_current_exception_handler")
          ((eq? p 'open-input-file)       "Cyc_io_open_input_file")
          ((eq? p 'open-output-file)      "Cyc_io_open_output_file")
+         ((eq? p 'open-binary-input-file)       "Cyc_io_open_binary_input_file")
+         ((eq? p 'open-binary-output-file)      "Cyc_io_open_binary_output_file")
          ((eq? p 'close-port)            "Cyc_io_close_port")
          ((eq? p 'close-input-port)      "Cyc_io_close_input_port")
          ((eq? p 'close-output-port)     "Cyc_io_close_output_port")
@@ -714,6 +720,8 @@
         Cyc-end-thread!
         open-input-file
         open-output-file
+        open-binary-input-file
+        open-binary-output-file
         close-port
         close-input-port
         close-output-port
@@ -802,6 +810,8 @@
         ((eq? p 'Cyc-stderr) "port_type")
         ((eq? p 'open-input-file) "port_type")
         ((eq? p 'open-output-file) "port_type")
+        ((eq? p 'open-binary-input-file) "port_type")
+        ((eq? p 'open-binary-output-file) "port_type")
         ;((eq? p 'Cyc-fast-plus) "object")
         ;((eq? p 'Cyc-fast-sub) "object")
         ;((eq? p 'Cyc-fast-mul) "object")
@@ -860,6 +870,8 @@
                  Cyc-stderr
                  open-input-file
                  open-output-file
+                 open-binary-input-file
+                 open-binary-output-file
                  Cyc-installation-dir
                  Cyc-compilation-environment
                  string->number 

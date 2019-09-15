@@ -4167,30 +4167,50 @@ port_type Cyc_stderr()
   return p;
 }
 
-port_type Cyc_io_open_input_file(void *data, object str)
+port_type _Cyc_io_open_input_file(void *data, object str, const char *mode)
 {
   const char *fname;
   Cyc_check_str(data, str);
   fname = ((string_type *) str)->str;
   make_input_port(p, NULL, CYC_IO_BUF_LEN);
-  p.fp = fopen(fname, "r");
+  p.fp = fopen(fname, mode);
   if (p.fp == NULL) {
     Cyc_rt_raise2(data, "Unable to open file", str);
   }
   return p;
 }
 
-port_type Cyc_io_open_output_file(void *data, object str)
+port_type _Cyc_io_open_output_file(void *data, object str, const char *mode)
 {
   const char *fname;
   Cyc_check_str(data, str);
   fname = ((string_type *) str)->str;
   make_port(p, NULL, 0);
-  p.fp = fopen(fname, "w");
+  p.fp = fopen(fname, mode);
   if (p.fp == NULL) {
     Cyc_rt_raise2(data, "Unable to open file", str);
   }
   return p;
+}
+
+port_type Cyc_io_open_input_file(void *data, object str)
+{
+  return _Cyc_io_open_input_file(data, str, "r");
+}
+
+port_type Cyc_io_open_output_file(void *data, object str)
+{
+  return _Cyc_io_open_output_file(data, str, "w");
+}
+
+port_type Cyc_io_open_binary_input_file(void *data, object str)
+{
+  return _Cyc_io_open_input_file(data, str, "rb");
+}
+
+port_type Cyc_io_open_binary_output_file(void *data, object str)
+{
+  return _Cyc_io_open_output_file(data, str, "wb");
 }
 
 object Cyc_io_close_input_port(void *data, object port)
