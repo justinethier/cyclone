@@ -2501,9 +2501,10 @@
 
 (define mutated-loop-vars '())
 (define (mark-mutated-loop-var sym)
+  ;(write `(DEBUG mark mutated loop var ,sym)) (newline)
   (set! mutated-loop-vars (cons sym mutated-loop-vars)))
 (define (mutated-loop-var? sym)
-  (member sym mutated-loop-var))
+  (member sym mutated-loop-vars))
 
 ; analyze-mutable-variables : exp -> void
 (define (analyze-mutable-variables exp)
@@ -2531,12 +2532,16 @@
      (map analyze-mutable-variables exp)
      ;; Check if the application is a sentinel indicating the
      ;; var may be used for a recursive loop.
-     ;(when (and (= 2 (length exp))
-     ;           (ast:lambda? (car exp))
-     ;           (not (cadr exp)))
-     ; ;; Candidate, see if the var is set to a lambda
-     ; (with-var
-     ;)
+     (when (and (= 2 (length exp))
+                (ast:lambda? (car exp))
+                (not (cadr exp)))
+      ;; Candidate, see if the var is set to a lambda
+      (with-var (car (ast:lambda-formals->list (car exp))) (lambda (var)
+        (if (and (adbv:mutated-by-set? var)
+                 (ast:lambda? (adbv:assigned-value var)))
+            (mark-mutated-loop-var (car (ast:lambda-formals->list (car exp)))))
+      ))
+     )
      (void))
     (else
      (error "unknown expression type: " exp))))
@@ -2557,7 +2562,12 @@
                       (list (car formals))
                       (wrap-mutable-formals id (cdr formals) body-exp has-cont)
                       has-cont)
-                    `(cell ,(car formals))))
+                    `(cell ;,(car formals)
+                       ,(if (mutated-loop-var? (car formals))
+                            (with-var (car formals) (lambda (var)
+                              (adbv:assigned-value var)))
+                            (car formals))
+                    )))
             (wrap-mutable-formals id (cdr formals) body-exp has-cont))))
   
   (cond
@@ -2581,11 +2591,16 @@
     ((prim? exp)     exp)
     ((quote? exp)    exp)
     ((lambda? exp)   (error `(Unexpected lambda in wrap-mutables ,exp)))
-    ((set!? exp)     `(,(if (member (set!->var exp) globals)
-                            'set-global!
-                            'set-cell!) 
-                        ,(set!->var exp) 
-                        ,(wrap-mutables (set!->exp exp) globals)))
+    ((set!? exp) 
+     (cond
+      ((mutated-loop-var? (set!->var exp))
+       #f) ;; essentially no-op in generated code
+      (else
+        `(,(if (member (set!->var exp) globals)
+               'set-global!
+               'set-cell!) 
+          ,(set!->var exp) 
+          ,(wrap-mutables (set!->exp exp) globals)))))
     ((if? exp)       `(if ,(wrap-mutables (if->condition exp) globals)
                           ,(wrap-mutables (if->then exp) globals)
                           ,(wrap-mutables (if->else exp) globals)))
