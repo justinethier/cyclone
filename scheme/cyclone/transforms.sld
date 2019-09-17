@@ -779,6 +779,12 @@ if (acc) {
             (is-in? (cdr S)))))
   (is-in? mutable-variables))
 
+(define mutated-loop-vars '())
+(define (mark-mutated-loop-var sym)
+  (set! mutated-loop-vars (cons sym mutated-loop-vars)))
+(define (mutated-loop-var? sym)
+  (member sym mutated-loop-var))
+
 ; analyze-mutable-variables : exp -> void
 (define (analyze-mutable-variables exp)
   (cond 
@@ -803,6 +809,14 @@ if (acc) {
     ; Application:
     ((app? exp)
      (map analyze-mutable-variables exp)
+     ;; Check if the application is a sentinel indicating the
+     ;; var may be used for a recursive loop.
+     ;(when (and (= 2 (length exp))
+     ;           (ast:lambda? (car exp))
+     ;           (not (cadr exp)))
+     ; ;; Candidate, see if the var is set to a lambda
+     ; (with-var
+     ;)
      (void))
     (else
      (error "unknown expression type: " exp))))
