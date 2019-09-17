@@ -116,6 +116,8 @@
       is-mutable? 
       analyze-mutable-variables 
       wrap-mutables 
+      mark-mutated-loop-var
+      mutated-loop-var?
   )
   (include "cps-opt-local-var-redux.scm")
   (include "cps-opt-analyze-call-graph.scm")
@@ -2534,6 +2536,7 @@
      ;; var may be used for a recursive loop.
      (when (and (= 2 (length exp))
                 (ast:lambda? (car exp))
+#f ;; TEmporarily disabled
                 (not (cadr exp)))
       ;; Candidate, see if the var is set to a lambda
       (with-var (car (ast:lambda-formals->list (car exp))) (lambda (var)
