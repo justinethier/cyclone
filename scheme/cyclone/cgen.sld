@@ -1605,6 +1605,7 @@
                     )
                     (mangle free-var)))
              (closure->fv exp))) ; Note these are not necessarily symbols, but in cc form
+         (free-vars:str/code (map cons free-vars (closure->fv exp)))
          (cv-name (mangle (gensym 'c)))
          (lid (allocate-lambda lam (c-compile-lambda lam trace cps?) cps?))
          (use-obj-instead-of-closure? 
@@ -1650,12 +1651,16 @@
                cv-name sep "num_elements = " (number->string (length free-vars)) ";\n"
                cv-name sep "elements = (object *)" ev-name ";\n";
                (let loop ((i 0) 
-                          (vars free-vars))
+                          (vars free-vars:str/code))
                  (if  (null? vars)
                    ""
                    (string-append 
                      cv-name sep "elements[" (number->string i) "] = " 
-                             (car vars) ";\n"
+                             (if (and (ref? (cdr (car vars)))
+                                      (mutated-loop-var? (cdr (car vars))))
+                                 (string-append "&" cv-name) ;; Self-ref
+                                 (car (car vars)) )
+                             ";\n"
                      (loop (+ i 1) (cdr vars)))))))))
          (create-mclosure (lambda () 
            (let ((prefix 
