@@ -40,6 +40,7 @@
     st:->var)
   (begin
 
+(define *cell-local-var* #f)
 (define *optimize-well-known-lambdas* #f)
 
 (define (emit line)
@@ -836,6 +837,7 @@
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
+        (if (> (string-length tptr) 0) (set! *cell-local-var* tptr))
         (c-code/vars 
           (string-append c-func "(" tdata tptr-comma tptr)
           (list tptr-decl))))))
@@ -1657,13 +1659,16 @@
                    (string-append 
                      cv-name sep "elements[" (number->string i) "] = " 
                              (if (and (ref? (cdr (car vars)))
-                                      (mutated-loop-var? (cdr (car vars))))
-                TODO: don't want this, actually want the pair_type it is getting boxed into!
-                might be able to save the local when an instance of (cell ...) is compiled and 
-                then ref it here (setting it back to #f) after. not pretty but would work to at
-                least prove out the concept...
-                ;(tptr-type (mangle (gensym 'local)))
-                                 (string-append "&" cv-name) ;; Self-ref
+                                      (mutated-loop-var? (cdr (car vars)))
+                                      (string? *cell-local-var*))
+                ;TODO: don't want this, actually want the pair_type it is getting boxed into!
+                ;might be able to save the local when an instance of (cell ...) is compiled and 
+                ;then ref it here (setting it back to #f) after. not pretty but would work to at
+                ;least prove out the concept...
+                ;;(tptr-type (mangle (gensym 'local)))
+                                 (let ((result (string-append "&" *cell-local-var*))) ;; Self-ref
+                                   (set! *cell-local-var* #f)
+                                   result)
                                  (car (car vars)) )
                              ";\n"
                      (loop (+ i 1) (cdr vars)))))))))
