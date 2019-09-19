@@ -1959,21 +1959,27 @@
                     ))))))
 
 
-         (cond
-           (replace
-             (define (clo->lambda-body sexp)
-               (car (ast:lambda-body (cadr sexp))))
-             
-             (let* ((outer-body (clo->lambda-body (car result))) ; (clo-call cell)
-                    (inner-body (clo->lambda-body (car outer-body)))
-                    (set-cell-exp (cadr inner-body))
-                    (set-clo (caddr set-cell-exp))
-                   )
-               (set-car! (cdr inner-body) #f) ; '%Cyc-noop ;; Don't do the set
-               (set-cdr! outer-body `((cell ,set-clo))) ;; Relocate the closure
-               result
-             ))
-           (else result))
+         (with-handler
+          (lambda (err)
+            (trace:error `(error transforming CC loop ,err))
+            result)
+          (cond
+            ((and replace
+                  (tagged-list? '%closure (car result)) ;; TODO: see above, not always a closure, what to do then?
+             )
+              (define (clo->lambda-body sexp)
+                (car (ast:lambda-body (cadr sexp))))
+              
+              (let* ((outer-body (clo->lambda-body (car result))) ; (clo-call cell)
+                     (inner-body (clo->lambda-body (car outer-body)))
+                     (set-cell-exp (cadr inner-body))
+                     (set-clo (caddr set-cell-exp))
+                    )
+                (set-car! (cdr inner-body) #f) ; '%Cyc-noop ;; Don't do the set
+                (set-cdr! outer-body `((cell ,set-clo))) ;; Relocate the closure
+                result
+              ))
+            (else result)))
 ))
          ((lambda? fn)   (error `(Unexpected lambda in closure-convert ,exp)))
          (else
