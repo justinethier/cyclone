@@ -1878,6 +1878,24 @@
          ((equal? 'Cyc-local-set! fn)
           `(Cyc-local-set! ,@args))
          ((ast:lambda? fn)
+
+(let* ((replace
+          (cond 
+           ((and (= 2 (length exp))
+                 (ast:lambda? (car exp))
+                 ;#f ;; TEmporarily disabled
+                 (not (cadr exp)))
+            ;; Candidate, see if the var is set to a lambda
+            (with-var (car (ast:lambda-formals->list (car exp))) (lambda (var)
+              (cond
+               ((and (adbv:mutated-by-set? var)
+                     (ast:lambda? (adbv:assigned-value var)))
+                (mark-mutated-loop-var (car (ast:lambda-formals->list (car exp))))
+                (trace:error `(found loop var ,(car (ast:lambda-formals->list (car exp)))))
+                #t)
+               (else #f)))))
+           (else #f)))
+         (result
           (cond
             ;; If the lambda argument is not used, flag so the C code is 
             ;; all generated within the same function
@@ -1938,7 +1956,25 @@
                        )
                       ,@args)
                     
-                    )))))
+                    ))))))
+
+
+         (cond
+           (replace
+             (define (clo->lambda-body sexp)
+               (car (ast:lambda-body (cadr sexp))))
+             
+             (let* ((outer-body (clo->lambda-body (car result))) ; (clo-call cell)
+                    (inner-body (clo->lambda-body (car outer-body)))
+                    (set-cell-exp (cadr inner-body))
+                    (set-clo (caddr set-cell-exp))
+                   )
+               (set-car! (cdr inner-body) #f) ; '%Cyc-noop ;; Don't do the set
+               (set-cdr! outer-body `((cell ,set-clo))) ;; Relocate the closure
+               result
+             ))
+           (else result))
+))
          ((lambda? fn)   (error `(Unexpected lambda in closure-convert ,exp)))
          (else
            (let ((f (cc fn)))
@@ -2532,19 +2568,6 @@
     ; Application:
     ((app? exp)
      (map analyze-mutable-variables exp)
-     ;; Check if the application is a sentinel indicating the
-     ;; var may be used for a recursive loop.
-     (when (and (= 2 (length exp))
-                (ast:lambda? (car exp))
-#f ;; TEmporarily disabled
-                (not (cadr exp)))
-      ;; Candidate, see if the var is set to a lambda
-      (with-var (car (ast:lambda-formals->list (car exp))) (lambda (var)
-        (if (and (adbv:mutated-by-set? var)
-                 (ast:lambda? (adbv:assigned-value var)))
-            (mark-mutated-loop-var (car (ast:lambda-formals->list (car exp)))))
-      ))
-     )
      (void))
     (else
      (error "unknown expression type: " exp))))
