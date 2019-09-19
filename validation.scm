@@ -1,3 +1,4 @@
+;; Temporary test file:
 (cond-expand 
   (program
     (import (scheme base) 
@@ -9,6 +10,9 @@
 
 (cond-expand
   (program
+;; TODO: write code to find the loop. 
+;; may be able to use code in wrap-mutables for this.
+;; anyway, here is one:
     (define sexp
      '((%closure
          (lambda
@@ -43,9 +47,33 @@
          (%closure-ref self$41 1))
        #f))
 
-    (pretty-print
-      (ast:ast->pp-sexp
-        (ast:sexp->ast sexp))
-    )
+    (define ast (ast:sexp->ast sexp))
+
+    ;(pretty-print
+    ;  (ast:ast->pp-sexp
+    ;    (ast:sexp->ast sexp))
+    ;)
   )
      )
+
+(define (clo->lambda-body sexp)
+  (car (ast:lambda-body (cadr sexp))))
+
+(let* ((outer-body (clo->lambda-body (car ast))) ; (clo-call cell)
+       (inner-body (clo->lambda-body (car outer-body)))
+       (set-cell-exp (cadr inner-body))
+       (set-clo (caddr set-cell-exp))
+       
+      )
+  (write outer-body)
+  (set-car! (cdr inner-body) #f) ;; Don't do the set
+  (set-cdr! outer-body `((cell ,set-clo))) ;; Relocate the closure
+  ;; TODO: replace self ref in params to set-clo
+  ;;       OR, just handle properly in cgen
+    (pretty-print
+      (ast:ast->pp-sexp
+        ast)
+    )
+)
+
+
