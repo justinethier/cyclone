@@ -1658,6 +1658,11 @@
                      cv-name sep "elements[" (number->string i) "] = " 
                              (if (and (ref? (cdr (car vars)))
                                       (mutated-loop-var? (cdr (car vars))))
+                TODO: don't want this, actually want the pair_type it is getting boxed into!
+                might be able to save the local when an instance of (cell ...) is compiled and 
+                then ref it here (setting it back to #f) after. not pretty but would work to at
+                least prove out the concept...
+                ;(tptr-type (mangle (gensym 'local)))
                                  (string-append "&" cv-name) ;; Self-ref
                                  (car (car vars)) )
                              ";\n"
