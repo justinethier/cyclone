@@ -41,6 +41,7 @@
   (begin
 
 (define *cell-local-var* #f)
+(define *cell-local-sym* #f)
 (define *optimize-well-known-lambdas* #f)
 
 (define (emit line)
@@ -987,6 +988,9 @@
                "continue;"))))
          
         ((prim? fun)
+         (when (and (eq? fun 'cell)
+                    (ref? (cadr exp)))
+           (set! *cell-local-sym* (cadr exp)))
          (let* ((c-fun 
                  (c-compile-prim fun cont ast-id))
                 (c-args
@@ -1662,14 +1666,19 @@
                      cv-name sep "elements[" (number->string i) "] = " 
                              (if (and (ref? (cdr (car vars)))
                                       (mutated-loop-var? (cdr (car vars)))
-                                      (string? *cell-local-var*))
+                                      (string? *cell-local-var*)
+                                      ;(ref? *cell-local-sym*)
+                                      ;(eq? *cell-local-sym* (cdr (car vars)))
+                                     )
                 ;TODO: don't want this, actually want the pair_type it is getting boxed into!
                 ;might be able to save the local when an instance of (cell ...) is compiled and 
                 ;then ref it here (setting it back to #f) after. not pretty but would work to at
                 ;least prove out the concept...
                 ;;(tptr-type (mangle (gensym 'local)))
                                  (let ((result (string-append "&" *cell-local-var*))) ;; Self-ref
+(trace:error `(JAE info cls ,*cell-local-sym* local ,(cdr (car vars))))
                                    (set! *cell-local-var* #f)
+                                   (set! *cell-local-sym* #f)
                                    result)
                                  (car (car vars)) )
                              ";\n"
