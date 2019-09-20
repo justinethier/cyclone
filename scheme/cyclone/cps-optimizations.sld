@@ -1968,11 +1968,29 @@
              )
               (define (clo->lambda-body sexp)
                 (car (ast:lambda-body (cadr sexp))))
+
+              (define (clo->self-ref sexp)
+                (car (ast:lambda-formals->list (cadr sexp))))
+              
+              (define (fix-clo-refs sexp nc oc)
+                (map
+                  (lambda (e)
+                    (cond
+                      ((and (tagged-list? '%closure-ref e)
+                            (eq? oc (cadr e)))
+                       `(%closure-ref ,nc ,(caddr e)))
+                      (else e)))
+                  sexp))
               
               (let* ((outer-body (clo->lambda-body (car result))) ; (clo-call cell)
                      (inner-body (clo->lambda-body (car outer-body)))
+                     (inner-clo-sym (clo->self-ref (car outer-body)))
+                     (outer-clo-sym (clo->self-ref (car result)))
                      (set-cell-exp (cadr inner-body))
-                     (set-clo (caddr set-cell-exp))
+                     (set-clo (fix-clo-refs
+                                (caddr set-cell-exp)
+                                outer-clo-sym
+                                inner-clo-sym))
                     )
                 (mark-mutated-loop-var replace)
                 (set-car! (cdr inner-body) #f) ; '%Cyc-noop ;; Don't do the set
