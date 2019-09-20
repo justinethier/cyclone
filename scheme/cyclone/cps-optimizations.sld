@@ -1890,9 +1890,8 @@
               (cond
                ((and (adbv:mutated-by-set? var)
                      (ast:lambda? (adbv:assigned-value var)))
-                (mark-mutated-loop-var (car (ast:lambda-formals->list (car exp))))
                 (trace:error `(found loop var ,(car (ast:lambda-formals->list (car exp)))))
-                #t)
+                (car (ast:lambda-formals->list (car exp))))
                (else #f)))))
            (else #f)))
          (result
@@ -1975,6 +1974,7 @@
                      (set-cell-exp (cadr inner-body))
                      (set-clo (caddr set-cell-exp))
                     )
+                (mark-mutated-loop-var replace)
                 (set-car! (cdr inner-body) #f) ; '%Cyc-noop ;; Don't do the set
                 (set-cdr! outer-body `((cell ,set-clo))) ;; Relocate the closure
                 result
