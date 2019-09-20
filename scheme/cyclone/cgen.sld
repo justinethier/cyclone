@@ -837,7 +837,9 @@
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
-        (if (> (string-length tptr) 0) (set! *cell-local-var* tptr))
+        (if (and (eq? p 'cell)
+            (> (string-length tptr) 0))
+            (set! *cell-local-var* tptr))
         (c-code/vars 
           (string-append c-func "(" tdata tptr-comma tptr)
           (list tptr-decl))))))
