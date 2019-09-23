@@ -1048,7 +1048,7 @@
           ((string_type *)s)->num_cp = num_cp;
           ((string_type *)s)->str = alloca(sizeof(char) * (len + 1));
         }
-        if (num_cp == 1) { /* Fast path */
+        if (buflen == 1) { /* Fast path */
           memset(((string_type *)s)->str, ch_buf[0], len);
         } else {
           char *buf = ((string_type *)s)->str;

@@ -157,6 +157,11 @@
     "abcde")
   (assert:equal "string-for-each" v '(101 100 99 98 97)))
 
+;; UTF-8 / Strings
+(assert:equal "UTF8 string length" (string-length (make-string 1 (integer->char 128))) 1)
+(assert:equal "UTF8 bv length" (bytevector-length (string->utf8 (make-string 1 (integer->char 128)))) 2)
+(assert:equal "UTF8 char" (string-ref (make-string 1 (integer->char 128)) 0) #\x80)
+
 ;; Recursion example:
 (letrec ((fnc (lambda (i) 
                 (begin
