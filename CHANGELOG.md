@@ -7,6 +7,7 @@ https://github.com/cyclone-scheme/cyclone-winds
 
 Bug Fixes
 
+- Fixed an issue with `make-string` and UTF-8 chars. Thanks to Lassi Kortela for the bug report!
 - Added `open-binary-input-file` and `open-binary-output-file` from R7RS.
 - Validate the number of arguments passed to `if` expressions.
 - Raise a useful error instead of aborting the whole program (!) when apply attempts to execute an object of the wrong type.
