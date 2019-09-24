@@ -126,4 +126,31 @@
     )
 )
 
+;; Is ADBV only referenced by lambda's in its own scope?
+(define (loop:only-ref-in-scope var)
+  (let* ((loop-lam (adbv:assigned-value var))
+         (adbv-refs (adbv:ref-by var))
+         (inner-refs (cons (adbv:defines-lambda-id var)
+                           (find-all-lambdas loop-lam))))
+    ;; OK only if all adbv-refs are inner-refs
+    (every
+      (lambda (r)
+        (member r inner-refs))
+      adbv-refs)))
+
+;; Find all lambda ID's referenced by the given CPS sexp
+(define (find-all-lambdas sexp)
+  (define ids '())
+  (define (scan exp)
+    (cond
+     ((ast:lambda? exp)
+      (set! ids (cons (ast:lambda-id exp) ids))
+      (scan (ast:lambda-body exp)))
+     ((quote? exp)
+      exp)
+     ((app? exp)
+      (map (lambda (e) (scan e)) exp))
+     (else exp)))
+  (scan sexp)
+  ids)
 
