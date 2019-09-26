@@ -477,15 +477,23 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 
 /* Mutation table functions
  *
- * Keep track of mutations (EG: set-car!) so that new
- * values are transported to the heap during GC.
+ * Keep track of mutations (EG: set-car!) so we can avoid having heap
+ * objects that point to old stack objects. We need to transport any
+ * such stack objects to the heap during minor GC.
+ *
  * Note these functions and underlying data structure are only used by
  * the calling thread, so locking is not required.
  */
 void add_mutation(void *data, object var, int index, object value)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
-  if (is_object_type(value)) {
+
+  // No need to track for minor GC purposes unless we are mutating
+  // a heap variable to point to a stack var.
+  //
+  // If var is on stack we'll get it anyway in minor GC,
+  // and if value is on heap we don't care (no chance of heap pointing to nursery)
+  if (!gc_is_stack_obj(data, var) && gc_is_stack_obj(data, value)) {
     thd->mutations = vpbuffer_add(thd->mutations, 
                                   &(thd->mutation_buflen), 
                                   thd->mutation_count, 
