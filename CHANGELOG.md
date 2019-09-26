@@ -5,6 +5,10 @@
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
 
+Features
+
+-  Speed up mutations by only tracking them for minor GC purposes if we are mutating a heap variable to point to a stack var.
+
 Bug Fixes
 
 - Fixed an issue with `make-string` and UTF-8 chars. Thanks to Lassi Kortela for the bug report!
