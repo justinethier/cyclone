@@ -13,7 +13,7 @@ Deprecated
 
 Bug Fixes
 
-- Only track mutations for minor GC if a heap variable is modified to point to a value on the stack. This significantly improves performance of mutation operations, `set!`, `set-car!`, etc.
+- Modified the minor GC write barrier to only track mutations where a heap variable is modified to point to an object on the stack. This significantly improves performance of mutation operations: `set!`, `set-car!`, etc.
 - Fixed an issue with `make-string` and UTF-8 chars. Thanks to Lassi Kortela for the bug report!
 - Added `open-binary-input-file` and `open-binary-output-file` from R7RS.
 - Validate the number of arguments passed to `if` expressions.
