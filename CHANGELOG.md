@@ -5,21 +5,20 @@
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
 
-Features
+Deprecated
 
--  Speed up mutations by only tracking them for minor GC purposes if we are mutating a heap variable to point to a stack var.
+- `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
+
+## 0.11.4 - September 27, 2019
 
 Bug Fixes
 
+- Only track mutations for minor GC if a heap variable is modified to point to a value on the stack. This significantly improves performance of mutation operations, `set!`, `set-car!`, etc.
 - Fixed an issue with `make-string` and UTF-8 chars. Thanks to Lassi Kortela for the bug report!
 - Added `open-binary-input-file` and `open-binary-output-file` from R7RS.
 - Validate the number of arguments passed to `if` expressions.
 - Raise a useful error instead of aborting the whole program (!) when apply attempts to execute an object of the wrong type.
 - Better handling of edge cases where an object of the wrong type is executed instead of a closure. Previously there were cases where this would cause the runtime to crash.
-
-Deprecated
-
-- `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.
 
 ## 0.11.3 - August 14, 2019
 
