@@ -1863,28 +1863,29 @@ void gc_sum_pending_writes(gc_thread_data * thd, int locked)
   }
 }
 
-/**
- * @brief Determine if object lives on the thread's stack
- * @param thd Mutator's thread data
- * @param obj Object to inspect
- * @return True if `obj` is on the mutator's stack, false otherwise
- */
-int gc_is_stack_obj(gc_thread_data * thd, object obj)
-{
-  char tmp;
-  object low_limit = &tmp;
-  object high_limit = thd->stack_start;
-  return (stack_overflow(low_limit, obj) && stack_overflow(obj, high_limit));
-}
+// /**
+//  * @brief Determine if object lives on the thread's stack
+//  * @param thd Mutator's thread data
+//  * @param obj Object to inspect
+//  * @return True if `obj` is on the mutator's stack, false otherwise
+//  */
+// int gc_is_stack_obj(gc_thread_data * thd, object obj)
+// {
+//   char tmp;
+//   object low_limit = &tmp;
+//   object high_limit = thd->stack_start;
+//   return (stack_overflow(low_limit, obj) && stack_overflow(obj, high_limit));
+// }
 
 /**
  * @brief Helper function for `gc_mut_update`
  */
 static void mark_stack_or_heap_obj(gc_thread_data * thd, object obj, int locked)
 {
+  char tmp;
   if (!is_object_type(obj) || type_of(obj) == boolean_tag) {
     return;
-  } else if (gc_is_stack_obj(thd, obj)) {
+  } else if (gc_is_stack_obj(&tmp, thd, obj)) {
     // Set object to be marked after moved to heap by next GC.
     // This avoids having to recursively examine the stack now, 
     // which we have to do anyway during minor GC.
@@ -2937,7 +2938,7 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object mayb
     // Check if obj was copied while we slept
     if (maybe_copied && 
         is_object_type(maybe_copied) && 
-        gc_is_stack_obj(thd, maybe_copied) &&
+        gc_is_stack_obj(&stack_limit, thd, maybe_copied) &&
         type_of(maybe_copied) == forward_tag) {
       gc_recopy_obj(maybe_copied, thd);
     }

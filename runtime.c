@@ -487,13 +487,14 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 void add_mutation(void *data, object var, int index, object value)
 {
   gc_thread_data *thd = (gc_thread_data *) data;
+  char tmp;
 
   // No need to track for minor GC purposes unless we are mutating
   // a heap variable to point to a stack var.
   //
   // If var is on stack we'll get it anyway in minor GC,
   // and if value is on heap we don't care (no chance of heap pointing to nursery)
-  if (!gc_is_stack_obj(data, var) && gc_is_stack_obj(data, value)) {
+  if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
     thd->mutations = vpbuffer_add(thd->mutations, 
                                   &(thd->mutation_buflen), 
                                   thd->mutation_count, 
@@ -5777,7 +5778,7 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   object buf[1];
   int tmp, *heap_grown = &tmp;
   if (!is_object_type(obj) || // Immediates do not have to be moved
-      !gc_is_stack_obj(data, obj)) { // Not thread-local, assume already on heap
+      !gc_is_stack_obj(&tmp, data, obj)) { // Not thread-local, assume already on heap
     return_closcall1(data, k, obj);
   }
 

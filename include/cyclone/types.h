@@ -395,7 +395,16 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
                          long stack_size);
 void gc_thread_data_free(gc_thread_data * thd);
 // Prototypes for mutator/collector:
-int gc_is_stack_obj(gc_thread_data * thd, object obj);
+/**
+ * @brief Determine if object lives on the thread's stack
+ * @param low_limit Temporary object at the current "end" of the stack
+ * @param thd Mutator's thread data
+ * @param obj Object to inspect
+ * @return True if `obj` is on the mutator's stack, false otherwise
+ */
+#define gc_is_stack_obj(low_limit, thd, obj) \
+ (stack_overflow(((object)low_limit), ((object)obj)) && \
+  stack_overflow(((object)obj), ((object)((gc_thread_data *)thd)->stack_start)))
 void gc_mut_update(gc_thread_data * thd, object old_obj, object value);
 void gc_mut_cooperate(gc_thread_data * thd, int buf_len);
 void gc_mark_gray(gc_thread_data * thd, object obj);
