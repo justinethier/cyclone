@@ -5,6 +5,10 @@
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
 
+Bug Fixes
+
+- Fix `read-u8`, `peek-u8`, and `write-u8` to work with integers (bytes) instead of characters.
+
 Deprecated
 
 - `(scheme cyclone array-list)` is no longer going to be part of the official Cyclone release. It will be relocated to the `(cyclone array-list)` cyclone-winds package.

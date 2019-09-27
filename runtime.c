@@ -1225,14 +1225,14 @@ object Cyc_write_char(void *data, object c, object port)
 object Cyc_write_u8(void *data, object c, object port)
 {
   Cyc_check_port(data, port);
-  if (obj_is_char(c)) {
+  if (obj_is_int(c)) {
     FILE *fp = ((port_type *) port)->fp;
     if (fp){
-      char unbox = (char) obj_obj2char(c);
-      fprintf(fp, "%c", unbox);
+      int i = obj_obj2int(c);
+      putc(i, fp);
     }
   } else {
-    Cyc_rt_raise2(data, "Argument is not a character", c);
+    Cyc_rt_raise2(data, "Argument is not an integer", c);
   }
   return quote_void;
 }
@@ -7242,7 +7242,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
 {
   FILE *stream;
   port_type *p;
-  int c;
+  uint8_t c;
 
   Cyc_check_port(data, port);
   {
@@ -7256,7 +7256,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
       _read_next_char(data, cont, p);
     }
     c = p->mem_buf[p->buf_idx];
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(c) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_int2obj(c) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
@@ -7310,14 +7310,12 @@ object Cyc_io_read_u8(void *data, object cont, object port)
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
   }
   {
-    char_type codepoint;
-    int c;
+    uint8_t c;
     set_thread_blocked(data, cont);
     _read_next_char(data, cont, p);
     c = p->mem_buf[p->buf_idx++];
-    codepoint = (char_type) c;
     p->col_num++;
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data, (c != EOF) ? obj_int2obj(c) : Cyc_EOF, p);
   }
   return Cyc_EOF;
 }
