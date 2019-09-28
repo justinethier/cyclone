@@ -50,7 +50,7 @@ This confirms that the compiler - with any changes - can still be built from sou
 
 ## Debugging the Runtime
 
-Cyclone should never segfault unless there is a bug in the runtime/compiler. To debug a segfault using the C compiler's tools, first rebuilt Cyclone with debugging turned on. With GCC, you can do this by changing two lines at the top of `Makefile.config` to use the `-g` option instead of `-O2`. 
+Cyclone should never segfault unless there is a bug in the runtime/compiler. To debug a segfault using the C compiler's tools, first rebuild Cyclone with debugging turned on. With GCC, you can do this by changing two lines at the top of `Makefile.config` to use the `-g` option instead of `-O2`. 
 
 For example:
 
