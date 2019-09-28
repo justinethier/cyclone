@@ -103,6 +103,8 @@ Compiler Internals
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector.md) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
+- The Garbage Collector has been enhanced to support [Lazy Sweeping](https://github.com/justinethier/cyclone/blob/master/docs/Garbage-Collection-Using-Lazy-Sweeping.md) which improves performance for a wide range of applications.
+
 License
 -------
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
