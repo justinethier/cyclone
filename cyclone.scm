@@ -28,7 +28,7 @@
 
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
-;; TODO: make this a cmd line option
+;; FUTURE: make this a cmd line option
 (define *report-elapsed* #f)
 (define (report:elapsed label)
   (when *report-elapsed*
@@ -61,7 +61,7 @@
     
       (report:elapsed "---------------- input program:")
       (trace:info "---------------- input program:")
-      (trace:info input-program) ;pretty-print
+      (trace:info input-program) 
 
       (cond
         ((library? (car input-program))
@@ -184,19 +184,16 @@
                   (error `(Unhandled expansion ,expanded))))))))
       (report:elapsed "---------------- after macro expansion:")
       (trace:info "---------------- after macro expansion:")
-      (trace:info input-program) ;pretty-print
-; TODO:
+      (trace:info input-program) 
       (set! input-program (macro:cleanup input-program rename-env))
       (report:elapsed "---------------- after macro expansion cleanup:")
       (trace:info "---------------- after macro expansion cleanup:")
-      (trace:info input-program) ;pretty-print
+      (trace:info input-program) 
 
       ;; If a program, check to see if any macros expanded into top-level imports
       (when program?
         (let ((program:imports/code (import-reduction input-program (base-expander))))
           (when (not (null? (car program:imports/code)))
-;(trace:info "debug")
-;(trace:info program:imports/code)
             (trace:info "-------------- macro expanded into import expression(s):")
             (set! imports (append imports (car program:imports/code)))
             (trace:info "imports:")
@@ -238,7 +235,7 @@
 
       (report:elapsed "---------------- after processing globals")
       (trace:info "---------------- after processing globals")
-      (trace:info input-program) ;pretty-print
+      (trace:info input-program) 
 
       ;; Identify global variables
       (set! module-globals (global-vars input-program))
@@ -282,8 +279,6 @@
     
       ; Note alpha-conversion is overloaded to convert internal defines to 
       ; set!'s below, since all remaining phases operate on set!, not define.
-      ;
-      ; TODO: consider moving some of this alpha-conv logic below back into trans?
       (set! globals (union globals '())) ;; Ensure list is sorted
       (set! input-program 
         (map
@@ -292,7 +287,7 @@
           input-program))
       (report:elapsed "---------------- after alpha conversion:")
       (trace:info "---------------- after alpha conversion:")
-      (trace:info input-program) ;pretty-print
+      (trace:info input-program) 
 
       ;; EXPERIMENTAL CODE - Load functions in other modules that are
       ;; able to be inlined (in this context, from CPS).
@@ -360,7 +355,7 @@
           input-program))
       (report:elapsed "---------------- after func->primitive conversion:")
       (trace:info "---------------- after func->primitive conversion:")
-      (trace:info input-program) ;pretty-print
+      (trace:info input-program) 
 
       ;; Identify native Scheme functions (from module being compiled) that can be inlined
       ;;
@@ -419,8 +414,6 @@
                     ;;   (apply k consumer vals)))))
              (cons
                ;; call/cc must be written in CPS form, so it is added here
-               ;; TODO: prevents this from being optimized-out
-               ;; TODO: will this cause issues if another var is assigned to call/cc?
                `(define call/cc
                  ,(ast:make-lambda 
                     '(k f) 
@@ -497,7 +490,7 @@
       (trace:info "---------------- after local variable reduction")
       (trace:info (ast:ast->pp-sexp input-program))
 
-      ;; TODO: could do this, but it seems like a bit of a band-aid...
+      ;; Clean up lambda numbering after code elimination
       (set! input-program (opt:renumber-lambdas! input-program))
       (report:elapsed "---------------- after renumber lambdas")
       (trace:info "---------------- after renumber lambdas")
@@ -630,8 +623,8 @@
             (else
               ;; Account for any cond-expand declarations in the library
               (list (lib:cond-expand (car in-prog-raw) expander)))))
-   ;; TODO: expand in-prog, if a library, using lib:cond-expand. (OK, this works now)
-   ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
+          ;; expand in-prog, if a library, using lib:cond-expand.
+          ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (program:imports/code (if program? (import-reduction in-prog expander) '()))
          (lib-deps 
            (if (and program?
@@ -752,7 +745,7 @@
       args)))
 
 ;; Handle command line arguments
-(let* ((args (command-line-arguments)) ;; TODO: port (command-line-arguments) to husk??
+(let* ((args (command-line-arguments))
        (non-opts 
         (if (null? args)
             '()
