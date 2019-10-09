@@ -297,7 +297,7 @@ void gc_remove_mutator(gc_thread_data * thd)
   ck_array_commit(&Cyc_mutators);
   // Place on list of old mutators to cleanup
   if (ck_array_put_unique(&old_mutators, (void *)thd) < 0) {
-    fprintf(stderr, "Unable to add thread data to GC list, existing\n");
+    fprintf(stderr, "Unable to add thread data to GC list, exiting\n");
     exit(1);
   }
   ck_array_commit(&old_mutators);
