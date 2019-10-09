@@ -6435,6 +6435,21 @@ void vpbuffer_free(void **buf)
   free(buf);
 }
 
+vpbuffer *vp_create(void)
+{
+  vpbuffer *v = malloc(sizeof(vpbuffer));
+  v->len = 128;
+  v->count = 0;
+  v->buf = NULL;
+  v->buf = vpbuffer_realloc(v->buf, &(v->len));
+  return v;
+}
+
+void vp_add(vpbuffer *v, void *obj)
+{
+  v->buf = vpbuffer_add(v->buf, &(v->len), v->count++, obj);
+}
+
 object Cyc_bit_unset(void *data, object n1, object n2) 
 {
   Cyc_check_int(data, n1);

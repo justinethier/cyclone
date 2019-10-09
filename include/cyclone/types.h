@@ -1428,6 +1428,16 @@ typedef union {
 /**@}*/
 /**@}*/
 
+typedef struct vpbuffer_t vpbuffer;
+struct vpbuffer_t {
+  void **buf;
+  int len;
+  int count;
+};
+
+vpbuffer *vp_create(void);
+void vp_add(vpbuffer *v, void *obj);
+
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
 void **vpbuffer_add(void **buf, int *len, int i, void *obj);
