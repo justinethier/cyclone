@@ -16,10 +16,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <ctype.h>
-//#include <signal.h> // TODO: only used for debugging!
-
-//int JAE_DEBUG = 0;
-//int gcMoveCountsDEBUG[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+//#include <signal.h> // only used for debugging!
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
@@ -239,10 +236,7 @@ static void *hs_malloc(size_t r)
 
 static void hs_free(void *p, size_t b, bool r)
 {
-//    (void)b;
-//    (void)r;
   free(p);
-//    return;
 }
 
 static struct ck_malloc my_allocator = {
@@ -281,8 +275,7 @@ static bool set_insert(ck_hs_t * hs, const void *value)
   h = CK_HS_HASH(hs, hs_hash, value);
   return ck_hs_put(hs, h, value);
 }
-
-// End supporting functions
+// End hashset supporting functions
 
 /**
  * @brief Perform one-time heap initializations for the program
@@ -312,18 +305,16 @@ void gc_init_heap(long heap_size)
 
 object cell_get(object cell)
 {
-  // FUTURE: always use unsafe car here, since computed by compiler
+  // Always use unsafe car here, since cell_get calls are computed by compiler
   return car(cell);
 }
 
 static boolean_type t_boolean = { {0}, boolean_tag, "t" };
 static boolean_type f_boolean = { {0}, boolean_tag, "f" };
+static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
 
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
-
-static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
-
 const object quote_void = &Cyc_void_symbol;
 
 /* Stack Traces */
@@ -378,15 +369,11 @@ static object find_symbol_by_name(const char *name)
 {
   symbol_type tmp = { {0}, symbol_tag, name};
   object result = set_get(&symbol_table, &tmp);
-  //if (result) {
-  //  printf("found symbol %s\n", symbol_desc(result));
-  //}
   return result;
 }
 
 object add_symbol(symbol_type * psym)
 {
-  //printf("Adding symbol %s, table size = %ld\n", symbol_desc(psym), ck_hs_count(&symbol_table));
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
   set_insert(&symbol_table, psym);
   pthread_mutex_unlock(&symbol_table_lock);
