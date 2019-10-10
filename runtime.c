@@ -429,9 +429,8 @@ list global_table = NULL;
 
 void add_global(object * glo)
 {
-  // It would probably be more efficient to allocate
-  // a contiguous block of memory for this... for now
-  // this is more expedient
+  // Tried using a vpbuffer for this and the benchmark
+  // results were the same or worse.
   global_table = malloc_make_pair(mcvar(glo), global_table);
 }
 
