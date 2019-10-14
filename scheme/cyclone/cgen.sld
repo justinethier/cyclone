@@ -40,6 +40,7 @@
     st:->var)
   (begin
 
+(define *cgen:track-call-history* #t)
 (define *optimize-well-known-lambdas* #f)
 
 (define (emit line)
@@ -263,7 +264,8 @@
 
 (define (st:->code trace)
   (if (or (not (pair? trace))
-          (null? (cdr trace)))
+          (null? (cdr trace))
+          (not *cgen:track-call-history*))
     ""
     (string-append 
       "Cyc_st_add(data, \""
@@ -1848,8 +1850,10 @@
                       globals
                       c-headers
                       required-libs
-                      src-file)
+                      src-file
+                      flag-set?)
   (set! *global-syms* (append globals (lib:idb:ids import-db)))
+  (set! *cgen:track-call-history*  (flag-set? 'track-call-history))
   (set! num-lambdas (+ (adb:max-lambda-id) 1))
   (set! cgen:mangle-global
     (lambda (ident)

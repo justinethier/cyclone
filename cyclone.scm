@@ -25,6 +25,7 @@
 
 (define *optimization-level* 2) ;; Default level
 (define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
+(define *cgen:track-call-history* #t)
 
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
@@ -463,6 +464,8 @@
           ((eq? flag 'memoize-pure-functions) 
            (and program? ;; Only for programs, because SRFI 69 becomes a new dep
                 *optimize:memoize-pure-functions*))
+          ((eq? flag 'track-call-history)
+           *cgen:track-call-history*)
           (else #f)))
 
       (when (> *optimization-level* 0)
@@ -553,7 +556,8 @@
                     module-globals
                     c-headers
                     lib-deps
-                    src-file) 
+                    src-file
+                    flag-set?) 
       (return '())))) ;; No codes to return
 
 ;; Read top-level imports from a program and return a cons of:
@@ -769,6 +773,8 @@
       (set! *optimize:memoize-pure-functions* #t))
   (if (member "-no-memoization-optimizations" args)
       (set! *optimize:memoize-pure-functions* #f))
+  (if (member "-no-call-history" args)
+      (set! *cgen:track-call-history* #f))
   ;; TODO: place more optimization reading here as necessary
   ;; End optimizations
   (if (member "-t" args)
@@ -811,6 +817,11 @@ Optimization options:
                                 where possible (enabled by default).
  -no-memoization-optimizations  Disable the above memoization optimization.
 
+Debug options
+
+ -no-call-history     Do not track call history in the compiled code. This 
+                      allows for a faster runtime at the cost of having 
+                      no call history in the event of an exception.
 ")
      (newline))
     ((member "-v" args)

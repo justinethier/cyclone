@@ -5,6 +5,10 @@
 TODO: mention cyclone-winds even though not part of this official release
 https://github.com/cyclone-scheme/cyclone-winds
 
+Features
+
+ - Added the `-no-call-history` flag to potentially allow for faster executables at the expense of call history.
+
 Bug Fixes
 
 - Fix `read-u8`, `peek-u8`, and `write-u8` to work with integers (bytes) instead of characters.
