@@ -10,6 +10,12 @@ CYCLONE = cyclone -A .
 CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
+# Libraries
+CYC_RT_LIB = libcyclone.a
+CYC_BN_LIB = libcyclonebn.a
+CYC_BN_LIB_SUBDIR = third-party/libtommath-1.1.0
+CYC_LIBS = $(CYC_RT_LIB) $(CYC_BN_LIB)
+
 # Directories
 BOOTSTRAP_DIR = ../cyclone-bootstrap
 SCHEME_DIR = scheme
@@ -55,6 +61,7 @@ clean :
 	rm -f tests/array-list-tests
 	rm -f tests/macro-hygiene
 	rm -f tests/match-tests
+	cd $(CYC_BN_LIB_SUBDIR) ; make clean
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
@@ -88,7 +95,8 @@ install : libs install-libs install-includes install-bin
 uninstall :
 	$(RM) $(DESTDIR)$(BINDIR)/cyclone
 	$(RM) $(DESTDIR)$(BINDIR)/icyc
-	$(RM) $(DESTDIR)$(LIBDIR)/libcyclone.a
+	$(RM) $(DESTDIR)$(LIBDIR)/$(CYC_RT_LIB)
+	$(RM) $(DESTDIR)$(LIBDIR)/$(CYC_BN_LIB)
 	$(RM) $(DESTDIR)$(INCDIR)/*.*
 	$(RMDIR) $(DESTDIR)$(INCDIR)
 	$(RM) $(DESTDIR)$(DATADIR)/scheme/cyclone/*.*
@@ -152,21 +160,21 @@ libs : $(COBJECTS)
 $(COBJECTS) : %.o: %.sld
 	$(CYCLONE) $<
 
-cyclone : cyclone.scm libcyclone.a
+cyclone : cyclone.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
 	$(CYCLONE) cyclone.scm
 
-icyc : icyc.scm libcyclone.a
+icyc : icyc.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
 	$(CYCLONE) $<
 
 dispatch.c : generate-c.scm
 	$(CYCLONE) $<
 	./generate-c
 
-libcyclone.a : $(CFILES) $(HEADERS) third-party/libtommath-1.1.0/libcyclonebn.a
+$(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
 
 # JAE TODO: clean this up
-third-party/libtommath-1.1.0/libcyclonebn.a : third-party/libtommath-1.1.0/*.c
-	cd third-party/libtommath-1.1.0 ; make LIBNAME=libcyclonebn.a
+$(CYC_BN_LIB) : $(CYC_BN_LIB_SUBDIR)/*.c
+	cd $(CYC_BN_LIB_SUBDIR) ; make LIBNAME=libcyclonebn.a && cp libcyclonebn.a ../..
 
 hashset.o : hashset.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
@@ -305,9 +313,10 @@ install-includes : $(HEADER_DIR)/*.h
 	$(MKDIR) $(DESTDIR)$(INCDIR)
 	$(INSTALL) -m0644 $(HEADER_DIR)/*.h $(DESTDIR)$(INCDIR)/
 
-install-libs : libcyclone.a
+install-libs : $(CYC_LIBS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
-	$(INSTALL) -m0644 libcyclone.a $(DESTDIR)$(LIBDIR)/
+	$(INSTALL) -m0644 $(CYC_RT_LIB) $(DESTDIR)$(LIBDIR)/
+	$(INSTALL) -m0644 $(CYC_BN_LIB) $(DESTDIR)$(LIBDIR)/
 
 install-bin : cyclone icyc
 	$(MKDIR) $(DESTDIR)$(BINDIR)
