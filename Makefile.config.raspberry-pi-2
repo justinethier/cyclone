@@ -9,7 +9,7 @@
 OS ?= $(shell uname)
 CC ?= cc
 
-LIBS = -pthread -lcyclone -lck -lm -ltommath
+LIBS = -pthread -lcyclone -lck -lm -lcyclonebn
 ifneq ($(OS),FreeBSD)
 # libdl is part of libc on FreeBSD
 LIBS += -ldl
