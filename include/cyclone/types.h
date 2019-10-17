@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <dlfcn.h>
-#include "tommath.h"
+#include "cyclone_bignum.h"
 
 /**
  * Generic object type
