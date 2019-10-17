@@ -162,7 +162,11 @@ dispatch.c : generate-c.scm
 	$(CYCLONE) $<
 	./generate-c
 
-libcyclone.a : $(CFILES) $(HEADERS)
+libcyclone.a : $(CFILES) $(HEADERS) third-party/libtommath-1.1.0/libcyclonebn.a
+
+# JAE TODO: clean this up
+third-party/libtommath-1.1.0/libcyclonebn.a : third-party/libtommath-1.1.0/*.c
+	cd third-party/libtommath-1.1.0 ; make LIBNAME=libcyclonebn.a
 
 hashset.o : hashset.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
