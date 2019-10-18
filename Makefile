@@ -172,9 +172,8 @@ dispatch.c : generate-c.scm
 
 $(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
 
-# JAE TODO: clean this up
 $(CYC_BN_LIB) : $(CYC_BN_LIB_SUBDIR)/*.c
-	cd $(CYC_BN_LIB_SUBDIR) ; make LIBNAME=libcyclonebn.a && cp libcyclonebn.a ../..
+	cd $(CYC_BN_LIB_SUBDIR) ; make LIBNAME=$(CYC_BN_LIB) && cp $(CYC_BN_LIB) ../..
 
 hashset.o : hashset.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
