@@ -1212,8 +1212,8 @@
 #   define LTM_LAST
 #endif
 
-#include <cyclone_bignum_superclass.h>
-#include <cyclone_bignum_class.h>
+#include <bignum_superclass.h>
+#include <bignum_class.h>
 #else
 #   define LTM_LAST
 #endif

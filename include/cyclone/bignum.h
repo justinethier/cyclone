@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <limits.h>
 
-#include "cyclone_bignum_class.h"
+#include "bignum_class.h"
 
 #ifdef __cplusplus
 extern "C" {
