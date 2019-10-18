@@ -1444,7 +1444,6 @@ void **vpbuffer_add(void **buf, int *len, int i, void *obj);
 void vpbuffer_free(void **buf);
 
 /* Bignum utility functions */
-double mp_get_double(const mp_int *a);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_int2bignum(int n, mp_int *bn);
 

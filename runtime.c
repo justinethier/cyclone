@@ -1478,24 +1478,6 @@ object Cyc_num_cmp_va_list(void *data, int argc,
   return boolean_t;
 }
 
-/**
- * Convert from a bignum to a double 
- * Code is from: https://github.com/libtom/libtommath/issues/3
- */
-#define PRECISION 53
-double mp_get_double(const mp_int *a)
-{
-   int i;
-   double d = 0.0, fac = 1.0;
-   for (i = 0; i < DIGIT_BIT; ++i) {
-      fac *= 2.0;
-   }
-   for (i = a->used; i --> 0;) {
-      d = (d * fac) + (double)DIGIT(a, i);
-   }
-   return (a->sign == MP_NEG) ? -d : d;
-}
-
 // Convert a bignum back to fixnum if possible
 object Cyc_bignum_normalize(void *data, object n)
 {
