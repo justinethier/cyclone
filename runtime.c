@@ -1522,7 +1522,8 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
   if (tx == bignum_tag && ty == bignum_tag) {
     cmp = mp_cmp(&bignum_value(x), &bignum_value(y));
   } else if (tx == bignum_tag && ty == -1) { \
-    mp_init(&tmp);
+    // JAE TODO: make a macro out of this, and use for other BN calls
+    mp_init(&tmp) ? fprintf(stderr, "Error initializing bignum"), exit(1) : 0;
     Cyc_int2bignum(obj_obj2int(y), &tmp);
     cmp = mp_cmp(&bignum_value(x), &tmp);
     mp_clear(&tmp);
