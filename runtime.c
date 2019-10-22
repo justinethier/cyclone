@@ -1002,13 +1002,16 @@ object Cyc_display(void *data, object x, FILE * port)
   case bignum_tag: {
     int bufsz; 
     char *buf;
+    size_t written;
 
     // TODO: check return value
     mp_radix_size(&bignum_value(x), 10, &bufsz);
 
     buf = alloca(bufsz);
-    // TODO: check return value
-    mp_toradix_n(&bignum_value(x), buf, 10, bufsz);
+    if (mp_to_radix(&bignum_value(x), buf, bufsz, &written,10) != 0) {
+      fprintf(port, "Error displaying bignum!");
+      exit(1);
+    }
     fprintf(port, "%s", buf);
     break;
   }
@@ -1489,12 +1492,12 @@ object Cyc_bignum_normalize(void *data, object n)
   }
 
   mp_init(&bn);
-  mp_set_int(&bn, CYC_FIXNUM_MAX);
+  mp_set_ul(&bn, CYC_FIXNUM_MAX);
   if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
     result = n;
   } else {
-    i = mp_get_int(&bignum_value(n));
-    if (SIGN(&bignum_value(n)) == MP_NEG) {
+    i = (int)mp_get_u32(&bignum_value(n));
+    if ((&bignum_value(n))->sign == MP_NEG) {
       i = -i;
     }
     result = obj_int2obj(i);
@@ -1505,7 +1508,7 @@ object Cyc_bignum_normalize(void *data, object n)
 
 void Cyc_int2bignum(int n, mp_int *bn)
 {
-  mp_set_int(bn, abs(n));
+  mp_set_ul(bn, abs(n));
   if (n < 0) { 
     mp_neg(bn, bn);
   }
@@ -2020,6 +2023,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
   object base = NULL;
   int base_num = 10, val, sz;
   char buffer[1024];
+  size_t written;
   va_list ap;
   va_start(ap, n);
   if (argc > 1) {
@@ -2041,7 +2045,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
       // TODO: just temporary, need to handle this better
       Cyc_rt_raise2(data, "number->string - bignum is too large to convert", n);
     }
-    mp_toradix(&bignum_value(n), buffer, base_num);
+    mp_to_radix(&bignum_value(n), buffer, 1024, &written, base_num);
   } else {
     if (base_num == 2) {
       val = obj_is_int(n) ?
@@ -3999,7 +4003,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
       } else {
         alloc_bignum(data, bn);
         Cyc_int2bignum(obj_obj2int(x), &(bn->bn));
-        mp_expt_d(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn));
+        mp_expt_u32(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4026,7 +4030,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
         Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), (double)obj_obj2int(y));
       } else {
         alloc_bignum(data, bn);
-        mp_expt_d(&bignum_value(x), obj_obj2int(y), &bignum_value(bn));
+        mp_expt_u32(&bignum_value(x), obj_obj2int(y), &bignum_value(bn));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
