@@ -1,0 +1,2 @@
+all:
+	gnuplot graphs.dem
