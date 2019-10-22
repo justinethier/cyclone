@@ -1496,10 +1496,7 @@ object Cyc_bignum_normalize(void *data, object n)
   if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
     result = n;
   } else {
-    i = (int)mp_get_u32(&bignum_value(n));
-    if ((&bignum_value(n))->sign == MP_NEG) {
-      i = -i;
-    }
+    i = mp_get_i32(&bignum_value(n));
     result = obj_int2obj(i);
   }
   mp_clear(&bn);
