@@ -764,6 +764,16 @@ typedef struct {
 #define alloc_bignum(data, p) \
   bignum_type *p = gc_alloc_bignum((gc_thread_data *)data);
 
+/** Helper for handling return value of a bignum function call */
+#define BIGNUM_CALL(x) { \
+  int __bn_mp_rv; \
+  if ((__bn_mp_rv = (x)) != MP_OKAY) { \
+    fprintf(stderr, "Error calling bignum function: %s\n", \
+      mp_error_to_string(__bn_mp_rv)); \
+    exit(1); \
+  } \
+}
+
 /**
  * @brief Complex number
  */

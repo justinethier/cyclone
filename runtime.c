@@ -1004,8 +1004,7 @@ object Cyc_display(void *data, object x, FILE * port)
     char *buf;
     size_t written;
 
-    // TODO: check return value
-    mp_radix_size(&bignum_value(x), 10, &bufsz);
+    BIGNUM_CALL(mp_radix_size(&bignum_value(x), 10, &bufsz));
 
     buf = alloca(bufsz);
     if (mp_to_radix(&bignum_value(x), buf, bufsz, &written,10) != 0) {
@@ -1491,7 +1490,7 @@ object Cyc_bignum_normalize(void *data, object n)
     return n;
   }
 
-  mp_init(&bn);
+  BIGNUM_CALL(mp_init(&bn));
   mp_set_ul(&bn, CYC_FIXNUM_MAX);
   if (mp_cmp_mag(&bignum_value(n), &bn) == MP_GT) {
     result = n;
@@ -1507,7 +1506,7 @@ void Cyc_int2bignum(int n, mp_int *bn)
 {
   mp_set_ul(bn, abs(n));
   if (n < 0) { 
-    mp_neg(bn, bn);
+    BIGNUM_CALL(mp_neg(bn, bn));
   }
 }
 
@@ -1525,7 +1524,7 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
     cmp = mp_cmp(&bignum_value(x), &tmp);
     mp_clear(&tmp);
   } else if (tx == -1 && ty == bignum_tag) { \
-    mp_init(&tmp);
+    BIGNUM_CALL(mp_init(&tmp));
     Cyc_int2bignum(obj_obj2int(x), &tmp);
     cmp = mp_cmp(&tmp, &bignum_value(y));
     mp_clear(&tmp);
@@ -2038,12 +2037,12 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
     if (base_num > 64 || base_num < 2) {
       Cyc_rt_raise2(data, "number->string - invalid radix for bignum", base);
     }
-    mp_radix_size(&bignum_value(n), base_num, &sz);
+    BIGNUM_CALL(mp_radix_size(&bignum_value(n), base_num, &sz));
     if (sz > 1024) {
       // TODO: just temporary, need to handle this better
       Cyc_rt_raise2(data, "number->string - bignum is too large to convert", n);
     }
-    mp_to_radix(&bignum_value(n), buffer, 1024, &written, base_num);
+    BIGNUM_CALL(mp_to_radix(&bignum_value(n), buffer, 1024, &written, base_num));
   } else {
     if (base_num == 2) {
       val = obj_is_int(n) ?
@@ -2201,7 +2200,7 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
       }
 
       // If result is mp_zero and str does not contain a 0, then fail
-      mp_init(&tmp);
+      BIGNUM_CALL(mp_init(&tmp));
       mp_zero(&tmp);
       if (MP_EQ == mp_cmp(&(bignum_value(bn)), &tmp) &&
           NULL == strchr(string_str(str), '0')) {
@@ -3263,15 +3262,15 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         if (INT_OP(x->integer_t.value, obj_obj2int(y), &result) == 0) { \
           x->integer_t.value = result; \
         } else { \
-          mp_init(&bn_tmp); \
-          mp_init(&bn_tmp2); \
+          BIGNUM_CALL(mp_init(&bn_tmp)); \
+          BIGNUM_CALL(mp_init(&bn_tmp2)); \
           Cyc_int2bignum(x->integer_t.value, &bn_tmp); \
           Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
           x->bignum_t.hdr.mark = gc_color_red; \
           x->bignum_t.hdr.grayed = 0; \
           x->bignum_t.tag = bignum_tag; \
-          mp_init(&(x->bignum_t.bn)); \
-          BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn)); \
+          BIGNUM_CALL(mp_init(&(x->bignum_t.bn))); \
+          BIGNUM_CALL(BN_OP(&bn_tmp, &bn_tmp2, &(x->bignum_t.bn))); \
           mp_clear(&bn_tmp); \
           mp_clear(&bn_tmp2); \
         } \
@@ -3289,20 +3288,20 @@ object FUNC_OP(void *data, common_type *x, object y) { \
     } else if (tx == double_tag && ty == double_tag) { \
         x->double_t.value = x->double_t.value OP ((double_type *)y)->value; \
     } else if (tx == integer_tag && ty == bignum_tag) { \
-        mp_init(&bn_tmp2); \
+        BIGNUM_CALL(mp_init(&bn_tmp2)); \
         Cyc_int2bignum(x->integer_t.value, &bn_tmp2); \
         x->bignum_t.hdr.mark = gc_color_red; \
         x->bignum_t.hdr.grayed = 0; \
         x->bignum_t.tag = bignum_tag; \
-        mp_init(&(x->bignum_t.bn)); \
-        BN_OP(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn)); \
+        BIGNUM_CALL(mp_init(&(x->bignum_t.bn))); \
+        BIGNUM_CALL(BN_OP(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn))); \
         mp_clear(&bn_tmp2); \
     } else if (tx == double_tag && ty == bignum_tag) { \
         x->double_t.value = x->double_t.value OP mp_get_double(&bignum_value(y)); \
     } else if (tx == bignum_tag && ty == -1) { \
-        mp_init(&bn_tmp2); \
+        BIGNUM_CALL(mp_init(&bn_tmp2)); \
         Cyc_int2bignum(obj_obj2int(y), &bn_tmp2); \
-        BN_OP(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn)); \
+        BIGNUM_CALL(BN_OP(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn))); \
         mp_clear(&bn_tmp2); \
     } else if (tx == bignum_tag && ty == double_tag) { \
         double d = mp_get_double(&(x->bignum_t.bn)); \
@@ -3312,7 +3311,7 @@ object FUNC_OP(void *data, common_type *x, object y) { \
         x->double_t.tag = double_tag; \
         x->double_t.value = d OP ((double_type *)y)->value; \
     } else if (tx == bignum_tag && ty == bignum_tag) { \
-        BN_OP(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn)); \
+        BIGNUM_CALL(BN_OP(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn))); \
     } else if (tx == complex_num_tag && ty == complex_num_tag) { \
         x->complex_num_t.value = x->complex_num_t.value OP ((complex_num_type *)y)->value; \
     } else if (tx == complex_num_tag && ty == -1) { \
@@ -3384,12 +3383,12 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
         return obj_int2obj(z);
       } else {
         mp_int bnx, bny;
-        mp_init(&bnx);
-        mp_init(&bny);
+        BIGNUM_CALL(mp_init(&bnx));
+        BIGNUM_CALL(mp_init(&bny));
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
         alloc_bignum(data, bn);
-        mp_add(&bnx, &bny, &bignum_value(bn));
+        BIGNUM_CALL(mp_add(&bnx, &bny, &bignum_value(bn)));
         mp_clear(&bnx);
         mp_clear(&bny);
         return bn;
@@ -3399,10 +3398,10 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
         mp_int bnx;
-        mp_init(&bnx);
+        BIGNUM_CALL(mp_init(&bnx));
         Cyc_int2bignum(obj_obj2int(x), &bnx);
         alloc_bignum(data, bn);
-        mp_add(&bnx, &bignum_value(y), &bignum_value(bn));
+        BIGNUM_CALL(mp_add(&bnx, &bignum_value(y), &bignum_value(bn)));
         mp_clear(&bnx);
         return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
@@ -3430,10 +3429,10 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
       mp_int bny;
-      mp_init(&bny);
+      BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
       alloc_bignum(data, bn);
-      mp_add(&bignum_value(x), &bny, &bignum_value(bn));
+      BIGNUM_CALL(mp_add(&bignum_value(x), &bny, &bignum_value(bn)));
       mp_clear(&bny);
       return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3441,7 +3440,7 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      BIGNUM_CALL(mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, mp_get_double(&bignum_value(x)) + complex_num_value(y));
@@ -3484,12 +3483,12 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
         return obj_int2obj(z);
       } else {
         mp_int bnx, bny;
-        mp_init(&bnx);
-        mp_init(&bny);
+        BIGNUM_CALL(mp_init(&bnx));
+        BIGNUM_CALL(mp_init(&bny));
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
         alloc_bignum(data, bn);
-        mp_sub(&bnx, &bny, &bignum_value(bn));
+        BIGNUM_CALL(mp_sub(&bnx, &bny, &bignum_value(bn)));
         mp_clear(&bnx);
         mp_clear(&bny);
         return bn;
@@ -3499,10 +3498,10 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
         mp_int bnx;
-        mp_init(&bnx);
+        BIGNUM_CALL(mp_init(&bnx));
         Cyc_int2bignum(obj_obj2int(x), &bnx);
         alloc_bignum(data, bn);
-        mp_sub(&bnx, &bignum_value(y), &bignum_value(bn));
+        BIGNUM_CALL(mp_sub(&bnx, &bignum_value(y), &bignum_value(bn)));
         mp_clear(&bnx);
         return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
@@ -3530,10 +3529,10 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
       mp_int bny;
-      mp_init(&bny);
+      BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
       alloc_bignum(data, bn);
-      mp_sub(&bignum_value(x), &bny, &bignum_value(bn));
+      BIGNUM_CALL(mp_sub(&bignum_value(x), &bny, &bignum_value(bn)));
       mp_clear(&bny);
       return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3541,7 +3540,7 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      BIGNUM_CALL(mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, mp_get_double(&bignum_value(x)) - complex_num_value(y));
@@ -3584,12 +3583,12 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
         return obj_int2obj(z);
       } else {
         mp_int bnx, bny;
-        mp_init(&bnx);
-        mp_init(&bny);
+        BIGNUM_CALL(mp_init(&bnx));
+        BIGNUM_CALL(mp_init(&bny));
         Cyc_int2bignum(xx, &bnx);
         Cyc_int2bignum(yy, &bny);
         alloc_bignum(data, bn);
-        mp_mul(&bnx, &bny, &bignum_value(bn));
+        BIGNUM_CALL(mp_mul(&bnx, &bny, &bignum_value(bn)));
         mp_clear(&bnx);
         mp_clear(&bny);
         return bn;
@@ -3599,10 +3598,10 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
         mp_int bnx;
-        mp_init(&bnx);
+        BIGNUM_CALL(mp_init(&bnx));
         Cyc_int2bignum(obj_obj2int(x), &bnx);
         alloc_bignum(data, bn);
-        mp_mul(&bnx, &bignum_value(y), &bignum_value(bn));
+        BIGNUM_CALL(mp_mul(&bnx, &bignum_value(y), &bignum_value(bn)));
         mp_clear(&bnx);
         return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
@@ -3630,10 +3629,10 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
       mp_int bny;
-      mp_init(&bny);
+      BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
       alloc_bignum(data, bn);
-      mp_mul(&bignum_value(x), &bny, &bignum_value(bn));
+      BIGNUM_CALL(mp_mul(&bignum_value(x), &bny, &bignum_value(bn)));
       mp_clear(&bny);
       return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3641,7 +3640,7 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(bn));
+      BIGNUM_CALL(mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, mp_get_double(&bignum_value(x)) * complex_num_value(y));
@@ -3689,10 +3688,10 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
         mp_int bnx;
-        mp_init(&bnx);
+        BIGNUM_CALL(mp_init(&bnx));
         Cyc_int2bignum(obj_obj2int(x), &bnx);
         alloc_bignum(data, bn);
-        mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL);
+        BIGNUM_CALL(mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL));
         mp_clear(&bnx);
         return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
@@ -3720,10 +3719,10 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   if (is_object_type(x) && type_of(x) == bignum_tag) {
     if (obj_is_int(y)){
       mp_int bny;
-      mp_init(&bny);
+      BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
       alloc_bignum(data, bn);
-      mp_div(&bignum_value(x), &bny, &bignum_value(bn), NULL);
+      BIGNUM_CALL(mp_div(&bignum_value(x), &bny, &bignum_value(bn), NULL));
       mp_clear(&bny);
       return bn;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3731,7 +3730,7 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(bn), NULL);
+      BIGNUM_CALL(mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(bn), NULL));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, mp_get_double(&bignum_value(x)) / complex_num_value(y));
@@ -3798,20 +3797,20 @@ object Cyc_div_op(void *data, common_type * x, object y)
   } else if (tx == double_tag && ty == double_tag) {
     x->double_t.value = x->double_t.value / ((double_type *) y)->value;
   } else if (tx == integer_tag && ty == bignum_tag) {
-    mp_init(&bn_tmp2);
+    BIGNUM_CALL(mp_init(&bn_tmp2));
     Cyc_int2bignum(x->integer_t.value, &bn_tmp2);
     x->bignum_t.hdr.mark = gc_color_red;
     x->bignum_t.hdr.grayed = 0;
     x->bignum_t.tag = bignum_tag;
-    mp_init(&(x->bignum_t.bn));
-    mp_div(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn), NULL);
+    BIGNUM_CALL(mp_init(&(x->bignum_t.bn)));
+    BIGNUM_CALL(mp_div(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn), NULL));
     mp_clear(&bn_tmp2);
   } else if (tx == double_tag && ty == bignum_tag) {
      x->double_t.value = x->double_t.value / mp_get_double(&bignum_value(y));
   } else if (tx == bignum_tag && ty == -1) {
-    mp_init(&bn_tmp2);
+    BIGNUM_CALL(mp_init(&bn_tmp2));
     Cyc_int2bignum(obj_obj2int(y), &bn_tmp2);
-    mp_div(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn), NULL);
+    BIGNUM_CALL(mp_div(&(x->bignum_t.bn), &bn_tmp2, &(x->bignum_t.bn), NULL));
     mp_clear(&bn_tmp2);
   } else if (tx == bignum_tag && ty == double_tag) {
     double d = mp_get_double(&(x->bignum_t.bn));
@@ -3821,7 +3820,7 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.tag = double_tag;
     x->double_t.value = d / ((double_type *)y)->value;
   } else if (tx == bignum_tag && ty == bignum_tag) {
-    mp_div(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL);
+    BIGNUM_CALL(mp_div(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL));
   } else if (tx == complex_num_tag && ty == complex_num_tag) {
       x->complex_num_t.value = x->complex_num_t.value / ((complex_num_type *)y)->value;
   } else if (tx == complex_num_tag && ty == -1) {
@@ -3928,7 +3927,7 @@ object Cyc_num_op_va_list(void *data, int argc,
     buf->bignum_t.hdr.mark = gc_color_red;
     buf->bignum_t.hdr.grayed = 0;
     buf->bignum_t.tag = bignum_tag;
-    mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n));
+    BIGNUM_CALL(mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n)));
   } else if (type_of(n) == complex_num_tag) {
     buf->complex_num_t.hdr.mark = gc_color_red;
     buf->complex_num_t.hdr.grayed = 0;
@@ -4001,7 +4000,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
       } else {
         alloc_bignum(data, bn);
         Cyc_int2bignum(obj_obj2int(x), &(bn->bn));
-        mp_expt_u32(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn));
+        BIGNUM_CALL(mp_expt_u32(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn)));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4028,7 +4027,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
         Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), (double)obj_obj2int(y));
       } else {
         alloc_bignum(data, bn);
-        mp_expt_u32(&bignum_value(x), obj_obj2int(y), &bignum_value(bn));
+        BIGNUM_CALL(mp_expt_u32(&bignum_value(x), obj_obj2int(y), &bignum_value(bn)));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4050,7 +4049,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
 
 void Cyc_bignum_remainder(void *data, object cont, object num1, object num2, object rem)
 {
-  mp_div(&bignum_value(num1), &bignum_value(num2), NULL, &bignum_value(rem));
+  BIGNUM_CALL(mp_div(&bignum_value(num1), &bignum_value(num2), NULL, &bignum_value(rem)));
   return_closcall1(data, cont, Cyc_bignum_normalize(data, rem));
 }
 
