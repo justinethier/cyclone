@@ -230,8 +230,6 @@ bootstrap : icyc libs
 	cp $(HEADER_DIR)/ck_ht_hash.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/hashset.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp $(HEADER_DIR)/bignum.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp $(HEADER_DIR)/bignum_class.h $(BOOTSTRAP_DIR)/include/cyclone
-	cp $(HEADER_DIR)/bignum_superclass.h $(BOOTSTRAP_DIR)/include/cyclone
 	cp scheme/*.sld $(BOOTSTRAP_DIR)/scheme
 	cp libs/cyclone/*.sld $(BOOTSTRAP_DIR)/libs/cyclone
 	cp scheme/cyclone/*.sld $(BOOTSTRAP_DIR)/scheme/cyclone
