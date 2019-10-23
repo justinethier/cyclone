@@ -51,7 +51,7 @@
      mp_int tmpx, tmpy;
 
      if (obj_is_int(x)) {
-       mp_init(&tmpx);
+       BIGNUM_CALL(mp_init(&tmpx));
        Cyc_int2bignum(obj_obj2int(x), &tmpx);
        xx = &tmpx;
      } else {
@@ -59,7 +59,7 @@
      }
 
      if (obj_is_int(y)) {
-       mp_init(&tmpy);
+       BIGNUM_CALL(mp_init(&tmpy));
        Cyc_int2bignum(obj_obj2int(y), &tmpy);
        yy = &tmpy;
      } else {
@@ -123,7 +123,7 @@
   "Cyc_check_int(data, x);
    alloc_bignum(data, bn);
    if (Cyc_is_bignum(x) == boolean_t) {
-     mp_copy(&bignum_value(x), &bignum_value(bn));
+     BIGNUM_CALL(mp_copy(&bignum_value(x), &bignum_value(bn)));
    } else {
      Cyc_int2bignum((int)unbox_number(x), &bignum_value(bn));
    }
@@ -132,8 +132,8 @@
    /* A one's complement, aka bitwise NOT, is actually just -a - 1 */
    //CHECK_ERROR(mp_neg(&op->mp, &out->mp));
    //CHECK_ERROR(mp_sub_d(&out->mp, 1, &out->mp));
-   mp_neg(&bignum_value(bn), &bignum_value(bn));
-   mp_sub_d(&bignum_value(bn), 1, &bignum_value(bn));
+   BIGNUM_CALL(mp_neg(&bignum_value(bn), &bignum_value(bn)));
+   BIGNUM_CALL(mp_sub_d(&bignum_value(bn), 1, &bignum_value(bn)));
    return_closcall1(data, k, Cyc_bignum_normalize(data, bn));
    ")
 
@@ -179,7 +179,7 @@
   "Cyc_check_int(data, x);
    if (Cyc_is_bignum(x) == boolean_t) {
      int res;
-     mp_radix_size(&bignum_value(x), 2, &res);
+     BIGNUM_CALL(mp_radix_size(&bignum_value(x), 2, &res));
      return_closcall1(data, k, obj_int2obj((res - 1)));
    } else {
      int input = (int)unbox_number(x);
@@ -247,7 +247,7 @@
     alloc_bignum(data, bn);
  
     if (Cyc_is_bignum(x) == boolean_t){
-      mp_copy(&bignum_value(x), &bignum_value(bn));
+      BIGNUM_CALL(mp_copy(&bignum_value(x), &bignum_value(bn)));
     } else {
       Cyc_int2bignum((int)unbox_number(x), &bignum_value(bn));
     }
@@ -257,11 +257,11 @@
     shift = (int)unbox_number(y);
     if (shift > 0) {
       for (i = 0; i < shift; i++) {
-         mp_mul_2(&bignum_value(bn), &bignum_value(bn));
+         BIGNUM_CALL(mp_mul_2(&bignum_value(bn), &bignum_value(bn)));
       }
     } else {
       for (i = 0; i < abs(shift); i++) {
-         mp_div_2(&bignum_value(bn), &bignum_value(bn));
+         BIGNUM_CALL(mp_div_2(&bignum_value(bn), &bignum_value(bn)));
       }
     }
 
