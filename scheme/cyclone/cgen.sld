@@ -640,7 +640,7 @@
               (string-append 
                 "alloc_bignum(data, " cvar-name "); "
                 ;; TODO: need error checking, this is just a first cut:
-                "mp_read_radix(&bignum_value(" cvar-name "), \"" num2str "\", 10);")))))
+                "BIGNUM_CALL(mp_read_radix(&bignum_value(" cvar-name "), \"" num2str "\", 10));")))))
     ((complex? exp)
       (let* ((cvar-name (mangle (gensym 'c)))
              (num2str (lambda (n)
