@@ -4,8 +4,8 @@
 
 Features
 
- - Added the `-no-call-history` flag to potentially allow for faster executables at the expense of call history.
  - Added support for LibTomMath 1.2.0 and integrated that library into our source tree to avoid users having to install the library as a separate dependency.
+ - Added the `-no-call-history` flag to potentially allow for faster executables at the expense of call history.
 
 Bug Fixes
 
