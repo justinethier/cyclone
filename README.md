@@ -22,6 +22,8 @@ Features
 - ... as well as an interpreter for debugging
 - Support for [many popular SRFI's](docs/API.md#srfi-libraries)
 - Online user manual and API documentation
+- Support for Linux, Windows, FreeBSD, and Mac platforms. 
+- Known to run on x86-64, x86, and Arm (Raspberry Pi) architectures.
 
 Getting Started
 ---------------
