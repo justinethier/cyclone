@@ -1,6 +1,6 @@
 # Changelog
 
-## Next Release - TBD
+## 0.11.5 - October 30, 2019
 
 Features
 
