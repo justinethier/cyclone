@@ -38,7 +38,7 @@ PROJECT_NAME           = "Cyclone Scheme"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 0.9
+PROJECT_NUMBER         = 0.11
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -876,8 +876,10 @@ RECURSIVE              = YES
 
 EXCLUDE                = include/cyclone/ck_ht_hash.h \
                          include/cyclone/runtime-main.h \
+                         include/cyclone/bignum.h \
                          .git \
                          docs \
+                         third-party \
                          examples \
                          scheme \
                          scripts \
