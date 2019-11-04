@@ -140,7 +140,8 @@ typedef unsigned char tag_type;
 /** GC debugging flag */
 #define GC_DEBUG_VERBOSE 0
 
-/** Additional runtime checking of the GC system.
+/** 
+ *  Additional runtime checking of the GC system.
  *  This is here because these checks should not be
  *  necessary if GC is working correctly. 
  */
@@ -178,8 +179,6 @@ typedef enum {
 } gc_heap_type;
 
 /** The first heap type that is not fixed-size */
-// TODO: disable this for now
-//#define LAST_FIXED_SIZE_HEAP_TYPE -1
 #if INTPTR_MAX == INT64_MAX
 #define LAST_FIXED_SIZE_HEAP_TYPE HEAP_96
 #else
@@ -199,32 +198,38 @@ struct gc_free_list_t {
 };
 
 /**
- * Data for a heap page
+ * Heap page
+ * @brief Contains data for a single page of the heap.
  */
 typedef struct gc_heap_t gc_heap;
 struct gc_heap_t {
   gc_heap_type type;
   unsigned int size;
-  unsigned int chunk_size;      // 0 for any size, other and heap will only alloc chunks of that size
+  /** 0 for any size; non-zero and heap will only alloc chunks of that size */
+  unsigned int chunk_size;      
   unsigned int max_size;
-  unsigned int ttl; // Keep empty page alive this many times before freeing
+  /** Keep empty page alive this many times before freeing */
+  unsigned int ttl; 
   unsigned int remaining;
   unsigned block_size;
   char *data_end;
   // Lazy-sweep related data
-  unsigned int free_size; // Amount of heap data that is free
-  unsigned char is_full; // Determine if the heap is full
+  /** Lazy-sweep: Amount of heap data that is free */
+  unsigned int free_size; 
+  /** Lazy-sweep: Determine if the heap is full */
+  unsigned char is_full; 
+  /** Lazy-sweep: Determine if the heap has been swept */
   unsigned char is_unswept;
+  //int num_children;
+  int num_unswept_children;
   //
-  gc_heap *next_free;
   unsigned int last_alloc_size;
   //unsigned int free_size;
+  gc_heap *next_free;
   gc_heap **next_frees;
   //
   gc_free_list *free_list;
   gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
-  //int num_children;
-  int num_unswept_children;
   char *data;
 };
 
