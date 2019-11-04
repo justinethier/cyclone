@@ -387,14 +387,11 @@ uint64_t gc_heap_free_size(gc_heap *h) {
  *        The caller must hold the necessary locks.
  * @param  heap_type  Define the size of objects that will be allocated on this heap 
  * @param  size       Requested size (unpadded) of the heap
- * @param  max_size   Define the heap page max size parameter
- * @param  chunk_size Define the heap chunk size parameter
  * @param  thd        Calling mutator's thread data object
  * @return Pointer to the newly allocated heap page, or NULL
  *         if the allocation failed.
  */
-gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
-                        size_t chunk_size, gc_thread_data *thd)
+gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd)
 {
   gc_free_list *free, *next;
   gc_heap *h;
@@ -408,15 +405,11 @@ gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
   h->size = size;
   h->ttl = 10;
   h->next_free = h;
-  h->next_frees = NULL;
   h->last_alloc_size = 0;
   thd->cached_heap_total_sizes[heap_type] += size;
   thd->cached_heap_free_sizes[heap_type] += size;
-  h->chunk_size = chunk_size;
-  h->max_size = max_size;
   h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
   h->next = NULL;
-  //h->num_children = 1;
   h->num_unswept_children = 0;
   free = h->free_list = (gc_free_list *) h->data;
   next = (gc_free_list *) (((char *)free) + gc_heap_align(gc_free_chunk_size));
@@ -728,15 +721,6 @@ gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
   return rv;
 }
 
-gc_heap *gc_find_heap_with_chunk_size(gc_heap *h, size_t chunk_size) 
-{
-  while (h) {
-    if (h->chunk_size == chunk_size) return h;
-    h = h->next;
-  }
-  return NULL;
-}
-
 /**
  * @brief   Free a page of the heap
  * @param   page        Page to free
@@ -1010,7 +994,6 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
  * @param h          Heap to be expanded
  * @param heap_type  Define the size of objects that will be allocated on this heap 
  * @param size       Not applicable, can set to 0
- * @param chunk_size Heap chunk size, or 0 if not applicable
  * @param thd        Thread data for the mutator using this heap
  * @return A true value if the heap was grown, or 0 otherwise
  *
@@ -1021,7 +1004,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
  * increasing size using the Fibonnaci Sequence until reaching the
  * max size.
  */
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd)
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd)
 {
   size_t /*cur_size,*/ new_size;
   gc_heap *h_last = h, *h_new;
@@ -1073,7 +1056,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_
   // allocate larger pages if size will not fit on the page
   //new_size = gc_heap_align(((cur_size > size) ? cur_size : size));
   // Done with computing new page size
-  h_new = gc_heap_create(heap_type, new_size, h_last->max_size, chunk_size, thd);
+  h_new = gc_heap_create(heap_type, new_size, thd);
   h_last->next = h_new;
   //pthread_mutex_unlock(&(thd->heap_lock));
 #if GC_DEBUG_TRACE
@@ -1198,8 +1181,6 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
-          //h_passed->num_children--;
-          //h_passed->num_unswept_children--;
           continue;
         }
       }
@@ -1314,8 +1295,6 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
           }
           //thd->cached_heap_free_sizes[heap_type] -= prev_free_size;
           thd->cached_heap_total_sizes[heap_type] -= h_size;
-          //h_passed->num_children--;
-          //h_passed->num_unswept_children--;
           continue;
         }
       }
@@ -1464,10 +1443,8 @@ fprintf(stderr, "slow alloc of %p\n", result);
       /* A vanilla mark&sweep collector would collect now, but unfortunately */
       /* we can't do that because we have to go through multiple stages, some */
       /* of which are asynchronous. So... no choice but to grow the heap. */
-      gc_grow_heap(h, heap_type, size, 0, thd);
+      gc_grow_heap(h, heap_type, size, thd);
       *heap_grown = 1;
-      //h_passed->num_children++;
-      //h_passed->num_unswept_children++;
   // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
   // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
   // the end of the heap anymore
@@ -2761,13 +2738,13 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   thd->cached_heap_total_sizes = calloc(5, sizeof(uintptr_t));
   thd->heap = calloc(1, sizeof(gc_heap_root));
   thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
-  thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, 0, 0, thd);
-  thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, 0, 0, thd);
-  thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, 0, 0, thd);
+  thd->heap->heap[HEAP_REST] = gc_heap_create(HEAP_REST, INITIAL_HEAP_SIZE, thd);
+  thd->heap->heap[HEAP_SM] = gc_heap_create(HEAP_SM, INITIAL_HEAP_SIZE, thd);
+  thd->heap->heap[HEAP_64] = gc_heap_create(HEAP_64, INITIAL_HEAP_SIZE, thd);
   if (sizeof(void *) == 8) { // Only use this heap on 64-bit platforms
-    thd->heap->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, 0, 0, thd);
+    thd->heap->heap[HEAP_96] = gc_heap_create(HEAP_96, INITIAL_HEAP_SIZE, thd);
   }
-  thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, 0, 0, thd);
+  thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, thd);
 }
 
 /**

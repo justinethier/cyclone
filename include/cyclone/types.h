@@ -199,37 +199,43 @@ struct gc_free_list_t {
 
 /**
  * Heap page
+ *
  * @brief Contains data for a single page of the heap.
+ *
+ * Note there are groups of parameters to support:
+ * - Bump-allocation - This type of allocation is faster but only applicable when a page is first created or empty.
+ * - Lazy sweep
  */
 typedef struct gc_heap_t gc_heap;
 struct gc_heap_t {
   gc_heap_type type;
+  /** Size of the heap page in bytes */
   unsigned int size;
-  /** 0 for any size; non-zero and heap will only alloc chunks of that size */
-  unsigned int chunk_size;      
-  unsigned int max_size;
   /** Keep empty page alive this many times before freeing */
   unsigned int ttl; 
+  /** Bump: Track remaining space; this is useful for bump&pop style allocation */
   unsigned int remaining;
+  /** For fixed-size heaps, only allocate blocks of this size */
   unsigned block_size;
+  /** End of the data when using bump alllocation or NULL when using free lists */
   char *data_end;
-  // Lazy-sweep related data
   /** Lazy-sweep: Amount of heap data that is free */
   unsigned int free_size; 
   /** Lazy-sweep: Determine if the heap is full */
   unsigned char is_full; 
   /** Lazy-sweep: Determine if the heap has been swept */
   unsigned char is_unswept;
-  //int num_children;
+  /** Lazy-sweep: Start GC cycle if fewer than this many heap pages are unswept */
   int num_unswept_children;
-  //
+  /** Last size of object that was allocated, allows for optimizations */
   unsigned int last_alloc_size;
-  //unsigned int free_size;
+  /** Next page that has free space, lets alloc find that page faster */
   gc_heap *next_free;
-  gc_heap **next_frees;
-  //
+  /** Linked list of free memory blocks in this page */
   gc_free_list *free_list;
+  /** Next page in this heap */
   gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
+  /** Actual data in this page */
   char *data;
 };
 
@@ -363,14 +369,13 @@ void gc_remove_mutator(gc_thread_data * thd);
 int gc_is_mutator_active(gc_thread_data *thd);
 int gc_is_mutator_new(gc_thread_data *thd);
 void gc_sleep_ms(int ms);
-gc_heap *gc_heap_create(int heap_type, size_t size, size_t max_size,
-                        size_t chunk_size, gc_thread_data *thd);
+gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd);
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
 void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
 void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
 int gc_is_heap_empty(gc_heap *h);
 void gc_print_stats(gc_heap * h);
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
+int gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
@@ -382,8 +387,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 
 void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd);
-int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, gc_thread_data *thd);
-void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, size_t chunk_size, char *obj, gc_thread_data * thd);
+int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd);
+void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd);
 void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd, int *heap_grown);
 void gc_init_fixed_size_free_list(gc_heap *h);
 
