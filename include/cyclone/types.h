@@ -217,8 +217,6 @@ struct gc_heap_t {
   unsigned int remaining;
   /** For fixed-size heaps, only allocate blocks of this size */
   unsigned block_size;
-  /** End of the data when using bump alllocation or NULL when using free lists */
-  char *data_end;
   /** Lazy-sweep: Amount of heap data that is free */
   unsigned int free_size; 
   /** Lazy-sweep: Determine if the heap is full */
@@ -237,6 +235,8 @@ struct gc_heap_t {
   gc_heap *next;                // TBD, linked list is not very efficient, but easy to work with as a start
   /** Actual data in this page */
   char *data;
+  /** End of the data when using bump alllocation or NULL when using free lists */
+  char *data_end;
 };
 
 /**
@@ -253,8 +253,8 @@ struct gc_heap_root_t {
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
   unsigned char mark;      // mark bits 
-  unsigned char grayed;    // stack object to be grayed when moved to heap
-  unsigned char immutable; // Flag normally mutable obj (EG: pair) as read-only
+  unsigned char grayed:1;    // stack object to be grayed when moved to heap
+  unsigned char immutable:1; // Flag normally mutable obj (EG: pair) as read-only
 };
 
 /** Get an object's `mark` value */
