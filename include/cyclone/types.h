@@ -307,58 +307,81 @@ typedef enum { CYC_THREAD_STATE_NEW, CYC_THREAD_STATE_RUNNABLE,
  */
 typedef struct gc_thread_data_t gc_thread_data;
 struct gc_thread_data_t {
-  // Thread object, if applicable
-  object scm_thread_obj;
-  cyc_thread_state_type thread_state;
-  // Data needed to initiate stack-based minor GC
-  char *stack_start;
-  char *stack_limit;
-  // Minor GC write barrier
-  void **mutations;
-  int mutation_buflen;
-  int mutation_count;
-  // Is minor collection of globals necessary?
-  unsigned char globals_changed;
-  // List of objects moved to heap during minor GC
-  void **moveBuf;
-  int moveBufLen;
-  // Need the following to perform longjmp's
-  //int mutator_num;
-  jmp_buf *jmp_start;
-  // After longjmp, pick up execution using continuation/arguments
-  object gc_cont;
-  object *gc_args;
-  short gc_num_args;
-  // Data needed for heap GC
-  unsigned char gc_alloc_color;
-  unsigned char gc_trace_color;
-  uint8_t gc_done_tracing;
-  int gc_status;
-  int last_write;
-  int last_read;
-  // Need this because minor GC may still be moving objects to the heap and
-  // if we try to trace before minor GC is done, some of the objects may be
-  // missed. So we "pend" them until minor GC is done and we know everything
-  // is on the heap.
-  int pending_writes;
-  mark_buffer *mark_buffer;
-  int mark_buffer_len;
-  pthread_mutex_t lock;
-  //pthread_mutex_t heap_lock;
-  pthread_t thread_id;
-  gc_heap_root *heap;
-  uintptr_t *cached_heap_free_sizes;
-  uintptr_t *cached_heap_total_sizes;
-  int heap_num_huge_allocations;
-  int num_minor_gcs;
-  // Data needed for call history
+  /** Call History: circular buffer of previous calls */
   char **stack_traces;
+  /** Call History: Current place in the buffer */
   int stack_trace_idx;
+  /** Call History: Previous frame written to call history; allows us to avoid duplicate entries */
   char *stack_prev_frame;
-  // Exception handler stack
+  /** Current state of this thread */
+  cyc_thread_state_type thread_state;
+  /** Minor GC: Data needed to initiate stack-based minor GC */
+  char *stack_start;
+  /** Minor GC: Data needed to initiate stack-based minor GC, defines the end of the memory range */
+  char *stack_limit;
+  /** Minor GC: write barrier */
+  void **mutations;
+  /** Minor GC: Size of the minor GC write barrier */
+  int mutation_buflen;
+  /** Minor GC: Number of entries in the minor GC write barrier */
+  int mutation_count;
+  /** Minor GC: Is minor collection of globals necessary? */
+  unsigned char globals_changed;
+  /** Minor GC: List of objects moved to heap during minor GC */
+  void **moveBuf;
+  /** Minor GC: Length of `moveBuf` */
+  int moveBufLen;
+  /** Heap GC: mark color used for new allocations */
+  unsigned char gc_alloc_color;
+  /** Heap GC: mark color the major GC is currently using tracing. This can be different than the alloc color due to lazy sweeping */
+  unsigned char gc_trace_color;
+  /** Heap GC: Is the major GC done tracing? */
+  uint8_t gc_done_tracing;
+  /** Heap GC: current state of the collector */
+  int gc_status;
+  /** Heap GC: index of last write to the mark buffer */
+  int last_write;
+  /** Heap GC: index of last read from the mark buffer */
+  int last_read;
+  /** Heap GC: 
+   *  Need this because minor GC may still be moving objects to the heap and
+   *  if we try to trace before minor GC is done, some of the objects may be
+   *  missed. So we "pend" them until minor GC is done and we know everything
+   *  is on the heap.
+   */
+  int pending_writes;
+  /** Heap GC: buffer of grey objects */
+  mark_buffer *mark_buffer;
+  /** Heap GC: length of the mark buffer */
+  int mark_buffer_len;
+  /** Heap GC: lock used to coordinate access between the collector and this thread */
+  pthread_mutex_t lock;
+  /** Id of the current thread */
+  pthread_t thread_id;
+  /** Heap GC: Root of this thread's heap */
+  gc_heap_root *heap;
+  /** Heap GC: Cached amount of free heap space, so we do not need to recalculate on the fly */
+  uintptr_t *cached_heap_free_sizes;
+  /** Heap GC: Cached total amount of heap space */
+  uintptr_t *cached_heap_total_sizes;
+  /** Heap GC: Number of "huge" allocations by this thread */
+  int heap_num_huge_allocations;
+  /** Heap GC: Keep track of number of minor GC's for use by the major GC */
+  int num_minor_gcs;
+  /** Exception handler stack */
   object exception_handler_stack;
-  // Parameter object data
+  /** Parameter object data */
   object param_objs;
+  /** Need the following to perform longjmp's */
+  jmp_buf *jmp_start;
+  /** After longjmp, pick up execution here */
+  object gc_cont;
+  /** After longjmp, pass continuation these arguments */
+  object *gc_args;
+  /** Length of `gc_args` */
+  short gc_num_args;
+  /**  Thread object, if applicable */
+  object scm_thread_obj;
 };
 
 /* GC prototypes */
