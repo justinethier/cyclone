@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.6 - TBD
+
+Features
+
+ - Faster record type constructors
+   TODO: is arg # validation sufficient??
+
 ## 0.11.5 - October 30, 2019
 
 Features
