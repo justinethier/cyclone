@@ -1864,7 +1864,7 @@
   (lambda args
     (let* ((field-tags (vector-ref name 2))
            (field-values (list->vector args)))
-      (when (not (equal? (length field-tags) (length args)))
+      (when (not (equal? (length field-tags) (vector-length field-values)))
         (error "invalid number of arguments passed to record type constructor" args))
       (vector record-marker name field-values))))
 (define (type-slot-offset name sym)
