@@ -1957,19 +1957,19 @@
                            (,_type_slot_offset ,name ',(car f))))))
                 fields)
          ;; constructor
-         (,_define ,make
-            (,_let ((%make (,(rename 'make-constructor/args)
-                            ,(symbol->string make) ;(identifier->symbol make))
-                            ,name)))
-              (,_lambda ,make-fields
-                (%make ,@make-fields))))
-         ; Possible alternate version that inlines make-constructor/args
          ;(,_define ,make
-         ;   (,_lambda ,make-fields
-         ;     (,(rename 'vector)
-         ;     ',record-marker
-         ;      ,name
-         ;      (,(rename 'vector)
-         ;       ,@make-fields))))
+         ;   (,_let ((%make (,(rename 'make-constructor/args)
+         ;                   ,(symbol->string make) ;(identifier->symbol make))
+         ;                   ,name)))
+         ;     (,_lambda ,make-fields
+         ;       (%make ,@make-fields))))
+         ; Alternate version that inlines make-constructor/args
+         (,_define ,make
+            (,_lambda ,make-fields
+              (,(rename 'vector)
+              ',record-marker
+               ,name
+               (,(rename 'vector)
+                ,@make-fields))))
   )))))
 ))
