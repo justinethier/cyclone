@@ -493,7 +493,7 @@ void gc_print_fixed_size_free_list(gc_heap *h)
  * @brief Essentially this is half of the sweep code, for sweeping bump&pop
  * @param h Heap page to convert
  */
-size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd) 
+static size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd) 
 {
   size_t freed = 0;
   object p;
@@ -584,7 +584,7 @@ size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd)
  * memory slots to the heap. It is only called by the collector thread after
  * the heap has been traced to identify live objects.
  */
-gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
+static gc_heap *gc_sweep_fixed_size(gc_heap * h, int heap_type, gc_thread_data *thd)
 {
   short heap_is_empty;
   object p, end;
@@ -1224,7 +1224,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
  * This function will fail if there is no space on the heap for the 
  * requested object.
  */
-void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd)
+static void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd)
 {
   void *result;
   //gc_heap *h_passed = h;
