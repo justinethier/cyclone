@@ -396,9 +396,8 @@ gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd);
 gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
 void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
 void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
-int gc_is_heap_empty(gc_heap *h);
 void gc_print_stats(gc_heap * h);
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd);
+gc_heap *gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
 void *gc_try_alloc(gc_heap * h, int heap_type, size_t size, char *obj,
                    gc_thread_data * thd);
@@ -410,7 +409,6 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 
 void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd);
-int gc_grow_heap_rest(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd);
 void *gc_try_alloc_rest(gc_heap * h, int heap_type, size_t size, char *obj, gc_thread_data * thd);
 void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd, int *heap_grown);
 void gc_init_fixed_size_free_list(gc_heap *h);

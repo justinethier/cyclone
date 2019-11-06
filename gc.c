@@ -747,7 +747,7 @@ gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page)
  * @param h Heap to inspect. The caller should acquire any necessary locks.
  * @return A truthy value if the heap is empty, 0 otherwise.
  */
-int gc_is_heap_empty(gc_heap *h) 
+static int gc_is_heap_empty(gc_heap *h) 
 {
   gc_free_list *f;
   if (!h) return 0;
@@ -1004,7 +1004,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
  * increasing size using the Fibonnaci Sequence until reaching the
  * max size.
  */
-int gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd)
+gc_heap *gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd)
 {
   size_t /*cur_size,*/ new_size;
   gc_heap *h_last = h, *h_new;
@@ -1062,7 +1062,7 @@ int gc_grow_heap(gc_heap * h, int heap_type, size_t size, gc_thread_data *thd)
 #if GC_DEBUG_TRACE
   fprintf(stderr, "DEBUG - grew heap\n");
 #endif
-  return (h_new != NULL);
+  return h_last;
 }
 
 /**
@@ -1443,12 +1443,9 @@ fprintf(stderr, "slow alloc of %p\n", result);
       /* A vanilla mark&sweep collector would collect now, but unfortunately */
       /* we can't do that because we have to go through multiple stages, some */
       /* of which are asynchronous. So... no choice but to grow the heap. */
-      gc_grow_heap(h, heap_type, size, thd);
+      gc_heap *last = gc_grow_heap(h, heap_type, size, thd);
       *heap_grown = 1;
-  // TODO: would be nice if gc_grow_heap returns new page (maybe it does) then we can start from there
-  // otherwise will be a bit of a bottleneck since with lazy sweeping there is no guarantee we are at 
-  // the end of the heap anymore
-      result = try_alloc_slow(h_passed, h, heap_type, size, obj, thd);
+      result = try_alloc_slow(h_passed, last, heap_type, size, obj, thd);
 #if GC_DEBUG_VERBOSE
 fprintf(stderr, "slowest alloc of %p\n", result);
 #endif
