@@ -5,7 +5,7 @@
 Features
 
  - Faster record type constructors
-   TODO: is arg # validation sufficient??
+ - During compilation, validate the number of arguments passed to local function calls.
 
 ## 0.11.5 - October 30, 2019
 

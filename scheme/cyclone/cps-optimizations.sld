@@ -2409,9 +2409,10 @@
              ;; Extract lambda definition
              (var (adb:get/default (car ast) #f))
              (lam* (adbv:assigned-value var))
-             ((pair? lam*))
-             ;; Assigned value is boxed in a cell, extract it
-             (lam (car lam*))
+             ;; If assigned value is boxed in a cell, extract it
+             (lam (if (pair? lam*)
+                      (car lam*)
+                      lam*))
              ((ast:lambda? lam))
              (formals-type (ast:lambda-formals-type lam))
              ((equal? 'args:fixed formals-type)) ;; Could validate fixed-with-varargs, too
