@@ -508,7 +508,7 @@
         ))))
 
 (define (make-thread-pool size . opts)
-  (let ((tp (%make-thread-pool (make-shared-queue) '() size))
+  (let ((tp (%make-thread-pool (make-shared-queue) '()))
         (handler (if (and (pair? opts)
                           (procedure? (car opts)))
                      (car opts)
