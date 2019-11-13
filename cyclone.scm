@@ -25,6 +25,8 @@
 
 (define *optimization-level* 2) ;; Default level
 (define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
+(define *optimize:beta-expand-threshold* #f) ;; BE threshold or #f to use default
+(define *optimize:inline-unsafe* #f) ;; Inline primitives even if generated code may be unsafe
 (define *cgen:track-call-history* #t)
 
 ; Placeholder for future enhancement to show elapsed time by phase:
@@ -466,6 +468,10 @@
                 *optimize:memoize-pure-functions*))
           ((eq? flag 'track-call-history)
            *cgen:track-call-history*)
+          ((eq? flag 'inline-unsafe)
+           *optimize:inline-unsafe*)
+          ((eq? flag 'beta-expand-threshold)
+           *optimize:beta-expand-threshold*)
           (else #f)))
 
       (when (> *optimization-level* 0)
@@ -764,11 +770,17 @@
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
        (cc-so   (apply string-append (collect-opt-values args "-CS")))
+       (opt-beta-expand-thresh (collect-opt-values args "-opt-be"))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
   ;; Set optimization level(s)
   (if (member "-O0" args)
       (set! *optimization-level* 0))
+  ;; Gather other optimization settings
+  (when (pair? opt-beta-expand-thresh)
+      (set! *optimize:beta-expand-threshold* (car opt-beta-expand-thresh)))
+  (if (member "-opt-inline-unsafe" args)
+      (set! *optimize:inline-unsafe* #t))
   (if (member "-memoization-optimizations" args)
       (set! *optimize:memoize-pure-functions* #t))
   (if (member "-no-memoization-optimizations" args)
