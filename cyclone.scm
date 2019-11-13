@@ -778,7 +778,9 @@
       (set! *optimization-level* 0))
   ;; Gather other optimization settings
   (when (pair? opt-beta-expand-thresh)
-      (set! *optimize:beta-expand-threshold* (car opt-beta-expand-thresh)))
+      (set! *optimize:beta-expand-threshold* 
+            (string->number 
+              (car opt-beta-expand-thresh))))
   (if (member "-opt-inline-unsafe" args)
       (set! *optimize:inline-unsafe* #t))
   (if (member "-memoization-optimizations" args)

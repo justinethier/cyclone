@@ -115,6 +115,9 @@
   (include "cps-opt-analyze-call-graph.scm")
   (include "cps-opt-memoize-pure-fncs.scm")
   (begin
+    (define *beta-expand-threshold* 4)
+    (define *inline-unsafe* #f)
+
     ;; The following two defines allow non-CPS functions to still be considered
     ;; for certain inlining optimizations.
     (define *inlinable-functions* '())
@@ -1232,9 +1235,11 @@
         (for-each
           (lambda (v)
             (with-var v (lambda (var)
-              (if (or (member scope-sym (adbv:mutated-indirectly var))
+              (if (and
+                    (not *inline-unsafe*)
+                    (or (member scope-sym (adbv:mutated-indirectly var))
                      ;(adbv:mutated-by-set? var)  ;; TOO restrictive, only matters if set! occurs in body we
-                  )                               ;; are inlining to. Also, does not catch cases where the
+                    ))                            ;; are inlining to. Also, does not catch cases where the
                                                   ;; var might be mutated by a function call outside this
                                                   ;; module (but hopefully we already catch that elsewhere).
                   (set! cannot-inline #t))
@@ -1505,7 +1510,7 @@
                       (= 1 (adbv:app-fnc-count var)))
                   (not (adbv:reassigned? var))
                   (not (adbv:self-rec-call? var))
-                  (not (fnc-depth>? (ast:lambda-body fnc) 4))
+                  (not (fnc-depth>? (ast:lambda-body fnc) *beta-expand-threshold*))
                   ;(not (fnc-depth>? (ast:lambda-body fnc) 5))
                   ;; Issue here is we can run into code that calls the 
                   ;; same continuation from both if branches. In this
@@ -1715,10 +1720,19 @@
     ;; END notes
 
     (define (optimize-cps ast add-globals! flag-set?)
+      ;; Handle any modified settings from caller
+      (if (flag-set? 'beta-expand-threshold)
+          (set! *beta-expand-threshold* (flag-set? 'beta-expand-threshold)))
+      (if (flag-set? 'inline-unsafe)
+          (set! *inline-unsafe* #t))
+
+      ;; Analysis phase
       (adb:clear!)
       (analyze-cps ast)
       (trace:info "---------------- cps analysis db:")
       (trace:info (adb:get-db))
+
+      ;; Optimization phase
       (let ((new-ast (opt:inline-prims 
                        (opt:contract ast) -1)))
         ;; Just a hack for now, need to fix beta expand in compiler benchmark
