@@ -2630,7 +2630,7 @@ static pthread_t collector_thread;
 void gc_start_collector()
 {
   if (pthread_create
-      (&collector_thread, NULL, collector_main, &collector_thread)) {
+      (&collector_thread, NULL, collector_main, NULL)) {
     fprintf(stderr, "Error creating collector thread\n");
     exit(1);
   }
