@@ -17,6 +17,8 @@ matrix:
             - clang-3.9
     - os: osx
       image: xcode8
+    - os: osx
+      image: xcode11.2
 notifications:
   email: false
 before_install:
