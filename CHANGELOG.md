@@ -7,6 +7,9 @@ Features
  - Faster record type constructors
  - During compilation, validate the number of arguments passed to local function calls.
 
+Internals
+ - When including an internal `.scm` file used by the compiler, check the current directory before the system directory.
+
 ## 0.11.5 - October 30, 2019
 
 Features
