@@ -307,7 +307,7 @@
                       ;(tagged-list? 'srfi import)
                       (tagged-list? 'cyclone import)
                   )
-                  (list (Cyc-installation-dir 'sld) "./")
+                  (list "./" (Cyc-installation-dir 'sld))
                   (list "./"))))
     (call/cc
       (lambda (return)
@@ -321,12 +321,9 @@
           (append prepend-dirs dir append-dirs))
         ;; Not found, just return base name
         (lib:check-system-path
-          (if (> (string-length (car dir)) 0)
-              (string-append (car dir) "/" filename)
-              filename))))
-    ;(if (tagged-list? 'scheme import)
-    ;  (string-append (Cyc-installation-dir 'sld) "/" path) ;; Built-in library
-    ;  path)
+          (if (> (length dir) 1)
+              (string-append (cadr dir) "/" filename)
+              (string-append (car dir) "/" filename)))))
   ))
 
 ;; string :: string
