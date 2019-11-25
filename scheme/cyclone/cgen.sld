@@ -660,7 +660,8 @@
             (list     ; Allocate on the C stack
               (string-append 
                 c-make-macro "(" cvar-name ", " rnum ", " inum ");")))))
-    ((integer? exp) 
+    ((and (integer? exp)
+          (exact? exp))
      (c-code (string-append "obj_int2obj(" 
                (number->string exp) ")")))
     ((real? exp)

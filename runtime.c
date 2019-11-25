@@ -1743,7 +1743,7 @@ object Cyc_is_integer(object o)
   if ((o != NULL) && (obj_is_int(o) ||
       (!is_value_type(o) && type_of(o) == integer_tag) ||
       (!is_value_type(o) && type_of(o) == bignum_tag)
-      // || (!is_value_type(o) && type_of(o) == double_tag && double_value(o) == round(double_value(o)))
+   || (!is_value_type(o) && type_of(o) == double_tag && double_value(o) == round(double_value(o)))
       )) // Per R7RS
     return boolean_t;
   return boolean_f;

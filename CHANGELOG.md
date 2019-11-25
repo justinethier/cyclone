@@ -7,6 +7,10 @@ Features
  - Faster record type constructors
  - During compilation, validate the number of arguments passed to local function calls.
 
+Bug Fixes
+
+- Fixed `integer?` such that if `x` is an inexact real number, then `(integer? x)` is true if and only if `(= x (round x))`, per R7RS.
+
 Internals
  - When including an internal `.scm` file used by the compiler, check the current directory before the system directory.
 
