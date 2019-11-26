@@ -575,11 +575,11 @@
          ((eq? p 'Cyc-unsafe-cdr)        "cdr")
          ((eq? p 'car)
           (if emit-unsafe
-              "car"
+              "Cyc_car_unsafe"
               "Cyc_car"))
          ((eq? p 'cdr)
           (if emit-unsafe
-              "cdr"
+              "Cyc_cdr_unsafe"
               "Cyc_cdr"))
          ((eq? p 'caar)          "Cyc_caar")
          ((eq? p 'cadr)          "Cyc_cadr")

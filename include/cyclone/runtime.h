@@ -826,6 +826,10 @@ static inline object Cyc_cdr(void *data, object lis)
   Cyc_check_pair(data, lis);
   return cdr(lis);
 }
+// Unsafe car/cdr
+#define Cyc_car_unsafe(d, lis) car(lis)
+#define Cyc_cdr_unsafe(d, lis) cdr(lis)
+
 list malloc_make_pair(object, object);
 object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
