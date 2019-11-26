@@ -41,6 +41,7 @@
   (begin
 
 (define *cgen:track-call-history* #t)
+(define *cgen:use-unsafe-prims* #f)
 (define *optimize-well-known-lambdas* #f)
 
 (define (emit line)
@@ -745,7 +746,7 @@
                    ((closure)"
                     (cgen:mangle-global p)
                  ")->fn)")
-               (prim->c-func p use-alloca?)))
+               (prim->c-func p use-alloca? *cgen:use-unsafe-prims*)))
          ;; Following closure defs are only used for prim:cont? to
          ;; create a new closure for the continuation, if needed.
          ;;
@@ -1855,6 +1856,7 @@
                       flag-set?)
   (set! *global-syms* (append globals (lib:idb:ids import-db)))
   (set! *cgen:track-call-history*  (flag-set? 'track-call-history))
+  (set! *cgen:use-unsafe-prims*  (flag-set? 'use-unsafe-prims))
   (set! num-lambdas (+ (adb:max-lambda-id) 1))
   (set! cgen:mangle-global
     (lambda (ident)

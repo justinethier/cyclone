@@ -492,7 +492,7 @@
 ;; TODO: get rid of this function and replace this with the same type of pre-alloc that
 ;;       we do for fast numeric operations. That will allow us to prevent out-of-order 
 ;;       execution for these as part of Cyc-seq
-    (define (prim->c-func p use-alloca?)
+    (define (prim->c-func p use-alloca? emit-unsafe)
       (cond
          (use-alloca?
           ;; Special case, when this flag is set the compiler is requesting a
@@ -507,11 +507,11 @@
             ;((eq? p 'Cyc-fast-list-4) "alloca_list_4")
             ;((eq? p 'cell)            "alloca_cell")
             (else
-              (_prim->c-func p))))
+              (_prim->c-func p emit-unsafe))))
          (else
-           (_prim->c-func p))))
+           (_prim->c-func p emit-unsafe))))
 
-    (define (_prim->c-func p)
+    (define (_prim->c-func p emit-unsafe)
       (cond
          ((eq? p 'Cyc-global-vars)       "Cyc_get_global_variables")
          ((eq? p 'Cyc-get-cvar)          "Cyc_get_cvar")
@@ -619,7 +619,10 @@
          ((eq? p 'make-vector)   "Cyc_make_vector")
          ((eq? p 'list->vector)  "Cyc_list2vector")
          ((eq? p 'vector-length) "Cyc_vector_length")
-         ((eq? p 'vector-ref)    "Cyc_vector_ref")
+         ((eq? p 'vector-ref)   
+          (if emit-unsafe
+              "Cyc_vector_ref_unsafe"
+              "Cyc_vector_ref"))
          ((eq? p 'vector-set!)   "Cyc_vector_set")
          ((eq? p 'string-append) "Cyc_string_append")
          ((eq? p 'string-cmp)    "Cyc_string_cmp")
