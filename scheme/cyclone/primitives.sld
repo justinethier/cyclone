@@ -573,8 +573,14 @@
          ((eq? p 'Cyc-write-char)        "Cyc_write_char")
          ((eq? p 'Cyc-unsafe-car)        "car")
          ((eq? p 'Cyc-unsafe-cdr)        "cdr")
-         ((eq? p 'car)           "Cyc_car")
-         ((eq? p 'cdr)           "Cyc_cdr")
+         ((eq? p 'car)
+          (if emit-unsafe
+              "car"
+              "Cyc_car"))
+         ((eq? p 'cdr)
+          (if emit-unsafe
+              "cdr"
+              "Cyc_cdr"))
          ((eq? p 'caar)          "Cyc_caar")
          ((eq? p 'cadr)          "Cyc_cadr")
          ((eq? p 'cdar)          "Cyc_cdar")
