@@ -6,6 +6,7 @@ Features
 
  - Faster record type constructors
  - During compilation, validate the number of arguments passed to local function calls.
+ - Added `-use-unsafe-prims` compiler option to allow generating faster code at the expense of runtime checks.
 
 Bug Fixes
 

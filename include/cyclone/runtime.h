@@ -487,7 +487,7 @@ object Cyc_is_immutable(object obj);
 object Cyc_vector_length(void *data, object v);
 object Cyc_vector_ref(void *d, object v, object k);
 #define Cyc_vector_ref_unsafe(d, v, k) \
-  ((vector) v)->elements[unbox_number(k)]
+  ((vector) v)->elements[obj_obj2int(k)]
 object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 /**@}*/
