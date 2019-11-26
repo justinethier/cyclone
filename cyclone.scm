@@ -28,6 +28,7 @@
 (define *optimize:beta-expand-threshold* #f) ;; BE threshold or #f to use default
 (define *optimize:inline-unsafe* #f) ;; Inline primitives even if generated code may be unsafe
 (define *cgen:track-call-history* #t)
+(define *cgen:use-unsafe-prims* #f)
 
 ; Placeholder for future enhancement to show elapsed time by phase:
 (define *start* (current-second))
@@ -468,6 +469,8 @@
                 *optimize:memoize-pure-functions*))
           ((eq? flag 'track-call-history)
            *cgen:track-call-history*)
+          ((eq? flag 'use-unsafe-prims)
+           *cgen:use-unsafe-prims*)
           ((eq? flag 'inline-unsafe)
            *optimize:inline-unsafe*)
           ((eq? flag 'beta-expand-threshold)
@@ -787,6 +790,8 @@
       (set! *optimize:memoize-pure-functions* #t))
   (if (member "-no-memoization-optimizations" args)
       (set! *optimize:memoize-pure-functions* #f))
+  (if (member "-use-unsafe-prims" args)
+      (set! *cgen:use-unsafe-prims* #t))
   (if (member "-no-call-history" args)
       (set! *cgen:track-call-history* #f))
   ;; TODO: place more optimization reading here as necessary
@@ -831,7 +836,13 @@ Optimization options:
                                 where possible (enabled by default).
  -no-memoization-optimizations  Disable the above memoization optimization.
 
-Debug options
+Unsafe options:
+
+ -use-unsafe-prims    Emit unsafe primitives. These primitives are faster
+                      but do not perform runtime type checking or bounds
+                      checking.
+
+Debug options:
 
  -no-call-history     Do not track call history in the compiled code. This 
                       allows for a faster runtime at the cost of having 
