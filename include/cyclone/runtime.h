@@ -836,6 +836,7 @@ object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
 object Cyc_set_cdr(void *, object l, object val);
 object Cyc_length(void *d, object l);
+object Cyc_length_unsafe(void *d, object l);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_list2string(void *d, object cont, object lst);
 object Cyc_list(void *data, int argc, object cont, ...);

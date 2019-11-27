@@ -2002,6 +2002,16 @@ object Cyc_length(void *data, object l)
   return obj_int2obj(len);
 }
 
+object Cyc_length_unsafe(void *data, object l)
+{
+  int len = 0;
+  while (l != NULL) {
+    l = cdr(l);
+    len++;
+  }
+  return obj_int2obj(len);
+}
+
 char *int_to_binary(char *b, int x)
 {
   unsigned int i = 0x80000000, leading_zeros = 1;

@@ -646,7 +646,10 @@
          ((eq? p 'Cyc-compilation-environment) "Cyc_compilation_environment")
          ((eq? p 'command-line-arguments) "Cyc_command_line_arguments")
          ((eq? p 'system)         "Cyc_system")
-         ((eq? p 'length)        "Cyc_length")
+         ((eq? p 'length)        
+          (if emit-unsafe
+              "Cyc_length_unsafe"
+              "Cyc_length"))
          ((eq? p 'set-car!)      "Cyc_set_car")
          ((eq? p 'set-cdr!)      "Cyc_set_cdr")
          ((eq? p 'eq?)           "Cyc_eq")
