@@ -1939,6 +1939,15 @@ object Cyc_vector_set(void *data, object v, object k, object obj)
   return v;
 }
 
+object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
+{
+  int idx = unbox_number(k);
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+  ((vector) v)->elements[idx] = obj;
+  add_mutation(data, v, idx, obj);
+  return v;
+}
+
 object Cyc_vector_ref(void *data, object v, object k)
 {
   int idx;

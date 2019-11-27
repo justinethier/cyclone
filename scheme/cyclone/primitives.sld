@@ -629,7 +629,10 @@
           (if emit-unsafe
               "Cyc_vector_ref_unsafe"
               "Cyc_vector_ref"))
-         ((eq? p 'vector-set!)   "Cyc_vector_set")
+         ((eq? p 'vector-set!)  
+          (if emit-unsafe
+              "Cyc_vector_set_unsafe"
+              "Cyc_vector_set"))
          ((eq? p 'string-append) "Cyc_string_append")
          ((eq? p 'string-cmp)    "Cyc_string_cmp")
          ((eq? p 'string->symbol) "Cyc_string2symbol")
