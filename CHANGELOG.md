@@ -6,7 +6,7 @@ Features
 
  - Faster record type constructors
  - During compilation, validate the number of arguments passed to local function calls.
- - Added the `-use-unsafe-prims` compiler option to allow generating faster code for certain primitives at the expense of runtime checks.
+ - Added the `-use-unsafe-prims` compiler option to generate faster code for certain primitives by eliminating runtime safety checks.
 
 Bug Fixes
 
@@ -14,7 +14,7 @@ Bug Fixes
 
 Internals
 
- - When including an internal `.scm` file used by the compiler, check the current directory before the system directory.
+ - When including an internal `.scm` file used by the compiler, check the current directory before the system directory. This makes it easier to work on certain compiler modules.
 
 ## 0.11.5 - October 30, 2019
 
