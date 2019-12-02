@@ -11,6 +11,7 @@ Features
 Bug Fixes
 
 - Fixed `integer?` such that if `x` is an inexact real number, then `(integer? x)` is true if and only if `(= x (round x))`, per R7RS.
+- @extrasharp fixed issues with definitions in `(scheme cxr)`.
 - @nymacro fixed a bug in the bootstrap Makefile that prevented builds from working on FreeBSD.
 
 Internals
