@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.11.6 - TBD
+## 0.11.7 - TBD
+
+Bug Fixes
+
+ - Fixed an issue with the library path when building on Mac OS.
+
+## 0.11.6 - December 2, 2019
 
 Features
 
