@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.7 - TBD
+## 0.11.7 - December 5, 2019
 
 Bug Fixes
 
