@@ -6,8 +6,7 @@ Cyclone is a brand-new Scheme-to-C compiler that allows practical application de
 
 Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard, and the intent is to support as much of that language as possible.
 
-Features
---------
+# Features
 
 - Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md). 
 - New features from R<sup>7</sup>RS including libraries, exceptions, and record types.
@@ -25,19 +24,18 @@ Features
 - Support for Linux, Windows, FreeBSD, and Mac platforms. 
 - Known to run on x86-64, x86, and Arm (Raspberry Pi) architectures.
 
-Installation
----------------
+# Installation
 
 There are several options available for installing Cyclone:
 
-### Docker 
+## Docker 
 ![Docker](docs/images/docker-thumb.png "Docker")
 
 Cyclone can be run from a [Docker Image](https://hub.docker.com/r/cyclonescm/cyclone):
     
     docker run -it cyclonescm/cyclone bash
     
-### Homebrew 
+## Homebrew 
 ![Homebrew](docs/images/homebrew-thumb.png "Homebrew")
 
 Mac (and Linux!) users wanting to use Homebrew can do the following.
@@ -47,7 +45,7 @@ Note if Homebrew is not already installed: follow the instructions at [https://b
     brew tap cyclone-scheme/cyclone
     brew install cyclone-scheme/cyclone/cyclone-bootstrap
 
-### Arch Linux 
+## Arch Linux 
 ![Arch Linux](docs/images/arch-linux-thumb.png "Arch Linux")
 
 Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/):
@@ -56,11 +54,10 @@ Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/
     cd cyclone-scheme
     makepkg -si
 
-### Build from Source
+## Build from Source
 To install Cyclone on your machine for the first time on Linux, Windows, FreeBSD, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, Windows (via MSYS), and FreeBSD 12.
 
-Getting Started
----------------
+# Getting Started
 
 After installing you can run the `cyclone` command to compile a single Scheme file:
 
@@ -93,8 +90,7 @@ And the `icyc` command to start an interactive interpreter. Note you can use [`r
 
 Read the documentation below for more information on how to use Cyclone.
 
-Documentation
--------------
+# Documentation
 
 - The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone and provides information on the Scheme language features implemented by Cyclone.
 
@@ -104,8 +100,7 @@ Documentation
 
 - Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
 
-Example Programs
-----------------
+# Example Programs
 
 Cyclone provides several example programs, including:
 
@@ -119,8 +114,7 @@ Cyclone provides several example programs, including:
 
 - Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`](cyclone.scm) and [`icyc.scm`](icyc.scm) to create executables for Cyclone's compiler and interpreter.
 
-Compiler Internals
-------------------
+# Compiler Internals
 
 - [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler-Revised-2017.md) provides high-level details on how the compiler was written and how it works.
 
@@ -130,8 +124,8 @@ Compiler Internals
 
 - The garbage collector was subsequently enhanced to support [Lazy Sweeping](https://github.com/justinethier/cyclone/blob/master/docs/Garbage-Collection-Using-Lazy-Sweeping.md) which improves performance for a wide range of applications.
 
-License
--------
+# License
+
 Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
 
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
