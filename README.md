@@ -25,62 +25,61 @@ Features
 - Support for Linux, Windows, FreeBSD, and Mac platforms. 
 - Known to run on x86-64, x86, and Arm (Raspberry Pi) architectures.
 
+Installation
+---------------
+
+There are several options available for installing Cyclone:
+
+### Build from Source
+To install Cyclone on your machine for the first time on Linux, Windows, FreeBSD, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, Windows (via MSYS), and FreeBSD 12.
+
+### Docker 
+Cyclone can be run from a [Docker Image](https://hub.docker.com/r/cyclonescm/cyclone):
+    
+    docker run -it cyclonescm/cyclone bash
+    
+### Homebrew
+Mac (and Linux!) users wanting to use Homebrew can do the following:
+- If Homebrew is not already installed: follow the instructions at [https://brew.sh/](https://brew.sh/) to install the homebrew package manager. 
+- `brew tap cyclone-scheme/cyclone`
+- `brew install cyclone-scheme/cyclone/cyclone-bootstrap`
+
+### Binary Packages
+Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/).
+
 Getting Started
 ---------------
 
-1. There are several options available for installing Cyclone:
+After installing you can run the `cyclone` command to compile a single Scheme file:
 
-    ### Build from Source
-    To install Cyclone on your machine for the first time on Linux, Windows, FreeBSD, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, Windows (via MSYS), and FreeBSD 12.
-
-    ### Docker 
-    Cyclone can be run from a [Docker Image](https://hub.docker.com/r/cyclonescm/cyclone).
+    $ cyclone examples/fac.scm
+    $ examples/fac
+    3628800
     
-    For example:
+And the `icyc` command to start an interactive interpreter. Note you can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`:
+
+    $ icyc
     
-        docker run -it cyclonescm/cyclone bash
-    
-    ### Homebrew
-    Mac (and Linux!) users wanting to use Homebrew can do the following:
-    - If Homebrew is not already installed: follow the instructions at [https://brew.sh/](https://brew.sh/) to install the homebrew package manager. 
-    - `brew tap cyclone-scheme/cyclone`
-    - `brew install cyclone-scheme/cyclone/cyclone-bootstrap`
+                  :@
+                @@@
+              @@@@:
+            `@@@@@+
+           .@@@+@@@      
+           @@     @@     Cyclone Scheme->C compiler
+          ,@             http://justinethier.github.io/cyclone/
+          '@
+          .@
+           @@     #@     (c) 2014-2019 Justin Ethier
+           `@@@#@@@.     Version 0.11
+            #@@@@@
+            +@@@+
+            @@#
+          `@.
+       
+    cyclone> (write 'hello-world)
+    hello-world
 
-    ### Binary Packages
-    Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/).
-
-2. After installing you can run the `cyclone` command to compile a single Scheme file:
-
-        $ cyclone examples/fac.scm
-        $ examples/fac
-        3628800
-    
-    And the `icyc` command to start an interactive interpreter:
-    
-        $ icyc
-        
-                      :@
-                    @@@
-                  @@@@:
-                `@@@@@+
-               .@@@+@@@      
-               @@     @@     Cyclone Scheme->C compiler
-              ,@             http://justinethier.github.io/cyclone/
-              '@
-              .@
-               @@     #@     (c) 2014-2019 Justin Ethier
-               `@@@#@@@.     Version 0.11
-                #@@@@@
-                +@@@+
-                @@#
-              `@.
-        
-        cyclone> (write 'hello-world)
-        hello-world
-
-   You can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`.
-
-3. Read the documentation below for more information on how to use Cyclone.
+Read the documentation below for more information on how to use Cyclone.
 
 Documentation
 -------------
