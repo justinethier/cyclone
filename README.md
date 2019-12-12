@@ -30,21 +30,18 @@ Installation
 
 There are several options available for installing Cyclone:
 
-### Docker 
-![Docker](docs/images/docker-thumb.png "Docker")
+### Docker ![Docker](docs/images/docker-thumb.png "Docker")
 Cyclone can be run from a [Docker Image](https://hub.docker.com/r/cyclonescm/cyclone):
     
     docker run -it cyclonescm/cyclone bash
     
-### Homebrew
-![Homebrew](docs/images/homebrew-thumb.png "Homebrew")
+### Homebrew ![Homebrew](docs/images/homebrew-thumb.png "Homebrew")
 Mac (and Linux!) users wanting to use Homebrew can do the following:
 - If Homebrew is not already installed: follow the instructions at [https://brew.sh/](https://brew.sh/) to install the homebrew package manager. 
 - `brew tap cyclone-scheme/cyclone`
 - `brew install cyclone-scheme/cyclone/cyclone-bootstrap`
 
-### Binary Packages
-![Arch Linux](docs/images/arch-linux-thumb.png "Arch Linux")
+### Arch Linux AUR ![Arch Linux](docs/images/arch-linux-thumb.png "Arch Linux")
 Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/).
 
 ### Build from Source
