@@ -45,7 +45,7 @@ Mac (and Linux!) users wanting to use Homebrew can do the following:
 - `brew tap cyclone-scheme/cyclone`
 - `brew install cyclone-scheme/cyclone/cyclone-bootstrap`
 
-### Arch Linux AUR 
+### Arch Linux 
 ![Arch Linux](docs/images/arch-linux-thumb.png "Arch Linux")
 
 Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/).
