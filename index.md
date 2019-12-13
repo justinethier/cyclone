@@ -9,8 +9,7 @@ Cyclone is a brand-new Scheme-to-C compiler that allows practical application de
 
 Cyclone is the first compiler written entirely in the latest R<sup>7</sup>RS Scheme language standard, and the intent is to support as much of that language as possible.
 
-Features
---------
+# Features
 
 - Support for the majority of the Scheme language as specified by the latest [R<sup>7</sup>RS standard](docs/Scheme-Language-Compliance.md). 
 - New features from R<sup>7</sup>RS including libraries, exceptions, and record types.
@@ -28,53 +27,73 @@ Features
 - Support for Linux, Windows, FreeBSD, and Mac platforms. 
 - Known to run on x86-64, x86, and Arm (Raspberry Pi) architectures.
 
-Getting Started
----------------
+# Installation
 
-1. To install Cyclone on your machine for the first time on Linux and Windows, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, and Windows (via MSYS). 
+There are several options available for installing Cyclone:
 
-    Mac users wanting to use Homebrew can do the following:
-    - If Homebrew is not already installed: follow the instructions at [https://brew.sh/](https://brew.sh/) to install the homebrew package manager. 
-    - `brew tap cyclone-scheme/cyclone`
-    - `brew install cyclone-scheme/cyclone/cyclone-bootstrap`
+## Docker 
+![Docker](docs/images/docker-thumb.png "Docker")
 
-    Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/).
-
-2. After installing you can run the `cyclone` command to compile a single Scheme file:
-
-        $ cyclone examples/fac.scm
-        $ examples/fac
-        3628800
+Cyclone can be run from a [Docker Image](https://hub.docker.com/r/cyclonescm/cyclone):
     
-    And the `icyc` command to start an interactive interpreter:
+    docker run -it cyclonescm/cyclone bash
     
-        $ icyc
-        
-                      :@
-                    @@@
-                  @@@@:
-                `@@@@@+
-               .@@@+@@@      
-               @@     @@     Cyclone Scheme->C compiler
-              ,@             http://justinethier.github.io/cyclone/
-              '@
-              .@
-               @@     #@     (c) 2014-2019 Justin Ethier
-               `@@@#@@@.     Version 0.11
-                #@@@@@
-                +@@@+
-                @@#
-              `@.
-        
-        cyclone> (write 'hello-world)
-        hello-world
+## Homebrew 
+![Homebrew](docs/images/homebrew-thumb.png "Homebrew")
 
-   You can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`.
+Mac (and Linux!) users wanting to use Homebrew can do the following.
 
-3. Read the documentation below for more information on how to use Cyclone.
+Note if Homebrew is not already installed: follow the instructions at [https://brew.sh/](https://brew.sh/) to install the homebrew package manager. 
 
-Documentation
--------------
+    brew tap cyclone-scheme/cyclone
+    brew install cyclone-scheme/cyclone/cyclone-bootstrap
+
+## Arch Linux 
+![Arch Linux](docs/images/arch-linux-thumb.png "Arch Linux")
+
+Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/cyclone-scheme/):
+
+    git clone https://aur.archlinux.org/cyclone-scheme.git
+    cd cyclone-scheme
+    makepkg -si
+
+## Build from Source
+To install Cyclone on your machine for the first time on Linux, Windows, FreeBSD, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, Windows (via MSYS), and FreeBSD 12.
+
+# Getting Started
+
+After installing you can run the `cyclone` command to compile a single Scheme file:
+
+    $ cyclone examples/fac.scm
+    $ examples/fac
+    3628800
+    
+And the `icyc` command to start an interactive interpreter. Note you can use [`rlwrap`](http://linux.die.net/man/1/rlwrap) to make the interpreter more friendly, EG: `rlwrap icyc`:
+
+    $ icyc
+    
+                  :@
+                @@@
+              @@@@:
+            `@@@@@+
+           .@@@+@@@      
+           @@     @@     Cyclone Scheme->C compiler
+          ,@             http://justinethier.github.io/cyclone/
+          '@
+          .@
+           @@     #@     (c) 2014-2019 Justin Ethier
+           `@@@#@@@.     Version 0.11
+            #@@@@@
+            +@@@+
+            @@#
+          `@.
+       
+    cyclone> (write 'hello-world)
+    hello-world
+
+Read the documentation below for more information on how to use Cyclone.
+
+# Documentation
 
 - The [User Manual](docs/User-Manual) covers in detail how to use Cyclone and provides information on the Scheme language features implemented by Cyclone.
 
@@ -84,23 +103,21 @@ Documentation
 
 - Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
 
-Example Programs
-----------------
+# Example Programs
 
 Cyclone provides several example programs, including:
 
-- [Tail Call Optimization]({{ page.ghproj }}examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
+- [Tail Call Optimization](examples/tail-call-optimization.scm) - A simple example of Scheme tail call optimization; this program runs forever, calling into two mutually recursive functions.
 
-- [Threading]({{ page.ghproj }}examples/threading) - Various examples of multi-threaded programs.
+- [Threading](examples/threading) - Various examples of multi-threaded programs.
 
-- [Game of Life]({{ page.ghproj }}examples/game-of-life) - The [Conway's game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
+- [Game of Life](examples/game-of-life) - The [Conway's game of life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) example program and libraries from R<sup>7</sup>RS.
 
-- [Game of Life PNG Image Generator]({{ page.ghproj }}examples/game-of-life-png) - A modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI).
+- [Game of Life PNG Image Generator](examples/game-of-life-png) - A modified version of game of life that uses libpng to create an image of each iteration instead of writing it to console. This example also demonstrates basic usage of the C Foreign Function Interface (FFI).
 
-- Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`]({{ page.ghproj }}cyclone.scm) and [`icyc.scm`]({{ page.ghproj }}icyc.scm) to create executables for Cyclone's compiler and interpreter.
+- Finally, the largest program is the compiler itself. Most of the code is contained in a series of libraries which are used by [`cyclone.scm`](cyclone.scm) and [`icyc.scm`](icyc.scm) to create executables for Cyclone's compiler and interpreter.
 
-Compiler Internals
-------------------
+# Compiler Internals
 
 - [Writing the Cyclone Scheme Compiler](docs/Writing-the-Cyclone-Scheme-Compiler-Revised-2017) provides high-level details on how the compiler was written and how it works.
 
@@ -108,3 +125,10 @@ Compiler Internals
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
+- The garbage collector was subsequently enhanced to support [Lazy Sweeping](https://github.com/justinethier/cyclone/blob/master/docs/Garbage-Collection-Using-Lazy-Sweeping) which improves performance for a wide range of applications.
+
+# License
+
+Copyright (C) 2014 [Justin Ethier](http://github.com/justinethier).
+
+Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
