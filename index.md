@@ -58,6 +58,8 @@ Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/
     makepkg -si
 
 ## Build from Source
+![Build from Source](docs/images/build-thumb.png "Build from Source")
+
 To install Cyclone on your machine for the first time on Linux, Windows, FreeBSD, and for Mac users wanting to install without using Homebrew, use [**cyclone-bootstrap**](https://github.com/justinethier/cyclone-bootstrap) to build a set of binaries. Instructions are provided for Linux, Mac, Windows (via MSYS), and FreeBSD 12.
 
 # Getting Started
