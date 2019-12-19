@@ -2,6 +2,12 @@
 
 [![Travis CI](https://travis-ci.org/justinethier/cyclone.svg?branch=master)](https://travis-ci.org/justinethier/cyclone)
 
+[![Github CI](https://github.com/justinethier/cyclone-bootstrap/workflows/CI/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+
+[![Github CI - MacOS](https://github.com/justinethier/cyclone-bootstrap/workflows/CI%20MacOS/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+
+[![Github CI - Windows](https://github.com/justinethier/cyclone-bootstrap/workflows/CI%20Windows%20MSYS2/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+
 Cyclone is a brand-new Scheme-to-C compiler developed to support real-world application development using the R<sup>7</sup>RS Scheme Language standard. We provide modern features and a system capable of generating fast native binaries.
 
 [Cheney on the MTA](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf) is used by Cyclone's runtime to implement full tail recursion, continuations, and generational garbage collection. In addition, the Cheney on the MTA concept has been extended to allow execution of multiple native threads. An on-the-fly garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
