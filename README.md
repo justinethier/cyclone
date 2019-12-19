@@ -2,11 +2,13 @@
 
 [![Travis CI](https://travis-ci.org/justinethier/cyclone.svg?branch=master)](https://travis-ci.org/justinethier/cyclone)
 
-[![Github CI](https://github.com/justinethier/cyclone-bootstrap/workflows/CI/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+[![Github CI - Linux](https://github.com/justinethier/cyclone-bootstrap/workflows/Ubuntu%20Linux%20Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
 
-[![Github CI - MacOS](https://github.com/justinethier/cyclone-bootstrap/workflows/CI%20MacOS/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+[![Github CI - MacOS](https://github.com/justinethier/cyclone-bootstrap/workflows/MacOS%20Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
 
-[![Github CI - Windows](https://github.com/justinethier/cyclone-bootstrap/workflows/CI%20Windows%20MSYS2/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+[![Github CI - MacOS Homebrew](https://github.com/justinethier/cyclone-bootstrap/workflows/MacOS%20Homebrew%20Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
+
+[![Github CI - Windows](https://github.com/justinethier/cyclone-bootstrap/workflows/Windows%20MSYS2%Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
 
 Cyclone is a brand-new Scheme-to-C compiler developed to support real-world application development using the R<sup>7</sup>RS Scheme Language standard. We provide modern features and a system capable of generating fast native binaries.
 
