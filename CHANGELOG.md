@@ -2,6 +2,10 @@
 
 ## 0.11.8 - TBD
 
+Bug Fixes
+
+- Fixed Windows build using MSYS2 and setup a continuous integration job for this platform to prevent breaking this build in the future.
+
 ## 0.11.7 - December 5, 2019
 
 Bug Fixes
