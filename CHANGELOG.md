@@ -5,6 +5,7 @@
 Bug Fixes
 
 - Fixed Windows build using MSYS2 and setup a continuous integration job for this platform to prevent breaking this build in the future.
+- Tweaked build flags to prevent spamming of compiler warnings when using Clang.
 
 ## 0.11.7 - December 5, 2019
 
