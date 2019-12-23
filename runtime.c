@@ -780,7 +780,7 @@ object Cyc_has_cycle(object lst)
 object Cyc_is_list(object lst)
 {
   object slow_lst, fast_lst;
-  if ((lst == NULL)){
+  if (lst == NULL){
     return boolean_t;
   } else if (is_value_type(lst)) {
     return boolean_f;
@@ -1242,7 +1242,7 @@ object memqp(void *data, object x, list l)
 {
   for (; l != NULL; l = cdr(l)) {
     Cyc_check_pair_or_null(data, l);
-    if ((x == car(l)))
+    if (x == car(l))
       return l;
   }
   return boolean_f;
@@ -1256,7 +1256,7 @@ list assq(void *data, object x, list l)
     Cyc_check_pair(data, l);
     list la = car(l);
     Cyc_check_pair(data, la);
-    if ((x == car(la)))
+    if (x == car(la))
       return la;
   }
   return boolean_f;
