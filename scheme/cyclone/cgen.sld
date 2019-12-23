@@ -970,11 +970,13 @@
                     string-append
                     (map
                       (lambda (arg body-exp)
-                        (string-append
-                          (mangle arg)
-                          " = "
-                          (c:body body-exp)
-                          ";"))
+                        (if (equal? (mangle arg) (c:body body-exp))
+                            "" ;; Do nothing
+                            (string-append
+                              (mangle arg)
+                              " = "
+                              (c:body body-exp)
+                              ";")))
                       parent-args
                       cgen-lis))))
            ;;(trace:info `(loop ,args ,(cadr args) ,cgen-lis ,parent-args))
