@@ -2,6 +2,10 @@
 
 ## 0.11.8 - TBD
 
+Bug Fixes
+
+ - Modified the compiler to ensure that a variable is not assigned to itself in the generated C code.
+
 ## 0.11.7 - December 5, 2019
 
 Bug Fixes
