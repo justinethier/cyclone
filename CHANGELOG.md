@@ -4,21 +4,23 @@
 
 Bug Fixes
 
- - Modified the compiler to ensure that a variable is not assigned to itself in the generated C code.
+- Fixed Windows build using MSYS2 and setup a continuous integration job for this platform to prevent breaking this build in the future.
+- Tweaked build flags to prevent spamming of compiler warnings when using Clang.
+- Modified the compiler to ensure that a variable is not assigned to itself in the generated C code.
 
 ## 0.11.7 - December 5, 2019
 
 Bug Fixes
 
- - Fixed an issue with the library path when building on Mac OS.
+- Fixed an issue with the library path when building on Mac OS.
 
 ## 0.11.6 - December 2, 2019
 
 Features
 
- - Faster record type constructors.
- - During compilation, validate the number of arguments passed to local function calls.
- - Added the `-use-unsafe-prims` compiler option to generate faster code for certain primitives by eliminating runtime safety checks.
+- Faster record type constructors.
+- During compilation, validate the number of arguments passed to local function calls.
+- Added the `-use-unsafe-prims` compiler option to generate faster code for certain primitives by eliminating runtime safety checks.
 
 Bug Fixes
 
