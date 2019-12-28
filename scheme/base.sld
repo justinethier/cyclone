@@ -190,7 +190,7 @@
 ; Possibly missing functions:
 ;
 ;    ; following byte vector functions are not implemented yet:
-;    read-bytevector
+    read-bytevector
 ;    read-bytevector!
     write-bytevector
 ;
@@ -713,6 +713,26 @@
       (if (null? port)
         (Cyc-display str (current-output-port))
         (Cyc-display str (car port))))
+    (define (read-bytevector k . _port)
+      (let ((port (if (null? _port)
+                      (current-input-port)
+                      (car _port))))
+        'test))
+    (define (read-bytevector k . _port)
+      (letrec ((port (if (null? port)
+                         (current-input-port)
+                         (car _port)))
+               (bv (make-bytevector k))
+               (loop (lambda (n)
+                       (let ((b (read-u8 port)))
+                         (cond
+                          ((eof-object? b)
+                           (bytevector-copy bv 0 n))
+                          ((< n k)
+                           (bytevector-u8-set! bv n b)
+                           (loop (+ n 1)))
+                          (else bv))))))
+        (loop 0)))
     (define (write-bytevector vec . opts)
       (letrec ((len (bytevector-length vec))
                (port (if (> (length opts) 0) (car opts) (current-output-port)))
