@@ -192,7 +192,7 @@
 ;    ; following byte vector functions are not implemented yet:
 ;    read-bytevector
 ;    read-bytevector!
-;    write-bytevector
+    write-bytevector
 ;
 ;    : No unicode support at this time
     peek-u8
@@ -713,6 +713,18 @@
       (if (null? port)
         (Cyc-display str (current-output-port))
         (Cyc-display str (car port))))
+    (define (write-bytevector vec . opts)
+      (letrec ((len (bytevector-length vec))
+               (port (if (> (length opts) 0) (car opts) (current-output-port)))
+               (start (if (> (length opts) 1) (cadr opts) 0))
+               (end (if (> (length opts) 2) (caddr opts) len))
+               )
+        (%write-bytevector vec port start end)))
+    (define-c %write-bytevector
+      "(void *data, int argc, closure _, object k, object bv, object port, object start, object end)"
+      " return_closcall1(data, k, Cyc_write_bytevector(data, bv, port, start, end));"
+      "(void *data, object ptr, object bv, object port, object start, object end)"
+      " return Cyc_write_bytevector(data, bv, port, start, end);")
     (define (write-char char . port)
       (if (null? port)
         (Cyc-write-char char (current-output-port))

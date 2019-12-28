@@ -2,6 +2,10 @@
 
 ## 0.11.8 - TBD
 
+Features
+
+- Added `write-bytevector` from R7RS.
+
 Bug Fixes
 
 - Fixed Windows build using MSYS2 and setup a continuous integration job for this platform to prevent breaking this build in the future.

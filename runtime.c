@@ -1227,6 +1227,39 @@ object Cyc_write_u8(void *data, object c, object port)
   return quote_void;
 }
 
+object Cyc_write_bytevector(void *data, object bvec, object port, object start, object end)
+{
+  Cyc_check_port(data, port);
+  Cyc_check_bvec(data, bvec);
+  Cyc_check_fixnum(data, start);
+  Cyc_check_fixnum(data, end);
+
+  bytevector bv = (bytevector) bvec;
+  FILE *fp = ((port_type *) port)->fp;
+  char *bytes = bv->data;
+  int s = obj_obj2int(start);
+  int e = obj_obj2int(end);
+
+  if (s < 0) { 
+    s = 0; 
+  } else if (s > bv->len) { 
+    s = bv->len; 
+  }
+
+  if (e < 0 || e > bv->len) {
+    e = bv->len;
+  }
+
+  if (s > e) {
+    s = e;
+  }
+
+  size_t rv = fwrite(
+    bytes + s,
+    sizeof(char), e - s, fp);
+  return obj_int2obj(rv);
+}
+
 /* Fast versions of member and assoc */
 object memberp(void *data, object x, list l)
 {
