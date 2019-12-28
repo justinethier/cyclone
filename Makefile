@@ -61,7 +61,7 @@ clean :
 	rm -f tests/array-list-tests
 	rm -f tests/macro-hygiene
 	rm -f tests/match-tests
-	cd $(CYC_BN_LIB_SUBDIR) ; make clean
+	cd $(CYC_BN_LIB_SUBDIR) ; $(MAKE) clean
 
 install : libs install-libs install-includes install-bin
 	$(MKDIR) $(DESTDIR)$(DATADIR)
@@ -173,7 +173,7 @@ dispatch.c : generate-c.scm
 $(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
 
 $(CYC_BN_LIB) : $(CYC_BN_LIB_SUBDIR)/*.c
-	cd $(CYC_BN_LIB_SUBDIR) ; make LIBNAME=$(CYC_BN_LIB) && cp $(CYC_BN_LIB) ../..
+	cd $(CYC_BN_LIB_SUBDIR) ; $(MAKE) LIBNAME=$(CYC_BN_LIB) && cp $(CYC_BN_LIB) ../..
 
 hashset.o : hashset.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
