@@ -191,7 +191,7 @@
 ;
 ;    ; following byte vector functions are not implemented yet:
     read-bytevector
-;    read-bytevector!
+    read-bytevector!
     write-bytevector
 ;
 ;    : No unicode support at this time
@@ -733,6 +733,16 @@
                            (loop (+ n 1)))
                           (else bv))))))
         (loop 0)))
+    ;; TODO: need to finish and debug the following function:
+    (define (read-bytevector! vec . opts)
+      (letrec ((len (bytevector-length vec))
+               (port (if (> (length opts) 0) (car opts) (current-output-port)))
+               (start (if (> (length opts) 1) (cadr opts) 0))
+               (end (if (> (length opts) 2) (caddr opts) len))
+               (bv (read-bytevector (- end start) port))
+               )
+      (bytevector-copy! vec start bv)
+      (- end start))) ;; TODO: return number of bytes read
     (define (write-bytevector vec . opts)
       (letrec ((len (bytevector-length vec))
                (port (if (> (length opts) 0) (car opts) (current-output-port)))
