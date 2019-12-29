@@ -185,27 +185,22 @@
     denominator
     numerator
     parameterize
+    read-bytevector
+    read-bytevector!
+    write-bytevector
+    peek-u8
+    read-u8
+    write-u8
+    binary-port?
+    textual-port?
 
 ;;;;
 ; Possibly missing functions:
 ;
-;    ; following byte vector functions are not implemented yet:
-    read-bytevector
-    read-bytevector!
-    write-bytevector
-;
-;    : No unicode support at this time
-    peek-u8
-    read-u8
 ;    u8-ready?
-    write-u8
 ;
 ;    ; No complex or rational numbers at this time
 ;    rationalize
-;
-;    ;; no binary/text ports yet
-;    binary-port?
-;    textual-port?
 ;
 ;    ;; syntax-rules
 ;    define-values
@@ -705,6 +700,13 @@
                 (loop (if chr (cons chr acc) acc)
                       (- i 1)
                       (read-char port))))))))
+    ;; TODO: the following procedures should be a bit smarter, but we would
+    ;;       need to track binary/text as part of port_type
+    (define (binary-port? obj)
+      (port? obj))
+    (define (textual-port? obj)
+      (port? obj))
+    ;;
     (define (flush-output-port . port)
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))
