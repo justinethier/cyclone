@@ -4,7 +4,7 @@
 
 Features
 
-- Added `read-bytevector` and `write-bytevector` IO functions from R7RS.
+- Added `read-bytevector`, `read-bytevector!`, and `write-bytevector` I/O functions from R7RS.
 
 Bug Fixes
 
