@@ -2,7 +2,7 @@ from ubuntu:latest
 
 MAINTAINER justin.ethier@gmail.com
 
-ENV CYCLONE_VERSION v0.11.7
+ENV CYCLONE_VERSION v0.11.8
 RUN apt update -y
 RUN apt install -y build-essential git rsync texinfo libtommath-dev libck-dev make gcc
 
