@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.8 - TBD
+## 0.11.8 - December 30, 2019
 
 Features
 
