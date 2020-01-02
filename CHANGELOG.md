@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.9 - TBD
+
+Features
+
+- Added `define-values` from R7RS.
+
 ## 0.11.8 - December 30, 2019
 
 Features
