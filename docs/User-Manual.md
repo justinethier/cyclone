@@ -98,7 +98,14 @@ and should be located in the file
 
     scheme/cyclone/util.sld
 
-Cyclone will not automatically generate libraries when compiling a program. Each library will need to be built separately prior to building the program.
+Cyclone will not automatically generate libraries when compiling a program. Each library will need to be built separately prior to building the program. For example:
+
+    $ cd cyclone/examples/game-of-life
+    $ cyclone example/grid.sld
+    $ cyclone example/life.sld
+    $ cyclone life.scm
+    $ ./life
+
 
 ## Command Line Options
 
