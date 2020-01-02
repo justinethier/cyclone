@@ -31,7 +31,7 @@ Section | Status | Comments
 4.3 Macros | Yes | Support for `syntax-rules` and a lower-level explicit renaming macro system.
 5.1 Programs | Yes |
 5.2 Import declarations | Yes |
-5.3 Variable definitions | Partial | `define-values` is not implemented yet.
+5.3 Variable definitions | Yes |
 5.4 Syntax definitions | Yes |
 5.5 Record-type definitions | Yes | 
 5.6 Libraries | Yes |
