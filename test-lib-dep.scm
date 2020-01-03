@@ -1,5 +1,6 @@
 (import 
   (scheme base)
+  (scheme file)
   (scheme write)
   (scheme cyclone libraries)
   (scheme cyclone pretty-print)
@@ -16,13 +17,26 @@
   (list lib-dep (recompile? lib-dep))
 ))
 
+;; recompile? :: [symbol] -> boolean
+;; Do we need to recompile given library?
 (define (recompile? lib-dep)
   (let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
          (base (basename sld-file ".sld"))
          (obj-file (string-append base ".o"))
+         (sys-dir (Cyc-installation-dir 'sld))
         )
-    (> (file-mtime sld-file)
-       (file-mtime obj-file)))) ;; Is obj file out of date??
+    (and
+      (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
+      (or
+        (not (file-exists? obj-file)) ;; No obj file, must rebuild
+        (> (file-mtime sld-file)
+           (file-mtime obj-file)))))) ;; obj file out of date
+
+;; Is "path" under given subdirectory "dir"?
+(define (in-subdir? dir path)
+  (and (>= (string-length path)
+           (string-length dir))
+       (equal? dir (substring path 0 (string-length dir)))))
 
 (define (basename filename ext)
   (let* ((len (string-length filename))
