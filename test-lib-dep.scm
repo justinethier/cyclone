@@ -2,29 +2,32 @@
   (scheme base)
   (scheme write)
   (scheme cyclone libraries)
+  (scheme cyclone pretty-print)
 )
 
 
 (define append-dirs '())
 (define prepend-dirs '())
-;(define lib-dep '(tmp))
 (define lib-dep '(scheme cyclone common2))
 
-(let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
-       (obj-file (lib:import->filename lib-dep ".o" append-dirs prepend-dirs))
-      )
-  (write (list 
-          (file-mtime sld-file)
-          (file-mtime obj-file)
-          (recompile? lib-dep)
-          )))
+(pretty-print (list
+  (list '(tmp) (recompile? '(tmp)))
+  (list '(scheme cyclone common) (recompile? '(scheme cyclone common)))
+  (list lib-dep (recompile? lib-dep))
+))
 
 (define (recompile? lib-dep)
   (let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
-         (obj-file (lib:import->filename lib-dep ".o" append-dirs prepend-dirs)) ;; TODO: update base name??
+         (base (basename sld-file ".sld"))
+         (obj-file (string-append base ".o"))
         )
     (> (file-mtime sld-file)
        (file-mtime obj-file)))) ;; Is obj file out of date??
+
+(define (basename filename ext)
+  (let* ((len (string-length filename))
+         (ext-len (string-length ext)))
+    (substring filename 0 (- len ext-len))))
 
 (define-c file-mtime
   "(void *data, int argc, closure _, object k, object filename)"
