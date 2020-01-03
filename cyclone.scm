@@ -223,6 +223,16 @@
           )))
       ;; END additional top-level imports
 
+      ;; Debug output for our dependencies
+;; TODO: determine which deps need to be built, and build if necessary
+      (trace:info "---------------- Library dependencies")
+      (trace:info lib-deps) 
+      (trace:info "---------------- Library files")
+      (trace:info (map 
+                    (lambda (lib-dep)
+                      (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
+                    lib-deps))
+
       ;; Validate syntax of basic forms
       (validate-keyword-syntax input-program)
 
