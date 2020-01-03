@@ -23,6 +23,7 @@
         (scheme cyclone cps-optimizations)
         (scheme cyclone libraries))
 
+(define *fe:batch-compile* #t) ;; Batch compilation. TODO: default to false or true??
 (define *optimization-level* 2) ;; Default level
 (define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
 (define *optimize:beta-expand-threshold* #f) ;; BE threshold or #f to use default
@@ -40,6 +41,38 @@
     (display (- (current-second) *start*) (current-error-port))
     (display (string-append " at " label) (current-error-port))
     (newline (current-error-port))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Batch compilation section
+
+;; Do we need to recompile given library?
+(define (recompile? lib-dep append-dirs prepend-dirs)
+  (let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
+         (base (basename sld-file))
+         (obj-file (string-append base ".o"))
+         (sys-dir (Cyc-installation-dir 'sld))
+        )
+    (and
+      (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
+      (or
+        (not (file-exists? obj-file)) ;; No obj file, must rebuild
+        (> (file-mtime sld-file)
+           (file-mtime obj-file)))))) ;; obj file out of date
+
+;; Is "path" under given subdirectory "dir"?
+(define (in-subdir? dir path)
+  (and (>= (string-length path)
+           (string-length dir))
+       (equal? dir (substring path 0 (string-length dir)))))
+
+(define-c file-mtime
+  "(void *data, int argc, closure _, object k, object filename)"
+  " make_double(box, 0.0);
+    Cyc_check_str(data, filename);
+    double_value(&box) = Cyc_file_last_modified_time(string_str(filename));
+    return_closcall1(data, k, &box); ")
+;; END batch compilation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Code emission.
   
@@ -224,7 +257,6 @@
       ;; END additional top-level imports
 
       ;; Debug output for our dependencies
-;; TODO: determine which deps need to be built, and build if necessary
       (trace:info "---------------- Library dependencies")
       (trace:info lib-deps) 
       (trace:info "---------------- Library files")
@@ -232,6 +264,16 @@
                     (lambda (lib-dep)
                       (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
                     lib-deps))
+      ;; Build dependent libraries, if instructed
+      (when *fe:batch-compile*
+        (for-each 
+          (lambda (lib-dep)
+            (when (recompile? lib-dep append-dirs prepend-dirs)
+              ;(write `(DEBUG auto compile ,lib-dep) (current-error-port))
+              ;(newline (current-error-port))
+              (system (string-append "cyclone " 
+                        (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
+          lib-deps))
 
       ;; Validate syntax of basic forms
       (validate-keyword-syntax input-program)
@@ -786,6 +828,10 @@
        (opt-beta-expand-thresh (collect-opt-values args "-opt-be"))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
+  (if (member "-batch" args)
+      (set! *fe:batch-compile* #t))
+  (if (member "-no-batch" args)
+      (set! *fe:batch-compile* #f))
   ;; Set optimization level(s)
   (if (member "-O0" args)
       (set! *optimization-level* 0))
@@ -837,6 +883,12 @@ General options:
  -h, --help      Display usage information
  -v              Display version information
  -vn             Display version number
+
+Batch Compilation options:
+
+ -batch          Automatically compile local library dependencies.
+ -no-batch       Compile as a single unit, do not attempt to compile local
+                 library dependencies.
 
 Optimization options:
 
