@@ -17,6 +17,7 @@
 #include <limits.h>
 #include <ctype.h>
 //#include <signal.h> // only used for debugging!
+#include <sys/stat.h>
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
@@ -4320,6 +4321,13 @@ object Cyc_io_file_exists(void *data, object filename)
   }
   return boolean_f;
 }
+
+time_t Cyc_file_last_modified_time(char *path) {
+    struct stat attr;
+    stat(path, &attr);
+    return(attr.st_mtime);
+}
+
 
 // Functions internal to the runtime that use malloc
 list malloc_make_pair(object a, object d)

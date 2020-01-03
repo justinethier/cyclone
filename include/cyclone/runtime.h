@@ -529,6 +529,7 @@ void Cyc_halt(object obj);
 object __halt(object obj);
 object Cyc_io_delete_file(void *data, object filename);
 object Cyc_io_file_exists(void *data, object filename);
+time_t Cyc_file_last_modified_time(char *path);
 /**@}*/
 
 /**
