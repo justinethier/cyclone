@@ -4,6 +4,7 @@
 
 Features
 
+- WIP: added batch compilation (TODO: more details)
 - Added `define-values` from R7RS.
 
 ## 0.11.8 - December 30, 2019
