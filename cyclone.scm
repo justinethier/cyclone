@@ -106,7 +106,8 @@
            (set! program? #f)
            (set! lib-name (lib:name (car input-program)))
            (set! c-headers (lib:include-c-headers (car input-program)))
-           (set! inlines (lib:inlines (car input-program)))
+           (when (> *optimization-level* 0)
+             (set! inlines (lib:inlines (car input-program))))
            (set! lib-exports
              (cons
                (lib:name->symbol lib-name)
@@ -145,7 +146,8 @@
           (let ((lis (lib:inlines `(dummy dummy ,@input-program))))
             (cond
               ((not (null? lis))
-               (set! inlines lis)
+               (when (> *optimization-level* 0)
+                 (set! inlines lis))
                (set! input-program 
                      (filter 
                        (lambda (expr)

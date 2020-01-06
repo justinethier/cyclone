@@ -7,6 +7,9 @@ Features
 - WIP: added batch compilation (TODO: more details)
 - Added `define-values` from R7RS.
 
+Bug Fixes
+- Do not inline functions if optimizations are disabled via `-O0`.
+
 ## 0.11.8 - December 30, 2019
 
 Features
