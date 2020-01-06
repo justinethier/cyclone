@@ -884,9 +884,10 @@ General options:
  -v              Display version information
  -vn             Display version number
 
-Batch Compilation options:
+Compilation options:
 
- -batch          Automatically compile local library dependencies.
+ -batch          Automatically compile local library dependencies 
+                 (enabled by default).
  -no-batch       Compile as a single unit, do not attempt to compile local
                  library dependencies.
 
