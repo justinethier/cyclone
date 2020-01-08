@@ -4,7 +4,12 @@
 
 Features
 
-- WIP: added batch compilation (TODO: more details)
+- When compiling a program with `cyclone` any library dependencies will be automatically built as well.
+  Note:
+  - A library will only be built if an object file does not exist for it or the `.sld` source file is newer than the object file.
+  - Only "local" libraries will be built. Cyclone will not automatically attempt to build libraries in system directories.
+  - This capability can be disabled by the `-no-batch` option.
+
 - Added `define-values` from R7RS.
 
 Bug Fixes
