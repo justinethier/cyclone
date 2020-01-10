@@ -48,21 +48,33 @@
 ;; Do we need to recompile given library?
 (define (recompile? lib-dep append-dirs prepend-dirs)
   (let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
-         ;(included-files (lib:read-includes lib-dep append-dirs prepend-dirs))
+         (includes (lib:read-includes lib-dep append-dirs prepend-dirs))
+         (included-files
+           (map
+             (lambda (include)
+               (lib:import->path lib-dep append-dirs prepend-dirs include))
+             includes))
          (base (basename sld-file))
          (obj-file (string-append base ".o"))
          (sys-dir (Cyc-installation-dir 'sld))
         )
+; DEBUG:
+;(display (list lib-dep "includes" included-files) (current-error-port))
+;(newline (current-error-port))
     (and
       (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
       (or
         (not (file-exists? obj-file)) ;; No obj file, must rebuild
-        ;(any (lambda (inc-file)
-        ;       TODO: do we have full path here? can we call file-mtime on the inc-file?
-        ;     )
-        ;     included-files)
-        (> (file-mtime sld-file)
-           (file-mtime obj-file)))))) ;; obj file out of date
+        (any (lambda (src-file)
+               (let ((result (> (file-mtime src-file)
+                                (file-mtime obj-file))) ;; obj file out of date
+                    )
+;                 (when result
+;(display (list "DEBUG src file newer than obj" src-file obj-file) (current-error-port))
+;(newline (current-error-port)))
+               result))
+             (cons sld-file included-files))
+        ))))
 
 ;; Is "path" under given subdirectory "dir"?
 (define (in-subdir? dir path)
