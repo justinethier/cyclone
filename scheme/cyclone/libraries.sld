@@ -46,6 +46,7 @@
     lib:import->path
     lib:check-system-path
     lib:read-imports
+    lib:read-includes
     lib:import->export-list
     lib:import-set/exports->imports
     ;lib:resolve-imports
@@ -367,6 +368,17 @@
          (imports (lib:imports (car lib))))
     (close-input-port fp)
     imports))
+
+;; Given a single import from an import-set, open the corresponding
+;; library file and retrieve the library's includes
+(define (lib:read-includes import append-dirs prepend-dirs)
+  (let* ((lib-name (lib:import->library-name import))
+         (dir (lib:import->filename lib-name ".sld" append-dirs prepend-dirs))
+         (fp (open-input-file dir))
+         (lib (read-all fp))
+         (includes (lib:includes (car lib))))
+    (close-input-port fp)
+    includes))
 
 ;; Read export list for a given import
 (define (lib:import->export-list import append-dirs prepend-dirs)
