@@ -4,16 +4,15 @@
 
 Features
 
-- When compiling a program with `cyclone` any library dependencies will be automatically built as well.
+- When compiling a program with `cyclone` any library dependencies are automatically built as well.
   Note:
-  - A library will only be built if an object file does not exist for it or the `.sld` source file is newer than the object file.
+  - A library will only be built if an object file does not exist for it or if any of the source files are newer than the object file.
   - Only "local" libraries will be built. Cyclone will not automatically attempt to build libraries in system directories.
   - This capability can be disabled by the `-no-batch` option.
-
 - Added `define-values` from R7RS.
 
 Bug Fixes
-- Do not inline functions if optimizations are disabled via `-O0`.
+- Prevent compilation errors when optimizations are disabled via `-O0`.
 
 ## 0.11.8 - December 30, 2019
 
