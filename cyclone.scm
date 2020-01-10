@@ -56,25 +56,16 @@
              includes))
          (base (basename sld-file))
          (obj-file (string-append base ".o"))
-         (sys-dir (Cyc-installation-dir 'sld))
-        )
-; DEBUG:
-;(display (list lib-dep "includes" included-files) (current-error-port))
-;(newline (current-error-port))
+         (sys-dir (Cyc-installation-dir 'sld)) )
     (and
       (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
       (or
         (not (file-exists? obj-file)) ;; No obj file, must rebuild
-        (any (lambda (src-file)
-               (let ((result (> (file-mtime src-file)
-                                (file-mtime obj-file))) ;; obj file out of date
-                    )
-;                 (when result
-;(display (list "DEBUG src file newer than obj" src-file obj-file) (current-error-port))
-;(newline (current-error-port)))
-               result))
-             (cons sld-file included-files))
-        ))))
+        (any 
+          (lambda (src-file)
+            (> (file-mtime src-file)
+               (file-mtime obj-file))) ;; obj file out of date
+          (cons sld-file included-files))))))
 
 ;; Is "path" under given subdirectory "dir"?
 (define (in-subdir? dir path)
@@ -288,8 +279,6 @@
         (for-each 
           (lambda (lib-dep)
             (when (recompile? lib-dep append-dirs prepend-dirs)
-              ;(write `(DEBUG auto compile ,lib-dep) (current-error-port))
-              ;(newline (current-error-port))
               (system (string-append "cyclone " 
                         (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
           lib-deps))
