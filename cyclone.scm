@@ -48,6 +48,7 @@
 ;; Do we need to recompile given library?
 (define (recompile? lib-dep append-dirs prepend-dirs)
   (let* ((sld-file (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
+         ;(included-files (lib:read-includes lib-dep append-dirs prepend-dirs))
          (base (basename sld-file))
          (obj-file (string-append base ".o"))
          (sys-dir (Cyc-installation-dir 'sld))
@@ -56,6 +57,10 @@
       (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
       (or
         (not (file-exists? obj-file)) ;; No obj file, must rebuild
+        ;(any (lambda (inc-file)
+        ;       TODO: do we have full path here? can we call file-mtime on the inc-file?
+        ;     )
+        ;     included-files)
         (> (file-mtime sld-file)
            (file-mtime obj-file)))))) ;; obj file out of date
 
