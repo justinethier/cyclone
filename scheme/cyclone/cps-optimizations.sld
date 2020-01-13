@@ -2434,14 +2434,14 @@
              (argc (- (length ast) 1)) )
      (when (not (= argc expected-argc))
        (compiler-msg "Compiler Error: ")
-       (compiler-msg ast)
+       (compiler-msg (cons (car ast) (cddr ast)))
        (compiler-error 
         "Expected "
-        (number->string expected-argc)
+        (number->string (- expected-argc 1)) ;; One less for continuation
         " arguments to "
         (symbol->string (car ast))
         " but received "
-        (number->string argc))) ))
+        (number->string (- argc 1)))) )) ;; One less for cont
 
 ;; Declare a compiler error and quit
 ;; Preferable to (error) since a stack trace is meaningless here.
