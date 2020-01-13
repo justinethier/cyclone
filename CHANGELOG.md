@@ -13,6 +13,7 @@ Features
 
 Bug Fixes
 - Prevent compilation errors when optimizations are disabled via `-O0`.
+- The compiler now omits the continuation argument when printing the expected number of arguments to a function, to avoid confusing error messages.
 
 ## 0.11.8 - December 30, 2019
 
