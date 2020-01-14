@@ -10,8 +10,8 @@
   (export
     call-with-input-file 
     call-with-output-file
-    ;delete-file 
-    ;file-exists?
+    delete-file 
+    file-exists?
     ;open-binary-input-file 
     ;open-binary-output-file
     ;open-input-file 
@@ -20,7 +20,20 @@
     with-output-to-file
   )
   (import (scheme base))
+  (inline
+    file-exists?
+    delete-file)
   (begin
+    (define-c file-exists?
+      "(void *data, int argc, closure _, object k, object filename)"
+      " return_closcall1(data, k, Cyc_io_file_exists(data, filename));"
+      "(void *data, object ptr, object filename)"
+      " return Cyc_io_file_exists(data, filename);")
+    (define-c delete-file
+      "(void *data, int argc, closure _, object k, object filename)"
+      " return_closcall1(data, k, Cyc_io_delete_file(data, filename));"
+      "(void *data, object ptr, object filename)"
+      " return Cyc_io_delete_file(data, filename);")
     (define (call-with-input-file string proc)
       (call-with-port (open-input-file string) proc))
     (define (call-with-output-file string proc)
