@@ -631,8 +631,8 @@
               "Cyc_vector_ref"))
          ((eq? p 'vector-set!)  
           (if emit-unsafe
-              "Cyc_vector_set_unsafe"
-              "Cyc_vector_set"))
+              "Cyc_vector_set_unsafe2"
+              "Cyc_vector_set2"))
          ((eq? p 'string-append) "Cyc_string_append")
          ((eq? p 'string-cmp)    "Cyc_string_cmp")
          ((eq? p 'string->symbol) "Cyc_string2symbol")
@@ -650,8 +650,8 @@
           (if emit-unsafe
               "Cyc_length_unsafe"
               "Cyc_length"))
-         ((eq? p 'set-car!)      "Cyc_set_car")
-         ((eq? p 'set-cdr!)      "Cyc_set_cdr")
+         ((eq? p 'set-car!)      "Cyc_set_car2")
+         ((eq? p 'set-cdr!)      "Cyc_set_cdr2")
          ((eq? p 'eq?)           "Cyc_eq")
          ((eq? p 'eqv?)          "Cyc_eq")
          ((eq? p 'equal?)        "equalp")
@@ -870,6 +870,9 @@
         ((eq? p 'make-vector) "object")
         ((eq? p 'list->string) "object")
         ((eq? p 'list->vector) "object")
+        ((eq? p 'set-car!) "object")
+        ((eq? p 'set-cdr!) "object")
+        ((eq? p 'vector-set!) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
         ;((memq p *udf-prims*) "object")
@@ -900,6 +903,9 @@
                  make-vector list->vector
                  symbol->string number->string 
                  substring
+                 set-car!
+                 set-cdr!
+                 vector-set!
                  ;Cyc-fast-plus
                  ;Cyc-fast-sub
                  ;Cyc-fast-mul
@@ -938,6 +944,9 @@
                          Cyc-fast-apply
                          + - * /
                          = > < >= <=
+                         set-car!
+                         set-cdr!
+                         vector-set!
                          Cyc-list
                          Cyc-read-char Cyc-peek-char 
                          symbol->string list->string substring string-append string->number
