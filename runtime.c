@@ -1981,6 +1981,57 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
   add_mutation(data, v, idx, obj);
   return v;
 }
+object Cyc_set_car2(void *data, object cont, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+  gc_mut_update((gc_thread_data *) data, car(l), val);
+  car(l) = val;
+  add_mutation(data, l, -1, val);
+  _return_closcall1(data, cont, l);
+}
+
+object Cyc_set_cdr2(void *data, object cont, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+  gc_mut_update((gc_thread_data *) data, cdr(l), val);
+  cdr(l) = val;
+  add_mutation(data, l, -1, val);
+  _return_closcall1(data, cont, l);
+}
+
+object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
+{
+  int idx;
+  Cyc_check_vec(data, v);
+  Cyc_check_fixnum(data, k);
+  Cyc_verify_mutable(data, v);
+  idx = unbox_number(k);
+
+  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
+  }
+
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+
+  ((vector) v)->elements[idx] = obj;
+  add_mutation(data, v, idx, obj);
+  _return_closcall1(data, cont, v);
+}
+
+object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, object obj)
+{
+  int idx = unbox_number(k);
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+  ((vector) v)->elements[idx] = obj;
+  add_mutation(data, v, idx, obj);
+  _return_closcall1(data, cont, v);
+}
 
 object Cyc_vector_ref(void *data, object v, object k)
 {
