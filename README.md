@@ -1,4 +1,4 @@
-[<img src="docs/images/cyclone-logo-04-header.png" alt="cyclone-scheme">](http://github.com/justinethier/cyclone)
+![Cyclone Scheme](docs/images/cyclone-logo-04-header.png "Cyclone Scheme")
 
 [![Travis CI](https://travis-ci.org/justinethier/cyclone.svg?branch=master)](https://travis-ci.org/justinethier/cyclone)
 
