@@ -472,8 +472,8 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 object share_object(gc_thread_data *data, object var, object value) 
 {
   char tmp;
+  int inttmp, *heap_grown = &inttmp;
   gc_heap_root *heap = data->heap;
-  int tmp, *heap_grown = &tmp;
 
   // Nothing needs to be done unless we are mutating
   // a heap variable to point to a stack var.
@@ -491,12 +491,11 @@ object share_object(gc_thread_data *data, object var, object value)
         if (immutable(value)) {
           // Safe to transport
           object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
-           return hp;
-
+          return hp;
         }
         // Need to GC if obj is mutable, EG: a string could be mutated so we can't
         // have multiple copies of the object running around
-        return boolean_f
+        return boolean_f;
       case double_tag:
       case port_tag:
       case c_opaque_tag:
@@ -512,6 +511,7 @@ object share_object(gc_thread_data *data, object var, object value)
       case vector_tag:
         return boolean_f;
       default:
+        // Other object types are not stack-allocated so should never get here
         printf("Invalid shared object type %d\n", type_of(value));
         exit(1);
     }
