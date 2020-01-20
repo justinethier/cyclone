@@ -463,13 +463,17 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 /* END Global table */
 
 /** new write barrier
- * @param data
- * @param var   Object being mutated
- * @param value New value being associated to var
+ * This function determines if a mutation introduces a pointer to a stack
+ * object from a heap object, and if so, either copies the object to the
+ * heap or lets the caller know a minor GC must be performed.
  *
- * TODO: caller can inspect return value and determine if it needs to initiate GC
+ * @param data   Current thread's data object
+ * @param var    Object being mutated
+ * @param value  New value being associated to var
+ * @param run_gc OUT parameter, returns 1 if minor GC needs to be invoked
+ * @return Pointer to `var` object
  */
-object share_object(gc_thread_data *data, object var, object value) 
+object share_object(gc_thread_data *data, object var, object value, int *run_gc) 
 {
   char tmp;
   int inttmp, *heap_grown = &inttmp;
@@ -509,7 +513,8 @@ object share_object(gc_thread_data *data, object var, object value)
       case closureN_tag:
       case pair_tag:
       case vector_tag:
-        return boolean_f;
+        *run_gc = 1;
+        return value;
       default:
         // Other object types are not stack-allocated so should never get here
         printf("Invalid shared object type %d\n", type_of(value));
@@ -517,7 +522,7 @@ object share_object(gc_thread_data *data, object var, object value)
     }
   }
 
-  return NULL; // Nothing to do
+  return value;
 }
 
 
@@ -2048,25 +2053,20 @@ object Cyc_set_car2(void *data, object cont, object l, object val)
   }
   Cyc_verify_mutable(data, l);
 
-//  // Alternate write barrier
-//  object result = share_object(data, l, val);
-//  if (result != NULL) {
-//    if (result == boolean_f) {
-//      // TODO: Initiate minor GC
-//      object buf[2]; buf[0] = l; buf[1] = val;
-//      // TODO: allocate closure to call set_car2 again. 
-//      // TODO: where to stuff cont?
-//      GC(data, TODO, buf, 2);
-//    } else {
-//      // val was copied to the heap
-//      val = result;
-//    }
-//  }
+  // Alternate write barrier
+  int do_gc = 0;
+  val = share_object(data, l, val, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, car(l), val);
   car(l) = val;
-  //add_mutation(data, l, -1, val); // Obsoleted by new WB
-  _return_closcall1(data, cont, l);
+  add_mutation(data, l, -1, val); // Ensure val is transported
+  if (do_gc) {
+    object buf[1]; buf[0] = l;
+    GC(data, cont, buf, 1);
+    return NULL;
+  } else {
+    _return_closcall1(data, cont, l);
+  }
 }
 
 object Cyc_set_cdr2(void *data, object cont, object l, object val)
@@ -2075,10 +2075,21 @@ object Cyc_set_cdr2(void *data, object cont, object l, object val)
     Cyc_invalid_type_error(data, pair_tag, l);
   }
   Cyc_verify_mutable(data, l);
+
+  // Alternate write barrier
+  int do_gc = 0;
+  val = share_object(data, l, val, &do_gc);
+
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
   cdr(l) = val;
-  add_mutation(data, l, -1, val);
-  _return_closcall1(data, cont, l);
+  add_mutation(data, l, -1, val); // Ensure val is transported
+  if (do_gc) {
+    object buf[1]; buf[0] = l;
+    GC(data, cont, buf, 1);
+    return NULL;
+  } else {
+    _return_closcall1(data, cont, l);
+  }
 }
 
 object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
@@ -2093,20 +2104,37 @@ object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
   }
 
+  int do_gc = 0;
+  obj = share_object(data, v, obj, &do_gc);
+
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
 
   ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
-  _return_closcall1(data, cont, v);
+  if (do_gc) {
+    object buf[1]; buf[0] = v;
+    GC(data, cont, buf, 1);
+    return NULL;
+  } else {
+    _return_closcall1(data, cont, v);
+  }
 }
 
 object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, object obj)
 {
   int idx = unbox_number(k);
+  int do_gc = 0;
+  obj = share_object(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
-  _return_closcall1(data, cont, v);
+  if (do_gc) {
+    object buf[1]; buf[0] = v;
+    GC(data, cont, buf, 1);
+    return NULL;
+  } else {
+    _return_closcall1(data, cont, v);
+  }
 }
 
 object Cyc_vector_ref(void *data, object v, object k)
