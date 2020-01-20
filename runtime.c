@@ -99,6 +99,32 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index)
 
 /* END error checking */
 
+#ifdef CYC_HIGH_RES_TIMERS
+/* High resolution timers */
+#include <sys/time.h>
+long long hrt_get_current() 
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL); /* TODO: longer-term consider using clock_gettime instead */
+  long long jiffy = (tv.tv_sec)*1000000LL + tv.tv_usec;
+  return jiffy;
+}
+
+long long hrt_cmp_current(long long tstamp) 
+{
+  long long now = hrt_get_current();
+  return (now - tstamp);
+}
+
+void hrt_log_delta(long long tstamp) 
+{
+  long long delta = hrt_cmp_current(tstamp);
+  fprintf(stdout, "[%llu]\n", delta);
+}
+
+/* END High resolution timers */
+#endif
+
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, a1) \
 if (obj_is_not_closure(clo)) { \
@@ -5951,9 +5977,15 @@ void GC(void *data, closure cont, object * args, int num_args)
   char tmp;
   object low_limit = &tmp;      // This is one end of the stack...
   object high_limit = ((gc_thread_data *) data)->stack_start;
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *) data, alloci);
+#ifdef CYC_HIGH_RES_TIMERS
+hrt_log_delta(tstamp);
+#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
 }
