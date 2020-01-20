@@ -1989,66 +1989,83 @@ object Cyc_set_cell(void *data, object l, object val)
   return l;
 }
 
-object Cyc_set_car(void *data, object l, object val)
-{
-  if (Cyc_is_pair(l) == boolean_f) {
-    Cyc_invalid_type_error(data, pair_tag, l);
-  }
-  Cyc_verify_mutable(data, l);
-  gc_mut_update((gc_thread_data *) data, car(l), val);
-  car(l) = val;
-  add_mutation(data, l, -1, val);
-  return l;
-}
+//object Cyc_set_car(void *data, object l, object val)
+//{
+//  if (Cyc_is_pair(l) == boolean_f) {
+//    Cyc_invalid_type_error(data, pair_tag, l);
+//  }
+//  Cyc_verify_mutable(data, l);
+//  gc_mut_update((gc_thread_data *) data, car(l), val);
+//  car(l) = val;
+//  add_mutation(data, l, -1, val);
+//  return l;
+//}
+//
+//object Cyc_set_cdr(void *data, object l, object val)
+//{
+//  if (Cyc_is_pair(l) == boolean_f) {
+//    Cyc_invalid_type_error(data, pair_tag, l);
+//  }
+//  Cyc_verify_mutable(data, l);
+//  gc_mut_update((gc_thread_data *) data, cdr(l), val);
+//  cdr(l) = val;
+//  add_mutation(data, l, -1, val);
+//  return l;
+//}
+//
+//object Cyc_vector_set(void *data, object v, object k, object obj)
+//{
+//  int idx;
+//  Cyc_check_vec(data, v);
+//  Cyc_check_fixnum(data, k);
+//  Cyc_verify_mutable(data, v);
+//  idx = unbox_number(k);
+//
+//  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+//    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
+//  }
+//
+//  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+//
+//  ((vector) v)->elements[idx] = obj;
+//  add_mutation(data, v, idx, obj);
+//  return v;
+//}
+//
+//object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
+//{
+//  int idx = unbox_number(k);
+//  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+//  ((vector) v)->elements[idx] = obj;
+//  add_mutation(data, v, idx, obj);
+//  return v;
+//}
 
-object Cyc_set_cdr(void *data, object l, object val)
-{
-  if (Cyc_is_pair(l) == boolean_f) {
-    Cyc_invalid_type_error(data, pair_tag, l);
-  }
-  Cyc_verify_mutable(data, l);
-  gc_mut_update((gc_thread_data *) data, cdr(l), val);
-  cdr(l) = val;
-  add_mutation(data, l, -1, val);
-  return l;
-}
-
-object Cyc_vector_set(void *data, object v, object k, object obj)
-{
-  int idx;
-  Cyc_check_vec(data, v);
-  Cyc_check_fixnum(data, k);
-  Cyc_verify_mutable(data, v);
-  idx = unbox_number(k);
-
-  if (idx < 0 || idx >= ((vector) v)->num_elements) {
-    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
-  }
-
-  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-
-  ((vector) v)->elements[idx] = obj;
-  add_mutation(data, v, idx, obj);
-  return v;
-}
-
-object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
-{
-  int idx = unbox_number(k);
-  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-  ((vector) v)->elements[idx] = obj;
-  add_mutation(data, v, idx, obj);
-  return v;
-}
 object Cyc_set_car2(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
     Cyc_invalid_type_error(data, pair_tag, l);
   }
   Cyc_verify_mutable(data, l);
+
+//  // Alternate write barrier
+//  object result = share_object(data, l, val);
+//  if (result != NULL) {
+//    if (result == boolean_f) {
+//      // TODO: Initiate minor GC
+//      object buf[2]; buf[0] = l; buf[1] = val;
+//      // TODO: allocate closure to call set_car2 again. 
+//      // TODO: where to stuff cont?
+//      GC(data, TODO, buf, 2);
+//    } else {
+//      // val was copied to the heap
+//      val = result;
+//    }
+//  }
+
   gc_mut_update((gc_thread_data *) data, car(l), val);
   car(l) = val;
-  add_mutation(data, l, -1, val);
+  //add_mutation(data, l, -1, val); // Obsoleted by new WB
   _return_closcall1(data, cont, l);
 }
 
@@ -4786,14 +4803,18 @@ void _null_127(void *data, object cont, object args)
 
 void _set_91car_67(void *data, object cont, object args)
 {
+  //Cyc_check_num_args(data, "set-car!", 2, args);
+  //return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-car!", 2, args);
-  return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
+  Cyc_set_car2(data, cont, car(args), cadr(args));
 }
 
 void _set_91cdr_67(void *data, object cont, object args)
 {
+  //Cyc_check_num_args(data, "set-cdr!", 2, args);
+  //return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-cdr!", 2, args);
-  return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
+  Cyc_set_cdr2(data, cont, car(args), cadr(args));
 }
 
 void _Cyc_91has_91cycle_127(void *data, object cont, object args)
@@ -5213,8 +5234,9 @@ void _vector_91set_67(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "vector-set!", 3, args);
   {
-    object ref = Cyc_vector_set(data, car(args), cadr(args), caddr(args));
-    return_closcall1(data, cont, ref);
+    //object ref = Cyc_vector_set(data, car(args), cadr(args), caddr(args));
+    //return_closcall1(data, cont, ref);
+    Cyc_vector_set2(data, cont, car(args), cadr(args), caddr(args));
 }}
 
 void _list_91_125vector(void *data, object cont, object args)
