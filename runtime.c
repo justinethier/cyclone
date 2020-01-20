@@ -462,6 +462,65 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 
 /* END Global table */
 
+/** new write barrier
+ * @param data
+ * @param var   Object being mutated
+ * @param value New value being associated to var
+ *
+ * TODO: caller can inspect return value and determine if it needs to initiate GC
+ */
+object share_object(gc_thread_data *data, object var, object value) 
+{
+  char tmp;
+  gc_heap_root *heap = data->heap;
+  int tmp, *heap_grown = &tmp;
+
+  // Nothing needs to be done unless we are mutating
+  // a heap variable to point to a stack var.
+  if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
+    /* TODO: 
+    - need to transport value to heap
+      - if value is mutable or has children, may need to do minor GC to transport
+      - else can just copy it
+    return obj (copied) or boolean_f (need minor GC;
+    */
+
+    switch(type_of(value)) {
+      case string_tag:
+      case bytevector_tag:
+        if (immutable(value)) {
+          // Safe to transport
+          object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+           return hp;
+
+        }
+        // Need to GC if obj is mutable, EG: a string could be mutated so we can't
+        // have multiple copies of the object running around
+        return boolean_f
+      case double_tag:
+      case port_tag:
+      case c_opaque_tag:
+      case complex_num_tag: {
+        object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+        return hp;
+      }
+      // Objs w/children force minor GC to guarantee everything is relocated:
+      case cvar_tag:
+      case closure1_tag:
+      case closureN_tag:
+      case pair_tag:
+      case vector_tag:
+        return boolean_f;
+      default:
+        printf("Invalid shared object type %d\n", type_of(value));
+        exit(1);
+    }
+  }
+
+  return NULL; // Nothing to do
+}
+
+
 /* Mutation table functions
  *
  * Keep track of mutations (EG: set-car!) so we can avoid having heap
