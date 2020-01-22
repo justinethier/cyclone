@@ -2075,6 +2075,9 @@ object Cyc_set_cell(void *data, object l, object val)
 //  return v;
 //}
 
+//
+// TODO: rename these as (EG) Cyc_set_car_cps. Uncomment non-CPS above and we can use them for unsafe compilation
+//
 object Cyc_set_car2(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
