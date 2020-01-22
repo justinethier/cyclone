@@ -118,8 +118,15 @@ long long hrt_cmp_current(long long tstamp)
 
 void hrt_log_delta(long long tstamp) 
 {
+  static long long initial = 1;
+  static long long initial_tstamp;
+  if (initial == 1) {
+    initial = 0;
+    initial_tstamp = hrt_get_current();
+  }
+  long long total = hrt_cmp_current(initial_tstamp);
   long long delta = hrt_cmp_current(tstamp);
-  fprintf(stdout, "[%llu]\n", delta);
+  fprintf(stdout, "%llu, %llu\n", total, delta);
 }
 
 /* END High resolution timers */
