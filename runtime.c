@@ -2097,7 +2097,7 @@ object Cyc_set_car2(void *data, object cont, object l, object val)
     GC(data, cont, buf, 1);
     return NULL;
   } else {
-    _return_closcall1(data, cont, l);
+    return l;
   }
 }
 
@@ -2120,7 +2120,7 @@ object Cyc_set_cdr2(void *data, object cont, object l, object val)
     GC(data, cont, buf, 1);
     return NULL;
   } else {
-    _return_closcall1(data, cont, l);
+    return l;
   }
 }
 
@@ -2148,7 +2148,7 @@ object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
     GC(data, cont, buf, 1);
     return NULL;
   } else {
-    _return_closcall1(data, cont, v);
+    return v; // Let caller pass this to cont
   }
 }
 
@@ -2165,7 +2165,7 @@ object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, objec
     GC(data, cont, buf, 1);
     return NULL;
   } else {
-    _return_closcall1(data, cont, v);
+    return v;
   }
 }
 
@@ -4866,7 +4866,8 @@ void _set_91car_67(void *data, object cont, object args)
   //Cyc_check_num_args(data, "set-car!", 2, args);
   //return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-car!", 2, args);
-  Cyc_set_car2(data, cont, car(args), cadr(args));
+  //Cyc_set_car2(data, cont, car(args), cadr(args));
+  return_closcall1(data, cont, Cyc_set_car2(data, cont, car(args), cadr(args)));
 }
 
 void _set_91cdr_67(void *data, object cont, object args)
@@ -4874,7 +4875,8 @@ void _set_91cdr_67(void *data, object cont, object args)
   //Cyc_check_num_args(data, "set-cdr!", 2, args);
   //return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-cdr!", 2, args);
-  Cyc_set_cdr2(data, cont, car(args), cadr(args));
+  //Cyc_set_cdr2(data, cont, car(args), cadr(args));
+  return_closcall1(data, cont, Cyc_set_cdr2(data, cont, car(args), cadr(args)));
 }
 
 void _Cyc_91has_91cycle_127(void *data, object cont, object args)
@@ -5294,9 +5296,8 @@ void _vector_91set_67(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "vector-set!", 3, args);
   {
-    //object ref = Cyc_vector_set(data, car(args), cadr(args), caddr(args));
-    //return_closcall1(data, cont, ref);
-    Cyc_vector_set2(data, cont, car(args), cadr(args), caddr(args));
+    object ref = Cyc_vector_set2(data, cont, car(args), cadr(args), caddr(args));
+    return_closcall1(data, cont, ref);
 }}
 
 void _list_91_125vector(void *data, object cont, object args)
