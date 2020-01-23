@@ -1091,8 +1091,11 @@
             ((and (ast:lambda? (car exp))
                   (every
                     (lambda (arg)
-                      (or (not (prim-call? arg))
-                          (not (prim:cont? (car arg)))))
+                      (and
+                        (not (set!? arg))
+                        (or (not (prim-call? arg))
+                            (not (prim:cont? (car arg)))
+                            )))
                     (cdr exp))
                   (every
                     (lambda (param)
