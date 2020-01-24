@@ -30,6 +30,20 @@ object Cyc_global_set(void *thd, object * glo, object value)
   return value;
 }
 
+object Cyc_global_set2(void *thd, object cont, object * glo, object value)
+{
+  int do_gc = 0;
+  value = share_object(thd, NULL, value, &do_gc);
+  gc_mut_update((gc_thread_data *) thd, *glo, value);
+  *(glo) = value;
+//  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
+  if (do_gc) {
+    object buf[1]; buf[0] = value;
+    GC(thd, cont, buf, 1);
+  }
+  return value;
+}
+
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[] = {

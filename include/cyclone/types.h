@@ -524,6 +524,14 @@ void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
 /**@}*/
 
+/**
+ * \defgroup gc_minor_sh_obj Shared object write barrier
+ * @brief Minor GC write barrier to ensure there are no references to stack objects from the heap.
+ */
+/**@{*/
+object share_object(gc_thread_data *data, object var, object value, int *run_gc);
+/**@}*/
+
 /**@}*/
 
 // END GC section
