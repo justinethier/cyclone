@@ -141,7 +141,7 @@
 (define (trace:error msg) (trace 1 msg pretty-print ""))
 (define (trace:warn msg)  (trace 2 msg pretty-print ""))
 (define (trace:info msg)  (trace 3 msg pretty-print ""))
-(define (trace:debug msg) (trace 4 msg display "DEBUG: "))
+(define (trace:debug msg) (trace 4 msg write "DEBUG: "))
 
 (define (cyc:error msg)
   (error msg)
