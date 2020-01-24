@@ -191,7 +191,7 @@
                            (new-var (cdr var/new-var))
                            (body
                              `((Cyc-seq
-                                 (set-global! ,var ,rsym)
+                                 (set-global-unsafe! ,var ,rsym)
                                  ,acc)))
                           )
                       `(Cyc-memoize

@@ -67,6 +67,7 @@
          Cyc-spawn-thread!
          Cyc-end-thread!
          set-global!
+         set-global-unsafe!
          set-cell!
          set-car!
          set-cdr!
@@ -132,6 +133,7 @@
          Cyc-fast-list-4
          cell-get
          set-global!
+         set-global-unsafe!
          set-cell!
          cell
          eq?
@@ -278,6 +280,7 @@
          (Cyc-fast-list-4 4 4)
          (cell-get 1 1)
          (set-global! 2 2)
+         (set-global-unsafe! 2 2)
          (set-cell! 2 2)
          (cell 1 1)
          (eq? 2 2)
@@ -688,7 +691,8 @@
          ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
-         ((eq? p 'set-global!)   "global_set")
+         ((eq? p 'set-global!)   "global_set2")
+         ((eq? p 'set-global-unsafe!)   "global_set")
          (else
            (error "unhandled primitive: " p))))
 
@@ -788,7 +792,8 @@
         set-car!
         set-cdr!
         procedure?
-        set-cell!))
+        set-cell!
+        set-global!))
        (memq p *udf-prims*)))
 
     ;; Determine if primitive receives a pointer to a local C variable
@@ -873,6 +878,7 @@
         ((eq? p 'set-car!) "object")
         ((eq? p 'set-cdr!) "object")
         ((eq? p 'vector-set!) "object")
+        ((eq? p 'set-global!) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
         ;((memq p *udf-prims*) "object")
@@ -906,6 +912,7 @@
                  set-car!
                  set-cdr!
                  vector-set!
+                 set-global!
                  ;Cyc-fast-plus
                  ;Cyc-fast-sub
                  ;Cyc-fast-mul
@@ -947,6 +954,7 @@
                          set-car!
                          set-cdr!
                          vector-set!
+                         set-global!
                          Cyc-list
                          Cyc-read-char Cyc-peek-char 
                          symbol->string list->string substring string-append string->number

@@ -431,6 +431,7 @@ if (acc) {
                   Cyc-current-exception-handler
                   cell-get
                   set-global!
+                  set-global-unsafe!
                   set-cell!
                   cell
                   cons
