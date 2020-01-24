@@ -689,8 +689,6 @@
                (number->string (char->integer exp)) ")")))
     ((string? exp)
      (c-compile-string exp use-alloca immutable))
-;TODO: not good enough, need to store new symbols in a table so they can
-;be inserted into the C program
     ((symbol? exp)
      (allocate-symbol exp)
      (c-code (string-append "quote_" (mangle exp))))
@@ -1001,6 +999,18 @@
                 (c-args* (if (prim:arg-count? fun)
                              (c:append (c-code num-args-str) c-args)
                              c-args)))
+;; TODO: emit mangled sym as first arg to set-global! (what about unsafe version?).
+;; This also means we need to pass the symbol to add_global, store it somewhere in memory, and add_symbol prior to calling add_global
+(when (eq? 'set-global! fun)
+  (let* ((ident (cadr args))
+         (mangled (cgen:mangle-global ident))
+         (mangled-sym (string-append "quote_" mangled))
+        )
+    (trace:debug `(JAE set-global args are ,c-args ,args mangled ,mangled-sym))
+    ))
+;; Example c-args:
+;;("quote__121pare_125, __glo__121pare_125, r_73558_731010_731308_731412" () 3 ("quote__121pare_125" () 0) ("__glo__121pare_125" ()) ("r_73558_731010_731308_731412" ()))
+
             (if (prim/cvar? fun)
               ;; Args need to go with alloc function
               (c-code/vars
