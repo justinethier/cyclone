@@ -36,7 +36,7 @@ object Cyc_global_set2(void *thd, object cont, object * glo, object value)
   value = share_object(thd, NULL, value, &do_gc);
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   *(glo) = value;
-//  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
+  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
   if (do_gc) {
     object buf[1]; buf[0] = value;
     GC(thd, cont, buf, 1);
