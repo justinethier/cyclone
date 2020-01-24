@@ -848,11 +848,17 @@ if (acc) {
     ((prim? exp)     exp)
     ((quote? exp)    exp)
     ((lambda? exp)   (error `(Unexpected lambda in wrap-mutables ,exp)))
-    ((set!? exp)     `(,(if (member (set!->var exp) globals)
-                            'set-global!
-                            'set-cell!) 
-                        ,(set!->var exp) 
-                        ,(wrap-mutables (set!->exp exp) globals)))
+    ((set!? exp)   
+     (cond
+       ((member (set!->var exp) globals)
+          `(set-global!
+            ,(list 'quote (set!->var exp))
+            ,(set!->var exp) 
+            ,(wrap-mutables (set!->exp exp) globals)) )
+      (else
+          `(set-cell!
+            ,(set!->var exp) 
+            ,(wrap-mutables (set!->exp exp) globals))) ))
     ((if? exp)       `(if ,(wrap-mutables (if->condition exp) globals)
                           ,(wrap-mutables (if->then exp) globals)
                           ,(wrap-mutables (if->else exp) globals)))

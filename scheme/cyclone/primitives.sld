@@ -279,8 +279,8 @@
          (Cyc-fast-list-3 3 3)
          (Cyc-fast-list-4 4 4)
          (cell-get 1 1)
-         (set-global! 2 2)
-         (set-global-unsafe! 2 2)
+         (set-global! 3 3)
+         (set-global-unsafe! 3 3)
          (set-cell! 2 2)
          (cell 1 1)
          (eq? 2 2)
@@ -691,8 +691,8 @@
          ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
-         ((eq? p 'set-global!)   "global_set2")
-         ((eq? p 'set-global-unsafe!)   "global_set")
+         ((eq? p 'set-global!)   "global_set2_id")
+         ((eq? p 'set-global-unsafe!)   "global_set_id")
          (else
            (error "unhandled primitive: " p))))
 

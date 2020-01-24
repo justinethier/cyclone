@@ -105,11 +105,13 @@ void set_env_variables(char **vars);
 
 object cell_get(object cell);
 
-#define global_set(glo,value) Cyc_global_set(data, (object *)&glo, value)
-object Cyc_global_set(void *thd, object * glo, object value);
+#define global_set(glo,value) Cyc_global_set(data, NULL, (object *)&glo, value)
+#define global_set_id(id,glo,value) Cyc_global_set(data, id, (object *)&glo, value)
+object Cyc_global_set(void *thd, object sym, object * glo, object value);
 
-#define global_set2(thd,k,glo,value) Cyc_global_set2(thd, k, (object *)&glo, value)
-object Cyc_global_set2(void *thd, object cont, object * glo, object value);
+#define global_set2(thd,k,glo,value) Cyc_global_set2(thd, k, NULL, (object *)&glo, value)
+#define global_set2_id(thd,k,id,glo,value) Cyc_global_set2(thd, k, id, (object *)&glo, value)
+object Cyc_global_set2(void *thd, object cont, object sym, object * glo, object value);
 
 /* Variable argument count support 
 

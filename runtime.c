@@ -22,7 +22,7 @@
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
 
-object Cyc_global_set(void *thd, object * glo, object value)
+object Cyc_global_set(void *thd, object identifier, object * glo, object value)
 {
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   *(glo) = value;
@@ -30,7 +30,7 @@ object Cyc_global_set(void *thd, object * glo, object value)
   return value;
 }
 
-object Cyc_global_set2(void *thd, object cont, object * glo, object value)
+object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, object value)
 {
   int do_gc = 0;
   value = share_object(thd, NULL, value, &do_gc);
@@ -562,6 +562,7 @@ object share_object(gc_thread_data *data, object var, object value, int *run_gc)
       }
       // Objs w/children force minor GC to guarantee everything is relocated:
       case cvar_tag:
+      case closure0_tag:
       case closure1_tag:
       case closureN_tag:
       case pair_tag:
