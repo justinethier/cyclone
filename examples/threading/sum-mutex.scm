@@ -11,7 +11,7 @@
 
 (define (sum-loop n)
   (mutex-lock! m)
-  (set! *sum* (make-shared (+ *sum* 1)))
+  (set! *sum* (+ *sum* 1))
   (mutex-unlock! m)
   ;(swap! *sum* + 1)
   (if (zero? n)
