@@ -225,6 +225,7 @@ static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custo
 const object Cyc_EOF = &__EOF;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
+static ck_hs_t global_hs_table;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
 
@@ -335,6 +336,38 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 }
 // End hashset supporting functions
 
+// New set of hashset functions that store non-relocated objects
+static unsigned long hs_obj_hash(const void *object, unsigned long seed)
+{
+  unsigned long h;
+  h = (unsigned long)MurmurHash64A(object, 0, seed);
+  return h;
+}
+
+static bool hs_obj_compare(const void *previous, const void *compare)
+{
+  return (previous == compare);
+}
+
+static void *obj_set_get(ck_hs_t * hs, const void *value)
+{
+  unsigned long h;
+  void *v;
+
+  h = CK_HS_HASH(hs, hs_obj_hash, value);
+  v = ck_hs_get(hs, h, value);
+  return v;
+}
+
+static bool obj_set_insert(ck_hs_t * hs, const void *value)
+{
+  unsigned long h;
+
+  h = CK_HS_HASH(hs, hs_obj_hash, value);
+  return ck_hs_put(hs, h, value);
+}
+// End new hashset functions
+
 /**
  * @brief Perform one-time heap initializations for the program
  * @param heap_size Unused
@@ -352,6 +385,13 @@ void gc_init_heap(long heap_size)
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
                   hs_hash, hs_compare,
                   &my_allocator, symbol_table_initial_size, 43423)) {
+    fprintf(stderr, "Unable to initialize symbol table\n");
+    exit(1);
+  }
+  if (!ck_hs_init(&global_hs_table,
+                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
+                  hs_obj_hash, hs_obj_compare,
+                  &my_allocator, 256, 43423)) {
     fprintf(stderr, "Unable to initialize symbol table\n");
     exit(1);
   }
@@ -490,6 +530,13 @@ void add_global(object * glo)
   // Tried using a vpbuffer for this and the benchmark
   // results were the same or worse.
   global_table = malloc_make_pair(mcvar(glo), global_table);
+
+// TODO: insert into global_hs_table. will require a symbol arg to add_global
+//       that matches the symbol passed to global_set
+//
+//  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
+//  set_insert(&lib_table, psym);
+//  pthread_mutex_unlock(&symbol_table_lock);
 }
 
 void debug_dump_globals()
