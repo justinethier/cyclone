@@ -2132,9 +2132,13 @@
     ;; Initialize global table
     (for-each
       (lambda (global)
-        (emits "\n  add_global((object *) &")
-        (emits (cgen:mangle-global (car global)))
-        (emits ");"))
+        (let ((mglo (cgen:mangle-global (car global))))
+          (emits (string-append
+                   "\n  add_global2(\""
+                   mglo
+                   "\", (object *) &"))
+          (emits mglo)
+          (emits ");")))
       *globals*)
     (emit "")
 
