@@ -9,6 +9,7 @@
  */
 
 #include <ck_hs.h>
+#include <ck_ht.h>
 #include <ck_pr.h>
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
@@ -225,7 +226,7 @@ static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custo
 const object Cyc_EOF = &__EOF;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
-static ck_hs_t global_hs_table;
+static ck_ht_t globals_ht;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
 
@@ -337,34 +338,62 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 // End hashset supporting functions
 
 // New set of hashset functions that store non-relocated objects
-static unsigned long hs_obj_hash(const void *object, unsigned long seed)
+static void ht_hash_wrapper(struct ck_ht_hash *h, const void *key, size_t length, uint64_t seed)
 {
-  unsigned long h;
-  h = (unsigned long)MurmurHash64A(object, 0, seed);
-  return h;
+  h->value = (unsigned long)MurmurHash64A(key, length, seed);
+  return;
 }
 
-static bool hs_obj_compare(const void *previous, const void *compare)
+static void *ht_get(ck_ht_t * ht, const void *key)
 {
-  return (previous == compare);
-}
-
-static void *obj_set_get(ck_hs_t * hs, const void *value)
-{
-  unsigned long h;
   void *v;
+  const symbol_type *c = key;
+  int len = strlen(c->desc);
+  ck_ht_hash_t h;
+  ck_ht_entry_t entry;
 
-  h = CK_HS_HASH(hs, hs_obj_hash, value);
-  v = ck_hs_get(hs, h, value);
+  ck_ht_hash(&h, ht, key, len);
+  ck_ht_entry_key_set(&entry, key, len);
+  if (!ck_ht_get_spmc(ht, h, &entry)) {
+    fprintf(stderr, "Unable to retrieve hash table value for key %p\n", key);
+    exit(1);
+  }
+  v = (void *)entry.value;
   return v;
 }
 
-static bool obj_set_insert(ck_hs_t * hs, const void *value)
+static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
 {
-  unsigned long h;
+  const symbol_type *c = key;
+  int len = strlen(c->desc);
+  ck_ht_hash_t h;
+  ck_ht_entry_t entry;
 
-  h = CK_HS_HASH(hs, hs_obj_hash, value);
-  return ck_hs_put(hs, h, value);
+  ck_ht_hash(&h, ht, key, len);
+  ck_ht_entry_set(&entry, h, key, len, value);
+  return ck_ht_put_spmc(ht, h, &entry);
+}
+
+void ht_test() {
+  symbol_type ka = {{0}, symbol_tag, "sym a"};
+  symbol_type kb = {{0}, symbol_tag, "sym b"};
+  symbol_type kc = {{0}, symbol_tag, "sym c"};
+  object v1 = obj_int2obj(1);
+  object v2 = obj_int2obj(2);
+  object v3 = obj_int2obj(3);
+  bool result;
+  
+  printf("RUNNING HT DEBUG!!!\n");
+  result = ht_insert(&globals_ht, &ka, v1);
+  result = ht_insert(&globals_ht, &kb, v2);
+  result = ht_insert(&globals_ht, &kc, v3);
+
+  object value = ht_get(&globals_ht, &ka);
+  printf("got value 1 %lu\n", obj_obj2int(value));
+  value = ht_get(&globals_ht, &kb);
+  printf("got value 2 %lu\n", obj_obj2int(value));
+  value = ht_get(&globals_ht, &kc);
+  printf("got value 3 %lu\n", obj_obj2int(value));
 }
 // End new hashset functions
 
@@ -388,17 +417,19 @@ void gc_init_heap(long heap_size)
     fprintf(stderr, "Unable to initialize symbol table\n");
     exit(1);
   }
-  if (!ck_hs_init(&global_hs_table,
-                  CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
-                  hs_obj_hash, hs_obj_compare,
-                  &my_allocator, 256, 43423)) {
-    fprintf(stderr, "Unable to initialize symbol table\n");
+  if (!ck_ht_init(&globals_ht,
+                  CK_HT_MODE_BYTESTRING,
+                  ht_hash_wrapper, 
+                  &my_allocator, 384, 43423)) {
+    fprintf(stderr, "Unable to initialize globals hash table\n");
     exit(1);
   }
   if (pthread_mutex_init(&(symbol_table_lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
     exit(1);
   }
+  
+  ht_test(); // JAE - DEBUGGING!!
 }
 
 object cell_get(object cell)
