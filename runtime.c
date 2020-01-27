@@ -352,10 +352,10 @@ static void *ht_get(ck_ht_t * ht, const void *key)
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
-  ck_ht_hash(&h, ht, key, len);
-  ck_ht_entry_key_set(&entry, key, len);
+  ck_ht_hash(&h, ht, c->desc, len);
+  ck_ht_entry_key_set(&entry, c->desc, len);
   if (!ck_ht_get_spmc(ht, h, &entry)) {
-    fprintf(stderr, "Unable to retrieve hash table value for key %p\n", key);
+    fprintf(stderr, "Unable to retrieve hash table value for key %s\n", c->desc);
     exit(1);
   }
   v = (void *)entry.value;
@@ -369,8 +369,8 @@ static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
-  ck_ht_hash(&h, ht, key, len);
-  ck_ht_entry_set(&entry, h, key, len, value);
+  ck_ht_hash(&h, ht, c->desc, len);
+  ck_ht_entry_set(&entry, h, c->desc, len, value);
   return ck_ht_put_spmc(ht, h, &entry);
 }
 
@@ -429,7 +429,7 @@ void gc_init_heap(long heap_size)
     exit(1);
   }
   
-  ht_test(); // JAE - DEBUGGING!!
+  //ht_test(); // JAE - DEBUGGING!!
 }
 
 object cell_get(object cell)
