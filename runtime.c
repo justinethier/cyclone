@@ -374,27 +374,27 @@ static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
   return ck_ht_put_spmc(ht, h, &entry);
 }
 
-void ht_test() {
-  symbol_type ka = {{0}, symbol_tag, "sym a"};
-  symbol_type kb = {{0}, symbol_tag, "sym b"};
-  symbol_type kc = {{0}, symbol_tag, "sym c"};
-  object v1 = obj_int2obj(1);
-  object v2 = obj_int2obj(2);
-  object v3 = obj_int2obj(3);
-  bool result;
-  
-  printf("RUNNING HT DEBUG!!!\n");
-  result = ht_insert(&globals_ht, &ka, v1);
-  result = ht_insert(&globals_ht, &kb, v2);
-  result = ht_insert(&globals_ht, &kc, v3);
-
-  object value = ht_get(&globals_ht, &ka);
-  printf("got value 1 %lu\n", obj_obj2int(value));
-  value = ht_get(&globals_ht, &kb);
-  printf("got value 2 %lu\n", obj_obj2int(value));
-  value = ht_get(&globals_ht, &kc);
-  printf("got value 3 %lu\n", obj_obj2int(value));
-}
+//void ht_test() {
+//  symbol_type ka = {{0}, symbol_tag, "sym a"};
+//  symbol_type kb = {{0}, symbol_tag, "sym b"};
+//  symbol_type kc = {{0}, symbol_tag, "sym c"};
+//  object v1 = obj_int2obj(1);
+//  object v2 = obj_int2obj(2);
+//  object v3 = obj_int2obj(3);
+//  bool result;
+//  
+//  printf("RUNNING HT DEBUG!!!\n");
+//  result = ht_insert(&globals_ht, &ka, v1);
+//  result = ht_insert(&globals_ht, &kb, v2);
+//  result = ht_insert(&globals_ht, &kc, v3);
+//
+//  object value = ht_get(&globals_ht, &ka);
+//  printf("got value 1 %lu\n", obj_obj2int(value));
+//  value = ht_get(&globals_ht, &kb);
+//  printf("got value 2 %lu\n", obj_obj2int(value));
+//  value = ht_get(&globals_ht, &kc);
+//  printf("got value 3 %lu\n", obj_obj2int(value));
+//}
 // End new hashset functions
 
 /**
@@ -568,6 +568,11 @@ void add_global(object * glo)
 //  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
 //  set_insert(&lib_table, psym);
 //  pthread_mutex_unlock(&symbol_table_lock);
+}
+
+void add_global2(object identifier, object * glo)
+{
+  global_table = malloc_make_pair(mcvar(glo), global_table);
 }
 
 void debug_dump_globals()
