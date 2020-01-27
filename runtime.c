@@ -570,11 +570,6 @@ void add_global(const char *identifier, object * glo)
 //  pthread_mutex_unlock(&symbol_table_lock);
 }
 
-void add_global2(object identifier, object * glo)
-{
-  global_table = malloc_make_pair(mcvar(glo), global_table);
-}
-
 void debug_dump_globals()
 {
   list l = global_table;

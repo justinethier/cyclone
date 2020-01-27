@@ -2134,7 +2134,7 @@
       (lambda (global)
         (let ((mglo (cgen:mangle-global (car global))))
           (emits (string-append
-                   "\n  add_global2(\""
+                   "\n  add_global(\""
                    mglo
                    "\", (object *) &"))
           (emits mglo)
