@@ -789,7 +789,7 @@ object register_library(const char *name);
  */
 /**@{*/
 extern list global_table;
-void add_global(object * glo);
+void add_global(const char *identifier, object * glo);
 void add_global2(object identifier, object * glo);
 void Cyc_set_globals_changed(gc_thread_data *thd);
 /**@}*/

@@ -556,7 +556,7 @@ object register_library(const char *name)
 /* Global table */
 list global_table = NULL;
 
-void add_global(object * glo)
+void add_global(const char *identifier, object * glo)
 {
   // Tried using a vpbuffer for this and the benchmark
   // results were the same or worse.
