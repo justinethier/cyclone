@@ -424,7 +424,7 @@ object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, 
   // TODO: if we don't do this how does GC know to transport the global??
   // don't really want to do this though because it is a performance nightmare
   // can we use add_mutation and add cvar as a case when transporting mutations?
-  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
+//  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
 /*
 in order to get rid of the above I think we need to find the corresponding cvar and ensure it is a root
 in the upcoming GC. or if there is no GC scheduled, just update it directly now
@@ -434,13 +434,14 @@ in the upcoming GC. or if there is no GC scheduled, just update it directly now
 
   if (do_gc) {
     object buf[1]; buf[0] = value;
-//    object cv = ht_get(&globals_ht, identifier);
-//    gc_thread_data *data = (gc_thread_data *) thd;
-//    // Ensure global is a root
-//    data->mutations = vpbuffer_add(data->mutations, 
-//                                  &(data->mutation_buflen), 
-//                                  data->mutation_count, 
-//                                  cv);
+    object cv = ht_get(&globals_ht, identifier);
+    gc_thread_data *data = (gc_thread_data *) thd;
+    // Ensure global is a root
+    data->mutations = vpbuffer_add(data->mutations, 
+                                  &(data->mutation_buflen), 
+                                  data->mutation_count, 
+                                  cv);
+    data->mutation_count++;
     GC(thd, cont, buf, 1);
   }
   return value;
