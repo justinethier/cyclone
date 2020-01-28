@@ -347,15 +347,14 @@ static void ht_hash_wrapper(struct ck_ht_hash *h, const void *key, size_t length
 static void *ht_get(ck_ht_t * ht, const void *key)
 {
   void *v;
-  const symbol_type *c = key;
-  int len = strlen(c->desc);
+  int len = strlen(key);
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
-  ck_ht_hash(&h, ht, c->desc, len);
-  ck_ht_entry_key_set(&entry, c->desc, len);
+  ck_ht_hash(&h, ht, key, len);
+  ck_ht_entry_key_set(&entry, key, len);
   if (!ck_ht_get_spmc(ht, h, &entry)) {
-    fprintf(stderr, "Unable to retrieve hash table value for key %s\n", c->desc);
+    fprintf(stderr, "Unable to retrieve hash table value for key %s\n", (char *)key);
     exit(1);
   }
   v = (void *)entry.value;
@@ -364,35 +363,37 @@ static void *ht_get(ck_ht_t * ht, const void *key)
 
 static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
 {
-  const symbol_type *c = key;
-  int len = strlen(c->desc);
+  int len = strlen(key);
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
-  ck_ht_hash(&h, ht, c->desc, len);
-  ck_ht_entry_set(&entry, h, c->desc, len, value);
+  ck_ht_hash(&h, ht, key, len);
+  ck_ht_entry_set(&entry, h, key, len, value);
   return ck_ht_put_spmc(ht, h, &entry);
 }
 
 //void ht_test() {
-//  symbol_type ka = {{0}, symbol_tag, "sym a"};
-//  symbol_type kb = {{0}, symbol_tag, "sym b"};
-//  symbol_type kc = {{0}, symbol_tag, "sym c"};
+//  //symbol_type ka = {{0}, symbol_tag, "sym a"};
+//  //symbol_type kb = {{0}, symbol_tag, "sym b"};
+//  //symbol_type kc = {{0}, symbol_tag, "sym c"};
+//  char ka[] = "test a";
+//  char kb[] = "test b";
+//  char kc[] = "test c";
 //  object v1 = obj_int2obj(1);
 //  object v2 = obj_int2obj(2);
 //  object v3 = obj_int2obj(3);
 //  bool result;
 //  
 //  printf("RUNNING HT DEBUG!!!\n");
-//  result = ht_insert(&globals_ht, &ka, v1);
-//  result = ht_insert(&globals_ht, &kb, v2);
-//  result = ht_insert(&globals_ht, &kc, v3);
+//  result = ht_insert(&globals_ht, ka, v1);
+//  result = ht_insert(&globals_ht, kb, v2);
+//  result = ht_insert(&globals_ht, kc, v3);
 //
-//  object value = ht_get(&globals_ht, &ka);
+//  object value = ht_get(&globals_ht, ka);
 //  printf("got value 1 %lu\n", obj_obj2int(value));
-//  value = ht_get(&globals_ht, &kb);
+//  value = ht_get(&globals_ht, kb);
 //  printf("got value 2 %lu\n", obj_obj2int(value));
-//  value = ht_get(&globals_ht, &kc);
+//  value = ht_get(&globals_ht, kc);
 //  printf("got value 3 %lu\n", obj_obj2int(value));
 //}
 // End new hashset functions
