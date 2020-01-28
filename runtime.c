@@ -23,38 +23,6 @@
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
 
-object Cyc_global_set(void *thd, object identifier, object * glo, object value)
-{
-  gc_mut_update((gc_thread_data *) thd, *glo, value);
-  *(glo) = value;
-  ((gc_thread_data *) thd)->globals_changed = 1;
-  return value;
-}
-
-object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, object value)
-{
-  int do_gc = 0;
-  value = share_object(thd, NULL, value, &do_gc);
-  gc_mut_update((gc_thread_data *) thd, *glo, value);
-  *(glo) = value;
-  // TODO: if we don't do this how does GC know to transport the global??
-  // don't really want to do this though because it is a performance nightmare
-  // can we use add_mutation and add cvar as a case when transporting mutations?
-  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
-/*
-in order to get rid of the above I think we need to find the corresponding cvar and ensure it is a root
-in the upcoming GC. or if there is no GC scheduled, just update it directly now
-*/
-
-// TODO: not applicable here but after all entry_pts are executed the app should run a minor gc to get globals off the stack!
-
-  if (do_gc) {
-    object buf[1]; buf[0] = value;
-    GC(thd, cont, buf, 1);
-  }
-  return value;
-}
-
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[] = {
@@ -439,6 +407,46 @@ object cell_get(object cell)
   return car(cell);
 }
 
+object Cyc_global_set(void *thd, object identifier, object * glo, object value)
+{
+  gc_mut_update((gc_thread_data *) thd, *glo, value);
+  *(glo) = value;
+  ((gc_thread_data *) thd)->globals_changed = 1;
+  return value;
+}
+
+object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, object value)
+{
+  int do_gc = 0;
+  value = share_object(thd, NULL, value, &do_gc);
+  gc_mut_update((gc_thread_data *) thd, *glo, value);
+  *(glo) = value;
+  // TODO: if we don't do this how does GC know to transport the global??
+  // don't really want to do this though because it is a performance nightmare
+  // can we use add_mutation and add cvar as a case when transporting mutations?
+  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
+/*
+in order to get rid of the above I think we need to find the corresponding cvar and ensure it is a root
+in the upcoming GC. or if there is no GC scheduled, just update it directly now
+*/
+
+// TODO: not applicable here but after all entry_pts are executed the app should run a minor gc to get globals off the stack!
+
+  if (do_gc) {
+    object buf[1]; buf[0] = value;
+//    object cv = ht_get(&globals_ht, identifier);
+//    gc_thread_data *data = (gc_thread_data *) thd;
+//    // Ensure global is a root
+//    data->mutations = vpbuffer_add(data->mutations, 
+//                                  &(data->mutation_buflen), 
+//                                  data->mutation_count, 
+//                                  cv);
+    GC(thd, cont, buf, 1);
+  }
+  return value;
+}
+
+
 static boolean_type t_boolean = { {0}, boolean_tag, "t" };
 static boolean_type f_boolean = { {0}, boolean_tag, "f" };
 static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
@@ -563,12 +571,9 @@ void add_global(const char *identifier, object * glo)
   // results were the same or worse.
   global_table = malloc_make_pair(mcvar(glo), global_table);
 
-// TODO: insert into global_hs_table. will require a symbol arg to add_global
-//       that matches the symbol passed to global_set
-//
-//  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
-//  set_insert(&lib_table, psym);
-//  pthread_mutex_unlock(&symbol_table_lock);
+  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
+  ht_insert(&globals_ht, identifier, car(global_table));
+  pthread_mutex_unlock(&symbol_table_lock);
 }
 
 void debug_dump_globals()
@@ -5997,6 +6002,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         for (i = 0; i < ((vector) v)->num_elements; i++) {
           gc_move2heap(((vector) v)->elements[i]);
         }
+      } else if (type_of(o) == cvar_tag) {
+        cvar_type *c = (cvar_type *) o;
+        gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
       } else {
         printf("Unexpected type %d transporting mutation\n", type_of(o));
         exit(1);
