@@ -999,17 +999,20 @@
                 (c-args* (if (prim:arg-count? fun)
                              (c:append (c-code num-args-str) c-args)
                              c-args)))
-;; TODO: emit mangled sym as first arg to set-global! (what about unsafe version?).
-;; This also means we need to pass the symbol to add_global, store it somewhere in memory, and add_symbol prior to calling add_global
-(when (eq? 'set-global! fun)
-  (let* ((ident (cadr args))
-         (mangled (cgen:mangle-global ident))
-         (mangled-sym (string-append "quote_" mangled))
-        )
-    (trace:debug `(JAE set-global args are ,c-args ,args mangled ,mangled-sym))
-    ))
-;; Example c-args:
-;;("quote__121pare_125, __glo__121pare_125, r_73558_731010_731308_731412" () 3 ("quote__121pare_125" () 0) ("__glo__121pare_125" ()) ("r_73558_731010_731308_731412" ()))
+            ;; Emit symbol when mutating global variables, so we can look 
+            ;; up the cvar
+            (when (eq? 'set-global! fun)
+              (let* ((ident (cadr args))
+                     (mangled (string-append "\"" (cgen:mangle-global ident) "\""))
+                     (all-args (string-split (car c-args) #\,))
+                     (new-all-args (string-join (cons mangled (cdr all-args)) ","))
+                    )
+                (set-car! c-args* new-all-args)
+                (set-car! (cadddr c-args*) mangled)
+                ;(trace:debug `(JAE set-global args are ,c-args ,args mangled ))
+                ;; Example c-args:
+                ;;("quote__121pare_125, __glo__121pare_125, r_73558_731010_731308_731412" () 3 ("quote__121pare_125" () 0) ("__glo__121pare_125" ()) ("r_73558_731010_731308_731412" ()))
+                ))
 
             (if (prim/cvar? fun)
               ;; Args need to go with alloc function
