@@ -418,30 +418,21 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
 object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, object value)
 {
   int do_gc = 0;
-  value = share_object(thd, NULL, value, &do_gc);
+  value = share_object(thd, NULL, value, &do_gc); // glo cannot be thread-local!
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   *(glo) = value;
-  // TODO: if we don't do this how does GC know to transport the global??
-  // don't really want to do this though because it is a performance nightmare
-  // can we use add_mutation and add cvar as a case when transporting mutations?
-//  ((gc_thread_data *) thd)->globals_changed = 1; // No longer needed??
-/*
-in order to get rid of the above I think we need to find the corresponding cvar and ensure it is a root
-in the upcoming GC. or if there is no GC scheduled, just update it directly now
-*/
-
-// TODO: not applicable here but after all entry_pts are executed the app should run a minor gc to get globals off the stack!
-
   if (do_gc) {
     object buf[1]; buf[0] = value;
+    // Ensure global is a root. We need to do this here to ensure
+    // global and all its children are relocated to the heap.
     object cv = ht_get(&globals_ht, identifier);
     gc_thread_data *data = (gc_thread_data *) thd;
-    // Ensure global is a root
     data->mutations = vpbuffer_add(data->mutations, 
                                   &(data->mutation_buflen), 
                                   data->mutation_count, 
                                   cv);
     data->mutation_count++;
+    // Run GC
     GC(thd, cont, buf, 1);
   }
   return value;
