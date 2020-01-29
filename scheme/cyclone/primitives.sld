@@ -691,7 +691,7 @@
          ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
-         ((eq? p 'set-global!)   "global_set2_id")
+         ((eq? p 'set-global!)   "global_set_cps_id")
          ((eq? p 'set-global-unsafe!)   "global_set_id")
          (else
            (error "unhandled primitive: " p))))

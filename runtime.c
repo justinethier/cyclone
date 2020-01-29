@@ -415,7 +415,7 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
   return value;
 }
 
-object Cyc_global_set2(void *thd, object cont, object identifier, object * glo, object value)
+object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
 {
   int do_gc = 0;
   value = share_object(thd, NULL, value, &do_gc); // glo cannot be thread-local!
