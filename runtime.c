@@ -418,7 +418,7 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
 object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
 {
   int do_gc = 0;
-  value = share_object(thd, NULL, value, &do_gc); // glo cannot be thread-local!
+  value = transport_stack_value(thd, NULL, value, &do_gc); // glo cannot be thread-local!
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   *(glo) = value;
   if (do_gc) {
@@ -606,7 +606,7 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
  * @param run_gc OUT parameter, returns 1 if minor GC needs to be invoked
  * @return Pointer to `var` object
  */
-object share_object(gc_thread_data *data, object var, object value, int *run_gc) 
+object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc) 
 {
   char tmp;
   int inttmp, *heap_grown = &inttmp;
@@ -2188,7 +2188,7 @@ object Cyc_set_car2(void *data, object cont, object l, object val)
 
   // Alternate write barrier
   int do_gc = 0;
-  val = share_object(data, l, val, &do_gc);
+  val = transport_stack_value(data, l, val, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, car(l), val);
   car(l) = val;
@@ -2211,7 +2211,7 @@ object Cyc_set_cdr2(void *data, object cont, object l, object val)
 
   // Alternate write barrier
   int do_gc = 0;
-  val = share_object(data, l, val, &do_gc);
+  val = transport_stack_value(data, l, val, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
   cdr(l) = val;
@@ -2238,7 +2238,7 @@ object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
   }
 
   int do_gc = 0;
-  obj = share_object(data, v, obj, &do_gc);
+  obj = transport_stack_value(data, v, obj, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
 
@@ -2257,7 +2257,7 @@ object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, objec
 {
   int idx = unbox_number(k);
   int do_gc = 0;
-  obj = share_object(data, v, obj, &do_gc);
+  obj = transport_stack_value(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);

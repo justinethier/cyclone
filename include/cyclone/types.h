@@ -529,7 +529,7 @@ void clear_mutations(void *data);
  * @brief Minor GC write barrier to ensure there are no references to stack objects from the heap.
  */
 /**@{*/
-object share_object(gc_thread_data *data, object var, object value, int *run_gc);
+object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc);
 /**@}*/
 
 /**@}*/
