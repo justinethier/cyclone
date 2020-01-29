@@ -2124,62 +2124,67 @@ object Cyc_set_cell(void *data, object l, object val)
   return l;
 }
 
-//object Cyc_set_car(void *data, object l, object val)
-//{
-//  if (Cyc_is_pair(l) == boolean_f) {
-//    Cyc_invalid_type_error(data, pair_tag, l);
-//  }
-//  Cyc_verify_mutable(data, l);
-//  gc_mut_update((gc_thread_data *) data, car(l), val);
-//  car(l) = val;
-//  add_mutation(data, l, -1, val);
-//  return l;
-//}
-//
-//object Cyc_set_cdr(void *data, object l, object val)
-//{
-//  if (Cyc_is_pair(l) == boolean_f) {
-//    Cyc_invalid_type_error(data, pair_tag, l);
-//  }
-//  Cyc_verify_mutable(data, l);
-//  gc_mut_update((gc_thread_data *) data, cdr(l), val);
-//  cdr(l) = val;
-//  add_mutation(data, l, -1, val);
-//  return l;
-//}
-//
-//object Cyc_vector_set(void *data, object v, object k, object obj)
-//{
-//  int idx;
-//  Cyc_check_vec(data, v);
-//  Cyc_check_fixnum(data, k);
-//  Cyc_verify_mutable(data, v);
-//  idx = unbox_number(k);
-//
-//  if (idx < 0 || idx >= ((vector) v)->num_elements) {
-//    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
-//  }
-//
-//  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-//
-//  ((vector) v)->elements[idx] = obj;
-//  add_mutation(data, v, idx, obj);
-//  return v;
-//}
-//
-//object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
-//{
-//  int idx = unbox_number(k);
-//  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-//  ((vector) v)->elements[idx] = obj;
-//  add_mutation(data, v, idx, obj);
-//  return v;
-//}
+object Cyc_set_car(void *data, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+  gc_mut_update((gc_thread_data *) data, car(l), val);
+  car(l) = val;
+  add_mutation(data, l, -1, val);
+  return l;
+}
 
-//
+object Cyc_set_cdr(void *data, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+  gc_mut_update((gc_thread_data *) data, cdr(l), val);
+  cdr(l) = val;
+  add_mutation(data, l, -1, val);
+  return l;
+}
+
+object Cyc_vector_set(void *data, object v, object k, object obj)
+{
+  int idx;
+  Cyc_check_vec(data, v);
+  Cyc_check_fixnum(data, k);
+  Cyc_verify_mutable(data, v);
+  idx = unbox_number(k);
+
+  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
+  }
+
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+
+  ((vector) v)->elements[idx] = obj;
+  add_mutation(data, v, idx, obj);
+  return v;
+}
+
+object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
+{
+  int idx = unbox_number(k);
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+  ((vector) v)->elements[idx] = obj;
+  add_mutation(data, v, idx, obj);
+  return v;
+}
+
+// JAE TODO: comment below in progress
 // TODO: rename these as (EG) Cyc_set_car_cps. Uncomment non-CPS above and we can use them for unsafe compilation
 //
 object Cyc_set_car2(void *data, object cont, object l, object val)
+{
+  return Cyc_set_car_cps(data, cont, l, val);
+}
+
+object Cyc_set_car_cps(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
     Cyc_invalid_type_error(data, pair_tag, l);
@@ -2204,6 +2209,11 @@ object Cyc_set_car2(void *data, object cont, object l, object val)
 
 object Cyc_set_cdr2(void *data, object cont, object l, object val)
 {
+  return Cyc_set_cdr_cps(data, cont, l, val);
+}
+
+object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
+{
   if (Cyc_is_pair(l) == boolean_f) {
     Cyc_invalid_type_error(data, pair_tag, l);
   }
@@ -2226,6 +2236,11 @@ object Cyc_set_cdr2(void *data, object cont, object l, object val)
 }
 
 object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
+{
+  return Cyc_vector_set_cps(data, cont, v, k, obj);
+}
+
+object Cyc_vector_set_cps(void *data, object cont, object v, object k, object obj)
 {
   int idx;
   Cyc_check_vec(data, v);
@@ -2254,6 +2269,11 @@ object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
 }
 
 object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, object obj)
+{
+  return Cyc_vector_set_unsafe_cps(data, cont, v, k, obj);
+}
+
+object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, object obj)
 {
   int idx = unbox_number(k);
   int do_gc = 0;

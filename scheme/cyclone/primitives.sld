@@ -634,8 +634,8 @@
               "Cyc_vector_ref"))
          ((eq? p 'vector-set!)  
           (if emit-unsafe
-              "Cyc_vector_set_unsafe2"
-              "Cyc_vector_set2"))
+              "Cyc_vector_set_unsafe_cps"
+              "Cyc_vector_set_cps"))
          ((eq? p 'string-append) "Cyc_string_append")
          ((eq? p 'string-cmp)    "Cyc_string_cmp")
          ((eq? p 'string->symbol) "Cyc_string2symbol")
@@ -653,8 +653,8 @@
           (if emit-unsafe
               "Cyc_length_unsafe"
               "Cyc_length"))
-         ((eq? p 'set-car!)      "Cyc_set_car2")
-         ((eq? p 'set-cdr!)      "Cyc_set_cdr2")
+         ((eq? p 'set-car!)      "Cyc_set_car_cps")
+         ((eq? p 'set-cdr!)      "Cyc_set_cdr_cps")
          ((eq? p 'eq?)           "Cyc_eq")
          ((eq? p 'eqv?)          "Cyc_eq")
          ((eq? p 'equal?)        "equalp")
