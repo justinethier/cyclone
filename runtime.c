@@ -2176,14 +2176,6 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
   return v;
 }
 
-// JAE TODO: comment below in progress
-// TODO: rename these as (EG) Cyc_set_car_cps. Uncomment non-CPS above and we can use them for unsafe compilation
-//
-object Cyc_set_car2(void *data, object cont, object l, object val)
-{
-  return Cyc_set_car_cps(data, cont, l, val);
-}
-
 object Cyc_set_car_cps(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
@@ -2207,11 +2199,6 @@ object Cyc_set_car_cps(void *data, object cont, object l, object val)
   }
 }
 
-object Cyc_set_cdr2(void *data, object cont, object l, object val)
-{
-  return Cyc_set_cdr_cps(data, cont, l, val);
-}
-
 object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
@@ -2233,11 +2220,6 @@ object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
   } else {
     return l;
   }
-}
-
-object Cyc_vector_set2(void *data, object cont, object v, object k, object obj)
-{
-  return Cyc_vector_set_cps(data, cont, v, k, obj);
 }
 
 object Cyc_vector_set_cps(void *data, object cont, object v, object k, object obj)
@@ -2266,11 +2248,6 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
   } else {
     return v; // Let caller pass this to cont
   }
-}
-
-object Cyc_vector_set_unsafe2(void *data, object cont, object v, object k, object obj)
-{
-  return Cyc_vector_set_unsafe_cps(data, cont, v, k, obj);
 }
 
 object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, object obj)
@@ -4988,7 +4965,7 @@ void _set_91car_67(void *data, object cont, object args)
   //return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-car!", 2, args);
   //Cyc_set_car2(data, cont, car(args), cadr(args));
-  return_closcall1(data, cont, Cyc_set_car2(data, cont, car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_set_car_cps(data, cont, car(args), cadr(args)));
 }
 
 void _set_91cdr_67(void *data, object cont, object args)
@@ -4997,7 +4974,7 @@ void _set_91cdr_67(void *data, object cont, object args)
   //return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-cdr!", 2, args);
   //Cyc_set_cdr2(data, cont, car(args), cadr(args));
-  return_closcall1(data, cont, Cyc_set_cdr2(data, cont, car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_set_cdr_cps(data, cont, car(args), cadr(args)));
 }
 
 void _Cyc_91has_91cycle_127(void *data, object cont, object args)
@@ -5417,7 +5394,7 @@ void _vector_91set_67(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "vector-set!", 3, args);
   {
-    object ref = Cyc_vector_set2(data, cont, car(args), cadr(args), caddr(args));
+    object ref = Cyc_vector_set_cps(data, cont, car(args), cadr(args), caddr(args));
     return_closcall1(data, cont, ref);
 }}
 

@@ -498,8 +498,6 @@ object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_vector_set_unsafe(void *d, object v, object k, object obj);
 object Cyc_vector_set_cps(void *d, object cont, object v, object k, object obj);
 object Cyc_vector_set_unsafe_cps(void *d, object cont, object v, object k, object obj);
-object Cyc_vector_set2(void *d, object cont, object v, object k, object obj);
-object Cyc_vector_set_unsafe2(void *d, object cont, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 /**@}*/
 
@@ -848,8 +846,6 @@ object Cyc_set_car(void *, object l, object val);
 object Cyc_set_cdr(void *, object l, object val);
 object Cyc_set_car_cps(void *, object cont, object l, object val);
 object Cyc_set_cdr_cps(void *, object cont, object l, object val);
-object Cyc_set_car2(void *, object cont, object l, object val);
-object Cyc_set_cdr2(void *, object cont, object l, object val);
 object Cyc_length(void *d, object l);
 object Cyc_length_unsafe(void *d, object l);
 object Cyc_list2vector(void *data, object cont, object l);
