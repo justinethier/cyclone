@@ -6,7 +6,7 @@ This release fixes a long-standing issue where a mutation (via `set-car!`, `vect
 
 In the past we provided functions such as `make-shared` that could be called from application code to guarantee safety. However, this approach is error-prone and asks too much of anyone using Cyclone for multithreaded development. The proper solution is for Cyclone to avoid this situation in the first place.
 
-To that end Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in application code. And since this work is being done by the Cyclone runtime, so special code needs to be added to your applications.
+To that end Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in application code. And since this work is being done by the Cyclone runtime, no special code needs to be added to your applications.
 
 Other Features
 
