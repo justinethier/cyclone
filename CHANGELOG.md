@@ -4,14 +4,11 @@
 
 This release is focused on improving multi-threaded support for the garbage collector.
 
-In particular, we have fixed a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a heap object to reference an object on a thread's local stack. This is problematic because another thread could then try to use the object after the original thread has relocated it to the heap.
+In particular, we have fixed a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a global object on the heap object to reference an object on a thread's local stack. This is problematic there is no way for a thread to know when an object on another thread's stack has been moved. Thus opening the possibility for race conditions, crashes, etc.
 
-NOTES:
-The interesting case is in particular when you write to a global mutable object, adding a reference to a local object. 
-> Given two mutator threads M1 and M2, assume that M1 creates an object X on its stack and that M2 receives a reference to X (through some global object). Now my question is: How do you handle this in the minor garbage collection of M1? To me, it seems that M2 has to be stopped as well so that the (minor) garbage collector can track all reference to X (which may be in CPU registers of M2).  
-END NOTES
+In the past we provided functions such as `make-shared` that could be called from application code to guarantee safety. However, this approach is error-prone and asks too much of anyone using Cyclone for multithreaded development. The proper solution is for Cyclone to avoid this situation in the first place.
 
-Cyclone will now automatically relocate any such stack objects to prevent threading issues where an application thread can access an object on another thread's local stack. This prevent a whole range of possible race conditions that had previously been possible in application code.
+To that end Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in application code. And since this work is being done by the Cyclone runtime, so special code needs to be added to your applications.
 
 Other Features
 
