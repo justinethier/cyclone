@@ -2,6 +2,17 @@
 
 ## 0.14 - TBD
 
+This release is focused on improving multi-threaded support for the garbage collector.
+
+In particular, we have fixed a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a heap object to reference an object on a thread's local stack. This is problematic because another thread could then try to use the object after the original thread has relocated it to the heap.
+
+NOTES:
+The interesting case is in particular when you write to a global mutable object, adding a reference to a local object. 
+> Given two mutator threads M1 and M2, assume that M1 creates an object X on its stack and that M2 receives a reference to X (through some global object). Now my question is: How do you handle this in the minor garbage collection of M1? To me, it seems that M2 has to be stopped as well so that the (minor) garbage collector can track all reference to X (which may be in CPU registers of M2).  
+END NOTES
+
+Cyclone will now automatically relocate any such stack objects to prevent threading issues where an application thread can access an object on another thread's local stack. This prevent a whole range of possible race conditions that had previously been possible in application code.
+
 ## 0.12 - January 17, 2020
 
 Features
