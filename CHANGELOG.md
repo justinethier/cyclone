@@ -2,7 +2,7 @@
 
 ## 0.14 - TBD
 
-This release fixes a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a global object on the heap object to reference an object on a thread's local stack. This is problematic because threads periodically relocate their local objects to the heap and for performance reasons this must be done without any coordination between threads. Thus opening the possibility for race conditions, crashes, etc.
+This release fixes a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a global object on the heap to reference objects on a thread's local stack. This is problematic because threads periodically relocate their local objects, and for performance reasons objects are moved without any coordination between threads. Thus it is critical that objects on the stack are only used by the thread that owns them.
 
 In the past we provided functions such as `make-shared` that could be called from application code to guarantee safety. However, this approach is error-prone and asks too much of anyone using Cyclone for multithreaded development. The proper solution is for Cyclone to avoid this situation in the first place.
 
