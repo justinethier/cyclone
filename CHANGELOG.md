@@ -13,6 +13,10 @@ END NOTES
 
 Cyclone will now automatically relocate any such stack objects to prevent threading issues where an application thread can access an object on another thread's local stack. This prevent a whole range of possible race conditions that had previously been possible in application code.
 
+Other Features
+
+ - Added `CYC_HIGH_RES_TIMERS` to the runtime code to allow logging of timer information for the GC. Note this can be passed to the C compiler via the `-D` option.
+
 ## 0.12 - January 17, 2020
 
 Features
