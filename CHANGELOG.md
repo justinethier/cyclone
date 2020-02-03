@@ -8,6 +8,8 @@ In the past we provided functions such as `make-shared` that could be called fro
 
 To that end Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in application code. And since this work is being done by the Cyclone runtime, no special code needs to be added to your applications.
 
+Special thanks to Daniel Mendler, whose discussions were the inspiration for these changes.
+
 Other Features
 
  - Added `CYC_HIGH_RES_TIMERS` to the runtime code to allow logging of timer information for the GC. Note this can be passed to the C compiler via the `-D` option.
