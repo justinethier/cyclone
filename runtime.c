@@ -415,14 +415,19 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
   return value;
 }
 
+static void Cyc_global_set_cps_gc_return(void *data, int argc, object cont, object glo_obj, object val, object next)
+{
+  object *glo = (object *)glo_obj;
+  *(glo) = val;
+  closcall1(data, (closure)next, val);
+}
+
 object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
 {
   int do_gc = 0;
   value = transport_stack_value(thd, NULL, value, &do_gc); // glo cannot be thread-local!
   gc_mut_update((gc_thread_data *) thd, *glo, value);
-  *(glo) = value;
   if (do_gc) {
-    object buf[1]; buf[0] = value;
     // Ensure global is a root. We need to do this here to ensure
     // global and all its children are relocated to the heap.
     object cv = ht_get(&globals_ht, identifier);
@@ -433,8 +438,11 @@ object Cyc_global_set_cps(void *thd, object cont, object identifier, object * gl
                                   cv);
     data->mutation_count++;
     // Run GC
-    GC(thd, cont, buf, 1);
+    mclosure0(clo, (function_type)Cyc_global_set_cps_gc_return);
+    object buf[3]; buf[0] = (object)glo; buf[1] = value; buf[2] = cont;
+    GC(data, &clo, buf, 3);
   }
+  *(glo) = value;
   return value;
 }
 
@@ -2176,6 +2184,14 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
   return v;
 }
 
+// Prevent the possibility of a race condition by doing the actual mutation
+// after all relevant objects have been relocated to the heap
+static void Cyc_set_car_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+{
+  car(l) = val;
+  closcall1(data, (closure)next, l);
+}
+
 object Cyc_set_car_cps(void *data, object cont, object l, object val)
 {
   if (Cyc_is_pair(l) == boolean_f) {
@@ -2186,23 +2202,23 @@ object Cyc_set_car_cps(void *data, object cont, object l, object val)
   // Alternate write barrier
   int do_gc = 0;
   val = transport_stack_value(data, l, val, &do_gc);
-
   gc_mut_update((gc_thread_data *) data, car(l), val);
-TODO: is there a race condition here between the collector (potentially with a stack value here) and the mutator (which is doing GC next?)
-maybe we need to wait until after gc is finished before doing the actual mutation. that implies we need to create another continuation (that will do the mutation) and 
-return to there from GC.
-NOTE set-cdr and vector-set are also affected. probably global_set too
-once this change is made need to retest maze benchmark extensively in particular (as it was crashing previously) as well as entire suite. need to make sure this is
-rock solid before it goes back to master
-  car(l) = val;
   add_mutation(data, l, -1, val); // Ensure val is transported
   if (do_gc) {
-    object buf[1]; buf[0] = l;
-    GC(data, cont, buf, 1);
+    mclosure0(clo, (function_type)Cyc_set_car_cps_gc_return);
+    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+    GC(data, &clo, buf, 3);
     return NULL;
   } else {
+    car(l) = val;
     return l;
   }
+}
+
+static void Cyc_set_cdr_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+{
+  cdr(l) = val;
+  closcall1(data, (closure)next, l);
 }
 
 object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
@@ -2217,15 +2233,23 @@ object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
   val = transport_stack_value(data, l, val, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
-  cdr(l) = val;
   add_mutation(data, l, -1, val); // Ensure val is transported
   if (do_gc) {
-    object buf[1]; buf[0] = l;
-    GC(data, cont, buf, 1);
+    mclosure0(clo, (function_type)Cyc_set_cdr_cps_gc_return);
+    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+    GC(data, &clo, buf, 3);
     return NULL;
   } else {
+    cdr(l) = val;
     return l;
   }
+}
+
+static void Cyc_vector_set_cps_gc_return(void *data, int argc, object cont, object vec, object idx, object val, object next)
+{
+  int i = obj_obj2int(idx);
+  ((vector) vec)->elements[i] = val;
+  closcall1(data, (closure)next, vec);
 }
 
 object Cyc_vector_set_cps(void *data, object cont, object v, object k, object obj)
@@ -2244,14 +2268,14 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
   obj = transport_stack_value(data, v, obj, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-
-  ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
   if (do_gc) {
-    object buf[1]; buf[0] = v;
-    GC(data, cont, buf, 1);
+    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
+    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+    GC(data, &clo, buf, 4);
     return NULL;
   } else {
+    ((vector) v)->elements[idx] = obj;
     return v; // Let caller pass this to cont
   }
 }
@@ -2262,13 +2286,14 @@ object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, ob
   int do_gc = 0;
   obj = transport_stack_value(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
-  ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
   if (do_gc) {
-    object buf[1]; buf[0] = v;
-    GC(data, cont, buf, 1);
+    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
+    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+    GC(data, &clo, buf, 4);
     return NULL;
   } else {
+    ((vector) v)->elements[idx] = obj;
     return v;
   }
 }
