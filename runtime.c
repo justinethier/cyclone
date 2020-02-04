@@ -437,12 +437,12 @@ object Cyc_global_set_cps(void *thd, object cont, object identifier, object * gl
                                   data->mutation_count, 
                                   cv);
     data->mutation_count++;
-    // Run GC
+    // Run GC, then do the actual assignment with heap objects
     mclosure0(clo, (function_type)Cyc_global_set_cps_gc_return);
     object buf[3]; buf[0] = (object)glo; buf[1] = value; buf[2] = cont;
     GC(data, &clo, buf, 3);
   }
-  *(glo) = value;
+  *(glo) = value; // Already have heap objs, do assignment now
   return value;
 }
 
@@ -2204,13 +2204,13 @@ object Cyc_set_car_cps(void *data, object cont, object l, object val)
   val = transport_stack_value(data, l, val, &do_gc);
   gc_mut_update((gc_thread_data *) data, car(l), val);
   add_mutation(data, l, -1, val); // Ensure val is transported
-  if (do_gc) {
+  if (do_gc) { // GC and then do assignment
     mclosure0(clo, (function_type)Cyc_set_car_cps_gc_return);
     object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
     GC(data, &clo, buf, 3);
     return NULL;
   } else {
-    car(l) = val;
+    car(l) = val; // Assign now since we have heap objects
     return l;
   }
 }
@@ -2234,13 +2234,13 @@ object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
 
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
   add_mutation(data, l, -1, val); // Ensure val is transported
-  if (do_gc) {
+  if (do_gc) { // GC and then to assignment
     mclosure0(clo, (function_type)Cyc_set_cdr_cps_gc_return);
     object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
     GC(data, &clo, buf, 3);
     return NULL;
   } else {
-    cdr(l) = val;
+    cdr(l) = val; // Assign now since we have heap objects
     return l;
   }
 }
@@ -2269,13 +2269,13 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
 
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   add_mutation(data, v, idx, obj);
-  if (do_gc) {
+  if (do_gc) { // GC and then do assignment
     mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
     object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
     GC(data, &clo, buf, 4);
     return NULL;
   } else {
-    ((vector) v)->elements[idx] = obj;
+    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
     return v; // Let caller pass this to cont
   }
 }
@@ -2287,13 +2287,13 @@ object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, ob
   obj = transport_stack_value(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   add_mutation(data, v, idx, obj);
-  if (do_gc) {
+  if (do_gc) { // GC and then do assignment
     mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
     object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
     GC(data, &clo, buf, 4);
     return NULL;
   } else {
-    ((vector) v)->elements[idx] = obj;
+    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
     return v;
   }
 }
