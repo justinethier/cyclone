@@ -1177,6 +1177,9 @@ hrt_log_delta("gc sweep", tstamp);
 #endif
       h_passed->num_unswept_children--;
       if (!keep) {
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p marked for deletion\n", h);
+#endif
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
         if (freed) {
@@ -1213,6 +1216,9 @@ hrt_log_delta("gc sweep", tstamp);
     } else {
       // TODO: else, assign heap full? YES for fixed-size, for REST maybe not??
       h->is_full = 1;
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p is full\n", h);
+#endif
     }
   }
   return result;
@@ -1297,6 +1303,9 @@ hrt_log_delta("gc sweep fixed size", tstamp);
 #endif
       h_passed->num_unswept_children--;
       if (!keep) {
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p marked for deletion\n", h);
+#endif
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
         if (freed) {
@@ -1318,6 +1327,9 @@ hrt_log_delta("gc sweep fixed size", tstamp);
     } else {
       // TODO: else, assign heap full? YES for fixed-size, for REST maybe not??
       h->is_full = 1;
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p is full\n", h);
+#endif
     }
   }
   return result;
