@@ -1144,6 +1144,9 @@ void gc_start_major_collection(gc_thread_data *thd){
 
 void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd)
 {
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   gc_heap *h_start = h, *h_prev;
   void *result = NULL;
   // Find next heap
@@ -1169,6 +1172,9 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
       //  prev_free_size = h_size; // Full size was cached
       //}
       gc_heap *keep = gc_sweep(h, heap_type, thd); // Clean up garbage objects
+#ifdef CYC_HIGH_RES_TIMERS
+hrt_log_delta("gc sweep", tstamp);
+#endif
       h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching
@@ -1262,6 +1268,9 @@ static void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, ch
 
 void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd)
 {
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   gc_heap *h_start = h, *h_prev;
   void *result = NULL;
   // Find next heap
@@ -1283,6 +1292,9 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) {
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
+#ifdef CYC_HIGH_RES_TIMERS
+hrt_log_delta("gc sweep fixed size", tstamp);
+#endif
       h_passed->num_unswept_children--;
       if (!keep) {
         // Heap marked for deletion, remove it and keep searching

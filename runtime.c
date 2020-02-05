@@ -109,7 +109,7 @@ long long hrt_cmp_current(long long tstamp)
   return (now - tstamp);
 }
 
-void hrt_log_delta(long long tstamp) 
+void hrt_log_delta(const char *label, long long tstamp) 
 {
   static long long initial = 1;
   static long long initial_tstamp;
@@ -119,7 +119,7 @@ void hrt_log_delta(long long tstamp)
   }
   long long total = hrt_cmp_current(initial_tstamp);
   long long delta = hrt_cmp_current(tstamp);
-  fprintf(stdout, "%llu, %llu\n", total, delta);
+  fprintf(stdout, "%s, %llu, %llu\n", label, total, delta);
 }
 
 /* END High resolution timers */
@@ -6123,7 +6123,7 @@ long long tstamp = hrt_get_current();
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *) data, alloci);
 #ifdef CYC_HIGH_RES_TIMERS
-hrt_log_delta(tstamp);
+hrt_log_delta("minor gc", tstamp);
 #endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
