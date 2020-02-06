@@ -1300,7 +1300,7 @@ long long tstamp = hrt_get_current();
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
 #ifdef CYC_HIGH_RES_TIMERS
-fprintf(stderr, "sweep fixed size heap %p \n", h);
+fprintf(stderr, "sweep fixed size heap %p size %lu \n", h, size);
 hrt_log_delta("gc sweep fixed size", tstamp);
 #endif
       h_passed->num_unswept_children--;
