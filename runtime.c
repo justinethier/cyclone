@@ -119,7 +119,7 @@ void hrt_log_delta(const char *label, long long tstamp)
   }
   long long total = hrt_cmp_current(initial_tstamp);
   long long delta = hrt_cmp_current(tstamp);
-  fprintf(stdout, "%s, %llu, %llu\n", label, total, delta);
+  fprintf(stderr, "%s, %llu, %llu\n", label, total, delta);
 }
 
 /* END High resolution timers */
