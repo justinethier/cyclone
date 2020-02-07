@@ -308,21 +308,21 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 // New set of hashset functions that store non-relocated objects
 static void ht_hash_wrapper(struct ck_ht_hash *h, const void *key, size_t length, uint64_t seed)
 {
-  h->value = (unsigned long)MurmurHash64A(key, length, seed);
+  h->value = (uintptr_t)key;
   return;
 }
 
 static void *ht_get(ck_ht_t * ht, const void *key)
 {
   void *v;
-  int len = strlen(key);
+  int len = sizeof(key);
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
   ck_ht_hash(&h, ht, key, len);
   ck_ht_entry_key_set(&entry, key, len);
   if (!ck_ht_get_spmc(ht, h, &entry)) {
-    fprintf(stderr, "Unable to retrieve hash table value for key %s\n", (char *)key);
+    fprintf(stderr, "Unable to retrieve hash table value for key %p\n", key);
     exit(1);
   }
   v = (void *)entry.value;
@@ -331,7 +331,7 @@ static void *ht_get(ck_ht_t * ht, const void *key)
 
 static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
 {
-  int len = strlen(key);
+  int len = sizeof(key);
   ck_ht_hash_t h;
   ck_ht_entry_t entry;
 
@@ -430,7 +430,7 @@ object Cyc_global_set_cps(void *thd, object cont, object identifier, object * gl
   if (do_gc) {
     // Ensure global is a root. We need to do this here to ensure
     // global and all its children are relocated to the heap.
-    object cv = ht_get(&globals_ht, identifier);
+    object cv = ht_get(&globals_ht, glo);
     gc_thread_data *data = (gc_thread_data *) thd;
     data->mutations = vpbuffer_add(data->mutations, 
                                   &(data->mutation_buflen), 
@@ -572,7 +572,11 @@ void add_global(const char *identifier, object * glo)
   global_table = malloc_make_pair(mcvar(glo), global_table);
 
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
-  ht_insert(&globals_ht, identifier, car(global_table));
+  if (!ht_insert(&globals_ht, glo, car(global_table)))
+  {
+    fprintf(stderr, "Error inserting global hash table %p\n", glo);
+    exit(1);
+  }
   pthread_mutex_unlock(&symbol_table_lock);
 }
 
