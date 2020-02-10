@@ -22,6 +22,17 @@
 #include <dlfcn.h>
 #include "cyclone/bignum.h"
 
+#ifdef CYC_HIGH_RES_TIMERS
+/**
+ * \defgroup hrt High resolution timers
+ */
+/**@{*/
+long long hrt_get_current();
+long long hrt_cmp_current(long long tstamp);
+void hrt_log_delta(const char *label, long long tstamp);
+/**@}*/
+#endif
+
 /**
  * Generic object type
  * \ingroup objects
@@ -522,6 +533,14 @@ void Cyc_make_shared_object(void *data, object k, object obj);
 /**@{*/
 void add_mutation(void *data, object var, int index, object value);
 void clear_mutations(void *data);
+/**@}*/
+
+/**
+ * \defgroup gc_minor_sh_obj Shared object write barrier
+ * @brief Minor GC write barrier to ensure there are no references to stack objects from the heap.
+ */
+/**@{*/
+object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc);
 /**@}*/
 
 /**@}*/

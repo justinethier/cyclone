@@ -141,7 +141,7 @@
 (define (trace:error msg) (trace 1 msg pretty-print ""))
 (define (trace:warn msg)  (trace 2 msg pretty-print ""))
 (define (trace:info msg)  (trace 3 msg pretty-print ""))
-(define (trace:debug msg) (trace 4 msg display "DEBUG: "))
+(define (trace:debug msg) (trace 4 msg write "DEBUG: "))
 
 (define (cyc:error msg)
   (error msg)
@@ -431,6 +431,7 @@ if (acc) {
                   Cyc-current-exception-handler
                   cell-get
                   set-global!
+                  set-global-unsafe!
                   set-cell!
                   cell
                   cons
@@ -847,11 +848,17 @@ if (acc) {
     ((prim? exp)     exp)
     ((quote? exp)    exp)
     ((lambda? exp)   (error `(Unexpected lambda in wrap-mutables ,exp)))
-    ((set!? exp)     `(,(if (member (set!->var exp) globals)
-                            'set-global!
-                            'set-cell!) 
-                        ,(set!->var exp) 
-                        ,(wrap-mutables (set!->exp exp) globals)))
+    ((set!? exp)   
+     (cond
+       ((member (set!->var exp) globals)
+          `(set-global!
+            ,(list 'quote (set!->var exp))
+            ,(set!->var exp) 
+            ,(wrap-mutables (set!->exp exp) globals)) )
+      (else
+          `(set-cell!
+            ,(set!->var exp) 
+            ,(wrap-mutables (set!->exp exp) globals))) ))
     ((if? exp)       `(if ,(wrap-mutables (if->condition exp) globals)
                           ,(wrap-mutables (if->then exp) globals)
                           ,(wrap-mutables (if->else exp) globals)))

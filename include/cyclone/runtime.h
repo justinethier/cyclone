@@ -105,8 +105,13 @@ void set_env_variables(char **vars);
 
 object cell_get(object cell);
 
-#define global_set(glo,value) Cyc_global_set(data, (object *)&glo, value)
-object Cyc_global_set(void *thd, object * glo, object value);
+#define global_set(glo,value) Cyc_global_set(data, NULL, (object *)&glo, value)
+#define global_set_id(id,glo,value) Cyc_global_set(data, id, (object *)&glo, value)
+object Cyc_global_set(void *thd, object sym, object * glo, object value);
+
+#define global_set_cps(thd,k,glo,value) Cyc_global_set_cps(thd, k, NULL, (object *)&glo, value)
+#define global_set_cps_id(thd,k,id,glo,value) Cyc_global_set_cps(thd, k, id, (object *)&glo, value)
+object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, object value);
 
 /* Variable argument count support 
 
@@ -491,6 +496,8 @@ object Cyc_vector_ref(void *d, object v, object k);
   ((vector) v)->elements[obj_obj2int(k)]
 object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_vector_set_unsafe(void *d, object v, object k, object obj);
+object Cyc_vector_set_cps(void *d, object cont, object v, object k, object obj);
+object Cyc_vector_set_unsafe_cps(void *d, object cont, object v, object k, object obj);
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 /**@}*/
 
@@ -782,7 +789,7 @@ object register_library(const char *name);
  */
 /**@{*/
 extern list global_table;
-void add_global(object * glo);
+void add_global(const char *identifier, object * glo);
 void Cyc_set_globals_changed(gc_thread_data *thd);
 /**@}*/
 
@@ -837,6 +844,8 @@ list malloc_make_pair(object, object);
 object Cyc_set_cell(void *, object l, object val);
 object Cyc_set_car(void *, object l, object val);
 object Cyc_set_cdr(void *, object l, object val);
+object Cyc_set_car_cps(void *, object cont, object l, object val);
+object Cyc_set_cdr_cps(void *, object cont, object l, object val);
 object Cyc_length(void *d, object l);
 object Cyc_length_unsafe(void *d, object l);
 object Cyc_list2vector(void *data, object cont, object l);

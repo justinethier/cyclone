@@ -9,6 +9,7 @@
  */
 
 #include <ck_hs.h>
+#include <ck_ht.h>
 #include <ck_pr.h>
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
@@ -21,14 +22,6 @@
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
-
-object Cyc_global_set(void *thd, object * glo, object value)
-{
-  gc_mut_update((gc_thread_data *) thd, *glo, value);
-  *(glo) = value;
-  ((gc_thread_data *) thd)->globals_changed = 1;
-  return value;
-}
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -98,6 +91,39 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index)
 }
 
 /* END error checking */
+
+#ifdef CYC_HIGH_RES_TIMERS
+/* High resolution timers */
+#include <sys/time.h>
+long long hrt_get_current() 
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL); /* TODO: longer-term consider using clock_gettime instead */
+  long long jiffy = (tv.tv_sec)*1000000LL + tv.tv_usec;
+  return jiffy;
+}
+
+long long hrt_cmp_current(long long tstamp) 
+{
+  long long now = hrt_get_current();
+  return (now - tstamp);
+}
+
+void hrt_log_delta(const char *label, long long tstamp) 
+{
+  static long long initial = 1;
+  static long long initial_tstamp;
+  if (initial == 1) {
+    initial = 0;
+    initial_tstamp = hrt_get_current();
+  }
+  long long total = hrt_cmp_current(initial_tstamp);
+  long long delta = hrt_cmp_current(tstamp);
+  fprintf(stderr, "%s, %llu, %llu\n", label, total, delta);
+}
+
+/* END High resolution timers */
+#endif
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, a1) \
@@ -302,6 +328,8 @@ void gc_init_heap(long heap_size)
     fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
     exit(1);
   }
+  
+  //ht_test(); // JAE - DEBUGGING!!
 }
 
 object cell_get(object cell)
@@ -309,6 +337,46 @@ object cell_get(object cell)
   // Always use unsafe car here, since cell_get calls are computed by compiler
   return car(cell);
 }
+
+object Cyc_global_set(void *thd, object identifier, object * glo, object value)
+{
+  gc_mut_update((gc_thread_data *) thd, *glo, value);
+  *(glo) = value;
+  ((gc_thread_data *) thd)->globals_changed = 1;
+  return value;
+}
+
+static void Cyc_global_set_cps_gc_return(void *data, int argc, object cont, object glo_obj, object val, object next)
+{
+  object *glo = (object *)glo_obj;
+  *(glo) = val;
+  closcall1(data, (closure)next, val);
+}
+
+object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
+{
+  int do_gc = 0;
+  value = transport_stack_value(thd, NULL, value, &do_gc); // glo cannot be thread-local!
+  gc_mut_update((gc_thread_data *) thd, *glo, value);
+  if (do_gc) {
+    // Ensure global is a root. We need to do this here to ensure
+    // global and all its children are relocated to the heap.
+    cvar_type cv = { {0}, cvar_tag, glo };
+    gc_thread_data *data = (gc_thread_data *) thd;
+    data->mutations = vpbuffer_add(data->mutations, 
+                                  &(data->mutation_buflen), 
+                                  data->mutation_count, 
+                                  &cv);
+    data->mutation_count++;
+    // Run GC, then do the actual assignment with heap objects
+    mclosure0(clo, (function_type)Cyc_global_set_cps_gc_return);
+    object buf[3]; buf[0] = (object)glo; buf[1] = value; buf[2] = cont;
+    GC(data, &clo, buf, 3);
+  }
+  *(glo) = value; // Already have heap objs, do assignment now
+  return value;
+}
+
 
 static boolean_type t_boolean = { {0}, boolean_tag, "t" };
 static boolean_type f_boolean = { {0}, boolean_tag, "f" };
@@ -428,7 +496,7 @@ object register_library(const char *name)
 /* Global table */
 list global_table = NULL;
 
-void add_global(object * glo)
+void add_global(const char *identifier, object * glo)
 {
   // Tried using a vpbuffer for this and the benchmark
   // results were the same or worse.
@@ -461,6 +529,67 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
 }
 
 /* END Global table */
+
+/** new write barrier
+ * This function determines if a mutation introduces a pointer to a stack
+ * object from a heap object, and if so, either copies the object to the
+ * heap or lets the caller know a minor GC must be performed.
+ *
+ * @param data   Current thread's data object
+ * @param var    Object being mutated
+ * @param value  New value being associated to var
+ * @param run_gc OUT parameter, returns 1 if minor GC needs to be invoked
+ * @return Pointer to `var` object
+ */
+object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc) 
+{
+  char tmp;
+  int inttmp, *heap_grown = &inttmp;
+  gc_heap_root *heap = data->heap;
+
+  // Nothing needs to be done unless we are mutating
+  // a heap variable to point to a stack var.
+  if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
+    // Must move `value` to the heap to allow use by other threads
+    switch(type_of(value)) {
+      case string_tag:
+      case bytevector_tag:
+        if (immutable(value)) {
+          // Safe to transport now
+          object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+          return hp;
+        }
+        // Need to GC if obj is mutable, EG: a string could be mutated so we can't
+        // have multiple copies of the object running around
+        *run_gc = 1;
+        return value;
+      case double_tag:
+      case port_tag:
+      case c_opaque_tag:
+      case complex_num_tag: {
+        // These objects are immutable, transport now
+        object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+        return hp;
+      }
+      // Objs w/children force minor GC to guarantee everything is relocated:
+      case cvar_tag:
+      case closure0_tag:
+      case closure1_tag:
+      case closureN_tag:
+      case pair_tag:
+      case vector_tag:
+        *run_gc = 1;
+        return value;
+      default:
+        // Other object types are not stack-allocated so should never get here
+        printf("Invalid shared object type %d\n", type_of(value));
+        exit(1);
+    }
+  }
+
+  return value;
+}
+
 
 /* Mutation table functions
  *
@@ -1980,6 +2109,120 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
   ((vector) v)->elements[idx] = obj;
   add_mutation(data, v, idx, obj);
   return v;
+}
+
+// Prevent the possibility of a race condition by doing the actual mutation
+// after all relevant objects have been relocated to the heap
+static void Cyc_set_car_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+{
+  car(l) = val;
+  closcall1(data, (closure)next, l);
+}
+
+object Cyc_set_car_cps(void *data, object cont, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+
+  // Alternate write barrier
+  int do_gc = 0;
+  val = transport_stack_value(data, l, val, &do_gc);
+  gc_mut_update((gc_thread_data *) data, car(l), val);
+  add_mutation(data, l, -1, val); // Ensure val is transported
+  if (do_gc) { // GC and then do assignment
+    mclosure0(clo, (function_type)Cyc_set_car_cps_gc_return);
+    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+    GC(data, &clo, buf, 3);
+    return NULL;
+  } else {
+    car(l) = val; // Assign now since we have heap objects
+    return l;
+  }
+}
+
+static void Cyc_set_cdr_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+{
+  cdr(l) = val;
+  closcall1(data, (closure)next, l);
+}
+
+object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
+{
+  if (Cyc_is_pair(l) == boolean_f) {
+    Cyc_invalid_type_error(data, pair_tag, l);
+  }
+  Cyc_verify_mutable(data, l);
+
+  // Alternate write barrier
+  int do_gc = 0;
+  val = transport_stack_value(data, l, val, &do_gc);
+
+  gc_mut_update((gc_thread_data *) data, cdr(l), val);
+  add_mutation(data, l, -1, val); // Ensure val is transported
+  if (do_gc) { // GC and then to assignment
+    mclosure0(clo, (function_type)Cyc_set_cdr_cps_gc_return);
+    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+    GC(data, &clo, buf, 3);
+    return NULL;
+  } else {
+    cdr(l) = val; // Assign now since we have heap objects
+    return l;
+  }
+}
+
+static void Cyc_vector_set_cps_gc_return(void *data, int argc, object cont, object vec, object idx, object val, object next)
+{
+  int i = obj_obj2int(idx);
+  ((vector) vec)->elements[i] = val;
+  closcall1(data, (closure)next, vec);
+}
+
+object Cyc_vector_set_cps(void *data, object cont, object v, object k, object obj)
+{
+  int idx;
+  Cyc_check_vec(data, v);
+  Cyc_check_fixnum(data, k);
+  Cyc_verify_mutable(data, v);
+  idx = unbox_number(k);
+
+  if (idx < 0 || idx >= ((vector) v)->num_elements) {
+    Cyc_rt_raise2(data, "vector-set! - invalid index", k);
+  }
+
+  int do_gc = 0;
+  obj = transport_stack_value(data, v, obj, &do_gc);
+
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+  add_mutation(data, v, idx, obj);
+  if (do_gc) { // GC and then do assignment
+    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
+    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+    GC(data, &clo, buf, 4);
+    return NULL;
+  } else {
+    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
+    return v; // Let caller pass this to cont
+  }
+}
+
+object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, object obj)
+{
+  int idx = unbox_number(k);
+  int do_gc = 0;
+  obj = transport_stack_value(data, v, obj, &do_gc);
+  gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
+  add_mutation(data, v, idx, obj);
+  if (do_gc) { // GC and then do assignment
+    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
+    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+    GC(data, &clo, buf, 4);
+    return NULL;
+  } else {
+    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
+    return v;
+  }
 }
 
 object Cyc_vector_ref(void *data, object v, object k)
@@ -4676,14 +4919,20 @@ void _null_127(void *data, object cont, object args)
 
 void _set_91car_67(void *data, object cont, object args)
 {
+  //Cyc_check_num_args(data, "set-car!", 2, args);
+  //return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-car!", 2, args);
-  return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
+  //Cyc_set_car2(data, cont, car(args), cadr(args));
+  return_closcall1(data, cont, Cyc_set_car_cps(data, cont, car(args), cadr(args)));
 }
 
 void _set_91cdr_67(void *data, object cont, object args)
 {
+  //Cyc_check_num_args(data, "set-cdr!", 2, args);
+  //return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
   Cyc_check_num_args(data, "set-cdr!", 2, args);
-  return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
+  //Cyc_set_cdr2(data, cont, car(args), cadr(args));
+  return_closcall1(data, cont, Cyc_set_cdr_cps(data, cont, car(args), cadr(args)));
 }
 
 void _Cyc_91has_91cycle_127(void *data, object cont, object args)
@@ -5103,7 +5352,7 @@ void _vector_91set_67(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "vector-set!", 3, args);
   {
-    object ref = Cyc_vector_set(data, car(args), cadr(args), caddr(args));
+    object ref = Cyc_vector_set_cps(data, cont, car(args), cadr(args), caddr(args));
     return_closcall1(data, cont, ref);
 }}
 
@@ -5700,6 +5949,9 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         for (i = 0; i < ((vector) v)->num_elements; i++) {
           gc_move2heap(((vector) v)->elements[i]);
         }
+      } else if (type_of(o) == cvar_tag) {
+        cvar_type *c = (cvar_type *) o;
+        gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
       } else {
         printf("Unexpected type %d transporting mutation\n", type_of(o));
         exit(1);
@@ -5791,9 +6043,15 @@ void GC(void *data, closure cont, object * args, int num_args)
   char tmp;
   object low_limit = &tmp;      // This is one end of the stack...
   object high_limit = ((gc_thread_data *) data)->stack_start;
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *) data, alloci);
+#ifdef CYC_HIGH_RES_TIMERS
+hrt_log_delta("minor gc", tstamp);
+#endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
 }

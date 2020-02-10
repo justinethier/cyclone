@@ -1144,6 +1144,9 @@ void gc_start_major_collection(gc_thread_data *thd){
 
 void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd)
 {
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   gc_heap *h_start = h, *h_prev;
   void *result = NULL;
   // Find next heap
@@ -1169,8 +1172,15 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
       //  prev_free_size = h_size; // Full size was cached
       //}
       gc_heap *keep = gc_sweep(h, heap_type, thd); // Clean up garbage objects
+#ifdef CYC_HIGH_RES_TIMERS
+fprintf(stderr, "sweep heap %p \n", h);
+hrt_log_delta("gc sweep", tstamp);
+#endif
       h_passed->num_unswept_children--;
       if (!keep) {
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p marked for deletion\n", h);
+#endif
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
         if (freed) {
@@ -1207,6 +1217,9 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, int heap_type, size_t siz
     } else {
       // TODO: else, assign heap full? YES for fixed-size, for REST maybe not??
       h->is_full = 1;
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p is full\n", h);
+#endif
     }
   }
   return result;
@@ -1262,6 +1275,9 @@ static void *gc_try_alloc_fixed_size(gc_heap * h, int heap_type, size_t size, ch
 
 void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type, size_t size, char *obj, gc_thread_data *thd)
 {
+#ifdef CYC_HIGH_RES_TIMERS
+long long tstamp = hrt_get_current();
+#endif
   gc_heap *h_start = h, *h_prev;
   void *result = NULL;
   // Find next heap
@@ -1283,8 +1299,15 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     } else if (h->is_unswept == 1 && !gc_is_heap_empty(h)) {
       unsigned int h_size = h->size;
       gc_heap *keep = gc_sweep_fixed_size(h, heap_type, thd); // Clean up garbage objects
+#ifdef CYC_HIGH_RES_TIMERS
+fprintf(stderr, "sweep fixed size heap %p size %lu \n", h, size);
+hrt_log_delta("gc sweep fixed size", tstamp);
+#endif
       h_passed->num_unswept_children--;
       if (!keep) {
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p marked for deletion\n", h);
+#endif
         // Heap marked for deletion, remove it and keep searching
         gc_heap *freed = gc_heap_free(h, h_prev);
         if (freed) {
@@ -1306,6 +1329,9 @@ void *gc_try_alloc_slow_fixed_size(gc_heap *h_passed, gc_heap *h, int heap_type,
     } else {
       // TODO: else, assign heap full? YES for fixed-size, for REST maybe not??
       h->is_full = 1;
+#if GC_DEBUG_TRACE
+  fprintf(stderr, "heap %p is full\n", h);
+#endif
     }
   }
   return result;

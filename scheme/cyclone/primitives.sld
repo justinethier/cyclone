@@ -67,6 +67,7 @@
          Cyc-spawn-thread!
          Cyc-end-thread!
          set-global!
+         set-global-unsafe!
          set-cell!
          set-car!
          set-cdr!
@@ -132,6 +133,7 @@
          Cyc-fast-list-4
          cell-get
          set-global!
+         set-global-unsafe!
          set-cell!
          cell
          eq?
@@ -277,7 +279,8 @@
          (Cyc-fast-list-3 3 3)
          (Cyc-fast-list-4 4 4)
          (cell-get 1 1)
-         (set-global! 2 2)
+         (set-global! 3 3)
+         (set-global-unsafe! 3 3)
          (set-cell! 2 2)
          (cell 1 1)
          (eq? 2 2)
@@ -631,8 +634,8 @@
               "Cyc_vector_ref"))
          ((eq? p 'vector-set!)  
           (if emit-unsafe
-              "Cyc_vector_set_unsafe"
-              "Cyc_vector_set"))
+              "Cyc_vector_set_unsafe_cps"
+              "Cyc_vector_set_cps"))
          ((eq? p 'string-append) "Cyc_string_append")
          ((eq? p 'string-cmp)    "Cyc_string_cmp")
          ((eq? p 'string->symbol) "Cyc_string2symbol")
@@ -650,8 +653,8 @@
           (if emit-unsafe
               "Cyc_length_unsafe"
               "Cyc_length"))
-         ((eq? p 'set-car!)      "Cyc_set_car")
-         ((eq? p 'set-cdr!)      "Cyc_set_cdr")
+         ((eq? p 'set-car!)      "Cyc_set_car_cps")
+         ((eq? p 'set-cdr!)      "Cyc_set_cdr_cps")
          ((eq? p 'eq?)           "Cyc_eq")
          ((eq? p 'eqv?)          "Cyc_eq")
          ((eq? p 'equal?)        "equalp")
@@ -688,7 +691,8 @@
          ((eq? p 'cell)          "set_cell_as_expr")
          ((eq? p 'cell-get)      "car") ;; Unsafe as cell gets added by compiler
          ((eq? p 'set-cell!)     "Cyc_set_cell")
-         ((eq? p 'set-global!)   "global_set")
+         ((eq? p 'set-global!)   "global_set_cps_id")
+         ((eq? p 'set-global-unsafe!)   "global_set_id")
          (else
            (error "unhandled primitive: " p))))
 
@@ -788,7 +792,8 @@
         set-car!
         set-cdr!
         procedure?
-        set-cell!))
+        set-cell!
+        set-global!))
        (memq p *udf-prims*)))
 
     ;; Determine if primitive receives a pointer to a local C variable
@@ -870,6 +875,10 @@
         ((eq? p 'make-vector) "object")
         ((eq? p 'list->string) "object")
         ((eq? p 'list->vector) "object")
+        ((eq? p 'set-car!) "object")
+        ((eq? p 'set-cdr!) "object")
+        ((eq? p 'vector-set!) "object")
+        ((eq? p 'set-global!) "object")
         ((eq? p 'Cyc-installation-dir) "object")
         ((eq? p 'Cyc-compilation-environment) "object")
         ;((memq p *udf-prims*) "object")
@@ -900,6 +909,10 @@
                  make-vector list->vector
                  symbol->string number->string 
                  substring
+                 set-car!
+                 set-cdr!
+                 vector-set!
+                 set-global!
                  ;Cyc-fast-plus
                  ;Cyc-fast-sub
                  ;Cyc-fast-mul
@@ -938,6 +951,10 @@
                          Cyc-fast-apply
                          + - * /
                          = > < >= <=
+                         set-car!
+                         set-cdr!
+                         vector-set!
+                         set-global!
                          Cyc-list
                          Cyc-read-char Cyc-peek-char 
                          symbol->string list->string substring string-append string->number
