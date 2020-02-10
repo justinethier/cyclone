@@ -194,7 +194,6 @@ static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custo
 const object Cyc_EOF = &__EOF;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
-static ck_ht_t globals_ht;
 static int symbol_table_initial_size = 4096;
 static pthread_mutex_t symbol_table_lock;
 
@@ -305,67 +304,6 @@ static bool set_insert(ck_hs_t * hs, const void *value)
 }
 // End hashset supporting functions
 
-// New set of hashset functions that store non-relocated objects
-static void ht_hash_wrapper(struct ck_ht_hash *h, const void *key, size_t length, uint64_t seed)
-{
-  h->value = (uintptr_t)key;
-  return;
-}
-
-static void *ht_get(ck_ht_t * ht, const void *key)
-{
-  void *v;
-  int len = sizeof(key);
-  ck_ht_hash_t h;
-  ck_ht_entry_t entry;
-
-  ck_ht_hash(&h, ht, key, len);
-  ck_ht_entry_key_set(&entry, key, len);
-  if (!ck_ht_get_spmc(ht, h, &entry)) {
-    fprintf(stderr, "Unable to retrieve hash table value for key %p\n", key);
-    exit(1);
-  }
-  v = (void *)entry.value;
-  return v;
-}
-
-static bool ht_insert(ck_ht_t * ht, const void *key, const void *value)
-{
-  int len = sizeof(key);
-  ck_ht_hash_t h;
-  ck_ht_entry_t entry;
-
-  ck_ht_hash(&h, ht, key, len);
-  ck_ht_entry_set(&entry, h, key, len, value);
-  return ck_ht_put_spmc(ht, h, &entry);
-}
-
-//void ht_test() {
-//  //symbol_type ka = {{0}, symbol_tag, "sym a"};
-//  //symbol_type kb = {{0}, symbol_tag, "sym b"};
-//  //symbol_type kc = {{0}, symbol_tag, "sym c"};
-//  char ka[] = "test a";
-//  char kb[] = "test b";
-//  char kc[] = "test c";
-//  object v1 = obj_int2obj(1);
-//  object v2 = obj_int2obj(2);
-//  object v3 = obj_int2obj(3);
-//  bool result;
-//  
-//  printf("RUNNING HT DEBUG!!!\n");
-//  result = ht_insert(&globals_ht, ka, v1);
-//  result = ht_insert(&globals_ht, kb, v2);
-//  result = ht_insert(&globals_ht, kc, v3);
-//
-//  object value = ht_get(&globals_ht, ka);
-//  printf("got value 1 %lu\n", obj_obj2int(value));
-//  value = ht_get(&globals_ht, kb);
-//  printf("got value 2 %lu\n", obj_obj2int(value));
-//  value = ht_get(&globals_ht, kc);
-//  printf("got value 3 %lu\n", obj_obj2int(value));
-//}
-// End new hashset functions
-
 /**
  * @brief Perform one-time heap initializations for the program
  * @param heap_size Unused
@@ -384,13 +322,6 @@ void gc_init_heap(long heap_size)
                   hs_hash, hs_compare,
                   &my_allocator, symbol_table_initial_size, 43423)) {
     fprintf(stderr, "Unable to initialize symbol table\n");
-    exit(1);
-  }
-  if (!ck_ht_init(&globals_ht,
-                  CK_HT_MODE_BYTESTRING,
-                  ht_hash_wrapper, 
-                  &my_allocator, 384, 43423)) {
-    fprintf(stderr, "Unable to initialize globals hash table\n");
     exit(1);
   }
   if (pthread_mutex_init(&(symbol_table_lock), NULL) != 0) {
@@ -430,12 +361,12 @@ object Cyc_global_set_cps(void *thd, object cont, object identifier, object * gl
   if (do_gc) {
     // Ensure global is a root. We need to do this here to ensure
     // global and all its children are relocated to the heap.
-    object cv = ht_get(&globals_ht, glo);
+    cvar_type cv = { {0}, cvar_tag, glo };
     gc_thread_data *data = (gc_thread_data *) thd;
     data->mutations = vpbuffer_add(data->mutations, 
                                   &(data->mutation_buflen), 
                                   data->mutation_count, 
-                                  cv);
+                                  &cv);
     data->mutation_count++;
     // Run GC, then do the actual assignment with heap objects
     mclosure0(clo, (function_type)Cyc_global_set_cps_gc_return);
@@ -570,14 +501,6 @@ void add_global(const char *identifier, object * glo)
   // Tried using a vpbuffer for this and the benchmark
   // results were the same or worse.
   global_table = malloc_make_pair(mcvar(glo), global_table);
-
-  pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
-  if (!ht_insert(&globals_ht, glo, car(global_table)))
-  {
-    fprintf(stderr, "Error inserting global hash table %p\n", glo);
-    exit(1);
-  }
-  pthread_mutex_unlock(&symbol_table_lock);
 }
 
 void debug_dump_globals()
