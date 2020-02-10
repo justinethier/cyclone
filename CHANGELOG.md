@@ -2,7 +2,7 @@
 
 ## 0.14 - TBD
 
-Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in multithreaded application code. And, since this work is done by the Cyclone runtime, no special code needs to be added to your applications.
+Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in multithreaded application code. And since this work is done by the Cyclone runtime no special code needs to be added to your applications.
 
 Special thanks to Daniel Mendler, whose discussions were the inspiration for these changes.
 
