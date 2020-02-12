@@ -2,6 +2,10 @@
 
 ## 0.15 - TBD
 
+Bug Fixes
+
+- Prevent truncation when dividing two fixnums.
+
 ## 0.14 - February 11, 2020
 
 Cyclone now automatically relocates any stack objects when performing a mutation. This prevents a whole range of race conditions that had previously been possible in multithreaded application code. And since this work is done by the Cyclone runtime no special code needs to be added to your applications.

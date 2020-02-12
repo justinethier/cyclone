@@ -3969,7 +3969,6 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
 }
 
 object Cyc_fast_div(void *data, object ptr, object x, object y) {
-  int z;
   // x is int (assume value types for integers)
   if (obj_is_int(x)){
     if (obj_is_int(y)){
@@ -3977,8 +3976,8 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       // Overflow can occur if y = 0 || (x = 0x80000000 && y = -1)
       // We already check for 0 above and the value of x above is a
       // bignum, so no futher checks are required.
-      z = obj_obj2int(x) / obj_obj2int(y);
-      return obj_int2obj(z);
+      assign_double(ptr, (double)(obj_obj2int(x)) / obj_obj2int(y));
+      return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
       return ptr;
