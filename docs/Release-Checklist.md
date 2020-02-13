@@ -11,4 +11,3 @@ Steps for making a release of Cyclone:
 - Update release on AUR
 - Update release on Homebrew (automated)
 - Update release on Dockerhub (push to bitbucket)
-- 
