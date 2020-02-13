@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Prevent truncation when dividing two fixnums.
+- Fixed the division (`/`) operator to ensure exact arguments will produce inexact results rather than incorrect fixnum results. The example given in R7RS is that `(/ 3 4)` must not return a mathematically incorrect result of `0`. This was previously broken in compiled code though `icyc` would return the correct result.
 
 ## 0.14 - February 11, 2020
 
