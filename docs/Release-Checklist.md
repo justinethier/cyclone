@@ -4,7 +4,7 @@ Steps for making a release of Cyclone:
 - Update release number in:
   - `common.sld` and rebuild bootstrap source files
   - `DEBIAN/control` in cyclone-bootstrap
-  - Release job in cyclone-bootstrap
+  - `.github/workflows/Release.yml` job in cyclone-bootstrap
 - Update documentation, if applicable
 - Tag releases and push to Github
 - Upload release notes to `gh-pages` branch
