@@ -683,7 +683,7 @@
       (read-all port))))
 
 ;; Compile and emit:
-(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so append-dirs prepend-dirs)
+(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so cc-prog-linker-opts append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -746,6 +746,7 @@
                        "~src-file~" src-file)
                      "~exec-file~" exec-file))
                  (comp-objs-cmd 
+                  (string-append
                    (string-replace-all
                      (string-replace-all
                        (string-replace-all
@@ -753,7 +754,10 @@
                          (get-comp-env 'cc-exec cc-exec)
                          "~exec-file~" exec-file)
                        "~obj-files~" objs-str)
-                     "~exec-file~" exec-file)))
+                     "~exec-file~" exec-file)
+                   " "
+                   cc-prog-linker-opts
+                   )))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
           (cond
@@ -833,6 +837,7 @@
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
        (cc-so   (apply string-append (collect-opt-values args "-CS")))
+       (cc-linker-opts (apply string-append (collect-opt-values args "-CLNK")))
        (opt-beta-expand-thresh (collect-opt-values args "-opt-be"))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
@@ -886,6 +891,8 @@ General options:
                  a library module.
  -CS cc-commands Specify a custom command line for the C compiler to compile
                  a shared object module.
+ -CLNK option    Specify a custom command to provide as a linker option,
+                 EG: \"-lcurl\".
  -d              Only generate intermediate C files, do not compile them
  -t              Show intermediate trace output in generated C files
  -h, --help      Display usage information
@@ -936,5 +943,5 @@ Debug options:
      (display "cyclone: no input file")
      (newline))
     (else
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so append-dirs prepend-dirs))))
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts append-dirs prepend-dirs))))
 
