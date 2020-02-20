@@ -4,6 +4,7 @@
 
 Features
 
+- Added the `c-linker-options` library directive to allow a library to specify options to pass to the C linker. This prevent compiler errors when linking the final executable.
 - Added the `-CLNK` compiler option to specify a custom command to provide as a linker option. For example: `"-lcurl"`.
 
 Bug Fixes
