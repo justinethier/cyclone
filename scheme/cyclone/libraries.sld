@@ -54,6 +54,9 @@
     lib:get-all
     lib:get-all-import-deps
     lib:get-dep-list
+    lib:c-linker-options
+    lib:read-c-linker-options
+    lib:get-all-c-linker-options
     ;; Import Database "idb" oriented functions
     ;;
     ;; These functions perform operations for a "database" created from
@@ -186,6 +189,15 @@
     (filter
       (lambda (code)
         (tagged-list? 'include code))
+      (cddr ast))))
+
+(define (lib:c-linker-options ast)
+  (map
+    (lambda (inc-lst)
+      (cadr inc-lst))
+    (filter
+      (lambda (code)
+        (tagged-list? 'c-linker-options code))
       (cddr ast))))
 
 (define (lib:include-c-headers ast)
@@ -379,6 +391,23 @@
          (includes (lib:includes (car lib))))
     (close-input-port fp)
     includes))
+
+(define (lib:read-c-linker-options import append-dirs prepend-dirs)
+  (let* ((lib-name (lib:import->library-name import))
+         (dir (lib:import->filename lib-name ".sld" append-dirs prepend-dirs))
+         (fp (open-input-file dir))
+         (lib (read-all fp))
+         (options (lib:c-linker-options (car lib))))
+    (close-input-port fp)
+    (string-join options " ")))
+
+(define (lib:get-all-c-linker-options imports append-dirs prepend-dirs)
+  (string-join
+    (map 
+      (lambda (import)
+        (lib:read-c-linker-options import append-dirs prepend-dirs))
+      imports)
+    " "))
 
 ;; Read export list for a given import
 (define (lib:import->export-list import append-dirs prepend-dirs)
