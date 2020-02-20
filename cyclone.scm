@@ -704,6 +704,8 @@
                     (not (null? (car program:imports/code))))
              (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)
             '()))
+         (c-linker-options
+          (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
@@ -757,6 +759,8 @@
                      "~exec-file~" exec-file)
                    " "
                    cc-prog-linker-opts
+                   " "
+                   c-linker-options
                    )))
           ;(write `(DEBUG all imports ,lib-deps objs ,objs-str))
           ;(write `(DEBUG ,(lib:get-all-import-deps (cdar in-prog))))
