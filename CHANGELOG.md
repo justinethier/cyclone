@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.15 - TBD
+## 0.15 - February 26, 2020
 
 Features
 
