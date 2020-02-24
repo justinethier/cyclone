@@ -19,6 +19,7 @@ title: User Manual
 - [Foreign Function Interface](#foreign-function-interface)
   - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
   - [Including a C Header File](#including-a-c-header-file)
+  - [Linking to a C Library](#linking-to-a-c-library)
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -228,6 +229,15 @@ Or as part of a program (add any includes immediately after the `import` express
     (include-c-header "<stdio.h>")
 
 By default this will generate an `#include` preprocessor directive with the name of the header file in double quotes. However, if `include-c-header` is passed a text string with angle brackets (EG: `"<stdio.h>"`), the generated C code will use angle brackets instead.
+
+## Linking to a C Library
+
+A Cyclone library may use the `c-linker-options` expression to instruct the compiler to include linker options when building an executable. For example:
+
+    (define-library (cyclone curl)
+      (include-c-header "<curl/curl.h>")
+      (export curl-version)
+      (c-linker-options "-lcurl")
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
