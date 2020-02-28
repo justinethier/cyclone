@@ -606,7 +606,7 @@ typedef uint32_t char_type;
  * Convert from an integer to an object.
  */
 //#define obj_int2obj(n) ((void *) ((((long)(n))*(long)(1uL<<1)) | 1))
-#define obj_int2obj(c) ((void *)((((long)c)<<1) | 1))
+#define obj_int2obj(c) ((void *)((((long)c)*2) | 1))
 
 /**
  * Determine if the object is a char.
