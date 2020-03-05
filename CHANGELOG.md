@@ -4,11 +4,13 @@
 
 Features
 
-- Updated the C API to optionally allow the GC to free memory pointed to by an Opaque object. For example:
+- Updated the C API to optionally allow Cyclone's GC to free memory pointed to by an Opaque object. 
 
-    my_c_obj = calloc(1, sizeof(*my_c_obj_type));
-    make_c_opaque(opq, my_c_obj);
-    opaque_collect_ptr(&opq) = 1; // Cyclone's GC will free this memory
+  For example:
+
+      my_c_obj = calloc(1, sizeof(*my_c_obj_type));
+      make_c_opaque(opq, my_c_obj);
+      opaque_collect_ptr(&opq) = 1; // Cyclone's GC will free this memory
 
 Bug Fixes
 
