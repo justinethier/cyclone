@@ -903,11 +903,15 @@
            ;; At this point defines cannot be in lambda form. 
            ;; EG: (define (f x) ...)
            ((define? expr)
-            (let ((bv* (cons (define->var expr) bv)))
-              `(define ,(define->var expr)
-                       ,@(map
-                          (lambda (e) (clean e bv*)) 
-                          (define->exp expr)))))
+            ;; #361 - Update parent list of bound variables to account
+            ;;        for defined variable since it is within that scope
+            (if (null? bv)
+                (set! bv (list bv))
+                (set-cdr! bv (cons (define->var expr) (cdr bv))))
+            `(define ,(define->var expr)
+                     ,@(map
+                        (lambda (e) (clean e bv)) 
+                        (define->exp expr))))
            ;; For now, assume set is not introducing a new binding
            ((set!? expr)
             `(set! ,(clean (set!->var expr) bv)
@@ -917,7 +921,7 @@
                  expr))
            (else
             (error "macro cleanup unexpected expression: " expr))))
-      (clean expr '()))
+      (clean expr (list '____unused____)))
       
     ; TODO: get macro name, transformer
 

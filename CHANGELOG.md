@@ -10,6 +10,10 @@ Features
     make_c_opaque(opq, my_c_obj);
     opaque_collect_ptr(&opq) = 1; // Cyclone's GC will free this memory
 
+Bug Fixes
+
+- Fixed a bug where variables defined within `define-syntax` and `let-syntax` are reported as unbound by the compiler.
+
 ## 0.15 - February 26, 2020
 
 Features
