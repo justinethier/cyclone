@@ -534,6 +534,11 @@ static size_t gc_convert_heap_page_to_free_list(gc_heap *h, gc_thread_data *thd)
         fprintf(stderr, "mp_clear from sweep\n");
 #endif
         mp_clear(&(((bignum_type *)p)->bn));
+      } else if (type_of(p) == c_opaque_tag && opaque_collect_ptr(p)) {
+#if GC_DEBUG_VERBOSE
+        fprintf(stderr, "free opaque pointer %p from sweep\n", opaque_ptr(p));
+#endif
+        free( opaque_ptr(p) );
       }
 
       // Free block
@@ -956,6 +961,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       mark(hp) = thd->gc_alloc_color;
       immutable(hp) = immutable(obj);
       type_of(hp) = c_opaque_tag;
+      hp->collect_ptr = ((c_opaque_type *) obj)->collect_ptr;
       hp->ptr = ((c_opaque_type *) obj)->ptr;
       return (char *)hp;
     }

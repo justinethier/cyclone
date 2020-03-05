@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16 - TBD
+
+Features
+
+- Updated the C API to optionally allow the GC to free memory pointed to by an Opaque object.
+
 ## 0.15 - February 26, 2020
 
 Features

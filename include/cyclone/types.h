@@ -692,7 +692,9 @@ typedef cvar_type *cvar;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  /** This pointer can be anything, GC will not collect it */
+  unsigned char collect_ptr;
+  /** This pointer can be anything, GC will not collect it
+      unless collect_ptr is set */
   void *ptr;
 } c_opaque_type;
 typedef c_opaque_type *c_opaque;
@@ -704,10 +706,14 @@ typedef c_opaque_type *c_opaque;
   var.hdr.grayed = 0; \
   var.hdr.immutable = 0; \
   var.tag = c_opaque_tag; \
+  var.collect_ptr = 0; \
   var.ptr = p;
 
 /** Access the Opaque's pointer */
 #define opaque_ptr(x) (((c_opaque)x)->ptr)
+
+/** Access the Opaque's "collect pointer" field */
+#define opaque_collect_ptr(x) (((c_opaque)x)->collect_ptr)
 
 /**
  * @brief The mutex thread synchronization type
