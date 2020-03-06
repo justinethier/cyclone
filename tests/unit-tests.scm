@@ -320,10 +320,33 @@
        (test 1 2 3)
        (and ''test ''test2))))
 
+(define-syntax indirect-def
+ (syntax-rules ()
+  ( (indirect-def x y)
+    (begin
+     (define z y)
+     (define x z) ) ) ) )
+
 (define x 42)
 (assert:equal "macro: test2" (test2 1 2 3) 'test2)
 (assert:equal "macro: test" (test 1 2 3) 3)
 (assert:equal "macro: eval test" (eval '(test 1 2 x)) x)
+
+(assert:equal "macro: define syntax indirect-def" 
+  (indirect-def a 3)
+  '(3))
+
+(assert:equal "macro: let syntax indirect-def" 
+ (let-syntax 
+  ( (indirect-def
+     (syntax-rules ()
+      ( (indirect-def x y)
+        (begin
+         (define z y)
+         (define x z) ) ) ) ) )
+  (indirect-def a 3)
+  a)
+ '3)
 ;; END macros
 
 ;; Record types
