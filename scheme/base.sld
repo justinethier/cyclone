@@ -710,11 +710,6 @@
         (Cyc-display str (current-output-port))
         (Cyc-display str (car port))))
     (define (read-bytevector k . _port)
-      (let ((port (if (null? _port)
-                      (current-input-port)
-                      (car _port))))
-        'test))
-    (define (read-bytevector k . _port)
       (letrec ((port (if (null? port)
                          (current-input-port)
                          (car _port)))
@@ -723,7 +718,9 @@
                        (let ((b (read-u8 port)))
                          (cond
                           ((eof-object? b)
-                           (bytevector-copy bv 0 n))
+                           (if (zero? n)
+                               b ;; EOF
+                               (bytevector-copy bv 0 n)))
                           ((< n k)
                            (bytevector-u8-set! bv n b)
                            (loop (+ n 1)))
