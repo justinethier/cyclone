@@ -715,16 +715,17 @@
                          (car _port)))
                (bv (make-bytevector k))
                (loop (lambda (n)
-                       (let ((b (read-u8 port)))
-                         (cond
-                          ((eof-object? b)
-                           (if (zero? n)
-                               b ;; EOF
-                               (bytevector-copy bv 0 n)))
-                          ((< n k)
-                           (bytevector-u8-set! bv n b)
-                           (loop (+ n 1)))
-                          (else bv))))))
+                       (if (>= n k)
+                           bv
+                          (let ((b (read-u8 port)))
+                            (cond
+                             ((eof-object? b)
+                              (if (zero? n)
+                                  b ;; EOF
+                                  (bytevector-copy bv 0 n)))
+                             (else
+                              (bytevector-u8-set! bv n b)
+                              (loop (+ n 1)))))))))
         (loop 0)))
     (define (read-bytevector! vec . o)
       (let* ((in (if (pair? o) (car o) (current-input-port)))

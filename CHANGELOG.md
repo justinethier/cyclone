@@ -14,8 +14,7 @@ Features
 
 Bug Fixes
 
-- WIP - bug fixes to `read-bytevector` (return EOF, issue with sha2 sums)
-
+- Fixed a bug in `read-bytevector` where an extra byte could be introduced when reading multiple chunks of data.
 - Fixed a bug where variables defined within `define-syntax` and `let-syntax` are reported as unbound by the compiler.
 
 ## 0.15 - February 26, 2020
