@@ -2,6 +2,10 @@
 
 ## 0.17 - TBD
 
+Bug Fixes
+
+- Modified `binary-port?` and `textual-port?` to correctly differentiate between binary and textual ports.
+
 ## 0.16 - March 11, 2020
 
 Features

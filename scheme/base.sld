@@ -694,12 +694,22 @@
                 (loop (if chr (cons chr acc) acc)
                       (- i 1)
                       (read-char port))))))))
-    ;; TODO: the following procedures should be a bit smarter, but we would
-    ;;       need to track binary/text as part of port_type
+    (define-c _binary-port?
+      "(void *data, int argc, closure _, object k, object obj)"
+      " object rv = boolean_f;
+        port_type *p = (port_type *)obj;
+        if (p->flags & CYC_BINARY_PORT_FLAG) {
+          rv = boolean_t;
+        }
+        return_closcall1(data, k, rv); ")
+
     (define (binary-port? obj)
-      (port? obj))
+      (and (port? obj)
+           (_binary-port? obj))
+      )
     (define (textual-port? obj)
-      (port? obj))
+      (and (port? obj)
+           (not (binary-port? obj))))
     ;;
     (define (flush-output-port . port)
       (if (null? port)

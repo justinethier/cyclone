@@ -1100,6 +1100,8 @@ typedef struct {
   size_t str_bv_in_mem_buf_len;
 } port_type;
 
+#define CYC_BINARY_PORT_FLAG 0x10
+
 #define CYC_IO_BUF_LEN 1024
 
 /** Create a new port object in the nursery */

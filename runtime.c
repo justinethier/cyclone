@@ -4480,12 +4480,16 @@ port_type Cyc_io_open_output_file(void *data, object str)
 
 port_type Cyc_io_open_binary_input_file(void *data, object str)
 {
-  return _Cyc_io_open_input_file(data, str, "rb");
+  port_type p = _Cyc_io_open_input_file(data, str, "rb");
+  p.flags |= CYC_BINARY_PORT_FLAG;
+  return p;
 }
 
 port_type Cyc_io_open_binary_output_file(void *data, object str)
 {
-  return _Cyc_io_open_output_file(data, str, "wb");
+  port_type p = _Cyc_io_open_output_file(data, str, "wb");
+  p.flags |= CYC_BINARY_PORT_FLAG;
+  return p;
 }
 
 object Cyc_io_close_input_port(void *data, object port)
