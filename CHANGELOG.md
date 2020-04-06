@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.17 - TBD
+## 0.17 - April 6, 2020
 
 Bug Fixes
 
