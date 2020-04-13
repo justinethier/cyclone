@@ -986,6 +986,12 @@
                "\n"
                "continue;"))))
          
+        ((eq? 'Cyc-foreign-code fun)
+         (c-code/vars 
+           (string-append 
+             "boolean_f")
+           args))
+
         ((prim? fun)
          (let* ((c-fun 
                  (c-compile-prim fun cont ast-id))
