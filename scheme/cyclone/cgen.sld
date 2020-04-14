@@ -992,6 +992,13 @@
              "boolean_f")
            args))
 
+        ((eq? 'Cyc-foreign-value fun)
+         ;; TODO: take type into account, do not hardcode int 
+         (c-code/vars 
+           (string-append 
+             "obj_int2obj(" (car args) ")")
+           (list)))
+
         ((prim? fun)
          (let* ((c-fun 
                  (c-compile-prim fun cont ast-id))

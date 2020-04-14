@@ -90,6 +90,7 @@
          Cyc-list
          Cyc-if
          Cyc-foreign-code
+         Cyc-foreign-value
          Cyc-fast-plus
          Cyc-fast-sub
          Cyc-fast-mul
@@ -240,6 +241,7 @@
          (Cyc-stderr 0 0)
          (Cyc-if 3 3)
          (Cyc-foreign-code 1 #f)
+         (Cyc-foreign-value 2 2)
          (Cyc-fast-plus 2 2)
          (Cyc-fast-sub 2 2)
          (Cyc-fast-mul 2 2)
@@ -531,7 +533,8 @@
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
          ((eq? p 'Cyc-list)              "Cyc_list")
          ((eq? p 'Cyc-if)                "Cyc_if")
-         ((eq? p 'Cyc-foreign-code)      "TODO")
+         ((eq? p 'Cyc-foreign-code)      "UNDEF")
+         ((eq? p 'Cyc-foreign-value)     "UNDEF")
          ((eq? p 'Cyc-fast-plus)         "Cyc_fast_sum")
          ((eq? p 'Cyc-fast-sub)          "Cyc_fast_sub")
          ((eq? p 'Cyc-fast-mul)          "Cyc_fast_mul")
@@ -705,6 +708,7 @@
       (memq p '(
         Cyc-list
         Cyc-foreign-code
+        Cyc-foreign-value
         Cyc-fast-plus
         Cyc-fast-sub
         Cyc-fast-mul
