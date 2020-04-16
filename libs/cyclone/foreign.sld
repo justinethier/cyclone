@@ -13,7 +13,7 @@
  )
  ;(include-c-header "<ck_pr.h>")
  (export
-  ;; TODO
+   foreign-code
  )
  (begin
   ;; TODO: internal to compiler? Anything to define in this library??
@@ -49,6 +49,14 @@
 ;            )))))
 
 
-TODO: macros for foreign-value, foreign-code
+  (define-syntax foreign-code
+    (er-macro-transformer
+      (lambda (expr rename compare)
+        (for-each
+          (lambda (arg)
+            (if (not (string? arg))
+                (error "foreign-code" "Invalid argument: string expected, received " arg)))
+          (cdr expr))
+        `(Cyc-foreign-code ,@(cdr expr)))))
  )
 )
