@@ -14,6 +14,7 @@
  ;(include-c-header "<ck_pr.h>")
  (export
    foreign-code
+   foreign-value
  )
  (begin
   ;; TODO: internal to compiler? Anything to define in this library??
@@ -22,11 +23,15 @@
   ;(foreign-code STRING ...)
 
 
-;; TODO: how to handle this?
+;; TODO: foreign-lambda
+;;
+;; We are going to use the CHICKEN interface: 
+;;  (foreign-lambda RETURNTYPE NAME ARGTYPE ...)
+;;
+;; We need to develop a macro to accept this interface and generate a
+;; define-c equivalent. Not nearly as flexible as CHICKEN but will work
+;; with our existing infrastructure. This is good enough for version 1.
 
-;could maybe have a macro (define-c-foreign) that takes below and rewrites it as a define-c
-;would be nice if we could have foreign-lambda though, which seems much more flexible.
-;maybe we can work up to that
 
   ;(define strlen
   ;  (foreign-lambda int "strlen" char-vector) )
@@ -48,6 +53,19 @@
 ;            (define ,sym (,lib_fnc))
 ;            )))))
 
+
+  (define-syntax foreign-value
+    (er-macro-transformer
+      (lambda (expr rename compare)
+        (let* ((code-arg (cadr expr))
+               (type-arg (caddr expr))
+              )
+          ;(for-each
+          ;  (lambda (arg)
+          ;    (if (not (string? arg))
+          ;        (error "foreign-value" "Invalid argument: string expected, received " arg)))
+          ;  (cdr expr))
+          `(Cyc-foreign-value ,code-arg ,type-arg)))))
 
   (define-syntax foreign-code
     (er-macro-transformer
