@@ -28,6 +28,10 @@
 ;; We are going to use the CHICKEN interface: 
 ;;  (foreign-lambda RETURNTYPE NAME ARGTYPE ...)
 ;;
+;; And modify it a bit for our infrastructure:
+;;
+;;  (define-foreign-lambda SCM-NAME RETURNTYPE C-NAME ARGTYPE ...)
+;;
 ;; We need to develop a macro to accept this interface and generate a
 ;; define-c equivalent. Not nearly as flexible as CHICKEN but will work
 ;; with our existing infrastructure. This is good enough for version 1.
