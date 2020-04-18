@@ -1,4 +1,7 @@
-(import (scheme base) (scheme write))
+(import 
+  (scheme base) 
+  (scheme write)
+  (scheme cyclone pretty-print))
 
 (define-syntax foreign-code
   (er-macro-transformer
@@ -10,23 +13,41 @@
         (cdr expr))
       `(Cyc-foreign-code ,@(cdr expr)))))
 
-(define-syntax define-foreign-code
-  (er-macro-transformer
+(pretty-print
+(
+;(define-syntax define-foreign-code
+;  (er-macro-transformer
     (lambda (expr rename compare)
       (let* ((scm-fnc (cadr expr))
              (c-fnc (cadddr expr))
              (rv-type (caddr expr))
              (arg-types (cddddr expr))
-;             (str (symbol->string sym))
-;             (lib_fnc_str (string-append "_" str))
-;             (lib_fnc (string->symbol lib_fnc_str)) ;; Internal library function
-;             (args "(void *data, int argc, closure _, object k)")
-;             (body
-;               (string-append
-;                 "return_closcall1(data, k, obj_int2obj(" str "));"))
+             (arg-syms (map gensym arg-types)) ;; TODO: need mangled strings, no syms!!!
+             (arg-mangled "TODO") ;; TODO: convert above
+             (arg-strings 
+               (map
+                 (lambda (sym)
+                   (string-append " object " sym) 
+                 )
+                 arg-syms))
+
+           ; TODO: append mangled args to other args
+           ;  cyclone> (string-join '("a" "b" "c") ",")
+           ;  "a,b,c"
+
+             (args "(void *data, int argc, closure _, object k)")
+             (body
+             ;; TODO: need to unbox all args, pass to C function, then box up the result
+               (string-append
+                 "return_closcall1(data, k, obj_int2obj(" "str" "));"))
             )
-      `((define-c ,lib_fnc ,args ,body)
-        )))))
+      `((define-c ,scm-fnc ,args ,body)
+        )))
+ '(define-foreign-lambda scm-strlen int "strlen" string dummy dummy)
+ list
+ list)
+)
+(newline)
 
 ;(define-c foreign-value
 ; "(void *data, int argc, closure _, object k, object code, object type)"
@@ -34,7 +55,7 @@
 ;   return_closcall1(data, k, obj_int2obj(code
 ; ")
 
-(define-foreign-lambda scm-strlen int "strlen" string)
+;(define-foreign-lambda scm-strlen int "strlen" string)
 
 ;(write (Cyc-foreign-value "errno" "3"))
 ;(newline)
