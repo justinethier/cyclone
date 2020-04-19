@@ -1,6 +1,8 @@
 (import 
   (scheme base) 
   (scheme write)
+  (scheme cyclone cgen)
+  (scheme cyclone util)
   (scheme cyclone pretty-print))
 
 (define-syntax foreign-code
@@ -22,8 +24,11 @@
              (c-fnc (cadddr expr))
              (rv-type (caddr expr))
              (arg-types (cddddr expr))
-             (arg-syms (map gensym arg-types)) ;; TODO: need mangled strings, no syms!!!
-             (arg-mangled "TODO") ;; TODO: convert above
+             (arg-syms 
+               (map 
+                 (lambda (type)
+                   (mangle (gensym type)))
+                 arg-types))
              (arg-strings 
                (map
                  (lambda (sym)
