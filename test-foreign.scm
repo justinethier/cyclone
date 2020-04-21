@@ -15,9 +15,8 @@
         (cdr expr))
       `(Cyc-foreign-code ,@(cdr expr)))))
 
-;(pretty-print
-;(
-(define-syntax define-foreign-code
+;(pretty-print (
+(define-syntax define-foreign-lambda
   (er-macro-transformer
     (lambda (expr rename compare)
       (let* ((scm-fnc (cadr expr))
@@ -46,7 +45,7 @@
                      (apply string-append 
                        (map
                          (lambda (sym/unbox)
-                           (string-append "," (car sym/unbox)))
+                           (string-append ", object " (car sym/unbox)))
                        arg-syms/unbox))
                       ")"))
              (body
@@ -54,12 +53,14 @@
                (string-append
                  "return_closcall1(data, k, obj_int2obj(" c-fnc "(" (string-join (map cdr arg-syms/unbox) ",") ")));"))
             )
-      `((define-c ,scm-fnc ,args ,body)
-        )))
-; '(define-foreign-lambda scm-strlen int "strlen" string)
-; list
-; list)
+      `(define-c ,scm-fnc ,args ,body)
+        ))
+ '(define-foreign-lambda scm-strlen int "strlen" string)
+ list
+ list
 )
+)
+
 (define-foreign-lambda scm-strlen int "strlen" string)
 (display (scm-strlen "testing 1, 2, 3"))
 (newline)
