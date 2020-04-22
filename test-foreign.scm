@@ -20,6 +20,19 @@
 (define-syntax define-foreign-lambda
   (er-macro-transformer
     (lambda (expr rename compare)
+
+;; Temporary definition, this does not stay here!
+(define (scm->c code type)
+  (case type
+    ((int integer)
+     (string-append "obj_obj2int(" code ")"))
+    ((bool)
+     (string-append "(" code " == boolean_f)"))
+    ((string)
+     (string-append "string_str(" code ")"))
+    (else
+      (error "scm->c unable to convert scheme object of type " type))))
+
       (let* ((scm-fnc (cadr expr))
              (c-fnc (cadddr expr))
              (rv-type (caddr expr))
@@ -28,7 +41,11 @@
                (map 
                  (lambda (type)
                    (let ((var (mangle (gensym 'arg))))
-                     (cons var (string-append "string_str(" var ")"))))
+                     (cons 
+                       var 
+                       (scm->c var type)
+                       ;(string-append "string_str(" var ")")
+                       )))
                  arg-types))
              ;(arg-strings 
              ;  (map
@@ -64,9 +81,15 @@
 
 ;; Unbox scheme object
 (define (scm->c code type)
-  (cond
+  (case type
+    ((int integer)
+     (string-append "obj_obj2int(" code ")"))
+    ((bool)
+     (string-append "(" code " == boolean_f)"))
+    ((string)
+     (string-append "string_str(" code ")"))
     (else
-      (error "scm->c unable to convert" type))))
+      (error "scm->c unable to convert scheme object of type " type))))
 
 ;; Box C object, basically the meat of (foreign-value)
 (define (c->scm code type)
@@ -75,12 +98,13 @@
      (string-append "obj_int2obj(" code ")"))
     ((bool)
      (string-append "(" code " == 0 ? boolean_f : boolean_t)"))
-    ((string)
-    TODO: how to handle the allocation here?
-     (string-append "
-     ))
+;    ((string)
+;    TODO: how to handle the allocation here?
+;          may need to return a c-code pair???
+;     (string-append "
+;     ))
     (else
-      (error "c->scm unable to convert" type))))
+      (error "c->scm unable to convert C object of type " type))))
 
 
 ;(define-c foreign-value
