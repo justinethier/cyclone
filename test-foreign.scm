@@ -1,6 +1,7 @@
 (import 
   (scheme base) 
   (scheme write)
+  (cyclone test)
   (scheme cyclone cgen)
   (scheme cyclone util)
   (scheme cyclone pretty-print))
@@ -61,9 +62,26 @@
 )
 )
 
-(define-foreign-lambda scm-strlen int "strlen" string)
-(display (scm-strlen "testing 1, 2, 3"))
-(newline)
+;; Unbox scheme object
+(define (scm->c code type)
+  (cond
+    (else
+      (error "scm->c unable to convert" type))))
+
+;; Box C object, basically the meat of (foreign-value)
+(define (c->scm code type)
+  (case type
+    ((int integer)
+     (string-append "obj_int2obj(" code ")"))
+    ((bool)
+     (string-append "(" code " == 0 ? boolean_f : boolean_t)"))
+    ((string)
+    TODO: how to handle the allocation here?
+     (string-append "
+     ))
+    (else
+      (error "c->scm unable to convert" type))))
+
 
 ;(define-c foreign-value
 ; "(void *data, int argc, closure _, object k, object code, object type)"
@@ -75,7 +93,16 @@
 
 ;(write (Cyc-foreign-value "errno" "3"))
 ;(newline)
+(test-group "basic"
 (write (foreign-code 
          "printf(\"test %d %d \\n\", 1, 2);"
-         "printf(\"test %d %d %d\\n\", 1, 2, 3);"))
-(newline)
+         "printf(\"test %d %d %d\\n\", 1, 2, 3);")) (newline)
+)
+
+;; Must be top-level
+(define-foreign-lambda scm-strlen int "strlen" string)
+
+(test-group "foreign lambda"
+  (test 15 (scm-strlen "testing 1, 2, 3"))
+)
+(test-exit)
