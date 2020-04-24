@@ -134,7 +134,11 @@
 
 ;(write (Cyc-foreign-value "errno" "3"))
 ;(newline)
-(test-group "basic"
+(test-group "foreign-value"
+  (test 3 (Cyc-foreign-value "1 + 2" 'integer))
+)
+
+(test-group "foreign-code"
 (write (foreign-code 
          "printf(\"test %d %d \\n\", 1, 2);"
          "printf(\"test %d %d %d\\n\", 1, 2, 3);")) (newline)
