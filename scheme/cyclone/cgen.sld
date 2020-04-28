@@ -989,7 +989,7 @@
         ((eq? 'Cyc-foreign-code fun)
          (c-code/vars 
            (string-append 
-             "boolean_f")
+             "")
            args))
 
         ((eq? 'Cyc-foreign-value fun)
