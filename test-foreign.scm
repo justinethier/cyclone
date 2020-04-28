@@ -2,7 +2,6 @@
   (scheme base) 
   (scheme write)
   (cyclone test)
-  (scheme cyclone cgen)
   (scheme cyclone util)
   (scheme cyclone pretty-print))
 
@@ -16,14 +15,6 @@
         (cdr expr))
       `(Cyc-foreign-code ,@(cdr expr)))))
 
-;(pretty-print (
-(define-syntax define-foreign-lambda
-  (er-macro-transformer
-    (lambda (expr rename compare)
-
-;; Temporary definition, this does not stay here!
-;; TODO: extract these out, probably into cgen!
-
 ;; Unbox scheme object
 ;;
 ;; scm->c :: string -> symbol -> string
@@ -33,16 +24,21 @@
 ;;  - type - Data type of the Scheme object
 ;; Returns:
 ;;  - C code used to unbox the data
-(define (scm->c code type)
-  (case type
-    ((int integer)
-     (string-append "obj_obj2int(" code ")"))
-    ((bool)
-     (string-append "(" code " == boolean_f)"))
-    ((string)
-     (string-append "string_str(" code ")"))
-    (else
-      (error "scm->c unable to convert scheme object of type " type))))
+;(define (scm->c code type)
+(define-syntax scm->c
+  (er-macro-transformer
+    (lambda (expr rename compare)
+      (let ((code (cadr expr))
+            (type (caddr expr)))
+       `(case ,type
+          ((int integer)
+           (string-append "obj_obj2int(" ,code ")"))
+          ((bool)
+           (string-append "(" ,code " == boolean_f)"))
+          ((string)
+           (string-append "string_str(" ,code ")"))
+          (else
+            (error "scm->c unable to convert scheme object of type " ,type)))))))
 
 ;; Box C object, basically the meat of (foreign-value)
 ;;
@@ -54,32 +50,39 @@
 ;; Returns:
 ;;  - Allocation code?
 ;;  - C code
-(define (c->scm code type)
-  (case type
-    ((int integer)
-     (cons
-       ""
-       (string-append "obj_int2obj(" code ")")))
-    ((float double)
-     (let ((var (mangle (gensym 'var))))
-     (cons
-       (string-append 
-         "make_double(" var ", " code ");")
-       (string-append "&" var)
-     )))
-    ((bool)
-     (cons
-       ""
-       (string-append "(" code " == 0 ? boolean_f : boolean_t)")))
-;    ((string)
-;    TODO: how to handle the allocation here?
-;          may need to return a c-code pair???
-;     (string-append "
-;     ))
-    (else
-      (error "c->scm unable to convert C object of type " type))))
+(define-syntax c->scm
+ (er-macro-transformer
+  (lambda (expr rename compare)
+    (let ((code (cadr expr))
+          (type (caddr expr)))
+     `(case ,type
+        ((int integer)
+         (cons
+           ""
+           (string-append "obj_int2obj(" ,code ")")))
+        ((float double)
+         (let ((var (mangle (gensym 'var))))
+         (cons
+           (string-append 
+             "make_double(" var ", " ,code ");")
+           (string-append "&" var)
+         )))
+        ((bool)
+         (cons
+           ""
+           (string-append "(" ,code " == 0 ? boolean_f : boolean_t)")))
+    ;    ((string)
+    ;    TODO: how to handle the allocation here?
+    ;          may need to return a c-code pair???
+    ;     (string-append "
+    ;     ))
+        (else
+          (error "c->scm unable to convert C object of type " ,type)))))))
 
-
+;(pretty-print (
+(define-syntax define-foreign-lambda
+  (er-macro-transformer
+    (lambda (expr rename compare)
       (let* ((scm-fnc (cadr expr))
              (c-fnc (cadddr expr))
              (rv-type (caddr expr))
