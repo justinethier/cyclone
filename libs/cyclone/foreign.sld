@@ -4,7 +4,7 @@
 ;;;; Copyright (c) 2014-2019, Justin Ethier
 ;;;; All rights reserved.
 ;;;;
-;;;; TBD
+;;;; This module makes it easier to interface directly with C code using the FFI.
 ;;;;
 (define-library (cyclone foreign)
  (import
@@ -34,7 +34,7 @@
           ;    (if (not (string? arg))
           ;        (error "foreign-value" "Invalid argument: string expected, received " arg)))
           ;  (cdr expr))
-          `(Cyc-foreign-value ,code-arg ,type-arg)))))
+          `((lambda () (Cyc-foreign-value ,code-arg ,type-arg)))))))
 
   (define-syntax foreign-code
     (er-macro-transformer
