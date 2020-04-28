@@ -1,3 +1,5 @@
+;; Unit tests for the (cyclone foreign) module.
+;;
 (import 
   (scheme base) 
   (scheme write)
