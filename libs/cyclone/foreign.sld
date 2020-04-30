@@ -15,15 +15,15 @@
  )
  ;(include-c-header "<ck_pr.h>")
  (export
-   foreign-code
-   foreign-value
-   define-foreign-lambda
+   c-code
+   c-value
+   c-defun
    c->scm
    scm->c
  )
  (begin
 
-  (define-syntax foreign-value
+  (define-syntax c-value
     (er-macro-transformer
       (lambda (expr rename compare)
         (let* ((code-arg (cadr expr))
@@ -32,17 +32,17 @@
           ;(for-each
           ;  (lambda (arg)
           ;    (if (not (string? arg))
-          ;        (error "foreign-value" "Invalid argument: string expected, received " arg)))
+          ;        (error "c-value" "Invalid argument: string expected, received " arg)))
           ;  (cdr expr))
           `((lambda () (Cyc-foreign-value ,code-arg ,type-arg)))))))
 
-  (define-syntax foreign-code
+  (define-syntax c-code
     (er-macro-transformer
       (lambda (expr rename compare)
         (for-each
           (lambda (arg)
             (if (not (string? arg))
-                (error "foreign-code" "Invalid argument: string expected, received " arg)))
+                (error "c-code" "Invalid argument: string expected, received " arg)))
           (cdr expr))
         `(Cyc-foreign-code ,@(cdr expr)))))
 
@@ -71,7 +71,7 @@
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
-  ;; Box C object, basically the meat of (foreign-value)
+  ;; Box C object, basically the meat of (c-value)
   ;;
   ;; c->scm :: string -> symbol -> string
   ;;
@@ -111,7 +111,7 @@
             (error "c->scm unable to convert C object of type " ,type)))))))
   
   ;(pretty-print (
-  (define-syntax define-foreign-lambda
+  (define-syntax c-defun
     (er-macro-transformer
       (lambda (expr rename compare)
         (let* ((scm-fnc (cadr expr))
@@ -150,10 +150,10 @@
                    "return_closcall1(data, k, " return-expr ");"))
               )
         `(define-c ,scm-fnc ,args ,body)
-          ))
-   '(define-foreign-lambda scm-strlen int "strlen" string)
-   list
-   list))
+          ))))
+  ; '(c-defun scm-strlen int "strlen" string)
+  ; list
+  ; list))
 
  )
 )
