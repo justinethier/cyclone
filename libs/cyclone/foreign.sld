@@ -17,7 +17,7 @@
  (export
    c-code
    c-value
-   c-defun
+   c-define
    c->scm
    scm->c
  )
@@ -111,7 +111,7 @@
             (error "c->scm unable to convert C object of type " ,type)))))))
   
   ;(pretty-print (
-  (define-syntax c-defun
+  (define-syntax c-define
     (er-macro-transformer
       (lambda (expr rename compare)
         (let* ((scm-fnc (cadr expr))
@@ -151,7 +151,7 @@
               )
         `(define-c ,scm-fnc ,args ,body)
           ))))
-  ; '(c-defun scm-strlen int "strlen" string)
+  ; '(c-define scm-strlen int "strlen" string)
   ; list
   ; list))
 

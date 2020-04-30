@@ -27,8 +27,8 @@
 )
 
 ;; Must be top-level
-(c-defun scm-strlen int "strlen" string)
-(c-defun scm-strlend double "strlen" string)
+(c-define scm-strlen int "strlen" string)
+(c-define scm-strlend double "strlen" string)
 
 (test-group "foreign lambda"
   (test 15 (scm-strlen "testing 1, 2, 3"))
