@@ -34,7 +34,7 @@
           ;    (if (not (string? arg))
           ;        (error "c-value" "Invalid argument: string expected, received " arg)))
           ;  (cdr expr))
-          `((lambda () (Cyc-foreign-value ,code-arg ,type-arg)))))))
+          `((lambda () (Cyc-foreign-value ,code-arg (quote ,type-arg))))))))
 
   (define-syntax c-code
     (er-macro-transformer

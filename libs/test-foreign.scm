@@ -12,7 +12,7 @@
 (define *my-global* #f)
 
 (test-group "foreign value"
-  (test 3 (c-value "1 + 2" 'integer))
+  (test 3 (c-value "1 + 2" integer))
 )
 
 (test-group "foreign code"
