@@ -3,6 +3,19 @@
 The `(cyclone foreign)` provides a convenient interface for integrating with C code. It is based in concept on the `(chicken foreign)` module from CHICKEN Scheme. Similarly to that module, this library manipulates the C code directly before it is compiled to a native binary. It is not possible to call these forms at runtime.
 
 TODO: list of type specifiers
+built-in types
+Scheme | C
+int | int
+integer | int
+bool | int
+char | int
+string | char *
+symbol | const char *
+bytevector | char *
+float | double
+double | double
+bignum | mp_int
+opaque | void *
 
 - [`c-code`](#c-code)
 - [`c-value`](#c-value)

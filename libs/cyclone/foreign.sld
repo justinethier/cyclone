@@ -64,10 +64,22 @@
          `(case ,type
             ((int integer)
              (string-append "obj_obj2int(" ,code ")"))
+            ((double float)
+             (string-append "double_value(" ,code ")"))
+            ((bignum bigint)
+             (string-append "bignum_value(" ,code ")"))
             ((bool)
              (string-append "(" ,code " == boolean_f)"))
+            ((char)
+             (string-append "obj_obj2char(" ,code ")"))
             ((string)
              (string-append "string_str(" ,code ")"))
+            ((symbol)
+             (string-append "symbol_desc(" ,code ")"))
+            ((bytevector)
+             (string-append "(((bytevector_type *)" ,code ")->data)"))
+            ((opaque
+             (string-append "opaque_ptr(" ,code ")"))
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
@@ -102,11 +114,25 @@
            (cons
              ""
              (string-append "(" ,code " == 0 ? boolean_f : boolean_t)")))
-      ;    ((string)
+          ((char)
+           (cons
+             ""
+             (string-append "obj_char2obj(" ,code ")")))
+          ((string)
+           (let ((var (mangle (gensym 'var))))
+           (cons
+             (string-append 
+               "make_double(" var ", " ,code ");")
+             (string-append "&" var)
+           )))
       ;    TODO: how to handle the allocation here?
       ;          may need to return a c-code pair???
       ;     (string-append "
       ;     ))
+;      /*bytevector_tag */ , "bytevector"
+;      /*c_opaque_tag  */ , "opaque"
+;      /*bignum_tag    */ , "bignum"
+;      /*symbol_tag    */ , "symbol"
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   
