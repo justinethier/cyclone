@@ -9,7 +9,7 @@
 (define-library (cyclone foreign)
  (import
    (scheme base)
-   ;(scheme write) ;; TODO: debugging only!
+   (scheme write) ;; TODO: debugging only!
    ;(scheme cyclone pretty-print)
    (scheme cyclone util)
  )
@@ -34,7 +34,7 @@
           ;    (if (not (string? arg))
           ;        (error "c-value" "Invalid argument: string expected, received " arg)))
           ;  (cdr expr))
-          `((lambda () (Cyc-foreign-value ,code-arg (quote ,type-arg))))))))
+          `((lambda () (Cyc-foreign-value ,code-arg ,(symbol->string type-arg))))))))
 
   (define-syntax c-code
     (er-macro-transformer
@@ -78,7 +78,7 @@
              (string-append "symbol_desc(" ,code ")"))
             ((bytevector)
              (string-append "(((bytevector_type *)" ,code ")->data)"))
-            ((opaque
+            ((opaque)
              (string-append "opaque_ptr(" ,code ")"))
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
@@ -98,7 +98,9 @@
     (lambda (expr rename compare)
       (let ((code (cadr expr))
             (type (caddr expr)))
-       `(case ,type
+       `(case (if (string? ,type)
+                  (string->symbol ,type)
+                  ,type)
           ((int integer)
            (cons
              ""
@@ -125,10 +127,6 @@
                "make_double(" var ", " ,code ");")
              (string-append "&" var)
            )))
-      ;    TODO: how to handle the allocation here?
-      ;          may need to return a c-code pair???
-      ;     (string-append "
-      ;     ))
 ;      /*bytevector_tag */ , "bytevector"
 ;      /*c_opaque_tag  */ , "opaque"
 ;      /*bignum_tag    */ , "bignum"

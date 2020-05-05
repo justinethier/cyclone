@@ -13,6 +13,7 @@
           (scheme eval)
           (scheme inexact)
           (scheme write)
+          (cyclone foreign)
           (scheme cyclone primitives)
           (scheme cyclone transforms)
           (scheme cyclone ast)
@@ -283,12 +284,12 @@
 ;;; Compilation routines.
 
 ;; Return generated code that also requests allocation of C variables on stack
-(define (c-code/vars str cvars)
+(define (c:code/vars str cvars)
   (list str
         cvars))
 
 ;; Return generated code with no C variables allocated on the stack
-(define (c-code str) (c-code/vars str (list)))
+(define (c:code str) (c:code/vars str (list)))
 
 ;; Append arg count to a C code pair
 (define (c:tuple/args cp num-args)
@@ -327,12 +328,12 @@
     c-allocs))
 
 (define (c:append cp1 cp2)
-  (c-code/vars 
+  (c:code/vars 
     (string-append (c:body cp1) (c:body cp2))
     (append (c:allocs cp1) (c:allocs cp2))))
 
 (define (c:append/prefix prefix cp1 cp2)
-  (c-code/vars 
+  (c:code/vars 
     (string-append prefix (c:body cp1) (c:body cp2))
     (append (c:allocs cp1) (c:allocs cp2))))
 
@@ -390,7 +391,7 @@
     ((const? exp)       (c-compile-const exp (alloca? ast-id trace) #f)) ;; TODO: OK to hardcode immutable to false here??
     ((prim?  exp)       
      ;; TODO: this needs to be more refined, probably w/a lookup table
-     (c-code (string-append "primitive_" (mangle exp))))
+     (c:code (string-append "primitive_" (mangle exp))))
     ((ref?   exp)       (c-compile-ref exp))
     ((quote? exp)       (c-compile-quote exp (alloca? ast-id trace)))
     ((if? exp)          (c-compile-if exp append-preamble cont ast-id trace cps?))
@@ -436,7 +437,7 @@
     (num-args 0)
     (create-cons
       (lambda (cvar a b)
-        (c-code/vars
+        (c:code/vars
          (string-append 
            c-make-macro "(" cvar "," (c:body a) "," (c:body b) ");"
            (c-set-immutable-field cvar use-alloca immutable))
@@ -445,7 +446,7 @@
      (lambda (args)
        (cond
         ((null? args)
-           (c-code "NULL"))
+           (c:code "NULL"))
         ((not (pair? args))
          (c-compile-const args use-alloca immutable))
         (else
@@ -455,7 +456,7 @@
                           (c-compile-const (car args) use-alloca immutable) 
                           (_c-compile-scalars (cdr args)))))
              (set! num-args (+ 1 num-args))
-             (c-code/vars
+             (c:code/vars
                 (string-append addr-op cvar-name)
                 (append
                   (c:allocs cell)
@@ -484,7 +485,7 @@
                 (let ((idx-code (c-compile-const (vector-ref exp i) use-alloca immutable)))
                   (loop 
                     (+ i 1)
-                    (c-code/vars
+                    (c:code/vars
                      ;; The vector's C variable
                       (c:body code)
                       ;; Allocations
@@ -498,7 +499,7 @@
                             ";"))))))))))
     (cond
       ((zero? len)
-        (c-code/vars
+        (c:code/vars
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
@@ -506,7 +507,7 @@
                 (c-set-immutable-field cvar-name use-alloca immutable)))))
       (else
         (let ((code
-                (c-code/vars
+                (c:code/vars
                   (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
@@ -532,7 +533,7 @@
                 (let ((byte-val (number->string (bytevector-u8-ref exp i))))
                   (loop 
                     (+ i 1)
-                    (c-code/vars
+                    (c:code/vars
                      ;; The bytevector's C variable
                       (c:body code)
                       ;; Allocations
@@ -545,7 +546,7 @@
                             ";"))))))))))
     (cond
       ((zero? len)
-        (c-code/vars
+        (c:code/vars
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list ; Allocate empty vector
               (string-append 
@@ -554,7 +555,7 @@
               ))))
       (else
         (let ((code
-                (c-code/vars
+                (c:code/vars
                   (string-append addr-op cvar-name) ; Code body is just var name
                   (list ; Allocate the vector
                     (string-append 
@@ -572,7 +573,7 @@
       (use-alloca
        (let ((tmp-name (mangle (gensym 'tmp)))
              (blen (number->string (string-byte-length exp))))
-        (c-code/vars
+        (c:code/vars
           (string-append "" cvar-name) ; Code is just the variable name
           (list     ; Allocate integer on the C stack
             (string-append 
@@ -595,7 +596,7 @@
                 use-alloca immutable)
             )))))
       (else
-        (c-code/vars
+        (c:code/vars
           (string-append "&" cvar-name) ; Code is just the variable name
           (list     ; Allocate integer on the C stack
             (string-append 
@@ -623,7 +624,7 @@
 (define (c-compile-const exp use-alloca immutable)
   (cond
     ((null? exp)
-     (c-code "NULL"))
+     (c:code "NULL"))
     ((pair? exp)
      (c-compile-scalars exp use-alloca immutable))
     ((vector? exp)
@@ -635,7 +636,7 @@
             (num2str (cond
                        (else
                          (number->string exp)))))
-        (c-code/vars
+        (c:code/vars
          (string-append "" cvar-name) ; Code is just the variable name
             (list     ; Allocate pointer on the C stack
               (string-append 
@@ -656,14 +657,14 @@
              (inum (num2str (imag-part exp)))
              (addr-op (if use-alloca "" "&"))
              (c-make-macro (if use-alloca "alloca_complex_num" "make_complex_num")))
-        (c-code/vars
+        (c:code/vars
             (string-append addr-op cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
                 c-make-macro "(" cvar-name ", " rnum ", " inum ");")))))
     ((and (integer? exp)
           (exact? exp))
-     (c-code (string-append "obj_int2obj(" 
+     (c:code (string-append "obj_int2obj(" 
                (number->string exp) ")")))
     ((real? exp)
       (let ((cvar-name (mangle (gensym 'c)))
@@ -676,22 +677,22 @@
                          (number->string exp))))
             (addr-op (if use-alloca "" "&"))
             (c-make-macro (if use-alloca "alloca_double" "make_double")))
-        (c-code/vars
+        (c:code/vars
          (string-append addr-op cvar-name) ; Code is just the variable name
             (list     ; Allocate on the C stack
               (string-append 
                 c-make-macro "(" cvar-name ", " num2str ");")))))
     ((boolean? exp) 
-      (c-code (string-append
+      (c:code (string-append
                 (if exp "boolean_t" "boolean_f"))))
     ((char? exp)
-     (c-code (string-append "obj_char2obj(" 
+     (c:code (string-append "obj_char2obj(" 
                (number->string (char->integer exp)) ")")))
     ((string? exp)
      (c-compile-string exp use-alloca immutable))
     ((symbol? exp)
      (allocate-symbol exp)
-     (c-code (string-append "quote_" (mangle exp))))
+     (c:code (string-append "quote_" (mangle exp))))
     (else
       (error "unknown constant: " exp))))
 
@@ -783,7 +784,7 @@
          (c-var-assign 
             (lambda (type)
               (let ((cv-name (mangle (gensym 'c))))
-                (c-code/vars 
+                (c:code/vars 
                   (string-append 
                     (if (or (prim:cont? p) 
                             (equal? (prim/c-var-assign p) "object")
@@ -830,7 +831,7 @@
       ;; the logic
       ;;
         (let ((cv-name (mangle (gensym 'c))))
-           (c-code/vars
+           (c:code/vars
             (if (or (prim:allocates-object? p use-alloca?)
                     (prim->c-func-uses-alloca? p use-alloca?))
                 cv-name ; Already a pointer
@@ -838,7 +839,7 @@
             (list
                 (string-append c-func "(" cv-name tdata-comma tdata)))))
      (else
-        (c-code/vars 
+        (c:code/vars 
           (string-append c-func "(" tdata tptr-comma tptr)
           (list tptr-decl))))))
 
@@ -869,7 +870,7 @@
 
 ;; c-compile-ref : ref-exp -> string
 (define (c-compile-ref exp)
-  (c-code 
+  (c:code 
     (if (member exp *global-syms*)
       (cgen:mangle-global exp)
       (mangle exp))))
@@ -882,7 +883,7 @@
           (lambda (args append-preamble prefix cont)
             (cond
              ((not (pair? args))
-              (c-code ""))
+              (c:code ""))
              (else
               ;; (trace:debug `(c-compile-args ,(car args)))
               (let ((cp (c-compile-exp (car args) 
@@ -929,7 +930,7 @@
                      cps?))
                 (num-cargs (c:num-args cgen)))
            (set-c-call-arity! num-cargs)
-           (c-code
+           (c:code
              (string-append
                (c:allocs->str (c:allocs cgen))
                "return_direct" (number->string num-cargs) 
@@ -978,7 +979,7 @@
                       parent-args
                       cgen-lis))))
            ;;(trace:info `(loop ,args ,(cadr args) ,cgen-lis ,parent-args))
-           (c-code
+           (c:code
              (string-append
               cgen-allocs ; (c:allocs->str (c:allocs cgen))
                "\n"
@@ -987,17 +988,18 @@
                "continue;"))))
          
         ((eq? 'Cyc-foreign-code fun)
-         (c-code/vars 
+         (c:code/vars 
            (string-append 
              "")
            args))
 
         ((eq? 'Cyc-foreign-value fun)
-         ;; TODO: take type into account, do not hardcode int 
-         (c-code/vars 
-           (string-append 
-             "obj_int2obj(" (car args) ")")
-           (list)))
+         (c->scm (car args) (cadr args))
+         ;(c:code/vars 
+         ;  (string-append 
+         ;    "obj_int2obj(" (car args) ")")
+         ;  (list))
+        )
 
         ((prim? fun)
          (let* ((c-fun 
@@ -1010,7 +1012,7 @@
                     (number->string num-args)
                     (if (> num-args 0) "," "")))
                 (c-args* (if (prim:arg-count? fun)
-                             (c:append (c-code num-args-str) c-args)
+                             (c:append (c:code num-args-str) c-args)
                              c-args)))
             ;; Emit symbol when mutating global variables, so we can look 
             ;; up the cvar
@@ -1029,7 +1031,7 @@
 
             (if (prim/cvar? fun)
               ;; Args need to go with alloc function
-              (c-code/vars
+              (c:code/vars
                 (c:body c-fun)
                 (append
                   (c:allocs c-args*) ; fun alloc depends upon arg allocs
@@ -1055,12 +1057,12 @@
                             (and (prim:udf? fun)
                                  (zero? num-args)))
                       c-fun
-                      (c:append c-fun (c-code ", "))))
+                      (c:append c-fun (c:code ", "))))
                   c-args*)
-                (c-code ")")))))
+                (c:code ")")))))
 
         ((equal? '%closure-ref fun)
-         (c-code (apply string-append (list
+         (c:code (apply string-append (list
             (c-compile-closure-element-ref 
               ast-id
               (car args)
@@ -1082,7 +1084,7 @@
                 (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
-              (c-code 
+              (c:code 
                 (string-append
                   (c:allocs->str (c:allocs cfun) "\n")
                   (c:allocs->str (c:allocs cargs) "\n")
@@ -1138,7 +1140,7 @@
                                   (string-append " " p " = " tmp "; "))
                                 params tmp-params))))
                       ;; (trace:error `(JAE ,fun ,ast-id ,params ,args (c:num-args cargs)))
-                    (c-code/vars 
+                    (c:code/vars 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
@@ -1163,7 +1165,7 @@
                    (let* ((lid (ast:lambda-id wkf))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
                           (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid))))
-                     (c-code
+                     (c:code
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
@@ -1184,7 +1186,7 @@
                   ((and wkf fnc)
                    (let* ((lid (ast:lambda-id wkf))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid))))
-                     (c-code
+                     (c:code
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
@@ -1197,7 +1199,7 @@
                           (c:body cargs)
                           ");"))))
                   (else
-                    (c-code 
+                    (c:code 
                       (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
@@ -1217,7 +1219,7 @@
                 (num-cargs (c:num-args cargs)))
            (cond
              ((not cps?)
-              (c-code
+              (c:code
                 (string-append
                    (c:allocs->str (c:allocs cfun) "\n")
                    (c:allocs->str (c:allocs cargs) "\n")
@@ -1237,7 +1239,7 @@
                    (let* ((lid (ast:lambda-id (closure->lam fun)))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid)))
                           (c-lambda-fnc-gc-ret-str (string-append "__lambda_gc_ret_" (number->string lid))))
-                     (c-code
+                     (c:code
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
@@ -1254,7 +1256,7 @@
                   ((adbf:well-known fnc)
                    (let* ((lid (ast:lambda-id (closure->lam fun)))
                           (c-lambda-fnc-str (string-append "__lambda_" (number->string lid))))
-                     (c-code
+                     (c:code
                        (string-append
                           (c:allocs->str (c:allocs cfun) "\n")
                           (c:allocs->str (c:allocs cargs) "\n")
@@ -1267,7 +1269,7 @@
                           (c:body cargs)
                           ");"))))
                   (else
-                   (c-code
+                   (c:code
                      (string-append
                         (c:allocs->str (c:allocs cfun) "\n")
                         (c:allocs->str (c:allocs cargs) "\n")
@@ -1284,25 +1286,25 @@
                          ;; Join expressions; based on c:append
                          (let ((cp1 (if (ref? expr)
                                         ;; Ignore lone ref to avoid C warning
-                                        (c-code/vars "" '())
+                                        (c:code/vars "" '())
                                         (c-compile-exp expr append-preamble cont ast-id trace cps?)))
                                (cp2 acc))
-                           (c-code/vars 
+                           (c:code/vars 
                              (let ((cp1-body (c:body cp1)))
                                (if (zero? (string-length cp1-body))
                                    (c:body cp2) ; Ignore cp1 if necessary
                                    (string-append cp1-body ";" (c:body cp2))))
                              (append (c:allocs cp1) (c:allocs cp2)))))
-                       (c-code "")
+                       (c:code "")
                        args)))
           exps))
         ((equal? 'Cyc-local-set! fun)
          ;:(trace:error `(JAE DEBUG Cyc-local-set ,exp))
          (let ((val-exp (c-compile-exp (caddr exp) append-preamble cont ast-id trace cps?)))
-           (c-code/vars
+           (c:code/vars
              (string-append (mangle (cadr exp)) " = " (c:body val-exp) ";")
              (c:allocs val-exp)))
-         ;; (c-code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
+         ;; (c:code (string-append (mangle (cadr exp)) " = " (mangle (caddr exp)) ";"))
         )
         ((equal? 'let fun)
          (let* ((vars/vals (cadr exp))
@@ -1314,14 +1316,14 @@
                           (let ((cp1 (c-compile-exp (cadr var/val) append-preamble cont ast-id trace cps?))
                                 (cp2 acc))
                             (set-use-alloca! #f) ; Revert flag
-                            (c-code/vars 
+                            (c:code/vars 
                               (let ((cp1-body (c:body cp1)))
                                 (string-append cp1-body ";" (c:body cp2)))
                               (append 
                                 (list (string-append "object " (mangle (car var/val)) ";"))
                                 (c:allocs cp1) 
                                 (c:allocs cp2)))))
-                        (c-code "")
+                        (c:code "")
                         vars/vals))
                (body-exp (c-compile-exp 
                            body append-preamble cont ast-id trace cps?)))
@@ -1337,7 +1339,7 @@
          (test (compile (if->condition exp)))
          (then (compile (if->then exp)))
          (els (compile (if->else exp))))
-  (c-code (string-append
+  (c:code (string-append
    (c:allocs->str (c:allocs test) "  ")
    "if( (boolean_f != "
    (c:body test)
@@ -1405,7 +1407,7 @@
           #f ; inline, so disable CPS on this pass
          )))
 
-   (c-code/vars "" (list ""))))
+   (c:code/vars "" (list ""))))
 
 (define (c-compile-raw-global-lambda exp append-preamble cont trace . cps?)
    (let* ((precompiled-sym
@@ -1447,14 +1449,14 @@
        (define->var exp)
        #t ; (lambda? body) 
        (let ((cv-name (mangle (gensym 'c))))
-         (c-code/vars 
+         (c:code/vars 
            (string-append "&" cv-name)
            (list
              (string-append "mclosure0(" cv-name ", (function_type)__lambda_"
                (number->string lid) ");" cv-name ".num_args = "
                (number->string num-args)
                ";")))))
-     (c-code/vars "" (list ""))))
+     (c:code/vars "" (list ""))))
 
 ;; Symbol compilation
 
@@ -1655,7 +1657,7 @@
          (create-object (lambda ()
            ;; JAE - this is fine, now need to handle other side (actually reading the value without a closure obj
            ;; (trace:error `(create-object free-vars ,free-vars ,(car free-vars)))
-           (c-code/vars
+           (c:code/vars
              (car free-vars)
              (list))))
          (create-nclosure (lambda ()
@@ -1713,7 +1715,7 @@
     (use-obj-instead-of-closure?
       (create-object))
     (else
-      (c-code/vars
+      (c:code/vars
         (if (and use-alloca?
                  (> (length free-vars) 0))
             cv-name
@@ -1819,7 +1821,7 @@
                          "") ; No varargs, skip
                        (c:serialize
                          (c:append
-                           (c-code 
+                           (c:code 
                             ;; Only trace when entering initial defined function
                              (cond
                                (has-closure?
