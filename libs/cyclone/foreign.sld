@@ -9,7 +9,7 @@
 (define-library (cyclone foreign)
  (import
    (scheme base)
-   (scheme write) ;; TODO: debugging only!
+   ;(scheme write) ;; TODO: debugging only!
    ;(scheme cyclone pretty-print)
    (scheme cyclone util)
  )

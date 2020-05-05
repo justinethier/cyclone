@@ -994,12 +994,10 @@
            args))
 
         ((eq? 'Cyc-foreign-value fun)
-         (c->scm (car args) (cadr args))
-         ;(c:code/vars 
-         ;  (string-append 
-         ;    "obj_int2obj(" (car args) ")")
-         ;  (list))
-        )
+         (let ((kons (c->scm (car args) (cadr args))))
+           (c:code/vars
+             (cdr kons)
+             (list (car kons)))))
 
         ((prim? fun)
          (let* ((c-fun 
