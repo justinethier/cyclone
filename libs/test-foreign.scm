@@ -11,8 +11,12 @@
 
 (define *my-global* #f)
 
+(c-define-type my-integer integer)
+(c-define-type my-integer2 integer)
+
 (test-group "foreign value"
   (test 3 (c-value "1 + 2" integer))
+  (test 4 (c-value "2 + 2" my-integer))
 )
 
 (test-group "foreign code"

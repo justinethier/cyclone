@@ -9,7 +9,8 @@
 (define-library (cyclone foreign)
  (import
    (scheme base)
-   ;(scheme write) ;; TODO: debugging only!
+   (scheme eval)
+   (scheme write) ;; TODO: debugging only!
    ;(scheme cyclone pretty-print)
    (scheme cyclone util)
  )
@@ -20,15 +21,40 @@
    c-define
    c->scm
    scm->c
+   c-define-type
  )
  (begin
+   ;; 
+   ;;(eval `(define *foreign-types* (list)))
+
+  ;; (c-define-type name type (pack (unpack)))
+  (define-syntax c-define-type
+    (er-macro-transformer
+      (lambda (expr rename compare)
+        (let ((name (cadr expr))
+              (type (caddr expr)))
+          (unless (eval '(with-handler (lambda X #f) *foreign-types*))
+            (write "no foreign type table" (current-error-port))
+            (newline (current-error-port))
+            (eval `(define *foreign-types* (make-hash-table))))
+          (eval `(hash-table-set! *foreign-types* (quote ,name) (quote ,type)))
+          #f))))
 
   (define-syntax c-value
     (er-macro-transformer
       (lambda (expr rename compare)
         (let* ((code-arg (cadr expr))
                (type-arg (caddr expr))
+               (c-type (eval `(with-handler 
+                                (lambda X #f)
+                                (hash-table-ref *foreign-types* (quote ,type-arg))
+                                )))
               )
+          (when c-type
+            (write `(defined c type ,c-type) (current-error-port))
+            (newline (current-error-port))
+            (set! type-arg c-type))
+
           ;(for-each
           ;  (lambda (arg)
           ;    (if (not (string? arg))
