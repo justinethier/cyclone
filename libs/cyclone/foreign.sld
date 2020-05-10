@@ -32,7 +32,7 @@
     (er-macro-transformer
       (lambda (expr rename compare)
         (let ((name (cadr expr))
-              (type (caddr expr)))
+              (type (cddr expr)))
           (unless (eval '(with-handler (lambda X #f) *foreign-types*))
             (write "no foreign type table" (current-error-port))
             (newline (current-error-port))
@@ -49,18 +49,26 @@
                                 (lambda X #f)
                                 (hash-table-ref *foreign-types* (quote ,type-arg))
                                 )))
+               (c-ret-convert #f)
               )
           (when c-type
             (write `(defined c type ,c-type) (current-error-port))
             (newline (current-error-port))
-            (set! type-arg c-type))
+            (set! type-arg (car c-type))
+            (if (= 3 (length c-type))
+                (set! c-ret-convert (caddr c-type))))
 
           ;(for-each
           ;  (lambda (arg)
           ;    (if (not (string? arg))
           ;        (error "c-value" "Invalid argument: string expected, received " arg)))
           ;  (cdr expr))
-          `((lambda () (Cyc-foreign-value ,code-arg ,(symbol->string type-arg))))))))
+
+          (if c-ret-convert
+            `((lambda () (,c-ret-convert (Cyc-foreign-value ,code-arg ,(symbol->string type-arg)))))
+            `((lambda () (Cyc-foreign-value ,code-arg ,(symbol->string type-arg))))
+          )
+          ))))
 
   (define-syntax c-code
     (er-macro-transformer
