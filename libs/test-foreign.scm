@@ -33,9 +33,9 @@
 
 ;; Must be top-level
 
-TODO: support custom types (arg and ret) for c-define.
-      Also need to be able to support arg/ret convert optional type arguments
-      Would need to generate scheme wrappers to handle these conversions
+;TODO: support custom types (arg and ret) for c-define.
+;      Also need to be able to support arg/ret convert optional type arguments
+;      Would need to generate scheme wrappers to handle these conversions
 
 (c-define scm-strlen my-integer "strlen" string)
 ;(c-define scm-strlen "int" "strlen" string)

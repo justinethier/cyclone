@@ -173,8 +173,17 @@
     (er-macro-transformer
       (lambda (expr rename compare)
         (let* ((scm-fnc (cadr expr))
+               (scm-fnc-wrapper (gensym 'scm-fnc))
                (c-fnc (cadddr expr))
                (rv-type (caddr expr))
+               (rv-cust-type (eval `(with-handler 
+                                (lambda X #f)
+                                (hash-table-ref *foreign-types* (quote ,rv-type))
+                                )))
+               (rv-cust-convert
+                 (if (and rv-cust-type (= 3 (length rv-cust-type)))
+                     (caddr rv-cust-type)
+                     #f))
                (arg-types (cddddr expr))
                (arg-syms/unbox 
                  (map 
@@ -190,7 +199,9 @@
                  (c->scm 
                    (string-append 
                      c-fnc "(" (string-join (map cdr arg-syms/unbox) ",") ")")
-                   rv-type))
+                   (if rv-cust-type
+                       (car rv-cust-type)
+                       rv-type)))
                (return-alloc (car returns))
                (return-expr (cdr returns))
                (args (string-append
@@ -207,7 +218,16 @@
                    return-alloc
                    "return_closcall1(data, k, " return-expr ");"))
               )
-        `(define-c ,scm-fnc ,args ,body)
+        (if rv-cust-type
+           (let ((arg-syms (map (lambda (a) (gensym 'arg)) arg-types)))
+             `(begin
+                (define-c ,scm-fnc-wrapper ,args ,body)
+                (define (,scm-fnc ,@arg-syms)
+                  (,rv-cust-convert TODO: if rv-cust-convert is not #f,
+                    (,scm-fnc-wrapper ,@arg-syms)))
+              ))
+           `(define-c ,scm-fnc ,args ,body)
+        )
           ))))
   ; '(c-define scm-strlen int "strlen" string)
   ; list
