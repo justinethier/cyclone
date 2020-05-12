@@ -44,7 +44,7 @@
 ;(c-define scm-strlen "int" "strlen" string)
 (c-define scm-strlend double "strlen" string)
 (c-define scm-strlen2 integer "strlen" my-string)
-(c-define scm-strlen3 integer "strlen" my-integer-as-string)
+(c-define scm-strlen3 integer "strlen" string-as-integer)
 
 (test-group "foreign lambda"
   (test 15 (scm-strlen "testing 1, 2, 3"))

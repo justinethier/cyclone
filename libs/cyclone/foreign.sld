@@ -203,7 +203,7 @@
                            var 
                            (cond
                             (arg-cust-type
-                             (if (= 3 (length arg-cust-type))
+                             (if (> (length arg-cust-type) 1)
                                  (set! arg-cust-convert #t))
                              (car arg-cust-type))
                             (else
@@ -249,8 +249,8 @@
                                    (hash-table-ref *foreign-types* (quote ,type)))))
                               (pass-arg
                                 (if (and arg-cust-type
-                                         (= 3 (length arg-cust-type)))
-                                   `(,(caddr arg-cust-type) ,sym)
+                                         (> (length arg-cust-type) 1))
+                                   `(,(cadr arg-cust-type) ,sym)
                                    sym)) )
                          (cons 
                            sym  ;; Arg 
