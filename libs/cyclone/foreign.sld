@@ -187,6 +187,7 @@
                      (caddr rv-cust-type)
                      #f))
                (arg-types (cddddr expr))
+               (arg-cust-convert #f)
                (arg-syms/unbox 
                  (map 
                    (lambda (type)
@@ -200,9 +201,13 @@
                          var 
                          (scm->c 
                            var 
-                           (if arg-cust-type
-                               (car arg-cust-type)
-                               type))
+                           (cond
+                            (arg-cust-type
+                             (if (= 3 (length arg-cust-type))
+                                 (set! arg-cust-convert #t))
+                             (car arg-cust-type))
+                            (else
+                              type)))
                          ;(string-append "string_str(" var ")")
                          )))
                    arg-types))
@@ -230,15 +235,32 @@
                    "return_closcall1(data, k, " return-expr ");"))
               )
         (cond
-          TODO: need to know if there any custom types for args with an arg-convert function, and need to handle those in case below.
-                also need to handle case where there are custom arg conversion but not a custom return type conversion
-          (rv-cust-convert
-           (let ((arg-syms (map (lambda (a) (gensym 'arg)) arg-types)))
+          ;TODO: need to know if there any custom types for args with an arg-convert function, and need to handle those in case below.
+          ;      also need to handle case where there are custom arg conversion but not a custom return type conversion
+          ((or rv-cust-convert arg-cust-convert)
+           (if (not rv-cust-convert)
+               (set! rv-cust-convert 'begin))
+           (let ((arg-syms 
+                   (map 
+                     (lambda (type) 
+                       (let* ((sym (gensym 'arg))
+                              (arg-cust-type (eval `(with-handler 
+                                   (lambda X #f)
+                                   (hash-table-ref *foreign-types* (quote ,type)))))
+                              (pass-arg
+                                (if (and arg-cust-type
+                                         (= 3 (length arg-cust-type)))
+                                   `(,(caddr arg-cust-type) ,sym)
+                                   sym)) )
+                         (cons 
+                           sym  ;; Arg 
+                           pass-arg)));; Passing arg to internal func
+                     arg-types)))
              `(begin
                 (define-c ,scm-fnc-wrapper ,args ,body)
-                (define (,scm-fnc ,@arg-syms)
+                (define (,scm-fnc ,@(map car arg-syms))
                   (,rv-cust-convert
-                    (,scm-fnc-wrapper ,@arg-syms))))))
+                    (,scm-fnc-wrapper ,@(map cdr arg-syms)))))))
           (else
            `(define-c ,scm-fnc ,args ,body)))
           ))))

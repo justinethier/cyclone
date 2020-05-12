@@ -14,6 +14,7 @@
 (c-define-type my-string string)
 (c-define-type my-integer integer)
 (c-define-type my-integer-as-string integer string->number number->string)
+(c-define-type string-as-integer string number->string string->number)
 
 (test-group "foreign value"
   (test 3 (c-value "1 + 2" integer))
@@ -43,11 +44,13 @@
 ;(c-define scm-strlen "int" "strlen" string)
 (c-define scm-strlend double "strlen" string)
 (c-define scm-strlen2 integer "strlen" my-string)
+(c-define scm-strlen3 integer "strlen" my-integer-as-string)
 
 (test-group "foreign lambda"
   (test 15 (scm-strlen "testing 1, 2, 3"))
   (test 15 (scm-strlen2 "testing 1, 2, 3"))
   (test 15.0 (scm-strlend "testing 1, 2, 3"))
   (test "15" (scm-strlen-str "testing 1, 2, 3"))
+  (test 3 (scm-strlen3 255))
 )
 (test-exit)
