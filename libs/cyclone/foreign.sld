@@ -230,6 +230,8 @@
                    "return_closcall1(data, k, " return-expr ");"))
               )
         (cond
+          TODO: need to know if there any custom types for args with an arg-convert function, and need to handle those in case below.
+                also need to handle case where there are custom arg conversion but not a custom return type conversion
           (rv-cust-convert
            (let ((arg-syms (map (lambda (a) (gensym 'arg)) arg-types)))
              `(begin
