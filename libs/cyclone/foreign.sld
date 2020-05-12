@@ -176,10 +176,12 @@
                (scm-fnc-wrapper (gensym 'scm-fnc))
                (c-fnc (cadddr expr))
                (rv-type (caddr expr))
+               ;; boolean - Are we returning a custom (user-defined) type?
                (rv-cust-type (eval `(with-handler 
                                 (lambda X #f)
                                 (hash-table-ref *foreign-types* (quote ,rv-type))
                                 )))
+               ;; boolean - Does the custom return type have a conversion function?
                (rv-cust-convert
                  (if (and rv-cust-type (= 3 (length rv-cust-type)))
                      (caddr rv-cust-type)
@@ -218,16 +220,16 @@
                    return-alloc
                    "return_closcall1(data, k, " return-expr ");"))
               )
-        (if rv-cust-type
+        (cond
+          (rv-cust-convert
            (let ((arg-syms (map (lambda (a) (gensym 'arg)) arg-types)))
              `(begin
                 (define-c ,scm-fnc-wrapper ,args ,body)
                 (define (,scm-fnc ,@arg-syms)
-                  (,rv-cust-convert TODO: if rv-cust-convert is not #f,
-                    (,scm-fnc-wrapper ,@arg-syms)))
-              ))
-           `(define-c ,scm-fnc ,args ,body)
-        )
+                  (,rv-cust-convert
+                    (,scm-fnc-wrapper ,@arg-syms))))))
+          (else
+           `(define-c ,scm-fnc ,args ,body)))
           ))))
   ; '(c-define scm-strlen int "strlen" string)
   ; list
