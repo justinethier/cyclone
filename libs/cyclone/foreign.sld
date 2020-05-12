@@ -190,10 +190,19 @@
                (arg-syms/unbox 
                  (map 
                    (lambda (type)
-                     (let ((var (mangle (gensym 'arg))))
+                     (let ((var (mangle (gensym 'arg)))
+                           (arg-cust-type (eval `(with-handler 
+                                (lambda X #f)
+                                (hash-table-ref *foreign-types* (quote ,type))
+                                )))
+                           )
                        (cons 
                          var 
-                         (scm->c var type)
+                         (scm->c 
+                           var 
+                           (if arg-cust-type
+                               (car arg-cust-type)
+                               type))
                          ;(string-append "string_str(" var ")")
                          )))
                    arg-types))
