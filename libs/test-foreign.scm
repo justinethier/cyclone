@@ -38,11 +38,13 @@
 ;      Would need to generate scheme wrappers to handle these conversions
 
 (c-define scm-strlen my-integer "strlen" string)
+(c-define scm-strlen-str my-integer-as-string "strlen" string)
 ;(c-define scm-strlen "int" "strlen" string)
 (c-define scm-strlend double "strlen" string)
 
 (test-group "foreign lambda"
   (test 15 (scm-strlen "testing 1, 2, 3"))
   (test 15.0 (scm-strlend "testing 1, 2, 3"))
+  (test "15" (scm-strlen-str "testing 1, 2, 3"))
 )
 (test-exit)
