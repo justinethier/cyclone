@@ -4,22 +4,10 @@ The `(cyclone foreign)` provides a convenient interface for integrating with C c
 
 # Overview
 
-- [`c-define-type`(#c-define-type)
 - [`c-code`](#c-code)
 - [`c-value`](#c-value)
 - [`c-define`](#c-define)
-
-## c-define-type
-
-*Syntax*
-
-    (c-define-type NAME TYPE (ARG-CONVERT (RET-CONVERT)))
-
-Define a custom type with symbol `NAME` that is an alias of type `TYPE`. It is also possible to specify conversion functions `ARG-CONVERT` and `RET-CONVERT` to convert to/from this custom type.
-
-EG, to define a type that consists of integers in Scheme and strings in C: 
-
-    (c-define-type string-as-integer string number->string string->number)
+- [`c-define-type`](#c-define-type)
 
 ## c-code
 
@@ -51,20 +39,34 @@ For example, to define a function that calls `strlen`:
 
 Note that these definitions are introduced at the top-level.
 
+## c-define-type
+
+*Syntax*
+
+    (c-define-type NAME TYPE (ARG-CONVERT (RET-CONVERT)))
+
+Define a custom type with symbol `NAME` that is an alias of type `TYPE`. It is also possible to specify conversion functions `ARG-CONVERT` and `RET-CONVERT` to convert to/from this custom type.
+
+EG, to define a type that consists of integers in Scheme and strings in C: 
+
+    (c-define-type string-as-integer string number->string string->number)
+
+
 # Type Specifiers
 
-TODO: list of type specifiers
-built-in types
+The following built-in specifiers may be used as a `TYPE` for forms in this module. 
+
 Scheme | C
-int | int
-integer | int
-bool | int
-char | int
-string | char *
-symbol | const char *
-bytevector | char *
-float | double
-double | double
-bignum | mp_int
-opaque | void *
+------ | -
+`int` | `int`
+`integer` | `int`
+`bool` | `int`
+`char` | `int`
+`string` | `char *`
+`symbol` | `const char *`
+`bytevector` | `char *`
+`float` | `double`
+`double` | `double`
+`bignum` | `mp_int`
+`opaque` | `void *`
 
