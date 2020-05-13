@@ -6359,7 +6359,7 @@ static primitive_type Cyc_91macro_127_primitive =
 static primitive_type port_127_primitive =
     { {0}, primitive_tag, "port?", &_port_127 };
 static primitive_type bytevector_127_primitive =
-    { {0}, primitive_tag, "bytevector?", &_vector_127 };
+    { {0}, primitive_tag, "bytevector?", &_bytevector_127 };
 static primitive_type vector_127_primitive =
     { {0}, primitive_tag, "vector?", &_vector_127 };
 static primitive_type string_127_primitive =
