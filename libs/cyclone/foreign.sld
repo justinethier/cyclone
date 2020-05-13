@@ -10,11 +10,9 @@
  (import
    (scheme base)
    (scheme eval)
-   (scheme write) ;; TODO: debugging only!
-   ;(scheme cyclone pretty-print)
    (scheme cyclone util)
+   ;(scheme write) ;; TODO: debugging only!
  )
- ;(include-c-header "<ck_pr.h>")
  (export
    c-code
    c-value
@@ -33,9 +31,14 @@
       (lambda (expr rename compare)
         (let ((name (cadr expr))
               (type (cddr expr)))
+          ;;
+          ;; Custom foreign types are all stored within the global environment 
+          ;; used by `eval` at compile time. We play a few tricks using exception
+          ;; handlers to check if variables are defined in that environment.
+          ;;
           (unless (eval '(with-handler (lambda X #f) *foreign-types*))
-            (write "no foreign type table" (current-error-port))
-            (newline (current-error-port))
+            ;(write "no foreign type table" (current-error-port))
+            ;(newline (current-error-port))
             (eval `(define *foreign-types* (make-hash-table))))
           (eval `(hash-table-set! *foreign-types* (quote ,name) (quote ,type)))
           #f))))
@@ -52,8 +55,8 @@
                (c-ret-convert #f)
               )
           (when c-type
-            (write `(defined c type ,c-type) (current-error-port))
-            (newline (current-error-port))
+            ;(write `(defined c type ,c-type) (current-error-port))
+            ;(newline (current-error-port))
             (set! type-arg (car c-type))
             (if (= 3 (length c-type))
                 (set! c-ret-convert (caddr c-type))))
@@ -161,6 +164,7 @@
                "make_double(" var ", " ,code ");")
              (string-append "&" var)
            )))
+TODO:
 ;      /*bytevector_tag */ , "bytevector"
 ;      /*c_opaque_tag  */ , "opaque"
 ;      /*bignum_tag    */ , "bignum"
@@ -168,7 +172,6 @@
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   
-  ;(pretty-print (
   (define-syntax c-define
     (er-macro-transformer
       (lambda (expr rename compare)
@@ -229,14 +232,13 @@
                          arg-syms/unbox))
                         ")"))
                (body
-               ;; TODO: need to unbox all args, pass to C function, then box up the result
                  (string-append
                    return-alloc
                    "return_closcall1(data, k, " return-expr ");"))
               )
         (cond
-          ;TODO: need to know if there any custom types for args with an arg-convert function, and need to handle those in case below.
-          ;      also need to handle case where there are custom arg conversion but not a custom return type conversion
+          ;; If there are any custom type conversion functions we need to create
+          ;; a wrapper function in Scheme to perform those conversions
           ((or rv-cust-convert arg-cust-convert)
            (if (not rv-cust-convert)
                (set! rv-cust-convert 'begin))
@@ -261,12 +263,10 @@
                 (define (,scm-fnc ,@(map car arg-syms))
                   (,rv-cust-convert
                     (,scm-fnc-wrapper ,@(map cdr arg-syms)))))))
+          ;; Simpler case, just define the function directly
           (else
            `(define-c ,scm-fnc ,args ,body)))
           ))))
-  ; '(c-define scm-strlen int "strlen" string)
-  ; list
-  ; list))
 
  )
 )
