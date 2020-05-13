@@ -808,8 +808,12 @@
                    '()
                    (cons obj (make (- n 1) obj) )))))
       (make k x)))
-    (define (list-copy lst)
-      (foldr (lambda (x y) (cons x y)) '() lst))
+    (define (list-copy ls)
+      (let lp ((ls ls) (res '()))
+        (if (pair? ls)
+            (lp (cdr ls) (cons (car ls) res))
+            (append (reverse res) ls))))
+
     ;; Implementation of receive from SRFI 8
     (define-syntax receive
       (er-macro-transformer
