@@ -20,6 +20,7 @@
   (test 3 (c-value "1 + 2" integer))
   (test 4 (c-value "2 + 2" my-integer))
   (test "4" (c-value "2 + 2" my-integer-as-string))
+  (test "test" (c-value "\"test\"" string))
 )
 
 (test-group "foreign code"

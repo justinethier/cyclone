@@ -161,7 +161,7 @@
            (let ((var (mangle (gensym 'var))))
            (cons
              (string-append 
-               "make_double(" var ", " ,code ");")
+               "make_double(" var ", " ,code ");") TODO: shouldn't this be building a string??
              (string-append "&" var)
            )))
 TODO:
