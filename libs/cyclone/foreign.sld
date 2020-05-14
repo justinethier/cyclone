@@ -161,10 +161,10 @@
            (let ((var (mangle (gensym 'var))))
            (cons
              (string-append 
-               "make_double(" var ", " ,code ");") TODO: shouldn't this be building a string??
+               "make_utf8_string(data," var ", " ,code ");")
              (string-append "&" var)
            )))
-TODO:
+;TODO:
 ;      /*bytevector_tag */ , "bytevector"
 ;      /*c_opaque_tag  */ , "opaque"
 ;      /*bignum_tag    */ , "bignum"
