@@ -164,11 +164,21 @@
                "make_utf8_string(data," var ", " ,code ");")
              (string-append "&" var)
            )))
-TODO:
-;      /*bytevector_tag */ , "bytevector"
-;      /*c_opaque_tag  */ , "opaque"
-;      /*bignum_tag    */ , "bignum"
-;      /*symbol_tag    */ , "symbol"
+          ((bytevector)
+           (let ((var (mangle (gensym 'var))))
+           (cons
+             (string-append 
+               "make_empty_bytevector(data," var ");"
+               var "->data = " ,code ";")
+             (string-append "&" var)
+           )))
+          ((opaque)
+           (let ((var (mangle (gensym 'var))))
+           (cons
+             (string-append 
+               "make_c_opaque(data," var ", " ,code ");")
+             (string-append "&" var)
+           )))
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   
