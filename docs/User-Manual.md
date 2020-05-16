@@ -25,9 +25,9 @@ title: User Manual
 
 
 # Introduction
-Cyclone is an experimental Scheme-to-C compiler that uses a variant of the [Cheney on the MTA](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf) technique to implement full tail recursion, continuations, generational garbage collection, and native threads.
+Cyclone is a brand-new Scheme-to-C compiler with the goal of supporting real-world application development using the R<sup>7</sup>RS Scheme Language standard. We provide modern features and a stable system capable of generating fast native binaries.
 
-Cyclone works by converting a Scheme program to continuation passing style and compiling each continuation to a C function. At runtime these functions never return and are allowed to fill up the stack until they trigger a minor garbage collection. Live stack objects are then copied to the heap and `longjmp` is used to return to the beginning of the stack. This is the same technique proposed by Henry Baker (Cheney on the MTA) and implemented first by CHICKEN Scheme. The difference is that our compiler allows multiple native threads, each with their own stack. A tracing garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
+A variant of the [Cheney on the MTA](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf) technique is used to implement full tail recursion, continuations, generational garbage collection, and native threads. This is the same technique proposed by Henry Baker (Cheney on the MTA) and implemented first by CHICKEN Scheme. The difference is that our compiler allows multiple native threads, each with their own stack. A tracing garbage collector is used to manage the second-generation heap and perform major collections without "stopping the world".
 
 Cyclone is developed by [Justin Ethier](https://github.com/justinethier). 
 
@@ -41,7 +41,6 @@ The following packages are required:
 
 - make
 - gcc
-- [LibTomMath](https://github.com/libtom/libtommath)
 - [Concurrency Kit](http://concurrencykit.org/)
 
   NOTE: The best way to install `libck` is via a package manager such as `apt-get`. But if a package is not available for this library it can also be built from source. Just replace `0.6.0` below with the latest version available from their website:
@@ -52,11 +51,11 @@ The following packages are required:
 
 On a Debian variant such as Ubuntu the necessary packages may be installed via the command:
 
-    sudo apt-get install libtommath-dev libck-dev make gcc
+    sudo apt-get install libck-dev make gcc
 
 The following command can be used to install dependencies on Fedora, though `libck` will also need to be built from source:
 
-    sudo yum install libtommath-devel gcc make
+    sudo yum install gcc make
     
 # Installation
 
@@ -99,43 +98,49 @@ and should be located in the file
 
     scheme/cyclone/util.sld
 
-Cyclone will not automatically generate libraries when compiling a program. Each library will need to be built separately prior to building the program. For example:
+Cyclone will automatically generate libraries when compiling a program. For example:
 
     $ cd cyclone/examples/game-of-life
-    $ cyclone example/grid.sld
-    $ cyclone example/life.sld
     $ cyclone life.scm
     $ ./life
-
 
 ## Command Line Options
 
 `cyclone` has the following command line options:
 
-Option             | Notes
------------------- | -----
-`-A directory`     | Append directory to the list of directories that are searched in order to locate imported libraries.
-`-I directory`     | Prepend directory to the list of directories that are searched in order to locate imported libraries.
-`-CP cc-commands`  | Specify a custom command line for the C compiler to compile a program module. See `Makefile.config` for an example of how to construct such a command line.
-`-CE cc-commands`  | Specify a custom command line for the C compiler to compile an executable.
-`-CL cc-commands`  | Specify a custom command line for the C compiler to compile a library module.
-`-Ox`              | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
-`-d`               | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
-`-t`               | Show intermediate trace output in generated C files
-`-h, --help`       | Display usage information
-`-v`               | Display version information
+Option              | Notes
+------------------- | -----
+`-A directory`      | Append directory to the list of directories that are searched in order to locate imported libraries.
+`-I directory`      | Prepend directory to the list of directories that are searched in order to locate imported libraries.
+`-CP cc-commands`   | Specify a custom command line for the C compiler to compile a program module. See `Makefile.config` for an example of how to construct such a command line.
+`-CE cc-commands`   | Specify a custom command line for the C compiler to compile an executable.
+`-CL cc-commands`   | Specify a custom command line for the C compiler to compile a library module.
+`-CS cc-commands`   | Specify a custom command line for the C compiler to compile a shared object module.
+`-CLNK option`      | Specify a custom command to provide as a linker option, EG: "-lcurl".
+`-Ox`               | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
+`-d`                | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
+`-t`                | Show intermediate trace output in generated C files
+`-h, --help`        | Display usage information
+`-v`                | Display version information
+`-vn`               | Display version number
+`-batch`            | Automatically compile local library dependencies (enabled by default).
+`-no-batch`         | Compile as a single unit, do not attempt to compile local library dependencies.
+`-use-unsafe-prims` | Emit unsafe primitives. These primitives are faster but do not perform runtime type checking or bounds checking.
+`-no-call-history`  | Do not track call history in the compiled code. This allows for a faster runtime at the cost of having no call history in the event of an exception.
 
 ## Generated Files
 
 The following files are generated during the Cyclone compilation process:
 
-File Extension | Notes
--------------- | -----
-`.meta` | These text files contain the expanded version of any macros exported by a Scheme library, and allow other modules to easily use those macros during compilation. This file is not generated when compiling a program.
-`.c` | C code file generated by Cyclone.
-`.o` | Object file generated by the C compiler from the corresponding `.c` file.
-`.so` | Shared Object files generated by the C compiler from the corresponding `.c` file. These are only generated for Scheme libraries and are used to allow loading a library at runtime.
-(None) | Final executable file generated by the C compiler when compiling a program.
+File Extension | Install Required | Notes
+-------------- | ---------------- | -----
+`.meta` | [x] | These text files contain the expanded version of any macros exported by a Scheme library, and allow other modules to easily use those macros during compilation. This file is not generated when compiling a program.
+`.c` | [ ] | C code file generated by Cyclone.
+`.o` | [x] | Object file generated by the C compiler from the corresponding `.c` file.
+`.so` | [x] | Shared Object files generated by the C compiler from the corresponding `.c` file. These are only generated for Scheme libraries and are used to allow loading a library at runtime.
+(None) | [x] | Final executable file generated by the C compiler when compiling a program.
+
+When installing a library, all of the checked files above must be installed as well as the corresponding `.sld` file.
 
 ## Interpreter
 
