@@ -78,6 +78,7 @@ install : libs install-libs install-includes install-bin
 	$(INSTALL) -m0644 scheme/cyclone/*.scm $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 libs/cyclone/test.meta $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 libs/cyclone/match.meta $(DESTDIR)$(DATADIR)/cyclone
+	$(INSTALL) -m0644 libs/cyclone/foreign.meta $(DESTDIR)$(DATADIR)/cyclone
 	$(INSTALL) -m0644 scheme/cyclone/*.o $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0755 scheme/cyclone/*.so $(DESTDIR)$(DATADIR)/scheme/cyclone
 	$(INSTALL) -m0644 libs/cyclone/*.sld $(DESTDIR)$(DATADIR)/cyclone
@@ -271,6 +272,7 @@ bootstrap : icyc libs
 	cp scheme/cyclone/macros.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp libs/cyclone/match.c $(BOOTSTRAP_DIR)/cyclone
 	cp libs/cyclone/match.meta $(BOOTSTRAP_DIR)/cyclone
+	cp libs/cyclone/foreign.meta $(BOOTSTRAP_DIR)/cyclone
 	cp scheme/cyclone/pretty-print.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/primitives.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/transforms.c $(BOOTSTRAP_DIR)/scheme/cyclone

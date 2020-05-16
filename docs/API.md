@@ -57,6 +57,7 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 These libraries are provided as Cyclone-specific extensions:
 
 - [`cyclone concurrent`](api/cyclone/concurrent.md) - A helper library for writing concurrent code.
+- [`cyclone foreign`](api/cyclone/foreign.md) - Provides a convenient interface for integrating with C code.
 - [`cyclone match`](api/cyclone/match.md) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
 - [`cyclone test`](api/cyclone/test.md) - A unit testing framework ported from `(chibi test)`.
 - [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
