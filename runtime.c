@@ -5412,6 +5412,22 @@ void _open_91output_91file(void *data, object cont, object args)
     return_closcall1(data, cont, &p);
 }}
 
+void _open_91binary_91input_91file(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "open-binary-input-file", 1, args);
+  {
+    port_type p = Cyc_io_open_binary_input_file(data, car(args));
+    return_closcall1(data, cont, &p);
+}}
+
+void _open_91binary_91output_91file(void *data, object cont, object args)
+{
+  Cyc_check_num_args(data, "open-binary-output-file", 1, args);
+  {
+    port_type p = Cyc_io_open_binary_output_file(data, car(args));
+    return_closcall1(data, cont, &p);
+}}
+
 void _close_91port(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "close-port", 1, args);
@@ -6370,6 +6386,10 @@ static primitive_type open_91input_91file_primitive =
     { {0}, primitive_tag, "open-input-file", &_open_91input_91file };
 static primitive_type open_91output_91file_primitive =
     { {0}, primitive_tag, "open-output-file", &_open_91output_91file };
+static primitive_type open_91binary_91input_91file_primitive =
+    { {0}, primitive_tag, "open-binary-input-file", &_open_91binary_91input_91file };
+static primitive_type open_91binary_91output_91file_primitive =
+    { {0}, primitive_tag, "open-binary-output-file", &_open_91binary_91output_91file };
 static primitive_type close_91port_primitive =
     { {0}, primitive_tag, "close-port", &_close_91port };
 static primitive_type close_91input_91port_primitive =
@@ -6525,6 +6545,8 @@ const object primitive_bytevector_127 = &bytevector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
 const object primitive_open_91input_91file = &open_91input_91file_primitive;
 const object primitive_open_91output_91file = &open_91output_91file_primitive;
+const object primitive_open_91binary_91input_91file = &open_91binary_91input_91file_primitive;
+const object primitive_open_91binary_91output_91file = &open_91binary_91output_91file_primitive;
 const object primitive_close_91port = &close_91port_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_close_91output_91port = &close_91output_91port_primitive;

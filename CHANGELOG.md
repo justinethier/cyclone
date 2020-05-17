@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.18 - TBD
+
+Features
+
+- Added the `(cyclone foreign)` library to make it easier to integrate with C code using the FFI.
+
+Bug Fixes
+
+- Allow `open-binary-input-file` and `open-binary-output-file` to be accessible via the REPL.
+- Fix `bytevector?` predicate which was accidentally aliased to `vector?`.
+- Fix `list-copy` to return a non-list object instead of raising an error, per R7RS.
+
 ## 0.17 - April 6, 2020
 
 Bug Fixes

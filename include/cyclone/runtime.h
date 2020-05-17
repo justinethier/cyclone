@@ -714,6 +714,8 @@ extern const object primitive_string_127;
 extern const object primitive_symbol_127;
 extern const object primitive_open_91input_91file;
 extern const object primitive_open_91output_91file;
+extern const object primitive_open_91binary_91input_91file;
+extern const object primitive_open_91binary_91output_91file;
 extern const object primitive_close_91port;
 extern const object primitive_close_91input_91port;
 extern const object primitive_close_91output_91port;

@@ -320,6 +320,8 @@
       (list 'symbol? symbol?)
       (list 'open-input-file open-input-file)
       (list 'open-output-file open-output-file)
+      (list 'open-binary-input-file open-binary-input-file)
+      (list 'open-binary-output-file open-binary-output-file)
       (list 'close-port close-port)
       (list 'close-input-port close-input-port)
       (list 'close-output-port close-output-port)
