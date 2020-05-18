@@ -172,6 +172,7 @@
   (or (integer? exp)
       (real? exp)
       (complex? exp)
+      (eq? (void) exp) ;; Poor man's (void?)
       (string? exp)
       (vector? exp)
       (bytevector? exp)

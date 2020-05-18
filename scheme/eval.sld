@@ -116,6 +116,7 @@
 (define (self-evaluating? exp)
   (cond ((number? exp) #t)
         ((boolean? exp) #t)
+        ((eq? (void) exp) #t) ;; Poor man's (void?)
         ((string? exp) #t)
         ((vector? exp) #t)
         ((bytevector? exp) #t)
@@ -159,7 +160,7 @@
 (define (if-alternative exp)
   (if (not (null? (cdddr exp))) ;; TODO: add (not) support
       (cadddr exp)
-      #f))
+      (void)))
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
@@ -1022,7 +1023,7 @@
                                  ;; Insert default value for missing else clause
                                  ;; FUTURE: append the empty (unprinted) value
                                  ;; instead of #f
-                                 #f)))
+                                 (void))))
     ((define-c? exp) exp)
     ((define-syntax? exp)
      ;(trace:info `(define-syntax ,exp))
