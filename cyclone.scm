@@ -810,7 +810,7 @@
 ;; Will return a list of values for the option.
 ;; For example:
 ;;  ("-a" "1" "2") ==> ("1")
-;;  ("-a" "1" -a "2") ==> ("1" "2")
+;;  ("-a" "1" "-a" "2") ==> ("1" "2")
 (define (collect-opt-values args opt)
   (cdr
     (foldl
