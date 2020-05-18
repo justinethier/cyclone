@@ -69,6 +69,7 @@ enum object_tag {
       , vector_tag      = 20
       , complex_num_tag = 21
       , atomic_tag      = 22
+      , void_tag        = 23
 };
 
 /**

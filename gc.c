@@ -968,6 +968,7 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
   case forward_tag:
     return (char *)forward(obj);
   case eof_tag:
+  case void_tag:
   case primitive_tag:
   case boolean_tag:
   case symbol_tag:

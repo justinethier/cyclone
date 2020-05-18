@@ -178,6 +178,7 @@
     exact
     inexact
     eof-object
+    void
     syntax-error
     bytevector-copy
     bytevector-copy!
@@ -1444,6 +1445,11 @@
     " return_closcall1(data, k, Cyc_EOF); "
     "(void *data, object ptr)"
     " return Cyc_EOF;")
+  (define-c void
+    "(void *data, int argc, closure _, object k)"
+    " return_closcall1(data, k, Cyc_VOID); "
+    "(void *data, object ptr)"
+    " return Cyc_VOID;")
   (define-c input-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;

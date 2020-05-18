@@ -48,7 +48,8 @@ const char *tag_names[] = {
       /*symbol_tag    */ , "symbol"
       /*vector_tag    */ , "vector"
       /*complex_num_tag*/ , "complex number"
-      /*atomic_tag*/ , "atomic"
+      /*atomic_tag*/     , "atomic"
+      /*void_tag*/       , "void"
   , "Reserved for future use"
 };
 
@@ -190,8 +191,10 @@ int _cyc_argc = 0;
 char **_cyc_argv = NULL;
 
 static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custom type
+static symbol_type __VOID = { {0}, void_tag, ""};  // symbol_type in lieu of custom type
 
 const object Cyc_EOF = &__EOF;
+const object Cyc_VOID = &__VOID;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
@@ -1032,6 +1035,8 @@ object Cyc_display(void *data, object x, FILE * port)
     break;
   case eof_tag:
     fprintf(port, "<EOF>");
+    break;
+  case void_tag:
     break;
   case port_tag:
     fprintf(port, "<port %p>", ((port_type *) x)->fp);
@@ -5857,6 +5862,7 @@ static char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_gro
   case forward_tag:
     return (char *)forward(obj);
   case eof_tag:
+  case void_tag:
     break;
   case primitive_tag:
     break;
@@ -6034,6 +6040,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
       break;
       // These types are not heap-allocated
     case eof_tag:
+    case void_tag:
     case primitive_tag:
     case symbol_tag:
     case boolean_tag:
@@ -6100,6 +6107,7 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   //  symbol_tag      = 19
   //  closure0_tag    = 3
   //  eof_tag         = 9
+  //  void_tag
   //  macro_tag       = 13
   //  primitive_tag   = 17
 

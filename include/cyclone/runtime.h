@@ -32,6 +32,12 @@ extern const object quote_void;
 extern const object Cyc_EOF;
 
 /**
+ * The void value.
+ * \ingroup objects
+ */
+extern const object Cyc_VOID;
+
+/**
  * \ingroup gc_minor
  */
 void GC(void *, closure, object *, int);
@@ -480,6 +486,7 @@ object Cyc_is_procedure(void *data, object o);
 //object Cyc_is_opaque(object o);
 #define Cyc_is_macro(o)       (make_boolean(is_object_type(o) && ((list) o)->tag == macro_tag))
 #define Cyc_is_eof_object(o)  (make_boolean(is_object_type(o) && ((list) o)->tag == eof_tag))
+#define Cyc_is_void_object(o) (make_boolean(is_object_type(o) && ((list) o)->tag == void_tag))
 #define Cyc_is_cvar(o)        (make_boolean(is_object_type(o) && ((list) o)->tag == cvar_tag))
 #define Cyc_is_opaque(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == c_opaque_tag))
 object Cyc_is_immutable(object obj);
