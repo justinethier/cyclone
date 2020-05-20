@@ -625,6 +625,8 @@
   (cond
     ((null? exp)
      (c:code "NULL"))
+    ((eq? (void) exp) ;; Poor man's (void?)
+     (c:code "Cyc_VOID"))
     ((pair? exp)
      (c-compile-scalars exp use-alloca immutable))
     ((vector? exp)
