@@ -8,6 +8,7 @@ Features
 
 Bug Fixes
 
+- Added a void type and a new supporting function `(void)`. A void object is also now returned in situations where the return value is undefined: `for-each` and `if` expressions with out an else clause.
 - Allow `open-binary-input-file` and `open-binary-output-file` to be accessible via the REPL.
 - Fix `bytevector?` predicate which was accidentally aliased to `vector?`.
 - Fix `list-copy` to return a non-list object instead of raising an error, per R7RS.
