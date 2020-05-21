@@ -443,6 +443,7 @@ double MRG32k3a (double seed);
  */
 /**@{*/
 //object Cyc_eq(object x, object y);
+object Cyc_eqv(object x, object y);
 #define Cyc_eq(x, y) (make_boolean(x == y))
 int equal(object, object);
 object equalp(object, object);

@@ -2041,6 +2041,18 @@ object Cyc_is_procedure(void *data, object o)
 //  return boolean_f;
 //}
 
+object Cyc_eqv(object x, object y)
+{
+  if (Cyc_eq(x, y) == boolean_t) {
+    return boolean_t;
+  } else if (Cyc_is_number(x) == boolean_t &&
+             equalp(x, y) == boolean_t) {
+    return boolean_t;
+  } else { 
+    return boolean_f;
+  }
+}
+
 object Cyc_is_immutable(object obj)
 {
   if (is_object_type(obj) &&
@@ -4838,7 +4850,7 @@ void _eq_127(void *data, object cont, object args)
 void _eqv_127(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "eqv?", 2, args);
-  _eq_127(data, cont, args);
+  return_closcall1(data, cont, Cyc_eqv(car(args), cadr(args)));
 }
 
 void _equal_127(void *data, object cont, object args)

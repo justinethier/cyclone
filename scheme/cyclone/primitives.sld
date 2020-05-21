@@ -662,7 +662,7 @@
          ((eq? p 'set-car!)      "Cyc_set_car_cps")
          ((eq? p 'set-cdr!)      "Cyc_set_cdr_cps")
          ((eq? p 'eq?)           "Cyc_eq")
-         ((eq? p 'eqv?)          "Cyc_eq")
+         ((eq? p 'eqv?)          "Cyc_eqv")
          ((eq? p 'equal?)        "equalp")
          ((eq? p 'Cyc-fast-member)  "memberp")
          ((eq? p 'Cyc-fast-assoc)   "assoc")
