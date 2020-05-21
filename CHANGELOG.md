@@ -12,6 +12,7 @@ Bug Fixes
 - Allow `open-binary-input-file` and `open-binary-output-file` to be accessible via the REPL.
 - Fix `bytevector?` predicate which was accidentally aliased to `vector?`.
 - Fix `list-copy` to return a non-list object instead of raising an error, per R7RS.
+- Fixed `eqv?` to use R7RS semantics to ensure equality of different instances of the same numeric value. The function was previously just an alias of `eq?`.
 - Support two-argument version of `atan`.
 
 ## 0.17 - April 6, 2020
