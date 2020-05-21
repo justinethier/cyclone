@@ -203,11 +203,11 @@
 (assert:equal "" (eq? 'a-1 'a-1) #t)
 (assert:equal "" (eq? (string->symbol "aa") 'aa) #t)
 (assert:equal "" (eq? 0.0 0.0) #f)
-(assert:equal "" (eq? 33333333333333 3333333333333333) #f)
+(assert:equal "" (eq? 33333333333333 33333333333333) #f)
 (assert:equal "" (eqv? 'a-1 'a-1) #t)
 (assert:equal "" (eqv? (string->symbol "aa") 'aa) #t)
 (assert:equal "" (eqv? 0.0 0.0) #t)
-(assert:equal "" (eqv? 33333333333333 3333333333333333) #t)
+(assert:equal "" (eqv? 33333333333333 33333333333333) #t)
 (assert:equal "" (equal? (string->symbol "aa") 'aa) #t)
 
 ;; Map
