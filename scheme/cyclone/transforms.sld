@@ -1133,6 +1133,16 @@ if (acc) {
            (cons 'write-string-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'write-string) (= (length ast) 3))
            (cons 'write-string-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;((and (eq? (car ast) 'string>=?) (= (length ast) 3))
+          ; (cons 'string>=?-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;((and (eq? (car ast) 'string>?) (= (length ast) 3))
+          ; (cons 'string>?-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;((and (eq? (car ast) 'string<=?) (= (length ast) 3))
+          ; (cons 'string<=?-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;((and (eq? (car ast) 'string<?) (= (length ast) 3))
+          ; (cons 'string<?-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ;((and (eq? (car ast) 'string=?) (= (length ast) 3))
+          ; (cons 'string=?-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ;; Regular case, alpha convert everything
           (else
            (regular-case)))))
