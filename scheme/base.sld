@@ -135,6 +135,8 @@
     newline
     write-char
     write-string
+    write-string-1
+    write-string-2
     flush-output-port
     peek-char
     read-char
@@ -716,10 +718,22 @@
       (if (null? port)
         (Cyc-flush-output-port (current-output-port))
         (Cyc-flush-output-port (car port))))
-    (define (write-string str . port)
-      (if (null? port)
-        (Cyc-display str (current-output-port))
-        (Cyc-display str (car port))))
+    (define (write-string-1 str)
+      (Cyc-display str (current-output-port)))
+    (define (write-string-2 str port)
+      (Cyc-display str port))
+    (define (write-string str . opts)
+      (cond
+       ((null? opts)
+        (Cyc-display str (current-output-port)))
+       ((null? (cdr opts))
+        (Cyc-display str (car opts)))
+       (else 
+        (let ((start (cadr opts))
+              (end (if (> (length opts) 2) (caddr opts) (string-length str))))
+          (Cyc-display
+            (substring str start end)
+            (car opts))))))
     (define (read-bytevector k . _port)
       (letrec ((port (if (null? port)
                          (current-input-port)

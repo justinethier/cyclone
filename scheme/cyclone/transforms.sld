@@ -1129,6 +1129,10 @@ if (acc) {
            (cons 'Cyc-map-loop-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ((and (eq? (car ast) 'map) (= (length ast) 4))
            (cons 'Cyc-map-loop-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'write-string) (= (length ast) 2))
+           (cons 'write-string-1 (map (lambda (a) (convert a renamed)) (cdr ast))))
+          ((and (eq? (car ast) 'write-string) (= (length ast) 3))
+           (cons 'write-string-2 (map (lambda (a) (convert a renamed)) (cdr ast))))
           ;; Regular case, alpha convert everything
           (else
            (regular-case)))))
