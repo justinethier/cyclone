@@ -606,7 +606,13 @@
     (define (string<=? str1 str2) (<= (string-cmp str1 str2) 0))
     (define (string>? str1 str2)  (>  (string-cmp str1 str2) 0))
     (define (string>=? str1 str2) (>= (string-cmp str1 str2) 0))
-    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
+;    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
+;    (define (string=?-2 str1 str2)  (equal? (string-cmp str1 str2) 0))
+;    (define (string<?-2 str1 str2)  (<  (string-cmp str1 str2) 0))
+;    (define (string<=?-2 str1 str2) (<= (string-cmp str1 str2) 0))
+;    (define (string>?-2 str1 str2)  (>  (string-cmp str1 str2) 0))
+;    (define (string>=?-2 str1 str2) (>= (string-cmp str1 str2) 0))
+
 
     (define (member-helper obj lst cmp-proc)
      (cond 
