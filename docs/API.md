@@ -63,7 +63,6 @@ These libraries are provided by Cyclone with a stable API that is unlikely to ch
 - [`cyclone concurrent`](api/cyclone/concurrent) - A helper library for writing concurrent code.
 - [`cyclone match`](api/cyclone/match) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
 - [`cyclone test`](api/cyclone/test) - A unit testing framework ported from `(chibi test)`.
-- [`scheme cyclone array-list`](api/scheme/cyclone/array-list)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print) - A pretty printer.
 
 # Internal Compiler API
@@ -214,14 +213,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`append`](api/scheme/base#append)
 [`apply                 `](api/primitives#apply)
 [`arithmetic-shift`](api/srfi/60#ash)
-[`array-list-delete!`](api/scheme/cyclone/array-list#array-list-delete)
-[`array-list-empty?`](api/scheme/cyclone/array-list#array-list-empty) 
-[`array-list-insert!`](api/scheme/cyclone/array-list#array-list-insert)
-[`array-list-length`](api/scheme/cyclone/array-list#array-list-length)
-[`array-list-ref`](api/scheme/cyclone/array-list#array-list-ref)
-[`array-list-set!`](api/scheme/cyclone/array-list#array-list-set)
-[`array-list?`](api/scheme/cyclone/array-list#array-list1)
-[`array-list`](api/scheme/cyclone/array-list#array-list)
 [`ash`](api/srfi/60#ash)
 [`asin`](api/scheme/inexact#asin)
 [`assoc`](api/scheme/base#assoc)
@@ -866,7 +857,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`macro:load-env!`](api/scheme/cyclone/macros#macroload-env)
 [`macro:macro?`](api/scheme/cyclone/macros#macromacro)
 [`magnitude`](api/scheme/complex#magnitude)
-[`make-array-list`](api/scheme/cyclone/array-list#make-array-list)
 [`make-atom`](api/cyclone/concurrent#make-atom)
 [`make-bytevector       `](api/primitives#make-bytevector)
 [`make-client-socket`](api/srfi/106#make-client-socket)
