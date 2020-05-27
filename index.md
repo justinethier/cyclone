@@ -100,7 +100,7 @@ Read the documentation below for more information on how to use Cyclone.
 
 ![Cyclone Winds](docs/images/cyclone-winds-small.png "Cyclone Winds")
 
-The [cyclone-winds](https://github.com/cyclone-scheme/cyclone-winds#cyclone-winds) package manager provides the ability to install packaged libraries and programs for Cyclone. See the `cyclone-winds` site for more information.
+The `cyclone-winds` package manager provides the ability to install packaged libraries and programs for Cyclone. See the [cyclone-winds](https://github.com/cyclone-scheme/cyclone-winds#cyclone-winds) site for more information.
 
 # Documentation
 
