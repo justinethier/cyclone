@@ -37,8 +37,7 @@ TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-28-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
-					 $(TEST_DIR)/srfi-143-tests.scm \
-					 $(TEST_DIR)/array-list-tests.scm
+					 $(TEST_DIR)/srfi-143-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
@@ -58,7 +57,6 @@ clean :
 	rm -f tests/srfi-60-tests
 	rm -f tests/srfi-121-tests
 	rm -f tests/srfi-143-tests
-	rm -f tests/array-list-tests
 	rm -f tests/macro-hygiene
 	rm -f tests/match-tests
 	cd $(CYC_BN_LIB_SUBDIR) ; $(MAKE) clean
@@ -281,10 +279,6 @@ bootstrap : icyc libs
 	cp libs/cyclone/test.c $(BOOTSTRAP_DIR)/cyclone
 	cp libs/cyclone/test.meta $(BOOTSTRAP_DIR)/cyclone
 	cp libs/cyclone/test.scm $(BOOTSTRAP_DIR)/cyclone
-	cp scheme/cyclone/array-list.c $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/array-list.meta $(BOOTSTRAP_DIR)/scheme/cyclone
-	cp scheme/cyclone/array-list.sld $(BOOTSTRAP_DIR)/scheme/cyclone #just in case
-	cp scheme/cyclone/array-list.scm $(BOOTSTRAP_DIR)/scheme/cyclone #just in case
 	cp srfi/1.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.meta $(BOOTSTRAP_DIR)/srfi
