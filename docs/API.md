@@ -60,7 +60,6 @@ These libraries are provided as Cyclone-specific extensions:
 - [`cyclone foreign`](api/cyclone/foreign.md) - Provides a convenient interface for integrating with C code.
 - [`cyclone match`](api/cyclone/match.md) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
 - [`cyclone test`](api/cyclone/test.md) - A unit testing framework ported from `(chibi test)`.
-- [`scheme cyclone array-list`](api/scheme/cyclone/array-list.md)
 - [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md) - A pretty printer.
 
 # Internal Compiler API
@@ -211,14 +210,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`append`](api/scheme/base.md#append)
 [`apply                 `](api/primitives.md#apply)
 [`arithmetic-shift`](api/srfi/60.md#ash)
-[`array-list-delete!`](api/scheme/cyclone/array-list.md#array-list-delete)
-[`array-list-empty?`](api/scheme/cyclone/array-list.md#array-list-empty) 
-[`array-list-insert!`](api/scheme/cyclone/array-list.md#array-list-insert)
-[`array-list-length`](api/scheme/cyclone/array-list.md#array-list-length)
-[`array-list-ref`](api/scheme/cyclone/array-list.md#array-list-ref)
-[`array-list-set!`](api/scheme/cyclone/array-list.md#array-list-set)
-[`array-list?`](api/scheme/cyclone/array-list.md#array-list1)
-[`array-list`](api/scheme/cyclone/array-list.md#array-list)
 [`ash`](api/srfi/60.md#ash)
 [`asin`](api/scheme/inexact.md#asin)
 [`assoc`](api/scheme/base.md#assoc)
@@ -863,7 +854,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`macro:load-env!`](api/scheme/cyclone/macros.md#macroload-env)
 [`macro:macro?`](api/scheme/cyclone/macros.md#macromacro)
 [`magnitude`](api/scheme/complex.md#magnitude)
-[`make-array-list`](api/scheme/cyclone/array-list.md#make-array-list)
 [`make-atom`](api/cyclone/concurrent.md#make-atom)
 [`make-bytevector       `](api/primitives.md#make-bytevector)
 [`make-client-socket`](api/srfi/106.md#make-client-socket)
