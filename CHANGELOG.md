@@ -5,6 +5,7 @@
 Features
 
 - Added the `(cyclone foreign)` library to make it easier to integrate with C code using the FFI.
+- Arthur Maciel improved how `icyc` handles the "-p" flag, to now read/evalute all expressions passed.
 
 Bug Fixes
 
