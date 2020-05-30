@@ -112,5 +112,5 @@ Options:
      (if (and (>= (length args) 1)
               (not (member (car (reverse args)) '("-s"))))
          (load (car (reverse args)) #;*icyc-env*))
-     (repl))))
+     (repl)))))
 
