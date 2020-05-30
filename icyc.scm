@@ -94,7 +94,7 @@ Options:
          (else
           (let* ((sexp-str (apply string-append sexp-strs))
                  (in-port (open-input-string sexp-str))
-                 (sexp (cons 'begin (read-all in-port)))
+                 (sexp (cons 'begin (read-all in-port))))
             (display
               (eval sexp))
             (newline)
