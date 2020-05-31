@@ -2,6 +2,8 @@
 
 ## 0.18 - TBD
 
+TBD: The major new feature is Arthur's cyclone-winds package manager
+
 Features
 
 - Added the `(cyclone foreign)` library to make it easier to integrate with C code using the FFI.
