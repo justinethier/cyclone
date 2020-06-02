@@ -287,21 +287,23 @@
       ; (reverse-string-append l) = (apply string-append (reverse l))
       
       (define (reverse-string-append l)
+        (apply string-append (reverse l)))
+        ;; JAE - Avoid issue with string-set and multibyte chars.
+        ;;       This should be more efficient as well
+        ;(define (rev-string-append l i)
+        ;  (if (pair? l)
+        ;    (let* ((str (car l))
+        ;           (len (string-length str))
+        ;           (result (rev-string-append (cdr l) (+ i len))))
+        ;      (let loop ((j 0) (k (- (- (string-length result) i) len)))
+        ;        (if (< j len)
+        ;          (begin
+        ;            (string-set! result k (string-ref str j))
+        ;            (loop (+ j 1) (+ k 1)))
+        ;          result)))
+        ;    (make-string i)))
       
-        (define (rev-string-append l i)
-          (if (pair? l)
-            (let* ((str (car l))
-                   (len (string-length str))
-                   (result (rev-string-append (cdr l) (+ i len))))
-              (let loop ((j 0) (k (- (- (string-length result) i) len)))
-                (if (< j len)
-                  (begin
-                    (string-set! result k (string-ref str j))
-                    (loop (+ j 1) (+ k 1)))
-                  result)))
-            (make-string i)))
-      
-        (rev-string-append l 0))
+        ;(rev-string-append l 0))
       
       (define (sexp-pretty-print obj . opt)
         (let ((port (if (pair? opt) (car opt) (current-output-port))))
