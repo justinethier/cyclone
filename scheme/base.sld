@@ -607,6 +607,7 @@
 
 
 ;    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
+    ;(define (string=? str1 str2 . strs)  (Cyc-bin-op fast-string=? str1 (cons str2 strs)))
     (define (string=? str1 str2)  (equal? (string-cmp str1 str2) 0))
     (define (string<? str1 str2)  (<  (string-cmp str1 str2) 0))
     (define (string<=? str1 str2) (<= (string-cmp str1 str2) 0))
