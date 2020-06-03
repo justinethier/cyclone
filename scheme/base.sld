@@ -72,6 +72,11 @@
     string<=?
     string>?
     string>=?
+    fast-string=?
+    fast-string<?
+    fast-string<=?
+    fast-string>?
+    fast-string>=?
     foldl
     foldr
     not
@@ -220,11 +225,11 @@
     zero?
     list?
     not
-    string>=?
-    string>?
-    string<=?
-    string<?
-    string=?
+    fast-string>=?
+    fast-string>?
+    fast-string<=?
+    fast-string<?
+    fast-string=?
   )
   (begin
     ;; Features implemented by this Scheme
@@ -601,18 +606,17 @@
     ; TODO: char-ci predicates (in scheme/char library)
 
 
+;    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
     (define (string=? str1 str2)  (equal? (string-cmp str1 str2) 0))
     (define (string<? str1 str2)  (<  (string-cmp str1 str2) 0))
     (define (string<=? str1 str2) (<= (string-cmp str1 str2) 0))
     (define (string>? str1 str2)  (>  (string-cmp str1 str2) 0))
     (define (string>=? str1 str2) (>= (string-cmp str1 str2) 0))
-;    ; TODO: generalize to multiple arguments: (define (string<? str1 str2 . strs)
-;    (define (string=?-2 str1 str2)  (equal? (string-cmp str1 str2) 0))
-;    (define (string<?-2 str1 str2)  (<  (string-cmp str1 str2) 0))
-;    (define (string<=?-2 str1 str2) (<= (string-cmp str1 str2) 0))
-;    (define (string>?-2 str1 str2)  (>  (string-cmp str1 str2) 0))
-;    (define (string>=?-2 str1 str2) (>= (string-cmp str1 str2) 0))
-
+    (define (fast-string=? str1 str2)  (equal? (string-cmp str1 str2) 0))
+    (define (fast-string<? str1 str2)  (<  (string-cmp str1 str2) 0))
+    (define (fast-string<=? str1 str2) (<= (string-cmp str1 str2) 0))
+    (define (fast-string>? str1 str2)  (>  (string-cmp str1 str2) 0))
+    (define (fast-string>=? str1 str2) (>= (string-cmp str1 str2) 0))
 
     (define (member-helper obj lst cmp-proc)
      (cond 
