@@ -534,8 +534,8 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
  * @brief Functions for interacting with the system
  */
 /**@{*/
-int _cyc_argc;
-char **_cyc_argv;
+extern int _cyc_argc;
+extern char **_cyc_argv;
 object Cyc_installation_dir(void *data, object cont, object type);
 object Cyc_compilation_environment(void *data, object cont, object var);
 object Cyc_command_line_arguments(void *data, object cont);
