@@ -18,6 +18,7 @@ Bug Fixes
 - Fixed `eqv?` to use R7RS semantics to ensure equality of different instances of the same numeric value. The function was previously just an alias of `eq?`.
 - Support two-argument version of `atan`.
 - Support `start` and `end` arguments to `write-string`.
+- Updated the string comparison procedures (EG: `string=?`) to support more than two arguments.
 
 ## 0.17 - April 6, 2020
 
