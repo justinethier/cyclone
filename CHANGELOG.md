@@ -2,7 +2,7 @@
 
 ## 0.18 - TBD
 
-TBD: The major new feature is Arthur's cyclone-winds package manager
+The  major new feature in 0.18 is the release of Arthur Maciel's Cyclone-Winds package manager, the official package manager for Cyclone! 
 
 Features
 
