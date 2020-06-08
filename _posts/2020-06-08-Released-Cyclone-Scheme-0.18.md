@@ -4,7 +4,7 @@ title: Released Cyclone Scheme 0.18
 excerpt: With this release we proudly present our new package manager, Cyclone-Winds!
 ---
 
-The main focus of this release is Arthur Maciel's Cyclone-Winds package manager, the official package manager for Cyclone Scheme! Cyclone-Winds contains a growing list of packages and is an easy way to distribute programs and libraries built using Cyclone.
+With this release we proudly present Cyclone-Winds, the official package manager for Cyclone Scheme. Cyclone-Winds contains a growing list of packages and is an easy way to distribute programs and libraries built using Cyclone. Please join me in thanking Arthur Maciel for writing Cyclone-Winds and making this release possible!
 
 The `cyclone-winds` binary is installed as part of our [bootstrap](https://github.com/justinethier/cyclone-bootstrap) installation. Alternatively it can be built and installed separately if you already have a copy of Cyclone installed, though version 0.18 or higher is required.
 
