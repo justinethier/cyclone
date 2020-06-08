@@ -1,5 +1,6 @@
 Steps for making a release of Cyclone:
 
+- Sync latest bootstrap code, including cyclone and cyclone-winds
 - Prepare release notes
 - Update release number in:
   - `common.sld` and rebuild bootstrap source files
