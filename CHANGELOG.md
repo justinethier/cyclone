@@ -1,13 +1,15 @@
 # Changelog
 
-## 0.18 - TBD
+## 0.18 - June 8, 2020
 
-The  major new feature in 0.18 is the release of Arthur Maciel's Cyclone-Winds package manager, the official package manager for Cyclone! 
+The main focus of this release is Arthur Maciel's Cyclone-Winds package manager, the official package manager for Cyclone Scheme! The `cyclone-winds` binary is built and installed as part of our [bootstrap](https://github.com/justinethier/cyclone-bootstrap) installation. Alternatively it can be built and installed separately if you already have a copy of Cyclone installed, though version 0.18 or higher is required.
+
+Please visit the [Cyclone-Winds] https://github.com/cyclone-scheme/cyclone-winds) site for more information.
 
 Features
 
 - Added the `(cyclone foreign)` library to make it easier to integrate with C code using the FFI.
-- Arthur Maciel improved how `icyc` handles the "-p" flag, to now read/evalute all expressions passed.
+- Arthur Maciel improved how `icyc` handles the "-p" flag, to now read/evaluate all expressions passed.
 
 Bug Fixes
 
