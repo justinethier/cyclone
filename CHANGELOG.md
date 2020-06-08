@@ -4,7 +4,7 @@
 
 The main focus of this release is Arthur Maciel's Cyclone-Winds package manager, the official package manager for Cyclone Scheme! The `cyclone-winds` binary is built and installed as part of our [bootstrap](https://github.com/justinethier/cyclone-bootstrap) installation. Alternatively it can be built and installed separately if you already have a copy of Cyclone installed, though version 0.18 or higher is required.
 
-Please visit the [Cyclone-Winds] https://github.com/cyclone-scheme/cyclone-winds) site for more information.
+Please visit the [Cyclone-Winds](https://github.com/cyclone-scheme/cyclone-winds) site for more information.
 
 Features
 
