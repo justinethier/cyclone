@@ -1,8 +1,14 @@
 # Changelog
 
-
 ## 0.19 - TBD
 
+Features
+
+- Added `cvoid` type into `(cyclone foreign)`.
+
+Bug Fixes
+
+- Fixed `make_empty_bytevector` and `make_c_opaque` parameters on `(cyclone foreign)`.
 
 ## 0.18 - June 8, 2020
 
