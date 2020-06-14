@@ -1,6 +1,8 @@
 # Changelog
 
+
 ## 0.19 - TBD
+
 
 ## 0.18 - June 8, 2020
 
