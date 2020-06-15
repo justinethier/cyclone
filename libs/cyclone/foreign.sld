@@ -117,6 +117,8 @@
              (string-append "(((bytevector_type *)" ,code ")->data)"))
             ((opaque)
              (string-append "opaque_ptr(" ,code ")"))
+            ((cvoid)
+             "Cyc_VOID")
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
@@ -168,7 +170,7 @@
            (let ((var (mangle (gensym 'var))))
            (cons
              (string-append 
-               "make_empty_bytevector(data," var ");"
+               "make_empty_bytevector(" var ");"
                var "->data = " ,code ";")
              (string-append "&" var)
            )))
@@ -176,9 +178,12 @@
            (let ((var (mangle (gensym 'var))))
            (cons
              (string-append 
-               "make_c_opaque(data," var ", " ,code ");")
-             (string-append "&" var)
-           )))
+               "make_c_opaque(" var ", " ,code ");")
+             (string-append "&" var))))
+          ((cvoid)
+           (cons
+            (string-append ,code ";")
+            "Cyc_VOID"))
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   

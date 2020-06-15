@@ -2,6 +2,14 @@
 
 ## 0.19 - TBD
 
+Features
+
+- Added `cvoid` type into `(cyclone foreign)`.
+
+Bug Fixes
+
+- Fixed `make_empty_bytevector` and `make_c_opaque` parameters on `(cyclone foreign)`.
+
 ## 0.18 - June 8, 2020
 
 With this release we proudly present Cyclone-Winds, the official package manager for Cyclone Scheme. Cyclone-Winds contains a growing list of packages and is an easy way to distribute programs and libraries built using Cyclone. Please join me in thanking Arthur Maciel for writing Cyclone-Winds and making this release possible!
