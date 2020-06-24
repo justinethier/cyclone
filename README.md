@@ -107,6 +107,8 @@ Read the documentation below for more information on how to use Cyclone.
 
 The `cyclone-winds` package manager provides the ability to install packaged libraries and programs for Cyclone. See the [cyclone-winds](https://github.com/cyclone-scheme/cyclone-winds#cyclone-winds) site for more information.
 
+The [Cyclone-Winds wiki](https://github.com/cyclone-scheme/cyclone-winds/wiki) contains a full list of packages with documentation.
+
 # Documentation
 
 - The [User Manual](docs/User-Manual.md) covers in detail how to use Cyclone and provides information on the Scheme language features implemented by Cyclone.
