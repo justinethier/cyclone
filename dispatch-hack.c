@@ -58,8 +58,10 @@ extern void _C_do_apply_hack(void *proc, object args, int count);
 
 void do_dispatch(void *data, int argc, function_type func, object clo, object *b) {
 
-  int *buf[argc + 3];
+  int *buf;
   void *proc;
+  buf = alloca((argc + 6) * sizeof(object));
+  buf = (void *)((((unsigned int)buf) + 15) & ~15); // JAE - ????
   buf[0] = data;
   buf[1] = argc + 3;
   buf[2] = clo;

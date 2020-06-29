@@ -180,6 +180,12 @@ hashset.o : hashset.c $(HEADERS)
 dispatch.o : dispatch.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
 
+dispatch-hack.o : dispatch-hack.c $(HEADERS)
+	$(CCOMP) -c $< -o $@
+
+apply-hack.x86-64.o: apply-hack.x86-64.S
+	$(CCOMP) -c $< -o $@
+
 gc.o : gc.c $(HEADERS)
 	$(CCOMP) -std=gnu99 -c $< -o $@
 
@@ -203,7 +209,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_PLATFORM=\"$(PLATFORM)\" \
 					$< -o $@
 
-libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
+libcyclone.a : runtime.o gc.o dispatch-hack.o apply-hack.x86-64.o mstreams.o hashset.o
 	$(CREATE_LIBRARY_COMMAND) $(CREATE_LIBRARY_FLAGS) $@ $&
 	$(RANLIB_COMMAND)
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
