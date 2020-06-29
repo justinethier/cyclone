@@ -1818,7 +1818,7 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
     } else if (tx == -1         && ty == bignum_tag) { \
       return Cyc_bignum_cmp(BN_CMP, x, tx, y, ty) ? boolean_t : boolean_f; \
     } else if (tx == double_tag && ty == bignum_tag) { \
-      return (double_value(x)) OP mp_get_double(&bignum_value(x)) ? boolean_t : boolean_f; \
+      return (double_value(x)) OP mp_get_double(&bignum_value(y)) ? boolean_t : boolean_f; \
     } else if (tx == complex_num_tag && ty == complex_num_tag) { \
       return ((complex_num_value(x)) == (complex_num_value(y))) ? boolean_t : boolean_f; \
     } else if (tx == complex_num_tag && ty != complex_num_tag) { \
