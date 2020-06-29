@@ -2,14 +2,15 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 
-#ifdef C_HACKED_APPLY
-# if defined(C_MACOSX) || defined(__MINGW32__) || defined(__CYGWIN__)
-extern void C_do_apply_hack(void *proc, C_word *args, int count) C_noret;
-# else
-extern void _C_do_apply_hack(void *proc, C_word *args, int count) C_noret;
+//#ifdef C_HACKED_APPLY
+//# if defined(C_MACOSX) || defined(__MINGW32__) || defined(__CYGWIN__)
+//extern void C_do_apply_hack(void *proc, C_word *args, int count) C_noret;
+//# else
+//extern void _C_do_apply_hack(void *proc, C_word *args, int count) C_noret;
+extern void _C_do_apply_hack(void *proc, object args, int count);
 #  define C_do_apply_hack _C_do_apply_hack
-# endif
-#endif
+//# endif
+//#endif
 
 /*
 #ifdef C_HACKED_APPLY
@@ -56,6 +57,15 @@ extern void _C_do_apply_hack(void *proc, C_word *args, int count) C_noret;
 */
 
 void do_dispatch(void *data, int argc, function_type func, object clo, object *b) {
+
+  int *buf[argc + 3];
+  void *proc;
+  buf[0] = data;
+  buf[1] = argc + 3;
+  buf[2] = clo;
+  memcpy(&buf[3], b, argc * sizeof(object));
+  proc = (void *)func;
+  C_do_apply_hack(proc, buf, argc + 3);
 //  switch(argc) {case 0:func(data,0,clo);
 //case 1:func(data,1,clo,*(b+0));
 //
