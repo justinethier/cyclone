@@ -134,7 +134,7 @@ Cyclone provides several example programs, including:
 
 - Cyclone's [Garbage Collector](docs/Garbage-Collector) is documented at a high-level. This document includes details on extending Cheney on the MTA to support multiple stacks and fusing that approach with a tri-color marking collector.
 
-- The garbage collector was subsequently enhanced to support [Lazy Sweeping](https://github.com/justinethier/cyclone/blob/master/docs/Garbage-Collection-Using-Lazy-Sweeping) which improves performance for a wide range of applications.
+- The garbage collector was subsequently enhanced to support [Lazy Sweeping](docs/Garbage-Collection-Using-Lazy-Sweeping) which improves performance for a wide range of applications.
 
 # License
 
