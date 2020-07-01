@@ -349,8 +349,8 @@ p.banner {
   background: -ms-linear-gradient(top, #f2f2f2, #007edf);
   background: -o-linear-gradient(top, #f2f2f2, #007edf);
   background: linear-gradient(top, #f2f2f2, #007edf);
-  background-image: url("images/header-bkg.png");
-  background-size: cover;
+  /*background-image: url("images/header-bkg.png");
+  background-size: cover;*/
 }
 
 #header_wrap .inner {
