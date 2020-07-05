@@ -117,7 +117,7 @@
              (string-append "(((bytevector_type *)" ,code ")->data)"))
             ((opaque)
              (string-append "opaque_ptr(" ,code ")"))
-            ((cvoid)
+            ((c-void)
              "Cyc_VOID")
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
@@ -180,7 +180,7 @@
              (string-append 
                "make_c_opaque(" var ", " ,code ");")
              (string-append "&" var))))
-          ((cvoid)
+          ((c-void)
            (cons
             (string-append ,code ";")
             "Cyc_VOID"))
