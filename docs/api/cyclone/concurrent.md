@@ -73,7 +73,7 @@ Note that concurrency primitives must still be used to safely coordinate access 
 
 The following types of objects are always shared:
 
-- Concurrency primitives (mutex, conditional variable, atom). These object are allocated directly on the heap since by definition multiple threads need to use them for synchronization.
+- Concurrency primitives (mutex, conditional variable, atom). These objects are allocated directly on the heap since by definition multiple threads need to use them for synchronization.
 
 - Fixnum integers and characters. These are immediates (IE, value types) so there is no object in memory to reference.
 
