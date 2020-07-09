@@ -10,7 +10,7 @@ Bug Fixes
 
 - Fixed a bug in the oprimized numeric comparison operators when comparing a double with a bignum, that could lead to undefined behavior.
 - Fixed `make_empty_bytevector` and `make_c_opaque` parameters on `(cyclone foreign)`.
-- Avoid compilation errors when a program ends with a `set!` expression.
+- Avoid compilation errors when a program ends with a `set!` expression. Thanks to Yorick Hardy for the bug report!
 
 ## 0.18 - June 8, 2020
 
