@@ -568,7 +568,7 @@ if (acc) {
              (program?
                ;; This is the main program, keep top level.
                ;; Use 0 here (and below) to ensure a meaningful top-level
-               `((begin 0 ,@(reverse exprs)))
+               `((begin 0 ,@(reverse exprs) (%halt 0)))
              )
              (else
                ;; This is a library, keep inits in their own function
