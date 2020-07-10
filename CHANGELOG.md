@@ -4,7 +4,7 @@
 
 Features
 
-- Added `cvoid` type into `(cyclone foreign)`.
+- Added `c-void` type into `(cyclone foreign)`.
 
 Bug Fixes
 
