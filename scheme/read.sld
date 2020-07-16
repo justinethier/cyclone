@@ -66,6 +66,10 @@
           (read-error fp "unexpected closing parenthesis")
           result)))))
 
+;; TODO: read given file, collecting source location information so we
+;;       can give meaningful compiler error messages
+;; read-all/source -> port -> filename
+
 ;; read-all -> port -> [objects]
 (define (read-all . args)
   (let ((fp (if (null? args)
@@ -142,6 +146,7 @@
           (Cyc-opaque-unsafe-string->number token))
          ;; Open paren, start read loop
          ((Cyc-opaque-unsafe-eq? token #\()
+  ;; TODO: save line number
           (let loop ((lis '())
                      (t (parse fp)))
             (cond
@@ -151,6 +156,8 @@
                (if (and (> (length lis) 2)
                         (equal? (cadr lis) *sym-dot*))
                    (->dotted-list (reverse lis))
+   ;; TODO: call code here to save line num (only if arg != #f),
+   ;;       want to do this if pair w/car of symbol
                    (reverse lis)))
               (else
                (loop (cons t lis) (parse fp))))))
