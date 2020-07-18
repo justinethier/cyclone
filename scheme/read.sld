@@ -14,6 +14,7 @@
     read
     read-all
     read-all/source
+    *source-loc-lis*
     include
     include-ci)
   (inline
@@ -26,6 +27,7 @@
 (define *sym-dot* (string->symbol "."))
 (define *sym-unquote-splicing* (string->symbol ",@"))
 (define *sym-datum-comment* (string->symbol "#;"))
+(define *source-loc-lis* '())
 
 (define-syntax include
   (er-macro-transformer
@@ -166,10 +168,13 @@
    return_closcall1(data, k, obj_int2obj(num)); ")
 
 (define (store-source-info! obj filename line col) 
+  (set! *source-loc-lis* 
+        ;; TODO: not good enough, need to index by file and obj
+        (cons (cons obj (vector filename line col))
+              *source-loc-lis*)))
   ;; TODO: where to store? Need to use a hashtable but also needs to
   ;; be accessible from macro's. probably needs to be in global env,
   ;; see (cyclone foreign) for an example
-  'todo)
 ;; TODO: need corresponding macro (syntax-error/source ??) to use this
 ;; information for error reporting
 ;; TODO: probably want to have a top-level exception handler on macro
