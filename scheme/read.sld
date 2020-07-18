@@ -15,6 +15,7 @@
     read-all
     read-all/source
     *source-loc-lis*
+    read-test
     include
     include-ci)
   (inline
@@ -82,6 +83,12 @@
 ;; can give meaningful compiler error messages
 (define (read-all/source port filename)
   (read-all port store-source-info! filename))
+
+;; TODO: assume the source-loc-lis needs to be part of (scheme base) so that those macros can use them
+(define-syntax read-test
+  (er-macro-transformer
+   (lambda (expr rename compare)
+     (error "read test error" (assoc expr *source-loc-lis*) *source-loc-lis*))))
 
 ;; read-all -> port -> [objects]
 (define (read-all . args)
