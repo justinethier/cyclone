@@ -307,7 +307,6 @@
       (er-macro-transformer
         (lambda (expr rename compare)
           (if (null? (cdr expr)) (error/loc "empty let" expr))
-          ;(if (null? (cdr expr)) (error/loc "empty let" expr))
           (if (null? (cddr expr)) (error/loc "no let body" expr))
           ((lambda (bindings)
              (if (list? bindings) #f (error/loc "bad let bindings" expr))
@@ -330,8 +329,8 @@
     (define-syntax let*
       (er-macro-transformer
         (lambda (expr rename compare)
-          (if (null? (cdr expr)) (error "empty let*" expr))
-          (if (null? (cddr expr)) (error "no let* body" expr))
+          (if (null? (cdr expr)) (error/loc "empty let*" expr))
+          (if (null? (cddr expr)) (error/loc "no let* body" expr))
           (if (null? (cadr expr))
               `(,(rename 'let) () ,@(cddr expr))
               (if (if (list? (cadr expr))
@@ -342,10 +341,13 @@
                       #f)
                   `(,(rename 'let) (,(caar (cdr expr)))
                     (,(rename 'let*) ,(cdar (cdr expr)) ,@(cddr expr)))
-                  (error "bad let* syntax"))))))
+                  (error/loc "bad let* syntax" expr))))))
     (define-syntax letrec 
       (er-macro-transformer
         (lambda (exp rename compare)
+         (with-handler
+          (lambda (e)
+            (error/loc "unable to expand letrec" exp))
           (let* ((bindings  (cadr exp)) ;(letrec->bindings exp)
                  (namings   (map (lambda (b) (list (car b) #f)) bindings))
                  (names     (map car (cadr exp))) ;(letrec->bound-vars exp)
@@ -354,7 +356,7 @@
                                  bindings))
                  (args      (map cadr (cadr exp)))) ;(letrec->args exp)
             `(let ,namings
-               (begin ,@(append sets (cddr exp)))))))) ;(letrec->exp exp)
+               (begin ,@(append sets (cddr exp))))))))) ;(letrec->exp exp)
 ;; NOTE: chibi uses the following macro. turns vars into defines?
 ;;(define-syntax letrec
 ;;  (er-macro-transformer
@@ -452,7 +454,7 @@
                 ((lambda (cl)
                    (if (compare (rename 'else) (car cl))
                        (if (pair? (cddr expr))
-                           (error "non-final else in cond" expr)
+                           (error/loc "non-final else in cond" expr)
                            (list (cons (rename 'lambda) (cons '() (cdr cl)))))
                        (if (if (null? (cdr cl)) #t (compare (rename '=>) (cadr cl)))
                            (list (list (rename 'lambda) (list (rename 'tmp))
@@ -506,16 +508,16 @@
     (define-syntax when
       (er-macro-transformer
         (lambda (exp rename compare)
-          (if (null? (cdr exp)) (error "empty when" exp))
-          (if (null? (cddr exp)) (error "no when body" exp))
+          (if (null? (cdr exp)) (error/loc "empty when" exp))
+          (if (null? (cddr exp)) (error/loc "no when body" exp))
           `(if ,(cadr exp)
                ((lambda () ,@(cddr exp)))
                #f))))
     (define-syntax unless
       (er-macro-transformer
         (lambda (exp rename compare)
-          (if (null? (cdr exp)) (error "empty unless" exp))
-          (if (null? (cddr exp)) (error "no unless body" exp))
+          (if (null? (cdr exp)) (error/loc "empty unless" exp))
+          (if (null? (cddr exp)) (error/loc "no unless body" exp))
           `(if ,(cadr exp)
                #f
                ((lambda () ,@(cddr exp)))))))
@@ -529,7 +531,7 @@
                   ,@(map (lambda (x)
                            (if (pair? (cddr x))
                                (if (pair? (cdr (cddr x)))
-                                   (error "too many forms in do iterator" x)
+                                   (error/loc "too many forms in do iterator" x)
                                    (car (cddr x)))
                                (car x)))
                          (cadr expr)))))
