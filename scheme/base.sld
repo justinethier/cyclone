@@ -10,7 +10,7 @@
   (import (scheme cyclone common))
   (export
     *source-loc-lis*
-    syntax-error2
+    error/loc
     member
     assoc
     cons-source
@@ -235,23 +235,32 @@
   )
   (begin
     (define *source-loc-lis* '())
-    (define (syntax-error2 reason expr)
-      (Cyc-write expr (current-error-port))
-      (Cyc-display #\newline (current-error-port))
+    (define (error/loc reason expr)
+      ;(Cyc-write expr (current-error-port))
+      ;(Cyc-display #\newline (current-error-port))
       (let* ((found (assoc expr *source-loc-lis*))
              (loc-vec (if found 
                           (cdr found) ;; Get value
-                          (vector #f #f #f))))
-        (Cyc-display loc-vec (current-error-port))
-        (Cyc-display #\newline (current-error-port))
-        (error "Syntax error at " 
-               (vector-ref loc-vec 0)
-               ":"
-               (vector-ref loc-vec 1)
-               ":"
-               (vector-ref loc-vec 2)
-               reason
-               expr)))
+                          #f)))
+        ;(Cyc-display loc-vec (current-error-port))
+        ;(Cyc-display #\newline (current-error-port))
+        (if loc-vec
+           (error 
+              (string-append
+                "invalid syntax "
+                reason
+                " in "
+                (vector-ref loc-vec 0)
+                " line "
+                (number->string (vector-ref loc-vec 1))
+                ", char "
+                (number->string (vector-ref loc-vec 2)))
+              expr) 
+           (error 
+              (string-append
+                "invalid syntax "
+                reason)
+              expr))))
 
     ;; Features implemented by this Scheme
     (define (features) 
@@ -297,11 +306,11 @@
     (define-syntax let
       (er-macro-transformer
         (lambda (expr rename compare)
-          (if (null? (cdr expr)) (syntax-error2 "empty let" expr))
-          ;(if (null? (cdr expr)) (error "empty let" expr))
-          (if (null? (cddr expr)) (error "no let body" expr))
+          (if (null? (cdr expr)) (error/loc "empty let" expr))
+          ;(if (null? (cdr expr)) (error/loc "empty let" expr))
+          (if (null? (cddr expr)) (error/loc "no let body" expr))
           ((lambda (bindings)
-             (if (list? bindings) #f (error "bad let bindings"))
+             (if (list? bindings) #f (error/loc "bad let bindings" expr))
              (if (every (lambda (x)
                           (if (pair? x) (if (pair? (cdr x)) (null? (cddr x)) #f) #f))
                         bindings)
@@ -316,7 +325,7 @@
                         `((,(rename 'lambda) ,vars ,@(cddr expr)) ,@vals)))
                   (map car bindings)
                   (map cadr bindings))
-                 (error "bad let syntax" expr)))
+                 (error/loc "bad let syntax" expr)))
            (if (symbol? (cadr expr)) (car (cddr expr)) (cadr expr))))))
     (define-syntax let*
       (er-macro-transformer
