@@ -198,7 +198,7 @@
          ;; Open paren, start read loop
          ((Cyc-opaque-unsafe-eq? token #\()
           (let ((line-num (get-line-num fp))
-                (col-num (get-col-num fp))) ;; TODO: minus one for paren
+                (col-num (get-col-num fp)))
             (let loop ((lis '())
                        (t (parse fp ssi! fname)))
               (cond
@@ -213,7 +213,10 @@
                                   (pair? result)
                                   (symbol? (car result)))
                          ;; Possible macro expansion, save source info
-                         (ssi! result fname line-num col-num))
+                         (ssi! result 
+                               fname 
+                               line-num 
+                               (- col-num 1))) ;; Account for open paren
                        result)))
                 (else
                  (loop (cons t lis) (parse fp ssi! fname)))))))

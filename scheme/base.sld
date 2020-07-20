@@ -10,7 +10,7 @@
   (import (scheme cyclone common))
   (export
     *source-loc-lis*
-    syntax-error/loc
+    syntax-error2
     member
     assoc
     cons-source
@@ -235,14 +235,21 @@
   )
   (begin
     (define *source-loc-lis* '())
-    (define (syntax-error/loc reason expr)
-      (let ((loc-vec (assoc expr *source-loc-lis*)))
+    (define (syntax-error2 reason expr)
+      (Cyc-write expr (current-error-port))
+      (Cyc-display #\newline (current-error-port))
+      (let* ((found (assoc expr *source-loc-lis*))
+             (loc-vec (if found 
+                          (cdr found) ;; Get value
+                          (vector #f #f #f))))
+        (Cyc-display loc-vec (current-error-port))
+        (Cyc-display #\newline (current-error-port))
         (error "Syntax error at " 
-               (vector-ref (assoc loc-vec *source-loc-lis*) 0)
+               (vector-ref loc-vec 0)
                ":"
-               (vector-ref (assoc loc-vec *source-loc-lis*) 1)
+               (vector-ref loc-vec 1)
                ":"
-               (vector-ref (assoc loc-vec *source-loc-lis*) 2)
+               (vector-ref loc-vec 2)
                reason
                expr)))
 
@@ -290,7 +297,8 @@
     (define-syntax let
       (er-macro-transformer
         (lambda (expr rename compare)
-          (if (null? (cdr expr)) (error "empty let" expr))
+          (if (null? (cdr expr)) (syntax-error2 "empty let" expr))
+          ;(if (null? (cdr expr)) (error "empty let" expr))
           (if (null? (cddr expr)) (error "no let body" expr))
           ((lambda (bindings)
              (if (list? bindings) #f (error "bad let bindings"))
