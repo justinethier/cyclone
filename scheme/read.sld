@@ -14,8 +14,6 @@
     read
     read-all
     read-all/source
-    *source-loc-lis*
-    read-test
     include
     include-ci)
   (inline
@@ -28,7 +26,6 @@
 (define *sym-dot* (string->symbol "."))
 (define *sym-unquote-splicing* (string->symbol ",@"))
 (define *sym-datum-comment* (string->symbol "#;"))
-(define *source-loc-lis* '())
 
 (define-syntax include
   (er-macro-transformer
@@ -83,12 +80,6 @@
 ;; can give meaningful compiler error messages
 (define (read-all/source port filename)
   (read-all port store-source-info! filename))
-
-;; TODO: assume the source-loc-lis needs to be part of (scheme base) so that those macros can use them
-(define-syntax read-test
-  (er-macro-transformer
-   (lambda (expr rename compare)
-     (error "read test error" (assoc expr *source-loc-lis*) *source-loc-lis*))))
 
 ;; read-all -> port -> [objects]
 (define (read-all . args)
@@ -176,7 +167,6 @@
 
 (define (store-source-info! obj filename line col) 
   (set! *source-loc-lis* 
-        ;; TODO: not good enough, need to index by file and obj
         (cons (cons obj (vector filename line col))
               *source-loc-lis*)))
   ;; TODO: where to store? Need to use a hashtable but also needs to

@@ -680,7 +680,7 @@
 (define (read-file filename)
   (call-with-input-file filename
     (lambda (port)
-      (read-all port))))
+      (read-all/source port filename))))
 
 ;; Compile and emit:
 (define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so cc-prog-linker-opts append-dirs prepend-dirs)

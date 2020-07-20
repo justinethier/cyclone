@@ -9,6 +9,8 @@
 (define-library (scheme base)
   (import (scheme cyclone common))
   (export
+    *source-loc-lis*
+    syntax-error/loc
     member
     assoc
     cons-source
@@ -232,6 +234,18 @@
     fast-string=?
   )
   (begin
+    (define *source-loc-lis* '())
+    (define (syntax-error/loc reason expr)
+      (let ((loc-vec (assoc expr *source-loc-lis*)))
+        (error "Syntax error at " 
+               (vector-ref (assoc loc-vec *source-loc-lis*) 0)
+               ":"
+               (vector-ref (assoc loc-vec *source-loc-lis*) 1)
+               ":"
+               (vector-ref (assoc loc-vec *source-loc-lis*) 2)
+               reason
+               expr)))
+
     ;; Features implemented by this Scheme
     (define (features) 
       (cons 
