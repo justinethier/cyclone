@@ -39,7 +39,7 @@
             (call-with-port
               (open-input-file filename)
               (lambda (port)
-                (read-all port))))
+                (read-all/source port filename))))
           (cdr expr)))))))
 
 (define-syntax include-ci
