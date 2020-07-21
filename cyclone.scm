@@ -947,5 +947,18 @@ Debug options:
      (display "cyclone: no input file")
      (newline))
     (else
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts append-dirs prepend-dirs))))
+     (with-handler
+      (lambda (err)
+        ;(parameterize ((current-input-port (current-error-port))))
+        (display "Error: " (current-error-port))
+        (display (car err) (current-error-port))
+        (newline (current-error-port))
+        (for-each
+          (lambda (obj)
+            (write obj (current-error-port))
+            (newline (current-error-port)))
+          (cdr err))
+        (newline (current-error-port))
+        (exit 1) )
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts append-dirs prepend-dirs)))))
 
