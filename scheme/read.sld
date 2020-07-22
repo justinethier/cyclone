@@ -73,7 +73,7 @@
                      #f)))
       (let ((result (parse fp ssi! fname)))
         (if (Cyc-opaque? result)
-          (read-error fp "unexpected closing parenthesis")
+          (read-error fp fname "unexpected closing parenthesis")
           result)))))
 
 ;; Read given file, collecting source location information so we
@@ -115,14 +115,20 @@
   " Cyc_io_read_token(data, k, port);")
 
 (define-c read-error
-  "(void *data, int argc, closure _, object k, object port, object msg)"
+  "(void *data, int argc, closure _, object k, object port, object filename, object msg)"
   " char buf[1024];
     port_type *p;
     Cyc_check_port(data, port);
     Cyc_check_str(data, msg);
     p = ((port_type *)port);
-    snprintf(buf, 1023, \"(line %d, column %d): %s\", 
-           p->line_num, p->col_num, string_str(msg));
+    if (Cyc_is_string(filename) == boolean_t) {
+      snprintf(buf, 1023, \"(%s line %d, column %d): %s\", 
+             string_str(filename), p->line_num, p->col_num, 
+             string_str(msg));
+    } else {
+      snprintf(buf, 1023, \"(line %d, column %d): %s\", 
+             p->line_num, p->col_num, string_str(msg));
+    }
     Cyc_rt_raise_msg(data, buf);")
 
 (define-c Cyc-opaque-eq?
@@ -203,7 +209,7 @@
                        (t (parse fp ssi! fname)))
               (cond
                 ((eof-object? t)
-                 (read-error fp "missing closing parenthesis"))
+                 (read-error fp fname "missing closing parenthesis"))
                 ((Cyc-opaque-eq? t #\))
                  (if (and (> (length lis) 2)
                           (equal? (cadr lis) *sym-dot*))
@@ -265,7 +271,7 @@
                     (t (parse fp ssi! fname)))
            (cond
              ((eof-object? t)
-              (read-error fp "missing closing parenthesis"))
+              (read-error fp fname "missing closing parenthesis"))
              ((Cyc-opaque-eq? t #\))
               (list->vector (reverse lis)))
              (else
@@ -275,7 +281,7 @@
                   (t (parse fp ssi! fname)))
          (cond
            ((eof-object? t)
-            (read-error fp "missing closing parenthesis"))
+            (read-error fp fname "missing closing parenthesis"))
            ((Cyc-opaque-eq? t #\))
             (apply bytevector (reverse lis)))
            (else

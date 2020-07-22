@@ -243,19 +243,17 @@
         (if loc-vec
            (error 
               (string-append
-                "invalid syntax "
-                reason
-                " in "
+                "("
                 (vector-ref loc-vec 0)
                 " line "
                 (number->string (vector-ref loc-vec 1))
                 ", column "
-                (number->string (vector-ref loc-vec 2)))
+                (number->string (vector-ref loc-vec 2))
+                ") "
+                reason)
               expr) 
            (error 
-              (string-append
-                "invalid syntax "
-                reason)
+              reason
               expr))))
 
     ;; Features implemented by this Scheme

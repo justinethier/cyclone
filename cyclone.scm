@@ -957,6 +957,7 @@ Debug options:
         (parameterize ((current-output-port (current-error-port)))
           (display "Error: ")
           (display (car err))
+          (display ": ")
           (newline)
           (for-each
             (lambda (obj)
