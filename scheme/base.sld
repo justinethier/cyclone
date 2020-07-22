@@ -1595,7 +1595,7 @@
            (_append (rename 'append))      (_map (rename 'map))
            (_vector? (rename 'vector?))    (_list? (rename 'list?))
            (_len (rename'len))             (_length (rename 'length))
-           (_- (rename '-))   (_>= (rename '>=))   (_error (rename 'error))
+           (_- (rename '-))   (_>= (rename '>=))   (_error (rename 'error/loc))
            (_ls (rename 'ls)) (_res (rename 'res)) (_i (rename 'i))
            (_reverse (rename 'reverse))
            (_vector->list (rename 'vector->list))
@@ -1771,7 +1771,7 @@
                       (ell-vars (free-vars (car t) vars ell-dim)))
                  (cond
                   ((null? ell-vars)
-                   (error "too many ...'s"))
+                   (error/loc "too many ...'s" expr))
                   ((and (null? (cdr (cdr t))) (identifier? (car t)))
                    ;; shortcut for (var ...)
                    (lp (car t) ell-dim))
