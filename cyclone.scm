@@ -949,16 +949,21 @@ Debug options:
     (else
      (with-handler
       (lambda (err)
-        ;(parameterize ((current-input-port (current-error-port))))
-        (display "Error: " (current-error-port))
-        (display (car err) (current-error-port))
-        (newline (current-error-port))
-        (for-each
-          (lambda (obj)
-            (write obj (current-error-port))
-            (newline (current-error-port)))
-          (cdr err))
-        (newline (current-error-port))
-        (exit 1) )
+        ;; Top-level exception handler for the compiler.
+        ;;
+        ;; We set this up since call history is generally
+        ;; pointless for users of the compiler, so we don't
+        ;; want to display it.
+        (parameterize ((current-output-port (current-error-port)))
+          (display "Error: ")
+          (display (car err))
+          (newline)
+          (for-each
+            (lambda (obj)
+              (write obj)
+              (newline))
+            (cdr err))
+          (newline)
+          (exit 1)))
       (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts append-dirs prepend-dirs)))))
 

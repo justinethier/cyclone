@@ -236,14 +236,10 @@
   (begin
     (define *source-loc-lis* '())
     (define (error/loc reason expr)
-      ;(Cyc-write expr (current-error-port))
-      ;(Cyc-display #\newline (current-error-port))
       (let* ((found (assoc expr *source-loc-lis*))
              (loc-vec (if found 
                           (cdr found) ;; Get value
                           #f)))
-        ;(Cyc-display loc-vec (current-error-port))
-        ;(Cyc-display #\newline (current-error-port))
         (if loc-vec
            (error 
               (string-append
@@ -253,7 +249,7 @@
                 (vector-ref loc-vec 0)
                 " line "
                 (number->string (vector-ref loc-vec 1))
-                ", char "
+                ", column "
                 (number->string (vector-ref loc-vec 2)))
               expr) 
            (error 
