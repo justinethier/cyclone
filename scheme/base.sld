@@ -239,22 +239,21 @@
       (let* ((found (assoc expr *source-loc-lis*))
              (loc-vec (if found 
                           (cdr found) ;; Get value
-                          #f)))
-        (if loc-vec
-           (error 
-              (string-append
-                "("
-                (vector-ref loc-vec 0)
-                " line "
-                (number->string (vector-ref loc-vec 1))
-                ", column "
-                (number->string (vector-ref loc-vec 2))
-                ") "
-                reason)
-              (if (pair? args) args expr))
-           (error 
-              reason
-              (if (pair? args) args expr))))
+                          #f))
+             (msg (if loc-vec
+                      (string-append
+                        "("
+                        (vector-ref loc-vec 0)
+                        " line "
+                        (number->string (vector-ref loc-vec 1))
+                        ", column "
+                        (number->string (vector-ref loc-vec 2))
+                        ") "
+                        reason)
+                      reason)))
+      (if (pair? args)
+        (apply error (cons msg args))
+        (error msg expr))))
 
     ;; Features implemented by this Scheme
     (define (features) 

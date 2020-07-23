@@ -829,6 +829,9 @@
 
           ;; Invoke ER macro
         (set! result
+         (with-handler
+          (lambda (err)
+            (apply error/loc (append (list (car err) exp) (cdr err))) )
           (cond
             ((not macro)
               (error "macro not found" exp))
@@ -844,7 +847,7 @@
                   (list 'quote exp)
                   (Cyc-er-rename use-env mac-env local-renamed)
                   (Cyc-er-compare? use-env rename-env))
-                mac-env))))
+                mac-env)))))
         ;(newline)
         ;(display "/* ")
         ;(write (list 'macro:expand exp macro compiled-macro?))
