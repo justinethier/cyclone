@@ -235,7 +235,7 @@
   )
   (begin
     (define *source-loc-lis* '())
-    (define (error/loc reason expr)
+    (define (error/loc reason expr . args)
       (let* ((found (assoc expr *source-loc-lis*))
              (loc-vec (if found 
                           (cdr found) ;; Get value
@@ -251,10 +251,10 @@
                 (number->string (vector-ref loc-vec 2))
                 ") "
                 reason)
-              expr) 
+              (if (pair? args) args expr))
            (error 
               reason
-              expr))))
+              (if (pair? args) args expr))))
 
     ;; Features implemented by this Scheme
     (define (features) 
@@ -401,7 +401,7 @@
                               (cond
                                 ((symbol? i) (symbol->string i))
                                 ((number? i) (number->string i))
-                                (else (error "Unexpected type in import set")))))
+                                (else (error/loc "Unexpected type in import set" expr)))))
                           import))
                       file-ext))
                    (filename
