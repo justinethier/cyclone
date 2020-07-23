@@ -122,11 +122,12 @@
     Cyc_check_str(data, msg);
     p = ((port_type *)port);
     if (Cyc_is_string(filename) == boolean_t) {
-      snprintf(buf, 1023, \"(%s line %d, column %d): %s\", 
-             string_str(filename), p->line_num, p->col_num, 
+      snprintf(buf, 1023, \"at line %d, column %d of %s: %s\", 
+             p->line_num, p->col_num, 
+             string_str(filename), 
              string_str(msg));
     } else {
-      snprintf(buf, 1023, \"(line %d, column %d): %s\", 
+      snprintf(buf, 1023, \"at line %d, column %d: %s\", 
              p->line_num, p->col_num, string_str(msg));
     }
     Cyc_rt_raise_msg(data, buf);")
