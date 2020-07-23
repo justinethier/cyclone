@@ -17,7 +17,7 @@
     (define (load filename . env)
       (let ((exprs (call-with-input-file filename
                      (lambda (port)
-                       (read-all port)))))
+                       (read-all/source port filename)))))
         (for-each
           (lambda (expr)
             (apply eval (cons expr env)))
