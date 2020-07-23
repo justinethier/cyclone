@@ -236,18 +236,24 @@
   (begin
     (define *source-loc-lis* '())
     (define (error/loc reason expr . args)
+      ;; Does reason already include line/file location info?
+      (define (reason/line-loc? reason)
+        (and (string? reason)
+             (equal? (substring reason 0 9)
+                     "(at line ")))
       (let* ((found (assoc expr *source-loc-lis*))
              (loc-vec (if found 
                           (cdr found) ;; Get value
                           #f))
-             (msg (if loc-vec
+             (msg (if (and loc-vec ;; Have line info
+                           (not (reason/line-loc? reason))) ;; Not there yet
                       (string-append
-                        "("
-                        (vector-ref loc-vec 0)
-                        " line "
+                        "(at line "
                         (number->string (vector-ref loc-vec 1))
                         ", column "
                         (number->string (vector-ref loc-vec 2))
+                        " of "
+                        (vector-ref loc-vec 0)
                         ") "
                         reason)
                       reason)))
