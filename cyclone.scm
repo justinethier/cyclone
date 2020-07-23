@@ -955,7 +955,13 @@ Debug options:
         ;; pointless for users of the compiler, so we don't
         ;; want to display it.
         (parameterize ((current-output-port (current-error-port)))
-          (display "Error: ")
+          (cond
+           ((and (string? (car err))
+                 (equal? (substring (car err) 0 8)
+                         "at line "))
+            (display "Error "))
+           (else
+            (display "Error: ")))
           (display (car err))
           (display ": ")
           (newline)
