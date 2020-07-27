@@ -14,7 +14,7 @@
     (scheme cyclone primitives)
     (scheme base)
     (scheme file)
-    (scheme write) ;; Only used for debugging
+    ;(scheme write) ;; Only used for debugging
     (scheme read))
   (export
     ;environment
@@ -379,7 +379,10 @@
                           (primitive-procedure-objects)
                           env:the-empty-environment))
 (define *initial-environment* (create-initial-environment))
-(define *global-environment* (setup-environment (create-initial-environment)))
+(define *global-environment* 
+  (env:extend-environment 
+    '() '() 
+    (setup-environment (create-initial-environment))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This step separates syntactic analysis from execution.
@@ -766,7 +769,16 @@
             ;(begin (write `(,lib-name ,us ,loaded? is already loaded skipping)) (newline))
            )))
       lib-names)
-    (set! *global-environment* (setup-environment *initial-environment*))
+
+        ;(newline)
+        ;(display "/* ")
+        ;(write (list 'DEBUG-GLO-ENV *global-environment*))
+        ;(display "*/ ")
+
+    (set! *global-environment* 
+          (cons
+            (car *global-environment*)
+            (setup-environment *initial-environment*)))
     #t))
 
 ;; Is the given library loaded?
@@ -824,7 +836,7 @@
              (result #f))
         ;(newline)
         ;(display "/* ")
-        ;(write (list 'macro:expand exp macro compiled-macro? local-renamed))
+        ;(write (list 'macro:expand exp (memloc exp) (assoc exp *source-loc-lis*) macro compiled-macro? local-renamed))
         ;(display "*/ ")
 
           ;; Invoke ER macro
@@ -946,12 +958,12 @@
 ;; local-env - Local macro definitions, used by let-syntax
 ;; local-renamed - Renamed local variables introduced by lambda expressions
 (define (_expand exp env rename-env local-env local-renamed)
-  (define (log e)
-    (display  
-      (list 'expand e 'env 
-        (env:frame-variables (env:first-frame env))) 
-      (current-error-port))
-    (newline (current-error-port)))
+  ;(define (log e)
+  ;  (display  
+  ;    (list 'expand e 'env 
+  ;      (env:frame-variables (env:first-frame env))) 
+  ;    (current-error-port))
+  ;  (newline (current-error-port)))
   ;(log exp)
 ;(display "/* ")
 ;(write `(expand ,exp))
@@ -1192,11 +1204,11 @@
   (_expand-body result exp env rename-env '() '()))
 
 (define (_expand-body result exp env rename-env local-env local-renamed)
-  (define (log e)
-    (display (list 'expand-body e 'env 
-              (env:frame-variables (env:first-frame env))) 
-             (current-error-port))
-    (newline (current-error-port)))
+  ;(define (log e)
+  ;  (display (list 'expand-body e 'env 
+  ;            (env:frame-variables (env:first-frame env))) 
+  ;           (current-error-port))
+  ;  (newline (current-error-port)))
 
   (if (null? exp) 
     (reverse result)
