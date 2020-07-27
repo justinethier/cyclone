@@ -8,6 +8,7 @@
 ;;;;
 (define-library (scheme read)
   (import (scheme base)
+          (scheme cyclone common)
           ;(scheme write)
           (scheme char))
   (export
@@ -173,9 +174,9 @@
    return_closcall1(data, k, obj_int2obj(num)); ")
 
 (define (store-source-info! obj filename line col) 
-  (set! *source-loc-lis* 
+  (set! *reader-source-db* 
         (cons (cons obj (vector filename line col))
-              *source-loc-lis*)))
+              *reader-source-db*)))
   ;; TODO: where to store? Need to use a hashtable but also needs to
   ;; be accessible from macro's. probably needs to be in global env,
   ;; see (cyclone foreign) for an example

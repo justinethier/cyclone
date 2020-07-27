@@ -9,8 +9,6 @@
 (define-library (scheme base)
   (import (scheme cyclone common))
   (export
-    *source-loc-lis*
-    error/loc
     member
     assoc
     cons-source
@@ -132,6 +130,7 @@
     error-object-irritants
     ; TODO: file-error?
     ; TODO: read-error?
+    error/loc
     error
     raise
     raise-continuable
@@ -234,33 +233,6 @@
     fast-string=?
   )
   (begin
-    (define *source-loc-lis* '())
-    (define (error/loc reason expr . args)
-      ;; Does reason already include line/file location info?
-      (define (reason/line-loc? reason)
-        (and (string? reason)
-             (equal? (substring reason 0 8)
-                     "at line ")))
-      (let* ((found (assoc expr *source-loc-lis*))
-             (loc-vec (if found 
-                          (cdr found) ;; Get value
-                          #f))
-             (msg (if (and loc-vec ;; Have line info
-                           (not (reason/line-loc? reason))) ;; Not there yet
-                      (string-append
-                        "at line "
-                        (number->string (vector-ref loc-vec 1))
-                        ", column "
-                        (number->string (vector-ref loc-vec 2))
-                        " of "
-                        (vector-ref loc-vec 0)
-                        ": "
-                        reason)
-                      reason)))
-      (if (pair? args)
-        (apply error (cons msg args))
-        (error msg expr))))
-
     ;; Features implemented by this Scheme
     (define (features) 
       (cons 
@@ -1309,6 +1281,41 @@
           thd->exception_handler_stack = cdr(thd->exception_handler_stack);
         }
         return_closcall1(data, k, thd->exception_handler_stack); ")
+
+    ;; Non-standard, used internally by Cyclone to report line number
+    ;; information for error messages
+    (define (error/loc reason expr . args)
+      ;(Cyc-write `(error/loc ,(map 
+      ;                (lambda (alis)
+      ;                  (list (car alis) 
+      ;                        (memloc (car alis))
+      ;                        (cdr alis)))
+      ;                *reader-source-db*)))
+      ;(Cyc-display "\n")
+      ;; Does reason already include line/file location info?
+      (define (reason/line-loc? reason)
+        (and (string? reason)
+             (equal? (substring reason 0 8)
+                     "at line ")))
+      (let* ((found (assoc expr *reader-source-db*))
+             (loc-vec (if found 
+                          (cdr found) ;; Get value
+                          #f))
+             (msg (if (and loc-vec ;; Have line info
+                           (not (reason/line-loc? reason))) ;; Not there yet
+                      (string-append
+                        "at line "
+                        (number->string (vector-ref loc-vec 1))
+                        ", column "
+                        (number->string (vector-ref loc-vec 2))
+                        " of "
+                        (vector-ref loc-vec 0)
+                        ": "
+                        reason)
+                      reason)))
+      (if (pair? args)
+        (apply error (cons msg args))
+        (error msg expr))))
 
   ;; Simplified versions of every/any from SRFI-1
   (define (any pred lst)
