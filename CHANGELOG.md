@@ -4,7 +4,7 @@
 
 Features
 
-- The compiler now provides improved error messages with file and line numbers for a wide range of syntax errors.
+- The compiler now provides improved error messages with filename and line numbers for a wide range of syntax errors.
 - Added `c-void` type into `(cyclone foreign)`.
 
 Bug Fixes
