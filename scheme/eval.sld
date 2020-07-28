@@ -755,7 +755,11 @@
         (explicit-lib-names 
           (map lib:import->library-name (lib:list->import-set import-sets)))
         ;; All dependent libraries
-        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs*)))
+        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs*))
+        (renamed-syms (filter pair?
+                        (map car 
+                          (lib:imports->idb import-sets *append-dirs* *prepend-dirs*))))
+        )
     (for-each
       (lambda (lib-name)
         (let* ((us (lib:name->unique-string lib-name))
@@ -779,6 +783,15 @@
           (cons
             (car *global-environment*)
             (setup-environment *initial-environment*)))
+
+    ;; Load any renamed exports into the environment
+    (for-each
+      (lambda (rename/base)
+        (env:define-variable! 
+          (car rename/base)
+          (env:_lookup-variable-value (cdr rename/base) *global-environment*)
+          *global-environment*))
+      renamed-syms)
     #t))
 
 ;; Is the given library loaded?
