@@ -13,6 +13,7 @@ Bug Fixes
 - Fixed `make_empty_bytevector` and `make_c_opaque` parameters on `(cyclone foreign)`.
 - Avoid compilation errors when a program ends with a `set!` expression. Thanks to Yorick Hardy for the bug report!
 - Fixed a bug with the interpreter such that running an `import` will no longer remove definitions from the global environment.
+- Fixed another interpreter bug to allow `import` to load renamed identifiers.
 
 ## 0.18 - June 8, 2020
 
