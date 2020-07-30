@@ -1341,6 +1341,18 @@ if (acc) {
                       (list (cps-seq (cddr ast) k)) 
                       #t))))
 
+          ;; TODO: still broken for 'args:fixed-with-varargs !!!!
+          ((and (app? ast)
+                (lambda? (app->fun ast))
+                (equal? 'args:varargs (lambda-formals-type (app->fun ast))))
+           (let ((fn (app->fun ast)))
+             ;; Special case, rewrite into a "normal" lambda and try again
+             (cps `((lambda 
+                      (,(cadr fn)) 
+                      ,@(cddr fn))
+                    (list ,@(cdr ast)))
+                  cont-ast) ))
+
           ((app? ast)
            ;; Syntax check the function
            (if (const? (car ast))
@@ -1351,7 +1363,8 @@ if (acc) {
               ((lambda? fn)
                ;; Check number of arguments to the lambda
                (let ((lam-min-num-args (lambda-num-args fn))
-                     (num-args (length (app->args ast))))
+                     (num-args (length (app->args ast)))
+                     (ltype (lambda-formals-type fn)))
                 (cond
                  ((< num-args lam-min-num-args)
                   (error 
@@ -1364,7 +1377,7 @@ if (acc) {
                       ":")
                     fn))
                  ((and (> num-args lam-min-num-args)
-                       (equal? 'args:fixed (lambda-formals-type fn)))
+                       (equal? 'args:fixed ltype))
                   (error 
                     (string-append
                       "Too many arguments passed to anonymous lambda. "
@@ -1373,22 +1386,15 @@ if (acc) {
                       " but received "
                       (number->string num-args)
                       ":")
-                    fn))
-               ))
-               ;; Do conversion
-               (cps-list (app->args ast)
-                         (lambda (vals)
-                           (let ((code 
-                                    (cons (ast:make-lambda
-                                            (lambda->formals fn)
-                                            (list (cps-seq (cddr fn) ;(ast-subx fn)
-                                                           cont-ast)))
-                                           vals)))
-                            (cond
-                              ((equal? (lambda-formals-type fn) 'args:varargs)
-                               (cons 'Cyc-list code)) ;; Manually build up list
-                              (else
-                                code))))))
+                    fn)))
+                ;; Do conversion
+                (cps-list (app->args ast)
+                          (lambda (vals)
+                            (cons (ast:make-lambda
+                                    (lambda->formals fn)
+                                    (list (cps-seq (cddr fn) ;(ast-subx fn)
+                                                   cont-ast)))
+                                   vals)))))
               (else
                  (cps-list ast ;(ast-subx ast)
                            (lambda (args)
