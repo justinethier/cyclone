@@ -1341,7 +1341,33 @@ if (acc) {
                       (list (cps-seq (cddr ast) k)) 
                       #t))))
 
-          ;; TODO: still broken for 'args:fixed-with-varargs !!!!
+;; TODO: add test cases
+;(define (test)
+;  ((lambda (a . Y) (write Y)) 'x)
+;  ((lambda (a . Y) (write Y)) 'x 'y)
+;  ((lambda (a . Y) (write Y)) 'x 'y 'z)
+;  ((lambda (a b . Y) (write Y)) 'x 'y 'z)
+;  ((lambda Y (write Y)) 'x 'y 'z)
+;    (lambda X (list X)))
+
+          ((and (app? ast)
+                (lambda? (app->fun ast))
+                (equal? 'args:fixed-with-varargs (lambda-formals-type (app->fun ast))))
+           (let* ((fn (app->fun ast))
+                  (formals (lambda->formals fn))
+                  (formals-lis (pair->list formals)) ;; Formals as proper list
+                  (formals-len (length formals-lis))
+                  (req-args (take (cdr ast) (- formals-len 1)))
+                  (opt-args (drop (cdr ast) (- formals-len 1)))
+                 )
+             ;; Special case, rewrite into a "normal" lambda and try again
+             (cps `((lambda 
+                      ,formals-lis
+                      ,@(cddr fn))
+                    ,@req-args
+                    (list ,@opt-args))
+                  cont-ast) ))
+
           ((and (app? ast)
                 (lambda? (app->fun ast))
                 (equal? 'args:varargs (lambda-formals-type (app->fun ast))))
