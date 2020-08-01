@@ -86,6 +86,14 @@
     ((lambda () (- x y)))) 5 4)
   1)
 
+;; Anonymous lambda's
+(assert:equal "execute anonymous lambda" ((lambda (a . Y) Y) 'x) '())
+(assert:equal "execute anonymous lambda" ((lambda (a . Y) Y) 'x 'y) '(y))
+(assert:equal "execute anonymous lambda" ((lambda (a . Y) Y) 'x 'y 'z) '(y z)) 
+(assert:equal "execute anonymous lambda" ((lambda (a b . Y) Y) 'x 'y 'z) '(z))
+(assert:equal "execute anonymous lambda" ((lambda Y Y) 'x 'y 'z) '(x y z))
+(assert:equal "execute anonymous lambda" ((lambda Y Y) ) '())
+
 ;; Factorial
 (define (fac n) (if (= n 0) 1 (* n (fac (- n 1)))))
 (assert:equal "Factorial example" (fac 10) 3628800)
