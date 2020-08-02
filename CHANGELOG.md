@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19 - TBD
+## 0.19 - August 3, 2020
 
 Features
 
