@@ -6,8 +6,8 @@
 extern object __glo_signal_91done;
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
-  // TODO: what to do with result?
-
+  // TODO: need to check this, does NOT work if result is a stack obj!!
+  thd->gc_cont = result;
   longjmp(*(thd->jmp_start), 1);
 }
 
@@ -29,7 +29,6 @@ void wait_and_signal(gc_thread_data *thd)
 
 void *c_thread(void *arg)
 {
-  int first = 1;
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
   char *stack_traces[MAX_STACK_TRACES];
@@ -45,16 +44,18 @@ void *c_thread(void *arg)
   thd.stack_traces = stack_traces; //calloc(MAX_STACK_TRACES, sizeof(char *));
   thd.stack_trace_idx = 0;
   thd.stack_prev_frame = NULL;
+  thd.gc_cont = NULL;
 
   // TODO: many more initializations required, need to figure out
   // minimum set to optimize for micro / short / long calls into Scheme.
   // We will make different assumptions in each case
 
-  setjmp(*(thd.jmp_start));
-
-  if (first) {
-    first = 0;
+  if (!setjmp(*(thd.jmp_start))) {
     wait_and_signal(&thd);
+  } else {
+    printf("Received: ");
+    Cyc_write(&thd, thd.gc_cont, stdout);
+    printf("\n");
   }
 
   return NULL;

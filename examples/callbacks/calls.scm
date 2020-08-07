@@ -13,16 +13,16 @@
    return_closcall1(data, k, boolean_t); ")
 
 (define (signal-done obj)
-  (write `(Called from C set *done* to ,obj))
-  (newline)
+  ;(write `(Called from C set *done* to ,obj))
+  ;(newline)
   (set! *done* obj)
   #t)
 
 (define (wait)
-  (start-c-thread)
   (thread-sleep! 1)
   (if *done*
       #t
       (wait)))
 
+(start-c-thread)
 (wait)
