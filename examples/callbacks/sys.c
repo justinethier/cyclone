@@ -46,7 +46,7 @@ void call_scm(gc_thread_data *thd, object obj)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-void c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
+object c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
@@ -66,6 +66,7 @@ void c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
   //thd.gc_cont = NULL;
 
   thd.thread_id = pthread_self();
+  thd.thread_state = CYC_THREAD_STATE_RUNNABLE;
 
   //thd.exception_handler_stack = NULL; // Default
 
@@ -94,12 +95,9 @@ void c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
 
 
   if (!setjmp(*(thd.jmp_start))) {
-    //wait_and_signal(&thd);
     fnc(&thd, arg);
   } else {
-    printf("Received: ");
-    Cyc_write(&thd, thd.gc_cont, stdout);
-    printf("\n");
+    return(thd.gc_cont);
   }
 }
 
@@ -111,7 +109,11 @@ void c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
  */
 void *c_thread(void *arg)
 {
-  c_trampoline(arg, (function_type)call_scm, boolean_t);
+  object obj = c_trampoline(arg, (function_type)call_scm, boolean_t);
+
+  printf("C received: ");
+  Cyc_write(NULL, obj, stdout);
+  printf("\n");
   return NULL;
 }
 
