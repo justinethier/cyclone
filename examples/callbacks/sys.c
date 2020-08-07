@@ -3,10 +3,17 @@
 #include "sys.h"
 #include <unistd.h>
 
+/**
+ * This variable corresponds to the Scheme function (in the generated C file)
+ * that we wish to call into.
+ */
 extern object __glo_signal_91done;
 
-// Scheme function calls into this when it is done.
-// We store results and longjmp back to where we started.
+/**
+ * Scheme function calls into this function when it is done.
+ * We store results and longjmp back to where we started, at the
+ * bottom of the trampoline (we only jump once).
+ */
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
   // TODO: need to check this, does NOT work if result is a stack obj!!
@@ -14,20 +21,17 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
   longjmp(*(thd->jmp_start), 1);
 }
 
-// Call into Scheme function
+/**
+ * Call into Scheme function
+ */
 void call_scm(gc_thread_data *thd, object obj)
 {
-  mclosure0(after, (function_type)after_call_scm); 
-  ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
-}
-
-void wait_and_signal(gc_thread_data *thd)
-{
-  // print, wait couple secs, signal SCM side
   printf("Hello from C thread\n");
   sleep(1);
   printf("C calling into SCM\n");
-  call_scm(thd, boolean_t);
+
+  mclosure0(after, (function_type)after_call_scm); 
+  ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
 }
 
 /**
@@ -42,7 +46,7 @@ void wait_and_signal(gc_thread_data *thd)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-void c_trampoline(gc_thread_data *parent_thd)
+void c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
@@ -90,7 +94,8 @@ void c_trampoline(gc_thread_data *parent_thd)
 
 
   if (!setjmp(*(thd.jmp_start))) {
-    wait_and_signal(&thd);
+    //wait_and_signal(&thd);
+    fnc(&thd, arg);
   } else {
     printf("Received: ");
     Cyc_write(&thd, thd.gc_cont, stdout);
@@ -106,7 +111,7 @@ void c_trampoline(gc_thread_data *parent_thd)
  */
 void *c_thread(void *arg)
 {
-  c_trampoline(arg);
+  c_trampoline(arg, (function_type)call_scm, boolean_t);
   return NULL;
 }
 
