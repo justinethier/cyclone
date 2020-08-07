@@ -4,6 +4,9 @@
 #include <unistd.h>
 
 extern object __glo_signal_91done;
+
+// Scheme function calls into this when it is done.
+// We store results and longjmp back to where we started.
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
   // TODO: need to check this, does NOT work if result is a stack obj!!
@@ -11,9 +14,9 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
   longjmp(*(thd->jmp_start), 1);
 }
 
+// Call into Scheme function
 void call_scm(gc_thread_data *thd, object obj)
 {
-  //static void __lambda_1(void *data, int argc, closure _,object k_7312, object obj_731_735) {
   mclosure0(after, (function_type)after_call_scm); 
   ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
 }
@@ -27,12 +30,12 @@ void wait_and_signal(gc_thread_data *thd)
   call_scm(thd, boolean_t);
 }
 
-void *c_thread(void *arg)
+void c_trampoline(void)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
   char *stack_traces[MAX_STACK_TRACES];
-  gc_thread_data thd; // TODO: initialize
+  gc_thread_data thd = {0};
   jmp_buf jmp;
   thd.jmp_start = &jmp;
   thd.stack_start = stack_base;
@@ -50,6 +53,13 @@ void *c_thread(void *arg)
   // minimum set to optimize for micro / short / long calls into Scheme.
   // We will make different assumptions in each case
 
+
+  // TODO: setup exception handler and parameter objects
+
+  // TODO: test this actually works, throw an error in test program
+  thd.exception_handler_stack = NULL; // Default
+  thd.param_objs = NULL;
+
   if (!setjmp(*(thd.jmp_start))) {
     wait_and_signal(&thd);
   } else {
@@ -57,7 +67,11 @@ void *c_thread(void *arg)
     Cyc_write(&thd, thd.gc_cont, stdout);
     printf("\n");
   }
+}
 
+void *c_thread(void *arg)
+{
+  c_trampoline();
   return NULL;
 }
 
