@@ -30,6 +30,18 @@ void wait_and_signal(gc_thread_data *thd)
   call_scm(thd, boolean_t);
 }
 
+/**
+ * Setup a quick-and-dirty thread object and use it to
+ * make a call into Scheme code.
+ *
+ * Note this call is made in a limited way, and is only
+ * designed for a quick call. There is no support for
+ * performing any memory allocation by the Scheme code
+ * other than temporary objects in the nursery. The 
+ * returned object will need to either be an immediate
+ * or re-allocated (EG: malloc) before returning it
+ * to the C layer.
+ */
 void c_trampoline(gc_thread_data *parent_thd)
 {
   long stack_size = 100000;
@@ -86,12 +98,23 @@ void c_trampoline(gc_thread_data *parent_thd)
   }
 }
 
+/**
+ * C thread. In our application we just call the trampoline function
+ * to setup a call into Scheme code. In a real application this thread
+ * could do quite a bit more work in C, occasionally calling into 
+ * Scheme code as necessary.
+ */
 void *c_thread(void *arg)
 {
   c_trampoline(arg);
   return NULL;
 }
 
+/**
+ * Called by Scheme to create the C thread.
+ * This is required by sample app since we start
+ * from a Scheme thread.
+ */
 void start_c_thread(gc_thread_data *thd)
 {
   pthread_t thread;
