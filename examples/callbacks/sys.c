@@ -4,10 +4,39 @@
 #include <unistd.h>
 
 /**
- * This variable corresponds to the Scheme function (in the generated C file)
+ * This variable corresponds to the Scheme function in the generated C file
  * that we wish to call into.
  */
 extern object __glo_signal_91done;
+
+/**
+ * Code for the C thread. 
+ * 
+ * In our application we just call the trampoline function to setup a call 
+ * into Scheme code. In a real application this thread would probably do 
+ * quite a bit more work in C, only calling into Scheme code as necessary.
+ */
+void *c_thread(void *arg)
+{
+  printf("Hello from C thread\n");
+  sleep(1);
+  printf("C calling into SCM\n");
+
+  object obj = c_trampoline(arg, __glo_signal_91done, boolean_t);
+
+  printf("C received: ");
+  Cyc_write(NULL, obj, stdout);
+  printf("\n");
+  return NULL;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Should not need to customize below here:
+//
+///////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * Scheme function calls into this function when it is done.
@@ -94,26 +123,6 @@ object c_trampoline(gc_thread_data *parent_thd, object fnc, object arg)
   } else {
     return(thd.gc_cont);
   }
-}
-
-/**
- * C thread. In our application we just call the trampoline function
- * to setup a call into Scheme code. In a real application this thread
- * could do quite a bit more work in C, occasionally calling into 
- * Scheme code as necessary.
- */
-void *c_thread(void *arg)
-{
-  printf("Hello from C thread\n");
-  sleep(1);
-  printf("C calling into SCM\n");
-
-  object obj = c_trampoline(arg, __glo_signal_91done, boolean_t);
-
-  printf("C received: ");
-  Cyc_write(NULL, obj, stdout);
-  printf("\n");
-  return NULL;
 }
 
 /**
