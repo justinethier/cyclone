@@ -1,6 +1,68 @@
 #include "cyclone/types.h"
+#include "cyclone/runtime.h"
+#include <unistd.h>
 
 extern object __glo_signal_91done;
-void call_scm(object obj)
+void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
+  // TODO: what to do with result?
+
+  longjmp(*(thd->jmp_start), 1);
+}
+
+void call_scm(gc_thread_data *thd, object obj)
+{
+  // TODO
+//static void __lambda_1(void *data, int argc, closure _,object k_7312, object obj_731_735) {
+
+  mclosure1(after, (function_type)after_call_scm, 
+  ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
+}
+
+void wait_and_signal(gc_thread_data *thd)
+{
+  // print, wait couple secs, signal SCM side
+  printf("Hello from C thread\n");
+  sleep(1);
+  printf("C calling into SCM\n");
+  call_scm(thd, boolean_t);
+}
+
+void *c_thread(void *arg)
+{
+  int first = 1;
+  long stack_size = 100000;
+  char *stack_base = &stack_start;
+  gc_thread_data thd; // TODO: initialize
+  thd.stack_start = stack_base;
+#if STACK_GROWTH_IS_DOWNWARD
+  thd.stack_limit = stack_base - stack_size;
+#else
+  thd.stack_limit = stack_base + stack_size;
+#endif
+  // TODO: many more initializations required, need to figure out
+  // minimum set to optimize for micro / short / long calls into Scheme.
+  // We will make different assumptions in each case
+
+  setjmp(*(thd.jmp_start));
+
+  if (first) {
+    first = 0;
+    wait_and_signal(&thd);
+  }
+
+  return NULL;
+}
+
+void start_c_thread()
+{
+  pthread_t thread;
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  if (pthread_create(&thread, &attr, c_thread, NULL)) {
+    fprintf(stderr, "Error creating a new thread\n");
+    exit(1);
+  }
+  pthread_attr_destroy(&attr);
 }
