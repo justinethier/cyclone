@@ -30,7 +30,7 @@ void wait_and_signal(gc_thread_data *thd)
   call_scm(thd, boolean_t);
 }
 
-void c_trampoline(void)
+void c_trampoline(gc_thread_data *parent_thd)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
@@ -45,20 +45,37 @@ void c_trampoline(void)
   thd.stack_limit = stack_base + stack_size;
 #endif
   thd.stack_traces = stack_traces; //calloc(MAX_STACK_TRACES, sizeof(char *));
-  thd.stack_trace_idx = 0;
-  thd.stack_prev_frame = NULL;
-  thd.gc_cont = NULL;
+  //thd.stack_trace_idx = 0;
+  //thd.stack_prev_frame = NULL;
+  //thd.gc_cont = NULL;
 
-  // TODO: many more initializations required, need to figure out
-  // minimum set to optimize for micro / short / long calls into Scheme.
-  // We will make different assumptions in each case
+  thd.thread_id = pthread_self();
 
+  //thd.exception_handler_stack = NULL; // Default
 
-  // TODO: setup exception handler and parameter objects
+  // Copy thread params from the calling thread
+  object parent = parent_thd->param_objs; // Unbox parent thread's data
+  object child = NULL;
+  //thd.param_objs = NULL;
+  while (parent) {
+    if (thd.param_objs == NULL) {
+      alloca_pair(p, NULL, NULL);
+      thd.param_objs = p;
+      //thd.param_objs = gc_alloc_pair(thd, NULL, NULL);
+      child = thd.param_objs;
+    } else {
+      //pair_type *p = gc_alloc_pair(thd, NULL, NULL);
+      alloca_pair(p, NULL, NULL);
+      cdr(child) = p;
+      child = p;
+    }
+    //car(child) = gc_alloc_pair(thd, car(car(parent)), cdr(car(parent)));
+    alloca_pair(cc, car(car(parent)), cdr(car(parent)));
+    car(child) = cc;
+    parent = cdr(parent);
+  }
+  // Done initializing parameter objects
 
-  // TODO: test this actually works, throw an error in test program
-  thd.exception_handler_stack = NULL; // Default
-  thd.param_objs = NULL;
 
   if (!setjmp(*(thd.jmp_start))) {
     wait_and_signal(&thd);
@@ -71,17 +88,17 @@ void c_trampoline(void)
 
 void *c_thread(void *arg)
 {
-  c_trampoline();
+  c_trampoline(arg);
   return NULL;
 }
 
-void start_c_thread(void)
+void start_c_thread(gc_thread_data *thd)
 {
   pthread_t thread;
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread, &attr, c_thread, NULL)) {
+  if (pthread_create(&thread, &attr, c_thread, thd)) {
     fprintf(stderr, "Error creating a new thread\n");
     exit(1);
   }
