@@ -24,14 +24,10 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 /**
  * Call into Scheme function
  */
-void call_scm(gc_thread_data *thd, object obj)
+void call_scm(gc_thread_data *thd, object fnc, object obj)
 {
-  printf("Hello from C thread\n");
-  sleep(1);
-  printf("C calling into SCM\n");
-
   mclosure0(after, (function_type)after_call_scm); 
-  ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
+  ((closure)fnc)->fn(thd, 2, fnc, &after, obj);
 }
 
 /**
@@ -46,7 +42,7 @@ void call_scm(gc_thread_data *thd, object obj)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-object c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
+object c_trampoline(gc_thread_data *parent_thd, object fnc, object arg)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
@@ -93,9 +89,8 @@ object c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
   }
   // Done initializing parameter objects
 
-
   if (!setjmp(*(thd.jmp_start))) {
-    fnc(&thd, arg);
+    call_scm(&thd, fnc, arg);
   } else {
     return(thd.gc_cont);
   }
@@ -109,7 +104,11 @@ object c_trampoline(gc_thread_data *parent_thd, function_type fnc, object arg)
  */
 void *c_thread(void *arg)
 {
-  object obj = c_trampoline(arg, (function_type)call_scm, boolean_t);
+  printf("Hello from C thread\n");
+  sleep(1);
+  printf("C calling into SCM\n");
+
+  object obj = c_trampoline(arg, __glo_signal_91done, boolean_t);
 
   printf("C received: ");
   Cyc_write(NULL, obj, stdout);
