@@ -1,5 +1,6 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
+#include "sys.h"
 #include <unistd.h>
 
 extern object __glo_signal_91done;
@@ -12,10 +13,8 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 
 void call_scm(gc_thread_data *thd, object obj)
 {
-  // TODO
-//static void __lambda_1(void *data, int argc, closure _,object k_7312, object obj_731_735) {
-
-  mclosure1(after, (function_type)after_call_scm, 
+  //static void __lambda_1(void *data, int argc, closure _,object k_7312, object obj_731_735) {
+  mclosure0(after, (function_type)after_call_scm); 
   ((closure)__glo_signal_91done)->fn(thd, 2, __glo_signal_91done, &after, obj);
 }
 
@@ -32,14 +31,21 @@ void *c_thread(void *arg)
 {
   int first = 1;
   long stack_size = 100000;
-  char *stack_base = &stack_start;
+  char *stack_base = (char *)&stack_size;
+  char *stack_traces[MAX_STACK_TRACES];
   gc_thread_data thd; // TODO: initialize
+  jmp_buf jmp;
+  thd.jmp_start = &jmp;
   thd.stack_start = stack_base;
 #if STACK_GROWTH_IS_DOWNWARD
   thd.stack_limit = stack_base - stack_size;
 #else
   thd.stack_limit = stack_base + stack_size;
 #endif
+  thd.stack_traces = stack_traces; //calloc(MAX_STACK_TRACES, sizeof(char *));
+  thd.stack_trace_idx = 0;
+  thd.stack_prev_frame = NULL;
+
   // TODO: many more initializations required, need to figure out
   // minimum set to optimize for micro / short / long calls into Scheme.
   // We will make different assumptions in each case
@@ -54,7 +60,7 @@ void *c_thread(void *arg)
   return NULL;
 }
 
-void start_c_thread()
+void start_c_thread(void)
 {
   pthread_t thread;
   pthread_attr_t attr;
