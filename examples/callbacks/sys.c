@@ -16,13 +16,13 @@ extern object __glo_signal_91done;
  * into Scheme code. In a real application this thread would probably do 
  * quite a bit more work in C, only calling into Scheme code as necessary.
  */
-void *c_thread(void *arg)
+void *c_thread(void *parent_thd)
 {
   printf("Hello from C thread\n");
   sleep(1);
   printf("C calling into SCM\n");
 
-  object obj = c_trampoline(arg, __glo_signal_91done, boolean_t);
+  object obj = scm_call_no_gc(parent_thd, __glo_signal_91done, boolean_t);
 
   printf("C received: ");
   Cyc_write(NULL, obj, stdout);
@@ -45,7 +45,6 @@ void *c_thread(void *arg)
  */
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
-  // TODO: need to check this, does NOT work if result is a stack obj!!
   thd->gc_cont = result;
   longjmp(*(thd->jmp_start), 1);
 }
@@ -71,7 +70,7 @@ void call_scm(gc_thread_data *thd, object fnc, object obj)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-object c_trampoline(gc_thread_data *parent_thd, object fnc, object arg)
+object scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
@@ -85,39 +84,38 @@ object c_trampoline(gc_thread_data *parent_thd, object fnc, object arg)
 #else
   thd.stack_limit = stack_base + stack_size;
 #endif
-  thd.stack_traces = stack_traces; //calloc(MAX_STACK_TRACES, sizeof(char *));
-  //thd.stack_trace_idx = 0;
-  //thd.stack_prev_frame = NULL;
-  //thd.gc_cont = NULL;
+  thd.stack_traces = stack_traces;
 
   thd.thread_id = pthread_self();
   thd.thread_state = CYC_THREAD_STATE_RUNNABLE;
 
-  //thd.exception_handler_stack = NULL; // Default
-
-  // Copy thread params from the calling thread
+  // Copy parameter objects from the calling thread
   object parent = parent_thd->param_objs; // Unbox parent thread's data
   object child = NULL;
-  //thd.param_objs = NULL;
   while (parent) {
     if (thd.param_objs == NULL) {
       alloca_pair(p, NULL, NULL);
       thd.param_objs = p;
-      //thd.param_objs = gc_alloc_pair(thd, NULL, NULL);
       child = thd.param_objs;
     } else {
-      //pair_type *p = gc_alloc_pair(thd, NULL, NULL);
       alloca_pair(p, NULL, NULL);
       cdr(child) = p;
       child = p;
     }
-    //car(child) = gc_alloc_pair(thd, car(car(parent)), cdr(car(parent)));
     alloca_pair(cc, car(car(parent)), cdr(car(parent)));
     car(child) = cc;
     parent = cdr(parent);
   }
-  // Done initializing parameter objects
 
+  // Setup trampoline and call into Scheme
+  //
+  // When the Scheme call is done we return result back to C
+  //
+  // It is very important to know that the result, IF ON THE STACK,
+  // is further up the stack than the caller and will be overwritten
+  // by subsequent C calls on this thread. Thus the caller will want
+  // to immediately create a copy of the object...
+  //
   if (!setjmp(*(thd.jmp_start))) {
     call_scm(&thd, fnc, arg);
   } else {
