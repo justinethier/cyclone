@@ -6,8 +6,11 @@ basic.o: basic.c
 basic-no-gc: basic-no-gc.scm basic.o
 	cyclone -CLNK basic.o basic-no-gc.scm
 
-full-with-gc: full-with-gc.scm basic.o
-	cyclone -CLNK basic.o full-with-gc.scm
+full.o: full.c
+	cc -g -c full.c
+
+full-with-gc: full-with-gc.scm full.o
+	cyclone -CLNK full.o full-with-gc.scm
 
 .PHONY: clean
 clean:

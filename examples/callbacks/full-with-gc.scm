@@ -3,7 +3,7 @@
         (srfi 1)
         (srfi 18))
 
-(include-c-header "basic.h")
+(include-c-header "full.h")
 
 (define lock (make-mutex))
 (define *done* #f)
