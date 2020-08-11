@@ -1,8 +1,9 @@
 (import (scheme base)
         (scheme write)
+        (srfi 1)
         (srfi 18))
 
-(include-c-header "sys.h")
+(include-c-header "basic.h")
 
 (define lock (make-mutex))
 (define *done* #f)
@@ -13,14 +14,23 @@
   "start_c_thread(data); 
    return_closcall1(data, k, boolean_t); ")
 
+;; TODO: this does not work right now, it crashes because we are not setup for GC!
+
 ;; Signal (wait) that it is done, this is called from C
 (define (signal-done obj)
+ (let ((result 0))
+  (for-each
+    (lambda (n)
+      (set! result (+ result n))
+    )
+    (iota 1000))
+
   (write `(Called from C set *done* to ,obj))
   (newline)
   (mutex-lock! lock)
   (set! *done* obj)
   (mutex-unlock! lock)
-  #u8(1 2 3))
+  result))
 
 ;; More efficient to use a condition var here to signal ready,
 ;; but this is just an example

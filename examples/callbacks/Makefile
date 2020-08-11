@@ -1,14 +1,14 @@
-all: limited-scm-call-from-c complex-scm-call
+all: basic-no-gc full-with-gc
 
-sys.o: sys.c
-	cc -g -c sys.c
+basic.o: basic.c
+	cc -g -c basic.c
 
-limited-scm-call-from-c: limited-scm-call-from-c.scm sys.o
-	cyclone -CLNK sys.o limited-scm-call-from-c.scm
+basic-no-gc: basic-no-gc.scm basic.o
+	cyclone -CLNK basic.o basic-no-gc.scm
 
-complex-scm-call: complex-scm-call.scm sys.o
-	cyclone -CLNK sys.o complex-scm-call.scm
+full-with-gc: full-with-gc.scm basic.o
+	cyclone -CLNK basic.o full-with-gc.scm
 
 .PHONY: clean
 clean:
-	rm -f *.o limited-scm-call-from-c.c limited-scm-call-from-c complex-scm-call.c complex-scm-call
+	rm -f *.o basic-no-gc.c basic-no-gc full-with-gc.c full-with-gc
