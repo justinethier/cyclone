@@ -17,8 +17,9 @@
 ;; TODO: this does not work right now, it crashes because we are not setup for GC!
 
 ;; Signal (wait) that it is done, this is called from C
-(define (signal-done obj)
- (let ((result 0))
+(define (signal-done) ; obj)
+ (let ((result 0)
+       (obj #t))
   (for-each
     (lambda (n)
       (set! result (+ result n))

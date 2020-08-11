@@ -1,6 +1,6 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
-#include "basic.h"
+#include "full.h"
 #include <unistd.h>
 
 /**
@@ -8,6 +8,8 @@
  * that we wish to call into.
  */
 extern object __glo_signal_91done;
+
+void *Cyc_init_thread(object thread_and_thunk);
 
 /**
  * Code for the C thread. 
@@ -22,7 +24,7 @@ void *c_thread(void *parent_thd)
   sleep(1);
   printf("C calling into SCM\n");
 
-  object obj = scm_call_no_gc(parent_thd, __glo_signal_91done, boolean_t);
+  object obj = scm_call_with_gc(parent_thd, __glo_signal_91done, boolean_t);
 
   printf("C received: ");
   Cyc_write(NULL, obj, stdout);
@@ -58,6 +60,11 @@ void call_scm(gc_thread_data *thd, object fnc, object obj)
   ((closure)fnc)->fn(thd, 2, fnc, &after, obj);
 }
 
+void call_thunk(void *data, int argc, object self, object k)
+{
+
+}
+
 /**
  * Setup a quick-and-dirty thread object and use it to
  * make a call into Scheme code.
@@ -70,57 +77,31 @@ void call_scm(gc_thread_data *thd, object fnc, object obj)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-object scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
+object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
 {
-  long stack_size = 100000;
-  char *stack_base = (char *)&stack_size;
-  char *stack_traces[MAX_STACK_TRACES];
-  gc_thread_data thd = {0};
-  jmp_buf jmp;
-  thd.jmp_start = &jmp;
-  thd.stack_start = stack_base;
-#if STACK_GROWTH_IS_DOWNWARD
-  thd.stack_limit = stack_base - stack_size;
-#else
-  thd.stack_limit = stack_base + stack_size;
-#endif
-  thd.stack_traces = stack_traces;
+  // TODO: build thread-and-thunk
+  //object thread_and_thunk = ??;
 
-  thd.thread_id = pthread_self();
-  thd.thread_state = CYC_THREAD_STATE_RUNNABLE;
+  gc_thread_data *td = malloc(sizeof(gc_thread_data));
+  gc_add_new_unrunning_mutator(td); /* Register this thread */
+  make_c_opaque(co, td);
+  make_utf8_string(NULL, name_str, "");
 
-  // Copy parameter objects from the calling thread
-  object parent = parent_thd->param_objs; // Unbox parent thread's data
-  object child = NULL;
-  while (parent) {
-    if (thd.param_objs == NULL) {
-      alloca_pair(p, NULL, NULL);
-      thd.param_objs = p;
-      child = thd.param_objs;
-    } else {
-      alloca_pair(p, NULL, NULL);
-      cdr(child) = p;
-      child = p;
-    }
-    alloca_pair(cc, car(car(parent)), cdr(car(parent)));
-    car(child) = cc;
-    parent = cdr(parent);
-  }
+  make_c_opaque(co_parent_thd, parent_thd);
 
-  // Setup trampoline and call into Scheme
-  //
-  // When the Scheme call is done we return result back to C
-  //
-  // It is very important to know that the result, IF ON THE STACK,
-  // is further up the stack than the caller and will be overwritten
-  // by subsequent C calls on this thread. Thus the caller will want
-  // to immediately create a copy of the object...
-  //
-  if (!setjmp(*(thd.jmp_start))) {
-    call_scm(&thd, fnc, arg);
-  } else {
-    return(thd.gc_cont);
-  }
+  make_empty_vector(vec);
+  vec.num_elements = 6;
+  vec.elements = alloca(sizeof(object) * 5);
+  vec.elements[0] = find_or_add_symbol("cyc-thread-obj");
+  vec.elements[1] = fnc;
+  vec.elements[2] = &co;
+  vec.elements[3] = &name_str;
+  vec.elements[4] = boolean_f;
+  vec.elements[5] = &co_parent_thd;
+
+  make_pair(thread_and_thunk, &vec, fnc); // TODO: OK we are not clearing vec[5]? I think so... 
+
+  Cyc_init_thread(&thread_and_thunk);
 }
 
 /**
