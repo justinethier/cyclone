@@ -47,8 +47,12 @@ void *c_thread(void *parent_thd)
  */
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
-  thd->gc_cont = result;
-  longjmp(*(thd->jmp_start), 1);
+  printf("after call scm\n");
+  // TODO: Cyc_end_thread logic to wind down thd
+  // TODO: other longjmp back before the scm trampoline, need to pass result (or something)
+
+//  thd->gc_cont = result;
+//  longjmp(*(thd->jmp_start), 1);
 }
 
 /**
@@ -88,9 +92,10 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
   make_utf8_string(NULL, name_str, "");
 
   make_c_opaque(co_parent_thd, parent_thd);
+  mclosure0(after, (function_type)after_call_scm); 
 
   make_empty_vector(vec);
-  vec.num_elements = 6;
+  vec.num_elements = 7;
   vec.elements = alloca(sizeof(object) * 5);
   vec.elements[0] = find_or_add_symbol("cyc-thread-obj");
   vec.elements[1] = fnc;
@@ -98,6 +103,7 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
   vec.elements[3] = &name_str;
   vec.elements[4] = boolean_f;
   vec.elements[5] = &co_parent_thd;
+  vec.elements[6] = &after;
 
   make_pair(thread_and_thunk, &vec, fnc); // TODO: OK we are not clearing vec[5]? I think so... 
 
