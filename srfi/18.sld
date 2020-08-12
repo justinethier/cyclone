@@ -71,12 +71,14 @@
         ;; - name
         ;; - specific
         ;; - internal
+        ;; - end of thread cont (or #f for default)
         (vector 
           'cyc-thread-obj 
           thunk 
           (%alloc-thread-data)  ;; Internal data for new thread
           name-str 
           #f 
+          #f
           #f)))
 
     (define (thread-name t) (vector-ref t 3))

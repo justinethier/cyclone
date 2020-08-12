@@ -6624,7 +6624,11 @@ void *Cyc_init_thread(object thread_and_thunk)
   thd->scm_thread_obj = car(thread_and_thunk);
   thd->gc_cont = cdr(thread_and_thunk);
   thd->gc_num_args = 1;
-  thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
+  if (t->num_elements >= 7 && t->elements[6] != boolean_f) {
+    thd->gc_args[0] = t->elements[6];
+  } else {
+    thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
+  }
   thd->thread_id = pthread_self();
 
   // Copy thread params from the calling thread
