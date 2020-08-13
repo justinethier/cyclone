@@ -9,6 +9,7 @@
  * that we wish to call into.
  */
 extern object __glo_signal_91done;
+extern object __glo_sum_91numbers;
 
 gc_thread_data local;
 
@@ -23,11 +24,17 @@ void *Cyc_init_thread(object thread_and_thunk);
  */
 void *c_thread(void *parent_thd)
 {
+  object obj;
   printf("Hello from C thread\n");
-  sleep(1);
   printf("C calling into SCM\n");
 
-  object obj = scm_call_with_gc(parent_thd, __glo_signal_91done, boolean_t);
+  obj = scm_call_with_gc(parent_thd, __glo_sum_91numbers, boolean_t);
+
+  printf("C received: ");
+  Cyc_write(NULL, obj, stdout);
+  printf("\n");
+
+  obj = scm_call_with_gc(parent_thd, __glo_signal_91done, boolean_t);
 
   printf("C received: ");
   Cyc_write(NULL, obj, stdout);
@@ -66,7 +73,6 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
   int i;
   printf("after call scm %p result %p\n", &i, result);
-
 
   mclosure0(clo, cleanup_and_return);
   object buf[1]; buf[0] = result;
