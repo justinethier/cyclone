@@ -10,10 +10,11 @@
  */
 extern object __glo_signal_91done;
 extern object __glo_sum_91numbers;
+extern object __glo_print_91result;
 
 gc_thread_data local;
 
-void *Cyc_init_thread(object thread_and_thunk);
+void *Cyc_init_thread(object thread_and_thunk, int argc, object *args);
 
 /**
  * Code for the C thread. 
@@ -24,19 +25,27 @@ void *Cyc_init_thread(object thread_and_thunk);
  */
 void *c_thread(void *parent_thd)
 {
-  object obj;
+  object obj, fnc, args[1];
   printf("Hello from C thread\n");
   printf("C calling into SCM\n");
 
-  obj = scm_call_with_gc(parent_thd, __glo_sum_91numbers, boolean_t);
+  fnc = scm_call_with_gc(parent_thd, __glo_sum_91numbers, 0, NULL);
 
-  printf("C received: ");
+  printf("\nC received: ");
+  Cyc_write(NULL, fnc, stdout);
+  printf("\n");
+
+  args[0] = fnc;
+  obj = scm_call_with_gc(parent_thd, __glo_print_91result, 1, args);
+
+  printf("\nC received: ");
   Cyc_write(NULL, obj, stdout);
   printf("\n");
 
-  obj = scm_call_with_gc(parent_thd, __glo_signal_91done, boolean_t);
+  args[0] = boolean_t;
+  obj = scm_call_with_gc(parent_thd, __glo_signal_91done, 1, args);
 
-  printf("C received: ");
+  printf("\nC received: ");
   Cyc_write(NULL, obj, stdout);
   printf("\n");
   return NULL;
@@ -51,9 +60,6 @@ void *c_thread(void *parent_thd)
 
 void cleanup_and_return(gc_thread_data *thd, int argc, object k, object result)
 {
-  int i;
-  printf("cleanup and return %p result %p\n", &i, result);
-
   // Cleaup thread object per Cyc_exit_thread
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
@@ -71,9 +77,6 @@ void cleanup_and_return(gc_thread_data *thd, int argc, object k, object result)
  */
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
-  int i;
-  printf("after call scm %p result %p\n", &i, result);
-
   mclosure0(clo, cleanup_and_return);
   object buf[1]; buf[0] = result;
   GC(thd, &clo, buf, 1);
@@ -105,7 +108,7 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
+object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, int argc, object *args)
 {
   jmp_buf l;
   local.gc_cont = NULL;
@@ -133,7 +136,7 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
   make_pair(thread_and_thunk, &vec, fnc); // TODO: OK we are not clearing vec[5]? I think so... 
 
   if (!setjmp(*(local.jmp_start))) {
-    Cyc_init_thread(&thread_and_thunk);
+    Cyc_init_thread(&thread_and_thunk, argc, args);
   }
 
   return local.gc_cont;

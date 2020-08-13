@@ -7,8 +7,9 @@
 
 (define lock (make-mutex))
 (define *done* #f)
-(define *dummy* signal-done) ;; Hack to prevent optimizing out signal-done
-(define *dummy2* sum-numbers) ;; Hack to prevent optimizing out signal-done
+(define *dummy* signal-done) ;; Hack to prevent optimizing out
+(define *dummy1* print-result) ;; Hack to prevent optimizing out
+(define *dummy2* sum-numbers) ;; Hack to prevent optimizing out
 
 (define-c start-c-thread
   "(void *data, int argc, closure _, object k)"
@@ -16,7 +17,7 @@
    return_closcall1(data, k, boolean_t); ")
 
 (define (sum-numbers)
- (let ((result 0))
+ (let ((result 500))
   (for-each
     (lambda (n)
       (set! result (+ result n)))
@@ -24,16 +25,19 @@
   (lambda X
     (list result 'result #(result)))))
 
-;(define (print-result
+(define (print-result fnc)
+  (let* ((result (fnc))
+         (num (car result)))
+    (write `(SCM result is ,num))
+    (newline)))
 
 ;; Signal (wait) that it is done, this is called from C
-(define (signal-done) ; obj)
- (let ((obj #t))
+(define (signal-done obj)
   (write `(Called from C set *done* to ,obj))
   (newline)
   (mutex-lock! lock)
   (set! *done* obj)
-  (mutex-unlock! lock)))
+  (mutex-unlock! lock))
 
 ;; More efficient to use a condition var here to signal ready,
 ;; but this is just an example
