@@ -6601,7 +6601,7 @@ void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
 /**
  * Thread initialization function only called from within the runtime
  */
-void *Cyc_init_thread(object thread_and_thunk)
+void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
 {
   vector_type *t;
   c_opaque_type *o;
@@ -6628,6 +6628,13 @@ void *Cyc_init_thread(object thread_and_thunk)
     thd->gc_args[0] = t->elements[6];
   } else {
     thd->gc_args[0] = &Cyc_91end_91thread_67_primitive;
+  }
+
+  if (argc > 0) {
+    thd->gc_num_args = argc + 1;
+    for (int i = 0; i < argc; i++) {
+      thd->gc_args[i + 1] = args[i];
+    }
   }
   thd->thread_id = pthread_self();
 
@@ -6659,6 +6666,11 @@ void *Cyc_init_thread(object thread_and_thunk)
   return NULL;
 }
 
+void *_Cyc_init_thread(object thread_and_thunk)
+{
+  return Cyc_init_thread(thread_and_thunk, 0, NULL);
+}
+
 /**
  * Spawn a new thread to execute the given thunk
  */
@@ -6687,7 +6699,7 @@ to look at the lock-free structures provided by ck?
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread, &attr, Cyc_init_thread, thread_and_thunk)) {
+  if (pthread_create(&thread, &attr, _Cyc_init_thread, thread_and_thunk)) {
     fprintf(stderr, "Error creating a new thread\n");
     exit(1);
   }
