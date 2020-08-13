@@ -26,12 +26,12 @@
     )
     (iota 1000))
 
-  (write `(Called from C set *done* to ,obj))
+  (write `(Called from C result is ,result set *done* to ,obj))
   (newline)
   (mutex-lock! lock)
   (set! *done* obj)
   (mutex-unlock! lock)
-  result))
+  (list list result '#())))
 
 ;; More efficient to use a condition var here to signal ready,
 ;; but this is just an example

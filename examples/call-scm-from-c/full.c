@@ -9,6 +9,8 @@
  */
 extern object __glo_signal_91done;
 
+gc_thread_data local;
+
 void *Cyc_init_thread(object thread_and_thunk);
 
 /**
@@ -47,12 +49,13 @@ void *c_thread(void *parent_thd)
  */
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
-  printf("after call scm\n");
-  // TODO: Cyc_end_thread logic to wind down thd
-  // TODO: other longjmp back before the scm trampoline, need to pass result (or something)
+  int i;
+  printf("after call scm %p\n", &i);
 
-//  thd->gc_cont = result;
-//  longjmp(*(thd->jmp_start), 1);
+   TODO: need to use Cyc_end_thread logic to wind down thd: run GC, ensure thread is cleaned up, etc
+
+  local.gc_cont = result;
+  longjmp(*(local.jmp_start), 1);
 }
 
 /**
@@ -83,8 +86,9 @@ void call_thunk(void *data, int argc, object self, object k)
  */
 object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
 {
-  // TODO: build thread-and-thunk
-  //object thread_and_thunk = ??;
+  jmp_buf l;
+  local.gc_cont = NULL;
+  local.jmp_start = &l;
 
   gc_thread_data *td = malloc(sizeof(gc_thread_data));
   gc_add_new_unrunning_mutator(td); /* Register this thread */
@@ -107,7 +111,11 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, object arg)
 
   make_pair(thread_and_thunk, &vec, fnc); // TODO: OK we are not clearing vec[5]? I think so... 
 
-  Cyc_init_thread(&thread_and_thunk);
+  if (!setjmp(*(local.jmp_start))) {
+    Cyc_init_thread(&thread_and_thunk);
+  }
+
+  return local.gc_cont;
 }
 
 /**
