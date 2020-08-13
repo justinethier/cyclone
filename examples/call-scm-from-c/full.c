@@ -1,6 +1,7 @@
 #include "cyclone/types.h"
 #include "cyclone/runtime.h"
 #include "full.h"
+#include <ck_pr.h>
 #include <unistd.h>
 
 /**
@@ -41,6 +42,20 @@ void *c_thread(void *parent_thd)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+void cleanup_and_return(gc_thread_data *thd, int argc, object k, object result)
+{
+  int i;
+  printf("cleanup and return %p result %p\n", &i, result);
+
+  // Cleaup thread object per Cyc_exit_thread
+  gc_remove_mutator(thd);
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
+                CYC_THREAD_STATE_TERMINATED);
+
+  // Return to local C caller
+  local.gc_cont = result;
+  longjmp(*(local.jmp_start), 1);
+}
 
 /**
  * Scheme function calls into this function when it is done.
@@ -50,27 +65,27 @@ void *c_thread(void *parent_thd)
 void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 {
   int i;
-  printf("after call scm %p\n", &i);
+  printf("after call scm %p result %p\n", &i, result);
 
-   TODO: need to use Cyc_end_thread logic to wind down thd: run GC, ensure thread is cleaned up, etc
 
-  local.gc_cont = result;
-  longjmp(*(local.jmp_start), 1);
+  mclosure0(clo, cleanup_and_return);
+  object buf[1]; buf[0] = result;
+  GC(thd, &clo, buf, 1);
 }
 
 /**
  * Call into Scheme function
  */
-void call_scm(gc_thread_data *thd, object fnc, object obj)
-{
-  mclosure0(after, (function_type)after_call_scm); 
-  ((closure)fnc)->fn(thd, 2, fnc, &after, obj);
-}
-
-void call_thunk(void *data, int argc, object self, object k)
-{
-
-}
+//void call_scm(gc_thread_data *thd, object fnc, object obj)
+//{
+//  mclosure0(after, (function_type)after_call_scm); 
+//  ((closure)fnc)->fn(thd, 2, fnc, &after, obj);
+//}
+//
+//void call_thunk(void *data, int argc, object self, object k)
+//{
+//
+//}
 
 /**
  * Setup a quick-and-dirty thread object and use it to
