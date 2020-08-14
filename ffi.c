@@ -13,6 +13,8 @@
 #include <ck_pr.h>
 #include <unistd.h>
 
+void *Cyc_init_thread(object thread_and_thunk, int argc, object *args);
+
 static void Cyc_return_from_scm_call(gc_thread_data *thd, int argc, object k, object result)
 {
   // Cleaup thread object per Cyc_exit_thread
@@ -173,7 +175,7 @@ object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
   //
   if (!setjmp(*(thd.jmp_start))) {
     no_gc_call_scm(&thd, fnc, arg);
-  } else {
-    return(thd.gc_cont);
   }
+
+  return(thd.gc_cont);
 }
