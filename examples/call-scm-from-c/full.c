@@ -7,6 +7,13 @@
 /**
  * This variable corresponds to the Scheme function in the generated C file
  * that we wish to call into.
+ *
+ * These names are from the compiled C files but can also be 
+ * generated using icyc:
+ *
+ *     cyclone> (mangle-global 'signal-done)
+ *     "__glo_signal_91done"
+ *
  */
 extern object __glo_signal_91done;
 extern object __glo_sum_91numbers;
