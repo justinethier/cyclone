@@ -550,6 +550,14 @@ object transport_stack_value(gc_thread_data *data, object var, object value, int
 /**@}*/
 
 /**
+ * \defgroup ffi Foreign Function Interface
+ */
+/**@{*/
+object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *args);
+object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg);
+/**@}*/
+
+/**
  * \defgroup datatypes Data types
  * @brief All of the Scheme data types provided by Cyclone.
  */

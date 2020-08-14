@@ -119,9 +119,10 @@ uninstall :
 tags :
 	ctags -R *
 
-indent : gc.c runtime.c mstreams.c $(HEADER_DIR)/*.h
+indent : gc.c runtime.c ffi.c mstreams.c $(HEADER_DIR)/*.h
 	$(INDENT_CMD) gc.c
 	$(INDENT_CMD) runtime.c
+	$(INDENT_CMD) ffi.c
 	$(INDENT_CMD) mstreams.c
 	$(INDENT_CMD) $(HEADER_DIR)/*.h
 
@@ -183,6 +184,9 @@ dispatch.o : dispatch.c $(HEADERS)
 gc.o : gc.c $(HEADERS)
 	$(CCOMP) -std=gnu99 -c $< -o $@
 
+ffi.o : ffi.c $(HEADERS)
+	$(CCOMP) -c $< -o $@
+
 mstreams.o : mstreams.c $(HEADERS)
 	$(CCOMP) -c \
 					-DCYC_HAVE_OPEN_MEMSTREAM=$(CYC_PLATFORM_HAS_MEMSTREAM) \
@@ -203,7 +207,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_PLATFORM=\"$(PLATFORM)\" \
 					$< -o $@
 
-libcyclone.a : runtime.o gc.o dispatch.o mstreams.o hashset.o
+libcyclone.a : runtime.o gc.o dispatch.o ffi.o mstreams.o hashset.o
 	$(CREATE_LIBRARY_COMMAND) $(CREATE_LIBRARY_FLAGS) $@ $&
 	$(RANLIB_COMMAND)
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
@@ -236,6 +240,7 @@ bootstrap : icyc libs
 	cp srfi/*.sld $(BOOTSTRAP_DIR)/srfi
 	cp srfi/*.scm $(BOOTSTRAP_DIR)/srfi
 	cp runtime.c $(BOOTSTRAP_DIR)
+	cp ffi.c $(BOOTSTRAP_DIR)
 	cp mstreams.c $(BOOTSTRAP_DIR)
 	cp hashset.c $(BOOTSTRAP_DIR)
 	cp gc.c $(BOOTSTRAP_DIR)
