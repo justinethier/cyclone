@@ -12,8 +12,6 @@ extern object __glo_signal_91done;
 extern object __glo_sum_91numbers;
 extern object __glo_print_91result;
 
-gc_thread_data local;
-
 void *Cyc_init_thread(object thread_and_thunk, int argc, object *args);
 
 /**
@@ -66,8 +64,10 @@ void cleanup_and_return(gc_thread_data *thd, int argc, object k, object result)
                 CYC_THREAD_STATE_TERMINATED);
 
   // Return to local C caller
-  local.gc_cont = result;
-  longjmp(*(local.jmp_start), 1);
+  vector vec = thd->scm_thread_obj;
+  gc_thread_data *local = opaque_ptr(vec->elements[4]);
+  local->gc_cont = result;
+  longjmp(*(local->jmp_start), 1);
 }
 
 /**
@@ -111,6 +111,7 @@ void after_call_scm(gc_thread_data *thd, int argc, object k, object result)
 object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, int argc, object *args)
 {
   jmp_buf l;
+  gc_thread_data local;
   local.gc_cont = NULL;
   local.jmp_start = &l;
 
@@ -120,6 +121,7 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, int argc, object
   make_utf8_string(NULL, name_str, "");
 
   make_c_opaque(co_parent_thd, parent_thd);
+  make_c_opaque(co_this_thd, &local);
   mclosure0(after, (function_type)after_call_scm); 
 
   make_empty_vector(vec);
@@ -129,7 +131,7 @@ object scm_call_with_gc(gc_thread_data *parent_thd, object fnc, int argc, object
   vec.elements[1] = fnc;
   vec.elements[2] = &co;
   vec.elements[3] = &name_str;
-  vec.elements[4] = boolean_f;
+  vec.elements[4] = &co_this_thd; //boolean_f;
   vec.elements[5] = &co_parent_thd;
   vec.elements[6] = &after;
 
