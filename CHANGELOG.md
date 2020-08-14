@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.20 - TBD
+## 0.20 - August 14, 2020
 
 Features
 
