@@ -15,6 +15,11 @@
 
 void *Cyc_init_thread(object thread_and_thunk, int argc, object *args);
 
+/**
+ * After the Scheme call finishes, we wind down the GC / Heap used
+ * for the call and perform a minor GC to ensure any returned object
+ * is on the heap and safe to use.
+ */
 static void Cyc_return_from_scm_call(gc_thread_data *thd, int argc, object k, object result)
 {
   // Cleaup thread object per Cyc_exit_thread
@@ -42,16 +47,12 @@ static void Cyc_after_scm_call(gc_thread_data *thd, int argc, object k, object r
 }
 
 /**
- * Setup a quick-and-dirty thread object and use it to
- * make a call into Scheme code.
+ * Setup a full call into Scheme code.
  *
- * Note this call is made in a limited way, and is only
- * designed for a quick call. There is no support for
- * performing any memory allocation by the Scheme code
- * other than temporary objects in the nursery. The 
- * returned object will need to either be an immediate
- * or re-allocated (EG: malloc) before returning it
- * to the C layer.
+ * This is somewhat expensive as we setup a new thread object and
+ * register it with our GC. On the other hand the called code
+ * can do anything "normal" Scheme code does, and any returned
+ * objects will be on the heap and available for use by the caller.
  */
 object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *args)
 {
