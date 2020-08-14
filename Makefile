@@ -48,6 +48,7 @@ test : libs $(TESTS)
 
 example :
 	cd $(EXAMPLE_DIR) ; $(MAKE)
+	cd $(EXAMPLE_DIR)/call-scm-from-c ; $(MAKE)
 
 clean :
 	rm -rf test.txt a.out *.so *.o *.a *.out tags cyclone icyc scheme/*.o scheme/*.so scheme/*.c scheme/*.meta srfi/*.c srfi/*.meta srfi/*.o srfi/*.so scheme/cyclone/*.o scheme/cyclone/*.so scheme/cyclone/*.c scheme/cyclone/*.meta libs/cyclone/*.o libs/cyclone/*.so libs/cyclone/*.c libs/cyclone/*.meta cyclone.c dispatch.c icyc.c generate-c.c generate-c
