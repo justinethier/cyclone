@@ -1,6 +1,5 @@
 # Cyclone Scheme
-# Copyright (c) 2014, Justin Ethier
-# Copyright (c) 2017, Koz Ross
+# Copyright (c) 2014-2020, Justin Ethier
 # All rights reserved.
 
 include Makefile.config
