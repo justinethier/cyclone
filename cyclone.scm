@@ -683,7 +683,9 @@
       (read-all/source port filename))))
 
 ;; Compile and emit:
-(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so cc-prog-linker-opts append-dirs prepend-dirs)
+(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so 
+                      cc-prog-linker-opts cc-prog-linker-objs 
+                      append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -734,12 +736,14 @@
     (cond
       (program?
         (letrec ((objs-str 
-                  (apply
-                    string-append
-                    (map
-                      (lambda (i)
-                        (string-append " " (lib:import->filename i ".o" append-dirs prepend-dirs) " "))
-                      lib-deps)))
+                  (string-append
+                    cc-prog-linker-objs
+                    (apply
+                      string-append
+                      (map
+                        (lambda (i)
+                          (string-append " " (lib:import->filename i ".o" append-dirs prepend-dirs) " "))
+                        lib-deps))))
                  (comp-prog-cmd 
                    (string-replace-all 
                      (string-replace-all 
@@ -842,6 +846,7 @@
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
        (cc-so   (apply string-append (collect-opt-values args "-CS")))
        (cc-linker-opts (apply string-append (collect-opt-values args "-CLNK")))
+       (cc-linker-extra-objects (apply string-append (collect-opt-values args "-COBJ")))
        (opt-beta-expand-thresh (collect-opt-values args "-opt-be"))
        (append-dirs (collect-opt-values args "-A"))
        (prepend-dirs (collect-opt-values args "-I")))
@@ -895,6 +900,10 @@ General options:
                  a library module.
  -CS cc-commands Specify a custom command line for the C compiler to compile
                  a shared object module.
+ -COBJ objects   Specify additional object files to send to the compiler
+                 when linking a program. For example, this may be used
+                 to link an executable where some object files are generated
+                 via a makefile instead of by Cyclone.
  -CLNK option    Specify a custom command to provide as a linker option,
                  EG: \"-lcurl\".
  -d              Only generate intermediate C files, do not compile them
@@ -972,5 +981,5 @@ Debug options:
             (cdr err))
           (newline)
           (exit 1)))
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts append-dirs prepend-dirs)))))
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts cc-linker-extra-objects append-dirs prepend-dirs)))))
 
