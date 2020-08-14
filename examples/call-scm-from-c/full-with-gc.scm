@@ -7,9 +7,11 @@
 
 (define lock (make-mutex))
 (define *done* #f)
-(define *dummy* signal-done) ;; Hack to prevent optimizing out
-(define *dummy1* print-result) ;; Hack to prevent optimizing out
-(define *dummy2* sum-numbers) ;; Hack to prevent optimizing out
+;; Hack to prevent optimizing out functions that are unused in Scheme code
+;; This is not required if functions are exported from a library
+(define *dummy* signal-done) 
+(define *dummy1* print-result)
+(define *dummy2* sum-numbers)
 
 (define-c start-c-thread
   "(void *data, int argc, closure _, object k)"
@@ -31,7 +33,7 @@
     (write `(SCM result is ,num))
     (newline)))
 
-;; Signal (wait) that it is done, this is called from C
+;; Signal (wait) that it is done
 (define (signal-done obj)
   (write `(Called from C set *done* to ,obj))
   (newline)
