@@ -1969,13 +1969,7 @@
 ;; Record-type definitions
 (define record-marker (list 'record-marker))
 (define (register-simple-type name parent field-tags)
-  (vector record-marker name field-tags)
-  ;(let ((new (make-vector 3 #f)))
-  ;  (vector-set! new 0 record-marker)
-  ;  (vector-set! new 1 name)
-  ;  (vector-set! new 2 field-tags)
-  ;  new)
-)
+  (vector record-marker name field-tags))
 (define (make-type-predicate pred name)
   (lambda (obj)
     (and (vector? obj)
@@ -2009,10 +2003,14 @@
   (vector-ref (vector-ref obj 2) idx)))
 (define (make-getter sym name idx)
   (lambda (obj)
-    (vector-ref (vector-ref obj 2) idx)))
+    (if (eq? (vector-ref obj 1) name)
+        (vector-ref (vector-ref obj 2) idx)
+        (error "Invalid type" obj "expected" name))))
 (define (make-setter sym name idx)
   (lambda (obj val)
-    (vector-set! (vector-ref obj 2) idx val)))
+    (if (eq? (vector-ref obj 1) name)
+        (vector-set! (vector-ref obj 2) idx val)
+        (error "Invalid type" obj "expected" name))))
 
 ;; Find index of element in list, or #f if not found
 (define _list-index
@@ -2037,7 +2035,6 @@
      (let* ((name+parent (cadr expr))
             (name (if (pair? name+parent) (car name+parent) name+parent))
             (parent (and (pair? name+parent) (cadr name+parent)))
-            (name-str (symbol->string name)) ;(identifier->symbol name)))
             (procs (cddr expr))
             (make (caar procs))
             (make-fields (cdar procs))
@@ -2055,11 +2052,11 @@
        `(,(rename 'begin)
          ;; type
          (,_define ,name (,_register 
-                          ,name-str 
+                          (quote ,name)
                           ,parent 
                           ',(map car fields)))
          ;; predicate
-         (,_define ,pred (,(rename 'make-type-predicate) 0 ,name))
+         (,_define ,pred (,(rename 'make-type-predicate) 0 (quote ,name)))
          ;; fields
          ,@(map (lambda (f)
                   (and (pair? f) (pair? (cdr f))
@@ -2069,7 +2066,7 @@
                              (cadr f)
                              ;(identifier->symbol (cadr f))
                             )
-                           ,name
+                           (quote ,name)
                            (,_type_slot_offset ,name ',(car f))))))
                 fields)
          ,@(map (lambda (f)
@@ -2080,7 +2077,7 @@
                              (car (cddr f))
                              ;(identifier->symbol (car (cddr f)))
                             )
-                           ,name
+                           (quote ,name)
                            (,_type_slot_offset ,name ',(car f))))))
                 fields)
          ;; constructor
@@ -2095,7 +2092,7 @@
             (,_lambda ,make-fields
               (,(rename 'vector)
               ',record-marker
-               ,name
+               (quote ,name)
                (,(rename 'vector)
                 ,@make-fields))))
   )))))
