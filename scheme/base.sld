@@ -2005,12 +2005,12 @@
   (lambda (obj)
     (if (eq? (vector-ref obj 1) name)
         (vector-ref (vector-ref obj 2) idx)
-        (error "Invalid type" obj "expected" name))))
+        (error "Invalid type" obj 'expected name))))
 (define (make-setter sym name idx)
   (lambda (obj val)
     (if (eq? (vector-ref obj 1) name)
         (vector-set! (vector-ref obj 2) idx val)
-        (error "Invalid type" obj "expected" name))))
+        (error "Invalid type" obj 'expected name))))
 
 ;; Find index of element in list, or #f if not found
 (define _list-index
