@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.21 - TBD
+
+Bug Fixes
+
+- Add type checking to record type accessor functions. We now raise an error if the passed object is of the wrong record type.
+
 ## 0.20 - August 14, 2020
 
 Features
