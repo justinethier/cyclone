@@ -2027,7 +2027,8 @@
 (define (is-a? obj rtype)
   (and (record? obj)
        (record? rtype)
-       (equal? (vector-ref obj 1) rtype)))
+       (equal? (vector-ref obj 1) 
+               (vector-ref rtype 1))))
 
 (define-syntax define-record-type
   (er-macro-transformer
