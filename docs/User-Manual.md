@@ -15,8 +15,10 @@
 - [Multithreaded Programming](#multithreaded-programming)
 - [Foreign Function Interface](#foreign-function-interface)
   - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
+  - [Foreign Library](#foreign-library)
   - [Including a C Header File](#including-a-c-header-file)
   - [Linking to a C Library](#linking-to-a-c-library)
+  - [Calling Scheme Functions from C](#calling-scheme-functions-from-c)
 - [Licensing](#licensing)
 - [References and Further Reading](#references-and-further-reading)
 
@@ -213,6 +215,10 @@ Functions that may block must call the `set_thread_blocked` macro to let the sys
 
 The Cyclone runtime can be used as a reference for how to write your own C functions. A good starting point would be [`runtime.c`](../runtime.c) and [`types.h`](../include/cyclone/types.h).
 
+## Foreign Library
+
+The `(cyclone foreign)` provides a convenient interface for integrating with C code, and provides higher-level constructs than `define-c`. See the API documentation for more information.
+
 ## Including a C Header File
 
 A C header may be included using the `include-c-header` special form. This special form may be used either as part of a library definition:
@@ -240,6 +246,12 @@ A Cyclone library may use the `c-linker-options` expression to instruct the comp
       (include-c-header "<curl/curl.h>")
       (export curl-version)
       (c-linker-options "-lcurl")
+
+## Calling Scheme Functions from C
+
+C functions `Cyc_scm_call` and `Cyc_scm_call_no_gc` are provided to allow calling Scheme functions from C. 
+
+The best way to get started with these functions is with the code examples in the Cyclone source tree under `examples/call-scm-from-c`.
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
