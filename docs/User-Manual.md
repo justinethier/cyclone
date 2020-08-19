@@ -217,7 +217,7 @@ The Cyclone runtime can be used as a reference for how to write your own C funct
 
 ## Foreign Library
 
-The `(cyclone foreign)` provides a convenient interface for integrating with C code, and provides higher-level constructs than `define-c`. See the API documentation for more information.
+The [`(cyclone foreign)`](api/cyclone/foreign.md) provides a convenient interface for integrating with C code, and provides higher-level constructs than `define-c`. See the API documentation for more information.
 
 ## Including a C Header File
 
@@ -251,7 +251,7 @@ A Cyclone library may use the `c-linker-options` expression to instruct the comp
 
 C functions `Cyc_scm_call` and `Cyc_scm_call_no_gc` are provided to allow calling Scheme functions from C. 
 
-The best way to get started with these functions is with the code examples in the Cyclone source tree under `examples/call-scm-from-c`.
+The best way to get started with these functions is with the code examples in the Cyclone source tree under [`examples/call-scm-from-c`](../examples/call-scm-from-c).
 
 # Licensing
 Cyclone is available under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
