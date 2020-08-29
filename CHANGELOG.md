@@ -5,6 +5,7 @@
 Bug Fixes
 
 - Add type checking to record type accessor functions. We now raise an error if the passed object is of the wrong record type.
+- Fix issues with expanding `cond-expand` expressions in libraries. Previously there would be issues with the expansion if the code needed to be within the context of a `begin`.
 
 ## 0.20 - August 14, 2020
 
