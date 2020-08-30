@@ -42,7 +42,9 @@ matrix:
 notifications:
   email: false
 before_install:
-  - [ "$(uname)" = "FreeBSD" ] || alias gmake=make
+      if [ "$(uname)" = "FreeBSD" ]; then
+        alias gmake=make
+      fi
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
       cd ${HOME}/ck
