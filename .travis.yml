@@ -32,13 +32,6 @@ matrix:
             - gmake
             - libtommath
             - concurrencykit
-#    - os: osx
-#      image: xcode8
-#      addons:
-#        homebrew:
-#          packages:
-#            - libtommath
-#            - concurrencykit
     - os: osx
       image: xcode11.2
       addons:
