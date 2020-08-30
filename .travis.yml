@@ -24,6 +24,14 @@ matrix:
         apt:
           packages:
             - libtommath-dev
+    - os: freebsd
+      addons:
+        pkg:
+          packages:
+            - sudo
+            - gmake
+            - libtommath
+            - concurrencykit
     - os: osx
       image: xcode8
       addons:
@@ -38,32 +46,26 @@ matrix:
           packages:
             - libtommath
             - concurrencykit
-    - os: freebsd
-      addons:
-        pkg:
-          packages:
-            - sudo
-            - libtommath
-            - concurrencykit
 notifications:
   email: false
 before_install:
+  - [ "$(uname)" = "FreeBSD" ] || alias gmake=make
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
       cd ${HOME}/ck
       git checkout 0.6.0
       ./configure PREFIX=/usr
-      make all
-      sudo make install
+      gmake all
+      sudo gmake install
       if [ "$(uname)" = "Linux" ]; then
         sudo ldconfig
       fi
   - |
       git clone https://github.com/justinethier/cyclone-bootstrap.git ${HOME}/cyclone-bootstrap
       cd ${HOME}/cyclone-bootstrap
-      make
-      sudo make install
+      gmake
+      sudo gmake install
 script:
-  - make
-  - sudo make install
-  - make test
+  - gmake
+  - sudo gmake install
+  - gmake test
