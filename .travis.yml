@@ -4,44 +4,68 @@ matrix:
   include:
     - os: linux
       compiler: gcc
+      arch: amd64
       addons:
         apt:
           packages:
             - libtommath-dev
     - os: linux
       compiler: clang
+      arch: amd64
       addons:
         apt:
           packages:
             - libtommath-dev
             - clang-3.9
+    - os: linux
+      compiler: gcc
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - libtommath-dev
+    - os: freebsd
+      addons:
+        pkg:
+          packages:
+            - sudo
+            - gmake
+            - libtommath
+            - concurrencykit
     - os: osx
       image: xcode8
+      addons:
+        homebrew:
+          packages:
+            - libtommath
+            - concurrencykit
     - os: osx
       image: xcode11.2
+      addons:
+        homebrew:
+          packages:
+            - libtommath
+            - concurrencykit
 notifications:
   email: false
 before_install:
-  - if [ "$(uname)" = "Darwin" ]; then
-      brew update;
-      brew install -v libtommath concurrencykit;
-    fi
+  - [ "$(uname)" = "FreeBSD" ] || alias gmake=make
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
       cd ${HOME}/ck
       git checkout 0.6.0
       ./configure PREFIX=/usr
-      make all
-      sudo make install
+      gmake all
+      sudo gmake install
       if [ "$(uname)" = "Linux" ]; then
         sudo ldconfig
       fi
   - |
       git clone https://github.com/justinethier/cyclone-bootstrap.git ${HOME}/cyclone-bootstrap
       cd ${HOME}/cyclone-bootstrap
-      make
-      sudo make install
+      gmake
+      sudo gmake install
 script:
-  - make
-  - sudo make install
-  - make test
+  - gmake
+  - sudo gmake install
+  - gmake test
