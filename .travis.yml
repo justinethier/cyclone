@@ -32,18 +32,11 @@ matrix:
             - gmake
             - libtommath
             - concurrencykit
-    - os: osx
-      image: xcode11.2
-      addons:
-        homebrew:
-          packages:
-            - libtommath
-            - concurrencykit
 notifications:
   email: false
 before_install:
   - |
-      if [[ "$(uname)" != "FreeBSD" && "$(uname)" != "Darwin" ]]; then
+      if [ "$(uname)" != "FreeBSD" ]; then
         sudo ln -s /usr/bin/make /usr/bin/gmake
       fi
   - |
