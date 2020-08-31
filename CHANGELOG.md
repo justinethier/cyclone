@@ -2,6 +2,10 @@
 
 ## 0.21 - TBD
 
+Features
+
+- Alex Arslan modified the Travis script to add support for FreeBSD continuous integration.
+
 Bug Fixes
 
 - Add type checking to record type accessor functions. We now raise an error if the passed object is of the wrong record type.
