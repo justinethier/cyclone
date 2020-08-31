@@ -43,7 +43,7 @@ notifications:
   email: false
 before_install:
   - |
-      if [ "$(uname)" -ne "FreeBSD" ]; then
+      if [ "$(uname)" != "FreeBSD" ]; then
         sudo ln -s /usr/bin/make /usr/bin/gmake
       fi
   - |
