@@ -8,7 +8,6 @@ matrix:
       addons:
         apt:
           packages:
-            - gmake
             - libtommath-dev
     - os: linux
       compiler: clang
@@ -16,7 +15,6 @@ matrix:
       addons:
         apt:
           packages:
-            - gmake
             - libtommath-dev
             - clang-3.9
     - os: linux
@@ -25,7 +23,6 @@ matrix:
       addons:
         apt:
           packages:
-            - gmake
             - libtommath-dev
     - os: freebsd
       addons:
@@ -40,15 +37,15 @@ matrix:
       addons:
         homebrew:
           packages:
-            - gmake
             - libtommath
             - concurrencykit
 notifications:
   email: false
 before_install:
-#   - if [ "$(uname)" -ne "FreeBSD" ]; then
-#       alias gmake=make
-#     fi
+  - |
+      if [ "$(uname)" -ne "FreeBSD" ]; then
+        sudo ln -s /usr/bin/make /usr/bin/gmake
+      fi
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
       cd ${HOME}/ck
