@@ -15,7 +15,7 @@
 ;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
-          ;; Debugging: (scheme write)
+          ;; Debug only (scheme write)
           (scheme read)
           (scheme process-context)
           (scheme cyclone util)
@@ -243,9 +243,17 @@
                   (begin? (and (pair? expr)
                                (not (member (car expr) 
                                            '(import export c-linker-options include-c-header))))))
-             (if begin?
-                 (cons `(begin ,expr) acc)
-                 (cons expr acc))))
+;(write `(DEBUG ,begin? ,(if (pair? expr) (lambda? (car expr)) #f) ,expr))
+;(newline)
+             (cond
+              ((and (pair? expr)
+                    (lambda? (car expr))
+                    (eq? '() (lambda->formals (car expr))))
+               (cons `(begin ,@(lambda->exp (car expr))) acc))  
+              (begin?
+               (cons `(begin ,expr) acc))
+              (else
+               (cons expr acc)))))
           (else
             (cons d acc)) ))
       '() 
