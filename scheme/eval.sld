@@ -745,13 +745,13 @@
   (set! *append-dirs* append-dirs)
   (set! *prepend-dirs* prepend-dirs))
 
-TODO:
 (define (base-expander)
   (let ((rename-env (env:extend-environment '() '() '()))
-        #;(macros (filter 
-                  (lambda (v) 
-                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
-                  (Cyc-global-vars))))
+        ;(macros (filter 
+        ;          (lambda (v) 
+        ;            (Cyc-macro? (Cyc-get-cvar (cdr v))))
+        ;          (Cyc-global-vars)))
+        )
     ;(macro:load-env! macros (create-environment '() '()))
     (lambda (ex) 
       (expand ex (macro:get-env) rename-env))))
@@ -766,7 +766,7 @@ TODO:
         (explicit-lib-names 
           (map lib:import->library-name (lib:list->import-set import-sets)))
         ;; All dependent libraries
-        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs* #f))
+        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs* base-expander))
         (renamed-syms (filter pair?
                         (map car 
                           (lib:imports->idb import-sets *append-dirs* *prepend-dirs*))))
