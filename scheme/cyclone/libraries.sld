@@ -15,7 +15,8 @@
 ;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
-          ;; Debug only (scheme write)
+          ;; Debug only 
+          (scheme write)
           (scheme read)
           (scheme process-context)
           (scheme cyclone util)
@@ -385,12 +386,15 @@
 
 ;; Given a single import from an import-set, open the corresponding
 ;; library file and retrieve the library's import-set.
-(define (lib:read-imports import append-dirs prepend-dirs)
+(define (lib:read-imports import append-dirs prepend-dirs expander)
   (let* ((lib-name (lib:import->library-name import))
          (dir (lib:import->filename lib-name ".sld" append-dirs prepend-dirs))
          (fp (open-input-file dir))
          (lib (read-all fp))
-         (imports (lib:imports (car lib))))
+         (lib* (if expander
+                   (list (lib:cond-expand (car lib) expander))
+                   lib))
+         (imports (lib:imports (car lib*))))
     (close-input-port fp)
     imports))
 
@@ -619,7 +623,7 @@
 ;; Given an import set, get all dependant import names that are required
 ;; The list of deps is intended to be returned in order, such that the
 ;; libraries can be initialized properly in sequence.
-(define (lib:get-all-import-deps imports append-dirs prepend-dirs)
+(define (lib:get-all-import-deps imports append-dirs prepend-dirs expander)
   (letrec ((libraries/deps '())
          (find-deps! 
           (lambda (import-sets)
@@ -631,7 +635,7 @@
                    ;; Prevent cycles by only processing new libraries
                    ((not (assoc lib-name libraries/deps))
                     ;; Find all dependencies of i (IE, libraries it imports)
-                    (let* ((deps (lib:read-imports import-set append-dirs prepend-dirs))
+                    (let* ((deps (lib:read-imports import-set append-dirs prepend-dirs expander))
                            (dep-libs (map lib:import->library-name deps)))
                      (set! 
                        libraries/deps 

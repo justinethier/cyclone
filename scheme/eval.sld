@@ -755,7 +755,7 @@
         (explicit-lib-names 
           (map lib:import->library-name (lib:list->import-set import-sets)))
         ;; All dependent libraries
-        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs*))
+        (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs* #f))
         (renamed-syms (filter pair?
                         (map car 
                           (lib:imports->idb import-sets *append-dirs* *prepend-dirs*))))

@@ -255,7 +255,7 @@
               (trace:info meta))
             (set! input-program (cdr program:imports/code))
             ;(set! lib-deps (append lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)))
-            (let ((new-lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)))
+            (let ((new-lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs #f)))
               (for-each
                 (lambda (dep)
                   (if (not (member dep lib-deps))
@@ -704,7 +704,7 @@
          (lib-deps 
            (if (and program?
                     (not (null? (car program:imports/code))))
-             (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)
+             (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs expander)
             '()))
          (c-linker-options
           (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs))
