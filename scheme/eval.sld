@@ -745,6 +745,17 @@
   (set! *append-dirs* append-dirs)
   (set! *prepend-dirs* prepend-dirs))
 
+TODO:
+(define (base-expander)
+  (let ((rename-env (env:extend-environment '() '() '()))
+        #;(macros (filter 
+                  (lambda (v) 
+                    (Cyc-macro? (Cyc-get-cvar (cdr v))))
+                  (Cyc-global-vars))))
+    ;(macro:load-env! macros (create-environment '() '()))
+    (lambda (ex) 
+      (expand ex (macro:get-env) rename-env))))
+
 ;; TODO: right now this is a hack, just get all the imports sets and call their entry point
 ;; function to initialize them. longer-term will need to only load the specific identifiers
 ;; called out in the import sets
