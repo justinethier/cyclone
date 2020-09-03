@@ -5,6 +5,8 @@
 Features
 
 - Alex Arslan modified the Travis script to add support for FreeBSD continuous integration.
+- Added additional functions to `(srfi 132)`: `vector-find-median!`, `vector-find-median`, `vector-select!`, `vector-select`, and `vector-separate!`.
+
 
 Bug Fixes
 
