@@ -264,3 +264,7 @@
         (else
          (copy-bigger! <? pivot dst at src (+ start 1) end))))
 
+(define (assert val)
+  (if (not val) 
+    (error 'assert val)))
+
