@@ -17,9 +17,19 @@
   )
   (begin
 
+  ;; promise
+  ;; ( tag value/obj )
+
+  (define *promise-tag* '(promise))
+  (define (promise? obj)
+    (and (pair? obj)
+         (eq? *promise-tag* (car obj))))
+
   (define force
-      (lambda (object)
-        (object)))
+      (lambda (obj)
+        (if (promise? obj)
+            ((cdr obj))
+            obj)))
 
   (define-syntax delay
     (er-macro-transformer
@@ -32,20 +42,23 @@
        `(make-promise (lambda () ,(cadr expr))))))
 
   (define make-promise
-    (lambda (proc)
-      (let ((result-ready? #f)
-            (result #f))
-        (lambda ()
-          (if result-ready? 
-              result
-              (let ((x (proc)))
-                (if result-ready?
+    (lambda (obj)
+      (if (promise? obj)
+          obj
+          (let ((result-ready? #f)
+                (result #f))
+            (cons
+              *promise-tag*
+              (lambda ()
+                (if result-ready? 
                     result
-                    (begin (set! result x)
-                           (set! result-ready? #t)
-                           result))))))))
+                    (let ((x (if (procedure? obj)
+                                 (obj)
+                                 obj)))
+                      (if result-ready?
+                          result
+                          (begin (set! result x)
+                                 (set! result-ready? #t)
+                                 result))))))))))
 
-  ;; Not a very satisfying implementation, but would need to change
-  ;; how promises are stored to do better
-  (define promise? procedure?)
 ))
