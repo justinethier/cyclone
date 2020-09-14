@@ -3,7 +3,7 @@ from ubuntu:latest
 MAINTAINER justin.ethier@gmail.com
 
 ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=America/New_York
+# ENV TZ=America/New_York
 
 ENV CYCLONE_VERSION v0.20
 RUN apt update -y
