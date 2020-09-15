@@ -28,7 +28,7 @@
   (define force
       (lambda (obj)
         (if (promise? obj)
-            ((cdr obj))
+            (force ((cdr obj)))
             obj)))
 
   (define-syntax delay
