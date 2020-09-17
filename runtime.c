@@ -7118,7 +7118,8 @@ static int _read_is_hex_digit(char c)
 static void _read_string(void *data, object cont, port_type *p) 
 {
   char c;
-  int escaped = 0;
+  int escaped = 0, escaped_whitespace = 0, 
+      ewrn = 0; // esc whitespace read newline
   while(1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
@@ -7128,6 +7129,28 @@ static void _read_string(void *data, object cont, port_type *p)
     }
     c = p->mem_buf[p->buf_idx++];
     p->col_num++;
+
+    if (escaped_whitespace) {
+      switch (c) {
+      case '\t':
+      case ' ':
+        p->col_num++;
+        continue;
+        break;
+      case '\n':
+        if (ewrn == 0) {
+          ewrn = 1;
+          p->line_num++;
+          p->col_num = 1;
+          continue;
+        }
+        break;
+      default:
+        escaped_whitespace = 0;
+        ewrn = 0;
+        break;
+      }
+    }
 
     if (escaped) {
       escaped = 0;
@@ -7192,6 +7215,18 @@ static void _read_string(void *data, object cont, port_type *p)
         }
         break;
       }
+      case '\t':
+      case ' ':
+        escaped_whitespace = 1;
+        ewrn = 0;
+        p->col_num++;
+        break;
+      case '\n':
+        escaped_whitespace = 1;
+        ewrn = 1;
+        p->line_num++;
+        p->col_num = 1;
+        break;
       default:
         _read_error(data, p, "invalid escape character in string"); // TODO: char
         break;

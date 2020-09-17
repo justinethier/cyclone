@@ -165,6 +165,14 @@
     "abcde")
   (assert:equal "string-for-each" v '(101 100 99 98 97)))
 
+(assert:equal "interline whitespace" "1 2 \      
+3 4" "1 2 3 4")
+
+(assert:equal "interline whitespace" "1 2 \
+
+
+3 4" "1 2 \n\n3 4")
+
 ;; UTF-8 / Strings
 (assert:equal "UTF8 string length" (string-length (make-string 1 (integer->char 128))) 1)
 (assert:equal "UTF8 bv length" (bytevector-length (string->utf8 (make-string 1 (integer->char 128)))) 2)

@@ -11,9 +11,10 @@ Bug Fixes
 
 - Updated the `Dockerfile` to use a non-interactive install. This prevents build problems with the official image on DockerHub.
 - Improved `(scheme lazy)` to allow `force` and `make-promise` to accept an argument of any type. Improved representation of promises to more precisely differentiate them from other objects.
+- Updated `(scheme lazy)` such that `force` will recursively force promises.
 - Add type checking to record type accessor functions. We now raise an error if the passed object is of the wrong record type.
 - Fix issues with expanding `cond-expand` expressions in libraries. Previously there would be issues with the expansion if the code needed to be within the context of a `begin`.
-- Updated `(scheme lazy)` such that `force` will recursively force promises.
+- Modified the reader to handle escaped intraline whitespace properly, per R7RS.
 
 ## 0.20 - August 14, 2020
 
