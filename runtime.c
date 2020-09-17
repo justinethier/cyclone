@@ -7132,6 +7132,7 @@ static void _read_string(void *data, object cont, port_type *p)
 
     if (escaped_whitespace) {
       switch (c) {
+      case '\r':
       case '\t':
       case ' ':
         p->col_num++;
@@ -7215,6 +7216,7 @@ static void _read_string(void *data, object cont, port_type *p)
         }
         break;
       }
+      case '\r':
       case '\t':
       case ' ':
         escaped_whitespace = 1;
