@@ -997,6 +997,11 @@
 ;(newline)
   (cond
     ((const? exp)      exp)
+    ;; Null and Improper lists are just consts, no need to expand
+    ((null? exp)      exp)
+    ((and (pair? exp)
+          (not (list? exp)))
+     exp)
     ((and (prim? exp) ;; Allow lambda vars to shadown primitives
           (not (assoc exp local-renamed)))
      exp)
