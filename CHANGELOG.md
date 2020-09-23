@@ -2,6 +2,10 @@
 
 ## 0.22 - TBD
 
+Bug Fixes
+
+- The compiler now displays a helpful error message to the user when compilation of a program fails due to an error building a dependent library.
+
 ## 0.21 - September 17, 2020
 
 Features
