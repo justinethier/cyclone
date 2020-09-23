@@ -279,8 +279,10 @@
         (for-each 
           (lambda (lib-dep)
             (when (recompile? lib-dep append-dirs prepend-dirs)
-              (system (string-append "cyclone " 
-                        (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
+              (let ((result (system (string-append "cyclone " 
+                                      (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
+                (when (> result 0)
+                  (error "Unable to compile library" lib-dep)))))
           lib-deps))
 
       ;; Validate syntax of basic forms
