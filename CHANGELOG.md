@@ -5,6 +5,9 @@
 Bug Fixes
 
 - The compiler now displays a helpful error message to the user when compilation of a program fails due to an error building a dependent library.
+- Enhanced `cond-expand` support in a library declaration to
+  - Properly handle cases where there is more than one `cond-expand` sub-expression. EG: two `begin` expressions, a `begin` / `import`, etc.
+  - Properly handle the case where `export` is defined by `cond-expand`. Previously such exports would not be recognized by code importing the library.
 
 ## 0.21 - September 17, 2020
 

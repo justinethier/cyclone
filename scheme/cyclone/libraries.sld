@@ -440,12 +440,15 @@
     " "))
 
 ;; Read export list for a given import
-(define (lib:import->export-list import append-dirs prepend-dirs)
+(define (lib:import->export-list import append-dirs prepend-dirs expander)
   (let* ((lib-name (lib:import->library-name import))
          (dir (string-append (lib:import->filename lib-name ".sld" append-dirs prepend-dirs)))
          (fp (open-input-file dir))
          (lib (read-all fp))
-         (exports (lib:exports (car lib))))
+         (lib* (if expander
+                   (list (lib:cond-expand (car lib) expander))
+                   lib))
+         (exports (lib:exports (car lib*))))
     (close-input-port fp)
     (lib:import-set/exports->imports import exports)))
 
@@ -551,7 +554,7 @@
 ;;
 ;; TODO: convert this to use a hashtable. Initially a-lists
 ;; will be used to prove out the concept, but this is inefficient
-(define (lib:imports->idb imports append-dirs prepend-dirs)
+(define (lib:imports->idb imports append-dirs prepend-dirs expander)
  (apply
    append
    (map 
@@ -563,7 +566,7 @@
               (cons id lib-name)
               ids))
           '()
-           (lib:import->export-list import-set append-dirs prepend-dirs))))
+           (lib:import->export-list import-set append-dirs prepend-dirs expander))))
      (map lib:list->import-set imports))))
 
 ;; Convert from the import DB to a list of identifiers that are imported.

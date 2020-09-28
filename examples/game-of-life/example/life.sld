@@ -1,21 +1,17 @@
 (define-library (example life)
-  (import (except (scheme base) set!)
-         ; (scheme write)
-         ; (example grid)
-          )
+  (import (except (scheme base) set!))
   (cond-expand
     (cyclone
      (import (scheme write))
-;     ))
-;  (cond-expand
-;    (cyclone
      (import (example grid))
-           ))
+     
+     ))
            
-  ;(cond-expand
-  ;  (cyclone
+  (cond-expand
+    (cyclone
   (export life)
-  ;))
+  ))
+
   (cond-expand
     (cyclone
     (begin

@@ -1,7 +1,10 @@
 ; Example from draft 6 of R7RS
 (define-library (example grid)
+  (cond-expand
+   (cyclone
     (export make rows cols ref each
             put!) ;(rename put! set!))
+   ))
     (import (scheme base))
     (begin
       ;; Create an NxM grid.
