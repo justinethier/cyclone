@@ -769,7 +769,7 @@
         (lib-names (lib:get-all-import-deps import-sets *append-dirs* *prepend-dirs* base-expander))
         (renamed-syms (filter pair?
                         (map car 
-                          (lib:imports->idb import-sets *append-dirs* *prepend-dirs*))))
+                          (lib:imports->idb import-sets *append-dirs* *prepend-dirs* base-expander))))
         )
     (for-each
       (lambda (lib-name)
