@@ -1,9 +1,24 @@
 (define-library (example life)
-  (export life)
   (import (except (scheme base) set!)
-          (scheme write)
-          (example grid))
-  (begin
+         ; (scheme write)
+         ; (example grid)
+          )
+  (cond-expand
+    (cyclone
+     (import (scheme write))
+;     ))
+;  (cond-expand
+;    (cyclone
+     (import (example grid))
+           ))
+           
+  ;(cond-expand
+  ;  (cyclone
+  (export life)
+  ;))
+  (cond-expand
+    (cyclone
+    (begin
     (define (life-count grid i j)
       (define (count i j)
         (if (ref grid i j) 1 0))
@@ -15,11 +30,18 @@
          (count (+ i 1) (- j 1))
          (count (+ i 1) j)
          (count (+ i 1) (+ j 1))))
+    )
+    (begin
     (define (life-alive? grid i j)
       (case (life-count grid i j)
             ((3) #t)
             ((2) (ref grid i j))
             (else #f)))
+)
+
+    )
+  )
+  (begin
     (define (clear-vt100)
         (display
             (string 

@@ -240,25 +240,38 @@
       (lambda (d acc) 
         (cond
           ((tagged-list? 'cond-expand d)
-           (let* ((expr (expander d))
-                  (begin? (and (pair? expr)
-                               (not (member (car expr) 
-                                           '(import export c-linker-options include-c-header))))))
-;(write `(DEBUG ,begin? ,(if (pair? expr) (lambda? (car expr)) #f) ,expr))
-;(newline)
+           ;; Can have more than one ce expression, EG:
+           ;; (cond-expand
+           ;;  (cyclone
+           ;;    (import ...)
+           ;;    (export ...)
+           ;;
+           ;;  TODO: handle this properly
+           (let* ((expr (expander d)))
              (cond
+              ;; Special case, multiple sub-expressions
               ((and (pair? expr)
                     (lambda? (car expr))
                     (eq? '() (lambda->formals (car expr))))
-               (cons `(begin ,@(lambda->exp (car expr))) acc))  
-              (begin?
-               (cons `(begin ,expr) acc))
+               (append 
+                 (reverse ;; Preserve order
+                   (map form-ce-expr (lambda->exp (car expr))))
+                 acc))
               (else
-               (cons expr acc)))))
+               (cons (form-ce-expr expr) acc)))))
           (else
             (cons d acc)) ))
       '() 
      decls)))
+
+(define (form-ce-expr expr)
+  (cond
+   ((and (pair? expr)
+         (not (member (car expr) 
+                     '(import export c-linker-options include-c-header))))
+    `(begin ,expr))
+   (else
+    expr)))
 
 (define (lib:atom->string atom)
   (cond
