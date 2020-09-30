@@ -18,6 +18,22 @@
   (export =? <? >? <=? >=?)
   (export comparator-if<=>)
   (export %salt%) ;; Temporary workaround since we cannot preserve referential transparency for this
+  (export comparator-max-in-list comparator-min-in-list
+          comparator-max comparator-min
+          default-comparator
+          boolean-comparator
+          real-comparator
+          char-comparator
+          char-ci-comparator
+          string-comparator
+          string-ci-comparator
+          pair-comparator
+          list-comparator
+          vector-comparator
+          eq-comparator
+          eqv-comparator 
+          equal-comparator)
   (include "comparators/comparators-impl.scm")
   (include "comparators/default.scm")
+  (include "comparators/162-impl.scm")
 )
