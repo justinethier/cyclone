@@ -2,6 +2,9 @@
 
 ## 0.22 - TBD
 
+Features
+- Added definitions from SRFI 162 (comparators sublibrary) to the `(srfi 128)` library.
+
 Bug Fixes
 
 - The compiler now displays a helpful error message to the user when compilation of a program fails due to an error building a dependent library.
