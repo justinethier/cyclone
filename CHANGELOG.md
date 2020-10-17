@@ -4,6 +4,7 @@
 
 Features
 - Added definitions from SRFI 162 (comparators sublibrary) to the `(srfi 128)` library.
+- Cleaned up printing of call history to make it more obvious which functions were called most recently.
 
 Bug Fixes
 

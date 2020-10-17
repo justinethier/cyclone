@@ -406,12 +406,16 @@ void Cyc_st_print(void *data, FILE * out)
      not be an issue in practice? a bit risky to ignore though
    */
   gc_thread_data *thd = (gc_thread_data *) data;
-  int i = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES;
+  int n = 1;
+  int i = (thd->stack_trace_idx - 1);
+  if (i < 0) { i = MAX_STACK_TRACES - 1; }
+
   while (i != thd->stack_trace_idx) {
     if (thd->stack_traces[i]) {
-      fprintf(out, "%s\n", thd->stack_traces[i]);
+      fprintf(out, "[%d] %s\n", n++, thd->stack_traces[i]);
     }
-    i = (i + 1) % MAX_STACK_TRACES;
+    i = (i - 1);
+    if (i < 0) { i = MAX_STACK_TRACES - 1; }
   }
 }
 
@@ -678,7 +682,7 @@ object Cyc_default_exception_handler(void *data, int argc, closure _,
     }
   }
 
-  fprintf(stderr, "\nCall history:\n");
+  fprintf(stderr, "\nCall history, most recent first:\n");
   Cyc_st_print(data, stderr);
   fprintf(stderr, "\n");
   //raise(SIGINT); // break into debugger, unix only
