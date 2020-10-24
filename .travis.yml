@@ -1,5 +1,5 @@
 language: c
-sudo: required
+#sudo: required
 matrix:
   include:
     - os: linux
