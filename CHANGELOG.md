@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.22 - TBD
+## 0.22 - November 3, 2020
 
 Features
 - Added definitions from SRFI 162 (comparators sublibrary) to the `(srfi 128)` library.
