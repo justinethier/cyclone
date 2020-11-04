@@ -1,6 +1,6 @@
 # Util Library
 
-The `(scheme cyclone util`) library contains various utility functions.
+The `(scheme cyclone util`) library contains various utility functions used internally the compiler.
 
 - [`Cyc-er-compare?            `](#cyc-er-compare)
 - [`Cyc-er-rename              `](#cyc-er-rename)
