@@ -74,4 +74,5 @@ Scheme | C
 `double` | `double`
 `bignum` | `mp_int`
 `opaque` | `void *`
+`cvoid` | `void`
 
