@@ -59,8 +59,8 @@ before_install:
       gmake
       if [ "$(uname)" != "FreeBSD" ]; then
         sudo gmake install
-      else
-        #gmake install
+      # else
+      # #gmake install
       fi
 script:
   - gmake
@@ -68,6 +68,6 @@ script:
       if [ "$(uname)" != "FreeBSD" ]; then
         sudo gmake install
         gmake test
-      else
-        # Can't do anything, TravisCI FreeBSD errors out doing sudo
+      # else
+      #  # Can't do anything, TravisCI FreeBSD errors out doing sudo
       fi
