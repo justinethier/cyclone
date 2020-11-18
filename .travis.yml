@@ -64,6 +64,11 @@ before_install:
       fi
 script:
   - gmake
-  #- sudo gmake install
+  - |
+      if [ "$(uname)" != "FreeBSD" ]; then
+        sudo gmake install
+      else
+        gmake install
+      fi
   - gmake install
   - gmake test
