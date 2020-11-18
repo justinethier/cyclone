@@ -28,7 +28,7 @@ matrix:
       addons:
         pkg:
           packages:
-            - sudo
+         #   - sudo
             - gmake
             - libtommath
             - concurrencykit
@@ -37,7 +37,8 @@ notifications:
 before_install:
   - |
       if [ "$(uname)" != "FreeBSD" ]; then
-        sudo ln -s /usr/bin/make /usr/bin/gmake
+        #sudo ln -s /usr/bin/make /usr/bin/gmake
+        ln -s /usr/bin/make /usr/bin/gmake
       fi
   - |
       git clone https://github.com/concurrencykit/ck.git ${HOME}/ck
@@ -45,16 +46,20 @@ before_install:
       git checkout 0.6.0
       ./configure PREFIX=/usr
       gmake all
-      sudo gmake install
+      #sudo gmake install
+      gmake install
       if [ "$(uname)" = "Linux" ]; then
-        sudo ldconfig
+        #sudo ldconfig
+        ldconfig
       fi
   - |
       git clone https://github.com/justinethier/cyclone-bootstrap.git ${HOME}/cyclone-bootstrap
       cd ${HOME}/cyclone-bootstrap
       gmake
-      sudo gmake install
+      #sudo gmake install
+      gmake install
 script:
   - gmake
-  - sudo gmake install
+  #- sudo gmake install
+  - gmake install
   - gmake test
