@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.23 - TBD
+
+Bug Fixes
+
+- Fixed compilation error in `runtime.c` on Raspberry Pi / ARM.
+
 ## 0.22 - November 3, 2020
 
 Features

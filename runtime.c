@@ -6607,6 +6607,7 @@ void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
  */
 void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
 {
+  int i;
   vector_type *t;
   c_opaque_type *o;
   object op, parent, child, tmp;
@@ -6636,7 +6637,7 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
 
   if (argc > 0) {
     thd->gc_num_args = argc + 1;
-    for (int i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++) {
       thd->gc_args[i + 1] = args[i];
     }
   }
