@@ -255,13 +255,21 @@
               (trace:info meta))
             (set! input-program (cdr program:imports/code))
             ;(set! lib-deps (append lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs)))
-            (let ((new-lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs #f)))
+            (let ((changed #f)
+                  (new-lib-deps (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs #f)))
               (for-each
                 (lambda (dep)
-                  (if (not (member dep lib-deps))
-                      (set! lib-deps (cons dep lib-deps))))
+                  (when (not (member dep lib-deps))
+                    (set! changed #t)
+                    (set! lib-deps (cons dep lib-deps))))
                 new-lib-deps)
-              (change-lib-deps! lib-deps))
+              (when changed
+                ;; Library dependencies can change if additional import
+                ;; expressions were encountered during macro expansion.
+                ;; If so, update the list of dependencies now
+                (set! ;; Use new deps
+                  lib-deps 
+                  (change-lib-deps! lib-deps)))) ;; Caller updates and returns new deps
             (trace:info lib-deps)
           )))
       ;; END additional top-level imports
@@ -728,7 +736,23 @@
                    program:imports/code 
                    lib-deps 
                    (lambda (new-lib-deps)
-                     (set! lib-deps new-lib-deps))
+                     ;; Deps changed so we need to
+                     ;; resolve dependency tree again
+                     (set! 
+                       lib-deps
+                       (lib:get-all-import-deps 
+                         new-lib-deps
+                         append-dirs 
+                         prepend-dirs 
+                         expander))
+                     ;; Recompute linker options
+                     (set! c-linker-options
+                       (lib:get-all-c-linker-options 
+                         lib-deps 
+                         append-dirs 
+                         prepend-dirs))
+                     ;; Return new deps
+                     lib-deps)
                    in-file 
                    append-dirs 
                    prepend-dirs)))))
