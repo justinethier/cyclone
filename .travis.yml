@@ -45,7 +45,11 @@ before_install:
       git checkout 0.6.0
       ./configure PREFIX=/usr
       gmake all
-      sudo gmake install
+      if [ "$(uname)" != "FreeBSD" ]; then
+        sudo gmake install
+      else
+        gmake install
+      fi
       if [ "$(uname)" = "Linux" ]; then
         sudo ldconfig
       fi
@@ -53,8 +57,17 @@ before_install:
       git clone https://github.com/justinethier/cyclone-bootstrap.git ${HOME}/cyclone-bootstrap
       cd ${HOME}/cyclone-bootstrap
       gmake
-      sudo gmake install
+      if [ "$(uname)" != "FreeBSD" ]; then
+        sudo gmake install
+      # else
+      # #gmake install
+      fi
 script:
   - gmake
-  - sudo gmake install
-  - gmake test
+  - |
+      if [ "$(uname)" != "FreeBSD" ]; then
+        sudo gmake install
+        gmake test
+      # else
+      #  # Can't do anything, TravisCI FreeBSD errors out doing sudo
+      fi
