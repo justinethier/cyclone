@@ -18,7 +18,7 @@
     memloc
   )
   (begin
-(define *version-number* "0.22")
+(define *version-number* "0.23")
 (define *version-name* "")
 (define *version* (string-append *version-number* " " *version-name* ""))
 
