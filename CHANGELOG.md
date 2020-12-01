@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.23 - TBD
+## 0.23 - December 1, 2020
 
 Bug Fixes
 
