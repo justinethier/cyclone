@@ -5,7 +5,7 @@
 Bug Fixes
 
 - Fixed compilation error in `runtime.c` on Raspberry Pi / ARM.
-- Fix the compiler to recompute library dependencies for a program if additional import expressions were encountered during macro expansion.
+- Have the compiler recompute library dependencies for a program if additional import expressions are encountered during macro expansion.
 
 ## 0.22 - November 3, 2020
 
