@@ -18,7 +18,7 @@
     memloc
   )
   (begin
-(define *version-number* "0.23")
+(define *version-number* "0.24")
 (define *version-name* "")
 (define *version* (string-append *version-number* " " *version-name* ""))
 
@@ -32,7 +32,7 @@
        @@     @@     Cyclone Scheme->C compiler
       ,@             http://justinethier.github.io/cyclone/
       '@        
-      .@             (c) 2014-2020 Justin Ethier
+      .@             (c) 2014-2021 Justin Ethier
        @@     #@     Version " *version* "
        `@@@#@@@.
         #@@@@@   
