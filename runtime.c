@@ -5639,7 +5639,7 @@ object apply(void *data, object cont, object func, object args)
 
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
         Cyc_rt_raise2(data, "Call of non-procedure: ", func);
-      } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, func, args);
         //printf("JAE DEBUG, sending to eval: ");
         //Cyc_display(data, &c, stderr);
@@ -5649,11 +5649,11 @@ object apply(void *data, object cont, object func, object args)
         // TODO: would be better to compare directly against symbols here,
         //       but need a way of looking them up ahead of time.
         //       maybe a libinit() or such is required.
-      } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, cadr(func), args);
         ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
                                             &c, NULL);
-      } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0) {
+      } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, func, args);
         ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
                                             &c, NULL);
