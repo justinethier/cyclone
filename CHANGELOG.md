@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Do not attempt to call `eval` from the runtime if `(scheme eval)` has not been imported. We not raise a Scheme error instead of risking a C segmentation violation.
+- Do not attempt to call `eval` from the runtime if `(scheme eval)` has not been imported. Instead we now raise a Scheme error in this case instead of allowing the runtime to raise a C segmentation violation.
 
 ## 0.23 - December 1, 2020
 
