@@ -2,6 +2,9 @@
 
 ## 0.24 - TBD
 
+TODO: shared object functions no longe required since 0.14, update docs to reflect that, mark functions in (cyclone concurrent) as deprecated
+
+
 Bug Fixes
 
 - Do not attempt to call `eval` from the runtime if `(scheme eval)` has not been imported. Instead we now raise a Scheme error in this case instead of allowing the runtime to raise a C segmentation violation.
