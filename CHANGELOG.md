@@ -2,7 +2,7 @@
 
 ## 0.24 - TBD
 
-TODO: shared object functions no longe required since 0.14, update docs to reflect that, mark functions in (cyclone concurrent) as deprecated
+TODO: shared object functions no longe required since 0.14, update docs to reflect that, mark functions in (cyclone concurrent) as deprecated. As part of this, consider creating a revised overview of our GC that unifies the original writeup, lazy sweeping, and these latest changes for safely sharing objects between threads.
 
 
 Bug Fixes
