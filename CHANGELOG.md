@@ -7,6 +7,7 @@ TODO: shared object functions no longe required since 0.14, update docs to refle
 
 Bug Fixes
 
+- Sean Lynch fixed a bug where record type predicates do not check the length of the target before checking if the vector is actually a record.
 - Do not attempt to call `eval` from the runtime if `(scheme eval)` has not been imported. Instead we now raise a Scheme error in this case instead of allowing the runtime to raise a C segmentation violation.
 
 ## 0.23 - December 1, 2020
