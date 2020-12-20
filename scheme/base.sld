@@ -1973,6 +1973,7 @@
 (define (make-type-predicate pred name)
   (lambda (obj)
     (and (vector? obj)
+         (= (vector-length obj) 3)
          (equal? (vector-ref obj 0) record-marker)
          (equal? (vector-ref obj 1) name))))
 (define (make-constructor make name)
