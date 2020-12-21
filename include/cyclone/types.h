@@ -70,6 +70,7 @@ enum object_tag {
       , complex_num_tag = 21
       , atomic_tag      = 22
       , void_tag        = 23
+      , record_tag      = 24
 };
 
 /**

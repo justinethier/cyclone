@@ -38,6 +38,12 @@ extern const object Cyc_EOF;
 extern const object Cyc_VOID;
 
 /**
+ * The record marker value.
+ * \ingroup objects
+ */
+extern const object Cyc_RECORD_MARKER;
+
+/**
  * \ingroup gc_minor
  */
 void GC(void *, closure, object *, int);
