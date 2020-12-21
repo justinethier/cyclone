@@ -29,6 +29,7 @@
     slot-ref
     slot-set!
     type-slot-offset
+    record-marker2
     ;; END records
     receive
     abs
@@ -1512,6 +1513,11 @@
     " return_closcall1(data, k, Cyc_VOID); "
     "(void *data, object ptr)"
     " return Cyc_VOID;")
+  (define-c record-marker2
+    "(void *data, int argc, closure _, object k)"
+    " return_closcall1(data, k, Cyc_RECORD_MARKER); "
+    "(void *data, object ptr)"
+    " return Cyc_RECORD_MARKER;")
   (define-c input-port?
     "(void *data, int argc, closure _, object k, object port)"
     " port_type *p = (port_type *)port;
