@@ -680,7 +680,7 @@
          ((eq? p 'procedure?)    "Cyc_is_procedure")
          ((eq? p 'Cyc-macro?)    "Cyc_is_macro")
          ((eq? p 'port?)         "Cyc_is_port")
-         ((eq? p 'vector?)       "Cyc_is_vector")
+         ((eq? p 'vector?)       "Cyc_is_vector_not_record_type")
          ((eq? p 'bytevector?)   "Cyc_is_bytevector")
          ((eq? p 'string?)       "Cyc_is_string")
          ((eq? p 'eof-object?)   "Cyc_is_eof_object")

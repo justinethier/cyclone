@@ -1978,12 +1978,7 @@
   (vector record-marker name field-tags))
 (define (make-type-predicate pred name)
   (lambda (obj)
-    (and (vector? obj)
-         (= (vector-length obj) 3)
-         (or
-          (equal? (vector-ref obj 0) record-marker)
-          (equal? (vector-ref obj 0) (list 'record-marker))
-         )
+    (and (record? obj)
          (equal? (vector-ref obj 1) name))))
 (define (make-constructor make name)
   (lambda args
@@ -2029,14 +2024,18 @@
       (and (not (null? lis))
            (if (eq? e (car lis)) n (lp (cdr lis) (+ n 1)))))))
 
-(define (record? obj)
-  (and (vector? obj)
-       (> (vector-length obj) 0)
-       (or 
-        (equal? record-marker (vector-ref obj 0))
-        (equal? (list 'record-marker) (vector-ref obj 0))
-       ) 
-       ))
+;(define (record? obj)
+;  (and (vector? obj)
+;       (> (vector-length obj) 0)
+;       (or 
+;        (equal? record-marker (vector-ref obj 0))
+;        (equal? (list 'record-marker) (vector-ref obj 0))
+;       ) 
+;       ))
+
+(define-c record?
+  "(void *data, int argc, closure _, object k, object obj)"
+  " return_closcall1(data, k, Cyc_is_record(obj)); ")
 
 (define (is-a? obj rtype)
   (and (record? obj)

@@ -476,7 +476,14 @@ object Cyc_is_integer(object o);
 //object Cyc_is_cond_var(object o);
 //object Cyc_is_symbol(object o);
 //object Cyc_is_string(object o);
-#define Cyc_is_vector(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == vector_tag))
+object Cyc_is_record(object o);
+#define Cyc_is_vector_not_record_type(o)     \
+  (make_boolean(is_object_type(o) && \
+                ((vector) o)->tag == vector_tag && \
+                ( ((vector) o)->num_elements == 0 || \
+                  ((vector) o)->elements[0] != Cyc_RECORD_MARKER ) \
+                ))
+#define Cyc_is_vector(o)     (make_boolean(is_object_type(o) && ((vector) o)->tag == vector_tag))
 #define Cyc_is_bytevector(o) (make_boolean(is_object_type(o) && ((list) o)->tag == bytevector_tag))
 #define Cyc_is_port(o)       (make_boolean(is_object_type(o) && ((list) o)->tag == port_tag))
 #define Cyc_is_mutex(o)      (make_boolean(is_object_type(o) && ((list) o)->tag == mutex_tag))

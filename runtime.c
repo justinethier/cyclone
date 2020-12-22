@@ -1990,6 +1990,18 @@ object Cyc_is_integer(object o)
 //  return boolean_f;
 //}
 
+object Cyc_is_record(object o)
+{
+  vector v = o;
+  if (is_object_type(o) && 
+      v->tag == vector_tag &&
+      v->num_elements > 0 &&
+      v->elements[0] == Cyc_RECORD_MARKER) {
+    return boolean_t;
+  }
+  return boolean_f;
+}
+
 object Cyc_is_procedure(void *data, object o)
 {
   int tag;
@@ -5099,7 +5111,7 @@ void _bytevector_127(void *data, object cont, object args)
 void _vector_127(void *data, object cont, object args)
 {
   Cyc_check_num_args(data, "vector?", 1, args);
-  return_closcall1(data, cont, Cyc_is_vector(car(args)));
+  return_closcall1(data, cont, Cyc_is_vector_not_record_type(car(args)));
 }
 
 void _string_127(void *data, object cont, object args)
