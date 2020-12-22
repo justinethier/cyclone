@@ -1973,14 +1973,17 @@
          (guard-aux reraise clause1 clause2 ...)))))
 
 ;; Record-type definitions
-(define record-marker (list 'record-marker))
+(define record-marker (record-marker2))
 (define (register-simple-type name parent field-tags)
   (vector record-marker name field-tags))
 (define (make-type-predicate pred name)
   (lambda (obj)
     (and (vector? obj)
          (= (vector-length obj) 3)
-         (equal? (vector-ref obj 0) record-marker)
+         (or
+          (equal? (vector-ref obj 0) record-marker)
+          (equal? (vector-ref obj 0) (list 'record-marker))
+         )
          (equal? (vector-ref obj 1) name))))
 (define (make-constructor make name)
   (lambda args
@@ -2029,7 +2032,11 @@
 (define (record? obj)
   (and (vector? obj)
        (> (vector-length obj) 0)
-       (equal? record-marker (vector-ref obj 0))))
+       (or 
+        (equal? record-marker (vector-ref obj 0))
+        (equal? (list 'record-marker) (vector-ref obj 0))
+       ) 
+       ))
 
 (define (is-a? obj rtype)
   (and (record? obj)
@@ -2099,7 +2106,7 @@
          (,_define ,make
             (,_lambda ,make-fields
               (,(rename 'vector)
-              ',record-marker
+               (record-marker2)
                (quote ,name)
                (,(rename 'vector)
                 ,@make-fields))))
