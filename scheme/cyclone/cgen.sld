@@ -627,7 +627,7 @@
      (c:code "NULL"))
     ((eq? (void) exp) ;; Poor man's (void?)
      (c:code "Cyc_VOID"))
-    ((eq? (record-marker2) exp)
+    ((eq? (make-record-marker) exp)
      (c:code "Cyc_RECORD_MARKER"))
     ((pair? exp)
      (c-compile-scalars exp use-alloca immutable))

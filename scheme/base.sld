@@ -29,7 +29,7 @@
     slot-ref
     slot-set!
     type-slot-offset
-    record-marker2
+    make-record-marker
     ;; END records
     receive
     abs
@@ -1513,7 +1513,7 @@
     " return_closcall1(data, k, Cyc_VOID); "
     "(void *data, object ptr)"
     " return Cyc_VOID;")
-  (define-c record-marker2
+  (define-c make-record-marker
     "(void *data, int argc, closure _, object k)"
     " return_closcall1(data, k, Cyc_RECORD_MARKER); "
     "(void *data, object ptr)"
@@ -1973,7 +1973,7 @@
          (guard-aux reraise clause1 clause2 ...)))))
 
 ;; Record-type definitions
-(define record-marker (record-marker2))
+(define record-marker (make-record-marker))
 (define (register-simple-type name parent field-tags)
   (vector record-marker name field-tags))
 (define (make-type-predicate pred name)
@@ -2105,7 +2105,7 @@
          (,_define ,make
             (,_lambda ,make-fields
               (,(rename 'vector)
-               (record-marker2)
+               (make-record-marker)
                (quote ,name)
                (,(rename 'vector)
                 ,@make-fields))))
