@@ -618,9 +618,16 @@ void add_mutation(void *data, object var, int index, object value)
   // No need to track for minor GC purposes unless we are mutating
   // a heap variable to point to a stack var.
   //
-  // If var is on stack we'll get it anyway in minor GC,
-  // and if value is on heap we don't care (no chance of heap pointing to nursery)
-  if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
+  // If var is on stack we'll get it anyway in minor GC, and if value 
+  // is on heap we don't care (no chance of heap pointing to nursery)
+  //
+  // There is one special case. For large vectors we use stack objects
+  // as a container to store "real" stack values that must be moved
+  // by the collector. In this case we pass -2 to force collection of
+  // these objects regardless of whether var is on the heap.
+  if ( (!gc_is_stack_obj(&tmp, data, var) && 
+         gc_is_stack_obj(&tmp, data, value)) ||
+       index == -2) {
     thd->mutations = vpbuffer_add(thd->mutations, 
                                   &(thd->mutation_buflen), 
                                   thd->mutation_count, 
@@ -3059,10 +3066,10 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     // Use write barrier to ensure fill is moved to heap if it is on the stack
     // Otherwise if next minor GC misses fill it could be catastrophic
     car(&tmp_pair) = fill;
-    add_mutation(data, &tmp_pair, -1, fill);
+    add_mutation(data, &tmp_pair, -2, fill);
     // Add a special object to indicate full vector must be scanned by GC
     opaque_ptr(&opq) = v;
-    add_mutation(data, &opq, -1, v);
+    add_mutation(data, &opq, -2, v);
   } else {
     v = alloca(sizeof(vector_type));
     ((vector) v)->hdr.mark = gc_color_red;
@@ -3467,7 +3474,7 @@ object Cyc_list2vector(void *data, object cont, object l)
     //add_mutation(data, &tmp_pair, -1, fill);
     // Add a special object to indicate full vector must be scanned by GC
     opaque_ptr(&opq) = v;
-    add_mutation(data, &opq, -1, v);
+    add_mutation(data, &opq, -2, v);
   } else {
     v = alloca(sizeof(vector_type));
     ((vector) v)->hdr.mark = gc_color_red;
