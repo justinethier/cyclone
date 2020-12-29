@@ -8,10 +8,6 @@ Shared Queues and Thread Pools are loosly based on API's from [Sagittarius Schem
 
 ## Index
 
-[Shared Objects](#shared-objects)
-- [`make-shared`](#make-shared)
-- [`share-all!`](#share-all)
-
 [Immutability](#immutability)
 - [`immutable?`](#immutable)
 
@@ -64,41 +60,6 @@ Shared Queues and Thread Pools are loosly based on API's from [Sagittarius Schem
 - [`thread-pool-push-task!`](#thread-pool-push-task)
 - [`thread-pool-release!`](#thread-pool-release)
 
-
-## Shared Objects
-
-Cyclone allocates new objects using the current thread's local stack. This is efficient for single-threaded code but makes it difficult to use an object from another thread. An object on a local stack could be overwritten or moved at any time, leading to undefined behavior.  The solution is to guarantee an object is located in a section of memory available for use by any thread. We call these shared objects.
-
-Note that concurrency primitives must still be used to safely coordinate access to shared objects!
-
-The following types of objects are always shared:
-
-- Concurrency primitives (mutex, conditional variable, atom). These objects are allocated directly on the heap since by definition multiple threads need to use them for synchronization.
-
-- Fixnum integers and characters. These are immediates (IE, value types) so there is no object in memory to reference.
-
-- Booleans, bignums, symbols, and the EOF object.
-
-All other objects must be explicitly shared before they can be safely used by multiple threads.
-
-### make-shared
-
-    (make-shared obj)
-
-Return an object that can be safely shared by many threads.
-
-If the given object is already shared it it simply returned. Otherwise it is necessary to create a copy of the object.
-
-Note this function may trigger a minor GC if a thread-local pair or vector is passed.
-
-### share-all!
-
-    (share-all!)
-
-Allow all objects currently on the calling thread's local stack to be shared with other threads.
-
-Note this function will trigger a minor garbage collection on the calling thread.
-
 ## Immutability
 
 Many types of objects are mutable by default: pairs, strings, vectors, and bytevectors. However, if an object is declared as a literal constant then it will be designated immutable. 
@@ -143,7 +104,7 @@ Per the Clojure docs:
 
 > Atoms are an efficient way to represent some state that will never need to be coordinated with any other, and for which you wish to make synchronous changes.
 
-Note an atom may only reference a shared object that is immutable. This guarantees that the value the atom is referencing is not modified unexpectedly by another thread.
+Note an atom may only reference an object that is immutable. This guarantees that the value the atom is referencing is not modified unexpectedly by another thread.
 
 For example:
 
@@ -165,7 +126,7 @@ Example programs:
 
 Create a new atom referencing `obj`.
 
-`obj` must be an immutable, shared object.
+`obj` must be an immutable object.
 
 ### atom
 
@@ -290,7 +251,7 @@ Returns `#t` if the future has finished executing on another thread, and `#f` ot
 
 ## Shared Queues
 
-A shared queue contains a circular buffer of objects intended to be shared among many threads. All operations are locked and thread-safe, and the queue will ensure any objects added are made into shared objects for use by other threads.
+A shared queue contains a circular buffer of objects intended to be shared among many threads. All operations are locked and thread-safe, and the queue will ensure any objects may be shared for use by other threads.
 
 Removal from a queue is a blocking operation, so threads can easily wait for new data to arrive.
 
