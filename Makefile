@@ -288,8 +288,6 @@ bootstrap : icyc libs
 	cp srfi/1.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/2.meta $(BOOTSTRAP_DIR)/srfi
-	cp srfi/9.c $(BOOTSTRAP_DIR)/srfi
-	cp srfi/9.meta $(BOOTSTRAP_DIR)/srfi
 	cp srfi/18.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/27.c $(BOOTSTRAP_DIR)/srfi
 	cp srfi/28.c $(BOOTSTRAP_DIR)/srfi
