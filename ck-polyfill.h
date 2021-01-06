@@ -1,16 +1,49 @@
 #ifndef CYCLONE_CK_POLYFILL_H
 #define CYCLONE_CK_POLYFILL_H
 
+#include "cyclone/types.h"
+#include "cyclone/hashset.h"
 #include <stdbool.h>
 #include <stdint.h>
 
-// CK Array section
-ck_array_t 
-ck_array_iterator_t
-ck_malloc
-CK_ARRAY_MODE_SPMC
+void ck_polyfill_init();
 
- ck_array_init(ck_array_t *array, unsigned int mode,
+// CK Array section
+struct ck_array {
+  pthread_mutex_t lock;
+  hashset_t hs;
+}
+typedef struct ck_array ck_array_t;
+
+struct ck_array_iterator {
+  int unused;
+};
+typedef struct ck_array_iterator ck_array_iterator_t;
+
+struct ck_malloc {                                                               
+  void *(*malloc)(size_t);                                                       
+  void *(*realloc)(void *, size_t, size_t, bool);                                
+  void (*free)(void *, size_t, bool);                                            
+};                                                                               
+
+#define CK_ARRAY_MODE_SPMC 0
+
+// DESCRIPTION
+//      The ck_array_init(3) function initializes the array pointed to by the
+//      argument array.  The mode value must be CK_ARRAY_MODE_SPMC.  The
+//      allocator argument must point to a ck_malloc data structure with valid
+//      non-NULL function pointers initialized for malloc, free and realloc. The
+//      initial_length specifies the initial length of the array. The value of
+//      initial_length must be greater than or equal to 2. An array allows for
+//      one concurrent put or remove operations in the presence of any number of
+//      concurrent CK_ARRAY_FOREACH operations.
+// 
+// RETURN VALUES
+//      This function returns true if the array was successfully created. It
+//      returns false if the creation failed. Failure may occur due to internal
+//      memory allocation failures or invalid arguments.
+bool
+ck_array_init(ck_array_t *array, unsigned int mode,
          struct ck_malloc *allocator, unsigned int initial_length);
 
 // DESCRIPTION
