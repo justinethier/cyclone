@@ -100,29 +100,95 @@ bool ck_array_commit(ck_array_t *array) {
 
 bool ck_pr_cas_int(int *target, int old_value, int new_value)
 {
+  bool result = false;
+  pthread_mutex_lock(&glock);
   if (*target == old_value) {
     *target = new_value;
-    return true;
+    result = true;
   }
-  return false;
+  pthread_mutex_unlock(&glock);
+  return result;
 }
 
 bool ck_pr_cas_ptr(void *target, void *old_value, void *new_value)
 {
+  bool result = false;
+  pthread_mutex_lock(&glock);
   if ( *(void **)target == old_value ) {
     *(void **)target = new_value;
-    return true;
+    result = true;
   }
-  return false;
+  pthread_mutex_unlock(&glock);
+  return result;
   // *(void **)v = set;                                                             
 }
 
 bool ck_pr_cas_8(uint8_t *target, uint8_t old_value, uint8_t new_value)
 {
+  bool result = false;
+  pthread_mutex_lock(&glock);
   if (*target == old_value) {
     *target = new_value;
-    return true;
+    result = true;
   }
-  return false;
+  pthread_mutex_unlock(&glock);
+  return result;
 }
 
+void
+ck_pr_add_ptr(void *target, uintptr_t delta)
+{
+  pthread_mutex_lock(&glock);
+  size_t value = (size_t) target;
+  size_t d = (size_t) delta;
+  size_t result = value + d;
+  *(void **)target = (void *)result;
+  // *(void **)v = set;                                                             
+  pthread_mutex_unlock(&glock);
+}
+
+void
+ck_pr_add_int(int *target, int delta)
+{
+  pthread_mutex_lock(&glock);
+  (*target) += delta;
+  pthread_mutex_unlock(&glock);
+}
+
+void
+ck_pr_add_8(uint8_t *target, uint8_t delta)
+{
+  pthread_mutex_lock(&glock);
+  (*target) += delta;
+  pthread_mutex_unlock(&glock);
+}
+
+void *
+ck_pr_load_ptr(const void *target)
+{
+  void *result;
+  pthread_mutex_lock(&glock);
+  result = *(void **)target;
+  pthread_mutex_unlock(&glock);
+  return result;
+}
+
+int
+ck_pr_load_int(const int *target)
+{
+  int result;
+  pthread_mutex_lock(&glock);
+  result = *target;
+  pthread_mutex_unlock(&glock);
+  return result;
+}
+
+uint8_t
+ck_pr_load_8(const uint8_t *target)
+{
+  uint8_t result;
+  pthread_mutex_lock(&glock);
+  result = *target;
+  pthread_mutex_unlock(&glock);
+  return result;
+}

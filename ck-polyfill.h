@@ -115,12 +115,22 @@ bool
 ck_pr_cas_8(uint8_t *target, uint8_t old_value, uint8_t new_value);
 
 
-TODO: 
-ck_pr_add_8
-ck_pr_add_int
-ck_pr_add_ptr
-ck_pr_load_8
-ck_pr_load_int
-ck_pr_load_ptr
+void
+ck_pr_add_ptr(void *target, uintptr_t delta);
+
+void
+ck_pr_add_int(int *target, int delta);
+
+void
+ck_pr_add_8(uint8_t *target, uint8_t delta);
+
+void *
+ck_pr_load_ptr(const void *target);
+
+int
+ck_pr_load_int(const int *target);
+
+uint8_t
+ck_pr_load_8(const uint8_t *target);
 
 #endif                          /* CYCLONE_CK_POLYFILL_H */
