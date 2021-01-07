@@ -12,7 +12,7 @@ void ck_polyfill_init();
 struct ck_array {
   pthread_mutex_t lock;
   hashset_t hs;
-}
+};
 typedef struct ck_array ck_array_t;
 
 struct ck_array_iterator {
@@ -93,22 +93,20 @@ ck_array_commit(ck_array_t *array);
   // TODO:
 
 // Can we safely lock the array, make a copy, and interate over that????
-#define CK_ARRAY_FOREACH(a, i, b)       \                                        
-  pthread_mutex_lock(&(a->lock));
-  size_t *tmp = calloc(a->hs->nitems, sizeof(struct hashset_st));
-  int tmpc = a->hs->nitems;
-  // TODO: just do this in the loop below, this is unnecessary
-  for (unsigned int tmpi = 0, tmpii = 0; tmpi < tmpc; tmpi++) {
-    if (a->hs->items != 0 && a->hs->items != 1) {
-      tmp[tmpii] = a->hs->items[tmpi];
-      tmpii++;
-    }
-  }
-  pthread_mutex_unlock(&(a->lock));
-  for (unsigned int _ck_i = 0;
-      _ck_i < (a)->active->n_committed &&
-      ((*b) = (a)->active->values[_ck_i], 1);
-      _ck_i++)                                                                   
+#define CK_ARRAY_FOREACH(a, i, b)       \
+  pthread_mutex_lock(&((a)->lock)); \
+  int tmpc = (a)->hs->nitems; \
+  size_t *tmp = calloc(tmpc, sizeof(struct hashset_st)); \
+  for (unsigned int tmpi = 0, tmpii = 0; tmpi < tmpc; tmpi++) { \
+    if ((a)->hs->items != 0 && (a)->hs->items != 1) { \
+      tmp[tmpii] = (a)->hs->items[tmpi]; \
+      tmpii++; \
+    } \
+  } \
+  pthread_mutex_unlock(&((a)->lock)); \
+  for (unsigned int _ck_i = 0, (*b) = (a)->hs->items[_ck_i]; \
+      _ck_i < tmpc; \
+      _ck_i++, (*b) = (a)->hs->items[_ck_i])                                                                   
                   
 // CAS section
 bool
