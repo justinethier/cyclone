@@ -66,7 +66,7 @@ extern "C" {
      */
     int hashset_is_member(hashset_t set, void *item);
 
-    void hashset_to_array(hashset_t set, void *items);
+    void hashset_to_array(hashset_t set, void **items);
 
 #ifdef __cplusplus
 }

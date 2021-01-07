@@ -144,12 +144,12 @@ int hashset_is_member(hashset_t set, void *item)
     return 0;
 }
 
-void hashset_to_array(hashset_t set, void *items)
+void hashset_to_array(hashset_t set, void **items)
 {
-  for (unsigned int hs = 0, a = 0; hs ; set->capacity; hs++) {
-    size_t value = (size_t)item;
+  for (unsigned int hs = 0, a = 0; hs < set->capacity; hs++) {
+    size_t value = (size_t)set->items[hs];
     if (value != 0 && value != 1) {
-      items[a] = set->items[hs];
+      items[a] = (void *)value;
       a++;
     }
   }
