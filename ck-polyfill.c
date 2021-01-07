@@ -29,9 +29,8 @@ bool
 ck_array_init(ck_array_t *array, unsigned int mode,
          struct ck_malloc *allocator, unsigned int initial_length)
 {
-  array = malloc(sizeof(ck_array_t));
-  array->hs = hashset_create();
-  if (pthread_mutex_init(&(array->lock), NULL) != 0) {
+  (*array).hs = hashset_create();
+  if (pthread_mutex_init(&((*array).lock), NULL) != 0) {
     fprintf(stderr, "Unable to initialize ck array mutex\n");
     exit(1);
   }
