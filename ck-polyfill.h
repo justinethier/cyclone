@@ -96,17 +96,13 @@ ck_array_commit(ck_array_t *array);
 #define CK_ARRAY_FOREACH(a, i, b)       \
   pthread_mutex_lock(&((a)->lock)); \
   int tmpc = (a)->hs->nitems; \
-  size_t *tmp = calloc(tmpc, sizeof(struct hashset_st)); \
-  for (unsigned int tmpi = 0, tmpii = 0; tmpi < tmpc; tmpi++) { \
-    if ((a)->hs->items != 0 && (a)->hs->items != 1) { \
-      tmp[tmpii] = (a)->hs->items[tmpi]; \
-      tmpii++; \
-    } \
-  } \
+  void **tmp = alloca(sizeof(void *) * tmpc); \
+  hashset_to_array((a)->hs, tmp); \
   pthread_mutex_unlock(&((a)->lock)); \
-  for (unsigned int _ck_i = 0, (*b) = (a)->hs->items[_ck_i]; \
+  if (tmpc > 0) { (*b) = tmp[0]; } \
+  for (unsigned int _ck_i = 0; \
       _ck_i < tmpc; \
-      _ck_i++, (*b) = (a)->hs->items[_ck_i])                                                                   
+      _ck_i++, (*b) = tmp[_ck_i])                                                                   
                   
 // CAS section
 bool
@@ -117,5 +113,14 @@ ck_pr_cas_int(int *target, int old_value, int new_value);
 
 bool
 ck_pr_cas_8(uint8_t *target, uint8_t old_value, uint8_t new_value);
+
+
+TODO: 
+ck_pr_add_8
+ck_pr_add_int
+ck_pr_add_ptr
+ck_pr_load_8
+ck_pr_load_int
+ck_pr_load_ptr
 
 #endif                          /* CYCLONE_CK_POLYFILL_H */
