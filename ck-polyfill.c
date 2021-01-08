@@ -24,6 +24,26 @@ void ck_polyfill_init()
   }
 }
 
+// CK Hashset section
+bool ck_hs_init(ck_hs_t *hs, unsigned int mode, ck_hs_hash_cb_t *hash_func,
+    ck_hs_compare_cb_t *cmp, struct ck_malloc *alloc, unsigned long capacity, unsigned long seed)
+{
+  (*hs).hs = simple_hashset_create();
+  if (pthread_mutex_init(&((*hs).lock), NULL) != 0) {
+    fprintf(stderr, "Unable to initialize ck hashset mutex\n");
+    exit(1);
+  }
+  return true;
+}
+
+void *ck_hs_get(ck_hs_t *hs, unsigned long hash, const void *key)
+{
+}
+
+bool ck_hs_put(ck_hs_t *hs, unsigned long hash, const void *key)
+{
+}
+
 // CK Array section
 bool
 ck_array_init(ck_array_t *array, unsigned int mode,
@@ -200,7 +220,7 @@ static const size_t prime_2 = 5009;
 
 struct simple_hashset_item_st {
     size_t hash;
-    char* item;
+    symbol_type* item;
 };
 
 struct simple_hashset_st {
@@ -215,7 +235,7 @@ struct simple_hashset_st {
     hash_func_t hash_func;
 };
 
-size_t hash_function(char* p, size_t len)
+size_t hash_function(const char* p, size_t len)
 {
     size_t hash = 0;
     for (; *p; ++p)
@@ -245,35 +265,12 @@ simple_hashset_t simple_hashset_create()
     return set;
 }
 
-void simple_hashset_clean(simple_hashset_t set)
-{
-    set->nitems = 0;
-    set->n_deleted_items = 0;
-
-    size_t i = 0;
-    while(i != set->capacity)
-        set->items[i++].hash = 0;
-}
-
-size_t simple_hashset_num_items(simple_hashset_t set)
-{
-    return set->nitems;
-}
-
-void simple_hashset_destroy(simple_hashset_t set)
-{
-    if (set) {
-        free(set->items);
-    }
-    free(set);
-}
-
 void simple_hashset_set_hash_function(simple_hashset_t set, hash_func_t func)
 {
     set->hash_func = func;
 }
 
-static int simple_hashset_add_member(simple_hashset_t set, char* key, size_t hash)
+static int simple_hashset_add_member(simple_hashset_t set, symbol_type* key, size_t hash)
 {
     size_t index;
 
@@ -326,40 +323,28 @@ static void set_maybe_rehash(simple_hashset_t set)
     }
 }
 
-int simple_hashset_add(simple_hashset_t set, char* key, size_t key_len)
+int simple_hashset_add(simple_hashset_t set, symbol_type* key)
 {
-    size_t hash = set->hash_func(key, key_len);
+// TODO: get from symbol type:, size_t key_len)
+size_t key_len = strlen(key->desc);
+
+    size_t hash = set->hash_func(key->desc, key_len);
     int rv = simple_hashset_add_member(set, key, hash);
     set_maybe_rehash(set);
     return rv;
 }
 
-int simple_hashset_remove(simple_hashset_t set, char* key, size_t key_len)
+int simple_hashset_is_member(simple_hashset_t set, symbol_type* key)
 {
-    size_t hash = set->hash_func(key, key_len);
+// TODO: get from symbol type, size_t key_len)
+size_t key_len = strlen(key->desc);
+
+    size_t hash = set->hash_func(key->desc, key_len);
     size_t index = set->mask & (prime_1 * hash);
 
     while (set->items[index].hash != 0) {
         if (set->items[index].hash == hash) {
-            set->items[index].hash = 1;
-            --set->nitems;
-            ++set->n_deleted_items;
-            return 1;
-        } else {
-            index = set->mask & (index + prime_2);
-        }
-    }
-    return 0;
-}
-
-int simple_hashset_is_member(simple_hashset_t set, char* key, size_t key_len)
-{
-    size_t hash = set->hash_func(key, key_len);
-    size_t index = set->mask & (prime_1 * hash);
-
-    while (set->items[index].hash != 0) {
-        if (set->items[index].hash == hash) {
-            return 1;
+            return index;
         } else {
             index = set->mask & (index + prime_2);
         }

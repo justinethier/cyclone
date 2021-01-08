@@ -8,10 +8,16 @@
 
 void ck_polyfill_init();
 
+struct ck_malloc {                                                               
+  void *(*malloc)(size_t);                                                       
+  void *(*realloc)(void *, size_t, size_t, bool);                                
+  void (*free)(void *, size_t, bool);                                            
+};                                                                               
+
 ///////////////////////////////////////////////////////////////////////////////
 // Simple hashset (hashset with string support)
     /* hash function */
-    typedef size_t(*hash_func_t)(char*, size_t);
+    typedef size_t(*hash_func_t)(const char*, size_t);
 
     struct simple_hashset_st;
     typedef struct simple_hashset_st *simple_hashset_t;
@@ -32,12 +38,6 @@ void ck_polyfill_init();
     /* set hash function */
     void simple_hashset_set_hash_function(simple_hashset_t set, hash_func_t func);
     
-    /* Just clear data but do not create anything*/
-    void simple_hashset_clean(simple_hashset_t set);
-
-    /* total items count */
-    size_t simple_hashset_num_items(simple_hashset_t set);
-
     /* add item into the hashset.
      *
      * @note 0 and 1 is special values, meaning nil and deleted items. the
@@ -45,20 +45,13 @@ void ck_polyfill_init();
      *
      * returns zero if the item already in the set and non-zero otherwise
      */
-    int simple_hashset_add(simple_hashset_t set, char* key, size_t key_len);
-
-    /* remove item from the hashset
-     *
-     * returns non-zero if the item was removed and zero if the item wasn't
-     * exist
-     */
-    int simple_hashset_remove(simple_hashset_t set, char *key, size_t key_len);
+    int simple_hashset_add(simple_hashset_t set, symbol_type* key);
 
     /* check if existence of the item
      *
      * returns non-zero if the item exists and zero otherwise
      */
-    int simple_hashset_is_member(simple_hashset_t set, char* key, size_t key_len);
+    int simple_hashset_is_member(simple_hashset_t set, symbol_type* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CK Hashset section
@@ -67,7 +60,8 @@ void ck_polyfill_init();
 #define CK_HS_MODE_SPMC 0
 
 struct ck_hs {                                                                   
-  // TODO
+  pthread_mutex_t lock;
+  simple_hashset_t hs;
 };                                                                               
 
 typedef struct ck_hs ck_hs_t;  
@@ -82,15 +76,13 @@ typedef unsigned long ck_hs_hash_cb_t(const void *, unsigned long);
  */                                                                              
 typedef bool ck_hs_compare_cb_t(const void *, const void *);  
 
-/*
-CK_HS_HASH(hs, hs_hash, value);
+#define CK_HS_HASH(hs, hs_hash, value) 0
 
 bool ck_hs_init(ck_hs_t *, unsigned int, ck_hs_hash_cb_t *,                      
     ck_hs_compare_cb_t *, struct ck_malloc *, unsigned long, unsigned long);     
 
 void *ck_hs_get(ck_hs_t *, unsigned long, const void *);                         
 bool ck_hs_put(ck_hs_t *, unsigned long, const void *);                          
-*/
 
 /*
 struct ck_hs {                                                                   
@@ -118,12 +110,6 @@ struct ck_array_iterator {
   int unused;
 };
 typedef struct ck_array_iterator ck_array_iterator_t;
-
-struct ck_malloc {                                                               
-  void *(*malloc)(size_t);                                                       
-  void *(*realloc)(void *, size_t, size_t, bool);                                
-  void (*free)(void *, size_t, bool);                                            
-};                                                                               
 
 #define CK_ARRAY_MODE_SPMC 0
 
