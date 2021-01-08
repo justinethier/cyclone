@@ -8,6 +8,59 @@
 
 void ck_polyfill_init();
 
+///////////////////////////////////////////////////////////////////////////////
+// Simple hashset (hashset with string support)
+    /* hash function */
+    typedef size_t(*hash_func_t)(char*, size_t);
+
+    struct simple_hashset_st;
+    typedef struct simple_hashset_st *simple_hashset_t;
+
+    struct hashmap_st;
+    typedef struct hashmap_st *hashmap_t;
+
+    /*
+     * HASHSET FUNCTIONS
+     */
+
+    /* create hashset instance */
+    simple_hashset_t simple_hashset_create(void);
+
+    /* destroy hashset instance */
+    void simple_hashset_destroy(simple_hashset_t set);
+
+    /* set hash function */
+    void simple_hashset_set_hash_function(simple_hashset_t set, hash_func_t func);
+    
+    /* Just clear data but do not create anything*/
+    void simple_hashset_clean(simple_hashset_t set);
+
+    /* total items count */
+    size_t simple_hashset_num_items(simple_hashset_t set);
+
+    /* add item into the hashset.
+     *
+     * @note 0 and 1 is special values, meaning nil and deleted items. the
+     *       function will return -1 indicating error.
+     *
+     * returns zero if the item already in the set and non-zero otherwise
+     */
+    int simple_hashset_add(simple_hashset_t set, char* key, size_t key_len);
+
+    /* remove item from the hashset
+     *
+     * returns non-zero if the item was removed and zero if the item wasn't
+     * exist
+     */
+    int simple_hashset_remove(simple_hashset_t set, char *key, size_t key_len);
+
+    /* check if existence of the item
+     *
+     * returns non-zero if the item exists and zero otherwise
+     */
+    int simple_hashset_is_member(simple_hashset_t set, char* key, size_t key_len);
+
+///////////////////////////////////////////////////////////////////////////////
 // CK Hashset section
 
 #define CK_HS_MODE_OBJECT 0
@@ -16,8 +69,20 @@ void ck_polyfill_init();
 struct ck_hs {                                                                   
   // TODO
 };                                                                               
+
 typedef struct ck_hs ck_hs_t;  
 
+/*                                                                               
+ * Hash callback function.                                                       
+ */                                                                              
+typedef unsigned long ck_hs_hash_cb_t(const void *, unsigned long);              
+                                                                                 
+/*                                                                               
+ * Returns pointer to object if objects are equivalent.                          
+ */                                                                              
+typedef bool ck_hs_compare_cb_t(const void *, const void *);  
+
+/*
 CK_HS_HASH(hs, hs_hash, value);
 
 bool ck_hs_init(ck_hs_t *, unsigned int, ck_hs_hash_cb_t *,                      
@@ -25,6 +90,7 @@ bool ck_hs_init(ck_hs_t *, unsigned int, ck_hs_hash_cb_t *,
 
 void *ck_hs_get(ck_hs_t *, unsigned long, const void *);                         
 bool ck_hs_put(ck_hs_t *, unsigned long, const void *);                          
+*/
 
 /*
 struct ck_hs {                                                                   
@@ -40,6 +106,7 @@ typedef struct ck_hs ck_hs_t;
 
 */
 
+///////////////////////////////////////////////////////////////////////////////
 // CK Array section
 struct ck_array {
   pthread_mutex_t lock;
@@ -136,7 +203,8 @@ ck_array_commit(ck_array_t *array);
       _ck_i < tmpc; \
       _ck_i++, (*b) = tmp[_ck_i])                                                                   
                   
-// CAS section
+///////////////////////////////////////////////////////////////////////////////
+// CK PR section
 bool
 ck_pr_cas_ptr(void *target, void *old_value, void *new_value);
 
