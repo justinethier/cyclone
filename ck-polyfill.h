@@ -8,6 +8,38 @@
 
 void ck_polyfill_init();
 
+// CK Hashset section
+
+#define CK_HS_MODE_OBJECT 0
+#define CK_HS_MODE_SPMC 0
+
+struct ck_hs {                                                                   
+  // TODO
+};                                                                               
+typedef struct ck_hs ck_hs_t;  
+
+CK_HS_HASH(hs, hs_hash, value);
+
+bool ck_hs_init(ck_hs_t *, unsigned int, ck_hs_hash_cb_t *,                      
+    ck_hs_compare_cb_t *, struct ck_malloc *, unsigned long, unsigned long);     
+
+void *ck_hs_get(ck_hs_t *, unsigned long, const void *);                         
+bool ck_hs_put(ck_hs_t *, unsigned long, const void *);                          
+
+/*
+struct ck_hs {                                                                   
+  struct ck_malloc *m;                                                           
+  struct ck_hs_map *map;                                                         
+  unsigned int mode;                                                             
+  unsigned long seed;                                                            
+  ck_hs_hash_cb_t *hf;                                                           
+  ck_hs_compare_cb_t *compare;                                                   
+};                                                                               
+typedef struct ck_hs ck_hs_t;  
+
+
+*/
+
 // CK Array section
 struct ck_array {
   pthread_mutex_t lock;
