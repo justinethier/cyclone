@@ -236,4 +236,5 @@ ck_pr_load_int(const int *target);
 uint8_t
 ck_pr_load_8(const uint8_t *target);
 
+void ck_pr_store_ptr(void *target, void *value);
 #endif                          /* CYCLONE_CK_POLYFILL_H */

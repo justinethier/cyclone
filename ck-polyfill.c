@@ -238,6 +238,13 @@ ck_pr_load_8(const uint8_t *target)
   return result;
 }
 
+void ck_pr_store_ptr(void *target, void *value)
+{
+  pthread_mutex_lock(&glock);
+  *(void **)target = value;
+  pthread_mutex_unlock(&glock);
+}
+
 
 // Simple hashset
 
@@ -272,6 +279,14 @@ simple_hashset_t simple_hashset_create()
     set->nitems = 0;
     set->n_deleted_items = 0;
     return set;
+}
+
+void simple_hashset_destroy(simple_hashset_t set)
+{
+    if (set) {
+        free(set->items);
+    }
+    free(set);
 }
 
 void simple_hashset_set_hash_function(simple_hashset_t set, hash_func_t func)
