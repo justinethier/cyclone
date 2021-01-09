@@ -19,8 +19,25 @@ struct ck_malloc {
     /* hash function */
     typedef size_t(*hash_func_t)(const char*, size_t);
 
-    struct simple_hashset_st;
+    struct simple_hashset_item_st {
+        size_t hash;
+        symbol_type* item;
+    };
+    
+    struct simple_hashset_st {
+        size_t nbits;
+        size_t mask;
+    
+        size_t capacity;
+        struct simple_hashset_item_st *items;
+        size_t nitems;
+        size_t n_deleted_items;
+    
+        hash_func_t hash_func;
+    };
+//    struct simple_hashset_st;
     typedef struct simple_hashset_st *simple_hashset_t;
+
 
     struct hashmap_st;
     typedef struct hashmap_st *hashmap_t;

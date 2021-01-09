@@ -36,12 +36,38 @@ bool ck_hs_init(ck_hs_t *hs, unsigned int mode, ck_hs_hash_cb_t *hash_func,
   return true;
 }
 
-void *ck_hs_get(ck_hs_t *hs, unsigned long hash, const void *key)
+void *ck_hs_get(ck_hs_t *_hs, unsigned long hash, const void *key)
 {
+  void *result = NULL;
+  int index = -1;
+  simple_hashset_t set = (*_hs).hs;
+
+  pthread_mutex_lock(&((*_hs).lock));
+
+  index = simple_hashset_is_member(set, (symbol_type *)key);
+  if (index > 0) {
+    result = (void *)(set->items[index].item);
+  }
+
+  pthread_mutex_unlock(&((*_hs).lock));
+  return result;
 }
 
-bool ck_hs_put(ck_hs_t *hs, unsigned long hash, const void *key)
+bool ck_hs_put(ck_hs_t *_hs, unsigned long hash, const void *key)
 {
+  bool result = false;
+  int rv;
+  simple_hashset_t hs = (*_hs).hs;
+
+  pthread_mutex_lock(&((*_hs).lock));
+
+  rv = simple_hashset_add(hs, (symbol_type *)key);
+  if (rv >= 0) {
+    result = true;
+  }
+
+  pthread_mutex_unlock(&((*_hs).lock));
+  return result;
 }
 
 // CK Array section
@@ -218,23 +244,6 @@ ck_pr_load_8(const uint8_t *target)
 static const size_t prime_1 = 73;
 static const size_t prime_2 = 5009;
 
-struct simple_hashset_item_st {
-    size_t hash;
-    symbol_type* item;
-};
-
-struct simple_hashset_st {
-    size_t nbits;
-    size_t mask;
-
-    size_t capacity;
-    struct simple_hashset_item_st *items;
-    size_t nitems;
-    size_t n_deleted_items;
-
-    hash_func_t hash_func;
-};
-
 size_t hash_function(const char* p, size_t len)
 {
     size_t hash = 0;
@@ -325,9 +334,7 @@ static void set_maybe_rehash(simple_hashset_t set)
 
 int simple_hashset_add(simple_hashset_t set, symbol_type* key)
 {
-// TODO: get from symbol type:, size_t key_len)
-size_t key_len = strlen(key->desc);
-
+    size_t key_len = strlen(key->desc);
     size_t hash = set->hash_func(key->desc, key_len);
     int rv = simple_hashset_add_member(set, key, hash);
     set_maybe_rehash(set);
@@ -336,9 +343,7 @@ size_t key_len = strlen(key->desc);
 
 int simple_hashset_is_member(simple_hashset_t set, symbol_type* key)
 {
-// TODO: get from symbol type, size_t key_len)
-size_t key_len = strlen(key->desc);
-
+    size_t key_len = strlen(key->desc);
     size_t hash = set->hash_func(key->desc, key_len);
     size_t index = set->mask & (prime_1 * hash);
 
