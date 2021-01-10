@@ -373,4 +373,3 @@ int simple_hashset_is_member(simple_hashset_t set, symbol_type* key)
 }
 
 
-

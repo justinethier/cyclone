@@ -70,6 +70,11 @@ struct ck_malloc {
      */
     int simple_hashset_is_member(simple_hashset_t set, symbol_type* key);
 
+static inline uint64_t MurmurHash64A(const void *key, int len, uint64_t seed)
+{ 
+   return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CK Hashset section
 
