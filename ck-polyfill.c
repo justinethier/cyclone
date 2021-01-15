@@ -5,7 +5,9 @@
  * Copyright (c) 2020, Justin Ethier
  * All rights reserved.
  *
- * FFI module to support calling Scheme code from C.
+ * An optional module that can be used to compile Cyclone when
+ * libck is not available. Note there will be a performance impact!
+ * It is recommended to compile with libck where possible.
  */
 
 #include "cyclone/types.h"
