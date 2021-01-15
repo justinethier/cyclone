@@ -3568,7 +3568,7 @@ static int Cyc_checked_mul(int x, int y, int *result)
 {
   // Avoid undefined behavior by detecting overflow prior to multiplication
   // Based on code from Hacker's Delight and CHICKEN scheme
-  uint xu, yu, c;
+  unsigned int xu, yu, c;
   c = (1UL<<30UL) - 1;
   xu = x < 0 ? -x : x;
   yu = y < 0 ? -y : y;
@@ -8126,7 +8126,7 @@ uint32_t Cyc_utf8_validate(char *str, size_t len) {
  */
 int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz)
 {
-    u_int32_t ch;
+    uint32_t ch;
     int i = 0;
     char *dest_end = dest + sz;
 
