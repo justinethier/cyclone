@@ -15,11 +15,12 @@ And in the closure object:
       object *elements;
     } closureN_type;
 
-This works fine to store closures. The problem is when we go to call them. Because these function pointers do not precisely match the function definitions we run into undefined behavior when attempting to call them. On native platforms this is fine but it does not work on WASM platforms when calling variadic functions.
+This works fine to store closures. The problem is that because these function pointers do not precisely match the function definitions we run into undefined behavior when attempting to call them. On native platforms this is fine. But WASM platforms will throw an exception when calling variadic functions.
 
 For example when calling a pointer to the following function we get a "function mismatch" error:
 
-    static void __lambda_687(void *data, int argc, closure _,object k_735958, object init_731083_733418, object o_731084_733419_raw, ...) {
+    static void __lambda_687(void *data, int argc, closure _,object k_735958, 
+                             object init_731083_733418, object o_731084_733419_raw, ...) {
 
 This can be resolved by using the correct function pointer in the call:
 
@@ -57,6 +58,12 @@ In addition zero or more objects may be listed after that as well as an ellipsis
 
 TODO: `define-c` examples
 
+    (define-c %write-bytevector
+      "(void *data, int argc, closure _, object k, object bv, object port, object start, object end)"
+      " return_closcall1(data, k, Cyc_write_bytevector(data, bv, port, start, end));"
+      "(void *data, object ptr, object bv, object port, object start, object end)"
+      " return Cyc_write_bytevector(data, bv, port, start, end);")
+
 ## New Signatures
 
 TBD
@@ -64,8 +71,15 @@ TBD
 
     static void __lambda(void *data, object closure, object k, int argc, object *args) ;
 
-TODO: how to call these functions
-TODO: how to unpack args for a call
+TODO: how to call these functions, need to pack args prior to call
+
+TODO: how to unpack args for a call. I think it would be simple, need to change compiler to point to members of `args` instead of directly to arguments
 
 TODO: fixed and variadic examples (same?)
+
+
+An added benefit of this, I think, is that we eliminate the restriction on number of function arguments.
+though, if this is on the stack there still is a limit
+
+TBD: no more need for dispatch.c?
 
