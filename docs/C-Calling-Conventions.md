@@ -67,7 +67,7 @@ In addition zero or more objects may be listed after that as well as an ellipsis
     static void __lambda_705(void *data, int argc, closure _,object k_735994, object x_731110_733428);
     static void __lambda_687(void *data, int argc, closure _,object k_735958, object init_731083_733418, object o_731084_733419_raw, ...);
 
-TODO: `define-c` examples
+Note our `define-c` FFI requires the user to specify the same calling conventions:
 
     (define-c %write-bytevector
       "(void *data, int argc, closure _, object k, object bv, object port, object start, object end)"
