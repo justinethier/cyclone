@@ -116,6 +116,7 @@ Option              | Notes
 `-CE cc-commands`   | Specify a custom command line for the C compiler to compile an executable.
 `-CL cc-commands`   | Specify a custom command line for the C compiler to compile a library module.
 `-CS cc-commands`   | Specify a custom command line for the C compiler to compile a shared object module.
+`-COPT options`     | Specify custom options to provide to the C compiler, EG: \"-Imy-directory\".
 `-CLNK option`      | Specify a custom command to provide as a linker option, EG: "-lcurl".
 `-Ox`               | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
 `-d`                | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
