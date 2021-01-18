@@ -18,8 +18,9 @@ title: User Manual
 - [Multithreaded Programming](#multithreaded-programming)
 - [Foreign Function Interface](#foreign-function-interface)
   - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
-  - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
+  - [Foreign Library](#foreign-library)
   - [Including a C Header File](#including-a-c-header-file)
+  - [C Compiler Options](#c-compiler-options)
   - [Linking to a C Library](#linking-to-a-c-library)
   - [Calling Scheme Functions from C](#calling-scheme-functions-from-c)
 - [Licensing](#licensing)
@@ -118,6 +119,7 @@ Option              | Notes
 `-CE cc-commands`   | Specify a custom command line for the C compiler to compile an executable.
 `-CL cc-commands`   | Specify a custom command line for the C compiler to compile a library module.
 `-CS cc-commands`   | Specify a custom command line for the C compiler to compile a shared object module.
+`-COPT options`     | Specify custom options to provide to the C compiler, EG: \"-Imy-directory\".
 `-CLNK option`      | Specify a custom command to provide as a linker option, EG: "-lcurl".
 `-Ox`               | Optimization level, higher means more optimizations will be used. Set to 0 to disable optimizations.
 `-d`                | Only generate intermediate C files, do not compile them. This option will also show the C compiler commands that would have been used to compile the C file.
@@ -241,6 +243,18 @@ Or as part of a program (add any includes immediately after the `import` express
 
 By default this will generate an `#include` preprocessor directive with the name of the header file in double quotes. However, if `include-c-header` is passed a text string with angle brackets (EG: `"<stdio.h>"`), the generated C code will use angle brackets instead.
 
+## C Compiler Options
+
+A Cyclone library may use the `c-compiler-options expression to pass options directly to the C compiler. For example:
+
+    (define-library (my-lib)
+      (c-compiler-options "-Imy-dir/include")
+      ...
+
+This expression may also be used at the top level of a program, EG:
+
+    (c-compiler-options "-Imy-dir/include")
+
 ## Linking to a C Library
 
 A Cyclone library may use the `c-linker-options` expression to instruct the compiler to include linker options when building an executable. For example:
@@ -249,6 +263,10 @@ A Cyclone library may use the `c-linker-options` expression to instruct the comp
       (include-c-header "<curl/curl.h>")
       (export curl-version)
       (c-linker-options "-lcurl")
+
+This expression may also be used at the top level of a program, EG:
+
+    (c-linker-options "-lcurl")
 
 ## Calling Scheme Functions from C
 
