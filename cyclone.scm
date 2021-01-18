@@ -694,7 +694,7 @@
 
 ;; Compile and emit:
 (define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so 
-                      cc-prog-linker-opts cc-prog-linker-objs 
+                      cc-opts cc-prog-linker-opts cc-prog-linker-objs 
                       append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
@@ -771,12 +771,16 @@
                           (string-append " " (lib:import->filename i ".o" append-dirs prepend-dirs) " "))
                         lib-deps))))
                  (comp-prog-cmd 
-                   (string-replace-all 
+                   (string-append
                      (string-replace-all 
-                       ;(Cyc-compilation-environment 'cc-prog) 
-                       (get-comp-env 'cc-prog cc-prog)
-                       "~src-file~" src-file)
-                     "~exec-file~" exec-file))
+                       (string-replace-all 
+                         ;(Cyc-compilation-environment 'cc-prog) 
+                         (get-comp-env 'cc-prog cc-prog)
+                         "~src-file~" src-file)
+                       "~exec-file~" exec-file)
+                     " "
+                     cc-opts
+                     " "))
                  (comp-objs-cmd 
                   (string-append
                    (string-replace-all
@@ -813,17 +817,25 @@
             (write (macro:get-defined-macros))))
         ;; Compile library
         (let ((comp-lib-cmd
+               (string-append
                 (string-replace-all 
                   (string-replace-all 
                     (get-comp-env 'cc-lib cc-lib)
                     "~src-file~" src-file)
-                  "~exec-file~" exec-file))
+                  "~exec-file~" exec-file)
+                " "
+                cc-opts
+                " "))
               (comp-so-cmd
+               (string-append
                 (string-replace-all 
                   (string-replace-all 
                     (get-comp-env 'cc-so cc-so)
                     "~src-file~" src-file)
-                  "~exec-file~" exec-file))
+                  "~exec-file~" exec-file)
+                " "
+                cc-opts
+                " "))
               )
           (cond
             (cc?
@@ -871,6 +883,7 @@
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
        (cc-so   (apply string-append (collect-opt-values args "-CS")))
+       (cc-opts (apply string-append (collect-opt-values args "-COPT")))
        (cc-linker-opts (apply string-append (collect-opt-values args "-CLNK")))
        (cc-linker-extra-objects (apply string-append (collect-opt-values args "-COBJ")))
        (opt-beta-expand-thresh (collect-opt-values args "-opt-be"))
@@ -930,6 +943,8 @@ General options:
                  when linking a program. For example, this may be used
                  to link an executable where some object files are generated
                  via a makefile instead of by Cyclone.
+ -COPT options   Specify custom options to provide to the C compiler,
+                 EG: \"-Imy-directory\".
  -CLNK option    Specify a custom command to provide as a linker option,
                  EG: \"-lcurl\".
  -d              Only generate intermediate C files, do not compile them
@@ -1007,5 +1022,7 @@ Debug options:
             (cdr err))
           (newline)
           (exit 1)))
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so cc-linker-opts cc-linker-extra-objects append-dirs prepend-dirs)))))
+      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so 
+                    cc-opts cc-linker-opts cc-linker-extra-objects 
+                    append-dirs prepend-dirs)))))
 
