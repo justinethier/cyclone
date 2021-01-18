@@ -77,29 +77,65 @@ Note our `define-c` FFI requires the user to specify the same calling convention
 
 ## New Calling Convention
 
-(TODO: still building this whole section)
-
 We want a signature similar to this:
 
     static void __lambda(void *data, object closure, object k, int argc, object *args) ;
 
-TODO:  better to pack args using a C array or a vector?
+That way we can pack all the extra arguments into `args` and call all functions using a single standard interface. 
 
-advantages to vector:
+An open question is whether to pack args using a C array or a vector.
+
+Advantages to vector:
 * can allocate vectors on the heap for extremely large numbers of arguments
 * vector specifies the number of arguments provided (is this any better than `argc` though?)
 
-disadvantages:
+Disadvantages:
 - larger memory footprint
 - more data to pack (object header, etc)
 - more overhead to unpack?
 
-TODO: how to call these functions, need to pack args prior to call
+Based on this overview I am planning to use C arrays rather than Cyclone vectors to pass arguments.
 
+
+TODO: how to call these functions, need to pack args prior to call
 TODO: how to unpack args for a call. I think it would be simple, need to change compiler to point to members of `args` instead of directly to arguments
 
-* varargs functions still expect to receive extra arguments as part of a list. we may need to unpack the vector only to repackage all the args as a list
+Varargs functions still expect to receive extra arguments as part of a list. we may need to unpack the vector only to repackage all the args as a list. This means we probably will still need the load_varargs macro
 
-TODO: fixed and variadic examples (same?)
+TODO: example of packing/unpacking for fixed args, EG: (lambda (a b c))
+TODO: example of packing for (lambda X) and (lambda (a b . c) variadic forms
 
-Finally, a key consideration here is runtime performance. We do not want this solution to significantly slow down our programs. I expect there may be some performance hit though. Again, this is an important consideration and we will need to run benchmarks to measure the impact. Adjustments will likely need to be made as part of this process.
+## Performance
+
+A key consideration is the impact to runtime performance. We do not want this solution to significantly slow down our programs. I expect there may be some performance hit though. 
+
+We will need to run benchmarks to measure the impact and make adjustments as needed. This will be part of the process to ensure the solution is as performant as possible.
+
+Items for consideration:
+
+* use the same array to pass args or `alloca` a new one each time? Maybe we have an array as part of `gc_thread_data` but `alloca` if there are more than N args? Concern here is whether using `alloca` for each function will have a performance impact; I suspect it would.
+
+## Runtime Safety Checks
+
+TODO: do we attempt to check number of arguments? Throw an exception if not enough (or too many) args?? This is more overhead but safer
+
+## Changes to the Runtime
+
+I believe non-CPS primitives do not use our function signature so they don't have to change for this either. Any CPS functions using the signature will need to be converted
+
+Can eliminate dispatch.c
+
+Impacts to apply, primitives, others?
+
+## Changes to the Compiler
+
+`(scheme cyclone cgen)` will need to emit code for the new signature.
+
+TODO: any complications in referencing vars from `args` rather than directly as C function arguments?
+
+## Changes to the FFI
+
+`define-c` needs to use the new signature.
+
+`(cyclone foreign)` will need to be modified to generate `define-c` forms that are compatible with the new signatures.
+
