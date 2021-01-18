@@ -96,6 +96,13 @@ Disadvantages:
 
 Based on this overview I am planning to use C arrays rather than Cyclone vectors to pass arguments.
 
+### Packing Arguments
+
+don't even need alloca for this, can just use an array, EG:
+
+  object aa[2];
+  aa[0] = arg1;
+  aa[1] = arg2;
 
 TODO: how to call these functions, need to pack args prior to call
 TODO: how to unpack args for a call. I think it would be simple, need to change compiler to point to members of `args` instead of directly to arguments
@@ -104,6 +111,15 @@ Varargs functions still expect to receive extra arguments as part of a list. we 
 
 TODO: example of packing/unpacking for fixed args, EG: (lambda (a b c))
 TODO: example of packing for (lambda X) and (lambda (a b . c) variadic forms
+
+### Unpacking Arguments
+
+Unpacking is just simple array references:
+
+   arg1 = args[0];
+   arg2 = args[1];
+
+TODO: any compilications here due to assumptions by our compiler, and how it compiles identifiers?
 
 ## Performance
 
