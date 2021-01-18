@@ -692,6 +692,18 @@
     (lambda (port)
       (read-all/source port filename))))
 
+(define (program-c-compiler-opts! in-prog)
+  (foldl
+    (lambda (expr acc)
+      (cond
+       ((tagged-list? 'c-compiler-options expr)
+        (set-car! expr (string->symbol "quote"))
+        (cons (cadr expr) acc))
+       (else
+         acc)))
+    '()
+    in-prog))
+
 ;; Compile and emit:
 (define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so 
                       cc-opts cc-prog-linker-opts cc-prog-linker-objs 
@@ -725,7 +737,10 @@
          ;; TODO: allow these to be read from a program
          (cc-opts*
           (cond
-            (program? "") ; TODO
+            (program? 
+              (string-join
+                (program-c-compiler-opts! in-prog)
+                ""))
             (else
               (string-join 
                 (lib:c-compiler-options (car in-prog)) 

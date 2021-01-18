@@ -17,6 +17,7 @@
   - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
   - [Foreign Library](#foreign-library)
   - [Including a C Header File](#including-a-c-header-file)
+  - [C Compiler Options](#c-compiler-options)
   - [Linking to a C Library](#linking-to-a-c-library)
   - [Calling Scheme Functions from C](#calling-scheme-functions-from-c)
 - [Licensing](#licensing)
@@ -245,6 +246,10 @@ A Cyclone library may use the `c-compiler-options expression to pass options dir
     (define-library (my-lib)
       (c-compiler-options "-Imy-dir/include")
       ...
+
+This expression may also be used at the top level of a program, EG:
+
+    (c-compiler-options "-Imy-dir/include")
 
 ## Linking to a C Library
 

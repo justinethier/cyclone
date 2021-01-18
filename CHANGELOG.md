@@ -5,7 +5,7 @@ TODO: consider creating a revised overview of our GC that unifies the original w
 
 Features
 
-- Added the `-COPT` compiler option to allow specifying options for the C compiler.
+- Added the `c-compiler-options` expression and `-COPT` Cyclone compiler option to allow specifying options for the C compiler.
 
 Bug Fixes
 
