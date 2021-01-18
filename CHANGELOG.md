@@ -3,6 +3,10 @@
 ## 0.25 - TBD
 TODO: consider creating a revised overview of our GC that unifies the original writeup, lazy sweeping, and these latest changes for safely sharing objects between threads.
 
+Features
+
+- Added the `-COPT` compiler option to allow specifying options for the C compiler.
+
 Bug Fixes
 
 - Fix import of library dependencies from the interpreter, when the dependencies are imported via `cond-expand`.
