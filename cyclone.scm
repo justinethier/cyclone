@@ -704,6 +704,7 @@
           (cond
             (program? 
               (Cyc-add-feature! 'program) ;; Load special feature
+              ;; TODO: what about top-level cond-expands in the program?
               in-prog-raw)
             (else
               ;; Account for any cond-expand declarations in the library
@@ -716,8 +717,19 @@
                     (not (null? (car program:imports/code))))
              (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs expander)
             '()))
+         ;; Read all linker options from dependent libs
+         ;; TODO: also read from program if applicable
          (c-linker-options
           (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs))
+         ;; Only read C compiler options from module being compiled
+         ;; TODO: allow these to be read from a program
+         (cc-opts*
+          (cond
+            (program? "") ; TODO
+            (else
+              (string-join 
+                (lib:c-compiler-options (car in-prog)) 
+                ""))))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
@@ -780,7 +792,8 @@
                        "~exec-file~" exec-file)
                      " "
                      cc-opts
-                     " "))
+                     " "
+                     cc-opts*))
                  (comp-objs-cmd 
                   (string-append
                    (string-replace-all
@@ -825,7 +838,8 @@
                   "~exec-file~" exec-file)
                 " "
                 cc-opts
-                " "))
+                " "
+                cc-opts*))
               (comp-so-cmd
                (string-append
                 (string-replace-all 
@@ -835,7 +849,8 @@
                   "~exec-file~" exec-file)
                 " "
                 cc-opts
-                " "))
+                " "
+                cc-opts*))
               )
           (cond
             (cc?

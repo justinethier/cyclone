@@ -238,6 +238,14 @@ Or as part of a program (add any includes immediately after the `import` express
 
 By default this will generate an `#include` preprocessor directive with the name of the header file in double quotes. However, if `include-c-header` is passed a text string with angle brackets (EG: `"<stdio.h>"`), the generated C code will use angle brackets instead.
 
+## C Compiler Options
+
+A Cyclone library may use the `c-compiler-options expression to pass options directly to the C compiler. For example:
+
+    (define-library (my-lib)
+      (c-compiler-options "-Imy-dir/include")
+      ...
+
 ## Linking to a C Library
 
 A Cyclone library may use the `c-linker-options` expression to instruct the compiler to include linker options when building an executable. For example:
