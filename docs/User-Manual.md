@@ -260,6 +260,10 @@ A Cyclone library may use the `c-linker-options` expression to instruct the comp
       (export curl-version)
       (c-linker-options "-lcurl")
 
+This expression may also be used at the top level of a program, EG:
+
+    (c-linker-options "-lcurl")
+
 ## Calling Scheme Functions from C
 
 C functions `Cyc_scm_call` and `Cyc_scm_call_no_gc` are provided to allow calling Scheme functions from C. 
