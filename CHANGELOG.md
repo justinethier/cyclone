@@ -6,6 +6,7 @@ TODO: consider creating a revised overview of our GC that unifies the original w
 Features
 
 - Added the `c-compiler-options` expression and `-COPT` Cyclone compiler option to allow specifying options for the C compiler.
+- Allow `c-linker-options` to work as a top-level expression in a program.
 
 Bug Fixes
 

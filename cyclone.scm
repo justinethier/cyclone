@@ -692,11 +692,21 @@
     (lambda (port)
       (read-all/source port filename))))
 
+;; Parse given expression and return data from any instances
+;; of c-compiler-options
 (define (program-c-compiler-opts! in-prog)
+  (get-options! 'c-compiler-options in-prog))
+
+(define (program-c-linker-opts! in-prog)
+  (get-options! 'c-linker-options in-prog))
+
+(define (get-options! opt in-prog)
   (foldl
     (lambda (expr acc)
       (cond
-       ((tagged-list? 'c-compiler-options expr)
+       ((tagged-list? opt expr)
+        ;; Replace expression since it is only used in this initial 
+        ;; pass, and would cause problems downstream
         (set-car! expr (string->symbol "quote"))
         (cons (cadr expr) acc))
        (else
@@ -730,21 +740,25 @@
              (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs expander)
             '()))
          ;; Read all linker options from dependent libs
-         ;; TODO: also read from program if applicable
          (c-linker-options
-          (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs))
+           (let ((lib-options (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs)))
+             (if program?
+                 (string-append ;; Also read from current program
+                   (string-join (program-c-linker-opts! in-prog) " ")
+                   " "
+                   lib-options)
+                 lib-options)))
          ;; Only read C compiler options from module being compiled
-         ;; TODO: allow these to be read from a program
          (cc-opts*
           (cond
             (program? 
-              (string-join
+              (string-join ;; Check current program for options
                 (program-c-compiler-opts! in-prog)
-                ""))
+                " "))
             (else
               (string-join 
                 (lib:c-compiler-options (car in-prog)) 
-                ""))))
+                " "))))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
