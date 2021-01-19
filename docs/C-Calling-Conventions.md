@@ -35,7 +35,7 @@ Ultimately this is not a viable solution. We need another way to avoid undefined
 
 # Proposed Solution 
 
-The ideal solution is to change the signature of all of our C functions to a common interface so the function pointer may be called correctly in all cases.
+The ideal solution is to change the signature of our C functions to a common interface so the function pointer may be called correctly in all cases.
 
 This calls back to [an earlier discussion](https://github.com/justinethier/cyclone/issues/193) on Cyclone's limit of ~128 function arguments:
 
@@ -58,7 +58,7 @@ Where:
  * `data` is state data for the current thread
  * `argc` indicates how many arguments were sent by the caller. Generally only applicable for variadic functions.
  * `closure` is the caller's closure. Note this is ignored for global functions as closures are never applicable to them.
- * `k` is the continuation
+ * `k` is the continuation to call into next.
 
 In addition zero or more objects may be listed after that as well as an ellipsis `...` for variadic functions. For example:
 
@@ -94,64 +94,72 @@ Disadvantages:
 - more data to pack (object header, etc)
 - more overhead to unpack?
 
-Based on this overview I am planning to use C arrays rather than Cyclone vectors to pass arguments.
+Based on this overview the plan is to use C arrays rather than Cyclone vectors to pass arguments, as arrays are more efficient.
 
 ### Packing Arguments
 
-don't even need alloca for this, can just use an array, EG:
+A stack allocated array may be used to pack arguments as part of making a function call:
 
-  object aa[2];
-  aa[0] = arg1;
-  aa[1] = arg2;
-
-TODO: how to call these functions, need to pack args prior to call
-TODO: how to unpack args for a call. I think it would be simple, need to change compiler to point to members of `args` instead of directly to arguments
-
-Varargs functions still expect to receive extra arguments as part of a list. we may need to unpack the vector only to repackage all the args as a list. This means we probably will still need the load_varargs macro
-
-TODO: example of packing/unpacking for fixed args, EG: (lambda (a b c))
-TODO: example of packing for (lambda X) and (lambda (a b . c) variadic forms
+    object aa[2];
+    aa[0] = arg1;
+    aa[1] = arg2;
 
 ### Unpacking Arguments
 
-Unpacking is just simple array references:
+After a function is called the arguments may be "unpacked" using simple array references:
 
    arg1 = args[0];
    arg2 = args[1];
 
+We will need to change the compiler to point to members of `args` instead of directly to arguments.
+
 TODO: any compilications here due to assumptions by our compiler, and how it compiles identifiers?
+
+Varargs functions still expect to receive extra arguments as part of a list. A variation of the `load_varargs` macro shall be used to convert the argument array to a list.
 
 ## Performance
 
-A key consideration is the impact to runtime performance. We do not want this solution to significantly slow down our programs. I expect there may be some performance hit though. 
+A key consideration is the impact to runtime performance. We do not want this solution to significantly slow down our programs if possible.
 
-We will need to run benchmarks to measure the impact and make adjustments as needed. This will be part of the process to ensure the solution is as performant as possible.
+We will need to run benchmarks to measure the impact and make adjustments as needed. This must be part of the process to ensure the solution is as performant as possible.
 
-Items for consideration:
+### Optimization of Arrays
 
-* use the same array to pass args or `alloca` a new one each time? Maybe we have an array as part of `gc_thread_data` but `alloca` if there are more than N args? Concern here is whether using `alloca` for each function will have a performance impact; I suspect it would.
+Thoughts on possible optimizations of argument arrays:
 
-## Runtime Safety Checks
+* It is best to allocate directly on the stack instead of using `alloca`.
+* Find opportunities to reuse argument arrays if possible (when can we do this?)
+* Use a single argument array as part of thread data? Is that practical?
 
-TODO: do we attempt to check number of arguments? Throw an exception if not enough (or too many) args?? This is more overhead but safer
+### Runtime Safety Checks
+
+We will want to add safety checks to make sure the minimum number of arguments are passed to a function. We may want to optionally disable emitting these checks from the compiler depending on the optimization level.
 
 ## Changes to the Runtime
 
-I believe non-CPS primitives do not use our function signature so they don't have to change for this either. Any CPS functions using the signature will need to be converted
+Non-CPS primitives do not use our function signature so they do not need to be modified as part of this change. We will probably need to clean up how `apply` and the corresponding primitive wrappers work.
 
-Can eliminate dispatch.c
+Any CPS functions using the signature will need to be converted.
 
-Impacts to apply, primitives, others?
+We can eliminate dispatch.c.
 
 ## Changes to the Compiler
 
 `(scheme cyclone cgen)` will need to emit code for the new signature.
 
-TODO: any complications in referencing vars from `args` rather than directly as C function arguments?
+TODO: Are there any complications in referencing vars from `args` rather than directly as C function arguments?
 
 ## Changes to the FFI
 
 `define-c` needs to use the new signature.
 
 `(cyclone foreign)` will need to be modified to generate `define-c` forms that are compatible with the new signatures.
+
+# Development Plan
+
+- Add necessary header definitions for new signatures
+- Modify compiler to generate new function code
+- Modify runtime / primitives to use calling convention
+- Modify FFI and define-c definitions
+- Bring up the compiler in stages. Will need to use the current version of Cyclone to generate a version with the new function signatures.
 
