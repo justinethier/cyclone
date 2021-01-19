@@ -157,8 +157,8 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 # Development Plan
 
-- Add necessary header definitions for new signatures
-- Modify compiler to generate new function code
+- Modify compiler to generate code using the new calling conventions
+- Add necessary header definitions
 - Modify runtime / primitives to use calling convention
 - Modify FFI and define-c definitions
 - Bring up the compiler in stages. Will need to use the current version of Cyclone to generate a version with the new function signatures.
