@@ -2009,8 +2009,8 @@
         (else
          (emit*
            "static void __lambda_" 
-           (number->string (car l)) "(void *data, int argc, "
-           (cdadr l)
+           (number->string (car l)) 
+           "(void *data, object clo, object k, int argc, object *args"
            ") ;"))))
      lambdas)
     
