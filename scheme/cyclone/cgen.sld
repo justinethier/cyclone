@@ -707,8 +707,10 @@
   (string-append "\"" (cstr:escape-chars str) "\""))
 
 (define-c string-byte-length
-  "(void *data, int argc, closure _, object k, object s)"
-  " return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
+  "(void *data, object clo, object k, int argc, object *args)"
+  " Cyc_check_argc(data, \"string-byte-length\", argc, 1);
+    object s = args[0];
+    return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Primitives
@@ -2042,7 +2044,7 @@
              (emit*
                "static void __lambda_gc_ret_"
                (number->string (car l))
-               "(void *data, int argc,"
+               "(void *data, int argc," TODO: update this and call below
                params-str
                ")"
                "{"
@@ -2086,7 +2088,7 @@
     ;; Emit inlinable function list
     (cond
       ((not program?)
-        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure _, object cont){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, object clo, object k, int argc, object *args){ ")
         (let ((pairs '())
               (head-pair #f))
           (for-each
@@ -2120,22 +2122,23 @@
                          (cdr ps) 
                          (cdr cs)))))
           (if head-pair
-              (emit* "(((closure)cont)->fn)(data, 1, cont, &" head-pair ");")
-              (emit* "(((closure)cont)->fn)(data, 1, cont, NULL);"))
+          TODO: need to change these function calls over
+                also, go back and check our changes, I think there is at least one other direct closure call we need to update
+              (emit* "(((closure)k)->fn)(data, 1, k, &" head-pair ");")
+              (emit* "(((closure)k)->fn)(data, 1, k, NULL);"))
           (emit* " } "))))
 
     ;; Emit entry point
     (cond
       (program?
-        (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);")
+        (emit "static void c_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args);")
         (for-each
           (lambda (lib-name)
-            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, closure cont, object value);"))
+            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, object clo, object k, int argc, object* args);"))
           required-libs)
-        (emit "static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,cont; { "))
+        (emit "static void c_entry_pt(void *data, object clo, object k, int argc, object *args) { "))
       (else
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
-        ;; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args){ ")
       ))
 
     ;; Set global-changed indicator
@@ -2272,8 +2275,7 @@
             ;; Start cont chain, but do not assume closcall1 macro was defined
             "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
           (emit "}")
-          (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {")
-          ;; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
+          (emit "static void c_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args) {")
           (emit compiled-program)
           (emit ";")))
       (else
