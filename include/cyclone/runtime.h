@@ -76,6 +76,15 @@ void gc_init_heap(long heap_size);
   } \
 }
 
+#define Cyc_check_argc(data, fnc_name, argc, expected) { \
+  if (expected > argc) { \
+    char buf[128]; \
+    snprintf(buf, 127, "Expected %d arguments to %s but received %ld", \
+             expected, fnc_name, argc);  \
+    Cyc_rt_raise_msg(data, buf); \
+  } \
+}
+
 #define Cyc_verify_mutable(data, obj) { \
   if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
 #define Cyc_verify_immutable(data, obj) { \
