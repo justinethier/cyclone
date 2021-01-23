@@ -12,7 +12,7 @@ Bug Fixes
 
 - Fix import of library dependencies from the interpreter, when the dependencies are imported via `cond-expand`.
 
-## 0.24 - TBD
+## 0.24 - January 2, 2021
 
 Bug Fixes
 
