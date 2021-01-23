@@ -119,6 +119,8 @@
              (string-append "opaque_ptr(" ,code ")"))
             ((c-void)
              "Cyc_VOID")
+            ((data)
+             "data")
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
@@ -151,6 +153,13 @@
                "make_double(" var ", " ,code ");")
              (string-append "&" var)
            )))
+          ((bignum bigint)
+            (let ((var (mangle (gensym 'var))))
+              (cons
+               (string-append 
+                "alloc_bignum(data," var ");"
+                var "->bn = " ,code ";")
+               (string-append var))))
           ((bool)
            (cons
              ""
@@ -184,6 +193,8 @@
            (cons
             (string-append ,code ";")
             "Cyc_VOID"))
+          ((data)
+           "data")
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   
