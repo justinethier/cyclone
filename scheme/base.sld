@@ -483,15 +483,13 @@
           (if (null? (cdr exp)) (error/loc "empty when" exp))
           (if (null? (cddr exp)) (error/loc "no when body" exp))
           `(if ,(cadr exp)
-               ((lambda () ,@(cddr exp)))
-               #f))))
+               ((lambda () ,@(cddr exp)))))))
     (define-syntax unless
       (er-macro-transformer
         (lambda (exp rename compare)
           (if (null? (cdr exp)) (error/loc "empty unless" exp))
           (if (null? (cddr exp)) (error/loc "no unless body" exp))
-          `(if ,(cadr exp)
-               #f
+          `(if (not ,(cadr exp))
                ((lambda () ,@(cddr exp)))))))
   (define-syntax do
     (er-macro-transformer
