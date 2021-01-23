@@ -27,7 +27,7 @@ Cyclone Scheme is a brand-new compiler that allows real-world application develo
 - A concurrent, generational garbage collector based on Cheney on the MTA
 - Includes an optimizing Scheme-to-C compiler,
 - ... as well as an interpreter for debugging
-- A [Package Manager](https://github.com/cyclone-scheme/cyclone-winds) and a growing list of packages.
+- A [Package Manager](https://github.com/cyclone-scheme/winds) and a growing list of packages.
 - Support for [many popular SRFI's](docs/API.md#srfi-libraries)
 - Online user manual and API documentation
 - Support for Linux, Windows, FreeBSD, and Mac platforms. 
@@ -105,9 +105,9 @@ Read the documentation below for more information on how to use Cyclone.
 
 ![Cyclone Winds](docs/images/cyclone-winds-small.png "Cyclone Winds")
 
-The `cyclone-winds` package manager provides the ability to install packaged libraries and programs for Cyclone. See the [cyclone-winds](https://github.com/cyclone-scheme/cyclone-winds#cyclone-winds) site for more information.
+The `winds` package manager provides the ability to install packaged libraries and programs for Cyclone. See the [winds](https://github.com/cyclone-scheme/winds#winds) site for more information.
 
-The [Cyclone-Winds wiki](https://github.com/cyclone-scheme/cyclone-winds/wiki) contains a full list of packages with documentation.
+The [Winds wiki](https://github.com/cyclone-scheme/winds/wiki) contains a full list of packages with documentation.
 
 # Documentation
 
