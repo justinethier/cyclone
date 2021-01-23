@@ -1,10 +1,10 @@
 # Changelog
 
 ## 0.25 - TBD
-TODO: consider creating a revised overview of our GC that unifies the original writeup, lazy sweeping, and these latest changes for safely sharing objects between threads.
 
 Features
 
+- Our package manager has been renamed to `winds`. Thanks Arthur Maciel!
 - Added the `c-compiler-options` expression and `-COPT` Cyclone compiler option to allow specifying options for the C compiler.
 - Allow `c-linker-options` to work as a top-level expression in a program.
 
