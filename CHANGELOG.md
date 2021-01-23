@@ -11,6 +11,7 @@ Features
 Bug Fixes
 
 - Fix import of library dependencies from the interpreter, when the dependencies are imported via `cond-expand`.
+- Arthur Maciel fixed `when` and `unless` to no longer return `#f` in cases where the expression body is not executed.
 
 ## 0.24 - January 2, 2021
 
