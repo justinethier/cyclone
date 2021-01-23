@@ -71,3 +71,6 @@ Scheme | C
 `opaque` | `void *`
 `c-void` | `void`
 
+Useful notes:
+- Use `opaque` if you need to handle any kind of C pointer.
+- Use `string` to handle C `const char*` (`symbol` is strictly used to represent Scheme symbols).
