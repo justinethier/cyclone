@@ -10,7 +10,7 @@
 
 # Introduction 
 
-This document presents a set of recommendations for Scheme code styling. Use them when possible. 
+This document presents a set of recommendations for Scheme code styling. Use them whenever possible. 
 
 Most of the recommendations presented here follow, at least partially, [Riastradh's Lisp Style Rules](https://mumble.net/~campbell/scheme/style.txt) and scheme-wiki guides on [general Scheme style](http://community.schemewiki.org/?scheme-style), [variable naming conventions](http://community.schemewiki.org/?variable-naming-convention) and [comment style](http://community.schemewiki.org/?comment-style).
 
