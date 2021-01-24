@@ -118,6 +118,10 @@ For most `operator`s, `operand1` determines the alignment of the other `operand`
 (if (this-is-too-long-to-go-in-one-line)
     (do-this)
     (do-other-things))
+
+(export proc1
+        var1
+        var2)
 ```
 
 If `operand1` is put in a different line from `operand`'s, it should be generally bellow `operand` (exceptions are discussed soon).
@@ -150,6 +154,11 @@ If `operand1` is put in a different line from `operand`'s, it should be generall
  (this-is-too-long-to-go-in-one-line)
  (do-this)
  (do-other-things))
+
+(export 
+ proc1
+ var1
+ var2)
 ```
 
 The same applies when the `operator` is a list, so 
