@@ -119,8 +119,6 @@
              (string-append "opaque_ptr(" ,code ")"))
             ((c-void)
              "Cyc_VOID")
-            ((data)
-             "data")
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
@@ -193,8 +191,6 @@
            (cons
             (string-append ,code ";")
             "Cyc_VOID"))
-          ((data)
-           "data")
           (else
             (error "c->scm unable to convert C object of type " ,type)))))))
   
