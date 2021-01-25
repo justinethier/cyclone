@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.25 - TBD
+## 0.25 - January 25, 2021
 
 Features
 
