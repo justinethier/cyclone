@@ -19,6 +19,7 @@
     thread-yield!
     thread-terminate!
     current-thread
+    current-thread-data
     thread-join!
 
     mutex?
@@ -90,6 +91,9 @@
         (if (null? t)
             *primordial-thread*
             t)))
+
+    (define (current-thread-data)
+      (%get-thread-data))
 
     (define *primordial-thread*
       (vector 'cyc-thread-obj #f #f "main thread" #f #f))
