@@ -9,9 +9,9 @@
 
 (c-define sub-big-nums bignum "sub_big_nums" opaque bignum bignum)
 
-(write
+(display
   (sub-big-nums 
      (current-thread-data)
      999999999999999999999999
-     222222222222222222222222
-     ))
+     222222222222222222222222))
+(newline)
