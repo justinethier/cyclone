@@ -197,6 +197,32 @@
   (define-syntax c-define
     (er-macro-transformer
       (lambda (expr rename compare)
+        (define (emit-type-check arg type)
+          (case type
+            ((int integer)
+             (string-append "Cyc_check_fixnum(data," arg ");")) 
+            ((double float)
+             (string-append "Cyc_check_double(data," arg ");")) 
+            ((bignum bigint)
+             (string-append "Cyc_check_type(data,Cyc_is_bignum,bignum_tag," arg ");")) 
+            ((bool)
+             (string-append "Cyc_check_type(data,Cyc_is_boolean,boolean_tag," arg ");")) 
+            ((char)
+             (string-append 
+               " if ((boolean_f == make_boolean(obj_is_char(" arg ")))) {"
+                  "Cyc_rt_raise2(data, \"Invalid type: expected char, found \", " arg "); } "))
+            ((string)
+             (string-append "Cyc_check_str(data," arg ");"))
+            ((symbol)
+             (string-append "Cyc_check_sym(data," arg ");"))
+            ((bytevector)
+             (string-append "Cyc_check_bvec(data," arg ");"))
+            ((opaque)
+             (string-append "Cyc_check_opaque(data," arg ");"))
+            ((c-void)
+             (string-append "Cyc_check_type(data,Cyc_is_void,void_tag," arg ");")) 
+            (else "")))
+
         (let* ((scm-fnc (cadr expr))
                (scm-fnc-wrapper (gensym 'scm-fnc))
                (c-fnc (cadddr expr))
@@ -253,8 +279,17 @@
                              (string-append ", object " (car sym/unbox)))
                          arg-syms/unbox))
                         ")"))
+               (type-checks
+                 (apply 
+                   string-append
+                   (map
+                     (lambda (arg type)
+                       (emit-type-check arg type))
+                     (map car arg-syms/unbox)
+                     arg-types) ))
                (body
                  (string-append
+                   type-checks
                    return-alloc
                    "return_closcall1(data, k, " return-expr ");"))
               )
