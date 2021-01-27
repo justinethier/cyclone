@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.26 - TBD
+
+Features
+
+- Enhanced `c-define` to emit type checks for parameters. 
+
 ## 0.25 - January 25, 2021
 
 Features
