@@ -119,6 +119,8 @@
              (string-append "opaque_ptr(" ,code ")"))
             ((c-void)
              "Cyc_VOID")
+            ((thread-data)
+             "data")
             (else
               (error "scm->c unable to convert scheme object of type " ,type)))))))
   
@@ -275,9 +277,12 @@
                        "(void *data, int argc, closure _, object k " 
                        (apply string-append 
                          (map
-                           (lambda (sym/unbox)
-                             (string-append ", object " (car sym/unbox)))
-                         arg-syms/unbox))
+                           (lambda (sym/unbox type)
+                             (if (eq? type 'thread-data)
+                                 ""
+                                 (string-append ", object " (car sym/unbox))))
+                         arg-syms/unbox
+                         arg-types))
                         ")"))
                (type-checks
                  (apply 
