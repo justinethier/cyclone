@@ -75,4 +75,10 @@ Scheme | C
 Useful notes:
 - Use `opaque` if you need to handle any kind of C pointer.
 - Use `string` to handle C `const char*` (`symbol` is strictly used to represent Scheme symbols).
-- `thread-data` is a special type used to pass the current thread's `gc_thread_data` instance to a C function. Objects of this type are passed implicitly when making a Scheme function call.
+- `thread-data` is a special type used to pass the current thread's `gc_thread_data` instance to a C function. These objects are passed implicitly when making a Scheme function call.
+
+     (c-define sub-big-nums bignum "sub_big_nums" thread-data bignum bignum)
+     (sub-big-nums 
+        999999999999999999999999
+        222222222222222222222222))
+
