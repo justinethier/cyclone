@@ -115,6 +115,8 @@ The [Winds wiki](https://github.com/cyclone-scheme/winds/wiki) contains a full l
 
 - An [API Reference](docs/API.md) is available for all libraries provided by Cyclone, including a complete alphabetical listing.
 
+- A guide is provided for [Scheme Code Conventions](Scheme-code-conventions.md).
+
 - If you need a resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
 - Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
