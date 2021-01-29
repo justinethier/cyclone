@@ -88,7 +88,7 @@ A reasonable *permanent* exception is when dealing with long lists made to be ex
 
 # Indentation and alignment
 
-We assume the following syntatic naming convention of elements in a list: 
+We assume the following syntactic naming convention of elements in a list: 
 
     (operator operand1 operand2 ...)
 
@@ -124,7 +124,7 @@ For most `operator`s, `operand1` determines the alignment of the other `operand`
         var2)
 ```
 
-If `operand1` is put in a different line from `operand`'s, it should be generally bellow `operand` (exceptions are discussed soon).
+If `operand1` is put in a different line from `operand`'s, it should be generally below `operand` (exceptions are discussed soon).
 
   NOT recommended:
 
@@ -185,7 +185,7 @@ The same applies when the `operator` is a list, so
          foo)
 ```
 
-There are special `operator`s with which `operand`s may be aligned differently. Usually this means that `operand1` will be placed bellow `operator`'s *second* letter. Here is a non-exhaustive list of examples:
+There are special `operator`s with which `operand`s may be aligned differently. Usually this means that `operand1` will be placed below `operator`'s *second* letter. Here is a non-exhaustive list of examples:
 
 ```scheme
 (lambda (x y)
@@ -309,9 +309,11 @@ Procedures or macros ending with a question mark return a **boolean**. They are 
 pair? procedure? proper-list?
 ```
 
+Predicates are generally understood to be side-effect free, except that they may raise an exception when passed the wrong type of argument.
+
 Do NOT use a question mark if the procedure may return any object other than a boolean.
 
-  The procedures bellow are non-examples, because although they interrogate their `operand`s, they don't return `#t` or `#f`:
+  The procedures below are non-examples, because although they interrogate their operands, they don't return `#t` or `#f`:
 
 ```scheme
 member assoc any every
@@ -367,7 +369,7 @@ INPUT-CODE
 
 ### Namespaces (:)
 
-Use `:` to explicitly note the namespace from which a name comes. **Only** use when it is not possible to define a library (which would otherwise allow the use of `(prefix ...)` import clause) or when, even inside a library, there would be no other way to prevent name clashes.
+Use `:` to explicitly note the namespace from which a name comes. **Only** use when it is not possible to define a library (which would otherwise allow the use of a `(prefix ...)` import clause) or when, even inside a library, there would be no other way to prevent name clashes.
 
     foo:procedure
 
