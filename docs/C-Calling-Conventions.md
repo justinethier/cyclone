@@ -151,7 +151,7 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 ## Changes to the FFI
 
-`define-c` needs to use the new signature.
+`define-c` needs to use the new signature. **TBD if there is an efficient way to do this without also requiring a migration of existing `define-c` forms. It would be great if existing code would continue to work, thus not making this a breaking change. Perhaps the compiler can detect the old signature and generate scaffolding accordingly.**
 
 `(cyclone foreign)` will need to be modified to generate `define-c` forms that are compatible with the new signatures.
 
