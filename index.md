@@ -108,6 +108,8 @@ The `winds` package manager provides the ability to install packaged libraries a
 
 - An [API Reference](docs/API) is available for all libraries provided by Cyclone, including a complete alphabetical listing.
 
+- A guide is provided for [Scheme Code Conventions](docs/Scheme-code-conventions.md).
+
 - If you need a resource to start learning the Scheme language you may want to try a classic textbook such as [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html).
 
 - Finally, this [benchmarks](http://ecraven.github.io/r7rs-benchmarks/benchmark.html) page by [ecraven](https://github.com/ecraven) compares the performance of Cyclone with other Schemes.
