@@ -35,7 +35,7 @@ const char *tag_names[] = {
       /*c_opaque_tag  */ , "opaque"
       /*cond_var_tag  */ , "condition variable"
       /*cvar_tag      */ , "C primitive"
-      /*double_tag    */ , "number"
+      /*double_tag    */ , "double"
       /*eof_tag       */ , "eof"
       /*forward_tag   */ , ""
       /*integer_tag   */ , "number"
