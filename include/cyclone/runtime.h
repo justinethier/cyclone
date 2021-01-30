@@ -91,6 +91,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj)
 #define Cyc_check_fixnum(d,obj) Cyc_check_type(d,Cyc_is_fixnum, integer_tag, obj)
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj)
+#define Cyc_check_double(d,obj) Cyc_check_type(d,Cyc_is_double, double_tag, obj)
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj)
 #define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj)
 #define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj)
@@ -465,6 +466,7 @@ object Cyc_is_real(object o);
 object Cyc_is_integer(object o);
 #define Cyc_is_fixnum(o) (make_boolean(obj_is_int(o)))
 //object Cyc_is_fixnum(object o);
+#define Cyc_is_double(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == double_tag))
 #define Cyc_is_bignum(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == bignum_tag))
 //object Cyc_is_complex(object o);
 #define Cyc_is_complex(o)     (make_boolean(is_object_type(o) && ((list) o)->tag == complex_num_tag))
