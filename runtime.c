@@ -5696,6 +5696,9 @@ object apply(void *data, object cont, object func, object args)
 }
 
 // Version of apply meant to be called from within compiled code
+// TODO: in cargs branch we are swapping cont and prim below
+//  old call convention, EG: Cyc_apply(td, 0, (closure)(a1), clo); \
+//
 void Cyc_apply(void *data, int argc, closure cont, object prim, ...)
 {
   va_list ap;

@@ -145,12 +145,12 @@
      ;;"/* Check for GC, then call given continuation closure */\n"
       "#define return_closcall" n "(td, clo" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td, clo, buf, " n "); \\\n"
       "     return; \\\n"
       " } else {\\\n"
-      "     closcall" n "(td, (closure) (clo)" args "); \\\n"
+      "     closcall" n "(td, (closure) (clo), buf"
       "     return;\\\n"
       " } \\\n"
       "}\n")))
@@ -233,12 +233,12 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(td, clo" args ") \\\n"
+      "#define closcall" n "(td, clo, buf) \\\n"
         (wrap (string-append "if (obj_is_not_closure(clo)) { \\\n"
-                             "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
+                             "   Cyc_apply(td, clo, " n ", buf ); \\\n"
                              "}"))
         (wrap " else { \\\n")
-        "   ((clo)->fn)(td, " n ", clo" args ")"
+        "   ((clo)->fn)(td, clo, " n ", buf)"
         (wrap ";\\\n}"))))
 
 (define (c-macro-n-prefix n prefix)
@@ -707,10 +707,10 @@
   (string-append "\"" (cstr:escape-chars str) "\""))
 
 (define-c string-byte-length
-  "(void *data, object clo, object k, int argc, object *args)"
-  " Cyc_check_argc(data, \"string-byte-length\", argc, 1);
-    object s = args[0];
-    return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
+  "(void *data, object clo, int argc, object *args)"
+  " Cyc_check_argc(data, \"string-byte-length\", argc, 2);
+    object s = args[1];
+    return_closcall1(data, args[0], Cyc_string_byte_length(data, s)); ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Primitives
@@ -2100,7 +2100,7 @@
                (set! pairs (cons pair-sym pairs))))
             *global-inlines*)
             ;; Link the pairs
-            (let loop ((code '())
+          (let loop ((code '())
                        (ps pairs)
                        (cs (map (lambda (_) (mangle (gensym 'c))) pairs)))
                 (cond
@@ -2121,11 +2121,15 @@
                    (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                          (cdr ps) 
                          (cdr cs)))))
+TODO: (emit* "object buf[1];");  
           (if head-pair
-          TODO: need to change these function calls over
-                also, go back and check our changes, I think there is at least one other direct closure call we need to update
-              (emit* "(((closure)k)->fn)(data, 1, k, &" head-pair ");")
-              (emit* "(((closure)k)->fn)(data, 1, k, NULL);"))
+;TODO: need to change these function calls over
+;also, go back and check our changes, I think there is at least one other direct closure call we need to update
+;;
+;; TODO: yes, just search for all ->fn calls
+;;
+              (emit* "(((closure)k)->fn)(data, k, 1, &" head-pair ");")
+              (emit* "(((closure)k)->fn)(data, k, 1, NULL);"))
           (emit* " } "))))
 
     ;; Emit entry point
