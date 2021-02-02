@@ -58,7 +58,7 @@ Where:
  * `data` is state data for the current thread
  * `argc` indicates how many arguments were sent by the caller. Generally only applicable for variadic functions.
  * `closure` is the caller's closure. Note this is ignored for global functions as closures are never applicable to them.
- * `k` is the continuation to call into next.
+ * `k` is the continuation to call into next. Note this is not necessarily present; it is often placed here as a result of the compiler's CPS conversion phase.
 
 In addition zero or more objects may be listed after that as well as an ellipsis `...` for variadic functions. For example:
 
