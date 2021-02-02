@@ -150,7 +150,7 @@
       "     GC(td, clo, buf, " n "); \\\n"
       "     return; \\\n"
       " } else {\\\n"
-      "     closcall" n "(td, (closure) (clo), buf"
+      "     closcall" n "(td, (closure) (clo), buf); \\\n"
       "     return;\\\n"
       " } \\\n"
       "}\n")))
@@ -183,13 +183,13 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct" n "(td, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign " \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, (function_type) _fn); \\\n"
       "     GC(td, &c1, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
+      "     (_fn)(td, (closure)_fn, " n ", buf); \\\n"
       " }}\n")))
 
 (define (c-macro-return-direct-with-closure num-args)
@@ -200,12 +200,12 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td, clo, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
+      "     (_fn)(td, (closure)(clo), " n ", buf); \\\n"
       " }}\n")))
 
 ;; Generate hybrid macros that can call a function directly but also receives
@@ -218,13 +218,13 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_obj" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     mclosure1(c1, (function_type) _clo_fn, clo); \\\n"
       "     GC(td, (closure)(&c1), buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
+      "     (_fn)(td, (closure)(clo), " n ", buf); \\\n"
       " }}\n")))
 
 (define (c-macro-closcall num-args)
@@ -238,7 +238,7 @@
                              "   Cyc_apply(td, clo, " n ", buf ); \\\n"
                              "}"))
         (wrap " else { \\\n")
-        "   ((clo)->fn)(td, clo, " n ", buf)"
+        "   ((clo)->fn)(td, clo, " n ", buf); \\\n"
         (wrap ";\\\n}"))))
 
 (define (c-macro-n-prefix n prefix)
@@ -2044,7 +2044,7 @@
              (emit*
                "static void __lambda_gc_ret_"
                (number->string (car l))
-               "(void *data, int argc," TODO: update this and call below
+               "(void *data, int argc," ; cargs TODO: update this and call below
                params-str
                ")"
                "{"
@@ -2121,7 +2121,7 @@
                    (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                          (cdr ps) 
                          (cdr cs)))))
-TODO: (emit* "object buf[1];");  
+;cargs TODO: (emit* "object buf[1];");  
           (if head-pair
 ;TODO: need to change these function calls over
 ;also, go back and check our changes, I think there is at least one other direct closure call we need to update
