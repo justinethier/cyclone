@@ -373,6 +373,25 @@ Use `:` to explicitly note the namespace from which a name comes. **Only** use w
 
     foo:procedure
 
+### Low-level internal procedures (% or _)
+
+Use `%` or `_` to prefix low-level procedures that are NOT exposed by an API.
+
+    %make-raw-structure
+    %adjust-settings
+    _py-eval
+    _curl-get-opts
+
+Although not a necessarily recommended style, it is not rare to see low-level internal procedures and high-level exposed procedures sharing their name, except for the prefix symbol. Sometimes the high-level procedures work as wrappers around the low-level ones.
+
+```Scheme
+%retrieve-data ;; low-level and not exposed
+retrieve-data  ;; high-level and exposed - a wrapper around %retrieve-data
+
+_py-eval ;; deals with C pointers and Python stuff
+py-eval  ;; deals only with Scheme data types
+```
+
 # Comments 
 
 Write comments only where the code is incapable of explaining itself. This is not a recommendation to avoid comments, but rather an incentive to **prefer self-explanatory code over explanatory comments**. 
