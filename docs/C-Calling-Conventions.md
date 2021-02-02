@@ -79,7 +79,7 @@ Note our `define-c` FFI requires the user to specify the same calling convention
 
 We want a signature similar to this:
 
-    static void __lambda(void *data, object closure, object k, int argc, object *args) ;
+    static void __lambda(void *data, object closure, int argc, object *args) ;
 
 That way we can pack all the extra arguments into `args` and call all functions using a single standard interface. 
 
