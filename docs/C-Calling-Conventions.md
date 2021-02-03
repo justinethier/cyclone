@@ -157,9 +157,9 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 # Development Plan
 
-- Modify compiler to generate code using the new calling conventions
+- Modify compiler (scheme/cyclone/cgen.sld) to generate code using the new calling conventions. Test as best we can that C code is generated properly.
 - Add necessary header definitions
-- Modify runtime / primitives to use calling convention
-- Modify FFI and define-c definitions
+- Modify runtime / primitives to use calling convention. Ensure runtime compiles with these changes in place.
+- Modify FFI and define-c definitions in scheme files
 - Bring up the compiler in stages. Will need to use the current version of Cyclone to generate a version with the new function signatures.
 
