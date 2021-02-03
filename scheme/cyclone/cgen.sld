@@ -2092,7 +2092,7 @@
     ;; Emit inlinable function list
     (cond
       ((not program?)
-        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, object clo, object k, int argc, object *args){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, object clo, int argc, object *args){ ")
         (let ((pairs '())
               (head-pair #f))
           (for-each
@@ -2125,28 +2125,23 @@
                    (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                          (cdr ps) 
                          (cdr cs)))))
-;cargs TODO: (emit* "object buf[1];");  
+          (emit* "object buf[1]; object cont = args[0]");  
           (if head-pair
-;TODO: need to change these function calls over
-;also, go back and check our changes, I think there is at least one other direct closure call we need to update
-;;
-;; TODO: yes, just search for all ->fn calls
-;;
-              (emit* "(((closure)k)->fn)(data, k, 1, &" head-pair ");")
-              (emit* "(((closure)k)->fn)(data, k, 1, NULL);"))
+              (emit* "buf[0] = &" head-pair "; (((closure)cont)->fn)(data, cont, 1, buf);")
+              (emit* "buf[0] = NULL; (((closure)cont)->fn)(data, cont 1, buf);"))
           (emit* " } "))))
 
     ;; Emit entry point
     (cond
       (program?
-        (emit "static void c_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args);")
+        (emit "static void c_entry_pt_first_lambda(void *data, object clo, int argc, object *args);")
         (for-each
           (lambda (lib-name)
-            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, object clo, object k, int argc, object* args);"))
+            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, object clo, int argc, object* args);"))
           required-libs)
-        (emit "static void c_entry_pt(void *data, object clo, object k, int argc, object *args) { "))
+        (emit "static void c_entry_pt(void *data, object clo, int argc, object *args) { "))
       (else
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(void *data, object clo, int argc, object *args){ ")
       ))
 
     ;; Set global-changed indicator
@@ -2283,12 +2278,13 @@
             ;; Start cont chain, but do not assume closcall1 macro was defined
             "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
           (emit "}")
-          (emit "static void c_entry_pt_first_lambda(void *data, object clo, object k, int argc, object *args) {")
+          (emit "static void c_entry_pt_first_lambda(void *data, object clo, int argc, object *args) {")
           (emit compiled-program)
           (emit ";")))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
         (emit "cont = ((closure1_type *)cont)->element;")
+TODO:
         (emit* 
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
