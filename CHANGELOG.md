@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.26
+## 0.26 - February 3, 2021
 
 Features
 
