@@ -707,10 +707,14 @@
   (string-append "\"" (cstr:escape-chars str) "\""))
 
 (define-c string-byte-length
-  "(void *data, object clo, int argc, object *args)"
-  " Cyc_check_argc(data, \"string-byte-length\", argc, 2);
-    object s = args[1];
-    return_closcall1(data, args[0], Cyc_string_byte_length(data, s)); ")
+  "(void *data, int argc, closure _, object k, object s)"
+  " return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
+; cargs TODO:
+;(define-c string-byte-length
+;  "(void *data, object clo, int argc, object *args)"
+;  " Cyc_check_argc(data, \"string-byte-length\", argc, 2);
+;    object s = args[1];
+;    return_closcall1(data, args[0], Cyc_string_byte_length(data, s)); ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Primitives
