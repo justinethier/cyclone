@@ -6,6 +6,10 @@ Features
 
 - Enhanced `c-define` to emit type checks for parameters. 
 
+Bug Fixes
+
+- Allow `pretty-print` to display contents of a record type.
+
 ## 0.25 - January 25, 2021
 
 Features

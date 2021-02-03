@@ -83,7 +83,9 @@
       
           (cond ((pair? obj)        (wr-expr obj col))
                 ((null? obj)        (wr-lst obj col))
-                ((vector? obj)      (wr-lst (vector->list obj) (out "#" col)))
+                ((or (vector? obj) 
+                     (record? obj))               
+                                    (wr-lst (vector->list obj) (out "#" col)))
                 ((bytevector? obj)  (wr-lst 
                                       (map char->integer (string->list (utf8->string obj)))
                                       (out "#u8" col)))
@@ -134,7 +136,7 @@
                    (spaces (- to col) col))))
       
           (define (pr obj col extra pp-pair)
-            (if (or (pair? obj) (vector? obj)) ; may have to split on multiple lines
+            (if (or (pair? obj) (vector? obj) (record? obj)) ; may have to split on multiple lines
               (let ((result '())
                     (left (min (+ (- (- width col) extra) 1) max-expr-width)))
                 (generic-write obj display? #f
