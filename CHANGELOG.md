@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.26 - TBD
+## 0.26
 
 Features
 
@@ -9,6 +9,7 @@ Features
 Bug Fixes
 
 - Allow `pretty-print` to display contents of a record type.
+- Re-enable optimizations that were broken when `vector?` was modified to no longer return true for record types.
 
 ## 0.25 - January 25, 2021
 
