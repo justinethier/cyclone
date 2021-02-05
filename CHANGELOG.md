@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.27 - TBD
+
+Bug Fixes
+
+- Prevent the compiler from inlining calls to primitives that open ports, avoiding a range of issues such as an open file operation being inlined across multiple places in the intermediate code.
+
 ## 0.26 - February 3, 2021
 
 Features

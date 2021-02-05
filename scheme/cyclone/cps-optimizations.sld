@@ -156,13 +156,18 @@
         global 
         defined-by 
         defines-lambda-id
-        const const-value  
-        ref-count ref-by
+        const 
+        const-value  
+        ref-count 
+        ref-by
         mutated-by-set
-        reassigned assigned-value 
-        app-fnc-count app-arg-count
+        reassigned 
+        assigned-value 
+        app-fnc-count 
+        app-arg-count
         cannot-inline
-        inlinable mutated-indirectly
+        inlinable 
+        mutated-indirectly
         cont
         def-in-loop
         ref-in-loop
@@ -1173,6 +1178,10 @@
           Cyc-fast-vector-3
           Cyc-fast-vector-4
           Cyc-fast-vector-5
+          open-input-file
+          open-output-file
+          open-binary-input-file
+          open-binary-output-file
           )))
 
     (define (prim-calls-inlinable? prim-calls)
