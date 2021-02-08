@@ -2,6 +2,10 @@
 
 ## 0.27 - TBD
 
+Features
+
+- Arthur Maciel added `opaque?` and `opaque-null?` predicates to `(cyclone foreign)`.
+
 Bug Fixes
 
 - Prevent the compiler from inlining calls to primitives that open ports, avoiding a range of issues such as an open file operation being inlined across multiple places in the intermediate code.
