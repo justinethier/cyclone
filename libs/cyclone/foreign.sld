@@ -12,6 +12,9 @@
    (scheme eval)
    (scheme cyclone util))
   (export
+   opaque?
+   opaque-null?
+   
    c-code
    c-value
    c-define
@@ -19,6 +22,15 @@
    scm->c
    c-define-type)
   (begin
+    (define-c opaque?
+      "(void *data, int argc, closure _, object k, object p)"
+      "return_closcall1(data, k, Cyc_is_opaque(p));")
+
+    (define-c opaque-null?
+      "(void *data, int argc, closure _, object k, object p)"
+      "Cyc_check_opaque(data, p);
+       return_closcall1(data, k, make_boolean(opaque_ptr(p) == NULL));")
+
     ;; (c-define-type name type (pack (unpack)))
     (define-syntax c-define-type
       (er-macro-transformer
