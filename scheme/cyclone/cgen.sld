@@ -2016,7 +2016,7 @@
          (emit*
            "static void __lambda_" 
            (number->string (car l)) 
-           "(void *data, object clo, object k, int argc, object *args"
+           "(void *data, object clo, int argc, object *args"
            ") ;"))))
      lambdas)
     
@@ -2276,19 +2276,19 @@
             (reverse required-libs)) ;; Init each lib's dependencies 1st
           (emit* 
             ;; Start cont chain, but do not assume closcall1 macro was defined
-            "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
+            " object buf[1]; buf[0] = &" this-clo "; "
+            "(" this-clo ".fn)(data, &" this-clo ", 1, buf);")
           (emit "}")
           (emit "static void c_entry_pt_first_lambda(void *data, object clo, int argc, object *args) {")
           (emit compiled-program)
           (emit ";")))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
-        (emit "cont = ((closure1_type *)cont)->element;")
-TODO:
+        (emit "object buf[1]; buf[0] = ((closure1_type *)clo)->element;")
         (emit* 
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
-            ")->fn)(data, 1, cont, cont);")
+            ")->fn)(data, buf[0] 1, buf);")
 
         (emit* "}")
         (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
