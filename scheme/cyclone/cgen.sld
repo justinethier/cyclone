@@ -1780,6 +1780,12 @@
              (and
                (> (string-length tmp-ident) 3)
                (equal? "self" (substring tmp-ident 0 4))))
+           (closure-name
+             (if has-closure? 
+                 (let* ((lis (string-split formals #\,))
+                        (var (cadr (string-split (car lis) #\space))))
+                   var)
+                 "_"))
            (has-loop?
              (or
                (adbf:calls-self? (adb:get/default (ast:lambda-id exp) (adb:make-fnc)))
@@ -1796,6 +1802,18 @@
                         arg-closure
                         (string-append arg-closure ",")))
                 formals))
+           (c-formals
+             (cond
+               (cps?
+                (string-append
+                  "(void *data, object " closure-name ", int argc, object *args)"
+                  " /* " formals* " */\n"))
+               (else
+                (string-append
+                  "(void *data, " arg-argc
+                   formals*
+                  ")"))))
+           (c-arg-unpacking formals)
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
                         (car (ast:lambda-body exp)) ; car ==> assume single expr in lambda body after CPS
@@ -1807,9 +1825,10 @@
      (cons 
       (lambda (name)
         (string-append "static " return-type " " name 
-                       "(void *data, " arg-argc
-                        formals*
-                       ") {\n"
+                       c-formals
+                       " {\n"
+                       "UNPACKED: " c-arg-unpacking
+                       "\n"
                        preamble
                        (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
@@ -2017,7 +2036,11 @@
            "static void __lambda_" 
            (number->string (car l)) 
            "(void *data, object clo, int argc, object *args"
-           ") ;"))))
+           ") ;"
+           "/*"
+           (cdadr l)
+           "*/"
+           ))))
      lambdas)
     
     (emit "")
@@ -2036,7 +2059,6 @@
             (when (and *optimize-well-known-lambdas*
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
-              ;; (trace:error `(JAE ,(car l) ,l ,fnc))
            (let* ((params-str (cdadr l))
                   (args-str
                     (string-join
@@ -2044,7 +2066,15 @@
                         (string-split
                           (string-replace-all params-str "object" "")
                           #\,))
-                      #\,)))
+                      #\,))
+                  (unpack-args-str
+                    (string-join
+                      (cdr
+                        (string-split
+                          (string-replace-all params-str "object" "")
+                          #\,))
+                      #\;))
+                  )
              (emit*
                "static void __lambda_gc_ret_"
                (number->string (car l))
@@ -2052,6 +2082,8 @@
                params-str
                ")"
                "{"
+                 ;; cargs TODO: this is broken, will fix later
+                  unpack-args-str
                   "\nobject obj = "
                   "((closure1)" (mangle (car (adbf:all-params fnc))) ")->element;\n"
                   "__lambda_"
@@ -2066,6 +2098,7 @@
     ;; Print the definitions:
     (for-each
      (lambda (l)
+;(trace:error `(JAE def ,l))
       (cond
        ((equal? 'precompiled-lambda (caadr l))
          (emit*
