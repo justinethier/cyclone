@@ -1813,7 +1813,28 @@
                   "(void *data, " arg-argc
                    formals*
                   ")"))))
-           (c-arg-unpacking formals)
+           (c-arg-unpacking ;; Unpack args array into locals
+             (cond
+               ;; TODO: how to unpack varargs
+               (cps? 
+                (let ((i 0)
+                      (cstr "")
+                      (args (string-split formals #\,)))
+                  (for-each
+                    (lambda (arg)
+                      (set! cstr (string-append 
+                                   cstr
+                                   arg
+                                   " = args["
+                                   (number->string i)
+                                   "];"
+                                   ))
+                      (set! i (+ i 1))) 
+                    (if has-closure?
+                        (cdr args)
+                        args))
+                  cstr))
+               (else "")))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
                         (car (ast:lambda-body exp)) ; car ==> assume single expr in lambda body after CPS
@@ -1827,7 +1848,7 @@
         (string-append "static " return-type " " name 
                        c-formals
                        " {\n"
-                       "UNPACKED: " c-arg-unpacking
+                       c-arg-unpacking
                        "\n"
                        preamble
                        (if (ast:lambda-varargs? exp)
