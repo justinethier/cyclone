@@ -1820,6 +1820,13 @@
                 (let ((i 0)
                       (cstr "")
                       (args (string-split formals #\,)))
+                  ;; Strip off extra varargs since we will load them
+                  ;; up using a different technique
+                  (when (ast:lambda-varargs? exp)
+                    (set! args
+                      (reverse
+                       (cddr (reverse args)))))
+                  ;; Generate code to unpack args into locals w/expected names
                   (for-each
                     (lambda (arg)
                       (set! cstr (string-append 
@@ -1852,6 +1859,14 @@
                        "\n"
                        preamble
                        (if (ast:lambda-varargs? exp)
+;  TODO: varargs
+;  does it make more sense to write code here directly
+;  or modify load_varargs? basically want args[nx]...args[ny] to become a list
+;;
+;; TODO: is it possible to rewrite load_varargs to not use alloca?
+;; should try this on master, because I would prefer to avoid alloca
+;; here if at all possible
+;;
                          ;; Load varargs from C stack into Scheme list
                          (string-append 
                           ;; DEBUGGING:
