@@ -2191,7 +2191,7 @@
                    (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                          (cdr ps) 
                          (cdr cs)))))
-          (emit* "object buf[1]; object cont = args[0]");  
+          (emit* "object buf[1]; object cont = args[0];");  
           (if head-pair
               (emit* "buf[0] = &" head-pair "; (((closure)cont)->fn)(data, cont, 1, buf);")
               (emit* "buf[0] = NULL; (((closure)cont)->fn)(data, cont 1, buf);"))
