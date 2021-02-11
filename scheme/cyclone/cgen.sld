@@ -2194,7 +2194,7 @@
           (emit* "object buf[1]; object cont = args[0];");  
           (if head-pair
               (emit* "buf[0] = &" head-pair "; (((closure)cont)->fn)(data, cont, 1, buf);")
-              (emit* "buf[0] = NULL; (((closure)cont)->fn)(data, cont 1, buf);"))
+              (emit* "buf[0] = NULL; (((closure)cont)->fn)(data, cont, 1, buf);"))
           (emit* " } "))))
 
     ;; Emit entry point
@@ -2354,15 +2354,15 @@
         (emit* 
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
-            ")->fn)(data, buf[0] 1, buf);")
+            ")->fn)(data, buf[0], 1, buf);")
 
         (emit* "}")
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, object cont, object value){ ")
         (emit* "  register_library(\""
                (lib:name->unique-string lib-name)
                "\");")
         (if (null? lib-pass-thru-exports)
-            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
+            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont, value);")
             ;; GC to ensure objects are moved when exporting exports.
             ;; Otherwise there will be broken hearts :(
             (emit*
