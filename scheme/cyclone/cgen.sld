@@ -1780,9 +1780,14 @@
              (and
                (> (string-length tmp-ident) 3)
                (equal? "self" (substring tmp-ident 0 4))))
+           (formals-as-list
+             (let ((lis (string-split formals #\,)))
+               (if (null? lis)
+                   (list formals)
+                   lis)))
            (closure-name
              (if has-closure? 
-                 (let* ((lis (string-split formals #\,))
+                 (let* ((lis formals-as-list)
                         (var (cadr (string-split (car lis) #\space))))
                    var)
                  "_"))
@@ -1819,7 +1824,7 @@
                (cps? 
                 (let ((i 0)
                       (cstr "")
-                      (args (string-split formals #\,)))
+                      (args formals-as-list))
                   ;; Strip off extra varargs since we will load them
                   ;; up using a different technique
                   (when (ast:lambda-varargs? exp)
@@ -1859,17 +1864,9 @@
                        "\n"
                        preamble
                        (if (ast:lambda-varargs? exp)
-;  TODO: varargs
-;  does it make more sense to write code here directly
-;  or modify load_varargs? basically want args[nx]...args[ny] to become a list
-;;
-;; TODO: is it possible to rewrite load_varargs to not use alloca?
-;; should try this on master, because I would prefer to avoid alloca
-;; here if at all possible
-;;
                          ;; Load varargs from C stack into Scheme list
                          (let ((num-fixargs (- (length (ast:lambda-formals->list exp)) 
-                                               2 ;; include raw and "..."
+                                               1
                                                (if has-closure? 1 0))))
                            (string-append 
                             ;; DEBUGGING:
