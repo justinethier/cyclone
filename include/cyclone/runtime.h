@@ -148,28 +148,21 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
    our compiler will compute the difference between the number of required
    args and the number of provided ones, and pass the difference as 'count'
  */
-#define load_varargs(var, arg_var, count) \
-  list var = (count > 0) ? alloca(sizeof(pair_type)*count) : NULL; \
+#define load_varargs(var, args_var, start, count) \
+  list var = ((count) > 0) ? alloca(sizeof(pair_type)*(count)) : NULL; \
   { \
     int i; \
     object tmp; \
-    va_list va; \
-    if (count > 0) { \
-      va_start(va, arg_var); \
-      for (i = 0; i < count; i++) { \
-        if (i) { \
-            tmp = va_arg(va, object); \
-        } else { \
-            tmp = arg_var; \
-        } \
+    if ((count) > 0) { \
+      for (i = 0; i < (count); i++) { \
+        tmp = arg[start + i]; \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
         var[i].hdr.immutable = 0; \
         var[i].tag = pair_tag; \
         var[i].pair_car = tmp; \
-        var[i].pair_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
+        var[i].pair_cdr = (i == ((count)-1)) ? NULL : &var[i + 1]; \
       } \
-      va_end(va); \
     } \
   }
 /* Prototypes for primitive functions. */

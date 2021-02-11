@@ -1868,19 +1868,19 @@
 ;; here if at all possible
 ;;
                          ;; Load varargs from C stack into Scheme list
-                         (string-append 
-                          ;; DEBUGGING:
-                          ;; "printf(\"%d %d\\n\", argc, "
-                          ;;  (number->string (length (ast:lambda-formals->list exp))) ");"
-                           "load_varargs(" 
-                           (mangle (ast:lambda-varargs-var exp))
-                           ", "
-                           (mangle (ast:lambda-varargs-var exp))
-                           "_raw, argc - " (number->string 
-                                         (- (length (ast:lambda-formals->list exp)) 
-                                            1
-                                            (if has-closure? 1 0)))
-                           ");\n");
+                         (let ((num-fixargs (- (length (ast:lambda-formals->list exp)) 
+                                               2 ;; include raw and "..."
+                                               (if has-closure? 1 0))))
+                           (string-append 
+                            ;; DEBUGGING:
+                            ;; "printf(\"%d %d\\n\", argc, "
+                            ;;  (number->string (length (ast:lambda-formals->list exp))) ");"
+                             "load_varargs(" 
+                             (mangle (ast:lambda-varargs-var exp))
+                             ", args"
+                             ", " (number->string num-fixargs)
+                             ", argc - " (number->string num-fixargs)
+                             ");\n"))
                          "") ; No varargs, skip
                        (c:serialize
                          (c:append
