@@ -155,7 +155,7 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
     object tmp; \
     if ((count) > 0) { \
       for (i = 0; i < (count); i++) { \
-        tmp = arg[start + i]; \
+        tmp = args_var[start + i]; \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
         var[i].hdr.immutable = 0; \
@@ -174,7 +174,7 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
 
 /**@{*/
 object apply(void *data, object cont, object func, object args);
-void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
+void Cyc_apply(void *data, object cont, int argc, object *args);
 void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
 object apply_va(void *data, object cont, int argc, object func, ...);
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
