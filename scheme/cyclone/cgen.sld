@@ -2357,12 +2357,12 @@
             ")->fn)(data, buf[0], 1, buf);")
 
         (emit* "}")
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, object cont, object value){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(void *data, object cont, int argc, object value){ ")
         (emit* "  register_library(\""
                (lib:name->unique-string lib-name)
                "\");")
         (if (null? lib-pass-thru-exports)
-            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont, value);")
+            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, cont, argc, value);")
             ;; GC to ensure objects are moved when exporting exports.
             ;; Otherwise there will be broken hearts :(
             (emit*
