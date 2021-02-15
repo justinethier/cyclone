@@ -2134,13 +2134,30 @@
 ;(trace:error `(JAE def ,l))
       (cond
        ((equal? 'precompiled-lambda (caadr l))
-         (emit*
-           "static void __lambda_" 
-           (number->string (car l))
-           (cadadr l)
-           " {"
-           (car (cddadr l))
-           " }"))
+        (cond
+         ((equal? (substring (cadadr l) 0 42)
+                  "(void *data, int argc, closure _, object k")
+           ;; Backwards compatibility for define-c expressions using
+           ;; the old style of all C parameters contained directly
+           ;; in the function definition. The above code finds them
+           ;; and below we emit code that unpacks the args array into
+           ;; a series of local variables
+           (emit*
+             "static void __lambda_" 
+             (number->string (car l))
+             "(void *data, object _, int args, object *args)"
+             " {"
+             (c:old-c-args->new-decls-from-args (cadadr l))
+             (car (cddadr l))
+             " }"))
+         (else
+           (emit*
+             "static void __lambda_" 
+             (number->string (car l))
+             (cadadr l)
+             " {"
+             (car (cddadr l))
+             " }"))))
        ((equal? 'precompiled-inline-lambda (caadr l))
          (emit*
            "static object __lambda_" 
@@ -2374,6 +2391,35 @@
     (if program?
       (emit *c-main-function*))))
 
+;; Take an old define-c CPS function definition string such as:
+;;
+;;   "(void *data, int argc, closure _, object k, object a, object b, object c)")
+;;
+;; And convert it to a series of local variable declarations, assigning a value
+;; from our new `args` parameter.
+;;
+;; These declarations are returned as a string.
+(define (c:old-c-args->new-decls-from-args cstr)
+  (let* ((args (cdddr 
+                 (string-split
+                   (filter-invalid-chars cstr)
+                   #\,))) ;; Get scheme list of any extra arguments
+         (vars (map (lambda (a) (cadr (string-split a #\space))) args)) ;; Get identifiers of variables
+         (i 0)
+         (str ""))
+    (for-each ;; Create a set of assignments from args array to new C local variables
+      (lambda (v)
+        (set! str (string-append str "object " v " = args[" (number->string i) "];"))
+        (set! i (+ i 1)))
+      vars)
+    str))
+
+(define (filter-invalid-chars str)
+  (list->string
+    (filter
+      (lambda (c)
+        (not (member c '(#\( #\)))))
+      (string->list str))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically generate blocks of code for the compiler
