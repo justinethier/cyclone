@@ -145,12 +145,12 @@
      ;;"/* Check for GC, then call given continuation closure */\n"
       "#define return_closcall" n "(td, clo" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td, clo, buf, " n "); \\\n"
       "     return; \\\n"
       " } else {\\\n"
-      "     closcall" n "(td, (closure) (clo)" args "); \\\n"
+      "     closcall" n "(td, (closure) (clo), buf); \\\n"
       "     return;\\\n"
       " } \\\n"
       "}\n")))
@@ -183,13 +183,13 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct" n "(td, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign " \\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign " \\\n"
       "     mclosure0(c1, (function_type) _fn); \\\n"
       "     GC(td, &c1, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)_fn" args "); \\\n"
+      "     (_fn)(td, (closure)_fn, " n ", buf); \\\n"
       " }}\n")))
 
 (define (c-macro-return-direct-with-closure num-args)
@@ -200,12 +200,12 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_clo" n "(td, clo, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     GC(td, clo, buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
+      "     (_fn)(td, (closure)(clo), " n ", buf); \\\n"
       " }}\n")))
 
 ;; Generate hybrid macros that can call a function directly but also receives
@@ -218,13 +218,13 @@
      ;;"/* Check for GC, then call C function directly */\n"
       "#define return_direct_with_obj" n "(td, clo, _clo_fn, _fn" args ") { \\\n"
       " char top; \\\n"
+      " object buf[" n "]; " arry-assign "\\\n"
       " if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \\\n"
-      "     object buf[" n "]; " arry-assign "\\\n"
       "     mclosure1(c1, (function_type) _clo_fn, clo); \\\n"
       "     GC(td, (closure)(&c1), buf, " n "); \\\n"
       "     return; \\\n"
       " } else { \\\n"
-      "     (_fn)(td, " n ", (closure)(clo)" args "); \\\n"
+      "     (_fn)(td, (closure)(clo), " n ", buf); \\\n"
       " }}\n")))
 
 (define (c-macro-closcall num-args)
@@ -233,12 +233,12 @@
         (n-1 (number->string (if (> num-args 0) (- num-args 1) 0)))
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
-      "#define closcall" n "(td, clo" args ") \\\n"
+      "#define closcall" n "(td, clo, buf) \\\n"
         (wrap (string-append "if (obj_is_not_closure(clo)) { \\\n"
-                             "   Cyc_apply(td, " n-1 ", (closure)(a1), clo" (if (> num-args 1) (substring args 3 (string-length args)) "") "); \\\n"
+                             "   Cyc_apply(td, clo, " n ", buf ); \\\n"
                              "}"))
         (wrap " else { \\\n")
-        "   ((clo)->fn)(td, " n ", clo" args ")"
+        "   ((clo)->fn)(td, clo, " n ", buf); \\\n"
         (wrap ";\\\n}"))))
 
 (define (c-macro-n-prefix n prefix)
@@ -709,6 +709,12 @@
 (define-c string-byte-length
   "(void *data, int argc, closure _, object k, object s)"
   " return_closcall1(data, k, Cyc_string_byte_length(data, s)); ")
+; cargs TODO:
+;(define-c string-byte-length
+;  "(void *data, object clo, int argc, object *args)"
+;  " Cyc_check_argc(data, \"string-byte-length\", argc, 2);
+;    object s = args[1];
+;    return_closcall1(data, args[0], Cyc_string_byte_length(data, s)); ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Primitives
@@ -1774,6 +1780,17 @@
              (and
                (> (string-length tmp-ident) 3)
                (equal? "self" (substring tmp-ident 0 4))))
+           (formals-as-list
+             (let ((lis (string-split formals #\,)))
+               (if (null? lis)
+                   (list formals)
+                   lis)))
+           (closure-name
+             (if has-closure? 
+                 (let* ((lis formals-as-list)
+                        (var (cadr (string-split (car lis) #\space))))
+                   var)
+                 "_"))
            (has-loop?
              (or
                (adbf:calls-self? (adb:get/default (ast:lambda-id exp) (adb:make-fnc)))
@@ -1790,6 +1807,46 @@
                         arg-closure
                         (string-append arg-closure ",")))
                 formals))
+           (c-formals
+             (cond
+               (cps?
+                (string-append
+                  "(void *data, object " closure-name ", int argc, object *args)"
+                  " /* " formals* " */\n"))
+               (else
+                (string-append
+                  "(void *data, " arg-argc
+                   formals*
+                  ")"))))
+           (c-arg-unpacking ;; Unpack args array into locals
+             (cond
+               ;; TODO: how to unpack varargs
+               (cps? 
+                (let ((i 0)
+                      (cstr "")
+                      (args formals-as-list))
+                  ;; Strip off extra varargs since we will load them
+                  ;; up using a different technique
+                  (when (ast:lambda-varargs? exp)
+                    (set! args
+                      (reverse
+                       (cddr (reverse args)))))
+                  ;; Generate code to unpack args into locals w/expected names
+                  (for-each
+                    (lambda (arg)
+                      (set! cstr (string-append 
+                                   cstr
+                                   arg
+                                   " = args["
+                                   (number->string i)
+                                   "];"
+                                   ))
+                      (set! i (+ i 1))) 
+                    (if has-closure?
+                        (cdr args)
+                        args))
+                  cstr))
+               (else "")))
            (env-closure (lambda->env exp))
            (body    (c-compile-exp     
                         (car (ast:lambda-body exp)) ; car ==> assume single expr in lambda body after CPS
@@ -1801,25 +1858,26 @@
      (cons 
       (lambda (name)
         (string-append "static " return-type " " name 
-                       "(void *data, " arg-argc
-                        formals*
-                       ") {\n"
+                       c-formals
+                       " {\n"
+                       c-arg-unpacking
+                       "\n"
                        preamble
                        (if (ast:lambda-varargs? exp)
                          ;; Load varargs from C stack into Scheme list
-                         (string-append 
-                          ;; DEBUGGING:
-                          ;; "printf(\"%d %d\\n\", argc, "
-                          ;;  (number->string (length (ast:lambda-formals->list exp))) ");"
-                           "load_varargs(" 
-                           (mangle (ast:lambda-varargs-var exp))
-                           ", "
-                           (mangle (ast:lambda-varargs-var exp))
-                           "_raw, argc - " (number->string 
-                                         (- (length (ast:lambda-formals->list exp)) 
-                                            1
-                                            (if has-closure? 1 0)))
-                           ");\n");
+                         (let ((num-fixargs (- (length (ast:lambda-formals->list exp)) 
+                                               1
+                                               (if has-closure? 1 0))))
+                           (string-append 
+                            ;; DEBUGGING:
+                            ;; "printf(\"%d %d\\n\", argc, "
+                            ;;  (number->string (length (ast:lambda-formals->list exp))) ");"
+                             "load_varargs(" 
+                             (mangle (ast:lambda-varargs-var exp))
+                             ", args"
+                             ", " (number->string num-fixargs)
+                             ", argc - " (number->string num-fixargs)
+                             ");\n"))
                          "") ; No varargs, skip
                        (c:serialize
                          (c:append
@@ -2009,9 +2067,13 @@
         (else
          (emit*
            "static void __lambda_" 
-           (number->string (car l)) "(void *data, int argc, "
+           (number->string (car l)) 
+           "(void *data, object clo, int argc, object *args"
+           ") ;"
+           "/*"
            (cdadr l)
-           ") ;"))))
+           "*/"
+           ))))
      lambdas)
     
     (emit "")
@@ -2030,7 +2092,6 @@
             (when (and *optimize-well-known-lambdas*
                        (adbf:well-known fnc)
                        (equal? (adbf:closure-size fnc) 1))
-              ;; (trace:error `(JAE ,(car l) ,l ,fnc))
            (let* ((params-str (cdadr l))
                   (args-str
                     (string-join
@@ -2038,14 +2099,24 @@
                         (string-split
                           (string-replace-all params-str "object" "")
                           #\,))
-                      #\,)))
+                      #\,))
+                  (unpack-args-str
+                    (string-join
+                      (cdr
+                        (string-split
+                          (string-replace-all params-str "object" "")
+                          #\,))
+                      #\;))
+                  )
              (emit*
                "static void __lambda_gc_ret_"
                (number->string (car l))
-               "(void *data, int argc,"
+               "(void *data, int argc," ; cargs TODO: update this and call below
                params-str
                ")"
                "{"
+                 ;; cargs TODO: this is broken, will fix later
+                  unpack-args-str
                   "\nobject obj = "
                   "((closure1)" (mangle (car (adbf:all-params fnc))) ")->element;\n"
                   "__lambda_"
@@ -2060,15 +2131,33 @@
     ;; Print the definitions:
     (for-each
      (lambda (l)
+;(trace:error `(JAE def ,l))
       (cond
        ((equal? 'precompiled-lambda (caadr l))
-         (emit*
-           "static void __lambda_" 
-           (number->string (car l))
-           (cadadr l)
-           " {"
-           (car (cddadr l))
-           " }"))
+        (cond
+         ((equal? (substring (cadadr l) 0 42)
+                  "(void *data, int argc, closure _, object k")
+           ;; Backwards compatibility for define-c expressions using
+           ;; the old style of all C parameters contained directly
+           ;; in the function definition. The above code finds them
+           ;; and below we emit code that unpacks the args array into
+           ;; a series of local variables
+           (emit*
+             "static void __lambda_" 
+             (number->string (car l))
+             "(void *data, object _, int args, object *args)"
+             " {"
+             (c:old-c-args->new-decls-from-args (cadadr l))
+             (car (cddadr l))
+             " }"))
+         (else
+           (emit*
+             "static void __lambda_" 
+             (number->string (car l))
+             (cadadr l)
+             " {"
+             (car (cddadr l))
+             " }"))))
        ((equal? 'precompiled-inline-lambda (caadr l))
          (emit*
            "static object __lambda_" 
@@ -2086,7 +2175,7 @@
     ;; Emit inlinable function list
     (cond
       ((not program?)
-        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, int argc, closure _, object cont){ ")
+        (emit* "void c_" (lib:name->string lib-name) "_inlinable_lambdas(void *data, object clo, int argc, object *args){ ")
         (let ((pairs '())
               (head-pair #f))
           (for-each
@@ -2098,7 +2187,7 @@
                (set! pairs (cons pair-sym pairs))))
             *global-inlines*)
             ;; Link the pairs
-            (let loop ((code '())
+          (let loop ((code '())
                        (ps pairs)
                        (cs (map (lambda (_) (mangle (gensym 'c))) pairs)))
                 (cond
@@ -2119,23 +2208,23 @@
                    (loop (cons (string-append "make_pair(" (car cs) ", &" (car ps) ", &" (cadr cs) ");\n") code)
                          (cdr ps) 
                          (cdr cs)))))
+          (emit* "object buf[1]; object cont = args[0];");  
           (if head-pair
-              (emit* "(((closure)cont)->fn)(data, 1, cont, &" head-pair ");")
-              (emit* "(((closure)cont)->fn)(data, 1, cont, NULL);"))
+              (emit* "buf[0] = &" head-pair "; (((closure)cont)->fn)(data, cont, 1, buf);")
+              (emit* "buf[0] = NULL; (((closure)cont)->fn)(data, cont, 1, buf);"))
           (emit* " } "))))
 
     ;; Emit entry point
     (cond
       (program?
-        (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value);")
+        (emit "static void c_entry_pt_first_lambda(void *data, object clo, int argc, object *args);")
         (for-each
           (lambda (lib-name)
-            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, int argc, closure cont, object value);"))
+            (emit* "extern void c_" (lib:name->string lib-name) "_entry_pt(void *data, object clo, int argc, object* args);"))
           required-libs)
-        (emit "static void c_entry_pt(data, argc, env,cont) void *data; int argc; closure env,cont; { "))
+        (emit "static void c_entry_pt(void *data, object clo, int argc, object *args) { "))
       (else
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
-        ;; DEBUG (emit (string-append "printf(\"init " (lib:name->string lib-name) "\\n\");"))
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt_first_lambda(void *data, object clo, int argc, object *args){ ")
       ))
 
     ;; Set global-changed indicator
@@ -2270,27 +2359,27 @@
             (reverse required-libs)) ;; Init each lib's dependencies 1st
           (emit* 
             ;; Start cont chain, but do not assume closcall1 macro was defined
-            "(" this-clo ".fn)(data, 0, &" this-clo ", &" this-clo ");")
+            " object buf[1]; buf[0] = &" this-clo "; "
+            "(" this-clo ".fn)(data, &" this-clo ", 1, buf);")
           (emit "}")
-          (emit "static void c_entry_pt_first_lambda(void *data, int argc, closure cont, object value) {")
-          ;; DEBUG (emit (string-append "printf(\"init first lambda\\n\");"))
+          (emit "static void c_entry_pt_first_lambda(void *data, object clo, int argc, object *args) {")
           (emit compiled-program)
           (emit ";")))
       (else
         ;; Do not use closcall1 macro as it might not have been defined
-        (emit "cont = ((closure1_type *)cont)->element;")
+        (emit "object buf[1]; buf[0] = ((closure1_type *)clo)->element;")
         (emit* 
             "(((closure)"
             (cgen:mangle-global (lib:name->symbol lib-name)) 
-            ")->fn)(data, 1, cont, cont);")
+            ")->fn)(data, buf[0], 1, buf);")
 
         (emit* "}")
-        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(data, argc, cont,value) void *data; int argc; closure cont; object value;{ ")
+        (emit* "void c_" (lib:name->string lib-name) "_entry_pt(void *data, object cont, int argc, object value){ ")
         (emit* "  register_library(\""
                (lib:name->unique-string lib-name)
                "\");")
         (if (null? lib-pass-thru-exports)
-            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, argc, cont,value);")
+            (emit* "  c_" (lib:name->string lib-name) "_entry_pt_first_lambda(data, cont, argc, value);")
             ;; GC to ensure objects are moved when exporting exports.
             ;; Otherwise there will be broken hearts :(
             (emit*
@@ -2302,6 +2391,35 @@
     (if program?
       (emit *c-main-function*))))
 
+;; Take an old define-c CPS function definition string such as:
+;;
+;;   "(void *data, int argc, closure _, object k, object a, object b, object c)")
+;;
+;; And convert it to a series of local variable declarations, assigning a value
+;; from our new `args` parameter.
+;;
+;; These declarations are returned as a string.
+(define (c:old-c-args->new-decls-from-args cstr)
+  (let* ((args (cdddr 
+                 (string-split
+                   (filter-invalid-chars cstr)
+                   #\,))) ;; Get scheme list of any extra arguments
+         (vars (map (lambda (a) (cadr (string-split a #\space))) args)) ;; Get identifiers of variables
+         (i 0)
+         (str ""))
+    (for-each ;; Create a set of assignments from args array to new C local variables
+      (lambda (v)
+        (set! str (string-append str "object " v " = args[" (number->string i) "];"))
+        (set! i (+ i 1)))
+      vars)
+    str))
+
+(define (filter-invalid-chars str)
+  (list->string
+    (filter
+      (lambda (c)
+        (not (member c '(#\( #\)))))
+      (string->list str))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically generate blocks of code for the compiler

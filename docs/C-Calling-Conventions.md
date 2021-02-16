@@ -58,7 +58,7 @@ Where:
  * `data` is state data for the current thread
  * `argc` indicates how many arguments were sent by the caller. Generally only applicable for variadic functions.
  * `closure` is the caller's closure. Note this is ignored for global functions as closures are never applicable to them.
- * `k` is the continuation to call into next.
+ * `k` is the continuation to call into next. Note this is not necessarily present; it is often placed here as a result of the compiler's CPS conversion phase.
 
 In addition zero or more objects may be listed after that as well as an ellipsis `...` for variadic functions. For example:
 
@@ -79,7 +79,7 @@ Note our `define-c` FFI requires the user to specify the same calling convention
 
 We want a signature similar to this:
 
-    static void __lambda(void *data, object closure, object k, int argc, object *args) ;
+    static void __lambda(void *data, object closure, int argc, object *args) ;
 
 That way we can pack all the extra arguments into `args` and call all functions using a single standard interface. 
 
@@ -151,15 +151,16 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 ## Changes to the FFI
 
-`define-c` needs to use the new signature.
+`define-c` needs to use the new signature. **TBD if there is an efficient way to do this without also requiring a migration of existing `define-c` forms. It would be great if existing code would continue to work, thus not making this a breaking change. Perhaps the compiler can detect the old signature and generate scaffolding accordingly.**
 
 `(cyclone foreign)` will need to be modified to generate `define-c` forms that are compatible with the new signatures.
 
 # Development Plan
 
-- Modify compiler to generate code using the new calling conventions
+- Modify compiler (scheme/cyclone/cgen.sld) to generate code using the new calling conventions. Test as best we can that C code is generated properly.
+- Branch off of master at this point?? At some point we will want to do this to prevent a nasty merge of cargs development back into master.
 - Add necessary header definitions
-- Modify runtime / primitives to use calling convention
-- Modify FFI and define-c definitions
+- Modify runtime / primitives to use calling convention. Ensure runtime compiles with these changes in place.
+- Modify FFI and define-c definitions in scheme files
 - Bring up the compiler in stages. Will need to use the current version of Cyclone to generate a version with the new function signatures.
 

@@ -76,6 +76,15 @@ void gc_init_heap(long heap_size);
   } \
 }
 
+#define Cyc_check_argc(data, fnc_name, argc, expected) { \
+  if (expected > argc) { \
+    char buf[128]; \
+    snprintf(buf, 127, "Expected %d arguments to %s but received %ld", \
+             expected, fnc_name, argc);  \
+    Cyc_rt_raise_msg(data, buf); \
+  } \
+}
+
 #define Cyc_verify_mutable(data, obj) { \
   if (immutable(obj)) Cyc_immutable_obj_error(data, obj); }
 #define Cyc_verify_immutable(data, obj) { \
@@ -140,28 +149,21 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
    our compiler will compute the difference between the number of required
    args and the number of provided ones, and pass the difference as 'count'
  */
-#define load_varargs(var, arg_var, count) \
-  list var = (count > 0) ? alloca(sizeof(pair_type)*count) : NULL; \
+#define load_varargs(var, args_var, start, count) \
+  list var = ((count) > 0) ? alloca(sizeof(pair_type)*(count)) : NULL; \
   { \
     int i; \
     object tmp; \
-    va_list va; \
-    if (count > 0) { \
-      va_start(va, arg_var); \
-      for (i = 0; i < count; i++) { \
-        if (i) { \
-            tmp = va_arg(va, object); \
-        } else { \
-            tmp = arg_var; \
-        } \
+    if ((count) > 0) { \
+      for (i = 0; i < (count); i++) { \
+        tmp = args_var[start + i]; \
         var[i].hdr.mark = gc_color_red; \
         var[i].hdr.grayed = 0; \
         var[i].hdr.immutable = 0; \
         var[i].tag = pair_tag; \
         var[i].pair_car = tmp; \
-        var[i].pair_cdr = (i == (count-1)) ? NULL : &var[i + 1]; \
+        var[i].pair_cdr = (i == ((count)-1)) ? NULL : &var[i + 1]; \
       } \
-      va_end(va); \
     } \
   }
 /* Prototypes for primitive functions. */
@@ -173,7 +175,7 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
 
 /**@{*/
 object apply(void *data, object cont, object func, object args);
-void Cyc_apply(void *data, int argc, closure cont, object prim, ...);
+void Cyc_apply(void *data, object cont, int argc, object *args);
 void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
 object apply_va(void *data, object cont, int argc, object func, ...);
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
