@@ -128,59 +128,61 @@ void hrt_log_delta(const char *label, long long tstamp)
 #endif
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(td, clo, a1) \
+#define closcall1(td, clo, buf) \
 if (obj_is_not_closure(clo)) { \
-   Cyc_apply(td, 0, (closure)(a1), clo); \
+   Cyc_apply(td, clo, 1, buf ); \
 } else { \
-   ((clo)->fn)(td, 1, clo, a1);\
+   ((clo)->fn)(td, clo, 1, buf); \
+;\
 }
-#define return_closcall1(td, clo, a1) { \
+#define return_closcall1(td, clo,a1) { \
  char top; \
+ object buf[1]; buf[0] = a1;\
  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
-     object buf[1]; buf[0] = a1;\
      GC(td, clo, buf, 1); \
      return; \
  } else {\
-     closcall1(td, (closure) (clo), a1); \
+     closcall1(td, (closure) (clo), buf); \
      return;\
  } \
 }
-#define _return_closcall1(td, clo, a1) { \
+#define _return_closcall1(td, clo,a1) { \
  char top; \
+ object buf[1]; buf[0] = a1;\
  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
-     object buf[1]; buf[0] = a1;\
      GC(td, clo, buf, 1); \
      return NULL; \
  } else {\
-     closcall1(td, (closure) (clo), a1); \
+     closcall1(td, (closure) (clo), buf); \
      return NULL;\
  } \
 }
-#define closcall2(td, clo, a1, a2) \
+#define closcall2(td, clo, buf) \
 if (obj_is_not_closure(clo)) { \
-   Cyc_apply(td, 1, (closure)(a1), clo,a2); \
+   Cyc_apply(td, clo, 2, buf ); \
 } else { \
-  ((clo)->fn)(td, 2, clo, a1, a2);\
+   ((clo)->fn)(td, clo, 2, buf); \
+;\
 }
-#define return_closcall2(td, clo, a1, a2) { \
+#define return_closcall2(td, clo,a1,a2) { \
  char top; \
+ object buf[2]; buf[0] = a1;buf[1] = a2;\
  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
-     object buf[2]; buf[0] = a1;buf[1] = a2;\
      GC(td, clo, buf, 2); \
      return; \
  } else {\
-     closcall2(td, (closure) (clo), a1, a2); \
+     closcall2(td, (closure) (clo), buf); \
      return;\
  } \
 }
-#define _return_closcall2(td, clo, a1, a2) { \
+#define _return_closcall2(td, clo,a1,a2) { \
  char top; \
+ object buf[2]; buf[0] = a1;buf[1] = a2;\
  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
-     object buf[2]; buf[0] = a1;buf[1] = a2;\
      GC(td, clo, buf, 2); \
      return NULL; \
  } else {\
-     closcall2(td, (closure) (clo), a1, a2); \
+     closcall2(td, (closure) (clo), buf); \
      return NULL;\
  } \
 }
@@ -352,11 +354,14 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
   return value;
 }
 
-static void Cyc_global_set_cps_gc_return(void *data, int argc, object cont, object glo_obj, object val, object next)
+static void Cyc_global_set_cps_gc_return(void *data, object cont, int argc, object *args) //object glo_obj, object val, object next)
 {
+  object glo_obj = args[0];
+  object val = args[1];
+  object next = args[2];
   object *glo = (object *)glo_obj;
   *(glo) = val;
-  closcall1(data, (closure)next, val);
+  closcall1(data, next, val);
 }
 
 object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
@@ -661,13 +666,13 @@ object Cyc_glo_eval_from_c = NULL;
 /**
  * @brief The default exception handler
  * @param data Thread data object
- * @return argc Unused, just here to maintain calling convention
- * @return _ Unused, just here to maintain calling convention
- * @return err Object containing data for the error
+ * @param _ Unused, just here to maintain calling convention
+ * @param argc Unused, just here to maintain calling convention
+ * @param args Argument buffer, index 0 is object containing data for the error
  */
-object Cyc_default_exception_handler(void *data, int argc, closure _,
-                                     object err)
+object Cyc_default_exception_handler(void *data, object _, int argc, object *args)
 {
+  object err = args[0];
   int is_msg = 1;
   fprintf(stderr, "Error: ");
 
@@ -5344,8 +5349,8 @@ void _Cyc_91current_91exception_91handler(void *data, object cont, object args)
 
 void _Cyc_91default_91exception_91handler(void *data, object cont, object args)
 {
-  // TODO: this is a quick-and-dirty implementation, may be a better way to write this
-  Cyc_default_exception_handler(data, 1, args, car(args));
+  object buf[1] = {car(args)};
+  Cyc_default_exception_handler(data, args, 1, buf);
 }
 
 void _string_91cmp(void *data, object cont, object args)

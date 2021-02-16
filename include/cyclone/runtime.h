@@ -776,7 +776,7 @@ extern object Cyc_glo_call_cc;
  * @brief Raise and handle Scheme exceptions
  */
 /**@{*/
-object Cyc_default_exception_handler(void *data, int argc, closure _, object err);
+object Cyc_default_exception_handler(void *data, object _, int argc, object *args);
 
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);
