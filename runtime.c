@@ -1188,38 +1188,40 @@ object Cyc_display(void *data, object x, FILE * port)
   return quote_void;
 }
 
-void dispatch_write_va(void *data, int argc, object clo, object cont,
-                         object x, ...)
+void dispatch_write_va(void *data, object clo, int argc, object *args)
 {
+  object x = args[0];
+  object opts = boolean_f;
   object result;
-  va_list ap;
-  va_start(ap, x);
-  result = Cyc_write_va_list(data, argc - 1, x, ap);
-  va_end(ap);
+  if (argc > 1) {
+    opts = args[1];
+  }
+  result = Cyc_write_va_list(data, x, opts);
   return_closcall1(data, cont, result);
 }
 
 object Cyc_write_va(void *data, int argc, object x, ...)
 {
   object result;
+  object opts = boolean_f;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_write_va_list(data, argc, x, ap);
+  if (argc > 1) {
+    opts = va_arg(ap, object);
+  }
+  result = Cyc_write_va_list(data, x, opts);
   va_end(ap);
   return result;
 }
 
-object Cyc_write_va_list(void *data, int argc, object x, va_list ap)
+object Cyc_write_va_list(void *data, object x, object opts)
 {
   FILE *fp = stdout; // OK since this is the internal version of write
-  // Longer-term maybe we get rid of varargs for this one
-  if (argc > 1) {
-    object tmp;
-    tmp = va_arg(ap, object);
-    Cyc_check_port(data, tmp);
-    fp = ((port_type *) tmp)->fp;
+  if (opts != boolean_f) {
+    Cyc_check_port(data, opts);
+    fp = ((port_type *) opts)->fp;
     if (fp == NULL) {
-      Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+      Cyc_rt_raise2(data, "Unable to write to closed port: ", opts);
       return quote_void;
     }
   }
@@ -5537,8 +5539,13 @@ void _Cyc_91write(void *data, object cont, object args)
   Cyc_check_num_args(data, "write", 1, args);
   {
     object argc = Cyc_length(data, args);
-    dispatch(data, obj_obj2int(argc), (function_type) dispatch_write_va, cont,
-             cont, args);
+    int c = obj_obj2int(argc);
+    object buf[2];
+    buf[0] = car(args);
+    if (c > 1) {
+      buf[1] = cadr(args);
+    }
+    dispatch_write_va(data, cont, c, buf);
 }}
 
 void _display(void *data, object cont, object args)
@@ -5552,7 +5559,7 @@ void _display(void *data, object cont, object args)
     if (c > 1) {
       buf[1] = cadr(args);
     }
-    dispatch_display_va(data, cont, argc, buf);
+    dispatch_display_va(data, cont, c, buf);
   }
 }
 
