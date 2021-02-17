@@ -248,10 +248,9 @@ object Cyc_set_cvar(object var, object value);
  */
 /**@{*/
 object Cyc_display(void *data, object, FILE * port);
-void dispatch_display_va(void *data, int argc, object clo, object cont,
-                         object x, ...);
+void dispatch_display_va(void *data, object clo, int argc, object *args);
 object Cyc_display_va(void *data, int argc, object x, ...);
-object Cyc_display_va_list(void *data, int argc, object x, va_list ap);
+object Cyc_display_va_list(void *data, object x, object opts);
 object Cyc_write_char(void *data, object c, object port);
 object Cyc_write(void *data, object, FILE * port);
 void dispatch_write_va(void *data, int argc, object clo, object cont,

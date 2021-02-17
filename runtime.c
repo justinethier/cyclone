@@ -976,47 +976,40 @@ int double2buffer(char *buf, int buf_size, double num)
   return i;
 }
 
-// TODO: need to change I/O functions (including display/write below)
-// to accept an optional port arg. also, if port is not specified, should
-// use (current-output-port) instead of stdout. will need to expose the
-// (current-*port) functions somehow (tricky since we do not have param
-// object yet) then figure out how to use them.
-//
-// If port is omitted from any output procedure, it defaults
-// to the value returned by (current-output-port). It is an
-// error to attempt an output operation on a closed port
-//
-void dispatch_display_va(void *data, int argc, object clo, object cont,
-                           object x, ...)
+void dispatch_display_va(void *data, object cont, int argc, object *args)
 {
+  object x = args[0];
+  object opts = boolean_f;
   object result;
-  va_list ap;
-  va_start(ap, x);
-  result = Cyc_display_va_list(data, argc - 1, x, ap);
-  va_end(ap);
+  if (argc > 1) {
+    opts = args[1];
+  }
+  result = Cyc_display_va_list(data, x, opts);
   return_closcall1(data, cont, result);
 }
 
 object Cyc_display_va(void *data, int argc, object x, ...)
 {
   object result;
+  object opts = boolean_f;
   va_list ap;
   va_start(ap, x);
-  result = Cyc_display_va_list(data, argc, x, ap);
+  if (argc > 1) {
+    opts = va_arg(ap, object);
+  }
+  result = Cyc_display_va_list(data, x, opts);
   va_end(ap);
   return result;
 }
 
-object Cyc_display_va_list(void *data, int argc, object x, va_list ap)
+object Cyc_display_va_list(void *data, object x, object opts)
 {
-  FILE *fp = stdout; // TODO: just a placeholder, should use current-output-port
-  if (argc > 1) {
-    object tmp;
-    tmp = va_arg(ap, object);
-    Cyc_check_port(data, tmp);
-    fp = ((port_type *) tmp)->fp;
+  FILE *fp = stdout;
+  if (opts != boolean_f) {
+    Cyc_check_port(data, opts);
+    fp = ((port_type *) opts)->fp;
     if (fp == NULL) {
-      Cyc_rt_raise2(data, "Unable to write to closed port: ", tmp);
+      Cyc_rt_raise2(data, "Unable to write to closed port: ", opts);
       return quote_void;
     }
   }
@@ -5553,9 +5546,15 @@ void _display(void *data, object cont, object args)
   Cyc_check_num_args(data, "display", 1, args);
   {
     object argc = Cyc_length(data, args);
-    dispatch(data, obj_obj2int(argc), (function_type) dispatch_display_va, cont,
-             cont, args);
-}}
+    int c = obj_obj2int(argc);
+    object buf[2];
+    buf[0] = car(args);
+    if (c > 1) {
+      buf[1] = cadr(args);
+    }
+    dispatch_display_va(data, cont, argc, buf);
+  }
+}
 
 void _call_95cc(void *data, object cont, object args)
 {
