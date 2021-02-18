@@ -1665,6 +1665,35 @@ object Cyc_num_cmp_va_list(void *data, int argc,
   return boolean_t;
 }
 
+object Cyc_num_cmp_list(void *data, int argc,
+                       int (fn_op(void *, object, object)), 
+                       object *args)
+{
+// carg TODO: does this work with cargs changes? do we really want argc - 1 in caller??
+  int i;
+  object n, next;
+
+  if (argc < 2) {
+    Cyc_rt_raise_msg(data, "Not enough arguments for boolean operator\n");
+  }
+
+  n = car(args);
+  args = cdr(args);
+  Cyc_check_num(data, n);
+
+  for (i = 1; i < argc; i++) {
+    next = car(args);
+    Cyc_check_num(data, next);
+    if (!fn_op(data, n, next)) {
+      return boolean_f;
+    }
+    n = next;
+    next = cdr(args);
+  }
+
+  return boolean_t;
+}
+
 // Convert a bignum back to fixnum if possible
 object Cyc_bignum_normalize(void *data, object n)
 {
@@ -1775,12 +1804,9 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     va_end(ap); \
     _return_closcall1(data, cont, result); \
 } \
-void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
+void FUNC_APPLY(void *data, object cont, int argc, object *args) { \
     object result; \
-    va_list ap; \
-    va_start(ap, n); \
-    result = Cyc_num_cmp_va_list(data, argc - 1, FUNC_OP, n, ap); \
-    va_end(ap); \
+    result = Cyc_num_cmp_list(data, argc - 1, FUNC_OP, args); \
     return_closcall1(data, cont, result); \
 } \
 object FUNC_FAST_OP(void *data, object x, object y) { \
@@ -1863,29 +1889,6 @@ declare_num_cmp(Cyc_num_lt,  Cyc_num_lt_op,  Cyc_num_fast_lt_op, dispatch_num_lt
 declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, Cyc_num_fast_gte_op, dispatch_num_gte, >=, CYC_BN_GTE);
 declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, Cyc_num_fast_lte_op, dispatch_num_lte, <=, CYC_BN_LTE);
 
-//object Cyc_is_boolean(object o)
-//{
-//  if ((o != NULL) &&
-//      !is_value_type(o) &&
-//      ((list) o)->tag == boolean_tag && ((boolean_f == o) || (boolean_t == o)))
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_pair(object o)
-//{
-//  if (is_object_type(o) && ((list) o)->tag == pair_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_null(object o)
-//{
-//  if (o == NULL)
-//    return boolean_t;
-//  return boolean_f;
-//}
-
 object Cyc_is_number(object o)
 {
   if ((o != NULL) && (obj_is_int(o) || (!is_value_type(o)
@@ -1909,20 +1912,6 @@ object Cyc_is_real(object o)
   return boolean_f;
 }
 
-//object Cyc_is_complex(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == complex_num_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-
-//object Cyc_is_fixnum(object o)
-//{
-//  if (obj_is_int(o))
-//    return boolean_t;
-//  return boolean_f;
-//}
-
 object Cyc_is_integer(object o)
 {
   if ((o != NULL) && (obj_is_int(o) ||
@@ -1933,69 +1922,6 @@ object Cyc_is_integer(object o)
     return boolean_t;
   return boolean_f;
 }
-
-//object Cyc_is_bignum(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bignum_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_symbol(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == symbol_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_vector(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == vector_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_bytevector(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == bytevector_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_port(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == port_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_mutex(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == mutex_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_cond_var(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == cond_var_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_string(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == string_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_char(object o)
-//{
-//  if (obj_is_char(o))
-//    return boolean_t;
-//  return boolean_f;
-//}
 
 object Cyc_is_record(object o)
 {
@@ -2029,46 +1955,6 @@ object Cyc_is_procedure(void *data, object o)
   }
   return boolean_f;
 }
-
-//object Cyc_is_macro(object o)
-//{
-//  int tag;
-//  if ((o != NULL) && !is_value_type(o)) {
-//    tag = type_of(o);
-//    if (tag == macro_tag) {
-//      return boolean_t;
-//    }
-//  }
-//  return boolean_f;
-//}
-//
-//object Cyc_is_eof_object(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && type_of(o) == eof_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_cvar(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && type_of(o) == cvar_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_is_opaque(object o)
-//{
-//  if ((o != NULL) && !is_value_type(o) && ((list) o)->tag == c_opaque_tag)
-//    return boolean_t;
-//  return boolean_f;
-//}
-//
-//object Cyc_eq(object x, object y)
-//{
-//  if (x == y)
-//    return boolean_t;
-//  return boolean_f;
-//}
 
 object Cyc_eqv(object x, object y)
 {
@@ -5188,33 +5074,31 @@ void _cell(void *data, object cont, object args)
 void __123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_num_eq, cont, cont, args);
+  dispatch_num_eq(data, cont, argc, args);
 }
 
 void __125(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_num_gt, cont, cont, args);
+  dispatch_num_gt(data, cont, argc, args);
 }
 
 void __121(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_num_lt, cont, cont, args);
+  dispatch_num_lt(data, cont, argc, args);
 }
 
 void __125_123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_num_gte, cont, cont,
-           args);
+  dispatch_num_gte(data, cont, argc, args);
 }
 
 void __121_123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_num_lte, cont, cont,
-           args);
+  dispatch_num_lte(data, cont, argc, args);
 }
 
 void _apply(void *data, object cont, object args)
