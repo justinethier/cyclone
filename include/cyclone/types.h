@@ -663,10 +663,10 @@ typedef uint32_t char_type;
 /**@{*/
 
 /** Function type */
-typedef void (*function_type) ();
+typedef void (*function_type) (void *data, object clo, int argc, object *args);
 
-/** Variable-argument function type */
-typedef void (*function_type_va) (int, object, object, object, ...);
+/** Primitive function */
+typedef void (*primitive_function_type)(void *data, object cont, object args);
 
 /** Non-CPS function type */
 typedef object (*inline_function_type) ();

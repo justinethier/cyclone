@@ -2045,8 +2045,12 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
 
 // Prevent the possibility of a race condition by doing the actual mutation
 // after all relevant objects have been relocated to the heap
-static void Cyc_set_car_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+static void Cyc_set_car_cps_gc_return(void *data, object _, int argc, object *args)
 {
+  object l = args[0];
+  object val = args[1];
+  object next = args[2];
+
   car(l) = val;
   closcall1(data, (closure)next, l);
 }
@@ -2074,8 +2078,12 @@ object Cyc_set_car_cps(void *data, object cont, object l, object val)
   }
 }
 
-static void Cyc_set_cdr_cps_gc_return(void *data, int argc, object cont, object l, object val, object next)
+static void Cyc_set_cdr_cps_gc_return(void *data, object _, int argc, object *args)
 {
+  object l = args[0];
+  object val = args[1];
+  object next = args[2];
+
   cdr(l) = val;
   closcall1(data, (closure)next, l);
 }
@@ -2104,8 +2112,12 @@ object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
   }
 }
 
-static void Cyc_vector_set_cps_gc_return(void *data, int argc, object cont, object vec, object idx, object val, object next)
+static void Cyc_vector_set_cps_gc_return(void *data, object _, int argc, object *args)
 {
+  object vec = args[0]; 
+  object idx = args[1]; 
+  object val = args[2]; 
+  object next = args[3];
   int i = obj_obj2int(idx);
   ((vector) vec)->elements[i] = val;
   closcall1(data, (closure)next, vec);
@@ -6095,25 +6107,6 @@ void dispatch(void *data, int argc, function_type func, object clo, object cont,
   }
 
   do_dispatch(data, argc, func, clo, b);
-}
-
-/**
- * Same as above but for a varargs C function
- */
-void dispatch_va(void *data, int argc, function_type_va func, object clo,
-                 object cont, object args)
-{
-  object b[argc + 1];           // OK to do this? Is this portable?
-  int i;
-
-  argc++;
-  b[0] = cont;
-  for (i = 1; i < argc; i++) {
-    b[i] = car(args);
-    args = cdr(args);
-  }
-
-  do_dispatch(data, argc, (function_type) func, clo, b);
 }
 
 static primitive_type Cyc_91global_91vars_primitive =
