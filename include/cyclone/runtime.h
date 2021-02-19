@@ -873,7 +873,6 @@ object Cyc_length(void *d, object l);
 object Cyc_length_unsafe(void *d, object l);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_list2string(void *d, object cont, object lst);
-object Cyc_list(void *data, int argc, object cont, ...);
 object memberp(void *data, object x, list l);
 object memqp(void *data, object x, list l);
 list assq(void *data, object x, list l);

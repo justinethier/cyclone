@@ -87,7 +87,6 @@
          Cyc-stdout
          Cyc-stdin
          Cyc-stderr
-         Cyc-list
          Cyc-if
          Cyc-foreign-code
          Cyc-foreign-value
@@ -531,7 +530,6 @@
          ((eq? p 'Cyc-stdout)            "Cyc_stdout")
          ((eq? p 'Cyc-stdin)             "Cyc_stdin")
          ((eq? p 'Cyc-stderr)            "Cyc_stderr")
-         ((eq? p 'Cyc-list)              "Cyc_list")
          ((eq? p 'Cyc-if)                "Cyc_if")
          ((eq? p 'Cyc-foreign-code)      "UNDEF")
          ((eq? p 'Cyc-foreign-value)     "UNDEF")
@@ -706,7 +704,6 @@
     (define (prim/data-arg? p)
      (or
       (memq p '(
-        Cyc-list
         Cyc-foreign-code
         Cyc-foreign-value
         Cyc-fast-plus
@@ -963,7 +960,6 @@
                          set-cdr!
                          vector-set!
                          set-global!
-                         Cyc-list
                          Cyc-read-char Cyc-peek-char 
                          symbol->string list->string substring string-append string->number
                          make-bytevector
@@ -994,7 +990,6 @@
                            bytevector
                            bytevector-append
                            make-vector
-                           Cyc-list
                            = > < >= <=
                            + - * /))))
 

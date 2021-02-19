@@ -2400,13 +2400,6 @@ object Cyc_list2string(void *data, object cont, object lst)
   }
 }
 
-object Cyc_list(void *data, int argc, object cont, ...) 
-{
-  load_varargs(objs, cont, argc);
-  //Cyc_st_add(data, "Cyc-list");
-  _return_closcall1(data, cont, cdr(objs));
-}
-
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
 {
   object base = NULL;
