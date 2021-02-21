@@ -361,7 +361,7 @@ static void Cyc_global_set_cps_gc_return(void *data, object cont, int argc, obje
   object next = args[2];
   object *glo = (object *)glo_obj;
   *(glo) = val;
-  closcall1(data, next, val);
+  closcall1(data, (closure)next, val);
 }
 
 object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
@@ -1197,7 +1197,7 @@ void dispatch_write_va(void *data, object clo, int argc, object *args)
     opts = args[1];
   }
   result = Cyc_write_va_list(data, x, opts);
-  return_closcall1(data, cont, result);
+  return_closcall1(data, clo, result);
 }
 
 object Cyc_write_va(void *data, int argc, object x, ...)
@@ -5568,20 +5568,20 @@ object apply(void *data, object cont, object func, object args)
         make_pair(c, func, args);
         //printf("JAE DEBUG, sending to eval: ");
         //Cyc_display(data, &c, stderr);
-        ((closure) Cyc_glo_eval_from_c)->fn(data, 2, Cyc_glo_eval_from_c, cont,
-                                            &c, NULL);
+        object buf[3] = {cont, &c, NULL};
+        ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 2, buf);
 
         // TODO: would be better to compare directly against symbols here,
         //       but need a way of looking them up ahead of time.
         //       maybe a libinit() or such is required.
       } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, cadr(func), args);
-        ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
-                                            &c, NULL);
+        object buf[3] = {cont, &c, NULL};
+        ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 3, buf);
       } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, func, args);
-        ((closure) Cyc_glo_eval_from_c)->fn(data, 3, Cyc_glo_eval_from_c, cont,
-                                            &c, NULL);
+        object buf[3] = {cont, &c, NULL};
+        ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 3, buf);
       } else {
         make_pair(c, func, args);
         Cyc_rt_raise2(data, "Unable to evaluate: ", &c);
@@ -6650,7 +6650,7 @@ void Cyc_exit_thread(gc_thread_data * thd)
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);
-  pthread_exit(NULL);           // For now, just a proof of concept
+  pthread_exit(NULL);
 }
 
 /**
@@ -6837,7 +6837,8 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
     Cyc_rt_raise2(data, "Unable to load symbol", &s);
   }
   mclosure1(clo, entry_pt, cont);
-  entry_pt(data, 0, &clo, &clo);
+  object buf[1] = {&clo};
+  entry_pt(data, &clo, 1, buf);
 }
 
 /** Read */
