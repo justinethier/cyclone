@@ -6633,7 +6633,7 @@ void Cyc_end_thread(gc_thread_data * thd)
   GC(thd, &clo, thd->gc_args, 0);
 }
 
-void Cyc_exit_thread(gc_thread_data * thd)
+void Cyc_exit_thread(void *data, object _, int argc, object *args)
 {
   // alternatively could call longjmp with a null continuation, but that seems
   // more complicated than necessary. or does it... see next comment:
@@ -6644,6 +6644,7 @@ void Cyc_exit_thread(gc_thread_data * thd)
 
 //printf("DEBUG - exiting thread\n");
   // Remove thread from the list of mutators, and mark its data to be freed
+  gc_thread_data *thd = data;
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);

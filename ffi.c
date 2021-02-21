@@ -101,8 +101,9 @@ object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *ar
  * We store results and longjmp back to where we started, at the
  * bottom of the trampoline (we only jump once).
  */
-static void no_gc_after_call_scm(gc_thread_data *thd, int argc, object k, object result)
+static void no_gc_after_call_scm(gc_thread_data *thd, object _, int argc, object *args)
 {
+  object result = args[0];
   thd->gc_cont = result;
   longjmp(*(thd->jmp_start), 1);
 }
@@ -113,7 +114,8 @@ static void no_gc_after_call_scm(gc_thread_data *thd, int argc, object k, object
 static void no_gc_call_scm(gc_thread_data *thd, object fnc, object obj)
 {
   mclosure0(after, (function_type)no_gc_after_call_scm); 
-  ((closure)fnc)->fn(thd, 2, fnc, &after, obj);
+  object buf[2] = {&after, obj};
+  ((closure)fnc)->fn(thd, fnc, 2, buf);
 }
 
 /**
