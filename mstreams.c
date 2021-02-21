@@ -13,20 +13,21 @@
 #include <errno.h>
 
 /* These macros are hardcoded here to support functions in this module. */
-#define closcall1(td, clo, a1) \
+#define closcall1(td, clo, buf) \
 if (obj_is_not_closure(clo)) { \
-   Cyc_apply(td, 0, (closure)(a1), clo); \
+   Cyc_apply(td, clo, 1, buf ); \
 } else { \
-   ((clo)->fn)(td, 1, clo, a1);\
+   ((clo)->fn)(td, clo, 1, buf); \
+;\
 }
-#define return_closcall1(td, clo, a1) { \
+#define return_closcall1(td, clo,a1) { \
  char top; \
+ object buf[1]; buf[0] = a1;\
  if (stack_overflow(&top, (((gc_thread_data *)data)->stack_limit))) { \
-     object buf[1]; buf[0] = a1;\
      GC(td, clo, buf, 1); \
      return; \
  } else {\
-     closcall1(td, (closure) (clo), a1); \
+     closcall1(td, (closure) (clo), buf); \
      return;\
  } \
 }
