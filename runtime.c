@@ -5596,34 +5596,31 @@ object apply(void *data, object cont, object func, object args)
 }
 
 // Version of apply meant to be called from within compiled code
-// TODO: in cargs branch we are swapping cont and prim below
-//  old call convention, EG: Cyc_apply(td, 0, (closure)(a1), clo); 
-//
-void Cyc_apply(void *data, int argc, closure cont, object prim, ...)
+void Cyc_apply(void *data, object cont, int argc, object *args)
 {
-  va_list ap;
   object tmp;
   int i;
-  list args = alloca(sizeof(pair_type) * argc);
+  list arglis = alloca(sizeof(pair_type) * argc);
+  // TODO: check size of argc/args??
+  // TODO: seems inefficient to put these in a list now, with
+  //       cargs do we still need to do this??
+  object prim = args[0];
 
-  va_start(ap, prim);
-
-  for (i = 0; i < argc; i++) {
-    tmp = va_arg(ap, object);
-    args[i].hdr.mark = gc_color_red;
-    args[i].hdr.grayed = 0;
-    args[i].hdr.immutable = 0;
-    args[i].tag = pair_tag;
-    args[i].pair_car = tmp;
-    args[i].pair_cdr = (i == (argc - 1)) ? NULL : &args[i + 1];
+  for (i = 1; i < argc; i++) {
+    tmp = args[i];
+    arglis[i].hdr.mark = gc_color_red;
+    arglis[i].hdr.grayed = 0;
+    arglis[i].hdr.immutable = 0;
+    arglis[i].tag = pair_tag;
+    arglis[i].pair_car = tmp;
+    arglis[i].pair_cdr = (i == (argc - 1)) ? NULL : &arglis[i + 1];
   }
   //printf("DEBUG applying primitive to ");
-  //Cyc_display(data, (object)&args[0]);
+  //Cyc_display(data, (object)&arglis[0]);
   //printf("\n");
 
-  va_end(ap);
-  apply(data, cont, prim, (argc > 0)
-        ? (object) & args[0]
+  apply(data, cont, prim, (argc > 1)
+        ? (object) & arglis[0]
         : NULL);
 }
 
@@ -5671,8 +5668,8 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   if (obj_is_not_closure(thd->gc_cont)) {
     Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
   } else {
-    do_dispatch(thd, thd->gc_num_args, ((closure) (thd->gc_cont))->fn,
-                thd->gc_cont, thd->gc_args);
+    closure clo = thd->gc_cont;
+   (clo->fn)(thd, clo, thd->gc_num_args, thd->gc_args);
   }
 
   fprintf(stderr, "Internal error: should never have reached this line\n");
@@ -6099,7 +6096,7 @@ void dispatch(void *data, int argc, function_type func, object clo, object cont,
     args = cdr(args);
   }
 
-  do_dispatch(data, argc, func, clo, b);
+  func(data, clo, argc, b);
 }
 
 static primitive_type Cyc_91global_91vars_primitive =

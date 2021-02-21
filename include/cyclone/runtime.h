@@ -180,8 +180,6 @@ void dispatch_apply_va(void *data, int argc, object clo, object cont, object fun
 object apply_va(void *data, object cont, int argc, object func, ...);
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
               object args);
-void do_dispatch(void *data, int argc, function_type func, object clo,
-                 object * buffer);
 
 /**@}*/
 

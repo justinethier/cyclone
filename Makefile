@@ -167,19 +167,12 @@ cyclone : cyclone.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
 icyc : icyc.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
 	$(CYCLONE) $<
 
-dispatch.c : generate-c.scm
-	$(CYCLONE) $<
-	./generate-c
-
 $(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
 
 $(CYC_BN_LIB) : $(CYC_BN_LIB_SUBDIR)/*.c
 	cd $(CYC_BN_LIB_SUBDIR) ; $(MAKE) LIBNAME=$(CYC_BN_LIB) && cp $(CYC_BN_LIB) ../..
 
 hashset.o : hashset.c $(HEADERS)
-	$(CCOMP) -c $< -o $@
-
-dispatch.o : dispatch.c $(HEADERS)
 	$(CCOMP) -c $< -o $@
 
 gc.o : gc.c $(HEADERS)
@@ -208,7 +201,7 @@ runtime.o : runtime.c $(HEADERS)
 					-DCYC_PLATFORM=\"$(PLATFORM)\" \
 					$< -o $@
 
-libcyclone.a : runtime.o gc.o dispatch.o ffi.o mstreams.o hashset.o
+libcyclone.a : runtime.o gc.o ffi.o mstreams.o hashset.o
 	$(CREATE_LIBRARY_COMMAND) $(CREATE_LIBRARY_FLAGS) $@ $&
 	$(RANLIB_COMMAND)
 # Instructions from: http://www.adp-gmbh.ch/cpp/gcc/create_lib.html
@@ -245,7 +238,6 @@ bootstrap : icyc libs
 	cp mstreams.c $(BOOTSTRAP_DIR)
 	cp hashset.c $(BOOTSTRAP_DIR)
 	cp gc.c $(BOOTSTRAP_DIR)
-	cp dispatch.c $(BOOTSTRAP_DIR)
 	cp scheme/base.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/case-lambda.c $(BOOTSTRAP_DIR)/scheme
 	cp scheme/cxr.c $(BOOTSTRAP_DIR)/scheme
