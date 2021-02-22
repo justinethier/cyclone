@@ -2918,7 +2918,8 @@ void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object mayb
       thd->gc_args[0] = result;
       Cyc_apply_from_buf(thd, 1, thd->gc_cont, thd->gc_args);
     } else {
-      (((closure) (thd->gc_cont))->fn) (thd, 1, thd->gc_cont, result);
+      object buf[1] = {result};
+      (((closure) (thd->gc_cont))->fn) (thd, thd->gc_cont, 1, buf);
     }
   }
 }
