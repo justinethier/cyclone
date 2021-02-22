@@ -4814,7 +4814,7 @@ void _bytevector_91u8_91set_67(void *data, object cont, object args)
 void _bytevector(void *data, object cont, object args)
 {
   object argc = Cyc_length(data, args);
-  dispatch(data, obj_obj2int(argc), (function_type) dispatch_bytevector, cont,
+  dispatch(data, obj_obj2int(argc), dispatch_bytevector, cont,
            cont, args);
 }
 
@@ -4822,7 +4822,7 @@ void _bytevector_91append(void *data, object cont, object args)
 {
   object argc = Cyc_length(data, args);
   dispatch(data, obj_obj2int(argc),
-           (function_type) dispatch_bytevector_91append, cont, cont, args);
+           dispatch_bytevector_91append, cont, cont, args);
 }
 
 void _Cyc_91bytevector_91copy(void *data, object cont, object args)
@@ -4897,7 +4897,7 @@ void _Cyc_91end_91thread_67(void *data, object cont, object args)
 void __87(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_sum, cont, cont, args);
+  dispatch(data, argc, dispatch_sum, cont, cont, args);
 }
 
 void __91(void *data, object cont, object args)
@@ -4905,13 +4905,13 @@ void __91(void *data, object cont, object args)
   Cyc_check_num_args(data, "-", 1, args);
   {
     int argc = obj_obj2int(Cyc_length(data, args));
-    dispatch(data, argc, (function_type) dispatch_sub, cont, cont, args);
+    dispatch(data, argc, dispatch_sub, cont, cont, args);
 }}
 
 void __85(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch(data, argc, (function_type) dispatch_mul, cont, cont, args);
+  dispatch(data, argc, dispatch_mul, cont, cont, args);
 }
 
 void __95(void *data, object cont, object args)
@@ -4919,7 +4919,7 @@ void __95(void *data, object cont, object args)
   Cyc_check_num_args(data, "/", 1, args);
   {
     int argc = obj_obj2int(Cyc_length(data, args));
-    dispatch(data, argc, (function_type) dispatch_div, cont, cont, args);
+    dispatch(data, argc, dispatch_div, cont, cont, args);
 }}
 
 void _Cyc_91cvar_127(void *data, object cont, object args)
@@ -5115,7 +5115,7 @@ void _apply(void *data, object cont, object args)
   //fprintf(stdout, "_apply received args: ");
   //Cyc_display(data, args, stdout);
   //fprintf(stdout, "\n");
-  dispatch(data, obj_obj2int(argc), (function_type)dispatch_apply_va, cont, cont, args);
+  dispatch(data, obj_obj2int(argc), dispatch_apply_va, cont, cont, args);
 }
 
 void _assq(void *data, object cont, object args)
@@ -5248,7 +5248,7 @@ void _string_91cmp(void *data, object cont, object args)
 void _string_91append(void *data, object cont, object args)
 {
   object argc = Cyc_length(data, args);
-  dispatch(data, obj_obj2int(argc), (function_type) dispatch_string_91append,
+  dispatch(data, obj_obj2int(argc), dispatch_string_91append,
            cont, cont, args);
 }
 
