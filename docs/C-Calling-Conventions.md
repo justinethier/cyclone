@@ -164,3 +164,7 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 - Modify FFI and define-c definitions in scheme files
 - Bring up the compiler in stages. Will need to use the current version of Cyclone to generate a version with the new function signatures.
 
+
+## TODO
+
+- Need to either remove `inline_function_type` or have a special compilation mode/flag so that we do not use it for compilers that are too strict to use it.
