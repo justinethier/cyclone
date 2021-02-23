@@ -6828,15 +6828,21 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   }
   dlerror();    /* Clear any existing error */
 
-  entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
-  if (entry_pt == NULL) {
-    snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
-    make_utf8_string(data, s, buffer);
-    Cyc_rt_raise2(data, "Unable to load symbol", &s);
+  if (string_len(entry_pt_fnc) == 0) {
+    // No entry point so this is a third party library.
+    // Just call into our continuation
+    return_closcall1(data, cont, boolean_t);
+  } else {
+    entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
+    if (entry_pt == NULL) {
+      snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
+      make_utf8_string(data, s, buffer);
+      Cyc_rt_raise2(data, "Unable to load symbol", &s);
+    }
+    mclosure1(clo, entry_pt, cont);
+    object buf[1] = {&clo};
+    entry_pt(data, &clo, 1, buf);
   }
-  mclosure1(clo, entry_pt, cont);
-  object buf[1] = {&clo};
-  entry_pt(data, &clo, 1, buf);
 }
 
 /** Read */

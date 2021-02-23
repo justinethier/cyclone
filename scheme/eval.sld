@@ -26,6 +26,8 @@
     %import
     imported?
     %set-import-dirs!
+    import-shared-object
+    ;; Macros
     *defined-macros* 
     get-macros
     macro:macro?
@@ -809,6 +811,9 @@
 ;; Is the given library loaded?
 (define (imported? lis)
   (c:lib-loaded? (lib:name->unique-string (lib:list->import-set lis))))
+
+(define (import-shared-object filename)
+  (c:import-shared-obj filename ""))
 
 ;; Wrapper around the actual shared object import function
 (define-c c:import-shared-obj
