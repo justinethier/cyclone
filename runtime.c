@@ -3027,40 +3027,51 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
   _return_closcall1(data, cont, bv);
 }
 
-#define Cyc_bytevector_va_list(argc) { \
-  int i = 0, val; \
-  va_list ap; \
-  object tmp; \
-  char *buffer; \
-  make_empty_bytevector(bv); \
-  if (argc > 0) { \
-    Cyc_check_num(data, bval); \
-    buffer = alloca(sizeof(char) * argc); \
-    val = unbox_number(bval); \
-    buffer[i] = val; \
-    va_start(ap, bval); \
-    for(i = 1; i < argc; i++) { \
-      tmp = va_arg(ap, object); \
-      Cyc_check_num(data, tmp); \
-      val = unbox_number(tmp); \
-      buffer[i] = (unsigned char)val; \
-    } \
-    va_end(ap); \
-    bv.len = argc; \
-    bv.data = buffer; \
-  } \
-  _return_closcall1(data, cont, &bv); \
+void dispatch_bytevector(void *data, object clo, int _argc, object *args)
+{
+  int argc = _argc - 1;
+  int i, val;
+  object tmp;
+  char *buffer;
+  make_empty_bytevector(bv);
+  if (argc > 0) {
+    buffer = alloca(sizeof(char) * argc);
+    for(i = 0; i < argc; i++) {
+      tmp = args[i];
+      Cyc_check_num(data, tmp);
+      val = unbox_number(tmp);
+      buffer[i] = (unsigned char)val;
+    }
+    bv.len = argc;
+    bv.data = buffer;
+  }
+  return_closcall1(data, clo, &bv);
 }
 
-object dispatch_bytevector(void *data, int _argc, object clo, object cont,
-                         object bval, ...)
+object Cyc_bytevector(void *data, object cont, int argc, object bval, ...)
 {
-  Cyc_bytevector_va_list((_argc - 1));
-}
-
-object Cyc_bytevector(void *data, object cont, int _argc, object bval, ...)
-{
-  Cyc_bytevector_va_list(_argc);
+  int i = 0, val;
+  va_list ap;
+  object tmp;
+  char *buffer;
+  make_empty_bytevector(bv);
+  if (argc > 0) {
+    Cyc_check_num(data, bval);
+    buffer = alloca(sizeof(char) * argc);
+    val = unbox_number(bval);
+    buffer[i] = val;
+    va_start(ap, bval);
+    for(i = 1; i < argc; i++) {
+      tmp = va_arg(ap, object);
+      Cyc_check_num(data, tmp);
+      val = unbox_number(tmp);
+      buffer[i] = (unsigned char)val;
+    }
+    va_end(ap);
+    bv.len = argc;
+    bv.data = buffer;
+  }
+  _return_closcall1(data, cont, &bv);
 }
 
 #define Cyc_bytevector_append_va_list(argc) { \
