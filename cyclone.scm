@@ -741,7 +741,7 @@
             '()))
          ;; Read all linker options from dependent libs
          (c-linker-options
-           (let ((lib-options (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs)))
+           (let ((lib-options (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs expander)))
              (if program?
                  (string-append ;; Also read from current program
                    (string-join (program-c-linker-opts! in-prog) " ")
@@ -791,7 +791,8 @@
                        (lib:get-all-c-linker-options 
                          lib-deps 
                          append-dirs 
-                         prepend-dirs))
+                         prepend-dirs
+                         expander))
                      ;; Return new deps
                      lib-deps)
                    in-file 

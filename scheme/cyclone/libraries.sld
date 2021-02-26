@@ -434,37 +434,43 @@
     (close-input-port fp)
     includes))
 
-(define (lib:read-c-linker-options import append-dirs prepend-dirs)
+(define (lib:read-c-linker-options import append-dirs prepend-dirs expander)
   (let* ((lib-name (lib:import->library-name import))
          (dir (lib:import->filename lib-name ".sld" append-dirs prepend-dirs))
          (fp (open-input-file dir))
          (lib (read-all fp))
-         (options (lib:c-linker-options (car lib))))
+         (lib* (if expander
+                   (list (lib:cond-expand (car lib) expander))
+                   lib))
+         (options (lib:c-linker-options (car lib*))))
     (close-input-port fp)
     (string-join options " ")))
 
-(define (lib:get-all-c-linker-options imports append-dirs prepend-dirs)
+(define (lib:get-all-c-linker-options imports append-dirs prepend-dirs expander)
   (string-join
     (map 
       (lambda (import)
-        (lib:read-c-linker-options import append-dirs prepend-dirs))
+        (lib:read-c-linker-options import append-dirs prepend-dirs expander))
       imports)
     " "))
 
-(define (lib:read-c-compiler-options import append-dirs prepend-dirs)
+(define (lib:read-c-compiler-options import append-dirs prepend-dirs expander)
   (let* ((lib-name (lib:import->library-name import))
          (dir (lib:import->filename lib-name ".sld" append-dirs prepend-dirs))
          (fp (open-input-file dir))
          (lib (read-all fp))
-         (options (lib:c-compiler-options (car lib))))
+         (lib* (if expander
+                   (list (lib:cond-expand (car lib) expander))
+                   lib))
+         (options (lib:c-compiler-options (car lib*))))
     (close-input-port fp)
     (string-join options " ")))
 
-(define (lib:get-all-c-compiler-options imports append-dirs prepend-dirs)
+(define (lib:get-all-c-compiler-options imports append-dirs prepend-dirs expander)
   (string-join
     (map 
       (lambda (import)
-        (lib:read-c-compiler-options import append-dirs prepend-dirs))
+        (lib:read-c-compiler-options import append-dirs prepend-dirs expander))
       imports)
     " "))
 

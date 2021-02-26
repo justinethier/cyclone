@@ -6,6 +6,7 @@ Features
 
 - Arthur Maciel added `opaque?` and `opaque-null?` predicates to `(cyclone foreign)`.
 - Added `import-shared-object` to `(scheme eval)` to allow loading a third party C shared library.
+- Allow C compiler/linker options from a library to be expanded via `cond-expand`.
 
 Bug Fixes
 
