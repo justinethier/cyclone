@@ -2601,12 +2601,30 @@ object Cyc_string_cmp(void *data, object str1, object str2)
     _return_closcall1(data, cont, &result); \
 }
 
-object dispatch_string_91append(void *data, int _argc, object clo, object cont,
-                              object str1, ...)
+void dispatch_string_91append(void *data, object clo, int _argc, object *args)
 {
-  va_list ap;
-  va_start(ap, str1);
-  Cyc_string_append_va_list(data, _argc - 1);
+  int argc =  _argc - 1;
+  int i = 0, total_cp = 0, total_len = 1;
+  int *len = alloca(sizeof(int) * argc);
+  char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
+  object tmp;
+  for (i = 1; i < argc; i++) {
+    tmp = args[i];
+    Cyc_check_str(data, tmp);
+    str[i] = ((string_type *)tmp)->str;
+    len[i] = string_len((tmp));
+    total_len += len[i];
+    total_cp += string_num_cp((tmp));
+  }
+  buffer = bufferp = alloca(sizeof(char) * total_len);
+  for (i = 1; i < argc; i++) {
+      memcpy(bufferp, str[i], len[i]);
+      bufferp += len[i];
+  }
+  *bufferp = '\0';
+  make_string(result, buffer);
+  string_num_cp((&result)) = total_cp;
+  return_closcall1(data, clo, &result);
 }
 
 object Cyc_string_append(void *data, object cont, int _argc, object str1, ...)
@@ -3027,6 +3045,8 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
   _return_closcall1(data, cont, bv);
 }
 
+// carg TODO: need to test each of these "dispatch" functions for
+// off-by-one errors! I think there are bugs in each of them
 void dispatch_bytevector(void *data, object clo, int _argc, object *args)
 {
   int argc = _argc - 1;
@@ -3625,14 +3645,11 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
     va_end(ap); \
     _return_closcall1(data, cont, result); \
 } \
-void FUNC_APPLY(void *data, int argc, object clo, object cont, object n, ...) { \
+void FUNC_APPLY(void *data, object clo, int argc, object *args) { \
     common_type buffer; \
     object result; \
-    va_list ap; \
-    va_start(ap, n); \
-    result = Cyc_num_op_va_list(data, argc - 1, FUNC_OP, NO_ARG, ONE_ARG, n, ap, &buffer); \
-    va_end(ap); \
-    return_closcall1(data, cont, result); \
+    result = Cyc_num_op_args(data, argc - 1, FUNC_OP, NO_ARG, ONE_ARG, args + 1, &buffer); \
+    return_closcall1(data, clo, result); \
 }
 
 object Cyc_fast_sum(void *data, object ptr, object x, object y) {
@@ -4136,21 +4153,118 @@ object Cyc_div(void *data, object cont, int argc, object n, ...)
   _return_closcall1(data, cont, result);
 }
 
-void dispatch_div(void *data, int argc, object clo, object cont, object n, ...)
+void dispatch_div(void *data, object clo, int argc, object *args)
 {
   common_type buffer;
   object result;
-  va_list ap;
-  va_start(ap, n);
   result =
-      Cyc_num_op_va_list(data, argc - 1, Cyc_div_op, -1, 1, n, ap, &buffer);
-  va_end(ap);
-  return_closcall1(data, cont, result);
+      Cyc_num_op_args(data, argc - 1, Cyc_div_op, -1, 1, args + 1, &buffer);
+  return_closcall1(data, clo, result);
 }
 
 declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, mp_add, 0, 0, 0);
 declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, mp_sub, -1, 0, 0);
 declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, mp_mul, 1, 1, 0);
+
+object Cyc_num_op_args(void *data, int argc,
+                       object(fn_op(void *, common_type *, object)),
+                       int default_no_args, int default_one_arg, 
+                       object *args,
+                       common_type * buf)
+{
+  int i;
+  object n;
+  if (argc == 0) {
+    if (default_no_args < 0) {
+      Cyc_rt_raise_msg(data, "No arguments for numeric operation");
+    }
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0;
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = default_no_args;
+    return buf;
+  }
+
+  n = args[0];
+
+  if (obj_is_int(n)) {
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0;
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = obj_obj2int(n);
+  } else if (!is_object_type(n)) {
+    goto bad_arg_type_error;
+  } else if (type_of(n) == integer_tag) {
+    buf->integer_t.hdr.mark = gc_color_red;
+    buf->integer_t.hdr.grayed = 0;
+    buf->integer_t.tag = integer_tag;
+    buf->integer_t.value = ((integer_type *) n)->value;
+  } else if (type_of(n) == double_tag) {
+    buf->double_t.hdr.mark = gc_color_red;
+    buf->double_t.hdr.grayed = 0;
+    buf->double_t.tag = double_tag;
+    buf->double_t.value = ((double_type *) n)->value;
+  } else if (type_of(n) == bignum_tag) {
+    buf->bignum_t.hdr.mark = gc_color_red;
+    buf->bignum_t.hdr.grayed = 0;
+    buf->bignum_t.tag = bignum_tag;
+    BIGNUM_CALL(mp_init_copy(&(buf->bignum_t.bn), &bignum_value(n)));
+  } else if (type_of(n) == complex_num_tag) {
+    buf->complex_num_t.hdr.mark = gc_color_red;
+    buf->complex_num_t.hdr.grayed = 0;
+    buf->complex_num_t.tag = complex_num_tag;
+    buf->complex_num_t.value = ((complex_num_type *) n)->value;
+  } else {
+    goto bad_arg_type_error;
+  }
+
+  if (argc == 1) {
+    common_type tmp;
+    tmp.integer_t.hdr.mark = gc_color_red;
+    tmp.integer_t.hdr.grayed = 0;
+    tmp.integer_t.tag = integer_tag;
+    tmp.integer_t.value = default_one_arg;
+
+    fn_op(data, &tmp, (object) buf);
+    if (type_of(&tmp) == integer_tag) {
+      buf->integer_t.tag = integer_tag;
+      buf->integer_t.value = integer_value(&tmp);
+    } else if (type_of(&tmp) == double_tag){
+      buf->double_t.tag = double_tag;
+      buf->double_t.value = double_value(&tmp);
+    } else if (type_of(&tmp) == complex_num_tag){
+      buf->complex_num_t.tag = complex_num_tag;
+      buf->complex_num_t.value = complex_num_value(&tmp);
+    } else {
+      buf->bignum_t.tag = bignum_tag;
+      buf->bignum_t.bn.used = tmp.bignum_t.bn.used;
+      buf->bignum_t.bn.alloc = tmp.bignum_t.bn.alloc;
+      buf->bignum_t.bn.sign = tmp.bignum_t.bn.sign;
+      buf->bignum_t.bn.dp = tmp.bignum_t.bn.dp;
+    }
+  } else {
+    for (i = 1; i < argc; i++) {
+      fn_op(data, buf, args[i]);
+    }
+  }
+
+  // Convert to immediate int
+  if (type_of(buf) == integer_tag) {
+    return obj_int2obj(buf->integer_t.value);
+  } else if (type_of(buf) == bignum_tag) {
+    buf = gc_alloc_from_bignum(data, &(buf->bignum_t));
+  }
+
+  return buf;
+bad_arg_type_error:
+  {
+    make_string(s, "Bad argument type");
+    make_pair(c1, n, NULL);
+    make_pair(c0, &s, &c1);
+    Cyc_rt_raise(data, &c0);
+    return NULL;
+  }
+}
 
 object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),

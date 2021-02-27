@@ -189,8 +189,7 @@ void dispatch(void *data, int argc, function_type func, object clo, object cont,
  */
 /**@{*/
 object Cyc_string_cmp(void *data, object str1, object str2);
-object dispatch_string_91append(void *data, int argc, object clo, object cont,
-                                object str1, ...);
+void dispatch_string_91append(void *data, object clo, int _argc, object *args);
 object Cyc_string2number_(void *d, object cont, object str);
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
 int binstr2int(const char *str);
@@ -435,6 +434,11 @@ object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
                           int default_no_args, int default_one_arg, object n,
                           va_list ns, common_type * buf);
+object Cyc_num_op_args(void *data, int argc,
+                       object(fn_op(void *, common_type *, object)),
+                       int default_no_args, int default_one_arg, 
+                       object *args,
+                       common_type * buf);
 void Cyc_int2bignum(int n, mp_int *bn);
 object Cyc_bignum_normalize(void *data, object n);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
