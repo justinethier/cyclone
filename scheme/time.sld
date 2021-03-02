@@ -25,7 +25,7 @@
       " struct timespec now;
         make_double(box, 0.0);
         clock_gettime(CLOCK_MONOTONIC, &now);
-        long long jiffy = (now.tv_sec)*1000000LL + tv.tv_nsec/1000; // nano->microseconds
+        long long jiffy = (now.tv_sec)*1000000LL + now.tv_nsec/1000; // nano->microseconds
         /* Future consideration:
         mp_int bn_tmp, bn_tmp2, bn_tmp3;
         mp_init(&bn_tmp);
