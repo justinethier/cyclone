@@ -10,12 +10,9 @@
   (export 
     current-second
     current-jiffy
-    jiffies-per-second
-  )
-  (include-c-header "<sys/time.h>")
-  (import (scheme base) 
-  )
-;; TODO: get an FFI syntax for including C header files, even if it is not needed for this library
+    jiffies-per-second)
+  (include-c-header "<time.h>")
+  (import (scheme base))
   (begin
     (define-c current-second
       "(void *data, int argc, closure _, object k)"
@@ -23,12 +20,13 @@
         time_t t = time(NULL);
         double_value(&box) = t;
         return_closcall1(data, k, &box); ")
+    
     (define-c current-jiffy
       "(void *data, int argc, closure _, object k)"
-      " struct timeval tv;
+      " struct timespec now;
         make_double(box, 0.0);
-        gettimeofday(&tv, NULL); /* TODO: longer-term consider using clock_gettime instead */
-        long long jiffy = (tv.tv_sec)*1000000LL + tv.tv_usec;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        long long jiffy = (now.tv_sec)*1000000LL + tv.tv_nsec/1000; // nano->microseconds
         /* Future consideration:
         mp_int bn_tmp, bn_tmp2, bn_tmp3;
         mp_init(&bn_tmp);
@@ -50,5 +48,4 @@
       "(void *data, int argc, closure _, object k)"
       " int n = 1000000;
         object obj = obj_int2obj(n);
-        return_closcall1(data, k, obj); ")
-  ))
+        return_closcall1(data, k, obj); ")))
