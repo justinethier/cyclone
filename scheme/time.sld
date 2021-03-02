@@ -20,7 +20,6 @@
         time_t t = time(NULL);
         double_value(&box) = t;
         return_closcall1(data, k, &box); ")
-    
     (define-c current-jiffy
       "(void *data, int argc, closure _, object k)"
       " struct timespec now;
