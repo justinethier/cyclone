@@ -168,42 +168,54 @@
       (map scan exp))
      (else exp)
   ))
-  (let ((new-exp (scan sexp)))
-    (cond
-      ((not (null? memo-tbl))
-       (when (procedure? add-globals!)
-         (add-globals! (map cdr memo-tbl)))
-       (append
-        (map 
-          (lambda (var/new-var)
-            `(define ,(car var/new-var) #f))
-          memo-tbl)
-        (map
-          (lambda (exp)
-            (cond
-              ((define? exp) exp) ;; not top-level
-              (else
-                ;; Memoize all of the functions at top-level
-                (foldl 
-                  (lambda (var/new-var acc)
-                    (let* ((rsym (gensym 'r))
-                           (var (car var/new-var))
-                           (new-var (cdr var/new-var))
-                           (body
-                             `((Cyc-seq
-                                 (set-global-unsafe! ,(list 'quote var) ,var ,rsym)
-                                 ,acc)))
-                          )
-                      `(Cyc-memoize
-                         ,(ast:make-lambda (list rsym) body)
-                         ,new-var)))
-                  exp
-                  memo-tbl)
-              )))
-          new-exp)))
-      (else new-exp)))
-)
 
+  ;; Does given sexp contain any top-level define-c expressions?
+  (define (has-define-c? sexp)
+    (call/cc 
+      (lambda (k) 
+        (for-each 
+          (lambda (exp) 
+            (if (define-c? exp) 
+                (k #t))) 
+          sexp)
+        (k #f))))
+
+  (if (has-define-c? sexp)
+      sexp ;; Can't optimize with define-c (yet), so bail
+      (let ((new-exp (scan sexp)))
+        (cond
+          ((not (null? memo-tbl))
+           (when (procedure? add-globals!)
+             (add-globals! (map cdr memo-tbl)))
+           (append
+            (map 
+              (lambda (var/new-var)
+                `(define ,(car var/new-var) #f))
+              memo-tbl)
+            (map
+              (lambda (exp)
+                (cond
+                  ((define? exp) exp) ;; not top-level
+                  (else
+                    ;; Memoize all of the functions at top-level
+                    (foldl 
+                      (lambda (var/new-var acc)
+                        (let* ((rsym (gensym 'r))
+                               (var (car var/new-var))
+                               (new-var (cdr var/new-var))
+                               (body
+                                 `((Cyc-seq
+                                     (set-global-unsafe! ,(list 'quote var) ,var ,rsym)
+                                     ,acc)))
+                              )
+                          `(Cyc-memoize
+                             ,(ast:make-lambda (list rsym) body)
+                             ,new-var)))
+                      exp
+                      memo-tbl)
+                  )))
+              new-exp)))
+          (else new-exp)))))
 
 (cond-expand
   (program
