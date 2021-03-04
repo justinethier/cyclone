@@ -11,6 +11,7 @@ Features
 Bug Fixes
 
 - Prevent the compiler from inlining calls to primitives that open ports, avoiding a range of issues such as an open file operation being inlined across multiple places in the intermediate code.
+- Arthur Maciel updated `current-jiffy` to use `clock_gettime`.
 
 ## 0.26 - February 3, 2021
 
