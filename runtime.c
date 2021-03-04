@@ -454,9 +454,16 @@ static object find_symbol_by_name(const char *name)
 object add_symbol(symbol_type * psym)
 {
   pthread_mutex_lock(&symbol_table_lock);       // Only 1 "writer" allowed
-  set_insert(&symbol_table, psym);
+  bool inserted = set_insert(&symbol_table, psym);
   pthread_mutex_unlock(&symbol_table_lock);
-  return psym;
+  if (!inserted) {
+    object sym = find_symbol_by_name(psym->desc);
+    free((char *)(psym->desc));
+    free(psym);
+    return sym;
+  } else {
+    return psym;
+  }
 }
 
 static object add_symbol_by_name(const char *name)
