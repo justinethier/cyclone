@@ -2251,12 +2251,6 @@
       *globals*)
     (emit "")
 
-    ;; Initialize symbol table
-    (for-each
-        (lambda (sym)
-            (emit* "  add_symbol(quote_" (mangle sym) ");"))
-        *symbols*)
-
     ;; Initialize globals
     (let* ((prefix "  ")
            (emit-global
