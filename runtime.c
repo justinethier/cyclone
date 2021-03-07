@@ -96,12 +96,12 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index)
 
 #ifdef CYC_HIGH_RES_TIMERS
 /* High resolution timers */
-#include <sys/time.h>
+#include <time.h>
 long long hrt_get_current() 
 {
-  struct timeval tv;
-  gettimeofday(&tv, NULL); /* TODO: longer-term consider using clock_gettime instead */
-  long long jiffy = (tv.tv_sec)*1000000LL + tv.tv_usec;
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  long long jiffy = (now.tv_sec)*1000000LL + now.tv_nsec/1000; // nano->microseconds
   return jiffy;
 }
 

@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.27 - TBD
+## 0.28 - TBD
+
+Bug Fixes
+
+- Arthur Maciel replaced high resolution code in the runtime to use `clock_gettime` instead of `gettimeofday`.
+
+## 0.27 - March 5, 2021
 
 Features
 
