@@ -2145,7 +2145,7 @@
            (emit*
              "static void __lambda_" 
              (number->string (car l))
-             "(void *data, object _, int args, object *args)"
+             "(void *data, object _, int argc, object *args)"
              " {"
              (c:old-c-args->new-decls-from-args (cadadr l))
              (car (cddadr l))
