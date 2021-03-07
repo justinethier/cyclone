@@ -5645,15 +5645,34 @@ void _call_95cc(void *data, object cont, object args)
   } \
   va_end(ap);
 
-void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...)
+//void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...)
+void dispatch_apply_va(void *data, object clo, int argc, object *args)
 {
   list lis = NULL, prev = NULL;
   object tmp;
+  // cargs TODO: check num args to make this safe
+  object func = args[1];
   int i;
-  va_list ap;
   argc = argc - 1; // Required for "dispatch" function
-  do_apply_va
-  apply(data, cont, func, lis);
+  if (argc == 2) {
+    lis = args[2];
+    Cyc_check_pair_or_null(data, lis);
+  } else {
+    lis = alloca(sizeof(pair_type));
+    tmp = args[2];
+    set_pair(lis, tmp, NULL);
+    prev = lis;
+    for (i = 3; i < argc - 1; i++) {
+      pair_type *next = alloca(sizeof(pair_type));
+      tmp = args[i];
+      set_pair(next, tmp, NULL);
+      cdr(prev) = next;
+      prev = next;
+    }
+    tmp = args[argc];
+    cdr(prev) = tmp;
+  }
+  apply(data, clo, func, lis);
 }
 
 object apply_va(void *data, object cont, int argc, object func, ...)

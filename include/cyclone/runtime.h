@@ -176,7 +176,7 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
 /**@{*/
 object apply(void *data, object cont, object func, object args);
 void Cyc_apply(void *data, object cont, int argc, object *args);
-void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...);
+void dispatch_apply_va(void *data, object clo, int argc, object *args);
 object apply_va(void *data, object cont, int argc, object func, ...);
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
               object args);
