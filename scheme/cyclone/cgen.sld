@@ -2050,8 +2050,10 @@
          (emit*
            "static void __lambda_" 
            (number->string (car l))
+           "(void *data, object clo, int argc, object *args) ;"
+           "/*"
            (cadadr l)
-           " ;"))
+           "*/"))
         ((equal? 'precompiled-inline-lambda (caadr l))
          (emit*
            "static object __lambda_" 
@@ -2068,8 +2070,7 @@
          (emit*
            "static void __lambda_" 
            (number->string (car l)) 
-           "(void *data, object clo, int argc, object *args"
-           ") ;"
+           "(void *data, object clo, int argc, object *args) ;"
            "/*"
            (cdadr l)
            "*/"
