@@ -211,7 +211,7 @@
 ;        (else (cons (car S) (insert sym (cdr S)))))))
 ;
 (define-c insert
- "(void *data, int argc, closure _,object k_7318, object sym_731_7312, object S_732_7313)"
+ "(void *data, int argc, closure _, object k_7318, object sym_731_7312, object S_732_7313)"
  "
  pair_type *acc = NULL, *acc_tail = NULL;
  object result;
