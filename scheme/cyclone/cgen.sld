@@ -2413,7 +2413,7 @@
   (list->string
     (filter
       (lambda (c)
-        (not (member c '(#\( #\)))))
+        (not (member c '(#\newline #\( #\)))))
       (string->list str))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
