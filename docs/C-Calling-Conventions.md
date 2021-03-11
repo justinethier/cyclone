@@ -167,4 +167,22 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 ## TODO
 
+- Cyc_apply of primitives
+
+We currently rearrange the order of arguments when calling into a primitive (TBD: are other function types called this way too?):
+
+    #define closcall3(td, clo,a1,a2,a3) \
+    if (obj_is_not_closure(clo)) { \
+       Cyc_apply(td, 2, (closure)(a1), clo,a2,a3); \
+
+This is not being done on cargs2-dev which leads to problems in the runtime:
+
+    #define closcall3(td, clo, buf) \
+    if (obj_is_not_closure(clo)) { \
+       Cyc_apply(td, clo, 3, buf ); \
+
+The "easy" answer is just to modify `Cyc_apply` to deal with this, but is that good enough? Will we run into problems with evaluated lambda's and/or primitives? Is the right answer to modify the emitted closcall macros to do this re-arranging, even though it will be more work for C arrays? 
+
+Need to spend more time investigating this issue.
+
 - Need to either remove `inline_function_type` or have a special compilation mode/flag so that we do not use it for compilers that are too strict to use it.
