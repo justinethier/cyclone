@@ -2608,14 +2608,15 @@ object Cyc_string_cmp(void *data, object str1, object str2)
     _return_closcall1(data, cont, &result); \
 }
 
-void dispatch_string_91append(void *data, object clo, int _argc, object *args)
+void dispatch_string_91append(void *data, object clo, int _argc, object *_args)
 {
-  int argc =  _argc - 1;
+  int argc =  _argc - 1; // Skip continuation
+  object *args = _args + 1; // Skip continuation
   int i = 0, total_cp = 0, total_len = 1;
   int *len = alloca(sizeof(int) * argc);
   char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
   object tmp;
-  for (i = 1; i < argc; i++) {
+  for (i = 0; i < argc; i++) {
     tmp = args[i];
     Cyc_check_str(data, tmp);
     str[i] = ((string_type *)tmp)->str;
@@ -2624,7 +2625,7 @@ void dispatch_string_91append(void *data, object clo, int _argc, object *args)
     total_cp += string_num_cp((tmp));
   }
   buffer = bufferp = alloca(sizeof(char) * total_len);
-  for (i = 1; i < argc; i++) {
+  for (i = 0; i < argc; i++) {
       memcpy(bufferp, str[i], len[i]);
       bufferp += len[i];
   }
