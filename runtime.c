@@ -3055,16 +3055,17 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 
 // carg TODO: need to test each of these "dispatch" functions for
 // off-by-one errors! I think there are bugs in each of them
-void dispatch_bytevector(void *data, object clo, int _argc, object *args)
+void dispatch_bytevector(void *data, object clo, int _argc, object *_args)
 {
-  int argc = _argc - 1;
+  int argc =  _argc - 1; // Skip continuation
+  object *args = _args + 1; // Skip continuation
   int i, val;
   object tmp;
   char *buffer;
   make_empty_bytevector(bv);
   if (argc > 0) {
     buffer = alloca(sizeof(char) * argc);
-    for(i = 1; i < argc; i++) {
+    for(i = 0; i < argc; i++) {
       tmp = args[i];
       Cyc_check_num(data, tmp);
       val = unbox_number(tmp);
@@ -3102,9 +3103,10 @@ object Cyc_bytevector(void *data, object cont, int argc, object bval, ...)
   _return_closcall1(data, cont, &bv);
 }
 
-void dispatch_bytevector_91append(void *data, object clo, int _argc, object *args)
+void dispatch_bytevector_91append(void *data, object clo, int _argc, object *_args)
 {
-  int argc = _argc - 1;
+  int argc =  _argc - 1; // Skip continuation
+  object *args = _args + 1; // Skip continuation
   int i = 0, buf_idx = 0, total_length = 0;
   object tmp;
   char *buffer;
@@ -3114,7 +3116,7 @@ void dispatch_bytevector_91append(void *data, object clo, int _argc, object *arg
   if (argc > 0) {
     buffers = alloca(sizeof(char *) * argc);
     lengths = alloca(sizeof(int) * argc);
-    for(i = 1; i < argc; i++) {
+    for(i = 0; i < argc; i++) {
       tmp = args[i];
       Cyc_check_bvec(data, tmp);
       total_length += ((bytevector)tmp)->len;
