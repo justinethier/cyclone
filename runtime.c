@@ -5767,7 +5767,7 @@ object apply(void *data, object cont, object func, object args)
 }
 
 // Version of apply meant to be called from within compiled code
-void Cyc_apply(void *data, object cont, int argc, object *args)
+void Cyc_apply(void *data, object prim, int argc, object *args)
 {
   object tmp;
   int i;
@@ -5775,16 +5775,16 @@ void Cyc_apply(void *data, object cont, int argc, object *args)
   // TODO: check size of argc/args??
   // TODO: seems inefficient to put these in a list now, with
   //       cargs do we still need to do this??
-  object prim = args[0];
+  object cont = args[0];
 
   for (i = 1; i < argc; i++) {
     tmp = args[i];
-    arglis[i].hdr.mark = gc_color_red;
-    arglis[i].hdr.grayed = 0;
-    arglis[i].hdr.immutable = 0;
-    arglis[i].tag = pair_tag;
-    arglis[i].pair_car = tmp;
-    arglis[i].pair_cdr = (i == (argc - 1)) ? NULL : &arglis[i + 1];
+    arglis[i-1].hdr.mark = gc_color_red;
+    arglis[i-1].hdr.grayed = 0;
+    arglis[i-1].hdr.immutable = 0;
+    arglis[i-1].tag = pair_tag;
+    arglis[i-1].pair_car = tmp;
+    arglis[i-1].pair_cdr = (i == (argc - 1)) ? NULL : &arglis[i];
   }
   //printf("DEBUG applying primitive to ");
   //Cyc_display(data, (object)&arglis[0]);
