@@ -1676,7 +1676,6 @@ object Cyc_num_cmp_list(void *data, int argc,
                        int (fn_op(void *, object, object)), 
                        object *args)
 {
-// carg TODO: does this work with cargs changes? do we really want argc - 1 in caller??
   int i;
   object n, next;
 
@@ -1684,18 +1683,16 @@ object Cyc_num_cmp_list(void *data, int argc,
     Cyc_rt_raise_msg(data, "Not enough arguments for boolean operator\n");
   }
 
-  n = car(args);
-  args = cdr(args);
+  n = args[0];
   Cyc_check_num(data, n);
 
   for (i = 1; i < argc; i++) {
-    next = car(args);
+    next = args[i];
     Cyc_check_num(data, next);
     if (!fn_op(data, n, next)) {
       return boolean_f;
     }
     n = next;
-    next = cdr(args);
   }
 
   return boolean_t;
@@ -1813,7 +1810,7 @@ object FUNC(void *data, object cont, int argc, object n, ...) { \
 } \
 void FUNC_APPLY(void *data, object cont, int argc, object *args) { \
     object result; \
-    result = Cyc_num_cmp_list(data, argc - 1, FUNC_OP, args); \
+    result = Cyc_num_cmp_list(data, argc - 1, FUNC_OP, args + 1); \
     return_closcall1(data, cont, result); \
 } \
 object FUNC_FAST_OP(void *data, object x, object y) { \
@@ -5234,31 +5231,31 @@ void _cell(void *data, object cont, object args)
 void __123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch_num_eq(data, cont, argc, args);
+  dispatch(data, argc, dispatch_num_eq, cont, cont, args);
 }
 
 void __125(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch_num_gt(data, cont, argc, args);
+  dispatch(data, argc, dispatch_num_gt, cont, cont, args);
 }
 
 void __121(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch_num_lt(data, cont, argc, args);
+  dispatch(data, argc, dispatch_num_lt, cont, cont, args);
 }
 
 void __125_123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch_num_gte(data, cont, argc, args);
+  dispatch(data, argc, dispatch_num_gte, cont, cont, args);
 }
 
 void __121_123(void *data, object cont, object args)
 {
   int argc = obj_obj2int(Cyc_length(data, args));
-  dispatch_num_lte(data, cont, argc, args);
+  dispatch(data, argc, dispatch_num_lte, cont, cont, args);
 }
 
 void _apply(void *data, object cont, object args)
