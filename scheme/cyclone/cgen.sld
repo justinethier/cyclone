@@ -1824,6 +1824,7 @@
                (cps? 
                 (let ((i 0)
                       (cstr "")
+                      ;;;(scm-args (ast:lambda-formals->list exp))
                       (args formals-as-list))
                   ;; Strip off extra varargs since we will load them
                   ;; up using a different technique
@@ -1834,14 +1835,22 @@
                   ;; Generate code to unpack args into locals w/expected names
                   (for-each
                     (lambda (arg)
-                      (set! cstr (string-append 
-                                   cstr
-                                   arg
-                                   " = args["
-                                   (number->string i)
-                                   "];"
-                                   ))
+                    ;;;(lambda (scm-arg arg)
+                      ;;;(trace:error `(DEBUG ,scm-arg ARG ,arg))
+                      ;;;(let ((var (adb:get scm-arg)))
+                      ;;;  (when (and (> (adbv:ref-count var) 0)
+                      ;;;             (not (null? (adbv:ref-by var))))
+                          (set! cstr (string-append 
+                                       cstr
+                                       arg
+                                       " = args["
+                                       (number->string i)
+                                       "];"
+                                       ) ;))
                       (set! i (+ i 1))) 
+                    ;;;(if has-closure?
+                    ;;;    (cdr scm-args)
+                    ;;;    scm-args))
                     (if has-closure?
                         (cdr args)
                         args))
