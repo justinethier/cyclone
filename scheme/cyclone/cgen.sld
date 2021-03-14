@@ -1846,11 +1846,11 @@
                                        " = args["
                                        (number->string i)
                                        "];"
-                                       ) ;))
+                                       )) ;)
                       (set! i (+ i 1))) 
                     ;;;(if has-closure?
                     ;;;    (cdr scm-args)
-                    ;;;    scm-args))
+                    ;;;    scm-args)
                     (if has-closure?
                         (cdr args)
                         args))
