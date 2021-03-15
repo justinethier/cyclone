@@ -555,7 +555,7 @@ object Cyc_installation_dir(void *data, object cont, object type);
 object Cyc_compilation_environment(void *data, object cont, object var);
 object Cyc_command_line_arguments(void *data, object cont);
 object Cyc_system(object cmd);
-void Cyc_halt(object obj);
+void Cyc_halt(void *data, object clo, int argc, object *args);
 object __halt(object obj);
 object Cyc_io_delete_file(void *data, object filename);
 object Cyc_io_file_exists(void *data, object filename);

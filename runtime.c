@@ -3473,8 +3473,12 @@ object Cyc_integer2char(void *data, object n)
   return obj_char2obj(val);
 }
 
-void Cyc_halt(object obj)
+void Cyc_halt(void *data, object clo, int argc, object *args)
 {
+  object obj = boolean_f;
+  if (argc > 0) {
+    obj = args[0];
+  }
 #if DEBUG_SHOW_DIAG
   gc_print_stats(Cyc_heap);
 #endif
@@ -3491,7 +3495,8 @@ void Cyc_halt(object obj)
 
 object __halt(object obj)
 {
-  Cyc_halt(obj);
+  object buf[1] = {obj};
+  Cyc_halt(NULL, NULL, 1, buf);
   return NULL;
 }
 
