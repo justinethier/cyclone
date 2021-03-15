@@ -1835,7 +1835,7 @@
                   ;; Generate code to unpack args into locals w/expected names
                   (for-each
                     (lambda (scm-arg arg)
-                      (trace:error `(DEBUG ,scm-arg ARG ,arg))
+                      ;;(trace:error `(DEBUG ,scm-arg ARG ,arg))
                       (let ((var (adb:get/default scm-arg #f)))
                         (when (and var
                                    (> (adbv:ref-count var) 0)
