@@ -6258,6 +6258,12 @@ void Cyc_make_shared_object(void *data, object k, object obj)
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
               object args)
 {
+  if (argc > 100000) {
+    char buf[128];
+    snprintf(buf, 127, "Too many arguments %d", argc);
+    Cyc_rt_raise_msg(data, buf);
+  }
+
   object b[argc + 1];           // OK to do this? Is this portable?
   int i;
 
