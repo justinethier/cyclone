@@ -2,6 +2,10 @@
 
 ## 0.28 - TBD
 
+Features
+
+- (allow an unlimited number of function arguments)
+
 Bug Fixes
 
 - Arthur Maciel replaced high resolution code in the runtime to use `clock_gettime` instead of `gettimeofday`.
