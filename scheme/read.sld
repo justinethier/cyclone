@@ -116,8 +116,11 @@
   " Cyc_io_read_token(data, k, port);")
 
 (define-c read-error
-  "(void *data, int argc, closure _, object k, object port, object filename, object msg)"
-  " char buf[1024];
+  "(void *data, object _, int argc, object *args)"
+  " object port = args[1];
+    object filename = args[2];
+    object msg = args[3];
+    char buf[1024];
     port_type *p;
     Cyc_check_port(data, port);
     Cyc_check_str(data, msg);
