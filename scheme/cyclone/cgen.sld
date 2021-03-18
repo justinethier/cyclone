@@ -14,6 +14,7 @@
           (scheme inexact)
           (scheme write)
           (cyclone foreign)
+          (srfi 69)
           (scheme cyclone primitives)
           (scheme cyclone transforms)
           (scheme cyclone ast)
@@ -44,6 +45,7 @@
 (define *cgen:track-call-history* #t)
 (define *cgen:use-unsafe-prims* #f)
 (define *optimize-well-known-lambdas* #f)
+(define *ref-table* #f)
 
 (define (emit line)
   (display line)
@@ -1835,18 +1837,18 @@
                   ;; Generate code to unpack args into locals w/expected names
                   (for-each
                     (lambda (scm-arg arg)
-                      ;;(trace:error `(DEBUG ,scm-arg ARG ,arg))
-                      (let ((var (adb:get/default scm-arg #f)))
-                        (when (and var
-                                   (> (adbv:ref-count var) 0)
-                                   (not (null? (adbv:ref-by var))))
-                          (set! cstr (string-append 
-                                       cstr
-                                       arg
-                                       " = args["
-                                       (number->string i)
-                                       "];"
-                                       ))))
+                      ;; Do not declare unused variables
+                      (when (and (hash-table-ref/default 
+                                    *ref-table*
+                                    scm-arg
+                                    #f))
+                        (set! cstr (string-append 
+                                     cstr
+                                     arg
+                                     " = args["
+                                     (number->string i)
+                                     "];"
+                                     )))
                       (set! i (+ i 1))) 
                     (if has-closure?
                         (cdr scm-args)
@@ -1953,6 +1955,7 @@
                       required-libs
                       src-file
                       flag-set?)
+  (set! *ref-table* (analyze:cc-ast->vars input-program)) ;; Walk input program to find used variables
   (set! *global-syms* (append globals (lib:idb:ids import-db)))
   (set! *cgen:track-call-history*  (flag-set? 'track-call-history))
   (set! *cgen:use-unsafe-prims*  (flag-set? 'use-unsafe-prims))
