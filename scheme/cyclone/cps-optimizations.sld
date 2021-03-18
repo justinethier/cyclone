@@ -2109,7 +2109,8 @@
       ((tagged-list? '%closure exp)
        (let* ((lam (closure->lam exp))
               (body (car (ast:lambda-body lam))))
-         (scan body)))
+         (scan body)
+         (for-each scan (closure->fv exp))))
       ;; Global definition
       ((define? exp)
        (scan (car (define->exp exp))))
