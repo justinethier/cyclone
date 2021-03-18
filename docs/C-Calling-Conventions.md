@@ -167,6 +167,6 @@ TODO: Are there any complications in referencing vars from `args` rather than di
 
 ## TODO
 
-- There are 'unused variable' warnings for variables that are in analysis DB but in reality are optimized out in subsequent phases prior to C generation. It may be necessary to add a special pass over the closure code to determine if variables are really used, and store the results in a new hashtable/cache.
+- ~~ There are 'unused variable' warnings for variables that are in analysis DB but in reality are optimized out in subsequent phases prior to C generation. It may be necessary to add a special pass over the closure code to determine if variables are really used, and store the results in a new hashtable/cache.~~
 - Limits - will need to enforce a limit at some point to prevent segfaults due to actually running out of memory due to passing to many parameters. Will need to figure out what that limit might be and how to enforce that. Perhaps at 15,000 or more args????
 - Need to either remove `inline_function_type` or have a special compilation mode/flag so that we do not use it for compilers that are too strict to use it.
