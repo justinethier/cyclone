@@ -1,10 +1,14 @@
 # Changelog
 
-## 0.28 - TBD
+## 0.28.0 - TBD
 
 Features
 
-- (allow an unlimited number of function arguments)
+- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions, but is transparent to application developers. Program should continue to work without requiring modifications, though it may be necessary to update `define-c` definitions if there are unused parameters.
+
+TODO: example of the above fix
+
+- Modifying version numbers going forward to use explicit three digit semantic versioning `major.minor.bugfix`.
 
 Bug Fixes
 
