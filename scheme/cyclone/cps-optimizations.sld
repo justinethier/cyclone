@@ -20,6 +20,7 @@
           (srfi 69))
   (export
       closure-convert 
+      analyze:cc-ast->vars
       pos-in-list 
       inlinable-top-level-lambda?
       optimize-cps 
@@ -2079,6 +2080,50 @@
           (map (lambda (e) (scan e lp)) exp))))
      (else exp)))
   (scan exp #f))
+
+;;; This function walks over a Closure-converted expression and 
+;;; builds a table of all variable references. This can be used 
+;;; to determine with certainty what variables are actually used.
+;;;
+;;; Returns a hash table where each key/var is a referenced var.
+(define (analyze:cc-ast->vars sexp)
+  (define %ht (make-hash-table))
+
+  (define (add! ref)
+    (hash-table-set! %ht ref ref))
+  
+  (define (scan exp)
+    (cond
+      ((ast:lambda? exp)
+       (scan
+        `(%closure ,exp)
+         ))
+      ((const? exp) #f)
+      ((prim?  exp) #f)     
+      ((ref?   exp) (add! exp))
+      ((quote? exp) #f)
+      ((if? exp)
+       (scan (if->condition exp))
+       (scan (if->then exp))
+       (scan (if->else exp)))
+      ((tagged-list? '%closure exp)
+       (let* ((lam (closure->lam exp))
+              (body (car (ast:lambda-body lam))))
+         (scan body)))
+      ;; Global definition
+      ((define? exp)
+       (scan (car (define->exp exp))))
+      ((define-c? exp)
+       #f)
+      
+      ;; Application:
+      ((app? exp)
+       (for-each scan exp))
+      (else
+        (error "unknown exp in analyze-cc-vars " exp))))
+
+  (for-each scan sexp)
+  %ht)
 
 ;; Find any top-level functions that call themselves directly
 (define (analyze:find-direct-recursive-calls exp)
