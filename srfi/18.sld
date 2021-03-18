@@ -131,7 +131,7 @@
 
     (define (thread-yield!) (thread-sleep! 1))
     (define-c thread-terminate!
-      "(void *data, int argc, closure _, object k)"
+      "(void *data, object _, int argc, object *args)"
       " Cyc_end_thread(data); ")
 
     ;; TODO: not good enough, need to return value from thread
