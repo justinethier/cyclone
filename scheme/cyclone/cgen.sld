@@ -112,7 +112,7 @@
  return 0;}")
 
 ;;; Auto-generation of C macros
-(define *c-call-max-args* 128)
+(define *c-call-max-args* 10000)
 (define *c-call-arity* (make-vector (+ 1 *c-call-max-args*) #f))
 
 (define (set-c-call-arity! arity)
@@ -120,7 +120,12 @@
     ((not (number? arity))
      (error `(Non-numeric number of arguments received ,arity)))
     ((> arity *c-call-max-args*)
-     (error "Only support up to 128 arguments. Received: " arity))
+     (error 
+       (string-append
+         "Only support up to "
+         (number->string *c-call-max-args*)
+         " arguments. Received: ")
+       arity))
     (else
       (vector-set! *c-call-arity* arity #t))))
 
