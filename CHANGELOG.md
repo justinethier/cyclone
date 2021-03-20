@@ -4,9 +4,17 @@
 
 Features
 
-- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions, but is transparent to application developers. Program should continue to work without requiring modifications though it may be necessary to update `define-c` definitions if there are unused parameters, to prevent warnings from the C compiler.
+- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. 
 
-TODO: example of the above fix
+  This involved changing the calling conventions of our generated C code and runtime functions, but is transparent to application developers. Program should continue to work without requiring modifications though it may be necessary to update `define-c` definitions if there are unused parameters, to prevent warnings from the C compiler. For example: 
+      
+      (define-c read-error
+        "(void *data, object _, int argc, object *args)"
+        " object port = args[1];
+          object filename = args[2];
+          object msg = args[3];
+
+  Note that no changes are a required if `(cyclone foreign)` is used to integrate with C.
 
 - Modifying version numbers going forward to use explicit three digit semantic versioning `major.minor.bugfix`.
 
