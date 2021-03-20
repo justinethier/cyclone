@@ -4,7 +4,7 @@
 
 Features
 
-- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions, but is transparent to application developers. Program should continue to work without requiring modifications, though it may be necessary to update `define-c` definitions if there are unused parameters.
+- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions, but is transparent to application developers. Program should continue to work without requiring modifications though it may be necessary to update `define-c` definitions if there are unused parameters, to prevent warnings from the C compiler.
 
 TODO: example of the above fix
 
