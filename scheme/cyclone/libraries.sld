@@ -78,6 +78,19 @@
   )
   (begin
 
+;; Experimental alias functionality
+(define *aliases*
+  `( ((scheme list) . (srfi ,(string->symbol "1")))
+     ((scheme hash-table) . (srfi ,(string->symbol "69")))
+   ))
+
+(define (lib:import-from-alias import)
+  (let ((conv (assoc import *aliases*)))
+    (if conv 
+        (cdr conv)
+        import)))
+;; END aliases
+
 (define (library? ast)
   (tagged-list? 'define-library ast))
  
@@ -92,11 +105,15 @@
 ;; (srfi 18) containing the number 18. An import set contains only symbols
 ;; or sub-lists.
 (define (lib:list->import-set lis)
+  (lib:import-from-alias
+    (%lib:list->import-set lis)))
+
+(define (%lib:list->import-set lis)
   (map
     (lambda (atom)
       (cond
         ((pair? atom)
-         (lib:list->import-set atom))
+         (%lib:list->import-set atom))
         ((number? atom)
          (string->symbol (number->string atom)))
         (else atom)))
