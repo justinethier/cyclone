@@ -78,16 +78,47 @@
   )
   (begin
 
-;; Experimental alias functionality
-(define *aliases*
-  `( ((scheme list) . (srfi ,(string->symbol "1")))
-     ((scheme hash-table) . (srfi ,(string->symbol "69")))
-   ))
+;; Alias friendlier names to SRFI libraries
+(define *srfi-aliases*
+  '( ;; Red Edition
+     ((scheme list)       (srfi 1))
+     ((scheme vector)     (srfi 133))
+     ((scheme sort)       (srfi 132))
+     ((scheme set)        (srfi 113))
+     ((scheme charset)    (srfi 14))
+     ;((scheme hash-table) (srfi 125))
+     ((scheme hash-table) (srfi 69)) ;; May upgrade this later
+     ((scheme ilist)      (srfi 116))
+     ((scheme rlist)      (srfi 101))
+     ((scheme ideque)     (srfi 134))
+     ;((scheme text)       (srfi 135))
+     ((scheme text)       (srfi 152)) ;; May replace with 135 later
+     ((scheme generator)  (srfi 121))
+     ((scheme lseq)       (srfi 127))
+     ((scheme stream)     (srfi 41))
+     ((scheme box)        (srfi 111))
+     ((scheme list-queue) (srfi 117))
+     ((scheme ephemeron)  (srfi 124))
+     ((scheme comparator) (srfi 128))
+     ;; Other SRFI's in Cyclone core
+     ((cyclone and-let*)      (srfi 2))
+     ((cyclone receive)       (srfi 8))
+     ((cyclone threads)       (srfi 18))
+     ((cyclone random)        (srfi 27))
+     ((cyclone format)        (srfi 28))
+     ((cyclone integer-bits)  (srfi 60))
+     ((cyclone socket)        (srfi 106))
+     ((cyclone fixnum)        (srfi 143))
+     ;; Other SRFI's in Winds packages
+     ((cyclone hooks)         (srfi 173))
+     ((cyclone chain)         (srfi 197))
+     ((cyclone assumptions)   (srfi 145))
+     ((cyclone cut)           (srfi 26)) ))
 
-(define (lib:import-from-alias import)
-  (let ((conv (assoc import *aliases*)))
+(define (lib:rename-aliases import)
+  (let ((conv (assoc import *srfi-aliases*)))
     (if conv 
-        (cdr conv)
+        (%lib:list->import-set (cadr conv))
         import)))
 ;; END aliases
 
@@ -104,8 +135,11 @@
 ;; Convert a raw list to an import set. For example, a list might be
 ;; (srfi 18) containing the number 18. An import set contains only symbols
 ;; or sub-lists.
+;;
+;; This is also a convenient time to do any name conversions from an
+;; alias to the actual library.
 (define (lib:list->import-set lis)
-  (lib:import-from-alias
+  (lib:rename-aliases
     (%lib:list->import-set lis)))
 
 (define (%lib:list->import-set lis)
