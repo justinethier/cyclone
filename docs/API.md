@@ -34,25 +34,25 @@ This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specific
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API:
 
-SRFI Number | Library Name | Description
------------ | ------------ | -----------
-[`srfi 1`](api/srfi/1.md)     | `(scheme list)`       | [List library](http://srfi.schemers.org/srfi-1/srfi-1.html)
-[`srfi 2`](api/srfi/2.md)     | `(cyclone and-let*)`  | [`and-let*`](http://srfi.schemers.org/srfi-2/srfi-2.html)
-[`srfi 8`](api/srfi/8.md)     |                       | [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
-[`srfi 18`](api/srfi/18.md)   | TBD | [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
-[`srfi 27`](api/srfi/27.md)   | TBD | [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
-[`srfi 28`](api/srfi/28.md)   | TBD | [Basic format strings](http://srfi.schemers.org/srfi-28/srfi-28.html)
-[`srfi 60`](api/srfi/60.md)   | TBD | [Integers as bits](http://srfi.schemers.org/srfi-60/srfi-60.html)
-[`srfi 69`](api/srfi/69.md)   | TBD | [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
-[`srfi 106`](api/srfi/106.md) | TBD | [Basic socket interface](http://srfi.schemers.org/srfi-106/srfi-106.html)
-[`srfi 111`](api/srfi/111.md) | TBD | [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
-[`srfi 113`](api/srfi/113.md) | TBD | [Sets and bags](http://srfi.schemers.org/srfi-113/srfi-113.html)
-[`srfi 117`](api/srfi/117.md) | TBD | [Mutable queues](http://srfi.schemers.org/srfi-117/srfi-117.html)
-[`srfi 121`](api/srfi/121.md) | TBD | [Generators](http://srfi.schemers.org/srfi-121/srfi-121.html)
-[`srfi 128`](api/srfi/128.md) | TBD | [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
-[`srfi 132`](api/srfi/132.md) | TBD | [Sort libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
-[`srfi 133`](api/srfi/133.md) | TBD | [Vector library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
-[`srfi 143`](api/srfi/143.md) | TBD | [Fixnums](http://srfi.schemers.org/srfi-143/srfi-143.html)
+SRFI Number | Library Name | Description | External Documentation
+----------- | ------------ | ----------- | ----------------------
+[`srfi 1`](api/srfi/1.md)     | `(scheme list)`       | List library | [List library](http://srfi.schemers.org/srfi-1/srfi-1.html)
+[`srfi 2`](api/srfi/2.md)     | `(cyclone and-let*)`  | | [`and-let*`](http://srfi.schemers.org/srfi-2/srfi-2.html)
+[`srfi 8`](api/srfi/8.md)     |                       | Binding to multiple values - Included as part of `scheme base`. | [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
+[`srfi 18`](api/srfi/18.md)   | TBD | | [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
+[`srfi 27`](api/srfi/27.md)   | TBD | | [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
+[`srfi 28`](api/srfi/28.md)   | TBD | | [Basic format strings](http://srfi.schemers.org/srfi-28/srfi-28.html)
+[`srfi 60`](api/srfi/60.md)   | TBD | | [Integers as bits](http://srfi.schemers.org/srfi-60/srfi-60.html)
+[`srfi 69`](api/srfi/69.md)   | TBD | | [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
+[`srfi 106`](api/srfi/106.md) | TBD | | [Basic socket interface](http://srfi.schemers.org/srfi-106/srfi-106.html)
+[`srfi 111`](api/srfi/111.md) | TBD | | [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
+[`srfi 113`](api/srfi/113.md) | TBD | | [Sets and bags](http://srfi.schemers.org/srfi-113/srfi-113.html)
+[`srfi 117`](api/srfi/117.md) | TBD | | [Mutable queues](http://srfi.schemers.org/srfi-117/srfi-117.html)
+[`srfi 121`](api/srfi/121.md) | TBD | | [Generators](http://srfi.schemers.org/srfi-121/srfi-121.html)
+[`srfi 128`](api/srfi/128.md) | TBD | | [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
+[`srfi 132`](api/srfi/132.md) | TBD | | [Sort libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
+[`srfi 133`](api/srfi/133.md) | TBD | | [Vector library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
+[`srfi 143`](api/srfi/143.md) | TBD | | [Fixnums](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
 # Cyclone Libraries
 
