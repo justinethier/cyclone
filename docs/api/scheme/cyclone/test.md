@@ -8,6 +8,11 @@ layout: main
 title: API
 ---
 
+---
+layout: main
+title: API
+---
+
 # Test Library
 
 The `(scheme cyclone test)` library contains a testing framework ported from `(chibi test)` which in turn was ported from CHICKEN.

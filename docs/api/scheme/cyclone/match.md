@@ -8,6 +8,11 @@ layout: main
 title: API
 ---
 
+---
+layout: main
+title: API
+---
+
 # Match Library
 
 The `(scheme cyclone match)` library provides a hygienic pattern matcher, based on Alex Shinn's portable `match.scm`.

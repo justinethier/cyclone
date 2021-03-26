@@ -17,67 +17,77 @@ title: API
 
 This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
 
-- [Primitives](api/primitives)
-- [`scheme base`](api/scheme/base)
-- [`scheme case-lambda`](api/scheme/case-lambda)
-- [`scheme char`](api/scheme/char)
-- [`scheme complex`](api/scheme/complex)
-- [`scheme cxr`](api/scheme/cxr)
-- [`scheme eval`](api/scheme/eval)
-- [`scheme file`](api/scheme/file)
-- [`scheme inexact`](api/scheme/inexact)
-- [`scheme lazy`](api/scheme/lazy)
-- [`scheme load`](api/scheme/load)
-- [`scheme process-context`](api/scheme/process-context)
-- [`scheme read`](api/scheme/read)
-- [`scheme repl`](api/scheme/repl)
-- [`scheme time`](api/scheme/time)
-- [`scheme write`](api/scheme/write)
+Library Name                                               | Description
+---------------------------------------------------------- | -----------
+[Primitives](api/primitives)                            | This is not actually a library but rather a summary of all of the built-in functions (AKA primitives).
+[`scheme base`](api/scheme/base)                        | The R7RS base library. This is quite extensive and will be required by most programs.
+[`scheme case-lambda`](api/scheme/case-lambda)          |
+[`scheme char`](api/scheme/char)                        |
+[`scheme complex`](api/scheme/complex)                  |
+[`scheme cxr`](api/scheme/cxr)                          |
+[`scheme eval`](api/scheme/eval)                        |
+[`scheme file`](api/scheme/file)                        |
+[`scheme inexact`](api/scheme/inexact)                  |
+[`scheme lazy`](api/scheme/lazy)                        |
+[`scheme load`](api/scheme/load)                        |
+[`scheme process-context`](api/scheme/process-context)  |
+[`scheme read`](api/scheme/read)                        |
+[`scheme repl`](api/scheme/repl)                        |
+[`scheme time`](api/scheme/time)                        |
+[`scheme write`](api/scheme/write)                      |
 
 # SRFI Libraries
 
-Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API:
+Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API.
 
-- [`srfi 1`](api/srfi/1) - [List library](http://srfi.schemers.org/srfi-1/srfi-1.html)
-- [`srfi 2`](api/srfi/2) - [`and-let*`](http://srfi.schemers.org/srfi-2/srfi-2.html)
-- [`srfi 8`](api/srfi/8) - [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
-- [`srfi 18`](api/srfi/18) - [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
-- [`srfi 27`](api/srfi/27) - [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
-- [`srfi 28`](api/srfi/28) - [Basic format strings](http://srfi.schemers.org/srfi-28/srfi-28.html)
-- [`srfi 60`](api/srfi/60) - [Integers as bits](http://srfi.schemers.org/srfi-60/srfi-60.html)
-- [`srfi 69`](api/srfi/69) - [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
-- [`srfi 106`](api/srfi/106) - [Basic socket interface](http://srfi.schemers.org/srfi-106/srfi-106.html)
-- [`srfi 111`](api/srfi/111) - [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
-- [`srfi 113`](api/srfi/113) - [Sets and bags](http://srfi.schemers.org/srfi-113/srfi-113.html)
-- [`srfi 117`](api/srfi/117) - [Mutable queues](http://srfi.schemers.org/srfi-117/srfi-117.html)
-- [`srfi 121`](api/srfi/121) - [Generators](http://srfi.schemers.org/srfi-121/srfi-121.html)
-- [`srfi 128`](api/srfi/128) - [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
-- [`srfi 132`](api/srfi/132) - [Sort libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
-- [`srfi 133`](api/srfi/133) - [Vector library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
-- [`srfi 143`](api/srfi/143) - [Fixnums](http://srfi.schemers.org/srfi-143/srfi-143.html)
+Note that these libraries may be imported using either the SRFI number (EG: `(srfi 1)` or a descriptive name (EG: `(scheme list)`). These descriptive names follow the recommendations from R7RS Large where available.
+
+Library Name                            | SRFI Number | Description | External Documentation
+--------------------------------------- | ----------- | ----------- | ----------------------
+[`scheme list`](api/srfi/1)          | [`srfi 1`](api/srfi/1)     | List library | [Link](http://srfi.schemers.org/srfi-1/srfi-1.html)
+[`cyclone and-let*`](api/srfi/2)     | [`srfi 2`](api/srfi/2)     | `AND-LET*`: an `AND` with local bindings, a guarded `LET*` special form | [Link](http://srfi.schemers.org/srfi-2/srfi-2.html)
+ N/A                                    | [`srfi 8`](api/srfi/8)     | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html)
+[`cyclone threads`](api/srfi/18)     | [`srfi 18`](api/srfi/18)   | Multithreading support | [Link](http://srfi.schemers.org/srfi-18/srfi-18.html)
+[`cyclone random`](api/srfi/27)      | [`srfi 27`](api/srfi/27)   | Sources of random bits | [Link](http://srfi.schemers.org/srfi-27/srfi-27.html)
+[`cyclone format`](api/srfi/28)      | [`srfi 28`](api/srfi/28)   | Basic format strings | [Link](http://srfi.schemers.org/srfi-28/srfi-28.html)
+[`cyclone integer-bits`](api/srfi/60)| [`srfi 60`](api/srfi/60)   | Integers as bits | [Link](http://srfi.schemers.org/srfi-60/srfi-60.html)
+[`scheme hash-table`](api/srfi/69)   | [`srfi 69`](api/srfi/69)   | Basic hash tables | [Link](http://srfi.schemers.org/srfi-69/srfi-69.html)
+[`cyclone socket`](api/srfi/106)     | [`srfi 106`](api/srfi/106) | Basic socket interface | [Link](http://srfi.schemers.org/srfi-106/srfi-106.html)
+[`scheme box`](api/srfi/111)         | [`srfi 111`](api/srfi/111) | Boxes | [Link](http://srfi.schemers.org/srfi-111/srfi-111.html)
+[`scheme set`](api/srfi/113)         | [`srfi 113`](api/srfi/113) | Sets and bags | [Link](http://srfi.schemers.org/srfi-113/srfi-113.html)
+[`scheme list-queue`](api/srfi/117)  | [`srfi 117`](api/srfi/117) | Mutable queues | [Link](http://srfi.schemers.org/srfi-117/srfi-117.html)
+[`scheme generator`](api/srfi/121)   | [`srfi 121`](api/srfi/121) | Generators | [Link](http://srfi.schemers.org/srfi-121/srfi-121.html)
+[`scheme comparator`](api/srfi/128)  | [`srfi 128`](api/srfi/128) | Comparators | [Link](http://srfi.schemers.org/srfi-128/srfi-128.html)
+[`scheme sort`](api/srfi/132)        | [`srfi 132`](api/srfi/132) | Sort libraries | [Link](http://srfi.schemers.org/srfi-132/srfi-132.html)
+[`scheme vector`](api/srfi/133)      | [`srfi 133`](api/srfi/133) | Vector library (R7RS-compatible) | [Link](http://srfi.schemers.org/srfi-133/srfi-133.html)
+[`cyclone fixnum`](api/srfi/143)     | [`srfi 143`](api/srfi/143) | Fixnums | [Link](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
 # Cyclone Libraries
 
-These libraries are provided by Cyclone with a stable API that is unlikely to change:
+These libraries are provided as Cyclone-specific extensions:
 
-- [`cyclone concurrent`](api/cyclone/concurrent) - A helper library for writing concurrent code.
-- [`cyclone foreign`](api/cyclone/foreign) - Provides a convenient interface for integrating with C code.
-- [`cyclone match`](api/cyclone/match) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
-- [`cyclone test`](api/cyclone/test) - A unit testing framework ported from `(chibi test)`.
-- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print) - A pretty printer.
+Library Name | Description
+------------ | -----------
+[`cyclone concurrent`](api/cyclone/concurrent) | A helper library for writing concurrent code.
+[`cyclone foreign`](api/cyclone/foreign) | Provides a convenient interface for integrating with C code. It is recommended to use this library if possible rather than our lower-level FFI.
+[`cyclone match`](api/cyclone/match) | A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
+[`cyclone test`](api/cyclone/test) | A unit testing framework ported from `(chibi test)`.
+[`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print) | A pretty printer.
 
 # Internal Compiler API
 
 These libraries are used by the Cyclone compiler. Some of these are stable and unlikely to change, whereas others could change as the compiler evolves.
 
-- [`scheme cyclone ast`](api/scheme/cyclone/ast)
-- [`scheme cyclone cgen`](api/scheme/cyclone/cgen)
-- [`scheme cyclone common`](api/scheme/cyclone/common)
-- [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations)
-- [`scheme cyclone libraries`](api/scheme/cyclone/libraries)
-- [`scheme cyclone primitives`](api/scheme/cyclone/primitives)
-- [`scheme cyclone transforms`](api/scheme/cyclone/transforms)
-- [`scheme cyclone util`](api/scheme/cyclone/util)
+Library Name                                                                  | Description
+----------------------------------------------------------------------------- | -----------
+[`scheme cyclone ast`](api/scheme/cyclone/ast)                             | Abstract syntax tree types used during compilation.
+[`scheme cyclone cgen`](api/scheme/cyclone/cgen)                           | C code generation
+[`scheme cyclone common`](api/scheme/cyclone/common)                       | Mostly version numbers and header comments
+[`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations) | Compiler optimizations, analysis, and related transformations
+[`scheme cyclone libraries`](api/scheme/cyclone/libraries)                 | Compiler support for R7RS libraries
+[`scheme cyclone primitives`](api/scheme/cyclone/primitives)               | Compiler support for primitives
+[`scheme cyclone transforms`](api/scheme/cyclone/transforms)               | Various Scheme-to-Scheme transformations of the intermediate code 
+[`scheme cyclone util`](api/scheme/cyclone/util)                           | Utility functions used internally by the compiler
 
 # C API
 
