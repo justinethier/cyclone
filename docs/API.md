@@ -32,37 +32,41 @@ This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specific
 
 # SRFI Libraries
 
-Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API:
+Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API.
+
+Note that these libraries may be imported using either the SRFI number (EG: `(srfi 1)` or a descriptive name (EG: `(scheme list)`). These descriptive names follow the recommendations from R7RS Large where available.
 
 SRFI Number | Library Name | Description | External Documentation
 ----------- | ------------ | ----------- | ----------------------
-[`srfi 1`](api/srfi/1.md)     | `(scheme list)`       | List library | [List library](http://srfi.schemers.org/srfi-1/srfi-1.html)
-[`srfi 2`](api/srfi/2.md)     | `(cyclone and-let*)`  | | [`and-let*`](http://srfi.schemers.org/srfi-2/srfi-2.html)
-[`srfi 8`](api/srfi/8.md)     |                       | Binding to multiple values - Included as part of `scheme base`. | [`receive`: Binding to multiple values](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
-[`srfi 18`](api/srfi/18.md)   | TBD | | [Multithreading support](http://srfi.schemers.org/srfi-18/srfi-18.html)
-[`srfi 27`](api/srfi/27.md)   | TBD | | [Sources of random bits](http://srfi.schemers.org/srfi-27/srfi-27.html)
-[`srfi 28`](api/srfi/28.md)   | TBD | | [Basic format strings](http://srfi.schemers.org/srfi-28/srfi-28.html)
-[`srfi 60`](api/srfi/60.md)   | TBD | | [Integers as bits](http://srfi.schemers.org/srfi-60/srfi-60.html)
-[`srfi 69`](api/srfi/69.md)   | TBD | | [Basic hash tables](http://srfi.schemers.org/srfi-69/srfi-69.html)
-[`srfi 106`](api/srfi/106.md) | TBD | | [Basic socket interface](http://srfi.schemers.org/srfi-106/srfi-106.html)
-[`srfi 111`](api/srfi/111.md) | TBD | | [Boxes](http://srfi.schemers.org/srfi-111/srfi-111.html)
-[`srfi 113`](api/srfi/113.md) | TBD | | [Sets and bags](http://srfi.schemers.org/srfi-113/srfi-113.html)
-[`srfi 117`](api/srfi/117.md) | TBD | | [Mutable queues](http://srfi.schemers.org/srfi-117/srfi-117.html)
-[`srfi 121`](api/srfi/121.md) | TBD | | [Generators](http://srfi.schemers.org/srfi-121/srfi-121.html)
-[`srfi 128`](api/srfi/128.md) | TBD | | [Comparators](http://srfi.schemers.org/srfi-128/srfi-128.html)
-[`srfi 132`](api/srfi/132.md) | TBD | | [Sort libraries](http://srfi.schemers.org/srfi-132/srfi-132.html)
-[`srfi 133`](api/srfi/133.md) | TBD | | [Vector library (R7RS-compatible)](http://srfi.schemers.org/srfi-133/srfi-133.html)
-[`srfi 143`](api/srfi/143.md) | TBD | | [Fixnums](http://srfi.schemers.org/srfi-143/srfi-143.html)
+[`srfi 1`](api/srfi/1.md)     | `(scheme list)`       | List library | [Link](http://srfi.schemers.org/srfi-1/srfi-1.html)
+[`srfi 2`](api/srfi/2.md)     | `(cyclone and-let*)`  | `AND-LET*`: an `AND` with local bindings, a guarded `LET*` special form | [Link](http://srfi.schemers.org/srfi-2/srfi-2.html)
+[`srfi 8`](api/srfi/8.md)     | N/A                   | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
+[`srfi 18`](api/srfi/18.md)   | `(cyclone threads)` | Multithreading support | [Link](http://srfi.schemers.org/srfi-18/srfi-18.html)
+[`srfi 27`](api/srfi/27.md)   | `(cyclone random)` | Sources of random bits | [Link](http://srfi.schemers.org/srfi-27/srfi-27.html)
+[`srfi 28`](api/srfi/28.md)   | `(cyclone format)` | Basic format strings | [Link](http://srfi.schemers.org/srfi-28/srfi-28.html)
+[`srfi 60`](api/srfi/60.md)   | `(cyclone integer-bits)` | Integers as bits | [Link](http://srfi.schemers.org/srfi-60/srfi-60.html)
+[`srfi 69`](api/srfi/69.md)   | `(scheme hash-table)` | Basic hash tables | [Link](http://srfi.schemers.org/srfi-69/srfi-69.html)
+[`srfi 106`](api/srfi/106.md) | `(cyclone socket)` | Basic socket interface | [Link](http://srfi.schemers.org/srfi-106/srfi-106.html)
+[`srfi 111`](api/srfi/111.md) | `(scheme box)` | Boxes | [Link](http://srfi.schemers.org/srfi-111/srfi-111.html)
+[`srfi 113`](api/srfi/113.md) | `(scheme set)` | Sets and bags | [Link](http://srfi.schemers.org/srfi-113/srfi-113.html)
+[`srfi 117`](api/srfi/117.md) | `(scheme list-queue)` | Mutable queues | [Link](http://srfi.schemers.org/srfi-117/srfi-117.html)
+[`srfi 121`](api/srfi/121.md) | `(scheme generator)` | Generators | [Link](http://srfi.schemers.org/srfi-121/srfi-121.html)
+[`srfi 128`](api/srfi/128.md) | `(scheme comparator)` | Comparators | [Link](http://srfi.schemers.org/srfi-128/srfi-128.html)
+[`srfi 132`](api/srfi/132.md) | `(scheme sort)` | Sort libraries | [Link](http://srfi.schemers.org/srfi-132/srfi-132.html)
+[`srfi 133`](api/srfi/133.md) | `(scheme vector)` | Vector library (R7RS-compatible) | [Link](http://srfi.schemers.org/srfi-133/srfi-133.html)
+[`srfi 143`](api/srfi/143.md) | `(cyclone fixnum)` | Fixnums | [Link](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
 # Cyclone Libraries
 
 These libraries are provided as Cyclone-specific extensions:
 
-- [`cyclone concurrent`](api/cyclone/concurrent.md) - A helper library for writing concurrent code.
-- [`cyclone foreign`](api/cyclone/foreign.md) - Provides a convenient interface for integrating with C code.
-- [`cyclone match`](api/cyclone/match.md) - A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
-- [`cyclone test`](api/cyclone/test.md) - A unit testing framework ported from `(chibi test)`.
-- [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md) - A pretty printer.
+Library Name | Description
+------------ | -----------
+[`cyclone concurrent`](api/cyclone/concurrent.md) | A helper library for writing concurrent code.
+[`cyclone foreign`](api/cyclone/foreign.md) | Provides a convenient interface for integrating with C code.
+[`cyclone match`](api/cyclone/match.md) | A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
+[`cyclone test`](api/cyclone/test.md) | A unit testing framework ported from `(chibi test)`.
+[`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md) | A pretty printer.
 
 # Internal Compiler API
 
