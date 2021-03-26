@@ -13,22 +13,24 @@
 
 This section of the Cyclone API is based on the [R<sup>7</sup>RS Scheme Specification](r7rs.pdf):
 
-- [Primitives](api/primitives.md)
-- [`scheme base`](api/scheme/base.md)
-- [`scheme case-lambda`](api/scheme/case-lambda.md)
-- [`scheme char`](api/scheme/char.md)
-- [`scheme complex`](api/scheme/complex.md)
-- [`scheme cxr`](api/scheme/cxr.md)
-- [`scheme eval`](api/scheme/eval.md)
-- [`scheme file`](api/scheme/file.md)
-- [`scheme inexact`](api/scheme/inexact.md)
-- [`scheme lazy`](api/scheme/lazy.md)
-- [`scheme load`](api/scheme/load.md)
-- [`scheme process-context`](api/scheme/process-context.md)
-- [`scheme read`](api/scheme/read.md)
-- [`scheme repl`](api/scheme/repl.md)
-- [`scheme time`](api/scheme/time.md)
-- [`scheme write`](api/scheme/write.md)
+Library Name                                               | Description
+---------------------------------------------------------- | -----------
+[Primitives](api/primitives.md)                            | This is not actually a library but rather a summary of all of the built-in functions (AKA primitives).
+[`scheme base`](api/scheme/base.md)                        | The R7RS base library. This is quite extensive and will be required by most programs.
+[`scheme case-lambda`](api/scheme/case-lambda.md)          |
+[`scheme char`](api/scheme/char.md)                        |
+[`scheme complex`](api/scheme/complex.md)                  |
+[`scheme cxr`](api/scheme/cxr.md)                          |
+[`scheme eval`](api/scheme/eval.md)                        |
+[`scheme file`](api/scheme/file.md)                        |
+[`scheme inexact`](api/scheme/inexact.md)                  |
+[`scheme lazy`](api/scheme/lazy.md)                        |
+[`scheme load`](api/scheme/load.md)                        |
+[`scheme process-context`](api/scheme/process-context.md)  |
+[`scheme read`](api/scheme/read.md)                        |
+[`scheme repl`](api/scheme/repl.md)                        |
+[`scheme time`](api/scheme/time.md)                        |
+[`scheme write`](api/scheme/write.md)                      |
 
 # SRFI Libraries
 
@@ -40,7 +42,7 @@ Library Name                            | SRFI Number | Description | External D
 --------------------------------------- | ----------- | ----------- | ----------------------
 [`scheme list`](api/srfi/1.md)          | [`srfi 1`](api/srfi/1.md)     | List library | [Link](http://srfi.schemers.org/srfi-1/srfi-1.html)
 [`cyclone and-let*`](api/srfi/2.md)     | [`srfi 2`](api/srfi/2.md)     | `AND-LET*`: an `AND` with local bindings, a guarded `LET*` special form | [Link](http://srfi.schemers.org/srfi-2/srfi-2.html)
- N/A                                    | [`srfi 8`](api/srfi/8.md)     | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
+ N/A                                    | [`srfi 8`](api/srfi/8.md)     | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html)
 [`cyclone threads`](api/srfi/18.md)     | [`srfi 18`](api/srfi/18.md)   | Multithreading support | [Link](http://srfi.schemers.org/srfi-18/srfi-18.html)
 [`cyclone random`](api/srfi/27.md)      | [`srfi 27`](api/srfi/27.md)   | Sources of random bits | [Link](http://srfi.schemers.org/srfi-27/srfi-27.html)
 [`cyclone format`](api/srfi/28.md)      | [`srfi 28`](api/srfi/28.md)   | Basic format strings | [Link](http://srfi.schemers.org/srfi-28/srfi-28.html)
@@ -63,7 +65,7 @@ These libraries are provided as Cyclone-specific extensions:
 Library Name | Description
 ------------ | -----------
 [`cyclone concurrent`](api/cyclone/concurrent.md) | A helper library for writing concurrent code.
-[`cyclone foreign`](api/cyclone/foreign.md) | Provides a convenient interface for integrating with C code.
+[`cyclone foreign`](api/cyclone/foreign.md) | Provides a convenient interface for integrating with C code. It is recommended to use this library if possible rather than our lower-level FFI.
 [`cyclone match`](api/cyclone/match.md) | A hygienic pattern matcher based on Alex Shinn's portable `match.scm`.
 [`cyclone test`](api/cyclone/test.md) | A unit testing framework ported from `(chibi test)`.
 [`scheme cyclone pretty-print`](api/scheme/cyclone/pretty-print.md) | A pretty printer.
@@ -72,14 +74,16 @@ Library Name | Description
 
 These libraries are used by the Cyclone compiler. Some of these are stable and unlikely to change, whereas others could change as the compiler evolves.
 
-- [`scheme cyclone ast`](api/scheme/cyclone/ast.md)
-- [`scheme cyclone cgen`](api/scheme/cyclone/cgen.md)
-- [`scheme cyclone common`](api/scheme/cyclone/common.md)
-- [`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations.md)
-- [`scheme cyclone libraries`](api/scheme/cyclone/libraries.md)
-- [`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)
-- [`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)
-- [`scheme cyclone util`](api/scheme/cyclone/util.md)
+Library Name                                                                  | Description
+----------------------------------------------------------------------------- | -----------
+[`scheme cyclone ast`](api/scheme/cyclone/ast.md)                             | Abstract syntax tree types used during compilation.
+[`scheme cyclone cgen`](api/scheme/cyclone/cgen.md)                           | C code generation
+[`scheme cyclone common`](api/scheme/cyclone/common.md)                       | Mostly version numbers and header comments
+[`scheme cyclone cps-optimizations`](api/scheme/cyclone/cps-optimizations.md) | Compiler optimizations, analysis, and related transformations
+[`scheme cyclone libraries`](api/scheme/cyclone/libraries.md)                 | Compiler support for R7RS libraries
+[`scheme cyclone primitives`](api/scheme/cyclone/primitives.md)               | Compiler support for primitives
+[`scheme cyclone transforms`](api/scheme/cyclone/transforms.md)               | Various Scheme-to-Scheme transformations of the intermediate code 
+[`scheme cyclone util`](api/scheme/cyclone/util.md)                           | Utility functions used internally by the compiler
 
 # C API
 
