@@ -36,25 +36,25 @@ Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http:
 
 Note that these libraries may be imported using either the SRFI number (EG: `(srfi 1)` or a descriptive name (EG: `(scheme list)`). These descriptive names follow the recommendations from R7RS Large where available.
 
-SRFI Number | Library Name | Description | External Documentation
------------ | ------------ | ----------- | ----------------------
-[`srfi 1`](api/srfi/1.md)     | `(scheme list)`       | List library | [Link](http://srfi.schemers.org/srfi-1/srfi-1.html)
-[`srfi 2`](api/srfi/2.md)     | `(cyclone and-let*)`  | `AND-LET*`: an `AND` with local bindings, a guarded `LET*` special form | [Link](http://srfi.schemers.org/srfi-2/srfi-2.html)
-[`srfi 8`](api/srfi/8.md)     | N/A                   | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
-[`srfi 18`](api/srfi/18.md)   | `(cyclone threads)` | Multithreading support | [Link](http://srfi.schemers.org/srfi-18/srfi-18.html)
-[`srfi 27`](api/srfi/27.md)   | `(cyclone random)` | Sources of random bits | [Link](http://srfi.schemers.org/srfi-27/srfi-27.html)
-[`srfi 28`](api/srfi/28.md)   | `(cyclone format)` | Basic format strings | [Link](http://srfi.schemers.org/srfi-28/srfi-28.html)
-[`srfi 60`](api/srfi/60.md)   | `(cyclone integer-bits)` | Integers as bits | [Link](http://srfi.schemers.org/srfi-60/srfi-60.html)
-[`srfi 69`](api/srfi/69.md)   | `(scheme hash-table)` | Basic hash tables | [Link](http://srfi.schemers.org/srfi-69/srfi-69.html)
-[`srfi 106`](api/srfi/106.md) | `(cyclone socket)` | Basic socket interface | [Link](http://srfi.schemers.org/srfi-106/srfi-106.html)
-[`srfi 111`](api/srfi/111.md) | `(scheme box)` | Boxes | [Link](http://srfi.schemers.org/srfi-111/srfi-111.html)
-[`srfi 113`](api/srfi/113.md) | `(scheme set)` | Sets and bags | [Link](http://srfi.schemers.org/srfi-113/srfi-113.html)
-[`srfi 117`](api/srfi/117.md) | `(scheme list-queue)` | Mutable queues | [Link](http://srfi.schemers.org/srfi-117/srfi-117.html)
-[`srfi 121`](api/srfi/121.md) | `(scheme generator)` | Generators | [Link](http://srfi.schemers.org/srfi-121/srfi-121.html)
-[`srfi 128`](api/srfi/128.md) | `(scheme comparator)` | Comparators | [Link](http://srfi.schemers.org/srfi-128/srfi-128.html)
-[`srfi 132`](api/srfi/132.md) | `(scheme sort)` | Sort libraries | [Link](http://srfi.schemers.org/srfi-132/srfi-132.html)
-[`srfi 133`](api/srfi/133.md) | `(scheme vector)` | Vector library (R7RS-compatible) | [Link](http://srfi.schemers.org/srfi-133/srfi-133.html)
-[`srfi 143`](api/srfi/143.md) | `(cyclone fixnum)` | Fixnums | [Link](http://srfi.schemers.org/srfi-143/srfi-143.html)
+Library Name                            | SRFI Number | Description | External Documentation
+--------------------------------------- | ----------- | ----------- | ----------------------
+[`scheme list`](api/srfi/1.md)          | [`srfi 1`](api/srfi/1.md)     | List library | [Link](http://srfi.schemers.org/srfi-1/srfi-1.html)
+[`cyclone and-let*`](api/srfi/2.md)     | [`srfi 2`](api/srfi/2.md)     | `AND-LET*`: an `AND` with local bindings, a guarded `LET*` special form | [Link](http://srfi.schemers.org/srfi-2/srfi-2.html)
+ N/A                                    | [`srfi 8`](api/srfi/8.md)     | Binding to multiple values - Included as part of `scheme base`. | [Link](http://srfi.schemers.org/srfi-8/srfi-8.html) - Included as part of `scheme base`.
+[`cyclone threads`](api/srfi/18.md)     | [`srfi 18`](api/srfi/18.md)   | Multithreading support | [Link](http://srfi.schemers.org/srfi-18/srfi-18.html)
+[`cyclone random`](api/srfi/27.md)      | [`srfi 27`](api/srfi/27.md)   | Sources of random bits | [Link](http://srfi.schemers.org/srfi-27/srfi-27.html)
+[`cyclone format`](api/srfi/28.md)      | [`srfi 28`](api/srfi/28.md)   | Basic format strings | [Link](http://srfi.schemers.org/srfi-28/srfi-28.html)
+[`cyclone integer-bits`](api/srfi/60.md)| [`srfi 60`](api/srfi/60.md)   | Integers as bits | [Link](http://srfi.schemers.org/srfi-60/srfi-60.html)
+[`scheme hash-table`](api/srfi/69.md)   | [`srfi 69`](api/srfi/69.md)   | Basic hash tables | [Link](http://srfi.schemers.org/srfi-69/srfi-69.html)
+[`cyclone socket`](api/srfi/106.md)     | [`srfi 106`](api/srfi/106.md) | Basic socket interface | [Link](http://srfi.schemers.org/srfi-106/srfi-106.html)
+[`scheme box`](api/srfi/111.md)         | [`srfi 111`](api/srfi/111.md) | Boxes | [Link](http://srfi.schemers.org/srfi-111/srfi-111.html)
+[`scheme set`](api/srfi/113.md)         | [`srfi 113`](api/srfi/113.md) | Sets and bags | [Link](http://srfi.schemers.org/srfi-113/srfi-113.html)
+[`scheme list-queue`](api/srfi/117.md)  | [`srfi 117`](api/srfi/117.md) | Mutable queues | [Link](http://srfi.schemers.org/srfi-117/srfi-117.html)
+[`scheme generator`](api/srfi/121.md)   | [`srfi 121`](api/srfi/121.md) | Generators | [Link](http://srfi.schemers.org/srfi-121/srfi-121.html)
+[`scheme comparator`](api/srfi/128.md)  | [`srfi 128`](api/srfi/128.md) | Comparators | [Link](http://srfi.schemers.org/srfi-128/srfi-128.html)
+[`scheme sort`](api/srfi/132.md)        | [`srfi 132`](api/srfi/132.md) | Sort libraries | [Link](http://srfi.schemers.org/srfi-132/srfi-132.html)
+[`scheme vector`](api/srfi/133.md)      | [`srfi 133`](api/srfi/133.md) | Vector library (R7RS-compatible) | [Link](http://srfi.schemers.org/srfi-133/srfi-133.html)
+[`cyclone fixnum`](api/srfi/143.md)     | [`srfi 143`](api/srfi/143.md) | Fixnums | [Link](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
 # Cyclone Libraries
 
