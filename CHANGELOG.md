@@ -22,6 +22,7 @@ Features
 Bug Fixes
 
 - Arthur Maciel replaced high resolution code in the runtime to use `clock_gettime` instead of `gettimeofday`.
+- Fixed the REPL to no longer automatically exit if an expression evaluates to EOF. However, the REPL will exit as a special case if the EOF character is entered directly, for example via CTRL-D on Linux. 
 
 ## 0.27 - March 5, 2021
 

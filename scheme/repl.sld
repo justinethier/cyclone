@@ -47,11 +47,12 @@
           (newline)
           (repl))
         (display "cyclone> ")
-        (let ((c (eval (read))))
-          (cond
-            ((not (eof-object? c))
-             (write c)
-             (newline)
-             (repl))
-            (else 
-              (display "\n"))))))))
+        (let ((obj (read)))
+          (if (eof-object? obj)
+              (newline) ;; Quick way to exit REPL
+              (let ((c (eval obj)))
+                (if (eof-object? c)
+                    (display "<EOF>")
+                    (write c))
+                (newline)
+                (repl))))))))
