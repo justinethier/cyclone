@@ -257,6 +257,8 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (boolean=? b1 b2 ...)
 
+Returns `#t` if all the arguments are booleans and all are `#t` or all are `#f`.
+
 # bytevector-copy
 
     (bytevector-copy bytevector)
@@ -264,6 +266,11 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
     (bytevector-copy bytevector start)
 
     (bytevector-copy bytevector start end)
+
+Returns a newly allocated bytevector containing the bytes in `bytevector` between `start` and `end`.
+
+    (define a #u8(1 2 3 4 5))
+    (bytevector-copy a 2 4)) => #u8(3 4)
 
 # bytevector-copy!
 
@@ -273,6 +280,13 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (bytevector-copy! to at from start end)
 
+Copies the bytes of `bytevector` from between `start` and `end` to bytevector `to`, starting at `at`.  
+
+    (define a (bytevector 1 2 3 4 5))
+    (define b (bytevector 10 20 30 40 50))
+    (bytevector-copy! b 1 a 0 2)
+    b => #u8(10 1 2 40 50)
+
 # call-with-current-continuation
 
     (call-with-current-continuation proc)
@@ -281,13 +295,30 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (call-with-port port proc)
 
+It is an error if `proc` does not accept one argument.
+
+The `call-with-port` procedure calls `proc` with `port` as an argument. If `proc` returns, then the `port` is closed automatically and the values yielded by the `proc` are returned.
+
 # call-with-values
 
     (call-with-values producer consumer)
 
+Calls its `producer` argument with no arguments and a
+continuation that, when passed some values, calls the
+`consumer` procedure with those values as arguments. The
+continuation for the call to consumer is the continuation
+of the call to `call-with-values`.
+
+    (call-with-values (lambda () (values 4 5))
+    (lambda (a b) b))
+    => 5
+    (call-with-values * -) => -1
+
 # call/cc
 
     (call/cc proc)
+
+An abbreviation for `call-with-current-continuation`.
 
 # case
 
