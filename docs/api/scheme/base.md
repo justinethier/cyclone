@@ -363,29 +363,43 @@ If the selected `{clause}` or else clause uses the `=>` alternate form, then the
 
     (ceiling z)
 
+Returns the smallest integer not smaller than `z`.
+
 # char<=?
 
     (char<=? c1 c2 c3 ...)
+
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically increasing or equal.
 
 # char<?
 
     (char<?  c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are respectively equal, monotonically increasing.
+
 # char=?
 
     (char=?  c1 c2 c3 ...)
+
+Return `#t` if the results of passing the arguments to `char->integer` are equal.
 
 # char>=?
 
     (char>=? c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically decreasing or equal.
+
 # char>?
 
     (char>?  c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically decreasing.
+
 # complex?
 
     (complex? obj) 
+
+Return `#t` if `obj` is a complex number, `#f` otherwise.
 
 # cond
 
@@ -468,13 +482,19 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (current-error-port)
 
+Returns the current error port (an output port).
+
 # current-input-port
 
     (current-input-port)
 
+Return the current input port.
+
 # current-output-port
 
     (current-output-port)
+
+Return the current output port.
 
 # define-record-type
 
@@ -484,9 +504,19 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
       {constructor} {pred} {field} ...)
 
+Create a new record type.
+
+Record-type definitions are used to introduce new data
+types, called record types. Like other definitions, they can
+appear either at the outermost level or in a body. The values of a record type are called records and are aggregations
+of zero or more fields, each of which holds a single location. A predicate, a constructor, and field accessors and
+mutators are defined for each record type.
+
 # denominator
 
     (denominator n)
+
+Return the denominator of `n`.
 
 # do
 
@@ -508,9 +538,13 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (eof-object)
 
+Return the end of file (EOF) object.
+
 # error
 
     (error message obj ...)
+
+Raise an error with message `message` and one or more associated objects `obj`.
 
 # even?
 
