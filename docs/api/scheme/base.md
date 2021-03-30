@@ -534,6 +534,10 @@ Return the denominator of `n`.
 
     (dynamic-wind before thunk after)
 
+Calls `thunk` without arguments, returning the result(s) of this call.
+
+`before` is called whenever execution enters the dynamic extent of the call to `thunk` and `after` is called whenever it exits that dynamic extent.
+
 # eof-object
 
     (eof-object)
@@ -596,13 +600,19 @@ Return an integer not larger than `z`.
 
     (floor-quotient n m)
 
+Returns the integer quotient of dividing `n` by `m`.
+
 # floor-remainder
 
     (floor-remainder n m)
 
+Returns the integer remainder of dividing `n` by `m`.
+
 # floor/ 
 
     (floor/ n m)
+
+Return integer quotient and remainder of dividing `n` by `m`.
 
 # flush-output-port
 
@@ -610,9 +620,15 @@ Return an integer not larger than `z`.
 
     (flush-output-port port)
 
+Flushes any buffered output from the buffer of `output-port`
+to the underlying file or device and returns an unspecified
+value.
+
 # foldl
 
     (foldl func accum lst)
+
+Perform a left fold.
 
 # foldr
 
@@ -622,17 +638,51 @@ Return an integer not larger than `z`.
 
     (for-each proc list1 list2 ...)
 
+It is an error if `proc` does not accept as many arguments as there are lists.
+
+The arguments to `for-each` are like the arguments to `map`,
+but `for-each` calls `proc` for its side effects rather than for
+its values. Unlike `map`, `for-each` is guaranteed to call `proc`
+on the elements of the lists in order from the first element(s) to the last, and the value returned by `for-each`
+is unspecified. If more than one list is given and not all
+lists have the same length, for-each terminates when the
+shortest list runs out. The lists can be circular, but it is
+an error if all of them are circular.
+
+    (let ((v (make-vector 5)))
+      (for-each (lambda (i)
+                  (vector-set! v i (* i i)))
+                ’(0 1 2 3 4))
+      v) => #(0 1 4 9 16)
+
 # gcd
 
     (gcd n1 ...)
+
+Return the greatest commong divisor of the arguments.
 
 # get-output-bytevector
 
     (get-output-bytevector port)
 
+Returns a bytevector consisting of the bytes that have been output to the `port` so far in the order they were output.
+
 # get-output-string
 
     (get-output-string port)
+
+Returns a string consisting of the characters that have been output to the `port` so far in the order they were output. If the result string is modified, the effect is unspecified.
+
+    (parameterize
+      ((current-output-port
+       (open-output-string)))
+      (display "piece")
+      (display " by piece ")
+      (display "by piece.")
+      (newline)
+      (get-output-string (current-output-port)))
+
+      => "piece by piece by piece.\n"
 
 # guard
 
@@ -648,21 +698,31 @@ Return an integer not larger than `z`.
 
     (inexact z)
 
+Return `z` as an inexact number.
+
 # inexact?
 
     (inexact? num)
+
+Return `#t` if `num` is inexact and `#f` otherwise.
 
 # input-port-open?
 
     (input-port-open? port)
 
+Return `#t` if the given input port is open and `#f` otherwise.
+
 # input-port?
 
     (input-port? port)
 
+Return `#t` if `port` is an input port and `#f` otherwise.
+
 # lcm
 
     (lcm n1 ...)
+
+Return the least common multiple of the arguments.
 
 # let
 
@@ -790,25 +850,53 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (list obj ...)
 
+Return a newly allocated list of its arguments.
+
 # list-copy
 
     (list-copy lst)
+
+Returns a newly allocated copy of the given `obj` if it is a
+list. Only the pairs themselves are copied; the cars of the
+result are the same (in the sense of `eqv?`) as the cars of list.
+
+If `obj` is an improper list, so is the result, and the final cdrs
+are the same in the sense of `eqv?`. An obj which is not a
+list is returned unchanged. 
+
+It is an error if obj is a circular list.
+
+    (define a ’(1 8 2 8)) ; a may be immutable
+    (define b (list-copy a))
+    (set-car! b 3) ; b is mutable
+
+    b => (3 8 2 8)
+    a => (1 8 2 8)
+
 
 # list-ref
 
     (list-ref lst k)
 
+Returns the kth element of `lst`.
+
 # list-set!
 
     (list-set! lst k obj)
+
+Stores `obj` in element `k` of `lst`.
 
 # list-tail
 
     (list-tail lst k) 
 
+Returns the sublist of `lst` obtained by omitting the first `k` elements.
+
 # list?
 
     (list? o)
+
+Returns `#t` if the given object is a list, and `#f` otherwise.
 
 # make-constructor
 
@@ -824,11 +912,17 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (make-list k fill)
 
+Returns a newly allocated list of `k` elements. If a second
+argument is given, then each element is initialized to fill.
+Otherwise the initial contents of each element is unspecified.
+
 # make-parameter
 
     (make-parameter init)
 
     (make-parameter init converter)
+
+Returns a newly allocated parameter object, which is a procedure that accepts zero arguments and returns the value associated with the parameter object.
 
 # make-setter
 
@@ -840,6 +934,11 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (make-string k fill)
 
+The `make-string` procedure returns a newly allocated
+string of length `k`. If `fill` char is given, then all the characters
+of the string are initialized to `fill` , otherwise the contents
+of the string are unspecified.
+
 # make-type-predicate
 
     (make-type-predicate pred name)
@@ -848,9 +947,24 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (map proc list1 list2 ...)
 
+The `map` procedure applies `proc` element-wise to the elements of the lists and returns a list of the results, in order.
+
+If more than one list is given and not all lists have the same length, `map` terminates when the shortest list runs out. The lists can be circular, but it is an error if all of them are circular. It is an error for `proc` to mutate any of the lists. The dynamic order in which `proc` is applied to the elements of the lists is unspecified. If multiple returns occur from `map`, the values returned by earlier returns are not mutated.
+
+    (map cadr ’((a b) (d e) (g h)))
+      => (b e h)
+
+    (map (lambda (n) (expt n n))
+         ’(1 2 3 4 5))
+      => (1 4 27 256 3125)
+
+    (map + ’(1 2 3) ’(4 5 6 7)) => (5 7 9)
+
 # max
 
     (max x1 x2 ...)
+
+`max` returns the largest of its arguments.
 
 # member
 
@@ -858,17 +972,30 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (member obj lst compare) 
 
+Returns the first sublist of `lst` whose car is `obj`, where the sublists are the non-empty lists returned by `(list-tail lst k)` for `k` less than the length of `lst`. 
+
+If obj does not occur in list, then #f (not the empty
+list) is returned. 
+
+`member` uses compare to compare elements of the list, if given, and `equal?` otherwise.
+
 # memq
 
     (memq obj lst)
+
+The `memq` procedure is the same as `member` but uses `eq?` to compare `obj` with the elements of `lst`.
 
 # memv
 
     (memv obj lst)
 
+The `memv` procedure is the same as `member` but uses `eqv?` to compare `obj` with the elements of `lst`.
+
 # min
 
     (min x1 x2 ...)
+
+`min` returns the smallest of its arguments.
 
 # modulo
 
@@ -877,6 +1004,8 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 # negative?
 
     (negative? n)
+
+Returns `#t` if `n` is a negative number and `#f` otherwise. It is an error if `n` is not a number.
 
 # newline
 
