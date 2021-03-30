@@ -162,6 +162,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (abs num)
 
+Return the absolute value of `num`.
+
 # and
 
 *Syntax*
@@ -179,9 +181,27 @@ Semantics: The `{test}` expressions are evaluated from left to right, and if any
 
     (any pred lst)
 
+Return `#t` if predicate function `pred` is true for any value of `lst`. Otherwise `#f` is returned.
+
 # append
 
     (append list ...)
+
+The last argument, if there is one, can be of any type.
+
+Returns a list consisting of the elements of the first list
+followed by the elements of the other lists. If there are no
+arguments, the empty list is returned. If there is exactly
+one argument, it is returned. Otherwise the resulting list
+is always newly allocated, except that it shares structure
+with the last argument. An improper list results if the last
+argument is not a proper list.
+
+    (append '(x) '(y)) => (x y)
+    (append '(a) '(b c d)) => (a b c d)
+    (append '(a (b)) '((c))) => (a (b) (c))
+    (append '(a b) '(c . d)) => (a b c . d)
+    (append '() 'a) => a
 
 # assoc
 
@@ -189,13 +209,26 @@ Semantics: The `{test}` expressions are evaluated from left to right, and if any
 
     (assoc obj alist compare)
 
+It is an error if alist (for "association list") is not a list of pairs.
+
+This procedure finds the first pair in `alist` whose car field
+is `obj`, and returns that pair. If no pair in `alist` has `obj`
+as its car, then `#f` (not the empty list) is returned. 
+
+`assoc` uses `compare` to compare `obj` with the car fields
+of the pairs in `alist` if given and `equal?` otherwise.
+
 # assq
 
     (assq obj alist)
 
+The `assq` procedure is the same as `assoc` except it uses `eq?` to compare `obj` with the car fields of the pairs in `alist`.
+
 # assv
 
     (assv obj alist)
+
+The `assv` procedure is the same as `assoc` except it uses `eqv?` to compare `obj` with the car fields of the pairs in `alist`.
 
 # begin
 
