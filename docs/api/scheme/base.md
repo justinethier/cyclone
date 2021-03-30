@@ -1001,6 +1001,8 @@ The `memv` procedure is the same as `member` but uses `eqv?` to compare `obj` wi
 
     (modulo a b)
 
+Return the integer remainder after dividing `a` by `b`.
+
 # negative?
 
     (negative? n)
@@ -1013,33 +1015,50 @@ Returns `#t` if `n` is a negative number and `#f` otherwise. It is an error if `
 
     (newline port) 
 
+Write a newline to `port`, or the current output port if no argument is given.
+
 # not
 
     (not x)
 
+The `not` procedure returns `#t` if `x` is false, and returns `#f` otherwise.
+
 # numerator
 
-    (numerator n) n)
+    (numerator n)
+
+Return the numerator of `n`.
 
 # odd?
 
     (odd? num)
 
+Return `#t` if `num` is an odd number and `#f` otherwise.
+
 # open-input-bytevector
 
     (open-input-bytevector bv)
+
+Takes a bytevector and returns a binary input port that delivers bytes from the bytevector.
 
 # open-input-string
 
     (open-input-string string)
 
+Takes a string and returns a textual input port that delivers
+characters from the string.
+
 # open-output-bytevector
 
     (open-output-bytevector open-output-string)
 
+Returns a binary output port that will accumulate bytes for retrieval by `get-output-bytevector`.
+
 # open-output-string
 
     (open-output-string)
+
+Returns a textual output port that will accumulate characters for retrieval by `get-output-string`.
 
 # or
 
@@ -1059,9 +1078,13 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (output-port-open? port)
 
+Returns `#t` if `port` is an open output port, and `#f` otherwise.
+
 # output-port?
 
     (output-port? obj)
+
+Returns `#t` if `obj` is an output port, and `#f` otherwise.
 
 # parameterize
 
@@ -1075,6 +1098,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (positive? n)
 
+Returns `#t` if `n` is a positive number and `#f` otherwise.
+
 # quasiquote
 
 *Syntax*
@@ -1085,17 +1110,35 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (quotient x y)
 
+Return the quotient of dividing `x` by `y`.
+
 # raise
 
     (raise obj)
+
+Raises an exception by invoking the current exception handler on `obj`. 
+
+The handler is called with the same dynamic environment as that of the call to `raise`, except that the current exception handler is the one that was in place when the handler being called was installed. If the handler returns, a secondary exception is raised in the same dynamic environment as the handler.
 
 # raise-continuable
 
     (raise-continuable obj)
 
+Raises an exception by invoking the current exception handler on `obj`. 
+
+The handler is called with the same dynamic
+environment as the call to `raise-continuable`, except
+that: (1) the current exception handler is the one that was
+in place when the handler being called was installed, and
+(2) if the handler being called returns, then it will again
+become the current exception handler. If the handler returns, the values it returns become the values returned by
+the call to `raise-continuable`.
+
 # rational?
 
     (rational? obj)
+
+Returns `#t` if `obj` is a rational number and `#f` otherwise.
 
 # read-line
 
@@ -1103,11 +1146,15 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (read-line port)
 
+Read a line of text from the current input port or `port` if specified.
+
 # read-string
 
     (read-string k)
 
     (read-string k port)
+
+Read a string from the current input port or `port` if specified.
 
 # receive
 
@@ -1119,17 +1166,25 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (record? obj)
 
+Returns `#t` if `obj` is a record type and `#f` otherwise.
+
 # remainder
 
     (remainder num1 num2)
+
+Returns the remainder of dividing `num1` by `num2`.
 
 # reverse
 
     (reverse lst)
 
+Returns a newly allocated list that is the reverse of `lst`.
+
 # round
 
     (round z)
+
+Returns the closest integer to `z`.
 
 # slot-set!
 
@@ -1139,9 +1194,13 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (square z)
 
+Returns the square of `z`.
+
 # string
 
     (string char ...)
+
+Returns a string containing the given characters.
 
 # string->list
 
@@ -1151,6 +1210,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string->list string start end)
 
+Returns a newly allocated list containing the characters of `string`.
+
 # string->utf8
 
     (string->utf8 string)
@@ -1158,6 +1219,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
     (string->utf8 string start)
 
     (string->utf8 string start end)
+
+Returns a newly allocated bytevector containing the UTF-8 bytecodes of `string`.
 
 # string->vector
 
@@ -1167,6 +1230,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string->vector string start end)
 
+Returns a newly allocated vector containing the contents of `string`.
+
 # string-copy
 
     (string-copy string)
@@ -1174,6 +1239,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
     (string-copy string start)
 
     (string-copy string end)
+
+Returns a copy of `string`.
 
 # string-copy!
 
@@ -1183,6 +1250,14 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string-copy! to at from start end)
 
+Copies the characters of `string` from between `start` and `end`
+to string `to`, starting at `at`.
+
+    (define a "12345")
+    (define b (string-copy "abcde"))
+    (string-copy! b 1 a 0 2)
+    b => "a12de"
+
 # string-fill!
 
     (string-fill! str fill)
@@ -1191,13 +1266,19 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string-fill! str fill start end)
 
+The `string-fill!` procedure stores `fill` in the elements of `str` between `start` and `end`.
+
 # string-for-each
 
     (string-for-each proc string1 string2 ...)
 
+`string-for-each` is like `for-each` but the arguments consist of strings instead of lists.
+
 # string-map
 
     (string-map proc string1 string2 ...)
+
+`string-maph` is like `map` but the arguments consist of strings instead of lists.
 
 # string<=?
 
@@ -1211,6 +1292,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string=? str1 str2)
 
+Returns `#t` if all of the given strings are equal and false otherwise.
+
 # string>=?
 
     (string>=? str1 str2)
@@ -1222,6 +1305,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 # symbol=?
 
     (symbol=? symbol1 symbol2 symbol3 ...)
+
+Returns `#t` if all of the arguments are the same symbol and `#f` otherwise.
 
 # syntax-error
 
@@ -1271,13 +1356,19 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (utf8->string bytevector start end)
 
+Convert bytecodes in the given `bytevector` to a string.
+
 # values
 
     (values obj ...)
 
+Return arguments received as multiple values.
+
 # vector
 
     (vector obj ...)
+
+`vector` returns a vector of its arguments.
 
 # vector->list
 
@@ -1287,6 +1378,8 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector->list vector start end)
 
+Return a newly-allocated list containing the contents of `vector`.
+
 # vector->string
 
     (vector->string vector)
@@ -1295,9 +1388,13 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector->string vector start end)
 
+Return a newly-allocated string containing the contents of `vector`.
+
 # vector-append
 
     (vector-append vector ...)
+
+Returns a newly allocated vector whose elements are the concatenation of the elements of the given vectors.
 
 # vector-copy
 
@@ -1307,6 +1404,11 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector-copy vector start end)
 
+Returns a newly allocated copy of the elements of the given
+vector between `start` and `end`. The elements of the new
+vector are the same (in the sense of `eqv?`) as the elements
+of the old.
+
 # vector-copy!
 
     (vector-copy! to at from)
@@ -1314,6 +1416,14 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
     (vector-copy! to at from start)
 
     (vector-copy! to at from start end)
+
+Copies the elements of `vector` from between `start` and `end`
+to vector `to`, starting at `at`.
+
+    (define a (vector 1 2 3 4 5))
+    (define b (vector 10 20 30 40 50))
+    (vector-copy! b 1 a 0 2)
+    b => #(10 1 2 40 50)
 
 # vector-fill!
 
@@ -1323,13 +1433,19 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector-fill! vector fill start end)
 
+The `vector-fill!` procedure stores `fill` in the elements of `vector` between `start` and `end`.
+
 # vector-for-each
 
     (vector-for-each proc vector1 vector2 ...)
 
+`vector-for-each` is like `for-each` but the arguments consist of vectors instead of lists.
+
 # vector-map
 
     (vector-map proc vector1 vector2 ...)
+
+`vector-map` is like `map` but the arguments consist of vectors instead of lists.
 
 # when
 
@@ -1349,6 +1465,8 @@ Semantics: The `test` is evaluated, and if it evaluates to a true value, the exp
 
     (with-exception-handler handler thunk)
 
+The `with-exception-handler` procedure returns the results of invoking `thunk`. `handler` is installed as the current exception handler in the dynamic environment used for the invocation of `thunk`.
+
 # with-handler
 
     (with-handler handler body)
@@ -1359,13 +1477,18 @@ Semantics: The `test` is evaluated, and if it evaluates to a true value, the exp
 
     (write-char char port)
 
+Write `char` to the current output port or `port` if specified.
+
 # write-string
 
     (write-string string)
 
     (write-string string port)
 
+Write `string` to the current output port or `port` if specified.
+
 # zero?
 
     (zero? n)
 
+Returns `#t` if `n` is zero and `#f` otherwise.
