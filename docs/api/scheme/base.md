@@ -550,21 +550,31 @@ Raise an error with message `message` and one or more associated objects `obj`.
 
     (even? num)
 
+Return `#t` if `num` is even and `#f` if it is not. It is an error if `num` is not a number.
+
 # every
 
     (every pred lst)
 
+Return `#t` if predicate function `pred` is true for every value of `lst`. Otherwise `#f` is returned.
+
 # exact
 
-    (exact? num)
+    (exact num)
+
+Return an exact representation of number `num`.
 
 # exact-integer?
 
     (exact-integer? num)
 
+Returns `#t` if `num` is both exact and an integer; otherwise returns `#f`.
+
 # exact?
 
     (exact? num)
+
+Return `#t` if `num` is exact.
 
 # expt
 
@@ -574,9 +584,13 @@ Raise an error with message `message` and one or more associated objects `obj`.
 
     (features) 
 
+Return a list of feature identifiers which `cond-expand` treats as true.
+
 # floor
 
     (floor z)
+
+Return an integer not larger than `z`.
 
 # floor-quotient 
 
