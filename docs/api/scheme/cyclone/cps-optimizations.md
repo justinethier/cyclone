@@ -2,6 +2,8 @@
 
 The `(scheme cyclone optimizations)` library performs CPS analysis and optimizations.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`optimize-cps`](#optimize-cps)
 - [`analyze-cps`](#analyze-cps)
 - [`opt:contract`](#optcontract)

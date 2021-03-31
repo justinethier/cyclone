@@ -2,6 +2,8 @@
 
 The `(scheme cyclone primitives)` library contains information about Cyclone's scheme primitives.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`prim?`](#prim)
 - [`*primitives*`](#primitives)
 - [`*primitives-num-args*`](#primitives-num-args)

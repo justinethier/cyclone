@@ -2,6 +2,8 @@
 
 The `(scheme cyclone transforms)` library performs Scheme-to-Scheme transformations, and also contains various utility functions used by the compiler.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`*defined-macros*          `](#*defined-macros)
 - [`*do-code-gen*             `](#*do-code-gen)
 - [`*primitives*              `](#*primitives)

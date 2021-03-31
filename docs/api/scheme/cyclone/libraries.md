@@ -2,6 +2,8 @@
 
 The `(scheme cyclone libraries)` library implements r7rs libraries.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`library?`](#library)
 - [`lib:list->import-set`](#liblist-import-set)
 - [`lib:name`](#libname)
