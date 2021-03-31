@@ -29,7 +29,12 @@ Write object to the given output port, or the current output if none is given. O
     (write-shared obj)
     (write-shared obj port)
 
+`write-shared` is the same as `write` because Cyclone does not support datum labels at this time.
+
 # write-simple
 
     (write-simple obj)
     (write-simple obj port)
+
+`write-simple` is the same as `write` because Cyclone does not support datum labels at this time.
+
