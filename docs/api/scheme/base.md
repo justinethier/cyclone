@@ -1469,7 +1469,13 @@ The `with-exception-handler` procedure returns the results of invoking `thunk`. 
 
 # with-handler
 
-    (with-handler handler body)
+*Syntax*
+
+    (with-handler handler expression1 expression2 ...)
+
+`with-handler` provides a convenient exception handling syntax. 
+
+The expressions are executed in order and if no exceptions are raised the result of the last expression is returned. Otherwise if an exception is raised then `handler` is called and its results are returned.
 
 # write-char
 
