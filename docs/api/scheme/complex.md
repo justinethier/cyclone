@@ -19,19 +19,26 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (imag-part x)
 
+Return the imaginary part of complex number `x`.
+
 # magnitude
 
     (magnitude z)
 
 # make-polar
 
-    (make-polar x y)
+    (make-polar r phi)
+
+Return a complex number corresponding to the given polar coordinate.
 
 # make-rectangular
 
     (make-rectangular x y)
 
+Create a complex number with real component `x` and imaginary component `y`.
+
 # real-part
 
     (real-part x)
 
+Return the real part of complex number `x`.
