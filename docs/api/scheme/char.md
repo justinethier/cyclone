@@ -31,29 +31,43 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (char-alphabetic? c)
 
+Return `#t` if `c` is alphabetic and `#f` otherwise.
+
 # char-ci<=?
 
     (char-ci<=? c1 c2 . cs)
+
+Return `#t` if the results of converting all characters to the same case and  passing the arguments to `char->integer` are monotonically increasing or equal.
 
 # char-ci<? 
 
     (char-ci<? c1 c2 . cs)
 
+Return `#t` if the results of converting all characters to the same case and  passing the arguments to `char->integer` are respectively equal, monotonically increasing.
+
 # char-ci=?
 
     (char-ci=? c1 c2 . cs)
+
+Return `#t` if the results of converting all characters to the same case and passing the arguments to `char->integer` are equal.
 
 # char-ci>=? 
 
     (char-ci>=? c1 c2 . cs)
 
+Return `#t` if the results of converting all characters to the same case and  passing the arguments to `char->integer` are monotonically decreasing or equal.
+
 # char-ci>?
 
     (char-ci>? c1 c2 . cs)
 
+Return `#t` if the results of converting all characters to the same case and passing the arguments to `char->integer` are monotonically decreasing.
+
 # char-downcase
 
     (char-downcase c)
+
+Returns the lowercase equivalent of `c` if one exists, otherwise `c` is returned.
 
 # char-foldcase
 
@@ -63,25 +77,37 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (char-lower-case? c)
 
+Return `#t` if `c` is lower case and `#f` otherwise.
+
 # char-numeric?
 
     (char-numeric? c) 
+
+Return `#t` if `c` is numeric and `#f` otherwise.
 
 # char-upcase
 
     (char-upcase c)
 
+Returns the uppercase equivalent of `c` if one exists, otherwise `c` is returned.
+
 # char-upper-case?
 
     (char-upper-case? c)
+
+Return `#t` if `c` is alphabetic and `#f` otherwise.
 
 # char-whitespace?
 
     (char-whitespace? c)
 
+Return `#t` if `c` is whitespace and `#f` otherwise.
+
 # digit-value
 
     (digit-value c)
+
+This procedure returns the numeric value (0 to 9) of its argument if it is a numeric digit (that is, if `char-numeric?` returns `#t`), or `#f` on any other character.
 
 # string-ci<=? 
 
@@ -95,6 +121,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (string-ci=? s1 s2)
 
+Returns `#t` if all of the given strings are equal using a case-insensitive comparison, and false otherwise.
+
 # string-ci>=?
 
     (string-ci>=? s1 s2)
@@ -107,6 +135,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (string-downcase str)
 
+Return a newly-allocated string with any uppercase characters converted to lowercase.
+
 # string-foldcase
 
     (string-foldcase str)
@@ -114,4 +144,6 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 # string-upcase
 
     (string-upcase str)
+
+Return a newly-allocated string with any lowercase characters converted to uppercase.
 
