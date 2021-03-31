@@ -40,7 +40,7 @@ Library Name                                               | Description
 
 Cyclone supports the following [Scheme Requests for Implementation (SRFI)](http://srfi.schemers.org/) libraries. Detailed information is available in the linked SRFI page as well as the provided Cyclone API.
 
-Note that these libraries may be imported using either the SRFI number (EG: `(srfi 1)` or a descriptive name (EG: `(scheme list)`). These descriptive names follow the recommendations from R7RS Large where available.
+Note that these libraries may be imported using either the SRFI number, such as `(srfi 1)`, or a descriptive name: `(scheme list)`. These descriptive names follow the recommendations from R7RS Large where available.
 
 Library Name                            | SRFI Number | Description | External Documentation
 --------------------------------------- | ----------- | ----------- | ----------------------

@@ -167,6 +167,8 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 
     (abs num)
 
+Return the absolute value of `num`.
+
 # and
 
 *Syntax*
@@ -184,9 +186,27 @@ Semantics: The `{test}` expressions are evaluated from left to right, and if any
 
     (any pred lst)
 
+Return `#t` if predicate function `pred` is true for any value of `lst`. Otherwise `#f` is returned.
+
 # append
 
     (append list ...)
+
+The last argument, if there is one, can be of any type.
+
+Returns a list consisting of the elements of the first list
+followed by the elements of the other lists. If there are no
+arguments, the empty list is returned. If there is exactly
+one argument, it is returned. Otherwise the resulting list
+is always newly allocated, except that it shares structure
+with the last argument. An improper list results if the last
+argument is not a proper list.
+
+    (append '(x) '(y)) => (x y)
+    (append '(a) '(b c d)) => (a b c d)
+    (append '(a (b)) '((c))) => (a (b) (c))
+    (append '(a b) '(c . d)) => (a b c . d)
+    (append '() 'a) => a
 
 # assoc
 
@@ -194,13 +214,26 @@ Semantics: The `{test}` expressions are evaluated from left to right, and if any
 
     (assoc obj alist compare)
 
+It is an error if alist (for "association list") is not a list of pairs.
+
+This procedure finds the first pair in `alist` whose car field
+is `obj`, and returns that pair. If no pair in `alist` has `obj`
+as its car, then `#f` (not the empty list) is returned. 
+
+`assoc` uses `compare` to compare `obj` with the car fields
+of the pairs in `alist` if given and `equal?` otherwise.
+
 # assq
 
     (assq obj alist)
 
+The `assq` procedure is the same as `assoc` except it uses `eq?` to compare `obj` with the car fields of the pairs in `alist`.
+
 # assv
 
     (assv obj alist)
+
+The `assv` procedure is the same as `assoc` except it uses `eqv?` to compare `obj` with the car fields of the pairs in `alist`.
 
 # begin
 
@@ -229,6 +262,8 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (boolean=? b1 b2 ...)
 
+Returns `#t` if all the arguments are booleans and all are `#t` or all are `#f`.
+
 # bytevector-copy
 
     (bytevector-copy bytevector)
@@ -236,6 +271,11 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
     (bytevector-copy bytevector start)
 
     (bytevector-copy bytevector start end)
+
+Returns a newly allocated bytevector containing the bytes in `bytevector` between `start` and `end`.
+
+    (define a #u8(1 2 3 4 5))
+    (bytevector-copy a 2 4)) => #u8(3 4)
 
 # bytevector-copy!
 
@@ -245,6 +285,13 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (bytevector-copy! to at from start end)
 
+Copies the bytes of `bytevector` from between `start` and `end` to bytevector `to`, starting at `at`.  
+
+    (define a (bytevector 1 2 3 4 5))
+    (define b (bytevector 10 20 30 40 50))
+    (bytevector-copy! b 1 a 0 2)
+    b => #u8(10 1 2 40 50)
+
 # call-with-current-continuation
 
     (call-with-current-continuation proc)
@@ -253,13 +300,30 @@ This form of `begin` can be used as an ordinary expression.  The `{expression}`'
 
     (call-with-port port proc)
 
+It is an error if `proc` does not accept one argument.
+
+The `call-with-port` procedure calls `proc` with `port` as an argument. If `proc` returns, then the `port` is closed automatically and the values yielded by the `proc` are returned.
+
 # call-with-values
 
     (call-with-values producer consumer)
 
+Calls its `producer` argument with no arguments and a
+continuation that, when passed some values, calls the
+`consumer` procedure with those values as arguments. The
+continuation for the call to consumer is the continuation
+of the call to `call-with-values`.
+
+    (call-with-values (lambda () (values 4 5))
+    (lambda (a b) b))
+    => 5
+    (call-with-values * -) => -1
+
 # call/cc
 
     (call/cc proc)
+
+An abbreviation for `call-with-current-continuation`.
 
 # case
 
@@ -304,29 +368,43 @@ If the selected `{clause}` or else clause uses the `=>` alternate form, then the
 
     (ceiling z)
 
+Returns the smallest integer not smaller than `z`.
+
 # char<=?
 
     (char<=? c1 c2 c3 ...)
+
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically increasing or equal.
 
 # char<?
 
     (char<?  c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are respectively equal, monotonically increasing.
+
 # char=?
 
     (char=?  c1 c2 c3 ...)
+
+Return `#t` if the results of passing the arguments to `char->integer` are equal.
 
 # char>=?
 
     (char>=? c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically decreasing or equal.
+
 # char>?
 
     (char>?  c1 c2 c3 ...)
 
+Return `#t` if the results of passing the arguments to `char->integer` are monotonically decreasing.
+
 # complex?
 
     (complex? obj) 
+
+Return `#t` if `obj` is a complex number, `#f` otherwise.
 
 # cond
 
@@ -409,13 +487,19 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (current-error-port)
 
+Returns the current error port (an output port).
+
 # current-input-port
 
     (current-input-port)
 
+Return the current input port.
+
 # current-output-port
 
     (current-output-port)
+
+Return the current output port.
 
 # define-record-type
 
@@ -425,9 +509,19 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
       {constructor} {pred} {field} ...)
 
+Create a new record type.
+
+Record-type definitions are used to introduce new data
+types, called record types. Like other definitions, they can
+appear either at the outermost level or in a body. The values of a record type are called records and are aggregations
+of zero or more fields, each of which holds a single location. A predicate, a constructor, and field accessors and
+mutators are defined for each record type.
+
 # denominator
 
     (denominator n)
+
+Return the denominator of `n`.
 
 # do
 
@@ -445,33 +539,51 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (dynamic-wind before thunk after)
 
+Calls `thunk` without arguments, returning the result(s) of this call.
+
+`before` is called whenever execution enters the dynamic extent of the call to `thunk` and `after` is called whenever it exits that dynamic extent.
+
 # eof-object
 
     (eof-object)
+
+Return the end of file (EOF) object.
 
 # error
 
     (error message obj ...)
 
+Raise an error with message `message` and one or more associated objects `obj`.
+
 # even?
 
     (even? num)
+
+Return `#t` if `num` is even and `#f` if it is not. It is an error if `num` is not a number.
 
 # every
 
     (every pred lst)
 
+Return `#t` if predicate function `pred` is true for every value of `lst`. Otherwise `#f` is returned.
+
 # exact
 
-    (exact? num)
+    (exact num)
+
+Return an exact representation of number `num`.
 
 # exact-integer?
 
     (exact-integer? num)
 
+Returns `#t` if `num` is both exact and an integer; otherwise returns `#f`.
+
 # exact?
 
     (exact? num)
+
+Return `#t` if `num` is exact.
 
 # expt
 
@@ -481,21 +593,31 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (features) 
 
+Return a list of feature identifiers which `cond-expand` treats as true.
+
 # floor
 
     (floor z)
+
+Return an integer not larger than `z`.
 
 # floor-quotient 
 
     (floor-quotient n m)
 
+Returns the integer quotient of dividing `n` by `m`.
+
 # floor-remainder
 
     (floor-remainder n m)
 
+Returns the integer remainder of dividing `n` by `m`.
+
 # floor/ 
 
     (floor/ n m)
+
+Return integer quotient and remainder of dividing `n` by `m`.
 
 # flush-output-port
 
@@ -503,9 +625,15 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (flush-output-port port)
 
+Flushes any buffered output from the buffer of `output-port`
+to the underlying file or device and returns an unspecified
+value.
+
 # foldl
 
     (foldl func accum lst)
+
+Perform a left fold.
 
 # foldr
 
@@ -515,17 +643,51 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (for-each proc list1 list2 ...)
 
+It is an error if `proc` does not accept as many arguments as there are lists.
+
+The arguments to `for-each` are like the arguments to `map`,
+but `for-each` calls `proc` for its side effects rather than for
+its values. Unlike `map`, `for-each` is guaranteed to call `proc`
+on the elements of the lists in order from the first element(s) to the last, and the value returned by `for-each`
+is unspecified. If more than one list is given and not all
+lists have the same length, for-each terminates when the
+shortest list runs out. The lists can be circular, but it is
+an error if all of them are circular.
+
+    (let ((v (make-vector 5)))
+      (for-each (lambda (i)
+                  (vector-set! v i (* i i)))
+                ’(0 1 2 3 4))
+      v) => #(0 1 4 9 16)
+
 # gcd
 
     (gcd n1 ...)
+
+Return the greatest commong divisor of the arguments.
 
 # get-output-bytevector
 
     (get-output-bytevector port)
 
+Returns a bytevector consisting of the bytes that have been output to the `port` so far in the order they were output.
+
 # get-output-string
 
     (get-output-string port)
+
+Returns a string consisting of the characters that have been output to the `port` so far in the order they were output. If the result string is modified, the effect is unspecified.
+
+    (parameterize
+      ((current-output-port
+       (open-output-string)))
+      (display "piece")
+      (display " by piece ")
+      (display "by piece.")
+      (newline)
+      (get-output-string (current-output-port)))
+
+      => "piece by piece by piece.\n"
 
 # guard
 
@@ -541,21 +703,31 @@ A `cond-expand` is then expanded by evaluating the `{feature requirement}`'s of 
 
     (inexact z)
 
+Return `z` as an inexact number.
+
 # inexact?
 
     (inexact? num)
+
+Return `#t` if `num` is inexact and `#f` otherwise.
 
 # input-port-open?
 
     (input-port-open? port)
 
+Return `#t` if the given input port is open and `#f` otherwise.
+
 # input-port?
 
     (input-port? port)
 
+Return `#t` if `port` is an input port and `#f` otherwise.
+
 # lcm
 
     (lcm n1 ...)
+
+Return the least common multiple of the arguments.
 
 # let
 
@@ -683,25 +855,53 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (list obj ...)
 
+Return a newly allocated list of its arguments.
+
 # list-copy
 
     (list-copy lst)
+
+Returns a newly allocated copy of the given `obj` if it is a
+list. Only the pairs themselves are copied; the cars of the
+result are the same (in the sense of `eqv?`) as the cars of list.
+
+If `obj` is an improper list, so is the result, and the final cdrs
+are the same in the sense of `eqv?`. An obj which is not a
+list is returned unchanged. 
+
+It is an error if obj is a circular list.
+
+    (define a ’(1 8 2 8)) ; a may be immutable
+    (define b (list-copy a))
+    (set-car! b 3) ; b is mutable
+
+    b => (3 8 2 8)
+    a => (1 8 2 8)
+
 
 # list-ref
 
     (list-ref lst k)
 
+Returns the kth element of `lst`.
+
 # list-set!
 
     (list-set! lst k obj)
+
+Stores `obj` in element `k` of `lst`.
 
 # list-tail
 
     (list-tail lst k) 
 
+Returns the sublist of `lst` obtained by omitting the first `k` elements.
+
 # list?
 
     (list? o)
+
+Returns `#t` if the given object is a list, and `#f` otherwise.
 
 # make-constructor
 
@@ -717,11 +917,17 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (make-list k fill)
 
+Returns a newly allocated list of `k` elements. If a second
+argument is given, then each element is initialized to fill.
+Otherwise the initial contents of each element is unspecified.
+
 # make-parameter
 
     (make-parameter init)
 
     (make-parameter init converter)
+
+Returns a newly allocated parameter object, which is a procedure that accepts zero arguments and returns the value associated with the parameter object.
 
 # make-setter
 
@@ -733,6 +939,11 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (make-string k fill)
 
+The `make-string` procedure returns a newly allocated
+string of length `k`. If `fill` char is given, then all the characters
+of the string are initialized to `fill` , otherwise the contents
+of the string are unspecified.
+
 # make-type-predicate
 
     (make-type-predicate pred name)
@@ -741,9 +952,24 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (map proc list1 list2 ...)
 
+The `map` procedure applies `proc` element-wise to the elements of the lists and returns a list of the results, in order.
+
+If more than one list is given and not all lists have the same length, `map` terminates when the shortest list runs out. The lists can be circular, but it is an error if all of them are circular. It is an error for `proc` to mutate any of the lists. The dynamic order in which `proc` is applied to the elements of the lists is unspecified. If multiple returns occur from `map`, the values returned by earlier returns are not mutated.
+
+    (map cadr ’((a b) (d e) (g h)))
+      => (b e h)
+
+    (map (lambda (n) (expt n n))
+         ’(1 2 3 4 5))
+      => (1 4 27 256 3125)
+
+    (map + ’(1 2 3) ’(4 5 6 7)) => (5 7 9)
+
 # max
 
     (max x1 x2 ...)
+
+`max` returns the largest of its arguments.
 
 # member
 
@@ -751,25 +977,42 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (member obj lst compare) 
 
+Returns the first sublist of `lst` whose car is `obj`, where the sublists are the non-empty lists returned by `(list-tail lst k)` for `k` less than the length of `lst`. 
+
+If obj does not occur in list, then #f (not the empty
+list) is returned. 
+
+`member` uses compare to compare elements of the list, if given, and `equal?` otherwise.
+
 # memq
 
     (memq obj lst)
+
+The `memq` procedure is the same as `member` but uses `eq?` to compare `obj` with the elements of `lst`.
 
 # memv
 
     (memv obj lst)
 
+The `memv` procedure is the same as `member` but uses `eqv?` to compare `obj` with the elements of `lst`.
+
 # min
 
     (min x1 x2 ...)
+
+`min` returns the smallest of its arguments.
 
 # modulo
 
     (modulo a b)
 
+Return the integer remainder after dividing `a` by `b`.
+
 # negative?
 
     (negative? n)
+
+Returns `#t` if `n` is a negative number and `#f` otherwise. It is an error if `n` is not a number.
 
 # newline
 
@@ -777,33 +1020,50 @@ If it is not possible to evaluate each `{init}` without assigning or referring t
 
     (newline port) 
 
+Write a newline to `port`, or the current output port if no argument is given.
+
 # not
 
     (not x)
 
+The `not` procedure returns `#t` if `x` is false, and returns `#f` otherwise.
+
 # numerator
 
-    (numerator n) n)
+    (numerator n)
+
+Return the numerator of `n`.
 
 # odd?
 
     (odd? num)
 
+Return `#t` if `num` is an odd number and `#f` otherwise.
+
 # open-input-bytevector
 
     (open-input-bytevector bv)
+
+Takes a bytevector and returns a binary input port that delivers bytes from the bytevector.
 
 # open-input-string
 
     (open-input-string string)
 
+Takes a string and returns a textual input port that delivers
+characters from the string.
+
 # open-output-bytevector
 
     (open-output-bytevector open-output-string)
 
+Returns a binary output port that will accumulate bytes for retrieval by `get-output-bytevector`.
+
 # open-output-string
 
     (open-output-string)
+
+Returns a textual output port that will accumulate characters for retrieval by `get-output-string`.
 
 # or
 
@@ -823,9 +1083,13 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (output-port-open? port)
 
+Returns `#t` if `port` is an open output port, and `#f` otherwise.
+
 # output-port?
 
     (output-port? obj)
+
+Returns `#t` if `obj` is an output port, and `#f` otherwise.
 
 # parameterize
 
@@ -839,6 +1103,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (positive? n)
 
+Returns `#t` if `n` is a positive number and `#f` otherwise.
+
 # quasiquote
 
 *Syntax*
@@ -849,17 +1115,35 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (quotient x y)
 
+Return the quotient of dividing `x` by `y`.
+
 # raise
 
     (raise obj)
+
+Raises an exception by invoking the current exception handler on `obj`. 
+
+The handler is called with the same dynamic environment as that of the call to `raise`, except that the current exception handler is the one that was in place when the handler being called was installed. If the handler returns, a secondary exception is raised in the same dynamic environment as the handler.
 
 # raise-continuable
 
     (raise-continuable obj)
 
+Raises an exception by invoking the current exception handler on `obj`. 
+
+The handler is called with the same dynamic
+environment as the call to `raise-continuable`, except
+that: (1) the current exception handler is the one that was
+in place when the handler being called was installed, and
+(2) if the handler being called returns, then it will again
+become the current exception handler. If the handler returns, the values it returns become the values returned by
+the call to `raise-continuable`.
+
 # rational?
 
     (rational? obj)
+
+Returns `#t` if `obj` is a rational number and `#f` otherwise.
 
 # read-line
 
@@ -867,11 +1151,15 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (read-line port)
 
+Read a line of text from the current input port or `port` if specified.
+
 # read-string
 
     (read-string k)
 
     (read-string k port)
+
+Read a string from the current input port or `port` if specified.
 
 # receive
 
@@ -883,17 +1171,25 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (record? obj)
 
+Returns `#t` if `obj` is a record type and `#f` otherwise.
+
 # remainder
 
     (remainder num1 num2)
+
+Returns the remainder of dividing `num1` by `num2`.
 
 # reverse
 
     (reverse lst)
 
+Returns a newly allocated list that is the reverse of `lst`.
+
 # round
 
     (round z)
+
+Returns the closest integer to `z`.
 
 # slot-set!
 
@@ -903,9 +1199,13 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (square z)
 
+Returns the square of `z`.
+
 # string
 
     (string char ...)
+
+Returns a string containing the given characters.
 
 # string->list
 
@@ -915,6 +1215,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string->list string start end)
 
+Returns a newly allocated list containing the characters of `string`.
+
 # string->utf8
 
     (string->utf8 string)
@@ -922,6 +1224,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
     (string->utf8 string start)
 
     (string->utf8 string start end)
+
+Returns a newly allocated bytevector containing the UTF-8 bytecodes of `string`.
 
 # string->vector
 
@@ -931,6 +1235,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string->vector string start end)
 
+Returns a newly allocated vector containing the contents of `string`.
+
 # string-copy
 
     (string-copy string)
@@ -938,6 +1244,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
     (string-copy string start)
 
     (string-copy string end)
+
+Returns a copy of `string`.
 
 # string-copy!
 
@@ -947,6 +1255,14 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string-copy! to at from start end)
 
+Copies the characters of `string` from between `start` and `end`
+to string `to`, starting at `at`.
+
+    (define a "12345")
+    (define b (string-copy "abcde"))
+    (string-copy! b 1 a 0 2)
+    b => "a12de"
+
 # string-fill!
 
     (string-fill! str fill)
@@ -955,13 +1271,19 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string-fill! str fill start end)
 
+The `string-fill!` procedure stores `fill` in the elements of `str` between `start` and `end`.
+
 # string-for-each
 
     (string-for-each proc string1 string2 ...)
 
+`string-for-each` is like `for-each` but the arguments consist of strings instead of lists.
+
 # string-map
 
     (string-map proc string1 string2 ...)
+
+`string-maph` is like `map` but the arguments consist of strings instead of lists.
 
 # string<=?
 
@@ -975,6 +1297,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 
     (string=? str1 str2)
 
+Returns `#t` if all of the given strings are equal and false otherwise.
+
 # string>=?
 
     (string>=? str1 str2)
@@ -986,6 +1310,8 @@ Semantics: The `{test}` expressions are evaluated from left to right, and the va
 # symbol=?
 
     (symbol=? symbol1 symbol2 symbol3 ...)
+
+Returns `#t` if all of the arguments are the same symbol and `#f` otherwise.
 
 # syntax-error
 
@@ -1035,13 +1361,19 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (utf8->string bytevector start end)
 
+Convert bytecodes in the given `bytevector` to a string.
+
 # values
 
     (values obj ...)
 
+Return arguments received as multiple values.
+
 # vector
 
     (vector obj ...)
+
+`vector` returns a vector of its arguments.
 
 # vector->list
 
@@ -1051,6 +1383,8 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector->list vector start end)
 
+Return a newly-allocated list containing the contents of `vector`.
+
 # vector->string
 
     (vector->string vector)
@@ -1059,9 +1393,13 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector->string vector start end)
 
+Return a newly-allocated string containing the contents of `vector`.
+
 # vector-append
 
     (vector-append vector ...)
+
+Returns a newly allocated vector whose elements are the concatenation of the elements of the given vectors.
 
 # vector-copy
 
@@ -1071,6 +1409,11 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector-copy vector start end)
 
+Returns a newly allocated copy of the elements of the given
+vector between `start` and `end`. The elements of the new
+vector are the same (in the sense of `eqv?`) as the elements
+of the old.
+
 # vector-copy!
 
     (vector-copy! to at from)
@@ -1078,6 +1421,14 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
     (vector-copy! to at from start)
 
     (vector-copy! to at from start end)
+
+Copies the elements of `vector` from between `start` and `end`
+to vector `to`, starting at `at`.
+
+    (define a (vector 1 2 3 4 5))
+    (define b (vector 10 20 30 40 50))
+    (vector-copy! b 1 a 0 2)
+    b => #(10 1 2 40 50)
 
 # vector-fill!
 
@@ -1087,13 +1438,19 @@ Semantics: The `test` is evaluated, and if it evaluates to `#f`, the expressions
 
     (vector-fill! vector fill start end)
 
+The `vector-fill!` procedure stores `fill` in the elements of `vector` between `start` and `end`.
+
 # vector-for-each
 
     (vector-for-each proc vector1 vector2 ...)
 
+`vector-for-each` is like `for-each` but the arguments consist of vectors instead of lists.
+
 # vector-map
 
     (vector-map proc vector1 vector2 ...)
+
+`vector-map` is like `map` but the arguments consist of vectors instead of lists.
 
 # when
 
@@ -1113,9 +1470,17 @@ Semantics: The `test` is evaluated, and if it evaluates to a true value, the exp
 
     (with-exception-handler handler thunk)
 
+The `with-exception-handler` procedure returns the results of invoking `thunk`. `handler` is installed as the current exception handler in the dynamic environment used for the invocation of `thunk`.
+
 # with-handler
 
-    (with-handler handler body)
+*Syntax*
+
+    (with-handler handler expression1 expression2 ...)
+
+`with-handler` provides a convenient exception handling syntax. 
+
+The expressions are executed in order and if no exceptions are raised the result of the last expression is returned. Otherwise if an exception is raised then `handler` is called and its results are returned.
 
 # write-char
 
@@ -1123,13 +1488,18 @@ Semantics: The `test` is evaluated, and if it evaluates to a true value, the exp
 
     (write-char char port)
 
+Write `char` to the current output port or `port` if specified.
+
 # write-string
 
     (write-string string)
 
     (write-string string port)
 
+Write `string` to the current output port or `port` if specified.
+
 # zero?
 
     (zero? n)
 
+Returns `#t` if `n` is zero and `#f` otherwise.
