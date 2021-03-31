@@ -2,6 +2,8 @@
 
 The `(scheme cyclone common)` library contains definitions used by the compiler and interpreter.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`*Cyc-version-banner*`](#cyc-version-banner)
 - [`*version*`](#version)
 - [`*version-number*`](#version-number)
