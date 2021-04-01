@@ -2,30 +2,21 @@
 
 The `(cyclone test)` library contains a testing framework ported from `(chibi test)` which in turn was ported from CHICKEN.
 
-## Exception Utilities
-- [`warning`](#warning)
-
-## Test Interface
+## Testing
 - [`test`](#test)
-
 - [`test-equal`](#test-equal)
 - [`test-error`](#test-error)
 - [`test-assert`](#test-assert)
 - [`test-not`](#test-not)
 - [`test-values`](#test-values)
+- [`test-propagate-info`](#test-propagate-info)
+- [`test-run`](#test-run)
+
+## Test Groups
+- [`test-group`](#test-group)
 - [`test-begin`](#test-begin)
 - [`test-end`](#test-end)
-- [`test-propagate-info`](#test-propagate-info)
-- [`test-vars`](#test-vars)
-- [`test-run`](#test-run)
 - [`test-exit`](#test-exit)
-
-## Group Interface
-- [`test-group`](#test-group)
-- [`test-group-inc!`](#test-group-inc)
-
-## Utilities
-- [`test-syntax-error`](#test-syntax-error)
 
 ## Parameters
 - [`current-test-group`](#current-test-group)
@@ -37,10 +28,6 @@ The `(cyclone test)` library contains a testing framework ported from `(chibi te
 - [`current-test-epsilon`](#current-test-epsilon)
 - [`current-test-comparator`](#current-test-comparator)
 - [`test-failure-count`](#test-failure-count)
-
-# warning
-
-    (warning msg . args)
 
 # test
 
@@ -54,48 +41,69 @@ Evaluate `expr` and check that it is `equal?` to `expect`.
 
 # test-equal
 
-;;> \macro{(test-equal equal [name] expect expr)}
+*Syntax*
 
-;;> Equivalent to test, using \var{equal} for comparison instead of
-;;> \scheme{equal?}.
+    (test-equal equal [name] expect expr)
+
+Equivalent to test, using `equal` for comparison instead of `equal?`.
 
 # test-error
 
-;;> \macro{(test-error [name] expr)}
+*Syntax*
 
-;;> Like \scheme{test} but evaluates \var{expr} and checks that it
-;;> raises an error.
+    (test-error [name] expr)
+
+Like `test` but evaluates `expr` and checks that it raises an error.
 
 # test-assert
 
-;;> \macro{(test-assert [name] expr)}
+*Syntax*
 
-;;> Like \scheme{test} but evaluates \var{expr} and checks that it's true.
+    (test-assert [name] expr)
+
+Like `test` but evaluates `expr` and checks that it's true.
 
 # test-not
 
-;;> \macro{(test-not [name] expr)}
+*Syntax*
 
-;;> Like \scheme{test} but evaluates \var{expr} and checks that it's false.
+    (test-not [name] expr)
+
+Like `test` but evaluates `expr` and checks that it's false.
 
 # test-values
 
-;;> \macro{(test-values [name] expect expr)}
+*Syntax*
 
-;;> Like \scheme{test} but \var{expect} and \var{expr} can both
-;;> return multiple values.
+    (test-values [name] expect expr)
+
+Like `test` but `expect` and `expr` can both return multiple values.
 
 # test-begin
 
+    (test-begin)
+    (test-begin name)
+
+Begin testing a new group until the closing `(test-end)`.
+
 # test-end
 
-# test-syntax-error
+    (test-end)
+    (test-end name)
+
+Ends testing group introduced with `(test-begin)`, and summarizes the results.
 
 # test-propagate-info
 
-# test-vars
+    (test-propagate-info name expect expr info)
+
+Low-level macro to pass alist info to the underlying `test-run`.
 
 # test-run
+
+    (test-run expect expr info)
+
+The procedural interface to testing. `expect` and `expr` should be thunks, and `info` is an alist of properties used in test reporting.
 
 # test-exit
 
@@ -110,6 +118,8 @@ Exits with a failure status if any tests have failed, and a successful status ot
 Wraps `body` as a single test group, which can be filtered and summarized separately.
 
 # current-test-group
+
+The current test group as started by `test-group` or `test-begin`.
 
 # current-test-verbosity
 
@@ -126,6 +136,4 @@ Wraps `body` as a single test group, which can be filtered and summarized separa
 # current-test-epsilon
 
 # current-test-comparator
-
-# test-group-inc!
 
