@@ -22,7 +22,6 @@ The `(cyclone test)` library contains a testing framework ported from `(chibi te
 - [`current-test-group`](#current-test-group)
 - [`current-test-verbosity`](#current-test-verbosity)
 - [`current-test-applier`](#current-test-applier)
-- [`current-test-handler`](#current-test-handler)
 - [`current-test-skipper`](#current-test-skipper)
 - [`current-test-group-reporter`](#current-test-group-reporter)
 - [`current-test-epsilon`](#current-test-epsilon)
@@ -123,17 +122,29 @@ The current test group as started by `test-group` or `test-begin`.
 
 # current-test-verbosity
 
+If true, show more verbose output per test. Inferred from the environment variable `TEST_VERBOSE`.
+
 # current-test-applier
 
-# current-test-handler
+The test applier - what we do with non-skipped tests. Takes the same signature as `test-run`, should be responsible for evaluating the thunks, determining the status of the test, and passing this information to `current-test-reporter`.
 
 # current-test-skipper
 
+The test skipper - what we do with non-skipped tests. This should not evaluate the thunks and simply pass off to `current-test-reporter`.
+
 # current-test-group-reporter
+
+Takes one argument, a test group, and prints a summary of the test results for that group.
 
 # test-failure-count
 
+A running count of all test failures and errors across all groups (and threads). Used by `test-exit`.
+
 # current-test-epsilon
 
+The epsilon used for floating point comparisons.
+
 # current-test-comparator
+
+The underlying comparator used in testing, defaults to `test-equal?`.
 
