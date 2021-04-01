@@ -2,6 +2,8 @@
 
 The `(scheme cyclone ast)` library defines abstract syntax tree types used during compilation.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`ast:make-lambda`](#astmake-lambda)
 - [`ast:%make-lambda`](#astmake-lambda-1)
 - [`ast:lambda?`](#astlambda)
