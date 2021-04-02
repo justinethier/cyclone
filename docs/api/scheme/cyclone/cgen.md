@@ -7,6 +7,8 @@ title: API
 
 The `(scheme cyclone cgen)` library compiles scheme code to a Cheney-on-the-MTA C runtime.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`mta:code-gen`](#mtacode-gen)
 - [`emit`](#emit)
 - [`emit*`](#emit-1)
@@ -49,5 +51,4 @@ Call `emits` for each of the given strings.
     (emit-newline)
 
 `display` a newline to the current output port.
-
 

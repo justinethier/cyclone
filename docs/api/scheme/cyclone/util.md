@@ -7,6 +7,8 @@ title: API
 
 The `(scheme cyclone util`) library contains various utility functions used internally the compiler.
 
+*This library is used internally by the compiler and its API may change at any time.*
+
 - [`Cyc-er-compare?            `](#cyc-er-compare)
 - [`Cyc-er-rename              `](#cyc-er-rename)
 - [`app?                       `](#app)

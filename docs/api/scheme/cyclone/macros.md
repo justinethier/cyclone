@@ -3,6 +3,11 @@ layout: main
 title: API
 ---
 
+---
+layout: main
+title: API
+---
+
 # Macro Library
 
 The `(scheme cyclone macro)` library contains code to deal with macros.
