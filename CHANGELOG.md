@@ -17,7 +17,7 @@ Features
 
   No changes are a required if `(cyclone foreign)` is used to integrate with C.
 
-- Provide alternative library names for each of the SRFI libraries. Generally these names follow the recommendations from R7RS Large - for example `(scheme list)` as a friendlier alternative to `(srfi 1)`. Where such a name does not exist we provide a name with the `(cyclone)` prefix:
+- Provided alternative library names for each of the SRFI libraries. Generally these names follow the recommendations from R7RS Large - for example `(scheme list)` as a friendlier alternative to `(srfi 1)`. Where such a name does not exist we provide a name with the `(cyclone)` prefix:
 
   Library Name                            | SRFI Number | Description | External Documentation
   --------------------------------------- | ----------- | ----------- | ----------------------
@@ -39,7 +39,7 @@ Features
   [`scheme vector`](api/srfi/133.md)      | [`srfi 133`](api/srfi/133.md) | Vector library (R7RS-compatible) | [Link](http://srfi.schemers.org/srfi-133/srfi-133.html)
   [`cyclone fixnum`](api/srfi/143.md)     | [`srfi 143`](api/srfi/143.md) | Fixnums | [Link](http://srfi.schemers.org/srfi-143/srfi-143.html)
 
-- Modifying version numbers going forward to use explicit three digit semantic versioning `major.minor.bugfix`.
+- We are modifying version numbers going forward to use explicit three digit semantic versioning `major.minor.bugfix`.
 
 Bug Fixes
 
