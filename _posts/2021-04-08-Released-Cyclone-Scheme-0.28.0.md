@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Released Cyclone Scheme 0.28.0
-excerpt: Allow an unlimited number of function arguments and provide friendly alternative names for SRFI libraries
+excerpt: We now allow an unlimited number of function arguments and provide friendly alternative names for SRFI libraries.
 ---
 
 Features
