@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.28.0 - TBD
+## 0.28.0 - April 8, 2021
 
 Features
 
