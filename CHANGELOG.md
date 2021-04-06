@@ -6,16 +6,16 @@ Features
 
 - Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions. 
   
-  Most importantly, this change is transparent to application developers. Programs will continue to work without requiring modifications, though it may be necessary to update `define-c` definitions if there are unused parameters, to prevent warnings from the C compiler. For example: 
+  Most importantly this change is transparent to application developers. Programs will continue to work without requiring modifications. This includes code using our FFI, though it may be necessary to update `define-c` definitions if there are unused parameters in order to prevent warnings from the C compiler. For example: 
       
       (define-c read-error
         "(void *data, object _, int argc, object *args)"
         " object port = args[1];
           object filename = args[2];
           object msg = args[3];
+          ...
 
-TODO: is the following true? What about unused args in the C code?????
-  Note that no changes are a required if `(cyclone foreign)` is used to integrate with C.
+  No changes are a required if `(cyclone foreign)` is used to integrate with C.
 
 - Provide alternative library names for each of the SRFI libraries. Generally these names follow the recommendations from R7RS Large - for example `(scheme list)` as a friendlier alternative to `(srfi 1)`. Where such a name does not exist we provide a name with the `(cyclone)` prefix:
 
