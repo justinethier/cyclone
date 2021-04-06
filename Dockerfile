@@ -4,7 +4,7 @@ MAINTAINER justin.ethier@gmail.com
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV CYCLONE_VERSION v0.27
+ENV CYCLONE_VERSION v0.28.0
 RUN apt update -y
 RUN apt install -y build-essential git rsync texinfo libtommath-dev libck-dev make gcc
 
