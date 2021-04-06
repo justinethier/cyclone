@@ -94,21 +94,101 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_type2(data, fnc_test, tag, obj) { \
   if ((boolean_f == fnc_test(data, obj))) Cyc_invalid_type_error(data, tag, obj); }
 
+/**
+ * Predicate - is `obj` a pair object or NULL?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_pair_or_null(d,obj) { if (obj != NULL) { Cyc_check_pair(d,obj); }}
+/**
+ * Predicate - is the object a pair?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_pair(d,obj) Cyc_check_type(d,Cyc_is_pair, pair_tag, obj)
+/**
+ * Predicate - is the object a procedure?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_proc(d,obj) Cyc_check_type2(d,Cyc_is_procedure, closureN_tag, obj)
+/**
+ * Predicate - is the object a number?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_num(d,obj) Cyc_check_type(d,Cyc_is_number, integer_tag, obj)
+/**
+ * Predicate - is the object an immediate integer?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_fixnum(d,obj) Cyc_check_type(d,Cyc_is_fixnum, integer_tag, obj)
+/**
+ * Predicate - is the object an integer?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_int(d,obj) Cyc_check_type(d,Cyc_is_integer, integer_tag, obj)
+/**
+ * Predicate - is the object a double precision number?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_double(d,obj) Cyc_check_type(d,Cyc_is_double, double_tag, obj)
+/**
+ * Predicate - is the object a string?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_str(d,obj) Cyc_check_type(d,Cyc_is_string, string_tag, obj)
+/**
+ * Predicate - is the object a symbol?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_sym(d,obj) Cyc_check_type(d,Cyc_is_symbol, symbol_tag, obj)
+/**
+ * Predicate - is the object a vector?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_vec(d,obj) Cyc_check_type(d,Cyc_is_vector, vector_tag, obj)
+/**
+ * Predicate - is the object a bytevector?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_bvec(d,obj) Cyc_check_type(d,Cyc_is_bytevector, bytevector_tag, obj)
+/**
+ * Predicate - is the object a port?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_port(d,obj) Cyc_check_type(d,Cyc_is_port, port_tag, obj)
+/**
+ * Predicate - is the object a mutex?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_mutex(d,obj) Cyc_check_type(d,Cyc_is_mutex, mutex_tag, obj)
+/**
+ * Predicate - is the object a condition variable?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_cond_var(d,obj) Cyc_check_type(d,Cyc_is_cond_var, cond_var_tag, obj)
+/**
+ * Predicate - is the object an atomic?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_atomic(d,obj) Cyc_check_type(d,Cyc_is_atomic, atomic_tag, obj)
+/**
+ * Predicate - is the object an opaque?
+ * @param `d` - Thread data object
+ * @param `obj` - Object to check
+ */
 #define Cyc_check_opaque(d,obj) Cyc_check_type(d,Cyc_is_opaque, c_opaque_tag, obj)
 void Cyc_invalid_type_error(void *data, int tag, object found);
 void Cyc_immutable_obj_error(void *data, object obj);
