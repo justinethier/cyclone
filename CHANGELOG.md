@@ -4,9 +4,9 @@
 
 Features
 
-- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. This involved changing the calling conventions of our generated C code and runtime functions. 
-  
-  Most importantly this change is transparent to application developers. Programs will continue to work without requiring modifications. This includes code using our FFI, though it may be necessary to update `define-c` definitions if there are unused parameters in order to prevent warnings from the C compiler. For example: 
+- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. 
+
+  Although the calling conventions of our generated C code and runtime functions were changed, there is no impact to application developers. Existing code will continue to work without requiring modifications. This includes code using our FFI, though it may be necessary to update `define-c` definitions if there are unused parameters in order to prevent warnings from the C compiler. For example by refactoring to use the new calling conventions: 
       
       (define-c read-error
         "(void *data, object _, int argc, object *args)"
