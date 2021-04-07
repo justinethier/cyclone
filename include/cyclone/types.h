@@ -888,6 +888,7 @@ typedef struct {
   n.tag = double_tag; \
   n.value = v;
 
+/** Create a new double in the nursery using alloca */
 #define alloca_double(n,v) \
   double_type *n = alloca(sizeof(double_type)); \
   n->hdr.mark = gc_color_red; \
@@ -1046,6 +1047,9 @@ typedef struct {
     ((string_type *)_s)->str = alloca(sizeof(char) * (_len + 1)); \
   }
 
+/**
+ * Allocate a new bytevector, either on the stack or heap depending upon size
+ */
 #define alloc_bytevector(_data, _bv, _len) \
   if (_len >= MAX_STACK_OBJ) { \
     int heap_grown; \
@@ -1137,6 +1141,7 @@ typedef struct {
   p.str_bv_in_mem_buf_len = 0; \
   p.read_len = 1;
 
+/** Create a new input port object in the nursery */
 #define make_input_port(p,f,rl) \
   port_type p; \
   p.hdr.mark = gc_color_red; \
@@ -1185,6 +1190,7 @@ typedef struct { vector_type v; object arr[5]; } vector_5_type;
   v.num_elements = 0; \
   v.elements = NULL;
 
+/** Create an empty vector in the nursery using alloca */
 #define alloca_empty_vector(v) \
   vector_type *v = alloca(sizeof(vector_type)); \
   v->hdr.mark = gc_color_red; \
@@ -1218,6 +1224,7 @@ typedef bytevector_type *bytevector;
   v.len = 0; \
   v.data = NULL;
 
+/** Create an empty bytevector in the nursery using alloca */
 #define alloca_empty_bytevector(v) \
   bytevector_type *v = alloca(sizeof(bytevector_type)); \
   v->hdr.mark = gc_color_red; \
@@ -1256,6 +1263,7 @@ typedef pair_type *pair;
   n.pair_car = a; \
   n.pair_cdr = d;
 
+/** Create a new pair in the nursery using alloca */
 #define alloca_pair(n,a,d) \
   pair_type *n = alloca(sizeof(pair_type)); \
   n->hdr.mark = gc_color_red; \
@@ -1265,6 +1273,12 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+/**
+ * Set members of the given pair 
+ * @param n - Pointer to a pair object
+ * @param a - Object to assign to car
+ * @param d - Object to assign to cdr
+ */
 #define set_pair(n,a,d) \
   n->hdr.mark = gc_color_red; \
   n->hdr.grayed = 0; \
@@ -1273,6 +1287,12 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+/**
+ * Set members of the given pair, using a single expression
+ * @param n - Pointer to a pair object
+ * @param a - Object to assign to car
+ * @param d - Object to assign to cdr
+ */
 #define set_pair_as_expr(n,a,d) \
  (((pair)(n))->hdr.mark = gc_color_red, \
   ((pair)(n))->hdr.grayed = 0, \
@@ -1420,18 +1440,12 @@ typedef closure0_type *macro;
   c.fn = f; \
   c.num_args = -1;
 
+/**
+ * Create a closure0 object
+ * These objects are special and can be statically allocated as an optimization
+ */
 #define mclosure0(c, f) \
  static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .num_args = -1 }; /* TODO: need a new macro that initializes num_args */
-
-/*
-#define mclosure0(c,f) \
-  closure0_type c; \
-  c.hdr.mark = gc_color_red; \
-  c.hdr.grayed = 0; \
-  c.tag = closure0_tag; \
-  c.fn = f; \
-  c.num_args = -1;
-*/
 
 #define maclosure0(c,f,na) \
   closure0_type c; \
@@ -1441,6 +1455,9 @@ typedef closure0_type *macro;
   c.fn = f; \
   c.num_args = na;
 
+/**
+ * Create a closure1 object in the nursery
+ */
 #define mclosure1(c,f,a) \
   closure1_type c; \
   c.hdr.mark = gc_color_red; \
@@ -1465,7 +1482,10 @@ typedef primitive_type *primitive;
 static primitive_type name##_primitive = {primitive_tag, #desc, fnc}; \
 static const object primitive_##name = &name##_primitive
 
+/** Is x a primitive object? */
 #define prim(x) (x && ((primitive)x)->tag == primitive_tag)
+
+/** Return description of primitive object x */
 #define prim_name(x) (((primitive_type *) x)->desc)
 
 /**
