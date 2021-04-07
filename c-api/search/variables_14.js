@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['value',['value',['../structinteger__type_a7191e96ef8a16d3c4f91a703725a33be.html#a7191e96ef8a16d3c4f91a703725a33be',1,'integer_type::value()'],['../structcomplex__num__type_ad312b916318974f8af3c00ff22185e25.html#ad312b916318974f8af3c00ff22185e25',1,'complex_num_type::value()'],['../structdouble__type_a35e90eca226d272c795276d903121d14.html#a35e90eca226d272c795276d903121d14',1,'double_type::value()']]]
+  ['unused_1923',['unused',['../structck__array__iterator_a0f5d5a9c8957cb46d76114b84b61754a.html#a0f5d5a9c8957cb46d76114b84b61754a',1,'ck_array_iterator::unused()'],['../structport__type_abaaab8ca038905e28123c03238daebe8.html#abaaab8ca038905e28123c03238daebe8',1,'port_type::unused()']]]
 ];

@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['pair_5ftype',['pair_type',['../structpair__type.html',1,'']]],
-  ['port_5ftype',['port_type',['../structport__type.html',1,'']]],
-  ['primitive_5ftype',['primitive_type',['../structprimitive__type.html',1,'']]]
+  ['integer_5ftype_1176',['integer_type',['../structinteger__type.html',1,'']]]
 ];

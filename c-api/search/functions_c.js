@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['read_5ffrom_5fport',['read_from_port',['../runtime_8c_a8b3c1817748701ea3357fc4441823b6a.html#a8b3c1817748701ea3357fc4441823b6a',1,'runtime.c']]],
-  ['register_5flibrary',['register_library',['../group__prim__glo_gaca813fd31c39e0f1163d5453a8ca4ada.html#gaca813fd31c39e0f1163d5453a8ca4ada',1,'register_library(const char *name):&#160;runtime.c'],['../group__prim__glo_gaca813fd31c39e0f1163d5453a8ca4ada.html#gaca813fd31c39e0f1163d5453a8ca4ada',1,'register_library(const char *name):&#160;runtime.c']]]
+  ['pack_5fenv_5fvariables_1644',['pack_env_variables',['../group__prim_gabd10ce68a5e67c762c8711cbf2bd57bb.html#gabd10ce68a5e67c762c8711cbf2bd57bb',1,'pack_env_variables(void *data, object k):&#160;runtime.c'],['../group__prim_gabd10ce68a5e67c762c8711cbf2bd57bb.html#gabd10ce68a5e67c762c8711cbf2bd57bb',1,'pack_env_variables(void *data, object k):&#160;runtime.c']]]
 ];

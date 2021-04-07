@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['safe_20pair_20access_20macros',['Safe pair access macros',['../group__objects__safe__cxr.html',1,'']]],
-  ['strings',['Strings',['../group__prim__str.html',1,'']]],
-  ['symbols',['Symbols',['../group__prim__sym.html',1,'']]],
-  ['symbol_20table',['Symbol table',['../group__prim__symtbl.html',1,'']]],
-  ['system_20interface',['System interface',['../group__prim__sys.html',1,'']]]
+  ['primitives_2079',['Primitives',['../group__prim.html',1,'']]],
+  ['primitive_20objects_2080',['Primitive objects',['../group__prim__obj.html',1,'']]],
+  ['pairs_20and_20lists_2081',['Pairs and lists',['../group__prim__pairs.html',1,'']]]
 ];

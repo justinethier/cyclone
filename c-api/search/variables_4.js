@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['element',['element',['../structclosure1__type_ae986d356667f7d5ab758a336a5eace9e.html#ae986d356667f7d5ab758a336a5eace9e',1,'closure1_type']]],
-  ['elements',['elements',['../structvector__type_a9c10f07833cb7222674d90eff4604ce4.html#a9c10f07833cb7222674d90eff4604ce4',1,'vector_type::elements()'],['../structclosureN__type_ab46488ff03fc2d5301eb347f2239bc51.html#ab46488ff03fc2d5301eb347f2239bc51',1,'closureN_type::elements()']]],
-  ['env_5fvariables',['env_variables',['../runtime_8c_ab4fcda267e6b4b6059eb081059801f86.html#ab4fcda267e6b4b6059eb081059801f86',1,'runtime.c']]],
-  ['exception_5fhandler_5fstack',['exception_handler_stack',['../structgc__thread__data__t_a4f230bcbfa4d533625e450f6e7003bac.html#a4f230bcbfa4d533625e450f6e7003bac',1,'gc_thread_data_t']]]
+  ['d_1688',['d',['../structlist__4__type_a38d92c17fe4b679c58747833bd9b8650.html#a38d92c17fe4b679c58747833bd9b8650',1,'list_4_type']]],
+  ['data_1689',['data',['../structgc__heap__t_a9e4266799b3372dacb4e614ee85c0bca.html#a9e4266799b3372dacb4e614ee85c0bca',1,'gc_heap_t::data()'],['../structbytevector__type_a324ee43524b76033982b1f1041ed27ef.html#a324ee43524b76033982b1f1041ed27ef',1,'bytevector_type::data()']]],
+  ['data_5fend_1690',['data_end',['../structgc__heap__t_ae30f3519c3a7fbdaa14f8371c029feb9.html#ae30f3519c3a7fbdaa14f8371c029feb9',1,'gc_heap_t']]],
+  ['desc_1691',['desc',['../structboolean__type_a52ca1061088f5c634f53496b90563bd5.html#a52ca1061088f5c634f53496b90563bd5',1,'boolean_type::desc()'],['../structsymbol__type_a7cc9d8329a840ad3fc372d399b4260e2.html#a7cc9d8329a840ad3fc372d399b4260e2',1,'symbol_type::desc()'],['../structprimitive__type_a31b167d20331c1f919fec7549afd3fae.html#a31b167d20331c1f919fec7549afd3fae',1,'primitive_type::desc()']]],
+  ['double_5ft_1692',['double_t',['../unioncommon__type_a81bf434ff1d47d4484a1ab3dcbb578fd.html#a81bf434ff1d47d4484a1ab3dcbb578fd',1,'common_type']]]
 ];

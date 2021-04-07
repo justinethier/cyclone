@@ -1,11 +1,16 @@
 var searchData=
 [
-  ['next',['next',['../structgc__free__list__t_a45bcbd3ff8e9a80a130eb340e8bb43d7.html#a45bcbd3ff8e9a80a130eb340e8bb43d7',1,'gc_free_list_t::next()'],['../structgc__heap__t_a3110f6d6f669020777a53e013a4f0402.html#a3110f6d6f669020777a53e013a4f0402',1,'gc_heap_t::next()'],['../structmark__buffer__t_a7809e23afc68ce826e020fd37cbc2730.html#a7809e23afc68ce826e020fd37cbc2730',1,'mark_buffer_t::next()']]],
-  ['next_5ffree',['next_free',['../structgc__heap__t_a85f735d33ba2650c3dfb4e7d279be330.html#a85f735d33ba2650c3dfb4e7d279be330',1,'gc_heap_t']]],
-  ['next_5ffrees',['next_frees',['../structgc__heap__t_afb01ecc8decdd2bc3639166c855afc43.html#afb01ecc8decdd2bc3639166c855afc43',1,'gc_heap_t']]],
-  ['num_5fargs',['num_args',['../structmacro__type_ac85b6b059d0082c5603a5f795adb7dcd.html#ac85b6b059d0082c5603a5f795adb7dcd',1,'macro_type::num_args()'],['../structclosure0__type_a42e450cfee6f1181eeab82ae4b7ace36.html#a42e450cfee6f1181eeab82ae4b7ace36',1,'closure0_type::num_args()'],['../structclosure1__type_a56445830b5527eb73e92170f1bc2081b.html#a56445830b5527eb73e92170f1bc2081b',1,'closure1_type::num_args()'],['../structclosureN__type_ad7197b423d889744ead5ee3bc0bd44f4.html#ad7197b423d889744ead5ee3bc0bd44f4',1,'closureN_type::num_args()']]],
-  ['num_5fcp',['num_cp',['../structstring__type_abed5b7ebbc533aba4fcbcc67a2dca39a.html#abed5b7ebbc533aba4fcbcc67a2dca39a',1,'string_type']]],
-  ['num_5felements',['num_elements',['../structvector__type_a48e7c0d3962ebac9d1ee39581316b642.html#a48e7c0d3962ebac9d1ee39581316b642',1,'vector_type::num_elements()'],['../structclosureN__type_abb1222449cbf59b64bb4ba61582bd370.html#abb1222449cbf59b64bb4ba61582bd370',1,'closureN_type::num_elements()']]],
-  ['num_5fminor_5fgcs',['num_minor_gcs',['../structgc__thread__data__t_a5c92e0829762becb182b9c534eff26bd.html#a5c92e0829762becb182b9c534eff26bd',1,'gc_thread_data_t']]],
-  ['num_5funswept_5fchildren',['num_unswept_children',['../structgc__heap__t_a4b665c3028065edf8b8ce5b76e62abfa.html#a4b665c3028065edf8b8ce5b76e62abfa',1,'gc_heap_t']]]
+  ['malloc_1734',['malloc',['../structck__malloc_a355c158120f6d777e7782ee8868e622d.html#a355c158120f6d777e7782ee8868e622d',1,'ck_malloc']]],
+  ['mark_1735',['mark',['../structgc__header__type__t_a3ccd7432ce43e0223518f665c3b5aa4b.html#a3ccd7432ce43e0223518f665c3b5aa4b',1,'gc_header_type_t']]],
+  ['mark_5fbuffer_1736',['mark_buffer',['../structgc__thread__data__t_a1c290f0c20a8f9663360f2ef27b98749.html#a1c290f0c20a8f9663360f2ef27b98749',1,'gc_thread_data_t']]],
+  ['mark_5fbuffer_5flen_1737',['mark_buffer_len',['../structgc__thread__data__t_a96660521efdd4bafd6f1b00569004872.html#a96660521efdd4bafd6f1b00569004872',1,'gc_thread_data_t']]],
+  ['mask_1738',['mask',['../structsimple__hashset__st_a1c8d9061eb160d7c2a08c2d5430c02c6.html#a1c8d9061eb160d7c2a08c2d5430c02c6',1,'simple_hashset_st::mask()'],['../structhashset__st_adf5780dd9e62e8c1bceb11207383cd0d.html#adf5780dd9e62e8c1bceb11207383cd0d',1,'hashset_st::mask()']]],
+  ['mem_5fbuf_1739',['mem_buf',['../structport__type_a725989e0a6fc5bb85bed2c705b090d79.html#a725989e0a6fc5bb85bed2c705b090d79',1,'port_type']]],
+  ['mem_5fbuf_5flen_1740',['mem_buf_len',['../structport__type_a6aef32d5669a24d4a098acb31a7a9fa4.html#a6aef32d5669a24d4a098acb31a7a9fa4',1,'port_type']]],
+  ['mode_1741',['mode',['../structport__type_a3453f5f9884dcef650c2e21c2f6e3bda.html#a3453f5f9884dcef650c2e21c2f6e3bda',1,'port_type']]],
+  ['movebuf_1742',['moveBuf',['../structgc__thread__data__t_a6065b6ee98c7d47067cdeeae6ef99f81.html#a6065b6ee98c7d47067cdeeae6ef99f81',1,'gc_thread_data_t']]],
+  ['movebuflen_1743',['moveBufLen',['../structgc__thread__data__t_a178ca9c0192728aeab63256e3a2e1201.html#a178ca9c0192728aeab63256e3a2e1201',1,'gc_thread_data_t']]],
+  ['mutation_5fbuflen_1744',['mutation_buflen',['../structgc__thread__data__t_ab7ab3db3c4e74034cb5217a89efec1f1.html#ab7ab3db3c4e74034cb5217a89efec1f1',1,'gc_thread_data_t']]],
+  ['mutation_5fcount_1745',['mutation_count',['../structgc__thread__data__t_a8249943ce5a4f574063b0d57a9395ff7.html#a8249943ce5a4f574063b0d57a9395ff7',1,'gc_thread_data_t']]],
+  ['mutations_1746',['mutations',['../structgc__thread__data__t_a8f0a8f02078294230fe70999a7d2af26.html#a8f0a8f02078294230fe70999a7d2af26',1,'gc_thread_data_t']]]
 ];
