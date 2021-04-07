@@ -1,0 +1,27 @@
+name: C API Docs
+
+#on: [create]
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    strategy:    
+      matrix:
+        arch: [64]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install doxygen
+      run: sudo apt-get install doxygen
+    - name: make doc
+      run: make doc && tar -cf html.tar html && bzip2 html.tar
+            
+    - name: upload deb
+      if: matrix.arch == '64'
+      uses: actions/upload-artifact@v1
+      with:
+        name: cyclone-scheme docs
+        path: html.tar.bz2
