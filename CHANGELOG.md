@@ -1,5 +1,11 @@
 # Changelog
 
+## TBD
+
+Bug Fixes
+
+- Avoid generating C code containing unused variables. In addition to generating better code this also prevents the C compiler from raising associated warnings.
+
 ## 0.28.0 - April 8, 2021
 
 Features

@@ -1299,10 +1299,15 @@
          (let ((exps (foldr
                        (lambda (expr acc)
                          ;; Join expressions; based on c:append
-                         (let ((cp1 (if (ref? expr)
-                                        ;; Ignore lone ref to avoid C warning
-                                        (c:code/vars "" '())
-                                        (c-compile-exp expr append-preamble cont ast-id trace cps?)))
+                         (let ((cp1 (cond
+                                     ((ref? expr)
+                                      ;; Ignore lone ref to avoid C warning
+                                      (c:code/vars "" '()))
+                                     ((tagged-list? '%closure expr)
+                                      ;; Discard unused func and avoid C warning
+                                      (c:code/vars "" '()))
+                                     (else
+                                        (c-compile-exp expr append-preamble cont ast-id trace cps?))))
                                (cp2 acc))
                            (c:code/vars 
                              (let ((cp1-body (c:body cp1)))
