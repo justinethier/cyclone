@@ -13,6 +13,7 @@
   - [Interpreter](#interpreter)
 - [Language Details](#language-details)
 - [Multithreaded Programming](#multithreaded-programming)
+  - [Thread Safety](#thread-safety)
 - [Foreign Function Interface](#foreign-function-interface)
   - [Writing a Scheme Function in C](#writing-a-scheme-function-in-c)
   - [Foreign Library](#foreign-library)
@@ -167,11 +168,11 @@ The [`srfi 18`](api/srfi/18.md) library may be imported to provide support for m
 
 Many helper functions are provided by [`(cyclone concurrent)`](api/cyclone/concurrent.md) to make it easier to write multithreaded programs.
 
-## Memory Layout
+## Thread Safety
 
-Cyclone uses a generational garbage collector that automatically move objects from the first generation (on the stack) to the second generation (on the heap). This move is performed by the application thread that originally created the object. Without the proper safety measures in place this could cause problems as the address that another thread is using for an object may suddenly change. To prevent race conditions Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread. 
+Cyclone uses a generational garbage collector that automatically move objects from the first generation (on the stack) to the second generation (on the heap). This move is performed by the application thread that originally created the object. Without the proper safety measures in place this could cause problems as the address that another thread is using for an object may suddenly change. 
 
-It is still necessary for application code to use the appropriate concurrency constructs - such as locks, atomics, etc - to ensure that an object is safely accessed by only one thread at a time.
+**To prevent race conditions Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread.** It is still necessary for application code to use the appropriate concurrency constructs - such as locks, atomics, etc - to ensure that an object is safely accessed by only one thread at a time.
 
 # Foreign Function Interface
 
