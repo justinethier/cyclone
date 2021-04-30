@@ -169,15 +169,9 @@ Many helper functions are provided by [`(cyclone concurrent)`](api/cyclone/concu
 
 ## Memory Layout
 
-Cyclone's garbage collector moves objects in memory from the first generation (on the stack) to the second generation (on the heap). This causes problems when an object is used by multiple threads, as the address another thread expects to find an object at may suddenly change. To prevent race conditions an object must be guaranteed to be on the heap prior to being used by another thread. 
+Cyclone uses a generational garbage collector that automatically move objects from the first generation (on the stack) to the second generation (on the heap). This move is performed by the application thread that originally created the object. Without the proper safety measures in place this could cause problems as the address that another thread is using for an object may suddenly change. To prevent race conditions Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread. 
 
-The easiest way to meet this guarantee is to use one of the `make-shared` and `share-all!` functions from `(cyclone concurrent)`. Several of the other constructs from that library (such as futures and shared queues) use these functions internally to guarantee objects are safely shared between threads.
-
-Finally, note there are some objects that are not relocated so the above does not apply:
-
-- Characters and integers are stored using value types and do not need to be garbage collected.
-- Symbols are stored in a global table rather than the stack/heap.
-- Mutexes, Atomics, and other concurrency-oriented objects are always allocated on the heap since by definition they are used by more than one thread.
+It is still necessary for application code to use the appropriate concurrency constructs - such as locks, atomics, etc - to ensure that an object is safely accessed by only one thread at a time.
 
 # Foreign Function Interface
 
