@@ -17,20 +17,20 @@ Library Name                                               | Description
 ---------------------------------------------------------- | -----------
 [Primitives](api/primitives.md)                            | This is not actually a library but rather a summary of all of the built-in functions (AKA primitives).
 [`scheme base`](api/scheme/base.md)                        | The R7RS base library. This is quite extensive and will be required by most programs.
-[`scheme case-lambda`](api/scheme/case-lambda.md)          |
-[`scheme char`](api/scheme/char.md)                        |
-[`scheme complex`](api/scheme/complex.md)                  |
-[`scheme cxr`](api/scheme/cxr.md)                          |
-[`scheme eval`](api/scheme/eval.md)                        |
-[`scheme file`](api/scheme/file.md)                        |
-[`scheme inexact`](api/scheme/inexact.md)                  |
-[`scheme lazy`](api/scheme/lazy.md)                        |
-[`scheme load`](api/scheme/load.md)                        |
-[`scheme process-context`](api/scheme/process-context.md)  |
-[`scheme read`](api/scheme/read.md)                        |
-[`scheme repl`](api/scheme/repl.md)                        |
-[`scheme time`](api/scheme/time.md)                        |
-[`scheme write`](api/scheme/write.md)                      |
+[`scheme case-lambda`](api/scheme/case-lambda.md)          | Exports the `case-lambda` syntax.
+[`scheme char`](api/scheme/char.md)                        | Provides procedures for dealing with characters.
+[`scheme complex`](api/scheme/complex.md)                  | Exports procedures for working with non-real numbers.
+[`scheme cxr`](api/scheme/cxr.md)                          | Exports twenty-four procedures which are the compositions of from three to four `car` and `cdr` operations. 
+[`scheme eval`](api/scheme/eval.md)                        | Exports procedures for evaluating Scheme data as programs.
+[`scheme file`](api/scheme/file.md)                        | Provides procedures for accessing files.
+[`scheme inexact`](api/scheme/inexact.md)                  | Procedures which are typically only useful with inexact values.
+[`scheme lazy`](api/scheme/lazy.md)                        | Procedures and syntax keywords for lazy evaluation.
+[`scheme load`](api/scheme/load.md)                        | Procedures for loading Scheme expressions from files.
+[`scheme process-context`](api/scheme/process-context.md)  | Procedures for accessing with the program's calling context.
+[`scheme read`](api/scheme/read.md)                        | Provides procedures for reading Scheme objects.
+[`scheme repl`](api/scheme/repl.md)                        | Provides functions related to Read-Eval-Print-Loops.
+[`scheme time`](api/scheme/time.md)                        | Provides access to time-related values.
+[`scheme write`](api/scheme/write.md)                      | Provides procedures for writing Scheme objects.
 
 # SRFI Libraries
 
