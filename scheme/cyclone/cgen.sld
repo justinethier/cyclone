@@ -93,6 +93,7 @@
 {gc_thread_data *thd;
  long stack_size = global_stack_size = STACK_SIZE;
  long heap_size = global_heap_size = HEAP_SIZE;
+ init_polyfills();
  mclosure0(clos_halt,&Cyc_halt);  // Halt if final closure is reached
  mclosure0(entry_pt,&c_entry_pt); // First function to execute
  _cyc_argc = argc;

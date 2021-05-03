@@ -8234,3 +8234,10 @@ int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz)
 
 
 ////////////// END UTF-8 Section //////////////
+
+void init_polyfills(void)
+{
+#ifdef CYCLONE_CK_POLYFILL_H
+  ck_polyfill_init();
+#endif
+}

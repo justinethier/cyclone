@@ -1003,5 +1003,6 @@ list assoc(void *data, object x, list l);
 list assoc_cdr(void *data, object x, list l);
 /**@}*/
 
+void init_polyfills(void);
 
 #endif                          /* CYCLONE_RUNTIME_H */
