@@ -33,13 +33,15 @@ Cyclone Scheme is a brand-new compiler that allows real-world application develo
 - Support for Linux, Windows, FreeBSD, and Mac platforms. 
 - Known to run on x86-64, x86, and Arm (Raspberry Pi) architectures.
 
-# Try Cyclone in your Browser
+# Try in your Browser
 
 You can [try the Cyclone interpreter](https://cyclone-scheme.netlify.app/terminal.html) right in your browser. No installation required.
 
 # Installation
 
-There are several options available for installing Cyclone:
+For the full user experience - compiling files, installing packages, running native code, etc - it is necessary to install a copy of Cyclone.
+
+There are several installation options available:
 
 ## Docker 
 ![Docker](docs/images/docker-thumb.png "Docker")
