@@ -35,7 +35,7 @@ Cyclone Scheme is a brand-new compiler that allows real-world application develo
 
 # Try in your Browser
 
-You can [try the Cyclone interpreter](https://cyclone-scheme.netlify.app/terminal.html) right in your browser. No installation required.
+You can [run the Cyclone interpreter](https://cyclone-scheme.netlify.app/terminal.html) right in your browser. No installation required.
 
 # Installation
 
