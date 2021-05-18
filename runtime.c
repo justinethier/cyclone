@@ -2025,7 +2025,7 @@ object Cyc_vector_set(void *data, object v, object k, object obj)
   Cyc_check_vec(data, v);
   Cyc_check_fixnum(data, k);
   Cyc_verify_mutable(data, v);
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
 
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
@@ -2133,7 +2133,7 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
   Cyc_check_vec(data, v);
   Cyc_check_fixnum(data, k);
   Cyc_verify_mutable(data, v);
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
 
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
     Cyc_rt_raise2(data, "vector-set! - invalid index", k);
@@ -2179,9 +2179,9 @@ object Cyc_vector_ref(void *data, object v, object k)
   Cyc_check_vec(data, v);
   Cyc_check_fixnum(data, k);
 
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
-    Cyc_rt_raise2(data, "vector-ref - invalid index", obj_int2obj(idx));
+    Cyc_rt_raise2(data, "vector-ref - invalid index", k);
   }
 
   return ((vector) v)->elements[idx];
@@ -2196,7 +2196,7 @@ object _unsafe_Cyc_vector_ref(object v, object k)
     return NULL;
   }
 
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
   if (idx < 0 || idx >= ((vector) v)->num_elements) {
     return NULL;
   }
@@ -2671,7 +2671,7 @@ object Cyc_string_set(void *data, object str, object k, object chr)
   }
 
   raw = string_str(str);
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
   len = string_len(str);
 
   Cyc_check_bounds(data, "string-set!", len, idx);
@@ -2750,7 +2750,7 @@ object Cyc_string_ref(void *data, object str, object k)
   Cyc_check_fixnum(data, k);
 
   raw = string_str(str);
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
   len = string_num_cp(str);
 
   if (idx < 0 || idx >= len) {
@@ -2788,8 +2788,8 @@ object Cyc_substring(void *data, object cont, object str, object start,
   Cyc_check_fixnum(data, end);
 
   raw = string_str(str);
-  s = unbox_number(start);
-  e = unbox_number(end);
+  s = obj_obj2int(start);
+  e = obj_obj2int(end);
   len = string_num_cp(str);
 
   if (s > e) {
@@ -3253,8 +3253,8 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   Cyc_check_fixnum(data, start);
   Cyc_check_fixnum(data, end);
 
-  s = unbox_number(start);
-  e = unbox_number(end);
+  s = obj_obj2int(start);
+  e = obj_obj2int(end);
   len = e - s;
 
   if (s < 0 || (s >= string_num_cp(str) && len > 0)) {
@@ -3346,7 +3346,7 @@ object Cyc_bytevector_u8_ref(void *data, object bv, object k)
   Cyc_check_fixnum(data, k);
 
   buf = ((bytevector) bv)->data;
-  idx = unbox_number(k);
+  idx = obj_obj2int(k);
 
   if (idx < 0 || idx >= ((bytevector) bv)->len) {
     Cyc_rt_raise2(data, "bytevector-u8-ref - invalid index", k);
@@ -3367,8 +3367,8 @@ object Cyc_bytevector_u8_set(void *data, object bv, object k, object b)
   Cyc_verify_mutable(data, bv);
 
   buf = ((bytevector) bv)->data;
-  idx = unbox_number(k);
-  val = unbox_number(b);
+  idx = obj_obj2int(k);
+  val = obj_obj2int(b);
   len = ((bytevector) bv)->len;
 
   Cyc_check_bounds(data, "bytevector-u8-set!", len, idx);

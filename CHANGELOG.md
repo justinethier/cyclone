@@ -2,6 +2,10 @@
 
 ## TBD
 
+Features
+
+- Improve performance of runtime by more efficiently unboxing known fixnums. 
+
 Bug Fixes
 
 - Avoid generating C code containing unused variables. In addition to generating better code this also prevents the C compiler from raising associated warnings.
