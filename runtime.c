@@ -2157,7 +2157,7 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
 
 object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, object obj)
 {
-  int idx = unbox_number(k);
+  int idx = obj_obj2int(k);
   int do_gc = 0;
   obj = transport_stack_value(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
