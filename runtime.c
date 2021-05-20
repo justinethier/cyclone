@@ -7553,14 +7553,22 @@ static void _read_return_number(void *data, port_type *p, int base, int exact)
   // TODO: validation?
   p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
   p->tok_end = 0; // Reset for next atom
-  make_empty_vector(vec);
-  make_string(str, p->tok_buf);
-  vec.num_elements = 3;
-  vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
-  vec.elements[0] = &str;
-  vec.elements[1] = obj_int2obj(base);
-  vec.elements[2] = exact ? boolean_t : boolean_f;
-  return_thread_runnable_with_obj(data, &vec, p);
+  if (exact > 1) {
+    // Special case, we don't know if exact or inexact
+    make_string(str, p->tok_buf);
+    str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
+    make_c_opaque(opq, &str);
+    return_thread_runnable_with_obj(data, &opq, p);
+  } else {
+    make_empty_vector(vec);
+    make_string(str, p->tok_buf);
+    vec.num_elements = 3;
+    vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
+    vec.elements[0] = &str;
+    vec.elements[1] = obj_int2obj(base);
+    vec.elements[2] = exact ? boolean_t : boolean_f;
+    return_thread_runnable_with_obj(data, &vec, p);
+  }
 }
 
 /**
@@ -7962,6 +7970,8 @@ void Cyc_io_read_token(void *data, object cont, object port)
         return_thread_runnable_with_obj(data, boolean_f, p);
       } else if (c == '\\') {
         _read_character(data, p);
+      } else if (c == 'd') {
+        _read_number(data, p, 10, 2);
       } else if (c == 'e') {
         _read_number(data, p, 10, 1);
       } else if (c == 'i') {
