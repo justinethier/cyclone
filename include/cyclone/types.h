@@ -665,9 +665,6 @@ typedef uint32_t char_type;
 /** Function type */
 typedef void (*function_type) (void *data, object clo, int argc, object *args);
 
-/** Primitive function */
-typedef void (*primitive_function_type)(void *data, object cont, object args);
-
 /** Non-CPS function type */
 typedef object (*inline_function_type) ();
 
@@ -1473,8 +1470,8 @@ typedef closure0_type *macro;
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
+  function_type fn;
   const char *desc;
-  primitive_function_type fn;
 } primitive_type;
 typedef primitive_type *primitive;
 
