@@ -4721,298 +4721,296 @@ void _caar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caar(data, args[1]));
 }
 
-JAE TODO: pick up calling convention changes here:
-need to update to check_argc and loading args from array
 void _cadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cadr(data, args[1]));
 }
 
 void _cdar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdar(data, args[1]));
 }
 
 void _cddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cddr(data, args[1]));
 }
 
 void _caaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_caaar(data, args[1]));
 }
 
 void _caadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_caadr(data, args[1]));
 }
 
 void _cadar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cadar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cadar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cadar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cadar(data, args[1]));
 }
 
 void _caddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_caddr(data, args[1]));
 }
 
 void _cdaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdaar(data, args[1]));
 }
 
 void _cdadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdadr(data, args[1]));
 }
 
 void _cddar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cddar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cddar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cddar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cddar(data, args[1]));
 }
 
 void _cdddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdddr(data, args[1]));
 }
 
 void _caaaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caaaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caaaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caaaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_caaaar(data, args[1]));
 }
 
 void _caaadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caaadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caaadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caaadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_caaadr(data, args[1]));
 }
 
 void _caadar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caadar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caadar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caadar(data, car(args)));
+  return_closcall1(data, cont, Cyc_caadar(data, args[1]));
 }
 
 void _caaddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caaddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caaddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caaddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_caaddr(data, args[1]));
 }
 
 void _cadaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cadaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cadaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cadaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cadaar(data, args[1]));
 }
 
 void _cadadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cadadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cadadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cadadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cadadr(data, args[1]));
 }
 
 void _caddar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "caddar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "caddar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_caddar(data, car(args)));
+  return_closcall1(data, cont, Cyc_caddar(data, args[1]));
 }
 
 void _cadddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cadddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cadddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cadddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cadddr(data, args[1]));
 }
 
 void _cdaaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdaaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdaaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdaaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdaaar(data, args[1]));
 }
 
 void _cdaadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdaadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdaadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdaadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdaadr(data, args[1]));
 }
 
 void _cdadar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdadar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdadar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdadar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdadar(data, args[1]));
 }
 
 void _cdaddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdaddr", 1, args);
+  Cyc_check_argc(data, "cdaddr", argc - 1, 1);
   object cont = args[0];
-  Cyc_check_pair(data, car(args));
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdaddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdaddr(data, args[1]));
 }
 
 void _cddaar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cddaar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cddaar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cddaar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cddaar(data, args[1]));
 }
 
 void _cddadr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cddadr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cddadr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cddadr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cddadr(data, args[1]));
 }
 
 void _cdddar(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cdddar", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cdddar", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cdddar(data, car(args)));
+  return_closcall1(data, cont, Cyc_cdddar(data, args[1]));
 }
 
 void _cddddr(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cddddr", 1, args);
-  Cyc_check_pair(data, car(args));
+  Cyc_check_argc(data, "cddddr", argc - 1, 1);
+  Cyc_check_pair(data, args[1]);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_cddddr(data, car(args)));
+  return_closcall1(data, cont, Cyc_cddddr(data, args[1]));
 }
 
 void _cons(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "cons", 2, args);
+  Cyc_check_argc(data, "cons", argc - 1, 2);
   {
-    make_pair(c, car(args), cadr(args));
-  object cont = args[0];
+    object cont = args[0];
+    make_pair(c, args[1], args[2]);
     return_closcall1(data, cont, &c);
 }}
 
 void _eq_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "eq?", 2, args);
+  Cyc_check_argc(data, "eq?", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_eq(car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_eq(args[1], args[2]));
 }
 
 void _eqv_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "eqv?", 2, args);
+  Cyc_check_argc(data, "eqv?", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_eqv(car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_eqv(args[1], args[2]));
 }
 
 void _equal_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "equal?", 2, args);
+  Cyc_check_argc(data, "equal?", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, equalp(car(args), cadr(args)));
+  return_closcall1(data, cont, equalp(args[1], args[2]));
 }
 
 void _length(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "length", 1, args);
+  Cyc_check_argc(data, "length", argc - 1, 1);
   {
-    object obj = Cyc_length(data, car(args));
-  object cont = args[0];
+    object cont = args[0];
+    object obj = Cyc_length(data, args[1]);
     return_closcall1(data, cont, obj);
 }}
 
 void _bytevector_91length(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "bytevector-length", 1, args);
+  Cyc_check_argc(data, "bytevector-length", argc - 1, 1);
   {
-    object obj = Cyc_bytevector_length(data, car(args));
-  object cont = args[0];
+    object cont = args[0];
+    object obj = Cyc_bytevector_length(data, args[1]);
     return_closcall1(data, cont, obj);
 }}
 
 void _bytevector_91u8_91ref(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "bytevector-u8-ref", 2, args);
+  Cyc_check_argc(data, "bytevector-u8-ref", argc - 1, 2);
   {
-    object c = Cyc_bytevector_u8_ref(data, car(args), cadr(args));
-  object cont = args[0];
+    object cont = args[0];
+    object c = Cyc_bytevector_u8_ref(data, args[1], args[2]);
     return_closcall1(data, cont, c);
 }}
 
 void _bytevector_91u8_91set_67(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "bytevector-u8-set!", 3, args);
+  Cyc_check_argc(data, "bytevector-u8-set!", argc - 1, 3);
   {
-    object bv = Cyc_bytevector_u8_set(data, car(args), cadr(args), caddr(args));
-  object cont = args[0];
+    object cont = args[0];
+    object bv = Cyc_bytevector_u8_set(data, args[1], args[2], args[3]);
     return_closcall1(data, cont, bv);
 }}
 
 void _bytevector(void *data, object clo, int argc, object *args)
 {
-  object argc = Cyc_length(data, args);
   object cont = args[0];
-  dispatch(data, obj_obj2int(argc), dispatch_bytevector, cont,
-           cont, args);
+  dispatch_bytevector(data, cont, argc, args);
 }
+
+JAE TODO: pick up conversion here:
 
 void _bytevector_91append(void *data, object clo, int argc, object *args)
 {
