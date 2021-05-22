@@ -5010,86 +5010,76 @@ void _bytevector(void *data, object clo, int argc, object *args)
   dispatch_bytevector(data, cont, argc, args);
 }
 
-JAE TODO: pick up conversion here:
-
 void _bytevector_91append(void *data, object clo, int argc, object *args)
 {
-  object argc = Cyc_length(data, args);
   object cont = args[0];
-  dispatch(data, obj_obj2int(argc),
-           dispatch_bytevector_91append, cont, cont, args);
+  dispatch_bytevector_91append(data, cont, argc, args);
 }
 
 void _Cyc_91bytevector_91copy(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-bytevector-copy", 3, args);
+  Cyc_check_argc(data, "Cyc-bytevector-copy", argc - 1, 3);
   object cont = args[0];
-  Cyc_bytevector_copy(data, cont, car(args), cadr(args), caddr(args));
+  Cyc_bytevector_copy(data, cont, args[1], args[2], args[3]);
 }
 
 void _Cyc_91string_91_125utf8(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-string->utf8", 3, args);
+  Cyc_check_argc(data, "Cyc-string->utf8", argc - 1, 3);
   object cont = args[0];
-  Cyc_string2utf8(data, cont, car(args), cadr(args), caddr(args));
+  Cyc_string2utf8(data, cont, args[1], args[2], args[3]);
 }
 
 void _Cyc_91utf8_91_125string(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-utf8->string", 3, args);
+  Cyc_check_argc(data, "Cyc-utf8->string", argc - 1, 3);
   object cont = args[0];
-  Cyc_utf82string(data, cont, car(args), cadr(args), caddr(args));
+  Cyc_utf82string(data, cont, args[1], args[2], args[3]);
 }
 
 void _vector_91length(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "vector-length", 1, args);
+  Cyc_check_argc(data, "vector-length", argc - 1, 1);
   {
-    object obj = Cyc_vector_length(data, car(args));
-  object cont = args[0];
+    object obj = Cyc_vector_length(data, args[1]);
+    object cont = args[0];
     return_closcall1(data, cont, obj);
 }}
 
 void _null_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "null?", 1, args);
+  Cyc_check_argc(data, "null?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_null(car(args)));
+  return_closcall1(data, cont, Cyc_is_null(args[1]));
 }
 
 void _set_91car_67(void *data, object clo, int argc, object *args)
 {
-  //Cyc_check_num_args(data, "set-car!", 2, args);
-  //return_closcall1(data, cont, Cyc_set_car(data, car(args), cadr(args)));
-  Cyc_check_num_args(data, "set-car!", 2, args);
-  //Cyc_set_car2(data, cont, car(args), cadr(args));
+  Cyc_check_argc(data, "set-car!", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_set_car_cps(data, cont, car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_set_car_cps(data, cont, args[1], args[2]);
 }
 
 void _set_91cdr_67(void *data, object clo, int argc, object *args)
 {
-  //Cyc_check_num_args(data, "set-cdr!", 2, args);
-  //return_closcall1(data, cont, Cyc_set_cdr(data, car(args), cadr(args)));
-  Cyc_check_num_args(data, "set-cdr!", 2, args);
-  //Cyc_set_cdr2(data, cont, car(args), cadr(args));
+  Cyc_check_argc(data, "set-cdr!", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_set_cdr_cps(data, cont, car(args), cadr(args)));
+  return_closcall1(data, cont, Cyc_set_cdr_cps(data, cont, args[1], args[2]);
 }
 
 void _Cyc_91has_91cycle_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-has-cycle?", 1, args);
+  Cyc_check_argc(data, "Cyc-has-cycle?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_has_cycle(car(args)));
+  return_closcall1(data, cont, Cyc_has_cycle(args[1]);
 }
 
 void _Cyc_91spawn_91thread_67(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-spawn-thread!", 1, args);
+  Cyc_check_argc(data, "Cyc-spawn-thread!", argc - 1, 1);
   // TODO: validate argument type?
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_spawn_thread(car(args)));
+  return_closcall1(data, cont, Cyc_spawn_thread(args[1]);
 }
 
 void _Cyc_91end_91thread_67(void *data, object clo, int argc, object *args)
@@ -5101,160 +5091,156 @@ void _Cyc_91end_91thread_67(void *data, object clo, int argc, object *args)
 
 void __87(void *data, object clo, int argc, object *args)
 {
-  int argc = obj_obj2int(Cyc_length(data, args));
   object cont = args[0];
-  dispatch(data, argc, dispatch_sum, cont, cont, args);
+  dispatch_sum(data, cont, argc, args);
 }
 
 void __91(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "-", 1, args);
+  Cyc_check_argc(data, "-", argc - 1, 1);
   {
-    int argc = obj_obj2int(Cyc_length(data, args));
-  object cont = args[0];
-    dispatch(data, argc, dispatch_sub, cont, cont, args);
+    object cont = args[0];
+    dispatch_sub(data, cont, argc, args);
 }}
 
 void __85(void *data, object clo, int argc, object *args)
 {
-  int argc = obj_obj2int(Cyc_length(data, args));
   object cont = args[0];
-  dispatch(data, argc, dispatch_mul, cont, cont, args);
+  dispatch_mul(data, cont, argc, args);
 }
 
 void __95(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "/", 1, args);
+  Cyc_check_argc(data, "/", argc - 1, 1);
   {
-    int argc = obj_obj2int(Cyc_length(data, args));
-  object cont = args[0];
-    dispatch(data, argc, dispatch_div, cont, cont, args);
+    object cont = args[0];
+    dispatch_div(data, cont, argc, args);
 }}
 
 void _Cyc_91cvar_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-cvar?", 1, args);
+  Cyc_check_argc(data, "Cyc-cvar?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_cvar(car(args)));
+  return_closcall1(data, cont, Cyc_is_cvar(args[1]);
 }
 
 void _Cyc_91opaque_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-opaque?", 1, args);
+  Cyc_check_argc(data, "Cyc-opaque?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_opaque(car(args)));
+  return_closcall1(data, cont, Cyc_is_opaque(args[1]);
 }
 
 void _boolean_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "boolean?", 1, args);
+  Cyc_check_argc(data, "boolean?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_boolean(car(args)));
+  return_closcall1(data, cont, Cyc_is_boolean(args[1]);
 }
 
 void _char_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "char?", 1, args);
+  Cyc_check_argc(data, "char?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_char(car(args)));
+  return_closcall1(data, cont, Cyc_is_char(args[1]);
 }
 
 void _eof_91object_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "eof_91object?", 1, args);
+  Cyc_check_argc(data, "eof_91object?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_eof_object(car(args)));
+  return_closcall1(data, cont, Cyc_is_eof_object(args[1]);
 }
 
 void _number_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "number?", 1, args);
+  Cyc_check_argc(data, "number?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_number(car(args)));
+  return_closcall1(data, cont, Cyc_is_number(args[1]);
 }
 
 void _real_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "real?", 1, args);
+  Cyc_check_argc(data, "real?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_real(car(args)));
+  return_closcall1(data, cont, Cyc_is_real(args[1]);
 }
 
 void _integer_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "integer?", 1, args);
+  Cyc_check_argc(data, "integer?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_integer(car(args)));
+  return_closcall1(data, cont, Cyc_is_integer(args[1]);
 }
 
 void _pair_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "pair?", 1, args);
+  Cyc_check_argc(data, "pair?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_pair(car(args)));
+  return_closcall1(data, cont, Cyc_is_pair(args[1]);
 }
 
 void _procedure_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "procedure?", 1, args);
+  Cyc_check_argc(data, "procedure?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_procedure(data, car(args)));
+  return_closcall1(data, cont, Cyc_is_procedure(data, args[1]);
 }
 
 void _macro_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "macro?", 1, args);
+  Cyc_check_argc(data, "macro?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_macro(car(args)));
+  return_closcall1(data, cont, Cyc_is_macro(args[1]);
 }
 
 void _Cyc_91macro_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "Cyc-macro?", 1, args);
+  Cyc_check_argc(data, "Cyc-macro?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_macro(car(args)));
+  return_closcall1(data, cont, Cyc_is_macro(args[1]);
 }
 
 void _port_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "port?", 1, args);
+  Cyc_check_argc(data, "port?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_port(car(args)));
+  return_closcall1(data, cont, Cyc_is_port(args[1]);
 }
 
 void _bytevector_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "bytevector?", 1, args);
+  Cyc_check_argc(data, "bytevector?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_bytevector(car(args)));
+  return_closcall1(data, cont, Cyc_is_bytevector(args[1]);
 }
 
 void _vector_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "vector?", 1, args);
+  Cyc_check_argc(data, "vector?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_vector_not_record_type(car(args)));
+  return_closcall1(data, cont, Cyc_is_vector_not_record_type(args[1]);
 }
 
 void _string_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "string?", 1, args);
+  Cyc_check_argc(data, "string?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_string(car(args)));
+  return_closcall1(data, cont, Cyc_is_string(args[1]);
 }
 
 void _symbol_127(void *data, object clo, int argc, object *args)
 {
-  Cyc_check_num_args(data, "symbol?", 1, args);
+  Cyc_check_argc(data, "symbol?", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_is_symbol(car(args)));
+  return_closcall1(data, cont, Cyc_is_symbol(args[1]);
 }
 
 void _Cyc_91get_91cvar(void *data, object clo, int argc, object *args)
 {
   Cyc_check_argc(data, "Cyc-get-cvar", argc - 1, 1);
   object cont = args[0];
-  return_closcall1(data, cont, Cyc_get_cvar((car(args))));
+  return_closcall1(data, cont, Cyc_get_cvar((args[1]));
 }
 
 void _Cyc_91set_91cvar_67(void *data, object clo, int argc, object *args)
@@ -5268,7 +5254,7 @@ void _cyc_exit(void *data, object clo, int argc, object *args)
 {
   if (args == NULL)
     __halt(NULL);
-  __halt(car(args));
+  __halt(args[1]);
 }
 
 void __75halt(void *data, object clo, int argc, object *args)
@@ -5305,17 +5291,17 @@ void _cell(void *data, object clo, int argc, object *args)
 
 void __123(void *data, object clo, int argc, object *args)
 {
-  int argc = obj_obj2int(Cyc_length(data, args));
   object cont = args[0];
-  dispatch(data, argc, dispatch_num_eq, cont, cont, args);
+  dispatch_num_eq(data, cont, argc, args);
 }
 
 void __125(void *data, object clo, int argc, object *args)
 {
-  int argc = obj_obj2int(Cyc_length(data, args));
   object cont = args[0];
-  dispatch(data, argc, dispatch_num_gt, cont, cont, args);
+  dispatch_num_gt(data, cont, argc, args);
 }
+
+JAE TODO: pick up conversion here
 
 void __121(void *data, object clo, int argc, object *args)
 {
