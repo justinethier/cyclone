@@ -79,7 +79,7 @@ void gc_init_heap(long heap_size);
 #define Cyc_check_argc(data, fnc_name, argc, expected) { \
   if (expected > argc) { \
     char buf[128]; \
-    snprintf(buf, 127, "Expected %d arguments to %s but received %ld", \
+    snprintf(buf, 127, "Expected %d arguments to %s but received %d", \
              expected, fnc_name, argc);  \
     Cyc_rt_raise_msg(data, buf); \
   } \
