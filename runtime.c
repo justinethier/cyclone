@@ -5794,27 +5794,23 @@ object apply(void *data, object cont, object func, object args)
 
   switch (type_of(func)) {
   case primitive_tag:
-    TODO: fn function signature changed, need to convert from list to array
-    ((primitive_type *) func)->fn(data, cont, args);
-    break;
   case macro_tag:
   case closure0_tag:
   case closure1_tag:
   case closureN_tag:
+    count = Cyc_length(data, args);
     if (func == Cyc_glo_call_cc) {
 //      make_pair(c, cont, args);
 //Cyc_display(data, args, stderr);
 //        args = &c;
 //Cyc_display(data, &c, stderr);
-      count = Cyc_length(data, args);
       Cyc_check_num_args(data, "<procedure>", 1, args);
       dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont,
                args);
+    } else {
+      Cyc_check_num_args(data, "<procedure>", ((closure) func)->num_args, args);  // TODO: could be more efficient, eg: cyc_length(args) is called twice.
+      dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont, args);
     }
-    count = Cyc_length(data, args);
-    // TODO: validate number of args provided:
-    Cyc_check_num_args(data, "<procedure>", ((closure) func)->num_args, args);  // TODO: could be more efficient, eg: cyc_length(args) is called twice.
-    dispatch(data, obj_obj2int(count), ((closure) func)->fn, func, cont, args);
     break;
 
   case pair_tag:
