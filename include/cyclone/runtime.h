@@ -66,12 +66,11 @@ void gc_init_heap(long heap_size);
  *
  */
 /**@{*/
-#define Cyc_check_num_args(data, fnc_name, num_args, args) { \
-  object l = Cyc_length(data, args); \
-  if (num_args > obj_obj2int(l)) { \
+#define Cyc_check_num_args(data, fnc_name, num_expected_args, args, args_len) { \
+  if (num_expected_args > args_len) { \
     char buf[128]; \
-    snprintf(buf, 127, "Expected %d arguments to %s but received %ld", \
-             num_args, fnc_name, obj_obj2int(l));  \
+    snprintf(buf, 127, "Expected %d arguments to %s but received %d", \
+             num_expected_args, fnc_name, args_len);  \
     Cyc_rt_raise_msg(data, buf); \
   } \
 }
