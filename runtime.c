@@ -5789,6 +5789,10 @@ object apply(void *data, object cont, object func, object args)
 
   switch (type_of(func)) {
   case primitive_tag:
+    count = obj_obj2int(Cyc_length(data, args));
+    dispatch(data, count, ((primitive) func)->fn, func, cont, args);
+    break;
+
   case macro_tag:
   case closure0_tag:
   case closure1_tag:
@@ -6357,253 +6361,218 @@ static primitive_type Cyc_91global_91vars_primitive =
 static primitive_type Cyc_91get_91cvar_primitive =
     { {0}, primitive_tag, &_Cyc_91get_91cvar, "Cyc-get-cvar" };
 static primitive_type Cyc_91set_91cvar_67_primitive =
-    { {0}, primitive_tag, "Cyc-set-cvar!", &_Cyc_91set_91cvar_67 };
+    { {0}, primitive_tag, &_Cyc_91set_91cvar_67, "Cyc-set-cvar!" };
 static primitive_type Cyc_91cvar_127_primitive =
-    { {0}, primitive_tag, "Cyc-cvar?", &_Cyc_91cvar_127 };
+    { {0}, primitive_tag, &_Cyc_91cvar_127, "Cyc-cvar?" };
 static primitive_type Cyc_91opaque_127_primitive =
-    { {0}, primitive_tag, "Cyc-opaque?", &_Cyc_91opaque_127 };
+    { {0}, primitive_tag, &_Cyc_91opaque_127, "Cyc-opaque?" };
 static primitive_type Cyc_91has_91cycle_127_primitive =
-    { {0}, primitive_tag, "Cyc-has-cycle?", &_Cyc_91has_91cycle_127 };
+    { {0}, primitive_tag, &_Cyc_91has_91cycle_127, "Cyc-has-cycle?" };
 static primitive_type Cyc_91spawn_91thread_67_primitive =
-    { {0}, primitive_tag, "Cyc-spawn-thread!", &_Cyc_91spawn_91thread_67 };
+    { {0}, primitive_tag, &_Cyc_91spawn_91thread_67, "Cyc-spawn-thread!" };
 static primitive_type Cyc_91end_91thread_67_primitive =
-    { {0}, primitive_tag, "Cyc-end-thread!", &_Cyc_91end_91thread_67 };
-static primitive_type _87_primitive = { {0}, primitive_tag, "+", &__87 };
-static primitive_type _91_primitive = { {0}, primitive_tag, "-", &__91 };
-static primitive_type _85_primitive = { {0}, primitive_tag, "*", &__85 };
-static primitive_type _95_primitive = { {0}, primitive_tag, "/", &__95 };
-static primitive_type _123_primitive = { {0}, primitive_tag, "=", &__123 };
-static primitive_type _125_primitive = { {0}, primitive_tag, ">", &__125 };
-static primitive_type _121_primitive = { {0}, primitive_tag, "<", &__121 };
-static primitive_type _125_123_primitive =
-    { {0}, primitive_tag, ">=", &__125_123 };
-static primitive_type _121_123_primitive =
-    { {0}, primitive_tag, "<=", &__121_123 };
-static primitive_type apply_primitive =
-    { {0}, primitive_tag, "apply", &_apply };
-static primitive_type _75halt_primitive =
-    { {0}, primitive_tag, "%halt", &__75halt };
-static primitive_type exit_primitive =
-    { {0}, primitive_tag, "exit", &_cyc_exit };
+    { {0}, primitive_tag, &_Cyc_91end_91thread_67, "Cyc-end-thread!" };
+static primitive_type _87_primitive = { {0},  primitive_tag, &__87 , "+"};
+static primitive_type _91_primitive = { {0},  primitive_tag, &__91 , "-"};
+static primitive_type _85_primitive = { {0},  primitive_tag, &__85 , "*"};
+static primitive_type _95_primitive = { {0},  primitive_tag, &__95 , "/"};
+static primitive_type _123_primitive = { {0}, primitive_tag, &__123, "=" };
+static primitive_type _125_primitive = { {0}, primitive_tag, &__125, ">" };
+static primitive_type _121_primitive = { {0}, primitive_tag, &__121, "<" };
+static primitive_type _125_123_primitive = { {0}, primitive_tag, &__125_123, ">="};
+static primitive_type _121_123_primitive = { {0}, primitive_tag, &__121_123, "<="};
+static primitive_type apply_primitive    = { {0}, primitive_tag, &_apply   , "apply"};
+static primitive_type _75halt_primitive  = { {0}, primitive_tag, &__75halt , "%halt"};
+static primitive_type exit_primitive     = { {0}, primitive_tag, &_cyc_exit, "exit"};
 static primitive_type Cyc_91current_91exception_91handler_primitive =
-    { {0}, primitive_tag, "Cyc_current_exception_handler",
-&_Cyc_91current_91exception_91handler
-};
+    { {0}, primitive_tag, &_Cyc_91current_91exception_91handler,
+    "Cyc_current_exception_handler" };
 static primitive_type Cyc_91default_91exception_91handler_primitive =
-    { {0}, primitive_tag, "Cyc_default_exception_handler",
-&_Cyc_91default_91exception_91handler
+    { {0}, primitive_tag,
+    &_Cyc_91default_91exception_91handler,
+    "Cyc_default_exception_handler"
 };
-static primitive_type cons_primitive = { {0}, primitive_tag, "cons", &_cons };
+static primitive_type cons_primitive = { {0}, primitive_tag, &_cons, "cons" };
 static primitive_type cell_91get_primitive =
-    { {0}, primitive_tag, "cell-get", &_cell_91get };
+    { {0}, primitive_tag, &_cell_91get, "cell-get" };
 static primitive_type set_91global_67_primitive =
-    { {0}, primitive_tag, "set-global!", &_set_91global_67 };
+    { {0}, primitive_tag, &_set_91global_67, "set-global!" };
 static primitive_type set_91cell_67_primitive =
-    { {0}, primitive_tag, "set-cell!", &_set_91cell_67 };
-static primitive_type cell_primitive = { {0}, primitive_tag, "cell", &_cell };
-static primitive_type eq_127_primitive =
-    { {0}, primitive_tag, "eq?", &_eq_127 };
-static primitive_type eqv_127_primitive =
-    { {0}, primitive_tag, "eqv?", &_eqv_127 };
-static primitive_type equal_127_primitive =
-    { {0}, primitive_tag, "equal?", &_equal_127 };
-static primitive_type assq_primitive = { {0}, primitive_tag, "assq", &_assq };
-static primitive_type assv_primitive = { {0}, primitive_tag, "assv", &_assv };
-static primitive_type memq_primitive = { {0}, primitive_tag, "memq", &_memq };
-static primitive_type memv_primitive = { {0}, primitive_tag, "memv", &_memv };
+    { {0}, primitive_tag, &_set_91cell_67, "set-cell!" };
+static primitive_type cell_primitive = { {0}, primitive_tag, &_cell, "cell" };
+static primitive_type eq_127_primitive    = { {0}, primitive_tag, &_eq_127   , "eq?"    };
+static primitive_type eqv_127_primitive   = { {0}, primitive_tag, &_eqv_127  , "eqv?"   };
+static primitive_type equal_127_primitive = { {0}, primitive_tag, &_equal_127, "equal?" };
+static primitive_type assq_primitive = { {0}, primitive_tag, &_assq, "assq" };
+static primitive_type assv_primitive = { {0}, primitive_tag, &_assv, "assv" };
+static primitive_type memq_primitive = { {0}, primitive_tag, &_memq, "memq" };
+static primitive_type memv_primitive = { {0}, primitive_tag, &_memv, "memv" };
 static primitive_type length_primitive =
-    { {0}, primitive_tag, "length", &_length };
+    { {0}, primitive_tag, &_length, "length" };
 static primitive_type bytevector_91length_primitive =
-    { {0}, primitive_tag, "bytevector-length", &_bytevector_91length };
+    { {0}, primitive_tag, &_bytevector_91length, "bytevector-length" };
 static primitive_type vector_91length_primitive =
-    { {0}, primitive_tag, "vector-length", &_vector_91length };
+    { {0}, primitive_tag, &_vector_91length, "vector-length" };
 static primitive_type set_91car_67_primitive =
-    { {0}, primitive_tag, "set-car!", &_set_91car_67 };
+    { {0}, primitive_tag, &_set_91car_67, "set-car!" };
 static primitive_type set_91cdr_67_primitive =
-    { {0}, primitive_tag, "set-cdr!", &_set_91cdr_67 };
+    { {0}, primitive_tag, &_set_91cdr_67, "set-cdr!" };
 static primitive_type car_primitive = { {0}, primitive_tag, &_car, "car" };
-static primitive_type cdr_primitive = { {0}, primitive_tag, "cdr", &_cdr };
-static primitive_type caar_primitive = { {0}, primitive_tag, "caar", &_caar };
-static primitive_type cadr_primitive = { {0}, primitive_tag, "cadr", &_cadr };
-static primitive_type cdar_primitive = { {0}, primitive_tag, "cdar", &_cdar };
-static primitive_type cddr_primitive = { {0}, primitive_tag, "cddr", &_cddr };
-static primitive_type caaar_primitive =
-    { {0}, primitive_tag, "caaar", &_caaar };
-static primitive_type caadr_primitive =
-    { {0}, primitive_tag, "caadr", &_caadr };
-static primitive_type cadar_primitive =
-    { {0}, primitive_tag, "cadar", &_cadar };
-static primitive_type caddr_primitive =
-    { {0}, primitive_tag, "caddr", &_caddr };
-static primitive_type cdaar_primitive =
-    { {0}, primitive_tag, "cdaar", &_cdaar };
-static primitive_type cdadr_primitive =
-    { {0}, primitive_tag, "cdadr", &_cdadr };
-static primitive_type cddar_primitive =
-    { {0}, primitive_tag, "cddar", &_cddar };
-static primitive_type cdddr_primitive =
-    { {0}, primitive_tag, "cdddr", &_cdddr };
-static primitive_type caaaar_primitive =
-    { {0}, primitive_tag, "caaaar", &_caaaar };
-static primitive_type caaadr_primitive =
-    { {0}, primitive_tag, "caaadr", &_caaadr };
-static primitive_type caadar_primitive =
-    { {0}, primitive_tag, "caadar", &_caadar };
-static primitive_type caaddr_primitive =
-    { {0}, primitive_tag, "caaddr", &_caaddr };
-static primitive_type cadaar_primitive =
-    { {0}, primitive_tag, "cadaar", &_cadaar };
-static primitive_type cadadr_primitive =
-    { {0}, primitive_tag, "cadadr", &_cadadr };
-static primitive_type caddar_primitive =
-    { {0}, primitive_tag, "caddar", &_caddar };
-static primitive_type cadddr_primitive =
-    { {0}, primitive_tag, "cadddr", &_cadddr };
-static primitive_type cdaaar_primitive =
-    { {0}, primitive_tag, "cdaaar", &_cdaaar };
-static primitive_type cdaadr_primitive =
-    { {0}, primitive_tag, "cdaadr", &_cdaadr };
-static primitive_type cdadar_primitive =
-    { {0}, primitive_tag, "cdadar", &_cdadar };
-static primitive_type cdaddr_primitive =
-    { {0}, primitive_tag, "cdaddr", &_cdaddr };
-static primitive_type cddaar_primitive =
-    { {0}, primitive_tag, "cddaar", &_cddaar };
-static primitive_type cddadr_primitive =
-    { {0}, primitive_tag, "cddadr", &_cddadr };
-static primitive_type cdddar_primitive =
-    { {0}, primitive_tag, "cdddar", &_cdddar };
-static primitive_type cddddr_primitive =
-    { {0}, primitive_tag, "cddddr", &_cddddr };
+static primitive_type cdr_primitive = { {0}, primitive_tag, &_cdr, "cdr" };
+static primitive_type caar_primitive = { {0}, primitive_tag, &_caar, "caar" };
+static primitive_type cadr_primitive = { {0}, primitive_tag, &_cadr, "cadr" };
+static primitive_type cdar_primitive = { {0}, primitive_tag, &_cdar, "cdar" };
+static primitive_type cddr_primitive = { {0}, primitive_tag, &_cddr, "cddr" };
+static primitive_type caaar_primitive = { {0}, primitive_tag, &_caaar, "caaar" };
+static primitive_type caadr_primitive = { {0}, primitive_tag, &_caadr, "caadr" };
+static primitive_type cadar_primitive = { {0}, primitive_tag, &_cadar, "cadar" };
+static primitive_type caddr_primitive = { {0}, primitive_tag, &_caddr, "caddr" };
+static primitive_type cdaar_primitive = { {0}, primitive_tag, &_cdaar, "cdaar" };
+static primitive_type cdadr_primitive = { {0}, primitive_tag, &_cdadr, "cdadr" };
+static primitive_type cddar_primitive = { {0}, primitive_tag, &_cddar, "cddar" };
+static primitive_type cdddr_primitive = { {0}, primitive_tag, &_cdddr, "cdddr" };
+static primitive_type caaaar_primitive = { {0}, primitive_tag, &_caaaar, "caaaar" };
+static primitive_type caaadr_primitive = { {0}, primitive_tag, &_caaadr, "caaadr" };
+static primitive_type caadar_primitive = { {0}, primitive_tag, &_caadar, "caadar" };
+static primitive_type caaddr_primitive = { {0}, primitive_tag, &_caaddr, "caaddr" };
+static primitive_type cadaar_primitive = { {0}, primitive_tag, &_cadaar, "cadaar" };
+static primitive_type cadadr_primitive = { {0}, primitive_tag, &_cadadr, "cadadr" };
+static primitive_type caddar_primitive = { {0}, primitive_tag, &_caddar, "caddar" };
+static primitive_type cadddr_primitive = { {0}, primitive_tag, &_cadddr, "cadddr" };
+static primitive_type cdaaar_primitive = { {0}, primitive_tag, &_cdaaar, "cdaaar" };
+static primitive_type cdaadr_primitive = { {0}, primitive_tag, &_cdaadr, "cdaadr" };
+static primitive_type cdadar_primitive = { {0}, primitive_tag, &_cdadar, "cdadar" };
+static primitive_type cdaddr_primitive = { {0}, primitive_tag, &_cdaddr, "cdaddr" };
+static primitive_type cddaar_primitive = { {0}, primitive_tag, &_cddaar, "cddaar" };
+static primitive_type cddadr_primitive = { {0}, primitive_tag, &_cddadr, "cddadr" };
+static primitive_type cdddar_primitive = { {0}, primitive_tag, &_cdddar, "cdddar" };
+static primitive_type cddddr_primitive = { {0}, primitive_tag, &_cddddr, "cddddr" };
 static primitive_type char_91_125integer_primitive =
-    { {0}, primitive_tag, "char->integer", &_char_91_125integer };
+    { {0}, primitive_tag, &_char_91_125integer, "char->integer" };
 static primitive_type integer_91_125char_primitive =
-    { {0}, primitive_tag, "integer->char", &_integer_91_125char };
+    { {0}, primitive_tag, &_integer_91_125char, "integer->char" };
 static primitive_type string_91_125number_primitive =
-    { {0}, primitive_tag, "string->number", &_string_91_125number };
+    { {0}, primitive_tag, &_string_91_125number, "string->number" };
 static primitive_type string_91length_primitive =
-    { {0}, primitive_tag, "string-length", &_string_91length };
+    { {0}, primitive_tag, &_string_91length, "string-length" };
 static primitive_type substring_primitive =
-    { {0}, primitive_tag, "substring", &_cyc_substring };
+    { {0}, primitive_tag, &_cyc_substring, "substring" };
 static primitive_type string_91ref_primitive =
-    { {0}, primitive_tag, "string-ref", &_cyc_string_91ref };
+    { {0}, primitive_tag, &_cyc_string_91ref, "string-ref" };
 static primitive_type string_91set_67_primitive =
-    { {0}, primitive_tag, "string-set!", &_cyc_string_91set_67 };
+    { {0}, primitive_tag, &_cyc_string_91set_67, "string-set!" };
 static primitive_type Cyc_91installation_91dir_primitive =
-    { {0}, primitive_tag, "Cyc-installation-dir", &_Cyc_91installation_91dir };
+    { {0}, primitive_tag, &_Cyc_91installation_91dir, "Cyc-installation-dir" };
 static primitive_type Cyc_91compilation_91environment_primitive =
-    { {0}, primitive_tag, "Cyc-compilation-environment", &_Cyc_91compilation_91environment };
+    { {0}, primitive_tag, &_Cyc_91compilation_91environment, "Cyc-compilation-environment" };
 static primitive_type command_91line_91arguments_primitive =
-    { {0}, primitive_tag, "command-line-arguments",
-&_command_91line_91arguments
+    { {0}, primitive_tag, &_command_91line_91arguments, "command-line-arguments"
 };
 static primitive_type system_primitive =
-    { {0}, primitive_tag, "system", &_cyc_system };
+    { {0}, primitive_tag, &_cyc_system, "system" };
 static primitive_type string_91cmp_primitive =
-    { {0}, primitive_tag, "string-cmp", &_string_91cmp };
+    { {0}, primitive_tag, &_string_91cmp, "string-cmp" };
 static primitive_type string_91append_primitive =
-    { {0}, primitive_tag, "string-append", &_string_91append };
+    { {0}, primitive_tag, &_string_91append, "string-append" };
 static primitive_type list_91_125string_primitive =
-    { {0}, primitive_tag, "list->string", &_list_91_125string };
+    { {0}, primitive_tag, &_list_91_125string, "list->string" };
 static primitive_type string_91_125symbol_primitive =
-    { {0}, primitive_tag, "string->symbol", &_string_91_125symbol };
+    { {0}, primitive_tag, &_string_91_125symbol, "string->symbol" };
 static primitive_type symbol_91_125string_primitive =
-    { {0}, primitive_tag, "symbol->string", &_symbol_91_125string };
+    { {0}, primitive_tag, &_symbol_91_125string, "symbol->string" };
 static primitive_type number_91_125string_primitive =
-    { {0}, primitive_tag, "number->string", &_number_91_125string };
+    { {0}, primitive_tag, &_number_91_125string, "number->string" };
 static primitive_type list_91_125vector_primitive =
-    { {0}, primitive_tag, "list-vector", &_list_91_125vector };
+    { {0}, primitive_tag, &_list_91_125vector, "list-vector" };
 static primitive_type make_91bytevector_primitive =
-    { {0}, primitive_tag, "make-bytevector", &_make_91bytevector };
+    { {0}, primitive_tag, &_make_91bytevector, "make-bytevector" };
 
 static primitive_type bytevector_primitive =
-    { {0}, primitive_tag, "bytevector", &_bytevector };
+    { {0}, primitive_tag, &_bytevector, "bytevector" };
 static primitive_type bytevector_91append_primitive =
-    { {0}, primitive_tag, "bytevector-append", &_bytevector_91append };
+    { {0}, primitive_tag, &_bytevector_91append, "bytevector-append" };
 static primitive_type Cyc_91bytevector_91copy_primitive =
-    { {0}, primitive_tag, "Cyc-bytevector-copy", &_Cyc_91bytevector_91copy };
+    { {0}, primitive_tag, &_Cyc_91bytevector_91copy, "Cyc-bytevector-copy" };
 static primitive_type bytevector_91u8_91ref_primitive =
-    { {0}, primitive_tag, "bytevector-u8-ref", &_bytevector_91u8_91ref };
+    { {0}, primitive_tag, &_bytevector_91u8_91ref, "bytevector-u8-ref" };
 static primitive_type bytevector_91u8_91set_67_primitive =
-    { {0}, primitive_tag, "bytevector-u8-set!", &_bytevector_91u8_91set_67 };
+    { {0}, primitive_tag, &_bytevector_91u8_91set_67, "bytevector-u8-set!" };
 static primitive_type Cyc_91string_91_125utf8_primitive =
-    { {0}, primitive_tag, "Cyc-string->utf8", &_Cyc_91string_91_125utf8 };
+    { {0}, primitive_tag, &_Cyc_91string_91_125utf8, "Cyc-string->utf8" };
 static primitive_type Cyc_91utf8_91_125string_primitive =
-    { {0}, primitive_tag, "Cyc-utf8->string", &_Cyc_91utf8_91_125string };
+    { {0}, primitive_tag, &_Cyc_91utf8_91_125string, "Cyc-utf8->string" };
 static primitive_type make_91vector_primitive =
-    { {0}, primitive_tag, "make-vector", &_make_91vector };
+    { {0}, primitive_tag, &_make_91vector, "make-vector" };
 static primitive_type vector_91ref_primitive =
-    { {0}, primitive_tag, "vector-ref", &_vector_91ref };
+    { {0}, primitive_tag, &_vector_91ref, "vector-ref" };
 static primitive_type vector_91set_67_primitive =
-    { {0}, primitive_tag, "vector-set!", &_vector_91set_67 };
+    { {0}, primitive_tag, &_vector_91set_67, "vector-set!" };
 static primitive_type boolean_127_primitive =
-    { {0}, primitive_tag, "boolean?", &_boolean_127 };
+    { {0}, primitive_tag, &_boolean_127, "boolean?" };
 static primitive_type char_127_primitive =
-    { {0}, primitive_tag, "char?", &_char_127 };
+    { {0}, primitive_tag, &_char_127, "char?" };
 static primitive_type eof_91object_127_primitive =
-    { {0}, primitive_tag, "eof-object?", &_eof_91object_127 };
+    { {0}, primitive_tag, &_eof_91object_127, "eof-object?" };
 static primitive_type null_127_primitive =
-    { {0}, primitive_tag, "null?", &_null_127 };
+    { {0}, primitive_tag, &_null_127, "null?" };
 static primitive_type number_127_primitive =
-    { {0}, primitive_tag, "number?", &_number_127 };
+    { {0}, primitive_tag, &_number_127, "number?" };
 static primitive_type real_127_primitive =
-    { {0}, primitive_tag, "real?", &_real_127 };
+    { {0}, primitive_tag, &_real_127, "real?" };
 static primitive_type integer_127_primitive =
-    { {0}, primitive_tag, "integer?", &_integer_127 };
+    { {0}, primitive_tag, &_integer_127, "integer?" };
 static primitive_type pair_127_primitive =
-    { {0}, primitive_tag, "pair?", &_pair_127 };
+    { {0}, primitive_tag, &_pair_127, "pair?" };
 static primitive_type procedure_127_primitive =
-    { {0}, primitive_tag, "procedure?", &_procedure_127 };
+    { {0}, primitive_tag, &_procedure_127, "procedure?" };
 static primitive_type macro_127_primitive =
-    { {0}, primitive_tag, "macro?", &_macro_127 };
+    { {0}, primitive_tag, &_macro_127, "macro?" };
 static primitive_type Cyc_91macro_127_primitive =
-    { {0}, primitive_tag, "Cyc-macro?", &_Cyc_91macro_127 };
+    { {0}, primitive_tag, &_Cyc_91macro_127, "Cyc-macro?" };
 static primitive_type port_127_primitive =
-    { {0}, primitive_tag, "port?", &_port_127 };
+    { {0}, primitive_tag, &_port_127, "port?" };
 static primitive_type bytevector_127_primitive =
-    { {0}, primitive_tag, "bytevector?", &_bytevector_127 };
+    { {0}, primitive_tag, &_bytevector_127, "bytevector?" };
 static primitive_type vector_127_primitive =
-    { {0}, primitive_tag, "vector?", &_vector_127 };
+    { {0}, primitive_tag, &_vector_127, "vector?" };
 static primitive_type string_127_primitive =
-    { {0}, primitive_tag, "string?", &_string_127 };
+    { {0}, primitive_tag, &_string_127, "string?" };
 static primitive_type symbol_127_primitive =
-    { {0}, primitive_tag, "symbol?", &_symbol_127 };
+    { {0}, primitive_tag, &_symbol_127, "symbol?" };
 static primitive_type open_91input_91file_primitive =
-    { {0}, primitive_tag, "open-input-file", &_open_91input_91file };
+    { {0}, primitive_tag, &_open_91input_91file, "open-input-file" };
 static primitive_type open_91output_91file_primitive =
-    { {0}, primitive_tag, "open-output-file", &_open_91output_91file };
+    { {0}, primitive_tag, &_open_91output_91file, "open-output-file" };
 static primitive_type open_91binary_91input_91file_primitive =
-    { {0}, primitive_tag, "open-binary-input-file", &_open_91binary_91input_91file };
+    { {0}, primitive_tag, &_open_91binary_91input_91file, "open-binary-input-file" };
 static primitive_type open_91binary_91output_91file_primitive =
-    { {0}, primitive_tag, "open-binary-output-file", &_open_91binary_91output_91file };
+    { {0}, primitive_tag, &_open_91binary_91output_91file, "open-binary-output-file" };
 static primitive_type close_91port_primitive =
-    { {0}, primitive_tag, "close-port", &_close_91port };
+    { {0}, primitive_tag, &_close_91port, "close-port" };
 static primitive_type close_91input_91port_primitive =
-    { {0}, primitive_tag, "close-input-port", &_close_91input_91port };
+    { {0}, primitive_tag, &_close_91input_91port, "close-input-port" };
 static primitive_type close_91output_91port_primitive =
-    { {0}, primitive_tag, "close-output-port", &_close_91output_91port };
+    { {0}, primitive_tag, &_close_91output_91port, "close-output-port" };
 static primitive_type Cyc_91flush_91output_91port_primitive =
-    { {0}, primitive_tag, "Cyc-flush-output-port",
-&_Cyc_91flush_91output_91port
-};
+    { {0}, primitive_tag, &_Cyc_91flush_91output_91port, "Cyc-flush-output-port" };
 static primitive_type file_91exists_127_primitive =
-    { {0}, primitive_tag, "file-exists?", &_file_91exists_127 };
+    { {0}, primitive_tag, &_file_91exists_127, "file-exists?" };
 static primitive_type delete_91file_primitive =
-    { {0}, primitive_tag, "delete-file", &_delete_91file };
+    { {0}, primitive_tag, &_delete_91file, "delete-file" };
 static primitive_type read_91char_primitive =
-    { {0}, primitive_tag, "read-char", &_read_91char };
+    { {0}, primitive_tag, &_read_91char, "read-char" };
 static primitive_type peek_91char_primitive =
-    { {0}, primitive_tag, "peek-char", &_peek_91char };
+    { {0}, primitive_tag, &_peek_91char, "peek-char" };
 static primitive_type Cyc_91read_91line_primitive =
-    { {0}, primitive_tag, "Cyc-read-line", &_Cyc_91read_91line };
+    { {0}, primitive_tag, &_Cyc_91read_91line, "Cyc-read-line" };
 static primitive_type Cyc_91write_primitive =
-    { {0}, primitive_tag, "Cyc-write", &_Cyc_91write };
+    { {0}, primitive_tag, &_Cyc_91write, "Cyc-write" };
 static primitive_type Cyc_91write_91char_primitive =
-    { {0}, primitive_tag, "Cyc-write-char", &_Cyc_91write_91char };
+    { {0}, primitive_tag, &_Cyc_91write_91char, "Cyc-write-char" };
 static primitive_type Cyc_91display_primitive =
-    { {0}, primitive_tag, "Cyc-display", &_display };
+    { {0}, primitive_tag, &_display, "Cyc-display" };
 static primitive_type call_95cc_primitive =
-    { {0}, primitive_tag, "call/cc", &_call_95cc };
+    { {0}, primitive_tag, &_call_95cc, "call/cc" };
 
 const object primitive_Cyc_91global_91vars = &Cyc_91global_91vars_primitive;
 const object primitive_Cyc_91get_91cvar = &Cyc_91get_91cvar_primitive;

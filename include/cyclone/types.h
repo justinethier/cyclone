@@ -1471,7 +1471,6 @@ typedef struct {
   gc_header_type hdr;
   tag_type tag;
   function_type fn;
-  int num_args;
   const char *desc;
 } primitive_type;
 typedef primitive_type *primitive;
