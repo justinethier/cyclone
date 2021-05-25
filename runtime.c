@@ -129,12 +129,7 @@ void hrt_log_delta(const char *label, long long tstamp)
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, buf) \
-if (obj_is_not_closure(clo)) { \
-   Cyc_apply(td, clo, 1, buf ); \
-} else { \
-   ((clo)->fn)(td, clo, 1, buf); \
-;\
-}
+   ((clo)->fn)(td, clo, 1, buf); 
 #define return_closcall1(td, clo,a1) { \
  char top; \
  object buf[1]; buf[0] = a1;\
@@ -158,12 +153,7 @@ if (obj_is_not_closure(clo)) { \
  } \
 }
 #define closcall2(td, clo, buf) \
-if (obj_is_not_closure(clo)) { \
-   Cyc_apply(td, clo, 2, buf ); \
-} else { \
-   ((clo)->fn)(td, clo, 2, buf); \
-;\
-}
+   ((clo)->fn)(td, clo, 2, buf); 
 #define return_closcall2(td, clo,a1,a2) { \
  char top; \
  object buf[2]; buf[0] = a1;buf[1] = a2;\
@@ -5916,12 +5906,12 @@ void Cyc_start_trampoline(gc_thread_data * thd)
   printf("Done with GC\n");
 #endif
 
-  if (obj_is_not_closure(thd->gc_cont)) {
-    Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
-  } else {
+  //if (obj_is_not_closure(thd->gc_cont)) {
+  //  Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
+  //} else {
     closure clo = thd->gc_cont;
    (clo->fn)(thd, clo, thd->gc_num_args, thd->gc_args);
-  }
+  //}
 
   fprintf(stderr, "Internal error: should never have reached this line\n");
   exit(1);

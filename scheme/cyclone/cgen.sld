@@ -242,12 +242,13 @@
         (wrap (lambda (s) (if (> num-args 0) s ""))))
     (string-append
       "#define closcall" n "(td, clo, buf) \\\n"
-        (wrap (string-append "if (obj_is_not_closure(clo)) { \\\n"
-                             "   Cyc_apply(td, clo, " n ", buf ); \\\n"
-                             "}"))
-        (wrap " else { \\\n")
+        ;(wrap (string-append "if (obj_is_not_closure(clo)) { \\\n"
+        ;                     "   Cyc_apply(td, clo, " n ", buf ); \\\n"
+        ;                     "}"))
+        ;(wrap " else { \\\n")
         "   ((clo)->fn)(td, clo, " n ", buf); \\\n"
-        (wrap ";\\\n}"))))
+        ;(wrap ";\\\n}")
+        )))
 
 (define (c-macro-n-prefix n prefix)
   (if (> n 0)
