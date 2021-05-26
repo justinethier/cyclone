@@ -14,7 +14,12 @@
 
 /* These macros are hardcoded here to support functions in this module. */
 #define closcall1(td, clo, buf) \
-   ((clo)->fn)(td, clo, 1, buf); 
+if (obj_is_not_closure(clo)) { \
+   Cyc_apply(td, clo, 1, buf ); \
+} else { \
+   ((clo)->fn)(td, clo, 1, buf); \
+;\
+}
 #define return_closcall1(td, clo,a1) { \
  char top; \
  object buf[1]; buf[0] = a1;\
