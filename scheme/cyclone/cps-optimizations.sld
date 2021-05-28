@@ -345,6 +345,12 @@
       (let ((var (adb:get/default sym (adb:make-var))))
         (fnc var)))
 
+    ;; If var found in adb pass to callback and return result, else return #f
+    (define (if-var sym callback)
+      (let* ((var (adb:get/default sym #f))
+             (result (if var (callback var) #f)))
+        result))
+
     (define (with-fnc id callback)
       (let ((fnc (adb:get/default id (adb:make-fnc))))
         (callback fnc)))
@@ -1961,7 +1967,12 @@
          ((lambda? fn)   (error `(Unexpected lambda in closure-convert ,exp)))
          (else
            (let ((f (cc fn)))
-            `((%closure-ref ,f 0)
+            `((%closure-ref ,f 0
+                            ;; Indicate if closure refers to a compiled continuation
+                            ,@(if (and (symbol? fn)
+                                       (if-var fn adbv:cont?))
+                                 (list #t)
+                                 (list)))
               ,f
               ,@args))))))
     (else                
