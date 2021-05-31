@@ -1970,7 +1970,9 @@
             `((%closure-ref ,f 0
                             ;; Indicate if closure refers to a compiled continuation
                             ,@(if (and (symbol? fn)
-                                       (if-var fn adbv:cont?))
+                                       (or
+                                         (if-var fn adbv:cont?)
+                                         (if-var fn adbv:global?)))
                                  (list #t)
                                  (list)))
               ,f
