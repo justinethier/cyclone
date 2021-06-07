@@ -5,6 +5,7 @@
 Features
 
 - Improve performance of runtime by more efficiently unboxing known fixnums. 
+- Improve performance of compiled code slightly by using more efficient closure calls when possible.
 - Add support for R7RS `#d` decimal specifier for numbers.
 
 Bug Fixes
