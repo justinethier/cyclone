@@ -7725,6 +7725,39 @@ static void _read_return_atom(void *data, object cont, port_type *p)
   }
 }
 
+object Cyc_io_char_ready(void *data, object port)
+{
+  FILE *stream;
+  port_type *p;
+
+  Cyc_check_port(data, port);
+  {
+    p = (port_type *)port;
+    stream = ((port_type *) port)->fp;
+    if (stream == NULL) {
+      Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+    }
+
+// TODO: this may be linux-specific
+// TODO: what about EOF?
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+      // TODO: slow path, does stream have data ready?
+      int fd = fileno(stream);
+      fd_set rfds;
+      struct timeval tv;
+      int retval;
+      FD_ZERO(&rfds);
+      FD_SET(fd, &rfds);
+      tv.tv_sec = 0;
+      tv.tv_usec = 0;
+      retval = select(fd + 1, &rfds, NULL, NULL, &tv);
+      return (retval ? boolean_t : boolean_f); 
+    } else {
+      return boolean_t;
+    }
+  }
+}
+
 /**
  * @brief Helper macro for Cyc_io_read_token
  */
