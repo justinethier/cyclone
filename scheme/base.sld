@@ -145,6 +145,7 @@
     write-string-1
     write-string-2
     flush-output-port
+    char-ready?
     peek-char
     read-char
     read-line
@@ -676,6 +677,14 @@
       (if (null? port)
         (_write-u8 chr (current-output-port))
         (_write-u8 chr (car port))))
+    (define-c Cyc-char-ready?
+      "(void *data, int argc, closure _, object k, object port)"
+      " object rv = Cyc_io_char_ready(data, port);
+        return_closcall1(data, k, rv); ")
+    (define (char-ready? . port)
+      (if (null? port)
+        (Cyc-char-ready? (current-input-port))
+        (Cyc-char-ready? (car port))))
     (define (peek-char . port)
       (if (null? port)
         (Cyc-peek-char (current-input-port))

@@ -7728,21 +7728,16 @@ static void _read_return_atom(void *data, object cont, port_type *p)
 
 object Cyc_io_char_ready(void *data, object port)
 {
-  FILE *stream;
-  port_type *p;
-
   Cyc_check_port(data, port);
   {
-    p = (port_type *)port;
-    stream = ((port_type *) port)->fp;
+    port_type *p = (port_type *)port;
+    FILE *stream = p->fp;
     if (stream == NULL) {
       Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
     }
 
-// TODO: this may be linux-specific
-// TODO: what about EOF?
     if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
-      // TODO: slow path, does stream have data ready?
+      // Slow path, check if underlying stream has data ready
       int fd = fileno(stream);
       fd_set rfds;
       struct timeval tv;
@@ -7751,10 +7746,11 @@ object Cyc_io_char_ready(void *data, object port)
       FD_SET(fd, &rfds);
       tv.tv_sec = 0;
       tv.tv_usec = 0;
-      retval = select(fd + 1, &rfds, NULL, NULL, &tv);
+      retval = select(fd + 1, &rfds, NULL, NULL, &tv); // Non-blocking fd check 
       return (retval ? boolean_t : boolean_f); 
     } else {
-      return boolean_t;
+      // Fast path, port has buffered data ready to go
+      return boolean_t; 
     }
   }
 }
@@ -7848,23 +7844,6 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
   }
   return Cyc_EOF;
 }
-
-// TODO: full requirements are:
-//
-// Returns #t if a character is ready on the textual input
-// port and returns #f otherwise. If char-ready returns #t
-// then the next read-char operation on the given port is
-// guaranteed not to hang. If the port is at end of file then
-// char-ready? returns #t.
-//
-// This is a bit of a challenge because the internal buffers 
-// cannot differentiate between being empty and being at EOF.
-//
-//object Cyc_io_char_ready(void *data, object cont, object port)
-//{
-//  port_type *p = (port_type *)port;
-//  Cyc_check_port(data, port);
-//}
 
 object Cyc_io_read_char(void *data, object cont, object port)
 {
