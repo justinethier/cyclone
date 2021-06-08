@@ -18,6 +18,7 @@
 #include <limits.h>
 #include <ctype.h>
 //#include <signal.h> // only used for debugging!
+#include <sys/select.h>
 #include <sys/stat.h>
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
