@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.29.0 - TBD
+## 0.29.0 - June 15, 2021
 
 Features
 
