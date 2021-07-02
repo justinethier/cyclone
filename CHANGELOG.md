@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.30.0 - TBD
+
+Features
+
+- Support semantic versioning of winds packages.
+
 ## 0.29.0 - June 15, 2021
 
 Features
