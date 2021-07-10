@@ -597,6 +597,7 @@ if (acc) {
                ;; global may still be init'd to NULL if the order is incorrect in the "top level"
                ;; initialization code.
                (symbol? (car (define->exp (car top-lvl)))) ;; TODO: put these at the end of top-lvl???
+               (vector? (car (define->exp (car top-lvl))))
                (and (list? (car (define->exp (car top-lvl))))
                     (not (lambda? (car (define->exp (car top-lvl)))))))
              (loop (cdr top-lvl)

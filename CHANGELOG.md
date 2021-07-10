@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.31.0 - TBD
+
+Bug Fixes
+
+- Properly handle literal vectors at the top level of compiled code.
+
 ## 0.30.0 - July 2, 2021
 
 Features
