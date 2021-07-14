@@ -7942,6 +7942,19 @@ object Cyc_io_read_line(void *data, object cont, object port)
   return NULL;
 }
 
+/*
+char *fgets_port(char *buf, int size, port_type *p) 
+{
+  // TODO: keep reading until fgets conditions are true
+  // also ensure we read a full code point for the last char
+  do {
+    _read_next_char(data, NULL, p);
+    c = p->mem_buf[p->buf_idx++];
+    if (c == EOF) break;
+  } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
+}
+*/
+
 // WIP - a version of read_line that uses our internal port buffer.
 // This will be compatible with other I/O function such as read-char
 object Cyc_io_read_line_slow(void *data, object cont, object port)
