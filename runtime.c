@@ -7942,6 +7942,22 @@ object Cyc_io_read_line(void *data, object cont, object port)
   return NULL;
 }
 
+// WIP - a version of read_line that uses our internal port buffer.
+// This will be compatible with other I/O function such as read-char
+object Cyc_io_read_line_slow(void *data, object cont, object port)
+{
+  // TODO: instead of fgets, read up to 1023 chars from our port buffer. per fgets,
+  // we stop when either (n-1) characters are read, the newline character is read, 
+  // or the end-of-file is reached, whichever comes first
+  //
+  // other difference is we read one char at a time until final code point is completely read
+  //
+  // development in 2 phases:
+  // 1) build out so we can replace Cyc_io_read_line with this "slow" version, verifying everything works
+  // 2) integrate slow back into fast such that we can revert to this function if
+  //    the buffer contains chars, else we use the fast read_line function
+}
+
 /**
  * @brief Read next token from the input port.
  * @param data Thread data object
