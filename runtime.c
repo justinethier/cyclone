@@ -7887,9 +7887,108 @@ object Cyc_io_read_u8(void *data, object cont, object port)
   return Cyc_EOF;
 }
 
+// WIP - a version of read_line that uses our internal port buffer.
+// This will be compatible with other I/O function such as read-char
+//
+// TODO: instead of fgets, read up to 1023 chars from our port buffer. per fgets,
+// we stop when either (n-1) characters are read, the newline character is read, 
+// or the end-of-file is reached, whichever comes first
+//
+// other difference is we read one char at a time until final code point is completely read
+//
+// development in 2 phases:
+// 1) build out so we can replace Cyc_io_read_line with this "slow" version, verifying everything works
+// 2) integrate slow back into fast such that we can revert to this function if
+//    the buffer contains chars, else we use the fast read_line function
+object Cyc_io_read_line_slow(void *data, object cont, object port)
+{
+  FILE *stream;
+  port_type *p;
+  char buf[1027];
+  int i, limit = 1024; // Ensure last code point is fully-read
+
+  Cyc_check_port(data, port);
+  stream = ((port_type *) port)->fp;
+  if (stream == NULL) {
+    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
+  }
+  set_thread_blocked(data, cont);
+
+  p = (port_type *)port;
+  for (i = 0; i < limit; i++) {
+    //_read_next_char(data, NULL, p);
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
+      int rv = read_from_port(p); 
+      if (!rv) { 
+        if (i == 0) { // Empty buffer, return EOF
+          return_thread_runnable_with_obj(data, Cyc_EOF, p); 
+        } else {
+          break; // Handle buf contents below
+        }
+      }
+    }
+    buf[i] = p->mem_buf[p->buf_idx++];
+    if (buf[i] == EOF) {
+      if (i == 0) { // Empty buffer, return EOF
+        return_thread_runnable_with_obj(data, Cyc_EOF, p); 
+      } else {
+        break; // Handle buf contents below
+      }
+    }
+    if (buf[i] == '\n') {
+      break;
+    }
+  } 
+
+  // ensure we fully-read last code point
+  {
+    int c, len, num_cp, ii = 0;
+    char_type codepoint;
+    uint32_t state;
+
+    buf[i+1] = '\0';
+    state = Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &codepoint, &num_cp, &len);
+    while (state != CYC_UTF8_ACCEPT && ii < 3) {
+      if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
+        int rv = read_from_port(p); 
+        if (!rv) {
+          break; // At EOF, return what we've got so far
+          // TODO: likely better to fall back to last fully-read codepoint.
+          //       in that case we might still return EOF
+        }
+      }
+      c = p->mem_buf[p->buf_idx++];
+
+      buf[len] = c;
+      len++;
+      Cyc_utf8_decode(&state, &codepoint, (uint8_t)c);
+      if (state == CYC_UTF8_ACCEPT) {
+        num_cp++;
+        break;
+      }
+      ii++;
+    }
+
+    // Remove any trailing CR / newline chars
+    while (len > 0 && (buf[len - 1] == '\n' ||
+                       buf[len - 1] == '\r')) {
+      len--;
+      num_cp--;
+    }
+    buf[len] = '\0';
+    make_string_noalloc(s, buf, len);
+    s.num_cp = num_cp;
+    return_thread_runnable_with_obj(data, &s, port);
+  }
+  return NULL;
+}
+
 /* TODO: this function needs some work, but approximates what is needed */
 object Cyc_io_read_line(void *data, object cont, object port)
 {
+  return Cyc_io_read_line_slow(data, cont, port);
+}
+/*
   FILE *stream;
   char buf[1027];
   int len, num_cp, i = 0;
@@ -7941,96 +8040,6 @@ object Cyc_io_read_line(void *data, object cont, object port)
     }
   }
   return NULL;
-}
-
-// WIP - a version of read_line that uses our internal port buffer.
-// This will be compatible with other I/O function such as read-char
-//
-// TODO: instead of fgets, read up to 1023 chars from our port buffer. per fgets,
-// we stop when either (n-1) characters are read, the newline character is read, 
-// or the end-of-file is reached, whichever comes first
-//
-// other difference is we read one char at a time until final code point is completely read
-//
-// development in 2 phases:
-// 1) build out so we can replace Cyc_io_read_line with this "slow" version, verifying everything works
-// 2) integrate slow back into fast such that we can revert to this function if
-//    the buffer contains chars, else we use the fast read_line function
-/*
-object Cyc_io_read_line_slow(void *data, object cont, object port)
-{
-  FILE *stream;
-  port_type *p;
-  char buf[1027];
-  int i, limit = 1024; // Ensure last code point is fully-read
-
-  Cyc_check_port(data, port);
-  stream = ((port_type *) port)->fp;
-  if (stream == NULL) {
-    Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
-  }
-  set_thread_blocked(data, cont);
-
-  p = (port_type *)port;
-  for (i = 0; i < limit; i++) {
-    //_read_next_char(data, NULL, p);
-    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-      int rv = read_from_port(p); 
-      if (!rv) { 
-        if (i == 0) {
-          return_thread_runnable_with_obj(data, Cyc_EOF, p); 
-        } else {
-          break; // Handle buf contents below
-        }
-      }
-    }
-    buf[i] = p->mem_buf[p->buf_idx++];
-    if (buf[i] == EOF) {
-      if (i == 0) {
-        return_thread_runnable_with_obj(data, Cyc_EOF, p); 
-      } else {
-        break; // Handle buf contents below
-      }
-    }
-    if (buf[i] == '\n') {
-      break;
-    }
-  } 
-
-  // ensure we fully-read last code point
-  {
-    int c, len, num_cp, ii = 0;
-    char_type codepoint;
-    uint32_t state;
-
-    state = Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &codepoint, &num_cp, &len);
-    while (state != CYC_UTF8_ACCEPT && ii < 3) {
-      if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-        int rv = read_from_port(p); 
-        if (!rv) {
-          break; // At EOF, return what we've got so far
-          // TODO: likely better to fall back to last fully-read codepoint.
-          //       in that case we might still return EOF
-        }
-      }
-      c = p->mem_buf[p->buf_idx++];
-
-      buf[len] = c;
-      len++;
-      Cyc_utf8_decode(&state, &codepoint, (uint8_t)c);
-      if (state == CYC_UTF8_ACCEPT) {
-        num_cp++;
-        break;
-      }
-      ii++;
-    }
-
-      // TODO: code section from read_line to
-      //
-      // Remove any trailing CR / newline chars
-      //
-      // this also returns the string to thread cont
-  }
 }
 */
 
