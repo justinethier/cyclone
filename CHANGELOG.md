@@ -6,6 +6,7 @@ Bug Fixes
 
 - Fix `read-line` to prevent data loss when used in conjunction with other I/O functions (such as `read-char`) to read from the same port. Previous versions of `read-line` would use a different internal buffer than our other I/O functions.
 - Properly handle literal vectors at the top level of compiled code.
+- Properly escape C strings in compiled code to avoid trigraphs.
 
 ## 0.30.0 - July 2, 2021
 

@@ -69,6 +69,8 @@
   (letrec ((next (lambda (head tail)
                    (cond
                      ((null? head) (list->string (reverse tail)))
+                     ((equal? (car head) #\?) ;; Escape ? to avoid trigraphs
+                      (next (cdr head) (cons #\? (cons #\\ tail))))
                      ((equal? (car head) #\")
                       (next (cdr head) (cons #\" (cons #\\ tail))))
                      ((equal? (car head) #\\)
