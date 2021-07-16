@@ -4,11 +4,11 @@
 
 Bug Fixes
 
-- Fix `read-line` to prevent data loss when used in conjunction with other I/O functions (such as `read-char`) to read from the same port. Previous versions of `read-line` would use a different internal buffer than our other I/O functions.
-- Properly handle literal vectors at the top level of compiled code.
-- Properly escape C strings in compiled code to avoid trigraphs.
+- Fixed `read-line` to prevent data loss when used in conjunction with other I/O functions (such as `read-char`) to read data from the same port. This was because the previous version of `read-line` used a different internal buffer than our other I/O functions.
+- Properly handle vectors literals at the top level of compiled code. Previously this could lead to segmentation faults (!!) at runtime.
+- Properly escape question marks within strings in generated C code to avoid trigraphs.
 - Eliminate clang compiler warnings referencing `EOF` when building the runtime.
-- Prevent warnings from the C compiler regarding string comparison for emitted code using `Cyc_st_add`.
+- Fixed code so that the C compiler will no longer generate warnings regarding the string comparisons in `Cyc_st_add`. Previously this could result in these warnings being spammed to the console when compiling code using Cyclone.
 
 ## 0.30.0 - July 2, 2021
 
