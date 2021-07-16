@@ -723,8 +723,10 @@ object copy2heap(void *data, object obj);
 #define Cyc_st_add(data, frame) \
 { \
   gc_thread_data *thd = (gc_thread_data *) data; \
+  intptr_t p1 = (intptr_t)frame; \
+  intptr_t p2 = (intptr_t)thd->stack_prev_frame; \
   /* Do not allow recursion to remove older frames */ \
-  if ((void *)frame != (void *)thd->stack_prev_frame) { \
+  if (p1 != p2) { \
     thd->stack_prev_frame = frame; \
     thd->stack_traces[thd->stack_trace_idx] = frame; \
     thd->stack_trace_idx = (thd->stack_trace_idx + 1) % MAX_STACK_TRACES; \

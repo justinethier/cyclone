@@ -8,6 +8,7 @@ Bug Fixes
 - Properly handle literal vectors at the top level of compiled code.
 - Properly escape C strings in compiled code to avoid trigraphs.
 - Eliminate clang compiler warnings referencing `EOF` when building the runtime.
+- Prevent warnings from the C compiler regarding string comparison for emitted code using `Cyc_st_add`.
 
 ## 0.30.0 - July 2, 2021
 
