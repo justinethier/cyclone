@@ -7796,12 +7796,12 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 
       buf[0] = c;
       i = 1;
-      while (i < 5) { // TODO: limit to 4 chars??
+      while (i < 5) {
         if (p->mem_buf_len == p->buf_idx + i) {
           // No more buffered chars
           at_mem_buf_end = 1;
           c = fgetc(stream);
-          if (c == EOF) break; // TODO: correct to do this here????
+          if (c == EOF) break;
         } else {
           c = p->mem_buf[p->buf_idx + i];
         }
@@ -7840,7 +7840,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
       _read_next_char(data, cont, p);
     }
     c = p->mem_buf[p->buf_idx];
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_int2obj(c) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data, obj_int2obj(c), p);
   }
   return Cyc_EOF;
 }
@@ -7860,11 +7860,9 @@ object Cyc_io_read_char(void *data, object cont, object port)
     do {
       _read_next_char(data, cont, p);
       c = p->mem_buf[p->buf_idx++];
-      if (c == EOF) break;
     } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
-// TODO: limit above to 4 chars and then thrown an error?
     p->col_num++;
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data, obj_char2obj(codepoint), p);
   }
   return Cyc_EOF;
 }
@@ -7882,7 +7880,7 @@ object Cyc_io_read_u8(void *data, object cont, object port)
     _read_next_char(data, cont, p);
     c = p->mem_buf[p->buf_idx++];
     p->col_num++;
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_int2obj(c) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data, obj_int2obj(c), p);
   }
   return Cyc_EOF;
 }
@@ -7905,7 +7903,8 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
 
   p = (port_type *)port;
   for (i = 0; i < limit; i++) {
-    //_read_next_char(data, NULL, p);
+    // Can't use this because it bails on EOF: _read_next_char(data, NULL, p);
+    // instead we use code based on that macro:
     if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
       int rv = read_from_port(p); 
       if (!rv) { 
