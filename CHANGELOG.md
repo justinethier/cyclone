@@ -9,7 +9,7 @@ Bug Fixes
 - Properly handle vectors literals at the top level of compiled code. Previously this could lead to segmentation faults (!!) at runtime.
 - Fixed a bug in `make-list` that consumed all available memory when passing a negative list length.
 - Eliminate clang compiler warnings referencing `EOF` when building the runtime.
-- Fixed code so that the C compiler will no longer generate warnings regarding the string comparisons in `Cyc_st_add`. Previously this could result in these warnings being spammed to the console when compiling code using Cyclone.
+- Updated runtime so the C compiler will no longer generate warnings regarding the string comparisons in `Cyc_st_add`. Previously this could result in these warnings being spammed to the console when compiling code using Cyclone.
 - Properly escape question marks within strings in generated C code to avoid trigraphs.
 
 ## 0.30.0 - July 2, 2021
