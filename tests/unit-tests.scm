@@ -378,6 +378,13 @@
   (x kar set-kar!)
   (y kdr))
 
+(define-record-type <point>
+  (point x y)
+  point?
+  (x get-x set-x!)
+  (y get-y set-y!)
+  (z get-z set-z!))
+
 (assert:equal "Records predicate (t)" (pare? (kons 1 2)) #t)
 (assert:equal "Records predicate (f)" (pare? (cons 1 2)) #f)
 (assert:equal "Records kar" (kar (kons 1 2)) 1)
@@ -389,6 +396,11 @@
   3)
 (assert:equal "Record type predicate (t)" (record? (kons 1 2)) #t)
 (assert:equal "Record type predicate (f)" (record? (cons 1 2)) #f)
+
+(assert:equal "Record type field not in constructor (f)" (get-z (point 1 2)) #f)
+(let ((p (point 1 2)))
+  (set-z! p 99)
+  (assert:equal "Record type get field not in constructor" (get-z p) 99))
 ;; END records
 
 ;; Lazy evaluation
