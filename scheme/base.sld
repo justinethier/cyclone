@@ -840,9 +840,9 @@
                    (car fill)))
                (make
                  (lambda (n obj)
-                   (if (zero? n)
-                   '()
-                   (cons obj (make (- n 1) obj) )))))
+                   (if (> n 0)
+                   (cons obj (make (- n 1) obj) )
+                   '() ))))
       (make k x)))
     (define (list-copy ls)
       (let lp ((ls ls) (res '()))
