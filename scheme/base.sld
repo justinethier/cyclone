@@ -2115,7 +2115,10 @@
                (make-record-marker)
                (quote ,name)
                (,(rename 'vector)
-                ,@make-fields))))
+                ,@make-fields ;; Pass field values sent to constructor
+                ,@(make-list ;; And include empty slots for any other fields
+                    (- (length (cddddr expr))
+                       (length make-fields))) ))))
   )))))
 
 (define-syntax define-values

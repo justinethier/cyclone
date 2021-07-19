@@ -9,6 +9,7 @@ Bug Fixes
 - Properly escape question marks within strings in generated C code to avoid trigraphs.
 - Eliminate clang compiler warnings referencing `EOF` when building the runtime.
 - Fixed code so that the C compiler will no longer generate warnings regarding the string comparisons in `Cyc_st_add`. Previously this could result in these warnings being spammed to the console when compiling code using Cyclone.
+- Allow a record type to contain fields that are not initialized by the constructor.
 
 ## 0.30.0 - July 2, 2021
 
