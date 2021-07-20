@@ -11,7 +11,7 @@ Bug Fixes
 - Eliminate clang compiler warnings referencing `EOF` when building the runtime.
 - Updated runtime so the C compiler will no longer generate warnings regarding the string comparisons in `Cyc_st_add`. Previously this could result in these warnings being spammed to the console when compiling code using Cyclone.
 - Properly escape question marks within strings in generated C code to avoid trigraphs.
-- Avoid "unused variable" warning from the C compiler when compiling certain recursive functions.
+- Avoid an "unused variable" warning from the C compiler when compiling certain recursive functions.
 
 ## 0.30.0 - July 2, 2021
 
