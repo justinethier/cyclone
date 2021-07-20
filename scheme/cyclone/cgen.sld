@@ -1001,10 +1001,12 @@
            ;;(trace:info `(loop ,args ,(cadr args) ,cgen-lis ,parent-args))
            (c:code
              (string-append
-              cgen-allocs ; (c:allocs->str (c:allocs cgen))
+              cgen-allocs
                "\n"
-               cgen-body ; TODO: (c:body cgen) ; TODO: re-assign function args, longer-term using temp variables
+               cgen-body
                "\n"
+               ;; Avoid unused var warning from C compiler
+               (mangle (cadr args)) " = " (mangle (cadr args)) ";"
                "continue;"))))
          
         ((eq? 'Cyc-foreign-code fun)
