@@ -20,6 +20,7 @@
 //#include <signal.h> // only used for debugging!
 #include <sys/select.h>
 #include <sys/stat.h>
+#include <float.h>
 
 static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
@@ -8386,4 +8387,41 @@ void init_polyfills(void)
 #ifdef CYCLONE_CK_POLYFILL_H
   ck_polyfill_init();
 #endif
+}
+
+// TODO: rename this and integrate with corresponding functions in (scheme base)
+// WIP - testing numerator/denominator computation
+// Code from https://stackoverflow.com/a/51142807/101258
+// Return error flag
+int split(double x, double *numerator, double *denominator) {
+  if (!isfinite(x)) {
+    *numerator = *denominator = 0.0;
+    if (x > 0.0) *numerator = 1.0;
+    if (x < 0.0) *numerator = -1.0;
+    return 1;
+  }
+  int bdigits = DBL_MANT_DIG;
+  int expo;
+  *denominator = 1.0;
+  *numerator = frexp(x, &expo) * pow(2.0, bdigits);
+  expo -= bdigits;
+  if (expo > 0) {
+    *numerator *= pow(2.0, expo);
+  }
+  else if (expo < 0) {
+    expo = -expo;
+    if (expo >= DBL_MAX_EXP-1) {
+      *numerator /= pow(2.0, expo - (DBL_MAX_EXP-1));
+      *denominator *= pow(2.0, DBL_MAX_EXP-1);
+      return fabs(*numerator) < 1.0;
+    } else {
+      *denominator *= pow(2.0, expo);
+    }
+  }
+
+  while (*numerator && fmod(*numerator,2) == 0 && fmod(*denominator,2) == 0) {
+    *numerator /= 2.0;
+    *denominator /= 2.0;
+  }
+  return 0;
 }
