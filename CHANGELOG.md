@@ -2,6 +2,10 @@
 
 ## 0.31.0 - TBD
 
+Features
+
+- Replaced placeholder versions of `numerator` and `denominator` with code conforming with R7RS.
+
 Bug Fixes
 
 - Allow a record type to contain fields that are not initialized by the constructor.

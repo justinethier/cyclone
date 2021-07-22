@@ -196,8 +196,6 @@
     string->utf8
     denominator
     numerator
-    ;denominator2
-    ;numerator2
     parameterize
     read-bytevector
     read-bytevector!
@@ -222,8 +220,6 @@
   (inline
     square
     quotient
-    numerator
-    denominator
     truncate
     negative?
     positive?
@@ -1488,13 +1484,11 @@
   ;; END gcd lcm
 
   ;; Placeholders
-  (define (denominator n) 1)
-  (define (numerator n) n)
-  (define-c numerator2
+  (define-c numerator
     "(void *data, int argc, closure _, object k, object n)"
     " Cyc_get_ratio(data, k, n, 1);")
 
-  (define-c denominator2
+  (define-c denominator
     "(void *data, int argc, closure _, object k, object n)"
     " Cyc_get_ratio(data, k, n, 0);")
 
