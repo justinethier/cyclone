@@ -526,6 +526,7 @@ object Cyc_num_cmp_va_list(void *data, int argc,
                            va_list ns);
 void Cyc_expt(void *data, object cont, object x, object y);
 void Cyc_remainder(void *data, object cont, object num1, object num2);
+void Cyc_get_ratio(void *data, object cont, object n, int numerator);
 object Cyc_number2string2(void *data, object cont, int argc, object n, ...);
 object Cyc_integer2char(void *data, object n);
 object Cyc_sum_op(void *data, common_type * x, object y);

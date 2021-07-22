@@ -8393,7 +8393,7 @@ void init_polyfills(void)
 // WIP - testing numerator/denominator computation
 // Code from https://stackoverflow.com/a/51142807/101258
 // Return error flag
-int split(double x, double *numerator, double *denominator) {
+int num2ratio(double x, double *numerator, double *denominator) {
   if (!isfinite(x)) {
     *numerator = *denominator = 0.0;
     if (x > 0.0) *numerator = 1.0;
@@ -8424,4 +8424,32 @@ int split(double x, double *numerator, double *denominator) {
     *denominator /= 2.0;
   }
   return 0;
+}
+
+void Cyc_get_ratio(void *data, object cont, object n, int numerator)
+{
+  double d = 0.0;
+  Cyc_check_num(data, n);
+
+  if (obj_is_int(n)) {
+    d = (double)obj_obj2int(n);
+  } else if (type_of(n) == double_tag) {
+    d = double_value(n);
+  } else if (type_of(n) == bignum_tag) {
+    d = mp_get_double(&bignum_value(n));
+  } else {
+    Cyc_rt_raise2(data, "Unable to convert to ratio", n);
+  }
+
+  {
+    double numer, denom;
+    make_double(val, 0.0);
+    num2ratio(d, &numer, &denom);
+    if (numerator) {
+      double_value(&val) = numer;
+    } else {
+      double_value(&val) = denom;
+    }
+    return_closcall1(data, cont, &val);
+  }
 }
