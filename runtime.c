@@ -8437,6 +8437,13 @@ void Cyc_get_ratio(void *data, object cont, object n, int numerator)
     d = double_value(n);
   } else if (type_of(n) == bignum_tag) {
     d = mp_get_double(&bignum_value(n));
+  } else if (type_of(n) == complex_num_tag) {
+    // TODO: if i is 0, set d = real part
+    if (numerator) {
+      return_closcall1(data, cont, n);
+    } else {
+      d = 1.0;
+    }
   } else {
     Cyc_rt_raise2(data, "Unable to convert to ratio", n);
   }
