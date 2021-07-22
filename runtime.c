@@ -8441,7 +8441,11 @@ void Cyc_get_ratio(void *data, object cont, object n, int numerator)
     Cyc_rt_raise2(data, "Unable to convert to ratio", n);
   }
 
-  {
+  if (!numerator && d == 0.0) {
+    // Special case
+    make_double(val, 1.0);
+    return_closcall1(data, cont, &val);
+  } else {
     double numer, denom;
     make_double(val, 0.0);
     num2ratio(d, &numer, &denom);
