@@ -12,6 +12,7 @@ Bug Fixes
 - Properly handle vectors literals at the top level of compiled code. Previously this could lead to segmentation faults (!!) at runtime.
 - Fixed a bug in `make-list` that consumed all available memory when passing a negative list length.
 - Allow a record type to contain fields that are not initialized by the constructor.
+- Fix off-by-one error unpacking arguments when calling a primitive as the continuation after a garbage collection.
 
 Bug Fixes for C Compiler Warnings
 
