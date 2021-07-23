@@ -8438,8 +8438,9 @@ void Cyc_get_ratio(void *data, object cont, object n, int numerator)
   } else if (type_of(n) == bignum_tag) {
     d = mp_get_double(&bignum_value(n));
   } else if (type_of(n) == complex_num_tag) {
-    // TODO: if i is 0, set d = real part
-    if (numerator) {
+    if (cimag(complex_num_value(n)) == 0.0) {
+      d = creal(complex_num_value(n));
+    } else if (numerator) {
       return_closcall1(data, cont, n);
     } else {
       d = 1.0;
