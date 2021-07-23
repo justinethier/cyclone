@@ -127,7 +127,7 @@
                                              ;; data available for child init
         (Cyc-minor-gc)
         (Cyc-spawn-thread! thread-params)
-        ))
+        t))
 
     (define (thread-yield!) (thread-sleep! 1))
     (define-c thread-terminate!
