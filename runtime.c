@@ -8389,10 +8389,12 @@ void init_polyfills(void)
 #endif
 }
 
-// TODO: rename this and integrate with corresponding functions in (scheme base)
-// WIP - testing numerator/denominator computation
-// Code from https://stackoverflow.com/a/51142807/101258
-// Return error flag
+/**
+ * Code from https://stackoverflow.com/a/51142807/101258
+ * to take a double and compute its numerator and denominator,
+ * which are returned using the given pointers.  
+ * An error flag is directly returned.
+ */
 int num2ratio(double x, double *numerator, double *denominator) {
   if (!isfinite(x)) {
     *numerator = *denominator = 0.0;
@@ -8426,6 +8428,11 @@ int num2ratio(double x, double *numerator, double *denominator) {
   return 0;
 }
 
+/**
+ * Receive a Scheme number and pass requested portion of a rational number to
+ * the continuation `cont`. Pass numerator if `numerator` is true, else the
+ * denominator is passed.
+ */
 void Cyc_get_ratio(void *data, object cont, object n, int numerator)
 {
   double d = 0.0;
