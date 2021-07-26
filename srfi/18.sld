@@ -73,12 +73,14 @@
         ;; - specific
         ;; - internal
         ;; - end of thread cont (or #f for default)
+        ;; - end-result - Result of thread that terminates successfully
         (vector 
           'cyc-thread-obj 
           thunk 
           (%alloc-thread-data)  ;; Internal data for new thread
           name-str 
           #f 
+          #f
           #f
           #f)))
 
@@ -151,9 +153,12 @@
         }
         return_thread_runnable(data, boolean_t);")
     (define (thread-join! t)
-      (if (and (thread? t) (Cyc-opaque? (vector-ref t 2)))
+      (cond
+       ((and (thread? t) (Cyc-opaque? (vector-ref t 2)))
         (%thread-join! (vector-ref t 2))
-        #f))
+        (vector-ref t 7))
+       (else
+        #f))) ;; TODO: raise an error instead?
 
     (define-c thread-sleep!
       "(void *data, int argc, closure _, object k, object timeout)"

@@ -5085,6 +5085,10 @@ void _Cyc_91spawn_91thread_67(void *data, object clo, int argc, object *args)
 
 void _Cyc_91end_91thread_67(void *data, object clo, int argc, object *args)
 {
+  gc_thread_data *d = data;
+  vector_type *v = d->scm_thread_obj;
+  v->elements[7] = args[0]; // Store thread result
+
   Cyc_end_thread((gc_thread_data *) data);
   object cont = args[0];
   return_closcall1(data, cont, boolean_f);
