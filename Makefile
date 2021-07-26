@@ -257,7 +257,8 @@ bootstrap : icyc libs
 	cp scheme/cyclone/common.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp icyc.c $(BOOTSTRAP_DIR)
-	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)
+	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)/tests
+	cp tests/threading.scm $(BOOTSTRAP_DIR)/tests
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-opt-local-var-redux.scm $(BOOTSTRAP_DIR)/scheme/cyclone
