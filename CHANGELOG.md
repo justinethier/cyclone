@@ -2,10 +2,6 @@
 
 ## 0.31.0 - TBD
 
-### Features
-
-- Built out `numerator` and `denominator` with code conforming to R7RS.
-
 ### Bug Fixes
 
 #### General Fixes 
@@ -18,6 +14,7 @@
 - Fixed `read-line` to prevent data loss when used in conjunction with other I/O functions (such as `read-char`) to read data from the same port. This was because the previous version of `read-line` used a different internal buffer than our other I/O functions.
 - Fixed a bug in `make-list` that consumed all available memory when passing a negative list length.
 - Allow a record type to contain fields that are not initialized by the constructor.
+- Built out `numerator` and `denominator` with code conforming to R7RS.
 
 #### SRFI 18 - Multithreading Library
 
