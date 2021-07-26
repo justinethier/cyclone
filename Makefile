@@ -30,6 +30,8 @@ SLDFILES = $(wildcard $(SCHEME_DIR)/*.sld) \
 COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
+					 $(TEST_DIR)/base.scm \
+					 $(TEST_DIR)/threading.scm \
 					 $(TEST_DIR)/test-shared-queue.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
 					 $(TEST_DIR)/match-tests.scm \
@@ -37,8 +39,7 @@ TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
 					 $(TEST_DIR)/srfi-128-162-tests.scm \
-					 $(TEST_DIR)/srfi-143-tests.scm \
-					 $(TEST_DIR)/threading.scm
+					 $(TEST_DIR)/srfi-143-tests.scm 
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
@@ -258,6 +259,7 @@ bootstrap : icyc libs
 	cp icyc.scm $(BOOTSTRAP_DIR)
 	cp icyc.c $(BOOTSTRAP_DIR)
 	cp tests/unit-tests.scm $(BOOTSTRAP_DIR)/tests
+	cp tests/base.scm $(BOOTSTRAP_DIR)/tests
 	cp tests/threading.scm $(BOOTSTRAP_DIR)/tests
 	cp scheme/cyclone/ast.c $(BOOTSTRAP_DIR)/scheme/cyclone
 	cp scheme/cyclone/cps-optimizations.c $(BOOTSTRAP_DIR)/scheme/cyclone
