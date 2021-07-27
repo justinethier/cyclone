@@ -12,6 +12,14 @@
   (cyclone test))
 
 
+(define vec #(1 2))
+
+(test-group
+  "vector literals"
+  (test #(1 2) vec)
+  (test vec (vector 1 2))
+)
+
 (test-group
   "make-list"
   (test '() (make-list -2))
