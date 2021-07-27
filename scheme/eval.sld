@@ -614,16 +614,18 @@
              ;(define use-env (env:extend-environment '() '() '()))
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
-               (let ((expanded
-                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)))
-                 (analyze expanded 
+               (let* ((expanded
+                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
+                      (cleaned (macro:cleanup expanded rename-env)))
+                 (analyze cleaned
                           a-env
                           rename-env
                           local-renamed))
                ;; Interpreted macro, build expression and eval
-               (let* ((expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed)))
+               (let* ((expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
+                      (cleaned (macro:cleanup expanded rename-env)))
                  (analyze
-                   expanded
+                   cleaned
                    a-env
                    rename-env
                    local-renamed))))))
@@ -917,6 +919,10 @@
 ;(newline)
 ;(display "*/ ")
          (cond 
+           ((and (pair? expr) ;; Improper list
+                 (not (list? expr)))
+            (cons (clean (car expr) bv)
+                  (clean (cdr expr) bv)))
            ((const? expr)      expr)
            ((null? expr)       expr)
            ((quote? expr)      
