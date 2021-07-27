@@ -26,6 +26,12 @@
 )
 
 (test-group
+  "rationals"
+  (test 3.0 (numerator (/ 6 4)))
+  (test 2.0 (denominator (/ 6 4)))
+)
+
+(test-group
   "I/O"
   (define p (open-input-string "one\ntwo\n"))
   (test #\o (read-char p))
