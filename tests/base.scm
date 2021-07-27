@@ -32,6 +32,21 @@
 )
 
 (test-group
+  "records"
+  (define-record-type employee
+     (make-employee name title)
+     employee?
+     (name get-name)
+     (title get-title)
+     (test get-test set-test!)) ;; Uninitialized by constructor
+  (define e (make-employee "test-name" "job 1"))
+
+  (test #f (get-test e))
+  (set-test! e 'test-field)
+  (test 'test-field (get-test e))
+)
+
+(test-group
   "I/O"
   (define p (open-input-string "one\ntwo\n"))
   (test #\o (read-char p))
