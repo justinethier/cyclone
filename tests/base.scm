@@ -31,6 +31,20 @@
 )
 
 (test-group
+  "I/O"
+  (define p (open-input-string "one\ntwo\n"))
+  (test #\o (read-char p))
+  (test "ne" (read-line p))
+  (test "two" (read-line p))
+  (test (eof-object) (read-line p))
+  (define p (open-input-string "one\ntwo\n"))
+  (test "one" (read-line p))
+  (test #\t (read-char p))
+  (test #\w (read-char p))
+  (test "o" (read-line p))
+)
+
+(test-group
   "rationals"
   (test 3.0 (numerator (/ 6 4)))
   (test 2.0 (denominator (/ 6 4)))
@@ -49,20 +63,6 @@
   (test #f (get-test e))
   (set-test! e 'test-field)
   (test 'test-field (get-test e))
-)
-
-(test-group
-  "I/O"
-  (define p (open-input-string "one\ntwo\n"))
-  (test #\o (read-char p))
-  (test "ne" (read-line p))
-  (test "two" (read-line p))
-  (test (eof-object) (read-line p))
-  (define p (open-input-string "one\ntwo\n"))
-  (test "one" (read-line p))
-  (test #\t (read-char p))
-  (test #\w (read-char p))
-  (test "o" (read-line p))
 )
 
 (test-exit)
