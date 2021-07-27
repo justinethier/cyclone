@@ -21,6 +21,11 @@
 )
 
 (test-group
+  "strings"
+  (test "??>" "??>")
+)
+
+(test-group
   "make-list"
   (test '() (make-list -2))
 )
