@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.31.0 - TBD
+## TBD
+
+
+## 0.31.0 - July 27, 2021
 
 ### Bug Fixes
 
