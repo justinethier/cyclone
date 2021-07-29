@@ -2972,8 +2972,8 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     ((vector) v)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
     ((vector) v)->hdr.grayed = 0;
     ((vector) v)->hdr.immutable = 0;
-    ((vector) v)->tag = vector_tag;
-    ((vector) v)->num_elements = ulen;
+    ((vector) v)->tag = double_tag; // Avoid race conditions w/GC tracing
+    ((vector) v)->num_elements = 0; // until array is filled
     ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
     // Use write barrier to ensure fill is moved to heap if it is on the stack
     // Otherwise if next minor GC misses fill it could be catastrophic
@@ -3000,6 +3000,9 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
   for (i = 0; i < ((vector) v)->num_elements; i++) {
     ((vector) v)->elements[i] = fill;
   }
+  ((vector) v)->tag = vector_tag;
+  ((vector) v)->num_elements = ulen;
+
   _return_closcall1(data, cont, v);
 }
 
@@ -3411,8 +3414,8 @@ object Cyc_list2vector(void *data, object cont, object l)
     ((vector) v)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
     ((vector) v)->hdr.grayed = 0;
     ((vector) v)->hdr.immutable = 0;
-    ((vector) v)->tag = vector_tag;
-    ((vector) v)->num_elements = len;
+    ((vector) v)->tag = double_tag; // Avoid race with GC tracing until
+    ((vector) v)->num_elements = 0; // array is initialized 
     ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
     // TODO: do we need to worry about stack object in the list????
     //// Use write barrier to ensure fill is moved to heap if it is on the stack
@@ -3437,6 +3440,8 @@ object Cyc_list2vector(void *data, object cont, object l)
     ((vector) v)->elements[i++] = car(lst);
     lst = cdr(lst);
   }
+  ((vector) v)->tag = vector_tag;
+  ((vector) v)->num_elements = len;
   _return_closcall1(data, cont, v);
 }
 

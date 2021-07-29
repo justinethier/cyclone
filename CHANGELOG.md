@@ -6,6 +6,10 @@ Features
 
 - Initiate major garbage collections faster after allocating a huge object (more than 500K). This allows the system to reclaim the memory faster and keep overall memory usage low for certain workloads.
 
+Bug Fixes
+
+- When allocating a large vector we now guarantee all vector elements are initialized before the major collector can trace those elements. This avoids the potential for a race condition which could lead to a segmentation fault.
+
 ## 0.31.0 - July 27, 2021
 
 ### Bug Fixes
