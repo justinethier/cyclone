@@ -9,6 +9,7 @@ Features
 Bug Fixes
 
 - When allocating a large vector we now guarantee all vector elements are initialized before the major collector can trace those elements. This avoids the potential for a race condition which could lead to a segmentation fault.
+- Ensure atomic objects are properly traced by the major garbage collector.
 
 ## 0.31.0 - July 27, 2021
 

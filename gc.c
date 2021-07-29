@@ -2263,6 +2263,7 @@ void gc_mark_black(object obj)
         if (obj) {
           gc_collector_mark_gray(obj, o);
         }
+        break;
       }
     default:
       break;
@@ -2281,46 +2282,54 @@ void gc_mark_black(object obj)
 #else
 // See full version above for debugging purposes.
 // Also sync any changes to this macro with the function version
-#define gc_mark_black(obj) \
+#define gc_mark_black(_obj) \
 { \
   int markColor = ck_pr_load_8(&gc_color_mark); \
-  if (is_object_type(obj) && mark(obj) != markColor) { \
-    switch (type_of(obj)) { \
+  if (is_object_type(_obj) && mark(_obj) != markColor) { \
+    switch (type_of(_obj)) { \
     case pair_tag:{ \
-        gc_collector_mark_gray(obj, car(obj)); \
-        gc_collector_mark_gray(obj, cdr(obj)); \
+        gc_collector_mark_gray(_obj, car(_obj)); \
+        gc_collector_mark_gray(_obj, cdr(_obj)); \
         break; \
       } \
     case closure1_tag: \
-      gc_collector_mark_gray(obj, ((closure1) obj)->element); \
+      gc_collector_mark_gray(_obj, ((closure1) _obj)->element); \
       break; \
     case closureN_tag:{ \
-        int i, n = ((closureN) obj)->num_elements; \
+        int i, n = ((closureN) _obj)->num_elements; \
         for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((closureN) obj)->elements[i]); \
+          gc_collector_mark_gray(_obj, ((closureN) _obj)->elements[i]); \
         } \
         break; \
       } \
     case vector_tag:{ \
-        int i, n = ((vector) obj)->num_elements; \
+        int i, n = ((vector) _obj)->num_elements; \
         for (i = 0; i < n; i++) { \
-          gc_collector_mark_gray(obj, ((vector) obj)->elements[i]); \
+          gc_collector_mark_gray(_obj, ((vector) _obj)->elements[i]); \
         } \
         break; \
       } \
     case cvar_tag:{ \
-        cvar_type *c = (cvar_type *) obj; \
+        cvar_type *c = (cvar_type *) _obj; \
         object pvar = *(c->pvar); \
         if (pvar) { \
-          gc_collector_mark_gray(obj, pvar); \
+          gc_collector_mark_gray(_obj, pvar); \
+        } \
+        break; \
+      } \
+    case atomic_tag: { \
+        atomic_type *a = (atomic_type *)_obj; \
+        object o = ck_pr_load_ptr(&(a->obj)); \
+        if (_obj) { \
+          gc_collector_mark_gray(_obj, o); \
         } \
         break; \
       } \
     default: \
       break; \
     } \
-    if (mark(obj) != gc_color_red) { \
-      mark(obj) = markColor; \
+    if (mark(_obj) != gc_color_red) { \
+      mark(_obj) = markColor; \
     } \
   } \
 }
