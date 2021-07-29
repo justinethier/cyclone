@@ -2,6 +2,9 @@
 
 ## TBD
 
+Features
+
+- Initiate major garbage collections faster after allocating a huge object (more than 500K). This allows the system to reclaim the memory faster and keep overall memory usage low for certain workloads.
 
 ## 0.31.0 - July 27, 2021
 

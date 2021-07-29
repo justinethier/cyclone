@@ -1447,9 +1447,16 @@ fprintf(stderr, "slowest alloc of %p\n", result);
 #endif
       if (result) {
         // We had to allocate memory, start a major collection ASAP!
-        if (heap_type != HEAP_HUGE) {
+        //
+        // Huge heaps are a special case because we always allocate a new page
+        // for them. However, we still initiate a collection for them, giving
+        // us a convenient way to handle short-lived HUGE objects. In practice
+        // this makes a BIG difference in memory usage for the array1 benchmark.
+        // Longer-term there may be a better way to deal with huge objects.
+        //
+        //if (heap_type != HEAP_HUGE) {
           gc_start_major_collection(thd);
-        }
+        //}
       } else {
         fprintf(stderr, "out of memory error allocating %zu bytes\n", size);
         fprintf(stderr, "Heap type %d diagnostics:\n", heap_type);
