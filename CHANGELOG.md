@@ -8,6 +8,7 @@ Features
 
 Bug Fixes
 
+- Avoid unnecessary renaming of identifiers when the interpreter performs macro expansion.
 - When allocating a large vector we now guarantee all vector elements are initialized before the major collector can trace those elements. This avoids the potential for a race condition which could lead to a segmentation fault.
 - Ensure atomic objects are properly traced by the major garbage collector.
 
