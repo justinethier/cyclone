@@ -611,18 +611,16 @@
                   #f))
          (expand 
            (lambda (macro-op)
-             ;(define use-env (env:extend-environment '() '() '()))
              (if (Cyc-macro? macro-op)
                ;; Compiled macro, call directly
-               (let* ((expanded
-                        (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
+               (let* ((expanded (_expand exp a-env rename-env '() local-renamed))
                       (cleaned (macro:cleanup expanded rename-env)))
                  (analyze cleaned
                           a-env
                           rename-env
                           local-renamed))
                ;; Interpreted macro, build expression and eval
-               (let* ((expanded (macro:expand exp (list 'macro macro-op) a-env rename-env local-renamed))
+               (let* ((expanded (_expand exp a-env rename-env '() local-renamed))
                       (cleaned (macro:cleanup expanded rename-env)))
                  (analyze
                    cleaned
