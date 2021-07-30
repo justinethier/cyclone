@@ -31,6 +31,7 @@ COBJECTS = $(SLDFILES:.sld=.o)
 HEADERS = $(HEADER_DIR)/runtime.h $(HEADER_DIR)/types.h
 TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/base.scm \
+					 $(TEST_DIR)/test.scm \
 					 $(TEST_DIR)/threading.scm \
 					 $(TEST_DIR)/test-shared-queue.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
