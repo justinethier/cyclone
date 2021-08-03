@@ -20,14 +20,14 @@ CREATE_LIBRARY_COMMAND = $(AR)
 CREATE_LIBRARY_FLAGS = rcs
 
 # Compiler options
-CFLAGS       ?= -O2 -fPIC -Wall -march=armv6k -Iinclude
+CFLAGS       += -O2 -fPIC -Wall -march=armv6k -Iinclude
 COMP_CFLAGS  ?= -O2 -fPIC -Wall -march=armv6k -I$(PREFIX)/include -L$(PREFIX)/lib
 # Use these lines instead for debugging or profiling
 #CFLAGS = -g -Wall
 #CFLAGS = -g -pg -Wall
 
 # Linker options
-LDFLAGS ?= -L.
+LDFLAGS += -L.
 ifeq ($(OS),Darwin)
 LDFLAGS     += -Wl,-export_dynamic -Wl,-undefined -Wl,dynamic_lookup
 COMP_CFLAGS += -Wl,-export_dynamic
