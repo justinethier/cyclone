@@ -47,6 +47,7 @@
           (newline)
           (repl))
         (display "cyclone> ")
+        (flush-output-port)
         (let ((obj (read)))
           (if (eof-object? obj)
               (newline) ;; Quick way to exit REPL
