@@ -25,7 +25,7 @@
 
 (define *fe:batch-compile* #t) ;; Batch compilation. TODO: default to false or true??
 (define *optimization-level* 2) ;; Default level
-(define *optimize:memoize-pure-functions* #t) ;; Memoize pure funcs by default
+(define *optimize:memoize-pure-functions* #f) ;; Memoize pure function
 (define *optimize:beta-expand-threshold* #f) ;; BE threshold or #f to use default
 (define *optimize:inline-unsafe* #f) ;; Inline primitives even if generated code may be unsafe
 (define *cgen:track-call-history* #t)

@@ -5,6 +5,7 @@
 Features
 
 - Initiate major garbage collections faster after allocating a huge object (larger than 500K). This allows the system to reclaim the memory faster and keep overall memory usage low for certain workloads.
+- Cyclone will no longer memoize pure functions by default.
 
 Bug Fixes
 
