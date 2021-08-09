@@ -50,7 +50,7 @@
     fxarithmetic-shift 
     fxarithmetic-shift-left fxarithmetic-shift-right
     fxbit-count 
-    fxif fxbit-set? fxcopy-bit
+    fxif fxcopy-bit
     fxfirst-set-bit 
     fxbit-field
     mask
@@ -170,7 +170,12 @@
       (fxior (fxand mask n0)
              (fxand (fxnot mask) n1)))
 
-    (define-c fxbit-set?
+    (define (fxbit-set? index i)
+      (or (%fxbit-set? index i)
+          (and (negative? i)
+               (>= index (fxlength i)))))
+
+    (define-c %fxbit-set?
        "(void* data, int argc, closure _, object k, object index, object i)"
        " Cyc_check_fixnum(data, index);
          Cyc_check_fixnum(data, i);
