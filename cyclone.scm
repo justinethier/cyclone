@@ -79,6 +79,11 @@
     Cyc_check_str(data, filename);
     double_value(&box) = Cyc_file_last_modified_time(string_str(filename));
     return_closcall1(data, k, &box); ")
+
+(define-c calling-program
+  "(void *data, int argc, closure _, object k)"
+  " make_utf8_string(data, s, _cyc_argv[0]);
+    return_closcall1(data, k, &s); ")
 ;; END batch compilation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -287,7 +292,8 @@
         (for-each 
           (lambda (lib-dep)
             (when (recompile? lib-dep append-dirs prepend-dirs)
-              (let ((result (system (string-append "cyclone " 
+              (let ((result (system (string-append 
+                                      (calling-program) " " 
                                       (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
                 (when (> result 0)
                   (error "Unable to compile library" lib-dep)))))
