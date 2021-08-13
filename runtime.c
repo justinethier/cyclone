@@ -6826,7 +6826,7 @@ object Cyc_spawn_thread(object thread_and_thunk)
   pthread_t thread;
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-#if CYC_PTHREAD_SET_STACK_SIZE
+#ifdef CYC_PTHREAD_SET_STACK_SIZE
   pthread_attr_setstacksize(&attr, 1024*1024*8);
 #endif
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
