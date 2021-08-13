@@ -6,7 +6,9 @@ Features
 
 - Initiate major garbage collections faster after allocating a huge object (larger than 500K). This allows the system to reclaim the memory faster and keep overall memory usage low for certain workloads.
 - Cyclone will no longer memoize pure functions by default.
-- Added build option `CYC_PTHREAD_SET_STACK_SIZE` to allow Cyclone to specify a thread stack size rather than using the OS default.
+- Added build option `CYC_PTHREAD_SET_STACK_SIZE` to allow Cyclone to specify a thread stack size rather than using the OS default. EG:
+
+     make CYC_PTHREAD_SET_STACK_SIZE=1 libcyclone.a
 
 Bug Fixes
 
