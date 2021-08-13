@@ -5,7 +5,12 @@
 include Makefile.config
 
 # Commands
-CYCLONE = cyclone -A .
+#
+# Set up Cyclone here to build the compiler itself using a system-installed
+# compiler (EG: from bootstrap or an earlier cyclone version). Everything
+# else can then be built using our local binary.
+CYCLONE_SYSTEM = cyclone -A .
+CYCLONE_LOCAL = ./cyclone -A . -COPT '-Iinclude' -CLNK '-L.'
 CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
@@ -146,12 +151,12 @@ doc :
 .PHONY: clean full bench bootstrap tags indent debug test doc
 
 $(TESTS) : %: %.scm
-	$(CYCLONE) -I . $<
+	$(CYCLONE_LOCAL) -I . $<
 	./$@
 	rm -rf $@
 
 $(EXAMPLES) : %: %.scm
-	$(CYCLONE) $<
+	$(CYCLONE_LOCAL) $<
 
 game-of-life :
 	cd $(EXAMPLE_DIR)/game-of-life ; $(MAKE)
@@ -162,13 +167,13 @@ hello-library/hello :
 libs : $(COBJECTS)
 
 $(COBJECTS) : %.o: %.sld
-	$(CYCLONE) $<
+	$(CYCLONE_LOCAL) $<
 
 cyclone : cyclone.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
-	$(CYCLONE) cyclone.scm
+	$(CYCLONE_SYSTEM) cyclone.scm
 
 icyc : icyc.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
-	$(CYCLONE) $<
+	$(CYCLONE_LOCAL) $<
 
 $(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
 
