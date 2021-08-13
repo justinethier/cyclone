@@ -197,6 +197,7 @@ mstreams.o : mstreams.c $(HEADERS)
 
 runtime.o : runtime.c $(HEADERS)
 	$(CCOMP) -c \
+					-DCYC_PTHREAD_SET_STACK_SIZE=$(CYC_PTHREAD_SET_STACK_SIZE) \
 					-DCYC_INSTALL_DIR=\"$(PREFIX)\" \
 					-DCYC_INSTALL_LIB=\"$(LIBDIR)\" \
 					-DCYC_INSTALL_BIN=\"$(BINDIR)\" \

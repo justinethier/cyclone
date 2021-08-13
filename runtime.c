@@ -6823,28 +6823,12 @@ void *_Cyc_init_thread(object thread_and_thunk)
  */
 object Cyc_spawn_thread(object thread_and_thunk)
 {
-// TODO: if we want to return mutator number to the caller, we need
-// to reserve a number here. need to figure out how we are going to
-// synchronize access to GC mutator fields, and then reserve one
-// here. will need to pass it, along with thunk, to Cyc_init_thread.
-// Then can use a new function up there to add the mutator, since we
-// already have the number.
-/*
-how to manage gc mutators. need to handle:
-- need to be able to allocate a thread but not run it yet.
-  maybe have a run level, or status
-- need to make mutators thread safe, ideally without major performance impacts
-- thread terminates
-  - should mark mutator as 'done'
-  - at an opportune moment, free mutator and set it back
-    to null
-
-what is the right data structure? is the array OK? or would it be better
-to look at the lock-free structures provided by ck?
-*/
   pthread_t thread;
   pthread_attr_t attr;
   pthread_attr_init(&attr);
+#if CYC_PTHREAD_SET_STACK_SIZE
+  pthread_attr_setstacksize(&attr, 1024*1024*8);
+#endif
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   if (pthread_create(&thread, &attr, _Cyc_init_thread, thread_and_thunk)) {
     fprintf(stderr, "Error creating a new thread\n");
