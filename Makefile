@@ -150,12 +150,12 @@ doc :
 
 .PHONY: clean full bench bootstrap tags indent debug test doc
 
-$(TESTS) : %: %.scm
+$(TESTS) : %: %.scm cyclone libs
 	$(CYCLONE_LOCAL) -I . $<
 	./$@
 	rm -rf $@
 
-$(EXAMPLES) : %: %.scm
+$(EXAMPLES) : %: %.scm cyclone libs
 	$(CYCLONE_LOCAL) $<
 
 game-of-life :
@@ -166,13 +166,13 @@ hello-library/hello :
 
 libs : $(COBJECTS)
 
-$(COBJECTS) : %.o: %.sld
+$(COBJECTS) : %.o: %.sld cyclone
 	$(CYCLONE_LOCAL) $<
 
 cyclone : cyclone.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
 	$(CYCLONE_SYSTEM) cyclone.scm
 
-icyc : icyc.scm $(CYC_RT_LIB) $(CYC_BN_LIB)
+icyc : icyc.scm $(CYC_RT_LIB) $(CYC_BN_LIB) cyclone libs
 	$(CYCLONE_LOCAL) $<
 
 $(CYC_RT_LIB) : $(CFILES) $(HEADERS) $(CYC_BN_LIB)
