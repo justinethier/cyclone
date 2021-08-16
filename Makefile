@@ -10,7 +10,7 @@ include Makefile.config
 # compiler (EG: from bootstrap or an earlier cyclone version). Everything
 # else can then be built using our local binary.
 CYCLONE_SYSTEM = cyclone -A .
-CYCLONE_LOCAL = ./cyclone -A . -COPT '-Iinclude' -CLNK '-L.'
+CYCLONE_LOCAL = ./cyclone -A . -A libs -COPT '-Iinclude' -CLNK '-L.'
 CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
