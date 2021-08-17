@@ -31,7 +31,6 @@
 
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
-#define gc_heap_last_block(h) ((object)((char*)h->data + h->size - gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_end(h) ((object)((char*)h->data + h->size))
 #define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
 #define gc_free_chunk_size (sizeof(gc_free_list))
