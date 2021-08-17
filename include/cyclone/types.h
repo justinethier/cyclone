@@ -176,27 +176,23 @@ typedef unsigned char tag_type;
  heaps (128, 160) are also added.
 
  32 bit x86 is starting to have trouble with just a 96 byte heap added.
-
- In the future, a better solution might be to allocate arrays (closureN's, vectors, bytevectors, and strings)
- as fixed-size chunks to prevent heap fragmentation. The advantage is then we have no fragmentation directly.
- But, an array will no longer be contiguous so they may cause other problems, and the runtime has to change
- to work with non-contiguous arrays. This would also cause a lot of problems for strings since the built-in
- functions would no longer work (EG: strlen, etc).
  */
-typedef enum { 
-    HEAP_SM = 0  // 32 byte objects (min gc_heap_align)
-  , HEAP_64
-  , HEAP_96
-  , HEAP_REST    // Everything else
-  , HEAP_HUGE    // Huge objects, 1 per page
-} gc_heap_type;
+
+// Type starts at 0 and ends at LAST_FIXED_SIZE_HEAP_TYPE
+// Presently each type contains buckets of a multiple of 32 bytes
+// EG: 0 ==> 32
+//     1 ==> 64, etc
+typedef int gc_heap_type;
 
 /** The first heap type that is not fixed-size */
 #if INTPTR_MAX == INT64_MAX
-#define LAST_FIXED_SIZE_HEAP_TYPE HEAP_96
+#define LAST_FIXED_SIZE_HEAP_TYPE 2
 #else
-#define LAST_FIXED_SIZE_HEAP_TYPE HEAP_64
+#define LAST_FIXED_SIZE_HEAP_TYPE 1
 #endif
+
+#define HEAP_REST (LAST_FIXED_SIZE_HEAP_TYPE + 1)
+#define HEAP_HUGE (HEAP_REST + 1)
 
 /** The number of `gc_heap_type`'s */
 #define NUM_HEAP_TYPES (HEAP_HUGE + 1)
