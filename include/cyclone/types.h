@@ -225,7 +225,7 @@ struct gc_heap_t {
   /** Size of the heap page in bytes */
   unsigned int size;
   /** Keep empty page alive this many times before freeing */
-  unsigned int ttl; 
+  unsigned char ttl; 
   /** Bump: Track remaining space; this is useful for bump&pop style allocation */
   unsigned int remaining;
   /** For fixed-size heaps, only allocate blocks of this size */
