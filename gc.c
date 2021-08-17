@@ -28,7 +28,6 @@
 
 // 64-bit is 3, 32-bit is 2
 #define GC_BLOCK_BITS 5
-#define GC_BLOCK_SIZE (1 << GC_BLOCK_BITS)
 
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
@@ -39,7 +38,10 @@
 
 #define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((uintptr_t)-1)-((1<<(bits))-1)))
 
-//#define gc_word_align(n) gc_align((n), 2)
+// Align to 8 byte block size (EG: 8, 16, etc)
+#define gc_word_align(n) gc_align((n), 3)
+
+// Align on GC_BLOCK_BITS, currently block size of 32 bytes
 #define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
 
 ////////////////////
