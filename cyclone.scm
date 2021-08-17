@@ -1139,8 +1139,8 @@ Debug options:
               (string-join args " ")))
           ;; Call the C compiler
           (run-external-compiler
-            non-opts compile? append-dirs prepend-dirs
-            cc-prog cc-exec cc-lib cc-so 
+            non-opts append-dirs prepend-dirs
+            compile? cc-prog cc-exec cc-lib cc-so 
             cc-opts cc-linker-opts cc-linker-extra-objects)))
       ))))
 
