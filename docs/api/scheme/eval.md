@@ -7,6 +7,7 @@ For more information see the [R<sup>7</sup>RS Scheme Specification](../../r7rs.p
 - [`eval`](#eval)
 - [`create-environment`](#create-environment)
 - [`setup-environment`](#setup-environment)
+- [`expand`](#expand)
 
 # eval
 
@@ -30,3 +31,9 @@ A non-standard function to create a new environment on top of the default one.
     (setup-environment)
 
 A non-standard function to initialize a new global environment.
+
+# expand
+
+    (expand expr environment rename-environment)
+
+Perform macro expansion on `expr` and `environment` is the current environment. `rename-environment` is an environment containing variables renamed directly by macros; this would generally be an empty environment when using this function for macro debugging.
