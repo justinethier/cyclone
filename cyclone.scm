@@ -21,7 +21,8 @@
         (scheme cyclone primitives)
         (scheme cyclone transforms)
         (scheme cyclone cps-optimizations)
-        (scheme cyclone libraries))
+        (scheme cyclone libraries)
+        (srfi 18))
 
 (define *fe:batch-compile* #t) ;; Batch compilation. TODO: default to false or true??
 (define *optimization-level* 2) ;; Default level
@@ -1125,10 +1126,13 @@ Debug options:
             (cdr err))
           (newline)
           (exit 1)))
-      (run-compiler non-opts append-dirs prepend-dirs)
-      (run-external-compiler non-opts compile? append-dirs prepend-dirs
-                             cc-prog cc-exec cc-lib cc-so 
-                             cc-opts cc-linker-opts cc-linker-extra-objects)
+      (let ((t (thread-start! 
+                 (make-thread (lambda () (run-compiler non-opts append-dirs prepend-dirs))))))
+        (thread-join! t)
+        (run-external-compiler
+          non-opts compile? append-dirs prepend-dirs
+          cc-prog cc-exec cc-lib cc-so 
+          cc-opts cc-linker-opts cc-linker-extra-objects))
       
       ))))
 
