@@ -4,7 +4,10 @@
 
 Features
 
-- Make `expand` easier to use for casual macro debugging. Only a single expression is now required as an argument. Updated associated documentation.
+- Allow easier macro debugging from the REPL by using `expand`. Passing a single expression as an argument will return the expanded expression:
+
+      cyclone> (expand '(when #t (+ 1 2 3)))
+      (if #t ((lambda () (+ 1 2 3))) )
 
 ## 0.32.0 - August 16, 2021
 
