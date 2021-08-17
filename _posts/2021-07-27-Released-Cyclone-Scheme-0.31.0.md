@@ -8,7 +8,7 @@ excerpt: This release fixes a number of critical bugs.
 
 #### Compiler
 
-- Properly handle vectors literals at the top level of compiled code. Previously this could lead to segmentation faults (!!) at runtime.
+- Properly handle vectors literals at the top level of compiled code. Previously this could lead to segmentation faults at runtime.
 - Fixed an off-by-one error unpacking arguments when calling a primitive as the continuation after a garbage collection.
 
 #### Base Library
