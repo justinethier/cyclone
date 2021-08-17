@@ -984,6 +984,7 @@
                 ;   args))
        (compile? #t)
        (run-scm-compiler? (member "-run-scm-compiler" args))
+       (no-compiler-subprocess (member "-no-compiler-subprocess" args))
        (cc-prog (apply string-append (collect-opt-values args "-CP")))
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
@@ -1133,10 +1134,18 @@ Debug options:
           (run-compiler non-opts append-dirs prepend-dirs))
         (else
           ;; Generate the C file
-          (system
-            (string-append 
-              (calling-program) " -run-scm-compiler "
-              (string-join args " ")))
+          (cond
+           (no-compiler-subprocess
+            ;; Special case, we can generate .C file within this process
+            (run-compiler non-opts append-dirs prepend-dirs))
+           (else
+            ;; Normal path is to run another instance of cyclone to generate
+            ;; the .C file. This lets us immediately free those resources once
+            ;; the Scheme compilation is done.
+            (system
+              (string-append 
+                (calling-program) " -run-scm-compiler "
+                (string-join args " ")))))
           ;; Call the C compiler
           (run-external-compiler
             non-opts append-dirs prepend-dirs
