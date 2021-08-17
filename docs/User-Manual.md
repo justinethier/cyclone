@@ -12,7 +12,7 @@
   - [Generated Files](#generated-files)
   - [Interpreter](#interpreter)
 - [Language Details](#language-details)
-- [Macro Systems](#macro-systems)
+- [Macros](#macros)
   - [Syntax Rules](#syntax-rules)
   - [Explicit Renaming](#explicit-renaming)
   - [Debugging](#debugging)
@@ -164,7 +164,7 @@ A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differ
 
 [API Documentation](API.md) is available for the libraries provided by Cyclone.
 
-# Macro Systems
+# Macros
 
 ## Syntax Rules
 
@@ -178,7 +178,7 @@ High-level hygienic macros may be created using `syntax-rules`. This system is b
 
 ## Explicit Renaming
 
-Alternatively a low-level explicit renaming (ER) macros system is also provided that allows defining macros using Scheme code, in a similar manner as `defmacro`. 
+Alternatively a low-level explicit renaming (ER) system is provided that allows defining macros using Scheme code, in a similar manner as `defmacro`. 
 
 This macro system provides the convenience functions `(rename identifier)` to hygienically rename an identifier and `(compare identifier1 identifier2)` to compare two identifiers:
 
