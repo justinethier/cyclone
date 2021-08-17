@@ -195,8 +195,7 @@ This macro system provides the convenience functions `(rename identifier)` to hy
 
 ## Debugging
 
-- A file may be compiled with the `-t` option which will write all of the intermediate transformations - including macro expansions - out to the `.c` file.
-- From the interpreter one can use `expand`: 
+- From the interpreter one can use `expand` to perform macro expansion on the given expression:
 
       cyclone> (expand '(when #t (+ 1 2 3)))
       (if #t ((lambda () (+ 1 2 3))) )
@@ -210,6 +209,8 @@ This macro system provides the convenience functions `(rename identifier)` to hy
            `(if ,(cadr exp)
                 ((lambda () ,@(cddr exp)))))
         '(when #t  (write 1) (write 2)) #f #f))
+
+- Finally, a Scheme file may be compiled with the `-t` option to write all of the intermediate transformations - including macro expansions - out to the corresponding `.c` file.
 
 # Multithreaded Programming
 
