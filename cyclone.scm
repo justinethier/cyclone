@@ -983,6 +983,7 @@
                 ;               (equal? #\- (string-ref arg 0)))))
                 ;   args))
        (compile? #t)
+       (run-scm-compiler? (member "-run-scm-compiler" args))
        (cc-prog (apply string-append (collect-opt-values args "-CP")))
        (cc-exec (apply string-append (collect-opt-values args "-CE")))
        (cc-lib  (apply string-append (collect-opt-values args "-CL")))
@@ -1126,13 +1127,20 @@ Debug options:
             (cdr err))
           (newline)
           (exit 1)))
-      (let ((t (thread-start! 
-                 (make-thread (lambda () (run-compiler non-opts append-dirs prepend-dirs))))))
-        (thread-join! t)
-        (run-external-compiler
-          non-opts compile? append-dirs prepend-dirs
-          cc-prog cc-exec cc-lib cc-so 
-          cc-opts cc-linker-opts cc-linker-extra-objects))
-      
+      (cond
+        (run-scm-compiler? 
+          ;; Compile Scheme code into a C file
+          (run-compiler non-opts append-dirs prepend-dirs))
+        (else
+          ;; Generate the C file
+          (system
+            (string-append 
+              (calling-program) " -run-scm-compiler "
+              (string-join args " ")))
+          ;; Call the C compiler
+          (run-external-compiler
+            non-opts compile? append-dirs prepend-dirs
+            cc-prog cc-exec cc-lib cc-so 
+            cc-opts cc-linker-opts cc-linker-extra-objects)))
       ))))
 
