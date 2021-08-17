@@ -721,9 +721,7 @@
     in-prog))
 
 ;; Compile and emit:
-(define (run-compiler args cc? cc-prog cc-exec cc-lib cc-so 
-                      cc-opts cc-prog-linker-opts cc-prog-linker-objs 
-                      append-dirs prepend-dirs)
+(define (run-compiler args append-dirs prepend-dirs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -827,9 +825,10 @@
       (cdr (assoc symbol meta))
       default))
 
-(define (run-external-compiler args cc? cc-prog cc-exec cc-lib cc-so 
-                      cc-opts cc-prog-linker-opts cc-prog-linker-objs 
-                      append-dirs prepend-dirs)
+(define (run-external-compiler 
+           args append-dirs prepend-dirs
+           cc? cc-prog cc-exec cc-lib cc-so 
+           cc-opts cc-prog-linker-opts cc-prog-linker-objs)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -1126,12 +1125,10 @@ Debug options:
             (cdr err))
           (newline)
           (exit 1)))
-      (run-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so 
-                    cc-opts cc-linker-opts cc-linker-extra-objects 
-                    append-dirs prepend-dirs)
-      (run-external-compiler non-opts compile? cc-prog cc-exec cc-lib cc-so 
-                    cc-opts cc-linker-opts cc-linker-extra-objects 
-                    append-dirs prepend-dirs)
+      (run-compiler non-opts append-dirs prepend-dirs)
+      (run-external-compiler non-opts compile? append-dirs prepend-dirs
+                             cc-prog cc-exec cc-lib cc-so 
+                             cc-opts cc-linker-opts cc-linker-extra-objects)
       
       ))))
 
