@@ -12,6 +12,8 @@
   - [Generated Files](#generated-files)
   - [Interpreter](#interpreter)
 - [Language Details](#language-details)
+- [Macro Systems](#macro-systems)
+  - [Debugging](#debugging)
 - [Multithreaded Programming](#multithreaded-programming)
   - [Thread Safety](#thread-safety)
 - [Foreign Function Interface](#foreign-function-interface)
@@ -159,6 +161,48 @@ Cyclone implements the Scheme language as documented by the [R<sup>7</sup>RS Sch
 A [R<sup>7</sup>RS Compliance Chart](Scheme-Language-Compliance.md) lists differences between the specification and Cyclone's implementation.
 
 [API Documentation](API.md) is available for the libraries provided by Cyclone.
+
+# Macro Systems
+
+## Overview
+
+Cyclone provides two macro systems. 
+
+High-level hygienic macros may be created using `syntax-rules`. This system is based on a template language specified by R<sup>7</sup>RS. The specification goes into more detail on how to work with these macros.
+
+    (define-syntax when
+      (syntax-rules  ()
+        ((when test result1 result2 ...)
+         (if test
+             (begin result1 result2 ...)))))
+
+Alternatively a low-level explicit renaming (ER) macros system is also provided that allows defining macros using Scheme code, in a similar manner as `defmacro`. This macro system provides the convenience functions `(rename identifier)` to hygienically rename an identifier and `(compare identifier1 identifier2)` to compare two identifiers.
+
+    (define-syntax when
+      (er-macro-transformer
+        (lambda (exp rename compare)
+          (if (null? (cdr exp)) (error/loc "empty when" exp))
+          (if (null? (cddr exp)) (error/loc "no when body" exp))
+          `(if ,(cadr exp)
+               ((lambda () ,@(cddr exp)))))))
+
+## Debugging
+
+- A file may be compiled with the `-t` option which will write all of the intermediate transformations - including macro expansions - out to the `.c` file.
+- From the interpreter one can use `expand`: 
+
+      cyclone> (expand '(when #t (+ 1 2 3)) *global-environment* '())
+      (if #t ((lambda () (+ 1 2 3))) )
+
+- Alternatively when developing an ER macro, since its just a Scheme function, the macro can be defined as a `lambda` and passed a quoted expression to debug.
+
+      (pretty-print
+        ((lambda (exp rename compare)
+           (if (null? (cdr exp)) (error/loc "empty when" exp))
+           (if (null? (cddr exp)) (error/loc "no when body" exp))
+           `(if ,(cadr exp)
+                ((lambda () ,@(cddr exp)))))
+        '(when #t  (write 1) (write 2)) #f #f))
 
 # Multithreaded Programming
 
