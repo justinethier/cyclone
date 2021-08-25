@@ -982,8 +982,14 @@
 ;TODO: modify this whole section to use macros:get-env instead of *defined-macros*. macro:get-env becomes the mac-env. any new scopes need to extend that env, and an env parameter needs to be added to (expand). any macros defined with define-syntax use that env as their mac-env (how to store that)?
 ; expand : exp -> exp
 
-(define (expand exp env rename-env)
-  (_expand exp env rename-env '() '()))
+(define (expand exp . opts)
+  (let ((env (if (> (length opts) 0) 
+                 (car opts)
+                 *global-environment*))
+        (rename-env (if (> (length opts) 1) 
+                        (cadr opts) 
+                        (env:extend-environment '() '() '()))))
+    (_expand exp env rename-env '() '())))
 
 ;; Internal implementation of expand
 ;; exp - Expression to expand
