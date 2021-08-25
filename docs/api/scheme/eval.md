@@ -39,6 +39,11 @@ A non-standard function to initialize a new global environment.
 
 # expand
 
-    (expand expr environment rename-environment)
+    (expand expr [[environment] [rename-environment]])
 
-Perform macro expansion on `expr` and `environment` is the current environment. `rename-environment` is an environment containing variables renamed directly by macros; this would generally be an empty environment when using this function for macro debugging.
+Perform macro expansion on `expr` and return the resulting expression.
+
+`environment` may be optionally passed as the current environment. 
+
+`rename-environment` is an optional argument of an environment containing variables renamed directly by macros. This would generally be an empty environment when using this function for macro debugging.
+
