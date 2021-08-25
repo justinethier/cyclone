@@ -2,6 +2,9 @@
 
 ## TBD -
 
+Features
+
+- Make `expand` easier to use for casual macro debugging. Only a single expression is now required as an argument. Updated associated documentation.
 
 ## 0.32.0 - August 16, 2021
 
