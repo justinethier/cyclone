@@ -43,8 +43,6 @@ The `(scheme cyclone transforms)` library performs Scheme-to-Scheme transformati
 - [`env-make->id              `](#env-make-id)
 - [`env-make->values          `](#env-make-values)
 - [`env-make?                 `](#env-make)
-- [`expand                    `](#expand)
-- [`expand-lambda-body        `](#expand-lambda-body)
 - [`filter-unused-variables   `](#filter-unused-variables)
 - [`free-vars                 `](#free-vars)
 - [`get-macros                `](#get-macros)
@@ -162,10 +160,6 @@ The `(scheme cyclone transforms)` library performs Scheme-to-Scheme transformati
 # env-make->values 
 
 # env-make? 
-
-# expand 
-
-# expand-lambda-body
 
 # filter-unused-variables 
 
