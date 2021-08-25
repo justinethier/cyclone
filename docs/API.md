@@ -621,9 +621,6 @@ This section is an alphabetic listing of all the functions, objects, and macros 
 [`expt`](api/scheme/base.md#expt)
 
 - - -
-Error processing line docs/api/cyclone/concurrent.md:[Immutability](#immutability) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[General](#general) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Atoms](#atoms) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Delays](#delays) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Promises](#promises) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Futures](#futures) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Shared Queues](#shared-queues) details ((Bad argument type 1 #f)))(Error processing line docs/api/cyclone/concurrent.md:[Thread Pool](#thread-pool) details ((Bad argument type 1 #f)))
-
-- - -
 [`features`](api/scheme/base.md#features)
 [`fifth`](api/srfi/1.md#fifth)
 [`file-exists?          `](api/primitives.md#file-exists)
