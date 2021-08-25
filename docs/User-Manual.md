@@ -195,7 +195,7 @@ This macro system provides the convenience functions `(rename identifier)` to hy
 - A file may be compiled with the `-t` option which will write all of the intermediate transformations - including macro expansions - out to the `.c` file.
 - From the interpreter one can use `expand`: 
 
-      cyclone> (expand '(when #t (+ 1 2 3)) *global-environment* '())
+      cyclone> (expand '(when #t (+ 1 2 3)))
       (if #t ((lambda () (+ 1 2 3))) )
 
 - Alternatively when developing an ER macro, since its just a Scheme function, the macro can be defined as a `lambda` and passed a quoted expression to debug:
