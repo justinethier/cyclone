@@ -9,6 +9,8 @@ Features
       cyclone> (expand '(when #t (+ 1 2 3)))
       (if #t ((lambda () (+ 1 2 3))) )
 
+- During compilation the compiler will now call itself as a subprocess to perform Scheme-to-C compilation. This allows Cyclone to free all of those resources before calling the C compiler to generate a binary, resulting in more efficient compilation.
+
 ## 0.32.0 - August 16, 2021
 
 Features
