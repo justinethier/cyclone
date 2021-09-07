@@ -14,6 +14,7 @@ Features
 Bug Fixes
 
 - Do not display error message for missing file(s) if SCM->C compilation fails.
+- Do not inline calls to `system` as it could result in multiple calls of the same command.
 
 ## 0.32.0 - August 16, 2021
 

@@ -1057,7 +1057,8 @@
                     (lambda (arg)
                       (and (prim-call? arg)
                            ;; Do not inline functions that are looping over lists, seems counter-productive
-                           (not (member (car arg) '( member assoc Cyc-fast-member Cyc-fast-assoc assq assv memq memv)))
+                           ;; Or functions that may be harmful to call more than once such as system
+                           (not (member (car arg) '( member assoc Cyc-fast-member Cyc-fast-assoc assq assv memq memv system)))
                            (not (prim:cont? (car arg)))))
                     (cdr exp))
                   ;; Disallow primitives that allocate a new obj,
