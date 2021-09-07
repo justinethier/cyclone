@@ -430,7 +430,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd)
           ((char *)free) + free->size, next, ((char *)next) + next->size);
 #endif
   if (heap_type <= LAST_FIXED_SIZE_HEAP_TYPE) {
-    h->block_size = (heap_type + 1) * 32;
+    h->block_size = (heap_type + 1) * 8;
 //
     h->remaining = size - (size % h->block_size);
     h->data_end = h->data + h->remaining;
@@ -1082,7 +1082,7 @@ void *gc_try_alloc(gc_heap * h, size_t size, char *obj,
   for (f1 = h->free_list, f2 = f1->next; f2; f1 = f2, f2 = f2->next) {        // all free in this heap
     if (f2->size >= size) {   // Big enough for request
       // TODO: take whole chunk or divide up f2 (using f3)?
-      if (f2->size >= (size + gc_heap_align(1) /* min obj size */ )) {
+      if (f2->size >= (size + gc_word_align(1) /* min obj size */ )) {
         f3 = (gc_free_list *) (((char *)f2) + size);
         f3->size = f2->size - size;
         f3->next = f2->next;
@@ -1094,8 +1094,8 @@ void *gc_try_alloc(gc_heap * h, size_t size, char *obj,
       if (h->type != HEAP_HUGE) {
         // Copy object into heap now to avoid any uninitialized memory issues
         #if GC_DEBUG_TRACE
-        if (size < (32 * NUM_ALLOC_SIZES)) {
-          allocated_size_counts[(size / 32) - 1]++;
+        if (size < (8 * NUM_ALLOC_SIZES)) {
+          allocated_size_counts[(size / 8) - 1]++;
         }
         #endif
         gc_copy_obj(f2, obj, thd);
@@ -1233,8 +1233,8 @@ static void *gc_try_alloc_fixed_size(gc_heap * h, size_t size, char *obj, gc_thr
     if (result) {
       // Copy object into heap now to avoid any uninitialized memory issues
       #if GC_DEBUG_TRACE
-      if (size < (32 * NUM_ALLOC_SIZES)) {
-        allocated_size_counts[(size / 32) - 1]++;
+      if (size < (8 * NUM_ALLOC_SIZES)) {
+        allocated_size_counts[(size / 8) - 1]++;
       }
       #endif
       gc_copy_obj(result, obj, thd);
@@ -1366,9 +1366,9 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   int heap_type;
   void *(*try_alloc)(gc_heap * h, size_t size, char *obj, gc_thread_data * thd);
   void *(*try_alloc_slow)(gc_heap *h_passed, gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
-  size = gc_heap_align(size);
-  if (size <= (32 * (LAST_FIXED_SIZE_HEAP_TYPE + 1))) {
-    heap_type = (size - 1) / 32;
+  size = gc_word_align(size);
+  if (size <= (8 * (LAST_FIXED_SIZE_HEAP_TYPE + 1))) {
+    heap_type = (size - 1) / 8;
     try_alloc = &gc_try_alloc_fixed_size;
     try_alloc_slow = &gc_try_alloc_slow_fixed_size;
   } else if (size >= MAX_STACK_OBJ) {
@@ -1475,47 +1475,47 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
 #endif
   t = type_of(obj);
   if (t == pair_tag)
-    return gc_heap_align(sizeof(pair_type));
+    return gc_word_align(sizeof(pair_type));
   if (t == closureN_tag) {
-    return gc_heap_align(sizeof(closureN_type) +
+    return gc_word_align(sizeof(closureN_type) +
                          sizeof(object) * 
                          ((closureN_type *) obj)->num_elements);
   }
   if (t == double_tag)
-    return gc_heap_align(sizeof(double_type));
+    return gc_word_align(sizeof(double_type));
   if (t == closure1_tag)
-    return gc_heap_align(sizeof(closure1_type));
+    return gc_word_align(sizeof(closure1_type));
   if (t == string_tag) {
-    return gc_heap_align(sizeof(string_type) + string_len(obj) + 1);
+    return gc_word_align(sizeof(string_type) + string_len(obj) + 1);
   }
   if (t == vector_tag) {
-    return gc_heap_align(sizeof(vector_type) +
+    return gc_word_align(sizeof(vector_type) +
                          sizeof(object) * ((vector_type *) obj)->num_elements);
   }
   if (t == bytevector_tag) {
-    return gc_heap_align(sizeof(bytevector_type) +
+    return gc_word_align(sizeof(bytevector_type) +
                          sizeof(char) * ((bytevector) obj)->len);
   }
   if (t == macro_tag)
-    return gc_heap_align(sizeof(macro_type));
+    return gc_word_align(sizeof(macro_type));
   if (t == bignum_tag)
-    return gc_heap_align(sizeof(bignum_type));
+    return gc_word_align(sizeof(bignum_type));
   if (t == port_tag)
-    return gc_heap_align(sizeof(port_type));
+    return gc_word_align(sizeof(port_type));
   if (t == cvar_tag)
-    return gc_heap_align(sizeof(cvar_type));
+    return gc_word_align(sizeof(cvar_type));
   if (t == c_opaque_tag)
-    return gc_heap_align(sizeof(c_opaque_type));
+    return gc_word_align(sizeof(c_opaque_type));
   if (t == mutex_tag)
-    return gc_heap_align(sizeof(mutex_type));
+    return gc_word_align(sizeof(mutex_type));
   if (t == cond_var_tag)
-    return gc_heap_align(sizeof(cond_var_type));
+    return gc_word_align(sizeof(cond_var_type));
   if (t == atomic_tag)
-    return gc_heap_align(sizeof(atomic_type));
+    return gc_word_align(sizeof(atomic_type));
   if (t == integer_tag)
-    return gc_heap_align(sizeof(integer_type));
+    return gc_word_align(sizeof(integer_type));
   if (t == complex_num_tag)
-    return gc_heap_align(sizeof(complex_num_type));
+    return gc_word_align(sizeof(complex_num_type));
 
   fprintf(stderr, "gc_allocated_bytes: unexpected object %p of type %d\n", obj,
           t);
@@ -2653,11 +2653,13 @@ void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
   }
   thd->heap_num_huge_allocations = 0;
   thd->num_minor_gcs = 0;
-  thd->cached_heap_free_sizes = calloc(5, sizeof(uintptr_t));
-  thd->cached_heap_total_sizes = calloc(5, sizeof(uintptr_t));
+  thd->cached_heap_free_sizes = calloc(5 * 4, sizeof(uintptr_t));
+  thd->cached_heap_total_sizes = calloc(5 * 4, sizeof(uintptr_t));
   thd->heap = calloc(1, sizeof(gc_heap_root));
   thd->heap->heap = calloc(1, sizeof(gc_heap *) * NUM_HEAP_TYPES);
   thd->heap->heap[HEAP_HUGE] = gc_heap_create(HEAP_HUGE, 1024, thd);
+//printf("DEBUG NUM_HEAP_TYPES = %d\n", NUM_HEAP_TYPES);
+//printf("DEBUG HEAP_HUGE = %d\n", HEAP_HUGE);
   for (int i = 0; i < HEAP_HUGE; i++) {
     thd->heap->heap[i] = gc_heap_create(i, INITIAL_HEAP_SIZE, thd);
   }

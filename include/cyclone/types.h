@@ -186,9 +186,9 @@ typedef int gc_heap_type;
 
 /** The first heap type that is not fixed-size */
 #if INTPTR_MAX == INT64_MAX
-#define LAST_FIXED_SIZE_HEAP_TYPE 2
+#define LAST_FIXED_SIZE_HEAP_TYPE (2 * 4)
 #else
-#define LAST_FIXED_SIZE_HEAP_TYPE 1
+#define LAST_FIXED_SIZE_HEAP_TYPE (1 * 4)
 #endif
 
 #define HEAP_REST (LAST_FIXED_SIZE_HEAP_TYPE + 1)
