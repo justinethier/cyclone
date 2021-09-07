@@ -1142,10 +1142,11 @@ Debug options:
             ;; Normal path is to run another instance of cyclone to generate
             ;; the .C file. This lets us immediately free those resources once
             ;; the Scheme compilation is done.
-            (system
-              (string-append 
-                (calling-program) " -run-scm-compiler "
-                (string-join args " ")))))
+            (when (not (zero? (system
+                                (string-append 
+                                  (calling-program) " -run-scm-compiler "
+                                  (string-join args " ")))))
+              (exit 1))))
           ;; Call the C compiler
           (run-external-compiler
             non-opts append-dirs prepend-dirs
