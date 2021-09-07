@@ -32,7 +32,7 @@
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_end(h) ((object)((char*)h->data + h->size))
-#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
+#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_word_align(1))
 #define gc_free_chunk_size (sizeof(gc_free_list))
 
 #define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((uintptr_t)-1)-((1<<(bits))-1)))
@@ -41,8 +41,8 @@
 #define gc_word_align(n) gc_align((n), 3)
 
 // Align on GC_BLOCK_BITS, currently block size of 32 bytes
-#define gc_heap_align(n) gc_word_align(n)
-//#define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
+//#define gc_heap_align(n) gc_word_align(n)
+#define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
 
 ////////////////////
 // Global variables
@@ -410,7 +410,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd)
   h->last_alloc_size = 0;
   thd->cached_heap_total_sizes[heap_type] += size;
   thd->cached_heap_free_sizes[heap_type] += size;
-  h->data = (char *)gc_align(sizeof(h->data) + (uintptr_t) & (h->data), 5);
+  h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
   h->next = NULL;
   h->num_unswept_children = 0;
   free = h->free_list = (gc_free_list *) h->data;
@@ -1017,7 +1017,7 @@ gc_heap *gc_grow_heap(gc_heap * h, size_t size, gc_thread_data *thd)
   gc_heap *h_last = h, *h_new;
   // Compute size of new heap page
   if (h->type == HEAP_HUGE) {
-    new_size = gc_heap_align(size) + 128;
+    new_size = gc_word_align(size) + 128;
     while (h_last->next) {
       h_last = h_last->next;
     }
