@@ -10,7 +10,7 @@ Features
 - Cyclone will no longer memoize pure functions by default.
 - Added build option `CYC_PTHREAD_SET_STACK_SIZE` to allow Cyclone to specify a thread stack size rather than using the OS default. EG:
 
-     make CYC_PTHREAD_SET_STACK_SIZE=1 libcyclone.a
+      make CYC_PTHREAD_SET_STACK_SIZE=1 libcyclone.a
 
 Bug Fixes
 
