@@ -41,7 +41,8 @@
 #define gc_word_align(n) gc_align((n), 3)
 
 // Align on GC_BLOCK_BITS, currently block size of 32 bytes
-#define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
+#define gc_heap_align(n) gc_word_align(n)
+//#define gc_heap_align(n) gc_align(n, GC_BLOCK_BITS)
 
 ////////////////////
 // Global variables
@@ -409,7 +410,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd)
   h->last_alloc_size = 0;
   thd->cached_heap_total_sizes[heap_type] += size;
   thd->cached_heap_free_sizes[heap_type] += size;
-  h->data = (char *)gc_heap_align(sizeof(h->data) + (uintptr_t) & (h->data));
+  h->data = (char *)gc_align(sizeof(h->data) + (uintptr_t) & (h->data), 5);
   h->next = NULL;
   h->num_unswept_children = 0;
   free = h->free_list = (gc_free_list *) h->data;
