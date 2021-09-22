@@ -32,7 +32,7 @@
 /* HEAP definitions, based off heap from Chibi scheme */
 #define gc_heap_first_block(h) ((object)(h->data + gc_heap_align(gc_free_chunk_size)))
 #define gc_heap_end(h) ((object)((char*)h->data + h->size))
-#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_word_align(1))
+#define gc_heap_pad_size(s) (sizeof(struct gc_heap_t) + (s) + gc_heap_align(1))
 #define gc_free_chunk_size (sizeof(gc_free_list))
 
 #define gc_align(n, bits) (((n)+(1<<(bits))-1)&(((uintptr_t)-1)-((1<<(bits))-1)))
@@ -156,8 +156,11 @@ static void mark_buffer_free(mark_buffer *mb)
 // END mark buffer
 
 #if GC_DEBUG_TRACE
-const int NUM_ALLOC_SIZES = 10;
-static double allocated_size_counts[10] = {
+const int NUM_ALLOC_SIZES = 25
+static double allocated_size_counts[25] = {
+  0,0,0,0,0,
+  0,0,0,0,0,
+  0,0,0,0,0,
   0,0,0,0,0,
   0,0,0,0,0};
 static double allocated_obj_counts[25] = {
@@ -431,6 +434,7 @@ gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd)
           ((char *)free) + free->size, next, ((char *)next) + next->size);
 #endif
   if (heap_type <= LAST_FIXED_SIZE_HEAP_TYPE) {
+  //if (0) { //heap_type <= LAST_FIXED_SIZE_HEAP_TYPE) {
     h->block_size = (heap_type + 1) * 8;
 //
     h->remaining = size - (size % h->block_size);
@@ -1017,7 +1021,7 @@ gc_heap *gc_grow_heap(gc_heap * h, size_t size, gc_thread_data *thd)
   gc_heap *h_last = h, *h_new;
   // Compute size of new heap page
   if (h->type == HEAP_HUGE) {
-    new_size = gc_word_align(size) + 128;
+    new_size = gc_heap_align(size) + 128;
     while (h_last->next) {
       h_last = h_last->next;
     }
@@ -1241,6 +1245,8 @@ static void *gc_try_alloc_fixed_size(gc_heap * h, size_t size, char *obj, gc_thr
       gc_copy_obj(result, obj, thd);
 
       h->free_size -= size;
+
+//printf("DEBUG %p %p %p %p\n", result, obj, h->data, h->data_end);
       return result;
     }
     return NULL;
