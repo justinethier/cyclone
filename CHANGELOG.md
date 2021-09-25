@@ -1,6 +1,6 @@
 # Changelog
 
-## TBD -
+## 0.33.0 - September 24, 2021
 
 Features
 
