@@ -882,12 +882,12 @@
                    (string-append
                      (string-replace-all 
                        (string-replace-all 
-                         ;(Cyc-compilation-environment 'cc-prog) 
-                         (get-comp-env 'cc-prog cc-prog)
-                         "~src-file~" src-file)
+                         (string-replace-all 
+                           ;(Cyc-compilation-environment 'cc-prog) 
+                           (get-comp-env 'cc-prog cc-prog)
+                           "~src-file~" src-file)
+                         "~cc-extra~" cc-opts)
                        "~exec-file~" exec-file)
-                     " "
-                     cc-opts
                      " "
                      cc-opts*))
                  (comp-objs-cmd 
@@ -895,13 +895,13 @@
                    (string-replace-all
                      (string-replace-all
                        (string-replace-all
-                         ;(Cyc-compilation-environment 'cc-exec)
-                         (get-comp-env 'cc-exec cc-exec)
-                         "~exec-file~" exec-file)
+                         (string-replace-all
+                           ;(Cyc-compilation-environment 'cc-exec)
+                           (get-comp-env 'cc-exec cc-exec)
+                           "~exec-file~" exec-file)
+                         "~ld-extra~" cc-prog-linker-opts)
                        "~obj-files~" objs-str)
                      "~exec-file~" exec-file)
-                   " "
-                   cc-prog-linker-opts
                    " "
                    c-linker-options
                    )))
@@ -922,11 +922,11 @@
                (string-append
                 (string-replace-all 
                   (string-replace-all 
-                    (get-comp-env 'cc-lib cc-lib)
-                    "~src-file~" src-file)
+                    (string-replace-all 
+                      (get-comp-env 'cc-lib cc-lib)
+                      "~src-file~" src-file)
+                    "~cc-extra~" cc-opts)
                   "~exec-file~" exec-file)
-                " "
-                cc-opts
                 " "
                 cc-opts*))
               (comp-so-cmd
