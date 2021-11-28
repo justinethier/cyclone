@@ -69,6 +69,11 @@ Arch Linux users can install using the [AUR](https://aur.archlinux.org/packages/
     cd cyclone-scheme
     makepkg -si
 
+## Gentoo Linux
+![Gentoo Linux](docs/images/gentoo-linux-logo.png "Gentoo Linux")
+
+Cyclone is available from the [official Gentoo package repository](https://packages.gentoo.org/packages/dev-scheme/cyclone).
+
 ## Build from Source
 ![Build from Source](docs/images/build-thumb.png "Build from Source")
 
