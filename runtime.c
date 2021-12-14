@@ -351,7 +351,9 @@ object cell_get(object cell)
 object Cyc_global_set(void *thd, object identifier, object * glo, object value)
 {
   gc_mut_update((gc_thread_data *) thd, *glo, value);
-  *(glo) = value;
+  if (*glo != value) {
+    *(glo) = value;
+  }
   ((gc_thread_data *) thd)->globals_changed = 1;
   return value;
 }
@@ -362,7 +364,9 @@ static void Cyc_global_set_cps_gc_return(void *data, object cont, int argc, obje
   object val = args[1];
   object next = args[2];
   object *glo = (object *)glo_obj;
-  *(glo) = val;
+  if (*glo != val) {
+    *(glo) = val;
+  }
   closcall1(data, (closure)next, val);
 }
 
@@ -386,7 +390,9 @@ object Cyc_global_set_cps(void *thd, object cont, object identifier, object * gl
     object buf[3]; buf[0] = (object)glo; buf[1] = value; buf[2] = cont;
     GC(data, &clo, buf, 3);
   }
-  *(glo) = value; // Already have heap objs, do assignment now
+  if (*glo != value) {
+    *(glo) = value; // Already have heap objs, do assignment now
+  }
   return value;
 }
 

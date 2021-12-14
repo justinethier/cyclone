@@ -347,7 +347,8 @@
               (cond
                 ((eq? e 'call/cc) #f) ;; Special case
                 ((and (not module-global?)
-                      (not imported-var?))
+                      (not imported-var?)
+                      (not (prim? e)))
                  (error "Identifier is exported but not defined" e))
                 (else
                   ;; Pass throughs are not defined in this module,
