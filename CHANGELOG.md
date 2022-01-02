@@ -1,6 +1,6 @@
 # Changelog
 
-## TBD
+## 0.34.0 - January 2, 2022
 
 Features
 
