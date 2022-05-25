@@ -15,3 +15,13 @@
 (define l2 (list l1))
 (set-cdr! l1 l2)
 (display l1)
+
+; TODO: need to compare pointers to prevent this sort of thing:
+;
+; cyclone> (display #(1 1 1 1 1 1 1 1))
+; #(... ... ... ... ... ... ... ...)
+;
+; for equalp of pairs we track progress using cdr, cddr
+; proves that if pointers are equal we are traversing the same list
+;
+; how to handle vector traversal?
