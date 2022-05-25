@@ -1031,7 +1031,29 @@ object Cyc_display_va_list(void *data, object x, object opts)
   return Cyc_display(data, x, fp);
 }
 
-object Cyc_display(void *data, object x, FILE * port)
+object _next(object x) {
+  if (x == NULL || is_value_type(x)) {
+    return x;
+  }
+
+  switch(type_of(x)) {
+    case pair_tag:
+      return cdr(x);
+    case vector_tag: {
+      vector_type *v = (vector)x;
+      if (v->num_elements > 1) {
+        return v->elements[1];
+      } else {
+        return x;
+      }
+    }
+    default: 
+      return x;
+  }
+}
+
+
+object _Cyc_display(void *data, object x, FILE * port, object fast)
 {
   object tmp = NULL;
   object has_cycle = boolean_f;
@@ -1117,7 +1139,12 @@ object Cyc_display(void *data, object x, FILE * port)
         if (i > 0) {
           fprintf(port, " ");
         }
-        Cyc_display(data, ((vector) x)->elements[i], port);
+        object o = ((vector) x)->elements[i];
+        if (o == fast) {
+          fprintf(port, "...");
+        } else {
+          _Cyc_display(data, o, port, _next(_next(fast)));
+        }
       }
     }
     fprintf(port, ")");
@@ -1133,9 +1160,14 @@ object Cyc_display(void *data, object x, FILE * port)
     fprintf(port, ")");
     break;
   case pair_tag:
+    if (x == fast) {
+      fprintf(port, "...");
+      break;
+    }
+
     has_cycle = Cyc_has_cycle(x);
     fprintf(port, "(");
-    Cyc_display(data, car(x), port);
+    _Cyc_display(data, car(x), port, _next(_next(fast)));
 
     // Experimenting with displaying lambda defs in REPL
     // not good enough but this is a start. would probably need
@@ -1143,7 +1175,7 @@ object Cyc_display(void *data, object x, FILE * port)
     if (Cyc_is_symbol(car(x)) == boolean_t &&
         strncmp(((symbol) car(x))->desc, "procedure", 10) == 0) {
       fprintf(port, " ");
-      Cyc_display(data, cadr(x), port);
+      _Cyc_display(data, cadr(x), port, _next(_next(cadr(x)))); // TODO: fast?
       fprintf(port, " ...)");   /* skip body and env for now */
       break;
     }
@@ -1154,13 +1186,13 @@ object Cyc_display(void *data, object x, FILE * port)
           break;                /* arbitrary number, for now */
       }
       fprintf(port, " ");
-      Cyc_display(data, car(tmp), port);
+      _Cyc_display(data, car(tmp), port, _next(_next(fast)));
     }
     if (has_cycle == boolean_t) {
       fprintf(port, " ...");
     } else if (tmp) {
       fprintf(port, " . ");
-      Cyc_display(data, tmp, port);
+      _Cyc_display(data, tmp, port, _next(_next(fast)));
     }
     fprintf(port, ")");
     break;
@@ -1201,6 +1233,10 @@ object Cyc_display(void *data, object x, FILE * port)
     exit(1);
   }
   return quote_void;
+}
+
+object Cyc_display(void *data, object x, FILE * port) {
+  return _Cyc_display(data, x, port, _next(x));
 }
 
 void dispatch_write_va(void *data, object clo, int argc, object *args)
