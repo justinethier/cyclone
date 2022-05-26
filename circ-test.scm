@@ -16,6 +16,11 @@
 (set-cdr! l1 l2)
 (display l1)
 
+(define l1 (list 1 2 3))
+(define l2 (list 1 l1 3))
+(set-cdr! (cdr l1) l2)
+(write l1)
+
 ; TODO: need to compare pointers to prevent this sort of thing:
 ;
 ; cyclone> (display #(1 1 1 1 1 1 1 1))
