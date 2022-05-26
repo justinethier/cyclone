@@ -4,7 +4,7 @@
 
 Bug Fixes
 
-- Enforce a maximum recursion depth when printing an object via `display` and `write`. This prevents segmentation faults when printing circular data structures.
+- Enforce a maximum recursion depth when printing an object via `display` and `write`, and when comparing objects via `equal?`. This prevents segmentation faults when working with circular data structures.
 
 ## 0.34.0 - January 2, 2022
 

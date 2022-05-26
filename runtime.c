@@ -785,7 +785,8 @@ void Cyc_rt_raise_msg(void *data, const char *err)
 
 /* END exception handler */
 
-int equal(object x, object y)
+object _equalp(object x, object y, int depth);
+static int equal(object x, object y, int depth)
 {
   if (x == y)
     return 1;
@@ -818,7 +819,7 @@ int equal(object x, object y)
       int i;
       if (x == y) return 1;
       for (i = 0; i < ((vector) x)->num_elements; i++) {
-        if (equalp(((vector) x)->elements[i], ((vector) y)->elements[i]) ==
+        if (_equalp(((vector) x)->elements[i], ((vector) y)->elements[i], depth + 1) ==
             boolean_f)
           return 0;
       }
@@ -1217,7 +1218,8 @@ done:
   return quote_void;
 }
 
-object Cyc_display(void *data, object x, FILE * port) {
+object Cyc_display(void *data, object x, FILE * port) 
+{
   return _Cyc_display(data, x, port, 0);
 }
 
@@ -1624,7 +1626,7 @@ object Cyc_heap_alloc_port(void *data, port_type *stack_p)
 /**
  * Check two objects for deep equality
  */
-object equalp(object x, object y)
+object _equalp(object x, object y, int depth)
 {
   int second_cycle = 0;
   object slow_lis = x, fast_lis = NULL;
@@ -1636,7 +1638,7 @@ object equalp(object x, object y)
   }
 
   for (;; x = cdr(x), y = cdr(y)) {
-    if (equal(x, y))
+    if (depth == MAX_DEPTH || equal(x, y, depth))
       return boolean_t;
     if (is_value_type(x) || is_value_type(y) ||
         (x == NULL) || (y == NULL) ||
@@ -1648,7 +1650,7 @@ object equalp(object x, object y)
         pcar_y == car(y)) {
       // do nothing, already equal
     } else {
-      if (boolean_f == equalp(car(x), car(y)))
+      if (boolean_f == _equalp(car(x), car(y), depth + 1))
         return boolean_f;
       pcar_x = car(x);
       pcar_y = car(y);
@@ -1680,6 +1682,11 @@ object equalp(object x, object y)
     slow_lis = cdr(slow_lis);
     fast_lis = cddr(fast_lis);
   }
+}
+
+object equalp(object x, object y)
+{
+  return _equalp(x, y, 0);
 }
 
 object Cyc_num_cmp_va_list(void *data, int argc,
