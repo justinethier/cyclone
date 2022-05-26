@@ -1,5 +1,11 @@
 # Changelog
 
+## - TBD
+
+Bug Fixes
+
+- Enforce a maximum recursion depth when printing an object via `display` and `write`. This prevents segmentation faults when printing circular data structures.
+
 ## 0.34.0 - January 2, 2022
 
 Features
