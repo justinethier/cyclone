@@ -35,6 +35,41 @@
 (set-cdr! l '(c b)) ; Above seems to break if it replaces this line
 (assert:equal "list? on circular list" (list? l) #t)
 
+;; Circular data structures
+(define v1 (vector #f))
+(define v2 (vector v1))
+(vector-set! v1 0 v2)
+(let ((fp (open-output-string)))
+  (display v1 fp)
+  (assert:equal "display circular vector" (> (string-length (get-output-string fp)) 0) #t))
+(assert:equal "equality on circular vectors" (equal? v1 v2) #t)
+(newline)
+
+(define v1 (vector 1 2 3))
+(define v2 (vector 1 v1 3))
+(vector-set! v1 1 v2)
+(let ((fp (open-output-string)))
+  (write v1 fp)
+  (assert:equal "display circular vector" (> (string-length (get-output-string fp)) 0) #t))
+(assert:equal "equality on circular vectors, test 2" (equal? v1 v2) #t)
+(newline)
+
+(define l1 (list #f))
+(define l2 (list l1))
+(set-cdr! l1 l2)
+(let ((fp (open-output-string)))
+  (display l1 fp)
+  (assert:equal "display circular list" (> (string-length (get-output-string fp)) 0) #t))
+(assert:equal "equality on circular lists" (equal? l1 l2) #f)
+
+(define l1 (list 1 2 3))
+(define l2 (list 1 l1 3))
+(set-cdr! (cdr l1) l2)
+(let ((fp (open-output-string)))
+  (write l1 fp)
+  (assert:equal "display circular list" (> (string-length (get-output-string fp)) 0) #t))
+(assert:equal "equality on circular lists, test 2" (equal? l1 l2) #f)
+
 ;; Adder example
 (define (make-adder x)
   (lambda (y) (+ x  y)))
