@@ -2,6 +2,10 @@
 
 ## 0.35.0 - TBD
 
+Features
+
+- Add `memory-streams` to the list of symbols that `(features)` can return, indicating that the current installation supports in-memory streams.
+
 Bug Fixes
 
 - Enforce a maximum recursion depth when printing an object via `display` and `write`, and when comparing objects via `equal?`. This prevents segmentation faults when working with circular data structures.

@@ -235,14 +235,17 @@
   (begin
     ;; Features implemented by this Scheme
     (define (features) 
-      (cons 
-        'cyclone
-        (cons
-          (string->symbol 
-            (string-append "version-" *version-number*))
+      (let ((feats *other-features*))
+        (if (> (string-length (Cyc-compilation-environment 'memory-streams)) 0)
+          (set! feats (cons 'memory-streams feats)))
+        (cons 
+          'cyclone
           (cons
-            (string->symbol (Cyc-compilation-environment 'platform))
-            *other-features*))))
+            (string->symbol 
+              (string-append "version-" *version-number*))
+            (cons
+              (string->symbol (Cyc-compilation-environment 'platform))
+              feats)))))
 
     (define *other-features* 
             '(r7rs 
