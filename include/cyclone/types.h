@@ -834,6 +834,22 @@ typedef struct {
 }
 
 /**
+ * @brief Exact integer of unlimited precision.
+ *
+ * TODO: describe this type
+ * 
+ * Note memory is allocated directly on the heap to allow for numeric optimizations
+ * that can be performed if the amount of stack space used per allocation remains constant.
+ */
+typedef struct {
+  gc_header_type hdr;
+  tag_type tag;
+  uint32_t num_digits;
+  uint32_t sign;
+  // TODO: digits (implicit, after object??)
+} bignum2_type;
+
+/**
  * @brief Complex number
  */
 typedef struct {
