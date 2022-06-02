@@ -1770,6 +1770,25 @@ void Cyc_int2bignum(int n, mp_int *bn)
   }
 }
 
+object Cyc_bignum2(bignum2_type *bn, int sign, int n)
+{
+  uint32_t *p = &(bn->sign);
+  *(p++) = 1;
+  *(p++) = sign;
+  *(p++) = n;
+  return bn;
+}
+
+object Cyc_int2bignum2(gc_thread_data *data, int n)
+{
+  bignum2_type *bn = gc_alloc_bignum2(data, n);
+  if (n < 0) {
+    return Cyc_bignum2(bn, 1, -n);
+  } else {
+    return Cyc_bignum2(bn, 0, n);
+  }
+}
+
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
 {
   mp_int tmp;

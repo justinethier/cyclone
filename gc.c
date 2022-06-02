@@ -1322,16 +1322,17 @@ hrt_log_delta("gc sweep fixed size", tstamp);
  * @param data  The mutator's thread data object
  * @return Pointer to a heap object for the bignum
  */
-void *gc_alloc_bignum2(gc_thread_data *data)
+void *gc_alloc_bignum2(gc_thread_data *data, uint32_t num_digits)
 {
-  int heap_grown, result;
+  int heap_grown;
   bignum2_type *bn;
   bignum2_type tmp;
+  tmp.num_digits = num_digits;
   // No need to do this since tmp is always local
   //tmp.hdr.mark = gc_color_red;
   //tmp.hdr.grayed = 0;
   tmp.tag = bignum2_tag;
-  bn = gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum2_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+  bn = gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum2_type) + (num_digits * sizeof(uint32_t)), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
   return bn;
 }
 

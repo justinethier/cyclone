@@ -415,7 +415,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, size_t size, char *obj, g
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
 void *gc_alloc_bignum(gc_thread_data *data);
-void *gc_alloc_bignum2(gc_thread_data *data);
+void *gc_alloc_bignum2(gc_thread_data *data, uint32_t num_digits);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 
@@ -1555,6 +1555,7 @@ void vpbuffer_free(void **buf);
 /* Bignum utility functions */
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_int2bignum(int n, mp_int *bn);
+object Cyc_int2bignum2(gc_thread_data *data, int n);
 
 /* Remaining GC prototypes that require objects to be defined */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
