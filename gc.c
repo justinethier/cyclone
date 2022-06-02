@@ -910,6 +910,15 @@ char *gc_copy_obj(object dest, char *obj, gc_thread_data * thd)
       ((bignum_type *)hp)->bn.dp = ((bignum_type *)obj)->bn.dp;
       return (char *)hp;
     }
+  case bignum2_tag: {
+      bignum2_type *hp = dest;
+      mark(hp) = thd->gc_alloc_color;
+      type_of(hp) = bignum2_tag;
+      ((bignum2_type *)hp)->num_digits = ((bignum2_type *)obj)->num_digits;
+      ((bignum2_type *)hp)->sign = ((bignum2_type *)obj)->sign;
+      // Don't copy digits, caller will populate them
+      return (char *)hp;
+    }
   case cvar_tag:{
       cvar_type *hp = dest;
       mark(hp) = thd->gc_alloc_color;
@@ -1313,6 +1322,24 @@ hrt_log_delta("gc sweep fixed size", tstamp);
  * @param data  The mutator's thread data object
  * @return Pointer to a heap object for the bignum
  */
+void *gc_alloc_bignum2(gc_thread_data *data)
+{
+  int heap_grown, result;
+  bignum2_type *bn;
+  bignum2_type tmp;
+  // No need to do this since tmp is always local
+  //tmp.hdr.mark = gc_color_red;
+  //tmp.hdr.grayed = 0;
+  tmp.tag = bignum2_tag;
+  bn = gc_alloc(((gc_thread_data *)data)->heap, sizeof(bignum2_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+  return bn;
+}
+
+/**
+ * @brief A convenience function for allocating bignums
+ * @param data  The mutator's thread data object
+ * @return Pointer to a heap object for the bignum
+ */
 void *gc_alloc_bignum(gc_thread_data *data)
 {
   int heap_grown, result;
@@ -1500,6 +1527,8 @@ size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r)
     return gc_heap_align(sizeof(macro_type));
   if (t == bignum_tag)
     return gc_heap_align(sizeof(bignum_type));
+  if (t == bignum2_tag)
+    return gc_heap_align(sizeof(bignum2_type) + ((bignum2_type *)obj)->num_digits * sizeof(uint32_t));
   if (t == port_tag)
     return gc_heap_align(sizeof(port_type));
   if (t == cvar_tag)

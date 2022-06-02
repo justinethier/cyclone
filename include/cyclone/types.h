@@ -71,6 +71,7 @@ enum object_tag {
       , atomic_tag      = 22
       , void_tag        = 23
       , record_tag      = 24
+      , bignum2_tag     = 25
 };
 
 /**
@@ -414,6 +415,7 @@ void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, size_t size, char *obj, g
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
 void *gc_alloc_bignum(gc_thread_data *data);
+void *gc_alloc_bignum2(gc_thread_data *data);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 

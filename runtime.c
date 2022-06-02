@@ -55,6 +55,7 @@ const char *tag_names[] = {
       /*atomic_tag*/     , "atomic"
       /*void_tag*/       , "void"
       /*record_tag*/     , "record"
+      /*bignum2_tag*/     , "bignum2"
   , "Reserved for future use"
 };
 
