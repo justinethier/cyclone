@@ -2395,6 +2395,79 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
   _return_closcall1(data, cont, &str);
 }
 
+/*
+ * Number of leading zero's
+ * From Hacker's Delight by Henry S. Warren
+ * based on a modified nlz() from section 5-3 (fig. 5-7)
+ */
+inline static int nlz(uint32_t x)
+{
+  uint32_t y;
+  int n = 0;
+
+//#ifdef C_SIXTY_FOUR
+//  y = x >> 32; if (y != 0) { n += 32; x = y; }
+//#endif
+  y = x >> 16; if (y != 0) { n += 16; x = y; }
+  y = x >>  8; if (y != 0) { n +=  8; x = y; }
+  y = x >>  4; if (y != 0) { n +=  4; x = y; }
+  y = x >>  2; if (y != 0) { n +=  2; x = y; }
+  y = x >>  1; if (y != 0) return n + 2;
+  return n + x;
+}
+
+int bignum2_num_digits(bignum2_type bn, int radix) 
+{
+  /* Approximation of the number of radix digits we'll need.  We try
+   * to be as precise as possible to avoid memmove overhead at the end
+   * of the non-powers of two part of the conversion procedure, which
+   * we may need to do because we write strings back-to-front, and
+   * pointers must be aligned (even for byte blocks).
+   */
+  len = bn->num_digits - 1; //C_bignum_size(num)-1;
+
+  nbits  = (size_t)len * 32; //C_BIGNUM_DIGIT_LENGTH;
+  nbits += nlz(C_bignum_digits(num)[len]); // TODO: ?
+
+  len = nlz(radix)-1;
+  len = (nbits + len - 1) / len;
+  len += bn->sign; // Space for sign
+  return len;
+}
+
+//TODO: static 
+void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
+{
+  static char *characters = "0123456789abcdef";
+  // buf
+  int negp = bn->sign, radix_shift = nlz(radix) - 1;
+  printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
+  printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
+  printf("DEBUG power of 2 %d\n", ((uint32_t)1 << radix_shift));
+  if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
+    uint32_t *scan, *end;
+    printf("radix power of two\n");
+    // TODO:
+  } else {
+    uint32_t base, *start, *scan, *end;
+    int steps, i;
+
+    // working copy??
+
+    start = &(bn->sign);
+    start += 1;
+    scan = start + bn->num_digits;
+
+    /* Calculate the largest power of radix that fits a halfdigit:
+     * steps = log10(2^halfdigit_bits), base = 10^steps
+     */
+    for(steps = 0, base = radix; C_fitsinbignumhalfdigitp(base); base *= radix)
+      steps++;
+
+    base /= radix; /* Back down: we overshot in the loop */
+  }
+}
+
 object Cyc_symbol2string(void *data, object cont, object sym)
 {
   Cyc_check_sym(data, sym);
