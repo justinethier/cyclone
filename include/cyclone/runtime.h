@@ -375,6 +375,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port);
 object Cyc_write_bytevector(void *data, object bvec, object port, object start, object end);
 object Cyc_io_read_line(void *data, object cont, object port);
 void Cyc_io_read_token(void *data, object cont, object port);
+int Cyc_have_mstreams();
 /**@}*/
 
 

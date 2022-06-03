@@ -32,6 +32,15 @@ if (obj_is_not_closure(clo)) { \
  } \
 }
 
+int Cyc_have_mstreams()
+{
+#if CYC_HAVE_FMEMOPEN && CYC_HAVE_OPEN_MEMSTREAM
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 object Cyc_heap_alloc_port(void *data, port_type *p);
 port_type *Cyc_io_open_input_string(void *data, object str)
 {

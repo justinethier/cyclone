@@ -2962,6 +2962,13 @@ object Cyc_compilation_environment(void *data, object cont, object var)
       snprintf(buf, sizeof(buf), "%s", CYC_PLATFORM);
       make_utf8_string(data, str, buf);
       _return_closcall1(data, cont, &str);
+    } else if (strncmp(((symbol) var)->desc, "memory-streams", 9) == 0) {
+      char buf[] = "memory-streams";
+      if (!Cyc_have_mstreams()) {
+        buf[0] = '\0';
+      }
+      make_utf8_string(data, str, buf);
+      _return_closcall1(data, cont, &str);
     }
   }
   Cyc_rt_raise2(data, 
