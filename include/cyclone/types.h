@@ -851,6 +851,51 @@ typedef struct {
   // TODO: digits (implicit, after object??)
 } bignum2_type;
 
+// TODO: covert applicable definitions below -
+// #ifdef C_SIXTY_FOUR
+// # define C_MOST_POSITIVE_FIXNUM   0x3fffffffffffffffL
+// # define C_WORD_SIZE              64
+// # define C_HALF_WORD_SIZE         32
+// #else
+// # define C_MOST_POSITIVE_FIXNUM   0x3fffffff
+// # define C_WORD_SIZE              32
+// # define C_HALF_WORD_SIZE         16
+// #endif
+// 
+// /* Tunable performance-related constants */
+// #ifndef C_KARATSUBA_THRESHOLD
+// /* This defines when we'll switch from schoolbook to Karatsuba
+//  * multiplication.  The smallest of the two numbers determines the
+//  * switch.  It is pretty high right now because it generates a bit
+//  * more garbage and GC overhead dominates the algorithmic performance
+//  * gains.  If the GC is improved, this can be readjusted.
+//  */
+// # define C_KARATSUBA_THRESHOLD        70
+// #endif
+// #ifndef C_BURNIKEL_ZIEGLER_THRESHOLD
+// /* This defines when to switch from schoolbook to Burnikel-Ziegler
+//  * division.  It creates even more garbage than Karatsuba :(
+//  */
+// # define C_BURNIKEL_ZIEGLER_THRESHOLD 300
+// #endif
+// #ifndef C_RECURSIVE_TO_STRING_THRESHOLD
+// /* This threshold is in terms of the expected string length. */
+// # define C_RECURSIVE_TO_STRING_THRESHOLD 750
+// #endif
+// 
+// /* These might fit better in runtime.c? */
+// #define C_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
+// #define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
+// #define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
+// #define C_BIGNUM_BITS_TO_DIGITS(n) \
+//         (((n) + (C_BIGNUM_DIGIT_LENGTH - 1)) / C_BIGNUM_DIGIT_LENGTH)
+// #define C_BIGNUM_DIGIT_LO_HALF(d)       (C_uhword)(d)
+// #define C_BIGNUM_DIGIT_HI_HALF(d)       (C_uhword)((d) >> C_BIGNUM_HALF_DIGIT_LENGTH)
+// #define C_BIGNUM_DIGIT_COMBINE(h,l)     ((C_uword)(h) << C_BIGNUM_HALF_DIGIT_LENGTH|(C_uhword)(l))
+// 
+// #define C_MOST_POSITIVE_32_BIT_FIXNUM  0x3fffffff
+// #define C_MOST_NEGATIVE_FIXNUM    (-C_MOST_POSITIVE_FIXNUM - 1)
+
 /**
  * @brief Complex number
  */
