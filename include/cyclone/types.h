@@ -858,8 +858,8 @@ typedef struct {
 // # define C_HALF_WORD_SIZE         32
 // #else
 // # define C_MOST_POSITIVE_FIXNUM   0x3fffffff
-// # define C_WORD_SIZE              32
-// # define C_HALF_WORD_SIZE         16
+#define C_WORD_SIZE              32
+#define C_HALF_WORD_SIZE         16
 // #endif
 // 
 // /* Tunable performance-related constants */
@@ -884,13 +884,13 @@ typedef struct {
 // #endif
 // 
 // /* These might fit better in runtime.c? */
-// #define C_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
+#define Cyc_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
 // #define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
-// #define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
+#define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
 // #define C_BIGNUM_BITS_TO_DIGITS(n) \
 //         (((n) + (C_BIGNUM_DIGIT_LENGTH - 1)) / C_BIGNUM_DIGIT_LENGTH)
 // #define C_BIGNUM_DIGIT_LO_HALF(d)       (C_uhword)(d)
-// #define C_BIGNUM_DIGIT_HI_HALF(d)       (C_uhword)((d) >> C_BIGNUM_HALF_DIGIT_LENGTH)
+#define C_BIGNUM_DIGIT_HI_HALF(d)       (uint16_t)((d) >> C_BIGNUM_HALF_DIGIT_LENGTH)
 // #define C_BIGNUM_DIGIT_COMBINE(h,l)     ((C_uword)(h) << C_BIGNUM_HALF_DIGIT_LENGTH|(C_uhword)(l))
 // 
 // #define C_MOST_POSITIVE_32_BIT_FIXNUM  0x3fffffff

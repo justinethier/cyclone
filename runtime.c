@@ -2449,10 +2449,10 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
     printf("radix power of two\n");
     // TODO:
   } else {
-    uint32_t base, *start, *scan, *end;
+    uint32_t base, *start, *scan, big_digit;
     int steps, i;
 
-    // working copy??
+    // TODO: make a working copy of the bignum so we can perform destructive operations (??)
 
     start = &(bn->sign);
     start += 1;
@@ -2461,11 +2461,39 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
     /* Calculate the largest power of radix that fits a halfdigit:
      * steps = log10(2^halfdigit_bits), base = 10^steps
      */
-    for(steps = 0, base = radix; C_fitsinbignumhalfdigitp(base); base *= radix)
+    for(steps = 0, base = radix; Cyc_fitsinbignumhalfdigitp(base); base *= radix)
       steps++;
 
     base /= radix; /* Back down: we overshot in the loop */
+
+    while (scan > start) {
+      big_digit = bignum_digits_destructive_scale_down(start, scan, base);
+
+      if (*(scan-1) == 0) scan--; /* Adjust if we exhausted the highest digit */
+
+      for(i = 0; i < steps && index >= buf; ++i) {
+        C_word tmp = big_digit / radix;
+        *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
+        big_digit = tmp;
+      }
+    }
+    assert(index >= buf-1);
+    free_tmp_bignum(working_copy);
+
+    /* Move index onto first nonzero digit.  We're writing a bignum
+       here: it can't consist of only zeroes. */
+    while(*++index == '0');
+  
+    if (negp) *--index = '-';
+  
+    /* Shorten with distance between start and index. */
+    if (buf != index) {
+      i = C_header_size(string) - (index - buf);
+      C_memmove(buf, index, i); /* Move start of number to beginning. */
+      C_block_header(string) = C_STRING_TYPE | i; /* Mutate strlength. */
+    }
   }
+  // TODO: call into cont with string
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
