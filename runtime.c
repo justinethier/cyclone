@@ -21,6 +21,7 @@
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <float.h>
+#include <assert.h>
 
 static const int MAX_DEPTH = 512;
 
@@ -2466,7 +2467,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
   int negp = bn->sign, radix_shift = nlz(radix) - 1;
   int str_length = bignum2_num_digits(bn, radix);
   int heap_grown;
-  string_type s = gc_alloc(((gc_thread_data *)data)->heap, 
+  string_type *s = gc_alloc(((gc_thread_data *)data)->heap, 
                        sizeof(string_type) + str_length + 1,
                        boolean_f, // OK to populate manually over here
                        (gc_thread_data *)data, 
@@ -2475,11 +2476,11 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
           ((string_type *) s)->hdr.grayed = 0;
           ((string_type *) s)->hdr.immutable = 0;
           ((string_type *) s)->tag = string_tag; 
-          ((string_type *) s)->str_length = str_length;
+          ((string_type *) s)->len = str_length;
           ((string_type *) s)->num_cp = str_length;
           ((string_type *) s)->str = (((char *)s) + sizeof(string_type));
   char *buf = string_str(s), 
-       *index = buf;  TODO: should be at other end of buf, I think??
+       *index = buf + str_length - 1;
 
   printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
   printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
@@ -2513,35 +2514,38 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
 
       if (*(scan-1) == 0) scan--; /* Adjust if we exhausted the highest digit */
 
-      //TODO: for(i = 0; i < steps && index >= buf; ++i) {
-      for(i = 0; i < steps ; ++i) {
+      for(i = 0; i < steps && index >= buf; ++i) {
+      //for(i = 0; i < steps ; ++i) {
         uint32_t tmp = big_digit / radix;
         printf("%c", characters[big_digit - (tmp*radix)]);
-        //TODO: *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
+        *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
         big_digit = tmp;
       }
     }
-    // TODO: assert(index >= buf-1);
+    assert(index >= buf-1);
     // TODO: free_tmp_bignum(working_copy);
 
     /* Move index onto first nonzero digit.  We're writing a bignum
        here: it can't consist of only zeroes. */
-// TODO:
-//    while(*++index == '0');
-//  
-//    if (negp) *--index = '-';
+    while(*++index == '0');
+  
+    if (negp) *--index = '-';
   
     /* Shorten with distance between start and index. */
 // TODO:
-//    if (buf != index) {
+    if (buf != index) {
+      printf("TODO buf != index\n");
+      i = str_length - (index - buf);
+      s->len = s->num_cp = i;
+      memmove(buf, index, i);
 //      i = C_header_size(string) - (index - buf);
 //      C_memmove(buf, index, i); /* Move start of number to beginning. */
 //      C_block_header(string) = C_STRING_TYPE | i; /* Mutate strlength. */
-//    }
+    }
   }
   // TODO: call into cont with string
   printf("string is %s\n", string_str(s));
-  return_closcall1(data, k, s); 
+  return_closcall1(data, cont, s); 
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
