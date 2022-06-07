@@ -851,7 +851,7 @@ typedef struct {
   // TODO: digits (implicit, after object??)
 } bignum2_type;
 
-#define C_bignum_digits(n) ((((bignum2_type *)n)->sign) + 1)
+#define C_bignum_digits(n) (&(((bignum2_type *)n)->sign) + 1)
 
 // TODO: covert applicable definitions below -
 // #ifdef C_SIXTY_FOUR
