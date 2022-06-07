@@ -851,6 +851,8 @@ typedef struct {
   // TODO: digits (implicit, after object??)
 } bignum2_type;
 
+#define C_bignum_digits(n) ((((bignum2_type *)n)->sign) + 1)
+
 // TODO: covert applicable definitions below -
 // #ifdef C_SIXTY_FOUR
 // # define C_MOST_POSITIVE_FIXNUM   0x3fffffffffffffffL
@@ -887,11 +889,11 @@ typedef struct {
 #define Cyc_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
 // #define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
 #define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
-// #define C_BIGNUM_BITS_TO_DIGITS(n) \
-//         (((n) + (C_BIGNUM_DIGIT_LENGTH - 1)) / C_BIGNUM_DIGIT_LENGTH)
-// #define C_BIGNUM_DIGIT_LO_HALF(d)       (C_uhword)(d)
+#define C_BIGNUM_BITS_TO_DIGITS(n) \
+        (((n) + (C_BIGNUM_DIGIT_LENGTH - 1)) / C_BIGNUM_DIGIT_LENGTH)
+#define C_BIGNUM_DIGIT_LO_HALF(d)       (uint16_t)(d)
 #define C_BIGNUM_DIGIT_HI_HALF(d)       (uint16_t)((d) >> C_BIGNUM_HALF_DIGIT_LENGTH)
-// #define C_BIGNUM_DIGIT_COMBINE(h,l)     ((C_uword)(h) << C_BIGNUM_HALF_DIGIT_LENGTH|(C_uhword)(l))
+#define C_BIGNUM_DIGIT_COMBINE(h,l)     ((uint16_t)(h) << C_BIGNUM_HALF_DIGIT_LENGTH|(uint16_t)(l))
 // 
 // #define C_MOST_POSITIVE_32_BIT_FIXNUM  0x3fffffff
 // #define C_MOST_NEGATIVE_FIXNUM    (-C_MOST_POSITIVE_FIXNUM - 1)

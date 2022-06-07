@@ -1772,7 +1772,7 @@ void Cyc_int2bignum(int n, mp_int *bn)
 
 object Cyc_bignum2(bignum2_type *bn, int sign, int n)
 {
-  uint32_t *p = &(bn->sign);
+  uint32_t *p = &(bn->num_digits);
   *(p++) = 1;
   *(p++) = sign;
   *(p++) = n;
@@ -2416,7 +2416,7 @@ inline static int nlz(uint32_t x)
   return n + x;
 }
 
-int bignum2_num_digits(bignum2_type bn, int radix) 
+int bignum2_num_digits(bignum2_type *bn, int radix) 
 {
   /* Approximation of the number of radix digits we'll need.  We try
    * to be as precise as possible to avoid memmove overhead at the end
@@ -2424,15 +2424,39 @@ int bignum2_num_digits(bignum2_type bn, int radix)
    * we may need to do because we write strings back-to-front, and
    * pointers must be aligned (even for byte blocks).
    */
-  len = bn->num_digits - 1; //C_bignum_size(num)-1;
+  int len = bn->num_digits - 1; //C_bignum_size(num)-1;
 
-  nbits  = (size_t)len * 32; //C_BIGNUM_DIGIT_LENGTH;
-  nbits += nlz(C_bignum_digits(num)[len]); // TODO: ?
+  int nbits  = (size_t)len * 32; //C_BIGNUM_DIGIT_LENGTH;
+  nbits += nlz(C_bignum_digits(bn)+len); // TODO: ?
 
   len = nlz(radix)-1;
   len = (nbits + len - 1) / len;
   len += bn->sign; // Space for sign
   return len;
+}
+
+static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *end, uint32_t denominator)
+{
+  uint32_t digit, k = 0;
+  uint16_t q_j_hi, q_j_lo;
+
+  /* Single digit divisor case from Hacker's Delight, Figure 9-1,
+   * adapted to modify u[] in-place instead of writing to q[].
+   */
+  while (start < end) {
+    digit = (*--end);
+
+    k = C_BIGNUM_DIGIT_COMBINE(k, C_BIGNUM_DIGIT_HI_HALF(digit)); /* j */
+    q_j_hi = k / denominator;
+    k -= q_j_hi * denominator;
+
+    k = C_BIGNUM_DIGIT_COMBINE(k, C_BIGNUM_DIGIT_LO_HALF(digit)); /* j-1 */
+    q_j_lo = k / denominator;
+    k -= q_j_lo * denominator;
+    
+    *end = C_BIGNUM_DIGIT_COMBINE(q_j_hi, q_j_lo);
+  }
+  return k;
 }
 
 //TODO: static 
@@ -2443,7 +2467,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
   int negp = bn->sign, radix_shift = nlz(radix) - 1;
   printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
   printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
-  printf("DEBUG power of 2 %d\n", ((uint32_t)1 << radix_shift));
+  printf(" DEBUG power of 2 %d\n", ((uint32_t)1 << radix_shift));
   if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
     uint32_t *scan, *end;
     printf("radix power of two\n");
@@ -2452,10 +2476,12 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
     uint32_t base, *start, *scan, big_digit;
     int steps, i;
 
-    // TODO: make a working copy of the bignum so we can perform destructive operations (??)
+    // TODO: make a working copy of the bignum so we can perform destructive operation below
 
-    start = &(bn->sign);
-    start += 1;
+    // TODO: C_bignum_digits
+    // TODO: start = C_bignum_digits(working_copy);
+    start = &(bn->sign); // DEBUG ONLY
+    start += 1; // DEBUG ONLY
     scan = start + bn->num_digits;
 
     /* Calculate the largest power of radix that fits a halfdigit:
@@ -2471,27 +2497,31 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
 
       if (*(scan-1) == 0) scan--; /* Adjust if we exhausted the highest digit */
 
-      for(i = 0; i < steps && index >= buf; ++i) {
-        C_word tmp = big_digit / radix;
-        *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
+      //TODO: for(i = 0; i < steps && index >= buf; ++i) {
+      for(i = 0; i < steps ; ++i) {
+        uint32_t tmp = big_digit / radix;
+        printf("%c", characters[big_digit - (tmp*radix)]);
+        //TODO: *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
         big_digit = tmp;
       }
     }
-    assert(index >= buf-1);
-    free_tmp_bignum(working_copy);
+    // TODO: assert(index >= buf-1);
+    // TODO: free_tmp_bignum(working_copy);
 
     /* Move index onto first nonzero digit.  We're writing a bignum
        here: it can't consist of only zeroes. */
-    while(*++index == '0');
-  
-    if (negp) *--index = '-';
+// TODO:
+//    while(*++index == '0');
+//  
+//    if (negp) *--index = '-';
   
     /* Shorten with distance between start and index. */
-    if (buf != index) {
-      i = C_header_size(string) - (index - buf);
-      C_memmove(buf, index, i); /* Move start of number to beginning. */
-      C_block_header(string) = C_STRING_TYPE | i; /* Mutate strlength. */
-    }
+// TODO:
+//    if (buf != index) {
+//      i = C_header_size(string) - (index - buf);
+//      C_memmove(buf, index, i); /* Move start of number to beginning. */
+//      C_block_header(string) = C_STRING_TYPE | i; /* Mutate strlength. */
+//    }
   }
   // TODO: call into cont with string
 }
