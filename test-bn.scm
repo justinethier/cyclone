@@ -17,9 +17,12 @@
      bignum2string(data, k, bn, obj_obj2int(radix));
      ")
 
-(write
+(map
+  (lambda (row)
+    (write row)
+    (newline))
   (list
-    (test-larger-bn 0 #x0FFF0001 10) ;; TODO: why is this not writing the correct number?
+    (test-larger-bn 0 #x0FFF0001 10)
     (test-bn #x0FFF0001 10)
 
     (test-bn -10 10)

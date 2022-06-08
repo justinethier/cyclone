@@ -2537,7 +2537,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
       i = str_length - (index - buf);
       s->len = s->num_cp = i;
       memmove(buf, index, i);
-      buf[str_length-1] = '\0';
+      s->str[i] = '\0';
     }
   }
   return_closcall1(data, cont, s); 
