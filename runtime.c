@@ -1782,10 +1782,11 @@ object Cyc_bignum2(bignum2_type *bn, int sign, int n)
 
 object Cyc_int2bignum2(gc_thread_data *data, int n)
 {
-  bignum2_type *bn = gc_alloc_bignum2(data, n);
   if (n < 0) {
+    bignum2_type *bn = gc_alloc_bignum2(data, 1);
     return Cyc_bignum2(bn, 1, -n);
   } else {
+    bignum2_type *bn = gc_alloc_bignum2(data, 1);
     return Cyc_bignum2(bn, 0, n);
   }
 }
@@ -2467,6 +2468,10 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
   int negp = bn->sign, radix_shift = nlz(radix) - 1;
   int str_length = bignum2_num_digits(bn, radix);
   int heap_grown;
+
+  //printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
+  //printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
+
   string_type *s = gc_alloc(((gc_thread_data *)data)->heap, 
                        sizeof(string_type) + str_length + 1,
                        boolean_f, // OK to populate manually over here
@@ -2482,9 +2487,6 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
   char *buf = string_str(s), 
        *index = buf + str_length - 1;
 
-  printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
-  printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
-  printf(" DEBUG power of 2 %d\n", ((uint32_t)1 << radix_shift));
   if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
     uint32_t *scan, *end;
     printf("radix power of two\n");
@@ -2515,7 +2517,6 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
       if (*(scan-1) == 0) scan--; /* Adjust if we exhausted the highest digit */
 
       for(i = 0; i < steps && index >= buf; ++i) {
-      //for(i = 0; i < steps ; ++i) {
         uint32_t tmp = big_digit / radix;
         printf("%c", characters[big_digit - (tmp*radix)]);
         *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
@@ -2532,19 +2533,13 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
     if (negp) *--index = '-';
   
     /* Shorten with distance between start and index. */
-// TODO:
     if (buf != index) {
-      printf("TODO buf != index\n");
       i = str_length - (index - buf);
       s->len = s->num_cp = i;
       memmove(buf, index, i);
-//      i = C_header_size(string) - (index - buf);
-//      C_memmove(buf, index, i); /* Move start of number to beginning. */
-//      C_block_header(string) = C_STRING_TYPE | i; /* Mutate strlength. */
+      buf[str_length-1] = '\0';
     }
   }
-  // TODO: call into cont with string
-  printf("string is %s\n", string_str(s));
   return_closcall1(data, cont, s); 
 }
 
