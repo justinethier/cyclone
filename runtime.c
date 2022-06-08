@@ -2461,16 +2461,17 @@ static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *
   return k;
 }
 
-// TODO:
 /* Copy all the digits from source to target, obliterating what was
  * there.  If target is larger than source, the most significant
  * digits will remain untouched.
  */
-//inline static void bignum_digits_destructive_copy(C_word target, C_word source)
-//{
-//  C_memcpy(C_bignum_digits(target), C_bignum_digits(source),
-//           C_wordstobytes(C_bignum_size(source)));
-//}
+inline static void bignum_digits_destructive_copy(bignum2_type *target, bignum2_type *source)
+{
+  memcpy(C_bignum_digits(target), 
+         C_bignum_digits(source),
+         source->num_digits * sizeof(uint32_t));
+         //C_wordstobytes(C_bignum_size(source)));
+}
 
 //TODO: static 
 void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
@@ -2479,9 +2480,6 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
   int negp = bn->sign, radix_shift = nlz(radix) - 1;
   int str_length = bignum2_num_digits(bn, radix);
   int heap_grown;
-
-  //printf("DEBUG string length %d\n", bignum2_num_digits(bn, radix));
-  //printf("DEBUG radix=%d, nlz = %d\n", radix, radix_shift);
 
   string_type *s = gc_alloc(((gc_thread_data *)data)->heap, 
                        sizeof(string_type) + str_length + 1,
@@ -2499,66 +2497,57 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
        *index = buf + str_length - 1;
 
   if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
-    uint32_t *scan, *end;
-    printf("TODO: radix is a power of two\n");
-    // TODO:
-//    int radix_mask = radix - 1, big_digit_len = 0, radix_digit;
-//    C_uword *scan, *end, big_digit = 0;
-//
-//    scan = C_bignum_digits(bignum);
-//    end = scan + C_bignum_size(bignum);
-//
-//    while (scan < end) {
-//      /* If radix isn't an exact divisor of digit length, handle overlap */
-//      if (big_digit_len == 0) {
-//        big_digit = *scan++;
-//        big_digit_len = C_BIGNUM_DIGIT_LENGTH;
-//      } else {
-//        assert(index >= buf);
-//	radix_digit = big_digit;
-//        big_digit = *scan++;
-//	radix_digit |= ((unsigned int)big_digit << big_digit_len) & radix_mask;
-//        *index-- = characters[radix_digit];
-//	big_digit >>= (radix_shift - big_digit_len);
-//        big_digit_len = C_BIGNUM_DIGIT_LENGTH - (radix_shift - big_digit_len);
-//      }
-//
-//      while(big_digit_len >= radix_shift && index >= buf) {
-//	radix_digit = big_digit & radix_mask;
-//        *index-- = characters[radix_digit];
-//	big_digit >>= radix_shift;
-//	big_digit_len -= radix_shift;
-//      }
-//    }
-//
-//    assert(big_digit < radix);
-//
-//    /* Final digit (like overlap at start of while loop) */
-//    if (big_digit) *index-- = characters[big_digit];
-//
-//    if (negp) {
-//      /* Loop above might've overwritten sign position with a zero */
-//      if (*(index+1) == '0') *(index+1) = '-';
-//      else *index-- = '-';
-//    }
-//
-//    /* Length calculation is always precise for radix powers of two. */
-//    assert(index == buf-1);
+    uint32_t *scan, *end, big_digit = 0;
+    int radix_mask = radix - 1, big_digit_len = 0, radix_digit;
+
+    scan = C_bignum_digits(bn);
+    end = scan + bn->num_digits;
+
+    while (scan < end) {
+      /* If radix isn't an exact divisor of digit length, handle overlap */
+      if (big_digit_len == 0) {
+        big_digit = *scan++;
+        big_digit_len = C_BIGNUM_DIGIT_LENGTH;
+      } else {
+        assert(index >= buf);
+        radix_digit = big_digit;
+        big_digit = *scan++;
+        radix_digit |= ((unsigned int)big_digit << big_digit_len) & radix_mask;
+        *index-- = characters[radix_digit];
+        big_digit >>= (radix_shift - big_digit_len);
+        big_digit_len = C_BIGNUM_DIGIT_LENGTH - (radix_shift - big_digit_len);
+      }
+
+      while(big_digit_len >= radix_shift && index >= buf) {
+        radix_digit = big_digit & radix_mask;
+        *index-- = characters[radix_digit];
+        big_digit >>= radix_shift;
+        big_digit_len -= radix_shift;
+      }
+    }
+
+    assert(big_digit < radix);
+
+    /* Final digit (like overlap at start of while loop) */
+    if (big_digit) *index-- = characters[big_digit];
+
+    if (negp) {
+      /* Loop above might've overwritten sign position with a zero */
+      if (*(index+1) == '0') *(index+1) = '-';
+      else *index-- = '-';
+    }
+
+    /* Length calculation is always precise for radix powers of two. */
+    assert(index == buf-1);
   } else {
     uint32_t base, *start, *scan, big_digit;
     int steps, i;
 
-    // TODO: make a working copy of the bignum so we can perform destructive operation below
-//    working_copy = allocate_tmp_bignum(C_fix(C_bignum_size(bignum)),
-//                                       C_mk_bool(negp), C_SCHEME_FALSE);
-//    bignum_digits_destructive_copy(working_copy, bignum);
-//
-//TODO: replace below two lines with this:    start = C_bignum_digits(working_copy);
+    bignum2_type *working_copy = gc_alloc_bignum2(data, bn->num_digits);
+    working_copy->sign = bn->sign;
+    bignum_digits_destructive_copy(working_copy, bn);
 
-    start = &(bn->sign); // DEBUG ONLY
-    start += 1; // DEBUG ONLY
-
-
+    start = C_bignum_digits(working_copy);
     scan = start + bn->num_digits;
 
     /* Calculate the largest power of radix that fits a halfdigit:
@@ -2582,7 +2571,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
       }
     }
     assert(index >= buf-1);
-    // TODO: free_tmp_bignum(working_copy);
+    // FUTURE (?): free_tmp_bignum(working_copy);
 
     /* Move index onto first nonzero digit.  We're writing a bignum
        here: it can't consist of only zeroes. */

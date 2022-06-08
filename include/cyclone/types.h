@@ -887,7 +887,7 @@ typedef struct {
 // 
 // /* These might fit better in runtime.c? */
 #define Cyc_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
-// #define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
+#define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
 #define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
 #define C_BIGNUM_BITS_TO_DIGITS(n) \
         (((n) + (C_BIGNUM_DIGIT_LENGTH - 1)) / C_BIGNUM_DIGIT_LENGTH)
