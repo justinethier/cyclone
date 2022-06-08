@@ -19,15 +19,16 @@
 
 (write
   (list
+    (test-larger-bn 0 #x0FFF0001 10) ;; TODO: why is this not writing the correct number?
+    (test-bn #x0FFF0001 10)
+
     (test-bn -10 10)
     (test-bn 163264 10)
     (test-bn 16326 10)
-    ;(test-bn -16326000 10)
+    (test-bn -16326000 10)
     (test-bn #x0FFFffff 10)
     (test-bn #x0FFFffff 16)
     (test-bn #x3FFFffff 10)
-    (test-bn #x0FFF0001 10)
-    (test-larger-bn 0 #x0FFF0001 10)
     (test-larger-bn #x3FFF0000 #x0FFF0001 10)
   ))
 (newline)
