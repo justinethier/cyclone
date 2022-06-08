@@ -2,41 +2,46 @@
 (import (scheme base) (scheme write) (scheme repl))
 
  (define-c test-bn
-   "(void *data, int argc, closure _, object k, object fx, object radix)"
+   "(void *data, int argc, closure _, object k, object fx)"
    " object bn = Cyc_int2bignum2(data, obj_obj2int(fx));
-     bignum2string(data, k, bn, obj_obj2int(radix));
+     return_closcall1(data, k, bn); 
      ")
 
  (define-c test-larger-bn
-   "(void *data, int argc, closure _, object k, object fx, object fx2, object radix)"
+   "(void *data, int argc, closure _, object k, object fx, object fx2)"
    " bignum2_type *bn = gc_alloc_bignum2(data, 2);
      C_bignum_digits(bn)[0] = obj_obj2int(fx2);
      C_bignum_digits(bn)[1] = obj_obj2int(fx);
      bn->num_digits = 2;
      bn->sign = 0;
-     bignum2string(data, k, bn, obj_obj2int(radix));
+     return_closcall1(data, k, bn); 
      ")
+
+(write (test-bn 123456789))
+(newline)
 
 (map
   (lambda (row)
     (write row)
     (newline))
   (list
-    (test-larger-bn 0 #x0FFF0001 10)
-    (test-bn #x0FFF0001 10)
+    (test-bn 123456789 )
+    (test-bn 123456789 )
+    (test-larger-bn 0 #x0FFF0001 )
+    (test-bn #x0FFF0001 )
 
-    (test-bn -10 10)
-    (test-bn 163264 10)
-    (test-bn 16326 10)
-    (test-bn -16326000 10)
-    (test-bn #x0FFFffff 10)
-    (test-bn #x0FFFffff 16)
-    (test-bn #x0eadbeef 16)
-    (test-bn #x0eadbeef 12)
-    (test-bn #x0eadbeef 8)
-    (test-bn #x0eadbeef 2)
-    (test-bn #x3FFFffff 10)
-    (test-larger-bn #x3FFF0000 #x0FFF0001 10)
+    (test-bn -10 )
+    (test-bn 163264 )
+    (test-bn 16326 )
+    (test-bn -16326000 )
+    (number->string (test-bn #x0FFFffff) 10)
+    (number->string (test-bn #x0FFFffff) 16)
+    (number->string (test-bn #x0eadbeef) 16)
+    (number->string (test-bn #x0eadbeef) 12)
+    (test-bn #x0eadbeef)
+    (test-bn #x0eadbeef)
+    (test-bn #x3FFFffff)
+    (test-larger-bn #x3FFF0000 #x0FFF0001 )
   ))
 (newline)
  ;(repl)

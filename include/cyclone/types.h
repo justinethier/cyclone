@@ -1604,7 +1604,7 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_int2bignum(int n, mp_int *bn);
 object Cyc_int2bignum2(gc_thread_data *data, int n);
 // TODO: debug only, remove this function from here!
-void bignum2string(void *data, object cont, bignum2_type *bn, int base);
+string_type *bignum2string(void *data, bignum2_type *bn, int base);
 
 /* Remaining GC prototypes that require objects to be defined */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);

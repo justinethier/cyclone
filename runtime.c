@@ -1180,6 +1180,11 @@ object _Cyc_display(void *data, object x, FILE * port, int depth)
     }
     fprintf(port, ")");
     break;
+  case bignum2_tag: {
+    string_type *s = bignum2string(data, x, 10);
+    return  _Cyc_display(data, s, port, depth);
+    break;
+  }
   case bignum_tag: {
     int bufsz; 
     char *buf;
@@ -1961,6 +1966,7 @@ object Cyc_is_number(object o)
   if ((o != NULL) && (obj_is_int(o) || (!is_value_type(o)
                                         && (type_of(o) == integer_tag
                                             || type_of(o) == bignum_tag
+                                            || type_of(o) == bignum2_tag
                                             || type_of(o) == double_tag
                                             || type_of(o) == complex_num_tag))))
     return boolean_t;
@@ -2350,6 +2356,9 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
       Cyc_rt_raise2(data, "number->string - bignum is too large to convert", n);
     }
     BIGNUM_CALL(mp_to_radix(&bignum_value(n), buffer, 1024, &written, base_num));
+  } else if (is_object_type(n) && type_of(n) == bignum2_tag) {
+    string_type *s = bignum2string(data, n, base_num);
+    _return_closcall1(data, cont, s);
   } else {
     if (base_num == 2) {
       val = obj_is_int(n) ?
@@ -2474,7 +2483,7 @@ inline static void bignum_digits_destructive_copy(bignum2_type *target, bignum2_
 }
 
 //TODO: static 
-void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
+string_type *bignum2string(void *data, bignum2_type *bn, int radix)
 {
   static char *characters = "0123456789abcdef";
   int negp = bn->sign, radix_shift = nlz(radix) - 1;
@@ -2565,7 +2574,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
 
       for(i = 0; i < steps && index >= buf; ++i) {
         uint32_t tmp = big_digit / radix;
-        printf("%c", characters[big_digit - (tmp*radix)]);
+        //printf("%c", characters[big_digit - (tmp*radix)]);
         *index-- = characters[big_digit - (tmp*radix)]; /* big_digit % radix */
         big_digit = tmp;
       }
@@ -2587,7 +2596,7 @@ void bignum2string(void *data, object cont, bignum2_type *bn, int radix)
       s->str[i] = '\0';
     }
   }
-  return_closcall1(data, cont, s); 
+  return s;
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
