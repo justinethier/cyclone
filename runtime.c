@@ -2599,6 +2599,60 @@ string_type *bignum2string(void *data, bignum2_type *bn, int radix)
   return s;
 }
 
+// TODO: static
+//object bignum_plus_unsigned(C_word **ptr, C_word x, C_word y, C_word negp)
+object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int negp)
+{
+  object result;
+  uint32_t size, sum, digit, *scan_y, *end_y, *scan_r, *end_r;
+  int carry = 0;
+
+  if (y->num_digits > x->num_digits) {  /* Ensure size(y) <= size(x) */
+    object z = x;
+    x = y;
+    y = z;
+  }
+
+  size = x->num_digits + 1; /* One more digit, for possible carry. */
+  result = gc_alloc_bignum2(data, size);
+  C_bignum_sign(result) = negp;
+
+  scan_y = C_bignum_digits(y);
+  end_y = scan_y + C_bignum_size(y);
+  scan_r = C_bignum_digits(result);
+  end_r = scan_r + C_bignum_size(result);
+
+  /* Copy x into r so we can operate on two pointers, which is faster
+   * than three, and we can stop earlier after adding y.  It's slower
+   * if x and y have equal length.  On average it's slightly faster.
+   */
+  bignum_digits_destructive_copy(result, x);
+  *(end_r-1) = 0; /* Ensure most significant digit is initialised */
+
+  /* Move over x and y simultaneously, destructively adding digits w/ carry. */
+  while (scan_y < end_y) {
+    digit = *scan_r;
+    if (carry) {
+      sum = digit + *scan_y++ + 1;
+      carry = sum <= digit;
+    } else {
+      sum = digit + *scan_y++;
+      carry = sum < digit;
+    }
+    (*scan_r++) = sum;
+  }
+  
+  /* The end of y, the smaller number.  Propagate carry into the rest of x. */
+  while (carry) {
+    sum = (*scan_r) + 1;
+    carry = (sum == 0);
+    (*scan_r++) = sum;
+  }
+  assert(scan_r <= end_r);
+
+  return C_bignum_simplify(result);
+}
+
 object Cyc_symbol2string(void *data, object cont, object sym)
 {
   Cyc_check_sym(data, sym);
