@@ -854,6 +854,7 @@ typedef struct {
 #define C_bignum_digits(n) (&(((bignum2_type *)n)->sign) + 1)
 #define C_bignum_size(n) (((bignum2_type *)n)->num_digits)
 #define C_bignum_sign(n) (((bignum2_type *)n)->sign)
+#define C_bignum_negativep(n) (((bignum2_type *)n)->sign == 1)
 
 // TODO: covert applicable definitions below -
 // #ifdef C_SIXTY_FOUR

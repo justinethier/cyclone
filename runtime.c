@@ -2451,37 +2451,37 @@ int bignum2_num_digits(bignum2_type *bn, int radix)
  * in scratch space, we mark it as reclaimable.  This means any
  * references to the original bignum are invalid after simplification!
  */
-//C_regparm C_word C_fcall C_bignum_simplify(C_word big)
-//{
-//  C_uword *start = C_bignum_digits(big),
-//          *last_digit = start + C_bignum_size(big) - 1,
-//          *scan = last_digit, tmp;
-//  int length;
-//
-//  while (scan >= start && *scan == 0)
-//    scan--;
-//  length = scan - start + 1;
-//
-//  switch(length) {
-//  case 0:
-//    if (C_in_scratchspacep(C_internal_bignum_vector(big)))
-//      C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
-//    return C_fix(0);
-//  case 1:
-//    tmp = *start;
-//    if (C_bignum_negativep(big) ?
-//        !(tmp & C_INT_SIGN_BIT) && C_fitsinfixnump(-(C_word)tmp) :
-//        C_ufitsinfixnump(tmp)) {
-//      if (C_in_scratchspacep(C_internal_bignum_vector(big)))
-//        C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
-//      return C_bignum_negativep(big) ? C_fix(-(C_word)tmp) : C_fix(tmp);
-//    }
-//    /* FALLTHROUGH */
-//  default:
-//    if (scan < last_digit) C_bignum_mutate_size(big, length);
-//    return big;
-//  }
-//}
+object C_bignum_simplify(object big)
+{
+  uint32_t *start = C_bignum_digits(big),
+           *last_digit = start + C_bignum_size(big) - 1,
+           *scan = last_digit, tmp;
+  int length;
+
+  while (scan >= start && *scan == 0)
+    scan--;
+  length = scan - start + 1;
+
+  switch(length) {
+  case 0:
+    //if (C_in_scratchspacep(C_internal_bignum_vector(big)))
+    //  C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
+    return obj_int2obj(0);
+  case 1:
+    tmp = *start;
+    if (C_bignum_negativep(big) ?
+        !(tmp & C_INT_SIGN_BIT) && C_fitsinfixnump(-(C_word)tmp) :
+        C_ufitsinfixnump(tmp)) {
+      if (C_in_scratchspacep(C_internal_bignum_vector(big)))
+        C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
+      return C_bignum_negativep(big) ? C_fix(-(C_word)tmp) : C_fix(tmp);
+    }
+    /* FALLTHROUGH */
+  default:
+    if (scan < last_digit) C_bignum_mutate_size(big, length);
+    return big;
+  }
+}
 
 static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *end, uint32_t denominator)
 {
