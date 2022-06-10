@@ -1,6 +1,18 @@
 ; ./sync.sh runtime.c gc.c include/cyclone/*.h test-bn.scm && cd ../cyclone-bootstrap && rm -f cyclone libcyclone.a ; ./install.sh && ./cyclone -L. -I. test-bn.scm && ./test-bn && cd ../cyclone
 (import (scheme base) (scheme write) (scheme repl))
 
+; TODO:
+;object str_to_bignum(void *data, object bignum, char *str, char *str_end, int radix);
+; (define-c test-str->bignum
+;   "(void *data, int argc, closure _, object k, object str )"
+;   " bignum2_type *bn = gc_alloc_bignum2(data, 2);
+;     C_bignum_digits(bn)[0] = obj_obj2int(fx2);
+;     C_bignum_digits(bn)[1] = obj_obj2int(fx);
+;     bn->num_digits = 2;
+;     bn->sign = 0;
+;     return_closcall1(data, k, bn); 
+;     ")
+
  (define-c test-plus
    "(void *data, int argc, closure _, object k, object fx1, object fx2)"
    " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));

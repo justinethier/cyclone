@@ -1608,6 +1608,7 @@ void Cyc_int2bignum(int n, mp_int *bn);
 object Cyc_int2bignum2(gc_thread_data *data, int n);
 // TODO: debug only, remove this function from here!
 string_type *bignum2string(void *data, bignum2_type *bn, int base);
+object str_to_bignum(void *data, object bignum, char *str, char *str_end, int radix);
 object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int negp);
 
 /* Remaining GC prototypes that require objects to be defined */

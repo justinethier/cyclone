@@ -2483,6 +2483,48 @@ object C_bignum_simplify(object big)
   }
 }
 
+//static void bignum_digits_destructive_negate(C_word result)
+//{
+//  C_uword *scan, *end, digit, sum;
+//
+//  scan = C_bignum_digits(result);
+//  end = scan + C_bignum_size(result);
+//
+//  do {
+//    digit = ~*scan;
+//    sum = digit + 1;
+//    *scan++ = sum;
+//  } while (sum == 0 && scan < end);
+//
+//  for (; scan < end; scan++) {
+//    *scan = ~*scan;
+//  }
+//}
+
+static uint32_t
+bignum_digits_destructive_scale_up_with_carry(uint32_t *start, uint32_t *end, uint32_t factor, uint32_t carry)
+{
+  uint32_t digit, p;
+
+  assert(Cyc_fitsinbignumhalfdigitp(carry));
+  assert(Cyc_fitsinbignumhalfdigitp(factor));
+
+  /* See fixnum_times.  Substitute xlo = factor, xhi = 0, y = digit
+   * and simplify the result to reduce variable usage.
+   */
+  while (start < end) {
+    digit = (*start);
+
+    p = factor * C_BIGNUM_DIGIT_LO_HALF(digit) + carry;
+    carry = C_BIGNUM_DIGIT_LO_HALF(p);
+
+    p = factor * C_BIGNUM_DIGIT_HI_HALF(digit) + C_BIGNUM_DIGIT_HI_HALF(p);
+    (*start++) = C_BIGNUM_DIGIT_COMBINE(C_BIGNUM_DIGIT_LO_HALF(p), carry);
+    carry = C_BIGNUM_DIGIT_HI_HALF(p);
+  }
+  return carry;
+}
+
 static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *end, uint32_t denominator)
 {
   uint32_t digit, k = 0;
@@ -2506,6 +2548,212 @@ static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *
   }
   return k;
 }
+
+//static C_uword
+//bignum_digits_destructive_shift_right(C_uword *start, C_uword *end, int shift_right, int negp)
+//{
+//  int shift_left = C_BIGNUM_DIGIT_LENGTH - shift_right;
+//  C_uword digit, carry = negp ? ((~(C_uword)0) << shift_left) : 0;
+//
+//  assert(shift_right < C_BIGNUM_DIGIT_LENGTH);
+//
+//  while (start < end) {
+//    digit = *(--end);
+//    *end = (digit >> shift_right) | carry;
+//    carry = digit << shift_left;
+//  }
+//  return carry >> shift_left; /* The bits that were shifted out to the right */
+//}
+//
+//static C_uword
+//bignum_digits_destructive_shift_left(C_uword *start, C_uword *end, int shift_left)
+//{
+//  C_uword carry = 0, digit;
+//  int shift_right = C_BIGNUM_DIGIT_LENGTH - shift_left;
+//
+//  assert(shift_left < C_BIGNUM_DIGIT_LENGTH);
+//
+//  while (start < end) {
+//    digit = *start;
+//    (*start++) = (digit << shift_left) | carry;
+//    carry = digit >> shift_right;
+//  }
+//  return carry;	 /* This would end up as most significant digit if it fit */
+//}
+//
+//static C_regparm void
+//bignum_digits_multiply(C_word x, C_word y, C_word result)
+//{
+//  C_uword product,
+//          *xd = C_bignum_digits(x),
+//          *yd = C_bignum_digits(y),
+//          *rd = C_bignum_digits(result);
+//  C_uhword carry, yj;
+//  /* Lengths in halfwords */
+//  int i, j, length_x = C_bignum_size(x) * 2, length_y = C_bignum_size(y) * 2;
+//
+//  /* From Hacker's Delight, Figure 8-1 (top part) */
+//  for (j = 0; j < length_y; ++j) {
+//    yj = C_uhword_ref(yd, j);
+//    if (yj == 0) continue;
+//    carry = 0;
+//    for (i = 0; i < length_x; ++i) {
+//      product = (C_uword)C_uhword_ref(xd, i) * yj +
+//                (C_uword)C_uhword_ref(rd, i + j) + carry;
+//      C_uhword_set(rd, i + j, product);
+//      carry = C_BIGNUM_DIGIT_HI_HALF(product);
+//    }
+//    C_uhword_set(rd, j + length_x, carry);
+//  }
+//}
+//
+//
+///* "small" is either a number that fits a halfdigit, or a power of two */
+//static C_regparm void
+//bignum_destructive_divide_unsigned_small(C_word **ptr, C_word x, C_word y, C_word *q, C_word *r)
+//{
+//  C_word size, quotient, q_negp = C_mk_bool((y & C_INT_SIGN_BIT) ?
+//                                            !(C_bignum_negativep(x)) :
+//                                            C_bignum_negativep(x)),
+//         r_negp = C_mk_bool(C_bignum_negativep(x));
+//  C_uword *start, *end, remainder;
+//  int shift_amount;
+//
+//  size = C_fix(C_bignum_size(x));
+//  quotient = C_allocate_scratch_bignum(ptr, size, q_negp, C_SCHEME_FALSE);
+//  bignum_digits_destructive_copy(quotient, x);
+//
+//  start = C_bignum_digits(quotient);
+//  end = start + C_bignum_size(quotient);
+//  
+//  y = (y & C_INT_SIGN_BIT) ? -C_unfix(y) : C_unfix(y);
+//
+//  shift_amount = C_ilen(y) - 1;
+//  if (((C_uword)1 << shift_amount) == y) { /* Power of two?  Shift! */
+//    remainder = bignum_digits_destructive_shift_right(start,end,shift_amount,0);
+//    assert(C_ufitsinfixnump(remainder));
+//  } else {
+//    remainder = bignum_digits_destructive_scale_down(start, end, y);
+//    assert(C_fitsinbignumhalfdigitp(remainder));
+//  }
+//
+//  if (r != NULL) *r = C_truep(r_negp) ? C_fix(-remainder) : C_fix(remainder);
+//  /* Calling this function only makes sense if quotient is needed */
+//  *q = C_bignum_simplify(quotient);
+//}
+//
+//static C_regparm void
+//bignum_destructive_divide_full(C_word numerator, C_word denominator, C_word quotient, C_word remainder, C_word return_remainder)
+//{
+//  C_word length = C_bignum_size(denominator);
+//  C_uword d1 = *(C_bignum_digits(denominator) + length - 1),
+//          *startr = C_bignum_digits(remainder),
+//          *endr = startr + C_bignum_size(remainder);
+//  int shift;
+//
+//  shift = C_BIGNUM_DIGIT_LENGTH - C_ilen(d1); /* nlz */
+//
+//  /* We have to work on halfdigits, so we shift out only the necessary
+//   * amount in order fill out that halfdigit (base is halved).
+//   * This trick is shamelessly stolen from Gauche :)
+//   * See below for part 2 of the trick.
+//   */
+//  if (shift >= C_BIGNUM_HALF_DIGIT_LENGTH)
+//    shift -= C_BIGNUM_HALF_DIGIT_LENGTH;
+//
+//  /* Code below won't always set high halfdigit of quotient, so do it here. */
+//  if (quotient != C_SCHEME_UNDEFINED)
+//    C_bignum_digits(quotient)[C_bignum_size(quotient)-1] = 0;
+//
+//  bignum_digits_destructive_copy(remainder, numerator);
+//  *(endr-1) = 0;    /* Ensure most significant digit is initialised */
+//  if (shift == 0) { /* Already normalized */
+//    bignum_destructive_divide_normalized(remainder, denominator, quotient);
+//  } else { /* Requires normalisation; allocate scratch denominator for this */
+//    C_uword *startnd;
+//    C_word ndenom;
+//
+//    bignum_digits_destructive_shift_left(startr, endr, shift);
+//
+//    ndenom = allocate_tmp_bignum(C_fix(length), C_SCHEME_FALSE, C_SCHEME_FALSE);
+//    startnd = C_bignum_digits(ndenom);
+//    bignum_digits_destructive_copy(ndenom, denominator);
+//    bignum_digits_destructive_shift_left(startnd, startnd+length, shift);
+//
+//    bignum_destructive_divide_normalized(remainder, ndenom, quotient);
+//    if (C_truep(return_remainder)) /* Otherwise, don't bother shifting back */
+//      bignum_digits_destructive_shift_right(startr, endr, shift, 0);
+//
+//    free_tmp_bignum(ndenom);
+//  }
+//}
+//
+//static C_regparm void
+//bignum_destructive_divide_normalized(C_word big_u, C_word big_v, C_word big_q)
+//{
+//  C_uword *v = C_bignum_digits(big_v),
+//          *u = C_bignum_digits(big_u),
+//          *q = big_q == C_SCHEME_UNDEFINED ? NULL : C_bignum_digits(big_q),
+//           p,               /* product of estimated quotient & "denominator" */
+//           hat, qhat, rhat, /* estimated quotient and remainder digit */
+//           vn_1, vn_2;      /* "cached" values v[n-1], v[n-2] */
+//  C_word t, k;              /* Two helpers: temp/final remainder and "borrow" */
+//  /* We use plain ints here, which theoretically may not be enough on
+//   * 64-bit for an insanely huge number, but it is a _lot_ faster.
+//   */
+//  int n = C_bignum_size(big_v) * 2,       /* in halfwords */
+//      m = (C_bignum_size(big_u) * 2) - 2; /* Correct for extra digit */
+//  int i, j;		   /* loop  vars */
+//
+//  /* Part 2 of Gauche's aforementioned trick: */
+//  if (C_uhword_ref(v, n-1) == 0) n--;
+//
+//  /* These won't change during the loop, but are used in every step. */
+//  vn_1 = C_uhword_ref(v, n-1);
+//  vn_2 = C_uhword_ref(v, n-2);
+//
+//  /* See also Hacker's Delight, Figure 9-1.  This is almost exactly that. */
+//  for (j = m - n; j >= 0; j--) {
+//    hat = C_BIGNUM_DIGIT_COMBINE(C_uhword_ref(u, j+n), C_uhword_ref(u, j+n-1));
+//    if (hat == 0) {
+//      if (q != NULL) C_uhword_set(q, j, 0);
+//      continue;
+//    }
+//    qhat = hat / vn_1;
+//    rhat = hat % vn_1;
+//
+//    /* Two whiles is faster than one big check with an OR.  Thanks, Gauche! */
+//    while(qhat >= ((C_uword)1 << C_BIGNUM_HALF_DIGIT_LENGTH)) { qhat--; rhat += vn_1; }
+//    while(qhat * vn_2 > C_BIGNUM_DIGIT_COMBINE(rhat, C_uhword_ref(u, j+n-2))
+//	  && rhat < ((C_uword)1 << C_BIGNUM_HALF_DIGIT_LENGTH)) {
+//      qhat--;
+//      rhat += vn_1;
+//    }
+//
+//    /* Multiply and subtract */
+//    k = 0;
+//    for (i = 0; i < n; i++) {
+//      p = qhat * C_uhword_ref(v, i);
+//      t = C_uhword_ref(u, i+j) - k - C_BIGNUM_DIGIT_LO_HALF(p);
+//      C_uhword_set(u, i+j, t);
+//      k = C_BIGNUM_DIGIT_HI_HALF(p) - (t >> C_BIGNUM_HALF_DIGIT_LENGTH);
+//    }
+//    t = C_uhword_ref(u,j+n) - k;
+//    C_uhword_set(u, j+n, t);
+//
+//    if (t < 0) {		/* Subtracted too much? */
+//      qhat--;
+//      k = 0;
+//      for (i = 0; i < n; i++) {
+//        t = (C_uword)C_uhword_ref(u, i+j) + C_uhword_ref(v, i) + k;
+//        C_uhword_set(u, i+j, t);
+//	k = t >> C_BIGNUM_HALF_DIGIT_LENGTH;
+//      }
+//      C_uhword_set(u, j+n, (C_uhword_ref(u, j+n) + k));
+//    }
+//    if (q != NULL) C_uhword_set(q, j, qhat);
+//  } /* end j */
+//}
 
 /* Copy all the digits from source to target, obliterating what was
  * there.  If target is larger than source, the most significant
@@ -2636,33 +2884,89 @@ string_type *bignum2string(void *data, bignum2_type *bn, int radix)
   return s;
 }
 
-// TODO:
-//inline static int hex_char_to_digit(int ch)
+//C_regparm C_word C_fcall C_static_bignum(C_word **ptr, int len, C_char *str)
 //{
-//  if (ch == (int)'#') return 0; /* Hash characters in numbers are mapped to 0 */
-//  else if (ch >= (int)'a') return ch - (int)'a' + 10; /* lower hex */
-//  else if (ch >= (int)'A') return ch - (int)'A' + 10; /* upper hex */
-//  else return ch - (int)'0'; /* decimal (OR INVALID; handled elsewhere) */
+//  C_word *dptr, bignum, bigvec, retval, size, negp = 0;
+//
+//  if (*str == '+' || *str == '-') {
+//    negp = ((*str++) == '-') ? 1 : 0;
+//    --len;
+//  }
+//  size = C_BIGNUM_BITS_TO_DIGITS((unsigned int)len << 2);
+//
+//  dptr = (C_word *)C_malloc(C_wordstobytes(C_SIZEOF_INTERNAL_BIGNUM_VECTOR(size)));
+//  if(dptr == NULL)
+//    panic(C_text("out of memory - cannot allocate static bignum"));
+//
+//  bigvec = (C_word)dptr;
+//  C_block_header_init(bigvec, C_STRING_TYPE | C_wordstobytes(size + 1));
+//  C_set_block_item(bigvec, 0, negp);
+//  /* This needs to be allocated at ptr, not dptr, because GC moves type tag */
+//  bignum = C_a_i_bignum_wrapper(ptr, bigvec);
+//
+//  retval = str_to_bignum(bignum, str, str + len, 16);
+//  if (retval & C_FIXNUM_BIT)
+//    C_free(dptr); /* Might have been simplified */
+//  return retval;
 //}
-//
-///* Write from digit character stream to bignum.  Bignum does not need
-// * to be initialised.  Returns the bignum, or a fixnum.  Assumes the
-// * string contains only digits that fit within radix (checked by
-// * string->number).
-// */
-//static C_regparm C_word
-//str_to_bignum(C_word bignum, char *str, char *str_end, int radix)
+
+//C_regparm C_word C_fcall
+//C_s_a_i_digits_to_integer(C_word **ptr, C_word n, C_word str, C_word start, C_word end, C_word radix, C_word negp)
 //{
-//  int radix_shift, str_digit;
-//  C_uword *digits = C_bignum_digits(bignum),
-//          *end_digits = digits + C_bignum_size(bignum), big_digit = 0;
+//  if (start == end) {
+//    return C_SCHEME_FALSE;
+//  } else {
+//    size_t nbits;
+//    char *s = C_c_string(str);
+//    C_word result, size;
+//    end = C_unfix(end);
+//    start = C_unfix(start);
+//    radix = C_unfix(radix);
 //
-//  /* Below, we try to save up as much as possible in big_digit, and
-//   * only when it exceeds what we would be able to multiply easily, we
-//   * scale up the bignum and add what we saved up.
-//   */
-//  radix_shift = C_ilen(radix) - 1;
-//  if (((C_uword)1 << radix_shift) == radix) { /* Power of two? */
+//    assert((radix > 1) && C_fitsinbignumhalfdigitp(radix));
+//
+//    nbits = (end - start) * C_ilen(radix - 1);
+//    size = C_BIGNUM_BITS_TO_DIGITS(nbits);
+//    if (size == 1) {
+//      result = C_bignum1(ptr, C_truep(negp), 0);
+//    } else if (size == 2) {
+//      result = C_bignum2(ptr, C_truep(negp), 0, 0);
+//    } else {
+//      size = C_fix(size);
+//      result = C_allocate_scratch_bignum(ptr, size, negp, C_SCHEME_FALSE);
+//    }
+//
+//    return str_to_bignum(result, s + start, s + end, radix);
+//  }
+//}
+
+inline static int hex_char_to_digit(int ch)
+{
+  if (ch == (int)'#') return 0; /* Hash characters in numbers are mapped to 0 */
+  else if (ch >= (int)'a') return ch - (int)'a' + 10; /* lower hex */
+  else if (ch >= (int)'A') return ch - (int)'A' + 10; /* upper hex */
+  else return ch - (int)'0'; /* decimal (OR INVALID; handled elsewhere) */
+}
+
+/* Write from digit character stream to bignum.  Bignum does not need
+ * to be initialised.  Returns the bignum, or a fixnum.  Assumes the
+ * string contains only digits that fit within radix (checked by
+ * string->number).
+ */
+//static C_regparm C_word
+object str_to_bignum(void *data, object bignum, char *str, char *str_end, int radix)
+{
+  int radix_shift, str_digit;
+  uint32_t *digits = C_bignum_digits(bignum),
+          *end_digits = digits + C_bignum_size(bignum), big_digit = 0;
+
+  /* Below, we try to save up as much as possible in big_digit, and
+   * only when it exceeds what we would be able to multiply easily, we
+   * scale up the bignum and add what we saved up.
+   */
+  radix_shift = nlz(radix) - 1;
+  if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
+// TODO:
 //    int n = 0; /* Number of bits read so far into current big digit */
 //
 //    /* Read from least to most significant digit to avoid shifting or scaling */
@@ -2682,33 +2986,33 @@ string_type *bignum2string(void *data, bignum2_type *bn, int radix)
 //    /* If radix isn't an exact divisor of digit length, write final digit */
 //    if (n > 0) *digits++ = big_digit;
 //    assert(digits == end_digits);
-//  } else {			  /* Not a power of two */
-//    C_uword *last_digit = digits, factor;  /* bignum starts as zero */
-//
-//    do {
-//      factor = radix;
-//      while (str < str_end && C_fitsinbignumhalfdigitp(factor)) {
-//        str_digit = hex_char_to_digit((int)*str++);
-//	factor *= radix;
-//	big_digit = radix * big_digit + str_digit;
-//      }
-//
-//      big_digit = bignum_digits_destructive_scale_up_with_carry(
-//                   digits, last_digit, factor / radix, big_digit);
-//
-//      if (big_digit) {
-//	(*last_digit++) = big_digit; /* Move end */
-//        big_digit = 0;
-//      }
-//    } while (str < str_end);
-//
-//    /* Set remaining digits to zero so bignum_simplify can do its work */
-//    assert(last_digit <= end_digits);
-//    while (last_digit < end_digits) *last_digit++ = 0;
-//  }
-//
-//  return C_bignum_simplify(bignum);
-//}
+  } else {			  /* Not a power of two */
+    uint32_t *last_digit = digits, factor;  /* bignum starts as zero */
+
+    do {
+      factor = radix;
+      while (str < str_end && Cyc_fitsinbignumhalfdigitp(factor)) {
+        str_digit = hex_char_to_digit((int)*str++);
+        factor *= radix;
+        big_digit = radix * big_digit + str_digit;
+      }
+
+      big_digit = bignum_digits_destructive_scale_up_with_carry(
+                   digits, last_digit, factor / radix, big_digit);
+
+      if (big_digit) {
+        (*last_digit++) = big_digit; /* Move end */
+        big_digit = 0;
+      }
+    } while (str < str_end);
+
+    /* Set remaining digits to zero so bignum_simplify can do its work */
+    assert(last_digit <= end_digits);
+    while (last_digit < end_digits) *last_digit++ = 0;
+  }
+
+  return C_bignum_simplify(bignum);
+}
 
 // TODO: static
 //object bignum_plus_unsigned(C_word **ptr, C_word x, C_word y, C_word negp)
