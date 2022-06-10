@@ -2599,6 +2599,80 @@ string_type *bignum2string(void *data, bignum2_type *bn, int radix)
   return s;
 }
 
+// TODO:
+//inline static int hex_char_to_digit(int ch)
+//{
+//  if (ch == (int)'#') return 0; /* Hash characters in numbers are mapped to 0 */
+//  else if (ch >= (int)'a') return ch - (int)'a' + 10; /* lower hex */
+//  else if (ch >= (int)'A') return ch - (int)'A' + 10; /* upper hex */
+//  else return ch - (int)'0'; /* decimal (OR INVALID; handled elsewhere) */
+//}
+//
+///* Write from digit character stream to bignum.  Bignum does not need
+// * to be initialised.  Returns the bignum, or a fixnum.  Assumes the
+// * string contains only digits that fit within radix (checked by
+// * string->number).
+// */
+//static C_regparm C_word
+//str_to_bignum(C_word bignum, char *str, char *str_end, int radix)
+//{
+//  int radix_shift, str_digit;
+//  C_uword *digits = C_bignum_digits(bignum),
+//          *end_digits = digits + C_bignum_size(bignum), big_digit = 0;
+//
+//  /* Below, we try to save up as much as possible in big_digit, and
+//   * only when it exceeds what we would be able to multiply easily, we
+//   * scale up the bignum and add what we saved up.
+//   */
+//  radix_shift = C_ilen(radix) - 1;
+//  if (((C_uword)1 << radix_shift) == radix) { /* Power of two? */
+//    int n = 0; /* Number of bits read so far into current big digit */
+//
+//    /* Read from least to most significant digit to avoid shifting or scaling */
+//    while (str_end > str) {
+//      str_digit = hex_char_to_digit((int)*--str_end);
+//
+//      big_digit |= (C_uword)str_digit << n;
+//      n += radix_shift;
+//
+//      if (n >= C_BIGNUM_DIGIT_LENGTH) {
+//	n -= C_BIGNUM_DIGIT_LENGTH;
+//	*digits++ = big_digit;
+//	big_digit = str_digit >> (radix_shift - n);
+//      }
+//    }
+//    assert(n < C_BIGNUM_DIGIT_LENGTH);
+//    /* If radix isn't an exact divisor of digit length, write final digit */
+//    if (n > 0) *digits++ = big_digit;
+//    assert(digits == end_digits);
+//  } else {			  /* Not a power of two */
+//    C_uword *last_digit = digits, factor;  /* bignum starts as zero */
+//
+//    do {
+//      factor = radix;
+//      while (str < str_end && C_fitsinbignumhalfdigitp(factor)) {
+//        str_digit = hex_char_to_digit((int)*str++);
+//	factor *= radix;
+//	big_digit = radix * big_digit + str_digit;
+//      }
+//
+//      big_digit = bignum_digits_destructive_scale_up_with_carry(
+//                   digits, last_digit, factor / radix, big_digit);
+//
+//      if (big_digit) {
+//	(*last_digit++) = big_digit; /* Move end */
+//        big_digit = 0;
+//      }
+//    } while (str < str_end);
+//
+//    /* Set remaining digits to zero so bignum_simplify can do its work */
+//    assert(last_digit <= end_digits);
+//    while (last_digit < end_digits) *last_digit++ = 0;
+//  }
+//
+//  return C_bignum_simplify(bignum);
+//}
+
 // TODO: static
 //object bignum_plus_unsigned(C_word **ptr, C_word x, C_word y, C_word negp)
 object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int negp)
