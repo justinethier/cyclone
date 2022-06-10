@@ -6,6 +6,11 @@
    " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));
      object bn2 = Cyc_int2bignum2(data, obj_obj2int(fx2));
      object result = bignum2_plus_unsigned(data, bn1, bn2, 0); // TODO: int negp);
+if(is_value_type(result)) {
+  printf(\"fixnum result\\n\");
+} else if (type_of(result) == bignum2_tag) {
+  printf(\"bignum result\\n\");
+}
      return_closcall1(data, k, result); 
      ")
  (define-c test-bn
@@ -32,10 +37,11 @@
     (write row)
     (newline))
   (list
+    (test-plus #x0FFFffff #x0FFFffff)
+    (test-plus #x2FFFffff #x2FFFffff)
     (test-plus 1 2)
     ;; TODO: (fixnum? (test-plus 1 2))
     (test-plus -1 2)
-    (test-plus #x0FFFffff #x0FFFffff)
     (test-bn 123456789 )
     (test-bn 123456789 )
     (test-larger-bn 0 #x0FFF0001 )

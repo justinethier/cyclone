@@ -2464,21 +2464,21 @@ object C_bignum_simplify(object big)
 
   switch(length) {
   case 0:
-    //if (C_in_scratchspacep(C_internal_bignum_vector(big)))
-    //  C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
     return obj_int2obj(0);
   case 1:
     tmp = *start;
-    if (C_bignum_negativep(big) ?
-        !(tmp & C_INT_SIGN_BIT) && C_fitsinfixnump(-(C_word)tmp) :
-        C_ufitsinfixnump(tmp)) {
-      if (C_in_scratchspacep(C_internal_bignum_vector(big)))
-        C_mutate_scratch_slot(NULL, C_internal_bignum_vector(big));
-      return C_bignum_negativep(big) ? C_fix(-(C_word)tmp) : C_fix(tmp);
+    if (((uint32_t)tmp) <= CYC_FIXNUM_MAX) {
+      if (C_bignum_negativep(big)) {
+        return obj_int2obj(-(int32_t)tmp);
+      } else {
+        return obj_int2obj(tmp);
+      }
     }
     /* FALLTHROUGH */
   default:
-    if (scan < last_digit) C_bignum_mutate_size(big, length);
+    if (scan < last_digit) {
+      C_bignum_size(big) = length;
+    }
     return big;
   }
 }
@@ -2761,8 +2761,7 @@ object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int n
   }
   assert(scan_r <= end_r);
 
-  // TODO: return C_bignum_simplify(result);
-  return result; // TODO: no, could be a fixnum. need to simplify using above!
+  return C_bignum_simplify(result);
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
