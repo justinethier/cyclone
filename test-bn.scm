@@ -33,6 +33,7 @@
     (newline))
   (list
     (test-plus 1 2)
+    ;; TODO: (fixnum? (test-plus 1 2))
     (test-plus -1 2)
     (test-plus #x0FFFffff #x0FFFffff)
     (test-bn 123456789 )
