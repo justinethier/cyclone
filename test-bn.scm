@@ -1,6 +1,13 @@
 ; ./sync.sh runtime.c gc.c include/cyclone/*.h test-bn.scm && cd ../cyclone-bootstrap && rm -f cyclone libcyclone.a ; ./install.sh && ./cyclone -L. -I. test-bn.scm && ./test-bn && cd ../cyclone
 (import (scheme base) (scheme write) (scheme repl))
 
+ (define-c test-plus
+   "(void *data, int argc, closure _, object k, object fx1, object fx2)"
+   " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));
+     object bn2 = Cyc_int2bignum2(data, obj_obj2int(fx2));
+     object result = bignum2_plus_unsigned(data, bn1, bn2, 0); // TODO: int negp);
+     return_closcall1(data, k, result); 
+     ")
  (define-c test-bn
    "(void *data, int argc, closure _, object k, object fx)"
    " object bn = Cyc_int2bignum2(data, obj_obj2int(fx));
@@ -25,11 +32,15 @@
     (write row)
     (newline))
   (list
+    (test-plus 1 2)
+    (test-plus -1 2)
+    (test-plus #x0FFFffff #x0FFFffff)
     (test-bn 123456789 )
     (test-bn 123456789 )
     (test-larger-bn 0 #x0FFF0001 )
     (test-bn #x0FFF0001 )
 
+    (test-bn 0 ) ;; TODO: 0 is broken right now!
     (test-bn -10 )
     (test-bn 163264 )
     (test-bn 16326 )

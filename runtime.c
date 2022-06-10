@@ -2762,7 +2762,7 @@ object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int n
   assert(scan_r <= end_r);
 
   // TODO: return C_bignum_simplify(result);
-  return NULL; // DEBUG only!
+  return result; // TODO: no, could be a fixnum. need to simplify using above!
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)
