@@ -2966,26 +2966,25 @@ object str_to_bignum(void *data, object bignum, char *str, char *str_end, int ra
    */
   radix_shift = nlz(radix) - 1;
   if (((uint32_t)1 << radix_shift) == radix) { /* Power of two? */
-// TODO:
-//    int n = 0; /* Number of bits read so far into current big digit */
-//
-//    /* Read from least to most significant digit to avoid shifting or scaling */
-//    while (str_end > str) {
-//      str_digit = hex_char_to_digit((int)*--str_end);
-//
-//      big_digit |= (C_uword)str_digit << n;
-//      n += radix_shift;
-//
-//      if (n >= C_BIGNUM_DIGIT_LENGTH) {
-//	n -= C_BIGNUM_DIGIT_LENGTH;
-//	*digits++ = big_digit;
-//	big_digit = str_digit >> (radix_shift - n);
-//      }
-//    }
-//    assert(n < C_BIGNUM_DIGIT_LENGTH);
-//    /* If radix isn't an exact divisor of digit length, write final digit */
-//    if (n > 0) *digits++ = big_digit;
-//    assert(digits == end_digits);
+    int n = 0; /* Number of bits read so far into current big digit */
+
+    /* Read from least to most significant digit to avoid shifting or scaling */
+    while (str_end > str) {
+      str_digit = hex_char_to_digit((int)*--str_end);
+
+      big_digit |= (uint32_t)str_digit << n;
+      n += radix_shift;
+
+      if (n >= C_BIGNUM_DIGIT_LENGTH) {
+        n -= C_BIGNUM_DIGIT_LENGTH;
+        *digits++ = big_digit;
+        big_digit = str_digit >> (radix_shift - n);
+      }
+    }
+    assert(n < C_BIGNUM_DIGIT_LENGTH);
+    /* If radix isn't an exact divisor of digit length, write final digit */
+    if (n > 0) *digits++ = big_digit;
+    assert(digits == end_digits);
   } else {			  /* Not a power of two */
     uint32_t *last_digit = digits, factor;  /* bignum starts as zero */
 
