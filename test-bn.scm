@@ -13,6 +13,14 @@
 ;     return_closcall1(data, k, bn); 
 ;     ")
 
+ (define-c test-str2bn
+   "(void *data, int argc, closure _, object k, object str, object radix)"
+   " int len = string_len(str);
+     char *s = string_str(str);
+     bignum2_type *bn = gc_alloc_bignum2(data, len);
+     bn = str_to_bignum(data, bn, s, s + len, obj_obj2int(radix));
+     return_closcall1(data, k, bn); ")
+
  (define-c test-plus
    "(void *data, int argc, closure _, object k, object fx1, object fx2)"
    " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));
@@ -42,6 +50,12 @@ if(is_value_type(result)) {
      ")
 
 (write (test-bn 123456789))
+(newline)
+
+(write (test-str2bn "123454354534523454243999" 10))
+(newline)
+
+(write (test-str2bn "123454354534523454243999" 16))
 (newline)
 
 (map
