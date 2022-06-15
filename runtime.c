@@ -2580,34 +2580,34 @@ static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *
 //  }
 //  return carry;	 /* This would end up as most significant digit if it fit */
 //}
-//
-//static C_regparm void
-//bignum_digits_multiply(C_word x, C_word y, C_word result)
-//{
-//  C_uword product,
-//          *xd = C_bignum_digits(x),
-//          *yd = C_bignum_digits(y),
-//          *rd = C_bignum_digits(result);
-//  C_uhword carry, yj;
-//  /* Lengths in halfwords */
-//  int i, j, length_x = C_bignum_size(x) * 2, length_y = C_bignum_size(y) * 2;
-//
-//  /* From Hacker's Delight, Figure 8-1 (top part) */
-//  for (j = 0; j < length_y; ++j) {
-//    yj = C_uhword_ref(yd, j);
-//    if (yj == 0) continue;
-//    carry = 0;
-//    for (i = 0; i < length_x; ++i) {
-//      product = (C_uword)C_uhword_ref(xd, i) * yj +
-//                (C_uword)C_uhword_ref(rd, i + j) + carry;
-//      C_uhword_set(rd, i + j, product);
-//      carry = C_BIGNUM_DIGIT_HI_HALF(product);
-//    }
-//    C_uhword_set(rd, j + length_x, carry);
-//  }
-//}
-//
-//
+
+// TODO: static C_regparm void
+bignum_digits_multiply(object x, object y, object result)
+{
+  uint32_t product,
+          *xd = C_bignum_digits(x),
+          *yd = C_bignum_digits(y),
+          *rd = C_bignum_digits(result);
+  uint16_t carry, yj;
+  /* Lengths in halfwords */
+  int i, j, length_x = C_bignum_size(x) * 2, length_y = C_bignum_size(y) * 2;
+
+  /* From Hacker's Delight, Figure 8-1 (top part) */
+  for (j = 0; j < length_y; ++j) {
+    yj = C_uhword_ref(yd, j);
+    if (yj == 0) continue;
+    carry = 0;
+    for (i = 0; i < length_x; ++i) {
+      product = (C_uword)C_uhword_ref(xd, i) * yj +
+                (C_uword)C_uhword_ref(rd, i + j) + carry;
+      C_uhword_set(rd, i + j, product);
+      carry = C_BIGNUM_DIGIT_HI_HALF(product);
+    }
+    C_uhword_set(rd, j + length_x, carry);
+  }
+}
+
+
 ///* "small" is either a number that fits a halfdigit, or a power of two */
 //static C_regparm void
 //bignum_destructive_divide_unsigned_small(C_word **ptr, C_word x, C_word y, C_word *q, C_word *r)
