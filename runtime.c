@@ -2948,16 +2948,6 @@ inline static int hex_char_to_digit(int ch)
   else return ch - (int)'0'; /* decimal (OR INVALID; handled elsewhere) */
 }
 
-void _str_to_bignum(void *data, char *str, *char *str_end, int radix) 
-{
-  TODO:
-   need to figure out sign, size (using nlz), what else??
-  bignum2_type *bn = gc_alloc_bignum2(data, 2);
-  bn->num_digits = 2;
-  bn->sign = 0;
-  str_to_bignum(data, bn, str, str_end, radix);
-}
-
 /* Write from digit character stream to bignum.  Bignum does not need
  * to be initialised.  Returns the bignum, or a fixnum.  Assumes the
  * string contains only digits that fit within radix (checked by
@@ -3020,6 +3010,21 @@ static object str_to_bignum(void *data, object bignum, char *str, char *str_end,
   }
 
   return C_bignum_simplify(bignum);
+}
+
+object _str_to_bignum(void *data, char *str, char *str_end, int radix) 
+{
+  int negp = 0;
+  size_t nbits;
+  uint32_t size;
+  if (*str == '+' || *str == '-') {
+    negp = ((*str++) == '-') ? 1 : 0;
+  }
+  nbits = (str_end - str) * nlz(radix - 1);
+  size = C_BIGNUM_BITS_TO_DIGITS(nbits);
+  bignum2_type *bn = gc_alloc_bignum2(data, size);
+  bn->sign = negp;
+  return str_to_bignum(data, bn, str, str_end, radix);
 }
 
 // TODO: static
