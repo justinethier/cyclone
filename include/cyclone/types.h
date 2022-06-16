@@ -906,9 +906,9 @@ typedef struct {
  * machines, we must swap the odd and even positions.
  */
 //#ifdef C_BIG_ENDIAN
-#define C_uhword_ref(x, p)           ((uint16_t *)(x))[(p)^1]
+//#define C_uhword_ref(x, p)           ((uint16_t *)(x))[(p)^1]
 //#else
-//#define C_uhword_ref(x, p)           ((C_uhword *)(x))[(p)]
+#define C_uhword_ref(x, p)           ((uint16_t *)(x))[(p)]
 //#endif
 #define C_uhword_set(x, p, d)        (C_uhword_ref(x,p) = (d))
 
