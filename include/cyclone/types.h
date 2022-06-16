@@ -866,29 +866,29 @@ typedef struct {
 #define C_WORD_SIZE              32
 #define C_HALF_WORD_SIZE         16
 // #endif
-// 
-// /* Tunable performance-related constants */
-// #ifndef C_KARATSUBA_THRESHOLD
-// /* This defines when we'll switch from schoolbook to Karatsuba
-//  * multiplication.  The smallest of the two numbers determines the
-//  * switch.  It is pretty high right now because it generates a bit
-//  * more garbage and GC overhead dominates the algorithmic performance
-//  * gains.  If the GC is improved, this can be readjusted.
-//  */
-// # define C_KARATSUBA_THRESHOLD        70
-// #endif
-// #ifndef C_BURNIKEL_ZIEGLER_THRESHOLD
-// /* This defines when to switch from schoolbook to Burnikel-Ziegler
-//  * division.  It creates even more garbage than Karatsuba :(
-//  */
-// # define C_BURNIKEL_ZIEGLER_THRESHOLD 300
-// #endif
-// #ifndef C_RECURSIVE_TO_STRING_THRESHOLD
-// /* This threshold is in terms of the expected string length. */
-// # define C_RECURSIVE_TO_STRING_THRESHOLD 750
-// #endif
-// 
-// /* These might fit better in runtime.c? */
+ 
+/* Tunable performance-related constants */
+#ifndef C_KARATSUBA_THRESHOLD
+/* This defines when we'll switch from schoolbook to Karatsuba
+ * multiplication.  The smallest of the two numbers determines the
+ * switch.  It is pretty high right now because it generates a bit
+ * more garbage and GC overhead dominates the algorithmic performance
+ * gains.  If the GC is improved, this can be readjusted.
+ */
+# define C_KARATSUBA_THRESHOLD        70
+#endif
+
+//#ifndef C_BURNIKEL_ZIEGLER_THRESHOLD
+///* This defines when to switch from schoolbook to Burnikel-Ziegler
+// * division.  It creates even more garbage than Karatsuba :(
+// */
+//# define C_BURNIKEL_ZIEGLER_THRESHOLD 300
+//#endif
+//#ifndef C_RECURSIVE_TO_STRING_THRESHOLD
+///* This threshold is in terms of the expected string length. */
+//# define C_RECURSIVE_TO_STRING_THRESHOLD 750
+//#endif
+ 
 #define Cyc_fitsinbignumhalfdigitp(n)     (C_BIGNUM_DIGIT_HI_HALF(n) == 0)
 #define C_BIGNUM_DIGIT_LENGTH           C_WORD_SIZE
 #define C_BIGNUM_HALF_DIGIT_LENGTH      C_HALF_WORD_SIZE
@@ -900,6 +900,17 @@ typedef struct {
 // 
 // #define C_MOST_POSITIVE_32_BIT_FIXNUM  0x3fffffff
 // #define C_MOST_NEGATIVE_FIXNUM    (-C_MOST_POSITIVE_FIXNUM - 1)
+
+/* The bignum digit representation is fullword- little endian, so on
+ * LE machines the halfdigits are numbered in the same order.  On BE
+ * machines, we must swap the odd and even positions.
+ */
+//#ifdef C_BIG_ENDIAN
+#define C_uhword_ref(x, p)           ((uint16_t *)(x))[(p)^1]
+//#else
+//#define C_uhword_ref(x, p)           ((C_uhword *)(x))[(p)]
+//#endif
+#define C_uhword_set(x, p, d)        (C_uhword_ref(x,p) = (d))
 
 /**
  * @brief Complex number
@@ -1610,6 +1621,7 @@ object Cyc_int2bignum2(gc_thread_data *data, int n);
 string_type *bignum2string(void *data, bignum2_type *bn, int base);
 object _str_to_bignum(void *data, char *str, char *str_end, int radix);
 object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int negp);
+object bignum_times_bignum_unsigned(void *data, object x, object y, int negp);
 
 /* Remaining GC prototypes that require objects to be defined */
 void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);

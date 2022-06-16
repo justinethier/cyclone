@@ -32,6 +32,15 @@ if(is_value_type(result)) {
 }
      return_closcall1(data, k, result); 
      ")
+ (define-c test-times
+   "(void *data, int argc, closure _, object k, object fx1, object fx2)"
+   " object x = Cyc_int2bignum2(data, obj_obj2int(fx1));
+     object y = Cyc_int2bignum2(data, obj_obj2int(fx2));
+     int negp = 0;
+     // TODO: set negp
+     object result = bignum_times_bignum_unsigned(data, x, y, negp);
+     return_closcall1(data, k, result); 
+     ")
  (define-c test-bn
    "(void *data, int argc, closure _, object k, object fx)"
    " object bn = Cyc_int2bignum2(data, obj_obj2int(fx));
@@ -60,6 +69,22 @@ if(is_value_type(result)) {
 (write (test-str2bn "123454354534523454243999" 16))
 (newline)
 
+(write "multiplication")
+(newline)
+(map
+  (lambda (row)
+    (write row)
+    (newline))
+  (list
+    (test-times 1 1)
+    (test-times 1 2)
+    (test-times -1 2)
+    (test-times #x0FFFffff #x0FFFffff)
+    (test-times #x2FFFffff #x2FFFffff)
+))
+
+(write "general")
+(newline)
 (map
   (lambda (row)
     (write row)

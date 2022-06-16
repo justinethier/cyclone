@@ -2581,8 +2581,7 @@ static uint32_t bignum_digits_destructive_scale_down(uint32_t *start, uint32_t *
 //  return carry;	 /* This would end up as most significant digit if it fit */
 //}
 
-// TODO: static C_regparm void
-bignum_digits_multiply(object x, object y, object result)
+static void bignum_digits_multiply(object x, object y, object result)
 {
   uint32_t product,
           *xd = C_bignum_digits(x),
@@ -2598,13 +2597,38 @@ bignum_digits_multiply(object x, object y, object result)
     if (yj == 0) continue;
     carry = 0;
     for (i = 0; i < length_x; ++i) {
-      product = (C_uword)C_uhword_ref(xd, i) * yj +
-                (C_uword)C_uhword_ref(rd, i + j) + carry;
+      product = (uint32_t)C_uhword_ref(xd, i) * yj +
+                (uint32_t)C_uhword_ref(rd, i + j) + carry;
       C_uhword_set(rd, i + j, product);
       carry = C_BIGNUM_DIGIT_HI_HALF(product);
     }
     C_uhword_set(rd, j + length_x, carry);
   }
+}
+
+// TODO: static 
+object bignum_times_bignum_unsigned(void *data, object x, object y, int negp)
+{
+  object res = boolean_f;
+  uint32_t size;
+  if (C_bignum_size(y) < C_bignum_size(x)) { /* Ensure size(x) <= size(y) */
+    object z = x;
+    x = y;
+    y = z;
+  }
+
+// TODO:
+  //if (C_bignum_size(x) >= C_KARATSUBA_THRESHOLD)
+  //  res = bignum_times_bignum_karatsuba(ptr, x, y, negp);
+
+  if (res == boolean_f) {
+    size = C_bignum_size(x) + C_bignum_size(y);
+    res = gc_alloc_bignum2(data, size);
+    C_bignum_sign(res) = negp;
+    bignum_digits_multiply(x, y, res);
+    res = C_bignum_simplify(res);
+  }
+  return res;
 }
 
 
