@@ -2606,6 +2606,56 @@ static void bignum_digits_multiply(object x, object y, object result)
   }
 }
 
+/* Karatsuba multiplication: invoked when the two numbers are large
+ * enough to make it worthwhile, and we still have enough stack left.
+ * Complexity is O(n^log2(3)), where n is max(len(x), len(y)).  The
+ * description in [Knuth, 4.3.3] leaves a lot to be desired.  [MCA,
+ * 1.3.2] and [MpNT, 3.2] are a bit easier to understand.  We assume
+ * that length(x) <= length(y).
+ */
+//static object
+//bignum_times_bignum_karatsuba(object x, object y, int negp)
+//{
+//   C_word kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, o[18],
+//          xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
+//   int i = 0;
+//
+//   /* Ran out of stack?  Fall back to non-recursive multiplication */
+//   C_stack_check1(return C_SCHEME_FALSE);
+//   
+//   /* Split |x| in half: <xhi,xlo> and |y|: <yhi,ylo> with len(ylo)=len(xlo) */
+//   x = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, x);
+//   y = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, y);
+//   n = C_fix(C_bignum_size(y) >> 1);
+//   xhi = o[i++] = bignum_extract_digits(&ka, 3, x, n, C_SCHEME_FALSE);
+//   xlo = o[i++] = bignum_extract_digits(&ka, 3, x, C_fix(0), n);
+//   yhi = o[i++] = bignum_extract_digits(&ka, 3, y, n, C_SCHEME_FALSE);
+//   ylo = o[i++] = bignum_extract_digits(&ka, 3, y, C_fix(0), n);
+//
+//   /* a = xhi * yhi, b = xlo * ylo, c = (xhi - xlo) * (yhi - ylo) */
+//   a = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xhi, yhi);
+//   b = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xlo, ylo);
+//   xmid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, xhi, xlo);
+//   ymid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, yhi, ylo);
+//   c = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xmid, ymid);
+//
+//   /* top(x) = a << (bits - 1)  and  bottom(y) = ((b + (a - c)) << bits) + b */
+//   bits = C_unfix(n) * C_BIGNUM_DIGIT_LENGTH;
+//   x = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, a, C_fix((C_uword)bits << 1));
+//   c = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, a, c);
+//   c = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, b, c);
+//   c = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, c, C_fix(bits));
+//   y = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, c, b);
+//   /* Finally, return top + bottom, and correct for negative */
+//   n = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, x, y);
+//   if (C_truep(negp)) n = o[i++] = C_s_a_u_i_integer_negate(&ka, 1, n);
+//
+//   n = move_buffer_object(ptr, kab, n);
+//   while(i--) clear_buffer_object(kab, o[i]);
+//   return n;
+//}
+
+
 // TODO: static 
 object bignum_times_bignum_unsigned(void *data, object x, object y, int negp)
 {
@@ -3103,6 +3153,62 @@ object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int n
   assert(scan_r <= end_r);
 
   return C_bignum_simplify(result);
+}
+
+//static 
+object bignum_minus_unsigned(void *data, object x, object y)
+{
+  object res; 
+  uint32_t size;
+  uint32_t *scan_r, *end_r, *scan_y, *end_y, difference, digit;
+  int borrow = 0;
+
+  switch(bignum_cmp_unsigned(x, y)) {
+  case 0:	      /* x = y, return 0 */
+    return C_fix(0);
+  case -1:	      /* abs(x) < abs(y), return -(abs(y) - abs(x)) */
+    size = C_fix(C_bignum_size(y)); /* Maximum size of result is length of y. */
+    size = y;
+    y = x;
+    x = size;
+    break;
+  case 1:	      /* abs(x) > abs(y), return abs(x) - abs(y) */
+  default:
+    size = C_fix(C_bignum_size(x)); /* Maximum size of result is length of x. */
+    break;
+  }
+
+  scan_r = C_bignum_digits(res);
+  end_r = scan_r + C_bignum_size(res);
+  scan_y = C_bignum_digits(y);
+  end_y = scan_y + C_bignum_size(y);
+
+  bignum_digits_destructive_copy(res, x); /* See bignum_plus_unsigned */
+
+  /* Destructively subtract y's digits w/ borrow from and back into r. */
+  while (scan_y < end_y) {
+    digit = *scan_r;
+    if (borrow) {
+      difference = digit - *scan_y++ - 1;
+      borrow = difference >= digit;
+    } else {
+      difference = digit - *scan_y++;
+      borrow = difference > digit;
+    }
+    (*scan_r++) = difference;
+  }
+
+  /* The end of y, the smaller number.  Propagate borrow into the rest of x. */
+  while (borrow) {
+    digit = *scan_r;
+    difference = digit - borrow;
+    borrow = difference >= digit;
+    (*scan_r++) = difference;
+  }
+
+  assert(scan_r <= end_r);
+
+  return C_bignum_simplify(res);
 }
 
 object Cyc_symbol2string(void *data, object cont, object sym)

@@ -1621,6 +1621,7 @@ object Cyc_int2bignum2(gc_thread_data *data, int n);
 string_type *bignum2string(void *data, bignum2_type *bn, int base);
 object _str_to_bignum(void *data, char *str, char *str_end, int radix);
 object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int negp);
+object bignum_minus_unsigned(void *data, object x, object y);
 object bignum_times_bignum_unsigned(void *data, object x, object y, int negp);
 
 /* Remaining GC prototypes that require objects to be defined */
