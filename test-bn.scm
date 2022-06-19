@@ -88,6 +88,12 @@ if(is_value_type(result)) {
     (write row)
     (newline))
   (list
+    (test-minus ;; TODO: just hangs, WTF?
+      (test-str2bn "1234567890123456789012345678901234567890")
+      (test-str2bn "1234567890"))
+    (test-minus
+      (test-str2bn "1234567890")
+      (test-str2bn "1234567890123456789012345678901234567890"))
     (test-minus 1 1)
     (test-minus 1 2)
     (test-minus -1 2)

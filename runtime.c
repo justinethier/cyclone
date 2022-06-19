@@ -2306,6 +2306,11 @@ object Cyc_length_unsafe(void *data, object l)
   return obj_int2obj(len);
 }
 
+/******************************************************************************
+ ** BIGNUM 2 SECTION **/
+
+static int bignum_cmp_unsigned(object x, object y);
+
 char *int_to_binary(char *b, int x)
 {
   unsigned int i = 0x80000000, leading_zeros = 1;
@@ -3155,28 +3160,55 @@ object bignum2_plus_unsigned(void *data, bignum2_type *x, bignum2_type *y, int n
   return C_bignum_simplify(result);
 }
 
+static int bignum_cmp_unsigned(object x, object y)
+{
+  uint32_t xlen = C_bignum_size(x), ylen = C_bignum_size(y);
+
+  if (xlen < ylen) {
+    return -1;
+  } else if (xlen > ylen) {
+    return 1;
+  } else if (x == y) {
+    return 0;
+  } else {
+    uint32_t *startx = C_bignum_digits(x),
+             *scanx = startx + xlen,
+             *scany = C_bignum_digits(y) + ylen;
+
+    while (startx < scanx) {
+      uint32_t xdigit = (*--scanx), ydigit = (*--scany);
+      if (xdigit < ydigit)
+        return -1;
+      if (xdigit > ydigit)
+        return 1;
+    }
+    return 0;
+  }
+}
+
 //static 
 object bignum_minus_unsigned(void *data, object x, object y)
 {
-  object res; 
+  object res, tmp; 
   uint32_t size;
   uint32_t *scan_r, *end_r, *scan_y, *end_y, difference, digit;
   int borrow = 0;
 
   switch(bignum_cmp_unsigned(x, y)) {
   case 0:	      /* x = y, return 0 */
-    return C_fix(0);
+    return obj_int2obj(0);
   case -1:	      /* abs(x) < abs(y), return -(abs(y) - abs(x)) */
     size = C_bignum_size(y); /* Maximum size of result is length of y. */
-    size = y;
+    tmp = y;
     y = x;
-    x = size;
+    x = tmp;
     break;
   case 1:	      /* abs(x) > abs(y), return abs(x) - abs(y) */
   default:
     size = C_bignum_size(x); /* Maximum size of result is length of x. */
     break;
   }
+  res = gc_alloc_bignum2(data, size);
 
   scan_r = C_bignum_digits(res);
   end_r = scan_r + C_bignum_size(res);
@@ -3210,6 +3242,9 @@ object bignum_minus_unsigned(void *data, object x, object y)
 
   return C_bignum_simplify(res);
 }
+
+/** END BIGNUM 2 SECTION **
+ ******************************************************************************/
 
 object Cyc_symbol2string(void *data, object cont, object sym)
 {
