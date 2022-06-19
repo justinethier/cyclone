@@ -3167,14 +3167,14 @@ object bignum_minus_unsigned(void *data, object x, object y)
   case 0:	      /* x = y, return 0 */
     return C_fix(0);
   case -1:	      /* abs(x) < abs(y), return -(abs(y) - abs(x)) */
-    size = C_fix(C_bignum_size(y)); /* Maximum size of result is length of y. */
+    size = C_bignum_size(y); /* Maximum size of result is length of y. */
     size = y;
     y = x;
     x = size;
     break;
   case 1:	      /* abs(x) > abs(y), return abs(x) - abs(y) */
   default:
-    size = C_fix(C_bignum_size(x)); /* Maximum size of result is length of x. */
+    size = C_bignum_size(x); /* Maximum size of result is length of x. */
     break;
   }
 
