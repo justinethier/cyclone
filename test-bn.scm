@@ -22,8 +22,8 @@
 
  (define-c test-plus
    "(void *data, int argc, closure _, object k, object fx1, object fx2)"
-   " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));
-     object bn2 = Cyc_int2bignum2(data, obj_obj2int(fx2));
+   " object bn1 = is_value_type(fx1) ? Cyc_int2bignum2(data, obj_obj2int(fx1)) : fx1;
+     object bn2 = is_value_type(fx2) ? Cyc_int2bignum2(data, obj_obj2int(fx2)) : fx2;
      object result = bignum2_plus_unsigned(data, bn1, bn2, 0); // TODO: int negp);
 if(is_value_type(result)) {
   printf(\"fixnum result\\n\");
@@ -34,8 +34,8 @@ if(is_value_type(result)) {
      ")
  (define-c test-minus
    "(void *data, int argc, closure _, object k, object fx1, object fx2)"
-   " object bn1 = Cyc_int2bignum2(data, obj_obj2int(fx1));
-     object bn2 = Cyc_int2bignum2(data, obj_obj2int(fx2));
+   " object bn1 = is_value_type(fx1) ? Cyc_int2bignum2(data, obj_obj2int(fx1)) : fx1;
+     object bn2 = is_value_type(fx2) ? Cyc_int2bignum2(data, obj_obj2int(fx2)) : fx2;
      object result = bignum_minus_unsigned(data, bn1, bn2);
 if(is_value_type(result)) {
   printf(\"fixnum result\\n\");
@@ -46,8 +46,8 @@ if(is_value_type(result)) {
      ")
  (define-c test-times
    "(void *data, int argc, closure _, object k, object fx1, object fx2)"
-   " object x = Cyc_int2bignum2(data, obj_obj2int(fx1));
-     object y = Cyc_int2bignum2(data, obj_obj2int(fx2));
+   " object x = is_value_type(fx1) ? Cyc_int2bignum2(data, obj_obj2int(fx1)) : fx1;
+     object y = is_value_type(fx2) ? Cyc_int2bignum2(data, obj_obj2int(fx2)) : fx2;
      int negp = 0;
      // TODO: set negp
      object result = bignum_times_bignum_unsigned(data, x, y, negp);
@@ -69,13 +69,15 @@ if(is_value_type(result)) {
      return_closcall1(data, k, bn); 
      ")
 
-(write
-    (test-plus
-      (test-str2bn "1234567890123456789012345678901234567890" 10)
-      (test-str2bn "1234567890" 10))
-)
-(newline)
-
+;(write (test-str2bn "1234567890123456789012345678901234567890" 10))
+;(newline)
+;(write
+;    (test-plus
+;      (test-str2bn "1234567890123456789012345678901234567890" 10)
+;      (test-str2bn "1234567890" 10))
+;)
+;(newline)
+;
 ;(write (test-bn 123456789))
 ;(newline)
 ;
@@ -92,28 +94,29 @@ if(is_value_type(result)) {
 ;(newline)
 ;(write (test-str2bn "1234567890" 10))
 ;(newline)
-;
-;(write "subtraction")
-;(newline)
-;(map
-;  (lambda (row)
-;    (write row)
-;    (newline))
-;  (list
-;    (test-minus 
-;      (test-str2bn "1234567890123456789012345678901234567890" 10)
-;      (test-str2bn "1234567890" 10))
-;    (test-minus
-;      (test-str2bn "1234567890" 10)
-;      (test-str2bn "1234567890123456789012345678901234567890" 10))
-;    (test-minus 1 1)
-;    (test-minus 1 2)
-;    (test-minus -1 2)
-;    (test-minus (- #x0FFFffff) (- #x0FFFffff))
-;    (test-minus (- #x2FFFffff) (- #x2FFFffff))
-;))
-;(newline)
-;
+
+(write "subtraction")
+(newline)
+(map
+  (lambda (row)
+    (write row)
+    (newline))
+  (list
+;; TODO: getting intermittent out of memory errors displaying the result
+    (test-minus 
+      (test-str2bn "1234567890123456789012345678901234567890" 10)
+      (test-str2bn "1234567890" 10))
+    ;(test-minus
+    ;  (test-str2bn "1234567890" 10)
+    ;  (test-str2bn "1234567890123456789012345678901234567890" 10))
+    ;(test-minus 1 1)
+    ;(test-minus 1 2)
+    ;(test-minus -1 2)
+    ;(test-minus (- #x0FFFffff) (- #x0FFFffff))
+    ;(test-minus (- #x2FFFffff) (- #x2FFFffff))
+))
+(newline)
+
 ;(write "multiplication")
 ;(newline)
 ;(map
