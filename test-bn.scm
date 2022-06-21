@@ -69,83 +69,101 @@ if(is_value_type(result)) {
      return_closcall1(data, k, bn); 
      ")
 
-(write (test-bn 123456789))
+(write
+    (test-plus
+      (test-str2bn "1234567890123456789012345678901234567890" 10)
+      (test-str2bn "1234567890" 10))
+)
 (newline)
 
-(write (test-str2bn "123454354534523454243999" 10))
-(newline)
-
-(write (test-str2bn "-123454354534523454243999" 10))
-(newline)
-
-(write (test-str2bn "123454354534523454243999" 16))
-(newline)
-
-(write "subtraction")
-(newline)
-(map
-  (lambda (row)
-    (write row)
-    (newline))
-  (list
-    (test-minus ;; TODO: just hangs, WTF?
-      (test-str2bn "1234567890123456789012345678901234567890")
-      (test-str2bn "1234567890"))
-    (test-minus
-      (test-str2bn "1234567890")
-      (test-str2bn "1234567890123456789012345678901234567890"))
-    (test-minus 1 1)
-    (test-minus 1 2)
-    (test-minus -1 2)
-    (test-minus (- #x0FFFffff) (- #x0FFFffff))
-    (test-minus (- #x2FFFffff) (- #x2FFFffff))
-))
-(newline)
-
-(write "multiplication")
-(newline)
-(map
-  (lambda (row)
-    (write row)
-    (newline))
-  (list
-    (test-times 1 1)
-    (test-times 1 2)
-    (test-times -1 2)
-    (test-times #x0FFFffff #x0FFFffff)
-    (test-times #x2FFFffff #x2FFFffff)
-))
-
-(write "general")
-(newline)
-(map
-  (lambda (row)
-    (write row)
-    (newline))
-  (list
-    (test-plus #x0FFFffff #x0FFFffff)
-    (test-plus #x2FFFffff #x2FFFffff)
-    (test-plus 1 2)
-    ;; TODO: (fixnum? (test-plus 1 2))
-    (test-plus -1 2)
-    (test-bn 123456789 )
-    (test-bn 123456789 )
-    (test-larger-bn 0 #x0FFF0001 )
-    (test-bn #x0FFF0001 )
-
-    (test-bn 0 ) ;; TODO: 0 is broken right now!
-    (test-bn -10 )
-    (test-bn 163264 )
-    (test-bn 16326 )
-    (test-bn -16326000 )
-    (number->string (test-bn #x0FFFffff) 10)
-    (number->string (test-bn #x0FFFffff) 16)
-    (number->string (test-bn #x0eadbeef) 16)
-    (number->string (test-bn #x0eadbeef) 12)
-    (test-bn #x0eadbeef)
-    (test-bn #x0eadbeef)
-    (test-bn #x3FFFffff)
-    (test-larger-bn #x3FFF0000 #x0FFF0001 )
-  ))
-(newline)
+;(write (test-bn 123456789))
+;(newline)
+;
+;(write (test-str2bn "123454354534523454243999" 10))
+;(newline)
+;
+;(write (test-str2bn "-123454354534523454243999" 10))
+;(newline)
+;
+;(write (test-str2bn "123454354534523454243999" 16))
+;(newline)
+;
+;(write (test-str2bn "1234567890123456789012345678901234567890" 10))
+;(newline)
+;(write (test-str2bn "1234567890" 10))
+;(newline)
+;
+;(write "subtraction")
+;(newline)
+;(map
+;  (lambda (row)
+;    (write row)
+;    (newline))
+;  (list
+;    (test-minus 
+;      (test-str2bn "1234567890123456789012345678901234567890" 10)
+;      (test-str2bn "1234567890" 10))
+;    (test-minus
+;      (test-str2bn "1234567890" 10)
+;      (test-str2bn "1234567890123456789012345678901234567890" 10))
+;    (test-minus 1 1)
+;    (test-minus 1 2)
+;    (test-minus -1 2)
+;    (test-minus (- #x0FFFffff) (- #x0FFFffff))
+;    (test-minus (- #x2FFFffff) (- #x2FFFffff))
+;))
+;(newline)
+;
+;(write "multiplication")
+;(newline)
+;(map
+;  (lambda (row)
+;    (write row)
+;    (newline))
+;  (list
+;    (test-times
+;      (test-str2bn "1234567890123456789012345678901234567890" 10)
+;      (test-str2bn "1234567890" 10))
+;    (test-times 1 1)
+;    (test-times 1 2)
+;    (test-times -1 2)
+;    (test-times #x0FFFffff #x0FFFffff)
+;    (test-times #x2FFFffff #x2FFFffff)
+;))
+;
+;(write "general")
+;(newline)
+;(map
+;  (lambda (row)
+;    (write row)
+;    (newline))
+;  (list
+;    (test-plus
+;      (test-str2bn "1234567890123456789012345678901234567890" 10)
+;      (test-str2bn "1234567890" 10))
+;    (test-plus #x0FFFffff #x0FFFffff)
+;    (test-plus #x2FFFffff #x2FFFffff)
+;    (test-plus 1 2)
+;    ;; TODO: (fixnum? (test-plus 1 2))
+;    (test-plus -1 2)
+;    (test-bn 123456789 )
+;    (test-bn 123456789 )
+;    (test-larger-bn 0 #x0FFF0001 )
+;    (test-bn #x0FFF0001 )
+;
+;    (test-bn 0 ) ;; TODO: 0 is broken right now!
+;    (test-bn -10 )
+;    (test-bn 163264 )
+;    (test-bn 16326 )
+;    (test-bn -16326000 )
+;    (number->string (test-bn #x0FFFffff) 10)
+;    (number->string (test-bn #x0FFFffff) 16)
+;    (number->string (test-bn #x0eadbeef) 16)
+;    (number->string (test-bn #x0eadbeef) 12)
+;    (test-bn #x0eadbeef)
+;    (test-bn #x0eadbeef)
+;    (test-bn #x3FFFffff)
+;    (test-larger-bn #x3FFF0000 #x0FFF0001 )
+;  ))
+;(newline)
  ;(repl)
