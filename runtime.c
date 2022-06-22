@@ -2311,6 +2311,10 @@ object Cyc_length_unsafe(void *data, object l)
 
 static int bignum_cmp_unsigned(object x, object y);
 
+#define nmax(x, y)                   ((x) > (y) ? (x) : (y))
+#define nmin(x, y)                   ((x) < (y) ? (x) : (y))
+//#define percentage(n, p)             ((C_long)(((double)(n) * (double)p) / 100))
+
 char *int_to_binary(char *b, int x)
 {
   unsigned int i = 0x80000000, leading_zeros = 1;
@@ -2485,6 +2489,50 @@ object C_bignum_simplify(object big)
       C_bignum_size(big) = length;
     }
     return big;
+  }
+}
+
+/* This is currently only used by Karatsuba multiplication and
+ * Burnikel-Ziegler division. */
+static object bignum_extract_digits(void *data, object n, object x, object start, object end)
+{
+  if (obj_is_int(x)) { /* Needed? */
+    if (obj_obj2int(start) == 0 && (end == boolean_f || obj_obj2int(end) > 0))
+      return x;
+    else
+      return obj_int2obj(0);
+  } else {
+    uint32_t negp, size;
+    int istart, iend;
+
+    negp = C_bignum_negativep(x); /* Always false */
+
+    istart = obj_obj2int(start);
+    /* We might get passed larger values than actually fits; pad w/ zeroes */
+    if (end == boolean_f) iend = C_bignum_size(x);
+    else iend = nmin(obj_obj2int(end), C_bignum_size(x));
+    assert(istart >= 0);
+
+    size = iend - istart;
+
+    if (size == 0 || istart >= C_bignum_size(x)) {
+      return obj_int2obj(0);
+    } else {
+      object res;
+      uint32_t *res_digits, *x_digits;
+      //res = C_allocate_scratch_bignum(ptr, C_fix(size), negp, C_SCHEME_FALSE);
+      res = gc_alloc_bignum2(data, size);
+      C_bignum_sign(res) = negp;
+
+      res_digits = C_bignum_digits(res);
+      x_digits = C_bignum_digits(x);
+      /* Can't use bignum_digits_destructive_copy because that assumes
+       * target is at least as big as source.
+       */
+      memcpy(res_digits, x_digits + istart, (iend - istart) * sizeof(uint32_t));
+      //memcpy(res_digits, x_digits + istart, C_wordstobytes(iend - istart));
+      return C_bignum_simplify(res);
+    }
   }
 }
 
