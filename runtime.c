@@ -3209,6 +3209,7 @@ object bignum_minus_unsigned(void *data, object x, object y)
     break;
   }
   res = gc_alloc_bignum2(data, size);
+  C_bignum_sign(res) = 0; // JAE TODO: this initializes sign, but how to we properly set sign when doing bignum subtraction?
 
   scan_r = C_bignum_digits(res);
   end_r = scan_r + C_bignum_size(res);
