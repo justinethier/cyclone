@@ -8,8 +8,8 @@ The `(cyclone foreign)` provides a convenient interface for integrating with C c
 - [`c-value`](#c-value)
 - [`c-define`](#c-define)
 - [`c-define-type`](#c-define-type)
-- [`opaque?`](#opaque?)
-- [`opaque-null?`](#opaque-null?)
+- [`opaque?`](#opaque)
+- [`opaque-null?`](#opaque-null)
 - [`make-opaque`](#make-opaque)
 
 ## c-code
