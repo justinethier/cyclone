@@ -9,6 +9,7 @@ Features
 
 Bug Fixes
 
+- Fix a regression where `c-compiler-options` was not recognized as a top level form by programs.
 - Enforce a maximum recursion depth when printing an object via `display` and `write`, and when comparing objects via `equal?`. This prevents segmentation faults when working with circular data structures.
 
 ## 0.34.0 - January 2, 2022

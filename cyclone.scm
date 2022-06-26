@@ -723,7 +723,7 @@
     in-prog))
 
 ;; Compile and emit:
-(define (run-compiler args append-dirs prepend-dirs)
+(define (run-compiler args append-dirs prepend-dirs change-cc-opts!)
   (let* ((in-file (car args))
          (expander (base-expander))
          (in-prog-raw (read-file in-file))
@@ -745,6 +745,20 @@
                     (not (null? (car program:imports/code))))
              (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs expander)
             '()))
+        ;; Read C compiler options
+         (cc-opts
+          (cond
+            (program? 
+              (let ((opts (program-c-compiler-opts! in-prog)))
+                (when (not (null? opts))
+                  (change-cc-opts! opts))
+                (string-join ;; Check current program for options
+                  opts
+                  " ")))
+            (else
+              (string-join 
+                (lib:c-compiler-options (car in-prog)) 
+                " "))))
          ;; Read all linker options from dependent libs
          (c-linker-options
            (let ((lib-options (lib:get-all-c-linker-options lib-deps append-dirs prepend-dirs expander)))
@@ -1132,13 +1146,18 @@ Debug options:
       (cond
         (run-scm-compiler? 
           ;; Compile Scheme code into a C file
-          (run-compiler non-opts append-dirs prepend-dirs))
+          (run-compiler non-opts append-dirs prepend-dirs
+            (lambda (opts) 
+              (set! cc-opts opts))))
         (else
           ;; Generate the C file
           (cond
            (no-compiler-subprocess
             ;; Special case, we can generate .C file within this process
-            (run-compiler non-opts append-dirs prepend-dirs))
+            (run-compiler non-opts append-dirs prepend-dirs
+              (lambda (opts) (set! cc-opts opts)))
+
+            )
            (else
             ;; Normal path is to run another instance of cyclone to generate
             ;; the .C file. This lets us immediately free those resources once
