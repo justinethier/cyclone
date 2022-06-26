@@ -4,6 +4,7 @@
 
 Features
 
+- Arthur Maciel added `make-opaque` to `(cyclone foreign)`.
 - Add `memory-streams` to the list of symbols that `(features)` can return, indicating that the current installation supports in-memory streams.
 
 Bug Fixes
