@@ -38,6 +38,7 @@ TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/base.scm \
 					 $(TEST_DIR)/test.scm \
 					 $(TEST_DIR)/threading.scm \
+					 $(TEST_DIR)/c-compiler-options.scm \
 					 $(TEST_DIR)/test-shared-queue.scm \
 					 $(TEST_DIR)/macro-hygiene.scm \
 					 $(TEST_DIR)/match-tests.scm \
