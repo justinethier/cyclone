@@ -89,7 +89,6 @@
     ;;  - type - Data type of the Scheme object
     ;; Returns:
     ;;  - C code used to unbox the data
-                                        ;(define (scm->c code type)
     (define-syntax scm->c
       (er-macro-transformer
        (lambda (expr rename compare)

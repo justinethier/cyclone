@@ -2,12 +2,15 @@
 
 The `(cyclone foreign)` provides a convenient interface for integrating with C code. It is based in concept on the `(chicken foreign)` module from CHICKEN Scheme. Similarly to that module, this library manipulates the C code directly before it is compiled to a native binary. It is not possible to call these forms at runtime.
 
-# Overview
+# API
 
 - [`c-code`](#c-code)
 - [`c-value`](#c-value)
 - [`c-define`](#c-define)
 - [`c-define-type`](#c-define-type)
+- [`opaque?`](#opaque?)
+- [`opaque-null?`](#opaque-null?)
+- [`make-opaque`](#make-opaque)
 
 ## c-code
 
@@ -51,6 +54,23 @@ EG, to define a type that consists of integers in Scheme and strings in C:
 
     (c-define-type string-as-integer string number->string string->number)
 
+## opaque?
+
+    (opaque? obj)
+
+Predicate to determine if `obj` is a C Opaque object.
+
+## opaque-null?
+
+    (opaque-null? obj)
+
+Predicate to determine if `obj` is a C Opaque object that contains `NULL`.
+
+## make-opaque
+
+    (make-opaque)
+
+Create a C Opaque object containing `NULL`.
 
 # Type Specifiers
 
