@@ -2494,7 +2494,7 @@ object C_bignum_simplify(object big)
 
 /* This is currently only used by Karatsuba multiplication and
  * Burnikel-Ziegler division. */
-static object bignum_extract_digits(void *data, object n, object x, object start, object end)
+static object bignum_extract_digits(void *data, object x, object start, object end)
 {
   if (obj_is_int(x)) { /* Needed? */
     if (obj_obj2int(start) == 0 && (end == boolean_f || obj_obj2int(end) > 0))
@@ -2669,7 +2669,8 @@ static void bignum_digits_multiply(object x, object y, object result)
 static object
 bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
 {
-   object kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, o[18],
+   //object kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, 
+   object o[18],
           xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
    int i = 0;
 
@@ -2677,13 +2678,13 @@ bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
 //   C_stack_check1(return C_SCHEME_FALSE);
 //   
 //   /* Split |x| in half: <xhi,xlo> and |y|: <yhi,ylo> with len(ylo)=len(xlo) */
-//   x = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, x);
-//   y = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, y);
+//   x = o[i++] = C_s_a_u_i_integer_abs(1, x);
+//   y = o[i++] = C_s_a_u_i_integer_abs(1, y);
 //   n = C_fix(C_bignum_size(y) >> 1);
-   xhi = o[i++] = bignum_extract_digits(data, &ka, 3, x, n, boolean_f);
-   xlo = o[i++] = bignum_extract_digits(data, &ka, 3, x, obj_int2obj(0), n);
-   yhi = o[i++] = bignum_extract_digits(data, &ka, 3, y, n, boolean_f);
-   ylo = o[i++] = bignum_extract_digits(data, &ka, 3, y, obj_int2obj(0), n);
+   xhi = o[i++] = bignum_extract_digits(data, x, n, boolean_f);
+   xlo = o[i++] = bignum_extract_digits(data, x, obj_int2obj(0), n);
+   yhi = o[i++] = bignum_extract_digits(data, y, n, boolean_f);
+   ylo = o[i++] = bignum_extract_digits(data, y, obj_int2obj(0), n);
 
 //   /* a = xhi * yhi, b = xlo * ylo, c = (xhi - xlo) * (yhi - ylo) */
 //   a = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xhi, yhi);
@@ -2703,9 +2704,10 @@ bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
 //   n = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, x, y);
 //   if (C_truep(negp)) n = o[i++] = C_s_a_u_i_integer_negate(&ka, 1, n);
 //
+// JAE - no scratch space so believe not needed. Double-check first:
 //   n = move_buffer_object(ptr, kab, n);
 //   while(i--) clear_buffer_object(kab, o[i]);
-//   return n;
+   return n;
 }
 
 
