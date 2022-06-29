@@ -2666,13 +2666,13 @@ static void bignum_digits_multiply(object x, object y, object result)
  * 1.3.2] and [MpNT, 3.2] are a bit easier to understand.  We assume
  * that length(x) <= length(y).
  */
-//static object
-//bignum_times_bignum_karatsuba(object x, object y, int negp)
-//{
-//   C_word kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, o[18],
-//          xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
-//   int i = 0;
-//
+static object
+bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
+{
+   object kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, o[18],
+          xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
+   int i = 0;
+
 //   /* Ran out of stack?  Fall back to non-recursive multiplication */
 //   C_stack_check1(return C_SCHEME_FALSE);
 //   
@@ -2680,11 +2680,11 @@ static void bignum_digits_multiply(object x, object y, object result)
 //   x = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, x);
 //   y = o[i++] = C_s_a_u_i_integer_abs(&ka, 1, y);
 //   n = C_fix(C_bignum_size(y) >> 1);
-//   xhi = o[i++] = bignum_extract_digits(&ka, 3, x, n, C_SCHEME_FALSE);
-//   xlo = o[i++] = bignum_extract_digits(&ka, 3, x, C_fix(0), n);
-//   yhi = o[i++] = bignum_extract_digits(&ka, 3, y, n, C_SCHEME_FALSE);
-//   ylo = o[i++] = bignum_extract_digits(&ka, 3, y, C_fix(0), n);
-//
+   xhi = o[i++] = bignum_extract_digits(data, &ka, 3, x, n, boolean_f);
+   xlo = o[i++] = bignum_extract_digits(data, &ka, 3, x, obj_int2obj(0), n);
+   yhi = o[i++] = bignum_extract_digits(data, &ka, 3, y, n, boolean_f);
+   ylo = o[i++] = bignum_extract_digits(data, &ka, 3, y, obj_int2obj(0), n);
+
 //   /* a = xhi * yhi, b = xlo * ylo, c = (xhi - xlo) * (yhi - ylo) */
 //   a = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xhi, yhi);
 //   b = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xlo, ylo);
@@ -2706,7 +2706,7 @@ static void bignum_digits_multiply(object x, object y, object result)
 //   n = move_buffer_object(ptr, kab, n);
 //   while(i--) clear_buffer_object(kab, o[i]);
 //   return n;
-//}
+}
 
 
 // TODO: static 

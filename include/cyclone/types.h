@@ -857,6 +857,7 @@ typedef struct {
 #define C_bignum_negativep(n) (((bignum2_type *)n)->sign == 1)
 
 #define C_SIZEOF_BIGNUM(n) (sizeof(bignum2_type) + (C_bignum_digits(n) * sizeof(uint32_t)))
+#define C_SIZEOF_FIX_BIGNUM C_SIZEOF_BIGNUM(1)
 
 // TODO: covert applicable definitions below -
 // #ifdef C_SIXTY_FOUR
