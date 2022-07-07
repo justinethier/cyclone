@@ -2659,56 +2659,58 @@ static void bignum_digits_multiply(object x, object y, object result)
   }
 }
 
-/* Karatsuba multiplication: invoked when the two numbers are large
- * enough to make it worthwhile, and we still have enough stack left.
- * Complexity is O(n^log2(3)), where n is max(len(x), len(y)).  The
- * description in [Knuth, 4.3.3] leaves a lot to be desired.  [MCA,
- * 1.3.2] and [MpNT, 3.2] are a bit easier to understand.  We assume
- * that length(x) <= length(y).
- */
-static object
-bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
-{
-   //object kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, 
-   object o[18],
-          xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
-   int i = 0;
-
-//   /* Ran out of stack?  Fall back to non-recursive multiplication */
-//   C_stack_check1(return C_SCHEME_FALSE);
-//   
-//   /* Split |x| in half: <xhi,xlo> and |y|: <yhi,ylo> with len(ylo)=len(xlo) */
-//   x = o[i++] = C_s_a_u_i_integer_abs(1, x);
-//   y = o[i++] = C_s_a_u_i_integer_abs(1, y);
-//   n = C_fix(C_bignum_size(y) >> 1);
-   xhi = o[i++] = bignum_extract_digits(data, x, n, boolean_f);
-   xlo = o[i++] = bignum_extract_digits(data, x, obj_int2obj(0), n);
-   yhi = o[i++] = bignum_extract_digits(data, y, n, boolean_f);
-   ylo = o[i++] = bignum_extract_digits(data, y, obj_int2obj(0), n);
-
-//   /* a = xhi * yhi, b = xlo * ylo, c = (xhi - xlo) * (yhi - ylo) */
-//   a = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xhi, yhi);
-//   b = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xlo, ylo);
-//   xmid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, xhi, xlo);
-//   ymid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, yhi, ylo);
-//   c = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xmid, ymid);
+// JAE TODO: at some point need to add this back for optimized multiplication:
 //
-//   /* top(x) = a << (bits - 1)  and  bottom(y) = ((b + (a - c)) << bits) + b */
-//   bits = C_unfix(n) * C_BIGNUM_DIGIT_LENGTH;
-//   x = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, a, C_fix((C_uword)bits << 1));
-//   c = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, a, c);
-//   c = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, b, c);
-//   c = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, c, C_fix(bits));
-//   y = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, c, b);
-//   /* Finally, return top + bottom, and correct for negative */
-//   n = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, x, y);
-//   if (C_truep(negp)) n = o[i++] = C_s_a_u_i_integer_negate(&ka, 1, n);
+///* Karatsuba multiplication: invoked when the two numbers are large
+// * enough to make it worthwhile, and we still have enough stack left.
+// * Complexity is O(n^log2(3)), where n is max(len(x), len(y)).  The
+// * description in [Knuth, 4.3.3] leaves a lot to be desired.  [MCA,
+// * 1.3.2] and [MpNT, 3.2] are a bit easier to understand.  We assume
+// * that length(x) <= length(y).
+// */
+//static object
+//bignum_times_bignum_karatsuba(void *data, object x, object y, int negp)
+//{
+//   //object kab[C_SIZEOF_FIX_BIGNUM*15+C_SIZEOF_BIGNUM(2)*3], *ka = kab, 
+//   object o[18],
+//          xhi, xlo, xmid, yhi, ylo, ymid, a, b, c, n, bits;
+//   int i = 0;
 //
-// JAE - no scratch space so believe not needed. Double-check first:
-//   n = move_buffer_object(ptr, kab, n);
-//   while(i--) clear_buffer_object(kab, o[i]);
-   return n;
-}
+////   /* Ran out of stack?  Fall back to non-recursive multiplication */
+////   C_stack_check1(return C_SCHEME_FALSE);
+////   
+////   /* Split |x| in half: <xhi,xlo> and |y|: <yhi,ylo> with len(ylo)=len(xlo) */
+////   x = o[i++] = C_s_a_u_i_integer_abs(1, x);
+////   y = o[i++] = C_s_a_u_i_integer_abs(1, y);
+////   n = C_fix(C_bignum_size(y) >> 1);
+//   xhi = o[i++] = bignum_extract_digits(data, x, n, boolean_f);
+//   xlo = o[i++] = bignum_extract_digits(data, x, obj_int2obj(0), n);
+//   yhi = o[i++] = bignum_extract_digits(data, y, n, boolean_f);
+//   ylo = o[i++] = bignum_extract_digits(data, y, obj_int2obj(0), n);
+//
+////   /* a = xhi * yhi, b = xlo * ylo, c = (xhi - xlo) * (yhi - ylo) */
+////   a = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xhi, yhi);
+////   b = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xlo, ylo);
+////   xmid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, xhi, xlo);
+////   ymid = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, yhi, ylo);
+////   c = o[i++] = C_s_a_u_i_integer_times(&ka, 2, xmid, ymid);
+////
+////   /* top(x) = a << (bits - 1)  and  bottom(y) = ((b + (a - c)) << bits) + b */
+////   bits = C_unfix(n) * C_BIGNUM_DIGIT_LENGTH;
+////   x = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, a, C_fix((C_uword)bits << 1));
+////   c = o[i++] = C_s_a_u_i_integer_minus(&ka, 2, a, c);
+////   c = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, b, c);
+////   c = o[i++] = C_s_a_i_arithmetic_shift(&ka, 2, c, C_fix(bits));
+////   y = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, c, b);
+////   /* Finally, return top + bottom, and correct for negative */
+////   n = o[i++] = C_s_a_u_i_integer_plus(&ka, 2, x, y);
+////   if (C_truep(negp)) n = o[i++] = C_s_a_u_i_integer_negate(&ka, 1, n);
+////
+//// JAE - no scratch space so believe not needed. Double-check first:
+////   n = move_buffer_object(ptr, kab, n);
+////   while(i--) clear_buffer_object(kab, o[i]);
+//   return n;
+//}
 
 
 // TODO: static 
