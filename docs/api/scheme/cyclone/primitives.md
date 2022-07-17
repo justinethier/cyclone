@@ -15,7 +15,7 @@ The `(scheme cyclone primitives)` library contains information about Cyclone's s
 - [`prim:cont?`](#primcont)
 - [`prim:cont/no-args?`](#primcontno-args)
 - [`prim:arg-count?`](#primarg-count)
-- [`prim:allocates-object?)`](#primallocates-object)
+- [`prim:allocates-object?`](#primallocates-object)
 
 # prim?
 
@@ -85,7 +85,7 @@ Is `sym` a primitive function that passes a continuation or thread data but has 
 
 Should the compiler pass an integer arg count as the function's first parameter?
 
-# prim:allocates-object?)
+# prim:allocates-object?
 
     (prim:allocates-object? sym use-alloca?)
 
