@@ -48,7 +48,7 @@
   (when (not (eof-object? line))
     (with-handler
       (lambda (obj)
-        (display `(Error processing line ,line details ,obj)))
+        (display `(Error processing line ,line details ,obj) (current-error-port)))
       (display (convert-line line))
       (newline))
         
