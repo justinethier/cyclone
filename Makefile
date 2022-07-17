@@ -147,9 +147,12 @@ debug :
 doc :
 	doxygen Doxyfile
 
+api-doc :
+	./scripts/generate-doc-index.sh && mv api-index.scm docs/api/
+
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean full bench bootstrap tags indent debug test doc
+.PHONY: clean full bench bootstrap tags indent debug test doc api-doc
 
 $(TESTS) : %: %.scm cyclone libs
 	$(CYCLONE_LOCAL) -I . $<
