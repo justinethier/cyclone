@@ -54,7 +54,7 @@ TESTS = $(basename $(TEST_SRC))
 all : cyclone icyc libs
 
 test : libs $(TESTS)
-	icyc -p "(begin (define-syntax foo (syntax-rules () ((foo) 123))) (foo))"
+	icyc -p "(cond-expand (linux (begin (define-syntax foo (syntax-rules () ((foo) 123))) (foo))))"
 
 example :
 	cd $(EXAMPLE_DIR) ; $(MAKE)
