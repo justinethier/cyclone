@@ -636,14 +636,9 @@
 ;(display "/* ")
 ;(write (list exp))
 ;(display "*/ ")
-       (let ((fncs 
-               ;; Our map starts from the end, we reverse
-               ;; so everything is evaluated in order, then
-               ;; reverse again so results are in order
-               (reverse
-                 (map (lambda (expr) 
-                        (analyze expr a-env rename-env local-renamed))
-                      (reverse (cdr exp))))))
+       (let ((fncs (Cyc-map-loop-1 (lambda (expr) 
+                                      (analyze expr a-env rename-env local-renamed))
+                                   (cdr exp))))
          (lambda (env)
            (foldl (lambda (fnc _) (fnc env)) #f fncs))))
       ;; compiled macro

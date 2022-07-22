@@ -9,6 +9,10 @@ Features
 
 Bug Fixes
 
+- Prevent an error when evaluating a `begin` expression that contains both a macro definition and an application of that macro. For example:
+
+      begin (define-syntax foo (syntax-rules () ((foo) 123))) (foo))
+
 - Fix a regression where `c-compiler-options` was not recognized as a top level form by programs.
 - Enforce a maximum recursion depth when printing an object via `display` and `write`, and when comparing objects via `equal?`. This prevents segmentation faults when working with circular data structures.
 
