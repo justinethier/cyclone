@@ -65,5 +65,27 @@
   (test 'test-field (get-test e))
 )
 
+(test-group
+  "assoc"
+  (define a 0.0)
+  (test '(0.0) (assoc a (list (list a))))
+  (test '(0.0) (assoc 0.0 (list (list a))))
+  (test '(0.0) (assv a (list (list a))))
+  (test '(0.0) (assv 0.0 (list (list a))))
+  (test '(0.0) (assq a (list (list a))))
+  (test #f (assq 0.0 (list (list a))))
+)
+
+(test-group
+  "member"
+  (define m 0.0)
+  (test '(0.0) (member m (list m)))
+  (test '(0.0) (member 0.0 (list m)))
+  (test '(0.0) (memv m (list m)))
+  (test '(0.0) (memv 0.0 (list m)))
+  (test '(0.0) (memq m (list m)))
+  (test #f (memq 0.0 (list m)))
+)
+
 (test-exit)
 

@@ -1466,6 +1466,16 @@ object memberp(void *data, object x, list l)
   return boolean_f;
 }
 
+object memvp(void *data, object x, list l)
+{
+  for (; l != NULL; l = cdr(l)) {
+    Cyc_check_pair_or_null(data, l);
+    if (boolean_f != Cyc_eqv(x, car(l)))
+      return l;
+  }
+  return boolean_f;
+}
+
 object memqp(void *data, object x, list l)
 {
   for (; l != NULL; l = cdr(l)) {
@@ -1485,6 +1495,20 @@ list assq(void *data, object x, list l)
     list la = car(l);
     Cyc_check_pair(data, la);
     if (x == car(la))
+      return la;
+  }
+  return boolean_f;
+}
+
+list assv(void *data, object x, list l)
+{
+  if ((l == NULL) || is_value_type(l) || type_of(l) != pair_tag)
+    return boolean_f;
+  for (; (l != NULL); l = cdr(l)) {
+    Cyc_check_pair(data, l);
+    list la = car(l);
+    Cyc_check_pair(data, la);
+    if (boolean_f != Cyc_eqv(x, car(la)))
       return la;
   }
   return boolean_f;
@@ -5392,7 +5416,7 @@ void _assv(void *data, object clo, int argc, object *args)
 {
   Cyc_check_argc(data, "assv", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, assq(data, args[1], args[2]));
+  return_closcall1(data, cont, assv(data, args[1], args[2]));
 }
 
 void _memq(void *data, object clo, int argc, object *args)
@@ -5406,7 +5430,7 @@ void _memv(void *data, object clo, int argc, object *args)
 {
   Cyc_check_argc(data, "memv", argc - 1, 2);
   object cont = args[0];
-  return_closcall1(data, cont, memqp(data, args[1], args[2]));
+  return_closcall1(data, cont, memvp(data, args[1], args[2]));
 }
 
 void _char_91_125integer(void *data, object clo, int argc, object *args)

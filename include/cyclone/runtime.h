@@ -1000,8 +1000,10 @@ object Cyc_length_unsafe(void *d, object l);
 object Cyc_list2vector(void *data, object cont, object l);
 object Cyc_list2string(void *d, object cont, object lst);
 object memberp(void *data, object x, list l);
+object memvp(void *data, object x, list l);
 object memqp(void *data, object x, list l);
 list assq(void *data, object x, list l);
+list assv(void *data, object x, list l);
 list assoc(void *data, object x, list l);
 list assoc_cdr(void *data, object x, list l);
 /**@}*/

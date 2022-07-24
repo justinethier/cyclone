@@ -15,6 +15,7 @@ Bug Fixes
 
 - Fix a regression where `c-compiler-options` was not recognized as a top level form by programs.
 - Enforce a maximum recursion depth when printing an object via `display` or `write`, and when comparing objects via `equal?`. This prevents segmentation faults when working with circular data structures.
+- Added proper implementations of `assv` and `memv`. Both were previously implemented in terms of `assq` and `memq`, respectively.
 
 ## 0.34.0 - January 2, 2022
 
