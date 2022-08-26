@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Released Cyclone Scheme 0.35.0
-excerpt: Various bug fixes to core functionality
+excerpt: Various bug fixes to core functionality.
 ---
 
 Features
