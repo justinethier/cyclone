@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.35.0 - TBD
+## 0.35.0 - August 25, 2022
 
 Features
 
