@@ -12,7 +12,8 @@
   - [Mark Buffers](#mark-buffers)
 - [Minor Collection](#minor-collection)
 - [Major Collection](#major-collection)
-  - [Tri-color Marking](#tri-color-marking)
+  - [Object Marking](#object-marking)
+  - [Tri-Color Invariant](#tri-color-invariant)
   - [Handshakes](#handshakes)
   - [Collection Cycle](#collection-cycle)
   - [Mutator Functions](#mutator-functions)
@@ -132,7 +133,7 @@ Finally, although not mentioned in Baker's paper, a heap object can be modified 
 
 A single heap is used to store objects relocated from the various thread stacks. Eventually the heap will run too low on space and a collection is required to reclaim unused memory. The collector thread is used to perform a major GC with cooperation from the mutator threads.
 
-## Tri-color Marking
+## Object Marking
 
 An object can be marked using any of the following colors to indicate the status of its memory:
 
@@ -142,11 +143,17 @@ An object can be marked using any of the following colors to indicate the status
   - Gray - Objects marked by the collector that may still have child objects that must be marked.
   - Black - Objects marked by the collector whose immediate child objects have also been marked.
 
-Only objects marked as white, gray, or black participate in major collections:
+## Tri-Color Invariant
 
-- White objects are freed during the sweep state. White is sometimes also referred to as the clear color.
-- Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
-- Black objects survive the collection cycle. Black is sometimes referred to as the mark color as live objects are ultimately marked black.
+Only objects marked as white, gray, or black participate in major collections. 
+
+White objects are freed during the sweep state. White is sometimes also referred to as the clear color.
+
+Black objects survive the collection cycle. Black is sometimes referred to as the mark color as live objects are ultimately marked black.
+
+Our collector must guarantee that a black object never has any children that are white objects. This satisfies the so-called tri-color invariant and guarantees that all white objects can be collected once the gray objects are marked. This is the reason our collector must use a gray color instead of transitioning white objects directly to black.
+
+Finally, as noted previously a mark buffer is used to store the list of gray objects. This improves performance by avoiding repeated passes over the heap to search for gray objects.
 
 ## Handshakes
 
