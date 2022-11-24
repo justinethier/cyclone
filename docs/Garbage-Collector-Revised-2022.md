@@ -304,7 +304,7 @@ Cyclone checks the amount of free memory as part of its cooperation code. A majo
 
 ## Lazy Sweeping
 
-A fundamental mark-sweep optimization suggested by the [Garbage Collection Handbook](#references) is lazy sweeping.
+A fundamental mark-sweep optimization suggested by the [Garbage Collection Handbook](#further-reading) is lazy sweeping.
 
 In a simple mark-sweep collector the entire heap is swept at once when tracing is finished. Instead with lazy sweeping each mutator thread will sweep its own heap incrementally as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages, and if so, the mutator will pick a page and sweep it to free up space. This amortizes the cost of sweeping.
 
@@ -312,7 +312,7 @@ Performance is improved in several ways:
 
 - Better Locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap. This allows programs to make better use of the processor cache.
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
-- Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
+- Reduced Complexity - According to [[1]](#further-reading) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
 This section describes several related changes to our collector that were required to support lazy sweeping.
 
@@ -390,7 +390,7 @@ The existing GC tracked free space and would start a major GC once the amount of
 
 ### Performance Measurements
 
-A benchmark suite [[3]](#references) was used to compare performance between the previous version of Cyclone (0.8.1) and the new version with lazy sweeping.
+A benchmark suite [[3]](#further-reading) was used to compare performance between the previous version of Cyclone (0.8.1) and the new version with lazy sweeping.
 
 The following table lists the differences in elapsed time (seconds) between versions:
 
