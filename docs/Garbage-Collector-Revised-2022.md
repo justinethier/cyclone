@@ -19,6 +19,7 @@
   - [Collector Functions](#collector-functions)
   - [Cooperation by the Collector](#cooperation-by-the-collector)
   - [Running the Collector](#running-the-collector)
+  - [Lazy Sweeping](#lazy-sweeping)
 - [Looking Ahead](#looking-ahead)
 - [Further Reading](#further-reading)
 
@@ -49,6 +50,8 @@ Cyclone supports native threads by using a tracing collector based on the Dolige
 - Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
 - Root - During tracing the collector uses these objects as the starting point to find all reachable data.
 - Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
+- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
+- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
 - Write Barrier - Code that is executed before writing to an object.
 
 # Code
@@ -292,56 +295,21 @@ When a mutator exits a (potentially) blocking section of code, it must call anot
 
 Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold. The goal is to run major collections infrequently, but at the same time we want to prevent unnecessary allocations.
 
-
 ## Lazy Sweeping
 
-TODO: WIP, entire lazy sweep paper is below. need to revise, relocate as needed.
+A fundamental mark-sweep optimization suggested by the [Garbage Collection Handbook](#references) is lazy sweeping.
 
+In a simple mark-sweep collector the entire heap is swept at once when tracing is finished. Instead with lazy sweeping each mutator thread will sweep its own heap incrementally as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages, and if so, the mutator will pick a page and sweep it to free up space. This amortizes the cost of sweeping.
 
-
-Cyclone uses a concurrent mark-sweep garbage collection algorithm [described in detail here](Garbage-Collector.md). But there are still some basic improvements to the mark-sweep algorithm that can be made. One such improvement suggested by the [Garbage Collection Handbook](#references) is lazy sweeping. 
-
-The basic idea is that instead of having the collector thread sweep the entire heap at once when tracing is finished, each mutator thread will sweep its own heap incrementally as part of allocation. When no more free space is available to meet a request the allocator will check to see if there are unswept heap pages, and if so, the mutator will pick one and sweep it to free up space. This amortizes the cost of sweeping.
-
-The main goal of this process is to improve performance through:
+Performance is improved in several ways:
 
 - Better Locality - Heap slots tend to be used soon after they are swept and sweep only needs to visit a small part of the heap. This allows programs to make better use of the processor cache.
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - According to [[1]](#references) the algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
-In the latest version of Cyclone Scheme (0.9) we have modified major GC to use lazy sweeping. We discuss the changes required to the existing GC, present results, and consider next steps.
+This section describes several related changes to our collector that were required to support lazy sweeping.
 
-# Terms
-
-- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
-- GC - Garbage collector.
-- Heap - A section of dynamic memory managed by the garbage collector. The heap is not stored as a single contiguous block but rather is broken up into a series of pages.
-- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
-- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
-- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
-- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
-
-# Marking Objects
-
-## Tri-color Marking
-
-Before this change, an object could be marked using any of the following colors to indicate the status of its memory:
-
-  - Blue - Unallocated memory.
-  - Red - An object on the stack.
-  - White - Heap memory that has not been scanned by the collector. 
-  - Gray - Objects marked by the collector that may still have child objects that must be marked.
-  - Black - Objects marked by the collector whose immediate child objects have also been marked.
-
-Only objects marked as white, gray, or black participate in major collections:
-
-- White objects are freed during the sweep state. White is sometimes also referred to as the clear color.
-- Gray is never explicitly assigned to an object. Instead, objects are grayed by being added to lists of gray objects awaiting marking. This improves performance by avoiding repeated passes over the heap to search for gray objects.
-- Black objects survive the collection cycle. Black is sometimes referred to as the mark color as live objects are ultimately marked black.
-
-After a major GC is completed the collector thread swaps the values of the black and white color. This simple optimization avoids having to revisit any objects while allowing the next cycle to start with a fresh set of white objects.
-
-## Requirements for Lazy Sweeping
+### Marking Objects
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. Thus an object that is really garbage could accidentally be assigned the black color.
 
@@ -364,7 +332,7 @@ We can assign a new purple color after tracing is finished. At this point the cl
 
 So we now have purple (assigned the previous clear color), clear (assigned the previous mark color), and mark (assigned a new number). All of these numbers must be odd so they will never conflict with the red or blue colors. Effectively any odd numbered colors not part of this set represent other "shades" of purple.
 
-# Allocation
+### Allocation
 
 The main allocation function takes a fast or slow path depending upon whether a free slot is found on the current heap page. 
 
@@ -389,7 +357,7 @@ A heap page uses a "free list" of available slots to quickly find the next avail
 
 On the other hand, `try_alloc_slow` has to do more work to find the next available heap page, sweep it, and then call `try_alloc` to perform an allocation.
 
-# Sweeping
+### Sweeping
 
 Sweep walks an entire heap page, freeing all unused slots along the way. The algorithm itself is mostly unchanged except that to identify an unused object we need to check for two colors:
 
@@ -401,7 +369,7 @@ Sweep walks an entire heap page, freeing all unused slots along the way. The alg
         ... // Free slot p
       }
 
-# Collector Thread
+### Collector Thread
 
 As well as coordinating major GC the main job of the collector thread is now just tracing. 
 
@@ -409,11 +377,11 @@ During this phase the collector visits all live objects and marks them as being 
 
 Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
 
-# Starting a Major Collection
+### Starting a Major Collection
 
 The existing GC tracked free space and would start a major GC once the amount of available heap memory was below a threshold. We continue to use the same strategy with lazy sweeping but during a slow allocation the mutator also checks how many heap pages are still free. If that number is too low we trigger a new GC cycle.
 
-# Results
+### Performance Measurements
 
 A benchmark suite [[3]](#references) was used to compare performance between the previous version of Cyclone (0.8.1) and the new version with lazy sweeping.
 
@@ -491,19 +459,13 @@ Average Speedup     | N/A |  10.74%
 Maximum Speedup     | deriv |  36.90%
 Minimum Speedup     | wc |  -2.07%
 
-Overall we achieve an average speedup of 10.74% with lazy sweeping, though there are a wide range of performance impacts across the whole benchmark suite. 
+Overall we achieve an average speedup of 10.74% with lazy sweeping. That said there are a wide range of performance impacts across the whole benchmark suite. 
 
 Those benchmarks with the biggest speedups are likely those that are generating the most garbage. For example `ack` frequently invokes GC and most of the heap is freed during each GC cycle - this benchmark benefits greatly from lazy sweeping. Alternatively `wc` - which did not realize a speedup - spends most of its time running in a tight loop, invokes GC infrequently, and after a GC cycle there are many live objects left on the heap. 
-
-# Conclusion
 
 By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. Though there is a slight performance overhead that affects some programs the overall performance improvement across a wide range of programs more than compensates. 
 
 Lazy sweeping is a large-scale change that took a few months to fully-integrate into Cyclone. Although there is work involved to re-stabilize the GC code after such a significant change, this does open up the possibility to experiment with future larger-scale GC optimizations.
-
-
-
-
 
 
 
