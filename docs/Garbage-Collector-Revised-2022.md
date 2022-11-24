@@ -153,7 +153,7 @@ Black objects survive the collection cycle. Black is sometimes referred to as th
 
 Our collector must guarantee that a black object never has any children that are white objects. This satisfies the so-called tri-color invariant and guarantees that all white objects can be collected once the gray objects are marked. This is the reason our collector must use a gray color instead of transitioning white objects directly to black.
 
-Finally, as noted previously a mark buffer is used to store the list of gray objects. This improves performance by avoiding repeated passes over the heap to search for gray objects.
+Finally, as noted previously a [mark buffer](#mark-buffers) is used to store the list of gray objects. This improves performance by avoiding repeated passes over the heap to search for gray objects.
 
 ## Handshakes
 
