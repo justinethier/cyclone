@@ -227,7 +227,7 @@ The collector finds all live objects using a breadth-first search and marks them
 
 <img src="images/gc-graph-trace.png" alt="Initial object graph">
 
-This is the slowest phase of collection as all objects in memory must be visited. In addition the object access pattern is across all of memory which makes poor use of the processor cache and may lead to poor performance. As a result it is helpful that this work is performed by the collector thread rather than directly holding up mutator threads.
+This is the slowest phase of collection as all objects in memory must be visited. In addition the object access pattern is across all of memory which makes poor use of the processor cache and may impact performance. As a result it is helpful that this work is performed by the collector thread rather than directly holding up mutator threads.
 
 ### Sweep
 This function is included here for completeness but is actually performed much later due to [lazy sweeping](#lazy-sweeping).
