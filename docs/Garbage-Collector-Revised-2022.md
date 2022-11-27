@@ -26,7 +26,7 @@
 
 # Introduction
 
-This paper provides a high-level overview of Cyclone's garbage collector. For more background there are introductory articles on garbage collection in the [further reading section](#further-reading) that discuss underlying concepts and that are worthwhile to read in their own right.
+This paper provides a high-level overview of Cyclone's garbage collector. 
 
 The collector has the following requirements:
 
@@ -39,6 +39,8 @@ Cyclone uses generational garbage collection (GC) to automatically free allocate
 Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
 
 Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
+
+For more background there are introductory articles on garbage collection in the [further reading section](#further-reading) that discuss underlying concepts and that are worthwhile to read in their own right.
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
@@ -70,7 +72,7 @@ The heap is used to store all objects that survive minor GC, and consists of a l
 
 Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
 
-The heap is locked during allocation and sweep operations to protect against concurrent access.
+A separate set of heap pages is maintained by each mutator thread. Thus there is no need to lock during allocation or sweep operations.
 
 If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. This is the only choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
 
@@ -145,7 +147,7 @@ Performance is improved in several ways:
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - The algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
-Lazy sweeping is discussed first as it impacts many components of the collector.
+Lazy sweeping is discussed first as it impacts many other components of the collector.
 
 ## Object Marking
 
@@ -174,7 +176,7 @@ Finally, as noted previously a [mark buffer](#mark-buffers) is used to store the
 
 The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. Thus an object that is really garbage could accidentally be assigned the black color.
 
-For example, suppose a heap page consists entirely of white objects after a GC is finished. All of the objects are garbage and would be freed if the page is swept. However if this page is not swept before the next collection starts, the collector will swap the values of white/black and during the subsequent cycle all of the objects will appear as if they have the black color. Thus a sweep during this most recent GC cycle would not be able to free any of the objects!
+For example, suppose a heap page consists entirely of white objects after a GC is finished. All of the objects are garbage and would be freed if the page is swept. However if this page is not swept before the next collection starts, the collector will [swap the values of white/black](#clear) and during the subsequent cycle all of the objects will appear as if they have the black color. Thus a sweep during this most recent GC cycle would not be able to free any of the objects!
 
 The solution is to add a new color (purple) to indicate garbage objects on the heap. Garbage can then be swept while the collector is busy doing other work such as mark/trace. In order to account for multiple generations of objects the object colors are incremented each cycle instead of being swapped. For example, the collector starts in the following state:
 
