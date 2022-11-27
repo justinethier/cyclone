@@ -228,11 +228,11 @@ The collector finds all live objects using a breadth-first search and marks them
 <img src="images/gc-graph-trace.png" alt="Initial object graph">
 
 ### Sweep
-The collector scans the heap and frees memory used by all white objects:
+This function is included here for completeness but is actually performed much later due to [lazy sweeping](#lazy-sweeping).
+
+When the time comes to reclaim memory a mutator scans a heap page and frees memory used by any of the white objects:
 
 <img src="images/gc-graph-sweep.png" alt="Initial object graph">
-
-If the heap is still low on memory at this point the heap will be increased in size. Also, to ensure a complete collection, data for any terminated threads is not freed until now.
 
 ### Resting
 The collector cycle is complete and it rests until it is triggered again.
@@ -303,6 +303,8 @@ In addition when a mutator transitions to async it will:
 - Use black as the allocation color for any new objects to prevent them from being collected during this cycle.
 
 Cyclone's mutators cooperate after each minor GC, for two reasons. Minor GC's are frequent and immediately afterwards all of the mutator's live objects can be marked because they are on the heap.
+
+Finally, at the end of a collection cycle the main thread must clean up heap data for any terminated threads.
 
 ### Mark Gray
 
