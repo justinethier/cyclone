@@ -310,7 +310,7 @@ The collector finds all live objects using a breadth-first search and marks them
 
 <img src="images/gc-graph-trace.png" alt="Initial object graph">
 
-The collector thread performs the bulk of its work during this phase. For more details see the [Collector Thread](#collector-thread) section.
+The collector thread performs the bulk of its work during this phase. For more details see the [Collector Trace](#collector-trace) section.
 
 ### Sweep
 This function is included here for completeness but is actually performed much later due to [lazy sweeping](#lazy-sweeping).
@@ -448,6 +448,12 @@ This function performs tracing for the collector by looping over all of the muta
             empty_collector_mark_stack()
             m->last_read++
 
+The primary job of the collector thread is tracing. 
+
+While tracing the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing algorithm cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
+
+Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
+
 ## Cooperation by the Collector
 
 In practice a mutator will not always be able to cooperate in a timely manner. For example, a thread can block indefinitely waiting for user input or reading from a network port. In the meantime the collector will never be able to complete a handshake with this mutator and major GC will never be performed.
@@ -473,14 +479,6 @@ When a mutator exits a (potentially) blocking section of code, it must call anot
 Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold. Additionally, during a slow allocation the mutator checks how many heap pages are still free. If that number is too low we trigger a new GC cycle.
 
 The goal is to run major collections infrequently while at the same time minimizing the allocation of new heap pages.
-
-### Collector Thread
-
-As well as coordinating major GC the main job of the collector thread is tracing. 
-
-During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing algorithm cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
-
-Note that during tracing some synchronization is required between the collector and the mutator threads. When an object is changed (EG via: `set!`, `vector-set!`, etc) the mutator needs to add this object to the mark stack, which requires a mutex lock to safely update shared resources.
 
 # Performance Measurements
 
