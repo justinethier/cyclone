@@ -36,11 +36,11 @@ The collector has the following requirements:
 
 Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection because they are still referenced in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead another type of collector is used for the second generation.
+Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. 
 
-Cyclone supports native threads by using a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that objects are not relocated once they are placed on the heap. In addition, major GC executes asynchronously so threads can continue to run concurrently even during collections.
+One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
-For more background there are introductory articles on garbage collection in the [further reading section](#further-reading) that discuss underlying concepts and that are worthwhile to read in their own right.
+For more background there are introductory articles on garbage collection in the [further reading](#further-reading) section that discuss underlying concepts.
 
 # Terms
 - Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
@@ -73,8 +73,6 @@ The heap is used to store all objects that survive minor GC, and consists of a l
 Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
 
 A separate set of heap pages is maintained by each mutator thread. Thus there is no need to lock during allocation or sweep operations.
-
-If there is not enough free memory to fulfill a request a new page is allocated and added to the heap. This is the only choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
 
 ## Thread Data
 
@@ -232,7 +230,7 @@ Performance is improved in several ways:
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - The algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
-Lazy sweeping is discussed first as it impacts many other components of the collector.
+Lazy sweeping is discussed here in the first major GC section as it impacts many other components of the collector.
 
 ## Object Marking
 
@@ -259,7 +257,7 @@ Finally, as noted previously a [mark buffer](#mark-buffers) is used to store the
 
 ## Deferred Collection
 
-The current set of colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. Thus an object that is really garbage could accidentally be assigned the black color.
+A set of three heap colors is insufficient for lazy sweeping because parts of the heap may not be swept during a collection cycle. Thus an object that is really garbage could accidentally be assigned the black color.
 
 For example, suppose a heap page consists entirely of white objects after a GC is finished. All of the objects are garbage and would be freed if the page is swept. However if this page is not swept before the next collection starts, the collector will [swap the values of white/black](#clear) and during the subsequent cycle all of the objects will appear as if they have the black color. Thus a sweep during this most recent GC cycle would not be able to free any of the objects!
 
@@ -312,7 +310,7 @@ The collector finds all live objects using a breadth-first search and marks them
 
 <img src="images/gc-graph-trace.png" alt="Initial object graph">
 
-This is the slowest phase of collection as all objects in memory must be visited. In addition the object access pattern is across all of memory which makes poor use of the processor cache and may impact performance. As a result it is helpful that this work is performed by the collector thread rather than directly holding up mutator threads.
+The collector thread performs the bulk of its work during this phase. For more details see the [Collector Thread](#collector-thread) section.
 
 ### Sweep
 This function is included here for completeness but is actually performed much later due to [lazy sweeping](#lazy-sweeping).
@@ -357,6 +355,8 @@ A heap page uses a "free list" of available slots to quickly find the next avail
 
 On the other hand, `try_alloc_slow` has to do more work to find the next available heap page, sweep it, and then call `try_alloc` to perform an allocation.
 
+If there is not enough free memory to fulfill a `try_alloc_slow` request a new page is allocated and added to the heap. This is the only choice, unfortunately. The collection process is asynchronous so memory cannot be freed immediately to make room.
+
 ### Sweep
 
 Sweep walks an entire heap page, freeing all unused slots along the way. 
@@ -365,6 +365,8 @@ To identify an unused object the algorithm must check for two colors:
 
 - Objects that are either newly-allocated or recently traced are given the allocation color; we need to keep them.
 - If the collector is currently tracing, objects not traced yet will have the trace/clear color. We need to keep any of those to make sure the collector has a chance to trace the entire heap.
+
+The code is as follows:
 
       if (mark(p) != thd->gc_alloc_color && 
           mark(p) != thd->gc_trace_color) {
@@ -566,13 +568,11 @@ Those benchmarks with the biggest speedups are likely those that are generating 
 
 By all accounts lazy sweeping is a great win for Cyclone and has exceeded performance expectations. Though there is a slight performance overhead that affects some programs the overall performance improvement across a wide range of programs more than compensates. 
 
-Lazy sweeping is a large-scale change that took a few months to fully-integrate into Cyclone. Although there is work involved to re-stabilize the GC code after such a significant change, this does open up the possibility to experiment with future larger-scale GC optimizations.
-
 # Conclusion
 
 The garbage collector is by far the most complex component of Cyclone. The primary motivations in developing it were to:
 
-- Extend baker's approach to support multiple mutators
+- Extend Baker's approach to support multiple mutators
 - Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
 
 There are a few limitations or potential issues with the current implementation:
@@ -582,8 +582,6 @@ There are a few limitations or potential issues with the current implementation:
     > instead of copying objects to evacuate fragmented regions of the heap, fragmentation is instead embraced. A fragmented heap is allowed to stay fragmented, but the collector ensures that it can still satisfy allocation requests even if no large enough contiguous free region of space exists.
 
 - Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
-
-Cyclone needs to be tested with large heap and large allocations. I believe it should work well for large heaps that do not allocate too many objects of irregular size. However, a program regularly allocating large strings or vectors could cause significant heap fragmentation over time.
 
 Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
 
