@@ -3,8 +3,6 @@
 # Garbage Collector
 
 - [Introduction](#introduction)
-- [Terms](#terms)
-- [Code](#code)
 - [Data Structures](#data-structures)
   - [Heap](#heap)
   - [Thread Data](#thread-data)
@@ -22,6 +20,8 @@
   - [Running the Collector](#running-the-collector)
   - [Performance Measurements](#performance-measurements)
 - [Conclusion](#conclusion)
+- [Terms](#terms)
+- [Code](#code)
 - [Further Reading](#further-reading)
 
 # Introduction
@@ -41,28 +41,6 @@ Cheney on the MTA, a technique introduced by Henry Baker, is used to implement t
 One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 For more background there are introductory articles on garbage collection in the [further reading](#further-reading) section that discuss underlying concepts.
-
-# Terms
-- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
-- Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
-- Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
-- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
-- Heap - A section of memory used to store longer-lived variables. In C, heap memory is allocated using built-in functions such as `malloc`, and memory must be explicitly deallocated using `free`.
-- Mutation - A modification to an object. For example, changing a vector (array) entry.
-- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
-- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
-- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
-- Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
-- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
-- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
-- Write Barrier - Code that is executed before writing to an object.
-
-# Code
-
-The implementation code is available here:
-
-- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
-- [`gc.c`](../gc.c) contains the major GC code.
 
 # Data Structures
 
@@ -106,11 +84,45 @@ An object on the stack cannot be added to a mark buffer because the reference ma
 
 # Minor Collection
 
-For minor collections cyclone uses a copying collector algorithm based on Cheney on the MTA.
+## Background
 
-A minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
+A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](research-papers/CheneyMTA.pdf) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
-Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
+Baker explains how it works:
+
+> We propose to compile Scheme by converting it into continuation-passing style (CPS), and then compile the resulting lambda expressions into individual C functions. Arguments are passed as normal C arguments, and function calls are normal C calls. Continuation closures and closure environments are passed as extra C arguments. Such a Scheme never executes a C return, so the stack will grow and grow ... eventually, the C "stack" will overflow the space assigned to it, and we must perform garbage collection. 
+
+Cheney on the M.T.A. uses a copying garbage collector. By using static roots and the current continuation closure, the GC is able to copy objects from the stack to a pre-allocated heap without having to know the format of C stack frames. To quote Baker:
+
+> the entire C "stack" is effectively the youngest generation in a generational garbage collector!
+
+After GC is finished, the C stack pointer is reset using [`longjmp`](http://man7.org/linux/man-pages/man3/longjmp.3.html) and the GC calls its continuation. 
+
+Here is a snippet demonstrating how C functions may be written using Baker's approach:
+
+    object Cyc_make_vector(object cont, object len, object fill) {
+      object v = NULL;
+      int i;
+      Cyc_check_int(len);
+
+      // Memory for vector can be allocated directly on the stack
+      v = alloca(sizeof(vector_type));
+
+      // Populate vector object
+      ((vector)v)->tag = vector_tag;
+      ... 
+
+      // Check if GC is needed, then call into continuation with the new vector
+      return_closcall1(cont, v);
+    }
+
+[CHICKEN](http://www.call-cc.org/) was the first Scheme compiler to use Baker's approach.
+
+## Minor Collections in Cyclone
+
+Minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
+
+As described in Baker's paper, Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
 The following root objects are used as a starting point to find all live objects:
 
@@ -580,6 +592,28 @@ There are a few limitations or potential issues with the current implementation:
 - Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
 
 Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
+
+# Terms
+- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
+- Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
+- Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
+- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
+- Heap - A section of memory used to store longer-lived variables. In C, heap memory is allocated using built-in functions such as `malloc`, and memory must be explicitly deallocated using `free`.
+- Mutation - A modification to an object. For example, changing a vector (array) entry.
+- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
+- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
+- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
+- Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
+- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
+- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
+- Write Barrier - Code that is executed before writing to an object.
+
+# Code
+
+The implementation code is available here:
+
+- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
+- [`gc.c`](../gc.c) contains the major GC code.
 
 # Further Reading
 
