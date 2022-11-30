@@ -9,6 +9,10 @@
   - [Object Header](#object-header)
   - [Mark Buffers](#mark-buffers)
 - [Minor Collection](#minor-collection)
+  - [Cheney on the MTA](#cheney-on-the-mta)
+  - [Our Implementation](#our-implementation)
+  - [Write Barrier for Heap Object References](#write-barrier-for-heap-object-references)
+  - [Write Barrier to Relocate Shared Objects](#write-barrier-to-relocate-shared-objects)
 - [Major Collection](#major-collection)
   - [Lazy Sweeping](#lazy-sweeping)
   - [Object Marking](#object-marking)
@@ -84,7 +88,7 @@ An object on the stack cannot be added to a mark buffer because the reference ma
 
 # Minor Collection
 
-## Background
+## Cheney on the MTA
 
 A runtime based on Henry Baker's paper [CONS Should Not CONS Its Arguments, Part II: Cheney on the M.T.A.](research-papers/CheneyMTA.pdf) was used as it allows for fast code that meets all of the fundamental requirements for a Scheme runtime: tail calls, garbage collection, and continuations.
 
@@ -118,7 +122,7 @@ Here is a snippet demonstrating how C functions may be written using Baker's app
 
 [CHICKEN](http://www.call-cc.org/) was the first Scheme compiler to use Baker's approach.
 
-## Minor Collections in Cyclone
+## Our Implementation
 
 Minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
 
@@ -153,7 +157,7 @@ This is problematic since stack references are no longer valid after a minor GC 
 
 The write barrier must be called by each primitive in the runtime that modifies object pointers - `set-car!`, `set-cdr!`, `vector-set!`, etc. Fortunately there are only a handful of these functions.
 
-## Write Barrier to Guarantee Thread Safety
+## Write Barrier to Relocate Shared Objects
 
 Cyclone must guarantee the objects located on each mutator thread's stack are only used by that thread. 
 
