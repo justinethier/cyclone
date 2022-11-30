@@ -108,9 +108,11 @@ An object on the stack cannot be added to a mark buffer because the reference ma
 
 # Minor Collection
 
+For minor collections cyclone uses a copying collector algorithm based on Cheney on the MTA. A minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
+
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
-Root objects are live objects the collector uses to begin the tracing process. Cyclone's minor collector treats the following as roots:
+The following root objects are used as a starting point to find all live objects:
 
 - The current continuation
 - Arguments to the current continuation
@@ -118,18 +120,93 @@ Root objects are live objects the collector uses to begin the tracing process. C
 - Closures from the exception stack
 - Global variables
 
-A minor collection is always performed for a single mutator thread, usually by the thread itself. The algorithm is based on Cheney on the MTA:
+The collection algorithm itself operates as follows:
 
 - Move any root objects on the stack to the heap. For each object moved: 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
   - Record each moved object in a buffer to serve as the Cheney to-space.
 - Loop over the to-space buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
-- Cooperate with the collection thread (see next section).
+- [Cooperate](#cooperate) with the major GC's collection thread.
 - Perform a `longjmp` to reset the stack and call into the current continuation.
 
 Any objects left on the stack after `longjmp` are considered garbage. There is no need to clean them up because the stack will just re-use the memory as it grows.
 
-Finally, although not mentioned in Baker's paper, a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC, and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC, these modified objects are treated as roots to avoid dangling references.
+## Write Barrier for Heap Object References
+
+Although not mentioned in Baker's paper a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC these modified objects are treated as roots to avoid dangling references.
+
+The write barrier must be called by each primitive in the runtime that modifies object pointers - `set-car!`, `set-cdr!`, `vector-set!`, etc. Fortunately there are only a handful of these functions.
+
+## Write Barrier to Guarantee Thread Safety
+
+Cyclone must guarantee the objects located on each mutator thread's stack are only used by that thread. This is critical as any existing references to a stack object will be invalid when that object is moved to the heap by minor GC. Without the proper safety measures in place this would lead to the potential for memory safety issues - segmentation faults, undefined behavior, etc.
+
+To ensure memory safety Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread. we do so by having each write barrier check to see if a heap variable is being changed to point to a variable on the stack.
+
+When such a change is detected Cyclone will  move only that object to the heap if possible. However for objects with many children - such as a list or vector - it may be necessary for Cyclone to trigger a minor collection in order to ensure all objects are relocated to the heap before they can be accessed by multiple threads:
+
+    object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc) 
+    {
+      char tmp;
+      int inttmp, *heap_grown = &inttmp;
+      gc_heap_root *heap = data->heap;
+    
+      // Nothing needs to be done unless we are mutating
+      // a heap variable to point to a stack var.
+      if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
+        // Must move `value` to the heap to allow use by other threads
+        switch(type_of(value)) {
+          case string_tag:
+          case bytevector_tag:
+            if (immutable(value)) {
+              // Safe to transport now
+              object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+              return hp;
+            }
+            // Need to GC if obj is mutable, EG: a string could be mutated so we can't
+            // have multiple copies of the object running around
+            *run_gc = 1;
+            return value;
+          case double_tag:
+          case port_tag:
+          case c_opaque_tag:
+          case complex_num_tag: {
+            // These objects are immutable, transport now
+            object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+            return hp;
+          }
+          // Objs w/children force minor GC to guarantee everything is relocated:
+          case cvar_tag:
+          case closure0_tag:
+          case closure1_tag:
+          case closureN_tag:
+          case pair_tag:
+          case vector_tag:
+            *run_gc = 1;
+            return value;
+          default:
+            // Other object types are not stack-allocated so should never get here
+            printf("Invalid shared object type %d\n", type_of(value));
+            exit(1);
+        }
+      }
+    
+      return value;
+    }
+
+The `transport_stack_value` function  is called from each write barrier in a manor similar to the below for `set-car!`:
+
+    int do_gc = 0;
+    val = transport_stack_value(data, l, val, &do_gc);
+    ...
+    if (do_gc) { // GC and then do assignment
+      mclosure0(clo, (function_type)Cyc_set_car_cps_gc_return);
+      object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+      GC(data, &clo, buf, 3);
+      return NULL;
+    }
+
+It is still necessary for application code to use the appropriate concurrency constructs - such as locks, atomics, etc - to ensure that a shared object is safely accessed by only one thread at a time.
 
 # Major Collection
 
