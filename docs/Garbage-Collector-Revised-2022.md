@@ -108,7 +108,9 @@ An object on the stack cannot be added to a mark buffer because the reference ma
 
 # Minor Collection
 
-For minor collections cyclone uses a copying collector algorithm based on Cheney on the MTA. A minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
+For minor collections cyclone uses a copying collector algorithm based on Cheney on the MTA.
+
+A minor GC is always performed for a single mutator thread. Each thread uses local stack storage for its own objects so there is no need for minor GC to synchronize with other mutator threads.
 
 Cyclone converts the original program to continuation passing style (CPS) and compiles it as a series of C functions that never return. At runtime each mutator periodically checks to see if its stack has exceeded a certain size. When this happens a minor GC is started and all live stack objects are copied to the heap.
 
@@ -133,13 +135,19 @@ Any objects left on the stack after `longjmp` are considered garbage. There is n
 
 ## Write Barrier for Heap Object References
 
-Although not mentioned in Baker's paper a heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list. This is problematic since stack references are no longer valid after a minor GC and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC these modified objects are treated as roots to avoid dangling references.
+Baker's paper does not mention one important detail. A heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list:
+
+TODO: diagram?
+
+This is problematic since stack references are no longer valid after a minor GC and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC these modified objects are treated as roots to avoid dangling references.
 
 The write barrier must be called by each primitive in the runtime that modifies object pointers - `set-car!`, `set-cdr!`, `vector-set!`, etc. Fortunately there are only a handful of these functions.
 
 ## Write Barrier to Guarantee Thread Safety
 
-Cyclone must guarantee the objects located on each mutator thread's stack are only used by that thread. This is critical as any existing references to a stack object will be invalid when that object is moved to the heap by minor GC. Without the proper safety measures in place this would lead to the potential for memory safety issues - segmentation faults, undefined behavior, etc.
+Cyclone must guarantee the objects located on each mutator thread's stack are only used by that thread. 
+
+This requirement is critical as any existing references to a stack object will become invalid when that object is moved to the heap by minor GC. Without the proper safety measures in place this would lead to the potential for memory safety issues - segmentation faults, undefined behavior, etc.
 
 To ensure memory safety Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread. we do so by having each write barrier check to see if a heap variable is being changed to point to a variable on the stack.
 
