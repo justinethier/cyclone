@@ -11,8 +11,7 @@
 - [Minor Collection](#minor-collection)
   - [Cheney on the MTA](#cheney-on-the-mta)
   - [Our Implementation](#our-implementation)
-  - [Write Barrier for Heap Object References](#write-barrier-for-heap-object-references)
-  - [Write Barrier to Relocate Shared Objects](#write-barrier-to-relocate-shared-objects)
+  - [Write Barriers](#write-barriers)
 - [Major Collection](#major-collection)
   - [Lazy Sweeping](#lazy-sweeping)
   - [Object Marking](#object-marking)
@@ -147,7 +146,9 @@ The collection algorithm itself operates as follows:
 
 Any objects left on the stack after `longjmp` are considered garbage. There is no need to clean them up because the stack will just re-use the memory as it grows.
 
-## Write Barrier for Heap Object References
+## Write Barriers
+
+### Heap Object References
 
 Baker's paper does not mention one important detail. A heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list:
 
@@ -157,7 +158,7 @@ This is problematic since stack references are no longer valid after a minor GC 
 
 The write barrier must be called by each primitive in the runtime that modifies object pointers - `set-car!`, `set-cdr!`, `vector-set!`, etc. Fortunately there are only a handful of these functions.
 
-## Write Barrier to Relocate Shared Objects
+### Relocating Shared Objects
 
 Cyclone must guarantee the objects located on each mutator thread's stack are only used by that thread. 
 
