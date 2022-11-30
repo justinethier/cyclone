@@ -470,15 +470,13 @@ When a mutator exits a (potentially) blocking section of code, it must call anot
 
 ## Running the Collector
 
-Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold. 
-
-Additionally, during a slow allocation the mutator checks how many heap pages are still free. If that number is too low we trigger a new GC cycle.
+Cyclone checks the amount of free memory as part of its cooperation code. A major GC cycle is started if the amount of free memory dips below a threshold. Additionally, during a slow allocation the mutator checks how many heap pages are still free. If that number is too low we trigger a new GC cycle.
 
 The goal is to run major collections infrequently while at the same time minimizing the allocation of new heap pages.
 
 ### Collector Thread
 
-As well as coordinating major GC the main job of the collector thread is now just tracing. 
+As well as coordinating major GC the main job of the collector thread is tracing. 
 
 During this phase the collector visits all live objects and marks them as being in use. Since these objects are stored all across the heap the tracing algorithm cannot take advantage of object locality and tends to demonstrate unusual memory access patterns, leading to inefficient use of the processor cache and poor performance. This makes tracing an excellent task to be done in parallel with the mutator threads so it does not slow down application code.
 
