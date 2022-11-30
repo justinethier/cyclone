@@ -149,9 +149,7 @@ Cyclone must guarantee the objects located on each mutator thread's stack are on
 
 This requirement is critical as any existing references to a stack object will become invalid when that object is moved to the heap by minor GC. Without the proper safety measures in place this would lead to the potential for memory safety issues - segmentation faults, undefined behavior, etc.
 
-To ensure memory safety Cyclone automatically relocates objects to the heap before they can be accessed by more than one thread. we do so by having each write barrier check to see if a heap variable is being changed to point to a variable on the stack.
-
-When such a change is detected Cyclone will  move only that object to the heap if possible. However for objects with many children - such as a list or vector - it may be necessary for Cyclone to trigger a minor collection in order to ensure all objects are relocated to the heap before they can be accessed by multiple threads:
+Thus Cyclone ensures memory safety by automatically relocating objects to the heap before they can be accessed by more than one thread. Each write barrier checks to see if a heap variable is being changed to point to a variable on the stack. When such a change is detected Cyclone will move only that object to the heap if possible. However for objects with many children - such as a list or vector - it may be necessary for Cyclone to trigger a minor collection in order to ensure all objects are relocated to the heap before they can be accessed by multiple threads. The following function does the heavy lifting:
 
     object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc) 
     {
@@ -202,7 +200,7 @@ When such a change is detected Cyclone will  move only that object to the heap i
       return value;
     }
 
-The `transport_stack_value` function  is called from each write barrier in a manor similar to the below for `set-car!`:
+Then, `transport_stack_value` is called from each write barrier in a manner similar to the below for `set-car!`:
 
     int do_gc = 0;
     val = transport_stack_value(data, l, val, &do_gc);
