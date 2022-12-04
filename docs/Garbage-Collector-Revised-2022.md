@@ -3,11 +3,6 @@
 # Garbage Collector
 
 - [Introduction](#introduction)
-- [Data Structures](#data-structures)
-  - [Heap](#heap)
-  - [Thread Data](#thread-data)
-  - [Object Header](#object-header)
-  - [Mark Buffers](#mark-buffers)
 - [Minor Collection](#minor-collection)
   - [Cheney on the MTA](#cheney-on-the-mta)
   - [Our Implementation](#our-implementation)
@@ -23,13 +18,19 @@
   - [Running the Collector](#running-the-collector)
   - [Performance Measurements](#performance-measurements)
 - [Conclusion](#conclusion)
-- [Terms](#terms)
-- [Code](#code)
 - [Further Reading](#further-reading)
+- [Appendix](#appendix)
+  - [Terms](#terms)
+  - [Code](#code)
+  - [Data Structures](#data-structures)
+    - [Heap](#heap)
+    - [Thread Data](#thread-data)
+    - [Object Header](#object-header)
+    - [Mark Buffers](#mark-buffers)
 
 # Introduction
 
-This paper provides a high-level overview of Cyclone's garbage collector. It includes more recent work on lazy sweeping and automatic relocation of shared objects. The combined document gives a much better overview of how the current GC works and is now a good starting point for the corresponding code in Cyclone's runtime. It might also be of interest to anyone wanting to implement - or just peek under the hood of - a (somewhat) modern, real-world GC.
+This paper provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a more modern, real-world GC.
 
 The collector has the following requirements:
 
@@ -44,46 +45,6 @@ Cheney on the MTA, a technique introduced by Henry Baker, is used to implement t
 One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that major GC executes asynchronously so threads can continue to run concurrently even during collections.
 
 For more background there are introductory articles on garbage collection in the [further reading](#further-reading) section that discuss underlying concepts.
-
-# Data Structures
-
-## Heap
-
-The heap is used to store all objects that survive minor GC, and consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
-
-Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
-
-A separate set of heap pages is maintained by each mutator thread. Thus there is no need to lock during allocation or sweep operations.
-
-## Thread Data
-
-At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The continuation and arguments are used by the application code to call into its next function with a result. Thread data is a structure that contains all of the necessary information to perform collections, including:
-
-- Thread state
-- Stack boundaries
-- Jump buffer
-- List of mutated objects detected by the minor GC write barrier
-- Major GC parameters - mark buffer, last read/write, etc (see next sections)
-- Call history buffer
-- Exception handler stack
-
-Each thread has its own instance of the thread data structure and its own stack (assigned by the C runtime/compiler).
-
-## Object Header
-
-Each object contains a header with the following information:
-
-- Tag - A number indicating the object type: cons, vector, string, etc.
-- Mark - The status of the object's memory.
-- Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet (see major GC sections below). This is only applicable for objects on the stack.
-
-## Mark Buffers
-
-Mark buffers are used to hold gray objects instead of explicitly marking objects gray. These mark buffers consist of fixed-size pointer arrays that are increased in size as necessary using `realloc`.  Each mutator has a reference to a mark buffer holding their gray objects. A last write variable is used to keep track of the buffer size.
-
-The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal. The collector also maintains a single mark stack of objects that the collector has marked gray.
-
-An object on the stack cannot be added to a mark buffer because the reference may become invalid before it can be processed by the collector.
 
 # Minor Collection
 
@@ -137,7 +98,8 @@ The following root objects are used as a starting point to find all live objects
 
 The collection algorithm itself operates as follows:
 
-- Move any root objects on the stack to the heap. For each object moved: 
+- Move any root objects on the stack to the heap. 
+- For each object moved: 
   - Replace the stack object with a forwarding pointer. The forwarding pointer ensures all references to a stack object refer to the same heap object, and allows minor GC to handle cycles.
   - Record each moved object in a buffer to serve as the Cheney to-space.
 - Loop over the to-space buffer and check each object moved to the heap. Move any child objects that are still on the stack. This loop continues until all live objects are moved.
@@ -150,9 +112,7 @@ Any objects left on the stack after `longjmp` are considered garbage. There is n
 
 ### Heap Object References
 
-Baker's paper does not mention one important detail. A heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list:
-
-TODO: diagram?
+Baker's paper does not mention one important detail. A heap object can be modified to contain a reference to a stack object. For example, by using a `set-car!` to change the head of a list.
 
 This is problematic since stack references are no longer valid after a minor GC and the GC does not check heap objects. We account for these mutations by using a write barrier to maintain a list of each modified object. During GC these modified objects are treated as roots to avoid dangling references.
 
@@ -247,7 +207,7 @@ Performance is improved in several ways:
 - Thread-Local Data - There is no need to lock the heap for allocation or sweeping since both operations are performed by the same thread.
 - Reduced Complexity - The algorithmic complexity of mark-sweep is reduced to be proportional to the size of the live data in the heap instead of the whole heap, similar to a copying collector. Lazy sweeping will perform best when most of the heap is empty.
 
-Lazy sweeping is discussed here in the first major GC section as it impacts many other components of the collector.
+Lazy sweeping is discussed here in the first major GC section as it impacts most of the other components of the collector.
 
 ## Object Marking
 
@@ -270,7 +230,7 @@ Black objects survive the collection cycle. Black is sometimes referred to as th
 
 Our collector must guarantee that a black object never has any children that are white objects. This satisfies the so-called tri-color invariant and guarantees that all white objects can be collected once the gray objects are marked. This is the reason our collector must use a gray color instead of transitioning white objects directly to black.
 
-Finally, as noted previously a [mark buffer](#mark-buffers) is used to store the list of gray objects. This improves performance by avoiding repeated passes over the heap to search for gray objects.
+Finally, a [mark buffer](#mark-buffers) is used to store the list of gray objects. This improves performance by avoiding repeated passes over the heap to search for gray objects.
 
 ## Deferred Collection
 
@@ -598,28 +558,6 @@ There are a few limitations or potential issues with the current implementation:
 
 Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
 
-# Terms
-- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
-- Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
-- Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
-- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
-- Heap - A section of memory used to store longer-lived variables. In C, heap memory is allocated using built-in functions such as `malloc`, and memory must be explicitly deallocated using `free`.
-- Mutation - A modification to an object. For example, changing a vector (array) entry.
-- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
-- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
-- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
-- Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
-- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
-- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
-- Write Barrier - Code that is executed before writing to an object.
-
-# Code
-
-The implementation code is available here:
-
-- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
-- [`gc.c`](../gc.c) contains the major GC code.
-
 # Further Reading
 
 - [Baby's First Garbage Collector](http://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/), by Bob Nystrom
@@ -634,3 +572,69 @@ The implementation code is available here:
 - [Introducing Riptide: WebKit's Retreating Wavefront Concurrent Garbage Collector](https://webkit.org/blog/7122/introducing-riptide-webkits-retreating-wavefront-concurrent-garbage-collector/), by Filip Pizlo
 - [Scheme Benchmarks](https://ecraven.github.io/r7rs-benchmarks/), by [ecraven](https://github.com/ecraven)
 - [The Ramsey sweep](http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html), by Olin Shivers
+
+
+# Appendix
+
+## Terms
+- Collector - A thread running the garbage collection code. The collector is responsible for coordinating and performing most of the work for major garbage collections.
+- Continuation - With respect to the collectors, this is a function that is called to resume execution of application code. For more information see [this article on continuation passing style](https://en.wikipedia.org/wiki/Continuation-passing_style).
+- Forwarding Pointer - When a copying collector relocates an object it leaves one of these pointers behind with the object's new address.
+- Garbage Collector (GC) - A form of automatic memory management that frees memory allocated by objects that are no longer used by the program.
+- Heap - A section of memory used to store longer-lived variables. In C, heap memory is allocated using built-in functions such as `malloc`, and memory must be explicitly deallocated using `free`.
+- Mutation - A modification to an object. For example, changing a vector (array) entry.
+- Mutator - A thread running user (or "application") code; there may be more than one mutator running concurrently.
+- Read Barrier - Code that is executed before reading an object. Read barriers have a larger overhead than write barriers because object reads are much more common.
+- Root - During tracing the collector uses these objects as the starting point to find all reachable data.
+- Stack - The C call stack, where local variables are allocated and freed automatically when a function returns. Stack variables only exist until the function that created them returns, at which point the memory may be overwritten. The stack has a very limited size and undefined behavior (usually a crash) will result if that size is exceeded.
+- Sweep - A phase of garbage collection where the heap - either the whole heap or a subset - is scanned and any unused slots are made available for new allocations.
+- Tracing - A phase of garbage collection that visits and marks all live objects on the heap. This is done by starting from a set of "root" objects and iteratively following references to child objects.
+- Write Barrier - Code that is executed before writing to an object.
+
+## Code
+
+The implementation code is available here:
+
+- [`runtime.c`](../runtime.c) contains most of the runtime system, including code to perform minor GC. A good place to start would be the `GC` and `gc_minor` functions.
+- [`gc.c`](../gc.c) contains the major GC code.
+
+## Data Structures
+
+### Heap
+
+The heap is used to store all objects that survive minor GC, and consists of a linked list of pages. Each page contains a contiguous block of memory and a linked list of free chunks. When a new chunk is requested the first free chunk large enough to meet the request is found and either returned directly or carved up into a smaller chunk to return to the caller.
+
+Memory is always allocated in multiples of 32 bytes. On the one hand this helps prevent external fragmentation by allocating many objects of the same size. But on the other it incurs internal fragmentation because an object will not always fill all of its allocated memory.
+
+A separate set of heap pages is maintained by each mutator thread. Thus there is no need to lock during allocation or sweep operations.
+
+### Thread Data
+
+At runtime Cyclone passes the current continuation, number of arguments, and a thread data parameter to each compiled C function. The continuation and arguments are used by the application code to call into its next function with a result. Thread data is a structure that contains all of the necessary information to perform collections, including:
+
+- Thread state
+- Stack boundaries
+- Jump buffer
+- List of mutated objects detected by the minor GC write barrier
+- Major GC parameters - mark buffer, last read/write, etc (see next sections)
+- Call history buffer
+- Exception handler stack
+
+Each thread has its own instance of the thread data structure and its own stack (assigned by the C runtime/compiler).
+
+### Object Header
+
+Each object contains a header with the following information:
+
+- Tag - A number indicating the object type: cons, vector, string, etc.
+- Mark - The status of the object's memory.
+- Grayed - A field indicating the object has been grayed but has not been added to a mark buffer yet (see major GC sections below). This is only applicable for objects on the stack.
+
+### Mark Buffers
+
+Mark buffers are used to hold gray objects instead of explicitly marking objects gray. These mark buffers consist of fixed-size pointer arrays that are increased in size as necessary using `realloc`.  Each mutator has a reference to a mark buffer holding their gray objects. A last write variable is used to keep track of the buffer size.
+
+The collector updates the mutator's last read variable each time it marks an object from the mark buffer. Marking is finished when last read and last write are equal. The collector also maintains a single mark stack of objects that the collector has marked gray.
+
+An object on the stack cannot be added to a mark buffer because the reference may become invalid before it can be processed by the collector.
+
