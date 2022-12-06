@@ -19,31 +19,31 @@
     if-syntax?
     begin?
     lambda?
-    pair->list 
-    define-lambda? 
-    define->lambda 
+    pair->list
+    define-lambda?
+    define->lambda
     formals->list
     lambda-formals->list
     lambda-varargs?
     lambda->formals
-    lambda->exp 
+    lambda->exp
     lambda-formals-type
     lambda-varargs-var
     pack-lambda-arguments
-    if->condition 
-    if->then 
-    if-else? 
-    if->else 
-    const? 
-    ref? 
-    quote? 
+    if->condition
+    if->then
+    if-else?
+    if->else
+    const?
+    ref?
+    quote?
     define-c?
-    set!? 
-    set!->var 
-    set!->exp 
-    define? 
-    define->var 
-    define->exp 
+    set!?
+    set!->var
+    set!->exp
+    define?
+    define->var
+    define->exp
     app?
     ;; Environments
     env:enclosing-environment
@@ -51,16 +51,16 @@
     env:the-empty-environment
     env:make-frame
     env:frame-variables
-    env:frame-values 
-    env:add-binding-to-frame! 
+    env:frame-values
+    env:add-binding-to-frame!
     env:all-variables
     env:all-values
-    env:extend-environment 
+    env:extend-environment
     env:lookup
-    env:lookup-variable-value 
-    env:_lookup-variable-value 
-    env:set-variable-value! 
-    env:define-variable! 
+    env:lookup-variable-value
+    env:_lookup-variable-value
+    env:set-variable-value!
+    env:define-variable!
     ;; Syntactic closures
     make-syntactic-closure
     strip-syntactic-closures
@@ -123,9 +123,9 @@
   (tagged-list? 'if exp))
 
 (define (if-syntax? exp)
-  (and 
+  (and
     (if? exp)
-    (or 
+    (or
       (= (length exp) 3)
       (= (length exp) 4))))
 
@@ -139,7 +139,7 @@
   (tagged-list? 'letrec-syntax exp))
 
 ; begin? : exp -> boolean
-(define (begin? exp) 
+(define (begin? exp)
   (tagged-list? 'begin exp))
 
 ; lambda? : exp -> boolean
@@ -208,7 +208,7 @@
   (let ((var (cadr exp)))
     (or
       ;; Standard function
-      (and (list? var) 
+      (and (list? var)
            (> (length var) 0)
            (symbol? (car var)))
       ;; Varargs function
@@ -229,7 +229,7 @@
   (cond
     ((define-lambda? exp)
      (caadr exp))
-    (else 
+    (else
      (cadr exp))))
 
 ; define->exp : define-exp -> exp
@@ -320,7 +320,7 @@
            (num-args (length args)))
       (if (> num-req-args num-args)
           (error "Too few arguments supplied" formals args))
-      (append 
+      (append
         (take args num-req-args) ;; Required args
         (list (list-tail args num-req-args)) ;; Optional args
       )))))
@@ -412,15 +412,15 @@
       -1
       (if (eq? (car lst) e)
         0
-        (if (= (list-index2 e (cdr lst)) -1) 
+        (if (= (list-index2 e (cdr lst)) -1)
           -1
           (+ 1 (list-index2 e (cdr lst))))))))
 
 ;; Replace all instances of needle within haystack.
-;; Based on code from: 
+;; Based on code from:
 ;; http://stackoverflow.com/a/32320936/101258
-(define (string-replace-all haystack needle replacement)    
-  ;; most of the processing works on lists 
+(define (string-replace-all haystack needle replacement)
+  ;; most of the processing works on lists
   ;; of char, not strings.
   (let ((haystack (string->list haystack))
         (needle (string->list needle))
@@ -439,7 +439,7 @@
   (append (reverse pre) lis))
 
 (define (list-prefix? lis prefix)
-  (call/cc 
+  (call/cc
     (lambda (return)
       (for-each
         (lambda (x y)
@@ -466,7 +466,7 @@
                                         (number->string gensym-count))))
                   (else
                        (set! gensym-count (+ gensym-count 1))
-                       (string->symbol (string-append 
+                       (string->symbol (string-append
                                         (if (symbol? (car params))
                                             (symbol->string (car params))
                                             (car params))
@@ -488,12 +488,12 @@
   (set-cdr! frame (cons val (cdr frame))))
 
 (define (env:all-variables env)
-  (flatten 
+  (flatten
     (env:frame-variables
       (env:first-frame env))))
 
 (define (env:all-values env)
-  (flatten 
+  (flatten
     (env:frame-values
       (env:first-frame env))))
 
@@ -505,7 +505,7 @@
           (error "Too few arguments supplied" vars vals))))
 
 (define (env:lookup-variable-value var env)
-  (env:_lookup-variable-value var env 
+  (env:_lookup-variable-value var env
     (lambda ()
       (error "Unbound variable" var))))
 
@@ -518,7 +518,7 @@
              (cond-expand
                (cyclone
                  (Cyc-get-cvar (car vals)))
-               (else 
+               (else
                  (car vals))))
             (else (scan (cdr vars) (cdr vals)))))
     (if (eq? env env:the-empty-environment)
@@ -624,7 +624,7 @@
                    ((tagged-list? 'macro val)
                     (let ((renamed (gensym identifier)))
                       (env:define-variable! renamed val mac-env)
-                      ;; Also update rename over here so it is available for 
+                      ;; Also update rename over here so it is available for
                       ;; use later on by compare
                       (env:define-variable! renamed identifier use-env)
                       renamed))
@@ -640,7 +640,7 @@
                    )
                    (else
                      identifier)))
-               ; 
+               ;
                ;(gensym identifier)
                ; gensym not good enough, need to also preserve ref trans.
                ; also note that an identifier can be an object, it does not
@@ -653,7 +653,7 @@
         (assq identifier binding-lis)
         (assq identifier renames))
        ))
-   ;; TODO: For now, do not allow renaming of special form symbols to 
+   ;; TODO: For now, do not allow renaming of special form symbols to
    ;; prevent issues within the compiler
    '(
      (define . define)
@@ -715,7 +715,7 @@
 (define (mangle-global symbol)
   (string-append "__glo_" (mangle symbol)))
 
-(define *c-keywords* 
+(define *c-keywords*
  '(auto _Bool break case char _Complex const continue default do double else
    enum extern float for goto if _Imaginary inline int long register restrict
    return short signed sizeof static struct switch typedef union unsigned
@@ -728,14 +728,14 @@
 (define (string-join lst delim)
   (let ((delim* (if (char? delim) (string delim) delim)))
     (cond
-      ((null? lst) 
+      ((null? lst)
         "")
-      ((= (length lst) 1) 
+      ((= (length lst) 1)
         (car lst))
       (else
-        (string-append 
-          (car lst) 
-          delim* 
+        (string-append
+          (car lst)
+          delim*
           (string-join (cdr lst) delim*))))))
 
 ;; string-split :: string -> char -> [string]
@@ -775,7 +775,7 @@
 (define (Cyc-set-immutable! obj val)
   (_Cyc-set-immutable! obj val)
   (cond
-    ((pair? obj) 
+    ((pair? obj)
      (_Cyc-set-immutable! (car obj) val)
      (_Cyc-set-immutable! (cdr obj) val))
     ((vector? obj) (vector-for-each (lambda (o) (_Cyc-set-immutable! o val)) obj))))

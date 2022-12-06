@@ -4,13 +4,13 @@
 ;;;; Copyright (c) 2014-2021, Justin Ethier
 ;;;; All rights reserved.
 ;;;;
-;;;; This module implements r7rs libraries. 
+;;;; This module implements r7rs libraries.
 ;;;;
 ;;;; Internally, our compiler uses libraries to encapsulate C modules.
 ;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
-          ;(scheme write) ;; Debug only 
+          ;(scheme write) ;; Debug only
           (scheme read)
           (scheme process-context)
           (scheme cyclone util)
@@ -111,18 +111,18 @@
 
 (define (lib:rename-aliases import)
   (let ((conv (assoc import *srfi-aliases*)))
-    (if conv 
+    (if conv
         (%lib:list->import-set (cadr conv))
         import)))
 ;; END aliases
 
 (define (library? ast)
   (tagged-list? 'define-library ast))
- 
+
 ;; Determine if a library exists for the given import set
 (define (library-exists? import . ext)
   (file-exists?
-    (lib:import->filename 
+    (lib:import->filename
       (lib:import->library-name import)
       (if (null? ext) ".sld" (car ext)))))
 
@@ -147,7 +147,7 @@
         (else atom)))
     lis))
 
-(define (lib:name ast) 
+(define (lib:name ast)
   (lib:list->import-set (cadr ast)))
 
 ;; Is import set just a library name?
@@ -172,7 +172,7 @@
          (tagged-list? 'except import)
          (tagged-list? 'prefix import)
          (tagged-list? 'rename import))
-     (lib:import->library-name 
+     (lib:import->library-name
        (cadr import)))
     (else
      import)))
@@ -193,7 +193,7 @@
 
 ;; Convert library name to a unique symbol
 (define (lib:name->symbol name)
-  (string->symbol 
+  (string->symbol
     (string-append
       "lib-init:" ;; Maybe make this an optional param? Trying to ensure uniqueness
       (lib:name->string name))))
@@ -210,13 +210,13 @@
 ;; and collect the contents of them into a single list.
 (define (lib:get-all ast tag)
   (foldr append '()
-    (map cdr 
+    (map cdr
       (filter (lambda (l) (tagged-list? tag l)) (cddr ast)))))
-(define (lib:body ast) 
+(define (lib:body ast)
   (lib:get-all ast 'begin))
-(define (lib:imports ast) 
+(define (lib:imports ast)
   (map lib:list->import-set (lib:get-all ast 'import)))
-(define (lib:raw-exports ast) 
+(define (lib:raw-exports ast)
   (lib:get-all ast 'export))
 (define (lib:rename-exports ast)
   (filter
@@ -268,7 +268,7 @@
       (cddr ast))))
 
 (define (lib:inlines ast)
-  (apply 
+  (apply
     append
     (map
       (lambda (inc-lst)
@@ -293,8 +293,8 @@
 
 (define (lib:cond-expand-decls decls expander)
   (reverse
-    (foldl 
-      (lambda (d acc) 
+    (foldl
+      (lambda (d acc)
         (cond
           ((tagged-list? 'cond-expand d)
            ;; Can have more than one ce expression, EG:
@@ -310,7 +310,7 @@
               ((and (pair? expr)
                     (lambda? (car expr))
                     (eq? '() (lambda->formals (car expr))))
-               (append 
+               (append
                  (reverse ;; Preserve order
                    (map form-ce-expr (lambda->exp (car expr))))
                  acc))
@@ -318,13 +318,13 @@
                (cons (form-ce-expr expr) acc)))))
           (else
             (cons d acc)) ))
-      '() 
+      '()
      decls)))
 
 (define (form-ce-expr expr)
   (cond
    ((and (pair? expr)
-         (not (member (car expr) 
+         (not (member (car expr)
                      '(import export c-linker-options c-compiler-options include-c-header))))
     `(begin ,expr))
    (else
@@ -339,13 +339,13 @@
     (else
      (error "Unexpected type in import set"))))
 
-;; Resolve library filename given an import. 
+;; Resolve library filename given an import.
 ;; Options:
 ;; - Extension, assumes ".sld" file extension if one is not specified.
 ;; - Append path, list of strings
 ;; - Prepend path, list of strings
 (define (lib:import->filename import . opts)
-  (let* ((file-ext 
+  (let* ((file-ext
           (if (null? opts)
               ".sld"
               (car opts)))
@@ -361,8 +361,8 @@
           (string-append
             (apply
               string-append
-              (map 
-                (lambda (i) 
+              (map
+                (lambda (i)
                   (string-append "/" (lib:atom->string i)))
                 import))
             file-ext))
@@ -378,7 +378,7 @@
         (for-each
           (lambda (path)
             (let ((f (string-append path "/" filename)))
-              (if (file-exists? f) 
+              (if (file-exists? f)
                   (return f))))
           (append prepend-dirs dir append-dirs))
         ;; Not found, just return base name
@@ -394,8 +394,8 @@
          (path
            (apply
              string-append
-             (map 
-               (lambda (i) 
+             (map
+               (lambda (i)
                  (string-append (lib:atom->string i) "/"))
                import-path)))
          (filename
@@ -413,7 +413,7 @@
             (let ((f (string-append path "/" filename)))
               ;(write `(DEBUG ,path ,f ,(file-exists? f)))
               ;(newline)
-              (if (file-exists? f) 
+              (if (file-exists? f)
                   (return f))))
           (append prepend-dirs dir append-dirs))
         ;; Not found, just return base name
@@ -430,8 +430,8 @@
 ;;
 (define (lib:check-system-path filename)
   (let* ((env-dir (get-environment-variable "CYCLONE_LIBRARY_PATH"))
-         (dir (if env-dir 
-                  env-dir 
+         (dir (if env-dir
+                  env-dir
                   (Cyc-installation-dir 'sld)))
          (path (string-append dir "/" filename)))
     (if (file-exists? path)
@@ -493,7 +493,7 @@
 
 (define (lib:get-all-c-linker-options imports append-dirs prepend-dirs expander)
   (string-join
-    (map 
+    (map
       (lambda (import)
         (lib:read-c-linker-options import append-dirs prepend-dirs expander))
       imports)
@@ -513,7 +513,7 @@
 
 (define (lib:get-all-c-compiler-options imports append-dirs prepend-dirs expander)
   (string-join
-    (map 
+    (map
       (lambda (import)
         (lib:read-c-compiler-options import append-dirs prepend-dirs expander))
       imports)
@@ -537,7 +537,7 @@
 ;;
 ;; Any identifiers renamed in the export list will be returned as a pair
 ;; of the form (renamed-ident . original-ident)
-;; 
+;;
 (define (lib:import-set/exports->imports import-set exports)
   ;; Handle import set that contains another import set
   (unless (lib:import-set:library-name? import-set)
@@ -560,7 +560,7 @@
      (let ((except-syms (cddr import-set)))
        (filter
          (lambda (sym)
-           (not (member 
+           (not (member
                   (if (pair? sym) (car sym) sym)
                   except-syms)))
          exports)))
@@ -575,7 +575,7 @@
               (string->symbol
                 (string-append
                   prestr
-                  (symbol->string 
+                  (symbol->string
                     (if (pair? e)
                         (car e)
                         e))))
@@ -588,11 +588,11 @@
      (let ((renames (cddr import-set)))
        (map
          (lambda (e)
-           (let ((rename (assoc 
-                           (if (pair? e) (car e) e) 
+           (let ((rename (assoc
+                           (if (pair? e) (car e) e)
                            renames)))
             (if rename
-                (cons 
+                (cons
                   (cadr rename) ;; Renamed identifier
                   (if (pair? e) (cdr e) e) ;; Original identifier from library
                 )
@@ -620,16 +620,16 @@
 ;(define (lib:resolve-imports imports)
 ; (apply
 ;   append
-;   (map 
+;   (map
 ;     (lambda (import)
 ;       (lib:import->export-list import))
 ;     (map lib:list->import-set imports))))
 
 ;; Take a list of imports and create a "database" from them
 ;; consisting of maps between each exported identifier and the
-;; library that imports that identifier. 
+;; library that imports that identifier.
 ;;
-;; TODO: Raise an exception if the same identifier is exported 
+;; TODO: Raise an exception if the same identifier is exported
 ;; from more than one library???
 ;;
 ;; TODO: convert this to use a hashtable. Initially a-lists
@@ -637,7 +637,7 @@
 (define (lib:imports->idb imports append-dirs prepend-dirs expander)
  (apply
    append
-   (map 
+   (map
      (lambda (import-set)
        (let ((lib-name (lib:import->library-name import-set)))
          (foldr
@@ -652,22 +652,22 @@
 ;; Convert from the import DB to a list of identifiers that are imported.
 ;; EG: '((call/cc . (scheme base))) ==> '(call/cc)
 (define (lib:idb:ids db)
-  (foldr 
-    (lambda (i is) 
+  (foldr
+    (lambda (i is)
       (let ((id (if (pair? (car i)) (caar i) (car i))))
         (cons id is)))
-   '() 
+   '()
     db))
 
 ;; Retrieve entry in the given idb database for the given identifier
 (define (lib:idb:lookup db identifier)
-  (call/cc 
+  (call/cc
     (lambda (return)
       (for-each
         (lambda (entry)
           (cond
             ;; Normal identifier, no renaming
-            ((equal? identifier (car entry)) 
+            ((equal? identifier (car entry))
              (return entry))
             ;; Identifier was renamed by an import set
             ((and (pair? (car entry))
@@ -711,7 +711,7 @@
 (define (lib:resolve-meta imports append-dirs prepend-dirs)
  (apply
    append
-   (map 
+   (map
      (lambda (import)
        (lib:import->metalist import append-dirs prepend-dirs))
      imports)))
@@ -721,9 +721,9 @@
 ;; libraries can be initialized properly in sequence.
 (define (lib:get-all-import-deps imports append-dirs prepend-dirs expander)
   (letrec ((libraries/deps '())
-         (find-deps! 
+         (find-deps!
           (lambda (import-sets)
-            (for-each 
+            (for-each
               (lambda (i)
                 (let* ((import-set (lib:list->import-set i))
                        (lib-name (lib:import->library-name import-set)))
@@ -733,8 +733,8 @@
                     ;; Find all dependencies of i (IE, libraries it imports)
                     (let* ((deps (lib:read-imports import-set append-dirs prepend-dirs expander))
                            (dep-libs (map lib:import->library-name deps)))
-                     (set! 
-                       libraries/deps 
+                     (set!
+                       libraries/deps
                        (cons (cons lib-name dep-libs) libraries/deps))
                      (find-deps! dep-libs)
                    )))))
@@ -749,13 +749,13 @@
 ;; libraries it imports (it's dependencies).
 (define lib:get-dep-list resolve-dependencies)
 
-;; Goal is to resolve a list of dependencies into the appropriate order such 
+;; Goal is to resolve a list of dependencies into the appropriate order such
 ;; that no node is encountered before its dependencies.
 ;; We also need to raise an error if a circular dependency is found
-;; 
+;;
 ;; A dependency list consists of: (name . edges)
 ;; Where edges are all of the dependencies of name.
-;; 
+;;
 ;; nodes is a list of many dependency lists.
 ;;
 ;; Based on code from:

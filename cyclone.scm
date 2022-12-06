@@ -62,7 +62,7 @@
       (not (in-subdir? sys-dir sld-file)) ;; Never try to recompile installed libraries
       (or
         (not (file-exists? obj-file)) ;; No obj file, must rebuild
-        (any 
+        (any
           (lambda (src-file)
             (> (file-mtime src-file)
                (file-mtime obj-file))) ;; obj file out of date
@@ -89,11 +89,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Code emission.
-  
+
 ; c-compile-and-emit : (string -> A) exp -> void
-(define (c-compile-and-emit input-program program:imports/code 
+(define (c-compile-and-emit input-program program:imports/code
                             lib-deps change-lib-deps! src-file append-dirs prepend-dirs)
-  (call/cc 
+  (call/cc
     (lambda (return)
       (define globals '())
       (define module-globals '()) ;; Globals defined by this module
@@ -109,10 +109,10 @@
       (define rename-env (env:extend-environment '() '() '()))
 
       (emit *c-file-header-comment*) ; Guarantee placement at top of C file
-    
+
       (report:elapsed "---------------- input program:")
       (trace:info "---------------- input program:")
-      (trace:info input-program) 
+      (trace:info input-program)
 
       (cond
         ((library? (car input-program))
@@ -127,27 +127,27 @@
                (lib:name->symbol lib-name)
                (lib:exports (car input-program))))
            (set! lib-pass-thru-exports lib-exports)
-           (set! lib-renamed-exports 
+           (set! lib-renamed-exports
              (lib:rename-exports (car input-program)))
            (set! imports (lib:imports (car input-program)))
            (set! input-program (lib:body (car input-program)))
            ;; Add any renamed exports to the begin section
            (set! input-program
                  (append
-                   (map 
-                     (lambda (r) 
+                   (map
+                     (lambda (r)
                       `(define ,(caddr r) ,(cadr r)))
-                     lib-renamed-exports)   
+                     lib-renamed-exports)
                    input-program))
            ;; Prepend any included files into the begin section
            (if (not (null? includes))
              (for-each
                (lambda (include)
-                 (set! input-program 
-                       (append (read-file ;(string-append 
-                                            (lib:import->path lib-name append-dirs prepend-dirs include) 
+                 (set! input-program
+                       (append (read-file ;(string-append
+                                            (lib:import->path lib-name append-dirs prepend-dirs include)
                                             ;include)
-                       ) 
+                       )
                                input-program)))
                (reverse includes))))) ;; Append code in same order as the library's includes
         (else
@@ -162,8 +162,8 @@
               ((not (null? lis))
                (when (> *optimization-level* 0)
                  (set! inlines lis))
-               (set! input-program 
-                     (filter 
+               (set! input-program
+                     (filter
                        (lambda (expr)
                          (not (tagged-list? 'inline expr)))
                        input-program)))))
@@ -173,8 +173,8 @@
             (cond
               ((not (null? headers))
                (set! c-headers headers)
-               (set! input-program 
-                     (filter 
+               (set! input-program
+                     (filter
                        (lambda (expr)
                          (not (tagged-list? 'include-c-header expr)))
                        input-program)))))
@@ -202,10 +202,10 @@
       ;; or just assume all imports were used and include them
       ;; in final compiled program
       ;(set! input-program (add-libs input-program))
-    
+
       ;; Load macros for expansion phase
-      (let ((macros (filter 
-                      (lambda (v) 
+      (let ((macros (filter
+                      (lambda (v)
                         (Cyc-macro? (Cyc-get-cvar (cdr v))))
                       (Cyc-global-vars))))
         (set! *defined-macros*
@@ -217,12 +217,12 @@
       ;; Expand macros
       ;; In each case, the input is expanded in a way that ensures
       ;; defines from any top-level begins are spliced correctly.
-      (set! input-program 
+      (set! input-program
         (cond
           (program?
             (expand-lambda-body input-program (macro:get-env) rename-env))
           (else
-            (let ((expanded (expand `(begin ,@input-program) 
+            (let ((expanded (expand `(begin ,@input-program)
                                     (macro:get-env)
                                     rename-env)))
               (cond
@@ -237,11 +237,11 @@
                   (error `(Unhandled expansion ,expanded))))))))
       (report:elapsed "---------------- after macro expansion:")
       (trace:info "---------------- after macro expansion:")
-      (trace:info input-program) 
+      (trace:info input-program)
       (set! input-program (macro:cleanup input-program rename-env))
       (report:elapsed "---------------- after macro expansion cleanup:")
       (trace:info "---------------- after macro expansion cleanup:")
-      (trace:info input-program) 
+      (trace:info input-program)
 
       ;; If a program, check to see if any macros expanded into top-level imports
       (when program?
@@ -274,7 +274,7 @@
                 ;; expressions were encountered during macro expansion.
                 ;; If so, update the list of dependencies now
                 (set! ;; Use new deps
-                  lib-deps 
+                  lib-deps
                   (change-lib-deps! lib-deps)))) ;; Caller updates and returns new deps
             (trace:info lib-deps)
           )))
@@ -282,19 +282,19 @@
 
       ;; Debug output for our dependencies
       (trace:info "---------------- Library dependencies")
-      (trace:info lib-deps) 
+      (trace:info lib-deps)
       (trace:info "---------------- Library files")
-      (trace:info (map 
+      (trace:info (map
                     (lambda (lib-dep)
                       (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs))
                     lib-deps))
       ;; Build dependent libraries, if instructed
       (when *fe:batch-compile*
-        (for-each 
+        (for-each
           (lambda (lib-dep)
             (when (recompile? lib-dep append-dirs prepend-dirs)
-              (let ((result (system (string-append 
-                                      (calling-program) " " 
+              (let ((result (system (string-append
+                                      (calling-program) " "
                                       (dirs->args "-A" append-dirs) " "
                                       (dirs->args "-I" prepend-dirs) " "
                                       (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
@@ -306,19 +306,19 @@
       (validate-keyword-syntax input-program)
 
       ;; Separate global definitions from the rest of the top-level code
-      (set! input-program 
+      (set! input-program
           (isolate-globals input-program program? lib-name rename-env))
 
       ;; Optimize-out unused global variables
       ;; For now, do not do this if eval is used.
       ;; TODO: do not have to be so aggressive, unless (eval (read)) or such
       (if (not (has-global? input-program 'eval))
-          (set! input-program 
+          (set! input-program
             (filter-unused-variables input-program lib-exports)))
 
       (report:elapsed "---------------- after processing globals")
       (trace:info "---------------- after processing globals")
-      (trace:info input-program) 
+      (trace:info input-program)
 
       ;; Identify global variables
       (set! module-globals (global-vars input-program))
@@ -336,7 +336,7 @@
       ;; So keep track of all functions marked as inline because there are still
       ;; possibilities for optimization even if the function must call into its
       ;; continuation.
-      (opt:add-inlinable-functions inlines) 
+      (opt:add-inlinable-functions inlines)
 
       ;; Trim down the export list to any exports that are just "pass throughs"
       ;; from imported libraries. That is, they are not actually defined in
@@ -360,18 +360,18 @@
       (report:elapsed "pass thru exports:")
       (trace:info "pass thru exports:")
       (trace:info lib-pass-thru-exports)
-    
-      ; Note alpha-conversion is overloaded to convert internal defines to 
+
+      ; Note alpha-conversion is overloaded to convert internal defines to
       ; set!'s below, since all remaining phases operate on set!, not define.
       (set! globals (union globals '())) ;; Ensure list is sorted
-      (set! input-program 
+      (set! input-program
         (map
           (lambda (expr)
             (alpha-convert expr globals return))
           input-program))
       (report:elapsed "---------------- after alpha conversion:")
       (trace:info "---------------- after alpha conversion:")
-      (trace:info input-program) 
+      (trace:info input-program)
 
       ;; EXPERIMENTAL CODE - Load functions in other modules that are
       ;; able to be inlined (in this context, from CPS).
@@ -386,19 +386,19 @@
       ;; TODO: probably not good enough since inlines are not in export list
       ;;
       ;; TODO: later on, in cgen, only add inlinables that correspond to exported functions
-      
+
       (for-each
         (lambda (import)
           (with-handler
             (lambda (err)
               #f)
             (let* ((lib-name-str (lib:name->string (lib:list->import-set import)))
-                   (inlinable-lambdas-fnc 
+                   (inlinable-lambdas-fnc
                     (string->symbol
                       (string-append "c_" lib-name-str "_inlinable_lambdas"))))
             (cond
               ((imported? import)
-               (let ((lib-name (lib:import->library-name 
+               (let ((lib-name (lib:import->library-name
                                  (lib:list->import-set import)))
                      (vars/inlines
                        (filter
@@ -416,7 +416,7 @@
                        (prim:add-udf! var inline)))
                    vars/inlines)
                  ;; Keep track of inline version of functions along with other imports
-                 (set! imported-vars 
+                 (set! imported-vars
                    (append
                      imported-vars
                      (map
@@ -432,22 +432,22 @@
       ;; END
 
       ;; Convert some function calls to primitives, if possible
-      (set! input-program 
+      (set! input-program
         (map
           (lambda (expr)
             (prim-convert expr))
           input-program))
       (report:elapsed "---------------- after func->primitive conversion:")
       (trace:info "---------------- after func->primitive conversion:")
-      (trace:info input-program) 
+      (trace:info input-program)
 
       ;; Identify native Scheme functions (from module being compiled) that can be inlined
       ;;
-      ;; NOTE: There is a chicken-and-egg problem here that prevents this from 
+      ;; NOTE: There is a chicken-and-egg problem here that prevents this from
       ;; automatically working 100%. Basically we need to know whether the inline logic will
       ;; work for a given candidate. The problem is, the only way to do that is to run the
       ;; code through CPS and by then we would have to go back and repeat many phases if a
-      ;; candidate fails the inline tests. At least for now, an alternative is to require 
+      ;; candidate fails the inline tests. At least for now, an alternative is to require
       ;; user code to specify (via inline) what functions the compiler should try inlining.
       ;; There is a small chance one of those inlines can pass these tests and still fail
       ;; the subsequent inline checks though, which causes an error in the C compiler.
@@ -468,8 +468,8 @@
         (report:elapsed "---------------- results of inlinable-top-level-lambda analysis: ")
         (trace:info "---------------- results of inlinable-top-level-lambda analysis: ")
         (trace:info inlinable-scheme-fncs))
-    
-      (let ((cps (map 
+
+      (let ((cps (map
                    (lambda (expr)
                      (cps-convert expr))
                    input-program)))
@@ -477,7 +477,7 @@
          ((and library? (equal? lib-name '(scheme base)))
            (set! globals (append '(call/cc) globals))
            (set! module-globals (append '(call/cc) module-globals))
-           (set! input-program 
+           (set! input-program
              ;(cons
              ; ;; Experimental version of call-with-values,
              ; ;; seems OK in compiler but not in eval.
@@ -487,7 +487,7 @@
              ;       (if (and (pair? x) (equal? '(multiple values) (car x)))
              ;         (apply consumer (cdr x))
              ;         (consumer k x))))
-             ;   ;  (producer 
+             ;   ;  (producer
              ;   ;    (lambda (result)
              ;   ;      (consumer k result))))
              ;   )
@@ -499,11 +499,11 @@
              (cons
                ;; call/cc must be written in CPS form, so it is added here
                `(define call/cc
-                 ,(ast:make-lambda 
-                    '(k f) 
-                    (list 
-                      (list 'f 'k 
-                            (ast:make-lambda '(_ result) 
+                 ,(ast:make-lambda
+                    '(k f)
+                    (list
+                      (list 'f 'k
+                            (ast:make-lambda '(_ result)
                                              (list '(k result)))))))
                  ;(lambda (k f) (f k (lambda (_ result) (k result)))))
                 cps)));)
@@ -544,7 +544,7 @@
 
       (define (flag-set? flag)
         (cond
-          ((eq? flag 'memoize-pure-functions) 
+          ((eq? flag 'memoize-pure-functions)
            (and program? ;; Only for programs, because SRFI 69 becomes a new dep
                 *optimize:memoize-pure-functions*))
           ((eq? flag 'track-call-history)
@@ -569,14 +569,14 @@
         (report:elapsed "---------------- after cps optimizations (2):")
         (trace:info "---------------- after cps optimizations (2):")
         (trace:info (ast:ast->pp-sexp input-program))
-        
+
         (set! input-program
           (optimize-cps input-program inject-globals! flag-set?))
         (report:elapsed "---------------- after cps optimizations (3):")
         (trace:info "---------------- after cps optimizations (3):")
         (trace:info (ast:ast->pp-sexp input-program))
       )
-    
+
       (set! input-program (opt:local-var-reduction input-program))
       (report:elapsed "---------------- after local variable reduction")
       (trace:info "---------------- after local variable reduction")
@@ -598,12 +598,12 @@
       (report:elapsed "---------------- after wrap-mutables:")
       (trace:info "---------------- after wrap-mutables:")
       (trace:info (ast:ast->pp-sexp input-program))
-    
+
       ;; Perform this analysis here since we need it later so it doesn't
       ;; make sense to execute it multiple times during CPS optimization
       (analyze:find-known-lambdas input-program)
 
-      (set! input-program 
+      (set! input-program
         (map
           (lambda (expr)
             (cond
@@ -624,11 +624,11 @@
       (report:elapsed "---------------- analysis db: ")
       (trace:info "---------------- analysis db: ")
       (trace:info (adb:get-db))
-      
+
       (when (not *do-code-gen*)
         (trace:error "DEBUG, existing program")
         (exit 0))
-    
+
       (trace:info "---------------- C headers: ")
       (trace:info c-headers)
 
@@ -637,16 +637,16 @@
 
       (report:elapsed "---------------- C code:")
       (trace:info "---------------- C code:")
-      (mta:code-gen input-program 
-                    program? 
-                    lib-name 
+      (mta:code-gen input-program
+                    program?
+                    lib-name
                     lib-pass-thru-exports
                     imported-vars
                     module-globals
                     c-headers
                     lib-deps
                     src-file
-                    flag-set?) 
+                    flag-set?)
       (return '())))) ;; No codes to return
 
 ;; Read top-level imports from a program and return a cons of:
@@ -682,12 +682,12 @@
 ;; macros are loaded from dependent libraries.
 (define (base-expander)
   (let ((rename-env (env:extend-environment '() '() '()))
-        (macros (filter 
-                  (lambda (v) 
+        (macros (filter
+                  (lambda (v)
                     (Cyc-macro? (Cyc-get-cvar (cdr v))))
                   (Cyc-global-vars))))
     (macro:load-env! macros (create-environment '() '()))
-    (lambda (ex) 
+    (lambda (ex)
       (expand ex (macro:get-env) rename-env))))
 
 ;; TODO: longer-term, will be used to find where cyclone's data is installed
@@ -715,7 +715,7 @@
     (lambda (expr acc)
       (cond
        ((tagged-list? opt expr)
-        ;; Replace expression since it is only used in this initial 
+        ;; Replace expression since it is only used in this initial
         ;; pass, and would cause problems downstream
         (set-car! expr (string->symbol "quote"))
         (cons (cadr expr) acc))
@@ -732,7 +732,7 @@
          (program? (not (library? (car in-prog-raw))))
          (in-prog
           (cond
-            (program? 
+            (program?
               (Cyc-add-feature! 'program) ;; Load special feature
               ;; TODO: what about top-level cond-expands in the program?
               in-prog-raw)
@@ -742,7 +742,7 @@
           ;; expand in-prog, if a library, using lib:cond-expand.
           ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (program:imports/code (if program? (import-reduction in-prog expander) '()))
-         (lib-deps 
+         (lib-deps
            (if (and program?
                     (not (null? (car program:imports/code))))
              (lib:get-all-import-deps (car program:imports/code) append-dirs prepend-dirs expander)
@@ -750,7 +750,7 @@
         ;; Read C compiler options
          (cc-opts
           (cond
-            (program? 
+            (program?
               (let ((opts (program-c-compiler-opts! in-prog)))
                 (when (not (null? opts))
                   (change-cc-opts! opts))
@@ -758,8 +758,8 @@
                   opts
                   " ")))
             (else
-              (string-join 
-                (lib:c-compiler-options (car in-prog)) 
+              (string-join
+                (lib:c-compiler-options (car in-prog))
                 " "))))
          ;; Read all linker options from dependent libs
          (c-linker-options
@@ -773,41 +773,41 @@
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
-         (get-comp-env 
+         (get-comp-env
            (lambda (sym str)
              (if (> (string-length str) 0)
                  str
-                 (Cyc-compilation-environment sym)))) 
-         (create-c-file 
-           (lambda (program) 
-             (with-output-to-file 
+                 (Cyc-compilation-environment sym))))
+         (create-c-file
+           (lambda (program)
+             (with-output-to-file
                src-file
                (lambda ()
-                 (c-compile-and-emit 
-                   program 
-                   program:imports/code 
-                   lib-deps 
+                 (c-compile-and-emit
+                   program
+                   program:imports/code
+                   lib-deps
                    (lambda (new-lib-deps)
                      ;; Deps changed so we need to
                      ;; resolve dependency tree again
-                     (set! 
+                     (set!
                        lib-deps
-                       (lib:get-all-import-deps 
+                       (lib:get-all-import-deps
                          new-lib-deps
-                         append-dirs 
-                         prepend-dirs 
+                         append-dirs
+                         prepend-dirs
                          expander))
                      ;; Recompute linker options
                      (set! c-linker-options
-                       (lib:get-all-c-linker-options 
-                         lib-deps 
-                         append-dirs 
+                       (lib:get-all-c-linker-options
+                         lib-deps
+                         append-dirs
                          prepend-dirs
                          expander))
                      ;; Return new deps
                      lib-deps)
-                   in-file 
-                   append-dirs 
+                   in-file
+                   append-dirs
                    prepend-dirs))))))
     (create-c-file in-prog)
     (cond
@@ -843,9 +843,9 @@
       (cdr (assoc symbol meta))
       default))
 
-(define (run-external-compiler 
+(define (run-external-compiler
            args append-dirs prepend-dirs
-           cc? cc-prog cc-exec cc-lib cc-so 
+           cc? cc-prog cc-exec cc-lib cc-so
            cc-opts cc-prog-linker-opts cc-prog-linker-objs)
   (let* ((in-file (car args))
          (expander (base-expander))
@@ -853,7 +853,7 @@
          (program? (not (library? (car in-prog-raw))))
          (in-prog
           (cond
-            (program? 
+            (program?
               (Cyc-add-feature! 'program) ;; Load special feature
               ;; TODO: what about top-level cond-expands in the program?
               in-prog-raw)
@@ -863,22 +863,22 @@
          ;; Only read C compiler options from module being compiled
          (cc-opts*
           (cond
-            (program? 
+            (program?
               (string-join ;; Check current program for options
                 (program-c-compiler-opts! in-prog)
                 " "))
             (else
-              (string-join 
-                (lib:c-compiler-options (car in-prog)) 
+              (string-join
+                (lib:c-compiler-options (car in-prog))
                 " "))))
          (exec-file (basename in-file))
          (src-file (string-append exec-file ".c"))
          (meta-file (string-append exec-file ".meta"))
-         (get-comp-env 
+         (get-comp-env
            (lambda (sym str)
              (if (> (string-length str) 0)
                  str
-                 (Cyc-compilation-environment sym)))) 
+                 (Cyc-compilation-environment sym))))
         )
     ;; Compile the generated C file
     (cond
@@ -886,7 +886,7 @@
         (letrec ((metadata (load-program-metadata meta-file))
                  (c-linker-options (get-meta metadata 'c-linker-options '()))
                  (lib-deps (get-meta metadata 'lib-deps '()))
-                 (objs-str 
+                 (objs-str
                   (string-append
                     cc-prog-linker-objs
                     (apply
@@ -895,19 +895,19 @@
                         (lambda (i)
                           (string-append " " (lib:import->filename i ".o" append-dirs prepend-dirs) " "))
                         lib-deps))))
-                 (comp-prog-cmd 
+                 (comp-prog-cmd
                    (string-append
-                     (string-replace-all 
-                       (string-replace-all 
-                         (string-replace-all 
-                           ;(Cyc-compilation-environment 'cc-prog) 
+                     (string-replace-all
+                       (string-replace-all
+                         (string-replace-all
+                           ;(Cyc-compilation-environment 'cc-prog)
                            (get-comp-env 'cc-prog cc-prog)
                            "~src-file~" src-file)
                          "~cc-extra~" cc-opts)
                        "~exec-file~" exec-file)
                      " "
                      cc-opts*))
-                 (comp-objs-cmd 
+                 (comp-objs-cmd
                   (string-append
                    (string-replace-all
                      (string-replace-all
@@ -937,9 +937,9 @@
         ;; Compile library
         (let ((comp-lib-cmd
                (string-append
-                (string-replace-all 
-                  (string-replace-all 
-                    (string-replace-all 
+                (string-replace-all
+                  (string-replace-all
+                    (string-replace-all
                       (get-comp-env 'cc-lib cc-lib)
                       "~src-file~" src-file)
                     "~cc-extra~" cc-opts)
@@ -948,8 +948,8 @@
                 cc-opts*))
               (comp-so-cmd
                (string-append
-                (string-replace-all 
-                  (string-replace-all 
+                (string-replace-all
+                  (string-replace-all
                     (get-comp-env 'cc-so cc-so)
                     "~src-file~" src-file)
                   "~exec-file~" exec-file)
@@ -992,7 +992,7 @@
 ;; EG: (dirs->args "-I" '("dir-1" "dir-2")) =>
 ;;     " -I dir-1 -I dir-2 "
 (define (dirs->args prefix dirs)
-  (apply 
+  (apply
     string-append
     (map
       (lambda (dir)
@@ -1001,12 +1001,12 @@
 
 ;; Handle command line arguments
 (let* ((args (command-line-arguments))
-       (non-opts 
+       (non-opts
         (if (null? args)
             '()
             (list (car (reverse args)))))
                 ; (filter
-                ;   (lambda (arg) 
+                ;   (lambda (arg)
                 ;     (not (and (> (string-length arg) 1)
                 ;               (equal? #\- (string-ref arg 0)))))
                 ;   args))
@@ -1032,8 +1032,8 @@
       (set! *optimization-level* 0))
   ;; Gather other optimization settings
   (when (pair? opt-beta-expand-thresh)
-      (set! *optimize:beta-expand-threshold* 
-            (string->number 
+      (set! *optimize:beta-expand-threshold*
+            (string->number
               (car opt-beta-expand-thresh))))
   (if (member "-opt-inline-unsafe" args)
       (set! *optimize:inline-unsafe* #t))
@@ -1060,9 +1060,9 @@ Run the Cyclone Scheme compiler.
 
 General options:
 
- -A directory    Append directory to the list of directories that are searched 
+ -A directory    Append directory to the list of directories that are searched
                  in order to locate imported libraries.
- -I directory    Prepend directory to the list of directories that are searched 
+ -I directory    Prepend directory to the list of directories that are searched
                  in order to locate imported libraries.
  -CP cc-commands Specify a custom command line for the C compiler to compile
                  a program module. See Makefile.config for an example of how
@@ -1089,7 +1089,7 @@ General options:
 
 Compilation options:
 
- -batch          Automatically compile local library dependencies 
+ -batch          Automatically compile local library dependencies
                  (enabled by default).
  -no-batch       Compile as a single unit, do not attempt to compile local
                  library dependencies.
@@ -1098,7 +1098,7 @@ Optimization options:
 
  -Ox             Optimization level, higher means more optimizations will
                  be used. Set to 0 to disable optimizations.
- -memoization-optimizations     Memoize recursive calls to pure functions, 
+ -memoization-optimizations     Memoize recursive calls to pure functions,
                                 where possible (enabled by default).
  -no-memoization-optimizations  Disable the above memoization optimization.
 
@@ -1110,8 +1110,8 @@ Unsafe options:
 
 Debug options:
 
- -no-call-history     Do not track call history in the compiled code. This 
-                      allows for a faster runtime at the cost of having 
+ -no-call-history     Do not track call history in the compiled code. This
+                      allows for a faster runtime at the cost of having
                       no call history in the event of an exception.
 ")
      (newline))
@@ -1157,10 +1157,10 @@ Debug options:
           (newline)
           (exit 1)))
       (cond
-        (run-scm-compiler? 
+        (run-scm-compiler?
           ;; Compile Scheme code into a C file
           (run-compiler non-opts append-dirs prepend-dirs
-            (lambda (opts) 
+            (lambda (opts)
               (set! cc-opts opts))))
         (else
           ;; Generate the C file
@@ -1176,14 +1176,13 @@ Debug options:
             ;; the .C file. This lets us immediately free those resources once
             ;; the Scheme compilation is done.
             (when (not (zero? (system
-                                (string-append 
+                                (string-append
                                   (calling-program) " -run-scm-compiler "
                                   (string-join args " ")))))
               (exit 1))))
           ;; Call the C compiler
           (run-external-compiler
             non-opts append-dirs prepend-dirs
-            compile? cc-prog cc-exec cc-lib cc-so 
+            compile? cc-prog cc-exec cc-lib cc-so
             cc-opts cc-linker-opts cc-linker-extra-objects)))
       ))))
-

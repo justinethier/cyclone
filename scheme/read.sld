@@ -56,7 +56,7 @@
      (cadr lst))
     (else
       (cons (car lst) (->dotted-list (cdr lst))))))
-  
+
 ;; Main lexer/parser
 (define read
   (lambda args
@@ -126,23 +126,23 @@
     Cyc_check_str(data, msg);
     p = ((port_type *)port);
     if (Cyc_is_string(filename) == boolean_t) {
-      snprintf(buf, 1023, \"at line %d, column %d of %s: %s\", 
-             p->line_num, p->col_num, 
-             string_str(filename), 
+      snprintf(buf, 1023, \"at line %d, column %d of %s: %s\",
+             p->line_num, p->col_num,
+             string_str(filename),
              string_str(msg));
     } else {
-      snprintf(buf, 1023, \"at line %d, column %d: %s\", 
+      snprintf(buf, 1023, \"at line %d, column %d: %s\",
              p->line_num, p->col_num, string_str(msg));
     }
     Cyc_rt_raise_msg(data, buf);")
 
 (define-c Cyc-opaque-eq?
   "(void *data, int argc, closure _, object k, object opq, object obj)"
-  " if (Cyc_is_opaque(opq) == boolean_f) 
+  " if (Cyc_is_opaque(opq) == boolean_f)
       return_closcall1(data, k, boolean_f);
     return_closcall1(data, k, equalp( opaque_ptr(opq), obj ));"
   "(void *data, object ptr, object opq, object obj)"
-  " if (Cyc_is_opaque(opq) == boolean_f) 
+  " if (Cyc_is_opaque(opq) == boolean_f)
       return(boolean_f);
     return(equalp( opaque_ptr(opq), obj ));")
 
@@ -166,18 +166,18 @@
   "(void *data, int argc, closure _, object k, object r, object i)"
   " Cyc_make_rectangular(data, k, r, i); ")
 
-(define-c get-line-num 
+(define-c get-line-num
   "(void *data, int argc, closure _, object k, object port)"
-  " int num = ((port_type *)port)->line_num; 
+  " int num = ((port_type *)port)->line_num;
    return_closcall1(data, k, obj_int2obj(num)); ")
 
-(define-c get-col-num 
+(define-c get-col-num
   "(void *data, int argc, closure _, object k, object port)"
-  " int num = ((port_type *)port)->col_num; 
+  " int num = ((port_type *)port)->col_num;
    return_closcall1(data, k, obj_int2obj(num)); ")
 
-(define (store-source-info! obj filename line col) 
-  (set! *reader-source-db* 
+(define (store-source-info! obj filename line col)
+  (set! *reader-source-db*
         (cons (cons obj (vector filename line col))
               *reader-source-db*)))
   ;; TODO: where to store? Need to use a hashtable but also needs to
@@ -186,7 +186,7 @@
 ;; TODO: need corresponding macro (syntax-error/source ??) to use this
 ;; information for error reporting
 ;; TODO: probably want to have a top-level exception handler on macro
-;; expansion and call compiler error to report any error along with 
+;; expansion and call compiler error to report any error along with
 ;; source info
 
 
@@ -224,9 +224,9 @@
                                   (pair? result)
                                   (symbol? (car result)))
                          ;; Possible macro expansion, save source info
-                         (ssi! result 
-                               fname 
-                               line-num 
+                         (ssi! result
+                               fname
+                               line-num
                                (- col-num 1))) ;; Account for open paren
                        result)))
                 (else
