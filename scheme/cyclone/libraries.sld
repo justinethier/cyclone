@@ -10,7 +10,7 @@
 ;;;;
 (define-library (scheme cyclone libraries)
   (import (scheme base)
-          ;(scheme write) ;; Debug only
+          ;; (scheme write) ;; Debug only
           (scheme read)
           (scheme process-context)
           (scheme cyclone util)
@@ -286,10 +286,13 @@
 ;obviously also need to expand cond-expand in cases where the code reads sld files to track down library dependencies
 
 ;; Take given define-library expression and cond-expand all declarations
-(define (lib:cond-expand expr expander)
-  (let ((name (cadr expr))
-        (decls (lib:cond-expand-decls (cddr expr) expander)))
-    `(define-library ,name ,@decls)))
+(define (lib:cond-expand filepath expr expander)
+  ;; parametrize include, and include-ci during expand, inside
+  ;; expander.
+  (parameterize ((current-expand-filepath filepath))
+    (let ((name (cadr expr))
+          (decls (lib:cond-expand-decls (cddr expr) expander)))
+      `(define-library ,name ,@decls))))
 
 (define (lib:cond-expand-decls decls expander)
   (reverse
@@ -462,7 +465,7 @@
          (fp (open-input-file dir))
          (lib (read-all fp))
          (lib* (if expander
-                   (list (lib:cond-expand (car lib) expander))
+                   (list (lib:cond-expand dir (car lib) expander))
                    lib))
          (imports (lib:imports (car lib*))))
     (close-input-port fp)
@@ -485,7 +488,7 @@
          (fp (open-input-file dir))
          (lib (read-all fp))
          (lib* (if expander
-                   (list (lib:cond-expand (car lib) expander))
+                   (list (lib:cond-expand dir (car lib) expander))
                    lib))
          (options (lib:c-linker-options (car lib*))))
     (close-input-port fp)
@@ -505,7 +508,7 @@
          (fp (open-input-file dir))
          (lib (read-all fp))
          (lib* (if expander
-                   (list (lib:cond-expand (car lib) expander))
+                   (list (lib:cond-expand dir (car lib) expander))
                    lib))
          (options (lib:c-compiler-options (car lib*))))
     (close-input-port fp)
@@ -526,7 +529,7 @@
          (fp (open-input-file dir))
          (lib (read-all fp))
          (lib* (if expander
-                   (list (lib:cond-expand (car lib) expander))
+                   (list (lib:cond-expand dir (car lib) expander))
                    lib))
          (exports (lib:exports (car lib*))))
     (close-input-port fp)

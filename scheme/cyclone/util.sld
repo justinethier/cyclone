@@ -93,7 +93,9 @@
     string-replace-all
     take
     drop
-    filter)
+    filter
+    ;; varia
+    current-expand-filepath)
   (inline
     env:frame-values
     env:frame-variables
@@ -112,6 +114,8 @@
     tagged-list?
   )
   (begin
+
+(define current-expand-filepath (make-parameter #f))
 
 (define (tagged-list? tag exp)
   (if (pair? exp)
