@@ -57,17 +57,12 @@
                     target
                     filename)))))
 
-     (apply
-      append
-      (cons
-        '(begin)
-         (map
-          (lambda (filename)
+     `(begin
+        ,@(let ((filename (massage (cadr expr))))
             (call-with-port
-              (open-input-file (massage filename))
-              (lambda (port)
-                (read-all/source port filename))))
-          (cdr expr)))))))
+             (open-input-file filename)
+             (lambda (port)
+               (read-all/source port filename))))))))
 
 (define-syntax include-ci
   (er-macro-transformer
