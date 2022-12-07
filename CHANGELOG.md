@@ -1,11 +1,5 @@
 # Changelog
 
-## 0.36.0 - TBD
-
-Bug Fixes
-
-- Pass append and prepend directories when compiling dependent libraries of a program. This prevents issues where the directories are not made available to any `include` directives within such libraries.
-
 ## 0.35.0 - August 25, 2022
 
 Features

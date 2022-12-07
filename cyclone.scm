@@ -295,8 +295,6 @@
             (when (recompile? lib-dep append-dirs prepend-dirs)
               (let ((result (system (string-append
                                       (calling-program) " "
-                                      (dirs->args "-A" append-dirs) " "
-                                      (dirs->args "-I" prepend-dirs) " "
                                       (lib:import->filename lib-dep ".sld" append-dirs prepend-dirs)))))
                 (when (> result 0)
                   (error "Unable to compile library" lib-dep)))))
@@ -987,17 +985,6 @@
            (cons #f (cdr accum)))))
       (list #f)
       args)))
-
-;; Convert a list of directories to a string of arguments.
-;; EG: (dirs->args "-I" '("dir-1" "dir-2")) =>
-;;     " -I dir-1 -I dir-2 "
-(define (dirs->args prefix dirs)
-  (apply
-    string-append
-    (map
-      (lambda (dir)
-        (string-append " " prefix " " dir " "))
-      dirs)))
 
 ;; Handle command line arguments
 (let* ((args (command-line-arguments))
