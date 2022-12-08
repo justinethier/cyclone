@@ -9,8 +9,8 @@ include Makefile.config
 # Set up Cyclone here to build the compiler itself using a system-installed
 # compiler (EG: from bootstrap or an earlier cyclone version). Everything
 # else can then be built using our local binary.
-CYCLONE_SYSTEM = cyclone -A . -CLNK '-L.'
-CYCLONE_LOCAL = ./cyclone -A . -A libs -COPT '-Iinclude' -CLNK '-L.'
+CYCLONE_SYSTEM = cyclone -I . -CLNK '-L.'
+CYCLONE_LOCAL = ./cyclone -I . -I libs -COPT '-Iinclude' -CLNK '-L.'
 CCOMP = $(CC) $(CFLAGS)
 INDENT_CMD = indent -linux -l80 -i2 -nut
 
@@ -46,7 +46,7 @@ TEST_SRC = $(TEST_DIR)/unit-tests.scm \
 					 $(TEST_DIR)/srfi-60-tests.scm \
 					 $(TEST_DIR)/srfi-121-tests.scm \
 					 $(TEST_DIR)/srfi-128-162-tests.scm \
-					 $(TEST_DIR)/srfi-143-tests.scm 
+					 $(TEST_DIR)/srfi-143-tests.scm
 TESTS = $(basename $(TEST_SRC))
 
 # Primary rules (of interest to an end user)
@@ -166,7 +166,7 @@ $(EXAMPLES) : %: %.scm cyclone libs
 game-of-life :
 	cd $(EXAMPLE_DIR)/game-of-life ; $(MAKE)
 
-hello-library/hello : 
+hello-library/hello :
 	cd $(EXAMPLE_DIR)/hello-library ; $(MAKE)
 
 libs : $(COBJECTS)
@@ -201,7 +201,7 @@ mstreams.o : mstreams.c $(HEADERS)
 					$< -o $@
 
 ifdef CYC_PTHREAD_SET_STACK_SIZE
-  DEF_PTHREAD_SET_STACK_SIZE=-DCYC_PTHREAD_SET_STACK_SIZE=$(CYC_PTHREAD_SET_STACK_SIZE) 
+  DEF_PTHREAD_SET_STACK_SIZE=-DCYC_PTHREAD_SET_STACK_SIZE=$(CYC_PTHREAD_SET_STACK_SIZE)
 else
   DEF_PTHREAD_SET_STACK_SIZE=
 endif
@@ -230,7 +230,7 @@ libcyclone.a : runtime.o gc.o ffi.o mstreams.o hashset.o
 #gcc -static main.c -L. -lmean -o statically_linked
 #Note: the first three letters (the lib) must not be specified, as well as the suffix (.a)
 
-full : 
+full :
 	$(MAKE) clean ; $(MAKE) && $(MAKE) test && $(MAKE) bootstrap && cd ../cyclone-bootstrap && $(MAKE) clean && ./install.sh
 
 bench :
@@ -323,7 +323,7 @@ bootstrap : icyc libs
 	cp cyclone.c $(BOOTSTRAP_DIR)/cyclone.c
 	cp Makefile.config $(BOOTSTRAP_DIR)/Makefile.config
 
-install-includes : $(HEADER_DIR)/*.h 
+install-includes : $(HEADER_DIR)/*.h
 	$(MKDIR) $(DESTDIR)$(INCDIR)
 	$(INSTALL) -m0644 $(HEADER_DIR)/*.h $(DESTDIR)$(INCDIR)/
 
