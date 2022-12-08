@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.36.0 - TBD
+
+Bug Fixes
+
+- `(include "body.scm")` inside a file `path/to/lib.sld` will look for
+  `path/to/body.scm`, then fallback to the legacy behavior, and
+  look for `$(pwd)/body.scm`.
+
 ## 0.35.0 - August 25, 2022
 
 Features
@@ -55,7 +63,7 @@ Features
 
 Bug Fixes
 
-- @nmeum fixed `(scheme repl)` to flush the output port prior to writing the prompt, guaranteeing the prompt is written at the correct time. 
+- @nmeum fixed `(scheme repl)` to flush the output port prior to writing the prompt, guaranteeing the prompt is written at the correct time.
 - Fixed `fxbit-set?` to properly handle negative values of `i`.
 - Avoid unnecessary renaming of identifiers when the interpreter performs macro expansion.
 - When allocating a large vector we now guarantee all vector elements are initialized before the major collector can trace those elements. This avoids the potential for a race condition which could lead to a segmentation fault.
@@ -99,7 +107,7 @@ Features
 
 Features
 
-- Improve performance of runtime by more efficiently unboxing known fixnums. 
+- Improve performance of runtime by more efficiently unboxing known fixnums.
 - Improve performance of compiled code slightly by using more efficient closure calls when possible.
 - Add support for R7RS `#d` decimal specifier for numbers.
 - Added `char-ready?` to `(scheme base)`
@@ -112,10 +120,10 @@ Bug Fixes
 
 Features
 
-- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments. 
+- Updated the compiler and runtime to allow a (practically) unlimited number of function arguments.
 
-  Although the calling conventions of our generated C code and runtime functions were changed, there is no impact to application developers. Existing code will continue to work without requiring modifications. This includes code using our FFI, though it may be necessary to update `define-c` definitions if there are unused parameters in order to prevent warnings from the C compiler. For example by refactoring to use the new calling conventions: 
-      
+  Although the calling conventions of our generated C code and runtime functions were changed, there is no impact to application developers. Existing code will continue to work without requiring modifications. This includes code using our FFI, though it may be necessary to update `define-c` definitions if there are unused parameters in order to prevent warnings from the C compiler. For example by refactoring to use the new calling conventions:
+
       (define-c read-error
         "(void *data, object _, int argc, object *args)"
         " object port = args[1];
@@ -152,7 +160,7 @@ Features
 Bug Fixes
 
 - Arthur Maciel replaced high resolution code in the runtime to use `clock_gettime` instead of `gettimeofday`.
-- Fixed the REPL to no longer automatically exit if an expression evaluates to EOF. However, the REPL will exit as a special case if the EOF character is entered directly, for example via CTRL-D on Linux. 
+- Fixed the REPL to no longer automatically exit if an expression evaluates to EOF. However, the REPL will exit as a special case if the EOF character is entered directly, for example via CTRL-D on Linux.
 
 ## 0.27 - March 5, 2021
 
@@ -172,7 +180,7 @@ Bug Fixes
 
 Features
 
-- Enhanced `c-define` to emit type checks for parameters. 
+- Enhanced `c-define` to emit type checks for parameters.
 
 Bug Fixes
 
@@ -297,7 +305,7 @@ Bug Fixes
 
 Features
 
-- Updated the C API to optionally allow Cyclone's GC to free memory pointed to by an Opaque object. 
+- Updated the C API to optionally allow Cyclone's GC to free memory pointed to by an Opaque object.
 
   For example:
 
@@ -327,7 +335,7 @@ Cyclone now automatically relocates any stack objects when performing a mutation
 
 Special thanks to Daniel Mendler, whose discussions were the inspiration for these changes.
 
-Some background: 
+Some background:
 
 There was a long-standing issue where a mutation (via `set-car!`, `vector-set!`, `set!`, etc) could allow a global object on the heap to reference objects on a thread's local stack. This is problematic because threads periodically relocate objects from their stack, and for performance reasons these objects are moved without any coordination between threads. Thus it is critical that objects on the stack are only used by the thread that owns them.
 
@@ -489,7 +497,7 @@ Bug Fixes
 - Avoid cases where bignums are not initialized properly by the runtime and incorrectly retain a value of zero.
 - Handle the following edge case from R7RS:
 
-  > If `z` is a complex number, then `(real? z)` is true if and only if `(zero? (imag-part z))` is true. 
+  > If `z` is a complex number, then `(real? z)` is true if and only if `(zero? (imag-part z))` is true.
 
 ## 0.9.8 - February 16, 2019
 
@@ -592,7 +600,7 @@ Features
   - Calls to `list` that contain less than five arguments.
   - Calls to `map` and `for-each` that only pass a single list.
 - Allow optimization of some simple self-recursive functions.
-- Allow the optimizer to beta expand a wider range of function calls. 
+- Allow the optimizer to beta expand a wider range of function calls.
 
 Bug Fixes
 
@@ -750,7 +758,7 @@ Features
 
 - Allow `define-c` function definitions to optionally provide an additional non-CPS form of the function. This form is more efficient and will be used by compiled code whenever possible.
 
-- Improved the compiler's CPS optimization phase to eliminate more unnecessary function calls. 
+- Improved the compiler's CPS optimization phase to eliminate more unnecessary function calls.
 
 - Modified the GC to allow a given number of "huge" allocations to trigger GC. Previously GC was only triggered when smaller heap regions were below a certain percentage of free memory.
 
@@ -805,7 +813,7 @@ Features
 - Allow a program to have more than one `import` declaration. A program can now also use `cond-expand` to selectively expand `import` declarations.
 - Added the `-A` and `-I` compiler options from SRFI 138 to `cyclone`:
 
-  > `-A directory` 
+  > `-A directory`
   >
   > Append directory to the list of directories that are searched in order to locate imported libraries.
   >
@@ -834,7 +842,7 @@ Features
 
 Bug Fixes
 
-- Thanks to Koz Ross, `equal?` has been updated to check bytevectors for deep equality. 
+- Thanks to Koz Ross, `equal?` has been updated to check bytevectors for deep equality.
 - Prevent crashes when allocating large bytevectors.
 - Display characters such as `#\space` correctly when output via `write`.
 - Thanks to Seth Alves, removed unnecessary include of `ck_string.h` which is not provided in older versions of `libck`.
@@ -843,7 +851,7 @@ Bug Fixes
 
 Features:
 
-- Added SRFI 113 - sets and bags.  
+- Added SRFI 113 - sets and bags.
 - Improved performance by more aggressively inlining primitives that work with immutable objects, such as the numeric arithmetic and comparison functions.
 - Allow the reader to recognize `#true` and `#false`.
 
@@ -892,7 +900,7 @@ Features:
 - Improve performance by inlining numeric arithmetic and comparison operations.
 - Reverted `assq`, `assv`, `memq`, and `memv` back to primitives for improved performance. In addition the compiler was modified to allow for more efficient compilation of `assoc` and `member`.
 - Improved library support to recognize all of the import set forms: `only`, `except`, `prefix`, and `rename`.
-- Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`. 
+- Allow explicit renaming macros to be declared interactively. This is the first limited support for calling `define-syntax` from `eval`.
 - Added the `get-environment-variables` function from R7RS.
 - Added support for the following SRFI's:
 
@@ -927,7 +935,7 @@ Features:
 
 Bug Fixes:
 
-- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`. 
+- Thanks to Mark Meyer, identified and fixed several segfaults in `write` and `display`.
 - Updated `write` to display escaped character sequences (EG: `\t`) instead of literal characters.
 - Prevent C compilation errors when building a program that only contains basic primitives or a constant at the top level.
 - Fixed the compiler to allow application of a function that can take any number of arguments. For example:
