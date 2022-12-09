@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- `(include "body.scm")` inside a file `path/to/lib.sld` will look for `path/to/body.scm`, then fallback to the legacy behavior, and look for `$(pwd)/body.scm`.
 - Pass append and prepend directories when compiling dependent libraries of a program. This prevents issues where the directories are not made available to any `include` directives within such libraries.
 
 ## 0.35.0 - August 25, 2022

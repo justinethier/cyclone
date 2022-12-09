@@ -738,7 +738,7 @@
               in-prog-raw)
             (else
               ;; Account for any cond-expand declarations in the library
-              (list (lib:cond-expand (car in-prog-raw) expander)))))
+              (list (lib:cond-expand in-file (car in-prog-raw) expander)))))
           ;; expand in-prog, if a library, using lib:cond-expand.
           ;; TODO: will also need to do below in lib:get-all-import-deps, after reading each library
          (program:imports/code (if program? (import-reduction in-prog expander) '()))
@@ -859,7 +859,7 @@
               in-prog-raw)
             (else
               ;; Account for any cond-expand declarations in the library
-              (list (lib:cond-expand (car in-prog-raw) expander)))))
+              (list (lib:cond-expand in-file (car in-prog-raw) expander)))))
          ;; Only read C compiler options from module being compiled
          (cc-opts*
           (cond

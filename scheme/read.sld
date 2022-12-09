@@ -9,6 +9,7 @@
 (define-library (scheme read)
   (import (scheme base)
           (scheme cyclone common)
+          (scheme cyclone util)
           ;(scheme write)
           (scheme char))
   (export
@@ -31,17 +32,37 @@
 (define-syntax include
   (er-macro-transformer
    (lambda (expr rename compare)
-     (apply
-      append
-      (cons
-        '(begin)
-         (map
-          (lambda (filename)
+
+     (define (dirname filename)
+       (let loop ((index (string-length filename)))
+         (if (zero? index)
+             ""
+             (let ((index (- index 1)))
+               (if (char=? (string-ref filename index) #\/)
+                   (substring filename 0 index)
+                   (loop index))))))
+
+     (define (massage filename)
+       (cond
+        ;; may happen in the REPL
+        ((not (current-expand-filepath)) filename)
+        ;; absolute filename
+        ((char=? (string-ref filename 0) #\/) filename)
+        ;; otherwise, open the file relative to the library that is
+        ;; expanded
+        (else (let ((target (string-append (dirname (current-expand-filepath)) "/" filename)))
+                ;; if the target exists use, otherwise fallback to the
+                ;; backward compatible behavior.
+                (if (file-exists? target)
+                    target
+                    filename)))))
+
+     `(begin
+        ,@(let ((filename (massage (cadr expr))))
             (call-with-port
               (open-input-file filename)
               (lambda (port)
-                (read-all/source port filename))))
-          (cdr expr)))))))
+                (read-all/source port filename))))))))
 
 (define-syntax include-ci
   (er-macro-transformer
