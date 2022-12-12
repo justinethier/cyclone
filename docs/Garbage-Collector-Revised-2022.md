@@ -42,7 +42,7 @@ Cyclone uses generational garbage collection (GC) to automatically free allocate
 
 Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
 
-A concurrent mark-sweep collector is used to manage heap memory and perform major collections without stopping the world.
+A concurrent mark-sweep collector is used to manage heap memory and perform major collections without [stopping the world](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent).
 
 For more background there are introductory articles on garbage collection in the [further reading](#further-reading) section that discuss underlying concepts.
 
