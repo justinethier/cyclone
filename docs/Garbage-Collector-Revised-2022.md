@@ -215,12 +215,12 @@ Lazy sweeping is discussed here in the first major GC section as it impacts most
 
 An object can be marked using any of the following colors to indicate the status of its memory:
 
-  - Blue - Unallocated memory.
-  - Red - An object on the stack.
-  - White - Heap memory that has not been scanned by the collector. 
-  - Gray - Objects marked by the collector that may still have child objects that must be marked.
-  - Black - Objects marked by the collector whose immediate child objects have also been marked.
-  - Purple - Garbage objects on the heap that have not yet been reclaimed due to lazy sweeping.
+  - :large_blue_circle: - Blue - Unallocated memory.
+  - :red_circle: - Red - An object on the stack.
+  - :white_circle: - White - Heap memory that has not been scanned by the collector. 
+  - :radio_button: - Gray - Objects marked by the collector that may still have child objects that must be marked.
+  - :black_circle: - Black - Objects marked by the collector whose immediate child objects have also been marked.
+  - :purple_circle: - Purple - Garbage objects on the heap that have not yet been reclaimed due to lazy sweeping.
 
 ### Tri-Color Invariant
 
