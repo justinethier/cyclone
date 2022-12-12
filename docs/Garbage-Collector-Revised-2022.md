@@ -40,9 +40,9 @@ The collector has the following requirements:
 
 Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection because they are still referenced in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. Baker's technique uses a copying collector for both the minor and major generations of collection. 
+Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
 
-One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. An advantage of this approach is that major GC executes asynchronously so threads can continue to run concurrently even during collections.
+A concurrent mark-sweep collector is used to manage heap memory and perform major collections without stopping the world.
 
 For more background there are introductory articles on garbage collection in the [further reading](#further-reading) section that discuss underlying concepts.
 
@@ -193,7 +193,9 @@ It is still necessary for application code to use the appropriate concurrency co
 
 # Major Collection
 
-Major collections are used to reclaim unused heap memory. A collector thread is used to perform a major GC with cooperation from the mutator threads.
+Baker's technique uses a copying collector for both the minor and major generations of collection. One of the drawbacks of using a copying collector for major GC is that it relocates all the live objects during collection. This is problematic for supporting native threads because an object can be relocated at any time, invalidating any references to the object. To prevent this either all threads must be stopped while major GC is running or a read barrier must be used each time an object is accessed. Both options add a potentially significant overhead so instead Cyclone uses a tracing collector based on the Doligez-Leroy-Gonthier (DLG) algorithm for major collections. 
+
+An advantage of this approach is that major GC executes asynchronously so threads can continue to run concurrently even during collections. A collector thread is used to perform a major GC with cooperation from the mutator threads.
 
 ## Lazy Sweeping
 
