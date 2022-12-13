@@ -30,7 +30,7 @@
 
 # Introduction
 
-This paper provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a modern, real-world collector.
+This article provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a modern, real-world collector.
 
 The collector has the following requirements:
 
@@ -545,18 +545,13 @@ By all accounts lazy sweeping is a great win for Cyclone and has exceeded perfor
 
 # Conclusion
 
-The garbage collector is by far the most complex component of Cyclone. The primary motivations in developing it were to:
+The garbage collector is by far the most complex component of Cyclone. The primary motivation in developing it was to extend Baker's approach to support multiple native threads, which had never been done before prior to this project. Cyclone demonstrates the viability of this approach.
 
-- Extend Baker's approach to support multiple mutators
-- Position to potentially support state of the art GC's built on top of DLG (Stopless, Chicken, Clover)
+Our GC is also positioned to potentially support state of the art GC's built on top of DLG such as Stopless, Chicken, and Clover.
 
-There are a few limitations or potential issues with the current implementation:
-
-- Heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
+That said, heap memory fragmentation has not been addressed and could be an issue for long-running programs. Traditionally a compaction process is used to defragment a heap. An alternative strategy has also been suggested by Pizlo:
 
     > instead of copying objects to evacuate fragmented regions of the heap, fragmentation is instead embraced. A fragmented heap is allowed to stay fragmented, but the collector ensures that it can still satisfy allocation requests even if no large enough contiguous free region of space exists.
-
-- Accordingly, the runtime needs to be able to handle large objects that could potentially span one or more pages.
 
 Ultimately, a garbage collector is tricky to implement and the focus must primarily be on correctness first, with an eye towards performance.
 
