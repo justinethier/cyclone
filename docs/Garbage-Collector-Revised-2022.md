@@ -30,7 +30,7 @@
 
 # Introduction
 
-This paper provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a more modern, real-world GC.
+This paper provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a modern, real-world collector.
 
 The collector has the following requirements:
 
