@@ -545,6 +545,8 @@ By all accounts lazy sweeping is a great win for Cyclone and has exceeded perfor
 
 # Conclusion
 
+[<img src="images/campfire.jpg" alt="Campfire">](#conclusion)
+
 The garbage collector is by far the most complex component of Cyclone. The primary motivation in developing it was to extend Baker's approach to support multiple native threads, which had never been done before prior to this project. Cyclone demonstrates the viability of this approach.
 
 Our GC is also positioned to potentially support state of the art GC's built on top of DLG such as Stopless, Chicken, and Clover.
