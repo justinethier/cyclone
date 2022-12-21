@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- Fix `read-line` to read entire lines that consist of more than 1022 bytes. Previously the function would only return partial data up to this limit. Thanks to Robby Zambito for the bug report.
 - `(include "body.scm")` inside a file `path/to/lib.sld` will look for `path/to/body.scm`, then fallback to the legacy behavior, and look for `$(pwd)/body.scm`.
 - Pass append and prepend directories when compiling dependent libraries of a program. This prevents issues where the directories are not made available to any `include` directives within such libraries.
 

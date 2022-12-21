@@ -695,9 +695,26 @@
         (Cyc-read-char (current-input-port))
         (Cyc-read-char (car port))))
     (define (read-line . port)
-      (if (null? port)
-        (Cyc-read-line (current-input-port))
-        (Cyc-read-line (car port))))
+      (let* ((p (if (null? port)
+                   (current-input-port)
+                   (car port)))
+             (str (Cyc-read-line p)))
+        (cond
+          ((eof-object? str) str)
+          ((< (string-length str) 1022) str)
+          (else (_read-line str p)))))
+    ;; Helper function to handle case where a line is too
+    ;; long to be read by a single runtime I/O call
+    (define (_read-line str port)
+      (let loop ((lis (list str))
+                 (str (Cyc-read-line port)))
+        (cond
+          ((eof-object? str)
+           (apply string-append (reverse lis)))
+          ((< (string-length str) 1022)
+           (apply string-append (reverse (cons str lis))))
+          (else
+            (loop (cons str lis) (Cyc-read-line port))))))
     (define (read-string k . opts)
       (let ((port (if (null? opts)
                       (current-input-port)
