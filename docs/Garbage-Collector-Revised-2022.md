@@ -30,7 +30,7 @@
 
 # Introduction
 
-This article provides a high-level overview of Cyclone's garbage collector including the most recent work on lazy sweeping and automatic relocation of shared objects. This document is a good starting point for understanding the corresponding code in Cyclone's runtime. And it might also be of interest to anyone wanting to implement - or just peek under the hood of - a modern, real-world collector.
+This article provides a high-level overview of Cyclone's garbage collector, including recent work on lazy sweeping and automatic relocation of shared objects. This overview would be a good starting point for understanding the corresponding code in Cyclone's runtime and may also be of interest to anyone wanting to implement - or just peek under the hood of - a modern, real-world collector.
 
 The collector has the following requirements:
 
@@ -38,9 +38,9 @@ The collector has the following requirements:
 - Allow the language implementation to support tail calls and continuations.
 - Allow the language to support native multithreading.
 
-Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. Some objects will survive this collection because they are still referenced in memory. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
+Cyclone uses generational garbage collection (GC) to automatically free allocated memory using two types of collection. In practice, most allocations consist of short-lived objects such as temporary variables. Minor GC is done frequently to clean up most of these short-lived objects. A major collection runs less often to free longer-lived objects that are no longer being used by the application.
 
-Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the first generation of our garbage collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
+Cheney on the MTA, a technique introduced by Henry Baker, is used to implement the minor collector. Objects are allocated directly on the stack using `alloca` so allocations are very fast, do not cause fragmentation, and do not require a special pass to free unused objects. 
 
 A concurrent mark-sweep collector is used to manage heap memory and perform major collections without [stopping the world](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent).
 
