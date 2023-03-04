@@ -182,7 +182,24 @@ libraries can be initialized properly in sequence.
 
     (lib:get-dep-list imports)
 
-Given a list of alists `(library-name . imports)`, resolve all of the dependencies and return an ordered list of library names such that each library is encounted after the libraries it imports (IE, it's dependencies).
+Given a list of alists `(library-name . imports)`, resolve all of the dependencies and return an ordered list of library names such that each library is encounted after the libraries it imports (IE, it's dependencies). For example:
+
+    (lib:get-dep-list `(
+      ((srfi 69) (scheme base) (scheme char))
+      ((scheme base) (scheme cyclone common))
+      ((scheme cyclone common))
+      ((scheme char) (scheme base))
+      ((scheme cyclone hashset) (scheme base) (scheme write))
+      ((scheme write) (scheme base))
+      ((scheme cyclone primitives) (scheme base) (scheme cyclone hashset) (srfi 69))
+      ((scheme process-context))
+      ((scheme cyclone libraries) (scheme base) (scheme read) (scheme process-context) (scheme cyclone util))
+      ((scheme read) (scheme base) (scheme cyclone common) (scheme cyclone util) (scheme char))
+      ((scheme cyclone util) (scheme base) (scheme char))
+      ((scheme eval) (scheme cyclone util) (scheme cyclone libraries) (scheme cyclone primitives) (scheme base) (scheme file) (scheme read))
+      ((scheme file) (scheme base))
+      ((scheme lazy) (scheme base))
+    ))
 
 # lib:imports->idb
 
