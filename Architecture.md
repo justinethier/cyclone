@@ -16,7 +16,7 @@ For more high-level overview of the project a good place to start is [Writing th
 
 # Code Map
 
-The Cyclone [API Documentation](docs/API.md) provides more details on the individual modules within these directories as well as code-level API documentation.
+This section provides an overview of the code and module layout used by Cyclone. The [API Documentation](docs/API.md) provides more details on individual modules within these directories as well as code-level API documentation.
 
 ## scheme/
 
