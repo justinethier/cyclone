@@ -1409,8 +1409,14 @@
       (if (< b 0)
         (if (<= res 0) res (+ res b))
         (if (>= res 0) res (+ res b)))))
-  (define (odd? num)   (= (modulo num 2) 1))
-  (define (even? num)  (= (modulo num 2) 0))
+  (define (odd? num)
+    (if (integer? num)
+        (= (modulo num 2) 1)
+        (error "Not an integer" num)))
+  (define (even? num) 
+    (if (integer? num)
+        (= (modulo num 2) 0)
+        (error "Not an integer" num)))
   (define-c bignum?
     "(void *data, int argc, closure _, object k, object obj)"
     " return_closcall1(data, k, Cyc_is_bignum(obj)); ")
