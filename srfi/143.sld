@@ -36,9 +36,6 @@
     fxbit-field-rotate fxbit-field-reverse
   )
   (inline
-    fx-width
-    fx-greatest
-    fx-least
     fixnum?
     fx=?  fx<? fx>? fx<=? fx>=?
     fxzero? fxpositive? fxnegative? fxodd? fxeven?
@@ -56,9 +53,9 @@
     mask
   )
   (begin
-    (define (fx-width) 31)
-    (define (fx-greatest) 1073741823)
-    (define (fx-least)   -1073741824)
+    (define fx-width 31)
+    (define fx-greatest 1073741823)
+    (define fx-least   -1073741824)
 
     (define-syntax bin-num-op
       (er-macro-transformer
