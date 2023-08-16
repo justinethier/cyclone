@@ -1395,6 +1395,8 @@
         alloc_bignum(data, bn);
         BIGNUM_CALL(mp_abs(&bignum_value(num), &bignum_value(bn)));
         return_closcall1(data, k, bn);
+      } else if (is_object_type(num) && type_of(num) == complex_num_tag){
+        Cyc_rt_raise2(data, \"Unable to compute absolute value of complex number\", num);
       } else {
         make_double(d, fabs(((double_type *)num)->value));
         return_closcall1(data, k, &d);

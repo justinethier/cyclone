@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- lassik and jpellegrini reported that `abs` was incorrectly returning the real part of a complex number argument. Modified `abs` to return an error for complex numbers.
 - jpellegrini fixed `(srfi 143)` so that the following are constants instead of procedures: `fx-width`, `fx-greatest`, and `fx-least`.
 - Raise an error if `odd?` or `even?` is passed a decimal number. Thanks to jpellegrini for the bug report.
 - Fix `read-line` to read entire lines that consist of more than 1022 bytes. Previously the function would only return partial data up to this limit. Thanks to Robby Zambito for the bug report.
