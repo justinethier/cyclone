@@ -984,14 +984,19 @@ object Cyc_is_list(object lst)
  */
 int double2buffer(char *buf, int buf_size, double num)
 {
-  int i;
-  i = snprintf(buf, buf_size, "%.15g", num);
-  if (!strchr(buf, '.') && !strchr(buf, 'e')) {
-    buf[i++] = '.';
-    buf[i++] = '0';
-    buf[i++] = '\0';
+  if (num == INFINITY) {
+    return snprintf(buf, buf_size, "+inf.0");
+  } else if (num == -INFINITY) {
+    return snprintf(buf, buf_size, "-inf.0");
+  } else {
+    int i = snprintf(buf, buf_size, "%.15g", num);
+    if (!strchr(buf, '.') && !strchr(buf, 'e')) {
+      buf[i++] = '.';
+      buf[i++] = '0';
+      buf[i++] = '\0';
+    }
+    return i;
   }
-  return i;
 }
 
 void dispatch_display_va(void *data, object cont, int argc, object *args)
@@ -7776,9 +7781,11 @@ static void _read_return_atom(void *data, object cont, port_type *p)
     } else {
       return_thread_runnable_with_obj(data, &opq, p);
     }
-  } else if (strncmp("+inf.0", p->tok_buf, 6) == 0 ||
-             strncmp("-inf.0", p->tok_buf, 6) == 0) {
-    make_double(d, pow(2.0, 1000000));
+  } else if (strncmp("+inf.0", p->tok_buf, 6) == 0) {
+    make_double(d, INFINITY);
+    return_thread_runnable_with_obj(data, &d, p);
+  } else if (strncmp("-inf.0", p->tok_buf, 6) == 0) {
+    make_double(d, -INFINITY);
     return_thread_runnable_with_obj(data, &d, p);
   } else if (strncmp("+nan.0", p->tok_buf, 6) == 0 ||
              strncmp("-nan.0", p->tok_buf, 6) == 0) {

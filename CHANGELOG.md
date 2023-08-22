@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- Ensure the runtime properly differentiates between `+inf.0` and `-inf.0`. Thanks to jpellegrini for the bug report.
 - lassik and jpellegrini reported that `abs` was incorrectly returning the real part of a complex number argument. Modified `abs` to return an error for complex numbers.
 - jpellegrini fixed `(srfi 143)` so that the following are constants instead of procedures: `fx-width`, `fx-greatest`, and `fx-least`.
 - Raise an error if `odd?` or `even?` is passed a decimal number. Thanks to jpellegrini for the bug report.
