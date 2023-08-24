@@ -1863,8 +1863,15 @@ int FUNC_OP(void *data, object x, object y) { \
         make_pair(c0, &s, &c1); \
         Cyc_rt_raise(data, &c0); \
       } \
-    } else if (tx == complex_num_tag && ty != complex_num_tag) { \
-    } else if (tx != complex_num_tag && ty == complex_num_tag) { \
+    } else if ((tx == complex_num_tag && ty != complex_num_tag) || \
+               (tx != complex_num_tag && ty == complex_num_tag)) { \
+      if (BN_CMP != CYC_BN_EQ) { \
+        make_string(s, "Complex comparison operation not allowed"); \
+        make_pair(c2, y, NULL); \
+        make_pair(c1, x, &c2); \
+        make_pair(c0, &s, &c1); \
+        Cyc_rt_raise(data, &c0); \
+      } \
     } else { \
         make_string(s, "Bad argument type"); \
         make_pair(c1, y, NULL); \
@@ -1950,9 +1957,15 @@ object FUNC_FAST_OP(void *data, object x, object y) { \
         Cyc_rt_raise(data, &c0); \
         return NULL; \
       } \
-    } else if (tx == complex_num_tag && ty != complex_num_tag) { \
-      return boolean_f; \
-    } else if (tx != complex_num_tag && ty == complex_num_tag) { \
+    } else if ((tx == complex_num_tag && ty != complex_num_tag) || \
+               (tx != complex_num_tag && ty == complex_num_tag)) { \
+      if (BN_CMP != CYC_BN_EQ) { \
+        make_string(s, "Complex comparison operation not allowed"); \
+        make_pair(c2, y, NULL); \
+        make_pair(c1, x, &c2); \
+        make_pair(c0, &s, &c1); \
+        Cyc_rt_raise(data, &c0); \
+      } \
       return boolean_f; \
     } else { \
         goto bad_arg_type_error; \
