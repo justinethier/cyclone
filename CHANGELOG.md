@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- jpellegrini reported that Cyclone returns `#f` when comparing complex numbers using operators other than `=`. Instead it is better to raise an error in these situations.
 - lassik and jpellegrini reported that `abs` was incorrectly returning the real part of a complex number argument. Modified `abs` to return an error for complex numbers.
 - jpellegrini fixed `(srfi 143)` so that the following are constants instead of procedures: `fx-width`, `fx-greatest`, and `fx-least`.
 - Raise an error if `odd?` or `even?` is passed a decimal number. Thanks to jpellegrini for the bug report.
