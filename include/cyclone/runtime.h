@@ -478,6 +478,7 @@ int Cyc_have_mstreams();
     return_closcall1(data, cont, z); \
   } else { \
     i = (int)OP(((double_type *)z)->value); \
+TODO: make_double, see return_inexact_double_or_cplx_op
   } \
   return_closcall1(data, cont, obj_int2obj(i))
 
@@ -495,6 +496,7 @@ int Cyc_have_mstreams();
     return z; \
   } else { \
     i = (int)OP(((double_type *)z)->value); \
+    TODO: assign_double
   } \
   return obj_int2obj(i);
 
