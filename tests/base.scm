@@ -51,6 +51,24 @@
 )
 
 (test-group
+  "truncate"
+  (test -1 (truncate -1))
+  (test -1.0 (truncate -1.0))
+  (test -1.0 (truncate -1.1))
+  (test -1.0 (truncate -1.1))
+  (test +inf.0 (truncate +inf.0))
+)
+
+(test-group
+  "exact"
+  (test -1 (exact -1))
+  (test -1 (exact -1.0))
+  (test -1 (exact -1.1))
+  (test -1 (exact -1.1))
+  ;(test +inf.0 (exact +inf.0))
+)
+
+(test-group
   "records"
   (define-record-type employee
      (make-employee name title)
