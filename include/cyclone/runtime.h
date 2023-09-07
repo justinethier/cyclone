@@ -386,6 +386,46 @@ int Cyc_have_mstreams();
 /**@{*/
 
 /**
+ * Extract result of OP and pass it in a call to continuation `cont`
+ */
+#define return_double_op(data, cont, OP, z) \
+  int i = 0; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    i = obj_obj2int(z); \
+  } else if (type_of(z) == integer_tag) { \
+    i = (int)OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    return_closcall1(data, cont, z); \
+  } else if (type_of(z) == double_tag) { \
+    make_double(d, OP(((double_type *)z)->value)); \
+    return_closcall1(data, cont, &d); \
+  } else { \
+    Cyc_rt_raise2(data, "Expected number but received", z); \
+  } \
+  return_closcall1(data, cont, obj_int2obj(i));
+
+/**
+ * Directly return result of OP to caller
+ */
+#define return_double_op_no_cps(data, ptr, OP, z) \
+  int i = 0; \
+  Cyc_check_num(data, z); \
+  if (obj_is_int(z)) { \
+    i = obj_obj2int(z); \
+  } else if (type_of(z) == integer_tag) { \
+    i = (int)OP(((integer_type *)z)->value); \
+  } else if (type_of(z) == bignum_tag) { \
+    return z; \
+  } else if (type_of(z) == double_tag) { \
+    assign_double(ptr, OP(((double_type *)z)->value)); \
+    return ptr; \
+  } else { \
+    Cyc_rt_raise2(data, "Expected number but received", z); \
+  } \
+  return obj_int2obj(i);
+
+/**
  * Extract double and return it to caller
  */
 #define return_inexact_double_op_no_cps(data, ptr, OP, z) \
@@ -465,9 +505,9 @@ int Cyc_have_mstreams();
   return_closcall1(data, cont, &d)
 
 /**
- * Extract exact or double number and pass it in a call to continuation `cont`
+ * Implementation of exact
  */
-#define return_exact_double_op(data, cont, OP, z) \
+#define return_exact_op(data, cont, OP, z) \
   int i = 0; \
   Cyc_check_num(data, z); \
   if (obj_is_int(z)) { \
@@ -476,16 +516,28 @@ int Cyc_have_mstreams();
     i = (int)OP(((integer_type *)z)->value); \
   } else if (type_of(z) == bignum_tag) { \
     return_closcall1(data, cont, z); \
+  } else if (type_of(z) == complex_num_tag) { \
   } else { \
+    double d = ((double_type *)z)->value; \
+    if (isnan(d)) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d == INFINITY) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d == -INFINITY) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } \
     i = (int)OP(((double_type *)z)->value); \
-TODO: make_double, see return_inexact_double_or_cplx_op
   } \
   return_closcall1(data, cont, obj_int2obj(i))
 
+// TODO: truncate complex number components
+// TODO: what if double is outside fixnum range??
+// need to convert to a bignum
+
 /**
- * Directly return exact or double number to caller
+ * Directly compute exact
  */
-#define return_exact_double_op_no_cps(data, ptr, OP, z) \
+#define return_exact_op_no_cps(data, ptr, OP, z) \
   int i = 0; \
   Cyc_check_num(data, z); \
   if (obj_is_int(z)) { \
@@ -496,9 +548,10 @@ TODO: make_double, see return_inexact_double_or_cplx_op
     return z; \
   } else { \
     i = (int)OP(((double_type *)z)->value); \
-    TODO: assign_double
   } \
   return obj_int2obj(i);
+
+// TODO: sync changes from above CPS macro
 
 /**
  * Take Scheme object that is a number and return the number as a C type

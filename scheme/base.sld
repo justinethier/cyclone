@@ -1362,25 +1362,29 @@
 
   (define-c floor
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, floor, z); "
+    " return_double_op(data, k, floor, z); "
     "(void *data, object ptr, object z)"
-    " return_exact_double_op_no_cps(data, ptr, floor, z);")
+    " return_double_op_no_cps(data, ptr, floor, z);")
   (define-c ceiling
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, ceil, z); "
+    " return_double_op(data, k, ceil, z); "
     "(void *data, object ptr, object z)"
-    " return_exact_double_op_no_cps(data, ptr, ceil, z);")
+    " return_double_op_no_cps(data, ptr, ceil, z);")
   (define-c truncate
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, (int), z); "
+    " return_double_op(data, k, trunc, z); "
     "(void *data, object ptr, object z)"
-    " return_exact_double_op_no_cps(data, ptr, trunc, z);")
+    " return_double_op_no_cps(data, ptr, trunc, z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_double_op(data, k, round, z); "
+    " return_double_op(data, k, round, z); "
     "(void *data, object ptr, object z)"
-    " return_exact_double_op_no_cps(data, ptr, round, z);")
-  (define exact truncate)
+    " return_double_op_no_cps(data, ptr, round, z);")
+  (define-c exact
+    "(void *data, int argc, closure _, object k, object z)"
+    " return_exact_op(data, k, round, z); "
+    "(void *data, object ptr, object z)"
+    " return_exact_op_no_cps(data, ptr, round, z);")
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
     " return_inexact_double_or_cplx_op(data, k, (double), (double complex), z); "
