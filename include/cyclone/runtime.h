@@ -517,7 +517,10 @@ int Cyc_have_mstreams();
   } else if (type_of(z) == bignum_tag) { \
     return_closcall1(data, cont, z); \
   } else if (type_of(z) == complex_num_tag) { \
-    return_closcall1(data, cont, z); \
+    double dreal = OP(creal(((complex_num_type *) z)->value)); \
+    double dimag = OP(cimag(((complex_num_type *) z)->value)); \
+    make_complex_num(num, dreal, dimag); \
+    return_closcall1(data, cont, &num); \
   } else { \
     double d = ((double_type *)z)->value; \
     if (isnan(d)) { \
@@ -548,7 +551,11 @@ int Cyc_have_mstreams();
   } else if (type_of(z) == bignum_tag) { \
     return z; \
   } else if (type_of(z) == complex_num_tag) { \
-    return z; \
+    double dreal = OP(creal(((complex_num_type *) z)->value)); \
+    double dimag = OP(cimag(((complex_num_type *) z)->value)); \
+    double complex unboxed = dreal + (dimag * I); \
+    assign_complex_num(ptr, unboxed); \
+    return ptr; \
   } else { \
     double d = ((double_type *)z)->value; \
     if (isnan(d)) { \
