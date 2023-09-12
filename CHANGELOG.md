@@ -7,7 +7,7 @@ Bug Fixes
 - Fix `exact` to properly handle complex numbers, including raising an error when passed `nan` or `inf` double values.
 - Ensure the runtime properly differentiates between `+inf.0` and `-inf.0`. Thanks to jpellegrini for the bug report.
 - jpellegrini reported that Cyclone returns `#f` when comparing complex numbers using operators other than `=`. Instead it is better to raise an error in these situations.
-- lassik and jpellegrini reported that `abs` was incorrectly returning the real part of a complex number argument. Modified `abs` to return an error for complex numbers.
+- lassik and jpellegrini reported that `abs` was incorrectly returning the real part of a complex number argument. Modified `abs` to properly handle complex numbers.
 - jpellegrini fixed `(srfi 143)` so that the following are constants instead of procedures: `fx-width`, `fx-greatest`, and `fx-least`.
 - Raise an error if `odd?` or `even?` is passed a decimal number. Thanks to jpellegrini for the bug report.
 - Fix `read-line` to read entire lines that consist of more than 1022 bytes. Previously the function would only return partial data up to this limit. Thanks to Robby Zambito for the bug report.
