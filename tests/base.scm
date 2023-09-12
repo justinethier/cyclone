@@ -65,6 +65,8 @@
   (test -1 (exact -1.0))
   (test -1 (exact -1.1))
   (test -1 (exact -1.1))
+  (test #t (bignum? (exact 111111111111111111111111111.0)))
+  (test #t (bignum? (exact -111111111111111111111111111.0)))
   ;(test +inf.0 (exact +inf.0))
 )
 

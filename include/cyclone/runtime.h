@@ -517,6 +517,7 @@ int Cyc_have_mstreams();
   } else if (type_of(z) == bignum_tag) { \
     return_closcall1(data, cont, z); \
   } else if (type_of(z) == complex_num_tag) { \
+    return_closcall1(data, cont, z); \
   } else { \
     double d = ((double_type *)z)->value; \
     if (isnan(d)) { \
@@ -525,14 +526,14 @@ int Cyc_have_mstreams();
       Cyc_rt_raise2(data, "Expected number but received", z); \
     } else if (d == -INFINITY) { \
       Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){ \
+      alloc_bignum(data, bn); \
+      BIGNUM_CALL(mp_set_double(&bignum_value(bn), d)); \
+      return_closcall1(data, cont, bn); \
     } \
     i = (int)OP(((double_type *)z)->value); \
   } \
   return_closcall1(data, cont, obj_int2obj(i))
-
-// TODO: truncate complex number components
-// TODO: what if double is outside fixnum range??
-// need to convert to a bignum
 
 /**
  * Directly compute exact
@@ -546,12 +547,24 @@ int Cyc_have_mstreams();
     i = (int)OP(((integer_type *)z)->value); \
   } else if (type_of(z) == bignum_tag) { \
     return z; \
+  } else if (type_of(z) == complex_num_tag) { \
+    return z; \
   } else { \
+    double d = ((double_type *)z)->value; \
+    if (isnan(d)) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d == INFINITY) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d == -INFINITY) { \
+      Cyc_rt_raise2(data, "Expected number but received", z); \
+    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){ \
+      alloc_bignum(data, bn); \
+      BIGNUM_CALL(mp_set_double(&bignum_value(bn), d)); \
+      return bn; \
+    } \
     i = (int)OP(((double_type *)z)->value); \
   } \
   return obj_int2obj(i);
-
-// TODO: sync changes from above CPS macro
 
 /**
  * Take Scheme object that is a number and return the number as a C type
