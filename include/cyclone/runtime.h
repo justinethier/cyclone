@@ -504,74 +504,8 @@ int Cyc_have_mstreams();
   } \
   return_closcall1(data, cont, &d)
 
-/**
- * Implementation of exact
- */
-#define return_exact_op(data, cont, OP, z) \
-  int i = 0; \
-  Cyc_check_num(data, z); \
-  if (obj_is_int(z)) { \
-    i = obj_obj2int(z); \
-  } else if (type_of(z) == integer_tag) { \
-    i = (int)OP(((integer_type *)z)->value); \
-  } else if (type_of(z) == bignum_tag) { \
-    return_closcall1(data, cont, z); \
-  } else if (type_of(z) == complex_num_tag) { \
-    double dreal = OP(creal(((complex_num_type *) z)->value)); \
-    double dimag = OP(cimag(((complex_num_type *) z)->value)); \
-    make_complex_num(num, dreal, dimag); \
-    return_closcall1(data, cont, &num); \
-  } else { \
-    double d = ((double_type *)z)->value; \
-    if (isnan(d)) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d == INFINITY) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d == -INFINITY) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){ \
-      alloc_bignum(data, bn); \
-      BIGNUM_CALL(mp_set_double(&bignum_value(bn), d)); \
-      return_closcall1(data, cont, bn); \
-    } \
-    i = (int)OP(((double_type *)z)->value); \
-  } \
-  return_closcall1(data, cont, obj_int2obj(i))
-
-/**
- * Directly compute exact
- */
-#define return_exact_op_no_cps(data, ptr, OP, z) \
-  int i = 0; \
-  Cyc_check_num(data, z); \
-  if (obj_is_int(z)) { \
-    i = obj_obj2int(z); \
-  } else if (type_of(z) == integer_tag) { \
-    i = (int)OP(((integer_type *)z)->value); \
-  } else if (type_of(z) == bignum_tag) { \
-    return z; \
-  } else if (type_of(z) == complex_num_tag) { \
-    double dreal = OP(creal(((complex_num_type *) z)->value)); \
-    double dimag = OP(cimag(((complex_num_type *) z)->value)); \
-    double complex unboxed = dreal + (dimag * I); \
-    assign_complex_num(ptr, unboxed); \
-    return ptr; \
-  } else { \
-    double d = ((double_type *)z)->value; \
-    if (isnan(d)) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d == INFINITY) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d == -INFINITY) { \
-      Cyc_rt_raise2(data, "Expected number but received", z); \
-    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){ \
-      alloc_bignum(data, bn); \
-      BIGNUM_CALL(mp_set_double(&bignum_value(bn), d)); \
-      return bn; \
-    } \
-    i = (int)OP(((double_type *)z)->value); \
-  } \
-  return obj_int2obj(i);
+void Cyc_exact(void *data, object cont, object z);
+object Cyc_exact_no_cps(void *data, object ptr, object z);
 
 /**
  * Take Scheme object that is a number and return the number as a C type

@@ -1382,9 +1382,9 @@
     " return_double_op_no_cps(data, ptr, round, z);")
   (define-c exact
     "(void *data, int argc, closure _, object k, object z)"
-    " return_exact_op(data, k, round, z); "
+    " Cyc_exact(data, k, z); "
     "(void *data, object ptr, object z)"
-    " return_exact_op_no_cps(data, ptr, round, z);")
+    " return Cyc_exact_no_cps(data, ptr, z);")
   (define-c inexact
     "(void *data, int argc, closure _, object k, object z)"
     " return_inexact_double_or_cplx_op(data, k, (double), (double complex), z); "

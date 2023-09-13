@@ -8596,12 +8596,11 @@ void Cyc_exact(void *data, object cont, object z)
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == -INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
+#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
     } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){
       alloc_bignum(data, bn);
       BIGNUM_CALL(mp_set_double(&bignum_value(bn), d));
       return_closcall1(data, cont, bn);
-// TODO: mp_set_double not supported on macos !?!
-#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
 #endif
     }
     i = (int)round(((double_type *)z)->value);
@@ -8633,12 +8632,11 @@ object Cyc_exact_no_cps(void *data, object ptr, object z)
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == -INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
+#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
     } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){
       alloc_bignum(data, bn);
       BIGNUM_CALL(mp_set_double(&bignum_value(bn), d));
       return bn;
-// TODO: mp_set_double not supported on macos !?!
-#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
 #endif
     }
     i = (int)round(((double_type *)z)->value);
