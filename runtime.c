@@ -2557,7 +2557,8 @@ typedef enum {
     STR2INT_SUCCESS,
     STR2INT_OVERFLOW,
     STR2INT_UNDERFLOW,
-    STR2INT_INCONVERTIBLE
+    STR2INT_INCONVERTIBLE,
+    STR2INT_RATIONAL
 } str2int_errno;
 
 /*
@@ -2588,12 +2589,18 @@ static str2int_errno str2int(int *out, char *s, int base)
     errno = 0;
     long l = strtol(s, &end, base);
     /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
-    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX))
+    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX)) {
         return STR2INT_OVERFLOW;
-    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN))
+    }
+    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN)) {
         return STR2INT_UNDERFLOW;
-    if (*end != '\0')
+    }
+    if (*end == '/') {
+        return STR2INT_RATIONAL;
+    }
+    if (*end != '\0') {
         return STR2INT_INCONVERTIBLE;
+    }
     *out = l;
     return STR2INT_SUCCESS;
 }
@@ -2622,6 +2629,11 @@ object Cyc_string2number_(void *data, object cont, object str)
     rv = str2int(&result, s, 10);
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
+    } else if (rv == STR2INT_RATIONAL) {
+      // TODO: function to handle this:
+      // - find / symbol
+      // - parse int on either side (could be bignums!)
+      // - for now, perform division and return float. longer-term, return rational
     } else if (str_is_bignum(rv, s)) {
       alloc_bignum(data, bn);
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), s, 10)) {
