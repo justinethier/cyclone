@@ -2617,6 +2617,16 @@ int str_is_bignum(str2int_errno errnum, char *c)
   return 1;
 }
 
+float string2rational(char *s){
+{
+  // TODO: this is terrible, needs work:
+  char *nom = _strdup(s);
+  char *denom = strchr(s, '\');
+  denom[0] = '\0';
+  denom++;
+  return strtol(nom, NULL, 10) / strtol(denom, NULL, 10);
+}
+
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
