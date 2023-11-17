@@ -2617,14 +2617,20 @@ int str_is_bignum(str2int_errno errnum, char *c)
   return 1;
 }
 
-float string2rational(char *s){
+double string2rational(char *s)
 {
-  // TODO: this is terrible, needs work:
   char *nom = _strdup(s);
-  char *denom = strchr(s, '\');
+  char *denom = strchr(nom, '/');
+  if (denom == NULL) {
+    // Should never happen since we check for '/' elsewhere
+    return 0.0;
+  }
   denom[0] = '\0';
   denom++;
-  return strtol(nom, NULL, 10) / strtol(denom, NULL, 10);
+// TODO: check return values from strtol
+  double x = strtol(nom, NULL, 10);
+  double y = strtol(denom, NULL, 10);
+  return x / y;
 }
 
 object Cyc_string2number_(void *data, object cont, object str)
@@ -2640,10 +2646,9 @@ object Cyc_string2number_(void *data, object cont, object str)
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
     } else if (rv == STR2INT_RATIONAL) {
-      // TODO: function to handle this:
-      // - find / symbol
-      // - parse int on either side (could be bignums!)
-      // - for now, perform division and return float. longer-term, return rational
+      double d = string2rational(s);
+      make_double(result, d);
+      _return_closcall1(data, cont, &result);
     } else if (str_is_bignum(rv, s)) {
       alloc_bignum(data, bn);
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), s, 10)) {
