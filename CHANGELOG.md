@@ -2,6 +2,10 @@
 
 ## 0.36.0 - TBD
 
+Features
+
+- Enhanced the reader to parse rationals and store them as inexact numbers.
+
 Bug Fixes
 
 - Fix `exact` to properly handle complex numbers, including raising an error when passed `nan` or `inf` double values.
@@ -20,7 +24,6 @@ Features
 
 - Arthur Maciel added `make-opaque` to `(cyclone foreign)`.
 - Add `memory-streams` to the list of symbols that `(features)` can return, indicating that the current installation supports in-memory streams.
-- Enhanced the reader to load rationals as inexact numbers.
 
 Bug Fixes
 
