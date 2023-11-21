@@ -72,6 +72,11 @@
 )
 
 (test-group
+  "rationals"
+  (test 3.0 (expt 81 1/4))
+)
+
+(test-group
   "records"
   (define-record-type employee
      (make-employee name title)
