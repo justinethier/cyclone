@@ -2617,7 +2617,7 @@ int str_is_bignum(str2int_errno errnum, char *c)
   return 1;
 }
 
-double string2rational(char *s)
+double string2rational(void *data, char *s)
 {
   char *nom = _strdup(s);
   char *denom = strchr(nom, '/');
@@ -2627,9 +2627,20 @@ double string2rational(char *s)
   }
   denom[0] = '\0';
   denom++;
+// TODO: clean this up
 // TODO: check return values from strtol
-  double x = strtol(nom, NULL, 10);
-  double y = strtol(denom, NULL, 10);
+//  double x = strtol(nom, NULL, 10);
+//  double y = strtol(denom, NULL, 10);
+      alloc_bignum(data, bn_nom);
+      if (MP_OKAY != mp_read_radix(&(bignum_value(bn_nom)), nom, 10)) {
+        Cyc_rt_raise2(data, "Error converting string to bignum", nom);
+      }
+      double x = mp_get_double(&bignum_value(bn_nom));
+      alloc_bignum(data, bn_denom);
+      if (MP_OKAY != mp_read_radix(&(bignum_value(bn_denom)), denom, 10)) {
+        Cyc_rt_raise2(data, "Error converting string to bignum", denom);
+      }
+      double y = mp_get_double(&bignum_value(bn_denom));
   return x / y;
 }
 
@@ -2645,8 +2656,11 @@ object Cyc_string2number_(void *data, object cont, object str)
     rv = str2int(&result, s, 10);
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
-    } else if (rv == STR2INT_RATIONAL) {
-      double d = string2rational(s);
+    } else if (rv == STR2INT_RATIONAL ||
+               // TODO: is there a more efficient way?
+               ((rv == STR2INT_OVERFLOW || rv == STR2INT_UNDERFLOW) &&
+                 strchr(s, '/') != NULL)) {
+      double d = string2rational(data, s);
       make_double(result, d);
       _return_closcall1(data, cont, &result);
     } else if (str_is_bignum(rv, s)) {
