@@ -2657,7 +2657,8 @@ object Cyc_string2number_(void *data, object cont, object str)
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
     } else if (rv == STR2INT_RATIONAL ||
-               // TODO: is there a more efficient way?
+               // Could still be a rational if numerator is 
+               // bignum, so in that case do one more scan
                ((rv == STR2INT_OVERFLOW || rv == STR2INT_UNDERFLOW) &&
                  strchr(s, '/') != NULL)) {
       double d = string2rational(data, s);
