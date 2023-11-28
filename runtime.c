@@ -2617,9 +2617,22 @@ int str_is_bignum(str2int_errno errnum, char *c)
   return 1;
 }
 
+/**
+ * @brief Read a rational number from given string.
+ * @param data Thread data object for the caller.
+ * @param char* String to read
+ * @return double Return number as double, since cyclone does
+ *                not support a rational number type at this time
+ */
 double string2rational(void *data, char *s)
 {
+  // Duplicate string so we can safely create separate strings
+  // for numerator and denominator
   char *nom = _strdup(s);
+  if (nom == NULL) {
+    return 0.0;
+  }
+
   char *denom = strchr(nom, '/');
   if (denom == NULL) {
     // Should never happen since we check for '/' elsewhere
@@ -2627,20 +2640,22 @@ double string2rational(void *data, char *s)
   }
   denom[0] = '\0';
   denom++;
-// TODO: clean this up
-// TODO: check return values from strtol
-//  double x = strtol(nom, NULL, 10);
-//  double y = strtol(denom, NULL, 10);
-      alloc_bignum(data, bn_nom);
-      if (MP_OKAY != mp_read_radix(&(bignum_value(bn_nom)), nom, 10)) {
-        Cyc_rt_raise2(data, "Error converting string to bignum", nom);
-      }
-      double x = mp_get_double(&bignum_value(bn_nom));
-      alloc_bignum(data, bn_denom);
-      if (MP_OKAY != mp_read_radix(&(bignum_value(bn_denom)), denom, 10)) {
-        Cyc_rt_raise2(data, "Error converting string to bignum", denom);
-      }
-      double y = mp_get_double(&bignum_value(bn_denom));
+
+  // Parse both rational components as bignums since 
+  // that code handles any integer
+  alloc_bignum(data, bn_nom);
+  if (MP_OKAY != mp_read_radix(&(bignum_value(bn_nom)), nom, 10)) {
+    Cyc_rt_raise2(data, "Error converting string to bignum", nom);
+  }
+
+  alloc_bignum(data, bn_denom);
+  if (MP_OKAY != mp_read_radix(&(bignum_value(bn_denom)), denom, 10)) {
+    Cyc_rt_raise2(data, "Error converting string to bignum", denom);
+  }
+
+  // Compute final result as double
+  double x = mp_get_double(&bignum_value(bn_nom));
+  double y = mp_get_double(&bignum_value(bn_denom));
   return x / y;
 }
 
