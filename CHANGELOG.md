@@ -2,6 +2,10 @@
 
 ## 0.36.0 - TBD
 
+Features
+
+- Enhanced the reader to parse rationals and store them as inexact numbers.
+
 Bug Fixes
 
 - Fix `exact` to properly handle complex numbers, including raising an error when passed `nan` or `inf` double values.

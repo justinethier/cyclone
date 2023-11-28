@@ -48,6 +48,11 @@
   "rationals"
   (test 3.0 (numerator (/ 6 4)))
   (test 2.0 (denominator (/ 6 4)))
+  (test 3.0 (expt 81 1/4))
+  (test #t
+    (< 1.0e+40 
+       (/ 33333333333333333333333333333333333333333 3.0)
+       1.2e+40))
 )
 
 (test-group

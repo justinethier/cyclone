@@ -2557,7 +2557,8 @@ typedef enum {
     STR2INT_SUCCESS,
     STR2INT_OVERFLOW,
     STR2INT_UNDERFLOW,
-    STR2INT_INCONVERTIBLE
+    STR2INT_INCONVERTIBLE,
+    STR2INT_RATIONAL
 } str2int_errno;
 
 /*
@@ -2588,12 +2589,18 @@ static str2int_errno str2int(int *out, char *s, int base)
     errno = 0;
     long l = strtol(s, &end, base);
     /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
-    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX))
+    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX)) {
         return STR2INT_OVERFLOW;
-    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN))
+    }
+    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN)) {
         return STR2INT_UNDERFLOW;
-    if (*end != '\0')
+    }
+    if (*end == '/') {
+        return STR2INT_RATIONAL;
+    }
+    if (*end != '\0') {
         return STR2INT_INCONVERTIBLE;
+    }
     *out = l;
     return STR2INT_SUCCESS;
 }
@@ -2610,6 +2617,51 @@ int str_is_bignum(str2int_errno errnum, char *c)
   return 1;
 }
 
+/**
+ * @brief Read a rational number from given string.
+ * @param data Thread data object for the caller.
+ * @param char* String to read
+ * @return double Return number as double, since cyclone does
+ *                not support a rational number type at this time
+ */
+double string2rational(void *data, char *s)
+{
+  // Duplicate string so we can safely create separate strings
+  // for numerator and denominator
+  char *nom = _strdup(s);
+  if (nom == NULL) {
+    return 0.0;
+  }
+
+  char *denom = strchr(nom, '/');
+  if (denom == NULL) {
+    // Should never happen since we check for '/' elsewhere
+    return 0.0;
+  }
+  denom[0] = '\0';
+  denom++;
+
+  // Parse both rational components as bignums since 
+  // that code handles any integer
+  alloc_bignum(data, bn_nom);
+  if (MP_OKAY != mp_read_radix(&(bignum_value(bn_nom)), nom, 10)) {
+    Cyc_rt_raise2(data, "Error converting string to bignum", nom);
+  }
+
+  alloc_bignum(data, bn_denom);
+  if (MP_OKAY != mp_read_radix(&(bignum_value(bn_denom)), denom, 10)) {
+    Cyc_rt_raise2(data, "Error converting string to bignum", denom);
+  }
+
+  // Prevent memory leak
+  free(nom);
+
+  // Compute final result as double
+  double x = mp_get_double(&bignum_value(bn_nom));
+  double y = mp_get_double(&bignum_value(bn_denom));
+  return x / y;
+}
+
 object Cyc_string2number_(void *data, object cont, object str)
 {
   int result, rv;
@@ -2622,6 +2674,14 @@ object Cyc_string2number_(void *data, object cont, object str)
     rv = str2int(&result, s, 10);
     if (rv == STR2INT_SUCCESS) {
       _return_closcall1(data, cont, obj_int2obj(result));
+    } else if (rv == STR2INT_RATIONAL ||
+               // Could still be a rational if numerator is 
+               // bignum, so in that case do one more scan
+               ((rv == STR2INT_OVERFLOW || rv == STR2INT_UNDERFLOW) &&
+                 strchr(s, '/') != NULL)) {
+      double d = string2rational(data, s);
+      make_double(result, d);
+      _return_closcall1(data, cont, &result);
     } else if (str_is_bignum(rv, s)) {
       alloc_bignum(data, bn);
       if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), s, 10)) {
