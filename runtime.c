@@ -2653,6 +2653,9 @@ double string2rational(void *data, char *s)
     Cyc_rt_raise2(data, "Error converting string to bignum", denom);
   }
 
+  // Prevent memory leak
+  free(nom);
+
   // Compute final result as double
   double x = mp_get_double(&bignum_value(bn_nom));
   double y = mp_get_double(&bignum_value(bn_denom));
