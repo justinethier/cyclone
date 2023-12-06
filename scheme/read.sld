@@ -179,6 +179,12 @@
   "(void *data, object ptr, object opq)"
   " return(Cyc_is_string(opaque_ptr(opq)));")
 
+(define-c Cyc-opaque->string
+  "(void *data, int argc, closure _, object k, object opq)"
+  " return_closcall1(data, k, opaque_ptr(opq));"
+  "(void *data, object ptr, object opq)"
+  " return(opaque_ptr(opq));")
+
 (define-c Cyc-opaque-unsafe-string->number
   "(void *data, int argc, closure _, object k, object opq)"
   " Cyc_string2number_(data, k, opaque_ptr(opq));")
@@ -226,7 +232,10 @@
       ((Cyc-opaque? token)
        (cond
          ((Cyc-opaque-unsafe-string? token)
-          (Cyc-opaque-unsafe-string->number token))
+          (let ((rv (Cyc-opaque-unsafe-string->number token)))
+            (if rv
+                rv
+                (error "Invalid numeric syntax" (Cyc-opaque->string token)))))
          ;; Open paren, start read loop
          ((Cyc-opaque-unsafe-eq? token #\()
           (let ((line-num (get-line-num fp))
