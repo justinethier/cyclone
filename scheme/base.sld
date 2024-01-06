@@ -1535,6 +1535,11 @@
     ;; TODO: if x and y are fixnums, do fast divide and return a fixnum
     ;; TODO: above good enough or are there special cases??
     (truncate (/ x y)))
+  ;; TODO: something like this, but do we want inline?
+    ;;(let ((result (/ x y)))
+    ;;  (if (and (fixnum? x) (fixnum? y))
+    ;;      (exact (truncate result))
+    ;;      (truncate result))))
 
   (define truncate-quotient quotient)
   (define truncate-remainder remainder)
