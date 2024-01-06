@@ -4139,10 +4139,15 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
     if (obj_is_int(y)){
       if (obj_obj2int(y) == 0) { goto divbyzero; }
       // Overflow can occur if y = 0 || (x = 0x80000000 && y = -1)
-      // We already check for 0 above and the value of x above is a
-      // bignum, so no futher checks are required.
-      assign_double(ptr, (double)(obj_obj2int(x)) / obj_obj2int(y));
-      return ptr;
+      // We already check for 0 above and the invalid value of x would
+      // be a bignum, so no futher checks are required.
+      double result = (double)(obj_obj2int(x)) / obj_obj2int(y);
+      if (result == round(result)) {
+        return obj_int2obj(result);
+      } else {
+        assign_double(ptr, result);
+        return ptr;
+      }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
       return ptr;
@@ -4253,6 +4258,11 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.tag = double_tag;
     x->double_t.value =
         ((double)x->integer_t.value) / ((integer_type *) y)->value;
+    if (x->double_t.value == round(x->double_t.value)) {
+      int tmp = x->double_t.value;
+      x->integer_t.tag = integer_tag;
+      x->integer_t.value = tmp;
+    }
   } else if (tx == double_tag && ty == integer_tag) {
     x->double_t.value = x->double_t.value / ((integer_type *) y)->value;
   } else if (tx == integer_tag && ty == double_tag) {
