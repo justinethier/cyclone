@@ -1525,21 +1525,17 @@
     "(void *data, int argc, closure _, object k, object n)"
     " Cyc_get_ratio(data, k, n, 0);")
 
-    ;; TODO: integrate into quotient?
-    (define-c fixnum?
-      "(void *data, int argc, closure _, object k, object obj)"
-      " return_closcall1(data, k, 
-          obj_is_int(obj) ? boolean_t : boolean_f); ")
+  (define-c fixnum?
+    "(void *data, int argc, closure _, object k, object obj)"
+    " return_closcall1(data, k, 
+        obj_is_int(obj) ? boolean_t : boolean_f); "
+    "(void *data, object ptr, object obj)"
+    " return obj_is_int(obj) ? boolean_t : boolean_f; ")
 
   (define (quotient x y)
-    ;; TODO: if x and y are fixnums, do fast divide and return a fixnum
-    ;; TODO: above good enough or are there special cases??
-    (truncate (/ x y)))
-  ;; TODO: something like this, but do we want inline?
-    ;;(let ((result (/ x y)))
-    ;;  (if (and (fixnum? x) (fixnum? y))
-    ;;      (exact (truncate result))
-    ;;      (truncate result))))
+    (if (and (fixnum? x) (fixnum? y))
+        (exact (truncate (/ x y)))
+        (truncate (/ x y))))
 
   (define truncate-quotient quotient)
   (define truncate-remainder remainder)
