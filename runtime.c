@@ -4241,6 +4241,12 @@ object Cyc_div_op(void *data, common_type * x, object y)
     }
     x->double_t.tag = double_tag;
     x->double_t.value = ((double)x->integer_t.value) / (obj_obj2int(y));
+
+    if (x->double_t.value == round(x->double_t.value)) {
+      int tmp = x->double_t.value;
+      x->integer_t.tag = integer_tag;
+      x->integer_t.value = tmp;
+    }
   } else if (tx == double_tag && ty == -1) {
     x->double_t.value = x->double_t.value / (obj_obj2int(y));
   } else if (tx == integer_tag && ty == integer_tag) {
