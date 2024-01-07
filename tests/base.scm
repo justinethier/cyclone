@@ -59,47 +59,46 @@
        1.2e+40))
 )
 
-;TODO: 
-;(floor/ 5 2) =⇒ 2 1
-;(floor/ -5 2) =⇒ -3 1
-;(floor/ 5 -2) =⇒ -3 -1
-;(floor/ -5 -2) =⇒ 2 -1
-;(truncate/ 5 2) =⇒ 2 1
-;(truncate/ -5 2) =⇒ -2 -1
-;(truncate/ 5 -2) =⇒ -2 1
-;(truncate/ -5 -2) =⇒ 2 -1
-;(truncate/ -5.0 -2) =⇒ 2.0 -1.0
-;
-;(gcd 32 -36) =⇒ 4
-;(gcd) =⇒ 0
-;(lcm 32 -36) =⇒ 288
-;(lcm 32.0 -36) =⇒ 288.0 ; inexact
-;(lcm) =⇒ 1
-;
-;(floor -4.3) =⇒ -5.0
-;(ceiling -4.3) =⇒ -4.0
-;(truncate -4.3) =⇒ -4.0
-;(round -4.3) =⇒ -4.0
-;(floor 3.5) =⇒ 3.0
-;(ceiling 3.5) =⇒ 4.0
-;(truncate 3.5) =⇒ 3.0
-;(round 3.5) =⇒ 4.0 ; inexact
-;(round 7/2) =⇒ 4 ; exact
-;(round 7) =⇒ 7
-;
-;(numerator (/ 6 4)) =⇒ 3
-;(denominator (/ 6 4)) =⇒ 2
-;(denominator
-;(inexact (/ 6 4))) =⇒ 2.0
-
-
 (test-group
-  "truncate"
+  "numeric operations - floor, truncate, "
   (test -1 (truncate -1))
   (test -1.0 (truncate -1.0))
   (test -1.0 (truncate -1.1))
   (test -1.0 (truncate -1.1))
   (test +inf.0 (truncate +inf.0))
+
+  (test (values 2 1) (floor/ 5 2))
+  (test (values -3 1) (floor/ -5 2))
+  (test (values -3 -1) (floor/ 5 -2))
+  (test (values 2 -1) (floor/ -5 -2))
+  (test (values 2 1) (truncate/ 5 2))
+  (test (values -2 -1) (truncate/ -5 2))
+  (test (values -2 1) (truncate/ 5 -2))
+  (test (values 2 -1) (truncate/ -5 -2))
+; TODO:
+;  (test (values 2.0 -1.0) (truncate/ -5.0 -2))
+
+  (test 4 (gcd 32 -36))
+  (test 0 (gcd))
+  (test 288 (lcm 32 -36))
+  (test 288.0 (lcm 32.0 -36))
+  (test 1 (lcm))
+
+  (test -5.0 (floor -4.3))
+  (test -4.0 (ceiling -4.3))
+  (test -4.0 (truncate -4.3))
+  (test -4.0 (round -4.3))
+  (test 3.0  (floor 3.5))
+  (test 4.0  (ceiling 3.5))
+  (test 3.0  (truncate 3.5))
+  (test 4.0  (round 3.5))
+  (test 4.0  (round 7/2)) ;; Rationals not supported, so result is inexact
+  (test 7    (round 7))
+
+  ; TODO: 
+  ;(test 3 (numerator (/ 6 4)))
+  ;(test 2 (denominator (/ 6 4)))
+  (test 2.0 (denominator (inexact (/ 6 4))))
 )
 
 (test-group
