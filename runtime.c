@@ -8636,6 +8636,12 @@ void Cyc_get_ratio(void *data, object cont, object n, int numerator)
     // Special case
     make_double(val, 1.0);
     return_closcall1(data, cont, &val);
+  } else if (obj_is_int(n) || type_of(n) == bignum_tag) {
+    if (numerator) {
+      return_closcall1(data, cont, n);
+    } else {
+      return_closcall1(data, cont, obj_int2obj((1)));
+    }
   } else {
     double numer, denom;
     make_double(val, 0.0);
