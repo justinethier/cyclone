@@ -75,8 +75,7 @@
   (test (values -2 -1) (truncate/ -5 2))
   (test (values -2 1) (truncate/ 5 -2))
   (test (values 2 -1) (truncate/ -5 -2))
-; TODO:
-;  (test (values 2.0 -1.0) (truncate/ -5.0 -2))
+  (test (values 2.0 -1.0) (truncate/ -5.0 -2))
 
   (test 4 (gcd 32 -36))
   (test 0 (gcd))
@@ -95,9 +94,8 @@
   (test 4.0  (round 7/2)) ;; Rationals not supported, so result is inexact
   (test 7    (round 7))
 
-  ; TODO: 
-  ;(test 3 (numerator (/ 6 4)))
-  ;(test 2 (denominator (/ 6 4)))
+  (test 3.0 (numerator (/ 6 4))) ;; Inexact because we don't support rationals yet
+  (test 2.0 (denominator (/ 6 4))) ;; Inexact because we don't support rationals yet
   (test 2.0 (denominator (inexact (/ 6 4))))
 )
 
