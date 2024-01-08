@@ -4660,11 +4660,9 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       Cyc_bignum_remainder(data, cont, num1, num2, rem);
     }
     else if (is_object_type(num2) && type_of(num2) == double_tag){
-      // TODO: correct to convert bignum to double here
-      j = ((double_type *)num2)->value; 
-      alloc_bignum(data, bn);
-      Cyc_int2bignum(obj_obj2int(j), &(bn->bn));
-      Cyc_bignum_remainder(data, cont, num1, bn, bn);
+      ii = mp_get_double(&bignum_value(num1));
+      jj = ((double_type *)num2)->value; 
+      goto handledouble;
     }
     else {
       goto typeerror;
@@ -4676,11 +4674,9 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       goto handledouble;
     }
     else if (is_object_type(num2) && type_of(num2) == bignum_tag){
-      // TODO: convert bignum to double here
-      i = ((double_type *)num1)->value; 
-      alloc_bignum(data, bn);
-      Cyc_int2bignum(obj_obj2int(i), &(bn->bn));
-      Cyc_bignum_remainder(data, cont, bn, num2, bn);
+      ii = ((double_type *)num1)->value; 
+      jj = mp_get_double(&bignum_value(num2));
+      goto handledouble;
     }
     else if (is_object_type(num2) && type_of(num2) == double_tag){
       ii = ((double_type *)num1)->value; 
@@ -4697,11 +4693,11 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
   result = obj_int2obj(i % j);
   return_closcall1(data, cont, result); 
 handledouble:
-{
-  if (jj == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
-  make_double(dresult, fmod(ii, jj));
-  return_closcall1(data, cont, &dresult); 
-}
+  {
+    if (jj == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
+    make_double(dresult, fmod(ii, jj));
+    return_closcall1(data, cont, &dresult); 
+  }
 typeerror:
   {
     make_string(s, "Bad argument type");
