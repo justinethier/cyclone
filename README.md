@@ -1,7 +1,5 @@
 ![Cyclone Scheme](docs/images/cyclone-logo-04-header.png "Cyclone Scheme")
 
-[![Travis CI](https://travis-ci.org/justinethier/cyclone.svg?branch=master)](https://travis-ci.org/justinethier/cyclone)
-
 [![Github CI - Linux](https://github.com/justinethier/cyclone-bootstrap/workflows/Ubuntu%20Linux%20Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
 
 [![Github CI - MacOS](https://github.com/justinethier/cyclone-bootstrap/workflows/MacOS%20Build/badge.svg)](https://github.com/justinethier/cyclone-bootstrap)
