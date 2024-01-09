@@ -205,15 +205,10 @@
     write-u8
     binary-port?
     textual-port?
-
+    rationalize
 ;;;;
 ; Possibly missing functions:
-;
 ;    u8-ready?
-;
-;    ; No complex or rational numbers at this time
-;    rationalize
-;
 ;    ;; syntax-rules
 ;;;;
   )
@@ -1483,6 +1478,9 @@
     "(void *data, object ptr, object z)"
     " return Cyc_is_complex(z); ")
   (define rational? number?)
+  ;; Stub, doesn't do much now because rationals are not supported
+  (define (rationalize x y)
+    (/ x y))
   (define (max first . rest) (foldl (lambda (old new) (if (> old new) old new)) first rest))
   (define (min first . rest) (foldl (lambda (old new) (if (< old new) old new)) first rest))
   ; Implementations of gcd and lcm using Euclid's algorithm

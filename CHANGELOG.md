@@ -5,6 +5,7 @@
 Features
 
 - Enhanced the reader to parse rationals and store them as inexact numbers.
+- Add a stub for `(rationalize x y)` to `(scheme base)`.
 
 Bug Fixes
 
