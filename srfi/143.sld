@@ -158,10 +158,11 @@
          return_closcall1(data, k, obj_int2obj(count));")
 
     (define (fxlength  i)
-      (ceiling (/ (log (if (fxnegative? i)
-                           (fxneg i)
-                           (fx+ 1 i)))
-                  (log 2))))
+      (exact 
+        (ceiling (/ (log (if (fxnegative? i)
+                             (fxneg i)
+                             (fx+ 1 i)))
+                    (log 2)))))
 
     (define (fxif mask n0 n1)
       (fxior (fxand mask n0)
