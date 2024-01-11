@@ -5,9 +5,11 @@
 Features
 
 - Enhanced the reader to parse rationals and store them as inexact numbers.
+- Add a stub for `(rationalize x y)` to `(scheme base)`.
 
 Bug Fixes
 
+- Updated various numeric functions to properly handle numeric type conversions, including `quotient`, `remainder`, `numerator`, `denominator`, `truncate`, `truncate-quotient`, and `/`.
 - Fix `exact` to properly handle complex numbers, including raising an error when passed `nan` or `inf` double values.
 - Ensure the runtime properly differentiates between `+inf.0` and `-inf.0`. Thanks to jpellegrini for the bug report.
 - jpellegrini reported that Cyclone returns `#f` when comparing complex numbers using operators other than `=`. Instead it is better to raise an error in these situations.

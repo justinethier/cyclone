@@ -4139,10 +4139,15 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
     if (obj_is_int(y)){
       if (obj_obj2int(y) == 0) { goto divbyzero; }
       // Overflow can occur if y = 0 || (x = 0x80000000 && y = -1)
-      // We already check for 0 above and the value of x above is a
-      // bignum, so no futher checks are required.
-      assign_double(ptr, (double)(obj_obj2int(x)) / obj_obj2int(y));
-      return ptr;
+      // We already check for 0 above and the invalid value of x would
+      // be a bignum, so no futher checks are required.
+      double result = (double)(obj_obj2int(x)) / obj_obj2int(y);
+      if (result == round(result)) {
+        return obj_int2obj(result);
+      } else {
+        assign_double(ptr, result);
+        return ptr;
+      }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
       return ptr;
@@ -4241,12 +4246,23 @@ object Cyc_div_op(void *data, common_type * x, object y)
     }
     x->double_t.tag = double_tag;
     x->double_t.value = ((double)x->integer_t.value) / (obj_obj2int(y));
+
+    if (x->double_t.value == round(x->double_t.value)) {
+      int tmp = x->double_t.value;
+      x->integer_t.tag = integer_tag;
+      x->integer_t.value = tmp;
+    }
   } else if (tx == double_tag && ty == -1) {
     x->double_t.value = x->double_t.value / (obj_obj2int(y));
   } else if (tx == integer_tag && ty == integer_tag) {
     x->double_t.tag = double_tag;
     x->double_t.value =
         ((double)x->integer_t.value) / ((integer_type *) y)->value;
+    if (x->double_t.value == round(x->double_t.value)) {
+      int tmp = x->double_t.value;
+      x->integer_t.tag = integer_tag;
+      x->integer_t.value = tmp;
+    }
   } else if (tx == double_tag && ty == integer_tag) {
     x->double_t.value = x->double_t.value / ((integer_type *) y)->value;
   } else if (tx == integer_tag && ty == double_tag) {
@@ -4613,6 +4629,7 @@ void Cyc_bignum_remainder(void *data, object cont, object num1, object num2, obj
 void Cyc_remainder(void *data, object cont, object num1, object num2)
 {
   int i = 0, j = 0;
+  double ii = 0, jj = 0;
   object result;
   if (obj_is_int(num1)) {
     if (obj_is_int(num2)){
@@ -4625,8 +4642,9 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       Cyc_bignum_remainder(data, cont, bn, num2, bn);
     }
     else if (is_object_type(num2) && type_of(num2) == double_tag){
-      i = obj_obj2int(num1);
-      j = ((double_type *)num2)->value; 
+      ii = obj_obj2int(num1);
+      jj = ((double_type *)num2)->value; 
+      goto handledouble;
     }
     else {
       goto typeerror;
@@ -4642,28 +4660,28 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
       Cyc_bignum_remainder(data, cont, num1, num2, rem);
     }
     else if (is_object_type(num2) && type_of(num2) == double_tag){
-      j = ((double_type *)num2)->value; 
-      alloc_bignum(data, bn);
-      Cyc_int2bignum(obj_obj2int(j), &(bn->bn));
-      Cyc_bignum_remainder(data, cont, num1, bn, bn);
+      ii = mp_get_double(&bignum_value(num1));
+      jj = ((double_type *)num2)->value; 
+      goto handledouble;
     }
     else {
       goto typeerror;
     }
   } else if (is_object_type(num1) && type_of(num1) == double_tag){
     if (obj_is_int(num2)){
-      i = ((double_type *)num1)->value; 
-      j = obj_obj2int(num2);
+      ii = ((double_type *)num1)->value; 
+      jj = obj_obj2int(num2);
+      goto handledouble;
     }
     else if (is_object_type(num2) && type_of(num2) == bignum_tag){
-      i = ((double_type *)num1)->value; 
-      alloc_bignum(data, bn);
-      Cyc_int2bignum(obj_obj2int(i), &(bn->bn));
-      Cyc_bignum_remainder(data, cont, bn, num2, bn);
+      ii = ((double_type *)num1)->value; 
+      jj = mp_get_double(&bignum_value(num2));
+      goto handledouble;
     }
     else if (is_object_type(num2) && type_of(num2) == double_tag){
-      i = ((double_type *)num1)->value; 
-      j = ((double_type *)num2)->value; 
+      ii = ((double_type *)num1)->value; 
+      jj = ((double_type *)num2)->value; 
+      goto handledouble;
     } 
     else {
       goto typeerror;
@@ -4674,6 +4692,12 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
   if (j == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
   result = obj_int2obj(i % j);
   return_closcall1(data, cont, result); 
+handledouble:
+  {
+    if (jj == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
+    make_double(dresult, fmod(ii, jj));
+    return_closcall1(data, cont, &dresult); 
+  }
 typeerror:
   {
     make_string(s, "Bad argument type");
@@ -8620,6 +8644,12 @@ void Cyc_get_ratio(void *data, object cont, object n, int numerator)
     // Special case
     make_double(val, 1.0);
     return_closcall1(data, cont, &val);
+  } else if (obj_is_int(n) || type_of(n) == bignum_tag) {
+    if (numerator) {
+      return_closcall1(data, cont, n);
+    } else {
+      return_closcall1(data, cont, obj_int2obj((1)));
+    }
   } else {
     double numer, denom;
     make_double(val, 0.0);
