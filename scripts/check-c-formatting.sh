@@ -1,11 +1,12 @@
 #!/bin/bash
 
 FORMAT_CMD="indent -linux -l80 -i2 -nut"
-echo $1
+FILE=$1
+TMP=$(mktemp)
 
-$FORMAT_CMD $1 -o $1.format-test
+$FORMAT_CMD $FILE -o $TMP
 
-diff $1 $1.format-test > /dev/null
+diff $FILE $TMP > /dev/null
 #ret=$?
 #
 #if [[ $ret -eq 0 ]]; then
