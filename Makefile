@@ -12,7 +12,7 @@ include Makefile.config
 CYCLONE_SYSTEM = cyclone -I . -CLNK '-L.'
 CYCLONE_LOCAL = ./cyclone -I . -I libs -COPT '-Iinclude' -CLNK '-L.'
 CCOMP = $(CC) $(CFLAGS)
-INDENT_CMD = indent -linux -l80 -i2 -nut
+FORMAT_CMD = indent -linux -l80 -i2 -nut
 
 # Libraries
 CYC_RT_LIB = libcyclone.a
@@ -130,15 +130,15 @@ uninstall :
 tags :
 	ctags -R *
 
-indent : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $(HEADER_DIR)/*.h
-	$(INDENT_CMD) $(HEADER_DIR)/*.h
-	$(INDENT_CMD) ck-polyfill.c
-	$(INDENT_CMD) ck-polyfill.h
-	$(INDENT_CMD) ffi.c
-	$(INDENT_CMD) gc.c
-	$(INDENT_CMD) hashset.c
-	$(INDENT_CMD) mstreams.c
-	$(INDENT_CMD) runtime.c
+format : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $(HEADER_DIR)/*.h
+	$(FORMAT_CMD) $(HEADER_DIR)/*.h
+	$(FORMAT_CMD) ck-polyfill.c
+	$(FORMAT_CMD) ck-polyfill.h
+	$(FORMAT_CMD) ffi.c
+	$(FORMAT_CMD) gc.c
+	$(FORMAT_CMD) hashset.c
+	$(FORMAT_CMD) mstreams.c
+	$(FORMAT_CMD) runtime.c
 
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
@@ -156,7 +156,7 @@ api-doc :
 
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean full bench bootstrap tags indent debug test doc api-doc
+.PHONY: clean full bench bootstrap tags format debug test doc api-doc
 
 $(TESTS) : %: %.scm cyclone libs
 	$(CYCLONE_LOCAL) -I . $<
