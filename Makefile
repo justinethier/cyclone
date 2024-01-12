@@ -140,6 +140,9 @@ format : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $
 	$(FORMAT_CMD) mstreams.c
 	$(FORMAT_CMD) runtime.c
 
+test-format :
+	./scripts/check-c-formatting.sh hashset.c
+
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
 sld :
@@ -156,7 +159,7 @@ api-doc :
 
 # Helper rules (of interest to people hacking on this makefile)
 
-.PHONY: clean full bench bootstrap tags format debug test doc api-doc
+.PHONY: clean full bench bootstrap tags format test-format debug test doc api-doc
 
 $(TESTS) : %: %.scm cyclone libs
 	$(CYCLONE_LOCAL) -I . $<
