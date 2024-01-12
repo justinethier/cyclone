@@ -130,12 +130,15 @@ uninstall :
 tags :
 	ctags -R *
 
-indent : gc.c runtime.c ffi.c mstreams.c $(HEADER_DIR)/*.h
-	$(INDENT_CMD) gc.c
-	$(INDENT_CMD) runtime.c
-	$(INDENT_CMD) ffi.c
-	$(INDENT_CMD) mstreams.c
+indent : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $(HEADER_DIR)/*.h
 	$(INDENT_CMD) $(HEADER_DIR)/*.h
+	$(INDENT_CMD) ck-polyfill.c
+	$(INDENT_CMD) ck-polyfill.h
+	$(INDENT_CMD) ffi.c
+	$(INDENT_CMD) gc.c
+	$(INDENT_CMD) hashset.c
+	$(INDENT_CMD) mstreams.c
+	$(INDENT_CMD) runtime.c
 
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
