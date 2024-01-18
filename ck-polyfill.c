@@ -27,8 +27,9 @@ void ck_polyfill_init()
 }
 
 // CK Hashset section
-bool ck_hs_init(ck_hs_t *hs, unsigned int mode, ck_hs_hash_cb_t *hash_func,
-    ck_hs_compare_cb_t *cmp, struct ck_malloc *alloc, unsigned long capacity, unsigned long seed)
+bool ck_hs_init(ck_hs_t * hs, unsigned int mode, ck_hs_hash_cb_t * hash_func,
+                ck_hs_compare_cb_t * cmp, struct ck_malloc *alloc,
+                unsigned long capacity, unsigned long seed)
 {
   (*hs).hs = simple_hashset_create();
   if (pthread_mutex_init(&((*hs).lock), NULL) != 0) {
@@ -38,7 +39,7 @@ bool ck_hs_init(ck_hs_t *hs, unsigned int mode, ck_hs_hash_cb_t *hash_func,
   return true;
 }
 
-void *ck_hs_get(ck_hs_t *_hs, unsigned long hash, const void *key)
+void *ck_hs_get(ck_hs_t * _hs, unsigned long hash, const void *key)
 {
   void *result = NULL;
   int index = -1;
@@ -46,7 +47,7 @@ void *ck_hs_get(ck_hs_t *_hs, unsigned long hash, const void *key)
 
   pthread_mutex_lock(&((*_hs).lock));
 
-  index = simple_hashset_is_member(set, (symbol_type *)key);
+  index = simple_hashset_is_member(set, (symbol_type *) key);
   if (index > 0) {
     result = (void *)(set->items[index].item);
   }
@@ -55,7 +56,7 @@ void *ck_hs_get(ck_hs_t *_hs, unsigned long hash, const void *key)
   return result;
 }
 
-bool ck_hs_put(ck_hs_t *_hs, unsigned long hash, const void *key)
+bool ck_hs_put(ck_hs_t * _hs, unsigned long hash, const void *key)
 {
   bool result = false;
   int rv, index;
@@ -65,10 +66,10 @@ bool ck_hs_put(ck_hs_t *_hs, unsigned long hash, const void *key)
 
   //index = simple_hashset_is_member(hs, (symbol_type *)key);
   //if (index == 0) {
-    rv = simple_hashset_add(hs, (symbol_type *)key);
-    if (rv >= 0) {
-      result = true;
-    }
+  rv = simple_hashset_add(hs, (symbol_type *) key);
+  if (rv >= 0) {
+    result = true;
+  }
   //}
 
   pthread_mutex_unlock(&((*_hs).lock));
@@ -77,8 +78,8 @@ bool ck_hs_put(ck_hs_t *_hs, unsigned long hash, const void *key)
 
 // CK Array section
 bool
-ck_array_init(ck_array_t *array, unsigned int mode,
-         struct ck_malloc *allocator, unsigned int initial_length)
+ck_array_init(ck_array_t * array, unsigned int mode,
+              struct ck_malloc *allocator, unsigned int initial_length)
 {
   (*array).hs = hashset_create();
   if (pthread_mutex_init(&((*array).lock), NULL) != 0) {
@@ -101,8 +102,7 @@ ck_array_init(ck_array_t *array, unsigned int mode,
 //      This function returns 1 if the pointer already exists in the array.  It
 //      returns 0 if the put operation succeeded. It returns -1 on error due to
 //      internal memory allocation failures.
-int
-ck_array_put_unique(ck_array_t *array, void *pointer)
+int ck_array_put_unique(ck_array_t * array, void *pointer)
 {
   pthread_mutex_lock(&(array->lock));
   hashset_add(array->hs, pointer);
@@ -121,8 +121,8 @@ ck_array_put_unique(ck_array_t *array, void *pointer)
 //      This function returns true if the remove operation succeeded. It will
 //      return false otherwise due to internal allocation failures or because the
 //      value did not exist.
-bool
-ck_array_remove(ck_array_t *array, void *pointer){
+bool ck_array_remove(ck_array_t * array, void *pointer)
+{
   pthread_mutex_lock(&(array->lock));
   hashset_remove(array->hs, pointer);
   pthread_mutex_unlock(&(array->lock));
@@ -138,11 +138,11 @@ ck_array_remove(ck_array_t *array, void *pointer){
 // RETURN VALUES
 //      This function returns true if the commit operation succeeded. It will
 //      return false otherwise, and pending operations will not be applied.
-bool ck_array_commit(ck_array_t *array) {
+bool ck_array_commit(ck_array_t * array)
+{
   // Nothing to do in this polyfill
   return true;
 }
-
 
 // TODO: global pthread mutex lock for this? obviously not ideal but the
 // whole purpose of this module is a minimal interface for compatibility
@@ -164,7 +164,7 @@ bool ck_pr_cas_ptr(void *target, void *old_value, void *new_value)
 {
   bool result = false;
   pthread_mutex_lock(&glock);
-  if ( *(void **)target == old_value ) {
+  if (*(void **)target == old_value) {
     *(void **)target = new_value;
     result = true;
   }
@@ -173,7 +173,7 @@ bool ck_pr_cas_ptr(void *target, void *old_value, void *new_value)
   // *(void **)v = set;                                                             
 }
 
-bool ck_pr_cas_8(uint8_t *target, uint8_t old_value, uint8_t new_value)
+bool ck_pr_cas_8(uint8_t * target, uint8_t old_value, uint8_t new_value)
 {
   bool result = false;
   pthread_mutex_lock(&glock);
@@ -185,36 +185,32 @@ bool ck_pr_cas_8(uint8_t *target, uint8_t old_value, uint8_t new_value)
   return result;
 }
 
-void
-ck_pr_add_ptr(void *target, uintptr_t delta)
+void ck_pr_add_ptr(void *target, uintptr_t delta)
 {
   pthread_mutex_lock(&glock);
-  size_t value = (size_t) target;
-  size_t d = (size_t) delta;
+  size_t value = (size_t)target;
+  size_t d = (size_t)delta;
   size_t result = value + d;
   *(void **)target = (void *)result;
   // *(void **)v = set;                                                             
   pthread_mutex_unlock(&glock);
 }
 
-void
-ck_pr_add_int(int *target, int delta)
+void ck_pr_add_int(int *target, int delta)
 {
   pthread_mutex_lock(&glock);
   (*target) += delta;
   pthread_mutex_unlock(&glock);
 }
 
-void
-ck_pr_add_8(uint8_t *target, uint8_t delta)
+void ck_pr_add_8(uint8_t * target, uint8_t delta)
 {
   pthread_mutex_lock(&glock);
   (*target) += delta;
   pthread_mutex_unlock(&glock);
 }
 
-void *
-ck_pr_load_ptr(const void *target)
+void *ck_pr_load_ptr(const void *target)
 {
   void *result;
   pthread_mutex_lock(&glock);
@@ -223,8 +219,7 @@ ck_pr_load_ptr(const void *target)
   return result;
 }
 
-int
-ck_pr_load_int(const int *target)
+int ck_pr_load_int(const int *target)
 {
   int result;
   pthread_mutex_lock(&glock);
@@ -233,8 +228,7 @@ ck_pr_load_int(const int *target)
   return result;
 }
 
-uint8_t
-ck_pr_load_8(const uint8_t *target)
+uint8_t ck_pr_load_8(const uint8_t * target)
 {
   uint8_t result;
   pthread_mutex_lock(&glock);
@@ -250,134 +244,139 @@ void ck_pr_store_ptr(void *target, void *value)
   pthread_mutex_unlock(&glock);
 }
 
-
 // Simple hashset
 
 static const size_t prime_1 = 73;
 static const size_t prime_2 = 5009;
 
-size_t hash_function(const char* str, size_t len) {
-    unsigned long hash = 5381;
-    int c;
+size_t hash_function(const char *str, size_t len)
+{
+  unsigned long hash = 5381;
+  int c;
 
-    while (c = *str++) {
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-    }
+  while (c = *str++) {
+    hash = ((hash << 5) + hash) + c;    /* hash * 33 + c */
+  }
 
-    return hash;
+  return hash;
 }
 
 simple_hashset_t simple_hashset_create()
 {
-    simple_hashset_t set = (simple_hashset_t)calloc(1, sizeof(struct simple_hashset_st));
+  simple_hashset_t set =
+      (simple_hashset_t) calloc(1, sizeof(struct simple_hashset_st));
 
-    if (set == NULL) {
-        return NULL;
-    }
+  if (set == NULL) {
+    return NULL;
+  }
 
-    set->hash_func = hash_function;
-    set->nbits = 3;
-    set->capacity = (size_t)(1 << set->nbits);
-    set->mask = set->capacity - 1;
-    set->items = (struct simple_hashset_item_st*)calloc(set->capacity, sizeof(struct simple_hashset_item_st));
-    if (set->items == NULL) {
-        simple_hashset_destroy(set);
-        return NULL;
-    }
-    set->nitems = 0;
-    set->n_deleted_items = 0;
-    return set;
+  set->hash_func = hash_function;
+  set->nbits = 3;
+  set->capacity = (size_t)(1 << set->nbits);
+  set->mask = set->capacity - 1;
+  set->items =
+      (struct simple_hashset_item_st *)calloc(set->capacity,
+                                              sizeof(struct
+                                                     simple_hashset_item_st));
+  if (set->items == NULL) {
+    simple_hashset_destroy(set);
+    return NULL;
+  }
+  set->nitems = 0;
+  set->n_deleted_items = 0;
+  return set;
 }
 
 void simple_hashset_destroy(simple_hashset_t set)
 {
-    if (set) {
-        free(set->items);
-    }
-    free(set);
+  if (set) {
+    free(set->items);
+  }
+  free(set);
 }
 
 void simple_hashset_set_hash_function(simple_hashset_t set, hash_func_t func)
 {
-    set->hash_func = func;
+  set->hash_func = func;
 }
 
-static int simple_hashset_add_member(simple_hashset_t set, symbol_type* key, size_t hash)
+static int simple_hashset_add_member(simple_hashset_t set, symbol_type * key,
+                                     size_t hash)
 {
-    size_t index;
+  size_t index;
 
-    if (hash < 2) {
-        return -1;
+  if (hash < 2) {
+    return -1;
+  }
+
+  index = set->mask & (prime_1 * hash);
+
+  while (set->items[index].hash != 0 && set->items[index].hash != 1) {
+    if (set->items[index].hash == hash) {
+      return 0;
+    } else {
+      /* search free slot */
+      index = set->mask & (index + prime_2);
     }
+  }
 
-    index = set->mask & (prime_1 * hash);
+  ++set->nitems;
+  if (set->items[index].hash == 1) {
+    --set->n_deleted_items;
+  }
 
-    while (set->items[index].hash != 0 && set->items[index].hash != 1) {
-        if (set->items[index].hash == hash) {
-            return 0;
-        }
-        else {
-            /* search free slot */
-            index = set->mask & (index + prime_2);
-        }
-    }
-
-    ++set->nitems;
-    if (set->items[index].hash == 1) {
-        --set->n_deleted_items;
-    }
-
-    set->items[index].hash = hash;
-    set->items[index].item = key;
-    return 1;
+  set->items[index].hash = hash;
+  set->items[index].item = key;
+  return 1;
 }
 
 static void set_maybe_rehash(simple_hashset_t set)
 {
-    struct simple_hashset_item_st *old_items;
-    size_t old_capacity, index;
+  struct simple_hashset_item_st *old_items;
+  size_t old_capacity, index;
 
-
-    if (set->nitems + set->n_deleted_items >= (double)set->capacity * 0.85) {
-        old_items = set->items;
-        old_capacity = set->capacity;
-        ++set->nbits;
-        set->capacity = (size_t)(1 << set->nbits);
-        set->mask = set->capacity - 1;
-        set->items = (struct simple_hashset_item_st*)calloc(set->capacity, sizeof(struct simple_hashset_item_st));
-        set->nitems = 0;
-        set->n_deleted_items = 0;
-        //assert(set->items);
-        for (index = 0; index < old_capacity; ++index) {
-            simple_hashset_add_member(set, old_items[index].item, old_items[index].hash);
-        }
-        free(old_items);
+  if (set->nitems + set->n_deleted_items >= (double)set->capacity * 0.85) {
+    old_items = set->items;
+    old_capacity = set->capacity;
+    ++set->nbits;
+    set->capacity = (size_t)(1 << set->nbits);
+    set->mask = set->capacity - 1;
+    set->items =
+        (struct simple_hashset_item_st *)calloc(set->capacity,
+                                                sizeof(struct
+                                                       simple_hashset_item_st));
+    set->nitems = 0;
+    set->n_deleted_items = 0;
+    //assert(set->items);
+    for (index = 0; index < old_capacity; ++index) {
+      simple_hashset_add_member(set, old_items[index].item,
+                                old_items[index].hash);
     }
+    free(old_items);
+  }
 }
 
-int simple_hashset_add(simple_hashset_t set, symbol_type* key)
+int simple_hashset_add(simple_hashset_t set, symbol_type * key)
 {
-    size_t key_len = strlen(key->desc);
-    size_t hash = set->hash_func(key->desc, key_len);
-    int rv = simple_hashset_add_member(set, key, hash);
-    set_maybe_rehash(set);
-    return rv;
+  size_t key_len = strlen(key->desc);
+  size_t hash = set->hash_func(key->desc, key_len);
+  int rv = simple_hashset_add_member(set, key, hash);
+  set_maybe_rehash(set);
+  return rv;
 }
 
-int simple_hashset_is_member(simple_hashset_t set, symbol_type* key)
+int simple_hashset_is_member(simple_hashset_t set, symbol_type * key)
 {
-    size_t key_len = strlen(key->desc);
-    size_t hash = set->hash_func(key->desc, key_len);
-    size_t index = set->mask & (prime_1 * hash);
+  size_t key_len = strlen(key->desc);
+  size_t hash = set->hash_func(key->desc, key_len);
+  size_t index = set->mask & (prime_1 * hash);
 
-    while (set->items[index].hash != 0) {
-        if (set->items[index].hash == hash) {
-            return index;
-        } else {
-            index = set->mask & (index + prime_2);
-        }
+  while (set->items[index].hash != 0) {
+    if (set->items[index].hash == hash) {
+      return index;
+    } else {
+      index = set->mask & (index + prime_2);
     }
-    return 0;
+  }
+  return 0;
 }
-
-

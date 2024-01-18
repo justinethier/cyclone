@@ -12,7 +12,7 @@
 long global_stack_size = 0;
 long global_heap_size = 0;
 
-static void c_entry_pt(void *data, object clo, int argc, object *args);
+static void c_entry_pt(void *data, object clo, int argc, object * args);
 static void Cyc_heap_init(long heap_size);
 
 static void Cyc_heap_init(long heap_size)

@@ -9,7 +9,6 @@
 #ifndef CYCLONE_RUNTIME_H
 #define CYCLONE_RUNTIME_H
 
-
 /**
  * The boolean True value.
  * \ingroup objects
@@ -231,7 +230,8 @@ object Cyc_global_set(void *thd, object sym, object * glo, object value);
 
 #define global_set_cps(thd,k,glo,value) Cyc_global_set_cps(thd, k, NULL, (object *)&glo, value)
 #define global_set_cps_id(thd,k,id,glo,value) Cyc_global_set_cps(thd, k, id, (object *)&glo, value)
-object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, object value);
+object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo,
+                          object value);
 
 /**
  * Variable argument count support 
@@ -274,8 +274,8 @@ object Cyc_global_set_cps(void *thd, object cont, object sym, object * glo, obje
 
 /**@{*/
 object apply(void *data, object cont, object func, object args);
-void Cyc_apply(void *data, object cont, int argc, object *args);
-void dispatch_apply_va(void *data, object clo, int argc, object *args);
+void Cyc_apply(void *data, object cont, int argc, object * args);
+void dispatch_apply_va(void *data, object clo, int argc, object * args);
 object apply_va(void *data, object cont, int argc, object func, ...);
 void dispatch(void *data, int argc, function_type func, object clo, object cont,
               object args);
@@ -288,7 +288,7 @@ void dispatch(void *data, int argc, function_type func, object clo, object cont,
  */
 /**@{*/
 object Cyc_string_cmp(void *data, object str1, object str2);
-void dispatch_string_91append(void *data, object clo, int _argc, object *args);
+void dispatch_string_91append(void *data, object clo, int _argc, object * args);
 object Cyc_string2number_(void *d, object cont, object str);
 object Cyc_string2number2_(void *data, object cont, int argc, object str, ...);
 int binstr2int(const char *str);
@@ -342,12 +342,12 @@ object Cyc_set_cvar(object var, object value);
  */
 /**@{*/
 object Cyc_display(void *data, object, FILE * port);
-void dispatch_display_va(void *data, object clo, int argc, object *args);
+void dispatch_display_va(void *data, object clo, int argc, object * args);
 object Cyc_display_va(void *data, int argc, object x, ...);
 object Cyc_display_va_list(void *data, object x, object opts);
 object Cyc_write_char(void *data, object c, object port);
 object Cyc_write(void *data, object, FILE * port);
-void dispatch_write_va(void *data, object clo, int argc, object *args);
+void dispatch_write_va(void *data, object clo, int argc, object * args);
 object Cyc_write_va(void *data, int argc, object x, ...);
 object Cyc_write_va_list(void *data, object x, object opts);
 port_type Cyc_stdout(void);
@@ -372,12 +372,12 @@ object Cyc_io_char_ready(void *data, object port);
 object Cyc_write_u8(void *data, object c, object port);
 object Cyc_io_read_u8(void *data, object cont, object port);
 object Cyc_io_peek_u8(void *data, object cont, object port);
-object Cyc_write_bytevector(void *data, object bvec, object port, object start, object end);
+object Cyc_write_bytevector(void *data, object bvec, object port, object start,
+                            object end);
 object Cyc_io_read_line(void *data, object cont, object port);
 void Cyc_io_read_token(void *data, object cont, object port);
 int Cyc_have_mstreams();
 /**@}*/
-
 
 /**
  * \defgroup prim_num Numbers
@@ -558,9 +558,11 @@ object Cyc_fast_list_3(object ptr, object a1, object a2, object a3);
 object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4);
 object Cyc_fast_vector_2(object ptr, object a1, object a2);
 object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3);
-object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4);
-object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4, object a5);
-object Cyc_bit_unset(void *data, object n1, object n2); 
+object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3,
+                         object a4);
+object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4,
+                         object a5);
+object Cyc_bit_unset(void *data, object n1, object n2);
 object Cyc_bit_set(void *data, object n1, object n2);
 object Cyc_num_op_va_list(void *data, int argc,
                           object(fn_op(void *, common_type *, object)),
@@ -568,14 +570,13 @@ object Cyc_num_op_va_list(void *data, int argc,
                           va_list ns, common_type * buf);
 object Cyc_num_op_args(void *data, int argc,
                        object(fn_op(void *, common_type *, object)),
-                       int default_no_args, int default_one_arg, 
-                       object *args,
-                       common_type * buf);
-void Cyc_int2bignum(int n, mp_int *bn);
+                       int default_no_args, int default_one_arg,
+                       object * args, common_type * buf);
+void Cyc_int2bignum(int n, mp_int * bn);
 object Cyc_bignum_normalize(void *data, object n);
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
 void Cyc_make_rectangular(void *data, object k, object r, object i);
-double MRG32k3a (double seed);
+double MRG32k3a(double seed);
 /**@}*/
 /**
  * \defgroup prim_eq Equality and type predicates
@@ -651,7 +652,8 @@ object Cyc_vector_ref(void *d, object v, object k);
 object Cyc_vector_set(void *d, object v, object k, object obj);
 object Cyc_vector_set_unsafe(void *d, object v, object k, object obj);
 object Cyc_vector_set_cps(void *d, object cont, object v, object k, object obj);
-object Cyc_vector_set_unsafe_cps(void *d, object cont, object v, object k, object obj);
+object Cyc_vector_set_unsafe_cps(void *d, object cont, object v, object k,
+                                 object obj);
 object Cyc_make_vector(void *data, object cont, int argc, object len, ...);
 /**@}*/
 
@@ -686,7 +688,7 @@ object Cyc_installation_dir(void *data, object cont, object type);
 object Cyc_compilation_environment(void *data, object cont, object var);
 object Cyc_command_line_arguments(void *data, object cont);
 object Cyc_system(object cmd);
-void Cyc_halt(void *data, object clo, int argc, object *args);
+void Cyc_halt(void *data, object clo, int argc, object * args);
 object __halt(object obj);
 object Cyc_io_delete_file(void *data, object filename);
 object Cyc_io_file_exists(void *data, object filename);
@@ -704,7 +706,7 @@ time_t Cyc_file_last_modified_time(char *path);
 object Cyc_spawn_thread(object thunk);
 void Cyc_start_trampoline(gc_thread_data * thd);
 void Cyc_end_thread(gc_thread_data * thd);
-void Cyc_exit_thread(void *data, object _, int argc, object *args);
+void Cyc_exit_thread(void *data, object _, int argc, object * args);
 object Cyc_thread_sleep(void *data, object timeout);
 /**@}*/
 
@@ -907,7 +909,8 @@ extern object Cyc_glo_call_cc;
  * @brief Raise and handle Scheme exceptions
  */
 /**@{*/
-object Cyc_default_exception_handler(void *data, object _, int argc, object *args);
+object Cyc_default_exception_handler(void *data, object _, int argc,
+                                     object * args);
 
 object Cyc_current_exception_handler(void *data);
 void Cyc_rt_raise(void *data, object err);
@@ -948,7 +951,7 @@ object register_library(const char *name);
 /**@{*/
 extern list global_table;
 void add_global(const char *identifier, object * glo);
-void Cyc_set_globals_changed(gc_thread_data *thd);
+void Cyc_set_globals_changed(gc_thread_data * thd);
 /**@}*/
 
 /**
@@ -970,9 +973,9 @@ void Cyc_set_globals_changed(gc_thread_data *thd);
 #define Cyc_utf8_encode_char(dest, dest_size, char_value) \
   Cyc_utf8_encode(dest, dest_size, &char_value, 1)
 
-int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz);
-int Cyc_utf8_count_code_points(uint8_t* s);
-uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len); 
+int Cyc_utf8_encode(char *dest, int sz, uint32_t * src, int srcsz);
+int Cyc_utf8_count_code_points(uint8_t * s);
+uint32_t Cyc_utf8_validate_stream(uint32_t * state, char *str, size_t len);
 uint32_t Cyc_utf8_validate(char *str, size_t len);
 /**@}*/
 
@@ -994,6 +997,7 @@ static inline object Cyc_cdr(void *data, object lis)
   Cyc_check_pair(data, lis);
   return cdr(lis);
 }
+
 // Unsafe car/cdr
 #define Cyc_car_unsafe(d, lis) car(lis)
 #define Cyc_cdr_unsafe(d, lis) cdr(lis)

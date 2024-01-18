@@ -46,31 +46,13 @@ typedef void *object;
  *\ingroup objects
  */
 enum object_tag {
-        closure0_tag    = 0
-      , closure1_tag    = 1
-      , closureN_tag    = 2
-      , macro_tag       = 3 // Keep closures here for quick type checking
-      , boolean_tag     = 4
-      , bytevector_tag  = 5
-      , c_opaque_tag    = 6
-      , cond_var_tag    = 7
-      , cvar_tag        = 8
-      , double_tag      = 9
-      , eof_tag         = 10
-      , forward_tag     = 11
-      , integer_tag     = 12
-      , bignum_tag      = 13
-      , mutex_tag       = 14
-      , pair_tag        = 15
-      , port_tag        = 16 
-      , primitive_tag   = 17
-      , string_tag      = 18
-      , symbol_tag      = 19
-      , vector_tag      = 20
-      , complex_num_tag = 21
-      , atomic_tag      = 22
-      , void_tag        = 23
-      , record_tag      = 24
+  closure0_tag = 0, closure1_tag = 1, closureN_tag = 2, macro_tag = 3   // Keep closures here for quick type checking
+  , boolean_tag = 4, bytevector_tag = 5, c_opaque_tag = 6, cond_var_tag =
+      7, cvar_tag = 8, double_tag = 9, eof_tag = 10, forward_tag =
+      11, integer_tag = 12, bignum_tag = 13, mutex_tag = 14, pair_tag =
+      15, port_tag = 16, primitive_tag = 17, string_tag = 18, symbol_tag =
+      19, vector_tag = 20, complex_num_tag = 21, atomic_tag = 22, void_tag =
+      23, record_tag = 24
 };
 
 /**
@@ -113,13 +95,13 @@ typedef unsigned char tag_type;
 // Parameters for size of a "page" on the heap (the second generation GC), in bytes.
 
 /** Grow first page by adding this amount to it */
-#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)    
+#define GROW_HEAP_BY_SIZE (2 * 1024 * 1024)
 
 /** Size of the first page */
-#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)     
+#define INITIAL_HEAP_SIZE (3 * 1024 * 1024)
 
 /** Normal size of a heap page */
-#define HEAP_SIZE (8 * 1024 * 1024)    
+#define HEAP_SIZE (8 * 1024 * 1024)
 
 // End heap page size parameters
 ////////////////////////////////
@@ -128,7 +110,7 @@ typedef unsigned char tag_type;
 // Major GC tuning parameters
 
 /** Start GC cycle if % heap space free below this percentage */
-#define GC_COLLECTION_THRESHOLD 0.0125 //0.05
+#define GC_COLLECTION_THRESHOLD 0.0125  //0.05
 
 /** Start GC cycle if fewer than this many heap pages are unswept */
 #define GC_COLLECT_UNDER_UNSWEPT_HEAP_COUNT 3
@@ -221,15 +203,15 @@ struct gc_heap_t {
   /** Size of the heap page in bytes */
   unsigned int size;
   /** Keep empty page alive this many times before freeing */
-  unsigned char ttl; 
+  unsigned char ttl;
   /** Bump: Track remaining space; this is useful for bump&pop style allocation */
   unsigned int remaining;
   /** For fixed-size heaps, only allocate blocks of this size */
   unsigned block_size;
   /** Lazy-sweep: Amount of heap data that is free */
-  unsigned int free_size; 
+  unsigned int free_size;
   /** Lazy-sweep: Determine if the heap is full */
-  unsigned char is_full; 
+  unsigned char is_full;
   /** Lazy-sweep: Determine if the heap has been swept */
   unsigned char is_unswept;
   /** Lazy-sweep: Start GC cycle if fewer than this many heap pages are unswept */
@@ -261,9 +243,9 @@ struct gc_heap_root_t {
  */
 typedef struct gc_header_type_t gc_header_type;
 struct gc_header_type_t {
-  unsigned char mark;      // mark bits 
-  unsigned char grayed:1;    // stack object to be grayed when moved to heap
-  unsigned char immutable:1; // Flag normally mutable obj (EG: pair) as read-only
+  unsigned char mark;           // mark bits 
+  unsigned char grayed:1;       // stack object to be grayed when moved to heap
+  unsigned char immutable:1;    // Flag normally mutable obj (EG: pair) as read-only
 };
 
 /** Get an object's `mark` value */
@@ -290,10 +272,10 @@ typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
 // the collector swaps their values as an optimization.
 
 /** Memory not to be collected by major GC, such as on the stack */
-#define gc_color_red  0         
+#define gc_color_red  0
 
 /** Unallocated memory */
-#define gc_color_blue 2         
+#define gc_color_blue 2
 
 /** Mark buffers */
 typedef struct mark_buffer_t mark_buffer;
@@ -398,29 +380,31 @@ void gc_initialize(void);
 void gc_add_new_unrunning_mutator(gc_thread_data * thd);
 void gc_add_mutator(gc_thread_data * thd);
 void gc_remove_mutator(gc_thread_data * thd);
-int gc_is_mutator_active(gc_thread_data *thd);
-int gc_is_mutator_new(gc_thread_data *thd);
+int gc_is_mutator_active(gc_thread_data * thd);
+int gc_is_mutator_new(gc_thread_data * thd);
 void gc_sleep_ms(int ms);
-gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data *thd);
-gc_heap *gc_heap_free(gc_heap *page, gc_heap *prev_page);
-void gc_heap_merge(gc_heap *hdest, gc_heap *hsrc);
-void gc_merge_all_heaps(gc_thread_data *dest, gc_thread_data *src);
+gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data * thd);
+gc_heap *gc_heap_free(gc_heap * page, gc_heap * prev_page);
+void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc);
+void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src);
 void gc_print_stats(gc_heap * h);
-gc_heap *gc_grow_heap(gc_heap * h, size_t size, gc_thread_data *thd);
+gc_heap *gc_grow_heap(gc_heap * h, size_t size, gc_thread_data * thd);
 char *gc_copy_obj(object hp, char *obj, gc_thread_data * thd);
-void *gc_try_alloc(gc_heap * h, size_t size, char *obj,
-                   gc_thread_data * thd);
-void *gc_try_alloc_slow(gc_heap *h_passed, gc_heap *h, size_t size, char *obj, gc_thread_data *thd);
+void *gc_try_alloc(gc_heap * h, size_t size, char *obj, gc_thread_data * thd);
+void *gc_try_alloc_slow(gc_heap * h_passed, gc_heap * h, size_t size, char *obj,
+                        gc_thread_data * thd);
 void *gc_alloc(gc_heap_root * h, size_t size, char *obj, gc_thread_data * thd,
                int *heap_grown);
-void *gc_alloc_bignum(gc_thread_data *data);
+void *gc_alloc_bignum(gc_thread_data * data);
 size_t gc_allocated_bytes(object obj, gc_free_list * q, gc_free_list * r);
 gc_heap *gc_heap_last(gc_heap * h);
 
-void gc_heap_create_rest(gc_heap *h, gc_thread_data *thd);
-void *gc_try_alloc_rest(gc_heap * h, size_t size, char *obj, gc_thread_data * thd);
-void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd, int *heap_grown);
-void gc_init_fixed_size_free_list(gc_heap *h);
+void gc_heap_create_rest(gc_heap * h, gc_thread_data * thd);
+void *gc_try_alloc_rest(gc_heap * h, size_t size, char *obj,
+                        gc_thread_data * thd);
+void *gc_alloc_rest(gc_heap_root * hrt, size_t size, char *obj,
+                    gc_thread_data * thd, int *heap_grown);
+void gc_init_fixed_size_free_list(gc_heap * h);
 
 //size_t gc_heap_total_size(gc_heap * h);
 //size_t gc_heap_total_free_size(gc_heap *h);
@@ -429,7 +413,7 @@ void gc_init_fixed_size_free_list(gc_heap *h);
 void gc_request_mark_globals(void);
 void gc_mark_globals(object globals, object global_table);
 //size_t gc_sweep(gc_heap * h, size_t * sum_freed_ptr, gc_thread_data *thd);
-gc_heap *gc_sweep(gc_heap * h, gc_thread_data *thd);
+gc_heap *gc_sweep(gc_heap * h, gc_thread_data * thd);
 void gc_thr_grow_move_buffer(gc_thread_data * d);
 void gc_thread_data_init(gc_thread_data * thd, int mut_num, char *stack_base,
                          long stack_size);
@@ -456,7 +440,8 @@ void gc_post_handshake(gc_status_type s);
 void gc_wait_handshake();
 void gc_start_collector();
 void gc_mutator_thread_blocked(gc_thread_data * thd, object cont);
-void gc_mutator_thread_runnable(gc_thread_data * thd, object result, object maybe_copied);
+void gc_mutator_thread_runnable(gc_thread_data * thd, object result,
+                                object maybe_copied);
 void Cyc_make_shared_object(void *data, object k, object obj);
 #define set_thread_blocked(d, c) \
   gc_mutator_thread_blocked(((gc_thread_data *)d), (c))
@@ -523,7 +508,6 @@ void Cyc_make_shared_object(void *data, object k, object obj);
  */
 #define forward(obj) (((pair_type *) obj)->pair_car)
 
-
 /**
  * \defgroup gc_minor_mut Mutation table
  * @brief Mutation table to support the minor GC write barrier
@@ -538,7 +522,8 @@ void clear_mutations(void *data);
  * @brief Minor GC write barrier to ensure there are no references to stack objects from the heap.
  */
 /**@{*/
-object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc);
+object transport_stack_value(gc_thread_data * data, object var, object value,
+                             int *run_gc);
 /**@}*/
 
 /**@}*/
@@ -550,8 +535,9 @@ object transport_stack_value(gc_thread_data *data, object var, object value, int
  * \defgroup ffi Foreign Function Interface
  */
 /**@{*/
-object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *args);
-object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg);
+object Cyc_scm_call(gc_thread_data * parent_thd, object fnc, int argc,
+                    object * args);
+object Cyc_scm_call_no_gc(gc_thread_data * parent_thd, object fnc, object arg);
 /**@}*/
 
 /**
@@ -659,10 +645,10 @@ typedef uint32_t char_type;
 /**@{*/
 
 /** Function type */
-typedef void (*function_type) (void *data, object clo, int argc, object *args);
+typedef void (*function_type)(void *data, object clo, int argc, object * args);
 
 /** Non-CPS function type */
-typedef object (*inline_function_type) ();
+typedef object(*inline_function_type) ();
 
 /**
  * @brief C-variable integration type - wrapper around a Cyclone object pointer
@@ -913,11 +899,8 @@ typedef struct {
  * and provides constants for each of the comparison operators.
  */
 typedef enum {
-    CYC_BN_LTE = -2
-  , CYC_BN_LT = MP_LT
-  , CYC_BN_EQ = MP_EQ
-  , CYC_BN_GT = MP_GT
-  , CYC_BN_GTE = 2
+  CYC_BN_LTE = -2, CYC_BN_LT = MP_LT, CYC_BN_EQ = MP_EQ, CYC_BN_GT =
+      MP_GT, CYC_BN_GTE = 2
 } bn_cmp_type;
 
 /** 
@@ -1089,17 +1072,17 @@ typedef struct {
 typedef struct {
   gc_header_type hdr;
   tag_type tag;
-  void *unused; // Protect against forwarding pointer, ideally would not be needed.
+  void *unused;                 // Protect against forwarding pointer, ideally would not be needed.
   FILE *fp;
   int mode;
   unsigned char flags;
   unsigned int line_num;
   unsigned int col_num;
   unsigned int buf_idx;
-  unsigned int tok_start; // Start of token in mem_buf (end is unknown yet)
-  unsigned int tok_end; // End of token in tok_buf (start is tok_buf[0])
-  char *tok_buf; // Alternative buffer for tokens
-  size_t tok_buf_len; 
+  unsigned int tok_start;       // Start of token in mem_buf (end is unknown yet)
+  unsigned int tok_end;         // End of token in tok_buf (start is tok_buf[0])
+  char *tok_buf;                // Alternative buffer for tokens
+  size_t tok_buf_len;
   char *mem_buf;
   size_t mem_buf_len;
   unsigned short read_len;
@@ -1168,10 +1151,22 @@ typedef struct {
 } vector_type;
 typedef vector_type *vector;
 
-typedef struct { vector_type v; object arr[2]; } vector_2_type;
-typedef struct { vector_type v; object arr[3]; } vector_3_type;
-typedef struct { vector_type v; object arr[4]; } vector_4_type;
-typedef struct { vector_type v; object arr[5]; } vector_5_type;
+typedef struct {
+  vector_type v;
+  object arr[2];
+} vector_2_type;
+typedef struct {
+  vector_type v;
+  object arr[3];
+} vector_3_type;
+typedef struct {
+  vector_type v;
+  object arr[4];
+} vector_4_type;
+typedef struct {
+  vector_type v;
+  object arr[5];
+} vector_5_type;
 
 /** Create a new vector in the nursery */
 #define make_empty_vector(v) \
@@ -1296,9 +1291,21 @@ typedef pair_type *pair;
   (n))
 
 //typedef list_1_type pair_type;
-typedef struct { pair_type a; pair_type b; } list_2_type;
-typedef struct { pair_type a; pair_type b; pair_type c;} list_3_type;
-typedef struct { pair_type a; pair_type b; pair_type c; pair_type d;} list_4_type;
+typedef struct {
+  pair_type a;
+  pair_type b;
+} list_2_type;
+typedef struct {
+  pair_type a;
+  pair_type b;
+  pair_type c;
+} list_3_type;
+typedef struct {
+  pair_type a;
+  pair_type b;
+  pair_type c;
+  pair_type d;
+} list_4_type;
 
 /**
  * Create a pair with a single value. 
@@ -1438,7 +1445,7 @@ typedef closure0_type *macro;
  * These objects are special and can be statically allocated as an optimization
  */
 #define mclosure0(c, f) \
- static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .num_args = -1 }; /* TODO: need a new macro that initializes num_args */
+ static closure0_type c = { .hdr.mark = gc_color_red, .hdr.grayed = 0, .tag = closure0_tag, .fn = f, .num_args = -1 };  /* TODO: need a new macro that initializes num_args */
 
 #define maclosure0(c,f,na) \
   closure0_type c; \
@@ -1527,7 +1534,7 @@ struct vpbuffer_t {
 };
 
 vpbuffer *vp_create(void);
-void vp_add(vpbuffer *v, void *obj);
+void vp_add(vpbuffer * v, void *obj);
 
 /* Utility functions */
 void **vpbuffer_realloc(void **buf, int *len);
@@ -1536,10 +1543,10 @@ void vpbuffer_free(void **buf);
 
 /* Bignum utility functions */
 int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty);
-void Cyc_int2bignum(int n, mp_int *bn);
+void Cyc_int2bignum(int n, mp_int * bn);
 
 /* Remaining GC prototypes that require objects to be defined */
-void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
+void *gc_alloc_from_bignum(gc_thread_data * data, bignum_type * src);
 
 /**
  * Do a minor GC
@@ -1548,5 +1555,6 @@ void *gc_alloc_from_bignum(gc_thread_data *data, bignum_type *src);
 int gc_minor(void *data, object low_limit, object high_limit, closure cont,
              object * args, int num_args);
 
-void Cyc_import_shared_object(void *data, object cont, object filename, object entry_pt_fnc);
+void Cyc_import_shared_object(void *data, object cont, object filename,
+                              object entry_pt_fnc);
 #endif                          /* CYCLONE_TYPES_H */

@@ -24,13 +24,16 @@
 
 static const int MAX_DEPTH = 512;
 
-static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte);
-static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes);
+static uint32_t Cyc_utf8_decode(uint32_t * state, uint32_t * codep,
+                                uint32_t byte);
+static int Cyc_utf8_count_code_points_and_bytes(uint8_t * s,
+                                                char_type * codepoint,
+                                                int *cpts, int *bytes);
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
 const char *tag_names[] = {
-      /*closure0_tag  */   "procedure"
+  /*closure0_tag  */ "procedure"
       /*closure1_tag  */ , "procedure"
       /*closureN_tag  */ , "procedure"
       /*macro_tag     */ , "macro"
@@ -51,10 +54,10 @@ const char *tag_names[] = {
       /*string_tag    */ , "string"
       /*symbol_tag    */ , "symbol"
       /*vector_tag    */ , "vector"
-      /*complex_num_tag*/ , "complex number"
-      /*atomic_tag*/     , "atomic"
-      /*void_tag*/       , "void"
-      /*record_tag*/     , "record"
+      /*complex_num_tag */ , "complex number"
+      /*atomic_tag */ , "atomic"
+      /*void_tag */ , "void"
+      /*record_tag */ , "record"
   , "Reserved for future use"
 };
 
@@ -63,7 +66,8 @@ void Cyc_invalid_type_error(void *data, int tag, object found)
   char buf[256];
 #if GC_DEBUG_TRACE
   // Object address can be very useful for GC debugging
-  snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag], found);
+  snprintf(buf, 255, "Invalid type: expected %s, found (%p) ", tag_names[tag],
+           found);
 #else
   snprintf(buf, 255, "Invalid type: expected %s, found ", tag_names[tag]);
 #endif
@@ -101,21 +105,21 @@ void Cyc_check_bounds(void *data, const char *label, int len, int index)
 #ifdef CYC_HIGH_RES_TIMERS
 /* High resolution timers */
 #include <time.h>
-long long hrt_get_current() 
+long long hrt_get_current()
 {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  long long jiffy = (now.tv_sec)*1000000LL + now.tv_nsec/1000; // nano->microseconds
+  long long jiffy = (now.tv_sec) * 1000000LL + now.tv_nsec / 1000;      // nano->microseconds
   return jiffy;
 }
 
-long long hrt_cmp_current(long long tstamp) 
+long long hrt_cmp_current(long long tstamp)
 {
   long long now = hrt_get_current();
   return (now - tstamp);
 }
 
-void hrt_log_delta(const char *label, long long tstamp) 
+void hrt_log_delta(const char *label, long long tstamp)
 {
   static long long initial = 1;
   static long long initial_tstamp;
@@ -197,9 +201,9 @@ object Cyc_global_variables = NULL;
 int _cyc_argc = 0;
 char **_cyc_argv = NULL;
 
-static symbol_type __EOF = { {0}, eof_tag, ""};  // symbol_type in lieu of custom type
-static symbol_type __VOID = { {0}, void_tag, ""};  // symbol_type in lieu of custom type
-static symbol_type __RECORD = { {0}, record_tag, ""};  // symbol_type in lieu of custom type
+static symbol_type __EOF = { {0}, eof_tag, "" };        // symbol_type in lieu of custom type
+static symbol_type __VOID = { {0}, void_tag, "" };      // symbol_type in lieu of custom type
+static symbol_type __RECORD = { {0}, record_tag, "" };  // symbol_type in lieu of custom type
 
 const object Cyc_EOF = &__EOF;
 const object Cyc_VOID = &__VOID;
@@ -222,37 +226,36 @@ void pack_env_variables(void *data, object k)
   object head = NULL;
   tail = head;
   for (; *env != NULL; env++) {
-    char *e = *env,
-         *eqpos = strchr(e, '=');
+    char *e = *env, *eqpos = strchr(e, '=');
     pair_type *p = alloca(sizeof(pair_type));
     pair_type *tmp = alloca(sizeof(pair_type));
     string_type *sval = alloca(sizeof(string_type));
     string_type *svar = alloca(sizeof(string_type));
 
-    svar->hdr.mark = gc_color_red; 
+    svar->hdr.mark = gc_color_red;
     svar->hdr.grayed = 0;
     svar->hdr.immutable = 0;
-    svar->tag = string_tag; 
+    svar->tag = string_tag;
     svar->len = eqpos - e;
     svar->str = alloca(sizeof(char) * (svar->len));
     strncpy(svar->str, e, svar->len);
     (svar->str)[svar->len] = '\0';
-    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *)svar->str);
+    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *) svar->str);
 
     if (eqpos) {
       eqpos++;
     }
-    sval->hdr.mark = gc_color_red; 
+    sval->hdr.mark = gc_color_red;
     sval->hdr.grayed = 0;
     sval->hdr.immutable = 0;
-    sval->tag = string_tag; 
+    sval->tag = string_tag;
     sval->len = strlen(eqpos);
-    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *)eqpos);
+    svar->num_cp = Cyc_utf8_count_code_points((uint8_t *) eqpos);
     sval->str = eqpos;
     set_pair(tmp, svar, sval);
     set_pair(p, tmp, NULL);
     if (head == NULL) {
-        tail = head = p;
+      tail = head = p;
     } else {
       cdr(tail) = p;
       tail = p;
@@ -314,6 +317,7 @@ static bool set_insert(ck_hs_t * hs, const void *value)
   h = CK_HS_HASH(hs, hs_hash, value);
   return ck_hs_put(hs, h, value);
 }
+
 // End hashset supporting functions
 
 /**
@@ -324,8 +328,7 @@ void gc_init_heap(long heap_size)
 {
   if (!ck_hs_init(&lib_table,
                   CK_HS_MODE_OBJECT | CK_HS_MODE_SPMC,
-                  hs_hash, hs_compare,
-                  &my_allocator, 32, 43423)) {
+                  hs_hash, hs_compare, &my_allocator, 32, 43423)) {
     fprintf(stderr, "Unable to initialize library table\n");
     exit(1);
   }
@@ -340,7 +343,6 @@ void gc_init_heap(long heap_size)
     fprintf(stderr, "Unable to initialize symbol_table_lock mutex\n");
     exit(1);
   }
-  
   //ht_test(); // JAE - DEBUGGING!!
 }
 
@@ -360,48 +362,50 @@ object Cyc_global_set(void *thd, object identifier, object * glo, object value)
   return value;
 }
 
-static void Cyc_global_set_cps_gc_return(void *data, object cont, int argc, object *args) //object glo_obj, object val, object next)
+static void Cyc_global_set_cps_gc_return(void *data, object cont, int argc, object * args)      //object glo_obj, object val, object next)
 {
   object glo_obj = args[0];
   object val = args[1];
   object next = args[2];
-  object *glo = (object *)glo_obj;
+  object *glo = (object *) glo_obj;
   if (*glo != val) {
     *(glo) = val;
   }
-  closcall1(data, (closure)next, val);
+  closcall1(data, (closure) next, val);
 }
 
-object Cyc_global_set_cps(void *thd, object cont, object identifier, object * glo, object value)
+object Cyc_global_set_cps(void *thd, object cont, object identifier,
+                          object * glo, object value)
 {
   int do_gc = 0;
-  value = transport_stack_value(thd, NULL, value, &do_gc); // glo cannot be thread-local!
+  value = transport_stack_value(thd, NULL, value, &do_gc);      // glo cannot be thread-local!
   gc_mut_update((gc_thread_data *) thd, *glo, value);
   if (do_gc) {
     // Ensure global is a root. We need to do this here to ensure
     // global and all its children are relocated to the heap.
     cvar_type cv = { {0}, cvar_tag, glo };
     gc_thread_data *data = (gc_thread_data *) thd;
-    data->mutations = vpbuffer_add(data->mutations, 
-                                  &(data->mutation_buflen), 
-                                  data->mutation_count, 
-                                  &cv);
+    data->mutations = vpbuffer_add(data->mutations,
+                                   &(data->mutation_buflen),
+                                   data->mutation_count, &cv);
     data->mutation_count++;
     // Run GC, then do the actual assignment with heap objects
-    mclosure0(clo, (function_type)Cyc_global_set_cps_gc_return);
-    object buf[3]; buf[0] = (object)glo; buf[1] = value; buf[2] = cont;
+    mclosure0(clo, (function_type) Cyc_global_set_cps_gc_return);
+    object buf[3];
+    buf[0] = (object) glo;
+    buf[1] = value;
+    buf[2] = cont;
     GC(data, &clo, buf, 3);
   }
   if (*glo != value) {
-    *(glo) = value; // Already have heap objs, do assignment now
+    *(glo) = value;             // Already have heap objs, do assignment now
   }
   return value;
 }
 
-
 static boolean_type t_boolean = { {0}, boolean_tag, "t" };
 static boolean_type f_boolean = { {0}, boolean_tag, "f" };
-static symbol_type Cyc_void_symbol = { {0}, symbol_tag, ""};
+static symbol_type Cyc_void_symbol = { {0}, symbol_tag, "" };
 
 const object boolean_t = &t_boolean;
 const object boolean_f = &f_boolean;
@@ -426,14 +430,18 @@ void Cyc_st_print(void *data, FILE * out)
   gc_thread_data *thd = (gc_thread_data *) data;
   int n = 1;
   int i = (thd->stack_trace_idx - 1);
-  if (i < 0) { i = MAX_STACK_TRACES - 1; }
+  if (i < 0) {
+    i = MAX_STACK_TRACES - 1;
+  }
 
   while (i != thd->stack_trace_idx) {
     if (thd->stack_traces[i]) {
       fprintf(out, "[%d] %s\n", n++, thd->stack_traces[i]);
     }
     i = (i - 1);
-    if (i < 0) { i = MAX_STACK_TRACES - 1; }
+    if (i < 0) {
+      i = MAX_STACK_TRACES - 1;
+    }
   }
 }
 
@@ -461,7 +469,7 @@ static char *_strdup(const char *s)
 
 static object find_symbol_by_name(const char *name)
 {
-  symbol_type tmp = { {0}, symbol_tag, name};
+  symbol_type tmp = { {0}, symbol_tag, name };
   object result = set_get(&symbol_table, &tmp);
   return result;
 }
@@ -483,7 +491,7 @@ object add_symbol(symbol_type * psym)
 
 static object add_symbol_by_name(const char *name)
 {
-  symbol_type sym = { {0}, symbol_tag, _strdup(name)};
+  symbol_type sym = { {0}, symbol_tag, _strdup(name) };
   symbol_type *psym = malloc(sizeof(symbol_type));
   memcpy(psym, &sym, sizeof(symbol_type));
   return add_symbol(psym);
@@ -504,7 +512,7 @@ object find_or_add_symbol(const char *name)
 /* Library table */
 object is_library_loaded(const char *name)
 {
-  symbol_type tmp = { {0}, symbol_tag, name};
+  symbol_type tmp = { {0}, symbol_tag, name };
   object result = set_get(&lib_table, &tmp);
   if (result)
     return boolean_t;
@@ -513,7 +521,7 @@ object is_library_loaded(const char *name)
 
 object register_library(const char *name)
 {
-  symbol_type sym = { {0}, symbol_tag, _strdup(name)};
+  symbol_type sym = { {0}, symbol_tag, _strdup(name) };
   symbol_type *psym = malloc(sizeof(symbol_type));
   memcpy(psym, &sym, sizeof(symbol_type));
   // Reuse mutex since lib inserts will be rare
@@ -522,8 +530,8 @@ object register_library(const char *name)
   pthread_mutex_unlock(&symbol_table_lock);
   return boolean_t;
 }
-/* END Library table */
 
+/* END Library table */
 
 /* Global table */
 list global_table = NULL;
@@ -555,7 +563,7 @@ void debug_dump_globals()
   }
 }
 
-void Cyc_set_globals_changed(gc_thread_data *thd) 
+void Cyc_set_globals_changed(gc_thread_data * thd)
 {
   thd->globals_changed = 1;
 }
@@ -573,7 +581,8 @@ void Cyc_set_globals_changed(gc_thread_data *thd)
  * @param run_gc OUT parameter, returns 1 if minor GC needs to be invoked
  * @return Pointer to `var` object
  */
-object transport_stack_value(gc_thread_data *data, object var, object value, int *run_gc) 
+object transport_stack_value(gc_thread_data * data, object var, object value,
+                             int *run_gc)
 {
   char tmp;
   int inttmp, *heap_grown = &inttmp;
@@ -583,45 +592,48 @@ object transport_stack_value(gc_thread_data *data, object var, object value, int
   // a heap variable to point to a stack var.
   if (!gc_is_stack_obj(&tmp, data, var) && gc_is_stack_obj(&tmp, data, value)) {
     // Must move `value` to the heap to allow use by other threads
-    switch(type_of(value)) {
-      case string_tag:
-      case bytevector_tag:
-        if (immutable(value)) {
-          // Safe to transport now
-          object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
-          return hp;
-        }
-        // Need to GC if obj is mutable, EG: a string could be mutated so we can't
-        // have multiple copies of the object running around
-        *run_gc = 1;
-        return value;
-      case double_tag:
-      case port_tag:
-      case c_opaque_tag:
-      case complex_num_tag: {
+    switch (type_of(value)) {
+    case string_tag:
+    case bytevector_tag:
+      if (immutable(value)) {
+        // Safe to transport now
+        object hp =
+            gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data,
+                     heap_grown);
+        return hp;
+      }
+      // Need to GC if obj is mutable, EG: a string could be mutated so we can't
+      // have multiple copies of the object running around
+      *run_gc = 1;
+      return value;
+    case double_tag:
+    case port_tag:
+    case c_opaque_tag:
+    case complex_num_tag:{
         // These objects are immutable, transport now
-        object hp = gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data, heap_grown);
+        object hp =
+            gc_alloc(heap, gc_allocated_bytes(value, NULL, NULL), value, data,
+                     heap_grown);
         return hp;
       }
       // Objs w/children force minor GC to guarantee everything is relocated:
-      case cvar_tag:
-      case closure0_tag:
-      case closure1_tag:
-      case closureN_tag:
-      case pair_tag:
-      case vector_tag:
-        *run_gc = 1;
-        return value;
-      default:
-        // Other object types are not stack-allocated so should never get here
-        printf("Invalid shared object type %d\n", type_of(value));
-        exit(1);
+    case cvar_tag:
+    case closure0_tag:
+    case closure1_tag:
+    case closureN_tag:
+    case pair_tag:
+    case vector_tag:
+      *run_gc = 1;
+      return value;
+    default:
+      // Other object types are not stack-allocated so should never get here
+      printf("Invalid shared object type %d\n", type_of(value));
+      exit(1);
     }
   }
 
   return value;
 }
-
 
 /* Mutation table functions
  *
@@ -647,21 +659,18 @@ void add_mutation(void *data, object var, int index, object value)
   // as a container to store "real" stack values that must be moved
   // by the collector. In this case we pass -2 to force collection of
   // these objects regardless of whether var is on the heap.
-  if ( (!gc_is_stack_obj(&tmp, data, var) && 
-         gc_is_stack_obj(&tmp, data, value)) ||
-       index == -2) {
-    thd->mutations = vpbuffer_add(thd->mutations, 
-                                  &(thd->mutation_buflen), 
-                                  thd->mutation_count, 
-                                  var);
+  if ((!gc_is_stack_obj(&tmp, data, var) &&
+       gc_is_stack_obj(&tmp, data, value)) || index == -2) {
+    thd->mutations = vpbuffer_add(thd->mutations,
+                                  &(thd->mutation_buflen),
+                                  thd->mutation_count, var);
     thd->mutation_count++;
     if (index >= 0) {
       // For vectors only, add index as another var. That way
       // the write barrier only needs to inspect the mutated index.
-      thd->mutations = vpbuffer_add(thd->mutations, 
-                                     &(thd->mutation_buflen), 
-                                     thd->mutation_count, 
-                                     obj_int2obj(index));
+      thd->mutations = vpbuffer_add(thd->mutations,
+                                    &(thd->mutation_buflen),
+                                    thd->mutation_count, obj_int2obj(index));
       thd->mutation_count++;
     }
   }
@@ -687,7 +696,8 @@ object Cyc_glo_eval_from_c = NULL;
  * @param argc Unused, just here to maintain calling convention
  * @param args Argument buffer, index 0 is object containing data for the error
  */
-object Cyc_default_exception_handler(void *data, object _, int argc, object *args)
+object Cyc_default_exception_handler(void *data, object _, int argc,
+                                     object * args)
 {
   object err = args[0];
   int is_msg = 1;
@@ -699,9 +709,7 @@ object Cyc_default_exception_handler(void *data, object _, int argc, object *arg
     // Error is list of form (type arg1 ... argn)
     err = cdr(err);             // skip type field
     for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
-      if (is_msg && 
-          is_object_type(car(err)) && 
-          type_of(car(err)) == string_tag) {
+      if (is_msg && is_object_type(car(err)) && type_of(car(err)) == string_tag) {
         is_msg = 0;
         Cyc_display(data, car(err), stderr);
         if (cdr(err)) {
@@ -799,9 +807,9 @@ static int equal(object x, object y, int depth)
   if (obj_is_int(x))
     return (obj_is_int(y) && x == y) ||
         (is_object_type(y) &&
-         (
-          (type_of(y) == integer_tag && integer_value(y) == obj_obj2int(x)) ||
-          (type_of(y) == bignum_tag && Cyc_bignum_cmp(MP_EQ, x, -1, y, bignum_tag))
+         ((type_of(y) == integer_tag && integer_value(y) == obj_obj2int(x)) ||
+          (type_of(y) == bignum_tag
+           && Cyc_bignum_cmp(MP_EQ, x, -1, y, bignum_tag))
          ));
   switch (type_of(x)) {
   case string_tag:
@@ -817,10 +825,12 @@ static int equal(object x, object y, int depth)
         type_of(y) == vector_tag &&
         ((vector) x)->num_elements == ((vector) y)->num_elements) {
       int i;
-      if (x == y) return 1;
+      if (x == y)
+        return 1;
       for (i = 0; i < ((vector) x)->num_elements; i++) {
-        if (_equalp(((vector) x)->elements[i], ((vector) y)->elements[i], depth + 1) ==
-            boolean_f)
+        if (_equalp
+            (((vector) x)->elements[i], ((vector) y)->elements[i],
+             depth + 1) == boolean_f)
           return 0;
       }
       return 1;
@@ -832,33 +842,33 @@ static int equal(object x, object y, int depth)
         ((bytevector) x)->len == ((bytevector) y)->len) {
       int i;
       for (i = 0; i < ((bytevector) x)->len; i++) {
-        if (((bytevector)x)->data[i] != ((bytevector)y)->data[i]) {
+        if (((bytevector) x)->data[i] != ((bytevector) y)->data[i]) {
           return 0;
         }
       }
       return 1;
     }
     return 0;
-  case bignum_tag: {
-    int ty = -1;
-    if (is_value_type(y)) {
-      if (!obj_is_int(y)) {
-        return 0;
+  case bignum_tag:{
+      int ty = -1;
+      if (is_value_type(y)) {
+        if (!obj_is_int(y)) {
+          return 0;
+        }
+      } else {
+        ty = type_of(y);
       }
-    } else {
-      ty = type_of(y);
+
+      return Cyc_bignum_cmp(MP_EQ, x, bignum_tag, y, ty);
+      //  return (is_object_type(y) &&
+      //          type_of(y) == bignum_tag &&
+      //          MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
     }
-    
-    return Cyc_bignum_cmp(MP_EQ, x, bignum_tag, y, ty);
-  //  return (is_object_type(y) &&
-  //          type_of(y) == bignum_tag &&
-  //          MP_EQ == mp_cmp(&bignum_value(x), &bignum_value(y)));
-  }
-  //case integer_tag:
-  //  return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
-  //      (is_object_type(y) &&
-  //       type_of(y) == integer_tag &&
-  //       ((integer_type *) x)->value == ((integer_type *) y)->value);
+    //case integer_tag:
+    //  return (obj_is_int(y) && obj_obj2int(y) == integer_value(x)) ||
+    //      (is_object_type(y) &&
+    //       type_of(y) == integer_tag &&
+    //       ((integer_type *) x)->value == ((integer_type *) y)->value);
   case complex_num_tag:
     return (is_object_type(y) &&
             type_of(y) == complex_num_tag &&
@@ -906,8 +916,8 @@ object Cyc_has_vector_cycle(object vec)
 {
   int i;
   // TODO: this is not generic enough
-  for (i = 0; i < ((vector)vec)->num_elements; i++) {
-    if (((vector)vec)->elements[i] == vec) {
+  for (i = 0; i < ((vector) vec)->num_elements; i++) {
+    if (((vector) vec)->elements[i] == vec) {
       return boolean_t;
     }
   }
@@ -950,7 +960,7 @@ object Cyc_has_cycle(object lst)
 object Cyc_is_list(object lst)
 {
   object slow_lst, fast_lst;
-  if (lst == NULL){
+  if (lst == NULL) {
     return boolean_t;
   } else if (is_value_type(lst)) {
     return boolean_f;
@@ -963,13 +973,13 @@ object Cyc_is_list(object lst)
     if (fast_lst == NULL)
       return boolean_t;
     if (Cyc_is_pair(fast_lst) == boolean_f)
-      return boolean_f; // Improper list
+      return boolean_f;         // Improper list
     if ((cdr(fast_lst)) == NULL)
       return boolean_t;
     if (Cyc_is_pair(cdr(fast_lst)) == boolean_f)
-      return boolean_f; // Improper
+      return boolean_f;         // Improper
     if (slow_lst == fast_lst)
-      return boolean_t; // Cycle; we have a list
+      return boolean_t;         // Cycle; we have a list
 
     slow_lst = cdr(slow_lst);
     fast_lst = cddr(fast_lst);
@@ -999,7 +1009,7 @@ int double2buffer(char *buf, int buf_size, double num)
   }
 }
 
-void dispatch_display_va(void *data, object cont, int argc, object *args)
+void dispatch_display_va(void *data, object cont, int argc, object * args)
 {
   object x = args[0];
   object opts = boolean_f;
@@ -1106,12 +1116,12 @@ object _Cyc_display(void *data, object x, FILE * port, int depth)
   case integer_tag:
     fprintf(port, "%d", ((integer_type *) x)->value);
     break;
-  case double_tag: {
-    char buf[33];
-    double2buffer(buf, 32, ((double_type *) x)->value);
-    fprintf(port, "%s", buf);
-    break;
-  }
+  case double_tag:{
+      char buf[33];
+      double2buffer(buf, 32, ((double_type *) x)->value);
+      fprintf(port, "%s", buf);
+      break;
+    }
   case string_tag:
     fprintf(port, "%s", ((string_type *) x)->str);
     break;
@@ -1183,52 +1193,49 @@ object _Cyc_display(void *data, object x, FILE * port, int depth)
     }
     fprintf(port, ")");
     break;
-  case bignum_tag: {
-    int bufsz; 
-    char *buf;
-    size_t written;
+  case bignum_tag:{
+      int bufsz;
+      char *buf;
+      size_t written;
 
-    BIGNUM_CALL(mp_radix_size(&bignum_value(x), 10, &bufsz));
+      BIGNUM_CALL(mp_radix_size(&bignum_value(x), 10, &bufsz));
 
-    buf = alloca(bufsz);
-    if (mp_to_radix(&bignum_value(x), buf, bufsz, &written,10) != 0) {
-      fprintf(port, "Error displaying bignum!");
-      exit(1);
+      buf = alloca(bufsz);
+      if (mp_to_radix(&bignum_value(x), buf, bufsz, &written, 10) != 0) {
+        fprintf(port, "Error displaying bignum!");
+        exit(1);
+      }
+      fprintf(port, "%s", buf);
+      break;
     }
-    fprintf(port, "%s", buf);
-    break;
-  }
-  case complex_num_tag: {
-    char rbuf[33], ibuf[33];
-    const char *plus="+", *empty="";
-    double dreal = creal(((complex_num_type *) x)->value);
-    double dimag = cimag(((complex_num_type *) x)->value);
-    double2buffer(rbuf, 32, dreal);
-    double2buffer(ibuf, 32, dimag);
-    if (dreal == 0.0) {
-      fprintf(port, "%si", ibuf);
-    } else {
-      fprintf(port, "%s%s%si", 
-        rbuf, 
-        (dimag < 0.0) ? empty : plus,
-        ibuf);
+  case complex_num_tag:{
+      char rbuf[33], ibuf[33];
+      const char *plus = "+", *empty = "";
+      double dreal = creal(((complex_num_type *) x)->value);
+      double dimag = cimag(((complex_num_type *) x)->value);
+      double2buffer(rbuf, 32, dreal);
+      double2buffer(ibuf, 32, dimag);
+      if (dreal == 0.0) {
+        fprintf(port, "%si", ibuf);
+      } else {
+        fprintf(port, "%s%s%si", rbuf, (dimag < 0.0) ? empty : plus, ibuf);
+      }
+      break;
     }
-    break;
-  }
   default:
     fprintf(port, "Cyc_display: bad tag x=%d\n", ((closure) x)->tag);
     exit(1);
   }
-done:
+ done:
   return quote_void;
 }
 
-object Cyc_display(void *data, object x, FILE * port) 
+object Cyc_display(void *data, object x, FILE * port)
 {
   return _Cyc_display(data, x, port, 0);
 }
 
-void dispatch_write_va(void *data, object clo, int argc, object *args)
+void dispatch_write_va(void *data, object clo, int argc, object * args)
 {
   object x = args[0];
   object opts = boolean_f;
@@ -1256,7 +1263,7 @@ object Cyc_write_va(void *data, int argc, object x, ...)
 
 object Cyc_write_va_list(void *data, object x, object opts)
 {
-  FILE *fp = stdout; // OK since this is the internal version of write
+  FILE *fp = stdout;            // OK since this is the internal version of write
   if (opts != boolean_f) {
     Cyc_check_port(data, opts);
     fp = ((port_type *) opts)->fp;
@@ -1280,20 +1287,38 @@ static object _Cyc_write(void *data, object x, FILE * port, int depth)
   if (obj_is_char(x)) {
     char_type c = obj_obj2char(x);
     switch (c) {
-    case 0:   fprintf(port, "#\\null"); break;
-    case 7:   fprintf(port, "#\\alarm"); break;
-    case 8:   fprintf(port, "#\\backspace"); break;
-    case 9:   fprintf(port, "#\\tab"); break;
-    case 10:  fprintf(port, "#\\newline"); break;
-    case 13:  fprintf(port, "#\\return"); break;
-    case 27:  fprintf(port, "#\\escape"); break;
-    case 32:  fprintf(port, "#\\space"); break;
-    case 127: fprintf(port, "#\\delete"); break;
-    default: {
-      char cbuf[5];
-      Cyc_utf8_encode_char(cbuf, 5, c);
-      fprintf(port, "#\\%s", cbuf);
+    case 0:
+      fprintf(port, "#\\null");
       break;
+    case 7:
+      fprintf(port, "#\\alarm");
+      break;
+    case 8:
+      fprintf(port, "#\\backspace");
+      break;
+    case 9:
+      fprintf(port, "#\\tab");
+      break;
+    case 10:
+      fprintf(port, "#\\newline");
+      break;
+    case 13:
+      fprintf(port, "#\\return");
+      break;
+    case 27:
+      fprintf(port, "#\\escape");
+      break;
+    case 32:
+      fprintf(port, "#\\space");
+      break;
+    case 127:
+      fprintf(port, "#\\delete");
+      break;
+    default:{
+        char cbuf[5];
+        Cyc_utf8_encode_char(cbuf, 5, c);
+        fprintf(port, "#\\%s", cbuf);
+        break;
       }
     }
     return quote_void;
@@ -1303,30 +1328,48 @@ static object _Cyc_write(void *data, object x, FILE * port, int depth)
     return quote_void;
   }
   switch (type_of(x)) {
-  case string_tag: {
-    //fprintf(port, "\"%s\"", ((string_type *) x)->str);
-    char *s = string_str(x);
-    fputc('"', port);
-    while (*s){
-      switch(*s){
-      case '\a': fprintf(port, "\\a"); break;
-      case '\b': fprintf(port, "\\b"); break;
-      case '\f': fprintf(port, "\\f"); break;
-      case '\n': fprintf(port, "\\n"); break;
-      case '\r': fprintf(port, "\\r"); break;
-      case '\t': fprintf(port, "\\t"); break;
-      case '\v': fprintf(port, "\\v"); break;
-      case '\\': fprintf(port, "\\\\"); break;
-      case '\"': fprintf(port, "\\\""); break;
-      default:
-        fputc(*s, port);
-        break;
+  case string_tag:{
+      //fprintf(port, "\"%s\"", ((string_type *) x)->str);
+      char *s = string_str(x);
+      fputc('"', port);
+      while (*s) {
+        switch (*s) {
+        case '\a':
+          fprintf(port, "\\a");
+          break;
+        case '\b':
+          fprintf(port, "\\b");
+          break;
+        case '\f':
+          fprintf(port, "\\f");
+          break;
+        case '\n':
+          fprintf(port, "\\n");
+          break;
+        case '\r':
+          fprintf(port, "\\r");
+          break;
+        case '\t':
+          fprintf(port, "\\t");
+          break;
+        case '\v':
+          fprintf(port, "\\v");
+          break;
+        case '\\':
+          fprintf(port, "\\\\");
+          break;
+        case '\"':
+          fprintf(port, "\\\"");
+          break;
+        default:
+          fputc(*s, port);
+          break;
+        }
+        s++;
       }
-      s++;
+      fputc('"', port);
+      break;
     }
-    fputc('"', port);
-    break;
-  }
   case vector_tag:
     has_cycle = Cyc_has_cycle(x);
     fprintf(port, "#(");
@@ -1384,7 +1427,7 @@ static object _Cyc_write(void *data, object x, FILE * port, int depth)
   default:
     Cyc_display(data, x, port);
   }
-done:
+ done:
   return quote_void;
 }
 
@@ -1400,7 +1443,7 @@ object Cyc_write_char(void *data, object c, object port)
   Cyc_check_port(data, port);
   if (obj_is_char(c)) {
     FILE *fp = ((port_type *) port)->fp;
-    if (fp){
+    if (fp) {
       char cbuf[5];
       char_type unbox = obj_obj2char(c);
       Cyc_utf8_encode_char(cbuf, 5, unbox);
@@ -1417,7 +1460,7 @@ object Cyc_write_u8(void *data, object c, object port)
   Cyc_check_port(data, port);
   if (obj_is_int(c)) {
     FILE *fp = ((port_type *) port)->fp;
-    if (fp){
+    if (fp) {
       int i = obj_obj2int(c);
       putc(i, fp);
     }
@@ -1427,7 +1470,8 @@ object Cyc_write_u8(void *data, object c, object port)
   return quote_void;
 }
 
-object Cyc_write_bytevector(void *data, object bvec, object port, object start, object end)
+object Cyc_write_bytevector(void *data, object bvec, object port, object start,
+                            object end)
 {
   Cyc_check_port(data, port);
   Cyc_check_bvec(data, bvec);
@@ -1440,10 +1484,10 @@ object Cyc_write_bytevector(void *data, object bvec, object port, object start, 
   int s = obj_obj2int(start);
   int e = obj_obj2int(end);
 
-  if (s < 0) { 
-    s = 0; 
-  } else if (s > bv->len) { 
-    s = bv->len; 
+  if (s < 0) {
+    s = 0;
+  } else if (s > bv->len) {
+    s = bv->len;
   }
 
   if (e < 0 || e > bv->len) {
@@ -1454,9 +1498,8 @@ object Cyc_write_bytevector(void *data, object bvec, object port, object start, 
     s = e;
   }
 
-  size_t rv = fwrite(
-    bytes + s,
-    sizeof(char), e - s, fp);
+  size_t rv = fwrite(bytes + s,
+                     sizeof(char), e - s, fp);
   return obj_int2obj(rv);
 }
 
@@ -1548,57 +1591,58 @@ list assoc_cdr(void *data, object x, list l)
   }
   return boolean_f;
 }
+
 /* END member and assoc */
 
-object Cyc_fast_list_2(object ptr, object a1, object a2) 
+object Cyc_fast_list_2(object ptr, object a1, object a2)
 {
-  list_2_type *l = (list_2_type *)ptr;
-  set_pair( ((pair)(&(l->b))), a2, NULL);
-  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  list_2_type *l = (list_2_type *) ptr;
+  set_pair(((pair) (&(l->b))), a2, NULL);
+  set_pair(((pair) (&(l->a))), a1, ((pair) (&(l->b))));
   return ptr;
 }
 
-object Cyc_fast_list_3(object ptr, object a1, object a2, object a3) 
+object Cyc_fast_list_3(object ptr, object a1, object a2, object a3)
 {
-  list_3_type *l = (list_3_type *)ptr;
-  set_pair( ((pair)(&(l->c))), a3, NULL);
-  set_pair( ((pair)(&(l->b))), a2, ((pair)(&(l->c))));
-  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  list_3_type *l = (list_3_type *) ptr;
+  set_pair(((pair) (&(l->c))), a3, NULL);
+  set_pair(((pair) (&(l->b))), a2, ((pair) (&(l->c))));
+  set_pair(((pair) (&(l->a))), a1, ((pair) (&(l->b))));
   return ptr;
 }
 
-object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4) 
+object Cyc_fast_list_4(object ptr, object a1, object a2, object a3, object a4)
 {
-  list_4_type *l = (list_4_type *)ptr;
-  set_pair( ((pair)(&(l->d))), a4, NULL);
-  set_pair( ((pair)(&(l->c))), a3, ((pair)(&(l->d))));
-  set_pair( ((pair)(&(l->b))), a2, ((pair)(&(l->c))));
-  set_pair( ((pair)(&(l->a))), a1, ((pair)(&(l->b))));
+  list_4_type *l = (list_4_type *) ptr;
+  set_pair(((pair) (&(l->d))), a4, NULL);
+  set_pair(((pair) (&(l->c))), a3, ((pair) (&(l->d))));
+  set_pair(((pair) (&(l->b))), a2, ((pair) (&(l->c))));
+  set_pair(((pair) (&(l->a))), a1, ((pair) (&(l->b))));
   return ptr;
 }
 
-object Cyc_fast_vector_2(object ptr, object a1, object a2) 
+object Cyc_fast_vector_2(object ptr, object a1, object a2)
 {
-  vector_2_type *v = (vector_2_type *)ptr;
-  v->v.hdr.mark = gc_color_red; 
-  v->v.hdr.grayed = 0; 
-  v->v.hdr.immutable = 0; 
-  v->v.tag = vector_tag; 
-  v->v.num_elements = 2; 
+  vector_2_type *v = (vector_2_type *) ptr;
+  v->v.hdr.mark = gc_color_red;
+  v->v.hdr.grayed = 0;
+  v->v.hdr.immutable = 0;
+  v->v.tag = vector_tag;
+  v->v.num_elements = 2;
   v->v.elements = v->arr;
   v->v.elements[0] = a1;
   v->v.elements[1] = a2;
   return ptr;
 }
 
-object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3) 
+object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3)
 {
-  vector_3_type *v = (vector_3_type *)ptr;
-  v->v.hdr.mark = gc_color_red; 
-  v->v.hdr.grayed = 0; 
-  v->v.hdr.immutable = 0; 
-  v->v.tag = vector_tag; 
-  v->v.num_elements = 3; 
+  vector_3_type *v = (vector_3_type *) ptr;
+  v->v.hdr.mark = gc_color_red;
+  v->v.hdr.grayed = 0;
+  v->v.hdr.immutable = 0;
+  v->v.tag = vector_tag;
+  v->v.num_elements = 3;
   v->v.elements = v->arr;
   v->v.elements[0] = a1;
   v->v.elements[1] = a2;
@@ -1606,14 +1650,14 @@ object Cyc_fast_vector_3(object ptr, object a1, object a2, object a3)
   return ptr;
 }
 
-object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4) 
+object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4)
 {
-  vector_4_type *v = (vector_4_type *)ptr;
-  v->v.hdr.mark = gc_color_red; 
-  v->v.hdr.grayed = 0; 
-  v->v.hdr.immutable = 0; 
-  v->v.tag = vector_tag; 
-  v->v.num_elements = 4; 
+  vector_4_type *v = (vector_4_type *) ptr;
+  v->v.hdr.mark = gc_color_red;
+  v->v.hdr.grayed = 0;
+  v->v.hdr.immutable = 0;
+  v->v.tag = vector_tag;
+  v->v.num_elements = 4;
   v->v.elements = v->arr;
   v->v.elements[0] = a1;
   v->v.elements[1] = a2;
@@ -1622,14 +1666,15 @@ object Cyc_fast_vector_4(object ptr, object a1, object a2, object a3, object a4)
   return ptr;
 }
 
-object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4, object a5) 
+object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4,
+                         object a5)
 {
-  vector_5_type *v = (vector_5_type *)ptr;
-  v->v.hdr.mark = gc_color_red; 
-  v->v.hdr.grayed = 0; 
-  v->v.hdr.immutable = 0; 
-  v->v.tag = vector_tag; 
-  v->v.num_elements = 5; 
+  vector_5_type *v = (vector_5_type *) ptr;
+  v->v.hdr.mark = gc_color_red;
+  v->v.hdr.grayed = 0;
+  v->v.hdr.immutable = 0;
+  v->v.tag = vector_tag;
+  v->v.num_elements = 5;
   v->v.elements = v->arr;
   v->v.elements[0] = a1;
   v->v.elements[1] = a2;
@@ -1640,15 +1685,13 @@ object Cyc_fast_vector_5(object ptr, object a1, object a2, object a3, object a4,
 }
 
 // Internal function, do not use this anywhere outside the runtime
-object Cyc_heap_alloc_port(void *data, port_type *stack_p)
+object Cyc_heap_alloc_port(void *data, port_type * stack_p)
 {
   object p = NULL;
   int heap_grown;
-  p = gc_alloc(((gc_thread_data *)data)->heap, 
+  p = gc_alloc(((gc_thread_data *) data)->heap,
                sizeof(port_type),
-               (char *)stack_p,
-               (gc_thread_data *)data, 
-               &heap_grown);
+               (char *)stack_p, (gc_thread_data *) data, &heap_grown);
   return p;
 }
 
@@ -1659,10 +1702,9 @@ object _equalp(object x, object y, int depth)
 {
   int second_cycle = 0;
   object slow_lis = x, fast_lis = NULL;
-  object pcar_x = &second_cycle, pcar_y = &second_cycle; // never a car value
+  object pcar_x = &second_cycle, pcar_y = &second_cycle;        // never a car value
 
-  if (Cyc_is_pair(x) == boolean_t &&
-      Cyc_is_pair(cdr(x)) == boolean_t){
+  if (Cyc_is_pair(x) == boolean_t && Cyc_is_pair(cdr(x)) == boolean_t) {
     fast_lis = cdr(x);
   }
 
@@ -1675,8 +1717,7 @@ object _equalp(object x, object y, int depth)
       return boolean_f;
 
     // Both objects are lists at this point, compare cars
-    if (pcar_x == car(x) &&
-        pcar_y == car(y)) {
+    if (pcar_x == car(x) && pcar_y == car(y)) {
       // do nothing, already equal
     } else {
       if (boolean_f == _equalp(car(x), car(y), depth + 1))
@@ -1689,11 +1730,9 @@ object _equalp(object x, object y, int depth)
     if (fast_lis == NULL ||
         Cyc_is_pair(fast_lis) == boolean_f ||
         cdr(fast_lis) == NULL ||
-        Cyc_is_pair(cdr(fast_lis)) == boolean_f ||
-        cddr(fast_lis) == NULL){
+        Cyc_is_pair(cdr(fast_lis)) == boolean_f || cddr(fast_lis) == NULL) {
       continue;
     }
-
     // If there is a cycle, handle it
     if (slow_lis == fast_lis) {
       // if this is y, both lists have cycles and are equal, return #t
@@ -1743,8 +1782,7 @@ object Cyc_num_cmp_va_list(void *data, int argc,
 }
 
 object Cyc_num_cmp_list(void *data, int argc,
-                       int (fn_op(void *, object, object)), 
-                       object *args)
+                        int (fn_op(void *, object, object)), object * args)
 {
   int i;
   object n, next;
@@ -1790,10 +1828,10 @@ object Cyc_bignum_normalize(void *data, object n)
   return result;
 }
 
-void Cyc_int2bignum(int n, mp_int *bn)
+void Cyc_int2bignum(int n, mp_int * bn)
 {
   mp_set_ul(bn, abs(n));
-  if (n < 0) { 
+  if (n < 0) {
     BIGNUM_CALL(mp_neg(bn, bn));
   }
 }
@@ -1805,13 +1843,13 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
 
   if (tx == bignum_tag && ty == bignum_tag) {
     cmp = mp_cmp(&bignum_value(x), &bignum_value(y));
-  } else if (tx == bignum_tag && ty == -1) { \
+  } else if (tx == bignum_tag && ty == -1) {
     // JAE TODO: make a macro out of this, and use for other BN calls
     mp_init(&tmp) ? fprintf(stderr, "Error initializing bignum"), exit(1) : 0;
     Cyc_int2bignum(obj_obj2int(y), &tmp);
     cmp = mp_cmp(&bignum_value(x), &tmp);
     mp_clear(&tmp);
-  } else if (tx == -1 && ty == bignum_tag) { \
+  } else if (tx == -1 && ty == bignum_tag) {
     BIGNUM_CALL(mp_init(&tmp));
     Cyc_int2bignum(obj_obj2int(x), &tmp);
     cmp = mp_cmp(&tmp, &bignum_value(y));
@@ -1821,8 +1859,8 @@ int Cyc_bignum_cmp(bn_cmp_type type, object x, int tx, object y, int ty)
   }
 
   return (cmp == type) ||
-         ((type == CYC_BN_GTE && cmp > MP_LT) ||
-          (type == CYC_BN_LTE && cmp < MP_GT));
+      ((type == CYC_BN_GTE && cmp > MP_LT) ||
+       (type == CYC_BN_LTE && cmp < MP_GT));
 }
 
 #define declare_num_cmp(FUNC, FUNC_OP, FUNC_FAST_OP, FUNC_APPLY, OP, BN_CMP) \
@@ -1987,11 +2025,16 @@ bad_arg_type_error: \
     } \
 }
 
-declare_num_cmp(Cyc_num_eq,  Cyc_num_eq_op,  Cyc_num_fast_eq_op, dispatch_num_eq, ==, CYC_BN_EQ);
-declare_num_cmp(Cyc_num_gt,  Cyc_num_gt_op,  Cyc_num_fast_gt_op, dispatch_num_gt, >, CYC_BN_GT);
-declare_num_cmp(Cyc_num_lt,  Cyc_num_lt_op,  Cyc_num_fast_lt_op, dispatch_num_lt, <, CYC_BN_LT);
-declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, Cyc_num_fast_gte_op, dispatch_num_gte, >=, CYC_BN_GTE);
-declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, Cyc_num_fast_lte_op, dispatch_num_lte, <=, CYC_BN_LTE);
+declare_num_cmp(Cyc_num_eq, Cyc_num_eq_op, Cyc_num_fast_eq_op, dispatch_num_eq,
+                ==, CYC_BN_EQ);
+declare_num_cmp(Cyc_num_gt, Cyc_num_gt_op, Cyc_num_fast_gt_op, dispatch_num_gt,
+                >, CYC_BN_GT);
+declare_num_cmp(Cyc_num_lt, Cyc_num_lt_op, Cyc_num_fast_lt_op, dispatch_num_lt,
+                <, CYC_BN_LT);
+declare_num_cmp(Cyc_num_gte, Cyc_num_gte_op, Cyc_num_fast_gte_op,
+                dispatch_num_gte, >=, CYC_BN_GTE);
+declare_num_cmp(Cyc_num_lte, Cyc_num_lte_op, Cyc_num_fast_lte_op,
+                dispatch_num_lte, <=, CYC_BN_LTE);
 
 object Cyc_is_number(object o)
 {
@@ -2006,12 +2049,7 @@ object Cyc_is_number(object o)
 
 object Cyc_is_real(object o)
 {
-  if ((o != NULL) && (obj_is_int(o) || 
-      (!is_value_type(o) && (type_of(o) == integer_tag
-                          || type_of(o) == bignum_tag
-                          || type_of(o) == double_tag
-                          || (type_of(o) == complex_num_tag &&
-                              cimag(complex_num_value(o)) == 0.0))))) // Per R7RS
+  if ((o != NULL) && (obj_is_int(o) || (!is_value_type(o) && (type_of(o) == integer_tag || type_of(o) == bignum_tag || type_of(o) == double_tag || (type_of(o) == complex_num_tag && cimag(complex_num_value(o)) == 0.0)))))    // Per R7RS
     return boolean_t;
   return boolean_f;
 }
@@ -2019,10 +2057,11 @@ object Cyc_is_real(object o)
 object Cyc_is_integer(object o)
 {
   if ((o != NULL) && (obj_is_int(o) ||
-      (!is_value_type(o) && type_of(o) == integer_tag) ||
-      (!is_value_type(o) && type_of(o) == bignum_tag)
-   || (!is_value_type(o) && type_of(o) == double_tag && double_value(o) == round(double_value(o)))
-      )) // Per R7RS
+                      (!is_value_type(o) && type_of(o) == integer_tag) ||
+                      (!is_value_type(o) && type_of(o) == bignum_tag)
+                      || (!is_value_type(o) && type_of(o) == double_tag
+                          && double_value(o) == round(double_value(o)))
+      ))                        // Per R7RS
     return boolean_t;
   return boolean_f;
 }
@@ -2030,10 +2069,9 @@ object Cyc_is_integer(object o)
 object Cyc_is_record(object o)
 {
   vector v = o;
-  if (is_object_type(o) && 
+  if (is_object_type(o) &&
       v->tag == vector_tag &&
-      v->num_elements > 0 &&
-      v->elements[0] == Cyc_RECORD_MARKER) {
+      v->num_elements > 0 && v->elements[0] == Cyc_RECORD_MARKER) {
     return boolean_t;
   }
   return boolean_f;
@@ -2064,10 +2102,9 @@ object Cyc_eqv(object x, object y)
 {
   if (Cyc_eq(x, y) == boolean_t) {
     return boolean_t;
-  } else if (Cyc_is_number(x) == boolean_t &&
-             equalp(x, y) == boolean_t) {
+  } else if (Cyc_is_number(x) == boolean_t && equalp(x, y) == boolean_t) {
     return boolean_t;
-  } else { 
+  } else {
     return boolean_f;
   }
 }
@@ -2078,9 +2115,7 @@ object Cyc_is_immutable(object obj)
       (type_of(obj) == pair_tag ||
        type_of(obj) == vector_tag ||
        type_of(obj) == bytevector_tag ||
-       type_of(obj) == string_tag
-      ) &&
-      !immutable(obj) ) {
+       type_of(obj) == string_tag) && !immutable(obj)) {
     return boolean_f;
   }
   return boolean_t;
@@ -2149,14 +2184,15 @@ object Cyc_vector_set_unsafe(void *data, object v, object k, object obj)
 
 // Prevent the possibility of a race condition by doing the actual mutation
 // after all relevant objects have been relocated to the heap
-static void Cyc_set_car_cps_gc_return(void *data, object _, int argc, object *args)
+static void Cyc_set_car_cps_gc_return(void *data, object _, int argc,
+                                      object * args)
 {
   object l = args[0];
   object val = args[1];
   object next = args[2];
 
   car(l) = val;
-  closcall1(data, (closure)next, l);
+  closcall1(data, (closure) next, l);
 }
 
 object Cyc_set_car_cps(void *data, object cont, object l, object val)
@@ -2170,26 +2206,30 @@ object Cyc_set_car_cps(void *data, object cont, object l, object val)
   int do_gc = 0;
   val = transport_stack_value(data, l, val, &do_gc);
   gc_mut_update((gc_thread_data *) data, car(l), val);
-  add_mutation(data, l, -1, val); // Ensure val is transported
-  if (do_gc) { // GC and then do assignment
-    mclosure0(clo, (function_type)Cyc_set_car_cps_gc_return);
-    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+  add_mutation(data, l, -1, val);       // Ensure val is transported
+  if (do_gc) {                  // GC and then do assignment
+    mclosure0(clo, (function_type) Cyc_set_car_cps_gc_return);
+    object buf[3];
+    buf[0] = l;
+    buf[1] = val;
+    buf[2] = cont;
     GC(data, &clo, buf, 3);
     return NULL;
   } else {
-    car(l) = val; // Assign now since we have heap objects
+    car(l) = val;               // Assign now since we have heap objects
     return l;
   }
 }
 
-static void Cyc_set_cdr_cps_gc_return(void *data, object _, int argc, object *args)
+static void Cyc_set_cdr_cps_gc_return(void *data, object _, int argc,
+                                      object * args)
 {
   object l = args[0];
   object val = args[1];
   object next = args[2];
 
   cdr(l) = val;
-  closcall1(data, (closure)next, l);
+  closcall1(data, (closure) next, l);
 }
 
 object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
@@ -2204,30 +2244,35 @@ object Cyc_set_cdr_cps(void *data, object cont, object l, object val)
   val = transport_stack_value(data, l, val, &do_gc);
 
   gc_mut_update((gc_thread_data *) data, cdr(l), val);
-  add_mutation(data, l, -1, val); // Ensure val is transported
-  if (do_gc) { // GC and then to assignment
-    mclosure0(clo, (function_type)Cyc_set_cdr_cps_gc_return);
-    object buf[3]; buf[0] = l; buf[1] = val; buf[2] = cont;
+  add_mutation(data, l, -1, val);       // Ensure val is transported
+  if (do_gc) {                  // GC and then to assignment
+    mclosure0(clo, (function_type) Cyc_set_cdr_cps_gc_return);
+    object buf[3];
+    buf[0] = l;
+    buf[1] = val;
+    buf[2] = cont;
     GC(data, &clo, buf, 3);
     return NULL;
   } else {
-    cdr(l) = val; // Assign now since we have heap objects
+    cdr(l) = val;               // Assign now since we have heap objects
     return l;
   }
 }
 
-static void Cyc_vector_set_cps_gc_return(void *data, object _, int argc, object *args)
+static void Cyc_vector_set_cps_gc_return(void *data, object _, int argc,
+                                         object * args)
 {
-  object vec = args[0]; 
-  object idx = args[1]; 
-  object val = args[2]; 
+  object vec = args[0];
+  object idx = args[1];
+  object val = args[2];
   object next = args[3];
   int i = obj_obj2int(idx);
   ((vector) vec)->elements[i] = val;
-  closcall1(data, (closure)next, vec);
+  closcall1(data, (closure) next, vec);
 }
 
-object Cyc_vector_set_cps(void *data, object cont, object v, object k, object obj)
+object Cyc_vector_set_cps(void *data, object cont, object v, object k,
+                          object obj)
 {
   int idx;
   Cyc_check_vec(data, v);
@@ -2244,31 +2289,40 @@ object Cyc_vector_set_cps(void *data, object cont, object v, object k, object ob
 
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   add_mutation(data, v, idx, obj);
-  if (do_gc) { // GC and then do assignment
-    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
-    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+  if (do_gc) {                  // GC and then do assignment
+    mclosure0(clo, (function_type) Cyc_vector_set_cps_gc_return);
+    object buf[4];
+    buf[0] = v;
+    buf[1] = k;
+    buf[2] = obj;
+    buf[3] = cont;
     GC(data, &clo, buf, 4);
     return NULL;
   } else {
-    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
-    return v; // Let caller pass this to cont
+    ((vector) v)->elements[idx] = obj;  // Assign now since we have heap objs
+    return v;                   // Let caller pass this to cont
   }
 }
 
-object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k, object obj)
+object Cyc_vector_set_unsafe_cps(void *data, object cont, object v, object k,
+                                 object obj)
 {
   int idx = obj_obj2int(k);
   int do_gc = 0;
   obj = transport_stack_value(data, v, obj, &do_gc);
   gc_mut_update((gc_thread_data *) data, ((vector) v)->elements[idx], obj);
   add_mutation(data, v, idx, obj);
-  if (do_gc) { // GC and then do assignment
-    mclosure0(clo, (function_type)Cyc_vector_set_cps_gc_return);
-    object buf[4]; buf[0] = v; buf[1] = k; buf[2] = obj; buf[3] = cont;
+  if (do_gc) {                  // GC and then do assignment
+    mclosure0(clo, (function_type) Cyc_vector_set_cps_gc_return);
+    object buf[4];
+    buf[0] = v;
+    buf[1] = k;
+    buf[2] = obj;
+    buf[3] = cont;
     GC(data, &clo, buf, 4);
     return NULL;
   } else {
-    ((vector) v)->elements[idx] = obj; // Assign now since we have heap objs
+    ((vector) v)->elements[idx] = obj;  // Assign now since we have heap objs
     return v;
   }
 }
@@ -2290,9 +2344,7 @@ object Cyc_vector_ref(void *data, object v, object k)
 object _unsafe_Cyc_vector_ref(object v, object k)
 {
   int idx;
-  if (Cyc_is_vector(v) == boolean_f ||
-      Cyc_is_fixnum(k) == boolean_f)
-  {
+  if (Cyc_is_vector(v) == boolean_f || Cyc_is_fixnum(k) == boolean_f) {
     return NULL;
   }
 
@@ -2346,7 +2398,7 @@ char *int_to_binary(char *b, int x)
     return b;
   }
 
-  while (i){
+  while (i) {
     if (x & i) {
       *b++ = '1';
       leading_zeros = 0;
@@ -2386,7 +2438,8 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
       // TODO: just temporary, need to handle this better
       Cyc_rt_raise2(data, "number->string - bignum is too large to convert", n);
     }
-    BIGNUM_CALL(mp_to_radix(&bignum_value(n), buffer, 1024, &written, base_num));
+    BIGNUM_CALL(mp_to_radix
+                (&bignum_value(n), buffer, 1024, &written, base_num));
   } else {
     if (base_num == 2) {
       val = obj_is_int(n) ?
@@ -2412,7 +2465,7 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
         double2buffer(buffer, 1024, ((double_type *) n)->value);
       } else if (type_of(n) == complex_num_tag) {
         char rbuf[33], ibuf[33];
-        const char *plus="+", *empty="";
+        const char *plus = "+", *empty = "";
         double dreal = creal(((complex_num_type *) n)->value);
         double dimag = cimag(((complex_num_type *) n)->value);
         double2buffer(rbuf, 32, dreal);
@@ -2420,10 +2473,8 @@ object Cyc_number2string2(void *data, object cont, int argc, object n, ...)
         if (dreal == 0.0) {
           snprintf(buffer, 1024, "%si", ibuf);
         } else {
-          snprintf(buffer, 1024, "%s%s%si", 
-            rbuf, 
-            (dimag < 0.0) ? empty : plus,
-            ibuf);
+          snprintf(buffer, 1024, "%s%s%si",
+                   rbuf, (dimag < 0.0) ? empty : plus, ibuf);
         }
       } else {
         Cyc_rt_raise2(data, "number->string - Unexpected object", n);
@@ -2475,7 +2526,7 @@ object Cyc_list2string(void *data, object cont, object lst)
     }
     if (!ch) {
       len++;
-      num_cp++; // Failsafe?
+      num_cp++;                 // Failsafe?
     } else {
       Cyc_utf8_encode_char(cbuf, 5, ch);
       len += strlen(cbuf);
@@ -2487,15 +2538,15 @@ object Cyc_list2string(void *data, object cont, object lst)
   {
     object str;
     alloc_string(data, str, len, num_cp);
-    buf = ((string_type *)str)->str;
+    buf = ((string_type *) str)->str;
     while ((lst != NULL)) {
       cbox = car(lst);
-      ch = obj_obj2char(cbox); // Already validated, can assume chars now
+      ch = obj_obj2char(cbox);  // Already validated, can assume chars now
       if (!ch) {
         i++;
       } else {
         Cyc_utf8_encode_char(&(buf[i]), 5, ch);
-        i += strlen(buf+i);
+        i += strlen(buf + i);
       }
       lst = cdr(lst);
     }
@@ -2524,7 +2575,7 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
     } else if (base_num == 8) {
       result = (int)strtol(string_str(str), NULL, 8);
     } else if (base_num == 10) {
-      Cyc_string2number_(data, cont, str); // Default processing
+      Cyc_string2number_(data, cont, str);      // Default processing
     } else if (base_num == 16) {
       result = (int)strtol(string_str(str), NULL, 16);
     }
@@ -2532,16 +2583,16 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
     if (result <= 0 || result > CYC_FIXNUM_MAX) {
       mp_int tmp;
       alloc_bignum(data, bn);
-      if (MP_OKAY != mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
+      if (MP_OKAY !=
+          mp_read_radix(&(bignum_value(bn)), string_str(str), base_num)) {
         Cyc_rt_raise2(data, "Error converting string to bignum", str);
       }
-
       // If result is mp_zero and str does not contain a 0, then fail
       BIGNUM_CALL(mp_init(&tmp));
       mp_zero(&tmp);
       if (MP_EQ == mp_cmp(&(bignum_value(bn)), &tmp) &&
           NULL == strchr(string_str(str), '0')) {
-          _return_closcall1(data, cont, boolean_f);
+        _return_closcall1(data, cont, boolean_f);
       }
 
       _return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
@@ -2554,11 +2605,11 @@ object Cyc_string2number2_(void *data, object cont, int argc, object str, ...)
 }
 
 typedef enum {
-    STR2INT_SUCCESS,
-    STR2INT_OVERFLOW,
-    STR2INT_UNDERFLOW,
-    STR2INT_INCONVERTIBLE,
-    STR2INT_RATIONAL
+  STR2INT_SUCCESS,
+  STR2INT_OVERFLOW,
+  STR2INT_UNDERFLOW,
+  STR2INT_INCONVERTIBLE,
+  STR2INT_RATIONAL
 } str2int_errno;
 
 /*
@@ -2581,35 +2632,36 @@ Convert string s to int out.
 
 @return Indicates if the operation succeeded, or why it failed.
 */
-static str2int_errno str2int(int *out, char *s, int base) 
+static str2int_errno str2int(int *out, char *s, int base)
 {
-    char *end;
-    if (s[0] == '\0' || isspace((unsigned char) s[0]))
-        return STR2INT_INCONVERTIBLE;
-    errno = 0;
-    long l = strtol(s, &end, base);
-    /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
-    if (l > CYC_FIXNUM_MAX /*INT_MAX*/ || (errno == ERANGE && l == LONG_MAX)) {
-        return STR2INT_OVERFLOW;
-    }
-    if (l < CYC_FIXNUM_MIN /*INT_MIN*/ || (errno == ERANGE && l == LONG_MIN)) {
-        return STR2INT_UNDERFLOW;
-    }
-    if (*end == '/') {
-        return STR2INT_RATIONAL;
-    }
-    if (*end != '\0') {
-        return STR2INT_INCONVERTIBLE;
-    }
-    *out = l;
-    return STR2INT_SUCCESS;
+  char *end;
+  if (s[0] == '\0' || isspace((unsigned char)s[0]))
+    return STR2INT_INCONVERTIBLE;
+  errno = 0;
+  long l = strtol(s, &end, base);
+  /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+  if (l > CYC_FIXNUM_MAX /*INT_MAX */  || (errno == ERANGE && l == LONG_MAX)) {
+    return STR2INT_OVERFLOW;
+  }
+  if (l < CYC_FIXNUM_MIN /*INT_MIN */  || (errno == ERANGE && l == LONG_MIN)) {
+    return STR2INT_UNDERFLOW;
+  }
+  if (*end == '/') {
+    return STR2INT_RATIONAL;
+  }
+  if (*end != '\0') {
+    return STR2INT_INCONVERTIBLE;
+  }
+  *out = l;
+  return STR2INT_SUCCESS;
 }
 
 int str_is_bignum(str2int_errno errnum, char *c)
 {
-  if (errnum == STR2INT_INCONVERTIBLE) return 0; // Unexpected chars for int
+  if (errnum == STR2INT_INCONVERTIBLE)
+    return 0;                   // Unexpected chars for int
 
-  for (;*c; c++) {
+  for (; *c; c++) {
     if (!isdigit(*c) && *c != '-') {
       return 0;
     }
@@ -2652,7 +2704,6 @@ double string2rational(void *data, char *s)
   if (MP_OKAY != mp_read_radix(&(bignum_value(bn_denom)), denom, 10)) {
     Cyc_rt_raise2(data, "Error converting string to bignum", denom);
   }
-
   // Prevent memory leak
   free(nom);
 
@@ -2678,7 +2729,7 @@ object Cyc_string2number_(void *data, object cont, object str)
                // Could still be a rational if numerator is 
                // bignum, so in that case do one more scan
                ((rv == STR2INT_OVERFLOW || rv == STR2INT_UNDERFLOW) &&
-                 strchr(s, '/') != NULL)) {
+                strchr(s, '/') != NULL)) {
       double d = string2rational(data, s);
       make_double(result, d);
       _return_closcall1(data, cont, &result);
@@ -2733,10 +2784,10 @@ object Cyc_string_cmp(void *data, object str1, object str2)
                             ((string_type *) str2)->str));
 }
 
-void dispatch_string_91append(void *data, object clo, int _argc, object *_args)
+void dispatch_string_91append(void *data, object clo, int _argc, object * _args)
 {
-  int argc =  _argc - 1; // Skip continuation
-  object *args = _args + 1; // Skip continuation
+  int argc = _argc - 1;         // Skip continuation
+  object *args = _args + 1;     // Skip continuation
   int i = 0, total_cp = 0, total_len = 1;
   int *len = alloca(sizeof(int) * argc);
   char *buffer, *bufferp, **str = alloca(sizeof(char *) * argc);
@@ -2744,15 +2795,15 @@ void dispatch_string_91append(void *data, object clo, int _argc, object *_args)
   for (i = 0; i < argc; i++) {
     tmp = args[i];
     Cyc_check_str(data, tmp);
-    str[i] = ((string_type *)tmp)->str;
+    str[i] = ((string_type *) tmp)->str;
     len[i] = string_len((tmp));
     total_len += len[i];
     total_cp += string_num_cp((tmp));
   }
   buffer = bufferp = alloca(sizeof(char) * total_len);
   for (i = 0; i < argc; i++) {
-      memcpy(bufferp, str[i], len[i]);
-      bufferp += len[i];
+    memcpy(bufferp, str[i], len[i]);
+    bufferp += len[i];
   }
   *bufferp = '\0';
   make_string(result, buffer);
@@ -2770,7 +2821,7 @@ object Cyc_string_append(void *data, object cont, int argc, object str1, ...)
   object tmp;
   if (argc > 0) {
     Cyc_check_str(data, str1);
-    str[i] = ((string_type *)str1)->str;
+    str[i] = ((string_type *) str1)->str;
     len[i] = string_len((str1));
     total_len += len[i];
     total_cp += string_num_cp((str1));
@@ -2778,15 +2829,15 @@ object Cyc_string_append(void *data, object cont, int argc, object str1, ...)
   for (i = 1; i < argc; i++) {
     tmp = va_arg(ap, object);
     Cyc_check_str(data, tmp);
-    str[i] = ((string_type *)tmp)->str;
+    str[i] = ((string_type *) tmp)->str;
     len[i] = string_len((tmp));
     total_len += len[i];
     total_cp += string_num_cp((tmp));
   }
   buffer = bufferp = alloca(sizeof(char) * total_len);
   for (i = 0; i < argc; i++) {
-      memcpy(bufferp, str[i], len[i]);
-      bufferp += len[i];
+    memcpy(bufferp, str[i], len[i]);
+    bufferp += len[i];
   }
   *bufferp = '\0';
   make_string(result, buffer);
@@ -2848,9 +2899,9 @@ object Cyc_string_set(void *data, object str, object k, object chr)
     int i = 0, count, prev_cp_bytes = 0, cp_idx;
 
     // Find index to change, and how many bytes it is
-    for (count = 0; *tmp; ++tmp){
+    for (count = 0; *tmp; ++tmp) {
       prev_cp_bytes++;
-      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t) * tmp)) {
         if (count == idx) {
           break;
         }
@@ -2862,9 +2913,8 @@ object Cyc_string_set(void *data, object str, object k, object chr)
     }
     cp_idx = i;
     if (state != CYC_UTF8_ACCEPT) {
-       Cyc_rt_raise2(data, "string-set! - invalid character at index", k);
+      Cyc_rt_raise2(data, "string-set! - invalid character at index", k);
     }
-
     // Perform actual mutation
     //
     // Now we know length of start (both in codepoints and bytes),
@@ -2890,12 +2940,14 @@ object Cyc_string_set(void *data, object str, object k, object chr)
       // Null terminate the shorter string.
       // Ensure string_len is not reduced because original 
       // value still matters for GC purposes
-      raw[len - (prev_cp_bytes - buf_len)] = '\0'; 
+      raw[len - (prev_cp_bytes - buf_len)] = '\0';
     }
     // - 3) TODO: buf_len > prev_cp_bytes, will need to allocate more memory (!!)
     else {
       // TODO: maybe we can try a little harder here, at least in some cases
-      Cyc_rt_raise2(data, "string-set! - Unable to allocate memory to store multibyte character", chr);
+      Cyc_rt_raise2(data,
+                    "string-set! - Unable to allocate memory to store multibyte character",
+                    chr);
     }
   }
   return str;
@@ -2916,7 +2968,6 @@ object Cyc_string_ref(void *data, object str, object k)
   if (idx < 0 || idx >= len) {
     Cyc_rt_raise2(data, "string-ref - invalid index", k);
   }
-
   // Take fast path if all chars are just 1 byte
   if (string_num_cp(str) == string_len(str)) {
     return obj_char2obj(raw[idx]);
@@ -2925,14 +2976,15 @@ object Cyc_string_ref(void *data, object str, object k)
     uint32_t state = 0;
     int count;
 
-    for (count = 0; *raw; ++raw){
-      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*raw)){
-        if (count == idx) break; // Reached requested index
+    for (count = 0; *raw; ++raw) {
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t) * raw)) {
+        if (count == idx)
+          break;                // Reached requested index
         count += 1;
       }
     }
     if (state != CYC_UTF8_ACCEPT)
-       Cyc_rt_raise2(data, "string-ref - invalid character at index", k);
+      Cyc_rt_raise2(data, "string-ref - invalid character at index", k);
     return obj_char2obj(codepoint);
   }
 }
@@ -2964,7 +3016,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
     e = len;
   }
 
-  if (string_num_cp(str) == string_len(str)){ // Fast path for ASCII
+  if (string_num_cp(str) == string_len(str)) {  // Fast path for ASCII
     make_string_with_len(sub, raw + s, e - s);
     _return_closcall1(data, cont, &sub);
   } else {
@@ -2972,9 +3024,9 @@ object Cyc_substring(void *data, object cont, object str, object start,
     char_type codepoint;
     uint32_t state = 0;
     int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
-    for (num_ch = 0; *tmp; ++tmp){
+    for (num_ch = 0; *tmp; ++tmp) {
       cur_ch_bytes++;
-      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t) * tmp)) {
         end_i += cur_ch_bytes;
         num_ch += 1;
         cur_ch_bytes = 0;
@@ -2988,7 +3040,7 @@ object Cyc_substring(void *data, object cont, object str, object start,
       }
     }
     if (state != CYC_UTF8_ACCEPT)
-       Cyc_rt_raise2(data, "substring - invalid character in string", str);
+      Cyc_rt_raise2(data, "substring - invalid character in string", str);
     make_utf8_string_with_len(sub, raw + start_i, end_i - start_i, e - s);
     _return_closcall1(data, cont, &sub);
   }
@@ -3035,7 +3087,7 @@ object Cyc_installation_dir(void *data, object cont, object type)
  */
 object Cyc_compilation_environment(void *data, object cont, object var)
 {
-  if (Cyc_is_symbol(var) == boolean_t){
+  if (Cyc_is_symbol(var) == boolean_t) {
     if (strncmp(((symbol) var)->desc, "cc-prog", 8) == 0) {
       char buf[1024];
       snprintf(buf, sizeof(buf), "%s", CYC_CC_PROG);
@@ -3070,9 +3122,7 @@ object Cyc_compilation_environment(void *data, object cont, object var)
       _return_closcall1(data, cont, &str);
     }
   }
-  Cyc_rt_raise2(data, 
-    "Cyc-compilation-environment - unrecognized symbol", 
-    var);
+  Cyc_rt_raise2(data, "Cyc-compilation-environment - unrecognized symbol", var);
   return NULL;
 }
 
@@ -3129,17 +3179,14 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     // TODO: mark this thread as potentially blocking before doing
     //       the allocation????
     int heap_grown;
-    v = gc_alloc(((gc_thread_data *)data)->heap, 
-                 sizeof(vector_type) + element_vec_size,
-                 boolean_f, // OK to populate manually over here
-                 (gc_thread_data *)data, 
-                 &heap_grown);
-    ((vector) v)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    v = gc_alloc(((gc_thread_data *) data)->heap, sizeof(vector_type) + element_vec_size, boolean_f,    // OK to populate manually over here
+                 (gc_thread_data *) data, &heap_grown);
+    ((vector) v)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
     ((vector) v)->hdr.grayed = 0;
     ((vector) v)->hdr.immutable = 0;
-    ((vector) v)->tag = double_tag; // Avoid race conditions w/GC tracing
-    ((vector) v)->num_elements = 0; // until array is filled
-    ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
+    ((vector) v)->tag = double_tag;     // Avoid race conditions w/GC tracing
+    ((vector) v)->num_elements = 0;     // until array is filled
+    ((vector) v)->elements = (object *) (((char *)v) + sizeof(vector_type));
     // Use write barrier to ensure fill is moved to heap if it is on the stack
     // Otherwise if next minor GC misses fill it could be catastrophic
     car(&tmp_pair) = fill;
@@ -3157,8 +3204,8 @@ object Cyc_make_vector(void *data, object cont, int argc, object len, ...)
     ((vector) v)->elements = NULL;
 
     if (ulen > 0) {
-      ((vector) v)->elements = 
-        (object *) alloca(sizeof(object) * ((vector) v)->num_elements);
+      ((vector) v)->elements =
+          (object *) alloca(sizeof(object) * ((vector) v)->num_elements);
     }
   }
 
@@ -3187,12 +3234,9 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 
   if (length >= MAX_STACK_OBJ) {
     int heap_grown;
-    bv = gc_alloc(((gc_thread_data *)data)->heap,
-                  sizeof(bytevector_type) + length,
-                  boolean_f, // OK to populate manually over here
-                  (gc_thread_data *)data, 
-                  &heap_grown);
-    ((bytevector) bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    bv = gc_alloc(((gc_thread_data *) data)->heap, sizeof(bytevector_type) + length, boolean_f, // OK to populate manually over here
+                  (gc_thread_data *) data, &heap_grown);
+    ((bytevector) bv)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
     ((bytevector) bv)->hdr.grayed = 0;
     ((bytevector) bv)->hdr.immutable = 0;
     ((bytevector) bv)->tag = bytevector_tag;
@@ -3218,17 +3262,17 @@ object Cyc_make_bytevector(void *data, object cont, int argc, object len, ...)
 
 // carg TODO: need to test each of these "dispatch" functions for
 // off-by-one errors! I think there are bugs in each of them
-void dispatch_bytevector(void *data, object clo, int _argc, object *_args)
+void dispatch_bytevector(void *data, object clo, int _argc, object * _args)
 {
-  int argc =  _argc - 1; // Skip continuation
-  object *args = _args + 1; // Skip continuation
+  int argc = _argc - 1;         // Skip continuation
+  object *args = _args + 1;     // Skip continuation
   int i, val;
   object tmp;
   char *buffer;
   make_empty_bytevector(bv);
   if (argc > 0) {
     buffer = alloca(sizeof(char) * argc);
-    for(i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++) {
       tmp = args[i];
       Cyc_check_num(data, tmp);
       val = unbox_number(tmp);
@@ -3253,7 +3297,7 @@ object Cyc_bytevector(void *data, object cont, int argc, object bval, ...)
     val = unbox_number(bval);
     buffer[i] = val;
     va_start(ap, bval);
-    for(i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++) {
       tmp = va_arg(ap, object);
       Cyc_check_num(data, tmp);
       val = unbox_number(tmp);
@@ -3266,10 +3310,11 @@ object Cyc_bytevector(void *data, object cont, int argc, object bval, ...)
   _return_closcall1(data, cont, &bv);
 }
 
-void dispatch_bytevector_91append(void *data, object clo, int _argc, object *_args)
+void dispatch_bytevector_91append(void *data, object clo, int _argc,
+                                  object * _args)
 {
-  int argc =  _argc - 1; // Skip continuation
-  object *args = _args + 1; // Skip continuation
+  int argc = _argc - 1;         // Skip continuation
+  object *args = _args + 1;     // Skip continuation
   int i = 0, buf_idx = 0, total_length = 0;
   object tmp;
   char *buffer;
@@ -3279,12 +3324,12 @@ void dispatch_bytevector_91append(void *data, object clo, int _argc, object *_ar
   if (argc > 0) {
     buffers = alloca(sizeof(char *) * argc);
     lengths = alloca(sizeof(int) * argc);
-    for(i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++) {
       tmp = args[i];
       Cyc_check_bvec(data, tmp);
-      total_length += ((bytevector)tmp)->len;
-      lengths[i] = ((bytevector)tmp)->len;
-      buffers[i] = ((bytevector)tmp)->data;
+      total_length += ((bytevector) tmp)->len;
+      lengths[i] = ((bytevector) tmp)->len;
+      buffers[i] = ((bytevector) tmp)->data;
     }
     buffer = alloca(sizeof(char) * total_length);
     for (i = 0; i < argc; i++) {
@@ -3310,16 +3355,16 @@ object Cyc_bytevector_append(void *data, object cont, int argc, object bv, ...)
     buffers = alloca(sizeof(char *) * argc);
     lengths = alloca(sizeof(int) * argc);
     Cyc_check_bvec(data, bv);
-    total_length = ((bytevector)bv)->len;
-    lengths[0] = ((bytevector)bv)->len;
-    buffers[0] = ((bytevector)bv)->data;
+    total_length = ((bytevector) bv)->len;
+    lengths[0] = ((bytevector) bv)->len;
+    buffers[0] = ((bytevector) bv)->data;
     va_start(ap, bv);
-    for(i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++) {
       tmp = va_arg(ap, object);
       Cyc_check_bvec(data, tmp);
-      total_length += ((bytevector)tmp)->len;
-      lengths[i] = ((bytevector)tmp)->len;
-      buffers[i] = ((bytevector)tmp)->data;
+      total_length += ((bytevector) tmp)->len;
+      lengths[i] = ((bytevector) tmp)->len;
+      buffers[i] = ((bytevector) tmp)->data;
     }
     va_end(ap);
     buffer = alloca(sizeof(char) * total_length);
@@ -3357,18 +3402,20 @@ object Cyc_bytevector_copy(void *data, object cont, object bv, object start,
 
   if (len >= MAX_STACK_OBJ) {
     int heap_grown;
-    object result = gc_alloc(((gc_thread_data *)data)->heap,
-                  sizeof(bytevector_type) + len,
-                  boolean_f, // OK to populate manually over here
-                  (gc_thread_data *)data, 
-                  &heap_grown);
-    ((bytevector) result)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    object result = gc_alloc(((gc_thread_data *) data)->heap,
+                             sizeof(bytevector_type) + len,
+                             boolean_f, // OK to populate manually over here
+                             (gc_thread_data *) data,
+                             &heap_grown);
+    ((bytevector) result)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
     ((bytevector) result)->hdr.grayed = 0;
     ((bytevector) result)->hdr.immutable = 0;
     ((bytevector) result)->tag = bytevector_tag;
     ((bytevector) result)->len = len;
-    ((bytevector) result)->data = (char *)(((char *)result) + sizeof(bytevector_type));
-    memcpy(&(((bytevector) result)->data[0]), &(((bytevector) bv)->data)[s], len);
+    ((bytevector) result)->data =
+        (char *)(((char *)result) + sizeof(bytevector_type));
+    memcpy(&(((bytevector) result)->data[0]), &(((bytevector) bv)->data)[s],
+           len);
     _return_closcall1(data, cont, result);
   } else {
     make_empty_bytevector(result);
@@ -3406,9 +3453,10 @@ object Cyc_utf82string(void *data, object cont, object bv, object start,
   {
     object st;
     alloc_string(data, st, len, len);
-    memcpy(((string_type *)st)->str, &buf[s], len);
-    ((string_type *)st)->str[len] = '\0';
-    ((string_type *)st)->num_cp = Cyc_utf8_count_code_points((uint8_t *)(((string_type *)st)->str));
+    memcpy(((string_type *) st)->str, &buf[s], len);
+    ((string_type *) st)->str[len] = '\0';
+    ((string_type *) st)->num_cp =
+        Cyc_utf8_count_code_points((uint8_t *) (((string_type *) st)->str));
     _return_closcall1(data, cont, st);
   }
 }
@@ -3434,22 +3482,22 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
   if (e < 0 || e < s || e > string_num_cp(str)) {
     Cyc_rt_raise2(data, "string->utf8 - invalid end", end);
   }
-
   // Fast path
   if (string_num_cp(str) == string_len(str)) {
     if (len >= MAX_STACK_OBJ) {
       int heap_grown;
-      object bv = gc_alloc(((gc_thread_data *)data)->heap,
-                    sizeof(bytevector_type) + len,
-                    boolean_f, // OK to populate manually over here
-                    (gc_thread_data *)data, 
-                    &heap_grown);
-      ((bytevector) bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+      object bv = gc_alloc(((gc_thread_data *) data)->heap,
+                           sizeof(bytevector_type) + len,
+                           boolean_f,   // OK to populate manually over here
+                           (gc_thread_data *) data,
+                           &heap_grown);
+      ((bytevector) bv)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
       ((bytevector) bv)->hdr.grayed = 0;
       ((bytevector) bv)->hdr.immutable = 0;
       ((bytevector) bv)->tag = bytevector_tag;
       ((bytevector) bv)->len = len;
-      ((bytevector) bv)->data = (char *)(((char *)bv) + sizeof(bytevector_type));
+      ((bytevector) bv)->data =
+          (char *)(((char *)bv) + sizeof(bytevector_type));
       memcpy(&(((bytevector) bv)->data[0]), &(string_str(str))[s], len);
       _return_closcall1(data, cont, bv);
     } else {
@@ -3465,9 +3513,9 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
     uint32_t state = 0;
     int num_ch, cur_ch_bytes = 0, start_i = 0, end_i = 0;
     // Figure out start / end indices
-    for (num_ch = 0; *tmp; ++tmp){
+    for (num_ch = 0; *tmp; ++tmp) {
       cur_ch_bytes++;
-      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)*tmp)){
+      if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t) * tmp)) {
         end_i += cur_ch_bytes;
         num_ch += 1;
         cur_ch_bytes = 0;
@@ -3483,17 +3531,18 @@ object Cyc_string2utf8(void *data, object cont, object str, object start,
     len = end_i - start_i;
     if (len >= MAX_STACK_OBJ) {
       int heap_grown;
-      object bv = gc_alloc(((gc_thread_data *)data)->heap,
-                    sizeof(bytevector_type) + len,
-                    boolean_f, // OK to populate manually over here
-                    (gc_thread_data *)data, 
-                    &heap_grown);
-      ((bytevector) bv)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+      object bv = gc_alloc(((gc_thread_data *) data)->heap,
+                           sizeof(bytevector_type) + len,
+                           boolean_f,   // OK to populate manually over here
+                           (gc_thread_data *) data,
+                           &heap_grown);
+      ((bytevector) bv)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
       ((bytevector) bv)->hdr.grayed = 0;
       ((bytevector) bv)->hdr.immutable = 0;
       ((bytevector) bv)->tag = bytevector_tag;
       ((bytevector) bv)->len = len;
-      ((bytevector) bv)->data = (char *)(((char *)bv) + sizeof(bytevector_type));
+      ((bytevector) bv)->data =
+          (char *)(((char *)bv) + sizeof(bytevector_type));
       memcpy(&(((bytevector) bv)->data[0]), &(string_str(str))[start_i], len);
       _return_closcall1(data, cont, bv);
     } else {
@@ -3571,17 +3620,14 @@ object Cyc_list2vector(void *data, object cont, object l)
   element_vec_size = sizeof(object) * len;
   if (element_vec_size >= MAX_STACK_OBJ) {
     int heap_grown;
-    v = gc_alloc(((gc_thread_data *)data)->heap, 
-                 sizeof(vector_type) + element_vec_size,
-                 boolean_f, // OK to populate manually over here
-                 (gc_thread_data *)data, 
-                 &heap_grown);
-    ((vector) v)->hdr.mark = ((gc_thread_data *)data)->gc_alloc_color;
+    v = gc_alloc(((gc_thread_data *) data)->heap, sizeof(vector_type) + element_vec_size, boolean_f,    // OK to populate manually over here
+                 (gc_thread_data *) data, &heap_grown);
+    ((vector) v)->hdr.mark = ((gc_thread_data *) data)->gc_alloc_color;
     ((vector) v)->hdr.grayed = 0;
     ((vector) v)->hdr.immutable = 0;
-    ((vector) v)->tag = double_tag; // Avoid race with GC tracing until
-    ((vector) v)->num_elements = 0; // array is initialized 
-    ((vector) v)->elements = (object *)(((char *)v) + sizeof(vector_type));
+    ((vector) v)->tag = double_tag;     // Avoid race with GC tracing until
+    ((vector) v)->num_elements = 0;     // array is initialized 
+    ((vector) v)->elements = (object *) (((char *)v) + sizeof(vector_type));
     // TODO: do we need to worry about stack object in the list????
     //// Use write barrier to ensure fill is moved to heap if it is on the stack
     //// Otherwise if next minor GC misses fill it could be catastrophic
@@ -3625,9 +3671,9 @@ object FUNC(void *data, object a, object b) \
     return boolean_t; \
   return boolean_f; \
 }
-declare_char_comp(Cyc_char_eq_op,  ==);
-declare_char_comp(Cyc_char_gt_op,  > );
-declare_char_comp(Cyc_char_lt_op,  < );
+declare_char_comp(Cyc_char_eq_op, ==);
+declare_char_comp(Cyc_char_gt_op, >);
+declare_char_comp(Cyc_char_lt_op, <);
 declare_char_comp(Cyc_char_gte_op, >=);
 declare_char_comp(Cyc_char_lte_op, <=);
 
@@ -3645,7 +3691,7 @@ object Cyc_integer2char(void *data, object n)
   return obj_char2obj(val);
 }
 
-void Cyc_halt(void *data, object clo, int argc, object *args)
+void Cyc_halt(void *data, object clo, int argc, object * args)
 {
   object obj = boolean_f;
   if (argc > 0) {
@@ -3667,7 +3713,7 @@ void Cyc_halt(void *data, object clo, int argc, object *args)
 
 object __halt(object obj)
 {
-  object buf[1] = {obj};
+  object buf[1] = { obj };
   Cyc_halt(NULL, NULL, 1, buf);
   return NULL;
 }
@@ -3691,16 +3737,16 @@ static int Cyc_checked_mul(int x, int y, int *result)
   // Avoid undefined behavior by detecting overflow prior to multiplication
   // Based on code from Hacker's Delight and CHICKEN scheme
   unsigned int xu, yu, c;
-  c = (1UL<<30UL) - 1;
+  c = (1UL << 30UL) - 1;
   xu = x < 0 ? -x : x;
   yu = y < 0 ? -y : y;
 
-  if (yu != 0 && xu > (c / yu)) return 1; // Overflow
+  if (yu != 0 && xu > (c / yu))
+    return 1;                   // Overflow
 
   *result = x * y;
 
-  return (*result > CYC_FIXNUM_MAX) ||
-         (*result < CYC_FIXNUM_MIN);
+  return (*result > CYC_FIXNUM_MAX) || (*result < CYC_FIXNUM_MIN);
 }
 
 #define declare_num_op(FUNC, FUNC_OP, FUNC_APPLY, OP, INT_OP, BN_OP, NO_ARG, ONE_ARG, DIV) \
@@ -3832,13 +3878,12 @@ void FUNC_APPLY(void *data, object clo, int argc, object *args) { \
     return_closcall1(data, clo, result); \
 }
 
-object Cyc_fast_sum(void *data, object ptr, object x, object y) {
+object Cyc_fast_sum(void *data, object ptr, object x, object y)
+{
   // x is int (assume value types for integers)
-  if (obj_is_int(x)){
-    if (obj_is_int(y)){
-      int xx = obj_obj2int(x),
-          yy = obj_obj2int(y),
-          z;
+  if (obj_is_int(x)) {
+    if (obj_is_int(y)) {
+      int xx = obj_obj2int(x), yy = obj_obj2int(y), z;
 
       if (Cyc_checked_add(xx, yy, &z) == 0) {
         return obj_int2obj(z);
@@ -3858,13 +3903,13 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       assign_double(ptr, (double)(obj_obj2int(x)) + double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-        mp_int bnx;
-        BIGNUM_CALL(mp_init(&bnx));
-        Cyc_int2bignum(obj_obj2int(x), &bnx);
-        alloc_bignum(data, bn);
-        BIGNUM_CALL(mp_add(&bnx, &bignum_value(y), &bignum_value(bn)));
-        mp_clear(&bnx);
-        return bn;
+      mp_int bnx;
+      BIGNUM_CALL(mp_init(&bnx));
+      Cyc_int2bignum(obj_obj2int(x), &bnx);
+      alloc_bignum(data, bn);
+      BIGNUM_CALL(mp_add(&bnx, &bignum_value(y), &bignum_value(bn)));
+      mp_clear(&bnx);
+      return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, ((obj_obj2int(x)) + complex_num_value(y)));
       return ptr;
@@ -3872,7 +3917,7 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   }
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_double(ptr, double_value(x) + (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3888,7 +3933,7 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   }
   // x is bignum
   if (is_object_type(x) && type_of(x) == bignum_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       mp_int bny;
       BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
@@ -3901,16 +3946,19 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      BIGNUM_CALL(mp_add(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
+      BIGNUM_CALL(mp_add
+                  (&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
-      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) + complex_num_value(y));
+      assign_complex_num(ptr,
+                         mp_get_double(&bignum_value(x)) +
+                         complex_num_value(y));
       return ptr;
     }
   }
   // x is complex
   if (is_object_type(x) && type_of(x) == complex_num_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_complex_num(ptr, complex_num_value(x) + (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3920,7 +3968,9 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
       assign_complex_num(ptr, complex_num_value(x) + complex_num_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_complex_num(ptr, complex_num_value(x) + mp_get_double(&bignum_value(y)));
+      assign_complex_num(ptr,
+                         complex_num_value(x) +
+                         mp_get_double(&bignum_value(y)));
       return ptr;
     }
   }
@@ -3933,13 +3983,12 @@ object Cyc_fast_sum(void *data, object ptr, object x, object y) {
   return NULL;
 }
 
-object Cyc_fast_sub(void *data, object ptr, object x, object y) {
+object Cyc_fast_sub(void *data, object ptr, object x, object y)
+{
   // x is int (assume value types for integers)
-  if (obj_is_int(x)){
-    if (obj_is_int(y)){
-      int xx = obj_obj2int(x),
-          yy = obj_obj2int(y),
-          z;
+  if (obj_is_int(x)) {
+    if (obj_is_int(y)) {
+      int xx = obj_obj2int(x), yy = obj_obj2int(y), z;
       if (Cyc_checked_sub(xx, yy, &z) == 0) {
         return obj_int2obj(z);
       } else {
@@ -3958,13 +4007,13 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       assign_double(ptr, (double)(obj_obj2int(x)) - double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-        mp_int bnx;
-        BIGNUM_CALL(mp_init(&bnx));
-        Cyc_int2bignum(obj_obj2int(x), &bnx);
-        alloc_bignum(data, bn);
-        BIGNUM_CALL(mp_sub(&bnx, &bignum_value(y), &bignum_value(bn)));
-        mp_clear(&bnx);
-        return bn;
+      mp_int bnx;
+      BIGNUM_CALL(mp_init(&bnx));
+      Cyc_int2bignum(obj_obj2int(x), &bnx);
+      alloc_bignum(data, bn);
+      BIGNUM_CALL(mp_sub(&bnx, &bignum_value(y), &bignum_value(bn)));
+      mp_clear(&bnx);
+      return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, ((obj_obj2int(x)) - complex_num_value(y)));
       return ptr;
@@ -3972,7 +4021,7 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   }
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_double(ptr, double_value(x) - (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -3988,7 +4037,7 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   }
   // x is bignum
   if (is_object_type(x) && type_of(x) == bignum_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       mp_int bny;
       BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
@@ -4001,16 +4050,19 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      BIGNUM_CALL(mp_sub(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
+      BIGNUM_CALL(mp_sub
+                  (&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
-      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) - complex_num_value(y));
+      assign_complex_num(ptr,
+                         mp_get_double(&bignum_value(x)) -
+                         complex_num_value(y));
       return ptr;
     }
   }
   // x is complex
   if (is_object_type(x) && type_of(x) == complex_num_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_complex_num(ptr, complex_num_value(x) - (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4020,7 +4072,9 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
       assign_complex_num(ptr, complex_num_value(x) - complex_num_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_complex_num(ptr, complex_num_value(x) - mp_get_double(&bignum_value(y)));
+      assign_complex_num(ptr,
+                         complex_num_value(x) -
+                         mp_get_double(&bignum_value(y)));
       return ptr;
     }
   }
@@ -4033,13 +4087,12 @@ object Cyc_fast_sub(void *data, object ptr, object x, object y) {
   return NULL;
 }
 
-object Cyc_fast_mul(void *data, object ptr, object x, object y) {
+object Cyc_fast_mul(void *data, object ptr, object x, object y)
+{
   // x is int (assume value types for integers)
-  if (obj_is_int(x)){
-    if (obj_is_int(y)){
-      int xx = obj_obj2int(x),
-          yy = obj_obj2int(y),
-          z;
+  if (obj_is_int(x)) {
+    if (obj_is_int(y)) {
+      int xx = obj_obj2int(x), yy = obj_obj2int(y), z;
       if (Cyc_checked_mul(xx, yy, &z) == 0) {
         return obj_int2obj(z);
       } else {
@@ -4058,13 +4111,13 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       assign_double(ptr, (double)(obj_obj2int(x)) * double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-        mp_int bnx;
-        BIGNUM_CALL(mp_init(&bnx));
-        Cyc_int2bignum(obj_obj2int(x), &bnx);
-        alloc_bignum(data, bn);
-        BIGNUM_CALL(mp_mul(&bnx, &bignum_value(y), &bignum_value(bn)));
-        mp_clear(&bnx);
-        return bn;
+      mp_int bnx;
+      BIGNUM_CALL(mp_init(&bnx));
+      Cyc_int2bignum(obj_obj2int(x), &bnx);
+      alloc_bignum(data, bn);
+      BIGNUM_CALL(mp_mul(&bnx, &bignum_value(y), &bignum_value(bn)));
+      mp_clear(&bnx);
+      return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, ((obj_obj2int(x)) * complex_num_value(y)));
       return ptr;
@@ -4072,7 +4125,7 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
   }
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_double(ptr, double_value(x) * (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4088,7 +4141,7 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
   }
   // x is bignum
   if (is_object_type(x) && type_of(x) == bignum_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       mp_int bny;
       BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
@@ -4101,16 +4154,19 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      BIGNUM_CALL(mp_mul(&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
+      BIGNUM_CALL(mp_mul
+                  (&bignum_value(x), &bignum_value(y), &bignum_value(bn)));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
-      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) * complex_num_value(y));
+      assign_complex_num(ptr,
+                         mp_get_double(&bignum_value(x)) *
+                         complex_num_value(y));
       return ptr;
     }
   }
   // x is complex
   if (is_object_type(x) && type_of(x) == complex_num_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_complex_num(ptr, complex_num_value(x) * (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4120,7 +4176,9 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
       assign_complex_num(ptr, complex_num_value(x) * complex_num_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_complex_num(ptr, complex_num_value(x) * mp_get_double(&bignum_value(y)));
+      assign_complex_num(ptr,
+                         complex_num_value(x) *
+                         mp_get_double(&bignum_value(y)));
       return ptr;
     }
   }
@@ -4133,11 +4191,14 @@ object Cyc_fast_mul(void *data, object ptr, object x, object y) {
   return NULL;
 }
 
-object Cyc_fast_div(void *data, object ptr, object x, object y) {
+object Cyc_fast_div(void *data, object ptr, object x, object y)
+{
   // x is int (assume value types for integers)
-  if (obj_is_int(x)){
-    if (obj_is_int(y)){
-      if (obj_obj2int(y) == 0) { goto divbyzero; }
+  if (obj_is_int(x)) {
+    if (obj_is_int(y)) {
+      if (obj_obj2int(y) == 0) {
+        goto divbyzero;
+      }
       // Overflow can occur if y = 0 || (x = 0x80000000 && y = -1)
       // We already check for 0 above and the invalid value of x would
       // be a bignum, so no futher checks are required.
@@ -4152,13 +4213,13 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       assign_double(ptr, (double)(obj_obj2int(x)) / double_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-        mp_int bnx;
-        BIGNUM_CALL(mp_init(&bnx));
-        Cyc_int2bignum(obj_obj2int(x), &bnx);
-        alloc_bignum(data, bn);
-        BIGNUM_CALL(mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL));
-        mp_clear(&bnx);
-        return bn;
+      mp_int bnx;
+      BIGNUM_CALL(mp_init(&bnx));
+      Cyc_int2bignum(obj_obj2int(x), &bnx);
+      alloc_bignum(data, bn);
+      BIGNUM_CALL(mp_div(&bnx, &bignum_value(y), &bignum_value(bn), NULL));
+      mp_clear(&bnx);
+      return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
       assign_complex_num(ptr, ((obj_obj2int(x)) / complex_num_value(y)));
       return ptr;
@@ -4166,7 +4227,7 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   }
   // x is double
   if (is_object_type(x) && type_of(x) == double_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_double(ptr, double_value(x) / (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4182,7 +4243,7 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   }
   // x is bignum
   if (is_object_type(x) && type_of(x) == bignum_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       mp_int bny;
       BIGNUM_CALL(mp_init(&bny));
       Cyc_int2bignum(obj_obj2int(y), &bny);
@@ -4195,16 +4256,20 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
       alloc_bignum(data, bn);
-      BIGNUM_CALL(mp_div(&bignum_value(x), &bignum_value(y), &bignum_value(bn), NULL));
+      BIGNUM_CALL(mp_div
+                  (&bignum_value(x), &bignum_value(y), &bignum_value(bn),
+                   NULL));
       return bn;
     } else if (is_object_type(y) && type_of(y) == complex_num_tag) {
-      assign_complex_num(ptr, mp_get_double(&bignum_value(x)) / complex_num_value(y));
+      assign_complex_num(ptr,
+                         mp_get_double(&bignum_value(x)) /
+                         complex_num_value(y));
       return ptr;
     }
   }
   // x is complex
   if (is_object_type(x) && type_of(x) == complex_num_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       assign_complex_num(ptr, complex_num_value(x) / (double)(obj_obj2int(y)));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4214,7 +4279,9 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
       assign_complex_num(ptr, complex_num_value(x) / complex_num_value(y));
       return ptr;
     } else if (is_object_type(y) && type_of(y) == bignum_tag) {
-      assign_complex_num(ptr, complex_num_value(x) / mp_get_double(&bignum_value(y)));
+      assign_complex_num(ptr,
+                         complex_num_value(x) /
+                         mp_get_double(&bignum_value(y)));
       return ptr;
     }
   }
@@ -4224,7 +4291,7 @@ object Cyc_fast_div(void *data, object ptr, object x, object y) {
   make_pair(c1, x, &c2);
   make_pair(c0, &s, &c1);
   Cyc_rt_raise(data, &c0);
-divbyzero:
+ divbyzero:
   Cyc_rt_raise_msg(data, "Divide by zero");
   return NULL;
 }
@@ -4282,7 +4349,7 @@ object Cyc_div_op(void *data, common_type * x, object y)
     BIGNUM_CALL(mp_div(&bn_tmp2, &bignum_value(y), &(x->bignum_t.bn), NULL));
     mp_clear(&bn_tmp2);
   } else if (tx == double_tag && ty == bignum_tag) {
-     x->double_t.value = x->double_t.value / mp_get_double(&bignum_value(y));
+    x->double_t.value = x->double_t.value / mp_get_double(&bignum_value(y));
   } else if (tx == bignum_tag && ty == -1) {
     BIGNUM_CALL(mp_init(&bn_tmp2));
     Cyc_int2bignum(obj_obj2int(y), &bn_tmp2);
@@ -4294,41 +4361,46 @@ object Cyc_div_op(void *data, common_type * x, object y)
     x->double_t.hdr.mark = gc_color_red;
     x->double_t.hdr.grayed = 0;
     x->double_t.tag = double_tag;
-    x->double_t.value = d / ((double_type *)y)->value;
+    x->double_t.value = d / ((double_type *) y)->value;
   } else if (tx == bignum_tag && ty == bignum_tag) {
-    BIGNUM_CALL(mp_div(&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL));
+    BIGNUM_CALL(mp_div
+                (&(x->bignum_t.bn), &bignum_value(y), &(x->bignum_t.bn), NULL));
   } else if (tx == complex_num_tag && ty == complex_num_tag) {
-      x->complex_num_t.value = x->complex_num_t.value / ((complex_num_type *)y)->value;
+    x->complex_num_t.value =
+        x->complex_num_t.value / ((complex_num_type *) y)->value;
   } else if (tx == complex_num_tag && ty == -1) {
-      x->complex_num_t.value = x->complex_num_t.value / (obj_obj2int(y));
+    x->complex_num_t.value = x->complex_num_t.value / (obj_obj2int(y));
   } else if (tx == complex_num_tag && ty == integer_tag) {
-      x->complex_num_t.value = x->complex_num_t.value / ((integer_type *)y)->value;
+    x->complex_num_t.value =
+        x->complex_num_t.value / ((integer_type *) y)->value;
   } else if (tx == complex_num_tag && ty == bignum_tag) {
-      x->complex_num_t.value = x->complex_num_t.value / mp_get_double(&bignum_value(y));
+    x->complex_num_t.value =
+        x->complex_num_t.value / mp_get_double(&bignum_value(y));
   } else if (tx == complex_num_tag && ty == double_tag) {
-      x->complex_num_t.value = x->complex_num_t.value / complex_num_value(y);
+    x->complex_num_t.value = x->complex_num_t.value / complex_num_value(y);
   } else if (tx == integer_tag && ty == complex_num_tag) {
-      x->complex_num_t.hdr.mark = gc_color_red;
-      x->complex_num_t.hdr.grayed = 0;
-      x->complex_num_t.tag = complex_num_tag;
-      x->complex_num_t.value = x->integer_t.value / ((complex_num_type *)y)->value;
+    x->complex_num_t.hdr.mark = gc_color_red;
+    x->complex_num_t.hdr.grayed = 0;
+    x->complex_num_t.tag = complex_num_tag;
+    x->complex_num_t.value =
+        x->integer_t.value / ((complex_num_type *) y)->value;
   } else if (tx == bignum_tag && ty == complex_num_tag) {
-      double d = mp_get_double(&(x->bignum_t.bn));
-      mp_clear(&(x->bignum_t.bn));
-      x->complex_num_t.hdr.mark = gc_color_red;
-      x->complex_num_t.hdr.grayed = 0;
-      x->complex_num_t.tag = complex_num_tag;
-      x->complex_num_t.value = d / ((complex_num_type *)y)->value;
+    double d = mp_get_double(&(x->bignum_t.bn));
+    mp_clear(&(x->bignum_t.bn));
+    x->complex_num_t.hdr.mark = gc_color_red;
+    x->complex_num_t.hdr.grayed = 0;
+    x->complex_num_t.tag = complex_num_tag;
+    x->complex_num_t.value = d / ((complex_num_type *) y)->value;
   } else if (tx == double_tag && ty == complex_num_tag) {
-      x->complex_num_t.hdr.mark = gc_color_red;
-      x->complex_num_t.hdr.grayed = 0;
-      x->complex_num_t.tag = complex_num_tag;
-      x->complex_num_t.value = x->double_t.value / complex_num_value(y);
+    x->complex_num_t.hdr.mark = gc_color_red;
+    x->complex_num_t.hdr.grayed = 0;
+    x->complex_num_t.tag = complex_num_tag;
+    x->complex_num_t.value = x->double_t.value / complex_num_value(y);
   } else {
     goto bad_arg_type_error;
   }
   return x;
-bad_arg_type_error:
+ bad_arg_type_error:
   {
     make_string(s, "Bad argument type");
     make_pair(c1, y, NULL);
@@ -4349,7 +4421,7 @@ object Cyc_div(void *data, object cont, int argc, object n, ...)
   _return_closcall1(data, cont, result);
 }
 
-void dispatch_div(void *data, object clo, int argc, object *args)
+void dispatch_div(void *data, object clo, int argc, object * args)
 {
   common_type buffer;
   object result;
@@ -4358,15 +4430,17 @@ void dispatch_div(void *data, object clo, int argc, object *args)
   return_closcall1(data, clo, result);
 }
 
-declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, mp_add, 0, 0, 0);
-declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, mp_sub, -1, 0, 0);
-declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, mp_mul, 1, 1, 0);
+declare_num_op(Cyc_sum, Cyc_sum_op, dispatch_sum, +, Cyc_checked_add, mp_add, 0,
+               0, 0);
+declare_num_op(Cyc_sub, Cyc_sub_op, dispatch_sub, -, Cyc_checked_sub, mp_sub,
+               -1, 0, 0);
+declare_num_op(Cyc_mul, Cyc_mul_op, dispatch_mul, *, Cyc_checked_mul, mp_mul, 1,
+               1, 0);
 
 object Cyc_num_op_args(void *data, int argc,
                        object(fn_op(void *, common_type *, object)),
-                       int default_no_args, int default_one_arg, 
-                       object *args,
-                       common_type * buf)
+                       int default_no_args, int default_one_arg,
+                       object * args, common_type * buf)
 {
   int i;
   object n;
@@ -4425,10 +4499,10 @@ object Cyc_num_op_args(void *data, int argc,
     if (type_of(&tmp) == integer_tag) {
       buf->integer_t.tag = integer_tag;
       buf->integer_t.value = integer_value(&tmp);
-    } else if (type_of(&tmp) == double_tag){
+    } else if (type_of(&tmp) == double_tag) {
       buf->double_t.tag = double_tag;
       buf->double_t.value = double_value(&tmp);
-    } else if (type_of(&tmp) == complex_num_tag){
+    } else if (type_of(&tmp) == complex_num_tag) {
       buf->complex_num_t.tag = complex_num_tag;
       buf->complex_num_t.value = complex_num_value(&tmp);
     } else {
@@ -4452,7 +4526,7 @@ object Cyc_num_op_args(void *data, int argc,
   }
 
   return buf;
-bad_arg_type_error:
+ bad_arg_type_error:
   {
     make_string(s, "Bad argument type");
     make_pair(c1, n, NULL);
@@ -4521,10 +4595,10 @@ object Cyc_num_op_va_list(void *data, int argc,
     if (type_of(&tmp) == integer_tag) {
       buf->integer_t.tag = integer_tag;
       buf->integer_t.value = integer_value(&tmp);
-    } else if (type_of(&tmp) == double_tag){
+    } else if (type_of(&tmp) == double_tag) {
       buf->double_t.tag = double_tag;
       buf->double_t.value = double_value(&tmp);
-    } else if (type_of(&tmp) == complex_num_tag){
+    } else if (type_of(&tmp) == complex_num_tag) {
       buf->complex_num_t.tag = complex_num_tag;
       buf->complex_num_t.value = complex_num_value(&tmp);
     } else {
@@ -4548,7 +4622,7 @@ object Cyc_num_op_va_list(void *data, int argc,
   }
 
   return buf;
-bad_arg_type_error:
+ bad_arg_type_error:
   {
     make_string(s, "Bad argument type");
     make_pair(c1, n, NULL);
@@ -4566,14 +4640,16 @@ void Cyc_expt_double(void *data, object cont, double x, double y)
 
 void Cyc_expt(void *data, object cont, object x, object y)
 {
-  if (obj_is_int(x)){
-    if (obj_is_int(y)){
+  if (obj_is_int(x)) {
+    if (obj_is_int(y)) {
       if (obj_obj2int(y) < 0) {
-        Cyc_expt_double(data, cont, (double)obj_obj2int(x), (double)obj_obj2int(y));
+        Cyc_expt_double(data, cont, (double)obj_obj2int(x),
+                        (double)obj_obj2int(y));
       } else {
         alloc_bignum(data, bn);
         Cyc_int2bignum(obj_obj2int(x), &(bn->bn));
-        BIGNUM_CALL(mp_expt_u32(&bignum_value(bn), obj_obj2int(y), &bignum_value(bn)));
+        BIGNUM_CALL(mp_expt_u32
+                    (&bignum_value(bn), obj_obj2int(y), &bignum_value(bn)));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
@@ -4584,7 +4660,7 @@ void Cyc_expt(void *data, object cont, object x, object y)
   }
   if (is_object_type(x) && type_of(x) == double_tag) {
     make_double(d, 0.0);
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       d.value = (double)obj_obj2int(y);
     } else if (is_object_type(y) && type_of(y) == double_tag) {
       d.value = double_value(y);
@@ -4595,16 +4671,19 @@ void Cyc_expt(void *data, object cont, object x, object y)
     return_closcall1(data, cont, &d);
   }
   if (is_object_type(x) && type_of(x) == bignum_tag) {
-    if (obj_is_int(y)){
+    if (obj_is_int(y)) {
       if (obj_obj2int(y) < 0) {
-        Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), (double)obj_obj2int(y));
+        Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)),
+                        (double)obj_obj2int(y));
       } else {
         alloc_bignum(data, bn);
-        BIGNUM_CALL(mp_expt_u32(&bignum_value(x), obj_obj2int(y), &bignum_value(bn)));
+        BIGNUM_CALL(mp_expt_u32
+                    (&bignum_value(x), obj_obj2int(y), &bignum_value(bn)));
         return_closcall1(data, cont, Cyc_bignum_normalize(data, bn));
       }
     } else if (is_object_type(y) && type_of(y) == double_tag) {
-      Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)), double_value(y));
+      Cyc_expt_double(data, cont, mp_get_double(&bignum_value(x)),
+                      double_value(y));
       //make_double(d, 0.0);
       //d.value = pow(mp_get_double(&bignum_value(x)), double_value(y));
       //return_closcall1(data, cont, &d);
@@ -4620,9 +4699,12 @@ void Cyc_expt(void *data, object cont, object x, object y)
   Cyc_rt_raise(data, &c0);
 }
 
-void Cyc_bignum_remainder(void *data, object cont, object num1, object num2, object rem)
+void Cyc_bignum_remainder(void *data, object cont, object num1, object num2,
+                          object rem)
 {
-  BIGNUM_CALL(mp_div(&bignum_value(num1), &bignum_value(num2), NULL, &bignum_value(rem)));
+  BIGNUM_CALL(mp_div
+              (&bignum_value(num1), &bignum_value(num2), NULL,
+               &bignum_value(rem)));
   return_closcall1(data, cont, Cyc_bignum_normalize(data, rem));
 }
 
@@ -4632,73 +4714,68 @@ void Cyc_remainder(void *data, object cont, object num1, object num2)
   double ii = 0, jj = 0;
   object result;
   if (obj_is_int(num1)) {
-    if (obj_is_int(num2)){
+    if (obj_is_int(num2)) {
       i = obj_obj2int(num1);
       j = obj_obj2int(num2);
-    }
-    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
+    } else if (is_object_type(num2) && type_of(num2) == bignum_tag) {
       alloc_bignum(data, bn);
       Cyc_int2bignum(obj_obj2int(num1), &(bn->bn));
       Cyc_bignum_remainder(data, cont, bn, num2, bn);
-    }
-    else if (is_object_type(num2) && type_of(num2) == double_tag){
+    } else if (is_object_type(num2) && type_of(num2) == double_tag) {
       ii = obj_obj2int(num1);
-      jj = ((double_type *)num2)->value; 
+      jj = ((double_type *) num2)->value;
       goto handledouble;
-    }
-    else {
+    } else {
       goto typeerror;
     }
   } else if (is_object_type(num1) && type_of(num1) == bignum_tag) {
-    if (obj_is_int(num2)){
+    if (obj_is_int(num2)) {
       alloc_bignum(data, bn);
       Cyc_int2bignum(obj_obj2int(num2), &(bn->bn));
       Cyc_bignum_remainder(data, cont, num1, bn, bn);
-    }
-    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
+    } else if (is_object_type(num2) && type_of(num2) == bignum_tag) {
       alloc_bignum(data, rem);
       Cyc_bignum_remainder(data, cont, num1, num2, rem);
-    }
-    else if (is_object_type(num2) && type_of(num2) == double_tag){
+    } else if (is_object_type(num2) && type_of(num2) == double_tag) {
       ii = mp_get_double(&bignum_value(num1));
-      jj = ((double_type *)num2)->value; 
+      jj = ((double_type *) num2)->value;
       goto handledouble;
-    }
-    else {
+    } else {
       goto typeerror;
     }
-  } else if (is_object_type(num1) && type_of(num1) == double_tag){
-    if (obj_is_int(num2)){
-      ii = ((double_type *)num1)->value; 
+  } else if (is_object_type(num1) && type_of(num1) == double_tag) {
+    if (obj_is_int(num2)) {
+      ii = ((double_type *) num1)->value;
       jj = obj_obj2int(num2);
       goto handledouble;
-    }
-    else if (is_object_type(num2) && type_of(num2) == bignum_tag){
-      ii = ((double_type *)num1)->value; 
+    } else if (is_object_type(num2) && type_of(num2) == bignum_tag) {
+      ii = ((double_type *) num1)->value;
       jj = mp_get_double(&bignum_value(num2));
       goto handledouble;
-    }
-    else if (is_object_type(num2) && type_of(num2) == double_tag){
-      ii = ((double_type *)num1)->value; 
-      jj = ((double_type *)num2)->value; 
+    } else if (is_object_type(num2) && type_of(num2) == double_tag) {
+      ii = ((double_type *) num1)->value;
+      jj = ((double_type *) num2)->value;
       goto handledouble;
-    } 
-    else {
+    } else {
       goto typeerror;
     }
   } else {
     goto typeerror;
   }
-  if (j == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
-  result = obj_int2obj(i % j);
-  return_closcall1(data, cont, result); 
-handledouble:
-  {
-    if (jj == 0) { Cyc_rt_raise_msg(data, "Divide by zero"); }
-    make_double(dresult, fmod(ii, jj));
-    return_closcall1(data, cont, &dresult); 
+  if (j == 0) {
+    Cyc_rt_raise_msg(data, "Divide by zero");
   }
-typeerror:
+  result = obj_int2obj(i % j);
+  return_closcall1(data, cont, result);
+ handledouble:
+  {
+    if (jj == 0) {
+      Cyc_rt_raise_msg(data, "Divide by zero");
+    }
+    make_double(dresult, fmod(ii, jj));
+    return_closcall1(data, cont, &dresult);
+  }
+ typeerror:
   {
     make_string(s, "Bad argument type");
     make_pair(c2, num2, NULL);
@@ -4796,21 +4873,21 @@ object Cyc_io_close_port(void *data, object port)
     if (stream)
       fclose(stream);
     ((port_type *) port)->fp = NULL;
-   
-    if (((port_type *)port)->mem_buf != NULL){
-      free( ((port_type *)port)->mem_buf );
-      ((port_type *)port)->mem_buf = NULL;
-      ((port_type *)port)->mem_buf_len = 0;
+
+    if (((port_type *) port)->mem_buf != NULL) {
+      free(((port_type *) port)->mem_buf);
+      ((port_type *) port)->mem_buf = NULL;
+      ((port_type *) port)->mem_buf_len = 0;
     }
-    if (((port_type *)port)->str_bv_in_mem_buf != NULL){
-      free( ((port_type *)port)->str_bv_in_mem_buf );
-      ((port_type *)port)->str_bv_in_mem_buf = NULL;
-      ((port_type *)port)->str_bv_in_mem_buf_len = 0;
+    if (((port_type *) port)->str_bv_in_mem_buf != NULL) {
+      free(((port_type *) port)->str_bv_in_mem_buf);
+      ((port_type *) port)->str_bv_in_mem_buf = NULL;
+      ((port_type *) port)->str_bv_in_mem_buf_len = 0;
     }
-    if (((port_type *)port)->tok_buf != NULL){
-      free( ((port_type *)port)->tok_buf );
-      ((port_type *)port)->tok_buf = NULL;
-      ((port_type *)port)->tok_buf_len = 0;
+    if (((port_type *) port)->tok_buf != NULL) {
+      free(((port_type *) port)->tok_buf);
+      ((port_type *) port)->tok_buf = NULL;
+      ((port_type *) port)->tok_buf_len = 0;
     }
   }
   return port;
@@ -4854,12 +4931,12 @@ object Cyc_io_file_exists(void *data, object filename)
   return boolean_f;
 }
 
-time_t Cyc_file_last_modified_time(char *path) {
-    struct stat attr;
-    stat(path, &attr);
-    return(attr.st_mtime);
+time_t Cyc_file_last_modified_time(char *path)
+{
+  struct stat attr;
+  stat(path, &attr);
+  return (attr.st_mtime);
 }
-
 
 // Functions internal to the runtime that use malloc
 list malloc_make_pair(object a, object d)
@@ -4885,13 +4962,13 @@ cvar_type *mcvar(object * var)
   return c;
 }
 
-void _Cyc_91global_91vars(void *data, object clo, int argc, object *args)
+void _Cyc_91global_91vars(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   return_closcall1(data, cont, Cyc_global_variables);
 }
 
-void _car(void *data, object clo, int argc, object *args)
+void _car(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "car", argc - 1, 1);
   {
@@ -4901,7 +4978,7 @@ void _car(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, car(var));
 }}
 
-void _cdr(void *data, object clo, int argc, object *args)
+void _cdr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4909,7 +4986,7 @@ void _cdr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, cdr(args[1]));
 }
 
-void _caar(void *data, object clo, int argc, object *args)
+void _caar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4917,7 +4994,7 @@ void _caar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caar(data, args[1]));
 }
 
-void _cadr(void *data, object clo, int argc, object *args)
+void _cadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4925,7 +5002,7 @@ void _cadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cadr(data, args[1]));
 }
 
-void _cdar(void *data, object clo, int argc, object *args)
+void _cdar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4933,7 +5010,7 @@ void _cdar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdar(data, args[1]));
 }
 
-void _cddr(void *data, object clo, int argc, object *args)
+void _cddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4941,7 +5018,7 @@ void _cddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cddr(data, args[1]));
 }
 
-void _caaar(void *data, object clo, int argc, object *args)
+void _caaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4949,7 +5026,7 @@ void _caaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caaar(data, args[1]));
 }
 
-void _caadr(void *data, object clo, int argc, object *args)
+void _caadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4957,7 +5034,7 @@ void _caadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caadr(data, args[1]));
 }
 
-void _cadar(void *data, object clo, int argc, object *args)
+void _cadar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cadar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4965,7 +5042,7 @@ void _cadar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cadar(data, args[1]));
 }
 
-void _caddr(void *data, object clo, int argc, object *args)
+void _caddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4973,7 +5050,7 @@ void _caddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caddr(data, args[1]));
 }
 
-void _cdaar(void *data, object clo, int argc, object *args)
+void _cdaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4981,7 +5058,7 @@ void _cdaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdaar(data, args[1]));
 }
 
-void _cdadr(void *data, object clo, int argc, object *args)
+void _cdadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4989,7 +5066,7 @@ void _cdadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdadr(data, args[1]));
 }
 
-void _cddar(void *data, object clo, int argc, object *args)
+void _cddar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cddar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -4997,7 +5074,7 @@ void _cddar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cddar(data, args[1]));
 }
 
-void _cdddr(void *data, object clo, int argc, object *args)
+void _cdddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5005,7 +5082,7 @@ void _cdddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdddr(data, args[1]));
 }
 
-void _caaaar(void *data, object clo, int argc, object *args)
+void _caaaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caaaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5013,7 +5090,7 @@ void _caaaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caaaar(data, args[1]));
 }
 
-void _caaadr(void *data, object clo, int argc, object *args)
+void _caaadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caaadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5021,7 +5098,7 @@ void _caaadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caaadr(data, args[1]));
 }
 
-void _caadar(void *data, object clo, int argc, object *args)
+void _caadar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caadar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5029,7 +5106,7 @@ void _caadar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caadar(data, args[1]));
 }
 
-void _caaddr(void *data, object clo, int argc, object *args)
+void _caaddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caaddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5037,7 +5114,7 @@ void _caaddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caaddr(data, args[1]));
 }
 
-void _cadaar(void *data, object clo, int argc, object *args)
+void _cadaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cadaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5045,7 +5122,7 @@ void _cadaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cadaar(data, args[1]));
 }
 
-void _cadadr(void *data, object clo, int argc, object *args)
+void _cadadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cadadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5053,7 +5130,7 @@ void _cadadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cadadr(data, args[1]));
 }
 
-void _caddar(void *data, object clo, int argc, object *args)
+void _caddar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "caddar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5061,7 +5138,7 @@ void _caddar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_caddar(data, args[1]));
 }
 
-void _cadddr(void *data, object clo, int argc, object *args)
+void _cadddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cadddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5069,7 +5146,7 @@ void _cadddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cadddr(data, args[1]));
 }
 
-void _cdaaar(void *data, object clo, int argc, object *args)
+void _cdaaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdaaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5077,7 +5154,7 @@ void _cdaaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdaaar(data, args[1]));
 }
 
-void _cdaadr(void *data, object clo, int argc, object *args)
+void _cdaadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdaadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5085,7 +5162,7 @@ void _cdaadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdaadr(data, args[1]));
 }
 
-void _cdadar(void *data, object clo, int argc, object *args)
+void _cdadar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdadar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5093,7 +5170,7 @@ void _cdadar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdadar(data, args[1]));
 }
 
-void _cdaddr(void *data, object clo, int argc, object *args)
+void _cdaddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdaddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5101,7 +5178,7 @@ void _cdaddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdaddr(data, args[1]));
 }
 
-void _cddaar(void *data, object clo, int argc, object *args)
+void _cddaar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cddaar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5109,7 +5186,7 @@ void _cddaar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cddaar(data, args[1]));
 }
 
-void _cddadr(void *data, object clo, int argc, object *args)
+void _cddadr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cddadr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5117,7 +5194,7 @@ void _cddadr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cddadr(data, args[1]));
 }
 
-void _cdddar(void *data, object clo, int argc, object *args)
+void _cdddar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cdddar", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5125,7 +5202,7 @@ void _cdddar(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cdddar(data, args[1]));
 }
 
-void _cddddr(void *data, object clo, int argc, object *args)
+void _cddddr(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cddddr", argc - 1, 1);
   Cyc_check_pair(data, args[1]);
@@ -5133,7 +5210,7 @@ void _cddddr(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_cddddr(data, args[1]));
 }
 
-void _cons(void *data, object clo, int argc, object *args)
+void _cons(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "cons", argc - 1, 2);
   {
@@ -5142,28 +5219,28 @@ void _cons(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, &c);
 }}
 
-void _eq_127(void *data, object clo, int argc, object *args)
+void _eq_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "eq?", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_eq(args[1], args[2]));
 }
 
-void _eqv_127(void *data, object clo, int argc, object *args)
+void _eqv_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "eqv?", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_eqv(args[1], args[2]));
 }
 
-void _equal_127(void *data, object clo, int argc, object *args)
+void _equal_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "equal?", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, equalp(args[1], args[2]));
 }
 
-void _length(void *data, object clo, int argc, object *args)
+void _length(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "length", argc - 1, 1);
   {
@@ -5172,7 +5249,7 @@ void _length(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _bytevector_91length(void *data, object clo, int argc, object *args)
+void _bytevector_91length(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "bytevector-length", argc - 1, 1);
   {
@@ -5181,7 +5258,7 @@ void _bytevector_91length(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _bytevector_91u8_91ref(void *data, object clo, int argc, object *args)
+void _bytevector_91u8_91ref(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "bytevector-u8-ref", argc - 1, 2);
   {
@@ -5190,7 +5267,7 @@ void _bytevector_91u8_91ref(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, c);
 }}
 
-void _bytevector_91u8_91set_67(void *data, object clo, int argc, object *args)
+void _bytevector_91u8_91set_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "bytevector-u8-set!", argc - 1, 3);
   {
@@ -5199,40 +5276,40 @@ void _bytevector_91u8_91set_67(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, bv);
 }}
 
-void _bytevector(void *data, object clo, int argc, object *args)
+void _bytevector(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_bytevector(data, cont, argc, args);
 }
 
-void _bytevector_91append(void *data, object clo, int argc, object *args)
+void _bytevector_91append(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_bytevector_91append(data, cont, argc, args);
 }
 
-void _Cyc_91bytevector_91copy(void *data, object clo, int argc, object *args)
+void _Cyc_91bytevector_91copy(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-bytevector-copy", argc - 1, 3);
   object cont = args[0];
   Cyc_bytevector_copy(data, cont, args[1], args[2], args[3]);
 }
 
-void _Cyc_91string_91_125utf8(void *data, object clo, int argc, object *args)
+void _Cyc_91string_91_125utf8(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-string->utf8", argc - 1, 3);
   object cont = args[0];
   Cyc_string2utf8(data, cont, args[1], args[2], args[3]);
 }
 
-void _Cyc_91utf8_91_125string(void *data, object clo, int argc, object *args)
+void _Cyc_91utf8_91_125string(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-utf8->string", argc - 1, 3);
   object cont = args[0];
   Cyc_utf82string(data, cont, args[1], args[2], args[3]);
 }
 
-void _vector_91length(void *data, object clo, int argc, object *args)
+void _vector_91length(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "vector-length", argc - 1, 1);
   {
@@ -5241,35 +5318,35 @@ void _vector_91length(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _null_127(void *data, object clo, int argc, object *args)
+void _null_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "null?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_null(args[1]));
 }
 
-void _set_91car_67(void *data, object clo, int argc, object *args)
+void _set_91car_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "set-car!", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_set_car_cps(data, cont, args[1], args[2]));
 }
 
-void _set_91cdr_67(void *data, object clo, int argc, object *args)
+void _set_91cdr_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "set-cdr!", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_set_cdr_cps(data, cont, args[1], args[2]));
 }
 
-void _Cyc_91has_91cycle_127(void *data, object clo, int argc, object *args)
+void _Cyc_91has_91cycle_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-has-cycle?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_has_cycle(args[1]));
 }
 
-void _Cyc_91spawn_91thread_67(void *data, object clo, int argc, object *args)
+void _Cyc_91spawn_91thread_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-spawn-thread!", argc - 1, 1);
   // TODO: validate argument type?
@@ -5277,24 +5354,24 @@ void _Cyc_91spawn_91thread_67(void *data, object clo, int argc, object *args)
   return_closcall1(data, cont, Cyc_spawn_thread(args[1]));
 }
 
-void _Cyc_91end_91thread_67(void *data, object clo, int argc, object *args)
+void _Cyc_91end_91thread_67(void *data, object clo, int argc, object * args)
 {
   gc_thread_data *d = data;
   vector_type *v = d->scm_thread_obj;
-  v->elements[7] = args[0]; // Store thread result
+  v->elements[7] = args[0];     // Store thread result
 
   Cyc_end_thread((gc_thread_data *) data);
   object cont = args[0];
   return_closcall1(data, cont, boolean_f);
 }
 
-void __87(void *data, object clo, int argc, object *args)
+void __87(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_sum(data, cont, argc, args);
 }
 
-void __91(void *data, object clo, int argc, object *args)
+void __91(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "-", argc - 1, 1);
   {
@@ -5302,13 +5379,13 @@ void __91(void *data, object clo, int argc, object *args)
     dispatch_sub(data, cont, argc, args);
 }}
 
-void __85(void *data, object clo, int argc, object *args)
+void __85(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_mul(data, cont, argc, args);
 }
 
-void __95(void *data, object clo, int argc, object *args)
+void __95(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "/", argc - 1, 1);
   {
@@ -5316,147 +5393,147 @@ void __95(void *data, object clo, int argc, object *args)
     dispatch_div(data, cont, argc, args);
 }}
 
-void _Cyc_91cvar_127(void *data, object clo, int argc, object *args)
+void _Cyc_91cvar_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-cvar?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_cvar(args[1]));
 }
 
-void _Cyc_91opaque_127(void *data, object clo, int argc, object *args)
+void _Cyc_91opaque_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-opaque?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_opaque(args[1]));
 }
 
-void _boolean_127(void *data, object clo, int argc, object *args)
+void _boolean_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "boolean?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_boolean(args[1]));
 }
 
-void _char_127(void *data, object clo, int argc, object *args)
+void _char_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "char?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_char(args[1]));
 }
 
-void _eof_91object_127(void *data, object clo, int argc, object *args)
+void _eof_91object_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "eof_91object?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_eof_object(args[1]));
 }
 
-void _number_127(void *data, object clo, int argc, object *args)
+void _number_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "number?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_number(args[1]));
 }
 
-void _real_127(void *data, object clo, int argc, object *args)
+void _real_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "real?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_real(args[1]));
 }
 
-void _integer_127(void *data, object clo, int argc, object *args)
+void _integer_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "integer?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_integer(args[1]));
 }
 
-void _pair_127(void *data, object clo, int argc, object *args)
+void _pair_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "pair?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_pair(args[1]));
 }
 
-void _procedure_127(void *data, object clo, int argc, object *args)
+void _procedure_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "procedure?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_procedure(data, args[1]));
 }
 
-void _macro_127(void *data, object clo, int argc, object *args)
+void _macro_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "macro?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_macro(args[1]));
 }
 
-void _Cyc_91macro_127(void *data, object clo, int argc, object *args)
+void _Cyc_91macro_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-macro?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_macro(args[1]));
 }
 
-void _port_127(void *data, object clo, int argc, object *args)
+void _port_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "port?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_port(args[1]));
 }
 
-void _bytevector_127(void *data, object clo, int argc, object *args)
+void _bytevector_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "bytevector?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_bytevector(args[1]));
 }
 
-void _vector_127(void *data, object clo, int argc, object *args)
+void _vector_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "vector?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_vector_not_record_type(args[1]));
 }
 
-void _string_127(void *data, object clo, int argc, object *args)
+void _string_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_string(args[1]));
 }
 
-void _symbol_127(void *data, object clo, int argc, object *args)
+void _symbol_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "symbol?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_is_symbol(args[1]));
 }
 
-void _Cyc_91get_91cvar(void *data, object clo, int argc, object *args)
+void _Cyc_91get_91cvar(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-get-cvar", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_get_cvar(args[1]));
 }
 
-void _Cyc_91set_91cvar_67(void *data, object clo, int argc, object *args)
+void _Cyc_91set_91cvar_67(void *data, object clo, int argc, object * args)
 {
   printf("not implemented\n");
   exit(1);
 }
 
 /* Note we cannot use _exit (per convention) because it is reserved by C */
-void _cyc_exit(void *data, object clo, int argc, object *args)
+void _cyc_exit(void *data, object clo, int argc, object * args)
 {
   if (args == NULL)
     __halt(NULL);
   __halt(args[1]);
 }
 
-void __75halt(void *data, object clo, int argc, object *args)
+void __75halt(void *data, object clo, int argc, object * args)
 {
 #if DEBUG_SHOW_DIAG
   gc_print_stats(Cyc_heap);
@@ -5464,95 +5541,95 @@ void __75halt(void *data, object clo, int argc, object *args)
   exit(0);
 }
 
-void _cell_91get(void *data, object clo, int argc, object *args)
+void _cell_91get(void *data, object clo, int argc, object * args)
 {
   printf("not implemented\n");
   exit(1);
 }
 
-void _set_91global_67(void *data, object clo, int argc, object *args)
+void _set_91global_67(void *data, object clo, int argc, object * args)
 {
   printf("not implemented\n");
   exit(1);
 }
 
-void _set_91cell_67(void *data, object clo, int argc, object *args)
+void _set_91cell_67(void *data, object clo, int argc, object * args)
 {
   printf("not implemented\n");
   exit(1);
 }
 
-void _cell(void *data, object clo, int argc, object *args)
+void _cell(void *data, object clo, int argc, object * args)
 {
   printf("not implemented\n");
   exit(1);
 }
 
-void __123(void *data, object clo, int argc, object *args)
+void __123(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_num_eq(data, cont, argc, args);
 }
 
-void __125(void *data, object clo, int argc, object *args)
+void __125(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_num_gt(data, cont, argc, args);
 }
 
-void __121(void *data, object clo, int argc, object *args)
+void __121(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_num_lt(data, cont, argc, args);
 }
 
-void __125_123(void *data, object clo, int argc, object *args)
+void __125_123(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_num_gte(data, cont, argc, args);
 }
 
-void __121_123(void *data, object clo, int argc, object *args)
+void __121_123(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_num_lte(data, cont, argc, args);
 }
 
-void _apply(void *data, object clo, int argc, object *args)
+void _apply(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_apply_va(data, cont, argc, args);
 }
 
-void _assq(void *data, object clo, int argc, object *args)
+void _assq(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "assq", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, assq(data, args[1], args[2]));
 }
 
-void _assv(void *data, object clo, int argc, object *args)
+void _assv(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "assv", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, assv(data, args[1], args[2]));
 }
 
-void _memq(void *data, object clo, int argc, object *args)
+void _memq(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "memq", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, memqp(data, args[1], args[2]));
 }
 
-void _memv(void *data, object clo, int argc, object *args)
+void _memv(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "memv", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, memvp(data, args[1], args[2]));
 }
 
-void _char_91_125integer(void *data, object clo, int argc, object *args)
+void _char_91_125integer(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "char->integer", argc - 1, 1);
   {
@@ -5561,14 +5638,14 @@ void _char_91_125integer(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _integer_91_125char(void *data, object clo, int argc, object *args)
+void _integer_91_125char(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "integer->char", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_integer2char(data, args[1]));
 }
 
-void _string_91_125number(void *data, object clo, int argc, object *args)
+void _string_91_125number(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string->number", argc - 1, 1);
   {
@@ -5581,7 +5658,7 @@ void _string_91_125number(void *data, object clo, int argc, object *args)
   }
 }
 
-void _string_91length(void *data, object clo, int argc, object *args)
+void _string_91length(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string-length", argc - 1, 1);
   {
@@ -5590,14 +5667,14 @@ void _string_91length(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _cyc_substring(void *data, object clo, int argc, object *args)
+void _cyc_substring(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "substring", argc - 1, 3);
   object cont = args[0];
   Cyc_substring(data, cont, args[1], args[2], args[3]);
 }
 
-void _cyc_string_91set_67(void *data, object clo, int argc, object *args)
+void _cyc_string_91set_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string-set!", argc - 1, 3);
   {
@@ -5606,7 +5683,7 @@ void _cyc_string_91set_67(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, s);
 }}
 
-void _cyc_string_91ref(void *data, object clo, int argc, object *args)
+void _cyc_string_91ref(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string-ref", argc - 1, 2);
   {
@@ -5615,28 +5692,30 @@ void _cyc_string_91ref(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, c);
 }}
 
-void _Cyc_91installation_91dir(void *data, object clo, int argc, object *args)
+void _Cyc_91installation_91dir(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-installation-dir", argc - 1, 1);
   object cont = args[0];
   Cyc_installation_dir(data, cont, args[1]);
 }
 
-void _Cyc_91compilation_91environment(void *data, object clo, int argc, object *args)
+void _Cyc_91compilation_91environment(void *data, object clo, int argc,
+                                      object * args)
 {
   Cyc_check_argc(data, "Cyc-compilation-environment", argc - 1, 1);
   object cont = args[0];
   Cyc_compilation_environment(data, cont, args[1]);
 }
 
-void _command_91line_91arguments(void *data, object clo, int argc, object *args)
+void _command_91line_91arguments(void *data, object clo, int argc,
+                                 object * args)
 {
   object cont = args[0];
   object cmdline = Cyc_command_line_arguments(data, cont);
   return_closcall1(data, cont, cmdline);
 }
 
-void _cyc_system(void *data, object clo, int argc, object *args)
+void _cyc_system(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "system", argc - 1, 1);
   {
@@ -5645,21 +5724,23 @@ void _cyc_system(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _Cyc_91current_91exception_91handler(void *data, object clo, int argc, object *args)
+void _Cyc_91current_91exception_91handler(void *data, object clo, int argc,
+                                          object * args)
 {
   object handler = Cyc_current_exception_handler(data);
   object cont = args[0];
   return_closcall1(data, cont, handler);
 }
 
-void _Cyc_91default_91exception_91handler(void *data, object clo, int argc, object *args)
+void _Cyc_91default_91exception_91handler(void *data, object clo, int argc,
+                                          object * args)
 {
   //object cont = args[0];
-  object buf[1] = {args[1]};
+  object buf[1] = { args[1] };
   Cyc_default_exception_handler(data, NULL, 1, buf);
 }
 
-void _string_91cmp(void *data, object clo, int argc, object *args)
+void _string_91cmp(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string-cmp", argc - 1, 2);
   {
@@ -5668,13 +5749,13 @@ void _string_91cmp(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, obj);
 }}
 
-void _string_91append(void *data, object clo, int argc, object *args)
+void _string_91append(void *data, object clo, int argc, object * args)
 {
   object cont = args[0];
   dispatch_string_91append(data, cont, argc, args);
 }
 
-void _make_91vector(void *data, object clo, int argc, object *args)
+void _make_91vector(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "make-vector", argc - 1, 1);
   {
@@ -5687,7 +5768,7 @@ void _make_91vector(void *data, object clo, int argc, object *args)
   }
 }
 
-void _make_91bytevector(void *data, object clo, int argc, object *args)
+void _make_91bytevector(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "make-bytevector", argc - 1, 1);
   {
@@ -5700,7 +5781,7 @@ void _make_91bytevector(void *data, object clo, int argc, object *args)
   }
 }
 
-void _vector_91ref(void *data, object clo, int argc, object *args)
+void _vector_91ref(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "vector-ref", argc - 1, 2);
   {
@@ -5709,7 +5790,7 @@ void _vector_91ref(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, ref);
 }}
 
-void _vector_91set_67(void *data, object clo, int argc, object *args)
+void _vector_91set_67(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "vector-set!", argc - 1, 3);
   {
@@ -5718,35 +5799,35 @@ void _vector_91set_67(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, ref);
 }}
 
-void _list_91_125vector(void *data, object clo, int argc, object *args)
+void _list_91_125vector(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "list->vector", argc - 1, 1);
   object cont = args[0];
   Cyc_list2vector(data, cont, args[1]);
 }
 
-void _list_91_125string(void *data, object clo, int argc, object *args)
+void _list_91_125string(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "list->string", argc - 1, 1);
   object cont = args[0];
   Cyc_list2string(data, cont, args[1]);
 }
 
-void _string_91_125symbol(void *data, object clo, int argc, object *args)
+void _string_91_125symbol(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "string->symbol", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_string2symbol(data, args[1]));
 }
 
-void _symbol_91_125string(void *data, object clo, int argc, object *args)
+void _symbol_91_125string(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "symbol->string", argc - 1, 1);
   object cont = args[0];
   Cyc_symbol2string(data, cont, args[1]);
 }
 
-void _number_91_125string(void *data, object clo, int argc, object *args)
+void _number_91_125string(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "number->string", argc - 1, 1);
   {
@@ -5759,7 +5840,7 @@ void _number_91_125string(void *data, object clo, int argc, object *args)
   }
 }
 
-void _open_91input_91file(void *data, object clo, int argc, object *args)
+void _open_91input_91file(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "open-input-file", argc - 1, 1);
   {
@@ -5768,7 +5849,7 @@ void _open_91input_91file(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, &p);
 }}
 
-void _open_91output_91file(void *data, object clo, int argc, object *args)
+void _open_91output_91file(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "open-output-file", argc - 1, 1);
   {
@@ -5777,7 +5858,8 @@ void _open_91output_91file(void *data, object clo, int argc, object *args)
     return_closcall1(data, cont, &p);
 }}
 
-void _open_91binary_91input_91file(void *data, object clo, int argc, object *args)
+void _open_91binary_91input_91file(void *data, object clo, int argc,
+                                   object * args)
 {
   Cyc_check_argc(data, "open-binary-input-file", argc - 1, 1);
   {
@@ -5786,7 +5868,8 @@ void _open_91binary_91input_91file(void *data, object clo, int argc, object *arg
     return_closcall1(data, cont, &p);
 }}
 
-void _open_91binary_91output_91file(void *data, object clo, int argc, object *args)
+void _open_91binary_91output_91file(void *data, object clo, int argc,
+                                    object * args)
 {
   Cyc_check_argc(data, "open-binary-output-file", argc - 1, 1);
   {
@@ -5795,77 +5878,78 @@ void _open_91binary_91output_91file(void *data, object clo, int argc, object *ar
     return_closcall1(data, cont, &p);
 }}
 
-void _close_91port(void *data, object clo, int argc, object *args)
+void _close_91port(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "close-port", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_close_port(data, args[1]));
 }
 
-void _close_91input_91port(void *data, object clo, int argc, object *args)
+void _close_91input_91port(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "close-input-port", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_close_input_port(data, args[1]));
 }
 
-void _close_91output_91port(void *data, object clo, int argc, object *args)
+void _close_91output_91port(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "close-output-port", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_close_output_port(data, args[1]));
 }
 
-void _Cyc_91flush_91output_91port(void *data, object clo, int argc, object *args)
+void _Cyc_91flush_91output_91port(void *data, object clo, int argc,
+                                  object * args)
 {
   Cyc_check_argc(data, "Cyc-flush-output-port", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_flush_output_port(data, args[1]));
 }
 
-void _file_91exists_127(void *data, object clo, int argc, object *args)
+void _file_91exists_127(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "file-exists?", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_file_exists(data, args[1]));
 }
 
-void _delete_91file(void *data, object clo, int argc, object *args)
+void _delete_91file(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "delete-file", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_delete_file(data, args[1]));
 }
 
-void _read_91char(void *data, object clo, int argc, object *args)
+void _read_91char(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "read-char", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_read_char(data, cont, args[1]));
 }
 
-void _peek_91char(void *data, object clo, int argc, object *args)
+void _peek_91char(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "peek-char", argc - 1, 1);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_io_peek_char(data, cont, args[1]));
 }
 
-void _Cyc_91read_91line(void *data, object clo, int argc, object *args)
+void _Cyc_91read_91line(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "Cyc-read-line", argc - 1, 1);
   object cont = args[0];
   Cyc_io_read_line(data, cont, args[1]);
 }
 
-void _Cyc_91write_91char(void *data, object clo, int argc, object *args)
+void _Cyc_91write_91char(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "write-char", argc - 1, 2);
   object cont = args[0];
   return_closcall1(data, cont, Cyc_write_char(data, args[1], args[2]));
 }
 
-void _Cyc_91write(void *data, object clo, int argc, object *args)
+void _Cyc_91write(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "write", argc - 1, 1);
   {
@@ -5876,9 +5960,10 @@ void _Cyc_91write(void *data, object clo, int argc, object *args)
       buf[1] = args[2];
     }
     dispatch_write_va(data, cont, argc - 1, buf);
-}}
+  }
+}
 
-void _display(void *data, object clo, int argc, object *args)
+void _display(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "display", argc - 1, 1);
   {
@@ -5892,7 +5977,7 @@ void _display(void *data, object clo, int argc, object *args)
   }
 }
 
-void _call_95cc(void *data, object clo, int argc, object *args)
+void _call_95cc(void *data, object clo, int argc, object * args)
 {
   Cyc_check_argc(data, "call/cc", argc - 1, 1);
   object cont = args[0];
@@ -5935,14 +6020,14 @@ void _call_95cc(void *data, object clo, int argc, object *args)
   va_end(ap);
 
 //void dispatch_apply_va(void *data, int argc, object clo, object cont, object func, ...)
-void dispatch_apply_va(void *data, object clo, int argc, object *args)
+void dispatch_apply_va(void *data, object clo, int argc, object * args)
 {
   list lis = NULL, prev = NULL;
   object tmp;
   // cargs TODO: check num args to make this safe
   object func = args[1];
   int i;
-  argc = argc - 1; // Required for "dispatch" function
+  argc = argc - 1;              // Required for "dispatch" function
   if (argc == 2) {
     lis = args[2];
     Cyc_check_pair_or_null(data, lis);
@@ -5970,8 +6055,7 @@ object apply_va(void *data, object cont, int argc, object func, ...)
   object tmp;
   int i;
   va_list ap;
-  do_apply_va
-  return apply(data, cont, func, lis); // Never actually returns
+  do_apply_va return apply(data, cont, func, lis);      // Never actually returns
 }
 
 /*
@@ -6000,10 +6084,10 @@ object apply(void *data, object cont, object func, object args)
     count = obj_obj2int(Cyc_length(data, args));
     if (func == Cyc_glo_call_cc) {
       Cyc_check_num_args(data, "<procedure>", 1, args, count);
-      dispatch(data, count, ((closure) func)->fn, func, cont,
-               args);
+      dispatch(data, count, ((closure) func)->fn, func, cont, args);
     } else {
-      Cyc_check_num_args(data, "<procedure>", ((closure) func)->num_args, args, count);
+      Cyc_check_num_args(data, "<procedure>", ((closure) func)->num_args, args,
+                         count);
       dispatch(data, count, ((closure) func)->fn, func, cont, args);
     }
     break;
@@ -6015,23 +6099,26 @@ object apply(void *data, object cont, object func, object args)
 
       if (!is_object_type(fobj) || type_of(fobj) != symbol_tag) {
         Cyc_rt_raise2(data, "Call of non-procedure: ", func);
-      } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0 && Cyc_glo_eval_from_c != NULL) {
+      } else if (strncmp(((symbol) fobj)->desc, "lambda", 7) == 0
+                 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, func, args);
         //printf("JAE DEBUG, sending to eval: ");
         //Cyc_display(data, &c, stderr);
-        object buf[3] = {cont, &c, NULL};
+        object buf[3] = { cont, &c, NULL };
         ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 2, buf);
 
         // TODO: would be better to compare directly against symbols here,
         //       but need a way of looking them up ahead of time.
         //       maybe a libinit() or such is required.
-      } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
+      } else if (strncmp(((symbol) fobj)->desc, "primitive", 10) == 0
+                 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, cadr(func), args);
-        object buf[3] = {cont, &c, NULL};
+        object buf[3] = { cont, &c, NULL };
         ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 3, buf);
-      } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0 && Cyc_glo_eval_from_c != NULL) {
+      } else if (strncmp(((symbol) fobj)->desc, "procedure", 10) == 0
+                 && Cyc_glo_eval_from_c != NULL) {
         make_pair(c, func, args);
-        object buf[3] = {cont, &c, NULL};
+        object buf[3] = { cont, &c, NULL };
         ((closure) Cyc_glo_eval_from_c)->fn(data, Cyc_glo_eval_from_c, 3, buf);
       } else {
         make_pair(c, func, args);
@@ -6039,7 +6126,7 @@ object apply(void *data, object cont, object func, object args)
       }
     }
 
-  default: {
+  default:{
       Cyc_rt_raise2(data, "Call of non-procedure: ", func);
     }
   }
@@ -6047,7 +6134,7 @@ object apply(void *data, object cont, object func, object args)
 }
 
 // Version of apply meant to be called from within compiled code
-void Cyc_apply(void *data, object prim, int argc, object *args)
+void Cyc_apply(void *data, object prim, int argc, object * args)
 {
   object tmp;
   int i;
@@ -6059,12 +6146,12 @@ void Cyc_apply(void *data, object prim, int argc, object *args)
 
   for (i = 1; i < argc; i++) {
     tmp = args[i];
-    arglis[i-1].hdr.mark = gc_color_red;
-    arglis[i-1].hdr.grayed = 0;
-    arglis[i-1].hdr.immutable = 0;
-    arglis[i-1].tag = pair_tag;
-    arglis[i-1].pair_car = tmp;
-    arglis[i-1].pair_cdr = (i == (argc - 1)) ? NULL : &arglis[i];
+    arglis[i - 1].hdr.mark = gc_color_red;
+    arglis[i - 1].hdr.grayed = 0;
+    arglis[i - 1].hdr.immutable = 0;
+    arglis[i - 1].tag = pair_tag;
+    arglis[i - 1].pair_car = tmp;
+    arglis[i - 1].pair_cdr = (i == (argc - 1)) ? NULL : &arglis[i];
   }
   //printf("DEBUG applying primitive to ");
   //Cyc_display(data, (object)&arglis[0]);
@@ -6120,7 +6207,7 @@ void Cyc_start_trampoline(gc_thread_data * thd)
     Cyc_apply_from_buf(thd, thd->gc_num_args, thd->gc_cont, thd->gc_args);
   } else {
     closure clo = thd->gc_cont;
-   (clo->fn)(thd, clo, thd->gc_num_args, thd->gc_args);
+    (clo->fn) (thd, clo, thd->gc_num_args, thd->gc_args);
   }
 
   fprintf(stderr, "Internal error: should never have reached this line\n");
@@ -6141,7 +6228,8 @@ void gc_request_mark_globals(void)
  * @param alloci  Pointer to the next open slot in the buffer
  * @param obj     Object to add
  */
-static void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object obj)
+static void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci,
+                                      object obj)
 {
   if (*alloci == d->moveBufLen) {
     gc_thr_grow_move_buffer(d);
@@ -6152,7 +6240,7 @@ static void gc_thr_add_to_move_buffer(gc_thread_data * d, int *alloci, object ob
 }
 
 static char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
-                         object hp)
+                                object hp)
 {
   int acquired_lock = 0;
   if (grayed(obj)) {
@@ -6175,7 +6263,8 @@ static char *gc_fixup_moved_obj(gc_thread_data * thd, int *alloci, char *obj,
   return (char *)hp;
 }
 
-static char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_grown)
+static char *gc_move(char *obj, gc_thread_data * thd, int *alloci,
+                     int *heap_grown)
 {
   gc_heap_root *heap = thd->heap;
   if (!is_object_type(obj))
@@ -6220,23 +6309,20 @@ static char *gc_move(char *obj, gc_thread_data * thd, int *alloci, int *heap_gro
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case port_tag:{
-      port_type *hp =
-          gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
+      port_type *hp = gc_alloc(heap, sizeof(port_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case bignum_tag:{
-      bignum_type *hp = 
+      bignum_type *hp =
           gc_alloc(heap, sizeof(bignum_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
-  }
+    }
   case cvar_tag:{
-      cvar_type *hp =
-          gc_alloc(heap, sizeof(cvar_type), obj, thd, heap_grown);
+      cvar_type *hp = gc_alloc(heap, sizeof(cvar_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case macro_tag:{
-      macro_type *hp =
-          gc_alloc(heap, sizeof(macro_type), obj, thd, heap_grown);
+      macro_type *hp = gc_alloc(heap, sizeof(macro_type), obj, thd, heap_grown);
       return gc_fixup_moved_obj(thd, alloci, obj, hp);
     }
   case closure1_tag:{
@@ -6369,7 +6455,7 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
         }
       } else if (type_of(o) == cvar_tag) {
         cvar_type *c = (cvar_type *) o;
-        gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+        gc_move2heap(*(c->pvar));       // Transport underlying global, not the pvar
       } else {
         printf("Unexpected type %d transporting mutation\n", type_of(o));
         exit(1);
@@ -6381,18 +6467,17 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
   // Collect globals but only if a change was made. This avoids traversing a
   // long list of objects unless absolutely necessary.
   if (((gc_thread_data *) data)->globals_changed) {
-      ((gc_thread_data *) data)->globals_changed = 0;
+    ((gc_thread_data *) data)->globals_changed = 0;
     // Transport globals
-    gc_move2heap(Cyc_global_variables);   // Internal global used by the runtime
+    gc_move2heap(Cyc_global_variables); // Internal global used by the runtime
     {
       list l = global_table;
       for (; l != NULL; l = cdr(l)) {
         cvar_type *c = (cvar_type *) car(l);
-        gc_move2heap(*(c->pvar)); // Transport underlying global, not the pvar
+        gc_move2heap(*(c->pvar));       // Transport underlying global, not the pvar
       }
     }
   }
-
   // Check allocated objects, moving additional objects as needed
   while (scani < alloci) {
     object obj = ((gc_thread_data *) data)->moveBuf[scani];
@@ -6464,13 +6549,13 @@ void GC(void *data, closure cont, object * args, int num_args)
   object low_limit = &tmp;      // This is one end of the stack...
   object high_limit = ((gc_thread_data *) data)->stack_start;
 #ifdef CYC_HIGH_RES_TIMERS
-long long tstamp = hrt_get_current();
+  long long tstamp = hrt_get_current();
 #endif
   int alloci = gc_minor(data, low_limit, high_limit, cont, args, num_args);
   // Cooperate with the collector thread
   gc_mut_cooperate((gc_thread_data *) data, alloci);
 #ifdef CYC_HIGH_RES_TIMERS
-hrt_log_delta("minor gc", tstamp);
+  hrt_log_delta("minor gc", tstamp);
 #endif
   // Let it all go, Neo...
   longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
@@ -6482,41 +6567,43 @@ hrt_log_delta("minor gc", tstamp);
 
 void Cyc_make_shared_object(void *data, object k, object obj)
 {
-  gc_thread_data *thd = (gc_thread_data *)data;
+  gc_thread_data *thd = (gc_thread_data *) data;
   gc_heap_root *heap = thd->heap;
   object buf[1];
   int tmp, *heap_grown = &tmp;
-  if (!is_object_type(obj) || // Immediates do not have to be moved
-      !gc_is_stack_obj(&tmp, data, obj)) { // Not thread-local, assume already on heap
+  if (!is_object_type(obj) ||   // Immediates do not have to be moved
+      !gc_is_stack_obj(&tmp, data, obj)) {      // Not thread-local, assume already on heap
     return_closcall1(data, k, obj);
   }
 
-  switch(type_of(obj)) {
-  // These are never on the stack, ignore them
-  //  cond_var_tag    = 6
-  //  mutex_tag       = 14
-  //  atomic_tag      = 22
-  //  boolean_tag     = 0
-  //  bignum_tag      = 12
-  //  symbol_tag      = 19
-  //  closure0_tag    = 3
-  //  eof_tag         = 9
-  //  void_tag
-  // record_tag 
-  //  macro_tag       = 13
-  //  primitive_tag   = 17
+  switch (type_of(obj)) {
+    // These are never on the stack, ignore them
+    //  cond_var_tag    = 6
+    //  mutex_tag       = 14
+    //  atomic_tag      = 22
+    //  boolean_tag     = 0
+    //  bignum_tag      = 12
+    //  symbol_tag      = 19
+    //  closure0_tag    = 3
+    //  eof_tag         = 9
+    //  void_tag
+    // record_tag 
+    //  macro_tag       = 13
+    //  primitive_tag   = 17
 
-  // Copy stack-allocated objects with no children to the heap:
+    // Copy stack-allocated objects with no children to the heap:
   case string_tag:
   case double_tag:
   case bytevector_tag:
   case port_tag:
   case c_opaque_tag:
-  case complex_num_tag: {
-    object hp = gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd, heap_grown);
-    return_closcall1(data, k, hp);
-  }
-  // Objs w/children force minor GC to guarantee everything is relocated:
+  case complex_num_tag:{
+      object hp =
+          gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd,
+                   heap_grown);
+      return_closcall1(data, k, hp);
+    }
+    // Objs w/children force minor GC to guarantee everything is relocated:
   case cvar_tag:
   case closure1_tag:
   case closureN_tag:
@@ -6572,25 +6659,31 @@ static primitive_type Cyc_91spawn_91thread_67_primitive =
     { {0}, primitive_tag, &_Cyc_91spawn_91thread_67, "Cyc-spawn-thread!" };
 static primitive_type Cyc_91end_91thread_67_primitive =
     { {0}, primitive_tag, &_Cyc_91end_91thread_67, "Cyc-end-thread!" };
-static primitive_type _87_primitive = { {0},  primitive_tag, &__87 , "+"};
-static primitive_type _91_primitive = { {0},  primitive_tag, &__91 , "-"};
-static primitive_type _85_primitive = { {0},  primitive_tag, &__85 , "*"};
-static primitive_type _95_primitive = { {0},  primitive_tag, &__95 , "/"};
+static primitive_type _87_primitive = { {0}, primitive_tag, &__87, "+" };
+static primitive_type _91_primitive = { {0}, primitive_tag, &__91, "-" };
+static primitive_type _85_primitive = { {0}, primitive_tag, &__85, "*" };
+static primitive_type _95_primitive = { {0}, primitive_tag, &__95, "/" };
 static primitive_type _123_primitive = { {0}, primitive_tag, &__123, "=" };
 static primitive_type _125_primitive = { {0}, primitive_tag, &__125, ">" };
 static primitive_type _121_primitive = { {0}, primitive_tag, &__121, "<" };
-static primitive_type _125_123_primitive = { {0}, primitive_tag, &__125_123, ">="};
-static primitive_type _121_123_primitive = { {0}, primitive_tag, &__121_123, "<="};
-static primitive_type apply_primitive    = { {0}, primitive_tag, &_apply   , "apply"};
-static primitive_type _75halt_primitive  = { {0}, primitive_tag, &__75halt , "%halt"};
-static primitive_type exit_primitive     = { {0}, primitive_tag, &_cyc_exit, "exit"};
+static primitive_type _125_123_primitive =
+    { {0}, primitive_tag, &__125_123, ">=" };
+static primitive_type _121_123_primitive =
+    { {0}, primitive_tag, &__121_123, "<=" };
+static primitive_type apply_primitive =
+    { {0}, primitive_tag, &_apply, "apply" };
+static primitive_type _75halt_primitive =
+    { {0}, primitive_tag, &__75halt, "%halt" };
+static primitive_type exit_primitive =
+    { {0}, primitive_tag, &_cyc_exit, "exit" };
 static primitive_type Cyc_91current_91exception_91handler_primitive =
     { {0}, primitive_tag, &_Cyc_91current_91exception_91handler,
-    "Cyc_current_exception_handler" };
+"Cyc_current_exception_handler"
+};
 static primitive_type Cyc_91default_91exception_91handler_primitive =
     { {0}, primitive_tag,
-    &_Cyc_91default_91exception_91handler,
-    "Cyc_default_exception_handler"
+&_Cyc_91default_91exception_91handler,
+"Cyc_default_exception_handler"
 };
 static primitive_type cons_primitive = { {0}, primitive_tag, &_cons, "cons" };
 static primitive_type cell_91get_primitive =
@@ -6600,9 +6693,12 @@ static primitive_type set_91global_67_primitive =
 static primitive_type set_91cell_67_primitive =
     { {0}, primitive_tag, &_set_91cell_67, "set-cell!" };
 static primitive_type cell_primitive = { {0}, primitive_tag, &_cell, "cell" };
-static primitive_type eq_127_primitive    = { {0}, primitive_tag, &_eq_127   , "eq?"    };
-static primitive_type eqv_127_primitive   = { {0}, primitive_tag, &_eqv_127  , "eqv?"   };
-static primitive_type equal_127_primitive = { {0}, primitive_tag, &_equal_127, "equal?" };
+static primitive_type eq_127_primitive =
+    { {0}, primitive_tag, &_eq_127, "eq?" };
+static primitive_type eqv_127_primitive =
+    { {0}, primitive_tag, &_eqv_127, "eqv?" };
+static primitive_type equal_127_primitive =
+    { {0}, primitive_tag, &_equal_127, "equal?" };
 static primitive_type assq_primitive = { {0}, primitive_tag, &_assq, "assq" };
 static primitive_type assv_primitive = { {0}, primitive_tag, &_assv, "assv" };
 static primitive_type memq_primitive = { {0}, primitive_tag, &_memq, "memq" };
@@ -6623,30 +6719,54 @@ static primitive_type caar_primitive = { {0}, primitive_tag, &_caar, "caar" };
 static primitive_type cadr_primitive = { {0}, primitive_tag, &_cadr, "cadr" };
 static primitive_type cdar_primitive = { {0}, primitive_tag, &_cdar, "cdar" };
 static primitive_type cddr_primitive = { {0}, primitive_tag, &_cddr, "cddr" };
-static primitive_type caaar_primitive = { {0}, primitive_tag, &_caaar, "caaar" };
-static primitive_type caadr_primitive = { {0}, primitive_tag, &_caadr, "caadr" };
-static primitive_type cadar_primitive = { {0}, primitive_tag, &_cadar, "cadar" };
-static primitive_type caddr_primitive = { {0}, primitive_tag, &_caddr, "caddr" };
-static primitive_type cdaar_primitive = { {0}, primitive_tag, &_cdaar, "cdaar" };
-static primitive_type cdadr_primitive = { {0}, primitive_tag, &_cdadr, "cdadr" };
-static primitive_type cddar_primitive = { {0}, primitive_tag, &_cddar, "cddar" };
-static primitive_type cdddr_primitive = { {0}, primitive_tag, &_cdddr, "cdddr" };
-static primitive_type caaaar_primitive = { {0}, primitive_tag, &_caaaar, "caaaar" };
-static primitive_type caaadr_primitive = { {0}, primitive_tag, &_caaadr, "caaadr" };
-static primitive_type caadar_primitive = { {0}, primitive_tag, &_caadar, "caadar" };
-static primitive_type caaddr_primitive = { {0}, primitive_tag, &_caaddr, "caaddr" };
-static primitive_type cadaar_primitive = { {0}, primitive_tag, &_cadaar, "cadaar" };
-static primitive_type cadadr_primitive = { {0}, primitive_tag, &_cadadr, "cadadr" };
-static primitive_type caddar_primitive = { {0}, primitive_tag, &_caddar, "caddar" };
-static primitive_type cadddr_primitive = { {0}, primitive_tag, &_cadddr, "cadddr" };
-static primitive_type cdaaar_primitive = { {0}, primitive_tag, &_cdaaar, "cdaaar" };
-static primitive_type cdaadr_primitive = { {0}, primitive_tag, &_cdaadr, "cdaadr" };
-static primitive_type cdadar_primitive = { {0}, primitive_tag, &_cdadar, "cdadar" };
-static primitive_type cdaddr_primitive = { {0}, primitive_tag, &_cdaddr, "cdaddr" };
-static primitive_type cddaar_primitive = { {0}, primitive_tag, &_cddaar, "cddaar" };
-static primitive_type cddadr_primitive = { {0}, primitive_tag, &_cddadr, "cddadr" };
-static primitive_type cdddar_primitive = { {0}, primitive_tag, &_cdddar, "cdddar" };
-static primitive_type cddddr_primitive = { {0}, primitive_tag, &_cddddr, "cddddr" };
+static primitive_type caaar_primitive =
+    { {0}, primitive_tag, &_caaar, "caaar" };
+static primitive_type caadr_primitive =
+    { {0}, primitive_tag, &_caadr, "caadr" };
+static primitive_type cadar_primitive =
+    { {0}, primitive_tag, &_cadar, "cadar" };
+static primitive_type caddr_primitive =
+    { {0}, primitive_tag, &_caddr, "caddr" };
+static primitive_type cdaar_primitive =
+    { {0}, primitive_tag, &_cdaar, "cdaar" };
+static primitive_type cdadr_primitive =
+    { {0}, primitive_tag, &_cdadr, "cdadr" };
+static primitive_type cddar_primitive =
+    { {0}, primitive_tag, &_cddar, "cddar" };
+static primitive_type cdddr_primitive =
+    { {0}, primitive_tag, &_cdddr, "cdddr" };
+static primitive_type caaaar_primitive =
+    { {0}, primitive_tag, &_caaaar, "caaaar" };
+static primitive_type caaadr_primitive =
+    { {0}, primitive_tag, &_caaadr, "caaadr" };
+static primitive_type caadar_primitive =
+    { {0}, primitive_tag, &_caadar, "caadar" };
+static primitive_type caaddr_primitive =
+    { {0}, primitive_tag, &_caaddr, "caaddr" };
+static primitive_type cadaar_primitive =
+    { {0}, primitive_tag, &_cadaar, "cadaar" };
+static primitive_type cadadr_primitive =
+    { {0}, primitive_tag, &_cadadr, "cadadr" };
+static primitive_type caddar_primitive =
+    { {0}, primitive_tag, &_caddar, "caddar" };
+static primitive_type cadddr_primitive =
+    { {0}, primitive_tag, &_cadddr, "cadddr" };
+static primitive_type cdaaar_primitive =
+    { {0}, primitive_tag, &_cdaaar, "cdaaar" };
+static primitive_type cdaadr_primitive =
+    { {0}, primitive_tag, &_cdaadr, "cdaadr" };
+static primitive_type cdadar_primitive =
+    { {0}, primitive_tag, &_cdadar, "cdadar" };
+static primitive_type cdaddr_primitive =
+    { {0}, primitive_tag, &_cdaddr, "cdaddr" };
+static primitive_type cddaar_primitive =
+    { {0}, primitive_tag, &_cddaar, "cddaar" };
+static primitive_type cddadr_primitive =
+    { {0}, primitive_tag, &_cddadr, "cddadr" };
+static primitive_type cdddar_primitive =
+    { {0}, primitive_tag, &_cdddar, "cdddar" };
+static primitive_type cddddr_primitive =
+    { {0}, primitive_tag, &_cddddr, "cddddr" };
 static primitive_type char_91_125integer_primitive =
     { {0}, primitive_tag, &_char_91_125integer, "char->integer" };
 static primitive_type integer_91_125char_primitive =
@@ -6664,7 +6784,8 @@ static primitive_type string_91set_67_primitive =
 static primitive_type Cyc_91installation_91dir_primitive =
     { {0}, primitive_tag, &_Cyc_91installation_91dir, "Cyc-installation-dir" };
 static primitive_type Cyc_91compilation_91environment_primitive =
-    { {0}, primitive_tag, &_Cyc_91compilation_91environment, "Cyc-compilation-environment" };
+    { {0}, primitive_tag, &_Cyc_91compilation_91environment,
+    "Cyc-compilation-environment" };
 static primitive_type command_91line_91arguments_primitive =
     { {0}, primitive_tag, &_command_91line_91arguments, "command-line-arguments"
 };
@@ -6744,9 +6865,11 @@ static primitive_type open_91input_91file_primitive =
 static primitive_type open_91output_91file_primitive =
     { {0}, primitive_tag, &_open_91output_91file, "open-output-file" };
 static primitive_type open_91binary_91input_91file_primitive =
-    { {0}, primitive_tag, &_open_91binary_91input_91file, "open-binary-input-file" };
+    { {0}, primitive_tag, &_open_91binary_91input_91file,
+    "open-binary-input-file" };
 static primitive_type open_91binary_91output_91file_primitive =
-    { {0}, primitive_tag, &_open_91binary_91output_91file, "open-binary-output-file" };
+    { {0}, primitive_tag, &_open_91binary_91output_91file,
+    "open-binary-output-file" };
 static primitive_type close_91port_primitive =
     { {0}, primitive_tag, &_close_91port, "close-port" };
 static primitive_type close_91input_91port_primitive =
@@ -6754,7 +6877,8 @@ static primitive_type close_91input_91port_primitive =
 static primitive_type close_91output_91port_primitive =
     { {0}, primitive_tag, &_close_91output_91port, "close-output-port" };
 static primitive_type Cyc_91flush_91output_91port_primitive =
-    { {0}, primitive_tag, &_Cyc_91flush_91output_91port, "Cyc-flush-output-port" };
+    { {0}, primitive_tag, &_Cyc_91flush_91output_91port,
+    "Cyc-flush-output-port" };
 static primitive_type file_91exists_127_primitive =
     { {0}, primitive_tag, &_file_91exists_127, "file-exists?" };
 static primitive_type delete_91file_primitive =
@@ -6900,8 +7024,10 @@ const object primitive_bytevector_127 = &bytevector_127_primitive;
 const object primitive_symbol_127 = &symbol_127_primitive;
 const object primitive_open_91input_91file = &open_91input_91file_primitive;
 const object primitive_open_91output_91file = &open_91output_91file_primitive;
-const object primitive_open_91binary_91input_91file = &open_91binary_91input_91file_primitive;
-const object primitive_open_91binary_91output_91file = &open_91binary_91output_91file_primitive;
+const object primitive_open_91binary_91input_91file =
+    &open_91binary_91input_91file_primitive;
+const object primitive_open_91binary_91output_91file =
+    &open_91binary_91output_91file_primitive;
 const object primitive_close_91port = &close_91port_primitive;
 const object primitive_close_91input_91port = &close_91input_91port_primitive;
 const object primitive_close_91output_91port = &close_91output_91port_primitive;
@@ -6917,7 +7043,7 @@ const object primitive_Cyc_91write = &Cyc_91write_primitive;
 const object primitive_Cyc_91display = &Cyc_91display_primitive;
 const object primitive_call_95cc = &call_95cc_primitive;
 
-void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
+void *gc_alloc_pair(gc_thread_data * data, object head, object tail)
 {
   int heap_grown;
   pair_type *p;
@@ -6928,7 +7054,8 @@ void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
   tmp.tag = pair_tag;
   tmp.pair_car = head;
   tmp.pair_cdr = tail;
-  p = gc_alloc(((gc_thread_data *)data)->heap, sizeof(pair_type), (char *)(&tmp), (gc_thread_data *)data, &heap_grown);
+  p = gc_alloc(((gc_thread_data *) data)->heap, sizeof(pair_type),
+               (char *)(&tmp), (gc_thread_data *) data, &heap_grown);
 
   return p;
 }
@@ -6936,7 +7063,7 @@ void *gc_alloc_pair(gc_thread_data *data, object head, object tail)
 /**
  * Thread initialization function only called from within the runtime
  */
-void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
+void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
 {
   int i;
   vector_type *t;
@@ -6946,15 +7073,15 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
   gc_thread_data *thd;
 
   // Extract passed-in thread data object
-  tmp = car(thread_and_thunk); 
-  t = (vector_type *)tmp;
-  op = _unsafe_Cyc_vector_ref(t, obj_int2obj(2)); // Field set in thread-start!
+  tmp = car(thread_and_thunk);
+  t = (vector_type *) tmp;
+  op = _unsafe_Cyc_vector_ref(t, obj_int2obj(2));       // Field set in thread-start!
   if (op == NULL) {
     // Should never happen
     thd = malloc(sizeof(gc_thread_data));
   } else {
-    o = (c_opaque_type *)op;
-    thd = (gc_thread_data *)(opaque_ptr(o));
+    o = (c_opaque_type *) op;
+    thd = (gc_thread_data *) (opaque_ptr(o));
   }
   gc_thread_data_init(thd, 0, (char *)&stack_start, global_stack_size);
   thd->scm_thread_obj = car(thread_and_thunk);
@@ -6975,10 +7102,10 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object *args)
   thd->thread_id = pthread_self();
 
   // Copy thread params from the calling thread
-  t = (vector_type *)thd->scm_thread_obj;
-  op = Cyc_vector_ref(thd, t, obj_int2obj(5)); // Field set in thread-start!
-  o = (c_opaque_type *)op;
-  parent = ((gc_thread_data *)o->ptr)->param_objs; // Unbox parent thread's data
+  t = (vector_type *) thd->scm_thread_obj;
+  op = Cyc_vector_ref(thd, t, obj_int2obj(5));  // Field set in thread-start!
+  o = (c_opaque_type *) op;
+  parent = ((gc_thread_data *) o->ptr)->param_objs;     // Unbox parent thread's data
   child = NULL;
   thd->param_objs = NULL;
   while (parent) {
@@ -7016,7 +7143,7 @@ object Cyc_spawn_thread(object thread_and_thunk)
   pthread_attr_t attr;
   pthread_attr_init(&attr);
 #ifdef CYC_PTHREAD_SET_STACK_SIZE
-  pthread_attr_setstacksize(&attr, 1024*1024*8);
+  pthread_attr_setstacksize(&attr, 1024 * 1024 * 8);
 #endif
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   if (pthread_create(&thread, &attr, _Cyc_init_thread, thread_and_thunk)) {
@@ -7039,7 +7166,7 @@ void Cyc_end_thread(gc_thread_data * thd)
   GC(thd, &clo, thd->gc_args, 0);
 }
 
-void Cyc_exit_thread(void *data, object _, int argc, object *args)
+void Cyc_exit_thread(void *data, object _, int argc, object * args)
 {
   // alternatively could call longjmp with a null continuation, but that seems
   // more complicated than necessary. or does it... see next comment:
@@ -7067,7 +7194,8 @@ object Cyc_thread_sleep(void *data, object timeout)
   Cyc_check_num(data, timeout);
   value = unbox_number(timeout);
   tim.tv_sec = (long)value;
-  tim.tv_nsec = (long)((value - tim.tv_sec) * 1000 * NANOSECONDS_PER_MILLISECOND);
+  tim.tv_nsec =
+      (long)((value - tim.tv_sec) * 1000 * NANOSECONDS_PER_MILLISECOND);
   nanosleep(&tim, NULL);
   return boolean_t;
 }
@@ -7090,8 +7218,8 @@ object copy2heap(void *data, object obj)
     return obj;
   }
 
-  return gc_alloc(((gc_thread_data *)data)->heap, gc_allocated_bytes(obj, NULL, NULL), obj, data,
-                  &on_stack);
+  return gc_alloc(((gc_thread_data *) data)->heap,
+                  gc_allocated_bytes(obj, NULL, NULL), obj, data, &on_stack);
 }
 
 // TODO: version of above that will perform a deep copy (via GC) if necessary
@@ -7127,33 +7255,31 @@ vpbuffer *vp_create(void)
   return v;
 }
 
-void vp_add(vpbuffer *v, void *obj)
+void vp_add(vpbuffer * v, void *obj)
 {
   v->buf = vpbuffer_add(v->buf, &(v->len), v->count++, obj);
 }
 
-object Cyc_bit_unset(void *data, object n1, object n2) 
+object Cyc_bit_unset(void *data, object n1, object n2)
 {
   Cyc_check_int(data, n1);
   Cyc_check_int(data, n2);
-  return (obj_int2obj( 
-            obj_obj2int(n1) & ~(obj_obj2int(n2))));
+  return (obj_int2obj(obj_obj2int(n1) & ~(obj_obj2int(n2))));
 }
 
-object Cyc_bit_set(void *data, object n1, object n2) 
+object Cyc_bit_set(void *data, object n1, object n2)
 {
   Cyc_check_int(data, n1);
   Cyc_check_int(data, n2);
-  return (obj_int2obj( 
-            obj_obj2int(n1) | obj_obj2int(n2)));
+  return (obj_int2obj(obj_obj2int(n1) | obj_obj2int(n2)));
 }
 
 object Cyc_num2double(void *data, object ptr, object z)
 {
- return_inexact_double_op_no_cps(data, ptr, (double), z);
+  return_inexact_double_op_no_cps(data, ptr, (double), z);
 }
 
-void Cyc_make_rectangular(void *data, object k, object r, object i) 
+void Cyc_make_rectangular(void *data, object k, object r, object i)
 {
   double_type dr, di;
   Cyc_num2double(data, &dr, r);
@@ -7182,44 +7308,43 @@ The seeds for s20, s21, s22 must be integers in [0, m2 - 1] and not all 0.
 //static double s10 = SEED, s11 = SEED, s12 = SEED,
 //              s20 = SEED, s21 = SEED, s22 = SEED;
 
-
-double MRG32k3a (double seed)
+double MRG32k3a(double seed)
 {
-   double s10 = seed, s11 = seed, s12 = seed,
-          s20 = seed, s21 = seed, s22 = seed;
-   long k;
-   double p1, p2;
-   /* Component 1 */
-   p1 = a12 * s11 - a13n * s10;
-   k = p1 / m1;
-   p1 -= k * m1;
-   if (p1 < 0.0)
-      p1 += m1;
-   s10 = s11;
-   s11 = s12;
-   s12 = p1;
+  double s10 = seed, s11 = seed, s12 = seed, s20 = seed, s21 = seed, s22 = seed;
+  long k;
+  double p1, p2;
+  /* Component 1 */
+  p1 = a12 * s11 - a13n * s10;
+  k = p1 / m1;
+  p1 -= k * m1;
+  if (p1 < 0.0)
+    p1 += m1;
+  s10 = s11;
+  s11 = s12;
+  s12 = p1;
 
-   /* Component 2 */
-   p2 = a21 * s22 - a23n * s20;
-   k = p2 / m2;
-   p2 -= k * m2;
-   if (p2 < 0.0)
-      p2 += m2;
-   s20 = s21;
-   s21 = s22;
-   s22 = p2;
+  /* Component 2 */
+  p2 = a21 * s22 - a23n * s20;
+  k = p2 / m2;
+  p2 -= k * m2;
+  if (p2 < 0.0)
+    p2 += m2;
+  s20 = s21;
+  s21 = s22;
+  s22 = p2;
 
-   /* Combination */
-   if (p1 <= p2)
-      return ((p1 - p2 + m1) * norm);
-   else
-      return ((p1 - p2) * norm);
+  /* Combination */
+  if (p1 <= p2)
+    return ((p1 - p2 + m1) * norm);
+  else
+    return ((p1 - p2) * norm);
 }
+
 /* END RNG */
 
-
 /** Dynamic loading */
-void Cyc_import_shared_object(void *data, object cont, object filename, object entry_pt_fnc)
+void Cyc_import_shared_object(void *data, object cont, object filename,
+                              object entry_pt_fnc)
 {
   char buffer[256];
   void *handle;
@@ -7232,7 +7357,7 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
     make_utf8_string(data, s, buffer);
     Cyc_rt_raise2(data, "Unable to import library", &s);
   }
-  dlerror();    /* Clear any existing error */
+  dlerror();                    /* Clear any existing error */
 
   if (string_len(entry_pt_fnc) == 0) {
     // No entry point so this is a third party library.
@@ -7241,12 +7366,13 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
   } else {
     entry_pt = (function_type) dlsym(handle, string_str(entry_pt_fnc));
     if (entry_pt == NULL) {
-      snprintf(buffer, 256, "%s, %s, %s", string_str(filename), string_str(entry_pt_fnc), dlerror());
+      snprintf(buffer, 256, "%s, %s, %s", string_str(filename),
+               string_str(entry_pt_fnc), dlerror());
       make_utf8_string(data, s, buffer);
       Cyc_rt_raise2(data, "Unable to load symbol", &s);
     }
     mclosure1(clo, entry_pt, cont);
-    object buf[1] = {&clo};
+    object buf[1] = { &clo };
     entry_pt(data, &clo, 1, buf);
   }
 }
@@ -7258,13 +7384,13 @@ void Cyc_import_shared_object(void *data, object cont, object filename, object e
  * @param p Input port
  * @return Number of characters read, or 0 for EOF/error
  */
-int read_from_port(port_type *p)
+int read_from_port(port_type * p)
 {
   size_t rv = 0;
   FILE *fp = p->fp;
   char *buf = p->mem_buf;
 
-  while(1) {
+  while (1) {
     errno = 0;
     rv = fread(buf, sizeof(char), p->read_len, fp);
 
@@ -7284,16 +7410,15 @@ int read_from_port(port_type *p)
  * @param p Input port
  * @param msg Error message
  */
-static void _read_error(void *data, port_type *p, const char *msg) 
+static void _read_error(void *data, port_type * p, const char *msg)
 {
   char buf[1024];
-  snprintf(buf, 1023, "(line %d, column %d): %s", 
-           p->line_num, p->col_num, msg);
+  snprintf(buf, 1023, "(line %d, column %d): %s", p->line_num, p->col_num, msg);
   // TODO: can't do this because thread is blocked, need to return a value to cont.
   // the cont could receive an error and raise it though
   //Cyc_rt_raise_msg(data, buf);
   make_string(str, buf);
-  str.num_cp = Cyc_utf8_count_code_points((uint8_t *)buf);
+  str.num_cp = Cyc_utf8_count_code_points((uint8_t *) buf);
   make_empty_vector(vec);
   vec.num_elements = 1;
   vec.elements = (object *) alloca(sizeof(object) * vec.num_elements);
@@ -7305,17 +7430,17 @@ static void _read_error(void *data, port_type *p, const char *msg)
  * @brief Helper function to read past a comment
  * @param p Input port
  */
-static void _read_line_comment(port_type *p)
+static void _read_line_comment(port_type * p)
 {
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
-        break; // Return if buf is empty
+      if (!read_from_port(p)) {
+        break;                  // Return if buf is empty
       }
     }
     if (p->mem_buf[p->buf_idx++] == '\n') {
-      p->line_num++; // Ignore col_num since we are just skipping over chars
+      p->line_num++;            // Ignore col_num since we are just skipping over chars
       p->col_num = 1;
       break;
     }
@@ -7326,15 +7451,15 @@ static void _read_line_comment(port_type *p)
  * @brief Helper function to read past a block comment
  * @param p Input port
  */
-static void _read_multiline_comment(port_type *p)
+static void _read_multiline_comment(port_type * p)
 {
   int maybe_end = 0;
 
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
-        break; // Return if buf is empty
+      if (!read_from_port(p)) {
+        break;                  // Return if buf is empty
       }
     }
 
@@ -7363,25 +7488,25 @@ static void _read_multiline_comment(port_type *p)
  * @brief Helper function to read past whitespace characters
  * @param p Input port
  */
-static void _read_whitespace(port_type *p) 
+static void _read_whitespace(port_type * p)
 {
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
-        break; // Return if buf is empty
+      if (!read_from_port(p)) {
+        break;                  // Return if buf is empty
       }
     }
     if (p->mem_buf[p->buf_idx] == '\n') {
       p->buf_idx++;
-      p->line_num++; // Ignore col_num since we are just skipping over chars
+      p->line_num++;            // Ignore col_num since we are just skipping over chars
       p->col_num = 1;
       break;
     } else if (isspace(p->mem_buf[p->buf_idx])) {
       p->buf_idx++;
       p->col_num++;
     } else {
-      break; // Terminate on non-whitespace char
+      break;                    // Terminate on non-whitespace char
     }
   }
 }
@@ -7391,11 +7516,11 @@ static void _read_whitespace(port_type *p)
  * @param p Input port
  * @param c Character to add
  */
-static void _read_add_to_tok_buf(port_type *p, char c)
+static void _read_add_to_tok_buf(port_type * p, char c)
 {
   // FUTURE: more efficient to try and use mem_buf directly??
   //         complicates things with more edge cases though
-  if ((p->tok_end + 1) == p->tok_buf_len) { // +1 for trailing \0 later on
+  if ((p->tok_end + 1) == p->tok_buf_len) {     // +1 for trailing \0 later on
     p->tok_buf_len *= 2;
     p->tok_buf = realloc(p->tok_buf, p->tok_buf_len);
     if (!p->tok_buf) {
@@ -7414,7 +7539,8 @@ static int _read_is_numeric(const char *tok, int len)
   return (len &&
           ((isdigit(tok[0])) ||
            ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
-           ((len > 1) && (tok[1] == '.' || isdigit(tok[1])) && (tok[0] == '-' || tok[0] == '+'))));
+           ((len > 1) && (tok[1] == '.' || isdigit(tok[1]))
+            && (tok[0] == '-' || tok[0] == '+'))));
 }
 
 /**
@@ -7423,8 +7549,7 @@ static int _read_is_numeric(const char *tok, int len)
 static int _read_is_complex_number(const char *tok, int len)
 {
   // Assumption: tok already passed checks from _read_is_numeric
-  return (tok[len - 1] == 'i' ||
-          tok[len - 1] == 'I');
+  return (tok[len - 1] == 'i' || tok[len - 1] == 'I');
 }
 
 /**
@@ -7433,8 +7558,7 @@ static int _read_is_complex_number(const char *tok, int len)
  */
 static int _read_is_hex_digit(char c)
 {
-  return (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F');
+  return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
 /**
@@ -7443,15 +7567,14 @@ static int _read_is_hex_digit(char c)
  * @param cont Current continuation
  * @param p Input port
  */
-static void _read_string(void *data, object cont, port_type *p) 
+static void _read_string(void *data, object cont, port_type * p)
 {
   char c;
-  int escaped = 0, escaped_whitespace = 0, 
-      ewrn = 0; // esc whitespace read newline
-  while(1) {
+  int escaped = 0, escaped_whitespace = 0, ewrn = 0;    // esc whitespace read newline
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
+      if (!read_from_port(p)) {
         _read_error(data, p, "Missing closing double-quote");
       }
     }
@@ -7506,44 +7629,44 @@ static void _read_string(void *data, object cont, port_type *p)
       case 't':
         _read_add_to_tok_buf(p, '\t');
         break;
-      case 'x': {
-        char buf[32];
-        int i = 0;
-        while (i < 31){
-          if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-            int rv = read_from_port(p); 
-            if (!rv) { 
+      case 'x':{
+          char buf[32];
+          int i = 0;
+          while (i < 31) {
+            if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+              int rv = read_from_port(p);
+              if (!rv) {
+                break;
+              }
+            }
+            if (p->mem_buf[p->buf_idx] == ';') {
+              p->buf_idx++;
               break;
             }
-          }
-          if (p->mem_buf[p->buf_idx] == ';'){
+            // Verify if hex digit is valid
+            if (!isdigit(p->mem_buf[p->buf_idx]) &&
+                !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
+              p->buf_idx++;
+              _read_error(data, p, "invalid hex digit in string");
+            }
+            buf[i] = p->mem_buf[p->buf_idx];
             p->buf_idx++;
-            break;
+            p->col_num++;
+            i++;
           }
-          // Verify if hex digit is valid
-          if (!isdigit(p->mem_buf[p->buf_idx]) && 
-              !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
-            p->buf_idx++;
-            _read_error(data, p, "invalid hex digit in string");
+          buf[i] = '\0';
+          {
+            char_type result = strtol(buf, NULL, 16);
+            char cbuf[5];
+            int i;
+            Cyc_utf8_encode_char(cbuf, 5, result);
+            for (i = 0; cbuf[i] != 0; i++) {
+              _read_add_to_tok_buf(p, cbuf[i]);
+            }
+            //p->tok_buf[p->tok_end++] = (char)result;
           }
-          buf[i] = p->mem_buf[p->buf_idx];
-          p->buf_idx++;
-          p->col_num++;
-          i++;
+          break;
         }
-        buf[i] = '\0';
-        {
-          char_type result = strtol(buf, NULL, 16);
-          char cbuf[5];
-          int i;
-          Cyc_utf8_encode_char(cbuf, 5, result);
-          for (i = 0; cbuf[i] != 0; i++) {
-            _read_add_to_tok_buf(p, cbuf[i]);
-          }
-          //p->tok_buf[p->tok_end++] = (char)result;
-        }
-        break;
-      }
       case '\r':
       case '\t':
       case ' ':
@@ -7558,12 +7681,12 @@ static void _read_string(void *data, object cont, port_type *p)
         p->col_num = 1;
         break;
       default:
-        _read_error(data, p, "invalid escape character in string"); // TODO: char
+        _read_error(data, p, "invalid escape character in string");     // TODO: char
         break;
       }
     } else if (c == '"') {
-      p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
-      p->tok_end = 0; // Reset for next atom
+      p->tok_buf[p->tok_end] = '\0';    // TODO: what if buffer is full?
+      p->tok_end = 0;           // Reset for next atom
       {
         make_utf8_string(data, str, p->tok_buf);
         return_thread_runnable_with_obj(data, &str, p);
@@ -7585,14 +7708,14 @@ static void _read_string(void *data, object cont, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-static void _read_literal_identifier(void *data, port_type *p) 
+static void _read_literal_identifier(void *data, port_type * p)
 {
   char c;
   int escaped = 0;
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
+      if (!read_from_port(p)) {
         _read_error(data, p, "EOF encountered parsing literal identifier");
       }
     }
@@ -7624,51 +7747,51 @@ static void _read_literal_identifier(void *data, port_type *p)
       case 't':
         _read_add_to_tok_buf(p, '\t');
         break;
-      case 'x': {
-        char buf[32];
-        int i = 0;
-        while (i < 31){
-          if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-            int rv = read_from_port(p); 
-            if (!rv) { 
+      case 'x':{
+          char buf[32];
+          int i = 0;
+          while (i < 31) {
+            if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+              int rv = read_from_port(p);
+              if (!rv) {
+                break;
+              }
+            }
+            if (p->mem_buf[p->buf_idx] == ';') {
+              p->buf_idx++;
               break;
             }
-          }
-          if (p->mem_buf[p->buf_idx] == ';'){
+            // Verify if hex digit is valid
+            if (!isdigit(p->mem_buf[p->buf_idx]) &&
+                !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
+              p->buf_idx++;
+              _read_error(data, p, "invalid hex digit in literal identifier");
+            }
+            buf[i] = p->mem_buf[p->buf_idx];
             p->buf_idx++;
-            break;
+            p->col_num++;
+            i++;
           }
-          // Verify if hex digit is valid
-          if (!isdigit(p->mem_buf[p->buf_idx]) && 
-              !_read_is_hex_digit(p->mem_buf[p->buf_idx])) {
-            p->buf_idx++;
-            _read_error(data, p, "invalid hex digit in literal identifier");
+          buf[i] = '\0';
+          {
+            char_type result = strtol(buf, NULL, 16);
+            char cbuf[5];
+            int i;
+            Cyc_utf8_encode_char(cbuf, 5, result);
+            for (i = 0; cbuf[i] != 0; i++) {
+              _read_add_to_tok_buf(p, cbuf[i]);
+            }
+            //p->tok_buf[p->tok_end++] = (char)result;
           }
-          buf[i] = p->mem_buf[p->buf_idx];
-          p->buf_idx++;
-          p->col_num++;
-          i++;
+          break;
         }
-        buf[i] = '\0';
-        {
-          char_type result = strtol(buf, NULL, 16);
-          char cbuf[5];
-          int i;
-          Cyc_utf8_encode_char(cbuf, 5, result);
-          for (i = 0; cbuf[i] != 0; i++) {
-            _read_add_to_tok_buf(p, cbuf[i]);
-          }
-          //p->tok_buf[p->tok_end++] = (char)result;
-        }
-        break;
-      }
       default:
         _read_error(data, p, "invalid escape character in literal identifier"); // TODO: char
         break;
       }
     } else if (c == '|') {
-      p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
-      p->tok_end = 0; // Reset for next atom
+      p->tok_buf[p->tok_end] = '\0';    // TODO: what if buffer is full?
+      p->tok_end = 0;           // Reset for next atom
       {
         object sym = find_or_add_symbol(p->tok_buf);
         return_thread_runnable_with_obj(data, sym, p);
@@ -7690,32 +7813,32 @@ static void _read_literal_identifier(void *data, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-static void _read_return_character(void *data, port_type *p)
+static void _read_return_character(void *data, port_type * p)
 {
-  p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
-  p->tok_end = 0; // Reset for next atom
+  p->tok_buf[p->tok_end] = '\0';        // TODO: what if buffer is full?
+  p->tok_end = 0;               // Reset for next atom
   if (strlen(p->tok_buf) == 1) {
     // ASCII char, consider merging with below?
     return_thread_runnable_with_obj(data, obj_char2obj(p->tok_buf[0]), p);
-  } else if(strncmp(p->tok_buf, "alarm", 5) == 0) {
+  } else if (strncmp(p->tok_buf, "alarm", 5) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\a'), p);
-  } else if(strncmp(p->tok_buf, "backspace", 9) == 0) {
+  } else if (strncmp(p->tok_buf, "backspace", 9) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\b'), p);
-  } else if(strncmp(p->tok_buf, "delete", 6) == 0) {
+  } else if (strncmp(p->tok_buf, "delete", 6) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj(127), p);
-  } else if(strncmp(p->tok_buf, "escape", 6) == 0) {
+  } else if (strncmp(p->tok_buf, "escape", 6) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj(27), p);
-  } else if(strncmp(p->tok_buf, "newline", 7) == 0) {
+  } else if (strncmp(p->tok_buf, "newline", 7) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\n'), p);
-  } else if(strncmp(p->tok_buf, "null", 4) == 0) {
+  } else if (strncmp(p->tok_buf, "null", 4) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\0'), p);
-  } else if(strncmp(p->tok_buf, "return", 6) == 0) {
+  } else if (strncmp(p->tok_buf, "return", 6) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\r'), p);
-  } else if(strncmp(p->tok_buf, "space", 5) == 0) {
+  } else if (strncmp(p->tok_buf, "space", 5) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj(' '), p);
-  } else if(strncmp(p->tok_buf, "tab", 3) == 0) {
+  } else if (strncmp(p->tok_buf, "tab", 3) == 0) {
     return_thread_runnable_with_obj(data, obj_char2obj('\t'), p);
-  } else if(strlen(p->tok_buf) > 1 && p->tok_buf[0] == 'x') {
+  } else if (strlen(p->tok_buf) > 1 && p->tok_buf[0] == 'x') {
     const char *buf = p->tok_buf + 1;
     char_type result = strtol(buf, NULL, 16);
     return_thread_runnable_with_obj(data, obj_char2obj(result), p);
@@ -7723,8 +7846,8 @@ static void _read_return_character(void *data, port_type *p)
     // Try to read a UTF-8 char and if so return it, otherwise throw an error
     uint32_t state = CYC_UTF8_ACCEPT;
     char_type codepoint;
-    uint8_t *s = (uint8_t *)p->tok_buf;
-    while(s) {
+    uint8_t *s = (uint8_t *) p->tok_buf;
+    while (s) {
       if (!Cyc_utf8_decode(&state, &codepoint, *s)) {
         s++;
         break;
@@ -7746,13 +7869,13 @@ static void _read_return_character(void *data, port_type *p)
  * @param data Thread data object
  * @param p Input port
  */
-static void _read_character(void *data, port_type *p) 
+static void _read_character(void *data, port_type * p)
 {
   char c;
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
+      if (!read_from_port(p)) {
         _read_return_character(data, p);
       }
     }
@@ -7776,15 +7899,15 @@ static void _read_character(void *data, port_type *p)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-static void _read_return_number(void *data, port_type *p, int base, int exact)
+static void _read_return_number(void *data, port_type * p, int base, int exact)
 {
   // TODO: validation?
-  p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
-  p->tok_end = 0; // Reset for next atom
+  p->tok_buf[p->tok_end] = '\0';        // TODO: what if buffer is full?
+  p->tok_end = 0;               // Reset for next atom
   if (exact > 1) {
     // Special case, we don't know if exact or inexact
     make_string(str, p->tok_buf);
-    str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
+    str.num_cp = Cyc_utf8_count_code_points((uint8_t *) (p->tok_buf));
     make_c_opaque(opq, &str);
     return_thread_runnable_with_obj(data, &opq, p);
   } else {
@@ -7806,7 +7929,7 @@ static void _read_return_number(void *data, port_type *p, int base, int exact)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-static void _read_return_complex_number(void *data, port_type *p, int len)
+static void _read_return_complex_number(void *data, port_type * p, int len)
 {
 //      TODO: return complex num, see _read_return_number for possible template
 //      probably want to have that function extract/identify the real/imaginary components.
@@ -7822,7 +7945,8 @@ static void _read_return_complex_number(void *data, port_type *p, int len)
     i++;
   }
   for (; i < len; i++) {
-    if (!isdigit(p->tok_buf[i]) && p->tok_buf[i] != '.' && p->tok_buf[i] != 'e' && p->tok_buf[i] != 'E') {
+    if (!isdigit(p->tok_buf[i]) && p->tok_buf[i] != '.' && p->tok_buf[i] != 'e'
+        && p->tok_buf[i] != 'E') {
       break;
     }
   }
@@ -7837,13 +7961,13 @@ static void _read_return_complex_number(void *data, port_type *p, int len)
  * @param base Number base
  * @param exact Return an exact number if true
  */
-static void _read_number(void *data, port_type *p, int base, int exact) 
+static void _read_number(void *data, port_type * p, int base, int exact)
 {
   char c;
-  while(1) {
+  while (1) {
     // Read more data into buffer, if needed
     if (p->buf_idx == p->mem_buf_len) {
-      if (!read_from_port(p)){
+      if (!read_from_port(p)) {
         _read_return_number(data, p, base, exact);
       }
     }
@@ -7851,8 +7975,7 @@ static void _read_number(void *data, port_type *p, int base, int exact)
     p->col_num++;
 
     if (isdigit(c)) {
-      if ((base == 2 && c > '1') ||
-          (base == 8 && c > '7')) {
+      if ((base == 2 && c > '1') || (base == 8 && c > '7')) {
         _read_error(data, p, "Illegal digit");
       }
       _read_add_to_tok_buf(p, c);
@@ -7874,7 +7997,7 @@ static void _read_number(void *data, port_type *p, int base, int exact)
  * @param cont Current continuation
  * @param p Input port
  */
-static void _read_return_atom(void *data, object cont, port_type *p) 
+static void _read_return_atom(void *data, object cont, port_type * p)
 {
   object sym;
   int len = p->tok_end;
@@ -7883,12 +8006,12 @@ static void _read_return_atom(void *data, object cont, port_type *p)
   // indicating we have the full atom
   p->buf_idx--;
   p->col_num--;
-  p->tok_buf[p->tok_end] = '\0'; // TODO: what if buffer is full?
-  p->tok_end = 0; // Reset for next atom
+  p->tok_buf[p->tok_end] = '\0';        // TODO: what if buffer is full?
+  p->tok_end = 0;               // Reset for next atom
 
   if (_read_is_numeric(p->tok_buf, len)) {
     make_string(str, p->tok_buf);
-    str.num_cp = Cyc_utf8_count_code_points((uint8_t *)(p->tok_buf));
+    str.num_cp = Cyc_utf8_count_code_points((uint8_t *) (p->tok_buf));
     make_c_opaque(opq, &str);
     if (_read_is_complex_number(p->tok_buf, len)) {
       _read_return_complex_number(data, p, len);
@@ -7915,7 +8038,7 @@ object Cyc_io_char_ready(void *data, object port)
 {
   Cyc_check_port(data, port);
   {
-    port_type *p = (port_type *)port;
+    port_type *p = (port_type *) port;
     FILE *stream = p->fp;
     if (stream == NULL) {
       Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
@@ -7931,11 +8054,11 @@ object Cyc_io_char_ready(void *data, object port)
       FD_SET(fd, &rfds);
       tv.tv_sec = 0;
       tv.tv_usec = 0;
-      retval = select(fd + 1, &rfds, NULL, NULL, &tv); // Non-blocking fd check 
-      return (retval ? boolean_t : boolean_f); 
+      retval = select(fd + 1, &rfds, NULL, NULL, &tv);  // Non-blocking fd check 
+      return (retval ? boolean_t : boolean_f);
     } else {
       // Fast path, port has buffered data ready to go
-      return boolean_t; 
+      return boolean_t;
     }
   }
 }
@@ -7950,7 +8073,7 @@ object Cyc_io_char_ready(void *data, object port)
      if (p->tok_end) _read_return_atom(data, cont, p); \
      return_thread_runnable_with_obj(data, Cyc_EOF, p); \
    } \
- } 
+ }
 
 object Cyc_io_peek_char(void *data, object cont, object port)
 {
@@ -7963,7 +8086,7 @@ object Cyc_io_peek_char(void *data, object cont, object port)
 
   Cyc_check_port(data, port);
   {
-    p = (port_type *)port;
+    p = (port_type *) port;
     stream = ((port_type *) port)->fp;
     if (stream == NULL) {
       Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
@@ -7973,7 +8096,7 @@ object Cyc_io_peek_char(void *data, object cont, object port)
       _read_next_char(data, cont, p);
     }
     c = p->mem_buf[p->buf_idx];
-    if (Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
+    if (Cyc_utf8_decode(&state, &codepoint, (uint8_t) c)) {
       // Only have a partial UTF8 code point, read more chars.
       // Problem is that there may not be enough space to store them
       // and do need to set them aside since we are just peeking here
@@ -7986,12 +8109,13 @@ object Cyc_io_peek_char(void *data, object cont, object port)
           // No more buffered chars
           at_mem_buf_end = 1;
           c = fgetc(stream);
-          if (c == EOF) break;
+          if (c == EOF)
+            break;
         } else {
           c = p->mem_buf[p->buf_idx + i];
         }
         buf[i++] = c;
-        if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t)c)) {
+        if (!Cyc_utf8_decode(&state, &codepoint, (uint8_t) c)) {
           break;
         }
       }
@@ -8002,7 +8126,10 @@ object Cyc_io_peek_char(void *data, object cont, object port)
       memmove(p->mem_buf, buf, i);
     }
 
-    return_thread_runnable_with_obj(data, (c != EOF) ? obj_char2obj(codepoint) : Cyc_EOF, p);
+    return_thread_runnable_with_obj(data,
+                                    (c !=
+                                     EOF) ? obj_char2obj(codepoint) : Cyc_EOF,
+                                    p);
   }
   return Cyc_EOF;
 }
@@ -8015,7 +8142,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
 
   Cyc_check_port(data, port);
   {
-    p = (port_type *)port;
+    p = (port_type *) port;
     stream = ((port_type *) port)->fp;
     if (stream == NULL) {
       Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
@@ -8032,7 +8159,7 @@ object Cyc_io_peek_u8(void *data, object cont, object port)
 
 object Cyc_io_read_char(void *data, object cont, object port)
 {
-  port_type *p = (port_type *)port;
+  port_type *p = (port_type *) port;
   Cyc_check_port(data, port);
   if (p->fp == NULL) {
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
@@ -8045,7 +8172,7 @@ object Cyc_io_read_char(void *data, object cont, object port)
     do {
       _read_next_char(data, cont, p);
       c = p->mem_buf[p->buf_idx++];
-    } while(Cyc_utf8_decode(&state, &codepoint, (uint8_t)c));
+    } while (Cyc_utf8_decode(&state, &codepoint, (uint8_t) c));
     p->col_num++;
     return_thread_runnable_with_obj(data, obj_char2obj(codepoint), p);
   }
@@ -8054,7 +8181,7 @@ object Cyc_io_read_char(void *data, object cont, object port)
 
 object Cyc_io_read_u8(void *data, object cont, object port)
 {
-  port_type *p = (port_type *)port;
+  port_type *p = (port_type *) port;
   Cyc_check_port(data, port);
   if (p->fp == NULL) {
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
@@ -8077,7 +8204,7 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
   FILE *stream;
   port_type *p;
   char buf[1027];
-  int i, limit = 1024; // Ensure last code point is fully-read
+  int i, limit = 1024;          // Ensure last code point is fully-read
 
   Cyc_check_port(data, port);
   stream = ((port_type *) port)->fp;
@@ -8086,17 +8213,17 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
   }
   set_thread_blocked(data, cont);
 
-  p = (port_type *)port;
+  p = (port_type *) port;
   for (i = 0; i < limit; i++) {
     // Can't use this because it bails on EOF: _read_next_char(data, NULL, p);
     // instead we use code based on that macro:
-    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-      int rv = read_from_port(p); 
-      if (!rv) { 
-        if (i == 0) { // Empty buffer, return EOF
-          return_thread_runnable_with_obj(data, Cyc_EOF, p); 
+    if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+      int rv = read_from_port(p);
+      if (!rv) {
+        if (i == 0) {           // Empty buffer, return EOF
+          return_thread_runnable_with_obj(data, Cyc_EOF, p);
         } else {
-          break; // Handle buf contents below
+          break;                // Handle buf contents below
         }
       }
     }
@@ -8104,7 +8231,7 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
     if (buf[i] == '\n') {
       break;
     }
-  } 
+  }
 
   // ensure we fully-read last code point
   {
@@ -8112,20 +8239,22 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
     char_type codepoint;
     uint32_t state;
 
-    buf[i+1] = '\0';
-    state = Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &codepoint, &num_cp, &len);
+    buf[i + 1] = '\0';
+    state =
+        Cyc_utf8_count_code_points_and_bytes((uint8_t *) buf, &codepoint,
+                                             &num_cp, &len);
     while (state != CYC_UTF8_ACCEPT && ii < 3) {
-      if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) { 
-        int rv = read_from_port(p); 
+      if (p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx) {
+        int rv = read_from_port(p);
         if (!rv) {
-          break; // At EOF, return what we've got so far
+          break;                // At EOF, return what we've got so far
         }
       }
       c = p->mem_buf[p->buf_idx++];
 
       buf[len] = c;
       len++;
-      Cyc_utf8_decode(&state, &codepoint, (uint8_t)c);
+      Cyc_utf8_decode(&state, &codepoint, (uint8_t) c);
       if (state == CYC_UTF8_ACCEPT) {
         num_cp++;
         break;
@@ -8134,8 +8263,7 @@ object Cyc_io_read_line_slow(void *data, object cont, object port)
     }
 
     // Remove any trailing CR / newline chars
-    while (len > 0 && (buf[len - 1] == '\n' ||
-                       buf[len - 1] == '\r')) {
+    while (len > 0 && (buf[len - 1] == '\n' || buf[len - 1] == '\r')) {
       len--;
       num_cp--;
     }
@@ -8161,26 +8289,26 @@ object Cyc_io_read_line(void *data, object cont, object port)
   if (stream == NULL) {
     Cyc_rt_raise2(data, "Unable to read from closed port: ", port);
   }
-
   // If there is data in the port buffer we have to use the slow path
   // for compatibility with other I/O functions
-  p = (port_type *)port;
-  if ( !(p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx)) { 
+  p = (port_type *) port;
+  if (!(p->mem_buf_len == 0 || p->mem_buf_len == p->buf_idx)) {
     return Cyc_io_read_line_slow(data, cont, port);
   }
-
   // Otherwise, the port buffer is empty so we can use the fast path below:
   set_thread_blocked(data, cont);
   errno = 0;
   if (fgets(buf, 1023, stream) != NULL) {
-    state = Cyc_utf8_count_code_points_and_bytes((uint8_t *)buf, &codepoint, &num_cp, &len);
+    state =
+        Cyc_utf8_count_code_points_and_bytes((uint8_t *) buf, &codepoint,
+                                             &num_cp, &len);
     // Check if we stopped reading in the middle of a code point and
     // if so, read one byte at a time until that code point is finished.
     while (state != CYC_UTF8_ACCEPT && i < 3) {
       int c = fgetc(stream);
       buf[len] = c;
       len++;
-      Cyc_utf8_decode(&state, &codepoint, (uint8_t)c);
+      Cyc_utf8_decode(&state, &codepoint, (uint8_t) c);
       if (state == CYC_UTF8_ACCEPT) {
         num_cp++;
         break;
@@ -8190,8 +8318,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
 
     {
       // Remove any trailing CR / newline chars
-      while (len > 0 && (buf[len - 1] == '\n' ||
-                         buf[len - 1] == '\r')) {
+      while (len > 0 && (buf[len - 1] == '\n' || buf[len - 1] == '\r')) {
         len--;
         num_cp--;
       }
@@ -8215,7 +8342,7 @@ object Cyc_io_read_line(void *data, object cont, object port)
 void Cyc_io_read_token(void *data, object cont, object port)
 {
   Cyc_check_port(data, port);
-  port_type *p = (port_type *)port;
+  port_type *p = (port_type *) port;
   char c;
 
   // Find and return (to cont, so want to minimize stack growth if possible) next token from buf
@@ -8230,24 +8357,29 @@ void Cyc_io_read_token(void *data, object cont, object port)
 
     // If comment found, eat up comment chars
     if (c == ';') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       _read_line_comment(p);
     } else if (c == '\n') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       p->line_num++;
       p->col_num = 1;
     } else if (isspace(c)) {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       _read_whitespace(p);
     } else if (c == '(' || c == ')' || c == '\'' || c == '`') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
       make_c_opaque(opq, obj_char2obj(c));
       return_thread_runnable_with_obj(data, &opq, p);
     } else if (c == ',') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
 
-      _read_next_char(data, cont, p); // Do another buffer read if needed
+      _read_next_char(data, cont, p);   // Do another buffer read if needed
       if (p->mem_buf[p->buf_idx] == '@') {
         object unquote_splicing = find_or_add_symbol(",@");
         make_empty_vector(vec);
@@ -8264,10 +8396,11 @@ void Cyc_io_read_token(void *data, object cont, object port)
         return_thread_runnable_with_obj(data, &opq, p);
       }
     } else if (c == '"') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       _read_string(data, cont, p);
     } else if (c == '#' && !p->tok_end) {
-      _read_next_char(data, cont, p); // Fill buffer
+      _read_next_char(data, cont, p);   // Fill buffer
       c = p->mem_buf[p->buf_idx++];
       p->col_num++;
       if (c == 't') {
@@ -8303,15 +8436,15 @@ void Cyc_io_read_token(void *data, object cont, object port)
         _read_number(data, p, 8, 1);
       } else if (c == 'x') {
         _read_number(data, p, 16, 1);
-      } else if (c == '(') { // Vector
+      } else if (c == '(') {    // Vector
         make_empty_vector(vec);
         return_thread_runnable_with_obj(data, &vec, p);
-      } else if (c == 'u') { // Bytevector
+      } else if (c == 'u') {    // Bytevector
         _read_next_char(data, cont, p); // Fill buffer
         c = p->mem_buf[p->buf_idx++];
         p->col_num++;
         if (c == '8') {
-          _read_next_char(data, cont, p); // Fill buffer
+          _read_next_char(data, cont, p);       // Fill buffer
           c = p->mem_buf[p->buf_idx++];
           p->col_num++;
           if (c == '(') {
@@ -8323,10 +8456,10 @@ void Cyc_io_read_token(void *data, object cont, object port)
         } else {
           _read_error(data, p, "Unhandled input sequence");
         }
-      } else if (c == '|') { // Block comment
+      } else if (c == '|') {    // Block comment
         _read_multiline_comment(p);
         continue;
-      } else if (c == ';') { // Datum comment
+      } else if (c == ';') {    // Datum comment
         object sym = find_or_add_symbol("#;");
         make_empty_vector(vec);
         vec.num_elements = 2;
@@ -8342,14 +8475,16 @@ void Cyc_io_read_token(void *data, object cont, object port)
     } else if (c == '|' && !p->tok_end) {
       _read_literal_identifier(data, p);
     } else if (c == '[' || c == '{') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
-      make_c_opaque(opq, obj_char2obj('(')); // Cheap support for brackets
+      make_c_opaque(opq, obj_char2obj('('));    // Cheap support for brackets
       return_thread_runnable_with_obj(data, &opq, p);
     } else if (c == ']' || c == '}') {
-      if (p->tok_end) _read_return_atom(data, cont, p);
+      if (p->tok_end)
+        _read_return_atom(data, cont, p);
       // Special encoding so we can distinguish from chars such as #\(
-      make_c_opaque(opq, obj_char2obj(')')); // Cheap support for brackets
+      make_c_opaque(opq, obj_char2obj(')'));    // Cheap support for brackets
       return_thread_runnable_with_obj(data, &opq, p);
     } else {
       // No special meaning, add char to current token (an atom)
@@ -8366,22 +8501,34 @@ void Cyc_io_read_token(void *data, object cont, object port)
 static const uint8_t utf8d[] = {
   // The first part of the table maps bytes to character classes that
   // to reduce the size of the transition table and create bitmasks.
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,  9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-   8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-  10,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3, 11,6,6,6,5,8,8,8,8,8,8,8,8,8,8,8,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+      9, 9, 9, 9, 9, 9,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+      7, 7, 7, 7, 7, 7,
+  8, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 2, 2, 2, 2, 2,
+  10, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 3, 3, 11, 6, 6, 6, 5, 8, 8, 8, 8,
+      8, 8, 8, 8, 8, 8, 8,
 
   // The second part is a transition table that maps a combination
   // of a state of the automaton and a character class to a state.
-   0,12,24,36,60,96,84,12,12,12,48,72, 12,12,12,12,12,12,12,12,12,12,12,12,
-  12, 0,12,12,12,12,12, 0,12, 0,12,12, 12,24,12,12,12,12,12,24,12,24,12,12,
-  12,12,12,12,12,12,12,24,12,12,12,12, 12,24,12,12,12,12,12,12,12,24,12,12,
-  12,12,12,12,12,12,12,36,12,36,12,12, 12,36,12,12,12,12,12,36,12,36,12,12,
-  12,36,12,12,12,12,12,12,12,12,12,12, 
+  0, 12, 24, 36, 60, 96, 84, 12, 12, 12, 48, 72, 12, 12, 12, 12, 12, 12, 12, 12,
+      12, 12, 12, 12,
+  12, 0, 12, 12, 12, 12, 12, 0, 12, 0, 12, 12, 12, 24, 12, 12, 12, 12, 12, 24,
+      12, 24, 12, 12,
+  12, 12, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12,
+      12, 12, 24, 12, 12,
+  12, 12, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12,
+      36, 12, 36, 12, 12,
+  12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
 };
 
 /**
@@ -8392,16 +8539,18 @@ static const uint8_t utf8d[] = {
  * @param byte Byte to examine
  * @return The current state: `CYC_UTF8_ACCEPT` if successful otherwise `CYC_UTF8_REJECT`.
  */
-static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
+static uint32_t Cyc_utf8_decode(uint32_t * state, uint32_t * codep,
+                                uint32_t byte)
+{
   uint32_t type = utf8d[byte];
 
   *codep = (*state != CYC_UTF8_ACCEPT) ?
-    (byte & 0x3fu) | (*codep << 6) :
-    (0xff >> type) & (byte);
+      (byte & 0x3fu) | (*codep << 6) : (0xff >> type) & (byte);
 
   *state = utf8d[256 + *state + type];
   return *state;
 }
+
 // END Bjoern Hoehrmann
 
 /**
@@ -8410,7 +8559,8 @@ static uint32_t Cyc_utf8_decode(uint32_t* state, uint32_t* codep, uint32_t byte)
  * @param s String to examine
  * @return The number of codepoints found, or -1 if there was an error.
  */
-int Cyc_utf8_count_code_points(uint8_t* s) {
+int Cyc_utf8_count_code_points(uint8_t * s)
+{
   uint32_t codepoint;
   uint32_t state = 0;
   int count;
@@ -8432,11 +8582,14 @@ int Cyc_utf8_count_code_points(uint8_t* s) {
  * @param bytes Out parameter, set to the number of bytes
  * @return Returns `CYC_UTF8_ACCEPT`  on success, otherwise `CYC_UTF8_REJECT`.
  */
-static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint, int *cpts, int *bytes) {
+static int Cyc_utf8_count_code_points_and_bytes(uint8_t * s,
+                                                char_type * codepoint,
+                                                int *cpts, int *bytes)
+{
   uint32_t state = 0;
   *cpts = 0;
   *bytes = 0;
-  for (; *s; ++s){
+  for (; *s; ++s) {
     *bytes += 1;
     if (!Cyc_utf8_decode(&state, codepoint, *s))
       *cpts += 1;
@@ -8457,41 +8610,43 @@ static int Cyc_utf8_count_code_points_and_bytes(uint8_t* s, char_type *codepoint
  *
  * From https://stackoverflow.com/a/22135005/101258
  */
-uint32_t Cyc_utf8_validate_stream(uint32_t *state, char *str, size_t len) {
-   size_t i;
-   uint32_t type;
+uint32_t Cyc_utf8_validate_stream(uint32_t * state, char *str, size_t len)
+{
+  size_t i;
+  uint32_t type;
 
-    for (i = 0; i < len; i++) {
-        // We don't care about the codepoint, so this is
-        // a simplified version of the decode function.
-        type = utf8d[(uint8_t)str[i]];
-        *state = utf8d[256 + (*state) + type];
+  for (i = 0; i < len; i++) {
+    // We don't care about the codepoint, so this is
+    // a simplified version of the decode function.
+    type = utf8d[(uint8_t) str[i]];
+    *state = utf8d[256 + (*state) + type];
 
-        if (*state == CYC_UTF8_REJECT)
-            break;
-    }
+    if (*state == CYC_UTF8_REJECT)
+      break;
+  }
 
-    return *state;
+  return *state;
 }
 
 /**
  * @brief Simplified version of Cyc_utf8_validate_stream that must always be called with a complete string buffer.
  */
-uint32_t Cyc_utf8_validate(char *str, size_t len) {
-   size_t i;
-   uint32_t state = CYC_UTF8_ACCEPT, type;
+uint32_t Cyc_utf8_validate(char *str, size_t len)
+{
+  size_t i;
+  uint32_t state = CYC_UTF8_ACCEPT, type;
 
-    for (i = 0; i < len; i++) {
-        // We don't care about the codepoint, so this is
-        // a simplified version of the decode function.
-        type = utf8d[(uint8_t)str[i]];
-        state = utf8d[256 + (state) + type];
+  for (i = 0; i < len; i++) {
+    // We don't care about the codepoint, so this is
+    // a simplified version of the decode function.
+    type = utf8d[(uint8_t) str[i]];
+    state = utf8d[256 + (state) + type];
 
-        if (state == CYC_UTF8_REJECT)
-            break;
-    }
+    if (state == CYC_UTF8_REJECT)
+      break;
+  }
 
-    return state;
+  return state;
 }
 
 //int uint32_num_bytes(uint32_t x) {
@@ -8522,47 +8677,43 @@ uint32_t Cyc_utf8_validate(char *str, size_t len) {
  * the NUL as well.
  * the destination string will never be bigger than the source string.
  */
-int Cyc_utf8_encode(char *dest, int sz, uint32_t *src, int srcsz)
+int Cyc_utf8_encode(char *dest, int sz, uint32_t * src, int srcsz)
 {
-    uint32_t ch;
-    int i = 0;
-    char *dest_end = dest + sz;
+  uint32_t ch;
+  int i = 0;
+  char *dest_end = dest + sz;
 
-    while (srcsz<0 ? src[i]!=0 : i < srcsz) {
-        ch = src[i];
-        if (ch < 0x80) {
-            if (dest >= dest_end)
-                return i;
-            *dest++ = (char)ch;
-        }
-        else if (ch < 0x800) {
-            if (dest >= dest_end-1)
-                return i;
-            *dest++ = (ch>>6) | 0xC0;
-            *dest++ = (ch & 0x3F) | 0x80;
-        }
-        else if (ch < 0x10000) {
-            if (dest >= dest_end-2)
-                return i;
-            *dest++ = (ch>>12) | 0xE0;
-            *dest++ = ((ch>>6) & 0x3F) | 0x80;
-            *dest++ = (ch & 0x3F) | 0x80;
-        }
-        else if (ch < 0x110000) {
-            if (dest >= dest_end-3)
-                return i;
-            *dest++ = (ch>>18) | 0xF0;
-            *dest++ = ((ch>>12) & 0x3F) | 0x80;
-            *dest++ = ((ch>>6) & 0x3F) | 0x80;
-            *dest++ = (ch & 0x3F) | 0x80;
-        }
-        i++;
+  while (srcsz < 0 ? src[i] != 0 : i < srcsz) {
+    ch = src[i];
+    if (ch < 0x80) {
+      if (dest >= dest_end)
+        return i;
+      *dest++ = (char)ch;
+    } else if (ch < 0x800) {
+      if (dest >= dest_end - 1)
+        return i;
+      *dest++ = (ch >> 6) | 0xC0;
+      *dest++ = (ch & 0x3F) | 0x80;
+    } else if (ch < 0x10000) {
+      if (dest >= dest_end - 2)
+        return i;
+      *dest++ = (ch >> 12) | 0xE0;
+      *dest++ = ((ch >> 6) & 0x3F) | 0x80;
+      *dest++ = (ch & 0x3F) | 0x80;
+    } else if (ch < 0x110000) {
+      if (dest >= dest_end - 3)
+        return i;
+      *dest++ = (ch >> 18) | 0xF0;
+      *dest++ = ((ch >> 12) & 0x3F) | 0x80;
+      *dest++ = ((ch >> 6) & 0x3F) | 0x80;
+      *dest++ = (ch & 0x3F) | 0x80;
     }
-    if (dest < dest_end)
-        *dest = '\0';
-    return i;
+    i++;
+  }
+  if (dest < dest_end)
+    *dest = '\0';
+  return i;
 }
-
 
 ////////////// END UTF-8 Section //////////////
 
@@ -8579,11 +8730,14 @@ void init_polyfills(void)
  * which are returned using the given pointers.  
  * An error flag is directly returned.
  */
-int num2ratio(double x, double *numerator, double *denominator) {
+int num2ratio(double x, double *numerator, double *denominator)
+{
   if (!isfinite(x)) {
     *numerator = *denominator = 0.0;
-    if (x > 0.0) *numerator = 1.0;
-    if (x < 0.0) *numerator = -1.0;
+    if (x > 0.0)
+      *numerator = 1.0;
+    if (x < 0.0)
+      *numerator = -1.0;
     return 1;
   }
   int bdigits = DBL_MANT_DIG;
@@ -8593,19 +8747,18 @@ int num2ratio(double x, double *numerator, double *denominator) {
   expo -= bdigits;
   if (expo > 0) {
     *numerator *= pow(2.0, expo);
-  }
-  else if (expo < 0) {
+  } else if (expo < 0) {
     expo = -expo;
-    if (expo >= DBL_MAX_EXP-1) {
-      *numerator /= pow(2.0, expo - (DBL_MAX_EXP-1));
-      *denominator *= pow(2.0, DBL_MAX_EXP-1);
+    if (expo >= DBL_MAX_EXP - 1) {
+      *numerator /= pow(2.0, expo - (DBL_MAX_EXP - 1));
+      *denominator *= pow(2.0, DBL_MAX_EXP - 1);
       return fabs(*numerator) < 1.0;
     } else {
       *denominator *= pow(2.0, expo);
     }
   }
 
-  while (*numerator && fmod(*numerator,2) == 0 && fmod(*denominator,2) == 0) {
+  while (*numerator && fmod(*numerator, 2) == 0 && fmod(*denominator, 2) == 0) {
     *numerator /= 2.0;
     *denominator /= 2.0;
   }
@@ -8670,7 +8823,7 @@ void Cyc_exact(void *data, object cont, object z)
   if (obj_is_int(z)) {
     i = obj_obj2int(z);
   } else if (type_of(z) == integer_tag) {
-    i = (int)round(((integer_type *)z)->value);
+    i = (int)round(((integer_type *) z)->value);
   } else if (type_of(z) == bignum_tag) {
     return_closcall1(data, cont, z);
   } else if (type_of(z) == complex_num_tag) {
@@ -8679,21 +8832,21 @@ void Cyc_exact(void *data, object cont, object z)
     make_complex_num(num, dreal, dimag);
     return_closcall1(data, cont, &num);
   } else {
-    double d = ((double_type *)z)->value;
+    double d = ((double_type *) z)->value;
     if (isnan(d)) {
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == -INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
-#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
-    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){
+#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559)
+    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN) {
       alloc_bignum(data, bn);
       BIGNUM_CALL(mp_set_double(&bignum_value(bn), d));
       return_closcall1(data, cont, bn);
 #endif
     }
-    i = (int)round(((double_type *)z)->value);
+    i = (int)round(((double_type *) z)->value);
   }
   return_closcall1(data, cont, obj_int2obj(i));
 }
@@ -8705,7 +8858,7 @@ object Cyc_exact_no_cps(void *data, object ptr, object z)
   if (obj_is_int(z)) {
     i = obj_obj2int(z);
   } else if (type_of(z) == integer_tag) {
-    i = (int)round(((integer_type *)z)->value);
+    i = (int)round(((integer_type *) z)->value);
   } else if (type_of(z) == bignum_tag) {
     return z;
   } else if (type_of(z) == complex_num_tag) {
@@ -8715,21 +8868,21 @@ object Cyc_exact_no_cps(void *data, object ptr, object z)
     assign_complex_num(ptr, unboxed);
     return ptr;
   } else {
-    double d = ((double_type *)z)->value;
+    double d = ((double_type *) z)->value;
     if (isnan(d)) {
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
     } else if (d == -INFINITY) {
       Cyc_rt_raise2(data, "Expected number but received", z);
-#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559) 
-    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN){
+#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559)
+    } else if (d > CYC_FIXNUM_MAX || d < CYC_FIXNUM_MIN) {
       alloc_bignum(data, bn);
       BIGNUM_CALL(mp_set_double(&bignum_value(bn), d));
       return bn;
 #endif
     }
-    i = (int)round(((double_type *)z)->value);
+    i = (int)round(((double_type *) z)->value);
   }
   return obj_int2obj(i);
 }

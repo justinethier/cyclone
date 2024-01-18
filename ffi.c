@@ -13,14 +13,15 @@
 #include <ck_pr.h>
 #include <unistd.h>
 
-void *Cyc_init_thread(object thread_and_thunk, int argc, object *args);
+void *Cyc_init_thread(object thread_and_thunk, int argc, object * args);
 
 /**
  * After the Scheme call finishes, we wind down the GC / Heap used
  * for the call and perform a minor GC to ensure any returned object
  * is on the heap and safe to use.
  */
-static void Cyc_return_from_scm_call(void *data, object _, int argc, object *args)
+static void Cyc_return_from_scm_call(void *data, object _, int argc,
+                                     object * args)
 {
   gc_thread_data *thd = data;
   object result = args[0];
@@ -41,12 +42,13 @@ static void Cyc_return_from_scm_call(void *data, object _, int argc, object *arg
  * We store results and longjmp back to where we started, at the
  * bottom of the trampoline (we only jump once).
  */
-static void Cyc_after_scm_call(void *data, object _, int argc, object *args)
+static void Cyc_after_scm_call(void *data, object _, int argc, object * args)
 {
   gc_thread_data *thd = data;
   object result = args[0];
   mclosure0(clo, Cyc_return_from_scm_call);
-  object buf[1]; buf[0] = result;
+  object buf[1];
+  buf[0] = result;
   GC(thd, &clo, buf, 1);
 }
 
@@ -58,7 +60,8 @@ static void Cyc_after_scm_call(void *data, object _, int argc, object *args)
  * can do anything "normal" Scheme code does, and any returned
  * objects will be on the heap and available for use by the caller.
  */
-object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *args)
+object Cyc_scm_call(gc_thread_data * parent_thd, object fnc, int argc,
+                    object * args)
 {
   jmp_buf l;
   gc_thread_data local;
@@ -66,13 +69,13 @@ object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *ar
   local.jmp_start = &l;
 
   gc_thread_data *td = malloc(sizeof(gc_thread_data));
-  gc_add_new_unrunning_mutator(td); /* Register this thread */
+  gc_add_new_unrunning_mutator(td);     /* Register this thread */
   make_c_opaque(co, td);
   make_utf8_string(NULL, name_str, "");
 
   make_c_opaque(co_parent_thd, parent_thd);
   make_c_opaque(co_this_thd, &local);
-  mclosure0(after, (function_type)Cyc_after_scm_call); 
+  mclosure0(after, (function_type) Cyc_after_scm_call);
 
   make_empty_vector(vec);
   vec.num_elements = 7;
@@ -81,11 +84,11 @@ object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *ar
   vec.elements[1] = fnc;
   vec.elements[2] = &co;
   vec.elements[3] = &name_str;
-  vec.elements[4] = &co_this_thd; //boolean_f;
+  vec.elements[4] = &co_this_thd;       //boolean_f;
   vec.elements[5] = &co_parent_thd;
   vec.elements[6] = &after;
 
-  make_pair(thread_and_thunk, &vec, fnc); // TODO: OK we are not clearing vec[5]? I think so... 
+  make_pair(thread_and_thunk, &vec, fnc);       // TODO: OK we are not clearing vec[5]? I think so... 
 
   if (!setjmp(*(local.jmp_start))) {
     Cyc_init_thread(&thread_and_thunk, argc, args);
@@ -105,7 +108,8 @@ object Cyc_scm_call(gc_thread_data *parent_thd, object fnc, int argc, object *ar
  * We store results and longjmp back to where we started, at the
  * bottom of the trampoline (we only jump once).
  */
-static void no_gc_after_call_scm(gc_thread_data *thd, object _, int argc, object *args)
+static void no_gc_after_call_scm(gc_thread_data * thd, object _, int argc,
+                                 object * args)
 {
   object result = args[0];
   thd->gc_cont = result;
@@ -115,11 +119,11 @@ static void no_gc_after_call_scm(gc_thread_data *thd, object _, int argc, object
 /**
  * Call into Scheme function
  */
-static void no_gc_call_scm(gc_thread_data *thd, object fnc, object obj)
+static void no_gc_call_scm(gc_thread_data * thd, object fnc, object obj)
 {
-  mclosure0(after, (function_type)no_gc_after_call_scm); 
-  object buf[2] = {&after, obj};
-  ((closure)fnc)->fn(thd, fnc, 2, buf);
+  mclosure0(after, (function_type) no_gc_after_call_scm);
+  object buf[2] = { &after, obj };
+  ((closure) fnc)->fn(thd, fnc, 2, buf);
 }
 
 /**
@@ -134,12 +138,12 @@ static void no_gc_call_scm(gc_thread_data *thd, object fnc, object obj)
  * or re-allocated (EG: malloc) before returning it
  * to the C layer.
  */
-object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
+object Cyc_scm_call_no_gc(gc_thread_data * parent_thd, object fnc, object arg)
 {
   long stack_size = 100000;
   char *stack_base = (char *)&stack_size;
   char *stack_traces[MAX_STACK_TRACES];
-  gc_thread_data thd = {0};
+  gc_thread_data thd = { 0 };
   jmp_buf jmp;
   thd.jmp_start = &jmp;
   thd.stack_start = stack_base;
@@ -154,7 +158,7 @@ object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
   thd.thread_state = CYC_THREAD_STATE_RUNNABLE;
 
   // Copy parameter objects from the calling thread
-  object parent = parent_thd->param_objs; // Unbox parent thread's data
+  object parent = parent_thd->param_objs;       // Unbox parent thread's data
   object child = NULL;
   while (parent) {
     if (thd.param_objs == NULL) {
@@ -184,5 +188,5 @@ object Cyc_scm_call_no_gc(gc_thread_data *parent_thd, object fnc, object arg)
     no_gc_call_scm(&thd, fnc, arg);
   }
 
-  return(thd.gc_cont);
+  return (thd.gc_cont);
 }
