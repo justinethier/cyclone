@@ -342,3 +342,7 @@ install-bin : cyclone icyc
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m0755 cyclone $(DESTDIR)$(BINDIR)/
 	$(INSTALL) -m0755 icyc $(DESTDIR)$(BINDIR)/
+
+# TODO: is this linking in local lcyclone or the system one????
+test-lib: test-lib.c
+	$(CC) test-lib.c -o test-lib -L . $(LIBS)
