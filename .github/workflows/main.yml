@@ -26,7 +26,7 @@ jobs:
 
     # Execute runtime library unit tests
     - name: make test-lib
-      run: make make libcyclone.a && make test-lib && ./test-lib
+      run: make libcyclone.a && make test-lib && ./test-lib
 
     # Build documentation
     - name: make doc
