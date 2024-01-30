@@ -29,9 +29,22 @@ int main(int argc, char **argv, char **envp)
  return 0;}
  */
 
+void test_exact() {
+  common_type ptr;
+  make_double(d, 42.5);
+  assert(obj_int2obj(42) == Cyc_exact_no_cps(NULL, &ptr, obj_int2obj(42)));
+  object result = Cyc_exact_no_cps(NULL, &ptr, &d);
+  assert( result == obj_int2obj(43));
+
+  // TODO: unit tests for below as examples:
+  //void Cyc_exact(void *data, object cont, object z)
+}
+
 int main(){
   assert(boolean_t == boolean_t);
   assert(boolean_t != boolean_f);
+
+  test_exact();
 
   printf("All tests passed successfully!\n");
   return 0;
