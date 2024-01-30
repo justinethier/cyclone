@@ -16,6 +16,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install doxygen
       run: sudo apt-get install doxygen
+    - name: make test-lib
+      run: make test-lib && ./test-lib
     - name: make doc
       run: make doc && tar -cf html.tar html && bzip2 html.tar
             
