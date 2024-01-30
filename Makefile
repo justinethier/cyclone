@@ -345,4 +345,4 @@ install-bin : cyclone icyc
 
 # TODO: is this linking in local lcyclone or the system one????
 test-lib: test-lib.c
-	$(CC) test-lib.c -o test-lib -L . $(LIBS)
+	$(CCOMP) test-lib.c -o test-lib -L . $(LIBS)
