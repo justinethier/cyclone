@@ -13,11 +13,22 @@ jobs:
         arch: [64]
     
     steps:
+    # Install dependencies
+    - name: Install libck
+      run: sudo apt-get install libck-dev    
+    #- name: Install Cyclone
+    #  run: |
+    #    wget https://github.com/cyclone-scheme/binary-releases/raw/master/ubuntu-18.04-lts/cyclone-scheme_0.30.0_amd64.deb 
+    #    sudo apt install ./cyclone-scheme_0.30.0_amd64.deb
     - uses: actions/checkout@v1
     - name: Install doxygen
       run: sudo apt-get install doxygen
+
+    # Execute runtime library unit tests
     - name: make test-lib
-      run: make test-lib && ./test-lib
+      run: make make libcyclone.a && make test-lib && ./test-lib
+
+    # Build documentation
     - name: make doc
       run: make doc && tar -cf html.tar html && bzip2 html.tar
             
