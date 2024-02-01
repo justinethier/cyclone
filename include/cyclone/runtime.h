@@ -504,6 +504,7 @@ int Cyc_have_mstreams();
   } \
   return_closcall1(data, cont, &d)
 
+double round_to_nearest_even(double);
 void Cyc_exact(void *data, object cont, object z);
 object Cyc_exact_no_cps(void *data, object ptr, object z);
 
