@@ -8765,6 +8765,11 @@ int num2ratio(double x, double *numerator, double *denominator)
   return 0;
 }
 
+double round_to_nearest_even(double x)
+{
+ return x-remainder(x,1.0);
+}
+
 /**
  * Receive a Scheme number and pass requested portion of a rational number to
  * the continuation `cont`. Pass numerator if `numerator` is true, else the

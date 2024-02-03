@@ -91,6 +91,9 @@
   (test 4.0  (ceiling 3.5))
   (test 3.0  (truncate 3.5))
   (test 4.0  (round 3.5))
+  (test 2.0  (round 2.5))
+  (test -4.0 (round -3.5))
+  (test -2.0 (round -2.5))
   (test 4.0  (round 7/2)) ;; Rationals not supported, so result is inexact
   (test 7    (round 7))
 

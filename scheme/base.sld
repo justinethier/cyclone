@@ -1372,9 +1372,9 @@
     " return_double_op_no_cps(data, ptr, trunc, z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
-    " return_double_op(data, k, round, z); "
+    " return_double_op(data, k, round_to_nearest_even, z); "
     "(void *data, object ptr, object z)"
-    " return_double_op_no_cps(data, ptr, round, z);")
+    " return_double_op_no_cps(data, ptr, round_to_nearest_even, z);")
   (define-c exact
     "(void *data, int argc, closure _, object k, object z)"
     " Cyc_exact(data, k, z); "
