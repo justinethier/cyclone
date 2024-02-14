@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.36.0 - TBD
+## 0.36.0 - February 14, 2024
 
 Features
 
