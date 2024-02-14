@@ -15,3 +15,4 @@ Steps for making a release of Cyclone:
 - Update release on Homebrew (automated)
 - Update release on Dockerhub (push to bitbucket)
 - Upload new binary from cyclone-bootstrap release build to the cyclone-scheme "packages" repo
+- TODO: what about WASM application?
