@@ -7,6 +7,7 @@ Steps for making a release of Cyclone:
   - `Dockerfile`
   - `DEBIAN/control` in cyclone-bootstrap
   - `.github/workflows/Release.yml` job in cyclone-bootstrap
+  - `libs/common.sld` in cyclone winds repo
 - Update documentation, if applicable
 - Tag releases and push to Github
 - Upload release notes to `gh-pages` branch
