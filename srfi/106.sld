@@ -388,7 +388,7 @@
 #ifdef AI_V4MAPPED
       return_closcall1(data, k, obj_int2obj(AI_V4MAPPED)); 
 #else
-      Cyc_rt_raise_msg(data, \"AI_V4MAPPED is not available on this platform\");
+      return_closcall1(data, k, obj_int2obj(0)); 
 #endif
       ")
     (define *ai-all* (ai-all))
@@ -398,7 +398,7 @@
 #ifdef AI_ALL
       return_closcall1(data, k, obj_int2obj(AI_ALL)); 
 #else
-      Cyc_rt_raise_msg(data, \"AI_ALL is not available on this platform\");
+      return_closcall1(data, k, obj_int2obj(0)); 
 #endif
       ")
     (make-const ai-addrconfig  "AI_ADDRCONFIG" )
