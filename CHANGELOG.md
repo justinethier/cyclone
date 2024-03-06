@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.37.0 - TBD
+
+Bug Fixes
+
+- Added a fix from Yorick Hardy to define `*ai-v4mapped*` to zero on platforms where `AI_V4MAPPED` is undefined.
+
 ## 0.36.0 - February 14, 2024
 
 Features
