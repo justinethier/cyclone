@@ -1442,9 +1442,14 @@
       (values s r)))
   (define-c sqrt
     "(void *data, int argc, closure _, object k, object z)"
-    " return_inexact_double_op(data, k, sqrt, z);"
+    "
+      common_type buffer;
+// TODO: can common type be brought forward into CPS as result like this? Need to double-check
+      object result = Cyc_sqrt(data, &buffer, z);
+      return_closcall1(data, k, result);
+    "
     "(void *data, object ptr, object z)"
-    " return_inexact_double_op_no_cps(data, ptr, sqrt, z);")
+    " return Cyc_sqrt(data, ptr, z); ")
   (define-c exact-integer?
     "(void *data, int argc, closure _, object k, object num)"
     " if (obj_is_int(num) || (num != NULL && !is_value_type(num) && 

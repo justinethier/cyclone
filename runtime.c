@@ -8891,3 +8891,30 @@ object Cyc_exact_no_cps(void *data, object ptr, object z)
   }
   return obj_int2obj(i);
 }
+
+object Cyc_sqrt(void *data, object ptr, object z)
+{
+  double d;
+  Cyc_check_num(data, z); 
+  if (obj_is_int(z)) { 
+    d = (obj_obj2int(z)); 
+  } else if (type_of(z) == integer_tag) { 
+    d = (((integer_type *)z)->value); 
+  } else if (type_of(z) == bignum_tag) { 
+    d = (mp_get_double(&bignum_value(z)));
+  } else { 
+    d = (((double_type *)z)->value); 
+  } 
+
+  if (d >= 0) {
+    d = sqrt(d);
+    assign_double(ptr, d);
+  } else {
+    double dreal = 0.0;
+    double dimag = sqrt(fabs(d));
+    double complex c = dreal + (dimag * I);
+    assign_complex_num(ptr, c);
+  }
+
+  return ptr;
+}

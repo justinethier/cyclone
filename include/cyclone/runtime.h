@@ -508,6 +508,8 @@ double round_to_nearest_even(double);
 void Cyc_exact(void *data, object cont, object z);
 object Cyc_exact_no_cps(void *data, object ptr, object z);
 
+object Cyc_sqrt(void *data, object ptr, object z);
+
 /**
  * Take Scheme object that is a number and return the number as a C type
  */
