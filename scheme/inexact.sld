@@ -120,6 +120,28 @@
      } "
 ;   "(void *data, object ptr, object z)"
 ;   " return_inexact_double_or_cplx_op_no_cps(data, ptr, sqrt, csqrt, z);"
-)
+   "(void *data, object ptr, object z)"
+   " double complex unboxed;
+     Cyc_check_num(data, z);
+     if (obj_is_int(z)) {
+       unboxed = csqrt(obj_obj2int(z));
+     } else if (type_of(z) == integer_tag) {
+       unboxed = csqrt(((integer_type *)z)->value);
+     } else if (type_of(z) == bignum_tag) {
+       unboxed = csqrt(mp_get_double(&bignum_value(z)));
+     } else if (type_of(z) == complex_num_tag) {
+       unboxed = csqrt(complex_num_value(z));
+       assign_complex_num(ptr, unboxed);
+       return ptr;
+     } else {
+       unboxed = csqrt(((double_type *)z)->value);
+     }
+  
+     if (cimag(unboxed) == 0.0) {
+       assign_double(ptr, creal(unboxed));
+     } else {
+       assign_double(ptr, unboxed);
+     }
+     return ptr; ")
 
 ))
