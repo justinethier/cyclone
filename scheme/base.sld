@@ -1437,10 +1437,10 @@
       (error "exact non-negative integer required" k))
     (let* ((s (if (bignum? k)
                   (bignum-sqrt k)
-                  (exact (truncate (sqrt k)))))
+                  (exact (truncate (_sqrt k)))))
            (r (- k (* s s))))
       (values s r)))
-  (define-c sqrt
+  (define-c _sqrt
     "(void *data, int argc, closure _, object k, object z)"
     " return_inexact_double_op(data, k, sqrt, z);"
     "(void *data, object ptr, object z)"
