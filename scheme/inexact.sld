@@ -111,6 +111,9 @@
      }
    
      if (cimag(result) == 0.0) {
+       if (obj_is_int(z) && creal(result) == round(creal(result))) {
+         return_closcall1(data, k, obj_int2obj(creal(result)));
+       }
        make_double(d, creal(result));
        return_closcall1(data, k, &d);
      } else {
