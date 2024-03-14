@@ -7931,9 +7931,6 @@ static void _read_return_number(void *data, port_type * p, int base, int exact)
  */
 static void _read_return_complex_number(void *data, port_type * p, int len)
 {
-//      TODO: return complex num, see _read_return_number for possible template
-//      probably want to have that function extract/identify the real/imaginary components.
-//      can just scan the buffer and read out start/end index of each number.
   int i;
   make_empty_vector(vec);
   make_string(str, p->tok_buf);
