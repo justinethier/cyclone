@@ -107,9 +107,12 @@
   "sqrt"
   (test 1i (sqrt -1))
   (test 1i (sqrt -1.0))
+  (test +i (sqrt -1.0))
   (test 2 (sqrt 4))
   (test 2.0 (sqrt 4.0))
   (test 2i (sqrt -4.0))
+  (test #t (complex? (sqrt -1)))
+  (test #t (complex? (sqrt -i)))
 )
 
 (test-group
