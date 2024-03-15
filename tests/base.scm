@@ -9,6 +9,7 @@
 
 (import 
   (scheme base)
+  (scheme inexact)
   (cyclone test))
 
 
@@ -100,6 +101,18 @@
   (test 3.0 (numerator (/ 6 4))) ;; Inexact because we don't support rationals yet
   (test 2.0 (denominator (/ 6 4))) ;; Inexact because we don't support rationals yet
   (test 2.0 (denominator (inexact (/ 6 4))))
+)
+
+(test-group
+  "sqrt"
+  (test 1i (sqrt -1))
+  (test 1i (sqrt -1.0))
+  (test +i (sqrt -1.0))
+  (test 2 (sqrt 4))
+  (test 2.0 (sqrt 4.0))
+  (test 2i (sqrt -4.0))
+  (test #t (complex? (sqrt -1)))
+  (test #t (complex? (sqrt -i)))
 )
 
 (test-group

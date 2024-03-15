@@ -5,6 +5,7 @@
 Bug Fixes
 
 - Added a fix from Yorick Hardy to define `*ai-v4mapped*` to zero on platforms where `AI_V4MAPPED` is undefined.
+- Updated `sqrt` to properly handle complex results given non-complex input. EG: `(sqrt -1) ==> 1i`. And updated the parser to properly handle `+i` and `-i`. Thanks to Christopher Hebert for the bug reports!
 
 ## 0.36.0 - February 14, 2024
 
