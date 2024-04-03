@@ -4,6 +4,10 @@
 
 Bug Fixes
 
+- Fixed a beta expansion optimization bug where code such as the following would cause the compiler to hang. Thanks to Yorick Hardy for the bug report:
+
+      (define (compile-forever x) x (compile-forever x))
+
 - Added a fix from Yorick Hardy to define `*ai-v4mapped*` to zero on platforms where `AI_V4MAPPED` is undefined.
 - Updated `sqrt` to properly handle complex results given non-complex input. EG: `(sqrt -1) ==> 1i`. And updated the parser to properly handle `+i` and `-i`. Thanks to Christopher Hebert for the bug reports!
 
