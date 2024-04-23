@@ -7538,6 +7538,8 @@ static int _read_is_numeric(const char *tok, int len)
 {
   return (len &&
           ((isdigit(tok[0])) ||
+           (((len == 2) && tok[1] == 'i') 
+            && (tok[0] == '-' || tok[0] == '+')) ||
            ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
            ((len > 1) && (tok[1] == '.' || isdigit(tok[1]))
             && (tok[0] == '-' || tok[0] == '+'))));
