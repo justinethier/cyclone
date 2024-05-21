@@ -99,7 +99,9 @@
   (cond 
     ((application? exp)
      (cond
-       ((compound-procedure? (car exp))
+       ((or (primitive-procedure? (car exp)) 
+            (compound-procedure? (car exp))
+            (procedure? (car exp)))
         (cons 
           (car exp)
           (map 
