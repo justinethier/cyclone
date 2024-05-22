@@ -9,6 +9,7 @@
 
 (import 
   (scheme base)
+  (scheme eval)
   (scheme inexact)
   (cyclone test))
 
@@ -29,6 +30,12 @@
 (test-group
   "make-list"
   (test '() (make-list -2))
+)
+
+(test-group
+  "apply"
+  (test '(5 1 2) (eval '(apply cons '(5 (1 2)))))
+  (test '(5 1 2) (apply cons '(5 (1 2))))
 )
 
 (cond-expand
