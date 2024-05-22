@@ -89,12 +89,19 @@
       ((analyze exp *global-environment* rename-env '()) *global-environment*)
       ((analyze exp (car env) rename-env '()) (car env))))
 
+;; Called from the C runtime to support apply
 (define (eval-from-c exp . _env)
   (let ((env (if (null? _env) *global-environment* (car _env))))
     (eval (wrapc exp) env)))
 
-;; Expressions received from C code are already evaluated, but sometimes too much so.
-;; Try to wrap 
+;; Helper function for eval-from-c
+;; 
+;; Expressions received from C code are already evaluated, 
+;; however any quoted expressions will have the quotes
+;; stripped off. This is a problem for expressions that
+;; aren't self evaluating - like (1 2) - so we re-quote
+;; the expressions here so a subsequent eval will work.
+;;
 (define (wrapc exp)
   (cond 
     ((application? exp)
