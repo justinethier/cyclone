@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- Fixed a bug in `apply` where an error may be raised when processing quoted sub-expressions. For example the following would throw an error: `(apply cons '(5 (1 2)))`. Thanks to @srgx for the bug report!
 - Fixed a beta expansion optimization bug where code such as the following would cause the compiler to hang. Thanks to Yorick Hardy for the bug report:
 
       (define (compile-forever x) x (compile-forever x))
