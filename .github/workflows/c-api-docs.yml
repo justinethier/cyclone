@@ -21,7 +21,7 @@ jobs:
             
     - name: upload deb
       if: matrix.arch == '64'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: cyclone-scheme docs
         path: html.tar.bz2
