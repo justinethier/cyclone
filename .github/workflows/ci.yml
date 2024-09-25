@@ -1,0 +1,26 @@
+name: Ubuntu Linux Build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    strategy:    
+      matrix:
+        arch: [32, 64]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install ck
+      run: sudo apt-get install libck-dev
+    - name: make runtime
+      run: make libcyclone.a
+#    - name: make
+#      run: make
+#    - name: make install
+#      run: sudo make install
+#    - name: make test
+#      run: make test
+            
