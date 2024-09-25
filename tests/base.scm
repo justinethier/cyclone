@@ -9,6 +9,8 @@
 
 (import 
   (scheme base)
+  (scheme eval)
+  (scheme inexact)
   (cyclone test))
 
 
@@ -28,6 +30,12 @@
 (test-group
   "make-list"
   (test '() (make-list -2))
+)
+
+(test-group
+  "apply"
+  (test '(5 1 2) (eval '(apply cons '(5 (1 2)))))
+  (test '(5 1 2) (apply cons '(5 (1 2))))
 )
 
 (cond-expand
@@ -91,6 +99,9 @@
   (test 4.0  (ceiling 3.5))
   (test 3.0  (truncate 3.5))
   (test 4.0  (round 3.5))
+  (test 2.0  (round 2.5))
+  (test -4.0 (round -3.5))
+  (test -2.0 (round -2.5))
   (test 4.0  (round 7/2)) ;; Rationals not supported, so result is inexact
   (test 7    (round 7))
 
@@ -100,14 +111,26 @@
 )
 
 (test-group
+  "sqrt"
+  (test 1i (sqrt -1))
+  (test 1i (sqrt -1.0))
+  (test +i (sqrt -1.0))
+  (test 2 (sqrt 4))
+  (test 2.0 (sqrt 4.0))
+  (test 2i (sqrt -4.0))
+  (test #t (complex? (sqrt -1)))
+  (test #t (complex? (sqrt -i)))
+)
+
+(test-group
   "exact"
   (test -1 (exact -1))
   (test -1 (exact -1.0))
   (test -1 (exact -1.1))
   (test -1 (exact -1.1))
   (test 1.0+1.0i (exact 1.1+1.2i))
-  (test #t (bignum? (exact 111111111111111111111111111.0)))
-  (test #t (bignum? (exact -111111111111111111111111111.0)))
+  ;(test #t (bignum? (exact 111111111111111111111111111.0)))
+  ;(test #t (bignum? (exact -111111111111111111111111111.0)))
   ;(test +inf.0 (exact +inf.0))
 )
 

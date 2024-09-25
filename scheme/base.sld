@@ -1372,9 +1372,9 @@
     " return_double_op_no_cps(data, ptr, trunc, z);")
   (define-c round
     "(void *data, int argc, closure _, object k, object z)"
-    " return_double_op(data, k, round, z); "
+    " return_double_op(data, k, round_to_nearest_even, z); "
     "(void *data, object ptr, object z)"
-    " return_double_op_no_cps(data, ptr, round, z);")
+    " return_double_op_no_cps(data, ptr, round_to_nearest_even, z);")
   (define-c exact
     "(void *data, int argc, closure _, object k, object z)"
     " Cyc_exact(data, k, z); "
@@ -1437,10 +1437,10 @@
       (error "exact non-negative integer required" k))
     (let* ((s (if (bignum? k)
                   (bignum-sqrt k)
-                  (exact (truncate (sqrt k)))))
+                  (exact (truncate (_sqrt k)))))
            (r (- k (* s s))))
       (values s r)))
-  (define-c sqrt
+  (define-c _sqrt
     "(void *data, int argc, closure _, object k, object z)"
     " return_inexact_double_op(data, k, sqrt, z);"
     "(void *data, object ptr, object z)"

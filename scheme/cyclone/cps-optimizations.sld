@@ -1665,7 +1665,7 @@
 
     ;; Full beta expansion phase, make a pass over all of the program's AST
     (define (opt:beta-expand exp)
-;(write `(DEBUG opt:beta-expand ,exp)) (newline)
+      ;(trace:info `(opt:beta-expand ,exp)) (flush-output-port)
       (cond
        ((ast:lambda? exp)
         (ast:%make-lambda
@@ -1694,6 +1694,7 @@
        (else exp)))
 
     (define (analyze-cps exp)
+      ;(trace:info `(analyze-cps ,exp))
       (analyze:find-named-lets exp)
       (analyze:find-direct-recursive-calls exp)
       (analyze:find-recursive-calls exp)
@@ -2230,11 +2231,17 @@
       (scan (if->then exp) def-sym)
       (scan (if->else exp) def-sym))
      ((app? exp)
-      (when (equal? (car exp) def-sym)
-        (trace:info `("recursive call" ,exp))
-        (with-var! def-sym (lambda (var)
-          (adbv:set-self-rec-call! var #t)))
-        ))
+      ;(trace:info `(analyze:find-recursive-calls scan app ,exp))
+      (cond
+        ((equal? (car exp) def-sym)
+         (trace:info `("recursive call" ,exp))
+         (with-var! def-sym (lambda (var)
+           (adbv:set-self-rec-call! var #t))))
+        (else
+          (for-each
+            (lambda (e)
+              (scan e def-sym))
+            exp))))
      (else #f)))
 
   ;; TODO: probably not good enough, what about recursive functions that are not top-level??

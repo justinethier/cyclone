@@ -7,6 +7,7 @@ Steps for making a release of Cyclone:
   - `Dockerfile`
   - `DEBIAN/control` in cyclone-bootstrap
   - `.github/workflows/Release.yml` job in cyclone-bootstrap
+  - `libs/common.sld` in cyclone winds repo
 - Update documentation, if applicable
 - Tag releases and push to Github
 - Upload release notes to `gh-pages` branch
@@ -14,3 +15,8 @@ Steps for making a release of Cyclone:
 - Update release on Homebrew (automated)
 - Update release on Dockerhub (push to bitbucket)
 - Upload new binary from cyclone-bootstrap release build to the cyclone-scheme "packages" repo
+- Update WASM hosted Cyclone
+  - Trigger CI action on the WASM repo to recompile the WASM binary: https://github.com/cyclone-scheme/wasm-terminal
+  - Download the generated `.zip` artifact
+  - Extract `terminal.js` and `terminal.wasm` and copy to the `_site` directory in the repo to update the build
+  - Optionally update year in the `terminal.html` file

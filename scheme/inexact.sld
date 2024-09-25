@@ -69,7 +69,6 @@
             (/ (c-log z1) (c-log z2*)))))
     (define-inexact-op c-log "log"   "clog")
     (define-inexact-op exp   "exp"   "cexp")
-    (define-inexact-op sqrt  "sqrt"  "csqrt")
     (define-inexact-op sin   "sin"   "csin")
     (define-inexact-op cos   "cos"   "ccos")
     (define-inexact-op tan   "tan"   "ctan")
@@ -93,4 +92,58 @@
                         (* (if (eqv? y -0.0) -1 1)
                            (if (eqv? x -0.0) 3.141592653589793 x))
                         (atan1 (/ y x))))))))
+
+ (define-c
+   sqrt
+   "(void *data, int argc, closure _, object k, object z)"
+   " double complex result;
+     Cyc_check_num(data, z);
+     if (obj_is_int(z)) {
+       result = csqrt(obj_obj2int(z));
+     } else if (type_of(z) == integer_tag) {
+       result = csqrt(((integer_type *)z)->value);
+     } else if (type_of(z) == bignum_tag) {
+       result = csqrt(mp_get_double(&bignum_value(z)));
+     } else if (type_of(z) == complex_num_tag) {
+       result = csqrt(complex_num_value(z));
+     } else {
+       result = csqrt(((double_type *)z)->value);
+     }
+   
+     if (cimag(result) == 0.0) {
+       if (obj_is_int(z) && creal(result) == round(creal(result))) {
+         return_closcall1(data, k, obj_int2obj(creal(result)));
+       }
+       make_double(d, creal(result));
+       return_closcall1(data, k, &d);
+     } else {
+       complex_num_type cn;
+       assign_complex_num((&cn), result);
+       return_closcall1(data, k, &cn);
+     } "
+   "(void *data, object ptr, object z)"
+   " double complex result;
+     Cyc_check_num(data, z);
+     if (obj_is_int(z)) {
+       result = csqrt(obj_obj2int(z));
+     } else if (type_of(z) == integer_tag) {
+       result = csqrt(((integer_type *)z)->value);
+     } else if (type_of(z) == bignum_tag) {
+       result = csqrt(mp_get_double(&bignum_value(z)));
+     } else if (type_of(z) == complex_num_tag) {
+       result = csqrt(complex_num_value(z));
+     } else {
+       result = csqrt(((double_type *)z)->value);
+     }
+  
+     if (cimag(result) == 0.0) {
+       if (obj_is_int(z) && creal(result) == round(creal(result))) {
+         return obj_int2obj(creal(result));
+       }
+       assign_double(ptr, creal(result));
+     } else {
+       assign_complex_num(ptr, result);
+     }
+     return ptr;
+     ")
 ))

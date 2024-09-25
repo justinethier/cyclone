@@ -7538,6 +7538,8 @@ static int _read_is_numeric(const char *tok, int len)
 {
   return (len &&
           ((isdigit(tok[0])) ||
+           (((len == 2) && tok[1] == 'i') 
+            && (tok[0] == '-' || tok[0] == '+')) ||
            ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
            ((len > 1) && (tok[1] == '.' || isdigit(tok[1]))
             && (tok[0] == '-' || tok[0] == '+'))));
@@ -7931,9 +7933,6 @@ static void _read_return_number(void *data, port_type * p, int base, int exact)
  */
 static void _read_return_complex_number(void *data, port_type * p, int len)
 {
-//      TODO: return complex num, see _read_return_number for possible template
-//      probably want to have that function extract/identify the real/imaginary components.
-//      can just scan the buffer and read out start/end index of each number.
   int i;
   make_empty_vector(vec);
   make_string(str, p->tok_buf);
@@ -8763,6 +8762,11 @@ int num2ratio(double x, double *numerator, double *denominator)
     *denominator /= 2.0;
   }
   return 0;
+}
+
+double round_to_nearest_even(double x)
+{
+ return x-remainder(x,1.0);
 }
 
 /**
