@@ -13,11 +13,12 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: switch to gcc-14 on linux
-      run: |
-        sudo apt install gcc-14 g++-14
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 --slave /usr/bin/g++ g++ /usr/bin/g++-14 --slave /usr/bin/gcov gcov /usr/bin/gcov-14
-        sudo update-alternatives --set gcc /usr/bin/gcc-14
+# Future consideration. Would be nice if this could be matrixed... alternatively could have different CI's for different gcc versions, if we end up caring about that...
+#    - name: switch to gcc-10 on linux
+#      run: |
+#        sudo apt install gcc-10 g++-10
+#        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+#        sudo update-alternatives --set gcc /usr/bin/gcc-10
     - name: Install ck
       run: sudo apt-get install libck-dev
     - name: make runtime
