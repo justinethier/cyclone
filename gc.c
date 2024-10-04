@@ -294,6 +294,7 @@ void gc_add_mutator(gc_thread_data * thd)
  */
 void gc_remove_mutator(gc_thread_data * thd)
 {
+  printf("gc_remove_mutator\n");
   pthread_mutex_lock(&mutators_lock);
   if (!ck_array_remove(&Cyc_mutators, (void *)thd)) {
     fprintf(stderr, "Unable to remove thread data, exiting\n");
@@ -354,18 +355,18 @@ void gc_free_old_thread_data()
 
   pthread_mutex_lock(&mutators_lock);
   CK_ARRAY_FOREACH(&old_mutators, &iterator, &m) {
-//printf("JAE DEBUG - freeing old thread data...");
+printf("JAE DEBUG - freeing old thread data...");
     gc_thread_data_free(m);
     if (!ck_array_remove(&old_mutators, (void *)m)) {
       fprintf(stderr, "Error removing old mutator data\n");
       exit(1);
     }
     freed = 1;
-//printf(" done\n");
+printf(" done\n");
   }
   if (freed) {
     ck_array_commit(&old_mutators);
-//printf("commited old mutator data deletions\n");
+printf("commited old mutator data deletions\n");
   }
   pthread_mutex_unlock(&mutators_lock);
 }
@@ -1140,9 +1141,9 @@ int gc_num_unswept_heaps(gc_heap * h)
 void gc_start_major_collection(gc_thread_data * thd)
 {
   if (ck_pr_load_int(&gc_stage) == STAGE_RESTING) {
-#if GC_DEBUG_TRACE
-    gc_log(stderr, "gc_start_major_collection - initiating collector");
-#endif
+//#if GC_DEBUG_TRACE
+    fprintf(stderr, "gc_start_major_collection - initiating collector\n");
+//#endif
     ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_CLEAR_OR_MARKING);
   }
 }
@@ -1380,6 +1381,7 @@ void *gc_alloc(gc_heap_root * hrt, size_t size, char *obj, gc_thread_data * thd,
   void *(*try_alloc)(gc_heap * h, size_t size, char *obj, gc_thread_data * thd);
   void *(*try_alloc_slow)(gc_heap * h_passed, gc_heap * h, size_t size,
                           char *obj, gc_thread_data * thd);
+        gc_start_major_collection(thd);
   size = gc_heap_align(size);
   if (size <= (32 * (LAST_FIXED_SIZE_HEAP_TYPE + 1))) {
     heap_type = (size - 1) / 32;
@@ -2745,6 +2747,39 @@ void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
   last->next = hsrc;
 }
 
+gc_heap *gc_heap_free_empty(gc_heap *heap, uintptr_t *freed_size) {
+  gc_heap *prev, *h;
+
+  if (heap) {
+    prev = heap;
+    h = heap->next;
+    while (h) {
+      if (gc_is_heap_empty(h)) {
+        printf("freeing empty heap pages\n");
+        prev->next = h->next;
+        *freed_size += h->size;
+        free(h);
+        h = prev;
+      }
+
+      prev = h;
+      h = prev->next;
+    }
+  }
+
+  // free first page if able
+  if (heap && gc_is_heap_empty(heap)) {
+    printf("freeing empty first heap page\n");
+    h = heap->next;
+    *freed_size += heap->size;
+    free(heap);
+    heap = h;
+  }
+
+  printf("done freeing heap pages\n");
+  return heap;
+}
+
 /**
  * @brief Merge all thread heaps into another.
  * @param dest Heap receiving new pages
@@ -2760,7 +2795,17 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     hdest = dest->heap->heap[heap_type];
     hsrc = src->heap->heap[heap_type];
+
+    uintptr_t freed_size = 0;
+    hsrc = gc_heap_free_empty(hsrc, &freed_size);
+    src->cached_heap_total_sizes[heap_type] -= freed_size;
+    src->cached_heap_free_sizes[heap_type] = gc_heap_free_size(hsrc);
+
     if (hdest && hsrc) {
+      printf("total heap size = %lu, free size = %lu\n",
+        src->cached_heap_total_sizes[heap_type],
+        src->cached_heap_free_sizes[heap_type]);
+
       gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
@@ -2770,9 +2815,9 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
   }
   ck_pr_add_int(&(dest->heap_num_huge_allocations),
                 ck_pr_load_int(&(src->heap_num_huge_allocations)));
-#if GC_DEBUG_TRACE
+//#if GC_DEBUG_TRACE
   fprintf(stderr, "Finished merging old heap data\n");
-#endif
+//#endif
 }
 
 /**
