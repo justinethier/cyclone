@@ -2762,12 +2762,32 @@ void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
  */
 void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
 {
-  gc_heap *hdest, *hsrc;
+  gc_heap *hdest, *hsrc, *cur, *prev;
   int heap_type;
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     hdest = dest->heap->heap[heap_type];
     hsrc = src->heap->heap[heap_type];
+    if (!hdest) {
+     fprintf(stderr, "WARNING !!!!! merging heap type %d does not happen: hdest = %p hsrc = %p size = %d\n",
+       heap_type, hdest, hsrc, hsrc->size);
+     fflush(stderr);
+    }
+    if (hsrc) {
+      prev = hsrc;
+      cur = hsrc->next;
+      while (cur != NULL) {
+        if (gc_is_heap_empty(cur)) {
+          gc_heap_free(cur, prev);
+        }
+        prev = prev->next;
+        cur = prev->next;
+      }
+      if (gc_is_heap_empty(hsrc) && hsrc->next == NULL) {
+        free(hsrc);
+        hsrc = NULL;
+      }
+    }
     if (hdest && hsrc) {
       gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
