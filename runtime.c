@@ -7181,6 +7181,7 @@ void Cyc_exit_thread(void *data, object _, int argc, object * args)
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);
+  gc_force();
   pthread_exit(NULL);
 }
 
