@@ -118,13 +118,21 @@
         make_c_opaque(co, td);
         return_closcall1(data, k, &co); ")
 
+    (define-c %end-thread!
+      "(void *data, int argc, closure _, object k, object ret)"
+      " gc_thread_data *d = data;
+        vector_type *v = d->scm_thread_obj;
+        v->elements[7] = ret;     // Store thread result
+        Cyc_end_thread(d);
+        return_closcall1(data, k, boolean_f);")
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
       ;; it contains any closures on the "parent" thread's stack
       (let* ((thunk (vector-ref t 1)) 
              (thread-params (cons t (lambda ()
                                       (vector-set! t 5 #f)
-                                      (thunk)))))
+                                      (let ((r (thunk))) (%end-thread! r))))))
         (vector-set! t 5 (%get-thread-data)) ;; Temporarily make parent thread
                                              ;; data available for child init
         (Cyc-minor-gc)
