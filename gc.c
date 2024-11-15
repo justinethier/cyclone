@@ -2534,6 +2534,14 @@ void gc_collector()
   ck_pr_cas_int(&gc_stage, STAGE_SWEEPING, STAGE_RESTING);
 }
 
+void gc_force(void)
+{
+ /* try to force the collector to run */
+ ck_pr_cas_int(&gc_stage, STAGE_RESTING, STAGE_FORCING);
+ /* if the collector thread was idle, then begin collecting */
+ ck_pr_cas_int(&gc_stage, STAGE_FORCING, STAGE_CLEAR_OR_MARKING);
+}
+
 void *collector_main(void *arg)
 {
   int stage;

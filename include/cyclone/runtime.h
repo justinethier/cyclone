@@ -53,6 +53,11 @@ void GC(void *, closure, object *, int);
 void gc_init_heap(long heap_size);
 
 /**
+ * \ingroup gc_force
+ */
+void gc_force(void);
+
+/**
  * \defgroup prim Primitives
  * @brief Built-in Scheme functions provided by the runtime library
  *
