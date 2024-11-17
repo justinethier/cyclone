@@ -140,9 +140,19 @@
         t))
 
     (define (thread-yield!) (thread-sleep! 1))
-    (define-c thread-terminate!
-      "(void *data, object _, int argc, object *args)"
-      " Cyc_end_thread(data); ")
+
+    (define-c %thread-terminate!
+      "(void *data, int argc, closure _, object k, object thread_data_opaque)"
+      " gc_thread_data *td = (gc_thread_data *)(opaque_ptr(thread_data_opaque));
+        Cyc_end_thread(td);
+        /* TODO: if terminating the current thread, don't return */
+        return_closcall1(data, k, boolean_t);")
+    (define (thread-terminate! t)
+      (cond
+       ((and (thread? t) (Cyc-opaque? (vector-ref t 2)))
+        (%thread-terminate! (vector-ref t 2)))
+       (else
+        #f))) ;; TODO: raise an error instead?
 
     ;; TODO: not good enough, need to return value from thread
     ;; TODO: perhaps not an ideal solution using a loop/polling below, but good
