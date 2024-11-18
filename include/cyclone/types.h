@@ -264,7 +264,7 @@ typedef enum { STATUS_ASYNC, STATUS_SYNC1, STATUS_SYNC2
 /** Stages of the Major GC's collector thread */
 typedef enum { STAGE_CLEAR_OR_MARKING, STAGE_TRACING
       //, STAGE_REF_PROCESSING 
-  , STAGE_SWEEPING, STAGE_RESTING, STAGE_FORCING
+  , STAGE_SWEEPING, STAGE_RESTING
 } gc_stage_type;
 
 // Constant colors are defined here.
@@ -377,7 +377,6 @@ struct gc_thread_data_t {
 
 /* GC prototypes */
 void gc_initialize(void);
-void gc_force(void);
 void gc_add_new_unrunning_mutator(gc_thread_data * thd);
 void gc_add_mutator(gc_thread_data * thd);
 void gc_remove_mutator(gc_thread_data * thd);
