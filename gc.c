@@ -2739,7 +2739,7 @@ void gc_thread_data_free(gc_thread_data * thd)
  *
  * This function assumes appropriate locks are already held.
  */
-void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
+int gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
 {
   int freed = 0;
   gc_heap *last = gc_heap_last(hdest);
