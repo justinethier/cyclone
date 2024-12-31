@@ -2741,8 +2741,22 @@ void gc_thread_data_free(gc_thread_data * thd)
  */
 void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
 {
+  int freed = 0;
   gc_heap *last = gc_heap_last(hdest);
+  gc_heap *cur = hsrc, *prev = last, *next;
   last->next = hsrc;
+  // free any empty heaps
+  while (cur != NULL) {
+    next = cur->next;
+    if (gc_is_heap_empty(cur)) {
+      freed += cur->size;
+      gc_heap_free(cur, prev);
+    } else {
+      prev = cur;
+    }
+    cur = next;
+  }
+  return freed;
 }
 
 /**
@@ -2765,23 +2779,10 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
        heap_type, hdest, hsrc, hsrc->size);
      fflush(stderr);
     }
-    if (hsrc) {
-      prev = hsrc;
-      cur = hsrc->next;
-      while (cur != NULL) {
-        if (gc_is_heap_empty(cur)) {
-          gc_heap_free(cur, prev);
-        }
-        prev = prev->next;
-        cur = prev->next;
-      }
-      if (gc_is_heap_empty(hsrc) && hsrc->next == NULL) {
-        free(hsrc);
-        hsrc = NULL;
-      }
-    }
     if (hdest && hsrc) {
-      gc_heap_merge(hdest, hsrc);
+      freed = gc_heap_merge(hdest, hsrc);
+      ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
+                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type]))-freed);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]),
