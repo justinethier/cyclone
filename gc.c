@@ -2769,7 +2769,7 @@ void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
 void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
 {
   gc_heap *hdest, *hsrc, *cur, *prev;
-  int heap_type;
+  int heap_type, freed;
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     hdest = dest->heap->heap[heap_type];
