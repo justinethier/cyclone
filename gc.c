@@ -2783,8 +2783,6 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
       freed = gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type]))-freed);
-      ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
-                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
     }
