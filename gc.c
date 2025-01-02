@@ -1902,6 +1902,37 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
   }
 }
 
+static void gc_sweep_primordial_thread_heap() {
+  int heap_type, must_free;
+  gc_heap *h, *prev, *next, *sweep;
+  pthread_mutex_lock(&(primordial_thread->lock));
+  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+    prev = primordial_thread->heap->heap[heap_type];
+    h = prev->next;
+    while(h != NULL) {
+      next = h->next;
+      must_free = 0;
+      if (h->is_unswept) {
+        if (h->type <= LAST_FIXED_SIZE_HEAP_TYPE) {
+          sweep = gc_sweep_fixed_size(h, primordial_thread);
+        } else {
+          sweep = gc_sweep(h, primordial_thread);
+        }
+        must_free = (sweep == NULL);
+      } else {
+        must_free = gc_is_heap_empty(h);
+      }
+      if (must_free) {
+        gc_heap_free(h, prev);
+      } else {
+        prev = h;
+      }
+      h = next;
+    }
+  }
+  pthread_mutex_unlock(&(primordial_thread->lock));
+}
+
 /**
  * @brief Called by a mutator to cooperate with the collector thread
  * @param thd Mutator's thread data
@@ -1912,10 +1943,21 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
  */
 void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 {
-  int i, status_c, status_m;
+  int i, status_c, status_m, stage, merged;
 #if GC_DEBUG_VERBOSE
   int debug_print = 0;
 #endif
+
+  // Since terminated threads' heap pages are merged into
+  // the primordial thread's heap, it may be that a sweep
+  // for the primordeal thread is never triggered even though
+  // the heep keeps growing. Perform a sweep here if necessary.
+  stage = ck_pr_load_int(&gc_stage);
+  merged = ck_pr_load_int(&gc_threads_merged);
+  if ((thd == primordial_thread) && (merged == 1) && ((stage == STAGE_SWEEPING) || (stage == STAGE_RESTING))) {
+    gc_sweep_primordial_thread_heap();
+    ck_pr_cas_int(&gc_threads_merged, 1, 0);
+  }
 
   // Handle any pending marks from write barrier
   gc_sum_pending_writes(thd, 0);
