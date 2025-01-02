@@ -5360,7 +5360,7 @@ void _Cyc_91end_91thread_67(void *data, object clo, int argc, object * args)
   vector_type *v = d->scm_thread_obj;
   v->elements[7] = args[0];     // Store thread result
 
-  Cyc_end_thread((gc_thread_data *) data);
+  Cyc_end_thread(d);
   object cont = args[0];
   return_closcall1(data, cont, boolean_f);
 }
