@@ -32,7 +32,7 @@
        @@     @@     Cyclone Scheme->C compiler
       ,@             http://justinethier.github.io/cyclone/
       '@        
-      .@             (c) 2014-2024 Justin Ethier
+      .@             (c) 2014-2025 Justin Ethier
        @@     #@     Version " *version* "
        `@@@#@@@.
         #@@@@@   
