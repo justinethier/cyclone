@@ -55,6 +55,7 @@ static unsigned char gc_color_purple = 1;       // There are many "shades" of pu
 
 static int gc_status_col = STATUS_SYNC1;
 static int gc_stage = STAGE_RESTING;
+static int gc_threads_merged = 0;
 
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
@@ -2745,13 +2746,17 @@ int gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
   gc_heap *last = gc_heap_last(hdest);
   gc_heap *cur = hsrc, *prev = last, *next;
   last->next = hsrc;
-  // free any empty heaps
+  // free any empty heaps and convert remaining heaps
+  // to free list so that they can be swept
   while (cur != NULL) {
+    cur->is_unswept = 1;
     next = cur->next;
     if (gc_is_heap_empty(cur)) {
       freed += cur->size;
       gc_heap_free(cur, prev);
     } else {
+      gc_convert_heap_page_to_free_list(cur, primordial_thread);
+      ck_pr_cas_int(&gc_threads_merged, 0, 1);
       prev = cur;
     }
     cur = next;
