@@ -1261,6 +1261,9 @@ typedef pair_type *pair;
   n->pair_car = a; \
   n->pair_cdr = d;
 
+/** Create a new pair in the thread's heap */
+void *gc_alloc_pair(gc_thread_data * data, object head, object tail);
+
 /**
  * Set members of the given pair 
  * @param n - Pointer to a pair object
