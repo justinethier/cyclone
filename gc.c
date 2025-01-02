@@ -2773,8 +2773,33 @@ int gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
  */
 void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
 {
-  gc_heap *hdest, *hsrc, *cur, *prev;
-  int heap_type, freed;
+  gc_heap *hdest, *hsrc;
+  int freed, heap_type, i;
+  pair_type *context = NULL;
+  vector_type *v = src->scm_thread_obj;
+
+  // The following objects are part of the thread context and should
+  // be stored on the primordial thread's heap. Make this explicit by
+  // including it in the thread object.
+  if (src->gc_num_args > 0) {
+    for (i=src->gc_num_args-1; i>=0; --i) {
+      context = gc_alloc_pair(dest, (src->gc_args)[i], context);
+    }
+  }
+  if (src->gc_cont != NULL && is_object_type(src->gc_cont)) {
+    context = gc_alloc_pair(dest, src->gc_cont, context);
+  }
+  if (src->exception_handler_stack != NULL) {
+    context = gc_alloc_pair(dest, src->exception_handler_stack, context);
+  }
+  if (src->param_objs != NULL) {
+    context = gc_alloc_pair(dest, src->param_objs, context);
+  }
+
+  if (context != NULL) {
+    gc_mark_black(context);
+    v->elements[8] = context;
+  }
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     hdest = dest->heap->heap[heap_type];
