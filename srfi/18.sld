@@ -152,7 +152,9 @@
     (define (thread-terminate! t)
       (cond
        ((and (thread? t) (Cyc-opaque? (vector-ref t 2)))
-        (%thread-terminate! (vector-ref t 2)))
+        (begin
+         (Cyc-minor-gc)
+         (%thread-terminate! (vector-ref t 2))))
        (else
         #f))) ;; TODO: raise an error instead?
 
@@ -176,6 +178,7 @@
       (cond
        ((and (thread? t) (Cyc-opaque? (vector-ref t 2)))
         (%thread-join! (vector-ref t 2))
+        (Cyc-minor-gc)
         (vector-ref t 7))
        (else
         #f))) ;; TODO: raise an error instead?
