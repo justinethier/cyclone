@@ -74,12 +74,14 @@
         ;; - internal
         ;; - end of thread cont (or #f for default)
         ;; - end-result - Result of thread that terminates successfully
+        ;; - internal thread context at termination, e.g. parameterised objects
         (vector 
           'cyc-thread-obj 
           thunk 
           (%alloc-thread-data)  ;; Internal data for new thread
           name-str 
           #f 
+          #f
           #f
           #f
           #f)))
