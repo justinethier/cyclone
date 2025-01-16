@@ -98,7 +98,7 @@
       (%get-thread-data))
 
     (define *primordial-thread*
-      (vector 'cyc-thread-obj #f #f "main thread" #f #f))
+      (vector 'cyc-thread-obj #f #f "main thread" #f #f #f #f))
 
     (define-c %current-thread
       "(void *data, int argc, closure _, object k)"
