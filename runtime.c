@@ -8,6 +8,7 @@
  * This file contains the C runtime used by compiled programs.
  */
 
+#include <assert.h>
 #include <ck_hs.h>
 #include <ck_ht.h>
 #include <ck_pr.h>
@@ -211,6 +212,8 @@ const object Cyc_RECORD_MARKER = &__RECORD;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
+static int cyclone_thread_key_create = 1;
+static pthread_key_t cyclone_thread_key;
 static pthread_mutex_t symbol_table_lock;
 
 char **env_variables = NULL;
@@ -7125,6 +7128,11 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
+  if (ck_pr_cas_int(&cyclone_thread_key_create, 1, 0)) {
+    int r = pthread_key_create(&cyclone_thread_key, Cyc_end_thread);
+    assert(r == 0);
+  }
+  pthread_setspecific(cyclone_thread_key, thd);
   Cyc_start_trampoline(thd);
   return NULL;
 }
