@@ -30,6 +30,7 @@ static uint32_t Cyc_utf8_decode(uint32_t * state, uint32_t * codep,
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t * s,
                                                 char_type * codepoint,
                                                 int *cpts, int *bytes);
+static void Cyc_cancel_thread(gc_thread_data * thd);
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -7129,7 +7130,7 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
   if (ck_pr_cas_int(&cyclone_thread_key_create, 1, 0)) {
-    int r = pthread_key_create(&cyclone_thread_key, (void (*)(void *))Cyc_end_thread);
+    int r = pthread_key_create(&cyclone_thread_key, (void (*)(void *))Cyc_cancel_thread);
     assert(r == 0);
   }
   pthread_setspecific(cyclone_thread_key, thd);
@@ -7189,9 +7190,21 @@ void Cyc_exit_thread(void *data, object _, int argc, object * args)
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);
-  // we are exiting, the destructor does not need to be called
-  pthread_setspecific(cyclone_thread_key, (void (*)(void *))NULL);
   pthread_exit(NULL);
+}
+
+/**
+ * Cancel a thread
+ */
+static void Cyc_cancel_thread(gc_thread_data * thd)
+{
+  // don't do a minor GC, the thread is terminated without
+  // returning any values.
+  if (gc_is_mutator_active(thd)) {
+    gc_remove_mutator(thd);
+  }
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
+                CYC_THREAD_STATE_TERMINATED);
 }
 
 /**
