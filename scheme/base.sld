@@ -407,7 +407,7 @@
                   (else (error "cond-expand: bad feature" x)))
                 (memq x (features))))
           (let expand ((ls (cdr expr)))
-            (cond ((null? ls))  ; (error "cond-expand: no expansions" expr)
+            (cond ((null? ls)  (error "cond-expand: no expansions" expr))
                   ((not (pair? (car ls))) (error "cond-expand: bad clause" (car ls)))
                   ((eq? 'else (caar ls)) ;(identifier->symbol (caar ls)))
                    (if (pair? (cdr ls))
