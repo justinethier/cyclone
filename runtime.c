@@ -7189,6 +7189,8 @@ void Cyc_exit_thread(void *data, object _, int argc, object * args)
   gc_remove_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);
+  // we are exiting, the destructor does not need to be called
+  pthread_setspecific(cyclone_thread_key, (void (*)(void *))NULL);
   pthread_exit(NULL);
 }
 
