@@ -54,6 +54,7 @@
       (test "o" (read-line p))
     )
   )
+  (else #f)
 )
 
 (test-group
