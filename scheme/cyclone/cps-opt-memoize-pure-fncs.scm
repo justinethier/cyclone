@@ -18,9 +18,9 @@
             (scheme cyclone util) 
             (scheme cyclone pretty-print)
             (srfi 2)
-            (srfi 69)
-            )
-    ))
+            (srfi 69)))
+  (else
+    #f))
 
 ;; Predicate to determine if a function can be memoized
 ;; var - symbol - global name of the function
@@ -371,4 +371,5 @@
 ;;    ;  (ast:ast->pp-sexp
 ;;    ;    (opt:local-var-reduction (ast:sexp->ast sexp)))
 ;;    ;)
-))
+)
+(else #f))

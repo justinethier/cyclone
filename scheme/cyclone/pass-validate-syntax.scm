@@ -14,7 +14,8 @@
       (scheme base)
       (scheme read)
       (scheme cyclone pretty-print)
-      (scheme cyclone util))))
+      (scheme cyclone util)))
+   (else #f))
 ;;
 ;; TODO: call this from cyclone.scm after it works, probably after "resolve macros"
 
@@ -59,7 +60,9 @@
   (define (search exp vars)
     (cond-expand
       (program
-        (pretty-print `(search ,exp ,vars))(newline))) ;; Debugging
+        (pretty-print `(search ,exp ,vars))(newline)) ;; Debugging
+      (else
+        #f))
     (cond
       ;((ast:lambda? exp) 'TODO)
       ((const? exp) #f)
@@ -111,4 +114,5 @@
     ;(if 1 2 3 4)
     
      (let ((sexp (read-all (open-input-file "validation.scm"))))
-      (validate-keyword-syntax sexp))))
+      (validate-keyword-syntax sexp)))
+  (else #f))

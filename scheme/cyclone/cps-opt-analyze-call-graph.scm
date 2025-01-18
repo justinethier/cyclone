@@ -20,7 +20,8 @@
             (srfi 2)
             (srfi 69)
             )
-    ))
+    )
+  (else #f))
 
 ;; symbol -> hash-table -> boolean
 ;; Is it OK to inline code replacing ref, based on call graph data from lookup table?
@@ -261,4 +262,5 @@
     ;  (ast:ast->pp-sexp
     ;    (opt:local-var-reduction (ast:sexp->ast sexp)))
     ;)
-))
+)
+(else #f))

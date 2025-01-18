@@ -14,7 +14,9 @@
             (scheme cyclone ast) 
             (scheme cyclone primitives)
             (scheme cyclone util) 
-            (scheme cyclone pretty-print))))
+            (scheme cyclone pretty-print)))
+  (else
+    #f))
 
 ;; Local variable reduction:
 ;; Reduce given sexp by replacing certain lambda calls with a let containing
@@ -434,4 +436,5 @@
       (ast:ast->pp-sexp
         (opt:local-var-reduction (ast:sexp->ast sexp)))
     )
-    ))
+    )
+  (else #f))
