@@ -6416,13 +6416,15 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
     exit(1);
   }
 
-  gc_move2heap(cont);
-  ((gc_thread_data *) data)->gc_cont = cont;
-  ((gc_thread_data *) data)->gc_num_args = num_args;
+  if (cont != NULL) {
+    gc_move2heap(cont);
+    ((gc_thread_data *) data)->gc_cont = cont;
+    ((gc_thread_data *) data)->gc_num_args = num_args;
 
-  for (i = 0; i < num_args; i++) {
-    gc_move2heap(args[i]);
-    ((gc_thread_data *) data)->gc_args[i] = args[i];
+    for (i = 0; i < num_args; i++) {
+      gc_move2heap(args[i]);
+      ((gc_thread_data *) data)->gc_args[i] = args[i];
+    }
   }
 
   // Transport exception stack
@@ -6561,8 +6563,13 @@ void GC(void *data, closure cont, object * args, int num_args)
 #ifdef CYC_HIGH_RES_TIMERS
   hrt_log_delta("minor gc", tstamp);
 #endif
-  // Let it all go, Neo...
-  longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
+  // if this thread has a continuation (i.e. it is not cancelled)
+  // then we can continue after the minor GC, otherwise we return
+  // to the destructor which initiated the minor GC.
+  if (cont != NULL) {
+    // Let it all go, Neo...
+    longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
+  }
 }
 
 /**
@@ -7198,8 +7205,9 @@ void Cyc_exit_thread(void *data, object _, int argc, object * args)
  */
 static void Cyc_cancel_thread(gc_thread_data * thd)
 {
-  // don't do a minor GC, the thread is terminated without
-  // returning any values.
+  // do a minor GC without a continuation, so that we return
+  // here without performing a longjmp
+  GC(thd, (closure)NULL, (object *)NULL, 0);
   if (gc_is_mutator_active(thd)) {
     gc_remove_mutator(thd);
   }
