@@ -98,7 +98,7 @@
       (%get-thread-data))
 
     (define *primordial-thread*
-      (vector 'cyc-thread-obj #f #f "main thread" #f #f))
+      (vector 'cyc-thread-obj #f #f "main thread" #f #f #f #f))
 
     (define-c %current-thread
       "(void *data, int argc, closure _, object k)"
@@ -132,9 +132,33 @@
         t))
 
     (define (thread-yield!) (thread-sleep! 1))
-    (define-c thread-terminate!
-      "(void *data, object _, int argc, object *args)"
-      " Cyc_end_thread(data); ")
+
+    (define-c %thread-terminate!
+      "(void *data, int argc, closure _, object k, object thread_data_opaque)"
+      " gc_thread_data *td;
+        if (thread_data_opaque == boolean_f) {
+          /* primordial thread */
+          __halt(boolean_f);
+        } else {
+          td = (gc_thread_data *)(opaque_ptr(thread_data_opaque));
+          if (td == data) {
+            Cyc_end_thread(td);
+          } else {
+            pthread_cancel(td->thread_id);
+          }
+        }
+        return_closcall1(data, k, boolean_t);")
+    (define (thread-terminate! t)
+      (cond
+       ((and (thread? t)
+             (or (Cyc-opaque? (vector-ref t 2)) (equal? *primordial-thread* t)))
+        (begin
+         (Cyc-minor-gc)
+         (vector-set! t 5 (%get-thread-data)) ;; remember calling thread
+         (%thread-terminate! (vector-ref t 2))
+         #t))
+       (else
+        #f))) ;; TODO: raise an error instead?
 
     ;; TODO: not good enough, need to return value from thread
     ;; TODO: perhaps not an ideal solution using a loop/polling below, but good

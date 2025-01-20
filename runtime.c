@@ -8,6 +8,7 @@
  * This file contains the C runtime used by compiled programs.
  */
 
+#include <assert.h>
 #include <ck_hs.h>
 #include <ck_ht.h>
 #include <ck_pr.h>
@@ -29,6 +30,7 @@ static uint32_t Cyc_utf8_decode(uint32_t * state, uint32_t * codep,
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t * s,
                                                 char_type * codepoint,
                                                 int *cpts, int *bytes);
+static void Cyc_cancel_thread(gc_thread_data * thd);
 
 /* Error checking section - type mismatch, num args, etc */
 /* Type names to use for error messages */
@@ -211,6 +213,8 @@ const object Cyc_RECORD_MARKER = &__RECORD;
 static ck_hs_t lib_table;
 static ck_hs_t symbol_table;
 static int symbol_table_initial_size = 4096;
+static int cyclone_thread_key_create = 1;
+static pthread_key_t cyclone_thread_key;
 static pthread_mutex_t symbol_table_lock;
 
 char **env_variables = NULL;
@@ -6412,13 +6416,15 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
     exit(1);
   }
 
-  gc_move2heap(cont);
-  ((gc_thread_data *) data)->gc_cont = cont;
-  ((gc_thread_data *) data)->gc_num_args = num_args;
+  if (cont != NULL) {
+    gc_move2heap(cont);
+    ((gc_thread_data *) data)->gc_cont = cont;
+    ((gc_thread_data *) data)->gc_num_args = num_args;
 
-  for (i = 0; i < num_args; i++) {
-    gc_move2heap(args[i]);
-    ((gc_thread_data *) data)->gc_args[i] = args[i];
+    for (i = 0; i < num_args; i++) {
+      gc_move2heap(args[i]);
+      ((gc_thread_data *) data)->gc_args[i] = args[i];
+    }
   }
 
   // Transport exception stack
@@ -6557,8 +6563,13 @@ void GC(void *data, closure cont, object * args, int num_args)
 #ifdef CYC_HIGH_RES_TIMERS
   hrt_log_delta("minor gc", tstamp);
 #endif
-  // Let it all go, Neo...
-  longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
+  // if this thread has a continuation (i.e. it is not cancelled)
+  // then we can continue after the minor GC, otherwise we return
+  // to the destructor which initiated the minor GC.
+  if (cont != NULL) {
+    // Let it all go, Neo...
+    longjmp(*(((gc_thread_data *) data)->jmp_start), 1);
+  }
 }
 
 /**
@@ -7125,6 +7136,11 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
   gc_add_mutator(thd);
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
+  if (ck_pr_cas_int(&cyclone_thread_key_create, 1, 0)) {
+    int r = pthread_key_create(&cyclone_thread_key, (void (*)(void *))Cyc_cancel_thread);
+    assert(r == 0);
+  }
+  pthread_setspecific(cyclone_thread_key, thd);
   Cyc_start_trampoline(thd);
   return NULL;
 }
@@ -7182,6 +7198,21 @@ void Cyc_exit_thread(void *data, object _, int argc, object * args)
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
                 CYC_THREAD_STATE_TERMINATED);
   pthread_exit(NULL);
+}
+
+/**
+ * Cancel a thread
+ */
+static void Cyc_cancel_thread(gc_thread_data * thd)
+{
+  // do a minor GC without a continuation, so that we return
+  // here without performing a longjmp
+  GC(thd, (closure)NULL, (object *)NULL, 0);
+  if (gc_is_mutator_active(thd)) {
+    gc_remove_mutator(thd);
+  }
+  ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_RUNNABLE,
+                CYC_THREAD_STATE_TERMINATED);
 }
 
 /**
