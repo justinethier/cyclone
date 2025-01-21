@@ -7140,9 +7140,8 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
   if (ck_pr_cas_int(&cyclone_thread_key_create, 1, 0)) {
-    int r =
-        pthread_key_create(&cyclone_thread_key,
-                           (void (*)(void *))Cyc_cancel_thread);
+    int r = pthread_key_create(&cyclone_thread_key,
+                               (void (*)(void *))Cyc_cancel_thread);
     assert(r == 0);
   }
   pthread_setspecific(cyclone_thread_key, thd);

@@ -443,7 +443,7 @@ extern "C" {
  * It is compatible with `rng_get_bytes()` from libtomcrypt so you could
  * provide that one and then set `ltm_rng = rng_get_bytes;` */
   extern unsigned long (*ltm_rng)(unsigned char *out, unsigned long outlen,
-                                  void (*callback)(void));
+                                  void(*callback)(void));
   extern void (*ltm_rng_callback)(void);
 #endif
 
