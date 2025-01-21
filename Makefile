@@ -144,7 +144,17 @@ format : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $
 	$(FORMAT_CMD) runtime.c
 
 test-format :
+	./scripts/check-c-formatting.sh $(HEADER_DIR)/hashset.h
+	./scripts/check-c-formatting.sh $(HEADER_DIR)/runtime.h
+	./scripts/check-c-formatting.sh $(HEADER_DIR)/runtime-main.h
+	./scripts/check-c-formatting.sh $(HEADER_DIR)/types.h
+	./scripts/check-c-formatting.sh ck-polyfill.c
+	./scripts/check-c-formatting.sh ck-polyfill.h
+	./scripts/check-c-formatting.sh ffi.c
+	./scripts/check-c-formatting.sh gc.c
 	./scripts/check-c-formatting.sh hashset.c
+	./scripts/check-c-formatting.sh mstreams.c
+	./scripts/check-c-formatting.sh runtime.c
 
 # This is a test directive used to test changes to a SLD file
 # EG: make sld SLDPATH=scheme/cyclone SLD=macros
