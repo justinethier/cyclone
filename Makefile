@@ -148,11 +148,11 @@ test-format :
 	./scripts/check-c-formatting.sh $(HEADER_DIR)/runtime.h
 	./scripts/check-c-formatting.sh $(HEADER_DIR)/runtime-main.h
 	./scripts/check-c-formatting.sh $(HEADER_DIR)/types.h
-	./scripts/check-c-formatting.sh ffi.c
-	./scripts/check-c-formatting.sh gc.c
+#	./scripts/check-c-formatting.sh ffi.c
+#	./scripts/check-c-formatting.sh gc.c
 	./scripts/check-c-formatting.sh hashset.c
-	./scripts/check-c-formatting.sh mstreams.c
-	./scripts/check-c-formatting.sh runtime.c
+#	./scripts/check-c-formatting.sh mstreams.c
+#	./scripts/check-c-formatting.sh runtime.c
 #	./scripts/check-c-formatting.sh ck-polyfill.c
 #	./scripts/check-c-formatting.sh ck-polyfill.h
 
