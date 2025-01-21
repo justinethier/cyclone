@@ -13,20 +13,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-# Future consideration. Would be nice if this could be matrixed... alternatively could have different CI's for different gcc versions, if we end up caring about that...
-#    - name: switch to gcc-10 on linux
-#      run: |
-#        sudo apt install gcc-10 g++-10
-#        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
-#        sudo update-alternatives --set gcc /usr/bin/gcc-10
-    - name: Install ck
-      run: sudo apt-get install libck-dev
-    - name: make runtime
-      run: make libcyclone.a
-#    - name: make
-#      run: make
-#    - name: make install
-#      run: sudo make install
-#    - name: make test
-#      run: make test
+    - name: Install deps
+      run: sudo apt-get install indent
+    - name: make format
+      run: ! git status -s | grep "^ M "
             
