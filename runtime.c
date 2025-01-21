@@ -6427,7 +6427,6 @@ int gc_minor(void *data, object low_limit, object high_limit, closure cont,
       ((gc_thread_data *) data)->gc_args[i] = args[i];
     }
   }
-
   // Transport exception stack
   gc_move2heap(((gc_thread_data *) data)->exception_handler_stack);
   gc_move2heap(((gc_thread_data *) data)->param_objs);
@@ -6610,9 +6609,8 @@ void Cyc_make_shared_object(void *data, object k, object obj)
   case port_tag:
   case c_opaque_tag:
   case complex_num_tag:{
-      object hp =
-          gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd,
-                   heap_grown);
+      object hp = gc_alloc(heap, gc_allocated_bytes(obj, NULL, NULL), obj, thd,
+                           heap_grown);
       return_closcall1(data, k, hp);
     }
     // Objs w/children force minor GC to guarantee everything is relocated:
@@ -6797,7 +6795,8 @@ static primitive_type Cyc_91installation_91dir_primitive =
     { {0}, primitive_tag, &_Cyc_91installation_91dir, "Cyc-installation-dir" };
 static primitive_type Cyc_91compilation_91environment_primitive =
     { {0}, primitive_tag, &_Cyc_91compilation_91environment,
-    "Cyc-compilation-environment" };
+"Cyc-compilation-environment"
+};
 static primitive_type command_91line_91arguments_primitive =
     { {0}, primitive_tag, &_command_91line_91arguments, "command-line-arguments"
 };
@@ -6878,10 +6877,12 @@ static primitive_type open_91output_91file_primitive =
     { {0}, primitive_tag, &_open_91output_91file, "open-output-file" };
 static primitive_type open_91binary_91input_91file_primitive =
     { {0}, primitive_tag, &_open_91binary_91input_91file,
-    "open-binary-input-file" };
+"open-binary-input-file"
+};
 static primitive_type open_91binary_91output_91file_primitive =
     { {0}, primitive_tag, &_open_91binary_91output_91file,
-    "open-binary-output-file" };
+"open-binary-output-file"
+};
 static primitive_type close_91port_primitive =
     { {0}, primitive_tag, &_close_91port, "close-port" };
 static primitive_type close_91input_91port_primitive =
@@ -6890,7 +6891,8 @@ static primitive_type close_91output_91port_primitive =
     { {0}, primitive_tag, &_close_91output_91port, "close-output-port" };
 static primitive_type Cyc_91flush_91output_91port_primitive =
     { {0}, primitive_tag, &_Cyc_91flush_91output_91port,
-    "Cyc-flush-output-port" };
+"Cyc-flush-output-port"
+};
 static primitive_type file_91exists_127_primitive =
     { {0}, primitive_tag, &_file_91exists_127, "file-exists?" };
 static primitive_type delete_91file_primitive =
@@ -7138,7 +7140,9 @@ void *Cyc_init_thread(object thread_and_thunk, int argc, object * args)
   ck_pr_cas_int((int *)&(thd->thread_state), CYC_THREAD_STATE_NEW,
                 CYC_THREAD_STATE_RUNNABLE);
   if (ck_pr_cas_int(&cyclone_thread_key_create, 1, 0)) {
-    int r = pthread_key_create(&cyclone_thread_key, (void (*)(void *))Cyc_cancel_thread);
+    int r =
+        pthread_key_create(&cyclone_thread_key,
+                           (void (*)(void *))Cyc_cancel_thread);
     assert(r == 0);
   }
   pthread_setspecific(cyclone_thread_key, thd);
@@ -7209,7 +7213,7 @@ static void Cyc_cancel_thread(gc_thread_data * thd)
 {
   // do a minor GC without a continuation, so that we return
   // here without performing a longjmp
-  GC(thd, (closure)NULL, (object *)NULL, 0);
+  GC(thd, (closure) NULL, (object *) NULL, 0);
   if (gc_is_mutator_active(thd)) {
     gc_remove_mutator(thd);
   }
@@ -7569,13 +7573,11 @@ static void _read_add_to_tok_buf(port_type * p, char c)
  */
 static int _read_is_numeric(const char *tok, int len)
 {
-  return (len &&
-          ((isdigit(tok[0])) ||
-           (((len == 2) && tok[1] == 'i') 
-            && (tok[0] == '-' || tok[0] == '+')) ||
-           ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
-           ((len > 1) && (tok[1] == '.' || isdigit(tok[1]))
-            && (tok[0] == '-' || tok[0] == '+'))));
+  return (len && ((isdigit(tok[0])) || (((len == 2) && tok[1] == 'i')
+                                        && (tok[0] == '-' || tok[0] == '+')) ||
+                  ((len > 1) && tok[0] == '.' && isdigit(tok[1])) ||
+                  ((len > 1) && (tok[1] == '.' || isdigit(tok[1]))
+                   && (tok[0] == '-' || tok[0] == '+'))));
 }
 
 /**
@@ -8534,32 +8536,32 @@ static const uint8_t utf8d[] = {
   // The first part of the table maps bytes to character classes that
   // to reduce the size of the transition table and create bitmasks.
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-      9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9,
   7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-      7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7,
   8, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-      2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2,
   10, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 3, 3, 11, 6, 6, 6, 5, 8, 8, 8, 8,
-      8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8,
 
   // The second part is a transition table that maps a combination
   // of a state of the automaton and a character class to a state.
   0, 12, 24, 36, 60, 96, 84, 12, 12, 12, 48, 72, 12, 12, 12, 12, 12, 12, 12, 12,
-      12, 12, 12, 12,
+  12, 12, 12, 12,
   12, 0, 12, 12, 12, 12, 12, 0, 12, 0, 12, 12, 12, 24, 12, 12, 12, 12, 12, 24,
-      12, 24, 12, 12,
+  12, 24, 12, 12,
   12, 12, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12,
-      12, 12, 24, 12, 12,
+  12, 12, 24, 12, 12,
   12, 12, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12,
-      36, 12, 36, 12, 12,
+  36, 12, 36, 12, 12,
   12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
 };
 
@@ -8799,7 +8801,7 @@ int num2ratio(double x, double *numerator, double *denominator)
 
 double round_to_nearest_even(double x)
 {
- return x-remainder(x,1.0);
+  return x - remainder(x, 1.0);
 }
 
 /**

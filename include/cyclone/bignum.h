@@ -256,7 +256,7 @@ extern "C" {
 /* callback for mp_prime_random, should fill dst with random bytes and return how many read [upto len] */
   typedef int private_mp_prime_callback(unsigned char *dst, int len, void *dat);
   typedef private_mp_prime_callback MP_DEPRECATED(mp_rand_source)
-      ltm_prime_callback;
+   ltm_prime_callback;
 
 /* error code to char* string */
   const char *mp_error_to_string(mp_err code) MP_WUR;
@@ -443,7 +443,7 @@ extern "C" {
  * It is compatible with `rng_get_bytes()` from libtomcrypt so you could
  * provide that one and then set `ltm_rng = rng_get_bytes;` */
   extern unsigned long (*ltm_rng)(unsigned char *out, unsigned long outlen,
-                                  void(*callback)(void));
+                                  void (*callback)(void));
   extern void (*ltm_rng_callback)(void);
 #endif
 
@@ -766,15 +766,14 @@ extern "C" {
 
    MP_DEPRECATED(mp_ubin_size) int mp_unsigned_bin_size(const mp_int *
                                                         a) MP_WUR;
-   MP_DEPRECATED(mp_from_ubin) mp_err mp_read_unsigned_bin(mp_int * a,
-                                                           const unsigned char
+   MP_DEPRECATED(mp_from_ubin) mp_err mp_read_unsigned_bin(mp_int * a, const unsigned char
                                                            *b, int c) MP_WUR;
    MP_DEPRECATED(mp_to_ubin) mp_err mp_to_unsigned_bin(const mp_int * a,
                                                        unsigned char *b) MP_WUR;
    MP_DEPRECATED(mp_to_ubin) mp_err mp_to_unsigned_bin_n(const mp_int * a,
                                                          unsigned char *b,
                                                          unsigned long *outlen)
-      MP_WUR;
+   MP_WUR;
 
    MP_DEPRECATED(mp_sbin_size) int mp_signed_bin_size(const mp_int * a) MP_WUR;
    MP_DEPRECATED(mp_from_sbin) mp_err mp_read_signed_bin(mp_int * a,
@@ -785,7 +784,7 @@ extern "C" {
    MP_DEPRECATED(mp_to_sbin) mp_err mp_to_signed_bin_n(const mp_int * a,
                                                        unsigned char *b,
                                                        unsigned long *outlen)
-      MP_WUR;
+   MP_WUR;
 
   size_t mp_ubin_size(const mp_int * a) MP_WUR;
   mp_err mp_from_ubin(mp_int * a, const unsigned char *buf, size_t size) MP_WUR;

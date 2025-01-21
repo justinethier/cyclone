@@ -1902,14 +1902,15 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
   }
 }
 
-static void gc_sweep_primordial_thread_heap() {
+static void gc_sweep_primordial_thread_heap()
+{
   int heap_type, must_free;
   gc_heap *h, *prev, *next, *sweep;
   pthread_mutex_lock(&(primordial_thread->lock));
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     prev = primordial_thread->heap->heap[heap_type];
     h = prev->next;
-    while(h != NULL) {
+    while (h != NULL) {
       next = h->next;
       must_free = 0;
       if (h->is_unswept) {
@@ -1954,7 +1955,8 @@ void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
   // the heep keeps growing. Perform a sweep here if necessary.
   stage = ck_pr_load_int(&gc_stage);
   merged = ck_pr_load_int(&gc_threads_merged);
-  if ((thd == primordial_thread) && (merged == 1) && ((stage == STAGE_SWEEPING) || (stage == STAGE_RESTING))) {
+  if ((thd == primordial_thread) && (merged == 1)
+      && ((stage == STAGE_SWEEPING) || (stage == STAGE_RESTING))) {
     gc_sweep_primordial_thread_heap();
     ck_pr_cas_int(&gc_threads_merged, 1, 0);
   }
@@ -2824,7 +2826,7 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
   // be stored on the primordial thread's heap. Make this explicit by
   // including it in the thread object.
   if (src->gc_num_args > 0) {
-    for (i=src->gc_num_args-1; i>=0; --i) {
+    for (i = src->gc_num_args - 1; i >= 0; --i) {
       context = gc_alloc_pair(dest, (src->gc_args)[i], context);
     }
   }
@@ -2847,14 +2849,16 @@ void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
     hdest = dest->heap->heap[heap_type];
     hsrc = src->heap->heap[heap_type];
     if (!hdest) {
-     fprintf(stderr, "WARNING !!!!! merging heap type %d does not happen: hdest = %p hsrc = %p size = %d\n",
-       heap_type, hdest, hsrc, hsrc->size);
-     fflush(stderr);
+      fprintf(stderr,
+              "WARNING !!!!! merging heap type %d does not happen: hdest = %p hsrc = %p size = %d\n",
+              heap_type, hdest, hsrc, hsrc->size);
+      fflush(stderr);
     }
     if (hdest && hsrc) {
       freed = gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
-                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type]))-freed);
+                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])) -
+                    freed);
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
     }
