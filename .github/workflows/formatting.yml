@@ -18,6 +18,5 @@ jobs:
     - name: formatting
       run: |
         make format 
-        git diff
         ! git status -s | grep "^ M "
             
