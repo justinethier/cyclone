@@ -30,6 +30,7 @@ static uint32_t Cyc_utf8_decode(uint32_t * state, uint32_t * codep,
 static int Cyc_utf8_count_code_points_and_bytes(uint8_t * s,
                                                 char_type * codepoint,
                                                 int *cpts, int *bytes);
+void gc_start_major_collection(gc_thread_data * thd);
 static void Cyc_cancel_thread(gc_thread_data * thd);
 
 /* Error checking section - type mismatch, num args, etc */
