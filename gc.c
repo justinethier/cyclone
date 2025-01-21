@@ -55,6 +55,7 @@ static unsigned char gc_color_purple = 1;       // There are many "shades" of pu
 
 static int gc_status_col = STATUS_SYNC1;
 static int gc_stage = STAGE_RESTING;
+static int gc_threads_merged = 0;
 
 // Does not need sync, only used by collector thread
 static void **mark_stack = NULL;
@@ -1901,6 +1902,37 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
   }
 }
 
+static void gc_sweep_primordial_thread_heap() {
+  int heap_type, must_free;
+  gc_heap *h, *prev, *next, *sweep;
+  pthread_mutex_lock(&(primordial_thread->lock));
+  for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
+    prev = primordial_thread->heap->heap[heap_type];
+    h = prev->next;
+    while(h != NULL) {
+      next = h->next;
+      must_free = 0;
+      if (h->is_unswept) {
+        if (h->type <= LAST_FIXED_SIZE_HEAP_TYPE) {
+          sweep = gc_sweep_fixed_size(h, primordial_thread);
+        } else {
+          sweep = gc_sweep(h, primordial_thread);
+        }
+        must_free = (sweep == NULL);
+      } else {
+        must_free = gc_is_heap_empty(h);
+      }
+      if (must_free) {
+        gc_heap_free(h, prev);
+      } else {
+        prev = h;
+      }
+      h = next;
+    }
+  }
+  pthread_mutex_unlock(&(primordial_thread->lock));
+}
+
 /**
  * @brief Called by a mutator to cooperate with the collector thread
  * @param thd Mutator's thread data
@@ -1911,10 +1943,21 @@ void gc_mut_update(gc_thread_data * thd, object old_obj, object value)
  */
 void gc_mut_cooperate(gc_thread_data * thd, int buf_len)
 {
-  int i, status_c, status_m;
+  int i, status_c, status_m, stage, merged;
 #if GC_DEBUG_VERBOSE
   int debug_print = 0;
 #endif
+
+  // Since terminated threads' heap pages are merged into
+  // the primordial thread's heap, it may be that a sweep
+  // for the primordeal thread is never triggered even though
+  // the heep keeps growing. Perform a sweep here if necessary.
+  stage = ck_pr_load_int(&gc_stage);
+  merged = ck_pr_load_int(&gc_threads_merged);
+  if ((thd == primordial_thread) && (merged == 1) && ((stage == STAGE_SWEEPING) || (stage == STAGE_RESTING))) {
+    gc_sweep_primordial_thread_heap();
+    ck_pr_cas_int(&gc_threads_merged, 1, 0);
+  }
 
   // Handle any pending marks from write barrier
   gc_sum_pending_writes(thd, 0);
@@ -2739,10 +2782,28 @@ void gc_thread_data_free(gc_thread_data * thd)
  *
  * This function assumes appropriate locks are already held.
  */
-void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
+int gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
 {
+  int freed = 0;
   gc_heap *last = gc_heap_last(hdest);
+  gc_heap *cur = hsrc, *prev = last, *next;
   last->next = hsrc;
+  // free any empty heaps and convert remaining heaps
+  // to free list so that they can be swept
+  while (cur != NULL) {
+    cur->is_unswept = 1;
+    next = cur->next;
+    if (gc_is_heap_empty(cur)) {
+      freed += cur->size;
+      gc_heap_free(cur, prev);
+    } else {
+      gc_convert_heap_page_to_free_list(cur, primordial_thread);
+      ck_pr_cas_int(&gc_threads_merged, 0, 1);
+      prev = cur;
+    }
+    cur = next;
+  }
+  return freed;
 }
 
 /**
@@ -2755,15 +2816,45 @@ void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc)
 void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src)
 {
   gc_heap *hdest, *hsrc;
-  int heap_type;
+  int freed, heap_type, i;
+  pair_type *context = NULL;
+  vector_type *v = src->scm_thread_obj;
+
+  // The following objects are part of the thread context and should
+  // be stored on the primordial thread's heap. Make this explicit by
+  // including it in the thread object.
+  if (src->gc_num_args > 0) {
+    for (i=src->gc_num_args-1; i>=0; --i) {
+      context = gc_alloc_pair(dest, (src->gc_args)[i], context);
+    }
+  }
+  if (src->gc_cont != NULL && is_object_type(src->gc_cont)) {
+    context = gc_alloc_pair(dest, src->gc_cont, context);
+  }
+  if (src->exception_handler_stack != NULL) {
+    context = gc_alloc_pair(dest, src->exception_handler_stack, context);
+  }
+  if (src->param_objs != NULL) {
+    context = gc_alloc_pair(dest, src->param_objs, context);
+  }
+
+  if (context != NULL) {
+    gc_mark_black(context);
+    v->elements[8] = context;
+  }
 
   for (heap_type = 0; heap_type < NUM_HEAP_TYPES; heap_type++) {
     hdest = dest->heap->heap[heap_type];
     hsrc = src->heap->heap[heap_type];
+    if (!hdest) {
+     fprintf(stderr, "WARNING !!!!! merging heap type %d does not happen: hdest = %p hsrc = %p size = %d\n",
+       heap_type, hdest, hsrc, hsrc->size);
+     fflush(stderr);
+    }
     if (hdest && hsrc) {
-      gc_heap_merge(hdest, hsrc);
+      freed = gc_heap_merge(hdest, hsrc);
       ck_pr_add_ptr(&(dest->cached_heap_total_sizes[heap_type]),
-                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type])));
+                    ck_pr_load_ptr(&(src->cached_heap_total_sizes[heap_type]))-freed);
       ck_pr_add_ptr(&(dest->cached_heap_free_sizes[heap_type]),
                     ck_pr_load_ptr(&(src->cached_heap_free_sizes[heap_type])));
     }

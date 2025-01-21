@@ -385,7 +385,7 @@ int gc_is_mutator_new(gc_thread_data * thd);
 void gc_sleep_ms(int ms);
 gc_heap *gc_heap_create(int heap_type, size_t size, gc_thread_data * thd);
 gc_heap *gc_heap_free(gc_heap * page, gc_heap * prev_page);
-void gc_heap_merge(gc_heap * hdest, gc_heap * hsrc);
+int gc_heap_merge(gc_heap * hdest, gc_heap * hsrc);
 void gc_merge_all_heaps(gc_thread_data * dest, gc_thread_data * src);
 void gc_print_stats(gc_heap * h);
 gc_heap *gc_grow_heap(gc_heap * h, size_t size, gc_thread_data * thd);
@@ -1260,6 +1260,9 @@ typedef pair_type *pair;
   n->tag = pair_tag; \
   n->pair_car = a; \
   n->pair_cdr = d;
+
+/** Create a new pair in the thread's heap */
+void *gc_alloc_pair(gc_thread_data * data, object head, object tail);
 
 /**
  * Set members of the given pair 

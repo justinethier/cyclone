@@ -74,12 +74,14 @@
         ;; - internal
         ;; - end of thread cont (or #f for default)
         ;; - end-result - Result of thread that terminates successfully
+        ;; - internal thread context at termination, e.g. parameterised objects
         (vector 
           'cyc-thread-obj 
           thunk 
           (%alloc-thread-data)  ;; Internal data for new thread
           name-str 
           #f 
+          #f
           #f
           #f
           #f)))
@@ -118,13 +120,21 @@
         make_c_opaque(co, td);
         return_closcall1(data, k, &co); ")
 
+    (define-c %end-thread!
+      "(void *data, int argc, closure _, object k, object ret)"
+      " gc_thread_data *d = data;
+        vector_type *v = d->scm_thread_obj;
+        v->elements[7] = ret;     // Store thread result
+        Cyc_end_thread(d);
+        return_closcall1(data, k, boolean_f);")
+
     (define (thread-start! t)
       ;; Initiate a GC prior to running the thread, in case
       ;; it contains any closures on the "parent" thread's stack
       (let* ((thunk (vector-ref t 1)) 
              (thread-params (cons t (lambda ()
                                       (vector-set! t 5 #f)
-                                      (thunk)))))
+                                      (let ((r (thunk))) (%end-thread! r))))))
         (vector-set! t 5 (%get-thread-data)) ;; Temporarily make parent thread
                                              ;; data available for child init
         (Cyc-minor-gc)
@@ -180,6 +190,7 @@
       (cond
        ((and (thread? t) (Cyc-opaque? (vector-ref t 2)))
         (%thread-join! (vector-ref t 2))
+        (Cyc-minor-gc)
         (vector-ref t 7))
        (else
         #f))) ;; TODO: raise an error instead?
