@@ -131,7 +131,10 @@ tags :
 	ctags -R *
 
 format : gc.c runtime.c ffi.c hashset.c mstreams.c ck-polyfill.c ck-polyfill.h $(HEADER_DIR)/*.h
-	$(FORMAT_CMD) $(HEADER_DIR)/*.h
+	$(FORMAT_CMD) $(HEADER_DIR)/hashset.h
+	$(FORMAT_CMD) $(HEADER_DIR)/runtime.h
+	$(FORMAT_CMD) $(HEADER_DIR)/runtime-main.h
+	$(FORMAT_CMD) $(HEADER_DIR)/types.h
 	$(FORMAT_CMD) ck-polyfill.c
 	$(FORMAT_CMD) ck-polyfill.h
 	$(FORMAT_CMD) ffi.c
