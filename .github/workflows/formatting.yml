@@ -16,5 +16,8 @@ jobs:
     - name: Install deps
       run: sudo apt-get install -y indent
     - name: formatting
-      run: make test-format
+      run: |
+        make format 
+        git diff
+        ! git status -s | grep "^ M "
             
