@@ -17,6 +17,5 @@ jobs:
       run: sudo apt-get install -y indent
     - name: formatting
       run: |
-        make format 
-        ! git status -s | grep "^ M "
+        make test-format 
             
