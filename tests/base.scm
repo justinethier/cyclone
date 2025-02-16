@@ -11,6 +11,7 @@
   (scheme base)
   (scheme eval)
   (scheme inexact)
+  (scheme write)
   (cyclone test))
 
 
@@ -54,7 +55,6 @@
       (test "o" (read-line p))
     )
   )
-  (else #f)
 )
 
 (test-group
@@ -170,6 +170,46 @@
   (test '(0.0) (memv 0.0 (list m)))
   (test '(0.0) (memq m (list m)))
   (test #f (memq 0.0 (list m)))
+)
+
+(test-group
+  "exception handling"
+  (define (capture-output thunk)
+    (let ((output-string (open-output-string)))
+      (parameterize ((current-output-port output-string))
+        (thunk))
+      (let ((result (get-output-string output-string)))
+       (close-output-port output-string)
+       result)))
+  (test
+    "should be a number65"
+    (capture-output
+      (lambda ()
+        (with-exception-handler
+          (lambda (con)
+            (cond
+              ((string? con)
+               (display con))
+              (else
+               (display "a warning has been issued")))
+            42)
+          (lambda ()
+            (display
+              (+ (raise-continuable "should be a number")
+                 23)))))))
+  (test
+    "condition: an-error"
+    (capture-output
+      (lambda ()
+        (call-with-current-continuation
+          (lambda (k)
+            (with-exception-handler
+              (lambda (x)
+                (display "condition: ")
+                (write x)
+                (k "exception"))
+              (lambda ()
+                (+ 1 (raise 'an-error)))))))))
 )
 
 (test-exit)
