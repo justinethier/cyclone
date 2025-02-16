@@ -706,12 +706,13 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
 {
   object err = args[0];
   int is_msg = 1;
-  fprintf(stderr, "Error: ");
 
-  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || !Cyc_is_symbol(car(err))) {
+  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || type_of(car(err)) != symbol_tag) {
+    fprintf(stderr, "Exception: ");
     Cyc_display(data, err, stderr);
   } else {
     if (strncmp(((symbol) car(err))->desc, "error", 5) == 0) {
+      fprintf(stderr, "Error: ");
       // Error is list of form (type arg1 ... argn)
       err = cdr(err);             // skip type field
       for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
@@ -727,7 +728,7 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
         }
       }
     } else {
-      fprintf(stderr, "raised object: ");
+      fprintf(stderr, "Exception: ");
       Cyc_display(data, cdr(err), stderr);
     }
   }
