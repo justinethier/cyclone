@@ -708,22 +708,27 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
   int is_msg = 1;
   fprintf(stderr, "Error: ");
 
-  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag) {
+  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || !Cyc_is_symbol(car(err))) {
     Cyc_display(data, err, stderr);
   } else {
-    // Error is list of form (type arg1 ... argn)
-    err = cdr(err);             // skip type field
-    for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
-      if (is_msg && is_object_type(car(err)) && type_of(car(err)) == string_tag) {
-        is_msg = 0;
-        Cyc_display(data, car(err), stderr);
-        if (cdr(err)) {
-          fprintf(stderr, ": ");
+    if (strncmp(((symbol) car(err))->desc, "error", 10) == 0) {
+      // Error is list of form (type arg1 ... argn)
+      err = cdr(err);             // skip type field
+      for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
+        if (is_msg && is_object_type(car(err)) && type_of(car(err)) == string_tag) {
+          is_msg = 0;
+          Cyc_display(data, car(err), stderr);
+          if (cdr(err)) {
+            fprintf(stderr, ": ");
+          }
+        } else {
+          Cyc_write(data, car(err), stderr);
+          fprintf(stderr, " ");
         }
-      } else {
-        Cyc_write(data, car(err), stderr);
-        fprintf(stderr, " ");
       }
+    } else {
+      fprintf(stderr, "raised object: ");
+      Cyc_display(data, cdr(err), stderr);
     }
   }
 
