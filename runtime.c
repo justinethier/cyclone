@@ -711,7 +711,7 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
   if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || !Cyc_is_symbol(car(err))) {
     Cyc_display(data, err, stderr);
   } else {
-    if (strncmp(((symbol) car(err))->desc, "error", 10) == 0) {
+    if (strncmp(((symbol) car(err))->desc, "error", 5) == 0) {
       // Error is list of form (type arg1 ... argn)
       err = cdr(err);             // skip type field
       for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
