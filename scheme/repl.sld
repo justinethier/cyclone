@@ -20,9 +20,9 @@
     (define (repl)
       (with-handler
         (lambda (obj)
-          (display "Error: ")
           (cond
             ((error-object? obj)
+             (display "Error: ")
              (display (error-object-message obj))
              (if (not (null? (error-object-irritants obj)))
                  (display ": "))
@@ -31,18 +31,8 @@
                  (write o)
                  (display " "))
                (error-object-irritants obj)))
-            ((pair? obj)
-             (when (string? (car obj))
-               (display (car obj))
-               (if (not (null? (cdr obj)))
-                   (display ": "))
-               (set! obj (cdr obj)))
-             (for-each
-               (lambda (o)
-                 (write o)
-                 (display " "))
-               obj))
             (else
+              (display "Exception: ")
               (display obj)))
           (newline)
           (repl))
