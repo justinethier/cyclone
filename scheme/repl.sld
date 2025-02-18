@@ -32,7 +32,7 @@
                  (display " "))
                (error-object-irritants obj)))
             (else
-              (display "Exception: ")
+              (display "Error: ")
               (display obj)))
           (newline)
           (repl))

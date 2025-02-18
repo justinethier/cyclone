@@ -708,7 +708,7 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
   int is_msg = 1;
 
   if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || type_of(car(err)) != symbol_tag) {
-    fprintf(stderr, "Exception: ");
+    fprintf(stderr, "Error: ");
     Cyc_display(data, err, stderr);
   } else {
     if (strncmp(((symbol) car(err))->desc, "error", 5) == 0) {
@@ -728,7 +728,7 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
         }
       }
     } else {
-      fprintf(stderr, "Exception: ");
+      fprintf(stderr, "Error: ");
       Cyc_display(data, cdr(err), stderr);
     }
   }
