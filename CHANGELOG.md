@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- Yorick Hardy fixed the runtime to return the appropriate types of objects to exception handlers.
 - Yorick Hardy modified the runtime to allow `thread-terminate!` to take a thread object as an argument, per SRFI 18.
 - @nmeum fixed `open_memstream`/`fmemopen` feature detection with GCC >= 14.
 - Fixed a bug in `apply` where an error may be raised when processing quoted sub-expressions. For example the following would throw an error: `(apply cons '(5 (1 2)))`. Thanks to @srgx for the bug report!
