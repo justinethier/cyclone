@@ -707,16 +707,18 @@ object Cyc_default_exception_handler(void *data, object _, int argc,
   object err = args[0];
   int is_msg = 1;
 
-  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag || type_of(car(err)) != symbol_tag) {
+  if ((err == NULL) || is_value_type(err) || type_of(err) != pair_tag
+      || type_of(car(err)) != symbol_tag) {
     fprintf(stderr, "Error: ");
     Cyc_display(data, err, stderr);
   } else {
     if (strncmp(((symbol) car(err))->desc, "error", 5) == 0) {
       fprintf(stderr, "Error: ");
       // Error is list of form (type arg1 ... argn)
-      err = cdr(err);             // skip type field
-      for (; (err != NULL); err = cdr(err)) {     // output with no enclosing parens
-        if (is_msg && is_object_type(car(err)) && type_of(car(err)) == string_tag) {
+      err = cdr(err);           // skip type field
+      for (; (err != NULL); err = cdr(err)) {   // output with no enclosing parens
+        if (is_msg && is_object_type(car(err))
+            && type_of(car(err)) == string_tag) {
           is_msg = 0;
           Cyc_display(data, car(err), stderr);
           if (cdr(err)) {
@@ -8959,7 +8961,7 @@ object Cyc_exact_no_cps(void *data, object ptr, object z)
   return obj_int2obj(i);
 }
 
-int Cyc_stack_remaining(gc_thread_data *td) 
+int Cyc_stack_remaining(gc_thread_data * td)
 {
   int i;
   int stack_remaining = stack_delta(&i, td->stack_limit);
