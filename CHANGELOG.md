@@ -4,6 +4,7 @@
 
 Bug Fixes
 
+- Yorick Hardy updated `string-append` and `bytevector-append` to correctly handle stack memory limits.
 - Yorick Hardy fixed the runtime to return the appropriate types of objects to exception handlers.
 - Yorick Hardy modified the runtime to allow `thread-terminate!` to take a thread object as an argument, per SRFI 18.
 - @nmeum fixed `open_memstream`/`fmemopen` feature detection with GCC >= 14.
