@@ -1007,10 +1007,11 @@ typedef struct {
 #define alloc_string(_data, _s, _len, _num_cp) \
  { \
   int stack_left = Cyc_stack_remaining(data); \
-  if (_len >= stack_left) { \
+  int alloc_required = sizeof(string_type) + _len + 1; \
+  if (alloc_required >= stack_left) { \
     int heap_grown; \
     _s = gc_alloc(((gc_thread_data *)data)->heap,  \
-                 sizeof(string_type) + _len + 1, \
+                 alloc_required, \
                  boolean_f, /* OK to populate manually over here */ \
                  (gc_thread_data *)data,  \
                  &heap_grown); \
@@ -1039,10 +1040,11 @@ typedef struct {
 #define alloc_bytevector(_data, _bv, _len) \
  { \
   int stack_left = Cyc_stack_remaining(data); \
-  if (_len >= stack_left) { \
+  int alloc_required = sizeof(bytevector_type) + _len; \
+  if (alloc_required >= stack_left) { \
     int heap_grown; \
     _bv = gc_alloc(((gc_thread_data *)data)->heap, \
-                  sizeof(bytevector_type) + _len, \
+                  alloc_required, \
                   boolean_f, /* OK to populate manually over here */ \
                   (gc_thread_data *)data, \
                   &heap_grown); \
